@@ -7,18 +7,86 @@ buildscript {
     }
 }
 
+def env = project.hasProperty('env') ? project.getProperty('env') : 'local'
 
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'spring-boot'
+apply plugin: 'maven'
+apply plugin: 'checkstyle'
+apply plugin: 'jacoco'
+apply plugin: 'sonar-runner'
 
 sourceCompatibility = 1.7
 group = 'com.sequenceiq'
-version = '0.1'
 
-jar { 
-    baseName = 'provisioning-api' 
+allprojects { 
+    apply from: "$rootDir/gradle/versioning.gradle"
+    ext.config = new ConfigSlurper(env).parse(file("$rootDir/gradle/config/buildConfig.groovy").toURL()) 
+}
+
+jar {
+    baseName = 'provisioning-api'
+}
+
+configurations {
+    deployerJars
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            configuration = configurations.deployerJars
+            repository(url: "s3://seq-repo/releases") {
+                authentication(userName: "$System.env.AWS_ACCESS_KEY", passphrase: "$System.env.AWS_SECRET_ACCESS_KEY")
+            }
+            snapshotRepository(url: "s3://seq-repo/snapshots") {
+                authentication(userName: "$System.env.AWS_ACCESS_KEY", passphrase: "$System.env.AWS_SECRET_ACCESS_KEY")
+            }
+        }
+    }
+}
+
+checkstyleMain {
+    ignoreFailures = false
+    configProperties = ['config_loc': "$projectDir/config/checkstyle"]
+}
+
+checkstyleTest {
+    ignoreFailures = false
+    configProperties = ['config_loc': "$projectDir/config/checkstyle"]
+}
+
+jacoco {
+    toolVersion = "0.6.2.201302030002"
+    reportsDir = file("$buildDir/reports/jacoco")
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled false
+        csv.enabled false
+        html.destination "${buildDir}/jacocoHtml"
+    }
+}
+
+sonarRunner {
+    jacoco {
+        append = false
+        destinationFile = file("$buildDir/jacoco/jacocoTest.exec")
+        classDumpFile = file("$buildDir/jacoco/classpathdumps")
+    }
+    sonarProperties {
+        property "sonar.host.url", "$config.sonar_host_url"
+        property "sonar.jdbc.url", "$config.sonar_jdbc_url"
+        property "sonar.jdbc.driverClassName", "com.mysql.jdbc.Driver"
+        property "sonar.jdbc.username", "$System.env.SONAR_USERNAME"
+        property "sonar.jdbc.password", "$System.env.SONAR_PASSWORD"
+        property "project.reporting.outputEncoding", "UTF-8"
+        property "sonar.projectKey", "provisioning-api"
+        property "sonar.projectName", "provisioning-api"
+    }
 }
 
 repositories {
@@ -29,6 +97,31 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-web:1.0.2.RELEASE")
     compile("org.springframework.boot:spring-boot-starter-actuator:1.0.2.RELEASE")
     testCompile("org.springframework.boot:spring-boot-starter-test:1.0.2.RELEASE")
+    deployerJars("org.springframework.build.aws:org.springframework.build.aws.maven:3.0.0.RELEASE")
 }
 
 task wrapper(type: Wrapper) { gradleVersion = "1.12" }
+
+task buildInfo(type: BuildInfoTask) {
+    destination = file("$buildDir")
+    basename = jar.baseName
+    buildVersion =  version
+}
+
+compileJava.dependsOn buildInfo
+
+class BuildInfoTask extends DefaultTask {
+    File destination = new File("build.info")
+    String basename
+    String buildVersion
+
+    @TaskAction
+    def writeBuildInfo() {
+        destination.mkdirs()
+        new File(destination, "build.info").withWriter { out ->
+            [
+                "ARTIFACT_BASENAME=" + basename,
+                "ARTIFACT_VERSION=" + buildVersion,
+            ].each { out.println it } }
+    }
+}
