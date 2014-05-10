@@ -1,3 +1,5 @@
+import org.ajoberstar.grgit.*
+
 buildscript {
     repositories {
         mavenCentral()
@@ -7,11 +9,7 @@ buildscript {
     }
 }
 
-import org.ajoberstar.grgit.*
-
 def grgit = Grgit.open(project.file('.'))
-
-ext.buildTimestamp = new Date().format('yyyy-MM-dd HH:mm:ss')
 def buildNumber = System.getenv("BUILD_NUMBER")
 def branch = grgit.branch.current.name
 
