@@ -94,10 +94,11 @@ repositories {
 }
 
 dependencies {
-    compile("org.springframework.boot:spring-boot-starter-web:1.0.2.RELEASE")
-    compile("org.springframework.boot:spring-boot-starter-actuator:1.0.2.RELEASE")
-    testCompile("org.springframework.boot:spring-boot-starter-test:1.0.2.RELEASE")
-    deployerJars("org.springframework.build.aws:org.springframework.build.aws.maven:3.0.0.RELEASE")
+    compile 'org.springframework.boot:spring-boot-starter-web:1.0.2.RELEASE'
+    compile 'org.springframework.boot:spring-boot-starter-actuator:1.0.2.RELEASE'
+    compile 'com.amazonaws:aws-java-sdk:1.7.8.1'
+    testCompile 'org.springframework.boot:spring-boot-starter-test:1.0.2.RELEASE'
+    deployerJars 'org.springframework.build.aws:org.springframework.build.aws.maven:3.0.0.RELEASE'
 }
 
 task wrapper(type: Wrapper) { gradleVersion = "1.12" }
