@@ -16,6 +16,8 @@ println "branch name from git plugin: " + branch
 if ("HEAD".equals(branch)){
     branch = System.getenv("GIT_BRANCH")
     println "branch name from env variable: " + branch
+    branch = branch.split("/")[1];
+    println "branch name after split: " + branch
 }
 
 version = new ProjectVersion(0, 1, buildNumber != null ? buildNumber : "dev", branch)
