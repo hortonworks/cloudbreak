@@ -12,9 +12,10 @@ buildscript {
 def grgit = Grgit.open(project.file('.'))
 def buildNumber = System.getenv("BUILD_NUMBER")
 def branch = grgit.branch.current.name
+println "branch name from git plugin: " + branch
 if ("HEAD".equals(branch)){
     branch = System.getenv("GIT_BRANCH")
-    println branch
+    println "branch name from env variable: " + branch
 }
 
 version = new ProjectVersion(0, 1, buildNumber != null ? buildNumber : "dev", branch)
