@@ -1,0 +1,34 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.0.2.RELEASE")
+    }
+}
+
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'spring-boot'
+
+sourceCompatibility = 1.7
+group = 'com.sequenceiq'
+version = '0.1'
+
+jar { 
+    baseName = 'provisioning-api' 
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile("org.springframework.boot:spring-boot-starter-web:1.0.2.RELEASE")
+    compile("org.springframework.boot:spring-boot-starter-actuator:1.0.2.RELEASE")
+    testCompile("org.springframework.boot:spring-boot-starter-test:1.0.2.RELEASE")
+}
+
+task wrapper(type: Wrapper) { gradleVersion = "1.12" }
