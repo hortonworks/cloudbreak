@@ -1,3 +1,5 @@
+import java.io.File;
+
 buildscript {
     repositories {
         mavenCentral()
@@ -32,3 +34,27 @@ dependencies {
 }
 
 task wrapper(type: Wrapper) { gradleVersion = "1.12" }
+
+task buildInfo(type: BuildInfoTask) {
+    destination = file("$buildDir")
+    basename = jar.baseName
+    buildVersion =  version
+}
+
+compileJava.dependsOn buildInfo
+
+class BuildInfoTask extends DefaultTask {
+    File destination = new File("build.info")
+    String basename
+    String buildVersion
+
+    @TaskAction
+    def writeBuildInfo() {
+        destination.mkdirs()
+        new File(destination, "build.info").withWriter { out ->
+            [
+                "ARTIFACT_BASENAME=" + basename,
+                "ARTIFACT_VERSION=" + buildVersion,
+            ].each { out.println it } }
+    }
+}
