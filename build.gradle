@@ -14,6 +14,7 @@ apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'spring-boot'
 apply plugin: 'maven'
+apply plugin: 'checkstyle'
 
 sourceCompatibility = 1.7
 group = 'com.sequenceiq'
@@ -21,6 +22,10 @@ group = 'com.sequenceiq'
 allprojects { 
     apply from: "$rootDir/gradle/versioning.gradle"
     ext.config = new ConfigSlurper(env).parse(file("$rootDir/gradle/config/buildConfig.groovy").toURL()) 
+}
+
+jar {
+    baseName = 'provisioning-api'
 }
 
 configurations {
@@ -41,8 +46,14 @@ uploadArchives {
     }
 }
 
-jar { 
-    baseName = 'provisioning-api' 
+checkstyleMain {
+    ignoreFailures = false
+    configProperties = ['config_loc': "$projectDir/config/checkstyle"]
+}
+
+checkstyleTest {
+    ignoreFailures = false
+    configProperties = ['config_loc': "$projectDir/config/checkstyle"]
 }
 
 repositories {
