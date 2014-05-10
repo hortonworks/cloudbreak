@@ -14,6 +14,7 @@ def buildNumber = System.getenv("BUILD_NUMBER")
 def branch = grgit.branch.current.name
 if ("HEAD".equals(branch)){
     branch = System.getenv("GIT_BRANCH")
+    println branch
 }
 
 version = new ProjectVersion(0, 1, buildNumber != null ? buildNumber : "dev", branch)
