@@ -15,6 +15,8 @@ apply plugin: 'idea'
 apply plugin: 'spring-boot'
 apply plugin: 'maven'
 apply plugin: 'checkstyle'
+apply plugin: 'jacoco'
+apply plugin: 'sonar-runner'
 
 sourceCompatibility = 1.7
 group = 'com.sequenceiq'
@@ -37,10 +39,10 @@ uploadArchives {
         mavenDeployer {
             configuration = configurations.deployerJars
             repository(url: "s3://seq-repo/releases") {
-                authentication(userName: "$System.env.aws_access_key_id", passphrase: "$System.env.aws_secret_access_key")
+                authentication(userName: "$System.env.AWS_ACCESS_KEY", passphrase: "$System.env.AWS_SECRET_ACCESS_KEY")
             }
             snapshotRepository(url: "s3://seq-repo/snapshots") {
-                authentication(userName: "$System.env.aws_access_key_id", passphrase: "$System.env.aws_secret_access_key")
+                authentication(userName: "$System.env.AWS_ACCESS_KEY", passphrase: "$System.env.AWS_SECRET_ACCESS_KEY")
             }
         }
     }
@@ -54,6 +56,37 @@ checkstyleMain {
 checkstyleTest {
     ignoreFailures = false
     configProperties = ['config_loc': "$projectDir/config/checkstyle"]
+}
+
+jacoco {
+    toolVersion = "0.6.2.201302030002"
+    reportsDir = file("$buildDir/reports/jacoco")
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled false
+        csv.enabled false
+        html.destination "${buildDir}/jacocoHtml"
+    }
+}
+
+sonarRunner {
+    jacoco {
+        append = false
+        destinationFile = file("$buildDir/jacoco/jacocoTest.exec")
+        classDumpFile = file("$buildDir/jacoco/classpathdumps")
+    }
+    sonarProperties {
+        property "sonar.host.url", "$config.sonar_host_url"
+        property "sonar.jdbc.url", "$config.sonar_jdbc_url"
+        property "sonar.jdbc.driverClassName", "com.mysql.jdbc.Driver"
+        property "sonar.jdbc.username", "$System.env.SONAR_USERNAME"
+        property "sonar.jdbc.password", "$System.env.SONAR_PASSWORD"
+        property "project.reporting.outputEncoding", "UTF-8"
+        property "sonar.projectKey", "provisioning-api"
+        property "sonar.projectName", "provisioning-api"
+    }
 }
 
 repositories {
