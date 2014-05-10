@@ -9,6 +9,7 @@ buildscript {
     }
 }
 
+def env = project.hasProperty('env') ? project.getProperty('env') : 'local'
 
 apply plugin: 'java'
 apply plugin: 'eclipse'
@@ -17,7 +18,29 @@ apply plugin: 'spring-boot'
 
 sourceCompatibility = 1.7
 group = 'com.sequenceiq'
-version = '0.1'
+
+allprojects { 
+    apply from: "$rootDir/gradle/versioning.gradle"
+    ext.config = new ConfigSlurper(env).parse(file("$rootDir/gradle/config/buildConfig.groovy").toURL()) 
+}
+
+configurations {
+    deployerJars
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            configuration = configurations.deployerJars
+            repository(url: "s3://seq-repo/releases") {
+                authentication(userName: "$System.env.aws_access_key_id", passphrase: "$System.env.aws_secret_access_key")
+            }
+            snapshotRepository(url: "s3://seq-repo/snapshots") {
+                authentication(userName: "$System.env.aws_access_key_id", passphrase: "$System.env.aws_secret_access_key")
+            }
+        }
+    }
+}
 
 jar { 
     baseName = 'provisioning-api' 
@@ -31,6 +54,7 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-web:1.0.2.RELEASE")
     compile("org.springframework.boot:spring-boot-starter-actuator:1.0.2.RELEASE")
     testCompile("org.springframework.boot:spring-boot-starter-test:1.0.2.RELEASE")
+    deployerJars("org.springframework.build.aws:org.springframework.build.aws.maven:3.0.0.RELEASE")
 }
 
 task wrapper(type: Wrapper) { gradleVersion = "1.12" }

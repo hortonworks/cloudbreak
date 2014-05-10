@@ -1,0 +1,44 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.ajoberstar:gradle-git:0.8.0'
+    }
+}
+
+import org.ajoberstar.grgit.*
+
+def grgit = Grgit.open(project.file('.'))
+
+ext.buildTimestamp = new Date().format('yyyy-MM-dd HH:mm:ss')
+def buildNumber = System.getenv("BUILD_NUMBER")
+def branch = grgit.branch.current.name
+
+version = new ProjectVersion(0, 1, buildNumber != null ? buildNumber : "dev", branch)
+
+class ProjectVersion {
+    Integer major
+    Integer minor
+    String build
+    String branch
+
+    ProjectVersion(Integer major, Integer minor, String build, String branch) {
+        this.major = major
+        this.minor = minor
+        this.build = build
+        this.branch = branch
+    }
+
+    @Override
+    String toString() {
+        String fullVersion = "$major.$minor"
+        if(build) {
+            fullVersion += "-$build"
+        }
+        if (branch != null && !"master".equals(branch)) {
+            fullVersion += "-$branch"
+        }
+        fullVersion
+    }
+}
