@@ -12,6 +12,9 @@ buildscript {
 def grgit = Grgit.open(project.file('.'))
 def buildNumber = System.getenv("BUILD_NUMBER")
 def branch = grgit.branch.current.name
+if ("HEAD".equals(branch)){
+    branch = System.getenv("GIT_BRANCH")
+}
 
 version = new ProjectVersion(0, 1, buildNumber != null ? buildNumber : "dev", branch)
 
@@ -34,7 +37,7 @@ class ProjectVersion {
         if(build) {
             fullVersion += "-$build"
         }
-        if (branch != null && !"master".equals(branch)) {
+        if (branch != null && !branch.contains("master")) {
             fullVersion += "-$branch"
         }
         fullVersion
