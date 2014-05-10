@@ -6,7 +6,6 @@ public class SampleJson {
     private String status;
 
     public SampleJson(String name, String status) {
-        super();
         this.name = name;
         this.status = status;
     }
