@@ -41,7 +41,7 @@ public class CloudFormationController {
         amazonCloudFormationClient.setRegion(Region.getRegion(Regions.EU_WEST_1));
         ListStacksRequest listStacksRequest = new ListStacksRequest();
         listStacksRequest.setRequestCredentials(basicAWSCredentials);
-        ListStacksResult listStacksResult = amazonCloudFormationClient.listStacks();
+        ListStacksResult listStacksResult = amazonCloudFormationClient.listStacks(listStacksRequest);
         return new ResponseEntity<>(listStacksResult, HttpStatus.OK);
     }
 
@@ -52,7 +52,7 @@ public class CloudFormationController {
         amazonCloudFormationClient.setRegion(Region.getRegion(Regions.EU_WEST_1));
         DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest();
         describeStacksRequest.setRequestCredentials(basicAWSCredentials);
-        DescribeStacksResult describeStacksResult = amazonCloudFormationClient.describeStacks();
+        DescribeStacksResult describeStacksResult = amazonCloudFormationClient.describeStacks(describeStacksRequest);
         return new ResponseEntity<>(describeStacksResult, HttpStatus.OK);
     }
 
