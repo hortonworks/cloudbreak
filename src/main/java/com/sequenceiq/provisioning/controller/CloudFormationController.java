@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,9 +20,7 @@ import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.CreateStackRequest;
 import com.amazonaws.services.cloudformation.model.CreateStackResult;
 import com.amazonaws.services.cloudformation.model.DeleteStackRequest;
-import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStacksResult;
-import com.amazonaws.services.cloudformation.model.ListStacksRequest;
 import com.amazonaws.services.cloudformation.model.ListStacksResult;
 import com.amazonaws.services.cloudformation.model.Parameter;
 import com.sequenceiq.provisioning.controller.json.AwsCredentialsJson;
@@ -31,17 +28,13 @@ import com.sequenceiq.provisioning.controller.json.AwsCredentialsJson;
 @Controller
 public class CloudFormationController {
 
-    @Autowired
-    private AmazonCloudFormationClient amazonCloudFormationClient;
-
     @RequestMapping(method = RequestMethod.POST, value = "/listStacks")
     @ResponseBody
     public ResponseEntity<ListStacksResult> listStacks(@RequestBody AwsCredentialsJson awsCredentialsJson) {
         BasicAWSCredentials basicAWSCredentials = new BasicAWSCredentials(awsCredentialsJson.getAccessKey(), awsCredentialsJson.getSecretKey());
+        AmazonCloudFormationClient amazonCloudFormationClient = new AmazonCloudFormationClient(basicAWSCredentials);
         amazonCloudFormationClient.setRegion(Region.getRegion(Regions.EU_WEST_1));
-        ListStacksRequest listStacksRequest = new ListStacksRequest();
-        listStacksRequest.setRequestCredentials(basicAWSCredentials);
-        ListStacksResult listStacksResult = amazonCloudFormationClient.listStacks(listStacksRequest);
+        ListStacksResult listStacksResult = amazonCloudFormationClient.listStacks();
         return new ResponseEntity<>(listStacksResult, HttpStatus.OK);
     }
 
@@ -49,10 +42,9 @@ public class CloudFormationController {
     @ResponseBody
     public ResponseEntity<DescribeStacksResult> describeStacks(@RequestBody AwsCredentialsJson awsCredentialsJson) {
         BasicAWSCredentials basicAWSCredentials = new BasicAWSCredentials(awsCredentialsJson.getAccessKey(), awsCredentialsJson.getSecretKey());
+        AmazonCloudFormationClient amazonCloudFormationClient = new AmazonCloudFormationClient(basicAWSCredentials);
         amazonCloudFormationClient.setRegion(Region.getRegion(Regions.EU_WEST_1));
-        DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest();
-        describeStacksRequest.setRequestCredentials(basicAWSCredentials);
-        DescribeStacksResult describeStacksResult = amazonCloudFormationClient.describeStacks(describeStacksRequest);
+        DescribeStacksResult describeStacksResult = amazonCloudFormationClient.describeStacks();
         return new ResponseEntity<>(describeStacksResult, HttpStatus.OK);
     }
 
@@ -60,12 +52,12 @@ public class CloudFormationController {
     @ResponseBody
     public ResponseEntity<CreateStackResult> createStack(@RequestBody AwsCredentialsJson awsCredentialsJson) throws IOException {
         BasicAWSCredentials basicAWSCredentials = new BasicAWSCredentials(awsCredentialsJson.getAccessKey(), awsCredentialsJson.getSecretKey());
+        AmazonCloudFormationClient amazonCloudFormationClient = new AmazonCloudFormationClient(basicAWSCredentials);
         amazonCloudFormationClient.setRegion(Region.getRegion(Regions.EU_WEST_1));
         CreateStackRequest createStackRequest = new CreateStackRequest()
                 .withStackName("testStack")
                 .withTemplateBody(readTemplateFromFile("sample-vpc-template"))
                 .withParameters(new Parameter().withParameterKey("KeyName").withParameterValue("sequence-eu"));
-        createStackRequest.setRequestCredentials(basicAWSCredentials);
         CreateStackResult createStackResult = amazonCloudFormationClient.createStack(createStackRequest);
         return new ResponseEntity<>(createStackResult, HttpStatus.CREATED);
     }
@@ -74,9 +66,9 @@ public class CloudFormationController {
     @ResponseBody
     public ResponseEntity deleteStack(@RequestBody AwsCredentialsJson awsCredentialsJson) throws IOException {
         BasicAWSCredentials basicAWSCredentials = new BasicAWSCredentials(awsCredentialsJson.getAccessKey(), awsCredentialsJson.getSecretKey());
+        AmazonCloudFormationClient amazonCloudFormationClient = new AmazonCloudFormationClient(basicAWSCredentials);
         amazonCloudFormationClient.setRegion(Region.getRegion(Regions.EU_WEST_1));
         DeleteStackRequest deleteStackRequest = new DeleteStackRequest().withStackName("testStack");
-        deleteStackRequest.setRequestCredentials(basicAWSCredentials);
         amazonCloudFormationClient.deleteStack(deleteStackRequest);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
