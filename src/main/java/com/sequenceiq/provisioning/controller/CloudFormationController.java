@@ -81,7 +81,6 @@ public class CloudFormationController {
             sb.append((char) c);
         }
         return sb.toString();
-
     }
 
 }
