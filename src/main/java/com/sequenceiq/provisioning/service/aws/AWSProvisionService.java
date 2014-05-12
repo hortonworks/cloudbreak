@@ -9,9 +9,9 @@ import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.CreateStackRequest;
 import com.amazonaws.services.cloudformation.model.CreateStackResult;
 import com.amazonaws.services.cloudformation.model.Parameter;
-import com.sequenceiq.provisioning.controller.json.AWSProvisionResultJson;
-import com.sequenceiq.provisioning.controller.json.ProvisionRequestJson;
-import com.sequenceiq.provisioning.controller.json.ProvisionResultJson;
+import com.sequenceiq.provisioning.controller.json.AWSProvisionResult;
+import com.sequenceiq.provisioning.controller.json.ProvisionRequest;
+import com.sequenceiq.provisioning.controller.json.ProvisionResult;
 import com.sequenceiq.provisioning.domain.CloudFormationTemplate;
 import com.sequenceiq.provisioning.service.ProvisionService;
 
@@ -24,18 +24,18 @@ public class AWSProvisionService implements ProvisionService {
     private CloudFormationTemplate template;
 
     @Override
-    public ProvisionResultJson provisionCluster(ProvisionRequestJson provisionRequestJson) {
-        BasicAWSCredentials basicAWSCredentials = new BasicAWSCredentials(provisionRequestJson.getAccessKey(), provisionRequestJson.getSecretKey());
+    public ProvisionResult provisionCluster(ProvisionRequest provisionRequest) {
+        BasicAWSCredentials basicAWSCredentials = new BasicAWSCredentials(provisionRequest.getAccessKey(), provisionRequest.getSecretKey());
         AmazonCloudFormationClient amazonCloudFormationClient = new AmazonCloudFormationClient(basicAWSCredentials);
-        amazonCloudFormationClient.setRegion(Region.getRegion(provisionRequestJson.getRegion()));
+        amazonCloudFormationClient.setRegion(Region.getRegion(provisionRequest.getRegion()));
 
         CreateStackRequest createStackRequest = new CreateStackRequest()
-                .withStackName(provisionRequestJson.getClusterName())
+                .withStackName(provisionRequest.getClusterName())
                 .withTemplateBody(template.getBody())
-                .withParameters(new Parameter().withParameterKey("KeyName").withParameterValue(provisionRequestJson.getKeyName()));
+                .withParameters(new Parameter().withParameterKey("KeyName").withParameterValue(provisionRequest.getKeyName()));
 
         CreateStackResult createStackResult = amazonCloudFormationClient.createStack(createStackRequest);
-        return new AWSProvisionResultJson(OK_STATUS, createStackResult);
+        return new AWSProvisionResult(OK_STATUS, createStackResult);
     }
 
 }

@@ -1,10 +1,10 @@
 package com.sequenceiq.provisioning.controller.json;
 
-public class ProvisionResultJson {
+public class ProvisionResult {
 
     private String status;
 
-    public ProvisionResultJson(String status) {
+    public ProvisionResult(String status) {
         this.status = status;
     }
 

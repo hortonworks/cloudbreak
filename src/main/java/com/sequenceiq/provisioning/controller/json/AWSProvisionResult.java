@@ -2,11 +2,11 @@ package com.sequenceiq.provisioning.controller.json;
 
 import com.amazonaws.services.cloudformation.model.CreateStackResult;
 
-public class AWSProvisionResultJson extends ProvisionResultJson {
+public class AWSProvisionResult extends ProvisionResult {
 
     private CreateStackResult createStackResult;
 
-    public AWSProvisionResultJson(String status, CreateStackResult createStackResult) {
+    public AWSProvisionResult(String status, CreateStackResult createStackResult) {
         super(status);
         this.createStackResult = createStackResult;
     }

@@ -2,7 +2,7 @@ package com.sequenceiq.provisioning.controller.json;
 
 import com.amazonaws.regions.Regions;
 
-public class ProvisionRequestJson {
+public class ProvisionRequest {
 
     private String clusterName;
     private int clusterSize;

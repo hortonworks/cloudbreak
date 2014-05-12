@@ -1,10 +1,10 @@
 package com.sequenceiq.provisioning.service;
 
-import com.sequenceiq.provisioning.controller.json.ProvisionRequestJson;
-import com.sequenceiq.provisioning.controller.json.ProvisionResultJson;
+import com.sequenceiq.provisioning.controller.json.ProvisionRequest;
+import com.sequenceiq.provisioning.controller.json.ProvisionResult;
 
 public interface ProvisionService {
 
-    ProvisionResultJson provisionCluster(ProvisionRequestJson provisionRequestJson);
+    ProvisionResult provisionCluster(ProvisionRequest provisionRequest);
 
 }

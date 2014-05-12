@@ -1,6 +1,6 @@
 package com.sequenceiq.provisioning.controller.json;
 
-public class AwsCredentialsJson {
+public class AwsCredentialsRequest {
 
     private String accessKey;
     private String secretKey;
