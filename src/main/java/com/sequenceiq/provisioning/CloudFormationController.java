@@ -3,7 +3,6 @@ package com.sequenceiq.provisioning;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
@@ -38,7 +37,7 @@ public class CloudFormationController {
 
     @RequestMapping(method = RequestMethod.POST, value = "/stack")
     @ResponseBody
-    public ResponseEntity<CreateStackResult> createStack(@RequestBody AwsCredentialsJson awsCredentialsJson) throws UnsupportedEncodingException, IOException {
+    public ResponseEntity<CreateStackResult> createStack(@RequestBody AwsCredentialsJson awsCredentialsJson) throws IOException {
 
         BasicAWSCredentials basicAWSCredentials = new BasicAWSCredentials(awsCredentialsJson.getAccessKey(), awsCredentialsJson.getSecretKey());
         AmazonCloudFormationClient amazonCloudFormationClient = new AmazonCloudFormationClient(basicAWSCredentials);
@@ -51,7 +50,7 @@ public class CloudFormationController {
         return new ResponseEntity<>(createStackResult, HttpStatus.OK);
     }
 
-    private String readTemplateFromFile(String templateName) throws UnsupportedEncodingException, IOException {
+    private String readTemplateFromFile(String templateName) throws IOException {
         StringBuffer sb = new StringBuffer();
         BufferedReader br;
         br = new BufferedReader(new InputStreamReader(new ClassPathResource(templateName).getInputStream(), "UTF-8"));
