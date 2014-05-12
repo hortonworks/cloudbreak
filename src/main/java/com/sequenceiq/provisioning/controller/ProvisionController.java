@@ -16,16 +16,14 @@ import com.sequenceiq.provisioning.service.ProvisionService;
 @Controller
 public class ProvisionController {
 
-    private static final String OK_STATUS = "ok";
-
     @Autowired
     private ProvisionService provisionService;
 
     @RequestMapping(method = RequestMethod.POST, value = "/cluster")
     @ResponseBody
     public ResponseEntity<ProvisionResultJson> provisionCluster(@RequestBody ProvisionRequestJson provisionRequestJson) {
-        provisionService.provisionEC2Cluster(provisionRequestJson);
-        return new ResponseEntity<>(new ProvisionResultJson(OK_STATUS), HttpStatus.CREATED);
+        ProvisionResultJson result = provisionService.provisionCluster(provisionRequestJson);
+        return new ResponseEntity<ProvisionResultJson>(result, HttpStatus.CREATED);
     }
 
 }

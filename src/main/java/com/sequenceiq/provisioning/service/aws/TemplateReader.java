@@ -1,4 +1,4 @@
-package com.sequenceiq.provisioning.service;
+package com.sequenceiq.provisioning.service.aws;
 
 import java.io.BufferedReader;
 import java.io.IOException;

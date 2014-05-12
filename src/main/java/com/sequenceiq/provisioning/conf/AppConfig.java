@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.sequenceiq.provisioning.domain.CloudFormationTemplate;
-import com.sequenceiq.provisioning.service.TemplateReader;
+import com.sequenceiq.provisioning.service.aws.TemplateReader;
 
 @Configuration
 public class AppConfig {
