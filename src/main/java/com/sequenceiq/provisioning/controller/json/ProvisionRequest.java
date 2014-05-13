@@ -1,6 +1,7 @@
 package com.sequenceiq.provisioning.controller.json;
 
 import com.amazonaws.regions.Regions;
+import com.sequenceiq.provisioning.domain.Type;
 
 public class ProvisionRequest {
 
@@ -10,6 +11,7 @@ public class ProvisionRequest {
     private String keyName;
     private String accessKey;
     private String secretKey;
+    private Type type;
 
     public String getClusterName() {
         return clusterName;
@@ -59,4 +61,11 @@ public class ProvisionRequest {
         this.secretKey = secretKey;
     }
 
+    public Type getType() {
+        return type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
+    }
 }
