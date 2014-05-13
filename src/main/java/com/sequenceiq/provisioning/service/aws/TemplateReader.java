@@ -13,7 +13,7 @@ import com.sequenceiq.provisioning.domain.CloudFormationTemplate;
 public class TemplateReader {
 
     public CloudFormationTemplate readTemplateFromFile(String templateName) throws IOException {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         BufferedReader br;
         br = new BufferedReader(new InputStreamReader(new ClassPathResource(templateName).getInputStream(), "UTF-8"));
         for (int c = br.read(); c != -1; c = br.read()) {
