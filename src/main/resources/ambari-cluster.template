@@ -117,7 +117,7 @@
       }
     },
 
-    "GatewayToInternet" : {
+    "AttachGateway" : {
        "Type" : "AWS::EC2::VPCGatewayAttachment",
        "Properties" : {
          "VpcId" : { "Ref" : "VPC" },
@@ -139,7 +139,7 @@
 
     "PublicRoute" : {
       "Type" : "AWS::EC2::Route",
-      "DependsOn" : "GatewayToInternet",
+      "DependsOn" : "AttachGateway",
       "Properties" : {
         "RouteTableId" : { "Ref" : "PublicRouteTable" },
         "DestinationCidrBlock" : "0.0.0.0/0",
@@ -157,12 +157,19 @@
     
     "AmbariServerInstance" : {
       "Type" : "AWS::EC2::Instance",
+      "DependsOn" : "PublicRoute",
       "Properties" : {
+      	"AvailabilityZone" : { "Fn::GetAtt" : [ "PublicSubnet", "AvailabilityZone" ] },
         "ImageId"        : { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" }, { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "WebServerInstanceType" }, "Arch" ] } ] },
-        "SecurityGroupIds" : [{ "Ref" : "WebServerSecurityGroup" }],
-        "SubnetId" : { "Ref" : "PublicSubnet" },
         "InstanceType" : { "Ref" : "WebServerInstanceType" },
         "KeyName" : { "Ref" : "KeyName" },
+        "NetworkInterfaces" : [{
+          "GroupSet"                 : [{ "Ref" : "WebServerSecurityGroup" }],
+          "AssociatePublicIpAddress" : "true",
+          "DeviceIndex"              : "0",
+          "DeleteOnTermination"      : "true",
+          "SubnetId"                 : { "Ref" : "PublicSubnet" }
+        }],
         "Tags" : [ {"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} } ],
         "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
           "#!/bin/bash\n",
@@ -173,7 +180,7 @@
     
     "WebServerFleet" : {
       "Type" : "AWS::AutoScaling::AutoScalingGroup",
-      "DependsOn" : "PublicRoute",
+      "DependsOn" : "AmbariServerInstance",
       "Properties" : {
         "AvailabilityZones" : [{ "Fn::GetAtt" : [ "PublicSubnet", "AvailabilityZone" ] }],
         "VPCZoneIdentifier" : [{ "Ref" : "PublicSubnet" }],
@@ -197,9 +204,9 @@
           "#!/bin/bash -v\n",
           "echo 'IP address of Ambari server:'\n",
           "echo ",
-          { "Fn::GetAtt" : [ "AmbariServerInstance" , "PublicIp"] },
+          { "Fn::GetAtt" : [ "AmbariServerInstance" , "PrivateIp"] },
           "echo ",
-          { "Fn::GetAtt" : [ "AmbariServerInstance" , "PrivateIp"] }
+          { "Fn::GetAtt" : [ "AmbariServerInstance" , "PublicIp"] }
         ]]}}
       }
     },
