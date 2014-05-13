@@ -26,19 +26,4 @@ public class ProvisionController {
         return new ResponseEntity<ProvisionResult>(result, HttpStatus.CREATED);
     }
 
-    // @RequestMapping(method = RequestMethod.POST, value = "/listStacks")
-    // @ResponseBody
-    // public ResponseEntity<ListStacksResult> listStacks(@RequestBody
-    // AwsCredentialsRequest awsCredentialsJson) {
-    // BasicAWSCredentials basicAWSCredentials = new
-    // BasicAWSCredentials(awsCredentialsJson.getAccessKey(),
-    // awsCredentialsJson.getSecretKey());
-    // AmazonCloudFormationClient amazonCloudFormationClient = new
-    // AmazonCloudFormationClient(basicAWSCredentials);
-    // amazonCloudFormationClient.setRegion(Region.getRegion(Regions.EU_WEST_1));
-    // ListStacksResult listStacksResult =
-    // amazonCloudFormationClient.listStacks();
-    // return new ResponseEntity<>(listStacksResult, HttpStatus.OK);
-    // }
-
 }
