@@ -1,6 +1,7 @@
 package com.sequenceiq.provisioning.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -17,12 +18,16 @@ import com.sequenceiq.provisioning.service.ProvisionService;
 public class ProvisionController {
 
     @Autowired
-    private ProvisionService provisionService;
+    @Qualifier("azureProvisionService")
+    private ProvisionService azureProvisionService;
+    @Autowired
+    @Qualifier("awsProvisionService")
+    private ProvisionService awsProvisionService;
 
     @RequestMapping(method = RequestMethod.POST, value = "/cluster")
     @ResponseBody
     public ResponseEntity<ProvisionResult> provisionCluster(@RequestBody ProvisionRequest provisionRequest) {
-        ProvisionResult result = provisionService.provisionCluster(provisionRequest);
+        ProvisionResult result = awsProvisionService.provisionCluster(provisionRequest);
         return new ResponseEntity<ProvisionResult>(result, HttpStatus.CREATED);
     }
 

@@ -1,6 +1,7 @@
 package com.sequenceiq.provisioning.service.aws;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.auth.BasicAWSCredentials;
@@ -16,6 +17,7 @@ import com.sequenceiq.provisioning.domain.CloudFormationTemplate;
 import com.sequenceiq.provisioning.service.ProvisionService;
 
 @Component
+@Qualifier("awsProvisionService")
 public class AWSProvisionService implements ProvisionService {
 
     private static final String OK_STATUS = "ok";
