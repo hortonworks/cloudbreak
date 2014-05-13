@@ -172,39 +172,6 @@
 
     "WebServerServerLaunchConfig"  : {
       "Type" : "AWS::AutoScaling::LaunchConfiguration",
-      "Metadata" : {
-        "AWS::CloudFormation::Init" : {
-          "config" : {
-            "packages" : {
-              "yum" : {
-                "httpd" : []
-              }
-            },
-
-            "files" : {
-              "/var/www/html/index.html" : {
-                "content" : { "Fn::Join" : ["\n", [
-                  "<img src=\"https://s3.amazonaws.com/cloudformation-examples/cloudformation_graphic.png\" alt=\"AWS CloudFormation Logo\"/>",
-                  "<h1>Congratulations, you have successfully launched the AWS CloudFormation sample.</h1>"
-                ]]},
-                "mode"    : "000644",
-                "owner"   : "root",
-                "group"   : "root"
-              }
-            },
-
-            "services" : {
-              "sysvinit" : {
-                "httpd" : {
-                  "enabled"       : "true",
-                  "ensureRunning" : "true",
-                  "files"         : [ "/etc/httpd/conf.d/maptobackend.conf", "/var/www/html/index.html" ]
-                }
-              }
-            }
-          }
-        }
-      },
       "Properties" : {
         "ImageId"        : { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" }, { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "WebServerInstanceType" }, "Arch" ] } ] },
         "SecurityGroups" : [ { "Ref" : "WebServerSecurityGroup" } ],
@@ -213,16 +180,7 @@
         "AssociatePublicIpAddress" : "true",
         "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
           "#!/bin/bash -v\n",
-          "yum update -y aws-cfn-bootstrap\n",
-
-          "# Install the sample application\n",
-          "/opt/aws/bin/cfn-init ",
-          "    --stack ", { "Ref" : "AWS::StackId" },
-          "    --resource WebServerServerLaunchConfig ",
-          "    --region ", { "Ref" : "AWS::Region" }, "\n",
-
-          "# Signal completion\n",
-          "/opt/aws/bin/cfn-signal -e $? -r \"WebServer setup done\" '", { "Ref" : "WebServerWaitHandle" }, "'\n"
+          "echo 'hello'\n"
         ]]}}
       }
     },
