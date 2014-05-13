@@ -154,8 +154,23 @@
         "RouteTableId" : { "Ref" : "PublicRouteTable" }
       }
     },
-
-
+    
+    "AmbariServerInstance" : {
+      "Type" : "AWS::EC2::Instance",
+      "Properties" : {
+        "ImageId"        : { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" }, { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "WebServerInstanceType" }, "Arch" ] } ] },
+        "SecurityGroupIds" : [{ "Ref" : "WebServerSecurityGroup" }],
+        "SubnetId" : { "Ref" : "PublicSubnet" },
+        "InstanceType" : { "Ref" : "WebServerInstanceType" },
+        "KeyName" : { "Ref" : "KeyName" },
+        "Tags" : [ {"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} } ],
+        "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
+          "#!/bin/bash\n",
+          "echo 'hello'\n"
+        ]]}}
+      }
+    },
+    
     "WebServerFleet" : {
       "Type" : "AWS::AutoScaling::AutoScalingGroup",
       "DependsOn" : "PublicRoute",
