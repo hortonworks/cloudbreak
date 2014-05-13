@@ -1,7 +1,7 @@
 {
   "AWSTemplateFormatVersion" : "2010-09-09",
 
-  "Description" : "AWS CloudFormation Sample Template VPC_AutoScaling_With_Public_IPs.template: Sample template showing how to create a load balanced, auto scaled group in a VPC where the EC2 instances can directly access the internet. **WARNING** This template creates Elastic Load Balancers and Amazon EC2 instances. You will be billed for the AWS resources used if you create a stack from this template.",
+  "Description" : "CloudFormation template to create an Ambari cluster on EC2",
 
   "Parameters" : {
 
@@ -155,31 +155,6 @@
       }
     },
 
-    "PublicElasticLoadBalancer" : {
-      "Type" : "AWS::ElasticLoadBalancing::LoadBalancer",
-      "Properties" : {
-        "SecurityGroups" : [ { "Ref" : "PublicLoadBalancerSecurityGroup" } ],
-        "Subnets" : [ { "Ref" : "PublicSubnet" } ],
-        "Listeners" : [ { "LoadBalancerPort" : "80", "InstancePort" : "80", "Protocol" : "HTTP" } ],
-        "HealthCheck" : {
-          "Target" : "HTTP:80/",
-          "HealthyThreshold" : "3",
-          "UnhealthyThreshold" : "5",
-          "Interval" : "90",
-          "Timeout" : "60"
-        }
-      }
-    },
-
-    "PublicLoadBalancerSecurityGroup" : {
-      "Type" : "AWS::EC2::SecurityGroup",
-      "Properties" : {
-        "GroupDescription" : "Public ELB Security Group with HTTP access on port 80 from the internet",
-        "VpcId" : { "Ref" : "VPC" },
-        "SecurityGroupIngress" : [ { "IpProtocol" : "tcp", "FromPort" : "80", "ToPort" : "80", "CidrIp" : "0.0.0.0/0"} ],
-        "SecurityGroupEgress" : [ { "IpProtocol" : "tcp", "FromPort" : "80", "ToPort" : "80", "CidrIp" : "0.0.0.0/0"} ]
-      }
-    },
 
     "WebServerFleet" : {
       "Type" : "AWS::AutoScaling::AutoScalingGroup",
@@ -191,7 +166,6 @@
         "MinSize" : "1",
         "MaxSize" : "10",
         "DesiredCapacity" : { "Ref" : "WebServerCount" },
-        "LoadBalancerNames" : [ { "Ref" : "PublicElasticLoadBalancer" } ],
         "Tags" : [ { "Key" : "Network", "Value" : "Public", "PropagateAtLaunch" : "true" } ]
       }
     },
@@ -256,10 +230,10 @@
     "WebServerSecurityGroup" : {
       "Type" : "AWS::EC2::SecurityGroup",
       "Properties" : {
-        "GroupDescription" : "Allow access from load balancer and bastion as well as outbound HTTP and HTTPS traffic",
+        "GroupDescription" : "Allow access from web and bastion as well as outbound HTTP and HTTPS traffic",
         "VpcId" : { "Ref" : "VPC" },
         "SecurityGroupIngress" : [
-          { "IpProtocol" : "tcp", "FromPort" : "80", "ToPort" : "80", "SourceSecurityGroupId" : { "Ref" : "PublicLoadBalancerSecurityGroup" } } ,
+		  { "IpProtocol" : "tcp", "FromPort" : "80", "ToPort" : "80", "CidrIp" : "0.0.0.0/0"} ,
           { "IpProtocol" : "tcp", "FromPort" : "22", "ToPort" : "22", "CidrIp" : { "Ref" : "SSHLocation" } } ]
       }
     },
@@ -277,12 +251,6 @@
         "Count"   : { "Ref" : "WebServerCount" }
       }
     }
-  },
-
-  "Outputs" : {
-    "WebSite" : {
-      "Description" : "URL of the website",
-      "Value" :  { "Fn::Join" : [ "", [ "http://", { "Fn::GetAtt" : [ "PublicElasticLoadBalancer", "DNSName" ]}]]}
-    }
   }
+
 }
