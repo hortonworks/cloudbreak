@@ -195,7 +195,11 @@
         "AssociatePublicIpAddress" : "true",
         "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
           "#!/bin/bash -v\n",
-          "echo 'hello'\n"
+          "echo 'IP address of Ambari server:'\n",
+          "echo ",
+          { "Fn::GetAtt" : [ "AmbariServerInstance" , "PublicIp"] },
+          "echo ",
+          { "Fn::GetAtt" : [ "AmbariServerInstance" , "PrivateIp"] }
         ]]}}
       }
     },
