@@ -6,9 +6,9 @@ import org.springframework.stereotype.Component;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.regions.Region;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
-import com.amazonaws.services.cloudformation.model.CreateStackRequest;
 import com.amazonaws.services.cloudformation.model.CreateStackResult;
-import com.amazonaws.services.cloudformation.model.Parameter;
+import com.amazonaws.services.cloudformation.model.ValidateTemplateRequest;
+import com.amazonaws.services.cloudformation.model.ValidateTemplateResult;
 import com.sequenceiq.provisioning.controller.json.AWSProvisionResult;
 import com.sequenceiq.provisioning.controller.json.ProvisionRequest;
 import com.sequenceiq.provisioning.controller.json.ProvisionResult;
@@ -29,12 +29,19 @@ public class AWSProvisionService implements ProvisionService {
         AmazonCloudFormationClient amazonCloudFormationClient = new AmazonCloudFormationClient(basicAWSCredentials);
         amazonCloudFormationClient.setRegion(Region.getRegion(provisionRequest.getRegion()));
 
-        CreateStackRequest createStackRequest = new CreateStackRequest()
-                .withStackName(provisionRequest.getClusterName())
-                .withTemplateBody(template.getBody())
-                .withParameters(new Parameter().withParameterKey("KeyName").withParameterValue(provisionRequest.getKeyName()));
+        ValidateTemplateRequest validateTemplateRequest = new ValidateTemplateRequest().withTemplateBody(template.getBody());
+        ValidateTemplateResult validateTemplateResult = amazonCloudFormationClient.validateTemplate(validateTemplateRequest);
+        System.out.println(validateTemplateResult);
 
-        CreateStackResult createStackResult = amazonCloudFormationClient.createStack(createStackRequest);
+        // CreateStackRequest createStackRequest = new CreateStackRequest()
+        // .withStackName(provisionRequest.getClusterName())
+        // .withTemplateBody(template.getBody())
+        // .withParameters(new
+        // Parameter().withParameterKey("KeyName").withParameterValue(provisionRequest.getKeyName()));
+        //
+        // CreateStackResult createStackResult =
+        // amazonCloudFormationClient.createStack(createStackRequest);
+        CreateStackResult createStackResult = new CreateStackResult();
         return new AWSProvisionResult(OK_STATUS, createStackResult);
     }
 

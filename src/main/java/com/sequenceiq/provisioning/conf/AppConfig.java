@@ -12,7 +12,7 @@ import com.sequenceiq.provisioning.service.aws.TemplateReader;
 @Configuration
 public class AppConfig {
 
-    private static final String DEFAULT_TEMPLATE_NAME = "sample-vpc-template";
+    private static final String DEFAULT_TEMPLATE_NAME = "ambari-cluster.template";
 
     @Autowired
     private TemplateReader templateReader;
