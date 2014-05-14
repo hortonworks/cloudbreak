@@ -1,7 +1,7 @@
 package com.sequenceiq.provisioning.controller;
 
-import static com.sequenceiq.provisioning.domain.Type.AWS;
-import static com.sequenceiq.provisioning.domain.Type.AZURE;
+import static com.sequenceiq.provisioning.domain.CloudPlatform.AWS;
+import static com.sequenceiq.provisioning.domain.CloudPlatform.AZURE;
 
 import javax.activation.UnsupportedDataTypeException;
 

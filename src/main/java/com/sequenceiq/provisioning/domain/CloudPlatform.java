@@ -1,5 +1,5 @@
 package com.sequenceiq.provisioning.domain;
 
-public enum Type {
+public enum CloudPlatform {
     AWS, AZURE
 }
