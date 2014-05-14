@@ -5,13 +5,20 @@ import com.sequenceiq.provisioning.domain.CloudPlatform;
 
 public class ProvisionRequest {
 
+    private CloudPlatform cloudPlatform;
     private String clusterName;
     private int clusterSize;
     private Regions region;
     private String keyName;
-    private String accessKey;
-    private String secretKey;
-    private CloudPlatform cloudPlatform;
+    private String roleArn;
+
+    public CloudPlatform getCloudPlatform() {
+        return cloudPlatform;
+    }
+
+    public void setCloudPlatform(CloudPlatform type) {
+        this.cloudPlatform = type;
+    }
 
     public String getClusterName() {
         return clusterName;
@@ -45,27 +52,12 @@ public class ProvisionRequest {
         this.keyName = keyName;
     }
 
-    public String getAccessKey() {
-        return accessKey;
+    public String getRoleArn() {
+        return roleArn;
     }
 
-    public void setAccessKey(String accessKey) {
-        this.accessKey = accessKey;
+    public void setRoleArn(String roleArn) {
+        this.roleArn = roleArn;
     }
 
-    public String getSecretKey() {
-        return secretKey;
-    }
-
-    public void setSecretKey(String secretKey) {
-        this.secretKey = secretKey;
-    }
-
-    public CloudPlatform getCloudPlatform() {
-        return cloudPlatform;
-    }
-
-    public void setCloudPlatform(CloudPlatform type) {
-        this.cloudPlatform = type;
-    }
 }
