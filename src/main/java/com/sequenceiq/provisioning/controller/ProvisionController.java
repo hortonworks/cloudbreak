@@ -2,7 +2,6 @@ package com.sequenceiq.provisioning.controller;
 
 import java.util.Map;
 
-import javax.activation.UnsupportedDataTypeException;
 import javax.annotation.Resource;
 
 import org.springframework.http.HttpStatus;
@@ -26,7 +25,7 @@ public class ProvisionController {
 
     @RequestMapping(method = RequestMethod.POST, value = "/cluster")
     @ResponseBody
-    public ResponseEntity<ProvisionResult> provisionCluster(@RequestBody ProvisionRequest provisionRequest) throws UnsupportedDataTypeException {
+    public ResponseEntity<ProvisionResult> provisionCluster(@RequestBody ProvisionRequest provisionRequest) {
         ProvisionService provisionService = provisionServices.get(provisionRequest.getCloudPlatform());
         return new ResponseEntity<>(provisionService.provisionCluster(provisionRequest), HttpStatus.CREATED);
     }
