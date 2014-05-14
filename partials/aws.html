@@ -1,3 +1,5 @@
+
+
 <div class="row">
     <section class="intro-subpage">
         <div class="container">
@@ -24,7 +26,12 @@
             <div class="form-group">
                 <label for="blueprint" class="col-sm-2 control-label">Blueprint: </label>
                 <div class="col-sm-10">
-                    <textarea class="form-control" id="blueprint" rows="10" placeholder="put your blueprint here..."/>
+                    <div class="list-group" id="blueprint">
+                        <a class="list-group-item blueprint" ng-repeat="blueprint in blueprints">
+                            <h4 class="list-group-item-heading">{{blueprint}}</h4>
+                            <p class="list-group-item-text">Some text....</p>
+                        </a>
+                    </div>
                 </div>
             </div>
             <div class="form-group">
