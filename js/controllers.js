@@ -13,7 +13,7 @@ provisioningControllers.controller('ProvisioningController', ['$scope', '$http',
         $scope.apiUrl = "http://localhost:8080";
         $http.defaults.headers.common['x-auth-token']= $scope.token;
         $http.defaults.headers.common['Content-Type']= 'application/json';
-        $scope.signedIn = false;
+        $rootScope.signedIn = false;
         $rootScope.providers = [];
 
         $scope.reloadCtrl = function(){
@@ -24,12 +24,12 @@ provisioningControllers.controller('ProvisioningController', ['$scope', '$http',
         $scope.signIn = function() {
             if(username.value === "user" && password.value === "pass") {
                 localStorage.signedIn = true;
-                $scope.signedIn = true;
+                $rootScope.signedIn = true;
             }
         }
 
         $scope.signOut = function() {
-            $scope.signedIn = false;
+            $rootScope.signedIn = false;
             $scope.signUpOk = localStorage.signUpOk;
             $scope.token = "";
             localStorage.signedIn = false;
@@ -38,29 +38,16 @@ provisioningControllers.controller('ProvisioningController', ['$scope', '$http',
         }
 
         if (typeof (Storage) !== "undefined") {
-            if (localStorage.signedIn === 'true' && localStorage.token) {
-                $scope.signedIn = true;
-                $scope.token = localStorage.token;
+            if (localStorage.signedIn === 'true') {
+                $rootScope.signedIn = true;
             }
-            if (localStorage.signUpOk === 'true') {
-                $scope.signUpOk = true;
-            } else {
-                $scope.signUpOk = false;
-            }
-            if(localStorage.providers) {
-                $rootScope.providers = localStorage.providers;
-            } else {
-                $rootScope.providers = [];
-                localStorage.providers = $rootScope.providers;
-            }
-
         } else {
             console.log("No localstorage support!");
         }
 
-
     }
 ]);
+
 
 provisioningControllers.controller('AwsController', ['$scope', '$http', 'Templates', '$location', '$rootScope',
     function ($scope, $http, Templates, $location, $rootScope) {
@@ -68,7 +55,6 @@ provisioningControllers.controller('AwsController', ['$scope', '$http', 'Templat
         $scope.apiUrl = "http://localhost:8080";
         $http.defaults.headers.common['x-auth-token']= $scope.token;
         $http.defaults.headers.common['Content-Type']= 'application/json';
-        $scope.signedIn = false;
 
         $scope.reloadCtrl = function(){
             console.log('reloading...');
@@ -84,13 +70,11 @@ provisioningControllers.controller('AzureController', ['$scope', '$http', 'Templ
         $scope.apiUrl = "http://localhost:8080";
         $http.defaults.headers.common['x-auth-token']= $scope.token;
         $http.defaults.headers.common['Content-Type']= 'application/json';
-        $scope.signedIn = false;
 
         $scope.reloadCtrl = function(){
             console.log('reloading...');
             $route.reload();
         }
-
     }
 ]);
 
@@ -100,7 +84,6 @@ provisioningControllers.controller('CloudProviderController', ['$scope', '$http'
         $scope.apiUrl = "http://localhost:8080";
         $http.defaults.headers.common['x-auth-token']= $scope.token;
         $http.defaults.headers.common['Content-Type']= 'application/json';
-        $scope.signedIn = false;
         $scope.supportedProviders = ["Azure", "AWS"];
         $scope.awsProvider = false;
         $scope.azureProvider = false;
@@ -130,7 +113,6 @@ provisioningControllers.controller('CloudProviderController', ['$scope', '$http'
             secretKey.value = "";
             accessKey.value = "";
             $rootScope.providers.push(awsObject);
-            localStorage.providers = $rootScope.providers;
         }
 
         $scope.createAzureProvider = function($location) {
@@ -140,10 +122,8 @@ provisioningControllers.controller('CloudProviderController', ['$scope', '$http'
             keystorePath.value = "";
             keystorePassword.value = "";
             $rootScope.providers.push(azureObject);
-            localStorage.providers = $rootScope.providers;
         }
 
         $scope.createProvider();
-
     }
 ]);
