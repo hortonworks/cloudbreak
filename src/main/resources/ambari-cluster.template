@@ -1,5 +1,5 @@
 {
-  "AWSTemplateFormatVersion" : "2010-09-09",
+  "AWSTemplateFormatVersion" : "2014-05-14",
 
   "Description" : "CloudFormation template to create an Ambari cluster on EC2",
 
@@ -24,16 +24,16 @@
       "ConstraintDescription" : "must be a valid CIDR range of the form x.x.x.x/x."
     },
 
-    "WebServerInstanceType" : {
-      "Description" : "WebServer Server EC2 instance type",
+    "ClusterNodeInstanceType" : {
+      "Description" : "EC2 instance type of the nodes in the cluster",
       "Type" : "String",
       "Default" : "m1.small",
       "AllowedValues" : ["t1.micro", "m1.small", "m1.medium", "m1.large", "m1.xlarge", "m2.xlarge", "m2.2xlarge", "m2.4xlarge", "m3.xlarge", "m3.2xlarge", "c1.medium", "c1.xlarge", "cc1.4xlarge", "cc2.8xlarge", "cg1.4xlarge", "hi1.4xlarge", "hs1.8xlarge"],
       "ConstraintDescription" : "must be a valid EC2 instance type."
     },
 
-    "WebServerCount" : {
-      "Description" : "Number of EC2 instances to launch for the WebServer server",
+    "AmbariAgentCount" : {
+      "Description" : "Number of Ambari agent instances to launch in the cluster.",
       "Type" : "Number",
       "Default" : "1"
     }
@@ -160,11 +160,11 @@
       "DependsOn" : "PublicRoute",
       "Properties" : {
       	"AvailabilityZone" : { "Fn::GetAtt" : [ "PublicSubnet", "AvailabilityZone" ] },
-        "ImageId"        : { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" }, { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "WebServerInstanceType" }, "Arch" ] } ] },
-        "InstanceType" : { "Ref" : "WebServerInstanceType" },
+        "ImageId"        : { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" }, { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "ClusterNodeInstanceType" }, "Arch" ] } ] },
+        "InstanceType" : { "Ref" : "ClusterNodeInstanceType" },
         "KeyName" : { "Ref" : "KeyName" },
         "NetworkInterfaces" : [{
-          "GroupSet"                 : [{ "Ref" : "WebServerSecurityGroup" }],
+          "GroupSet"                 : [{ "Ref" : "ClusterNodeSecurityGroup" }],
           "AssociatePublicIpAddress" : "true",
           "DeviceIndex"              : "0",
           "DeleteOnTermination"      : "true",
@@ -178,26 +178,26 @@
       }
     },
     
-    "WebServerFleet" : {
+    "AmbariAgents" : {
       "Type" : "AWS::AutoScaling::AutoScalingGroup",
       "DependsOn" : "AmbariServerInstance",
       "Properties" : {
         "AvailabilityZones" : [{ "Fn::GetAtt" : [ "PublicSubnet", "AvailabilityZone" ] }],
         "VPCZoneIdentifier" : [{ "Ref" : "PublicSubnet" }],
-        "LaunchConfigurationName" : { "Ref" : "WebServerServerLaunchConfig"  },
+        "LaunchConfigurationName" : { "Ref" : "AmbariAgentLaunchConfig"  },
         "MinSize" : "1",
         "MaxSize" : "10",
-        "DesiredCapacity" : { "Ref" : "WebServerCount" },
+        "DesiredCapacity" : { "Ref" : "AmbariAgentCount" },
         "Tags" : [ { "Key" : "Network", "Value" : "Public", "PropagateAtLaunch" : "true" } ]
       }
     },
 
-    "WebServerServerLaunchConfig"  : {
+    "AmbariAgentLaunchConfig"  : {
       "Type" : "AWS::AutoScaling::LaunchConfiguration",
       "Properties" : {
-        "ImageId"        : { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" }, { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "WebServerInstanceType" }, "Arch" ] } ] },
-        "SecurityGroups" : [ { "Ref" : "WebServerSecurityGroup" } ],
-        "InstanceType"   : { "Ref" : "WebServerInstanceType" },
+        "ImageId"        : { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" }, { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "ClusterNodeInstanceType" }, "Arch" ] } ] },
+        "SecurityGroups" : [ { "Ref" : "ClusterNodeSecurityGroup" } ],
+        "InstanceType"   : { "Ref" : "ClusterNodeInstanceType" },
         "KeyName"        : { "Ref" : "KeyName" },
         "AssociatePublicIpAddress" : "true",
         "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
@@ -211,7 +211,7 @@
       }
     },
 
-    "WebServerSecurityGroup" : {
+    "ClusterNodeSecurityGroup" : {
       "Type" : "AWS::EC2::SecurityGroup",
       "Properties" : {
         "GroupDescription" : "Allow access from web and bastion as well as outbound HTTP and HTTPS traffic",
@@ -222,17 +222,17 @@
       }
     },
 
-    "WebServerWaitHandle" : {
+    "AmbariAgentWaitHandle" : {
       "Type" : "AWS::CloudFormation::WaitConditionHandle"
     },
 
-    "WebServerWaitCondition" : {
+    "AmbariAgentWaitCondition" : {
       "Type" : "AWS::CloudFormation::WaitCondition",
-      "DependsOn" : "WebServerFleet",
+      "DependsOn" : "AmbariAgents",
       "Properties" : {
-        "Handle"  : { "Ref" : "WebServerWaitHandle" },
+        "Handle"  : { "Ref" : "AmbariAgentWaitHandle" },
         "Timeout" : "3600",
-        "Count"   : { "Ref" : "WebServerCount" }
+        "Count"   : { "Ref" : "AmbariAgentCount" }
       }
     }
   }
