@@ -9,16 +9,14 @@
                 <tr>
                     <th>#</th>
                     <th>Name</th>
+                    <th>Create Cluster</th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr>
-                    <td>1</td>
-                    <td>Azure</td>
-                </tr>
-                <tr>
-                    <td>2</td>
-                    <td>AWS</td>
+                <tr ng-repeat="provider in providers track by $index">
+                    <td>{{$index}}</td>
+                    <td>{{provider}}</td>
+                    <td><a type="button" class="btn btn-success"  ng-href="#/{{provider.type}}">Create</a></td>
                 </tr>
                 </tbody>
             </table>
