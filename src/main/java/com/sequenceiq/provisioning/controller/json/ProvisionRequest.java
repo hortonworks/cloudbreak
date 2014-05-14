@@ -11,7 +11,7 @@ public class ProvisionRequest {
     private String keyName;
     private String accessKey;
     private String secretKey;
-    private CloudPlatform type;
+    private CloudPlatform cloudPlatform;
 
     public String getClusterName() {
         return clusterName;
@@ -61,11 +61,11 @@ public class ProvisionRequest {
         this.secretKey = secretKey;
     }
 
-    public CloudPlatform getType() {
-        return type;
+    public CloudPlatform getCloudPlatform() {
+        return cloudPlatform;
     }
 
-    public void setType(CloudPlatform type) {
-        this.type = type;
+    public void setCloudPlatform(CloudPlatform type) {
+        this.cloudPlatform = type;
     }
 }

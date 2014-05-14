@@ -1,12 +1,10 @@
 package com.sequenceiq.provisioning.controller;
 
-import static com.sequenceiq.provisioning.domain.CloudPlatform.AWS;
-import static com.sequenceiq.provisioning.domain.CloudPlatform.AZURE;
+import java.util.Map;
 
 import javax.activation.UnsupportedDataTypeException;
+import javax.annotation.Resource;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -17,28 +15,20 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sequenceiq.provisioning.controller.json.ProvisionRequest;
 import com.sequenceiq.provisioning.controller.json.ProvisionResult;
+import com.sequenceiq.provisioning.domain.CloudPlatform;
 import com.sequenceiq.provisioning.service.ProvisionService;
 
 @Controller
 public class ProvisionController {
 
-    @Autowired
-    @Qualifier("azureProvisionService")
-    private ProvisionService azureProvisionService;
-    @Autowired
-    @Qualifier("awsProvisionService")
-    private ProvisionService awsProvisionService;
+    @Resource
+    private Map<CloudPlatform, ProvisionService> provisionServices;
 
     @RequestMapping(method = RequestMethod.POST, value = "/cluster")
     @ResponseBody
     public ResponseEntity<ProvisionResult> provisionCluster(@RequestBody ProvisionRequest provisionRequest) throws UnsupportedDataTypeException {
-        if (AWS.equals(provisionRequest.getType())) {
-            return new ResponseEntity<>(awsProvisionService.provisionCluster(provisionRequest), HttpStatus.CREATED);
-        } else if (AZURE.equals(provisionRequest.getType())) {
-            return new ResponseEntity<>(azureProvisionService.provisionCluster(provisionRequest), HttpStatus.CREATED);
-        } else {
-            throw new UnsupportedDataTypeException("This type of provisioning not supported: " + provisionRequest.getType());
-        }
+        ProvisionService provisionService = provisionServices.get(provisionRequest.getCloudPlatform());
+        return new ResponseEntity<>(provisionService.provisionCluster(provisionRequest), HttpStatus.CREATED);
     }
 
 }
