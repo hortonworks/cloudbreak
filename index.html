@@ -1,12 +1,14 @@
 <html lang="en" ng-app="provisioningApp">
 <head>
     <meta charset="utf-8">
-    <title>api-console</title>
+    <title>provisioning-console</title>
+    <link rel="shortcut icon" type="image/ico" href="favicon.ico" />
     <script src="lib/jquery-1.10.2.js"></script>
     <!--<link href="css/bootstrap-screen.css" rel="stylesheet">-->
     <link rel="stylesheet"  type="text/css" href="css/bootstrap.css">
     <link rel="stylesheet"  type="text/css" href="css/bootstrap-theme.css">
     <link rel="stylesheet"  type="text/css" href="style/provisioning.css">
+    <link rel="stylesheet"  type="text/css" href="style/signin.css">
     <script src="lib/bootstrap.js"></script>
     <script src="lib/bootstrap.min.js"></script>
     <script src="lib/angular.js"></script>
@@ -17,6 +19,8 @@
     <script src="js/services.js"></script>
 </head>
 <body ng-controller="ProvisioningController">
+
+
 <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
     <div class="container">
 
@@ -28,24 +32,49 @@
                 <span class="icon-bar"></span>
             </button>
             <!-- .navbar-toggle -->
-            <a class="navbar-brand" href="index.html"><img id="logo" src="http://sequenceiq.com/img/logo@2x.png" alt="SequenceIQ" width="154" height="39"></a>
+
+                <a href="#/" class="navbar-brand">SequenceIQ</a>
         </div>
         <!-- .navbar-header -->
 
+
+
+
         <div class="collapse navbar-collapse" id="navbar-collapsing">
-            <ul class="nav navbar-nav navbar-right">
-                <li><a href="#/aws">AWS</a></li>
-                <li><a href="#/azure">Azure</a></li>
+            <ul class="nav navbar-nav navbar-right" ng-show="signedIn">
+
             </ul>
             <!-- .navbar-nav -->
+            <ul class="nav navbar-nav navbar-right">
+                <li><a ng-click="signOut()" ng-show="signedIn" href="#/">Logout</a></li>
+            </ul>
         </div>
         <!-- /.navbar-collapse -->
+
 
     </div>
     <!-- .container -->
 </nav>
 
-<main class="bs-masthead" id="content" role="main">
+
+<div class="container" ng-hide="signedIn">
+
+    <form class="form-signin" role="form">
+        <h2 class="form-signin-heading">Please sign in</h2>
+        <input type="text" ng-model="username" id="username" class="form-control" placeholder="User Name"  required="" autofocus="" autocomplete="off" style="background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAASCAYAAABSO15qAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3QsPDhss3LcOZQAAAU5JREFUOMvdkzFLA0EQhd/bO7iIYmklaCUopLAQA6KNaawt9BeIgnUwLHPJRchfEBR7CyGWgiDY2SlIQBT/gDaCoGDudiy8SLwkBiwz1c7y+GZ25i0wnFEqlSZFZKGdi8iiiOR7aU32QkR2c7ncPcljAARAkgckb8IwrGf1fg/oJ8lRAHkR2VDVmOQ8AKjqY1bMHgCGYXhFchnAg6omJGcBXEZRtNoXYK2dMsaMt1qtD9/3p40x5yS9tHICYF1Vn0mOxXH8Uq/Xb389wff9PQDbQRB0t/QNOiPZ1h4B2MoO0fxnYz8dOOcOVbWhqq8kJzzPa3RAXZIkawCenHMjJN/+GiIqlcoFgKKq3pEMAMwAuCa5VK1W3SAfbAIopum+cy5KzwXn3M5AI6XVYlVt1mq1U8/zTlS1CeC9j2+6o1wuz1lrVzpWXLDWTg3pz/0CQnd2Jos49xUAAAAASUVORK5CYII=); background-attachment: scroll; background-position: 100% 50%; background-repeat: no-repeat no-repeat;">
+        <input type="password" ng-model="password" id="password" class="form-control" placeholder="Password" required="" autocomplete="off" style="background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAASCAYAAABSO15qAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3QsPDhss3LcOZQAAAU5JREFUOMvdkzFLA0EQhd/bO7iIYmklaCUopLAQA6KNaawt9BeIgnUwLHPJRchfEBR7CyGWgiDY2SlIQBT/gDaCoGDudiy8SLwkBiwz1c7y+GZ25i0wnFEqlSZFZKGdi8iiiOR7aU32QkR2c7ncPcljAARAkgckb8IwrGf1fg/oJ8lRAHkR2VDVmOQ8AKjqY1bMHgCGYXhFchnAg6omJGcBXEZRtNoXYK2dMsaMt1qtD9/3p40x5yS9tHICYF1Vn0mOxXH8Uq/Xb389wff9PQDbQRB0t/QNOiPZ1h4B2MoO0fxnYz8dOOcOVbWhqq8kJzzPa3RAXZIkawCenHMjJN/+GiIqlcoFgKKq3pEMAMwAuCa5VK1W3SAfbAIopum+cy5KzwXn3M5AI6XVYlVt1mq1U8/zTlS1CeC9j2+6o1wuz1lrVzpWXLDWTg3pz/0CQnd2Jos49xUAAAAASUVORK5CYII=); background-attachment: scroll; background-position: 100% 50%; background-repeat: no-repeat no-repeat;">
+        <label class="checkbox">
+            <input type="checkbox" value="remember-me"> Remember me
+        </label>
+        <button class="btn btn-lg btn-primary btn-block" type="submit" ng-click="signIn()">Sign in</button>
+    </form>
+
+</div>
+
+
+
+
+<main class="bs-masthead margin50" id="content" role="main" ng-show="signedIn">
         <div class="view-container">
             <div ng-view class="view-frame"></div>
         </div>
@@ -55,9 +84,12 @@
 
 
 
+
+
+
 <footer class="bs-docs-footer footer navbar-fixed-bottom" role="contentinfo">
     <div class="container">
-          <p>Maintained by the <a href="https://github.com/sequenceiq">core team</a>.</p>
+          <p>Maintained by the <a href="https://github.com/sequenceiq">SequenceIQ team</a>.</p>
     </div>
 </footer>
 </body>

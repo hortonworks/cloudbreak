@@ -1,0 +1,86 @@
+<div class="row">
+    <section class="intro-subpage">
+        <div class="container">
+            <h1>Add New Cloud Provider</h1>
+            <div class="table-responsive" ng-show="providers.length">
+                <table cellpadding="0" cellspacing="0" border="0" class="table table-bordered" style="background: white;">
+                    <thead>
+                    <tr>
+                        <th>Text</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="provider in providers">
+                        <td>{{provider}}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- .container -->
+    </section>
+</div>
+
+<div class="container">
+    <div class="row margin50">
+
+        <form class="form-horizontal" role="form">
+            <div class="form-group" >
+                <div class="btn-group btn-group-justified" >
+                    <div class="btn-group" ng-repeat="provider in supportedProviders" >
+                        <button id="{{provider}}" type="button" class="btn btn-default" ng-click="createProvider(provider)">{{provider}}</button>
+                    </div>
+                </div>
+            </div>
+
+            <!--AZURE-->
+            <div id="azure_div"  ng-show="azureProvider" >
+                <div class="form-group">
+                    <label for="subscriptionId" class="col-sm-2 control-label">Subscription Id: </label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="subscriptionId" placeholder="subscription Id">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="keystorePath" class="col-sm-2 control-label">Key Store Path: </label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="keystorePath" placeholder="key store path">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="keystorePassword" class="col-sm-2 control-label">Key Store Password: </label>
+                    <div class="col-sm-10">
+                        <input type="password" class="form-control" id="keystorePassword" placeholder="key store password">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <button type="submit" class="btn btn-default" ng-click="createAzureProvider()">Create</button>
+                    </div>
+                </div>
+            </div>
+
+            <!--AWS-->
+            <div id="aws_div"  ng-show="awsProvider">
+                <div class="form-group">
+                    <label for="secretKey" class="col-sm-2 control-label">Secret Key: </label>
+                    <div class="col-sm-10">
+                        <input type="tesxt" class="form-control" id="secretKey" placeholder="secret key">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="accessKey" class="col-sm-2 control-label">Access Key: </label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="accessKey" placeholder="access key">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <button type="submit" class="btn btn-default" ng-click="createAwsProvider()">Create</button>
+                    </div>
+                </div>
+            </div>
+
+        </form>
+    </div>
+</div>

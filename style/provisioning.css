@@ -5,3 +5,7 @@ html,body{
 .navbar-default {
     background-image: none !important;
 }
+
+.margin50 {
+    margin-top: 50px;
+}
