@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 
 import com.amazonaws.auth.BasicSessionCredentials;
 import com.amazonaws.regions.Region;
+import com.amazonaws.regions.Regions;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.CreateStackRequest;
 import com.amazonaws.services.cloudformation.model.CreateStackResult;
@@ -37,14 +38,18 @@ public class AWSProvisionService implements ProvisionService {
 
     @Override
     public ProvisionResult provisionCluster(ProvisionRequest provisionRequest) {
+        Regions region = Regions.fromName(provisionRequest.getParameters().get("region"));
+        String keyName = provisionRequest.getParameters().get("keyName");
+        String roleArn = provisionRequest.getParameters().get("roleArn");
+
         BasicSessionCredentials basicSessionCredentials = credentialsProvider.retrieveSessionCredentials(SESSION_CREDENTIALS_DURATION, "provision-ambari",
-                provisionRequest.getRoleArn());
+                roleArn);
         AmazonCloudFormationClient amazonCloudFormationClient = new AmazonCloudFormationClient(basicSessionCredentials);
-        amazonCloudFormationClient.setRegion(Region.getRegion(provisionRequest.getRegion()));
+        amazonCloudFormationClient.setRegion(Region.getRegion(region));
         CreateStackRequest createStackRequest = new CreateStackRequest()
                 .withStackName(provisionRequest.getClusterName())
                 .withTemplateBody(template.getBody())
-                .withParameters(new Parameter().withParameterKey("KeyName").withParameterValue(provisionRequest.getKeyName()));
+                .withParameters(new Parameter().withParameterKey("KeyName").withParameterValue(keyName));
         CreateStackResult createStackResult = amazonCloudFormationClient.createStack(createStackRequest);
         return new AWSProvisionResult(OK_STATUS, createStackResult);
     }

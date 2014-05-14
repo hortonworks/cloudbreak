@@ -1,16 +1,20 @@
 package com.sequenceiq.provisioning.controller.json;
 
-import com.amazonaws.regions.Regions;
+import java.util.Map;
+
+import javax.validation.constraints.Min;
+
+import com.sequenceiq.provisioning.controller.validation.ValidProvisionRequest;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
 
+@ValidProvisionRequest
 public class ProvisionRequest {
 
     private CloudPlatform cloudPlatform;
     private String clusterName;
+    @Min(value = 2)
     private int clusterSize;
-    private Regions region;
-    private String keyName;
-    private String roleArn;
+    private Map<String, String> parameters;
 
     public CloudPlatform getCloudPlatform() {
         return cloudPlatform;
@@ -36,28 +40,12 @@ public class ProvisionRequest {
         this.clusterSize = clusterSize;
     }
 
-    public Regions getRegion() {
-        return region;
+    public Map<String, String> getParameters() {
+        return parameters;
     }
 
-    public void setRegion(Regions region) {
-        this.region = region;
-    }
-
-    public String getKeyName() {
-        return keyName;
-    }
-
-    public void setKeyName(String keyName) {
-        this.keyName = keyName;
-    }
-
-    public String getRoleArn() {
-        return roleArn;
-    }
-
-    public void setRoleArn(String roleArn) {
-        this.roleArn = roleArn;
+    public void setParameters(Map<String, String> parameters) {
+        this.parameters = parameters;
     }
 
 }

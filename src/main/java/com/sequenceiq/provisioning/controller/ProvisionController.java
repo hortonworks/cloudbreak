@@ -3,6 +3,7 @@ package com.sequenceiq.provisioning.controller;
 import java.util.Map;
 
 import javax.annotation.Resource;
+import javax.validation.Valid;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +26,7 @@ public class ProvisionController {
 
     @RequestMapping(method = RequestMethod.POST, value = "/cluster")
     @ResponseBody
-    public ResponseEntity<ProvisionResult> provisionCluster(@RequestBody ProvisionRequest provisionRequest) {
+    public ResponseEntity<ProvisionResult> provisionCluster(@RequestBody @Valid ProvisionRequest provisionRequest) {
         ProvisionService provisionService = provisionServices.get(provisionRequest.getCloudPlatform());
         return new ResponseEntity<>(provisionService.provisionCluster(provisionRequest), HttpStatus.CREATED);
     }
