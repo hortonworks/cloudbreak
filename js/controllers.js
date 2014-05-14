@@ -15,6 +15,7 @@ provisioningControllers.controller('ProvisioningController', ['$scope', '$http',
         $http.defaults.headers.common['Content-Type']= 'application/json';
         $rootScope.signedIn = false;
         $rootScope.providers = [];
+        $rootScope.blueprints = ["hadoop", "phoenix", "custom"];
 
         $scope.reloadCtrl = function(){
             console.log('reloading...');
@@ -61,6 +62,11 @@ provisioningControllers.controller('AwsController', ['$scope', '$http', 'Templat
             $route.reload();
         }
 
+        $scope.createAwsCluster = function() {
+            console.log("aws cluster creation started...");
+            $location.path("/");
+        }
+
     }
 ]);
 
@@ -74,6 +80,11 @@ provisioningControllers.controller('AzureController', ['$scope', '$http', 'Templ
         $scope.reloadCtrl = function(){
             console.log('reloading...');
             $route.reload();
+        }
+
+        $scope.createAzureCluster = function() {
+            console.log("azure cluster creation started...");
+            $location.path("/");
         }
     }
 ]);
@@ -107,21 +118,23 @@ provisioningControllers.controller('CloudProviderController', ['$scope', '$http'
             }
         }
 
-        $scope.createAwsProvider = function($location) {
+        $scope.createAwsProvider = function() {
             console.log("create aws");
             var awsObject = {type:"aws", secretKey: secretKey.value, accessKey: accessKey.value};
             secretKey.value = "";
             accessKey.value = "";
             $rootScope.providers.push(awsObject);
+            $location.path("/");
         }
 
-        $scope.createAzureProvider = function($location) {
+        $scope.createAzureProvider = function() {
             console.log("create azure");
             var azureObject = {type:"azure", subscriptionId: subscriptionId.value, keystorePath: keystorePath.value, keystorePassword: keystorePassword.value};
             subscriptionId.value = "";
             keystorePath.value = "";
             keystorePassword.value = "";
             $rootScope.providers.push(azureObject);
+            $location.path("/");
         }
 
         $scope.createProvider();
