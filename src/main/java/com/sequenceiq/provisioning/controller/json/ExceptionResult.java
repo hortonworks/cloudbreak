@@ -1,11 +1,11 @@
 package com.sequenceiq.provisioning.controller.json;
 
 
-public class ExceptionJson {
+public class ExceptionResult {
 
     private String message;
 
-    public ExceptionJson(String message) {
+    public ExceptionResult(String message) {
         this.message = message;
     }
 
