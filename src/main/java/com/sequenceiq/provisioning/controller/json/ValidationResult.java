@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class ValidationResult {
 
-    Map<String, String> validationErrors = new HashMap<>();
+    private Map<String, String> validationErrors = new HashMap<>();
 
     public Map<String, String> getValidationErrors() {
         return validationErrors;

@@ -17,7 +17,7 @@ import com.sequenceiq.provisioning.controller.json.ProvisionRequest;
 public class ProvisionParametersValidator implements ConstraintValidator<ValidProvisionRequest, ProvisionRequest> {
 
     // TODO: add other required params
-    List<String> requiredAWSParams = Arrays.asList("roleArn", "region", "sshKey");
+    private List<String> requiredAWSParams = Arrays.asList("roleArn", "region", "sshKey");
 
     @Override
     public void initialize(ValidProvisionRequest constraintAnnotation) {
@@ -38,6 +38,8 @@ public class ProvisionParametersValidator implements ConstraintValidator<ValidPr
             break;
         case AZURE:
             // TODO
+            break;
+        default:
             break;
         }
         return valid;
