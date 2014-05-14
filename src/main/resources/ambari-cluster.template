@@ -1,5 +1,5 @@
 {
-  "AWSTemplateFormatVersion" : "2014-05-14",
+  "AWSTemplateFormatVersion" : "2010-09-09",
 
   "Description" : "CloudFormation template to create an Ambari cluster on EC2",
 
