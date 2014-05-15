@@ -31,13 +31,7 @@ public class ProvisionParametersValidator implements ConstraintValidator<ValidPr
         boolean valid = true;
         switch (request.getCloudPlatform()) {
         case AWS:
-            for (String param : requiredAWSParams) {
-                if (!request.getParameters().containsKey(param)) {
-                    addParameterConstraintViolation(context, param, String.format("%s is required.", param));
-                    valid = false;
-                }
-            }
-            // TODO: validate instanceType, sshLocation with regex
+            valid = validateAWSParams(request, context);
             break;
         case AZURE:
             // TODO
@@ -47,6 +41,18 @@ public class ProvisionParametersValidator implements ConstraintValidator<ValidPr
         }
         return valid;
 
+    }
+
+    private boolean validateAWSParams(ProvisionRequest request, ConstraintValidatorContext context) {
+        boolean valid = true;
+        for (String param : requiredAWSParams) {
+            if (!request.getParameters().containsKey(param)) {
+                addParameterConstraintViolation(context, param, String.format("%s is required.", param));
+                valid = false;
+            }
+        }
+        // TODO: validate instanceType, sshLocation, etc.. with regex
+        return valid;
     }
 
     private void addParameterConstraintViolation(ConstraintValidatorContext context, String key, String message) {

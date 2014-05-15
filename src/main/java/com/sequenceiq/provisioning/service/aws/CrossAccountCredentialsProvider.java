@@ -27,10 +27,9 @@ public class CrossAccountCredentialsProvider {
                 .withRoleArn(roleARN)
                 .withRoleSessionName("hadoop-provisioning");
         AssumeRoleResult result = client.assumeRole(assumeRoleRequest);
-        BasicSessionCredentials basicSessionCredentials = new BasicSessionCredentials(
+        return new BasicSessionCredentials(
                 result.getCredentials().getAccessKeyId(),
                 result.getCredentials().getSecretAccessKey(),
                 result.getCredentials().getSessionToken());
-        return basicSessionCredentials;
     }
 }
