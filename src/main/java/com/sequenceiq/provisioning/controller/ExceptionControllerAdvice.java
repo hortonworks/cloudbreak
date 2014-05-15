@@ -5,10 +5,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.sequenceiq.provisioning.controller.json.ExceptionResult;
+import com.sequenceiq.provisioning.controller.json.ValidationResult;
 
 @ControllerAdvice
 public class ExceptionControllerAdvice {
@@ -19,6 +22,16 @@ public class ExceptionControllerAdvice {
     public ResponseEntity<ExceptionResult> badRequest(Exception e) {
         LOGGER.error(e.getMessage(), e);
         return new ResponseEntity<>(new ExceptionResult(e.getMessage()), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler({ MethodArgumentNotValidException.class })
+    public ResponseEntity<ValidationResult> validationFailed(MethodArgumentNotValidException e) {
+        LOGGER.error(e.getMessage(), e);
+        ValidationResult result = new ValidationResult();
+        for (FieldError err : e.getBindingResult().getFieldErrors()) {
+            result.addValidationError(err.getField(), err.getDefaultMessage());
+        }
+        return new ResponseEntity<>(result, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler({ Exception.class })
