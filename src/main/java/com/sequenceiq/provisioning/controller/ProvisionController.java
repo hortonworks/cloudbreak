@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.sequenceiq.provisioning.controller.json.ProvisionRequest;
 import com.sequenceiq.provisioning.controller.json.ProvisionResult;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
+import com.sequenceiq.provisioning.domain.User;
+import com.sequenceiq.provisioning.security.CurrentUser;
 import com.sequenceiq.provisioning.service.ProvisionService;
 
 @Controller
@@ -26,7 +28,7 @@ public class ProvisionController {
 
     @RequestMapping(method = RequestMethod.POST, value = "/cluster")
     @ResponseBody
-    public ResponseEntity<ProvisionResult> provisionCluster(@RequestBody @Valid ProvisionRequest provisionRequest) {
+    public ResponseEntity<ProvisionResult> provisionCluster(@CurrentUser User user, @RequestBody @Valid ProvisionRequest provisionRequest) {
         ProvisionService provisionService = provisionServices.get(provisionRequest.getCloudPlatform());
         return new ResponseEntity<>(provisionService.provisionCluster(provisionRequest), HttpStatus.CREATED);
     }
