@@ -13,6 +13,7 @@ import com.amazonaws.services.cloudformation.model.Parameter;
 import com.sequenceiq.provisioning.controller.json.AWSProvisionResult;
 import com.sequenceiq.provisioning.controller.json.ProvisionRequest;
 import com.sequenceiq.provisioning.controller.json.ProvisionResult;
+import com.sequenceiq.provisioning.controller.json.RequiredAWSRequestParam;
 import com.sequenceiq.provisioning.domain.CloudFormationTemplate;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
 import com.sequenceiq.provisioning.service.ProvisionService;
@@ -38,9 +39,10 @@ public class AWSProvisionService implements ProvisionService {
 
     @Override
     public ProvisionResult provisionCluster(ProvisionRequest provisionRequest) {
-        Regions region = Regions.fromName(provisionRequest.getParameters().get("region"));
-        String keyName = provisionRequest.getParameters().get("keyName");
-        String roleArn = provisionRequest.getParameters().get("roleArn");
+
+        Regions region = Regions.fromName(provisionRequest.getParameters().get(RequiredAWSRequestParam.REGION.getName()));
+        String keyName = provisionRequest.getParameters().get(RequiredAWSRequestParam.KEY_NAME.getName());
+        String roleArn = provisionRequest.getParameters().get(RequiredAWSRequestParam.ROLE_ARN.getName());
 
         BasicSessionCredentials basicSessionCredentials = credentialsProvider.retrieveSessionCredentials(SESSION_CREDENTIALS_DURATION, "provision-ambari",
                 roleArn);

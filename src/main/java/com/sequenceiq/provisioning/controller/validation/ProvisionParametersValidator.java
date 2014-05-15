@@ -1,12 +1,13 @@
 package com.sequenceiq.provisioning.controller.validation;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 import com.sequenceiq.provisioning.controller.json.ProvisionRequest;
+import com.sequenceiq.provisioning.controller.json.RequiredAWSRequestParam;
 
 /**
  * Validates a provision request. Because different parameters belong to
@@ -16,11 +17,13 @@ import com.sequenceiq.provisioning.controller.json.ProvisionRequest;
  */
 public class ProvisionParametersValidator implements ConstraintValidator<ValidProvisionRequest, ProvisionRequest> {
 
-    // TODO: add other required params
-    private List<String> requiredAWSParams = Arrays.asList("roleArn", "region", "sshKey");
+    private List<String> requiredAWSParams = new ArrayList<>();
 
     @Override
     public void initialize(ValidProvisionRequest constraintAnnotation) {
+        for (RequiredAWSRequestParam param : RequiredAWSRequestParam.values()) {
+            requiredAWSParams.add(param.getName());
+        }
     }
 
     @Override
