@@ -91,6 +91,9 @@ sonarRunner {
 
 repositories {
     mavenCentral()
+    maven { url "http://seq-repo.s3-website-eu-west-1.amazonaws.com/public" }
+    maven { url "http://seq-repo.s3-website-eu-west-1.amazonaws.com/releases" }
+    maven { url "http://seq-repo.s3-website-eu-west-1.amazonaws.com/snapshots" }
 }
 
 dependencies {
@@ -102,6 +105,17 @@ dependencies {
     compile 'com.h2database:h2:1.3.175'
     compile 'com.amazonaws:aws-java-sdk:1.7.8.1'
     compile 'org.hibernate:hibernate-validator:5.1.1.Final'
+    compile 'com.sequenceiq.azure:azure-client:1.0-SNAPSHOT'
+    compile 'org.codehaus.groovy:groovy-all:1.8.6'
+    compile 'org.codehaus.mojo:keytool-api-1.6:1.5'
+    compile 'commons-io:commons-io:2.4'
+    compile 'com.thoughtworks.xstream:xstream:1.4.7'
+    compile("org.codehaus.groovy.modules.http-builder:http-builder:0.7.1") {
+        exclude group: "commons-logging";
+        exclude group: "xml-apis";
+        exclude group: "groovy"
+    }
+
     testCompile 'org.springframework.boot:spring-boot-starter-test:1.0.2.RELEASE'
     deployerJars 'org.springframework.build.aws:org.springframework.build.aws.maven:3.0.0.RELEASE'
 }

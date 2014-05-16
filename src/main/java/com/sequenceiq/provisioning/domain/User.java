@@ -26,6 +26,12 @@ public class User {
     @Column(unique = true, nullable = false)
     private String email;
 
+    private String roleArn;
+
+    private String subscriptionId;
+
+    private String jks;
+
     @NotEmpty
     private String password;
 
@@ -38,6 +44,9 @@ public class User {
         this.lastName = user.lastName;
         this.email = user.email;
         this.password = user.password;
+        this.jks = user.jks;
+        this.subscriptionId = user.subscriptionId;
+        this.roleArn = user.roleArn;
     }
 
     public String getPassword() {
@@ -78,5 +87,33 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getRoleArn() {
+        return roleArn;
+    }
+
+    public void setRoleArn(String roleArn) {
+        this.roleArn = roleArn;
+    }
+
+    public String getSubscriptionId() {
+        return subscriptionId;
+    }
+
+    public void setSubscriptionId(String subscriptionId) {
+        this.subscriptionId = subscriptionId;
+    }
+
+    public String getJks() {
+        return jks;
+    }
+
+    public void setJks(String jks) {
+        this.jks = jks;
+    }
+
+    public String emailAsFolder() {
+        return email.replaceAll("@", "_").replace(".", "_");
     }
 }
