@@ -9,19 +9,124 @@ HOST: http://www.google.com
 Cloudbreak is a RESTful application development platform with the goal of helping developers to build solutions for deploying Hadoop YARN clusters in different environments.  
 Once it is deployed in your favorite servlet container it exposes a REST API allowing to span up Hadoop clusters of arbitary sizes and cloud providers. Provisioning Hadoop has never been easier.
 
-###Benefits
+##Benefits
 
-##Secure
+###Secure
 It supports a token based and OAuth2 authentication model. The cluster is provisioned in a logically isolated network (Virtual Private Cloud) of your cloud favorite cloud provider.
 If the cluster is launched in a VPC network, the framework gonfigure firewall settings that control the network access of your launched instances. For example a Hadoop Resource Manager can be accessed from the internet, whereas non of the other nodes are available.
 
-##Elastic
+###Elastic
 Using Cloudbreak API you can provision an arbitrary number of Hadoop nodes - the API does the hard work for you, and span up the cluster, configure the networks and the selected Hadoop services without any interaction. 
 POST once and use it anytime after.
 
-##Scalable
+###Scalable
 As your workload changes, the API allows you to add or remove nodes on the fly. Cloudbreak does the hard work of reconfiguring the infrastructure, provision or decomission Hadoop nodes and let the cluster be continuosely operational. 
 Once provisioned, new nodes will take up the load and increase the cluster throughput.
+
+###Blueprints
+Supports different Hadoop cluster blueprints. Hostgroups defined in blueprints can be associated to different VPC subnets and availability zones, thus you can span up a cluster for deploying highly available applications.
+
+###Flexible
+You have the option to choose your favorite cloud provider and different pricing models. The API translated the calls towards different cloud vendors - you develop and use one common API, no need to rewrite you code when changing between cloud providers.
+
+
+# Group User authentication
+Authentication related resources of the **Cloudbreak API**.
+
+The API supports token based and OAuth2 authentication. 
+All operations against a REST resource must be authenticated.
+
+## Authentication [/authenticate]
+### Authenticates a user [POST]
+After successful authentication the call will return with an authentication token, and the user role. The token invalidates with the HTTP session or with the expiration of OAuth2 token. 
+
++ Request (application/json)
+
+        {
+            "username": "mick.fanning@surf.com",
+            "password": "magicseaweed"
+        }
+
++ Response 200 (application/json)
+
+        {
+            "token": "user:c45sdfdsfo234jgkhsdgf324",
+            "roles": {
+                "ROLE_COMPANY_ADMIN": true,
+                "ROLE_COMPANY_USER ": true
+            },
+            "name": "mick.fanning@surf.com"
+        }
+
+# Group User management
+User management related resources of the **Cloudbreak API**.
+
+These calls require *COMPANY_ADMIN* roles. A company administrator is the user who registers the company.
+Currently there are two user roles supported: regular users as  *COMPANY_USER* and admin users as *COMPANY_ADMIN*.
+
+## User management [/users]
+### Creates a new user [POST]
+Creates a new user with the specified username/password and role.
+
++ Request (application/json)
+
+    + Headers
+
+            x-auth-token: user:c45sdfdsfo234jgkhsdgf324
+
+    + Body
+
+            {
+                "username": "kelly.slater@surf.com",
+                "password": "magicseaweed",
+                "userRole": {COMPANY_ADMIN, COMPANY_USER}
+            }
+
++ Response 200 (application/json)
+
+        {
+            "id": "user-2"
+        }
+
+### List all users [GET]
+Users in *COMPANY_ADMIN* role can retrieve all users belonging to the company. 
+The information contains generic user info, cloud and Hadoop cluster configurations belonging to the particular user.
+
++ Request
+
+    + Headers
+
+            x-auth-token: user:c45sdfdsfo234jgkhsdgf324
+
+
++ Response 200 (application/json)
+
+        [
+            {
+               TBD
+            }
+        ]
+
+## User informations [/me]
+Retrieve informations about the authenticated 
+
+### Retrieve a user config [GET]
+The information contains generic user info, cloud and Hadoop cluster configurations belonging to the particular user.
+
+
++ Request
+
+    + Headers
+
+            x-auth-token: user:c45sdfdsfo234jgkhsdgf324
+
++ Response 200 (application/json)
+
+        {
+            {
+               TBD
+            }
+        }
 
 
 
