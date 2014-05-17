@@ -18,6 +18,8 @@ public class AwsStack implements ProvisionEntity {
 
     private String name;
 
+    private Integer clusterSize;
+
     public AwsStack() {
     }
 
@@ -43,5 +45,13 @@ public class AwsStack implements ProvisionEntity {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Integer getClusterSize() {
+        return clusterSize;
+    }
+
+    public void setClusterSize(Integer clusterSize) {
+        this.clusterSize = clusterSize;
     }
 }

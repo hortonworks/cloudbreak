@@ -10,9 +10,10 @@ public class AwsStackConverter extends AbstractConverter<ProvisionRequest, AwsSt
 
     @Override
     public ProvisionRequest convert(AwsStack entity) {
-        ProvisionRequest azureStackJson = new ProvisionRequest();
-        azureStackJson.setClusterName(entity.getName());
-        return azureStackJson;
+        ProvisionRequest awsStackJson = new ProvisionRequest();
+        awsStackJson.setClusterName(entity.getName());
+        awsStackJson.setClusterSize(entity.getClusterSize());
+        return awsStackJson;
     }
 
     @Override
