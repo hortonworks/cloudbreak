@@ -9,7 +9,7 @@ import com.sequenceiq.provisioning.domain.CloudPlatform;
 import com.sequenceiq.provisioning.json.JsonEntity;
 
 @ValidProvisionRequest
-public class ProvisionRequest implements JsonEntity{
+public class ProvisionRequest implements JsonEntity {
 
     private CloudPlatform cloudPlatform;
     private String clusterName;
