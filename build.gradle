@@ -91,7 +91,6 @@ sonarRunner {
 
 repositories {
     mavenCentral()
-    maven { url "http://seq-repo.s3-website-eu-west-1.amazonaws.com/public" }
     maven { url "http://seq-repo.s3-website-eu-west-1.amazonaws.com/releases" }
     maven { url "http://seq-repo.s3-website-eu-west-1.amazonaws.com/snapshots" }
 }
@@ -107,7 +106,6 @@ dependencies {
     compile 'org.hibernate:hibernate-validator:5.1.1.Final'
     compile 'com.sequenceiq.azure:azure-client:1.0-SNAPSHOT'
     compile 'org.codehaus.groovy:groovy-all:1.8.6'
-    compile 'org.codehaus.mojo:keytool-api-1.6:1.5'
     compile 'commons-io:commons-io:2.4'
     compile 'com.thoughtworks.xstream:xstream:1.4.7'
     compile("org.codehaus.groovy.modules.http-builder:http-builder:0.7.1") {
