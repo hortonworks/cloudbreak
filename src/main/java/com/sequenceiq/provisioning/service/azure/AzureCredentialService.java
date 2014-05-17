@@ -11,9 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.provisioning.controller.InternalServerException;
-import com.sequenceiq.provisioning.controller.json.CredentialRequest;
+import com.sequenceiq.provisioning.controller.json.CredentialJson;
+import com.sequenceiq.provisioning.controller.validation.RequiredAzureCredentialParam;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
 import com.sequenceiq.provisioning.domain.User;
+import com.sequenceiq.provisioning.repository.UserRepository;
 import com.sequenceiq.provisioning.service.CredentialService;
 
 @Service
@@ -23,6 +25,9 @@ public class AzureCredentialService implements CredentialService {
     private static final String ENTRY = "mydomain";
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
     private KeyGeneratorService keyGeneratorService;
 
     public File getCertificateFile(User user) throws Exception {
@@ -30,12 +35,22 @@ public class AzureCredentialService implements CredentialService {
     }
 
     @Override
-    public void saveCredentials(User user, CredentialRequest credentialRequest) {
+    public void saveCredentials(User user, CredentialJson credentialRequest) {
         try {
-            generateCertificate(user);
+            User managedUser = userRepository.findByEmail(user.getEmail());
+            managedUser.setSubscriptionId(credentialRequest.getParameters().get(RequiredAzureCredentialParam.SUBSCRIPTION_ID.getName()));
+            managedUser.setJks(credentialRequest.getParameters().get(RequiredAzureCredentialParam.JKS_PASSWORD.getName()));
+            userRepository.save(managedUser);
+            generateCertificate(managedUser);
         } catch (Exception e) {
             throw new InternalServerException("Failed to generate Azure certificate.", e);
         }
+    }
+
+    @Override
+    public CredentialJson retrieveCredentials(User user) {
+
+        return null;
     }
 
     @Override

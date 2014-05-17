@@ -8,9 +8,9 @@ import javax.validation.ConstraintValidatorContext;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.sequenceiq.provisioning.controller.json.CredentialRequest;
+import com.sequenceiq.provisioning.controller.json.CredentialJson;
 
-public class CredentialParametersValidator implements ConstraintValidator<ValidCredentialRequest, CredentialRequest> {
+public class CredentialParametersValidator implements ConstraintValidator<ValidCredentialRequest, CredentialJson> {
 
     @Autowired
     private RequiredParametersValidator requiredParametersValidator;
@@ -30,7 +30,7 @@ public class CredentialParametersValidator implements ConstraintValidator<ValidC
     }
 
     @Override
-    public boolean isValid(CredentialRequest request, ConstraintValidatorContext context) {
+    public boolean isValid(CredentialJson request, ConstraintValidatorContext context) {
         boolean valid = true;
         switch (request.getCloudPlatform()) {
         case AWS:
@@ -45,11 +45,11 @@ public class CredentialParametersValidator implements ConstraintValidator<ValidC
         return valid;
     }
 
-    private boolean validateAzureParams(CredentialRequest request, ConstraintValidatorContext context) {
+    private boolean validateAzureParams(CredentialJson request, ConstraintValidatorContext context) {
         return requiredParametersValidator.validate(request.getParameters(), context, requiredAzureParams);
     }
 
-    private boolean validateAWSParams(CredentialRequest request, ConstraintValidatorContext context) {
+    private boolean validateAWSParams(CredentialJson request, ConstraintValidatorContext context) {
         return requiredParametersValidator.validate(request.getParameters(), context, requiredAWSParams);
     }
 
