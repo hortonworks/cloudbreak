@@ -2,23 +2,23 @@ package com.sequenceiq.provisioning.converter;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.provisioning.controller.json.ProvisionRequest;
 import com.sequenceiq.provisioning.domain.AzureStack;
-import com.sequenceiq.provisioning.json.AzureStackJson;
 
 @Component
-public class AzureStackConverter extends AbstractConverter<AzureStackJson, AzureStack> {
+public class AzureStackConverter extends AbstractConverter<ProvisionRequest, AzureStack> {
 
     @Override
-    public AzureStackJson convert(AzureStack entity) {
-        AzureStackJson azureStackJson = new AzureStackJson();
-        azureStackJson.setName(entity.getName());
+    public ProvisionRequest convert(AzureStack entity) {
+        ProvisionRequest azureStackJson = new ProvisionRequest();
+        azureStackJson.setClusterName(entity.getName());
         return azureStackJson;
     }
 
     @Override
-    public AzureStack convert(AzureStackJson json) {
+    public AzureStack convert(ProvisionRequest json) {
         AzureStack azureStack = new AzureStack();
-        azureStack.setName(json.getName());
+        azureStack.setName(json.getClusterName());
         return azureStack;
     }
 }

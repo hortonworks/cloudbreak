@@ -6,6 +6,7 @@ import java.util.List;
 import javax.persistence.Entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sequenceiq.provisioning.controller.json.ProvisionRequest;
 
 @Entity
 public class UserJson implements JsonEntity {
@@ -33,10 +34,10 @@ public class UserJson implements JsonEntity {
     private String password;
 
     @JsonProperty("azureStackList")
-    private List<AzureStackJson> azureStackList = new ArrayList<>();
+    private List<ProvisionRequest> azureStackList = new ArrayList<>();
 
     @JsonProperty("awsStackList")
-    private List<AwsStackJson> awsStackList = new ArrayList<>();
+    private List<ProvisionRequest> awsStackList = new ArrayList<>();
 
     public UserJson() {
 
@@ -98,19 +99,19 @@ public class UserJson implements JsonEntity {
         this.password = password;
     }
 
-    public List<AzureStackJson> getAzureStackList() {
+    public List<ProvisionRequest> getAzureStackList() {
         return azureStackList;
     }
 
-    public void setAzureStackList(List<AzureStackJson> azureStackList) {
+    public void setAzureStackList(List<ProvisionRequest> azureStackList) {
         this.azureStackList = azureStackList;
     }
 
-    public List<AwsStackJson> getAwsStackList() {
+    public List<ProvisionRequest> getAwsStackList() {
         return awsStackList;
     }
 
-    public void setAwsStackList(List<AwsStackJson> awsStackList) {
+    public void setAwsStackList(List<ProvisionRequest> awsStackList) {
         this.awsStackList = awsStackList;
     }
 }

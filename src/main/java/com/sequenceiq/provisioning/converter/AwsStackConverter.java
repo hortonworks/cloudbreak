@@ -1,25 +1,24 @@
 package com.sequenceiq.provisioning.converter;
 
-
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.provisioning.controller.json.ProvisionRequest;
 import com.sequenceiq.provisioning.domain.AwsStack;
-import com.sequenceiq.provisioning.json.AwsStackJson;
 
 @Component
-public class AwsStackConverter extends AbstractConverter<AwsStackJson, AwsStack> {
+public class AwsStackConverter extends AbstractConverter<ProvisionRequest, AwsStack> {
 
     @Override
-    public AwsStackJson convert(AwsStack entity) {
-        AwsStackJson awsStackJson = new AwsStackJson();
-        awsStackJson.setName(entity.getName());
-        return awsStackJson;
+    public ProvisionRequest convert(AwsStack entity) {
+        ProvisionRequest azureStackJson = new ProvisionRequest();
+        azureStackJson.setClusterName(entity.getName());
+        return azureStackJson;
     }
 
     @Override
-    public AwsStack convert(AwsStackJson json) {
+    public AwsStack convert(ProvisionRequest json) {
         AwsStack awsStack = new AwsStack();
-        awsStack.setName(json.getName());
+        awsStack.setName(json.getClusterName());
         return awsStack;
     }
 }
