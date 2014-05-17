@@ -115,7 +115,6 @@ Retrieve informations about the authenticated
 ### Retrieve a user config [GET]
 The information contains generic user info, cloud and Hadoop cluster configurations belonging to the particular user.
 
-
 + Request
 
     + Headers
@@ -190,7 +189,39 @@ Adds a Azure JKS the user's account.
                 TBD
             }
             
-##Associate a cloud credential to user [/credential/{id}]
+            
+##Retrieves the cloud credentials of a user [/credential]
+### Retrieve credentials [GET]
+Retrieve all the associated cloud credentials of a user
+
++ Request
+
+    + Headers
+
+            x-auth-token: user:c45sdfdsfo234jgkhsdgf324
+
++ Response 200 (application/json)
+
+        {
+            {
+            "id":"credential-123",
+            "type": "AWS",
+            "params":{
+              "roleArn":"arn:aws:iam::sequenceiq-acc-id:role/sequenceiq-provision"
+            }
+          },
+          {
+            "id":"credential-234",
+            "type": "AZURE",
+            "params": {
+              "subscriptionId":"80b6d3f7-be83-4c1f-b1623-c56c4317ed9a",
+              "jksName":"my-jks",
+              "jksPassword":"password123"
+            }
+          }
+        }
+        
+##Retrieves the cloud credential configuration of a user [/credential/{id}]
 ### Retrieve the user's JKS file [GET]
 Retrieves the Azure cloud JKS file associated with the user account
 + Parameters
@@ -226,4 +257,394 @@ Retrieves the Azure cloud JKS file associated with the user account
         {
             
         }
+        
 
+
+
+# Group Infrastructure 
+Infrastructure  related resources of the **Cloudbreak API**.
+Creates an AWS CloudFormation stack or an Azure stack. Allows configurations of VPC, subnet, internet gateway, route table, securityGroups, ACLs, instances. 
+It launches the desired number of instances based on a selected AMI.
+
+
+## Creates and infrastructure on AWS [/infra]
+### Create infrastructure [POST]
+Creates an AWS CloudFormation stack (vpc, subnet, internetGateway, routeTable, securityGroups, ACLs, instances)
+
++ Request
+
+    + Headers
+
+            x-auth-token: user:c45sdfdsfo234jgkhsdgf324
+            
+        
+    + Body
+
+            {
+                "cloudPlatform": "AWS",
+                "stackName": "my-stack-1",
+                "nodeCount": 3,
+                "description": "3 node AWS stack for Ambari provisioning",
+                "credentialId":"credential-123",
+                "parameters": {
+                    "region":"EU-WEST-1",
+                    "keyName":"sequence-eu",
+                    "addressPrefix": "172.16.0.0/16",
+                    "subnetAddressPrefix": "172.16.0.0/24",
+                    "instanceType": "M3.XLARGE",
+                    ... additional params if we want to further customize vpc, subnets, etc..
+                }
+            }
+
+    + Response 200 (application/json)
+    
+            {
+                
+            }
+
+
+## Creates and infrastructure on Azure [/infra]
+### Create infrastructure [POST]
+Creates an Azure infrastructure stack (vpc, subnet, instances)
+
++ Request
+
+    + Headers
+
+            x-auth-token: user:c45sdfdsfo234jgkhsdgf324
+            
+        
+    + Body
+
+            {
+                "cloudPlatform": "AZURE",
+                "stackName": "my-stack-2",
+                "nodeCount": 4,
+                "description": "4 node Azure stack for Ambari provisioning",
+                "credentialId":"credential-234",
+                "parameters": {
+                    "location": "EAST_ASIA",
+                    "addressPrefix": "172.16.0.0/16",
+                    "subnetAddressPrefix": "172.16.0.0/24",
+                    "sshPublicKey": "base64-encoded-public-key-for-pw-less-ssh",
+                    "disableSshPasswordAuthentication": true,
+                    "vmType": "SMALL",
+                    ... additional params if we want to further customize vpc, subnets, etc..
+                }
+            }
+
+    + Response 200 (application/json)
+    
+            {
+                
+            }
+
+## Retrieves al the created infrastructures of a user [/infra]
+### List infrastructures [GET]
+Describes the cloud infrastructures belonging to the user
+
++ Request
+
+    + Headers
+
+            x-auth-token: user:c45sdfdsfo234jgkhsdgf324
+            
+    + Body
+
+            {
+            
+            }
+
+    + Response 200 (application/json)
+    
+            {
+            
+                "id":"stack-123",
+                "status":"CREATE_IN_PROGRESS",
+                "creationTime":"2010-07-27T22:28:28Z",
+                "ambariServerIP":"ambari.server.ip",
+                "cloudPlatform": "AWS",
+                "stackName": "my-stack-1",
+                "nodeCount": 3,
+                "description": "3 node AWS stack for Ambari provisioning",
+                "credentialId":"credential-123",
+                "parameters": {
+                  "region":"EU-WEST-1",
+                  "keyName":"sequence-eu",
+                  "addressPrefix": "172.16.0.0/16",
+                  "subnetAddressPrefix": "172.16.0.0/24",
+                  "instanceType": "M3.XLARGE",
+                  ... additional params if we want to further customize vpc, subnets, etc..
+                }
+              },{
+                "id":"stack-234",
+                "status":"CREATE_COMPLETE",
+                "creationTime":"2010-07-27T22:28:28Z",
+                "ambariServerIP":"ambari.server.ip",
+                "cloudPlatform": "AZURE",
+                "stackName": "my-stack-2",
+                "nodeCount": 4,
+                "description": "4 node Azure stack for Ambari provisioning",
+                "credentialId":"credential-234",
+                "parameters": {
+                  "location": "EAST_ASIA",
+                  "addressPrefix": "172.16.0.0/16",
+                  "subnetAddressPrefix": "172.16.0.0/24",
+                  "sshPublicKey": "base64-encoded-public-key-for-pw-less-ssh",
+                  "disableSshPasswordAuthentication": true,
+                  "vmType": "SMALL",
+                  ... additional params if we want to further customize vpc, subnets, etc..
+                }
+                  
+            }
+            
+
+        
+##Describe the infrastructure [/infra/{id}]
+### Retrieve one particulat AWS or Azure infrastructure by id [GET]
+Retrieves the AWS or Azure infrastructure by submitting the infrastcuture ID
++ Parameters
+    + id (required String `aws-infrastructure-id`) ... The identifier of the Azure `credential`.
+
++ Request
+
+    + Headers
+
+            x-auth-token: user:c45sdfdsfo234jgkhsdgf324
+
++ Response 200 (application/json)
+
+        {
+            
+            "id":"stack-123",
+            "status":"CREATE_IN_PROGRESS",
+            "creationTime":"2010-07-27T22:28:28Z",
+            "ambariServerIP":"ambari.server.ip",
+            "cloudPlatform": "AWS",
+            "stackName": "my-stack-1",
+            "nodeCount": 3,
+            "description": "3 node AWS stack for Ambari provisioning",
+            "credentialId":"credential-123",
+            "parameters": {
+              "region":"EU-WEST-1",
+              "keyName":"sequence-eu",
+              "addressPrefix": "172.16.0.0/16",
+              "subnetAddressPrefix": "172.16.0.0/24",
+              "instanceType": "M3.XLARGE",
+              ... additional params if we want to further customize vpc, subnets, etc..
+            }
+                  
+        }
+
+
+##Deletes the specified infrastructure from the cloud [/infra/{id}]
+### Deletes the infrastructure[DELETE]
+WARNING: Deletes the specified infrastructure from the cloud and all associated resources (VPC, subnet, internetGateway, routeTable, securityGroups, ACLs, instances)
+
++ Parameters
+    + id (required String `aws-infrastructure-id`) ... The identifier of the Azure `credential`.
+
++ Request
+
+    + Headers
+
+            x-auth-token: user:c45sdfdsfo234jgkhsdgf324
+
++ Response 200 (application/json)
+
+        {
+            
+        }
+        
+        
+# Group Hadoop cluster  
+Hadoop cluster  related resources of the **Cloudbreak API**.
+
+Creates a Hadoop cluster stack on the specified infrastructure. Allows configurations of different cluster setups (blueprints) of arbitrary sizes.
+
+
+## Creates a Hadoop stack [/stack]
+### Create infrastructure [POST]
+Creates a Hadoop stack based on the blueprint. The blueprint specifies the Hadoop services, the number of hosts in the hostgroup and other Hadoop specific configurations. 
++ Request
+
+    + Headers
+
+            x-auth-token: user:c45sdfdsfo234jgkhsdgf324
+            
+        
+    + Body
+
+            {
+                "clusterName": "my-ambari-cluster-1",
+                "blueprintBody": {
+                "host_groups" : [
+                      {
+                        "name" : "master",
+                        "components" : [
+                            {
+                              "name" : "NAMENODE"
+                            },
+                            {
+                              "name" : "SECONDARY_NAMENODE"
+                            },
+                            {
+                              "name" : "RESOURCEMANAGER"
+                            },
+                            {
+                              "name" : "HISTORYSERVER"
+                            },
+                            {
+                              "name" : "NAGIOS_SERVER"
+                            },
+                            {
+                              "name" : "ZOOKEEPER_SERVER"
+                            }
+                        ],
+                        "cardinality" : "1"
+                      },
+                      {
+                        "name" : "slaves",
+                        "components" : [
+                            {
+                              "name" : "DATANODE"
+                            },
+                            {
+                              "name" : "HDFS_CLIENT"
+                            },
+                            {
+                              "name" : "NODEMANAGER"
+                            },
+                            {
+                              "name" : "YARN_CLIENT"
+                            },
+                            {
+                              "name" : "MAPREDUCE2_CLIENT"
+                            },
+                            {
+                              "name" : "ZOOKEEPER_CLIENT"
+                            }
+                            ],
+                        "cardinality" : "2"
+                      }
+                    ],
+                    "Blueprints" : {
+                      "blueprint_name" : "multi-node-hdfs-yarn",
+                      "stack_name" : "HDP",
+                      "stack_version" : "2.0"
+                    }
+                  }
+            }
+
+    + Response 200 (application/json)
+    
+            {
+                
+            }
+
+## Creates a Hadoop stack [/stack]
+### Create infrastructure [POST]
+Creates a Hadoop stack based on the blueprint. The blueprint specifies the Hadoop services, the number of hosts in the hostgroup and other Hadoop specific configurations. 
+The blueprint is available behind a URL.
++ Request
+
+    + Headers
+
+            x-auth-token: user:c45sdfdsfo234jgkhsdgf324
+            
+        
+    + Body
+
+            {
+                "clusterName": "my-ambari-cluster-1",
+                "blueprintUrl": "https://raw.githubusercontent.com/sequenceiq/ambari-rest-client/master/src/main/resources/blueprints/multi-node-hdfs-yarn"
+
+            }
+
+    + Response 200 (application/json)
+    
+            {
+                
+            }
+
+
+
+## Retrieves al the created Hadoop clusters of a user [/stack]
+### List stacks [GET]
+Retrieve all Hadoop cluster configurations
+
++ Request
+
+    + Headers
+
+            x-auth-token: user:c45sdfdsfo234jgkhsdgf324
+            
+    + Body
+
+            {
+            
+            }
+
+    + Response 200 (application/json)
+    
+            {
+                TBD
+            }
+            
+
+        
+##Describe one Hadoop cluster  [/stack/{id}]
+### Retrieve one particulat Hadoop cluster configuration [GET]
+Retrieves thRetrieve one particulat Hadoop cluster configuration by submitting the stack ID
++ Parameters
+    + id (required String `aws-infrastructure-id`) ... The identifier of the Azure `credential`.
+
++ Request
+
+    + Headers
+
+            x-auth-token: user:c45sdfdsfo234jgkhsdgf324
+
++ Response 200 (application/json)
+
+        {
+            
+            "id":"stack-123",
+            "status":"CREATE_IN_PROGRESS",
+            "creationTime":"2010-07-27T22:28:28Z",
+            "ambariServerIP":"ambari.server.ip",
+            "cloudPlatform": "AWS",
+            "stackName": "my-stack-1",
+            "nodeCount": 3,
+            "description": "3 node AWS stack for Ambari provisioning",
+            "credentialId":"credential-123",
+            "parameters": {
+              "region":"EU-WEST-1",
+              "keyName":"sequence-eu",
+              "addressPrefix": "172.16.0.0/16",
+              "subnetAddressPrefix": "172.16.0.0/24",
+              "instanceType": "M3.XLARGE",
+              ... additional params if we want to further customize vpc, subnets, etc..
+            }
+                  
+        }
+
+
+##Deletes the specified infrastructure from the cloud [/infra/{id}]
+### Deletes the infrastructure[DELETE]
+WARNING: Deletes the specified infrastructure from the cloud and all associated resources (VPC, subnet, internetGateway, routeTable, securityGroups, ACLs, instances)
+
++ Parameters
+    + id (required String `aws-infrastructure-id`) ... The identifier of the Azure `credential`.
+
++ Request
+
+    + Headers
+
+            x-auth-token: user:c45sdfdsfo234jgkhsdgf324
+
++ Response 200 (application/json)
+
+        {
+            
+        }
