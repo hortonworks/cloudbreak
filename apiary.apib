@@ -131,25 +131,99 @@ The information contains generic user info, cloud and Hadoop cluster configurati
         }
 
 
-# Group Cloud configuration 
-Cloud management related resources of the **Cloudbreak API**.
 
-## Cloud configuration [/cloudservices]
-### Creates a new cloud environment [POST]
-Creates a new cloud environment with the given configuration
-
-## Cloud configuration [/cloudservices]
-### Creates a new cloud environment [GET]
-Retrieves all the cloud environments and setups
+# Group Cloud authentication
+Cloud Authentication related resources of the **Cloudbreak API**.
+Adds an AWS IAM role ARN or Azure JKS to user's account.
 
 
-# Group Hadoop cluster configuration
-Hadoop cluster configuration related resources of the **Cloudbreak API**.
+## Associate a cloud credential to user [/credential]
+### Associate credential [POST]
+Adds an AWS IAM role ARN or the user's account.
 
-## Hadoop cluster configuration [/cloudservices]
-### Creates a new Hadoop cluster [POST]
-Creates a new Hadoop clustser with the given configuration
++ Request
 
-## Cloud configuration [/cloudservices]
-### Creates a new cloud environment [GET]
-Retrieves all the Hadoop cluster environments and their configuration
+    + Headers
+
+            x-auth-token: user:c45sdfdsfo234jgkhsdgf324
+            
+        
+    + Body
+
+            {
+                "type": "AWS",
+                "params": {
+                    "roleArn":"arn:aws:iam::sequenceiq-acc-id:role/provisioning-api-role"
+                 }
+            }
+
+    + Response 200 (application/json)
+    
+            {
+                TBD
+            }
+
+## Associate a cloud credential to user [/credential]
+### Associate credential [POST]
+Adds a Azure JKS the user's account.
+
++ Request
+
+    + Headers
+
+            x-auth-token: user:c45sdfdsfo234jgkhsdgf324
+            
+    + Body
+
+            {
+                "type": "AZURE",
+                      "params": {
+                          "subscriptionId":"80b6d3f7-be83-4c1f-b1623-c56c4317ed9a",
+                          "jksName":"my-jks",
+                          "jksPassword":"password123"
+                        }
+            }
+
+    + Response 200 (application/json)
+    
+            {
+                TBD
+            }
+            
+##Associate a cloud credential to user [/credential/{id}]
+### Retrieve the user's JKS file [GET]
+Retrieves the Azure cloud JKS file associated with the user account
++ Parameters
+    + id (required String `azure-credential-id`) ... The identifier of the Azure `credential`.
+
++ Request
+
+    + Headers
+
+            x-auth-token: user:c45sdfdsfo234jgkhsdgf324
+
++ Response 200 (application/json)
+
+        {
+            
+        }
+
+
+##Deletes the associated cloud credential from the user accountcredential [/credential/{id}]
+### Deletes the associated credential[DELETE]
+Retrieves the Azure cloud JKS file associated with the user account
++ Parameters
+    + id (required String `azure-credential-id`) ... The identifier of the Azure `credential`.
+
++ Request
+
+    + Headers
+
+            x-auth-token: user:c45sdfdsfo234jgkhsdgf324
+
++ Response 200 (application/json)
+
+        {
+            
+        }
+
