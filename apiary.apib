@@ -259,7 +259,7 @@ Retrieves the Azure cloud JKS file associated with the user account
         }
         
 
-# Group Infrastructure 
+# Group Infrastructure configuration
 Infrastructure  related resources of the **Cloudbreak API**.
 Creates an AWS CloudFormation stack or an Azure stack. Allows configurations of VPC, subnet, internet gateway, route table, securityGroups, ACLs, instances. 
 
@@ -440,7 +440,7 @@ Deletes the specified infrastructure stack from the database, unless there is a 
             
         }
   
-# Group Cloud 
+# Group Cloud instances
 Cloud  related resources of the **Cloudbreak API**.
 Creates an AWS or Azure cloud based on the infrastructure stack. Launches the specified number of instances in the selected infrastructure.
 ## Creates the AWS or Azure cloud [/cloud]
@@ -548,7 +548,7 @@ WARNING: All data will be lost - unless there was no storage configured. It is t
             
         }      
         
-# Group Hadoop stack  
+# Group Hadoop stack configuration
 Hadoop stack  related resources of the **Cloudbreak API**.
 
 Creates a Hadoop cluster stack. Allows configurations of different stacks (blueprints) to be used later to create cluster instances.
@@ -839,7 +839,7 @@ WARNING: Deletes the specified infrastructure from the cloud and all associated 
         }
         
         
-# Group Hadoop cluster  
+# Group Hadoop cluster instances
 Hadoop cluster related resources of the **Cloudbreak API**.
 
 Creates a Hadoop cluster from the given stack.
