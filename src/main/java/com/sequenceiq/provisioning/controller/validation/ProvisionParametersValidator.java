@@ -45,25 +45,22 @@ public class ProvisionParametersValidator implements ConstraintValidator<ValidPr
     }
 
     private boolean validateAzureParams(ProvisionRequest request, ConstraintValidatorContext context) {
-        boolean valid = true;
-        for (String param : requiredAzureParams) {
-            if (!request.getParameters().containsKey(param)) {
-                addParameterConstraintViolation(context, param, String.format("%s is required.", param));
-                valid = false;
-            }
-        }
-        return valid;
+        return validateRequiredParameters(request, context, requiredAzureParams);
     }
 
     private boolean validateAWSParams(ProvisionRequest request, ConstraintValidatorContext context) {
+        // TODO: validate instanceType, sshLocation, etc.. with regex
+        return validateRequiredParameters(request, context, requiredAWSParams);
+    }
+
+    private boolean validateRequiredParameters(ProvisionRequest request, ConstraintValidatorContext context, List<String> requiredParams) {
         boolean valid = true;
-        for (String param : requiredAWSParams) {
+        for (String param : requiredParams) {
             if (!request.getParameters().containsKey(param)) {
                 addParameterConstraintViolation(context, param, String.format("%s is required.", param));
                 valid = false;
             }
         }
-        // TODO: validate instanceType, sshLocation, etc.. with regex
         return valid;
     }
 
