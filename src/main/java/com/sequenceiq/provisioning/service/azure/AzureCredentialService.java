@@ -8,12 +8,16 @@ import java.security.cert.Certificate;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
+import com.sequenceiq.provisioning.controller.InternalServerException;
+import com.sequenceiq.provisioning.controller.json.CredentialRequest;
+import com.sequenceiq.provisioning.domain.CloudPlatform;
 import com.sequenceiq.provisioning.domain.User;
+import com.sequenceiq.provisioning.service.CredentialService;
 
-@Component
-public class CertificateGeneratorService {
+@Service
+public class AzureCredentialService implements CredentialService {
 
     private static final String DATADIR = "userdatas";
     private static final String ENTRY = "mydomain";
@@ -21,7 +25,25 @@ public class CertificateGeneratorService {
     @Autowired
     private KeyGeneratorService keyGeneratorService;
 
-    public void generateCertificate(User user) throws Exception {
+    public File getCertificateFile(User user) throws Exception {
+        return new File(getUserCerFileName(user.emailAsFolder()));
+    }
+
+    @Override
+    public void saveCredentials(User user, CredentialRequest credentialRequest) {
+        try {
+            generateCertificate(user);
+        } catch (Exception e) {
+            throw new InternalServerException("Failed to generate Azure certificate.", e);
+        }
+    }
+
+    @Override
+    public CloudPlatform getCloudPlatform() {
+        return CloudPlatform.AZURE;
+    }
+
+    private void generateCertificate(User user) throws Exception {
         File sourceFolder = new File(DATADIR);
         if (!sourceFolder.exists()) {
             FileUtils.forceMkdir(new File(DATADIR));
@@ -50,11 +72,6 @@ public class CertificateGeneratorService {
         os.write(Base64.encodeBase64(certificate.getEncoded(), true));
         os.close();
     }
-
-    public File getCertificateFile(User user) throws Exception {
-        return new File(getUserCerFileName(user.emailAsFolder()));
-    }
-
 
     private String getUserFolder(String user) {
         return String.format("%s/%s/", DATADIR, user);

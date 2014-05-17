@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 
 import com.sequenceiq.provisioning.domain.CloudFormationTemplate;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
+import com.sequenceiq.provisioning.service.CredentialService;
 import com.sequenceiq.provisioning.service.ProvisionService;
 import com.sequenceiq.provisioning.service.aws.TemplateReader;
 
@@ -25,6 +26,9 @@ public class AppConfig {
     @Autowired
     private List<ProvisionService> provisionServices;
 
+    @Autowired
+    private List<CredentialService> credentialServices;
+
     @Bean
     public CloudFormationTemplate defaultTemplate() throws IOException {
         return templateReader.readTemplateFromFile(DEFAULT_TEMPLATE_NAME);
@@ -35,6 +39,15 @@ public class AppConfig {
         Map<CloudPlatform, ProvisionService> map = new HashMap<>();
         for (ProvisionService provisionService : provisionServices) {
             map.put(provisionService.getCloudPlatform(), provisionService);
+        }
+        return map;
+    }
+
+    @Bean
+    public Map<CloudPlatform, CredentialService> credentialServices() {
+        Map<CloudPlatform, CredentialService> map = new HashMap<>();
+        for (CredentialService credentialService : credentialServices) {
+            map.put(credentialService.getCloudPlatform(), credentialService);
         }
         return map;
     }

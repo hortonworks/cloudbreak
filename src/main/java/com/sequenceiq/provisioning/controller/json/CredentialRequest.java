@@ -1,28 +1,30 @@
-package com.sequenceiq.provisioning.domain;
+package com.sequenceiq.provisioning.controller.json;
 
-public class CertificateRequest {
+import java.util.Map;
 
-    private String subscriptionId;
-    private String jksPassword;
+import com.sequenceiq.provisioning.controller.validation.ValidCredentialRequest;
+import com.sequenceiq.provisioning.domain.CloudPlatform;
 
-    public CertificateRequest(CertificateRequest certificateRequest) {
-        this.jksPassword = certificateRequest.jksPassword;
-        this.subscriptionId = certificateRequest.subscriptionId;
+@ValidCredentialRequest
+public class CredentialRequest {
+
+    private CloudPlatform cloudPlatform;
+    private Map<String, String> parameters;
+
+    public CloudPlatform getCloudPlatform() {
+        return cloudPlatform;
     }
 
-    public String getSubscriptionId() {
-        return subscriptionId;
+    public void setCloudPlatform(CloudPlatform cloudPlatform) {
+        this.cloudPlatform = cloudPlatform;
     }
 
-    public void setSubscriptionId(String subscriptionId) {
-        this.subscriptionId = subscriptionId;
+    public Map<String, String> getParameters() {
+        return parameters;
     }
 
-    public String getJksPassword() {
-        return jksPassword;
+    public void setParameters(Map<String, String> parameters) {
+        this.parameters = parameters;
     }
 
-    public void setJksPassword(String jksPassword) {
-        this.jksPassword = jksPassword;
-    }
 }

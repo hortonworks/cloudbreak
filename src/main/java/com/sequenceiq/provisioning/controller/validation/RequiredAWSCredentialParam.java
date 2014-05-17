@@ -1,20 +1,16 @@
 package com.sequenceiq.provisioning.controller.validation;
 
-public enum RequiredAWSStackParam {
+public enum RequiredAWSCredentialParam {
 
-    KEY_NAME("keyName"),
-    REGION("region");
+    ROLE_ARN("roleArn");
 
     private final String paramName;
 
-    private RequiredAWSStackParam(String paramName) {
+    private RequiredAWSCredentialParam(String paramName) {
         this.paramName = paramName;
     }
 
     public String getName() {
         return paramName;
     }
-
-    // TODO: add other required params
-
 }

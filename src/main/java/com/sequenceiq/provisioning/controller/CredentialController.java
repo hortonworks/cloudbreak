@@ -2,8 +2,11 @@ package com.sequenceiq.provisioning.controller;
 
 import java.io.File;
 import java.nio.file.Files;
+import java.util.Map;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,29 +19,32 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.sequenceiq.provisioning.domain.CertificateRequest;
+import com.sequenceiq.provisioning.controller.json.CredentialRequest;
+import com.sequenceiq.provisioning.domain.CloudPlatform;
 import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.security.CurrentUser;
-import com.sequenceiq.provisioning.service.azure.AzureProvisionService;
-import com.sequenceiq.provisioning.service.azure.CertificateGeneratorService;
+import com.sequenceiq.provisioning.service.CredentialService;
+import com.sequenceiq.provisioning.service.azure.AzureCredentialService;
 
 @Controller
-public class CertificateController {
+@RequestMapping("credential")
+public class CredentialController {
 
     @Autowired
-    private CertificateGeneratorService certificateGeneratorService;
+    private AzureCredentialService certificateGeneratorService;
 
-    @Autowired
-    private AzureProvisionService azureProvisionService;
+    @Resource
+    private Map<CloudPlatform, CredentialService> credentialServices;
 
-    @RequestMapping(method = RequestMethod.POST, value = "/certificate")
+    @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<String> generate(@CurrentUser User user, @RequestBody CertificateRequest certificateRequest) throws Exception {
-        certificateGeneratorService.generateCertificate(user);
+    public ResponseEntity<String> saveCredential(@CurrentUser User user, @Valid @RequestBody CredentialRequest credentialRequest) throws Exception {
+        CredentialService credentialService = credentialServices.get(credentialRequest.getCloudPlatform());
+        credentialService.saveCredentials(user, credentialRequest);
         return new ResponseEntity<>("generate", HttpStatus.OK);
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/certificate")
+    @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
     public ModelAndView getCertificateFile(@CurrentUser User user, HttpServletResponse response) throws Exception {
         File cerFile = certificateGeneratorService.getCertificateFile(user);
