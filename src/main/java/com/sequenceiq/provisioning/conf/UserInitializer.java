@@ -22,7 +22,16 @@ public class UserInitializer implements InitializingBean {
         user1.setLastName("test");
         user1.setPassword("password");
 
+        User user2 = new User();
+        user2.setEmail("user@seq.com");
+        user2.setFirstName("seq");
+        user2.setLastName("test");
+        user2.setPassword("test123");
+        user2.setSubscriptionId("");
+        user2.setJks("test123");
+
         userRepository.save(user1);
+        userRepository.save(user2);
 
     }
 }
