@@ -1,16 +1,21 @@
 package com.sequenceiq.provisioning.domain;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 
 @Entity
-public class User {
+public class User implements ProvisionEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -35,6 +40,12 @@ public class User {
     @NotEmpty
     private String password;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AzureStack> azureStackList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AwsStack> awsStackList = new ArrayList<>();
+
     public User() {
     }
 
@@ -44,6 +55,8 @@ public class User {
         this.lastName = user.lastName;
         this.email = user.email;
         this.password = user.password;
+        this.awsStackList = user.awsStackList;
+        this.azureStackList = user.azureStackList;
         this.jks = user.jks;
         this.subscriptionId = user.subscriptionId;
         this.roleArn = user.roleArn;
@@ -87,6 +100,22 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public List<AzureStack> getAzureStackList() {
+        return azureStackList;
+    }
+
+    public void setAwsStackList(List<AwsStack> awsStackList) {
+        this.awsStackList = awsStackList;
+    }
+
+    public List<AwsStack> getAwsStackList() {
+        return awsStackList;
+    }
+
+    public void setAzureStackList(List<AzureStack> azureStackList) {
+        this.azureStackList = azureStackList;
     }
 
     public String getRoleArn() {
