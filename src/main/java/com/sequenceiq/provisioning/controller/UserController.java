@@ -26,8 +26,7 @@ public class UserController {
     @RequestMapping(method = RequestMethod.GET, value = "/me")
     @ResponseBody
     public ResponseEntity<UserJson> generate(@CurrentUser User user) throws Exception {
-        User oneWithLists = userRepository.findOneWithLists(user.getId());
-        UserJson json = userConverter.convert(user);
+        UserJson json = userConverter.convert(userRepository.findOneWithLists(user.getId()));
         return new ResponseEntity<>(json, HttpStatus.OK);
     }
 

@@ -28,9 +28,6 @@ public class UserJson implements JsonEntity {
     @JsonProperty("jks")
     private String jks;
 
-    @JsonProperty("password")
-    private String password;
-
     @JsonProperty("azureStackList")
     private List<ProvisionRequest> azureStackList = new ArrayList<>();
 
@@ -87,14 +84,6 @@ public class UserJson implements JsonEntity {
 
     public void setJks(String jks) {
         this.jks = jks;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public List<ProvisionRequest> getAzureStackList() {

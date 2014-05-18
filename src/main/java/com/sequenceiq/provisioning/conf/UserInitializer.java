@@ -32,6 +32,7 @@ public class UserInitializer implements InitializingBean {
         user2.setJks("test123");
         AzureStack azureStack = new AzureStack();
         azureStack.setName("userAzureStack");
+        azureStack.setClusterSize(3);
         user2.getAzureStackList().add(azureStack);
 
         userRepository.save(user1);

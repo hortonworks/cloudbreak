@@ -20,6 +20,9 @@ public class AzureStack implements ProvisionEntity {
     private String deploymentSlot;
     private Boolean disableSshPasswordAuthentication;
     private String vmType;
+    private String imageName;
+    private String userName;
+    private String password;
 
     public AzureStack() {
 
@@ -89,11 +92,35 @@ public class AzureStack implements ProvisionEntity {
         this.disableSshPasswordAuthentication = disableSshPasswordAuthentication;
     }
 
+    public String getImageName() {
+        return imageName;
+    }
+
+    public void setImageName(String imageName) {
+        this.imageName = imageName;
+    }
+
     public String getVmType() {
         return vmType;
     }
 
     public void setVmType(String vmType) {
         this.vmType = vmType;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }
