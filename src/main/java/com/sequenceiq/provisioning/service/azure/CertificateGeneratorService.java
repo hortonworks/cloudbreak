@@ -30,10 +30,10 @@ public class CertificateGeneratorService {
         if (!userFolder.exists()) {
             FileUtils.forceMkdir(new File(getUserFolder(user.emailAsFolder())));
         }
-        if (!new File(getUserJksFileName(user.emailAsFolder())).exists()) {
-            keyGeneratorService.generateKey(user, ENTRY, getUserJksFileName(user.emailAsFolder()));
+        if (new File(getUserJksFileName(user.emailAsFolder())).exists()) {
+            FileUtils.forceDelete(new File(getUserJksFileName(user.emailAsFolder())));
         }
-
+        keyGeneratorService.generateKey(user, ENTRY, getUserJksFileName(user.emailAsFolder()));
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
         char[] pass = user.getJks().toCharArray();
         java.io.FileInputStream fis = null;

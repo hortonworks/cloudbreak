@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.provisioning.controller.json.ProvisionRequest;
 import com.sequenceiq.provisioning.domain.AwsStack;
+import com.sequenceiq.provisioning.domain.CloudPlatform;
 
 @Component
 public class AwsStackConverter extends AbstractConverter<ProvisionRequest, AwsStack> {
@@ -13,6 +14,7 @@ public class AwsStackConverter extends AbstractConverter<ProvisionRequest, AwsSt
         ProvisionRequest awsStackJson = new ProvisionRequest();
         awsStackJson.setClusterName(entity.getName());
         awsStackJson.setClusterSize(entity.getClusterSize());
+        awsStackJson.setCloudPlatform(CloudPlatform.AWS);
         return awsStackJson;
     }
 
