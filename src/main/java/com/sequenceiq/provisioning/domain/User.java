@@ -6,15 +6,20 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 
 @Entity
+@NamedQuery(
+        name = "User.findOneWithLists",
+        query = "SELECT u FROM User u LEFT JOIN FETCH u.azureStackList WHERE u.id= :id")
 public class User implements ProvisionEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -40,10 +45,10 @@ public class User implements ProvisionEntity {
     @NotEmpty
     private String password;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AzureStack> azureStackList = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AwsStack> awsStackList = new ArrayList<>();
 
     public User() {

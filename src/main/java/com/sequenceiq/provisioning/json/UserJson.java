@@ -3,12 +3,10 @@ package com.sequenceiq.provisioning.json;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.Entity;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.provisioning.controller.json.ProvisionRequest;
 
-@Entity
+
 public class UserJson implements JsonEntity {
 
 

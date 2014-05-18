@@ -4,7 +4,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToOne;
 
 @Entity
 public class AzureStack implements ProvisionEntity {
@@ -12,9 +11,6 @@ public class AzureStack implements ProvisionEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-
-    @ManyToOne
-    private User user;
 
     private Integer clusterSize;
     private String location;
@@ -35,14 +31,6 @@ public class AzureStack implements ProvisionEntity {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 
     public Integer getClusterSize() {
