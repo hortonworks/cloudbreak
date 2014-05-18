@@ -4,6 +4,12 @@
 
 var provisioningControllers = angular.module('provisioningControllers', []);
 
+var wait = function() {
+    var millisecondsToWait = 2000;
+    setTimeout(function() {
+        console.log("timeout...")
+    }, millisecondsToWait);
+}
 
 
 provisioningControllers.controller('ProvisioningController', ['$scope', '$http', 'Templates', '$location', '$rootScope',
@@ -38,6 +44,12 @@ provisioningControllers.controller('ProvisioningController', ['$scope', '$http',
 
         }
 
+        $scope.test = function() {
+            $http.get('http://localhost:8080/test').success(function(data) {
+                console.log(data);
+            });
+        }
+
         if (typeof (Storage) !== "undefined") {
             if (localStorage.signedIn === 'true') {
                 $rootScope.signedIn = true;
@@ -64,7 +76,12 @@ provisioningControllers.controller('AwsController', ['$scope', '$http', 'Templat
 
         $scope.createAwsCluster = function() {
             console.log("aws cluster creation started...");
-            $location.path("/");
+            $scope.isSuccessCreation = true;
+            $scope.isFailedCreation = false;
+            if ($scope.isSuccessCreation === true ) {
+                wait();
+                $location.path("/");
+            }
         }
 
     }
@@ -84,7 +101,12 @@ provisioningControllers.controller('AzureController', ['$scope', '$http', 'Templ
 
         $scope.createAzureCluster = function() {
             console.log("azure cluster creation started...");
-            $location.path("/");
+            $scope.isSuccessCreation = true;
+            $scope.isFailedCreation = false;
+            if ($scope.isSuccessCreation === true ) {
+                wait();
+                $location.path("/");
+            }
         }
     }
 ]);
@@ -124,7 +146,13 @@ provisioningControllers.controller('CloudProviderController', ['$scope', '$http'
             secretKey.value = "";
             accessKey.value = "";
             $rootScope.providers.push(awsObject);
-            $location.path("/");
+
+            $scope.isSuccessCreation = true;
+            $scope.isFailedCreation = false;
+            if ($scope.isSuccessCreation === true ) {
+                wait();
+                $location.path("/");
+            }
         }
 
         $scope.createAzureProvider = function() {
@@ -134,8 +162,16 @@ provisioningControllers.controller('CloudProviderController', ['$scope', '$http'
             keystorePath.value = "";
             keystorePassword.value = "";
             $rootScope.providers.push(azureObject);
-            $location.path("/");
+
+            $scope.isSuccessCreation = true;
+            $scope.isFailedCreation = false;
+            if ($scope.isSuccessCreation === true ) {
+                wait();
+                $location.path("/");
+            }
         }
+
+
 
         $scope.createProvider();
     }
