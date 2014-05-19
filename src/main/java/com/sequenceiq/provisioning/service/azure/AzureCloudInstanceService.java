@@ -16,6 +16,7 @@ import com.sequenceiq.provisioning.converter.AzureCloudConverter;
 import com.sequenceiq.provisioning.domain.AzureCloudInstance;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
 import com.sequenceiq.provisioning.domain.User;
+import com.sequenceiq.provisioning.repository.UserRepository;
 import com.sequenceiq.provisioning.service.CloudInstanceService;
 
 import groovyx.net.http.HttpResponseDecorator;
@@ -45,10 +46,15 @@ public class AzureCloudInstanceService implements CloudInstanceService {
     @Autowired
     private AzureCloudConverter azureCloudConverter;
 
+    @Autowired
+    private UserRepository userRepository;
+
     @Override
     public CloudInstanceResult createCloudInstance(User user, CloudInstanceRequest cloudInstanceRequest) {
-
         AzureCloudInstance azureCloudInstance = azureCloudConverter.convert(cloudInstanceRequest);
+        user.getAzureCloudInstanceList().add(azureCloudInstance);
+        userRepository.save(user);
+
         String filePath = getUserJksFileName(user.emailAsFolder());
         File file = new File(filePath);
         AzureClient azureClient = new AzureClient(user.getSubscriptionId(), file.getAbsolutePath(), user.getJks());

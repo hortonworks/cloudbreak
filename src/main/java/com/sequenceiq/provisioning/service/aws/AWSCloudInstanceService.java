@@ -18,6 +18,7 @@ import com.sequenceiq.provisioning.domain.AwsCloudInstance;
 import com.sequenceiq.provisioning.domain.CloudFormationTemplate;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
 import com.sequenceiq.provisioning.domain.User;
+import com.sequenceiq.provisioning.repository.UserRepository;
 import com.sequenceiq.provisioning.service.CloudInstanceService;
 
 /**
@@ -42,9 +43,15 @@ public class AWSCloudInstanceService implements CloudInstanceService {
     @Autowired
     private AwsCloudConverter awsCloudConverter;
 
+    @Autowired
+    private UserRepository userRepository;
+
     @Override
     public CloudInstanceResult createCloudInstance(User user, CloudInstanceRequest cloudInstanceRequest) {
         AwsCloudInstance convert = awsCloudConverter.convert(cloudInstanceRequest);
+        user.getAwsCloudInstanceList().add(convert);
+        userRepository.save(user);
+
         Regions region = Regions.fromName(convert.getAwsInfra().getRegion());
         String keyName = convert.getAwsInfra().getKeyName();
         String roleArn = user.getRoleArn();
