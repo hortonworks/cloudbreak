@@ -14,8 +14,6 @@ public class AwsInfra implements ProvisionEntity {
 
     private String name;
 
-    private Integer clusterSize;
-
     private String region;
 
     private String keyName;
@@ -37,14 +35,6 @@ public class AwsInfra implements ProvisionEntity {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public Integer getClusterSize() {
-        return clusterSize;
-    }
-
-    public void setClusterSize(Integer clusterSize) {
-        this.clusterSize = clusterSize;
     }
 
     public String getRegion() {

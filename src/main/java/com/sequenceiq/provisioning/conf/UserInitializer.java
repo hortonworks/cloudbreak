@@ -4,7 +4,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.provisioning.domain.AzureInfra;
+import com.sequenceiq.provisioning.domain.AwsInfra;
 import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.repository.UserRepository;
 
@@ -32,9 +32,13 @@ public class UserInitializer implements InitializingBean {
         user2.setPassword("test123");
         user2.setSubscriptionId("");
         user2.setJks("test123");
-        AzureInfra azureInfra = new AzureInfra();
-        azureInfra.setName("userAzureStack");
-        user2.getAzureInfraList().add(azureInfra);
+        AwsInfra awsInfra = new AwsInfra();
+        awsInfra.setName("userAzureStack");
+        awsInfra.setKeyName("smaple_key");
+        awsInfra.setName("template1");
+        awsInfra.setRegion("region-1");
+
+        user2.getAwsInfraList().add(awsInfra);
 
         userRepository.save(user1);
         userRepository.save(user2);

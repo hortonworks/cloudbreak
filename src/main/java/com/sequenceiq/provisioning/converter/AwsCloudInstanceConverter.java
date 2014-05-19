@@ -28,6 +28,6 @@ public class AwsCloudInstanceConverter extends AbstractConverter<CloudInstanceRe
         AwsCloudInstance awsCloudInstance = new AwsCloudInstance();
         awsCloudInstance.setClusterSize(json.getClusterSize());
         awsCloudInstance.setAwsInfra(awsInfraRepository.findOne(Long.valueOf(json.getInfraId())));
-        return new AwsCloudInstance();
+        return awsCloudInstance;
     }
 }
