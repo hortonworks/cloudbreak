@@ -42,9 +42,9 @@ public class CommonInfraService {
         if (awsInfra == null) {
             AzureInfra azureInfra = azureInfraRepository.findOne(id);
             if (azureInfra == null) {
-                return azureInfraConverter.convert(azureInfra);
-            } else {
                 return null;
+            } else {
+                return azureInfraConverter.convert(azureInfra);
             }
         } else {
             return awsInfraConverter.convert(awsInfra);

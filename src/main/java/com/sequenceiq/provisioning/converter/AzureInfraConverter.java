@@ -28,6 +28,7 @@ public class AzureInfraConverter extends AbstractConverter<InfraRequest, AzureIn
         InfraRequest azureStackJson = new InfraRequest();
         azureStackJson.setClusterName(entity.getName());
         azureStackJson.setCloudPlatform(CloudPlatform.AZURE);
+        azureStackJson.setId(entity.getId());
         Map<String, String> props = new HashMap<>();
         putProperty(props, NAME, entity.getName());
         putProperty(props, LOCATION, entity.getLocation());

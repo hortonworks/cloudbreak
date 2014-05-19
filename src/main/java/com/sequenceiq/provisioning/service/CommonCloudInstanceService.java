@@ -42,9 +42,9 @@ public class CommonCloudInstanceService {
         if (awsInstance == null) {
             AzureCloudInstance azureInstance = azureCloudInstanceRepository.findOne(id);
             if (azureInstance == null) {
-                return azureCloudInstanceConverter.convert(azureInstance);
-            } else {
                 return null;
+            } else {
+                return azureCloudInstanceConverter.convert(azureInstance);
             }
         } else {
             return awsCloudInstanceConverter.convert(awsInstance);
