@@ -4,9 +4,10 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 
 @Entity
-public class AzureStackInstance {
+public class AzureCloudInstance implements CloudInstance, ProvisionEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -14,7 +15,10 @@ public class AzureStackInstance {
 
     private Integer clusterSize;
 
-    public AzureStackInstance() {
+    @OneToOne
+    private AzureInfra azureInfra;
+
+    public AzureCloudInstance() {
 
     }
 
@@ -32,5 +36,18 @@ public class AzureStackInstance {
 
     public void setClusterSize(Integer clusterSize) {
         this.clusterSize = clusterSize;
+    }
+
+    public AzureInfra getAzureInfra() {
+        return azureInfra;
+    }
+
+    public void setAzureInfra(AzureInfra azureInfra) {
+        this.azureInfra = azureInfra;
+    }
+
+    @Override
+    public CloudPlatform getPlatform() {
+        return CloudPlatform.AZURE;
     }
 }

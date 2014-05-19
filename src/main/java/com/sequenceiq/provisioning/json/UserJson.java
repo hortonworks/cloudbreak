@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sequenceiq.provisioning.controller.json.ProvisionRequest;
+import com.sequenceiq.provisioning.controller.json.InfraRequest;
 
 
 public class UserJson implements JsonEntity {
@@ -28,11 +28,17 @@ public class UserJson implements JsonEntity {
     @JsonProperty("jks")
     private String jks;
 
-    @JsonProperty("azureStackList")
-    private List<ProvisionRequest> azureStackList = new ArrayList<>();
+    @JsonProperty("azureInfraList")
+    private List<InfraRequest> azureStackList = new ArrayList<>();
 
-    @JsonProperty("awsStackList")
-    private List<ProvisionRequest> awsStackList = new ArrayList<>();
+    @JsonProperty("awsInfraList")
+    private List<InfraRequest> awsStackList = new ArrayList<>();
+
+    @JsonProperty("azureCloudList")
+    private List<InfraRequest> azureCloudList = new ArrayList<>();
+
+    @JsonProperty("awsCloudList")
+    private List<InfraRequest> awsCloudList = new ArrayList<>();
 
     public UserJson() {
 
@@ -86,19 +92,27 @@ public class UserJson implements JsonEntity {
         this.jks = jks;
     }
 
-    public List<ProvisionRequest> getAzureStackList() {
+    public List<InfraRequest> getAzureStackList() {
         return azureStackList;
     }
 
-    public void setAzureStackList(List<ProvisionRequest> azureStackList) {
+    public void setAzureStackList(List<InfraRequest> azureStackList) {
         this.azureStackList = azureStackList;
     }
 
-    public List<ProvisionRequest> getAwsStackList() {
+    public List<InfraRequest> getAwsStackList() {
         return awsStackList;
     }
 
-    public void setAwsStackList(List<ProvisionRequest> awsStackList) {
+    public void setAwsStackList(List<InfraRequest> awsStackList) {
         this.awsStackList = awsStackList;
+    }
+
+    public List<InfraRequest> getAzureCloudList() {
+        return azureCloudList;
+    }
+
+    public void setAzureCloudList(List<InfraRequest> azureCloudList) {
+        this.azureCloudList = azureCloudList;
     }
 }

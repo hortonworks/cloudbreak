@@ -4,9 +4,10 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 
 @Entity
-public class AwsStackInstance {
+public class AwsCloudInstance implements CloudInstance, ProvisionEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -14,7 +15,10 @@ public class AwsStackInstance {
 
     private Integer clusterSize;
 
-    public AwsStackInstance() {
+    @OneToOne
+    private AwsInfra awsInfra;
+
+    public AwsCloudInstance() {
 
     }
 
@@ -33,4 +37,19 @@ public class AwsStackInstance {
     public void setClusterSize(Integer clusterSize) {
         this.clusterSize = clusterSize;
     }
+
+    public AwsInfra getAwsInfra() {
+        return awsInfra;
+    }
+
+    public void setAwsInfra(AwsInfra awsInfra) {
+        this.awsInfra = awsInfra;
+    }
+
+    @Override
+    public CloudPlatform getPlatform() {
+        return CloudPlatform.AWS;
+    }
+
+
 }

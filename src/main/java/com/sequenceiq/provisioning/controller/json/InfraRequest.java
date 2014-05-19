@@ -2,19 +2,15 @@ package com.sequenceiq.provisioning.controller.json;
 
 import java.util.Map;
 
-import javax.validation.constraints.Min;
-
 import com.sequenceiq.provisioning.controller.validation.ValidProvisionRequest;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
 import com.sequenceiq.provisioning.json.JsonEntity;
 
 @ValidProvisionRequest
-public class ProvisionRequest implements JsonEntity {
+public class InfraRequest implements JsonEntity {
 
     private CloudPlatform cloudPlatform;
     private String clusterName;
-    @Min(value = 2)
-    private int clusterSize;
     private Map<String, String> parameters;
 
     public CloudPlatform getCloudPlatform() {
@@ -31,14 +27,6 @@ public class ProvisionRequest implements JsonEntity {
 
     public void setClusterName(String clusterName) {
         this.clusterName = clusterName;
-    }
-
-    public int getClusterSize() {
-        return clusterSize;
-    }
-
-    public void setClusterSize(int clusterSize) {
-        this.clusterSize = clusterSize;
     }
 
     public Map<String, String> getParameters() {

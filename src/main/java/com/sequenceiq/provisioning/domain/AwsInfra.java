@@ -6,7 +6,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 @Entity
-public class AwsStack implements ProvisionEntity {
+public class AwsInfra implements ProvisionEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -16,7 +16,11 @@ public class AwsStack implements ProvisionEntity {
 
     private Integer clusterSize;
 
-    public AwsStack() {
+    private String region;
+
+    private String keyName;
+
+    public AwsInfra() {
     }
 
     public Long getId() {
@@ -41,5 +45,21 @@ public class AwsStack implements ProvisionEntity {
 
     public void setClusterSize(Integer clusterSize) {
         this.clusterSize = clusterSize;
+    }
+
+    public String getRegion() {
+        return region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
+    }
+
+    public String getKeyName() {
+        return keyName;
+    }
+
+    public void setKeyName(String keyName) {
+        this.keyName = keyName;
     }
 }

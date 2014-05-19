@@ -4,7 +4,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.provisioning.domain.AzureStack;
+import com.sequenceiq.provisioning.domain.AzureInfra;
 import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.repository.UserRepository;
 
@@ -32,10 +32,9 @@ public class UserInitializer implements InitializingBean {
         user2.setPassword("test123");
         user2.setSubscriptionId("");
         user2.setJks("test123");
-        AzureStack azureStack = new AzureStack();
-        azureStack.setName("userAzureStack");
-        azureStack.setClusterSize(CLUSTER_SIZE);
-        user2.getAzureStackList().add(azureStack);
+        AzureInfra azureInfra = new AzureInfra();
+        azureInfra.setName("userAzureStack");
+        user2.getAzureInfraList().add(azureInfra);
 
         userRepository.save(user1);
         userRepository.save(user2);

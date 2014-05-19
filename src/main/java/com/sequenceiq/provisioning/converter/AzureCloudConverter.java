@@ -1,16 +1,14 @@
 package com.sequenceiq.provisioning.converter;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.provisioning.controller.json.ProvisionRequest;
-import com.sequenceiq.provisioning.domain.AzureStack;
-import com.sequenceiq.provisioning.domain.CloudPlatform;
+import com.sequenceiq.provisioning.controller.json.CloudInstanceRequest;
+import com.sequenceiq.provisioning.domain.AzureCloudInstance;
 
 @Component
-public class AzureStackConverter extends AbstractConverter<ProvisionRequest, AzureStack> {
+public class AzureCloudConverter extends AbstractConverter<CloudInstanceRequest, AzureCloudInstance> {
 
     private static final String NAME = "name";
     private static final String LOCATION = "location";
@@ -24,11 +22,10 @@ public class AzureStackConverter extends AbstractConverter<ProvisionRequest, Azu
     private static final String VMTYPE = "vmType";
 
     @Override
-    public ProvisionRequest convert(AzureStack entity) {
-        ProvisionRequest azureStackJson = new ProvisionRequest();
+    public CloudInstanceRequest convert(AzureCloudInstance entity) {
+      /*  InfraRequest azureStackJson = new InfraRequest();
         azureStackJson.setClusterName(entity.getName());
         azureStackJson.setCloudPlatform(CloudPlatform.AZURE);
-        azureStackJson.setClusterSize(entity.getClusterSize());
         Map<String, String> props = new HashMap<>();
         putProperty(props, NAME, entity.getName());
         putProperty(props, LOCATION, entity.getLocation());
@@ -41,16 +38,15 @@ public class AzureStackConverter extends AbstractConverter<ProvisionRequest, Azu
         putProperty(props, DISABLESSHPASSWORDAUTHENTICATION, entity.getDisableSshPasswordAuthentication());
         putProperty(props, USERNAME, entity.getUserName());
         putProperty(props, PASSWORD, entity.getPassword());
-        azureStackJson.setParameters(props);
-        return azureStackJson;
+        azureStackJson.setParameters(props);*/
+        return new CloudInstanceRequest();
     }
 
     @Override
-    public AzureStack convert(ProvisionRequest json) {
-        AzureStack azureStack = new AzureStack();
-        azureStack.setName(json.getClusterName());
-        azureStack.setClusterSize(json.getClusterSize());
-        return azureStack;
+    public AzureCloudInstance convert(CloudInstanceRequest json) {
+       /* AzureInfra azureInfra = new AzureInfra();
+        azureInfra.setName(json.getClusterName());*/
+        return new AzureCloudInstance();
     }
 
     private void putProperty(Map<String, String> props, String key, Object property) {

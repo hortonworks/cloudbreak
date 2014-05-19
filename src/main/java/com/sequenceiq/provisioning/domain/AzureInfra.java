@@ -6,7 +6,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 @Entity
-public class AzureStack implements ProvisionEntity {
+public class AzureInfra implements ProvisionEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -23,7 +23,7 @@ public class AzureStack implements ProvisionEntity {
     private String userName;
     private String password;
 
-    public AzureStack() {
+    public AzureInfra() {
 
     }
 

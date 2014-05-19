@@ -18,7 +18,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 @Entity
 @NamedQuery(
         name = "User.findOneWithLists",
-        query = "SELECT u FROM User u LEFT JOIN FETCH u.azureStackList WHERE u.id= :id")
+        query = "SELECT u FROM User u LEFT JOIN FETCH u.azureInfraList WHERE u.id= :id")
 public class User implements ProvisionEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -45,16 +45,16 @@ public class User implements ProvisionEntity {
     private String password;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<AzureStack> azureStackList = new ArrayList<>();
+    private List<AzureInfra> azureInfraList = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<AwsStack> awsStackList = new ArrayList<>();
+    private List<AwsInfra> awsInfraList = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<AzureStackInstance> azureStackInstanceList = new ArrayList<>();
+    private List<AzureCloudInstance> azureCloudInstanceList = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<AwsStackInstance> awsStackInstanceList = new ArrayList<>();
+    private List<AwsCloudInstance> awsCloudInstanceList = new ArrayList<>();
 
 
     public User() {
@@ -66,13 +66,13 @@ public class User implements ProvisionEntity {
         this.lastName = user.lastName;
         this.email = user.email;
         this.password = user.password;
-        this.awsStackList = user.awsStackList;
-        this.azureStackList = user.azureStackList;
+        this.awsInfraList = user.awsInfraList;
+        this.azureInfraList = user.azureInfraList;
         this.jks = user.jks;
         this.subscriptionId = user.subscriptionId;
         this.roleArn = user.roleArn;
-        this.awsStackInstanceList = user.awsStackInstanceList;
-        this.azureStackInstanceList = user.azureStackInstanceList;
+        this.awsCloudInstanceList = user.awsCloudInstanceList;
+        this.azureCloudInstanceList = user.azureCloudInstanceList;
     }
 
     public String getPassword() {
@@ -115,20 +115,20 @@ public class User implements ProvisionEntity {
         this.email = email;
     }
 
-    public List<AzureStack> getAzureStackList() {
-        return azureStackList;
+    public List<AzureInfra> getAzureInfraList() {
+        return azureInfraList;
     }
 
-    public void setAwsStackList(List<AwsStack> awsStackList) {
-        this.awsStackList = awsStackList;
+    public void setAwsInfraList(List<AwsInfra> awsInfraList) {
+        this.awsInfraList = awsInfraList;
     }
 
-    public List<AwsStack> getAwsStackList() {
-        return awsStackList;
+    public List<AwsInfra> getAwsInfraList() {
+        return awsInfraList;
     }
 
-    public void setAzureStackList(List<AzureStack> azureStackList) {
-        this.azureStackList = azureStackList;
+    public void setAzureInfraList(List<AzureInfra> azureInfraList) {
+        this.azureInfraList = azureInfraList;
     }
 
     public String getRoleArn() {
@@ -155,20 +155,20 @@ public class User implements ProvisionEntity {
         this.jks = jks;
     }
 
-    public List<AzureStackInstance> getAzureStackInstanceList() {
-        return azureStackInstanceList;
+    public List<AzureCloudInstance> getAzureCloudInstanceList() {
+        return azureCloudInstanceList;
     }
 
-    public void setAzureStackInstanceList(List<AzureStackInstance> azureStackInstanceList) {
-        this.azureStackInstanceList = azureStackInstanceList;
+    public void setAzureCloudInstanceList(List<AzureCloudInstance> azureCloudInstanceList) {
+        this.azureCloudInstanceList = azureCloudInstanceList;
     }
 
-    public List<AwsStackInstance> getAwsStackInstanceList() {
-        return awsStackInstanceList;
+    public List<AwsCloudInstance> getAwsCloudInstanceList() {
+        return awsCloudInstanceList;
     }
 
-    public void setAwsStackInstanceList(List<AwsStackInstance> awsStackInstanceList) {
-        this.awsStackInstanceList = awsStackInstanceList;
+    public void setAwsCloudInstanceList(List<AwsCloudInstance> awsCloudInstanceList) {
+        this.awsCloudInstanceList = awsCloudInstanceList;
     }
 
     public String emailAsFolder() {
