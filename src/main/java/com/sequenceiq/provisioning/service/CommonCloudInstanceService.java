@@ -3,10 +3,12 @@ package com.sequenceiq.provisioning.service;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.commons.collections.IteratorUtils;
+import javax.persistence.EntityNotFoundException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.Lists;
 import com.sequenceiq.provisioning.controller.json.CloudInstanceRequest;
 import com.sequenceiq.provisioning.converter.AwsCloudInstanceConverter;
 import com.sequenceiq.provisioning.converter.AzureCloudInstanceConverter;
@@ -32,8 +34,8 @@ public class CommonCloudInstanceService {
 
     public Set<CloudInstanceRequest> getAll() {
         Set<CloudInstanceRequest> result = new HashSet<>();
-        result.addAll(awsCloudInstanceConverter.convertAllEntityToJson(IteratorUtils.toList(awsCloudInstanceRepository.findAll().iterator())));
-        result.addAll(azureCloudInstanceConverter.convertAllEntityToJson(IteratorUtils.toList(azureCloudInstanceRepository.findAll().iterator())));
+        result.addAll(awsCloudInstanceConverter.convertAllEntityToJson(Lists.newArrayList(awsCloudInstanceRepository.findAll())));
+        result.addAll(azureCloudInstanceConverter.convertAllEntityToJson(Lists.newArrayList(azureCloudInstanceRepository.findAll())));
         return result;
     }
 
@@ -42,7 +44,7 @@ public class CommonCloudInstanceService {
         if (awsInstance == null) {
             AzureCloudInstance azureInstance = azureCloudInstanceRepository.findOne(id);
             if (azureInstance == null) {
-                return null;
+                throw new EntityNotFoundException("Entity not exist with id: " + id);
             } else {
                 return azureCloudInstanceConverter.convert(azureInstance);
             }
