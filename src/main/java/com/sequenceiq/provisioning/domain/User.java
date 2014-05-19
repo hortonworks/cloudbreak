@@ -50,6 +50,13 @@ public class User implements ProvisionEntity {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AwsStack> awsStackList = new ArrayList<>();
 
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AzureStackInstance> azureStackInstanceList = new ArrayList<>();
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AwsStackInstance> awsStackInstanceList = new ArrayList<>();
+
+
     public User() {
     }
 
@@ -64,6 +71,8 @@ public class User implements ProvisionEntity {
         this.jks = user.jks;
         this.subscriptionId = user.subscriptionId;
         this.roleArn = user.roleArn;
+        this.awsStackInstanceList = user.awsStackInstanceList;
+        this.azureStackInstanceList = user.azureStackInstanceList;
     }
 
     public String getPassword() {
@@ -144,6 +153,22 @@ public class User implements ProvisionEntity {
 
     public void setJks(String jks) {
         this.jks = jks;
+    }
+
+    public List<AzureStackInstance> getAzureStackInstanceList() {
+        return azureStackInstanceList;
+    }
+
+    public void setAzureStackInstanceList(List<AzureStackInstance> azureStackInstanceList) {
+        this.azureStackInstanceList = azureStackInstanceList;
+    }
+
+    public List<AwsStackInstance> getAwsStackInstanceList() {
+        return awsStackInstanceList;
+    }
+
+    public void setAwsStackInstanceList(List<AwsStackInstance> awsStackInstanceList) {
+        this.awsStackInstanceList = awsStackInstanceList;
     }
 
     public String emailAsFolder() {

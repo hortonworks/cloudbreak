@@ -12,7 +12,6 @@ public class AzureStack implements ProvisionEntity {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    private Integer clusterSize;
     private String location;
     private String name;
     private String description;
@@ -34,14 +33,6 @@ public class AzureStack implements ProvisionEntity {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public Integer getClusterSize() {
-        return clusterSize;
-    }
-
-    public void setClusterSize(Integer clusterSize) {
-        this.clusterSize = clusterSize;
     }
 
     public String getLocation() {
