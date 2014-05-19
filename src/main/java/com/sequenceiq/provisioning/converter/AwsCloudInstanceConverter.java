@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.provisioning.controller.json.CloudInstanceRequest;
 import com.sequenceiq.provisioning.domain.AwsCloudInstance;
-import com.sequenceiq.provisioning.domain.CloudPlatform;
 import com.sequenceiq.provisioning.repository.AwsInfraRepository;
 
 @Component

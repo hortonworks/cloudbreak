@@ -1,5 +1,7 @@
 package com.sequenceiq.provisioning.controller;
 
+import java.nio.file.AccessDeniedException;
+
 import javax.persistence.EntityNotFoundException;
 
 import org.slf4j.Logger;
@@ -25,6 +27,14 @@ public class ExceptionControllerAdvice {
         LOGGER.error(e.getMessage(), e);
         return new ResponseEntity<>(new ExceptionResult(e.getMessage()), HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler({ AccessDeniedException.class})
+    public ResponseEntity<ExceptionResult> accessDenied(Exception e) {
+        LOGGER.error(e.getMessage(), e);
+        return new ResponseEntity<>(new ExceptionResult(e.getMessage()), HttpStatus.FORBIDDEN);
+    }
+
+
 
     @ExceptionHandler({ EntityNotFoundException.class })
     public ResponseEntity<ExceptionResult> notFound(Exception e) {
