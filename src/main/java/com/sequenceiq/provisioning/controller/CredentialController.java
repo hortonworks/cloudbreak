@@ -1,26 +1,32 @@
 package com.sequenceiq.provisioning.controller;
 
+import java.io.File;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
 
 import com.sequenceiq.provisioning.controller.json.CredentialJson;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
 import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.security.CurrentUser;
 import com.sequenceiq.provisioning.service.CredentialService;
+import com.sequenceiq.provisioning.service.azure.AzureCredentialService;
 
 @Controller
 @RequestMapping("credential")
@@ -43,9 +49,7 @@ public class CredentialController {
         List<CredentialJson> credentials = new ArrayList<>();
         for (CredentialService credentialService : credentialServices.values()) {
             CredentialJson credential = credentialService.retrieveCredentials(user);
-            if (credential != null) {
-                credentials.add(credential);
-            }
+            credentials.add(credential);
         }
         return credentials;
     }
@@ -61,16 +65,14 @@ public class CredentialController {
         }
     }
 
-    // @RequestMapping(method = RequestMethod.GET)
-    // @ResponseBody
-    // public ModelAndView getCertificateFile(@CurrentUser User user,
-    // HttpServletResponse response) throws Exception {
-    // File cerFile = certificateGeneratorService.getCertificateFile(user);
-    // response.setContentType("application/octet-stream");
-    // response.setHeader("Content-Disposition", "attachment;filename=" +
-    // user.emailAsFolder() + ".cer");
-    // FileCopyUtils.copy(Files.readAllBytes(cerFile.toPath()),
-    // response.getOutputStream());
-    // return null;
-    // }
+    @RequestMapping(method = RequestMethod.GET, value = "/certificate")
+    @ResponseBody
+    public ModelAndView getJksFile(@CurrentUser User user, HttpServletResponse response) throws Exception {
+        AzureCredentialService azureCredentialService = (AzureCredentialService) credentialServices.get(CloudPlatform.AZURE);
+        File cerFile = azureCredentialService.getCertificateFile(user);
+        response.setContentType("application/octet-stream");
+        response.setHeader("Content-Disposition", "attachment;filename=" + user.emailAsFolder() + ".cer");
+        FileCopyUtils.copy(Files.readAllBytes(cerFile.toPath()), response.getOutputStream());
+        return null;
+    }
 }

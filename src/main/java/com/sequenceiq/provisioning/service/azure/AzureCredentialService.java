@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
@@ -30,10 +32,6 @@ public class AzureCredentialService implements CredentialService {
     @Autowired
     private KeyGeneratorService keyGeneratorService;
 
-    public File getCertificateFile(User user) throws Exception {
-        return new File(getUserCerFileName(user.emailAsFolder()));
-    }
-
     @Override
     public void saveCredentials(User user, CredentialJson credentialRequest) {
         try {
@@ -49,13 +47,22 @@ public class AzureCredentialService implements CredentialService {
 
     @Override
     public CredentialJson retrieveCredentials(User user) {
-
-        return null;
+        CredentialJson credentialJson = new CredentialJson();
+        credentialJson.setCloudPlatform(CloudPlatform.AZURE);
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put(RequiredAzureCredentialParam.SUBSCRIPTION_ID.getName(), user.getSubscriptionId());
+        parameters.put(RequiredAzureCredentialParam.JKS_PASSWORD.getName(), user.getJks());
+        credentialJson.setParameters(parameters);
+        return credentialJson;
     }
 
     @Override
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.AZURE;
+    }
+
+    public File getCertificateFile(User user) throws Exception {
+        return new File(getUserCerFileName(user.emailAsFolder()));
     }
 
     private void generateCertificate(User user) throws Exception {
