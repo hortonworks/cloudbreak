@@ -53,7 +53,7 @@ public class InfraController {
     @RequestMapping(method = RequestMethod.GET, value = "/infra/{infraId}")
     @ResponseBody
     public ResponseEntity<InfraRequest> getCloudInstance(@CurrentUser User user, @PathVariable Long infraId) {
-        InfraRequest infraRequest = commonInfraService.get(infraId, userRepository.findOneWithLists(user.getId()));
+        InfraRequest infraRequest = commonInfraService.get(infraId);
         if (infraRequest == null) {
             new ResponseEntity<>(infraRequest, HttpStatus.NOT_FOUND);
         }

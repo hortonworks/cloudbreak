@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Resource;
+import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,12 +19,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sequenceiq.provisioning.controller.json.CloudInstanceRequest;
 import com.sequenceiq.provisioning.controller.json.CloudInstanceResult;
+import com.sequenceiq.provisioning.controller.json.InfraRequest;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
 import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.repository.UserRepository;
 import com.sequenceiq.provisioning.security.CurrentUser;
 import com.sequenceiq.provisioning.service.CloudInstanceService;
 import com.sequenceiq.provisioning.service.CommonCloudInstanceService;
+import com.sequenceiq.provisioning.service.CommonInfraService;
 
 @Controller
 public class CloudInstanceController {
@@ -37,12 +40,20 @@ public class CloudInstanceController {
     @Autowired
     private CommonCloudInstanceService commonCloudInstanceService;
 
+    @Autowired
+    private CommonInfraService commonInfraService;
+
     @RequestMapping(method = RequestMethod.POST, value = "/cloud")
     @ResponseBody
     public ResponseEntity<CloudInstanceResult> createCloudInstance(@CurrentUser User user, @RequestBody @Valid CloudInstanceRequest cloudInstanceRequest) {
-        CloudInstanceService cloudInstanceService = cloudInstanceServices.get(cloudInstanceRequest.getCloudPlatform());
-        return new ResponseEntity<>(cloudInstanceService.createCloudInstance(userRepository.findOneWithLists(user.getId()), cloudInstanceRequest),
-                HttpStatus.CREATED);
+        InfraRequest infraRequest = commonInfraService.get(cloudInstanceRequest.getInfraId());
+        if (infraRequest == null) {
+            throw new EntityNotFoundException("Infra config not exist with id: " + cloudInstanceRequest.getInfraId());
+        } else {
+            CloudInstanceService cloudInstanceService = cloudInstanceServices.get(infraRequest.getCloudPlatform());
+            return new ResponseEntity<>(cloudInstanceService.createCloudInstance(userRepository.findOneWithLists(user.getId()), cloudInstanceRequest),
+                    HttpStatus.CREATED);
+        }
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/cloud")

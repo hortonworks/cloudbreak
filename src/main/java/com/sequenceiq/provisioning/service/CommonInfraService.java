@@ -43,7 +43,7 @@ public class CommonInfraService {
         return result;
     }
 
-    public InfraRequest get(Long id, User user) {
+    public InfraRequest get(Long id) {
         AwsInfra awsInfra = awsInfraRepository.findOne(id);
         if (awsInfra == null) {
             AzureInfra azureInfra = azureInfraRepository.findOne(id);
