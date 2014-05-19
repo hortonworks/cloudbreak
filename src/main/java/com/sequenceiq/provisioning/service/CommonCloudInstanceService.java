@@ -8,12 +8,12 @@ import javax.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.google.common.collect.Lists;
 import com.sequenceiq.provisioning.controller.json.CloudInstanceRequest;
 import com.sequenceiq.provisioning.converter.AwsCloudInstanceConverter;
 import com.sequenceiq.provisioning.converter.AzureCloudInstanceConverter;
 import com.sequenceiq.provisioning.domain.AwsCloudInstance;
 import com.sequenceiq.provisioning.domain.AzureCloudInstance;
+import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.repository.AwsCloudInstanceRepository;
 import com.sequenceiq.provisioning.repository.AzureCloudInstanceRepository;
 
@@ -32,14 +32,14 @@ public class CommonCloudInstanceService {
     @Autowired
     private AzureCloudInstanceConverter azureCloudInstanceConverter;
 
-    public Set<CloudInstanceRequest> getAll() {
+    public Set<CloudInstanceRequest> getAll(User user) {
         Set<CloudInstanceRequest> result = new HashSet<>();
-        result.addAll(awsCloudInstanceConverter.convertAllEntityToJson(Lists.newArrayList(awsCloudInstanceRepository.findAll())));
-        result.addAll(azureCloudInstanceConverter.convertAllEntityToJson(Lists.newArrayList(azureCloudInstanceRepository.findAll())));
+        result.addAll(awsCloudInstanceConverter.convertAllEntityToJson(user.getAwsCloudInstanceList()));
+        result.addAll(azureCloudInstanceConverter.convertAllEntityToJson(user.getAzureCloudInstanceList()));
         return result;
     }
 
-    public CloudInstanceRequest get(Long id) {
+    public CloudInstanceRequest get(Long id, User user) {
         AwsCloudInstance awsInstance = awsCloudInstanceRepository.findOne(id);
         if (awsInstance == null) {
             AzureCloudInstance azureInstance = azureCloudInstanceRepository.findOne(id);

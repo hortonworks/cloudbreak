@@ -4,6 +4,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 
 @Entity
@@ -17,6 +18,9 @@ public class AwsCloudInstance implements CloudInstance, ProvisionEntity {
 
     @OneToOne
     private AwsInfra awsInfra;
+
+    @ManyToOne
+    private User user;
 
     public AwsCloudInstance() {
 
@@ -51,5 +55,11 @@ public class AwsCloudInstance implements CloudInstance, ProvisionEntity {
         return CloudPlatform.AWS;
     }
 
+    public User getUser() {
+        return user;
+    }
 
+    public void setUser(User user) {
+        this.user = user;
+    }
 }

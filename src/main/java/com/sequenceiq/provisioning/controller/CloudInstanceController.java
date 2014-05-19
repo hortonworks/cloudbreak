@@ -48,13 +48,14 @@ public class CloudInstanceController {
     @RequestMapping(method = RequestMethod.GET, value = "/cloud")
     @ResponseBody
     public ResponseEntity<Set<CloudInstanceRequest>> getAllCloudInstance(@CurrentUser User user) {
-        return new ResponseEntity<>(commonCloudInstanceService.getAll(), HttpStatus.CREATED);
+        User currentUser = userRepository.findOneWithLists(user.getId());
+        return new ResponseEntity<>(commonCloudInstanceService.getAll(currentUser), HttpStatus.CREATED);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/cloud/{cloudId}")
     @ResponseBody
     public ResponseEntity<CloudInstanceRequest> getCloudInstance(@CurrentUser User user, @PathVariable Long cloudId) {
-        CloudInstanceRequest cloudInstanceRequest = commonCloudInstanceService.get(cloudId);
+        CloudInstanceRequest cloudInstanceRequest = commonCloudInstanceService.get(cloudId, userRepository.findOneWithLists(user.getId()));
         if (cloudInstanceRequest == null) {
             new ResponseEntity<>(cloudInstanceRequest, HttpStatus.NOT_FOUND);
         }

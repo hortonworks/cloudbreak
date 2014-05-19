@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.provisioning.controller.json.CloudInstanceResult;
 import com.sequenceiq.provisioning.controller.json.InfraRequest;
 import com.sequenceiq.provisioning.converter.AzureInfraConverter;
+import com.sequenceiq.provisioning.domain.AzureInfra;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
 import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.repository.AzureInfraRepository;
@@ -28,7 +29,9 @@ public class AzureInfraService implements InfraService {
 
     @Override
     public CloudInstanceResult createInfra(User user, InfraRequest infraRequest) {
-        user.getAzureInfraList().add(azureInfraConverter.convert(infraRequest));
+        AzureInfra convert = azureInfraConverter.convert(infraRequest);
+        convert.setUser(user);
+        user.getAzureInfraList().add(convert);
         userRepository.save(user);
         return new CloudInstanceResult(OK_STATUS);
     }

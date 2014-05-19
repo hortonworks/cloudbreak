@@ -8,14 +8,15 @@ import javax.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.google.common.collect.Lists;
 import com.sequenceiq.provisioning.controller.json.InfraRequest;
 import com.sequenceiq.provisioning.converter.AwsInfraConverter;
 import com.sequenceiq.provisioning.converter.AzureInfraConverter;
 import com.sequenceiq.provisioning.domain.AwsInfra;
 import com.sequenceiq.provisioning.domain.AzureInfra;
+import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.repository.AwsInfraRepository;
 import com.sequenceiq.provisioning.repository.AzureInfraRepository;
+import com.sequenceiq.provisioning.repository.UserRepository;
 
 @Service
 public class CommonInfraService {
@@ -32,14 +33,17 @@ public class CommonInfraService {
     @Autowired
     private AzureInfraConverter azureInfraConverter;
 
-    public Set<InfraRequest> getAll() {
+    @Autowired
+    private UserRepository userRepository;
+
+    public Set<InfraRequest> getAll(User user) {
         Set<InfraRequest> result = new HashSet<>();
-        result.addAll(awsInfraConverter.convertAllEntityToJson(Lists.newArrayList(awsInfraRepository.findAll())));
-        result.addAll(azureInfraConverter.convertAllEntityToJson(Lists.newArrayList(azureInfraRepository.findAll())));
+        result.addAll(awsInfraConverter.convertAllEntityToJson(user.getAwsInfraList()));
+        result.addAll(azureInfraConverter.convertAllEntityToJson(user.getAzureInfraList()));
         return result;
     }
 
-    public InfraRequest get(Long id) {
+    public InfraRequest get(Long id, User user) {
         AwsInfra awsInfra = awsInfraRepository.findOne(id);
         if (awsInfra == null) {
             AzureInfra azureInfra = azureInfraRepository.findOne(id);

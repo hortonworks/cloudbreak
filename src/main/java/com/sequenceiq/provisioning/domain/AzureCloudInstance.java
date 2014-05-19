@@ -4,6 +4,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 
 @Entity
@@ -17,6 +18,9 @@ public class AzureCloudInstance implements CloudInstance, ProvisionEntity {
 
     @OneToOne
     private AzureInfra azureInfra;
+
+    @ManyToOne
+    private User user;
 
     public AzureCloudInstance() {
 
@@ -49,5 +53,13 @@ public class AzureCloudInstance implements CloudInstance, ProvisionEntity {
     @Override
     public CloudPlatform getPlatform() {
         return CloudPlatform.AZURE;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

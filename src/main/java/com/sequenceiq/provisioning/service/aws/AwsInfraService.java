@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.provisioning.controller.json.CloudInstanceResult;
 import com.sequenceiq.provisioning.controller.json.InfraRequest;
 import com.sequenceiq.provisioning.converter.AwsInfraConverter;
+import com.sequenceiq.provisioning.domain.AwsInfra;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
 import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.repository.AwsInfraRepository;
@@ -28,7 +29,9 @@ public class AwsInfraService implements InfraService {
 
     @Override
     public CloudInstanceResult createInfra(User user, InfraRequest infraRequest) {
-        user.getAwsInfraList().add(awsInfraConverter.convert(infraRequest));
+        AwsInfra convert = awsInfraConverter.convert(infraRequest);
+        convert.setUser(user);
+        user.getAwsInfraList().add(convert);
         userRepository.save(user);
         return new CloudInstanceResult(OK_STATUS);
     }

@@ -37,7 +37,7 @@ public class UserInitializer implements InitializingBean {
         awsInfra.setKeyName("smaple_key");
         awsInfra.setName("template1");
         awsInfra.setRegion("region-1");
-
+        awsInfra.setUser(user2);
         user2.getAwsInfraList().add(awsInfra);
 
         userRepository.save(user1);

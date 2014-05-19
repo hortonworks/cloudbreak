@@ -4,6 +4,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 
 @Entity
 public class AwsInfra implements ProvisionEntity {
@@ -17,6 +18,9 @@ public class AwsInfra implements ProvisionEntity {
     private String region;
 
     private String keyName;
+
+    @ManyToOne
+    private User user;
 
     public AwsInfra() {
     }
@@ -51,5 +55,13 @@ public class AwsInfra implements ProvisionEntity {
 
     public void setKeyName(String keyName) {
         this.keyName = keyName;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

@@ -49,6 +49,7 @@ public class AWSCloudInstanceService implements CloudInstanceService {
     @Override
     public CloudInstanceResult createCloudInstance(User user, CloudInstanceRequest cloudInstanceRequest) {
         AwsCloudInstance convert = awsCloudInstanceConverter.convert(cloudInstanceRequest);
+        convert.setUser(user);
         user.getAwsCloudInstanceList().add(convert);
         userRepository.save(user);
 

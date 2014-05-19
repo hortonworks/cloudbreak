@@ -52,6 +52,7 @@ public class AzureCloudInstanceService implements CloudInstanceService {
     @Override
     public CloudInstanceResult createCloudInstance(User user, CloudInstanceRequest cloudInstanceRequest) {
         AzureCloudInstance azureCloudInstance = azureCloudInstanceConverter.convert(cloudInstanceRequest);
+        azureCloudInstance.setUser(user);
         user.getAzureCloudInstanceList().add(azureCloudInstance);
         userRepository.save(user);
 
