@@ -1,5 +1,9 @@
 package com.sequenceiq.provisioning.controller;
 
+import java.nio.file.AccessDeniedException;
+
+import javax.persistence.EntityNotFoundException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -22,6 +26,18 @@ public class ExceptionControllerAdvice {
     public ResponseEntity<ExceptionResult> badRequest(Exception e) {
         LOGGER.error(e.getMessage(), e);
         return new ResponseEntity<>(new ExceptionResult(e.getMessage()), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler({ AccessDeniedException.class })
+    public ResponseEntity<ExceptionResult> accessDenied(Exception e) {
+        LOGGER.error(e.getMessage(), e);
+        return new ResponseEntity<>(new ExceptionResult(e.getMessage()), HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler({ EntityNotFoundException.class })
+    public ResponseEntity<ExceptionResult> notFound(Exception e) {
+        LOGGER.error(e.getMessage(), e);
+        return new ResponseEntity<>(new ExceptionResult(e.getMessage()), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler({ MethodArgumentNotValidException.class })

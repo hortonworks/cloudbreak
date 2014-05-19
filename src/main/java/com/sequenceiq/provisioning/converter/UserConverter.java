@@ -11,10 +11,16 @@ import com.sequenceiq.provisioning.json.UserJson;
 public class UserConverter extends AbstractConverter<UserJson, User> {
 
     @Autowired
-    private AzureStackConverter azureStackConverter;
+    private AzureInfraConverter azureInfraConverter;
 
     @Autowired
-    private AwsStackConverter awsStackConverter;
+    private AwsInfraConverter awsInfraConverter;
+
+    @Autowired
+    private AzureCloudInstanceConverter azureCloudInstanceConverter;
+
+    @Autowired
+    private AwsCloudInstanceConverter awsCloudInstanceConverter;
 
     @Override
     public UserJson convert(User entity) {
@@ -25,8 +31,10 @@ public class UserConverter extends AbstractConverter<UserJson, User> {
         userJson.setRoleArn(entity.getRoleArn() == null ? "" : entity.getRoleArn());
         userJson.setJks(entity.getJks() == null ? "" : entity.getJks());
         userJson.setSubscriptionId(entity.getSubscriptionId() == null ? "" : entity.getSubscriptionId());
-        userJson.setAwsStackList(awsStackConverter.convertAllEntityToJson(entity.getAwsStackList()));
-        userJson.setAzureStackList(azureStackConverter.convertAllEntityToJson(entity.getAzureStackList()));
+        userJson.setAwsInfraList(awsInfraConverter.convertAllEntityToJson(entity.getAwsInfraList()));
+        userJson.setAzureInfraList(azureInfraConverter.convertAllEntityToJson(entity.getAzureInfraList()));
+        userJson.setAzureCloudList(azureCloudInstanceConverter.convertAllEntityToJson(entity.getAzureCloudInstanceList()));
+        userJson.setAwsCloudList(awsCloudInstanceConverter.convertAllEntityToJson(entity.getAwsCloudInstanceList()));
         return userJson;
     }
 
@@ -39,8 +47,10 @@ public class UserConverter extends AbstractConverter<UserJson, User> {
         user.setRoleArn(json.getRoleArn());
         user.setJks(json.getJks());
         user.setSubscriptionId(json.getSubscriptionId());
-        user.setAwsStackList(awsStackConverter.convertAllJsonToEntity(json.getAwsStackList()));
-        user.setAzureStackList(azureStackConverter.convertAllJsonToEntity(json.getAzureStackList()));
+        user.setAwsInfraList(awsInfraConverter.convertAllJsonToEntity(json.getAwsInfraList()));
+        user.setAzureInfraList(azureInfraConverter.convertAllJsonToEntity(json.getAzureInfraList()));
+        user.setAzureCloudInstanceList(azureCloudInstanceConverter.convertAllJsonToEntity(json.getAzureCloudList()));
+        user.setAwsCloudInstanceList(awsCloudInstanceConverter.convertAllJsonToEntity(json.getAwsCloudList()));
         return user;
     }
 }

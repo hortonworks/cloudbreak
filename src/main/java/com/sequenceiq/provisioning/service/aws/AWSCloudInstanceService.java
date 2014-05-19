@@ -10,14 +10,16 @@ import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.CreateStackRequest;
 import com.amazonaws.services.cloudformation.model.CreateStackResult;
 import com.amazonaws.services.cloudformation.model.Parameter;
-import com.sequenceiq.provisioning.controller.json.AWSProvisionResult;
-import com.sequenceiq.provisioning.controller.json.ProvisionRequest;
-import com.sequenceiq.provisioning.controller.json.ProvisionResult;
-import com.sequenceiq.provisioning.controller.validation.RequiredAWSStackParam;
+import com.sequenceiq.provisioning.controller.json.AWSCloudInstanceResult;
+import com.sequenceiq.provisioning.controller.json.CloudInstanceRequest;
+import com.sequenceiq.provisioning.controller.json.CloudInstanceResult;
+import com.sequenceiq.provisioning.converter.AwsCloudInstanceConverter;
+import com.sequenceiq.provisioning.domain.AwsCloudInstance;
 import com.sequenceiq.provisioning.domain.CloudFormationTemplate;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
 import com.sequenceiq.provisioning.domain.User;
-import com.sequenceiq.provisioning.service.ProvisionService;
+import com.sequenceiq.provisioning.repository.UserRepository;
+import com.sequenceiq.provisioning.service.CloudInstanceService;
 
 /**
  * Provisions an Ambari based Hadoop cluster on a client's Amazon EC2 account by
@@ -27,7 +29,7 @@ import com.sequenceiq.provisioning.service.ProvisionService;
  * {@link CrossAccountCredentialsProvider}.
  */
 @Service
-public class AWSProvisionService implements ProvisionService {
+public class AWSCloudInstanceService implements CloudInstanceService {
 
     private static final int SESSION_CREDENTIALS_DURATION = 3600;
     private static final String OK_STATUS = "ok";
@@ -38,11 +40,21 @@ public class AWSProvisionService implements ProvisionService {
     @Autowired
     private CrossAccountCredentialsProvider credentialsProvider;
 
-    @Override
-    public ProvisionResult provisionCluster(User user, ProvisionRequest provisionRequest) {
+    @Autowired
+    private AwsCloudInstanceConverter awsCloudInstanceConverter;
 
-        Regions region = Regions.fromName(provisionRequest.getParameters().get(RequiredAWSStackParam.REGION.getName()));
-        String keyName = provisionRequest.getParameters().get(RequiredAWSStackParam.KEY_NAME.getName());
+    @Autowired
+    private UserRepository userRepository;
+
+    @Override
+    public CloudInstanceResult createCloudInstance(User user, CloudInstanceRequest cloudInstanceRequest) {
+        AwsCloudInstance convert = awsCloudInstanceConverter.convert(cloudInstanceRequest);
+        convert.setUser(user);
+        user.getAwsCloudInstanceList().add(convert);
+        userRepository.save(user);
+
+        Regions region = Regions.fromName(convert.getAwsInfra().getRegion());
+        String keyName = convert.getAwsInfra().getKeyName();
         String roleArn = user.getRoleArn();
 
         BasicSessionCredentials basicSessionCredentials = credentialsProvider.retrieveSessionCredentials(SESSION_CREDENTIALS_DURATION, "provision-ambari",
@@ -50,11 +62,11 @@ public class AWSProvisionService implements ProvisionService {
         AmazonCloudFormationClient amazonCloudFormationClient = new AmazonCloudFormationClient(basicSessionCredentials);
         amazonCloudFormationClient.setRegion(Region.getRegion(region));
         CreateStackRequest createStackRequest = new CreateStackRequest()
-                .withStackName(provisionRequest.getClusterName())
+                .withStackName(convert.getAwsInfra().getName())
                 .withTemplateBody(template.getBody())
                 .withParameters(new Parameter().withParameterKey("KeyName").withParameterValue(keyName));
         CreateStackResult createStackResult = amazonCloudFormationClient.createStack(createStackRequest);
-        return new AWSProvisionResult(OK_STATUS, createStackResult);
+        return new AWSCloudInstanceResult(OK_STATUS, createStackResult);
     }
 
     @Override

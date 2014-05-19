@@ -4,15 +4,18 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
 
 @Entity
-public class AzureStack implements ProvisionEntity {
+public class AzureInfra implements ProvisionEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "infra_generator")
+    @SequenceGenerator(name = "infra_generator", sequenceName = "sequence_table")
     private Long id;
 
-    private Integer clusterSize;
+
     private String location;
     private String name;
     private String description;
@@ -24,24 +27,10 @@ public class AzureStack implements ProvisionEntity {
     private String userName;
     private String password;
 
-    public AzureStack() {
+    @ManyToOne
+    private User user;
 
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Integer getClusterSize() {
-        return clusterSize;
-    }
-
-    public void setClusterSize(Integer clusterSize) {
-        this.clusterSize = clusterSize;
+    public AzureInfra() {
     }
 
     public String getLocation() {
@@ -122,5 +111,21 @@ public class AzureStack implements ProvisionEntity {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 }
