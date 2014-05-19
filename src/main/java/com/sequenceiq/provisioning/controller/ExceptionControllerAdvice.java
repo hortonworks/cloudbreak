@@ -34,7 +34,7 @@ public class ExceptionControllerAdvice {
         return new ResponseEntity<>(new ExceptionResult(e.getMessage()), HttpStatus.FORBIDDEN);
     }
 
-    @ExceptionHandler({ EntityNotFoundException.class })
+    @ExceptionHandler({ NotFoundException.class, EntityNotFoundException.class })
     public ResponseEntity<ExceptionResult> notFound(Exception e) {
         LOGGER.error(e.getMessage(), e);
         return new ResponseEntity<>(new ExceptionResult(e.getMessage()), HttpStatus.NOT_FOUND);
