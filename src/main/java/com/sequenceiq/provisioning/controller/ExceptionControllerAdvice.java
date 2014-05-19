@@ -28,13 +28,11 @@ public class ExceptionControllerAdvice {
         return new ResponseEntity<>(new ExceptionResult(e.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler({ AccessDeniedException.class})
+    @ExceptionHandler({ AccessDeniedException.class })
     public ResponseEntity<ExceptionResult> accessDenied(Exception e) {
         LOGGER.error(e.getMessage(), e);
         return new ResponseEntity<>(new ExceptionResult(e.getMessage()), HttpStatus.FORBIDDEN);
     }
-
-
 
     @ExceptionHandler({ EntityNotFoundException.class })
     public ResponseEntity<ExceptionResult> notFound(Exception e) {
