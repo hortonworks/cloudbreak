@@ -6,10 +6,16 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
 
 @Entity
-public class AzureCloudInstance extends CloudInstance implements ProvisionEntity {
+public class AzureCloudInstance implements ProvisionEntity {
 
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "cloudinstance_generator")
+    @SequenceGenerator(name = "cloudinstance_generator", sequenceName = "cloudsequence_table")
+    private Long id;
 
     private Integer clusterSize;
 
@@ -20,7 +26,6 @@ public class AzureCloudInstance extends CloudInstance implements ProvisionEntity
     private User user;
 
     public AzureCloudInstance() {
-        super();
     }
 
     public Integer getClusterSize() {
@@ -41,6 +46,15 @@ public class AzureCloudInstance extends CloudInstance implements ProvisionEntity
 
     public User getUser() {
         return user;
+    }
+
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public void setUser(User user) {

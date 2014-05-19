@@ -1,10 +1,19 @@
 package com.sequenceiq.provisioning.domain;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
 
 @Entity
-public class AwsInfra extends Infra implements ProvisionEntity {
+public class AwsInfra implements ProvisionEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "infra_generator")
+    @SequenceGenerator(name = "infra_generator", sequenceName = "sequence_table")
+    private Long id;
 
     private String name;
 
@@ -16,7 +25,6 @@ public class AwsInfra extends Infra implements ProvisionEntity {
     private User user;
 
     public AwsInfra() {
-        super();
     }
 
     public String getName() {
@@ -49,5 +57,13 @@ public class AwsInfra extends Infra implements ProvisionEntity {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 }

@@ -6,9 +6,15 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
 
 @Entity
-public class AwsCloudInstance extends CloudInstance implements ProvisionEntity {
+public class AwsCloudInstance implements ProvisionEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "cloudinstance_generator")
+    @SequenceGenerator(name = "cloudinstance_generator", sequenceName = "cloudsequence_table")
+    private Long id;
 
     private Integer clusterSize;
 
@@ -19,7 +25,6 @@ public class AwsCloudInstance extends CloudInstance implements ProvisionEntity {
     private User user;
 
     public AwsCloudInstance() {
-        super();
     }
 
     public Integer getClusterSize() {
@@ -44,5 +49,13 @@ public class AwsCloudInstance extends CloudInstance implements ProvisionEntity {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 }

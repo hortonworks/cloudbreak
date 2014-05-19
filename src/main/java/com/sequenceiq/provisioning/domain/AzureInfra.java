@@ -5,9 +5,16 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
 
 @Entity
-public class AzureInfra extends Infra implements ProvisionEntity {
+public class AzureInfra implements ProvisionEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "infra_generator")
+    @SequenceGenerator(name = "infra_generator", sequenceName = "sequence_table")
+    private Long id;
+
 
     private String location;
     private String name;
@@ -24,7 +31,6 @@ public class AzureInfra extends Infra implements ProvisionEntity {
     private User user;
 
     public AzureInfra() {
-        super();
     }
 
     public String getLocation() {
@@ -113,5 +119,13 @@ public class AzureInfra extends Infra implements ProvisionEntity {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 }
