@@ -13,7 +13,7 @@ import com.amazonaws.services.cloudformation.model.Parameter;
 import com.sequenceiq.provisioning.controller.json.AWSCloudInstanceResult;
 import com.sequenceiq.provisioning.controller.json.CloudInstanceRequest;
 import com.sequenceiq.provisioning.controller.json.CloudInstanceResult;
-import com.sequenceiq.provisioning.converter.AwsCloudConverter;
+import com.sequenceiq.provisioning.converter.AwsCloudInstanceConverter;
 import com.sequenceiq.provisioning.domain.AwsCloudInstance;
 import com.sequenceiq.provisioning.domain.CloudFormationTemplate;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
@@ -41,14 +41,14 @@ public class AWSCloudInstanceService implements CloudInstanceService {
     private CrossAccountCredentialsProvider credentialsProvider;
 
     @Autowired
-    private AwsCloudConverter awsCloudConverter;
+    private AwsCloudInstanceConverter awsCloudInstanceConverter;
 
     @Autowired
     private UserRepository userRepository;
 
     @Override
     public CloudInstanceResult createCloudInstance(User user, CloudInstanceRequest cloudInstanceRequest) {
-        AwsCloudInstance convert = awsCloudConverter.convert(cloudInstanceRequest);
+        AwsCloudInstance convert = awsCloudInstanceConverter.convert(cloudInstanceRequest);
         user.getAwsCloudInstanceList().add(convert);
         userRepository.save(user);
 

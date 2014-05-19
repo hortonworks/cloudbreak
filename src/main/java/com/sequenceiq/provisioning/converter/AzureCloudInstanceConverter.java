@@ -9,7 +9,7 @@ import com.sequenceiq.provisioning.domain.CloudPlatform;
 import com.sequenceiq.provisioning.repository.AzureInfraRepository;
 
 @Component
-public class AzureCloudConverter extends AbstractConverter<CloudInstanceRequest, AzureCloudInstance> {
+public class AzureCloudInstanceConverter extends AbstractConverter<CloudInstanceRequest, AzureCloudInstance> {
 
     @Autowired
     private AzureInfraRepository azureInfraRepository;

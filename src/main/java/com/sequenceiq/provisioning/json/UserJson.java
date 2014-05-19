@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sequenceiq.provisioning.controller.json.CloudInstanceRequest;
 import com.sequenceiq.provisioning.controller.json.InfraRequest;
 
 
@@ -29,16 +30,16 @@ public class UserJson implements JsonEntity {
     private String jks;
 
     @JsonProperty("azureInfraList")
-    private List<InfraRequest> azureStackList = new ArrayList<>();
+    private List<InfraRequest> azureInfraList = new ArrayList<>();
 
     @JsonProperty("awsInfraList")
-    private List<InfraRequest> awsStackList = new ArrayList<>();
+    private List<InfraRequest> awsInfraList = new ArrayList<>();
 
     @JsonProperty("azureCloudList")
-    private List<InfraRequest> azureCloudList = new ArrayList<>();
+    private List<CloudInstanceRequest> azureCloudList = new ArrayList<>();
 
     @JsonProperty("awsCloudList")
-    private List<InfraRequest> awsCloudList = new ArrayList<>();
+    private List<CloudInstanceRequest> awsCloudList = new ArrayList<>();
 
     public UserJson() {
 
@@ -92,27 +93,35 @@ public class UserJson implements JsonEntity {
         this.jks = jks;
     }
 
-    public List<InfraRequest> getAzureStackList() {
-        return azureStackList;
+    public List<InfraRequest> getAzureInfraList() {
+        return azureInfraList;
     }
 
-    public void setAzureStackList(List<InfraRequest> azureStackList) {
-        this.azureStackList = azureStackList;
+    public void setAzureInfraList(List<InfraRequest> azureInfraList) {
+        this.azureInfraList = azureInfraList;
     }
 
-    public List<InfraRequest> getAwsStackList() {
-        return awsStackList;
+    public List<InfraRequest> getAwsInfraList() {
+        return awsInfraList;
     }
 
-    public void setAwsStackList(List<InfraRequest> awsStackList) {
-        this.awsStackList = awsStackList;
+    public void setAwsInfraList(List<InfraRequest> awsInfraList) {
+        this.awsInfraList = awsInfraList;
     }
 
-    public List<InfraRequest> getAzureCloudList() {
+    public List<CloudInstanceRequest> getAzureCloudList() {
         return azureCloudList;
     }
 
-    public void setAzureCloudList(List<InfraRequest> azureCloudList) {
+    public void setAzureCloudList(List<CloudInstanceRequest> azureCloudList) {
         this.azureCloudList = azureCloudList;
+    }
+
+    public List<CloudInstanceRequest> getAwsCloudList() {
+        return awsCloudList;
+    }
+
+    public void setAwsCloudList(List<CloudInstanceRequest> awsCloudList) {
+        this.awsCloudList = awsCloudList;
     }
 }

@@ -9,7 +9,7 @@ import com.sequenceiq.provisioning.domain.CloudPlatform;
 import com.sequenceiq.provisioning.repository.AwsInfraRepository;
 
 @Component
-public class AwsCloudConverter extends AbstractConverter<CloudInstanceRequest, AwsCloudInstance> {
+public class AwsCloudInstanceConverter extends AbstractConverter<CloudInstanceRequest, AwsCloudInstance> {
 
     @Autowired
     private AwsInfraRepository awsInfraRepository;

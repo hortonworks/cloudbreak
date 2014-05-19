@@ -12,7 +12,7 @@ import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.provisioning.controller.json.AzureCloudInstanceResult;
 import com.sequenceiq.provisioning.controller.json.CloudInstanceRequest;
 import com.sequenceiq.provisioning.controller.json.CloudInstanceResult;
-import com.sequenceiq.provisioning.converter.AzureCloudConverter;
+import com.sequenceiq.provisioning.converter.AzureCloudInstanceConverter;
 import com.sequenceiq.provisioning.domain.AzureCloudInstance;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
 import com.sequenceiq.provisioning.domain.User;
@@ -44,14 +44,14 @@ public class AzureCloudInstanceService implements CloudInstanceService {
     private static final String DATADIR = "userdatas";
 
     @Autowired
-    private AzureCloudConverter azureCloudConverter;
+    private AzureCloudInstanceConverter azureCloudInstanceConverter;
 
     @Autowired
     private UserRepository userRepository;
 
     @Override
     public CloudInstanceResult createCloudInstance(User user, CloudInstanceRequest cloudInstanceRequest) {
-        AzureCloudInstance azureCloudInstance = azureCloudConverter.convert(cloudInstanceRequest);
+        AzureCloudInstance azureCloudInstance = azureCloudInstanceConverter.convert(cloudInstanceRequest);
         user.getAzureCloudInstanceList().add(azureCloudInstance);
         userRepository.save(user);
 
