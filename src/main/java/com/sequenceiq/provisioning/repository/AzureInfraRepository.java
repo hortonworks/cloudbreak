@@ -5,7 +5,7 @@ import org.springframework.data.repository.CrudRepository;
 import com.sequenceiq.provisioning.domain.AzureInfra;
 import com.sequenceiq.provisioning.domain.User;
 
-public interface AzureStackRepository extends CrudRepository<AzureInfra, Long> {
+public interface AzureInfraRepository extends CrudRepository<AzureInfra, Long> {
 
     User findByName(String name);
 }
