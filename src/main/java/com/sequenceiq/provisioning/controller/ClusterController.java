@@ -20,7 +20,7 @@ import com.sequenceiq.provisioning.security.CurrentUser;
 import com.sequenceiq.provisioning.service.AmbariClusterService;
 
 @Controller
-@RequestMapping("/cluster")
+@RequestMapping("/cloud/{cloudId}/cluster")
 public class ClusterController {
 
     @Autowired
@@ -28,21 +28,21 @@ public class ClusterController {
 
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<String> createCluser(@CurrentUser User user, @RequestBody @Valid ClusterJson clusterRequest) {
-        ambariClusterService.createCluster(clusterRequest);
+    public ResponseEntity<String> createCluser(@CurrentUser User user, @PathVariable Long cloudId, @RequestBody @Valid ClusterJson clusterRequest) {
+        ambariClusterService.createCluster(user, cloudId, clusterRequest);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<List<ClusterJson>> retrieveClusters(@CurrentUser User user) {
-        return new ResponseEntity<>(ambariClusterService.retrieveClusters(user), HttpStatus.OK);
+    public ResponseEntity<List<ClusterJson>> retrieveClusters(@CurrentUser User user, @PathVariable Long cloudId) {
+        return new ResponseEntity<>(ambariClusterService.retrieveClusters(user, cloudId), HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "{id}")
     @ResponseBody
-    public ResponseEntity<ClusterJson> retrieveCluster(@CurrentUser User user, @PathVariable String id) {
-        return new ResponseEntity<>(ambariClusterService.retrieveCluster(user, id), HttpStatus.OK);
+    public ResponseEntity<ClusterJson> retrieveCluster(@CurrentUser User user, @PathVariable Long cloudId, @PathVariable String id) {
+        return new ResponseEntity<>(ambariClusterService.retrieveCluster(user, cloudId, id), HttpStatus.OK);
     }
 
 }

@@ -10,15 +10,15 @@ import com.sequenceiq.provisioning.domain.User;
 @Service
 public class AmbariClusterService {
 
-    public void createCluster(ClusterJson clusterRequest) {
+    public void createCluster(User user, Long cloudId, ClusterJson clusterRequest) {
         // TODO: createCluser with ambari client
     }
 
-    public List<ClusterJson> retrieveClusters(User user) {
+    public List<ClusterJson> retrieveClusters(User user, Long cloudId) {
         return null;
     }
 
-    public ClusterJson retrieveCluster(User user, String id) {
+    public ClusterJson retrieveCluster(User user, Long cloudId, String id) {
         return null;
     }
 

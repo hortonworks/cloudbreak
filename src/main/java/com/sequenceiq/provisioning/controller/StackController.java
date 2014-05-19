@@ -20,7 +20,7 @@ import com.sequenceiq.provisioning.security.CurrentUser;
 import com.sequenceiq.provisioning.service.AmbariBlueprintService;
 
 @Controller
-@RequestMapping("/stack")
+@RequestMapping("/cloud/{cloudId}/stack")
 public class StackController {
 
     @Autowired
@@ -28,20 +28,20 @@ public class StackController {
 
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<String> addBlueprint(@CurrentUser User user, @RequestBody @Valid BlueprintJson blueprintRequest) {
-        ambariBlueprintService.addBlueprint(blueprintRequest);
+    public ResponseEntity<String> addBlueprint(@CurrentUser User user, @PathVariable Long cloudId, @RequestBody @Valid BlueprintJson blueprintRequest) {
+        ambariBlueprintService.addBlueprint(user, cloudId, blueprintRequest);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<List<BlueprintJson>> retrieveBlueprints(@CurrentUser User user) {
-        return new ResponseEntity<>(ambariBlueprintService.retrieveBlueprints(user), HttpStatus.OK);
+    public ResponseEntity<List<BlueprintJson>> retrieveBlueprints(@CurrentUser User user, @PathVariable Long cloudId) {
+        return new ResponseEntity<>(ambariBlueprintService.retrieveBlueprints(user, cloudId), HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "{id}")
     @ResponseBody
-    public ResponseEntity<BlueprintJson> retrieveBlueprint(@CurrentUser User user, @PathVariable String id) {
-        return new ResponseEntity<>(ambariBlueprintService.retrieveBlueprint(user, id), HttpStatus.OK);
+    public ResponseEntity<BlueprintJson> retrieveBlueprint(@CurrentUser User user, @PathVariable Long cloudId, @PathVariable String id) {
+        return new ResponseEntity<>(ambariBlueprintService.retrieveBlueprint(user, cloudId, id), HttpStatus.OK);
     }
 }
