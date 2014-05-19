@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.provisioning.controller.BadRequestException;
 import com.sequenceiq.provisioning.controller.json.BlueprintJson;
+import com.sequenceiq.provisioning.domain.User;
 
 @Service
 public class AmbariBlueprintService {
@@ -33,7 +34,7 @@ public class AmbariBlueprintService {
         }
     }
 
-    public List<BlueprintJson> retrieveBlueprints() {
+    public List<BlueprintJson> retrieveBlueprints(User user) {
         // TODO: for cloudRepo.findAllForUser().each() {
         // getBlueprints(cloud.host,cloud.port)}
 
@@ -62,7 +63,7 @@ public class AmbariBlueprintService {
         return blueprints;
     }
 
-    public BlueprintJson retrieveBlueprint(String id) {
+    public BlueprintJson retrieveBlueprint(User user, String id) {
         BlueprintJson blueprintJson = new BlueprintJson();
         blueprintJson.setCloudId(TEST_CLOUD_ID);
         ObjectMapper mapper = new ObjectMapper();
