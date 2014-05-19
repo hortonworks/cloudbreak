@@ -9,19 +9,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
-import com.sequenceiq.provisioning.controller.json.AzureProvisionResult;
+import com.sequenceiq.provisioning.controller.json.AzureCloudInstanceResult;
 import com.sequenceiq.provisioning.controller.json.CloudInstanceRequest;
-import com.sequenceiq.provisioning.controller.json.ProvisionResult;
+import com.sequenceiq.provisioning.controller.json.CloudInstanceResult;
 import com.sequenceiq.provisioning.converter.AzureCloudConverter;
 import com.sequenceiq.provisioning.domain.AzureCloudInstance;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
 import com.sequenceiq.provisioning.domain.User;
-import com.sequenceiq.provisioning.service.ProvisionService;
+import com.sequenceiq.provisioning.service.CloudInstanceService;
 
 import groovyx.net.http.HttpResponseDecorator;
 
 @Service
-public class AzureProvisionService implements ProvisionService {
+public class AzureCloudInstanceService implements CloudInstanceService {
     private static final String OK_STATUS = "ok";
     private static final String LOCATION = "location";
     private static final String NAME = "name";
@@ -46,7 +46,7 @@ public class AzureProvisionService implements ProvisionService {
     private AzureCloudConverter azureCloudConverter;
 
     @Override
-    public ProvisionResult provisionCluster(User user, CloudInstanceRequest cloudInstanceRequest) {
+    public CloudInstanceResult createCloudInstance(User user, CloudInstanceRequest cloudInstanceRequest) {
 
         AzureCloudInstance azureCloudInstance = azureCloudConverter.convert(cloudInstanceRequest);
         String filePath = getUserJksFileName(user.emailAsFolder());
@@ -96,7 +96,7 @@ public class AzureProvisionService implements ProvisionService {
             props.put(IMAGENAME, azureCloudInstance.getAzureInfra().getImageName());
             props.put(IMAGESTOREURI,
                     String.format("http://%s.blob.core.windows.net/vhd-store/%s.vhd", azureCloudInstance.getAzureInfra().getName(), vmName)
-                    );
+            );
             props.put(HOSTNAME, vmName);
             props.put(USERNAME, azureCloudInstance.getAzureInfra().getUserName());
             props.put(PASSWORD, azureCloudInstance.getAzureInfra().getPassword());
@@ -108,7 +108,7 @@ public class AzureProvisionService implements ProvisionService {
             requestId = (String) azureClient.getRequestId(virtualMachineResponse);
             azureClient.waitUntilComplete(requestId);
         }
-        return new AzureProvisionResult(OK_STATUS);
+        return new AzureCloudInstanceResult(OK_STATUS);
     }
 
     private String getUserJksFileName(String user) {

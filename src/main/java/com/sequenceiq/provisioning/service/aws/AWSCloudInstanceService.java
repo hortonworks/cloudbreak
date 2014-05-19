@@ -10,15 +10,15 @@ import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.CreateStackRequest;
 import com.amazonaws.services.cloudformation.model.CreateStackResult;
 import com.amazonaws.services.cloudformation.model.Parameter;
-import com.sequenceiq.provisioning.controller.json.AWSProvisionResult;
+import com.sequenceiq.provisioning.controller.json.AWSCloudInstanceResult;
 import com.sequenceiq.provisioning.controller.json.CloudInstanceRequest;
-import com.sequenceiq.provisioning.controller.json.ProvisionResult;
+import com.sequenceiq.provisioning.controller.json.CloudInstanceResult;
 import com.sequenceiq.provisioning.converter.AwsCloudConverter;
 import com.sequenceiq.provisioning.domain.AwsCloudInstance;
 import com.sequenceiq.provisioning.domain.CloudFormationTemplate;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
 import com.sequenceiq.provisioning.domain.User;
-import com.sequenceiq.provisioning.service.ProvisionService;
+import com.sequenceiq.provisioning.service.CloudInstanceService;
 
 /**
  * Provisions an Ambari based Hadoop cluster on a client's Amazon EC2 account by
@@ -28,7 +28,7 @@ import com.sequenceiq.provisioning.service.ProvisionService;
  * {@link CrossAccountCredentialsProvider}.
  */
 @Service
-public class AWSProvisionService implements ProvisionService {
+public class AWSCloudInstanceService implements CloudInstanceService {
 
     private static final int SESSION_CREDENTIALS_DURATION = 3600;
     private static final String OK_STATUS = "ok";
@@ -43,7 +43,7 @@ public class AWSProvisionService implements ProvisionService {
     private AwsCloudConverter awsCloudConverter;
 
     @Override
-    public ProvisionResult provisionCluster(User user, CloudInstanceRequest cloudInstanceRequest) {
+    public CloudInstanceResult createCloudInstance(User user, CloudInstanceRequest cloudInstanceRequest) {
         AwsCloudInstance convert = awsCloudConverter.convert(cloudInstanceRequest);
         Regions region = Regions.fromName(convert.getAwsInfra().getRegion());
         String keyName = convert.getAwsInfra().getKeyName();
@@ -58,7 +58,7 @@ public class AWSProvisionService implements ProvisionService {
                 .withTemplateBody(template.getBody())
                 .withParameters(new Parameter().withParameterKey("KeyName").withParameterValue(keyName));
         CreateStackResult createStackResult = amazonCloudFormationClient.createStack(createStackRequest);
-        return new AWSProvisionResult(OK_STATUS, createStackResult);
+        return new AWSCloudInstanceResult(OK_STATUS, createStackResult);
     }
 
     @Override

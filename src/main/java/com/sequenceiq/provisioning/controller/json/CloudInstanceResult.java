@@ -1,10 +1,10 @@
 package com.sequenceiq.provisioning.controller.json;
 
-public class ProvisionResult {
+public class CloudInstanceResult {
 
     private String status;
 
-    public ProvisionResult(String status) {
+    public CloudInstanceResult(String status) {
         this.status = status;
     }
 
