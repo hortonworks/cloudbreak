@@ -7,18 +7,10 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-import com.sequenceiq.provisioning.controller.json.ProvisionRequest;
+import com.sequenceiq.provisioning.controller.json.CredentialJson;
 
-/**
- * Validates a provision request. Because different parameters belong to
- * different cloud platforms, they must be validated accordingly. This class
- * checks if the required parameters are present and if they match the required
- * format.
- */
-@Component
-public class ProvisionParametersValidator implements ConstraintValidator<ValidProvisionRequest, ProvisionRequest> {
+public class CredentialParametersValidator implements ConstraintValidator<ValidCredentialRequest, CredentialJson> {
 
     @Autowired
     private RequiredParametersValidator requiredParametersValidator;
@@ -27,15 +19,18 @@ public class ProvisionParametersValidator implements ConstraintValidator<ValidPr
     private List<String> requiredAzureParams = new ArrayList<>();
 
     @Override
-    public void initialize(ValidProvisionRequest constraintAnnotation) {
-        for (RequiredAWSStackParam param : RequiredAWSStackParam.values()) {
+    public void initialize(ValidCredentialRequest constraintAnnotation) {
+        for (RequiredAWSCredentialParam param : RequiredAWSCredentialParam.values()) {
             requiredAWSParams.add(param.getName());
         }
-        // TODO: required Azure params
+        for (RequiredAzureCredentialParam param : RequiredAzureCredentialParam.values()) {
+            requiredAzureParams.add(param.getName());
+        }
+
     }
 
     @Override
-    public boolean isValid(ProvisionRequest request, ConstraintValidatorContext context) {
+    public boolean isValid(CredentialJson request, ConstraintValidatorContext context) {
         boolean valid = true;
         switch (request.getCloudPlatform()) {
         case AWS:
@@ -50,12 +45,11 @@ public class ProvisionParametersValidator implements ConstraintValidator<ValidPr
         return valid;
     }
 
-    private boolean validateAzureParams(ProvisionRequest request, ConstraintValidatorContext context) {
+    private boolean validateAzureParams(CredentialJson request, ConstraintValidatorContext context) {
         return requiredParametersValidator.validate(request.getParameters(), context, requiredAzureParams);
     }
 
-    private boolean validateAWSParams(ProvisionRequest request, ConstraintValidatorContext context) {
-        // TODO: validate instanceType, sshLocation, etc.. with regex
+    private boolean validateAWSParams(CredentialJson request, ConstraintValidatorContext context) {
         return requiredParametersValidator.validate(request.getParameters(), context, requiredAWSParams);
     }
 

@@ -1,11 +1,13 @@
 package com.sequenceiq.provisioning.service.azure;
 
+import groovyx.net.http.HttpResponseDecorator;
+
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.provisioning.controller.json.AzureProvisionResult;
@@ -15,9 +17,7 @@ import com.sequenceiq.provisioning.domain.CloudPlatform;
 import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.service.ProvisionService;
 
-import groovyx.net.http.HttpResponseDecorator;
-
-@Component
+@Service
 public class AzureProvisionService implements ProvisionService {
 
     private static final String OK_STATUS = "ok";
@@ -71,7 +71,6 @@ public class AzureProvisionService implements ProvisionService {
         requestId = (String) azureClient.getRequestId(virtualNetworkResponse);
         azureClient.waitUntilComplete(requestId);
 
-
         for (int i = 0; i < provisionRequest.getClusterSize(); i++) {
             String vmName = String.format("%s-1", provisionRequest.getClusterName());
             props = new HashMap<>();
@@ -89,8 +88,8 @@ public class AzureProvisionService implements ProvisionService {
             props.put(LABEL, label);
             props.put(IMAGENAME, provisionRequest.getParameters().get(IMAGENAME));
             props.put(IMAGESTOREURI, provisionRequest.getParameters().get(
-                            String.format("http://%s.blob.core.windows.net/vhd-store/%s.vhd", provisionRequest.getClusterName(), vmName))
-            );
+                    String.format("http://%s.blob.core.windows.net/vhd-store/%s.vhd", provisionRequest.getClusterName(), vmName))
+                    );
             props.put(HOSTNAME, vmName);
             props.put(USERNAME, provisionRequest.getParameters().get(USERNAME));
             props.put(PASSWORD, provisionRequest.getParameters().get(PASSWORD));

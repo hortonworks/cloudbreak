@@ -1,7 +1,7 @@
 package com.sequenceiq.provisioning.service.aws;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import com.amazonaws.auth.BasicSessionCredentials;
 import com.amazonaws.regions.Region;
@@ -13,7 +13,7 @@ import com.amazonaws.services.cloudformation.model.Parameter;
 import com.sequenceiq.provisioning.controller.json.AWSProvisionResult;
 import com.sequenceiq.provisioning.controller.json.ProvisionRequest;
 import com.sequenceiq.provisioning.controller.json.ProvisionResult;
-import com.sequenceiq.provisioning.controller.json.RequiredAWSRequestParam;
+import com.sequenceiq.provisioning.controller.validation.RequiredAWSStackParam;
 import com.sequenceiq.provisioning.domain.CloudFormationTemplate;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
 import com.sequenceiq.provisioning.domain.User;
@@ -26,7 +26,7 @@ import com.sequenceiq.provisioning.service.ProvisionService;
  * established through cross-account session credentials. See
  * {@link CrossAccountCredentialsProvider}.
  */
-@Component
+@Service
 public class AWSProvisionService implements ProvisionService {
 
     private static final int SESSION_CREDENTIALS_DURATION = 3600;
@@ -41,9 +41,9 @@ public class AWSProvisionService implements ProvisionService {
     @Override
     public ProvisionResult provisionCluster(User user, ProvisionRequest provisionRequest) {
 
-        Regions region = Regions.fromName(provisionRequest.getParameters().get(RequiredAWSRequestParam.REGION.getName()));
-        String keyName = provisionRequest.getParameters().get(RequiredAWSRequestParam.KEY_NAME.getName());
-        String roleArn = provisionRequest.getParameters().get(RequiredAWSRequestParam.ROLE_ARN.getName());
+        Regions region = Regions.fromName(provisionRequest.getParameters().get(RequiredAWSStackParam.REGION.getName()));
+        String keyName = provisionRequest.getParameters().get(RequiredAWSStackParam.KEY_NAME.getName());
+        String roleArn = user.getRoleArn();
 
         BasicSessionCredentials basicSessionCredentials = credentialsProvider.retrieveSessionCredentials(SESSION_CREDENTIALS_DURATION, "provision-ambari",
                 roleArn);

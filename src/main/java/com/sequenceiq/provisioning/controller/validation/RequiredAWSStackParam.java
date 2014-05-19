@@ -1,14 +1,13 @@
-package com.sequenceiq.provisioning.controller.json;
+package com.sequenceiq.provisioning.controller.validation;
 
-public enum RequiredAWSRequestParam {
+public enum RequiredAWSStackParam {
 
-    ROLE_ARN("roleArn"),
     KEY_NAME("keyName"),
     REGION("region");
 
     private final String paramName;
 
-    private RequiredAWSRequestParam(String paramName) {
+    private RequiredAWSStackParam(String paramName) {
         this.paramName = paramName;
     }
 
