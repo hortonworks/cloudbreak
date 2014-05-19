@@ -28,7 +28,7 @@ public class ProvisionParametersValidator implements ConstraintValidator<ValidPr
 
     @Override
     public void initialize(ValidProvisionRequest constraintAnnotation) {
-        for (RequiredAWSStackParam param : RequiredAWSStackParam.values()) {
+        for (RequiredAwsInfraParam param : RequiredAwsInfraParam.values()) {
             requiredAWSParams.add(param.getName());
         }
         // TODO: required Azure params

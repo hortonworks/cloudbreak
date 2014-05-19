@@ -6,22 +6,12 @@ import java.util.Map;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.provisioning.controller.json.InfraRequest;
+import com.sequenceiq.provisioning.controller.validation.RequiredAzureInfraParam;
 import com.sequenceiq.provisioning.domain.AzureInfra;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
 
 @Component
 public class AzureInfraConverter extends AbstractConverter<InfraRequest, AzureInfra> {
-
-    private static final String NAME = "name";
-    private static final String LOCATION = "location";
-    private static final String DESCRIPTION = "description";
-    private static final String ADDRESSPREFIX = "addressPrefix";
-    private static final String DEPLOYMENTSLOT = "deploymentSlot";
-    private static final String IMAGENAME = "imageName";
-    private static final String USERNAME = "username";
-    private static final String PASSWORD = "password";
-    private static final String DISABLESSHPASSWORDAUTHENTICATION = "disableSshPasswordAuthentication";
-    private static final String VMTYPE = "vmType";
 
     @Override
     public InfraRequest convert(AzureInfra entity) {
@@ -30,17 +20,16 @@ public class AzureInfraConverter extends AbstractConverter<InfraRequest, AzureIn
         azureStackJson.setCloudPlatform(CloudPlatform.AZURE);
         azureStackJson.setId(entity.getId());
         Map<String, String> props = new HashMap<>();
-        putProperty(props, NAME, entity.getName());
-        putProperty(props, LOCATION, entity.getLocation());
-        putProperty(props, DESCRIPTION, entity.getDescription());
-        putProperty(props, ADDRESSPREFIX, entity.getSubnetAddressPrefix());
-        putProperty(props, DEPLOYMENTSLOT, entity.getDeploymentSlot());
-        putProperty(props, IMAGENAME, entity.getImageName());
-        putProperty(props, VMTYPE, entity.getVmType());
-        putProperty(props, IMAGENAME, entity.getImageName());
-        putProperty(props, DISABLESSHPASSWORDAUTHENTICATION, entity.getDisableSshPasswordAuthentication());
-        putProperty(props, USERNAME, entity.getUserName());
-        putProperty(props, PASSWORD, entity.getPassword());
+        putProperty(props, RequiredAzureInfraParam.NAME.getName(), entity.getName());
+        putProperty(props, RequiredAzureInfraParam.LOCATION.getName(), entity.getLocation());
+        putProperty(props, RequiredAzureInfraParam.DESCRIPTION.getName(), entity.getDescription());
+        putProperty(props, RequiredAzureInfraParam.ADDRESSPREFIX.getName(), entity.getSubnetAddressPrefix());
+        putProperty(props, RequiredAzureInfraParam.DEPLOYMENTSLOT.getName(), entity.getDeploymentSlot());
+        putProperty(props, RequiredAzureInfraParam.IMAGENAME.getName(), entity.getImageName());
+        putProperty(props, RequiredAzureInfraParam.VMTYPE.getName(), entity.getVmType());
+        putProperty(props, RequiredAzureInfraParam.DISABLESSHPASSWORDAUTHENTICATION.getName(), entity.getDisableSshPasswordAuthentication());
+        putProperty(props, RequiredAzureInfraParam.USERNAME.getName(), entity.getUserName());
+        putProperty(props, RequiredAzureInfraParam.PASSWORD.getName(), entity.getPassword());
         azureStackJson.setParameters(props);
         return azureStackJson;
     }
@@ -49,16 +38,17 @@ public class AzureInfraConverter extends AbstractConverter<InfraRequest, AzureIn
     public AzureInfra convert(InfraRequest json) {
         AzureInfra azureInfra = new AzureInfra();
         azureInfra.setName(json.getClusterName());
-        azureInfra.setDeploymentSlot(json.getParameters().get(DEPLOYMENTSLOT));
-        azureInfra.setDescription(json.getParameters().get(DESCRIPTION));
-        azureInfra.setDisableSshPasswordAuthentication(Boolean.valueOf(json.getParameters().get(DISABLESSHPASSWORDAUTHENTICATION)));
-        azureInfra.setImageName(json.getParameters().get(IMAGENAME));
-        azureInfra.setLocation(json.getParameters().get(LOCATION));
+        azureInfra.setDeploymentSlot(json.getParameters().get(RequiredAzureInfraParam.DEPLOYMENTSLOT.getName()));
+        azureInfra.setDescription(json.getParameters().get(RequiredAzureInfraParam.DESCRIPTION.getName()));
+        azureInfra.setDisableSshPasswordAuthentication(Boolean.valueOf(json.getParameters()
+                .get(RequiredAzureInfraParam.DISABLESSHPASSWORDAUTHENTICATION.getName())));
+        azureInfra.setImageName(json.getParameters().get(RequiredAzureInfraParam.IMAGENAME.getName()));
+        azureInfra.setLocation(json.getParameters().get(RequiredAzureInfraParam.LOCATION.getName()));
         azureInfra.setName(json.getClusterName());
-        azureInfra.setPassword(json.getParameters().get(PASSWORD));
-        azureInfra.setSubnetAddressPrefix(json.getParameters().get(ADDRESSPREFIX));
-        azureInfra.setUserName(json.getParameters().get(USERNAME));
-        azureInfra.setVmType(json.getParameters().get(VMTYPE));
+        azureInfra.setPassword(json.getParameters().get(RequiredAzureInfraParam.PASSWORD.getName()));
+        azureInfra.setSubnetAddressPrefix(json.getParameters().get(RequiredAzureInfraParam.ADDRESSPREFIX.getName()));
+        azureInfra.setUserName(json.getParameters().get(RequiredAzureInfraParam.USERNAME.getName()));
+        azureInfra.setVmType(json.getParameters().get(RequiredAzureInfraParam.VMTYPE.getName()));
         return azureInfra;
     }
 

@@ -1,13 +1,13 @@
 package com.sequenceiq.provisioning.controller.validation;
 
-public enum RequiredAWSStackParam {
+public enum RequiredAwsInfraParam {
 
     KEY_NAME("keyName"),
     REGION("region");
 
     private final String paramName;
 
-    private RequiredAWSStackParam(String paramName) {
+    private RequiredAwsInfraParam(String paramName) {
         this.paramName = paramName;
     }
 
