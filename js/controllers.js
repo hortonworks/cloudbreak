@@ -44,11 +44,7 @@ provisioningControllers.controller('ProvisioningController', ['$scope', '$http',
 
         }
 
-        $scope.test = function() {
-            $http.get('http://localhost:8080/test').success(function(data) {
-                console.log(data);
-            });
-        }
+        
 
         if (typeof (Storage) !== "undefined") {
             if (localStorage.signedIn === 'true') {

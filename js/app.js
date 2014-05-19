@@ -7,7 +7,7 @@ var provisioningApp = angular.module('provisioningApp', ['ngRoute', 'provisionin
 provisioningApp.config([ '$routeProvider', function($routeProvider) {
     $routeProvider.when('/', {
         templateUrl : 'partials/list.html',
-        controller: 'AwsController'
+        controller: 'ProvisioningController'
     }).when('/aws', {
         templateUrl : 'partials/aws.html',
         controller: 'AwsController'
