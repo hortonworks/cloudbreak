@@ -13,7 +13,6 @@ import com.amazonaws.services.cloudformation.model.Parameter;
 import com.sequenceiq.provisioning.controller.json.AWSProvisionResult;
 import com.sequenceiq.provisioning.controller.json.CloudInstanceRequest;
 import com.sequenceiq.provisioning.controller.json.ProvisionResult;
-import com.sequenceiq.provisioning.controller.validation.RequiredAWSStackParam;
 import com.sequenceiq.provisioning.converter.AwsCloudConverter;
 import com.sequenceiq.provisioning.domain.AwsCloudInstance;
 import com.sequenceiq.provisioning.domain.CloudFormationTemplate;
@@ -45,13 +44,6 @@ public class AWSProvisionService implements ProvisionService {
 
     @Override
     public ProvisionResult provisionCluster(User user, CloudInstanceRequest cloudInstanceRequest) {
-        /*
-        cloudInstanceRequest.getParameters().get(RequiredAWSStackParam.REGION.getName())
-         cloudInstanceRequest.getParameters().get(RequiredAWSStackParam.KEY_NAME.getName())
-         cloudInstanceRequest.getClusterName()
-        */
-
-
         AwsCloudInstance convert = awsCloudConverter.convert(cloudInstanceRequest);
         Regions region = Regions.fromName(convert.getAwsInfra().getRegion());
         String keyName = convert.getAwsInfra().getKeyName();
