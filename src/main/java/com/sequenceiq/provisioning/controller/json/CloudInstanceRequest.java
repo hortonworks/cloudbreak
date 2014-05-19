@@ -9,7 +9,7 @@ public class CloudInstanceRequest implements JsonEntity {
 
     @Min(value = 2)
     private int clusterSize;
-    private String infraId;
+    private Long infraId;
     private CloudPlatform cloudPlatform;
 
     public CloudInstanceRequest() {
@@ -23,11 +23,11 @@ public class CloudInstanceRequest implements JsonEntity {
         this.clusterSize = clusterSize;
     }
 
-    public String getInfraId() {
+    public Long getInfraId() {
         return infraId;
     }
 
-    public void setInfraId(String infraId) {
+    public void setInfraId(Long infraId) {
         this.infraId = infraId;
     }
 

@@ -17,7 +17,7 @@ public class AzureCloudInstanceConverter extends AbstractConverter<CloudInstance
     @Override
     public CloudInstanceRequest convert(AzureCloudInstance entity) {
         CloudInstanceRequest cloudInstanceRequest = new CloudInstanceRequest();
-        cloudInstanceRequest.setInfraId(String.valueOf(entity.getAzureInfra().getId()));
+        cloudInstanceRequest.setInfraId(entity.getAzureInfra().getId());
         cloudInstanceRequest.setClusterSize(entity.getClusterSize());
         cloudInstanceRequest.setCloudPlatform(CloudPlatform.AWS);
         return cloudInstanceRequest;
@@ -27,7 +27,7 @@ public class AzureCloudInstanceConverter extends AbstractConverter<CloudInstance
     public AzureCloudInstance convert(CloudInstanceRequest json) {
         AzureCloudInstance azureCloudInstance = new AzureCloudInstance();
         azureCloudInstance.setClusterSize(json.getClusterSize());
-        azureCloudInstance.setAzureInfra(azureInfraRepository.findOne(Long.valueOf(json.getInfraId())));
+        azureCloudInstance.setAzureInfra(azureInfraRepository.findOne(json.getInfraId()));
         return azureCloudInstance;
     }
 
