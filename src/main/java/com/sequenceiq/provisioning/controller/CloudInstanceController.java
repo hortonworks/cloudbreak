@@ -35,7 +35,8 @@ public class CloudInstanceController {
     @ResponseBody
     public ResponseEntity<CloudInstanceResult> provisionCluster(@CurrentUser User user, @RequestBody @Valid CloudInstanceRequest cloudInstanceRequest) {
         CloudInstanceService cloudInstanceService = cloudInstanceServices.get(cloudInstanceRequest.getCloudPlatform());
-        return new ResponseEntity<>(cloudInstanceService.createCloudInstance(userRepository.findOneWithLists(user.getId()), cloudInstanceRequest), HttpStatus.CREATED);
+        return new ResponseEntity<>(cloudInstanceService.createCloudInstance(userRepository.findOneWithLists(user.getId()), cloudInstanceRequest),
+                HttpStatus.CREATED);
     }
 
 }

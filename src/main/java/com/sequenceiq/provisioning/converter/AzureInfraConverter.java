@@ -48,6 +48,16 @@ public class AzureInfraConverter extends AbstractConverter<InfraRequest, AzureIn
     public AzureInfra convert(InfraRequest json) {
         AzureInfra azureInfra = new AzureInfra();
         azureInfra.setName(json.getClusterName());
+        azureInfra.setDeploymentSlot(json.getParameters().get(DEPLOYMENTSLOT));
+        azureInfra.setDescription(json.getParameters().get(DESCRIPTION));
+        azureInfra.setDisableSshPasswordAuthentication(Boolean.valueOf(json.getParameters().get(DISABLESSHPASSWORDAUTHENTICATION)));
+        azureInfra.setImageName(json.getParameters().get(IMAGENAME));
+        azureInfra.setLocation(json.getParameters().get(LOCATION));
+        azureInfra.setName(json.getClusterName());
+        azureInfra.setPassword(json.getParameters().get(PASSWORD));
+        azureInfra.setSubnetAddressPrefix(json.getParameters().get(ADDRESSPREFIX));
+        azureInfra.setUserName(json.getParameters().get(USERNAME));
+        azureInfra.setVmType(json.getParameters().get(VMTYPE));
         return azureInfra;
     }
 

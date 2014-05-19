@@ -1,7 +1,7 @@
 package com.sequenceiq.provisioning.domain;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -18,7 +18,12 @@ import org.hibernate.validator.constraints.NotEmpty;
 @Entity
 @NamedQuery(
         name = "User.findOneWithLists",
-        query = "SELECT u FROM User u LEFT JOIN FETCH u.azureInfraList WHERE u.id= :id")
+        query = "SELECT u FROM User u "
+                + "LEFT JOIN FETCH u.azureInfraList "
+                + "LEFT JOIN FETCH u.awsInfraList "
+                + "LEFT JOIN FETCH u.azureCloudInstanceList "
+                + "LEFT JOIN FETCH u.awsCloudInstanceList "
+                + "WHERE u.id= :id")
 public class User implements ProvisionEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -45,16 +50,16 @@ public class User implements ProvisionEntity {
     private String password;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<AzureInfra> azureInfraList = new ArrayList<>();
+    private Set<AzureInfra> azureInfraList = new HashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<AwsInfra> awsInfraList = new ArrayList<>();
+    private Set<AwsInfra> awsInfraList = new HashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<AzureCloudInstance> azureCloudInstanceList = new ArrayList<>();
+    private Set<AzureCloudInstance> azureCloudInstanceList = new HashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<AwsCloudInstance> awsCloudInstanceList = new ArrayList<>();
+    private Set<AwsCloudInstance> awsCloudInstanceList = new HashSet<>();
 
 
     public User() {
@@ -115,19 +120,19 @@ public class User implements ProvisionEntity {
         this.email = email;
     }
 
-    public List<AzureInfra> getAzureInfraList() {
+    public Set<AzureInfra> getAzureInfraList() {
         return azureInfraList;
     }
 
-    public void setAwsInfraList(List<AwsInfra> awsInfraList) {
+    public void setAwsInfraList(Set<AwsInfra> awsInfraList) {
         this.awsInfraList = awsInfraList;
     }
 
-    public List<AwsInfra> getAwsInfraList() {
+    public Set<AwsInfra> getAwsInfraList() {
         return awsInfraList;
     }
 
-    public void setAzureInfraList(List<AzureInfra> azureInfraList) {
+    public void setAzureInfraList(Set<AzureInfra> azureInfraList) {
         this.azureInfraList = azureInfraList;
     }
 
@@ -155,19 +160,19 @@ public class User implements ProvisionEntity {
         this.jks = jks;
     }
 
-    public List<AzureCloudInstance> getAzureCloudInstanceList() {
+    public Set<AzureCloudInstance> getAzureCloudInstanceList() {
         return azureCloudInstanceList;
     }
 
-    public void setAzureCloudInstanceList(List<AzureCloudInstance> azureCloudInstanceList) {
+    public void setAzureCloudInstanceList(Set<AzureCloudInstance> azureCloudInstanceList) {
         this.azureCloudInstanceList = azureCloudInstanceList;
     }
 
-    public List<AwsCloudInstance> getAwsCloudInstanceList() {
+    public Set<AwsCloudInstance> getAwsCloudInstanceList() {
         return awsCloudInstanceList;
     }
 
-    public void setAwsCloudInstanceList(List<AwsCloudInstance> awsCloudInstanceList) {
+    public void setAwsCloudInstanceList(Set<AwsCloudInstance> awsCloudInstanceList) {
         this.awsCloudInstanceList = awsCloudInstanceList;
     }
 
