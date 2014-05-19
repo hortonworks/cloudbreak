@@ -30,7 +30,7 @@ public class ProvisionController {
     @ResponseBody
     public ResponseEntity<ProvisionResult> provisionCluster(@CurrentUser User user, @RequestBody @Valid ProvisionRequest provisionRequest) {
         ProvisionService provisionService = provisionServices.get(provisionRequest.getCloudPlatform());
-        return new ResponseEntity<>(provisionService.provisionCluster(provisionRequest), HttpStatus.CREATED);
+        return new ResponseEntity<>(provisionService.provisionCluster(user, provisionRequest), HttpStatus.CREATED);
     }
 
 }

@@ -18,6 +18,7 @@ import com.sequenceiq.provisioning.controller.json.RequiredAWSRequestParam;
 public class ProvisionParametersValidator implements ConstraintValidator<ValidProvisionRequest, ProvisionRequest> {
 
     private List<String> requiredAWSParams = new ArrayList<>();
+    private List<String> requiredAzureParams = new ArrayList<>();
 
     @Override
     public void initialize(ValidProvisionRequest constraintAnnotation) {
@@ -34,13 +35,24 @@ public class ProvisionParametersValidator implements ConstraintValidator<ValidPr
             valid = validateAWSParams(request, context);
             break;
         case AZURE:
-            // TODO
+            valid = validateAzureParams(request, context);
             break;
         default:
             break;
         }
         return valid;
 
+    }
+
+    private boolean validateAzureParams(ProvisionRequest request, ConstraintValidatorContext context) {
+        boolean valid = true;
+        for (String param : requiredAzureParams) {
+            if (!request.getParameters().containsKey(param)) {
+                addParameterConstraintViolation(context, param, String.format("%s is required.", param));
+                valid = false;
+            }
+        }
+        return valid;
     }
 
     private boolean validateAWSParams(ProvisionRequest request, ConstraintValidatorContext context) {

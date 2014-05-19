@@ -6,9 +6,10 @@ import javax.validation.constraints.Min;
 
 import com.sequenceiq.provisioning.controller.validation.ValidProvisionRequest;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
+import com.sequenceiq.provisioning.json.JsonEntity;
 
 @ValidProvisionRequest
-public class ProvisionRequest {
+public class ProvisionRequest implements JsonEntity {
 
     private CloudPlatform cloudPlatform;
     private String clusterName;

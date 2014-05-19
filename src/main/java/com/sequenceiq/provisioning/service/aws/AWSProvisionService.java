@@ -16,6 +16,7 @@ import com.sequenceiq.provisioning.controller.json.ProvisionResult;
 import com.sequenceiq.provisioning.controller.json.RequiredAWSRequestParam;
 import com.sequenceiq.provisioning.domain.CloudFormationTemplate;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
+import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.service.ProvisionService;
 
 /**
@@ -38,7 +39,7 @@ public class AWSProvisionService implements ProvisionService {
     private CrossAccountCredentialsProvider credentialsProvider;
 
     @Override
-    public ProvisionResult provisionCluster(ProvisionRequest provisionRequest) {
+    public ProvisionResult provisionCluster(User user, ProvisionRequest provisionRequest) {
 
         Regions region = Regions.fromName(provisionRequest.getParameters().get(RequiredAWSRequestParam.REGION.getName()));
         String keyName = provisionRequest.getParameters().get(RequiredAWSRequestParam.KEY_NAME.getName());

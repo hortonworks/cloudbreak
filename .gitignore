@@ -5,5 +5,9 @@
 .classpath
 .gradle
 .idea
-.iml
+*.iml
 .apib
+*.iml
+.DS_Store
+*.jks
+userdatas/
