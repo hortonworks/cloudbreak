@@ -7,11 +7,7 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
 @Entity
-public class AzureInfra implements ProvisionEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+public class AzureInfra extends Infra implements ProvisionEntity {
 
     private String location;
     private String name;
@@ -28,15 +24,7 @@ public class AzureInfra implements ProvisionEntity {
     private User user;
 
     public AzureInfra() {
-
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
+        super();
     }
 
     public String getLocation() {

@@ -8,11 +8,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 
 @Entity
-public class AzureCloudInstance implements CloudInstance, ProvisionEntity {
+public class AzureCloudInstance extends CloudInstance implements ProvisionEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
 
     private Integer clusterSize;
 
@@ -23,15 +20,7 @@ public class AzureCloudInstance implements CloudInstance, ProvisionEntity {
     private User user;
 
     public AzureCloudInstance() {
-
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
+        super();
     }
 
     public Integer getClusterSize() {
@@ -48,11 +37,6 @@ public class AzureCloudInstance implements CloudInstance, ProvisionEntity {
 
     public void setAzureInfra(AzureInfra azureInfra) {
         this.azureInfra = azureInfra;
-    }
-
-    @Override
-    public CloudPlatform getPlatform() {
-        return CloudPlatform.AZURE;
     }
 
     public User getUser() {

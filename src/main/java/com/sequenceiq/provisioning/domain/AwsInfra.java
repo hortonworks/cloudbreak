@@ -1,17 +1,10 @@
 package com.sequenceiq.provisioning.domain;
 
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
 @Entity
-public class AwsInfra implements ProvisionEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+public class AwsInfra extends Infra implements ProvisionEntity {
 
     private String name;
 
@@ -23,14 +16,7 @@ public class AwsInfra implements ProvisionEntity {
     private User user;
 
     public AwsInfra() {
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
+        super();
     }
 
     public String getName() {

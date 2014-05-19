@@ -7,14 +7,13 @@ import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 
 @MappedSuperclass
-public abstract class CloudInstance {
-
+public abstract class Infra {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    public CloudInstance() {
+    public Infra() {
 
     }
 

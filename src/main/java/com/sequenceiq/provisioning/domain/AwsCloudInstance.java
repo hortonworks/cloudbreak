@@ -8,11 +8,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 
 @Entity
-public class AwsCloudInstance implements CloudInstance, ProvisionEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+public class AwsCloudInstance extends CloudInstance implements ProvisionEntity {
 
     private Integer clusterSize;
 
@@ -23,15 +19,7 @@ public class AwsCloudInstance implements CloudInstance, ProvisionEntity {
     private User user;
 
     public AwsCloudInstance() {
-
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
+        super();
     }
 
     public Integer getClusterSize() {
@@ -48,11 +36,6 @@ public class AwsCloudInstance implements CloudInstance, ProvisionEntity {
 
     public void setAwsInfra(AwsInfra awsInfra) {
         this.awsInfra = awsInfra;
-    }
-
-    @Override
-    public CloudPlatform getPlatform() {
-        return CloudPlatform.AWS;
     }
 
     public User getUser() {
