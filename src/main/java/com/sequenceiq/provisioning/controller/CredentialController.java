@@ -7,7 +7,6 @@ import java.util.Map;
 import javax.annotation.Resource;
 import javax.validation.Valid;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -22,14 +21,10 @@ import com.sequenceiq.provisioning.domain.CloudPlatform;
 import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.security.CurrentUser;
 import com.sequenceiq.provisioning.service.CredentialService;
-import com.sequenceiq.provisioning.service.azure.AzureCredentialService;
 
 @Controller
 @RequestMapping("credential")
 public class CredentialController {
-
-    @Autowired
-    private AzureCredentialService certificateGeneratorService;
 
     @Resource
     private Map<CloudPlatform, CredentialService> credentialServices;
