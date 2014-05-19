@@ -5,16 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 public class BlueprintJson {
 
-    private Long cloudId;
     private String ambariBlueprint;
-
-    public Long getCloudId() {
-        return cloudId;
-    }
-
-    public void setCloudId(Long cloudId) {
-        this.cloudId = cloudId;
-    }
 
     @JsonRawValue
     public String getAmbariBlueprint() {

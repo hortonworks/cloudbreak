@@ -24,7 +24,7 @@ import com.sequenceiq.provisioning.domain.User;
 public class AmbariBlueprintService {
 
     public void addBlueprint(User user, Long cloudId, BlueprintJson blueprintJson) {
-        // TODO get ambari client host and port from cloud entity
+        // TODO get ambari client host and port from cloud service
         AmbariClient ambariClient = new AmbariClient("localhost", "49163");
         try {
             ambariClient.addBlueprint(blueprintJson.getAmbariBlueprint());
@@ -42,7 +42,7 @@ public class AmbariBlueprintService {
     public List<BlueprintJson> retrieveBlueprints(User user, Long cloudId) {
         try {
             List<BlueprintJson> blueprints = new ArrayList<>();
-            // TODO get ambari client host and port from cloud entity
+            // TODO get ambari client host and port from cloud service
             AmbariClient ambariClient = new AmbariClient("localhost", "49163");
             Set<String> blueprintNames = ambariClient.getBlueprintsMap().keySet();
             for (String blueprintName : blueprintNames) {
@@ -55,7 +55,7 @@ public class AmbariBlueprintService {
     }
 
     public BlueprintJson retrieveBlueprint(User user, Long cloudId, String id) {
-        // TODO get ambari client host and port from cloud entity
+        // TODO get ambari client host and port from cloud service
         AmbariClient ambariClient = new AmbariClient("localhost", "49163");
         try {
             return createBlueprintJsonFromString(cloudId, ambariClient.getBlueprintAsJson(id));
@@ -72,7 +72,6 @@ public class AmbariBlueprintService {
 
     private BlueprintJson createBlueprintJsonFromString(Long cloudId, String blueprint) throws IOException {
         BlueprintJson blueprintJson = new BlueprintJson();
-        blueprintJson.setCloudId(cloudId);
         ObjectMapper mapper = new ObjectMapper();
         JsonFactory factory = mapper.getFactory();
         JsonParser jp = factory.createParser(blueprint);
