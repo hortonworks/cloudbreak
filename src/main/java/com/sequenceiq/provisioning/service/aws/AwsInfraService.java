@@ -9,7 +9,6 @@ import com.sequenceiq.provisioning.converter.AwsInfraConverter;
 import com.sequenceiq.provisioning.domain.AwsInfra;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
 import com.sequenceiq.provisioning.domain.User;
-import com.sequenceiq.provisioning.repository.AwsInfraRepository;
 import com.sequenceiq.provisioning.repository.UserRepository;
 import com.sequenceiq.provisioning.service.InfraService;
 
@@ -20,9 +19,6 @@ public class AwsInfraService implements InfraService {
 
     @Autowired
     private AwsInfraConverter awsInfraConverter;
-
-    @Autowired
-    private AwsInfraRepository awsInfraRepository;
 
     @Autowired
     private UserRepository userRepository;
