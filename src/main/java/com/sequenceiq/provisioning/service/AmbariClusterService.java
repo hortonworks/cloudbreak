@@ -18,7 +18,7 @@ public class AmbariClusterService {
 
     public void createCluster(User user, Long cloudId, ClusterJson clusterRequest) {
         // TODO: get server and port from cloudService
-        AmbariClient ambariClient = new AmbariClient("localhost", "49163");
+        AmbariClient ambariClient = new AmbariClient("172.17.0.2", "8080");
         // TODO: get hostnames in from cloudService
         List<String> hosts = Arrays.asList("node1.mykorp.kom", "node2.mykorp.kom", "node3.mykorp.kom", "node4.mykorp.kom");
 
@@ -37,14 +37,14 @@ public class AmbariClusterService {
 
     public List<ClusterJson> retrieveClusters(User user, Long cloudId) {
         // TODO: get server and port from cloudService
-        AmbariClient ambariClient = new AmbariClient("localhost", "49163");
+        AmbariClient ambariClient = new AmbariClient("172.17.0.2", "8080");
         // ambariClient.getClusters();
         return null;
     }
 
     public ClusterJson retrieveCluster(User user, Long cloudId, String id) {
         // TODO: get server and port from cloudService
-        AmbariClient ambariClient = new AmbariClient("localhost", "49163");
+        AmbariClient ambariClient = new AmbariClient("172.17.0.2", "8080");
         return null;
     }
 }

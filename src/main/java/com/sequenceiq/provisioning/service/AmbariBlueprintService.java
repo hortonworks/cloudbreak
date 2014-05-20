@@ -25,7 +25,7 @@ public class AmbariBlueprintService {
 
     public void addBlueprint(User user, Long cloudId, BlueprintJson blueprintJson) {
         // TODO get ambari client host and port from cloud service
-        AmbariClient ambariClient = new AmbariClient("localhost", "49163");
+        AmbariClient ambariClient = new AmbariClient("172.17.0.2", "8080");
         try {
             ambariClient.addBlueprint(blueprintJson.getAmbariBlueprint());
         } catch (HttpResponseException e) {
@@ -43,7 +43,7 @@ public class AmbariBlueprintService {
         try {
             List<BlueprintJson> blueprints = new ArrayList<>();
             // TODO get ambari client host and port from cloud service
-            AmbariClient ambariClient = new AmbariClient("localhost", "49163");
+            AmbariClient ambariClient = new AmbariClient("172.17.0.2", "8080");
             Set<String> blueprintNames = ambariClient.getBlueprintsMap().keySet();
             for (String blueprintName : blueprintNames) {
                 blueprints.add(createBlueprintJsonFromString(cloudId, ambariClient.getBlueprintAsJson(blueprintName)));
@@ -56,7 +56,7 @@ public class AmbariBlueprintService {
 
     public BlueprintJson retrieveBlueprint(User user, Long cloudId, String id) {
         // TODO get ambari client host and port from cloud service
-        AmbariClient ambariClient = new AmbariClient("localhost", "49163");
+        AmbariClient ambariClient = new AmbariClient("172.17.0.2", "8080");
         try {
             return createBlueprintJsonFromString(cloudId, ambariClient.getBlueprintAsJson(id));
         } catch (HttpResponseException e) {
