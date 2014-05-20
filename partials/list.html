@@ -14,8 +14,8 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr ng-repeat="provider in providers track by $index">
-                    <td class="text-center">{{$index}}</td>
+                <tr ng-repeat="provider in providers">
+                    <td class="text-center">{{provider.id}}</td>
                     <td class="text-center">
                         <div ng-if="provider.cloudPlatform == 'AZURE' ">
                             <ul class="list-group">
@@ -117,8 +117,8 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr ng-repeat= "cloudinstance in cloudinstances track by $index">
-                    <td class="text-center">{{$index}}</td>
+                <tr ng-repeat= "cloudinstance in cloudinstances">
+                    <td class="text-center">{{cloudinstance.id}}</td>
                     <td class="text-center">{{cloudinstance.clusterSize}}</td>
                     <td class="text-center"><span class="label label-primary">{{cloudinstance.infraId}}</span></td>
                     <td class="text-center"><a type="button" class="btn btn-danger"  ng-click="deleteCloudInstance(index)">Delete</a></td>

@@ -81,6 +81,7 @@ provisioningControllers.controller('ProvisioningController', ['$scope', '$http',
                     'Content-Type': 'application/json'
                 }
             }).success(function (data, status, headers, config) {
+                console.log(data);
                 $rootScope.providers = data;
             }).error(function (data, status, headers, config) {
                 console.log("unsuccess");
@@ -99,9 +100,23 @@ provisioningControllers.controller('ProvisioningController', ['$scope', '$http',
                 }
             }).success(function (data, status, headers, config) {
                 $rootScope.infras = data;
+            }).error(function (data, status, headers, config) {
+                console.log("unsuccess");
+            });
+        }
 
-                console.log("hello");
-                console.log(data);
+        $scope.getCloudInstances = function() {
+            $http({
+                method: 'GET',
+                dataType: 'json',
+                withCredentials: true,
+                url:  $rootScope.apiUrl + "/cloud",
+                headers: {
+                    'Authorization': 'Basic ' + $rootScope.basic_auth,
+                    'Content-Type': 'application/json'
+                }
+            }).success(function (data, status, headers, config) {
+                $rootScope.cloudinstances = data;
             }).error(function (data, status, headers, config) {
                 console.log("unsuccess");
             });
@@ -112,6 +127,7 @@ provisioningControllers.controller('ProvisioningController', ['$scope', '$http',
         $scope.doQuerys = function() {
             $scope.getCredentials();
             $scope.getInfras();
+            $scope.getCloudInstances();
         }
 
         if (typeof (Storage) !== "undefined") {
