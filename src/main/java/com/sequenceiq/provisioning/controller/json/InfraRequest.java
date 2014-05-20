@@ -26,10 +26,12 @@ public class InfraRequest implements JsonEntity {
         this.id = id;
     }
 
+    @JsonProperty("type")
     public CloudPlatform getCloudPlatform() {
         return cloudPlatform;
     }
 
+    @JsonIgnore
     public void setCloudPlatform(CloudPlatform type) {
         this.cloudPlatform = type;
     }
