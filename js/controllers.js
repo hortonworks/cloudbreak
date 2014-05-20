@@ -98,7 +98,7 @@ provisioningControllers.controller('AwsController', ['$scope', '$http', 'Templat
                     location: cllocation.value,
                     name:  clname.value,
                     keyname:  keyname.value,
-                    type: 'aws'
+                    cloudPlatform: 'aws'
                 };
                 $rootScope.infras.push(infraObject);
                 $location.path("/");
@@ -121,7 +121,10 @@ provisioningControllers.controller('CloudInstanceController', ['$scope', '$http'
         }
 
         $scope.createCloudInstance = function() {
-            var cloudObject = {clusterSize: clusterSize.value, infraId: "1"};
+            var cloudObject = {
+                clusterSize: clusterSize.value,
+                infraId: "1"
+            };
             $rootScope.cloudinstances.push(cloudObject);
 
             $location.path("/");
@@ -160,7 +163,7 @@ provisioningControllers.controller('AzureController', ['$scope', '$http', 'Templ
                     userName: userName.value,
                     password: password.value,
                     sshString: sshString.value,
-                    type: 'azure'
+                    cloudPlatform: 'azure'
                 };
                 $rootScope.infras.push(infraObject);
 
@@ -213,7 +216,11 @@ provisioningControllers.controller('CloudProviderController', ['$scope', '$http'
 
         $scope.createAzureProvider = function() {
             console.log("create azure");
-            var azureObject = {type:"azure", subscriptionId: subscriptionId.value, jks: jksPassword.value};
+            var azureObject = {
+                cloudPlatform:"azure",
+                subscriptionId: subscriptionId.value,
+                jks: jksPassword.value
+            };
             $rootScope.providers.push(azureObject);
 
             $scope.isSuccessCreation = true;

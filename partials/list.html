@@ -17,19 +17,19 @@
                 <tr ng-repeat="provider in providers track by $index">
                     <td class="text-center">{{$index}}</td>
                     <td class="text-center">
-                        <div ng-if="provider.type == 'azure' ">
+                        <div ng-if="provider.cloudPlatform == 'azure' ">
                             <ul class="list-group">
                                 <li class="list-group-item">location: <span class="label label-info">{{provider.jks}}</span></li>
                                 <li class="list-group-item">name: <span class="label label-info">{{provider.subscriptionId}}</span></li>
                             </ul>
                         </div>
-                        <div ng-if="provider.type == 'aws' ">
+                        <div ng-if="provider.cloudPlatform == 'aws' ">
                             <ul class="list-group">
                                 <li class="list-group-item">location: {{provider.roleArn}}</li>
                             </ul>
                         </div>
                     </td>
-                    <td class="text-center"><a type="button" class="btn btn-success"  ng-href="#/{{provider.type}}">Create Infra</a></td>
+                    <td class="text-center"><a type="button" class="btn btn-success"  ng-href="#/{{provider.cloudPlatform}}">Create Infra</a></td>
                     <td class="text-center"><a type="button" class="btn btn-danger"  ng-click="deleteCloudService(index)">Delete</a></td>
                 </tr>
                 </tbody>
@@ -67,9 +67,9 @@
                 <tr ng-repeat= "infra in infras track by $index">
                     <td class="text-center">{{$index}}</td>
                     <td class="text-center">{{infra.name}}</td>
-                    <td class="text-center"><span class="label label-primary">{{infra.type}}</span></td>
+                    <td class="text-center"><span class="label label-primary">{{infra.cloudPlatform}}</span></td>
                     <td class="text-center">
-                        <div ng-if="infra.type == 'azure' ">
+                        <div ng-if="infra.cloudPlatform == 'azure' ">
                             <ul class="list-group">
                                 <li class="list-group-item">location: <span class="label label-info">{{infra.location}}</span></li>
                                 <li class="list-group-item">name: <span class="label label-info">{{infra.name}}</span></li>
@@ -83,7 +83,7 @@
                                 <li class="list-group-item">sshString: <span class="label label-info">{{infra.sshString}}</span></li>
                             </ul>
                         </div>
-                        <div ng-if="infra.type == 'aws' ">
+                        <div ng-if="infra.cloudPlatform == 'aws' ">
                             <ul class="list-group">
                                 <li class="list-group-item">location: <span class="label label-info">{{infra.location}}</span></li>
                                 <li class="list-group-item">name: <span class="label label-info">{{infra.name}}</span></li>
