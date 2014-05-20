@@ -38,7 +38,7 @@ public class AmbariClusterService {
     public List<ClusterJson> retrieveClusters(User user, Long cloudId) {
         // TODO: get server and port from cloudService
         AmbariClient ambariClient = new AmbariClient("localhost", "49163");
-        System.out.println(ambariClient.getClusters());
+        // ambariClient.getClusters();
         return null;
     }
 
