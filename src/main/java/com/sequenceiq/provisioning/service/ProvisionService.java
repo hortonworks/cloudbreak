@@ -1,17 +1,14 @@
 package com.sequenceiq.provisioning.service;
 
-import java.util.Set;
-
 import com.sequenceiq.provisioning.controller.json.CloudInstanceRequest;
 import com.sequenceiq.provisioning.controller.json.CloudInstanceResult;
+import com.sequenceiq.provisioning.domain.CloudPlatform;
 import com.sequenceiq.provisioning.domain.User;
 
-public interface CloudInstanceService {
+public interface ProvisionService {
 
-    CloudInstanceRequest get(Long id);
+    CloudInstanceResult createCloudInstance(User user, CloudInstanceRequest cloudInstanceRequest);
 
-    Set<CloudInstanceRequest> getAll(User user);
-
-    CloudInstanceResult create(User user, CloudInstanceRequest cloudInstanceRequest);
+    CloudPlatform getCloudPlatform();
 
 }

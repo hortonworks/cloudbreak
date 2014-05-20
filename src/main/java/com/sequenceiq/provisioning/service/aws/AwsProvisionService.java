@@ -19,7 +19,7 @@ import com.sequenceiq.provisioning.domain.CloudFormationTemplate;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
 import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.repository.UserRepository;
-import com.sequenceiq.provisioning.service.CloudInstanceService;
+import com.sequenceiq.provisioning.service.ProvisionService;
 
 /**
  * Provisions an Ambari based Hadoop cluster on a client's Amazon EC2 account by
@@ -29,7 +29,7 @@ import com.sequenceiq.provisioning.service.CloudInstanceService;
  * {@link CrossAccountCredentialsProvider}.
  */
 @Service
-public class AWSCloudInstanceService implements CloudInstanceService {
+public class AwsProvisionService implements ProvisionService {
 
     private static final int SESSION_CREDENTIALS_DURATION = 3600;
     private static final String OK_STATUS = "ok";

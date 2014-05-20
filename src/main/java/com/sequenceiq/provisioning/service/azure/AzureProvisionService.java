@@ -1,5 +1,7 @@
 package com.sequenceiq.provisioning.service.azure;
 
+import groovyx.net.http.HttpResponseDecorator;
+
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,12 +19,10 @@ import com.sequenceiq.provisioning.domain.AzureCloudInstance;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
 import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.repository.UserRepository;
-import com.sequenceiq.provisioning.service.CloudInstanceService;
-
-import groovyx.net.http.HttpResponseDecorator;
+import com.sequenceiq.provisioning.service.ProvisionService;
 
 @Service
-public class AzureCloudInstanceService implements CloudInstanceService {
+public class AzureProvisionService implements ProvisionService {
     private static final String OK_STATUS = "ok";
     private static final String LOCATION = "location";
     private static final String NAME = "name";
@@ -103,7 +103,7 @@ public class AzureCloudInstanceService implements CloudInstanceService {
             props.put(IMAGENAME, azureCloudInstance.getAzureInfra().getImageName());
             props.put(IMAGESTOREURI,
                     String.format("http://%s.blob.core.windows.net/vhd-store/%s.vhd", azureCloudInstance.getAzureInfra().getName(), vmName)
-            );
+                    );
             props.put(HOSTNAME, vmName);
             props.put(USERNAME, azureCloudInstance.getAzureInfra().getUserName());
             props.put(PASSWORD, azureCloudInstance.getAzureInfra().getPassword());
