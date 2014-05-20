@@ -20,7 +20,9 @@ provisioningControllers.controller('ProvisioningController', ['$scope', '$http',
         $http.defaults.headers.common['x-auth-token']= $scope.token;
         $http.defaults.headers.common['Content-Type']= 'application/json';
         $rootScope.signedIn = false;
-        $rootScope.providers = [];
+        if($rootScope.providers === null || $rootScope.providers === undefined ) {
+            $rootScope.providers = [];
+        }
         $rootScope.blueprints = ["hadoop", "phoenix", "custom"];
 
         $scope.reloadCtrl = function(){
@@ -138,9 +140,7 @@ provisioningControllers.controller('CloudProviderController', ['$scope', '$http'
 
         $scope.createAwsProvider = function() {
             console.log("create aws");
-            var awsObject = {type:"aws", secretKey: secretKey.value, accessKey: accessKey.value};
-            secretKey.value = "";
-            accessKey.value = "";
+            var awsObject = {type:"aws", roleArn: roleArn.value};
             $rootScope.providers.push(awsObject);
 
             $scope.isSuccessCreation = true;
@@ -153,10 +153,7 @@ provisioningControllers.controller('CloudProviderController', ['$scope', '$http'
 
         $scope.createAzureProvider = function() {
             console.log("create azure");
-            var azureObject = {type:"azure", subscriptionId: subscriptionId.value, keystorePath: keystorePath.value, keystorePassword: keystorePassword.value};
-            subscriptionId.value = "";
-            keystorePath.value = "";
-            keystorePassword.value = "";
+            var azureObject = {type:"azure", subscriptionId: subscriptionId.value, jksPassword: jksPassword.value};
             $rootScope.providers.push(azureObject);
 
             $scope.isSuccessCreation = true;
