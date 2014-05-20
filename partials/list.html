@@ -7,7 +7,6 @@
             <table class="table">
                 <thead>
                 <tr>
-                    <th class="text-center">Id</th>
                     <th class="text-center">Name</th>
                     <th class="text-center">Create Infra</th>
                     <th class="text-center">Delete</th>
@@ -15,7 +14,6 @@
                 </thead>
                 <tbody>
                 <tr ng-repeat="provider in providers">
-                    <td class="text-center">{{provider.id}}</td>
                     <td class="text-center">
                         <div ng-if="provider.cloudPlatform == 'AZURE' ">
                             <ul class="list-group">
