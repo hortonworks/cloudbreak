@@ -30,7 +30,7 @@
                         </div>
                     </td>
                     <td class="text-center"><a type="button" class="btn btn-success"  ng-href="#/{{provider.type}}">Create Infra</a></td>
-                    <td class="text-center"><a type="button" class="btn btn-success"  ng-click="deleteCloudService($index)">Delete</a></td>
+                    <td class="text-center"><a type="button" class="btn btn-danger"  ng-click="deleteCloudService(index)">Delete</a></td>
                 </tr>
                 </tbody>
             </table>
@@ -93,7 +93,7 @@
                     </td>
 
                     <td class="text-center"><a type="button" class="btn btn-success"  ng-href="#/cloud">Create</a></td>
-                    <td class="text-center"><a type="button" class="btn btn-success"  ng-click="deleteInfra($index)">Delete</a></td>
+                    <td class="text-center"><a type="button" class="btn btn-danger"  ng-click="deleteInfra(index)">Delete</a></td>
                 </tr>
                 </tbody>
             </table>
@@ -121,7 +121,7 @@
                     <td class="text-center">{{$index}}</td>
                     <td class="text-center">{{cloudinstance.clusterSize}}</td>
                     <td class="text-center"><span class="label label-primary">{{cloudinstance.infraId}}</span></td>
-                    <td class="text-center"><a type="button" class="btn btn-success"  ng-click="deleteCloudInstance($index)">Delete</a></td>
+                    <td class="text-center"><a type="button" class="btn btn-danger"  ng-click="deleteCloudInstance(index)">Delete</a></td>
                 </tr>
                 </tbody>
             </table>

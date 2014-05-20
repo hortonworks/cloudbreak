@@ -60,6 +60,10 @@ provisioningControllers.controller('ProvisioningController', ['$scope', '$http',
             $rootScope.infras.splice( id, 1 );
         }
 
+        $scope.deleteCloudService = function(id) {
+            $rootScope.providers.splice( id, 1 );
+        }
+
         if (typeof (Storage) !== "undefined") {
             if (localStorage.signedIn === 'true') {
                 $rootScope.signedIn = true;
@@ -91,10 +95,9 @@ provisioningControllers.controller('AwsController', ['$scope', '$http', 'Templat
             if ($scope.isSuccessCreation === true ) {
                 wait();
                 var infraObject = {
-                    location: location.value,
-                    name: name.value,
-                    keyname: keyname.value,
-                    clusterSize: clusterSize.value,
+                    location: cllocation.value,
+                    name:  clname.value,
+                    keyname:  keyname.value,
                     type: 'aws'
                 };
                 $rootScope.infras.push(infraObject);
@@ -146,8 +149,8 @@ provisioningControllers.controller('AzureController', ['$scope', '$http', 'Templ
             if ($scope.isSuccessCreation === true ) {
                 wait();
                 var infraObject = {
-                    location: location.value,
-                    name: name.value,
+                    location: cllocation.value,
+                    name: clname.value,
                     description: description.value,
                     subnetAddressPrefix: subnetAddressPrefix.value,
                     deploymentSlot: deploymentSlot.value,
