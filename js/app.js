@@ -8,11 +8,11 @@ provisioningApp.config([ '$routeProvider', function($routeProvider) {
     $routeProvider.when('/', {
         templateUrl : 'partials/list.html',
         controller: 'ProvisioningController'
-    }).when('/aws', {
-        templateUrl : 'partials/aws.html',
+    }).when('/AWS', {
+        templateUrl : 'partials/AWS.html',
         controller: 'AwsController'
-    }).when('/azure', {
-        templateUrl : 'partials/azure.html',
+    }).when('/AZURE', {
+        templateUrl : 'partials/AZURE.html',
         controller: 'AzureController'
     }).when('/add_provider', {
         templateUrl : 'partials/add_provider.html',
