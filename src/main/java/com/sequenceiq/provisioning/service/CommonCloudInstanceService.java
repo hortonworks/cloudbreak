@@ -2,6 +2,7 @@ package com.sequenceiq.provisioning.service;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UnknownFormatConversionException;
 
 import javax.persistence.EntityNotFoundException;
 
@@ -13,9 +14,11 @@ import com.sequenceiq.provisioning.converter.AwsCloudInstanceConverter;
 import com.sequenceiq.provisioning.converter.AzureCloudInstanceConverter;
 import com.sequenceiq.provisioning.domain.AwsCloudInstance;
 import com.sequenceiq.provisioning.domain.AzureCloudInstance;
+import com.sequenceiq.provisioning.domain.CloudInstance;
 import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.repository.AwsCloudInstanceRepository;
 import com.sequenceiq.provisioning.repository.AzureCloudInstanceRepository;
+import com.sequenceiq.provisioning.repository.CloudInstanceRepository;
 
 @Service
 public class CommonCloudInstanceService {
@@ -32,6 +35,9 @@ public class CommonCloudInstanceService {
     @Autowired
     private AzureCloudInstanceConverter azureCloudInstanceConverter;
 
+    @Autowired
+    private CloudInstanceRepository cloudInstanceRepository;
+
     public Set<CloudInstanceRequest> getAll(User user) {
         Set<CloudInstanceRequest> result = new HashSet<>();
         result.addAll(awsCloudInstanceConverter.convertAllEntityToJson(user.getAwsCloudInstanceList()));
@@ -39,17 +45,19 @@ public class CommonCloudInstanceService {
         return result;
     }
 
-    public CloudInstanceRequest get(Long id, User user) {
-        AwsCloudInstance awsInstance = awsCloudInstanceRepository.findOne(id);
-        if (awsInstance == null) {
-            AzureCloudInstance azureInstance = azureCloudInstanceRepository.findOne(id);
-            if (azureInstance == null) {
-                throw new EntityNotFoundException("Entity not exist with id: " + id);
-            } else {
-                return azureCloudInstanceConverter.convert(azureInstance);
-            }
+    public CloudInstanceRequest get(Long id) {
+        CloudInstance one = cloudInstanceRepository.findOne(id);
+        if (one == null) {
+            throw new EntityNotFoundException("Entity not exist with id: " + id);
         } else {
-            return awsCloudInstanceConverter.convert(awsInstance);
+            switch (one.cloudPlatform()) {
+                case AWS:
+                    return awsCloudInstanceConverter.convert((AwsCloudInstance) one);
+                case AZURE:
+                    return azureCloudInstanceConverter.convert((AzureCloudInstance) one);
+                default:
+                    throw new UnknownFormatConversionException("The cloudPlatform type not supported.");
+            }
         }
     }
 

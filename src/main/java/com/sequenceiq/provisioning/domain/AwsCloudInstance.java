@@ -1,20 +1,11 @@
 package com.sequenceiq.provisioning.domain;
 
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
-import javax.persistence.SequenceGenerator;
 
 @Entity
-public class AwsCloudInstance implements ProvisionEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "cloudinstance_generator")
-    @SequenceGenerator(name = "cloudinstance_generator", sequenceName = "cloudsequence_table")
-    private Long id;
+public class AwsCloudInstance extends CloudInstance implements ProvisionEntity {
 
     private Integer clusterSize;
 
@@ -25,6 +16,11 @@ public class AwsCloudInstance implements ProvisionEntity {
     private User user;
 
     public AwsCloudInstance() {
+    }
+
+    @Override
+    public CloudPlatform cloudPlatform() {
+        return CloudPlatform.AWS;
     }
 
     public Integer getClusterSize() {
@@ -51,11 +47,5 @@ public class AwsCloudInstance implements ProvisionEntity {
         this.user = user;
     }
 
-    public Long getId() {
-        return id;
-    }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
 }

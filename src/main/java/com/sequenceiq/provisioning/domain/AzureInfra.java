@@ -1,20 +1,10 @@
 package com.sequenceiq.provisioning.domain;
 
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import javax.persistence.SequenceGenerator;
 
 @Entity
-public class AzureInfra implements ProvisionEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "infra_generator")
-    @SequenceGenerator(name = "infra_generator", sequenceName = "sequence_table")
-    private Long id;
-
+public class AzureInfra extends Infra implements ProvisionEntity {
 
     private String location;
     private String name;
@@ -121,11 +111,8 @@ public class AzureInfra implements ProvisionEntity {
         this.user = user;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
+    @Override
+    public CloudPlatform cloudPlatform() {
+        return CloudPlatform.AZURE;
     }
 }
