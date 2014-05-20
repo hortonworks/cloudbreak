@@ -18,8 +18,7 @@ public class JsonHelper {
             ObjectMapper mapper = new ObjectMapper();
             JsonFactory factory = mapper.getFactory();
             JsonParser jp = factory.createParser(jsonString);
-            JsonNode actualObj = mapper.readTree(jp);
-            return actualObj;
+            return mapper.readTree(jp);
         } catch (IOException e) {
             throw new InternalServerException("Failed to parse JSON string.");
         }
