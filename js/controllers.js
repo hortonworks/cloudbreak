@@ -270,11 +270,29 @@ provisioningControllers.controller('CloudProviderController', ['$scope', '$http'
 
         $scope.createAwsProvider = function() {
             console.log("create aws");
-            var awsObject = {type:"aws", roleArn: roleArn.value};
-            $rootScope.providers.push(awsObject);
-
-            $scope.isSuccessCreation = true;
-            $scope.isFailedCreation = false;
+            $http({
+                method: 'POST',
+                dataType: 'json',
+                withCredentials: true,
+                url:  $rootScope.apiUrl + "/credential",
+                headers: {
+                    'Authorization': 'Basic ' + $rootScope.basic_auth
+                },
+                data: {
+                    cloudPlatform: "AWS",
+                    parameters: {
+                        roleArn: roleArn.value
+                    }
+                }
+            }).success(function (data, status, headers, config) {
+                console.log("success");
+                $scope.isSuccessCreation = true;
+                $scope.isFailedCreation = false;
+            }).error(function (data, status, headers, config) {
+                console.log("unsuccess");
+                $scope.isSuccessCreation = false;
+                $scope.isFailedCreation = true;
+            });
             if ($scope.isSuccessCreation === true ) {
                 wait();
                 $location.path("/");
@@ -282,16 +300,30 @@ provisioningControllers.controller('CloudProviderController', ['$scope', '$http'
         }
 
         $scope.createAzureProvider = function() {
-            console.log("create azure");
-            var azureObject = {
-                cloudPlatform:"azure",
-                subscriptionId: subscriptionId.value,
-                jks: jksPassword.value
-            };
-            $rootScope.providers.push(azureObject);
-
-            $scope.isSuccessCreation = true;
-            $scope.isFailedCreation = false;
+            $http({
+                method: 'POST',
+                dataType: 'json',
+                withCredentials: true,
+                url:  $rootScope.apiUrl + "/credential",
+                headers: {
+                    'Authorization': 'Basic ' + $rootScope.basic_auth,
+                },
+                data: {
+                    cloudPlatform: "AZURE",
+                    parameters: {
+                        subscriptionId: subscriptionId.value,
+                        jksPassword: jksPassword.value
+                    }
+                }
+            }).success(function (data, status, headers, config) {
+                console.log("success");
+                $scope.isSuccessCreation = true;
+                $scope.isFailedCreation = false;
+            }).error(function (data, status, headers, config) {
+                console.log("unsuccess");
+                $scope.isSuccessCreation = false;
+                $scope.isFailedCreation = true;
+            });
             if ($scope.isSuccessCreation === true ) {
                 wait();
                 $location.path("/");
