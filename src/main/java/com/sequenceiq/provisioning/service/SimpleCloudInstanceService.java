@@ -46,7 +46,7 @@ public class SimpleCloudInstanceService implements CloudInstanceService {
     public CloudInstanceRequest get(Long id) {
         CloudInstance one = cloudInstanceRepository.findOne(id);
         if (one == null) {
-            throw new EntityNotFoundException("Entity not exist with id: " + id);
+            throw new EntityNotFoundException(String.format("CloudInstance '%s' not found", id));
         } else {
             return cloudInstanceConverter.convert(one);
         }
@@ -56,7 +56,7 @@ public class SimpleCloudInstanceService implements CloudInstanceService {
     public CloudInstanceResult create(User user, CloudInstanceRequest cloudInstanceRequest) {
         Infra infra = infraRepository.findOne(cloudInstanceRequest.getInfraId());
         if (infra == null) {
-            throw new EntityNotFoundException("Infra config not exist with id: " + cloudInstanceRequest.getInfraId());
+            throw new EntityNotFoundException(String.format("Infrastructure '%s' not found", cloudInstanceRequest.getInfraId()));
         }
         CloudInstance cloudInstance = cloudInstanceConverter.convert(cloudInstanceRequest);
         cloudInstance.setUser(user);
