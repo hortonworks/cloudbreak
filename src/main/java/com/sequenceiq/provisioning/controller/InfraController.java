@@ -19,7 +19,7 @@ import com.sequenceiq.provisioning.controller.json.InfraRequest;
 import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.repository.UserRepository;
 import com.sequenceiq.provisioning.security.CurrentUser;
-import com.sequenceiq.provisioning.service.CommonInfraService;
+import com.sequenceiq.provisioning.service.SimpleInfraService;
 
 @Controller
 public class InfraController {
@@ -28,7 +28,7 @@ public class InfraController {
     private UserRepository userRepository;
 
     @Autowired
-    private CommonInfraService commonInfraService;
+    private SimpleInfraService commonInfraService;
 
     @RequestMapping(method = RequestMethod.POST, value = "/infra")
     @ResponseBody

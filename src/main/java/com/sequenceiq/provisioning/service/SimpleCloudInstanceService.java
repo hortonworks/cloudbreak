@@ -21,7 +21,7 @@ import com.sequenceiq.provisioning.repository.CloudInstanceRepository;
 import com.sequenceiq.provisioning.repository.InfraRepository;
 
 @Service
-public class IntegratedCloudInstanceService implements CloudInstanceService {
+public class SimpleCloudInstanceService implements CloudInstanceService {
 
     @Autowired
     private CloudInstanceConverter cloudInstanceConverter;

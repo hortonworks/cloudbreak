@@ -20,7 +20,7 @@ import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.repository.InfraRepository;
 
 @Service
-public class CommonInfraService implements InfraService {
+public class SimpleInfraService implements InfraService {
 
     @Autowired
     private InfraRepository infraRepository;
