@@ -23,6 +23,12 @@ provisioningControllers.controller('ProvisioningController', ['$scope', '$http',
         if($rootScope.providers === null || $rootScope.providers === undefined ) {
             $rootScope.providers = [];
         }
+        if($rootScope.infras === null || $rootScope.infras === undefined ) {
+            $rootScope.infras = [];
+        }
+        if($rootScope.cloudinstances === null || $rootScope.cloudinstances === undefined ) {
+            $rootScope.cloudinstances = [];
+        }
         $rootScope.blueprints = ["hadoop", "phoenix", "custom"];
 
         $scope.reloadCtrl = function(){
@@ -44,6 +50,14 @@ provisioningControllers.controller('ProvisioningController', ['$scope', '$http',
             localStorage.signedIn = false;
             localStorage.removeItem('token');
 
+        }
+
+        $scope.deleteCloudInstance = function(id) {
+            $rootScope.cloudinstances.splice( id, 1 );
+        }
+
+        $scope.deleteInfra = function(id) {
+            $rootScope.infras.splice( id, 1 );
         }
 
         if (typeof (Storage) !== "undefined") {
@@ -76,8 +90,38 @@ provisioningControllers.controller('AwsController', ['$scope', '$http', 'Templat
             $scope.isFailedCreation = false;
             if ($scope.isSuccessCreation === true ) {
                 wait();
+                var infraObject = {
+                    location: location.value,
+                    name: name.value,
+                    keyname: keyname.value,
+                    clusterSize: clusterSize.value,
+                    type: 'aws'
+                };
+                $rootScope.infras.push(infraObject);
                 $location.path("/");
             }
+        }
+
+    }
+]);
+
+provisioningControllers.controller('CloudInstanceController', ['$scope', '$http', 'Templates', '$location', '$rootScope',
+    function ($scope, $http, Templates, $location, $rootScope) {
+        $scope.form = undefined;
+        $scope.apiUrl = "http://localhost:8080";
+        $http.defaults.headers.common['x-auth-token']= $scope.token;
+        $http.defaults.headers.common['Content-Type']= 'application/json';
+
+        $scope.reloadCtrl = function(){
+            console.log('reloading...');
+            $route.reload();
+        }
+
+        $scope.createCloudInstance = function() {
+            var cloudObject = {clusterSize: clusterSize.value, infraId: "1"};
+            $rootScope.cloudinstances.push(cloudObject);
+
+            $location.path("/");
         }
 
     }
@@ -101,6 +145,22 @@ provisioningControllers.controller('AzureController', ['$scope', '$http', 'Templ
             $scope.isFailedCreation = false;
             if ($scope.isSuccessCreation === true ) {
                 wait();
+                var infraObject = {
+                    location: location.value,
+                    name: name.value,
+                    description: description.value,
+                    subnetAddressPrefix: subnetAddressPrefix.value,
+                    deploymentSlot: deploymentSlot.value,
+                    disableSshPasswordAuthentication: disableSshPasswordAuthentication.value,
+                    vmType: vmType.value,
+                    imageName: imageName.value,
+                    userName: userName.value,
+                    password: password.value,
+                    sshString: sshString.value,
+                    type: 'azure'
+                };
+                $rootScope.infras.push(infraObject);
+
                 $location.path("/");
             }
         }
@@ -150,7 +210,7 @@ provisioningControllers.controller('CloudProviderController', ['$scope', '$http'
 
         $scope.createAzureProvider = function() {
             console.log("create azure");
-            var azureObject = {type:"azure", subscriptionId: subscriptionId.value, jksPassword: jksPassword.value};
+            var azureObject = {type:"azure", subscriptionId: subscriptionId.value, jks: jksPassword.value};
             $rootScope.providers.push(azureObject);
 
             $scope.isSuccessCreation = true;

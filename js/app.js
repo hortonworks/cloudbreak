@@ -17,6 +17,9 @@ provisioningApp.config([ '$routeProvider', function($routeProvider) {
     }).when('/add_provider', {
         templateUrl : 'partials/add_provider.html',
         controller: 'CloudProviderController'
+    }).when('/cloud', {
+        templateUrl : 'partials/cloud.html',
+        controller: 'CloudInstanceController'
     }).otherwise({
         redirectTo : '/'
     });

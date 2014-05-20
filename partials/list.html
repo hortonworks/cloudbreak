@@ -7,26 +7,125 @@
             <table class="table">
                 <thead>
                 <tr>
-                    <th>#</th>
-                    <th>Name</th>
-                    <th>Create Cluster</th>
+                    <th class="text-center">#</th>
+                    <th class="text-center">Name</th>
+                    <th class="text-center">Create Infra</th>
+                    <th class="text-center">Delete</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr ng-repeat="provider in providers track by $index">
-                    <td>{{$index}}</td>
-                    <td>{{provider}}</td>
-                    <td><a type="button" class="btn btn-success"  ng-href="#/{{provider.type}}">Create</a></td>
+                    <td class="text-center">{{$index}}</td>
+                    <td class="text-center">
+                        <div ng-if="provider.type == 'azure' ">
+                            <ul class="list-group">
+                                <li class="list-group-item">location: {{provider.jks}}</li>
+                                <li class="list-group-item">name: {{provider.subscriptionId}}</li>
+                            </ul>
+                        </div>
+                        <div ng-if="provider.type == 'aws' ">
+                            <ul class="list-group">
+                                <li class="list-group-item">location: {{provider.roleArn}}</li>
+                            </ul>
+                        </div>
+                    </td>
+                    <td class="text-center"><a type="button" class="btn btn-success"  ng-href="#/{{provider.type}}">Create Infra</a></td>
+                    <td class="text-center"><a type="button" class="btn btn-success"  ng-click="deleteCloudService($index)">Delete</a></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="row">
+            <div class="container">
+                <a class="btn btn-default" href="#/add_provider" role="button">Add New Cloud Provider</a>
+            </div>
+
+        </div>
+
+        <div class="margin50 row">
+
+        </div>
+
+
+        <div class="container">
+            <h1>List of Infras</h1>
+        </div>
+        <div class="container">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th class="text-center">#</th>
+                    <th class="text-center">Name</th>
+                    <th class="text-center">Type</th>
+                    <th class="text-center">Properties</th>
+                    <th class="text-center">Create Cloud Instance</th>
+                    <th class="text-center">Delete</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat= "infra in infras track by $index">
+                    <td class="text-center">{{$index}}</td>
+                    <td class="text-center">{{infra.name}}</td>
+                    <td class="text-center"><span class="label label-primary">{{infra.type}}</span></td>
+                    <td class="text-center">
+                        <div ng-if="infra.type == 'azure' ">
+                            <ul class="list-group">
+                                <li class="list-group-item">location: {{infra.location}}</li>
+                                <li class="list-group-item">name: {{infra.name}}</li>
+                                <li class="list-group-item">description: {{infra.description}}</li>
+                                <li class="list-group-item">subnetAddressPrefix: {{infra.subnetAddressPrefix}}</li>
+                                <li class="list-group-item">ssh: {{infra.disableSshPasswordAuthentication}}</li>
+                                <li class="list-group-item">vmType: {{infra.vmType}}</li>
+                                <li class="list-group-item">imageName: {{infra.imageName}}</li>
+                                <li class="list-group-item">userName: {{infra.userName}}</li>
+                                <li class="list-group-item">password: {{infra.password}}</li>
+                                <li class="list-group-item">sshString: {{infra.sshString}}</li>
+                            </ul>
+                        </div>
+                        <div ng-if="infra.type == 'aws' ">
+                            <ul class="list-group">
+                                <li class="list-group-item">location: {{infra.location}}</li>
+                                <li class="list-group-item">name: {{infra.name}}</li>
+                                <li class="list-group-item">keyname: {{infra.keyname}}</li>
+                            </ul>
+                        </div>
+                    </td>
+
+                    <td class="text-center"><a type="button" class="btn btn-success"  ng-href="#/cloud">Create</a></td>
+                    <td class="text-center"><a type="button" class="btn btn-success"  ng-click="deleteInfra($index)">Delete</a></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="margin50 row">
+
+        </div>
+
+        <div class="container">
+            <h1>List of CloudInstances</h1>
+        </div>
+        <div class="container">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th class="text-center">#</th>
+                    <th class="text-center">Cluster Size</th>
+                    <th class="text-center">Infra Id</th>
+                    <th class="text-center">Delete</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat= "cloudinstance in cloudinstances track by $index">
+                    <td class="text-center">{{$index}}</td>
+                    <td class="text-center">{{cloudinstance.clusterSize}}</td>
+                    <td class="text-center"><span class="label label-primary">{{cloudinstance.infraId}}</span></td>
+                    <td class="text-center"><a type="button" class="btn btn-success"  ng-click="deleteCloudInstance($index)">Delete</a></td>
                 </tr>
                 </tbody>
             </table>
         </div>
     </section>
-
-</div>
-<div class="row">
-    <div class="container">
-        <a class="btn btn-default" href="#/add_provider" role="button">Add New Cloud Provider</a>
-    </div>
 
 </div>
