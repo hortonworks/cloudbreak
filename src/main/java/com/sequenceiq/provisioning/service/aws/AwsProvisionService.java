@@ -12,7 +12,7 @@ import com.amazonaws.services.cloudformation.model.CreateStackResult;
 import com.amazonaws.services.cloudformation.model.Parameter;
 import com.sequenceiq.provisioning.controller.json.AWSCloudInstanceResult;
 import com.sequenceiq.provisioning.controller.json.CloudInstanceResult;
-import com.sequenceiq.provisioning.domain.AwsCloudInstance;
+import com.sequenceiq.provisioning.domain.AwsInfra;
 import com.sequenceiq.provisioning.domain.CloudFormationTemplate;
 import com.sequenceiq.provisioning.domain.CloudInstance;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
@@ -40,9 +40,9 @@ public class AwsProvisionService implements ProvisionService {
 
     @Override
     public CloudInstanceResult createCloudInstance(User user, CloudInstance cloudInstance) {
-        AwsCloudInstance awsCloudInstance = (AwsCloudInstance) cloudInstance;
-        Regions region = Regions.fromName(awsCloudInstance.getAwsInfra().getRegion());
-        String keyName = awsCloudInstance.getAwsInfra().getKeyName();
+        AwsInfra awsInfra = (AwsInfra) cloudInstance.getInfra();
+        Regions region = Regions.fromName(awsInfra.getRegion());
+        String keyName = awsInfra.getKeyName();
         String roleArn = user.getRoleArn();
 
         BasicSessionCredentials basicSessionCredentials = credentialsProvider.retrieveSessionCredentials(SESSION_CREDENTIALS_DURATION, "provision-ambari",
@@ -50,7 +50,7 @@ public class AwsProvisionService implements ProvisionService {
         AmazonCloudFormationClient amazonCloudFormationClient = new AmazonCloudFormationClient(basicSessionCredentials);
         amazonCloudFormationClient.setRegion(Region.getRegion(region));
         CreateStackRequest createStackRequest = new CreateStackRequest()
-                .withStackName(awsCloudInstance.getAwsInfra().getName())
+                .withStackName(awsInfra.getName())
                 .withTemplateBody(template.getBody())
                 .withParameters(new Parameter().withParameterKey("KeyName").withParameterValue(keyName));
         CreateStackResult createStackResult = amazonCloudFormationClient.createStack(createStackRequest);

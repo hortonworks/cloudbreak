@@ -3,7 +3,6 @@ package com.sequenceiq.provisioning.service;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.UnknownFormatConversionException;
 
 import javax.annotation.Resource;
 import javax.persistence.EntityNotFoundException;
@@ -13,33 +12,25 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.provisioning.controller.json.CloudInstanceRequest;
 import com.sequenceiq.provisioning.controller.json.CloudInstanceResult;
-import com.sequenceiq.provisioning.controller.json.InfraRequest;
-import com.sequenceiq.provisioning.converter.AwsCloudInstanceConverter;
-import com.sequenceiq.provisioning.converter.AzureCloudInstanceConverter;
-import com.sequenceiq.provisioning.domain.AwsCloudInstance;
-import com.sequenceiq.provisioning.domain.AzureCloudInstance;
+import com.sequenceiq.provisioning.converter.CloudInstanceConverter;
 import com.sequenceiq.provisioning.domain.CloudInstance;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
+import com.sequenceiq.provisioning.domain.Infra;
 import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.repository.CloudInstanceRepository;
+import com.sequenceiq.provisioning.repository.InfraRepository;
 
 @Service
 public class IntegratedCloudInstanceService implements CloudInstanceService {
 
     @Autowired
-    private AwsCloudInstanceConverter awsCloudInstanceConverter;
-
-    @Autowired
-    private AzureCloudInstanceConverter azureCloudInstanceConverter;
+    private CloudInstanceConverter cloudInstanceConverter;
 
     @Autowired
     private CloudInstanceRepository cloudInstanceRepository;
-    //
-    // @Autowired
-    // private UserRepository userRepository;
 
     @Autowired
-    private CommonInfraService commonInfraService;
+    private InfraRepository infraRepository;
 
     @Resource
     private Map<CloudPlatform, ProvisionService> provisionServices;
@@ -47,8 +38,7 @@ public class IntegratedCloudInstanceService implements CloudInstanceService {
     @Override
     public Set<CloudInstanceRequest> getAll(User user) {
         Set<CloudInstanceRequest> result = new HashSet<>();
-        result.addAll(awsCloudInstanceConverter.convertAllEntityToJson(user.getAwsCloudInstanceList()));
-        result.addAll(azureCloudInstanceConverter.convertAllEntityToJson(user.getAzureCloudInstanceList()));
+        result.addAll(cloudInstanceConverter.convertAllEntityToJson(user.getCloudInstances()));
         return result;
     }
 
@@ -58,40 +48,21 @@ public class IntegratedCloudInstanceService implements CloudInstanceService {
         if (one == null) {
             throw new EntityNotFoundException("Entity not exist with id: " + id);
         } else {
-            switch (one.cloudPlatform()) {
-            case AWS:
-                return awsCloudInstanceConverter.convert((AwsCloudInstance) one);
-            case AZURE:
-                return azureCloudInstanceConverter.convert((AzureCloudInstance) one);
-            default:
-                throw new UnknownFormatConversionException("The cloudPlatform type not supported.");
-            }
+            return cloudInstanceConverter.convert(one);
         }
     }
 
     @Override
     public CloudInstanceResult create(User user, CloudInstanceRequest cloudInstanceRequest) {
-        InfraRequest infraRequest = commonInfraService.get(cloudInstanceRequest.getInfraId());
-        if (infraRequest == null) {
+        Infra infra = infraRepository.findOne(cloudInstanceRequest.getInfraId());
+        if (infra == null) {
             throw new EntityNotFoundException("Infra config not exist with id: " + cloudInstanceRequest.getInfraId());
         }
-        CloudInstance cloudInstance;
-        switch (infraRequest.getCloudPlatform()) {
-        case AWS:
-            cloudInstance = awsCloudInstanceConverter.convert(cloudInstanceRequest);
-            cloudInstance.setUser(user);
-            cloudInstanceRepository.save(cloudInstance);
-            break;
-        case AZURE:
-            cloudInstance = azureCloudInstanceConverter.convert(cloudInstanceRequest);
-            cloudInstance.setUser(user);
-            cloudInstanceRepository.save(cloudInstance);
-            break;
-        default:
-            throw new UnknownFormatConversionException("The cloudPlatform type is not supported.");
-        }
+        CloudInstance cloudInstance = cloudInstanceConverter.convert(cloudInstanceRequest);
+        cloudInstance.setUser(user);
+        cloudInstanceRepository.save(cloudInstance);
 
-        ProvisionService provisionService = provisionServices.get(infraRequest.getCloudPlatform());
+        ProvisionService provisionService = provisionServices.get(infra.cloudPlatform());
         return provisionService.createCloudInstance(user, cloudInstance);
     }
 

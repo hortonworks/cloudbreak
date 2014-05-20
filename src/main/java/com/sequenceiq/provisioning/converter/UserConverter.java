@@ -1,6 +1,5 @@
 package com.sequenceiq.provisioning.converter;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -17,10 +16,7 @@ public class UserConverter extends AbstractConverter<UserJson, User> {
     private AwsInfraConverter awsInfraConverter;
 
     @Autowired
-    private AzureCloudInstanceConverter azureCloudInstanceConverter;
-
-    @Autowired
-    private AwsCloudInstanceConverter awsCloudInstanceConverter;
+    private CloudInstanceConverter cloudInstanceConverter;
 
     @Override
     public UserJson convert(User entity) {
@@ -33,8 +29,7 @@ public class UserConverter extends AbstractConverter<UserJson, User> {
         userJson.setSubscriptionId(entity.getSubscriptionId() == null ? "" : entity.getSubscriptionId());
         userJson.setAwsInfraList(awsInfraConverter.convertAllEntityToJson(entity.getAwsInfraList()));
         userJson.setAzureInfraList(azureInfraConverter.convertAllEntityToJson(entity.getAzureInfraList()));
-        userJson.setAzureCloudList(azureCloudInstanceConverter.convertAllEntityToJson(entity.getAzureCloudInstanceList()));
-        userJson.setAwsCloudList(awsCloudInstanceConverter.convertAllEntityToJson(entity.getAwsCloudInstanceList()));
+        userJson.setCloudList(cloudInstanceConverter.convertAllEntityToJson(entity.getCloudInstances()));
         return userJson;
     }
 
@@ -49,8 +44,7 @@ public class UserConverter extends AbstractConverter<UserJson, User> {
         user.setSubscriptionId(json.getSubscriptionId());
         user.setAwsInfraList(awsInfraConverter.convertAllJsonToEntity(json.getAwsInfraList()));
         user.setAzureInfraList(azureInfraConverter.convertAllJsonToEntity(json.getAzureInfraList()));
-        user.setAzureCloudInstanceList(azureCloudInstanceConverter.convertAllJsonToEntity(json.getAzureCloudList()));
-        user.setAwsCloudInstanceList(awsCloudInstanceConverter.convertAllJsonToEntity(json.getAwsCloudList()));
+        user.setCloudInstances(cloudInstanceConverter.convertAllJsonToEntity(json.getCloudList()));
         return user;
     }
 }
