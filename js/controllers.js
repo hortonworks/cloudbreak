@@ -204,13 +204,32 @@ provisioningControllers.controller('CloudInstanceController', ['$scope', '$http'
         }
 
         $scope.createCloudInstance = function() {
-            var cloudObject = {
-                clusterSize: clusterSize.value,
-                infraId: "1"
-            };
-            $rootScope.cloudinstances.push(cloudObject);
-
-            $location.path("/");
+            $http({
+                method: 'POST',
+                dataType: 'json',
+                withCredentials: true,
+                url:  $rootScope.apiUrl + "/cloud",
+                headers: {
+                    'Authorization': 'Basic ' + $rootScope.basic_auth
+                },
+                data: {
+                    clusterSize: clusterSize.value,
+                    cloudPlatform: $location.search().type,
+                    infraId: $location.search().id
+                }
+            }).success(function (data, status, headers, config) {
+                console.log("success");
+                $scope.isSuccessCreation = true;
+                $scope.isFailedCreation = false;
+            }).error(function (data, status, headers, config) {
+                console.log("unsuccess");
+                $scope.isSuccessCreation = false;
+                $scope.isFailedCreation = true;
+            });
+            if ($scope.isSuccessCreation === true ) {
+                wait();
+                $location.path("/");
+            }
         }
 
     }
