@@ -3,6 +3,7 @@ package com.sequenceiq.provisioning.controller.json;
 import javax.validation.constraints.Min;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.sequenceiq.provisioning.domain.CloudPlatform;
 import com.sequenceiq.provisioning.json.JsonEntity;
 
 public class CloudInstanceRequest implements JsonEntity {
@@ -11,6 +12,7 @@ public class CloudInstanceRequest implements JsonEntity {
     @Min(value = 2)
     private int clusterSize;
     private Long infraId;
+    private CloudPlatform cloudPlatform;
 
     public CloudInstanceRequest() {
     }
@@ -40,4 +42,11 @@ public class CloudInstanceRequest implements JsonEntity {
         this.infraId = infraId;
     }
 
+    public CloudPlatform getCloudPlatform() {
+        return cloudPlatform;
+    }
+
+    public void setCloudPlatform(CloudPlatform cloudPlatform) {
+        this.cloudPlatform = cloudPlatform;
+    }
 }
