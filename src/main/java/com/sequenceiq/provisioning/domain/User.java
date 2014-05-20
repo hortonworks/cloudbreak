@@ -61,7 +61,6 @@ public class User implements ProvisionEntity {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<AwsCloudInstance> awsCloudInstanceList = new HashSet<>();
 
-
     public User() {
     }
 

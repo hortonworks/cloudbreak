@@ -1,7 +1,6 @@
 package com.sequenceiq.provisioning.domain;
 
 import javax.persistence.Entity;
-import javax.persistence.ManyToOne;
 
 @Entity
 public class AwsInfra extends Infra implements ProvisionEntity {
@@ -11,9 +10,6 @@ public class AwsInfra extends Infra implements ProvisionEntity {
     private String region;
 
     private String keyName;
-
-    @ManyToOne
-    private User user;
 
     public AwsInfra() {
     }
@@ -40,14 +36,6 @@ public class AwsInfra extends Infra implements ProvisionEntity {
 
     public void setKeyName(String keyName) {
         this.keyName = keyName;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 
     @Override
