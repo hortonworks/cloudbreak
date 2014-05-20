@@ -71,7 +71,6 @@ provisioningControllers.controller('ProvisioningController', ['$scope', '$http',
         }
 
         $scope.getCredentials = function() {
-
             $http({
                 method: 'GET',
                 dataType: 'json',
@@ -88,10 +87,31 @@ provisioningControllers.controller('ProvisioningController', ['$scope', '$http',
             });
         }
 
+        $scope.getInfras = function() {
+            $http({
+                method: 'GET',
+                dataType: 'json',
+                withCredentials: true,
+                url:  $rootScope.apiUrl + "/infra",
+                headers: {
+                    'Authorization': 'Basic ' + $rootScope.basic_auth,
+                    'Content-Type': 'application/json'
+                }
+            }).success(function (data, status, headers, config) {
+                $rootScope.infras = data;
+
+                console.log("hello");
+                console.log(data);
+            }).error(function (data, status, headers, config) {
+                console.log("unsuccess");
+            });
+        }
+
 
 
         $scope.doQuerys = function() {
             $scope.getCredentials();
+            $scope.getInfras();
         }
 
         if (typeof (Storage) !== "undefined") {

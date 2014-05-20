@@ -65,29 +65,29 @@
                 </thead>
                 <tbody>
                 <tr ng-repeat= "infra in infras track by $index">
-                    <td class="text-center">{{$index}}</td>
-                    <td class="text-center">{{infra.name}}</td>
+                    <td class="text-center">{{infra.id}}</td>
+                    <td class="text-center">{{infra.clusterName}}</td>
                     <td class="text-center"><span class="label label-primary">{{infra.cloudPlatform}}</span></td>
                     <td class="text-center">
-                        <div ng-if="infra.cloudPlatform == 'azure' ">
+                        <div ng-if="infra.cloudPlatform == 'AZURE' ">
                             <ul class="list-group">
-                                <li class="list-group-item">location: <span class="label label-info">{{infra.location}}</span></li>
-                                <li class="list-group-item">name: <span class="label label-info">{{infra.name}}</span></li>
-                                <li class="list-group-item">description: <span class="label label-info">{{infra.description}}</span></li>
-                                <li class="list-group-item">subnetAddressPrefix: <span class="label label-info">{{infra.subnetAddressPrefix}}</span></li>
-                                <li class="list-group-item">ssh: <span class="label label-info">{{infra.disableSshPasswordAuthentication}}</span></li>
-                                <li class="list-group-item">vmType: <span class="label label-info">{{infra.vmType}}</span></li>
-                                <li class="list-group-item">imageName: <span class="label label-info">{{infra.imageName}}</span></li>
-                                <li class="list-group-item">userName: <span class="label label-info">{{infra.userName}}</span></li>
-                                <li class="list-group-item">password: <span class="label label-info">{{infra.password}}</span></li>
-                                <li class="list-group-item">sshString: <span class="label label-info">{{infra.sshString}}</span></li>
+                                <li class="list-group-item">location: <span class="label label-info">{{infra.parameters.location}}</span></li>
+                                <li class="list-group-item">name: <span class="label label-info">{{infra.parameters.name}}</span></li>
+                                <li class="list-group-item">description: <span class="label label-info">{{infra.parameters.description}}</span></li>
+                                <li class="list-group-item">subnetAddressPrefix: <span class="label label-info">{{infra.parameters.subnetAddressPrefix}}</span></li>
+                                <li class="list-group-item">ssh: <span class="label label-info">{{infra.parameters.disableSshPasswordAuthentication}}</span></li>
+                                <li class="list-group-item">vmType: <span class="label label-info">{{infra.parameters.vmType}}</span></li>
+                                <li class="list-group-item">imageName: <span class="label label-info">{{infra.parameters.imageName}}</span></li>
+                                <li class="list-group-item">userName: <span class="label label-info">{{infra.parameters.userName}}</span></li>
+                                <li class="list-group-item">password: <span class="label label-info">{{infra.parameters.password}}</span></li>
+                                <li class="list-group-item">sshString: <span class="label label-info">{{infra.parameters.sshString}}</span></li>
                             </ul>
                         </div>
-                        <div ng-if="infra.cloudPlatform == 'aws' ">
+                        <div ng-if="infra.cloudPlatform == 'AWS' ">
                             <ul class="list-group">
-                                <li class="list-group-item">location: <span class="label label-info">{{infra.location}}</span></li>
-                                <li class="list-group-item">name: <span class="label label-info">{{infra.name}}</span></li>
-                                <li class="list-group-item">keyname: <span class="label label-info">{{infra.keyname}}</span></li>
+                                <li class="list-group-item">region: <span class="label label-info">{{infra.parameters.region}}</span></li>
+                                <li class="list-group-item">name: <span class="label label-info">{{infra.parameters.name}}</span></li>
+                                <li class="list-group-item">keyname: <span class="label label-info">{{infra.parameters.keyName}}</span></li>
                             </ul>
                         </div>
                     </td>
