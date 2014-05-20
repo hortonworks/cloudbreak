@@ -66,7 +66,7 @@ public class CloudInstanceController {
     @RequestMapping(method = RequestMethod.GET, value = "/cloud/{cloudId}")
     @ResponseBody
     public ResponseEntity<CloudInstanceRequest> getCloudInstance(@CurrentUser User user, @PathVariable Long cloudId) {
-        CloudInstanceRequest cloudInstanceRequest = commonCloudInstanceService.get(cloudId, userRepository.findOneWithLists(user.getId()));
+        CloudInstanceRequest cloudInstanceRequest = commonCloudInstanceService.get(cloudId);
         if (cloudInstanceRequest == null) {
             new ResponseEntity<>(cloudInstanceRequest, HttpStatus.NOT_FOUND);
         }

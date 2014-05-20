@@ -2,6 +2,7 @@ package com.sequenceiq.provisioning.service;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UnknownFormatConversionException;
 
 import javax.persistence.EntityNotFoundException;
 
@@ -13,9 +14,11 @@ import com.sequenceiq.provisioning.converter.AwsInfraConverter;
 import com.sequenceiq.provisioning.converter.AzureInfraConverter;
 import com.sequenceiq.provisioning.domain.AwsInfra;
 import com.sequenceiq.provisioning.domain.AzureInfra;
+import com.sequenceiq.provisioning.domain.Infra;
 import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.repository.AwsInfraRepository;
 import com.sequenceiq.provisioning.repository.AzureInfraRepository;
+import com.sequenceiq.provisioning.repository.InfraRepository;
 import com.sequenceiq.provisioning.repository.UserRepository;
 
 @Service
@@ -26,6 +29,9 @@ public class CommonInfraService {
 
     @Autowired
     private AzureInfraRepository azureInfraRepository;
+
+    @Autowired
+    private InfraRepository infraRepository;
 
     @Autowired
     private AwsInfraConverter awsInfraConverter;
@@ -44,16 +50,18 @@ public class CommonInfraService {
     }
 
     public InfraRequest get(Long id) {
-        AwsInfra awsInfra = awsInfraRepository.findOne(id);
-        if (awsInfra == null) {
-            AzureInfra azureInfra = azureInfraRepository.findOne(id);
-            if (azureInfra == null) {
-                throw new EntityNotFoundException("Entity not exist with id: " + id);
-            } else {
-                return azureInfraConverter.convert(azureInfra);
-            }
+        Infra one = infraRepository.findOne(id);
+        if (one == null) {
+            throw new EntityNotFoundException("Entity not exist with id: " + id);
         } else {
-            return awsInfraConverter.convert(awsInfra);
+            switch (one.cloudPlatform()) {
+                case AWS:
+                    return awsInfraConverter.convert((AwsInfra) one);
+                case AZURE:
+                    return azureInfraConverter.convert((AzureInfra) one);
+                default:
+                    throw new UnknownFormatConversionException("The cloudPlatform type not supported.");
+            }
         }
     }
 
