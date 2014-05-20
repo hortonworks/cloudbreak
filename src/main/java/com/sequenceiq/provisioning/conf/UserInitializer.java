@@ -34,7 +34,6 @@ public class UserInitializer implements InitializingBean {
         awsInfra.setUser(user2);
         user2.getAwsInfraList().add(awsInfra);
 
-        userRepository.save(user1);
         userRepository.save(user2);
 
     }
