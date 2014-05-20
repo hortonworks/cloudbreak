@@ -46,8 +46,6 @@ provisioningControllers.controller('ProvisioningController', ['$scope', '$http',
 
         }
 
-        
-
         if (typeof (Storage) !== "undefined") {
             if (localStorage.signedIn === 'true') {
                 $rootScope.signedIn = true;
@@ -119,7 +117,6 @@ provisioningControllers.controller('CloudProviderController', ['$scope', '$http'
         $scope.awsProvider = false;
         $scope.azureProvider = false;
 
-
         $scope.reloadCtrl = function(){
             console.log('reloading...');
             $route.reload();
@@ -163,9 +160,6 @@ provisioningControllers.controller('CloudProviderController', ['$scope', '$http'
                 $location.path("/");
             }
         }
-
-
-
         $scope.createProvider();
     }
 ]);
