@@ -34,6 +34,9 @@ public class IntegratedCloudInstanceService implements CloudInstanceService {
 
     @Autowired
     private CloudInstanceRepository cloudInstanceRepository;
+    //
+    // @Autowired
+    // private UserRepository userRepository;
 
     @Autowired
     private CommonInfraService commonInfraService;
@@ -71,10 +74,25 @@ public class IntegratedCloudInstanceService implements CloudInstanceService {
         InfraRequest infraRequest = commonInfraService.get(cloudInstanceRequest.getInfraId());
         if (infraRequest == null) {
             throw new EntityNotFoundException("Infra config not exist with id: " + cloudInstanceRequest.getInfraId());
-        } else {
-            ProvisionService provisionService = provisionServices.get(infraRequest.getCloudPlatform());
-            return provisionService.createCloudInstance(user, cloudInstanceRequest);
         }
+        CloudInstance cloudInstance;
+        switch (infraRequest.getCloudPlatform()) {
+        case AWS:
+            cloudInstance = awsCloudInstanceConverter.convert(cloudInstanceRequest);
+            cloudInstance.setUser(user);
+            cloudInstanceRepository.save(cloudInstance);
+            break;
+        case AZURE:
+            cloudInstance = azureCloudInstanceConverter.convert(cloudInstanceRequest);
+            cloudInstance.setUser(user);
+            cloudInstanceRepository.save(cloudInstance);
+            break;
+        default:
+            throw new UnknownFormatConversionException("The cloudPlatform type is not supported.");
+        }
+
+        ProvisionService provisionService = provisionServices.get(infraRequest.getCloudPlatform());
+        return provisionService.createCloudInstance(user, cloudInstance);
     }
 
 }

@@ -7,18 +7,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.provisioning.controller.json.AzureCloudInstanceResult;
-import com.sequenceiq.provisioning.controller.json.CloudInstanceRequest;
 import com.sequenceiq.provisioning.controller.json.CloudInstanceResult;
-import com.sequenceiq.provisioning.converter.AzureCloudInstanceConverter;
 import com.sequenceiq.provisioning.domain.AzureCloudInstance;
+import com.sequenceiq.provisioning.domain.CloudInstance;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
 import com.sequenceiq.provisioning.domain.User;
-import com.sequenceiq.provisioning.repository.UserRepository;
 import com.sequenceiq.provisioning.service.ProvisionService;
 
 @Service
@@ -43,18 +40,10 @@ public class AzureProvisionService implements ProvisionService {
     private static final String VMTYPE = "vmType";
     private static final String DATADIR = "userdatas";
 
-    @Autowired
-    private AzureCloudInstanceConverter azureCloudInstanceConverter;
-
-    @Autowired
-    private UserRepository userRepository;
-
     @Override
-    public CloudInstanceResult createCloudInstance(User user, CloudInstanceRequest cloudInstanceRequest) {
-        AzureCloudInstance azureCloudInstance = azureCloudInstanceConverter.convert(cloudInstanceRequest);
-        azureCloudInstance.setUser(user);
-        user.getAzureCloudInstanceList().add(azureCloudInstance);
-        userRepository.save(user);
+    public CloudInstanceResult createCloudInstance(User user, CloudInstance cloudInstance) {
+
+        AzureCloudInstance azureCloudInstance = (AzureCloudInstance) cloudInstance;
 
         String filePath = getUserJksFileName(user.emailAsFolder());
         File file = new File(filePath);

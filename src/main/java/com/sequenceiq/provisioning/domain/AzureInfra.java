@@ -1,6 +1,7 @@
 package com.sequenceiq.provisioning.domain;
 
 import javax.persistence.Entity;
+import javax.persistence.ManyToOne;
 
 @Entity
 public class AzureInfra extends Infra implements ProvisionEntity {
@@ -15,6 +16,9 @@ public class AzureInfra extends Infra implements ProvisionEntity {
     private String imageName;
     private String userName;
     private String password;
+
+    @ManyToOne
+    private User user;
 
     public AzureInfra() {
     }
@@ -97,6 +101,15 @@ public class AzureInfra extends Infra implements ProvisionEntity {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    @Override
+    public void setUser(User user) {
+        this.user = user;
     }
 
     @Override

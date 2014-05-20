@@ -38,13 +38,14 @@ public class AzureCloudInstance extends CloudInstance implements ProvisionEntity
         return user;
     }
 
+    @Override
+    public void setUser(User user) {
+        this.user = user;
+    }
 
     @Override
     public CloudPlatform cloudPlatform() {
         return CloudPlatform.AZURE;
     }
 
-    public void setUser(User user) {
-        this.user = user;
-    }
 }

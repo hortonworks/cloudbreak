@@ -14,10 +14,6 @@ public abstract class CloudInstance {
     @SequenceGenerator(name = "cloudinstance_generator", sequenceName = "cloudsequence_table")
     private Long id;
 
-    public CloudInstance() {
-
-    }
-
     public Long getId() {
         return id;
     }
@@ -27,4 +23,6 @@ public abstract class CloudInstance {
     }
 
     public abstract CloudPlatform cloudPlatform();
+
+    public abstract void setUser(User user);
 }

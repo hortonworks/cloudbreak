@@ -18,16 +18,12 @@ import com.sequenceiq.provisioning.domain.AzureInfra;
 import com.sequenceiq.provisioning.domain.Infra;
 import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.repository.InfraRepository;
-import com.sequenceiq.provisioning.repository.UserRepository;
 
 @Service
 public class CommonInfraService implements InfraService {
 
     @Autowired
     private InfraRepository infraRepository;
-
-    @Autowired
-    private UserRepository userRepository;
 
     @Autowired
     private AwsInfraConverter awsInfraConverter;
@@ -66,14 +62,12 @@ public class CommonInfraService implements InfraService {
         case AWS:
             Infra awsInfra = awsInfraConverter.convert(infraRequest);
             awsInfra.setUser(user);
-            user.getAwsInfraList().add((AwsInfra) awsInfra);
-            userRepository.save(user);
+            infraRepository.save(awsInfra);
             break;
         case AZURE:
             Infra azureInfra = azureInfraConverter.convert(infraRequest);
             azureInfra.setUser(user);
-            user.getAzureInfraList().add((AzureInfra) azureInfra);
-            userRepository.save(user);
+            infraRepository.save(azureInfra);
             break;
         default:
             throw new UnknownFormatConversionException("The cloudPlatform type not supported.");

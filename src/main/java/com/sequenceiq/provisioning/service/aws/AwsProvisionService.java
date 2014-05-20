@@ -11,14 +11,12 @@ import com.amazonaws.services.cloudformation.model.CreateStackRequest;
 import com.amazonaws.services.cloudformation.model.CreateStackResult;
 import com.amazonaws.services.cloudformation.model.Parameter;
 import com.sequenceiq.provisioning.controller.json.AWSCloudInstanceResult;
-import com.sequenceiq.provisioning.controller.json.CloudInstanceRequest;
 import com.sequenceiq.provisioning.controller.json.CloudInstanceResult;
-import com.sequenceiq.provisioning.converter.AwsCloudInstanceConverter;
 import com.sequenceiq.provisioning.domain.AwsCloudInstance;
 import com.sequenceiq.provisioning.domain.CloudFormationTemplate;
+import com.sequenceiq.provisioning.domain.CloudInstance;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
 import com.sequenceiq.provisioning.domain.User;
-import com.sequenceiq.provisioning.repository.UserRepository;
 import com.sequenceiq.provisioning.service.ProvisionService;
 
 /**
@@ -40,21 +38,11 @@ public class AwsProvisionService implements ProvisionService {
     @Autowired
     private CrossAccountCredentialsProvider credentialsProvider;
 
-    @Autowired
-    private AwsCloudInstanceConverter awsCloudInstanceConverter;
-
-    @Autowired
-    private UserRepository userRepository;
-
     @Override
-    public CloudInstanceResult createCloudInstance(User user, CloudInstanceRequest cloudInstanceRequest) {
-        AwsCloudInstance convert = awsCloudInstanceConverter.convert(cloudInstanceRequest);
-        convert.setUser(user);
-        user.getAwsCloudInstanceList().add(convert);
-        userRepository.save(user);
-
-        Regions region = Regions.fromName(convert.getAwsInfra().getRegion());
-        String keyName = convert.getAwsInfra().getKeyName();
+    public CloudInstanceResult createCloudInstance(User user, CloudInstance cloudInstance) {
+        AwsCloudInstance awsCloudInstance = (AwsCloudInstance) cloudInstance;
+        Regions region = Regions.fromName(awsCloudInstance.getAwsInfra().getRegion());
+        String keyName = awsCloudInstance.getAwsInfra().getKeyName();
         String roleArn = user.getRoleArn();
 
         BasicSessionCredentials basicSessionCredentials = credentialsProvider.retrieveSessionCredentials(SESSION_CREDENTIALS_DURATION, "provision-ambari",
@@ -62,7 +50,7 @@ public class AwsProvisionService implements ProvisionService {
         AmazonCloudFormationClient amazonCloudFormationClient = new AmazonCloudFormationClient(basicSessionCredentials);
         amazonCloudFormationClient.setRegion(Region.getRegion(region));
         CreateStackRequest createStackRequest = new CreateStackRequest()
-                .withStackName(convert.getAwsInfra().getName())
+                .withStackName(awsCloudInstance.getAwsInfra().getName())
                 .withTemplateBody(template.getBody())
                 .withParameters(new Parameter().withParameterKey("KeyName").withParameterValue(keyName));
         CreateStackResult createStackResult = amazonCloudFormationClient.createStack(createStackRequest);

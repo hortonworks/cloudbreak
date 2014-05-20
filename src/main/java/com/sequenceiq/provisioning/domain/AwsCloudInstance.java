@@ -18,11 +18,6 @@ public class AwsCloudInstance extends CloudInstance implements ProvisionEntity {
     public AwsCloudInstance() {
     }
 
-    @Override
-    public CloudPlatform cloudPlatform() {
-        return CloudPlatform.AWS;
-    }
-
     public Integer getClusterSize() {
         return clusterSize;
     }
@@ -43,9 +38,13 @@ public class AwsCloudInstance extends CloudInstance implements ProvisionEntity {
         return user;
     }
 
+    @Override
     public void setUser(User user) {
         this.user = user;
     }
 
-
+    @Override
+    public CloudPlatform cloudPlatform() {
+        return CloudPlatform.AWS;
+    }
 }
