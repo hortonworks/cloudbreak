@@ -11,14 +11,13 @@ var wait = function() {
     }, millisecondsToWait);
 }
 
-
 provisioningControllers.controller('ProvisioningController', ['$scope', '$http', 'Templates', '$location', '$rootScope',
     function ($scope, $http, Templates, $location, $rootScope) {
-
         $scope.form = undefined;
-        $scope.apiUrl = "http://localhost:8080";
-        $http.defaults.headers.common['x-auth-token']= $scope.token;
+        $http.defaults.useXDomain = true;
+        delete $http.defaults.headers.common['X-Requested-With'];
         $http.defaults.headers.common['Content-Type']= 'application/json';
+
         $rootScope.signedIn = false;
         if($rootScope.providers === null || $rootScope.providers === undefined ) {
             $rootScope.providers = [];
@@ -28,6 +27,12 @@ provisioningControllers.controller('ProvisioningController', ['$scope', '$http',
         }
         if($rootScope.cloudinstances === null || $rootScope.cloudinstances === undefined ) {
             $rootScope.cloudinstances = [];
+        }
+        if($rootScope.apiUrl === null || $rootScope.apiUrl === undefined ) {
+            $rootScope.apiUrl = "http://localhost:8080";
+        }
+        if($rootScope.basic_auth === null || $rootScope.basic_auth === undefined ) {
+            $rootScope.basic_auth = "dXNlckBzZXEuY29tOnRlc3QxMjM=";
         }
         $rootScope.blueprints = ["hadoop", "phoenix", "custom"];
 
@@ -40,6 +45,7 @@ provisioningControllers.controller('ProvisioningController', ['$scope', '$http',
             if(username.value === "user@seq.com" && password.value === "test123") {
                 localStorage.signedIn = true;
                 $rootScope.signedIn = true;
+                $scope.doQuerys();
             }
         }
 
@@ -64,9 +70,34 @@ provisioningControllers.controller('ProvisioningController', ['$scope', '$http',
             $rootScope.providers.splice( id, 1 );
         }
 
+        $scope.getCredentials = function() {
+
+            $http({
+                method: 'GET',
+                dataType: 'json',
+                withCredentials: true,
+                url:  $rootScope.apiUrl + "/credential",
+                headers: {
+                    'Authorization': 'Basic ' + $rootScope.basic_auth,
+                    'Content-Type': 'application/json'
+                }
+            }).success(function (data, status, headers, config) {
+                $rootScope.providers = data;
+            }).error(function (data, status, headers, config) {
+                console.log("unsuccess");
+            });
+        }
+
+
+
+        $scope.doQuerys = function() {
+            $scope.getCredentials();
+        }
+
         if (typeof (Storage) !== "undefined") {
             if (localStorage.signedIn === 'true') {
                 $rootScope.signedIn = true;
+                $scope.doQuerys();
             }
         } else {
             console.log("No localstorage support!");

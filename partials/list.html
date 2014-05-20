@@ -1,7 +1,7 @@
 <div class="row">
     <section class="intro-subpage">
         <div class="container">
-            <h1>List of Cloudservices</h1>
+            <h1>List of Credentials</h1>
         </div>
         <div class="container">
             <table class="table">
@@ -17,15 +17,15 @@
                 <tr ng-repeat="provider in providers track by $index">
                     <td class="text-center">{{$index}}</td>
                     <td class="text-center">
-                        <div ng-if="provider.cloudPlatform == 'azure' ">
+                        <div ng-if="provider.cloudPlatform == 'AZURE' ">
                             <ul class="list-group">
-                                <li class="list-group-item">location: <span class="label label-info">{{provider.jks}}</span></li>
-                                <li class="list-group-item">name: <span class="label label-info">{{provider.subscriptionId}}</span></li>
+                                <li class="list-group-item">Jks Password: <span class="label label-info">{{provider.parameters.jksPassword}}</span></li>
+                                <li class="list-group-item">Subscription Id: <span class="label label-info">{{provider.parameters.subscriptionId}}</span></li>
                             </ul>
                         </div>
-                        <div ng-if="provider.cloudPlatform == 'aws' ">
+                        <div ng-if="provider.cloudPlatform == 'AWS' ">
                             <ul class="list-group">
-                                <li class="list-group-item">location: {{provider.roleArn}}</li>
+                                <li class="list-group-item">Role Arn: {{provider.parameters.roleArn}}</li>
                             </ul>
                         </div>
                     </td>
