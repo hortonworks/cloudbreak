@@ -1,21 +1,11 @@
 package com.sequenceiq.provisioning.domain;
 
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
-import javax.persistence.SequenceGenerator;
 
 @Entity
-public class AzureCloudInstance implements ProvisionEntity {
-
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "cloudinstance_generator")
-    @SequenceGenerator(name = "cloudinstance_generator", sequenceName = "cloudsequence_table")
-    private Long id;
+public class AzureCloudInstance extends CloudInstance implements ProvisionEntity {
 
     private Integer clusterSize;
 
@@ -49,12 +39,9 @@ public class AzureCloudInstance implements ProvisionEntity {
     }
 
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
+    @Override
+    public CloudPlatform cloudPlatform() {
+        return CloudPlatform.AZURE;
     }
 
     public void setUser(User user) {
