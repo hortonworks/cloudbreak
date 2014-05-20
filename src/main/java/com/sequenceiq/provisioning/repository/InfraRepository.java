@@ -3,13 +3,10 @@ package com.sequenceiq.provisioning.repository;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.security.access.prepost.PostAuthorize;
 
-import com.sequenceiq.provisioning.domain.AzureInfra;
-import com.sequenceiq.provisioning.domain.User;
+import com.sequenceiq.provisioning.domain.Infra;
 
-public interface InfraRepository extends CrudRepository<AzureInfra, Long> {
-
-    User findByName(String name);
+public interface InfraRepository extends CrudRepository<Infra, Long> {
 
     @PostAuthorize("returnObject?.user?.id == principal?.id")
-    AzureInfra findOne(Long id);
+    Infra findOne(Long id);
 }
