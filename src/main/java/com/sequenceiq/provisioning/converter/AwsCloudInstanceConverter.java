@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.provisioning.controller.json.CloudInstanceRequest;
 import com.sequenceiq.provisioning.domain.AwsCloudInstance;
+import com.sequenceiq.provisioning.domain.CloudPlatform;
 import com.sequenceiq.provisioning.repository.AwsInfraRepository;
 
 @Component
@@ -18,6 +19,7 @@ public class AwsCloudInstanceConverter extends AbstractConverter<CloudInstanceRe
         CloudInstanceRequest cloudInstanceRequest = new CloudInstanceRequest();
         cloudInstanceRequest.setInfraId(entity.getAwsInfra().getId());
         cloudInstanceRequest.setClusterSize(entity.getClusterSize());
+        cloudInstanceRequest.setCloudPlatform(CloudPlatform.AWS);
         return cloudInstanceRequest;
     }
 
