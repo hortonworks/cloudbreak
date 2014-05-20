@@ -19,8 +19,8 @@
                     <td class="text-center">
                         <div ng-if="provider.type == 'azure' ">
                             <ul class="list-group">
-                                <li class="list-group-item">location: {{provider.jks}}</li>
-                                <li class="list-group-item">name: {{provider.subscriptionId}}</li>
+                                <li class="list-group-item">location: <span class="label label-info">{{provider.jks}}</span></li>
+                                <li class="list-group-item">name: <span class="label label-info">{{provider.subscriptionId}}</span></li>
                             </ul>
                         </div>
                         <div ng-if="provider.type == 'aws' ">
@@ -71,23 +71,23 @@
                     <td class="text-center">
                         <div ng-if="infra.type == 'azure' ">
                             <ul class="list-group">
-                                <li class="list-group-item">location: {{infra.location}}</li>
-                                <li class="list-group-item">name: {{infra.name}}</li>
-                                <li class="list-group-item">description: {{infra.description}}</li>
-                                <li class="list-group-item">subnetAddressPrefix: {{infra.subnetAddressPrefix}}</li>
-                                <li class="list-group-item">ssh: {{infra.disableSshPasswordAuthentication}}</li>
-                                <li class="list-group-item">vmType: {{infra.vmType}}</li>
-                                <li class="list-group-item">imageName: {{infra.imageName}}</li>
-                                <li class="list-group-item">userName: {{infra.userName}}</li>
-                                <li class="list-group-item">password: {{infra.password}}</li>
-                                <li class="list-group-item">sshString: {{infra.sshString}}</li>
+                                <li class="list-group-item">location: <span class="label label-info">{{infra.location}}</span></li>
+                                <li class="list-group-item">name: <span class="label label-info">{{infra.name}}</span></li>
+                                <li class="list-group-item">description: <span class="label label-info">{{infra.description}}</span></li>
+                                <li class="list-group-item">subnetAddressPrefix: <span class="label label-info">{{infra.subnetAddressPrefix}}</span></li>
+                                <li class="list-group-item">ssh: <span class="label label-info">{{infra.disableSshPasswordAuthentication}}</span></li>
+                                <li class="list-group-item">vmType: <span class="label label-info">{{infra.vmType}}</span></li>
+                                <li class="list-group-item">imageName: <span class="label label-info">{{infra.imageName}}</span></li>
+                                <li class="list-group-item">userName: <span class="label label-info">{{infra.userName}}</span></li>
+                                <li class="list-group-item">password: <span class="label label-info">{{infra.password}}</span></li>
+                                <li class="list-group-item">sshString: <span class="label label-info">{{infra.sshString}}</span></li>
                             </ul>
                         </div>
                         <div ng-if="infra.type == 'aws' ">
                             <ul class="list-group">
-                                <li class="list-group-item">location: {{infra.location}}</li>
-                                <li class="list-group-item">name: {{infra.name}}</li>
-                                <li class="list-group-item">keyname: {{infra.keyname}}</li>
+                                <li class="list-group-item">location: <span class="label label-info">{{infra.location}}</span></li>
+                                <li class="list-group-item">name: <span class="label label-info">{{infra.name}}</span></li>
+                                <li class="list-group-item">keyname: <span class="label label-info">{{infra.keyname}}</span></li>
                             </ul>
                         </div>
                     </td>

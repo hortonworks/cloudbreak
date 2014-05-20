@@ -37,7 +37,7 @@ provisioningControllers.controller('ProvisioningController', ['$scope', '$http',
         }
 
         $scope.signIn = function() {
-            if(username.value === "user" && password.value === "pass") {
+            if(username.value === "user@seq.com" && password.value === "test123") {
                 localStorage.signedIn = true;
                 $rootScope.signedIn = true;
             }
