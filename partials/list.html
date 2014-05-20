@@ -72,13 +72,13 @@
                         <div ng-if="infra.cloudPlatform == 'AZURE' ">
                             <ul class="list-group">
                                 <li class="list-group-item">location: <span class="label label-info">{{infra.parameters.location}}</span></li>
-                                <li class="list-group-item">name: <span class="label label-info">{{infra.parameters.name}}</span></li>
+                                <li class="list-group-item">name: <span class="label label-info">{{infra.clusterName}}</span></li>
                                 <li class="list-group-item">description: <span class="label label-info">{{infra.parameters.description}}</span></li>
-                                <li class="list-group-item">subnetAddressPrefix: <span class="label label-info">{{infra.parameters.subnetAddressPrefix}}</span></li>
+                                <li class="list-group-item">subnetAddressPrefix: <span class="label label-info">{{infra.parameters.addressPrefix}}</span></li>
                                 <li class="list-group-item">ssh: <span class="label label-info">{{infra.parameters.disableSshPasswordAuthentication}}</span></li>
                                 <li class="list-group-item">vmType: <span class="label label-info">{{infra.parameters.vmType}}</span></li>
                                 <li class="list-group-item">imageName: <span class="label label-info">{{infra.parameters.imageName}}</span></li>
-                                <li class="list-group-item">userName: <span class="label label-info">{{infra.parameters.userName}}</span></li>
+                                <li class="list-group-item">userName: <span class="label label-info">{{infra.parameters.name}}</span></li>
                                 <li class="list-group-item">password: <span class="label label-info">{{infra.parameters.password}}</span></li>
                                 <li class="list-group-item">sshString: <span class="label label-info">{{infra.parameters.sshString}}</span></li>
                             </ul>
@@ -86,7 +86,7 @@
                         <div ng-if="infra.cloudPlatform == 'AWS' ">
                             <ul class="list-group">
                                 <li class="list-group-item">region: <span class="label label-info">{{infra.parameters.region}}</span></li>
-                                <li class="list-group-item">name: <span class="label label-info">{{infra.parameters.name}}</span></li>
+                                <li class="list-group-item">name: <span class="label label-info">{{infra.clusterName}}</span></li>
                                 <li class="list-group-item">keyname: <span class="label label-info">{{infra.parameters.keyName}}</span></li>
                             </ul>
                         </div>
