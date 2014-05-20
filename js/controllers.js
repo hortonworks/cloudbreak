@@ -157,17 +157,33 @@ provisioningControllers.controller('AwsController', ['$scope', '$http', 'Templat
 
         $scope.createAwsCluster = function() {
             console.log("aws cluster creation started...");
-            $scope.isSuccessCreation = true;
-            $scope.isFailedCreation = false;
+            $http({
+                method: 'POST',
+                dataType: 'json',
+                withCredentials: true,
+                url:  $rootScope.apiUrl + "/infra",
+                headers: {
+                    'Authorization': 'Basic ' + $rootScope.basic_auth
+                },
+                data: {
+                    cloudPlatform: "AWS",
+                    clusterName: clname.value,
+                    parameters: {
+                        location: cllocation.value,
+                        keyname:  keyname.value
+                    }
+                }
+            }).success(function (data, status, headers, config) {
+                console.log("success");
+                $scope.isSuccessCreation = true;
+                $scope.isFailedCreation = false;
+            }).error(function (data, status, headers, config) {
+                console.log("unsuccess");
+                $scope.isSuccessCreation = false;
+                $scope.isFailedCreation = true;
+            });
             if ($scope.isSuccessCreation === true ) {
                 wait();
-                var infraObject = {
-                    location: cllocation.value,
-                    name:  clname.value,
-                    keyname:  keyname.value,
-                    cloudPlatform: 'aws'
-                };
-                $rootScope.infras.push(infraObject);
                 $location.path("/");
             }
         }
@@ -216,24 +232,42 @@ provisioningControllers.controller('AzureController', ['$scope', '$http', 'Templ
             console.log("azure cluster creation started...");
             $scope.isSuccessCreation = true;
             $scope.isFailedCreation = false;
+            $http({
+                method: 'POST',
+                dataType: 'json',
+                withCredentials: true,
+                url:  $rootScope.apiUrl + "/infra",
+                headers: {
+                    'Authorization': 'Basic ' + $rootScope.basic_auth
+                },
+                data: {
+                    cloudPlatform: "AZURE",
+                    clusterName: clname.value,
+                    parameters: {
+                        location: cllocation.value,
+                        name: clname.value,
+                        description: description.value,
+                        subnetAddressPrefix: subnetAddressPrefix.value,
+                        deploymentSlot: deploymentSlot.value,
+                        disableSshPasswordAuthentication: disableSshPasswordAuthentication.value,
+                        vmType: vmType.value,
+                        imageName: imageName.value,
+                        userName: userName.value,
+                        password: password.value,
+                        sshString: sshString.value
+                    }
+                }
+            }).success(function (data, status, headers, config) {
+                console.log("success");
+                $scope.isSuccessCreation = true;
+                $scope.isFailedCreation = false;
+            }).error(function (data, status, headers, config) {
+                console.log("unsuccess");
+                $scope.isSuccessCreation = false;
+                $scope.isFailedCreation = true;
+            });
             if ($scope.isSuccessCreation === true ) {
                 wait();
-                var infraObject = {
-                    location: cllocation.value,
-                    name: clname.value,
-                    description: description.value,
-                    subnetAddressPrefix: subnetAddressPrefix.value,
-                    deploymentSlot: deploymentSlot.value,
-                    disableSshPasswordAuthentication: disableSshPasswordAuthentication.value,
-                    vmType: vmType.value,
-                    imageName: imageName.value,
-                    userName: userName.value,
-                    password: password.value,
-                    sshString: sshString.value,
-                    cloudPlatform: 'azure'
-                };
-                $rootScope.infras.push(infraObject);
-
                 $location.path("/");
             }
         }
