@@ -30,6 +30,7 @@ public class AzureInfraConverter extends AbstractConverter<InfraRequest, AzureIn
         putProperty(props, RequiredAzureInfraParam.DISABLESSHPASSWORDAUTHENTICATION.getName(), entity.getDisableSshPasswordAuthentication());
         putProperty(props, RequiredAzureInfraParam.USERNAME.getName(), entity.getUserName());
         putProperty(props, RequiredAzureInfraParam.PASSWORD.getName(), entity.getPassword());
+        azureStackJson.setCloudPlatform(CloudPlatform.AZURE);
         azureStackJson.setParameters(props);
         return azureStackJson;
     }

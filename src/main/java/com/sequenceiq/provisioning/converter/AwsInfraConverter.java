@@ -1,6 +1,7 @@
 package com.sequenceiq.provisioning.converter;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
@@ -17,7 +18,10 @@ public class AwsInfraConverter extends AbstractConverter<InfraRequest, AwsInfra>
         InfraRequest awsStackJson = new InfraRequest();
         awsStackJson.setId(entity.getId());
         awsStackJson.setClusterName(entity.getName());
-        awsStackJson.setParameters(new HashMap<String, String>());
+        Map<String, String> props = new HashMap<>();
+        props.put(RequiredAwsInfraParam.KEY_NAME.getName(), entity.getKeyName());
+        props.put(RequiredAwsInfraParam.REGION.getName(), entity.getRegion());
+        awsStackJson.setParameters(props);
         awsStackJson.setCloudPlatform(CloudPlatform.AWS);
         return awsStackJson;
     }

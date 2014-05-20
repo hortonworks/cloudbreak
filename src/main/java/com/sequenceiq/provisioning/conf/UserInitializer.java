@@ -19,12 +19,6 @@ public class UserInitializer implements InitializingBean {
     @Override
     public void afterPropertiesSet() throws Exception {
 
-        User user1 = new User();
-        user1.setEmail("test@seq.com");
-        user1.setFirstName("seq");
-        user1.setLastName("test");
-        user1.setPassword("password");
-
         User user2 = new User();
         user2.setEmail("user@seq.com");
         user2.setFirstName("seq");
@@ -40,7 +34,6 @@ public class UserInitializer implements InitializingBean {
         awsInfra.setUser(user2);
         user2.getAwsInfraList().add(awsInfra);
 
-        userRepository.save(user1);
         userRepository.save(user2);
 
     }

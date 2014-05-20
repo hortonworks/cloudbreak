@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.provisioning.controller.json.CloudInstanceRequest;
 import com.sequenceiq.provisioning.domain.AzureCloudInstance;
+import com.sequenceiq.provisioning.domain.CloudPlatform;
 import com.sequenceiq.provisioning.repository.AzureInfraRepository;
 
 @Component
@@ -19,6 +20,7 @@ public class AzureCloudInstanceConverter extends AbstractConverter<CloudInstance
         cloudInstanceRequest.setId(entity.getId());
         cloudInstanceRequest.setInfraId(entity.getAzureInfra().getId());
         cloudInstanceRequest.setClusterSize(entity.getClusterSize());
+        cloudInstanceRequest.setCloudPlatform(CloudPlatform.AZURE);
         return cloudInstanceRequest;
     }
 
