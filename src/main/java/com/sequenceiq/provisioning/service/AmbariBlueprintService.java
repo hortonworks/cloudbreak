@@ -7,21 +7,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.provisioning.controller.BadRequestException;
 import com.sequenceiq.provisioning.controller.InternalServerException;
 import com.sequenceiq.provisioning.controller.NotFoundException;
 import com.sequenceiq.provisioning.controller.json.BlueprintJson;
+import com.sequenceiq.provisioning.controller.json.JsonHelper;
 import com.sequenceiq.provisioning.domain.User;
 
 @Service
 public class AmbariBlueprintService {
+
+    @Autowired
+    private JsonHelper jsonHelper;
 
     public void addBlueprint(User user, Long cloudId, BlueprintJson blueprintJson) {
         // TODO get ambari client host and port from cloud service
@@ -72,11 +73,7 @@ public class AmbariBlueprintService {
 
     private BlueprintJson createBlueprintJsonFromString(String blueprint) throws IOException {
         BlueprintJson blueprintJson = new BlueprintJson();
-        ObjectMapper mapper = new ObjectMapper();
-        JsonFactory factory = mapper.getFactory();
-        JsonParser jp = factory.createParser(blueprint);
-        JsonNode actualObj = mapper.readTree(jp);
-        blueprintJson.setAmbariBlueprint(actualObj);
+        blueprintJson.setAmbariBlueprint(jsonHelper.createJsonFromString(blueprint));
         return blueprintJson;
     }
 }

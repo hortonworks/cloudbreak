@@ -9,22 +9,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.provisioning.controller.InternalServerException;
 import com.sequenceiq.provisioning.controller.NotFoundException;
 import com.sequenceiq.provisioning.controller.json.ClusterRequest;
 import com.sequenceiq.provisioning.controller.json.ClusterResponse;
 import com.sequenceiq.provisioning.controller.json.HostGroupMappingJson;
+import com.sequenceiq.provisioning.controller.json.JsonHelper;
 import com.sequenceiq.provisioning.domain.User;
 
 @Service
 public class AmbariClusterService {
+
+    @Autowired
+    private JsonHelper jsonHelper;
 
     public void createCluster(User user, Long cloudId, ClusterRequest clusterRequest) {
         try {
@@ -67,11 +68,7 @@ public class AmbariClusterService {
 
     private ClusterResponse createClusterJsonFromString(String cluster) throws IOException {
         ClusterResponse clusterResponse = new ClusterResponse();
-        ObjectMapper mapper = new ObjectMapper();
-        JsonFactory factory = mapper.getFactory();
-        JsonParser jp = factory.createParser(cluster);
-        JsonNode actualObj = mapper.readTree(jp);
-        clusterResponse.setCluster(actualObj);
+        clusterResponse.setCluster(jsonHelper.createJsonFromString(cluster));
         return clusterResponse;
     }
 }
