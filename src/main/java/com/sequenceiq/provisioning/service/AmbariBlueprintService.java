@@ -46,7 +46,7 @@ public class AmbariBlueprintService {
             AmbariClient ambariClient = new AmbariClient("172.17.0.2", "8080");
             Set<String> blueprintNames = ambariClient.getBlueprintsMap().keySet();
             for (String blueprintName : blueprintNames) {
-                blueprints.add(createBlueprintJsonFromString(cloudId, ambariClient.getBlueprintAsJson(blueprintName)));
+                blueprints.add(createBlueprintJsonFromString(ambariClient.getBlueprintAsJson(blueprintName)));
             }
             return blueprints;
         } catch (IOException e) {
@@ -58,7 +58,7 @@ public class AmbariBlueprintService {
         // TODO get ambari client host and port from cloud service
         AmbariClient ambariClient = new AmbariClient("172.17.0.2", "8080");
         try {
-            return createBlueprintJsonFromString(cloudId, ambariClient.getBlueprintAsJson(id));
+            return createBlueprintJsonFromString(ambariClient.getBlueprintAsJson(id));
         } catch (HttpResponseException e) {
             if ("Not Found".equals(e.getMessage())) {
                 throw new NotFoundException("Ambari blueprint not found.", e);
@@ -70,7 +70,7 @@ public class AmbariBlueprintService {
         }
     }
 
-    private BlueprintJson createBlueprintJsonFromString(Long cloudId, String blueprint) throws IOException {
+    private BlueprintJson createBlueprintJsonFromString(String blueprint) throws IOException {
         BlueprintJson blueprintJson = new BlueprintJson();
         ObjectMapper mapper = new ObjectMapper();
         JsonFactory factory = mapper.getFactory();

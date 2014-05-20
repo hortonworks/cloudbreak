@@ -3,7 +3,7 @@ package com.sequenceiq.provisioning.controller.json;
 import java.util.List;
 
 //TODO: validate that the sum cardinality in the hostGroups is the same as the nodeCount in the cloudInstance
-public class ClusterJson {
+public class ClusterRequest {
 
     private String clusterName;
     private String blueprintName;
