@@ -17,9 +17,9 @@ public class UserJson implements JsonEntity {
 
     private String jks;
 
-    private Set<InfraRequest> azureInfras = new HashSet<>();
+    private Set<InfraJson> azureInfras = new HashSet<>();
 
-    private Set<InfraRequest> awsInfras = new HashSet<>();
+    private Set<InfraJson> awsInfras = new HashSet<>();
 
     private Set<CloudInstanceJson> cloudInstances = new HashSet<>();
 
@@ -75,19 +75,19 @@ public class UserJson implements JsonEntity {
         this.jks = jks;
     }
 
-    public Set<InfraRequest> getAwsInfras() {
+    public Set<InfraJson> getAwsInfras() {
         return awsInfras;
     }
 
-    public void setAwsInfras(Set<InfraRequest> awsInfras) {
+    public void setAwsInfras(Set<InfraJson> awsInfras) {
         this.awsInfras = awsInfras;
     }
 
-    public Set<InfraRequest> getAzureInfras() {
+    public Set<InfraJson> getAzureInfras() {
         return azureInfras;
     }
 
-    public void setAzureInfras(Set<InfraRequest> azureInfras) {
+    public void setAzureInfras(Set<InfraJson> azureInfras) {
         this.azureInfras = azureInfras;
     }
 

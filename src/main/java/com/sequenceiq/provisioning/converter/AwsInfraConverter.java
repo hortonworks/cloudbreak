@@ -5,17 +5,17 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.provisioning.controller.json.InfraRequest;
+import com.sequenceiq.provisioning.controller.json.InfraJson;
 import com.sequenceiq.provisioning.controller.validation.RequiredAwsInfraParam;
 import com.sequenceiq.provisioning.domain.AwsInfra;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
 
 @Component
-public class AwsInfraConverter extends AbstractConverter<InfraRequest, AwsInfra> {
+public class AwsInfraConverter extends AbstractConverter<InfraJson, AwsInfra> {
 
     @Override
-    public InfraRequest convert(AwsInfra entity) {
-        InfraRequest awsStackJson = new InfraRequest();
+    public InfraJson convert(AwsInfra entity) {
+        InfraJson awsStackJson = new InfraJson();
         awsStackJson.setId(entity.getId());
         awsStackJson.setClusterName(entity.getName());
         Map<String, String> props = new HashMap<>();
@@ -27,7 +27,7 @@ public class AwsInfraConverter extends AbstractConverter<InfraRequest, AwsInfra>
     }
 
     @Override
-    public AwsInfra convert(InfraRequest json) {
+    public AwsInfra convert(InfraJson json) {
         AwsInfra awsInfra = new AwsInfra();
         awsInfra.setName(json.getClusterName());
         awsInfra.setRegion(json.getParameters().get(RequiredAwsInfraParam.REGION.getName()));

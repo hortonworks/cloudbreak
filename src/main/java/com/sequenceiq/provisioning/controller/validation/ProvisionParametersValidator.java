@@ -9,7 +9,7 @@ import javax.validation.ConstraintValidatorContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.provisioning.controller.json.InfraRequest;
+import com.sequenceiq.provisioning.controller.json.InfraJson;
 
 /**
  * Validates a provision request. Because different parameters belong to
@@ -18,7 +18,7 @@ import com.sequenceiq.provisioning.controller.json.InfraRequest;
  * format.
  */
 @Component
-public class ProvisionParametersValidator implements ConstraintValidator<ValidProvisionRequest, InfraRequest> {
+public class ProvisionParametersValidator implements ConstraintValidator<ValidProvisionRequest, InfraJson> {
 
     @Autowired
     private RequiredParametersValidator requiredParametersValidator;
@@ -35,7 +35,7 @@ public class ProvisionParametersValidator implements ConstraintValidator<ValidPr
     }
 
     @Override
-    public boolean isValid(InfraRequest request, ConstraintValidatorContext context) {
+    public boolean isValid(InfraJson request, ConstraintValidatorContext context) {
         boolean valid = true;
         switch (request.getCloudPlatform()) {
         case AWS:
@@ -50,11 +50,11 @@ public class ProvisionParametersValidator implements ConstraintValidator<ValidPr
         return valid;
     }
 
-    private boolean validateAzureParams(InfraRequest request, ConstraintValidatorContext context) {
+    private boolean validateAzureParams(InfraJson request, ConstraintValidatorContext context) {
         return requiredParametersValidator.validate(request.getParameters(), context, requiredAzureParams);
     }
 
-    private boolean validateAWSParams(InfraRequest request, ConstraintValidatorContext context) {
+    private boolean validateAWSParams(InfraJson request, ConstraintValidatorContext context) {
         // TODO: validate instanceType, sshLocation, etc.. with regex
         return requiredParametersValidator.validate(request.getParameters(), context, requiredAWSParams);
     }

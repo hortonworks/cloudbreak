@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.provisioning.controller.NotFoundException;
-import com.sequenceiq.provisioning.controller.json.InfraRequest;
+import com.sequenceiq.provisioning.controller.json.InfraJson;
 import com.sequenceiq.provisioning.converter.AwsInfraConverter;
 import com.sequenceiq.provisioning.converter.AzureInfraConverter;
 import com.sequenceiq.provisioning.domain.AwsInfra;
@@ -30,15 +30,15 @@ public class SimpleInfraService implements InfraService {
     private AzureInfraConverter azureInfraConverter;
 
     @Override
-    public Set<InfraRequest> getAll(User user) {
-        Set<InfraRequest> result = new HashSet<>();
+    public Set<InfraJson> getAll(User user) {
+        Set<InfraJson> result = new HashSet<>();
         result.addAll(awsInfraConverter.convertAllEntityToJson(user.getAwsInfras()));
         result.addAll(azureInfraConverter.convertAllEntityToJson(user.getAzureInfras()));
         return result;
     }
 
     @Override
-    public InfraRequest get(Long id) {
+    public InfraJson get(Long id) {
         Infra infra = infraRepository.findOne(id);
         if (infra == null) {
             throw new NotFoundException(String.format("Infrastructure '%s' not found.", id));
@@ -55,7 +55,7 @@ public class SimpleInfraService implements InfraService {
     }
 
     @Override
-    public void create(User user, InfraRequest infraRequest) {
+    public void create(User user, InfraJson infraRequest) {
         switch (infraRequest.getCloudPlatform()) {
         case AWS:
             Infra awsInfra = awsInfraConverter.convert(infraRequest);

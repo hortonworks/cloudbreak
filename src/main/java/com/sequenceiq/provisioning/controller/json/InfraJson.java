@@ -8,7 +8,7 @@ import com.sequenceiq.provisioning.controller.validation.ValidProvisionRequest;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
 
 @ValidProvisionRequest
-public class InfraRequest implements JsonEntity {
+public class InfraJson implements JsonEntity {
 
     private Long id;
     private CloudPlatform cloudPlatform;
