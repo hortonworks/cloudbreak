@@ -4,10 +4,9 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.provisioning.domain.AwsCloudInstance;
 import com.sequenceiq.provisioning.domain.AwsInfra;
-import com.sequenceiq.provisioning.domain.AzureCloudInstance;
 import com.sequenceiq.provisioning.domain.AzureInfra;
+import com.sequenceiq.provisioning.domain.CloudInstance;
 import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.repository.UserRepository;
 
@@ -38,13 +37,13 @@ public class UserInitializer implements InitializingBean {
         awsInfra.setRegion("region-1");
         awsInfra.setUser(user2);
 
-        AwsCloudInstance awsCloudInstance = new AwsCloudInstance();
-        awsCloudInstance.setAwsInfra(awsInfra);
+        CloudInstance awsCloudInstance = new CloudInstance();
+        awsCloudInstance.setInfra(awsInfra);
         awsCloudInstance.setClusterSize(CLUSTER_SIZE);
         awsCloudInstance.setUser(user2);
 
         user2.getAwsInfraList().add(awsInfra);
-        user2.getAwsCloudInstanceList().add(awsCloudInstance);
+        user2.getCloudInstances().add(awsCloudInstance);
 
         AzureInfra azureInfra = new AzureInfra();
         azureInfra.setDeploymentSlot("slot");
@@ -58,13 +57,13 @@ public class UserInitializer implements InitializingBean {
         azureInfra.setVmType("small");
         azureInfra.setUser(user2);
 
-        AzureCloudInstance azureCloudInstance = new AzureCloudInstance();
-        azureCloudInstance.setAzureInfra(azureInfra);
+        CloudInstance azureCloudInstance = new CloudInstance();
+        azureCloudInstance.setInfra(azureInfra);
         azureCloudInstance.setClusterSize(CLUSTER_SIZE);
         azureCloudInstance.setUser(user2);
 
         user2.getAzureInfraList().add(azureInfra);
-        user2.getAzureCloudInstanceList().add(azureCloudInstance);
+        user2.getCloudInstances().add(azureCloudInstance);
 
         userRepository.save(user2);
 
