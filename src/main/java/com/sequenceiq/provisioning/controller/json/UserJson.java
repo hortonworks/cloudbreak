@@ -3,36 +3,25 @@ package com.sequenceiq.provisioning.controller.json;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 public class UserJson implements JsonEntity {
 
-    @JsonProperty("firstName")
     private String firstName;
 
-    @JsonProperty("lastName")
     private String lastName;
 
-    @JsonProperty("email")
     private String email;
 
-    @JsonProperty("roleArn")
     private String roleArn;
 
-    @JsonProperty("subscriptionId")
     private String subscriptionId;
 
-    @JsonProperty("jks")
     private String jks;
 
-    @JsonProperty("azureInfraList")
-    private Set<InfraRequest> azureInfraList = new HashSet<>();
+    private Set<InfraRequest> azureInfras = new HashSet<>();
 
-    @JsonProperty("awsInfraList")
-    private Set<InfraRequest> awsInfraList = new HashSet<>();
+    private Set<InfraRequest> awsInfras = new HashSet<>();
 
-    @JsonProperty("cloudList")
-    private Set<CloudInstanceJson> cloudList = new HashSet<>();
+    private Set<CloudInstanceJson> cloudInstances = new HashSet<>();
 
     public UserJson() {
 
@@ -86,27 +75,28 @@ public class UserJson implements JsonEntity {
         this.jks = jks;
     }
 
-    public Set<InfraRequest> getAzureInfraList() {
-        return azureInfraList;
+    public Set<InfraRequest> getAwsInfras() {
+        return awsInfras;
     }
 
-    public void setAzureInfraList(Set<InfraRequest> azureInfraList) {
-        this.azureInfraList = azureInfraList;
+    public void setAwsInfras(Set<InfraRequest> awsInfras) {
+        this.awsInfras = awsInfras;
     }
 
-    public Set<InfraRequest> getAwsInfraList() {
-        return awsInfraList;
+    public Set<InfraRequest> getAzureInfras() {
+        return azureInfras;
     }
 
-    public void setAwsInfraList(Set<InfraRequest> awsInfraList) {
-        this.awsInfraList = awsInfraList;
+    public void setAzureInfras(Set<InfraRequest> azureInfras) {
+        this.azureInfras = azureInfras;
     }
 
-    public Set<CloudInstanceJson> getCloudList() {
-        return cloudList;
+    public Set<CloudInstanceJson> getCloudInstances() {
+        return cloudInstances;
     }
 
-    public void setCloudList(Set<CloudInstanceJson> cloudList) {
-        this.cloudList = cloudList;
+    public void setCloudInstances(Set<CloudInstanceJson> cloudInstances) {
+        this.cloudInstances = cloudInstances;
     }
+
 }

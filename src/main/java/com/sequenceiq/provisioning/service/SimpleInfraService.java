@@ -32,8 +32,8 @@ public class SimpleInfraService implements InfraService {
     @Override
     public Set<InfraRequest> getAll(User user) {
         Set<InfraRequest> result = new HashSet<>();
-        result.addAll(awsInfraConverter.convertAllEntityToJson(user.getAwsInfraList()));
-        result.addAll(azureInfraConverter.convertAllEntityToJson(user.getAzureInfraList()));
+        result.addAll(awsInfraConverter.convertAllEntityToJson(user.getAwsInfras()));
+        result.addAll(azureInfraConverter.convertAllEntityToJson(user.getAzureInfras()));
         return result;
     }
 
