@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
 import com.sequenceiq.provisioning.json.JsonEntity;
 
-public class CloudInstanceRequest implements JsonEntity {
+public class CloudInstanceJson implements JsonEntity {
 
     private Long id;
     @Min(value = 2)
@@ -15,7 +15,7 @@ public class CloudInstanceRequest implements JsonEntity {
     private Long infraId;
     private CloudPlatform cloudPlatform;
 
-    public CloudInstanceRequest() {
+    public CloudInstanceJson() {
     }
 
     @JsonProperty("id")

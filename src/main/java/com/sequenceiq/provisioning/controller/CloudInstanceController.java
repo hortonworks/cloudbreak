@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.sequenceiq.provisioning.controller.json.CloudInstanceRequest;
+import com.sequenceiq.provisioning.controller.json.CloudInstanceJson;
 import com.sequenceiq.provisioning.controller.json.CloudInstanceResult;
 import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.repository.UserRepository;
@@ -33,23 +33,23 @@ public class CloudInstanceController {
 
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<CloudInstanceResult> createCloudInstance(@CurrentUser User user, @RequestBody @Valid CloudInstanceRequest cloudInstanceRequest) {
+    public ResponseEntity<CloudInstanceResult> createCloudInstance(@CurrentUser User user, @RequestBody @Valid CloudInstanceJson cloudInstanceRequest) {
         return new ResponseEntity<>(cloudInstanceService.create(userRepository.findOneWithLists(user.getId()), cloudInstanceRequest),
                 HttpStatus.CREATED);
     }
 
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<Set<CloudInstanceRequest>> getAllCloudInstances(@CurrentUser User user) {
+    public ResponseEntity<Set<CloudInstanceJson>> getAllCloudInstances(@CurrentUser User user) {
         User currentUser = userRepository.findOneWithLists(user.getId());
         return new ResponseEntity<>(cloudInstanceService.getAll(currentUser), HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "{cloudId}")
     @ResponseBody
-    public ResponseEntity<CloudInstanceRequest> getCloudInstance(@CurrentUser User user, @PathVariable Long cloudId) {
-        CloudInstanceRequest cloudInstanceRequest = cloudInstanceService.get(cloudId);
-        return new ResponseEntity<>(cloudInstanceRequest, HttpStatus.OK);
+    public ResponseEntity<CloudInstanceJson> getCloudInstance(@CurrentUser User user, @PathVariable Long cloudId) {
+        CloudInstanceJson cloudInstanceJson = cloudInstanceService.get(cloudId);
+        return new ResponseEntity<>(cloudInstanceJson, HttpStatus.OK);
     }
 
 }

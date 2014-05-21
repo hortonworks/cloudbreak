@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.provisioning.controller.NotFoundException;
-import com.sequenceiq.provisioning.controller.json.CloudInstanceRequest;
+import com.sequenceiq.provisioning.controller.json.CloudInstanceJson;
 import com.sequenceiq.provisioning.controller.json.CloudInstanceResult;
 import com.sequenceiq.provisioning.converter.CloudInstanceConverter;
 import com.sequenceiq.provisioning.domain.CloudInstance;
@@ -37,14 +37,14 @@ public class SimpleCloudInstanceService implements CloudInstanceService {
     private Map<CloudPlatform, ProvisionService> provisionServices;
 
     @Override
-    public Set<CloudInstanceRequest> getAll(User user) {
-        Set<CloudInstanceRequest> result = new HashSet<>();
+    public Set<CloudInstanceJson> getAll(User user) {
+        Set<CloudInstanceJson> result = new HashSet<>();
         result.addAll(cloudInstanceConverter.convertAllEntityToJson(user.getCloudInstances()));
         return result;
     }
 
     @Override
-    public CloudInstanceRequest get(Long id) {
+    public CloudInstanceJson get(Long id) {
         CloudInstance cloudInstance = cloudInstanceRepository.findOne(id);
         if (cloudInstance == null) {
             throw new NotFoundException(String.format("CloudInstance '%s' not found", id));
@@ -54,7 +54,7 @@ public class SimpleCloudInstanceService implements CloudInstanceService {
     }
 
     @Override
-    public CloudInstanceResult create(User user, CloudInstanceRequest cloudInstanceRequest) {
+    public CloudInstanceResult create(User user, CloudInstanceJson cloudInstanceRequest) {
         Infra infra = infraRepository.findOne(cloudInstanceRequest.getInfraId());
         if (infra == null) {
             throw new EntityNotFoundException(String.format("Infrastructure '%s' not found", cloudInstanceRequest.getInfraId()));

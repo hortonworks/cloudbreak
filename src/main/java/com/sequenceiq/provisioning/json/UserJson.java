@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sequenceiq.provisioning.controller.json.CloudInstanceRequest;
+import com.sequenceiq.provisioning.controller.json.CloudInstanceJson;
 import com.sequenceiq.provisioning.controller.json.InfraRequest;
 
 public class UserJson implements JsonEntity {
@@ -34,7 +34,7 @@ public class UserJson implements JsonEntity {
     private Set<InfraRequest> awsInfraList = new HashSet<>();
 
     @JsonProperty("cloudList")
-    private Set<CloudInstanceRequest> cloudList = new HashSet<>();
+    private Set<CloudInstanceJson> cloudList = new HashSet<>();
 
     public UserJson() {
 
@@ -104,11 +104,11 @@ public class UserJson implements JsonEntity {
         this.awsInfraList = awsInfraList;
     }
 
-    public Set<CloudInstanceRequest> getCloudList() {
+    public Set<CloudInstanceJson> getCloudList() {
         return cloudList;
     }
 
-    public void setCloudList(Set<CloudInstanceRequest> cloudList) {
+    public void setCloudList(Set<CloudInstanceJson> cloudList) {
         this.cloudList = cloudList;
     }
 }
