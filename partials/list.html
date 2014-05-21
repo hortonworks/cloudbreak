@@ -23,7 +23,7 @@
                         </div>
                         <div ng-if="provider.cloudPlatform == 'AWS' ">
                             <ul class="list-group">
-                                <li class="list-group-item">Role Arn: {{provider.parameters.roleArn}}</li>
+                                <li class="list-group-item">Role Arn: <span class="label label-info">{{provider.parameters.roleArn}}</span></li>
                             </ul>
                         </div>
                     </td>
@@ -108,7 +108,6 @@
             <table class="table">
                 <thead>
                 <tr>
-                    <th class="text-center">Id</th>
                     <th class="text-center">Cluster Size</th>
                     <th class="text-center">Infra Id</th>
                     <th class="text-center">Delete</th>
@@ -116,7 +115,6 @@
                 </thead>
                 <tbody>
                 <tr ng-repeat= "cloudinstance in cloudinstances">
-                    <td class="text-center">{{cloudinstance.id}}</td>
                     <td class="text-center">{{cloudinstance.clusterSize}}</td>
                     <td class="text-center"><span class="label label-primary">{{cloudinstance.infraId}}</span></td>
                     <td class="text-center"><a type="button" class="btn btn-danger"  ng-click="deleteCloudInstance(index)">Delete</a></td>

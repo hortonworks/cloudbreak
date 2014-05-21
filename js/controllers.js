@@ -81,7 +81,6 @@ provisioningControllers.controller('ProvisioningController', ['$scope', '$http',
                     'Content-Type': 'application/json'
                 }
             }).success(function (data, status, headers, config) {
-                console.log(data);
                 $rootScope.providers = data;
             }).error(function (data, status, headers, config) {
                 console.log("unsuccess");
@@ -169,23 +168,16 @@ provisioningControllers.controller('AwsController', ['$scope', '$http', 'Templat
                     cloudPlatform: "AWS",
                     clusterName: clname.value,
                     parameters: {
-                        location: cllocation.value,
-                        keyname:  keyname.value
+                        region: cllocation.value,
+                        keyName:  keyname.value
                     }
                 }
             }).success(function (data, status, headers, config) {
-                console.log("success");
-                $scope.isSuccessCreation = true;
-                $scope.isFailedCreation = false;
+                $location.path("/");
             }).error(function (data, status, headers, config) {
                 console.log("unsuccess");
-                $scope.isSuccessCreation = false;
                 $scope.isFailedCreation = true;
             });
-            if ($scope.isSuccessCreation === true ) {
-                wait();
-                $location.path("/");
-            }
         }
 
     }
@@ -218,18 +210,11 @@ provisioningControllers.controller('CloudInstanceController', ['$scope', '$http'
                     infraId: $location.search().id
                 }
             }).success(function (data, status, headers, config) {
-                console.log("success");
-                $scope.isSuccessCreation = true;
-                $scope.isFailedCreation = false;
+                $location.path("/");
             }).error(function (data, status, headers, config) {
                 console.log("unsuccess");
-                $scope.isSuccessCreation = false;
                 $scope.isFailedCreation = true;
             });
-            if ($scope.isSuccessCreation === true ) {
-                wait();
-                $location.path("/");
-            }
         }
 
     }
@@ -248,7 +233,6 @@ provisioningControllers.controller('AzureController', ['$scope', '$http', 'Templ
         }
 
         $scope.createAzureCluster = function() {
-            console.log("azure cluster creation started...");
             $scope.isSuccessCreation = true;
             $scope.isFailedCreation = false;
             $http({
@@ -266,29 +250,22 @@ provisioningControllers.controller('AzureController', ['$scope', '$http', 'Templ
                         location: cllocation.value,
                         name: clname.value,
                         description: description.value,
-                        subnetAddressPrefix: subnetAddressPrefix.value,
+                        addressPrefix: subnetAddressPrefix.value,
                         deploymentSlot: deploymentSlot.value,
                         disableSshPasswordAuthentication: disableSshPasswordAuthentication.value,
                         vmType: vmType.value,
                         imageName: imageName.value,
                         userName: userName.value,
-                        password: password.value,
+                        password: clpassword.value,
                         sshString: sshString.value
                     }
                 }
             }).success(function (data, status, headers, config) {
-                console.log("success");
-                $scope.isSuccessCreation = true;
-                $scope.isFailedCreation = false;
+                $location.path("/");
             }).error(function (data, status, headers, config) {
                 console.log("unsuccess");
-                $scope.isSuccessCreation = false;
                 $scope.isFailedCreation = true;
             });
-            if ($scope.isSuccessCreation === true ) {
-                wait();
-                $location.path("/");
-            }
         }
     }
 ]);
@@ -338,18 +315,11 @@ provisioningControllers.controller('CloudProviderController', ['$scope', '$http'
                     }
                 }
             }).success(function (data, status, headers, config) {
-                console.log("success");
-                $scope.isSuccessCreation = true;
-                $scope.isFailedCreation = false;
+                $location.path("/");
             }).error(function (data, status, headers, config) {
                 console.log("unsuccess");
-                $scope.isSuccessCreation = false;
                 $scope.isFailedCreation = true;
             });
-            if ($scope.isSuccessCreation === true ) {
-                wait();
-                $location.path("/");
-            }
         }
 
         $scope.createAzureProvider = function() {
@@ -369,18 +339,11 @@ provisioningControllers.controller('CloudProviderController', ['$scope', '$http'
                     }
                 }
             }).success(function (data, status, headers, config) {
-                console.log("success");
-                $scope.isSuccessCreation = true;
-                $scope.isFailedCreation = false;
+                $location.path("/");
             }).error(function (data, status, headers, config) {
                 console.log("unsuccess");
-                $scope.isSuccessCreation = false;
                 $scope.isFailedCreation = true;
             });
-            if ($scope.isSuccessCreation === true ) {
-                wait();
-                $location.path("/");
-            }
         }
         $scope.createProvider();
     }
