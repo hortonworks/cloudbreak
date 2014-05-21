@@ -41,18 +41,19 @@ public class AwsProvisionService implements ProvisionService {
     @Override
     public CloudInstanceResult createCloudInstance(User user, CloudInstance cloudInstance) {
         AwsInfra awsInfra = (AwsInfra) cloudInstance.getInfra();
-        Regions region = Regions.fromName(awsInfra.getRegion());
-        String keyName = awsInfra.getKeyName();
-        String roleArn = user.getRoleArn();
-
         BasicSessionCredentials basicSessionCredentials = credentialsProvider.retrieveSessionCredentials(SESSION_CREDENTIALS_DURATION, "provision-ambari",
-                roleArn);
+                user.getRoleArn());
         AmazonCloudFormationClient amazonCloudFormationClient = new AmazonCloudFormationClient(basicSessionCredentials);
-        amazonCloudFormationClient.setRegion(Region.getRegion(region));
+        amazonCloudFormationClient.setRegion(Region.getRegion(Regions.fromName(awsInfra.getRegion())));
         CreateStackRequest createStackRequest = new CreateStackRequest()
-                .withStackName(awsInfra.getName())
+                .withStackName(cloudInstance.getName())
                 .withTemplateBody(template.getBody())
-                .withParameters(new Parameter().withParameterKey("KeyName").withParameterValue(keyName));
+                .withParameters(
+                        new Parameter().withParameterKey("KeyName").withParameterValue(awsInfra.getKeyName()),
+                        new Parameter().withParameterKey("AMIId").withParameterValue(awsInfra.getAmiId()),
+                        new Parameter().withParameterKey("AmbariAgentCount").withParameterValue(String.valueOf(cloudInstance.getClusterSize() - 1)),
+                        new Parameter().withParameterKey("ClusterNodeInstanceType").withParameterValue(awsInfra.getInstanceType().toString()),
+                        new Parameter().withParameterKey("SSHLocation").withParameterValue(awsInfra.getSshLocation()));
         CreateStackResult createStackResult = amazonCloudFormationClient.createStack(createStackRequest);
         return new AWSCloudInstanceResult(OK_STATUS, createStackResult);
     }

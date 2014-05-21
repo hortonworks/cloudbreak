@@ -4,6 +4,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.amazonaws.services.ec2.model.InstanceType;
 import com.sequenceiq.provisioning.domain.AwsInfra;
 import com.sequenceiq.provisioning.domain.AzureInfra;
 import com.sequenceiq.provisioning.domain.CloudInstance;
@@ -35,6 +36,9 @@ public class UserInitializer implements InitializingBean {
         awsInfra.setKeyName("smaple_key");
         awsInfra.setName("template1");
         awsInfra.setRegion("region-1");
+        awsInfra.setAmiId("ami-2918e35e");
+        awsInfra.setInstanceType(InstanceType.M1Small);
+        awsInfra.setSshLocation("0.0.0.0/0");
         awsInfra.setUser(user2);
 
         CloudInstance awsCloudInstance = new CloudInstance();

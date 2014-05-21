@@ -15,11 +15,10 @@
     },
 
     "SSHLocation" : {
-      "Description" : "Lockdown SSH access to the bastion host (default can be accessed from anywhere)",
+      "Description" : "Lockdown SSH access (default can be accessed from anywhere)",
       "Type" : "String",
       "MinLength": "9",
       "MaxLength": "18",
-      "Default" : "0.0.0.0/0",
       "AllowedPattern" : "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
       "ConstraintDescription" : "must be a valid CIDR range of the form x.x.x.x/x."
     },
@@ -27,53 +26,23 @@
     "ClusterNodeInstanceType" : {
       "Description" : "EC2 instance type of the nodes in the cluster",
       "Type" : "String",
-      "Default" : "m1.small",
       "AllowedValues" : ["t1.micro", "m1.small", "m1.medium", "m1.large", "m1.xlarge", "m2.xlarge", "m2.2xlarge", "m2.4xlarge", "m3.xlarge", "m3.2xlarge", "c1.medium", "c1.xlarge", "cc1.4xlarge", "cc2.8xlarge", "cg1.4xlarge", "hi1.4xlarge", "hs1.8xlarge"],
       "ConstraintDescription" : "must be a valid EC2 instance type."
     },
 
     "AmbariAgentCount" : {
       "Description" : "Number of Ambari agent instances to launch in the cluster.",
-      "Type" : "Number",
-      "Default" : "1"
+      "Type" : "Number"
+    },
+    
+    "AMIId" : {
+      "Description" : "AMI of the Amazon Image that contains the preinstalled Ambari",
+      "Type" : "String",
+      "AllowedPattern" : "ami-[0-9a-z]{8}"
     }
   },
 
   "Mappings" : {
-
-    "AWSInstanceType2Arch": {
-      "t1.micro"   : { "Arch": "PV64" },
-      "m1.small"   : { "Arch": "PV64" },
-      "m1.medium"  : { "Arch": "PV64" },
-      "m1.large"   : { "Arch": "PV64" },
-      "m1.xlarge"  : { "Arch": "PV64" },
-      "m3.xlarge"  : { "Arch": "PV64" },
-      "m3.2xlarge" : { "Arch": "PV64" },
-      "m2.xlarge"  : { "Arch": "PV64" },
-      "m2.2xlarge" : { "Arch": "PV64" },
-      "m2.4xlarge" : { "Arch": "PV64" },
-      "c1.medium"  : { "Arch": "PV64" },
-      "c1.xlarge"  : { "Arch": "PV64" },
-      "cc1.4xlarge": { "Arch": "CLU64" },
-      "cc2.8xlarge": { "Arch": "CLU64" },
-      "cg1.4xlarge": { "Arch": "GPU64" },
-      "hi1.4xlarge": { "Arch": "PV64" },
-      "hs1.8xlarge": { "Arch": "PV64" }
-    },
-
-    "AWSRegionArch2AMI": {
-
-      "us-east-1"     : { "PV64": "ami-05355a6c", "CLU64": "ami-a73758ce", "GPU64": "ami-cf3758a6" },
-      "us-west-2"     : { "PV64": "ami-0358ce33", "CLU64": "ami-d75bcde7", "GPU64": "NOT_YET_SUPPORTED" },
-      "us-west-1"     : { "PV64": "ami-3ffed17a", "CLU64": "ami-47fed102", "GPU64": "NOT_YET_SUPPORTED" },
-      "eu-west-1"     : { "PV64": "ami-c7c0d6b3", "CLU64": "ami-d1c0d6a5", "GPU64": "ami-45c0d631" },
-      "ap-southeast-1": { "PV64": "ami-fade91a8", "CLU64": "ami-18de914a", "GPU64": "NOT_YET_SUPPORTED" },
-      "ap-southeast-2": { "PV64": "ami-d16bfbeb", "CLU64": "ami-876bfbbd", "GPU64": "NOT_YET_SUPPORTED" },
-      "ap-northeast-1": { "PV64": "ami-39b23d38", "CLU64": "ami-2db33c2c", "GPU64": "NOT_YET_SUPPORTED" },
-      "sa-east-1"     : { "PV64": "ami-5253894f", "CLU64": "ami-38538925", "GPU64": "NOT_YET_SUPPORTED" },
-      "us-gov-west-1" : { "PV64": "ami-a58feb86", "CLU64": "NOT_YET_SUPPORTED", "64GPU" : "NOT_YET_SUPPORTED" }
-    },
-
     "SubnetConfig" : {
       "VPC"     : { "CIDR" : "10.0.0.0/16" },
       "Public"  : { "CIDR" : "10.0.0.0/24" }
@@ -160,7 +129,7 @@
       "DependsOn" : "PublicRoute",
       "Properties" : {
       	"AvailabilityZone" : { "Fn::GetAtt" : [ "PublicSubnet", "AvailabilityZone" ] },
-        "ImageId"        : { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" }, { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "ClusterNodeInstanceType" }, "Arch" ] } ] },
+        "ImageId"        : { "Ref" : "AMIId" },
         "InstanceType" : { "Ref" : "ClusterNodeInstanceType" },
         "KeyName" : { "Ref" : "KeyName" },
         "NetworkInterfaces" : [{
@@ -172,8 +141,7 @@
         }],
         "Tags" : [ {"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} } ],
         "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
-          "#!/bin/bash\n",
-          "echo 'hello'\n"
+          "#!/bin/bash\n"
         ]]}}
       }
     },
@@ -195,17 +163,13 @@
     "AmbariAgentLaunchConfig"  : {
       "Type" : "AWS::AutoScaling::LaunchConfiguration",
       "Properties" : {
-        "ImageId"        : { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" }, { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "ClusterNodeInstanceType" }, "Arch" ] } ] },
+        "ImageId"        : { "Ref" : "AMIId" },
         "SecurityGroups" : [ { "Ref" : "ClusterNodeSecurityGroup" } ],
         "InstanceType"   : { "Ref" : "ClusterNodeInstanceType" },
         "KeyName"        : { "Ref" : "KeyName" },
         "AssociatePublicIpAddress" : "true",
         "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
-          "#!/bin/bash -v\n",
-          "echo 'IP address of Ambari server:'\n",
-          "echo ",
           { "Fn::GetAtt" : [ "AmbariServerInstance" , "PrivateIp"] },
-          "echo ",
           { "Fn::GetAtt" : [ "AmbariServerInstance" , "PublicIp"] }
         ]]}}
       }
@@ -219,20 +183,6 @@
         "SecurityGroupIngress" : [
 		  { "IpProtocol" : "tcp", "FromPort" : "80", "ToPort" : "80", "CidrIp" : "0.0.0.0/0"} ,
           { "IpProtocol" : "tcp", "FromPort" : "22", "ToPort" : "22", "CidrIp" : { "Ref" : "SSHLocation" } } ]
-      }
-    },
-
-    "AmbariAgentWaitHandle" : {
-      "Type" : "AWS::CloudFormation::WaitConditionHandle"
-    },
-
-    "AmbariAgentWaitCondition" : {
-      "Type" : "AWS::CloudFormation::WaitCondition",
-      "DependsOn" : "AmbariAgents",
-      "Properties" : {
-        "Handle"  : { "Ref" : "AmbariAgentWaitHandle" },
-        "Timeout" : "3600",
-        "Count"   : { "Ref" : "AmbariAgentCount" }
       }
     }
   }

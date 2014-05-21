@@ -11,6 +11,7 @@ public class CloudInstanceJson implements JsonEntity {
     private Long id;
     @Min(value = 2)
     private int clusterSize;
+    private String cloudName;
     private Long infraId;
     private CloudPlatform cloudPlatform;
 
@@ -33,6 +34,14 @@ public class CloudInstanceJson implements JsonEntity {
 
     public void setClusterSize(int clusterSize) {
         this.clusterSize = clusterSize;
+    }
+
+    public String getCloudName() {
+        return cloudName;
+    }
+
+    public void setCloudName(String cloudName) {
+        this.cloudName = cloudName;
     }
 
     public Long getInfraId() {
