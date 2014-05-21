@@ -46,9 +46,6 @@ public class InfraController {
     @ResponseBody
     public ResponseEntity<InfraRequest> getCloudInstance(@CurrentUser User user, @PathVariable Long infraId) {
         InfraRequest infraRequest = commonInfraService.get(infraId);
-        if (infraRequest == null) {
-            new ResponseEntity<>(infraRequest, HttpStatus.NOT_FOUND);
-        }
         return new ResponseEntity<>(infraRequest, HttpStatus.CREATED);
     }
 

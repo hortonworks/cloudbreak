@@ -28,7 +28,7 @@ public class ExceptionControllerAdvice {
         return new ResponseEntity<>(new ExceptionResult(e.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler({ AccessDeniedException.class })
+    @ExceptionHandler({ AccessDeniedException.class, org.springframework.security.access.AccessDeniedException.class })
     public ResponseEntity<ExceptionResult> accessDenied(Exception e) {
         LOGGER.error(e.getMessage(), e);
         return new ResponseEntity<>(new ExceptionResult(e.getMessage()), HttpStatus.FORBIDDEN);

@@ -4,11 +4,10 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UnknownFormatConversionException;
 
-import javax.persistence.EntityNotFoundException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.provisioning.controller.NotFoundException;
 import com.sequenceiq.provisioning.controller.json.InfraRequest;
 import com.sequenceiq.provisioning.converter.AwsInfraConverter;
 import com.sequenceiq.provisioning.converter.AzureInfraConverter;
@@ -40,15 +39,15 @@ public class SimpleInfraService implements InfraService {
 
     @Override
     public InfraRequest get(Long id) {
-        Infra one = infraRepository.findOne(id);
-        if (one == null) {
-            throw new EntityNotFoundException("Entity not exist with id: " + id);
+        Infra infra = infraRepository.findOne(id);
+        if (infra == null) {
+            throw new NotFoundException(String.format("Infrastructure '%s' does not exist.", id));
         } else {
-            switch (one.cloudPlatform()) {
+            switch (infra.cloudPlatform()) {
             case AWS:
-                return awsInfraConverter.convert((AwsInfra) one);
+                return awsInfraConverter.convert((AwsInfra) infra);
             case AZURE:
-                return azureInfraConverter.convert((AzureInfra) one);
+                return azureInfraConverter.convert((AzureInfra) infra);
             default:
                 throw new UnknownFormatConversionException("The cloudPlatform type not supported.");
             }
