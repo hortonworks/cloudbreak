@@ -18,6 +18,8 @@ public class CloudInstanceConverter extends AbstractConverter<CloudInstanceReque
         CloudInstanceRequest cloudInstanceRequest = new CloudInstanceRequest();
         cloudInstanceRequest.setInfraId(entity.getInfra().getId());
         cloudInstanceRequest.setClusterSize(entity.getClusterSize());
+        cloudInstanceRequest.setId(entity.getId());
+        cloudInstanceRequest.setCloudPlatform(entity.getInfra().cloudPlatform());
         return cloudInstanceRequest;
     }
 

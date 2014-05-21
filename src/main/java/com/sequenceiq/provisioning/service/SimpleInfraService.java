@@ -41,7 +41,7 @@ public class SimpleInfraService implements InfraService {
     public InfraRequest get(Long id) {
         Infra infra = infraRepository.findOne(id);
         if (infra == null) {
-            throw new NotFoundException(String.format("Infrastructure '%s' does not exist.", id));
+            throw new NotFoundException(String.format("Infrastructure '%s' not found.", id));
         } else {
             switch (infra.cloudPlatform()) {
             case AWS:
@@ -49,7 +49,7 @@ public class SimpleInfraService implements InfraService {
             case AZURE:
                 return azureInfraConverter.convert((AzureInfra) infra);
             default:
-                throw new UnknownFormatConversionException("The cloudPlatform type not supported.");
+                throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", infra.cloudPlatform()));
             }
         }
     }
@@ -68,7 +68,7 @@ public class SimpleInfraService implements InfraService {
             infraRepository.save(azureInfra);
             break;
         default:
-            throw new UnknownFormatConversionException("The cloudPlatform type not supported.");
+            throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", infraRequest.getCloudPlatform()));
         }
     }
 
