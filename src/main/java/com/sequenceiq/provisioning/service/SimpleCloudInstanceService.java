@@ -67,4 +67,13 @@ public class SimpleCloudInstanceService implements CloudInstanceService {
         return provisionService.createCloudInstance(user, cloudInstance);
     }
 
+    @Override
+    public void delete(Long id) {
+        CloudInstance cloudInstance = cloudInstanceRepository.findOne(id);
+        if (cloudInstance == null) {
+            throw new NotFoundException(String.format("CloudInstance '%s' not found.", id));
+        }
+        cloudInstanceRepository.delete(cloudInstance);
+    }
+
 }

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sequenceiq.provisioning.controller.json.CloudInstanceJson;
 import com.sequenceiq.provisioning.controller.json.CloudInstanceResult;
+import com.sequenceiq.provisioning.controller.json.InfraJson;
 import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.repository.UserRepository;
 import com.sequenceiq.provisioning.security.CurrentUser;
@@ -50,6 +51,13 @@ public class CloudInstanceController {
     public ResponseEntity<CloudInstanceJson> getCloudInstance(@CurrentUser User user, @PathVariable Long cloudId) {
         CloudInstanceJson cloudInstanceJson = cloudInstanceService.get(cloudId);
         return new ResponseEntity<>(cloudInstanceJson, HttpStatus.OK);
+    }
+
+    @RequestMapping(method = RequestMethod.DELETE, value = "{cloudId}")
+    @ResponseBody
+    public ResponseEntity<InfraJson> deleteInfra(@CurrentUser User user, @PathVariable Long cloudId) {
+        cloudInstanceService.delete(cloudId);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 }
