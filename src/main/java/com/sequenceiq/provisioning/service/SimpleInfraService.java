@@ -72,4 +72,13 @@ public class SimpleInfraService implements InfraService {
         }
     }
 
+    @Override
+    public void delete(Long id) {
+        Infra infra = infraRepository.findOne(id);
+        if (infra == null){
+            throw new NotFoundException(String.format("Infrastructure '%s' not found.", id));
+        }
+        infraRepository.delete(infra);
+    }
+
 }
