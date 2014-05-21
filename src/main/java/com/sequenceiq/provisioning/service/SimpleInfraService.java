@@ -51,12 +51,12 @@ public class SimpleInfraService implements InfraService {
             throw new NotFoundException(String.format("Infrastructure '%s' not found.", id));
         } else {
             switch (infra.cloudPlatform()) {
-            case AWS:
-                return awsInfraConverter.convert((AwsInfra) infra);
-            case AZURE:
-                return azureInfraConverter.convert((AzureInfra) infra);
-            default:
-                throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", infra.cloudPlatform()));
+                case AWS:
+                    return awsInfraConverter.convert((AwsInfra) infra);
+                case AZURE:
+                    return azureInfraConverter.convert((AzureInfra) infra);
+                default:
+                    throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", infra.cloudPlatform()));
             }
         }
     }
@@ -64,25 +64,25 @@ public class SimpleInfraService implements InfraService {
     @Override
     public void create(User user, InfraJson infraRequest) {
         switch (infraRequest.getCloudPlatform()) {
-        case AWS:
-            Infra awsInfra = awsInfraConverter.convert(infraRequest);
-            awsInfra.setUser(user);
-            infraRepository.save(awsInfra);
-            break;
-        case AZURE:
-            Infra azureInfra = azureInfraConverter.convert(infraRequest);
-            azureInfra.setUser(user);
-            infraRepository.save(azureInfra);
-            break;
-        default:
-            throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", infraRequest.getCloudPlatform()));
+            case AWS:
+                Infra awsInfra = awsInfraConverter.convert(infraRequest);
+                awsInfra.setUser(user);
+                infraRepository.save(awsInfra);
+                break;
+            case AZURE:
+                Infra azureInfra = azureInfraConverter.convert(infraRequest);
+                azureInfra.setUser(user);
+                infraRepository.save(azureInfra);
+                break;
+            default:
+                throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", infraRequest.getCloudPlatform()));
         }
     }
 
     @Override
     public void delete(Long id) {
         Infra infra = infraRepository.findOne(id);
-        if (infra == null){
+        if (infra == null) {
             throw new NotFoundException(String.format("Infrastructure '%s' not found.", id));
         }
         List<CloudInstance> allCloudForInfra = getAllCloudForInfra(id);
