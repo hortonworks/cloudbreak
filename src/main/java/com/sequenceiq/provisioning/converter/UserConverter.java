@@ -3,8 +3,8 @@ package com.sequenceiq.provisioning.converter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.provisioning.controller.json.UserJson;
 import com.sequenceiq.provisioning.domain.User;
-import com.sequenceiq.provisioning.json.UserJson;
 
 @Component
 public class UserConverter extends AbstractConverter<UserJson, User> {

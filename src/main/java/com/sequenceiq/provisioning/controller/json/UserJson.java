@@ -1,11 +1,9 @@
-package com.sequenceiq.provisioning.json;
+package com.sequenceiq.provisioning.controller.json;
 
 import java.util.HashSet;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sequenceiq.provisioning.controller.json.CloudInstanceJson;
-import com.sequenceiq.provisioning.controller.json.InfraRequest;
 
 public class UserJson implements JsonEntity {
 

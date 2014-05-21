@@ -5,8 +5,8 @@ import java.util.Set;
 
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
+import com.sequenceiq.provisioning.controller.json.JsonEntity;
 import com.sequenceiq.provisioning.domain.ProvisionEntity;
-import com.sequenceiq.provisioning.json.JsonEntity;
 
 public abstract class AbstractConverter<J extends JsonEntity, E extends ProvisionEntity> implements Converter<J, E> {
 

@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.sequenceiq.provisioning.controller.json.UserJson;
 import com.sequenceiq.provisioning.converter.UserConverter;
 import com.sequenceiq.provisioning.domain.User;
-import com.sequenceiq.provisioning.json.UserJson;
 import com.sequenceiq.provisioning.repository.UserRepository;
 import com.sequenceiq.provisioning.security.CurrentUser;
 
