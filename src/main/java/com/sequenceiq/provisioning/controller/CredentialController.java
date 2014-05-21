@@ -10,6 +10,8 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -32,6 +34,8 @@ import com.sequenceiq.provisioning.service.azure.AzureCredentialService;
 @RequestMapping("credential")
 public class CredentialController {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(CredentialController.class);
+
     @Resource
     private Map<CloudPlatform, CredentialService> credentialServices;
 
@@ -48,8 +52,12 @@ public class CredentialController {
     public List<CredentialJson> listCredentials(@CurrentUser User user) {
         List<CredentialJson> credentials = new ArrayList<>();
         for (CredentialService credentialService : credentialServices.values()) {
-            CredentialJson credential = credentialService.retrieveCredentials(user);
-            credentials.add(credential);
+            try {
+                CredentialJson credential = credentialService.retrieveCredentials(user);
+                credentials.add(credential);
+            } catch (NotFoundException e) {
+                LOGGER.info(e.getMessage());
+            }
         }
         return credentials;
     }

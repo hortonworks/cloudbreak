@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.provisioning.controller.NotFoundException;
 import com.sequenceiq.provisioning.controller.json.CredentialJson;
 import com.sequenceiq.provisioning.controller.validation.RequiredAWSCredentialParam;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
@@ -28,6 +29,9 @@ public class AWSCredentialService implements CredentialService {
 
     @Override
     public CredentialJson retrieveCredentials(User user) {
+        if (user.getRoleArn() == null) {
+            throw new NotFoundException("Aws credentials (IAM Role ARN) not found.");
+        }
         CredentialJson credentialJson = new CredentialJson();
         credentialJson.setCloudPlatform(CloudPlatform.AWS);
         Map<String, String> parameters = new HashMap<>();

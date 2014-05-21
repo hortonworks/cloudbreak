@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.provisioning.controller.InternalServerException;
+import com.sequenceiq.provisioning.controller.NotFoundException;
 import com.sequenceiq.provisioning.controller.json.CredentialJson;
 import com.sequenceiq.provisioning.controller.validation.RequiredAzureCredentialParam;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
@@ -47,6 +48,9 @@ public class AzureCredentialService implements CredentialService {
 
     @Override
     public CredentialJson retrieveCredentials(User user) {
+        if (user.getSubscriptionId() == null && user.getJks() == null) {
+            throw new NotFoundException("Azure credentials (subscription id and certificate) not found");
+        }
         CredentialJson credentialJson = new CredentialJson();
         credentialJson.setCloudPlatform(CloudPlatform.AZURE);
         Map<String, String> parameters = new HashMap<>();
