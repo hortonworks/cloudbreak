@@ -21,13 +21,13 @@ apply plugin: 'sonar-runner'
 sourceCompatibility = 1.7
 group = 'com.sequenceiq'
 
-allprojects { 
+allprojects {
     apply from: "$rootDir/gradle/versioning.gradle"
-    ext.config = new ConfigSlurper(env).parse(file("$rootDir/gradle/config/buildConfig.groovy").toURL()) 
+    ext.config = new ConfigSlurper(env).parse(file("$rootDir/gradle/config/buildConfig.groovy").toURL())
 }
 
 jar {
-    baseName = 'provisioning-api'
+    baseName = 'cloudbreak'
 }
 
 configurations {
@@ -84,8 +84,8 @@ sonarRunner {
         property "sonar.jdbc.username", "$System.env.SONAR_USERNAME"
         property "sonar.jdbc.password", "$System.env.SONAR_PASSWORD"
         property "project.reporting.outputEncoding", "UTF-8"
-        property "sonar.projectKey", "provisioning-api"
-        property "sonar.projectName", "provisioning-api"
+        property "sonar.projectKey", "cloudbreak"
+        property "sonar.projectName", "cloudbreak"
     }
 }
 
