@@ -48,7 +48,7 @@ public class AzureCredentialService implements CredentialService {
 
     @Override
     public CredentialJson retrieveCredentials(User user) {
-        if (user.getSubscriptionId() == null && user.getJks() == null) {
+        if (user.getSubscriptionId() == null || user.getJks() == null) {
             throw new NotFoundException("Azure credentials (subscription id and certificate) not found");
         }
         CredentialJson credentialJson = new CredentialJson();
