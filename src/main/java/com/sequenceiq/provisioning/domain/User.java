@@ -21,8 +21,7 @@ import org.hibernate.validator.constraints.NotEmpty;
         query = "SELECT u FROM User u "
                 + "LEFT JOIN FETCH u.azureInfraList "
                 + "LEFT JOIN FETCH u.awsInfraList "
-                + "LEFT JOIN FETCH u.azureCloudInstanceList "
-                + "LEFT JOIN FETCH u.awsCloudInstanceList "
+                + "LEFT JOIN FETCH u.cloudInstances "
                 + "WHERE u.id= :id")
 public class User implements ProvisionEntity {
     @Id
@@ -49,18 +48,14 @@ public class User implements ProvisionEntity {
     @NotEmpty
     private String password;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<AzureInfra> azureInfraList = new HashSet<>();
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<AwsInfra> awsInfraList = new HashSet<>();
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<AzureCloudInstance> azureCloudInstanceList = new HashSet<>();
-
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<AwsCloudInstance> awsCloudInstanceList = new HashSet<>();
-
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<CloudInstance> cloudInstances = new HashSet<>();
 
     public User() {
     }
@@ -76,8 +71,7 @@ public class User implements ProvisionEntity {
         this.jks = user.jks;
         this.subscriptionId = user.subscriptionId;
         this.roleArn = user.roleArn;
-        this.awsCloudInstanceList = user.awsCloudInstanceList;
-        this.azureCloudInstanceList = user.azureCloudInstanceList;
+        this.cloudInstances = user.cloudInstances;
     }
 
     public String getPassword() {
@@ -160,20 +154,12 @@ public class User implements ProvisionEntity {
         this.jks = jks;
     }
 
-    public Set<AzureCloudInstance> getAzureCloudInstanceList() {
-        return azureCloudInstanceList;
+    public Set<CloudInstance> getCloudInstances() {
+        return cloudInstances;
     }
 
-    public void setAzureCloudInstanceList(Set<AzureCloudInstance> azureCloudInstanceList) {
-        this.azureCloudInstanceList = azureCloudInstanceList;
-    }
-
-    public Set<AwsCloudInstance> getAwsCloudInstanceList() {
-        return awsCloudInstanceList;
-    }
-
-    public void setAwsCloudInstanceList(Set<AwsCloudInstance> awsCloudInstanceList) {
-        this.awsCloudInstanceList = awsCloudInstanceList;
+    public void setCloudInstances(Set<CloudInstance> cloudInstances) {
+        this.cloudInstances = cloudInstances;
     }
 
     public String emailAsFolder() {

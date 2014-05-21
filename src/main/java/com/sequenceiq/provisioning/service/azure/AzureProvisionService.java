@@ -1,28 +1,25 @@
 package com.sequenceiq.provisioning.service.azure;
 
+import groovyx.net.http.HttpResponseDecorator;
+
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.provisioning.controller.json.AzureCloudInstanceResult;
-import com.sequenceiq.provisioning.controller.json.CloudInstanceRequest;
 import com.sequenceiq.provisioning.controller.json.CloudInstanceResult;
-import com.sequenceiq.provisioning.converter.AzureCloudInstanceConverter;
-import com.sequenceiq.provisioning.domain.AzureCloudInstance;
+import com.sequenceiq.provisioning.domain.AzureInfra;
+import com.sequenceiq.provisioning.domain.CloudInstance;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
 import com.sequenceiq.provisioning.domain.User;
-import com.sequenceiq.provisioning.repository.UserRepository;
-import com.sequenceiq.provisioning.service.CloudInstanceService;
-
-import groovyx.net.http.HttpResponseDecorator;
+import com.sequenceiq.provisioning.service.ProvisionService;
 
 @Service
-public class AzureCloudInstanceService implements CloudInstanceService {
+public class AzureProvisionService implements ProvisionService {
     private static final String OK_STATUS = "ok";
     private static final String LOCATION = "location";
     private static final String NAME = "name";
@@ -43,54 +40,46 @@ public class AzureCloudInstanceService implements CloudInstanceService {
     private static final String VMTYPE = "vmType";
     private static final String DATADIR = "userdatas";
 
-    @Autowired
-    private AzureCloudInstanceConverter azureCloudInstanceConverter;
-
-    @Autowired
-    private UserRepository userRepository;
-
     @Override
-    public CloudInstanceResult createCloudInstance(User user, CloudInstanceRequest cloudInstanceRequest) {
-        AzureCloudInstance azureCloudInstance = azureCloudInstanceConverter.convert(cloudInstanceRequest);
-        azureCloudInstance.setUser(user);
-        user.getAzureCloudInstanceList().add(azureCloudInstance);
-        userRepository.save(user);
+    public CloudInstanceResult createCloudInstance(User user, CloudInstance cloudInstance) {
+
+        AzureInfra azureInfra = (AzureInfra) cloudInstance.getInfra();
 
         String filePath = getUserJksFileName(user.emailAsFolder());
         File file = new File(filePath);
         AzureClient azureClient = new AzureClient(user.getSubscriptionId(), file.getAbsolutePath(), user.getJks());
         Map<String, String> props = new HashMap<>();
-        props.put(NAME, azureCloudInstance.getAzureInfra().getName());
-        props.put(LOCATION, AzureLocation.valueOf(azureCloudInstance.getAzureInfra().getLocation()).location());
-        props.put(DESCRIPTION, azureCloudInstance.getAzureInfra().getDescription());
+        props.put(NAME, azureInfra.getName());
+        props.put(LOCATION, AzureLocation.valueOf(azureInfra.getLocation()).location());
+        props.put(DESCRIPTION, azureInfra.getDescription());
         HttpResponseDecorator affinityResponse = (HttpResponseDecorator) azureClient.createAffinityGroup(props);
         String requestId = (String) azureClient.getRequestId(affinityResponse);
         azureClient.waitUntilComplete(requestId);
 
         props = new HashMap<>();
-        props.put(NAME, azureCloudInstance.getAzureInfra().getName());
-        props.put(DESCRIPTION, azureCloudInstance.getAzureInfra().getDescription());
-        props.put(AFFINITYGROUP, azureCloudInstance.getAzureInfra().getName());
+        props.put(NAME, azureInfra.getName());
+        props.put(DESCRIPTION, azureInfra.getDescription());
+        props.put(AFFINITYGROUP, azureInfra.getName());
         HttpResponseDecorator storageResponse = (HttpResponseDecorator) azureClient.createStorageAccount(props);
         requestId = (String) azureClient.getRequestId(storageResponse);
         azureClient.waitUntilComplete(requestId);
 
         props = new HashMap<>();
-        props.put(NAME, azureCloudInstance.getAzureInfra().getName());
-        props.put(AFFINITYGROUP, azureCloudInstance.getAzureInfra().getName());
-        props.put(SUBNETNAME, azureCloudInstance.getAzureInfra().getSubnetAddressPrefix());
-        props.put(ADDRESSPREFIX, azureCloudInstance.getAzureInfra().getSubnetAddressPrefix());
-        props.put(SUBNETADDRESSPREFIX, azureCloudInstance.getAzureInfra().getSubnetAddressPrefix());
+        props.put(NAME, azureInfra.getName());
+        props.put(AFFINITYGROUP, azureInfra.getName());
+        props.put(SUBNETNAME, azureInfra.getSubnetAddressPrefix());
+        props.put(ADDRESSPREFIX, azureInfra.getSubnetAddressPrefix());
+        props.put(SUBNETADDRESSPREFIX, azureInfra.getSubnetAddressPrefix());
         HttpResponseDecorator virtualNetworkResponse = (HttpResponseDecorator) azureClient.createVirtualNetwork(props);
         requestId = (String) azureClient.getRequestId(virtualNetworkResponse);
         azureClient.waitUntilComplete(requestId);
 
-        for (int i = 0; i < azureCloudInstance.getClusterSize(); i++) {
-            String vmName = String.format("%s-1", azureCloudInstance.getAzureInfra().getName());
+        for (int i = 0; i < cloudInstance.getClusterSize(); i++) {
+            String vmName = String.format("%s-1", azureInfra.getName());
             props = new HashMap<>();
             props.put(NAME, vmName);
-            props.put(DESCRIPTION, azureCloudInstance.getAzureInfra().getDescription());
-            props.put(AFFINITYGROUP, azureCloudInstance.getAzureInfra().getName());
+            props.put(DESCRIPTION, azureInfra.getDescription());
+            props.put(AFFINITYGROUP, azureInfra.getName());
             HttpResponseDecorator cloudServiceResponse = (HttpResponseDecorator) azureClient.createCloudService(props);
             requestId = (String) azureClient.getRequestId(cloudServiceResponse);
             azureClient.waitUntilComplete(requestId);
@@ -98,19 +87,19 @@ public class AzureCloudInstanceService implements CloudInstanceService {
             String label = new String(encoded);
             props = new HashMap<>();
             props.put(NAME, vmName);
-            props.put(DEPLOYMENTSLOT, azureCloudInstance.getAzureInfra().getDeploymentSlot());
+            props.put(DEPLOYMENTSLOT, azureInfra.getDeploymentSlot());
             props.put(LABEL, label);
-            props.put(IMAGENAME, azureCloudInstance.getAzureInfra().getImageName());
+            props.put(IMAGENAME, azureInfra.getImageName());
             props.put(IMAGESTOREURI,
-                    String.format("http://%s.blob.core.windows.net/vhd-store/%s.vhd", azureCloudInstance.getAzureInfra().getName(), vmName)
-            );
+                    String.format("http://%s.blob.core.windows.net/vhd-store/%s.vhd", azureInfra.getName(), vmName)
+                    );
             props.put(HOSTNAME, vmName);
-            props.put(USERNAME, azureCloudInstance.getAzureInfra().getUserName());
-            props.put(PASSWORD, azureCloudInstance.getAzureInfra().getPassword());
-            props.put(DISABLESSHPASSWORDAUTHENTICATION, Boolean.valueOf(azureCloudInstance.getAzureInfra().getDisableSshPasswordAuthentication()).toString());
-            props.put(SUBNETNAME, azureCloudInstance.getAzureInfra().getName());
-            props.put(VIRTUALNETWORKNAME, azureCloudInstance.getAzureInfra().getName());
-            props.put(VMTYPE, AzureVmType.valueOf(azureCloudInstance.getAzureInfra().getVmType()).vmType());
+            props.put(USERNAME, azureInfra.getUserName());
+            props.put(PASSWORD, azureInfra.getPassword());
+            props.put(DISABLESSHPASSWORDAUTHENTICATION, Boolean.valueOf(azureInfra.getDisableSshPasswordAuthentication()).toString());
+            props.put(SUBNETNAME, azureInfra.getName());
+            props.put(VIRTUALNETWORKNAME, azureInfra.getName());
+            props.put(VMTYPE, AzureVmType.valueOf(azureInfra.getVmType()).vmType());
             HttpResponseDecorator virtualMachineResponse = (HttpResponseDecorator) azureClient.createVirtualMachine(props);
             requestId = (String) azureClient.getRequestId(virtualMachineResponse);
             azureClient.waitUntilComplete(requestId);

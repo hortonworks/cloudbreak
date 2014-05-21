@@ -1,14 +1,17 @@
 package com.sequenceiq.provisioning.service;
 
+import java.util.Set;
+
 import com.sequenceiq.provisioning.controller.json.CloudInstanceResult;
 import com.sequenceiq.provisioning.controller.json.InfraRequest;
-import com.sequenceiq.provisioning.domain.CloudPlatform;
 import com.sequenceiq.provisioning.domain.User;
 
 public interface InfraService {
 
-    CloudInstanceResult createInfra(User user, InfraRequest infraRequest);
+    Set<InfraRequest> getAll(User user);
 
-    CloudPlatform getCloudPlatform();
+    InfraRequest get(Long id);
+
+    CloudInstanceResult create(User user, InfraRequest infraRequest);
 
 }

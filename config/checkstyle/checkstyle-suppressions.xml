@@ -14,7 +14,7 @@
     <suppress checks="AbstractClassName" files="test" />
     <suppress checks="EmptyBlock" files="test" />
     <suppress checks="HideUtilityClassConstructor" files=".*Application.java" />
-    <suppress id="string-instantiation" files="AzureCloudInstanceService.java"/>
+    <suppress id="string-instantiation" files="AzureProvisionService.java"/>
     <suppress checks="IllegalCatch" files="CredentialController.java"/>
     
     <!-- -->

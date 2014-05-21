@@ -26,6 +26,8 @@ public abstract class Infra {
         this.id = id;
     }
 
+    public abstract void setUser(User user);
+
     public abstract CloudPlatform cloudPlatform();
 
 }

@@ -7,9 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.provisioning.controller.json.CloudInstanceRequest;
 import com.sequenceiq.provisioning.controller.json.InfraRequest;
 
-
 public class UserJson implements JsonEntity {
-
 
     @JsonProperty("firstName")
     private String firstName;
@@ -35,11 +33,8 @@ public class UserJson implements JsonEntity {
     @JsonProperty("awsInfraList")
     private Set<InfraRequest> awsInfraList = new HashSet<>();
 
-    @JsonProperty("azureCloudList")
-    private Set<CloudInstanceRequest> azureCloudList = new HashSet<>();
-
-    @JsonProperty("awsCloudList")
-    private Set<CloudInstanceRequest> awsCloudList = new HashSet<>();
+    @JsonProperty("cloudList")
+    private Set<CloudInstanceRequest> cloudList = new HashSet<>();
 
     public UserJson() {
 
@@ -109,19 +104,11 @@ public class UserJson implements JsonEntity {
         this.awsInfraList = awsInfraList;
     }
 
-    public Set<CloudInstanceRequest> getAzureCloudList() {
-        return azureCloudList;
+    public Set<CloudInstanceRequest> getCloudList() {
+        return cloudList;
     }
 
-    public void setAzureCloudList(Set<CloudInstanceRequest> azureCloudList) {
-        this.azureCloudList = azureCloudList;
-    }
-
-    public Set<CloudInstanceRequest> getAwsCloudList() {
-        return awsCloudList;
-    }
-
-    public void setAwsCloudList(Set<CloudInstanceRequest> awsCloudList) {
-        this.awsCloudList = awsCloudList;
+    public void setCloudList(Set<CloudInstanceRequest> cloudList) {
+        this.cloudList = cloudList;
     }
 }
