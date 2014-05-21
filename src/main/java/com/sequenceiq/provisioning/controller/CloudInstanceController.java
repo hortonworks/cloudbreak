@@ -41,7 +41,7 @@ public class CloudInstanceController {
     @ResponseBody
     public ResponseEntity<Set<CloudInstanceRequest>> getAllCloudInstance(@CurrentUser User user) {
         User currentUser = userRepository.findOneWithLists(user.getId());
-        return new ResponseEntity<>(cloudInstanceService.getAll(currentUser), HttpStatus.CREATED);
+        return new ResponseEntity<>(cloudInstanceService.getAll(currentUser), HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/cloud/{cloudId}")
@@ -51,7 +51,7 @@ public class CloudInstanceController {
         if (cloudInstanceRequest == null) {
             new ResponseEntity<>(cloudInstanceRequest, HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(cloudInstanceRequest, HttpStatus.CREATED);
+        return new ResponseEntity<>(cloudInstanceRequest, HttpStatus.OK);
     }
 
 }

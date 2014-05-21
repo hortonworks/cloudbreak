@@ -39,14 +39,14 @@ public class InfraController {
     @RequestMapping(method = RequestMethod.GET, value = "/infra")
     @ResponseBody
     public ResponseEntity<Set<InfraRequest>> getAllCloudInstance(@CurrentUser User user) {
-        return new ResponseEntity<>(commonInfraService.getAll(userRepository.findOneWithLists(user.getId())), HttpStatus.CREATED);
+        return new ResponseEntity<>(commonInfraService.getAll(userRepository.findOneWithLists(user.getId())), HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/infra/{infraId}")
     @ResponseBody
     public ResponseEntity<InfraRequest> getCloudInstance(@CurrentUser User user, @PathVariable Long infraId) {
         InfraRequest infraRequest = commonInfraService.get(infraId);
-        return new ResponseEntity<>(infraRequest, HttpStatus.CREATED);
+        return new ResponseEntity<>(infraRequest, HttpStatus.OK);
     }
 
 }
