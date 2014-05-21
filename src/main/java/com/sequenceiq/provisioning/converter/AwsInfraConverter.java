@@ -41,8 +41,8 @@ public class AwsInfraConverter extends AbstractConverter<InfraJson, AwsInfra> {
         awsInfra.setKeyName(json.getParameters().get(RequiredAwsInfraParam.KEY_NAME.getName()));
         awsInfra.setAmiId(json.getParameters().get(RequiredAwsInfraParam.AMI_ID.getName()));
         awsInfra.setInstanceType(InstanceType.fromValue(json.getParameters().get(RequiredAwsInfraParam.INSTANCE_TYPE.getName())));
-        String sshLocation = json.getParameters().containsKey(OptionalAwsInfraParam.SSH_LOCATION.getName()) ?
-                json.getParameters().get(OptionalAwsInfraParam.SSH_LOCATION.getName()) : DEFAULT_SSH_LOCATION;
+        String sshLocation = json.getParameters().containsKey(OptionalAwsInfraParam.SSH_LOCATION.getName())
+                ? json.getParameters().get(OptionalAwsInfraParam.SSH_LOCATION.getName()) : DEFAULT_SSH_LOCATION;
         awsInfra.setSshLocation(sshLocation);
         return awsInfra;
     }
