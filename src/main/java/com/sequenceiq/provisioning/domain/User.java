@@ -19,8 +19,8 @@ import org.hibernate.validator.constraints.NotEmpty;
 @NamedQuery(
         name = "User.findOneWithLists",
         query = "SELECT u FROM User u "
-                + "LEFT JOIN FETCH u.azureInfraList "
-                + "LEFT JOIN FETCH u.awsInfraList "
+                + "LEFT JOIN FETCH u.azureInfras "
+                + "LEFT JOIN FETCH u.awsInfras "
                 + "LEFT JOIN FETCH u.cloudInstances "
                 + "WHERE u.id= :id")
 public class User implements ProvisionEntity {
@@ -49,10 +49,10 @@ public class User implements ProvisionEntity {
     private String password;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<AzureInfra> azureInfraList = new HashSet<>();
+    private Set<AzureInfra> azureInfras = new HashSet<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<AwsInfra> awsInfraList = new HashSet<>();
+    private Set<AwsInfra> awsInfras = new HashSet<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<CloudInstance> cloudInstances = new HashSet<>();
@@ -66,8 +66,8 @@ public class User implements ProvisionEntity {
         this.lastName = user.lastName;
         this.email = user.email;
         this.password = user.password;
-        this.awsInfraList = user.awsInfraList;
-        this.azureInfraList = user.azureInfraList;
+        this.awsInfras = user.awsInfras;
+        this.azureInfras = user.azureInfras;
         this.jks = user.jks;
         this.subscriptionId = user.subscriptionId;
         this.roleArn = user.roleArn;
@@ -114,20 +114,20 @@ public class User implements ProvisionEntity {
         this.email = email;
     }
 
-    public Set<AzureInfra> getAzureInfraList() {
-        return azureInfraList;
+    public Set<AwsInfra> getAwsInfras() {
+        return awsInfras;
     }
 
-    public void setAwsInfraList(Set<AwsInfra> awsInfraList) {
-        this.awsInfraList = awsInfraList;
+    public void setAwsInfras(Set<AwsInfra> awsInfras) {
+        this.awsInfras = awsInfras;
     }
 
-    public Set<AwsInfra> getAwsInfraList() {
-        return awsInfraList;
+    public Set<AzureInfra> getAzureInfras() {
+        return azureInfras;
     }
 
-    public void setAzureInfraList(Set<AzureInfra> azureInfraList) {
-        this.azureInfraList = azureInfraList;
+    public void setAzureInfras(Set<AzureInfra> azureInfras) {
+        this.azureInfras = azureInfras;
     }
 
     public String getRoleArn() {

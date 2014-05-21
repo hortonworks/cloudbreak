@@ -1,4 +1,4 @@
-package com.sequenceiq.provisioning.json;
+package com.sequenceiq.provisioning.controller.json;
 
 import java.io.Serializable;
 

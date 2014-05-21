@@ -4,13 +4,11 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UnknownFormatConversionException;
 
-import javax.persistence.EntityNotFoundException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.provisioning.controller.json.CloudInstanceResult;
-import com.sequenceiq.provisioning.controller.json.InfraRequest;
+import com.sequenceiq.provisioning.controller.NotFoundException;
+import com.sequenceiq.provisioning.controller.json.InfraJson;
 import com.sequenceiq.provisioning.converter.AwsInfraConverter;
 import com.sequenceiq.provisioning.converter.AzureInfraConverter;
 import com.sequenceiq.provisioning.domain.AwsInfra;
@@ -32,32 +30,32 @@ public class SimpleInfraService implements InfraService {
     private AzureInfraConverter azureInfraConverter;
 
     @Override
-    public Set<InfraRequest> getAll(User user) {
-        Set<InfraRequest> result = new HashSet<>();
-        result.addAll(awsInfraConverter.convertAllEntityToJson(user.getAwsInfraList()));
-        result.addAll(azureInfraConverter.convertAllEntityToJson(user.getAzureInfraList()));
+    public Set<InfraJson> getAll(User user) {
+        Set<InfraJson> result = new HashSet<>();
+        result.addAll(awsInfraConverter.convertAllEntityToJson(user.getAwsInfras()));
+        result.addAll(azureInfraConverter.convertAllEntityToJson(user.getAzureInfras()));
         return result;
     }
 
     @Override
-    public InfraRequest get(Long id) {
-        Infra one = infraRepository.findOne(id);
-        if (one == null) {
-            throw new EntityNotFoundException("Entity not exist with id: " + id);
+    public InfraJson get(Long id) {
+        Infra infra = infraRepository.findOne(id);
+        if (infra == null) {
+            throw new NotFoundException(String.format("Infrastructure '%s' not found.", id));
         } else {
-            switch (one.cloudPlatform()) {
+            switch (infra.cloudPlatform()) {
             case AWS:
-                return awsInfraConverter.convert((AwsInfra) one);
+                return awsInfraConverter.convert((AwsInfra) infra);
             case AZURE:
-                return azureInfraConverter.convert((AzureInfra) one);
+                return azureInfraConverter.convert((AzureInfra) infra);
             default:
-                throw new UnknownFormatConversionException("The cloudPlatform type not supported.");
+                throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", infra.cloudPlatform()));
             }
         }
     }
 
     @Override
-    public CloudInstanceResult create(User user, InfraRequest infraRequest) {
+    public void create(User user, InfraJson infraRequest) {
         switch (infraRequest.getCloudPlatform()) {
         case AWS:
             Infra awsInfra = awsInfraConverter.convert(infraRequest);
@@ -70,9 +68,8 @@ public class SimpleInfraService implements InfraService {
             infraRepository.save(azureInfra);
             break;
         default:
-            throw new UnknownFormatConversionException("The cloudPlatform type not supported.");
+            throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", infraRequest.getCloudPlatform()));
         }
-        return new CloudInstanceResult("OK");
     }
 
 }

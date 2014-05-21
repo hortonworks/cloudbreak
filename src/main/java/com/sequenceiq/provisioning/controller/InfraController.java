@@ -14,43 +14,40 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.sequenceiq.provisioning.controller.json.CloudInstanceResult;
-import com.sequenceiq.provisioning.controller.json.InfraRequest;
+import com.sequenceiq.provisioning.controller.json.InfraJson;
 import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.repository.UserRepository;
 import com.sequenceiq.provisioning.security.CurrentUser;
-import com.sequenceiq.provisioning.service.SimpleInfraService;
+import com.sequenceiq.provisioning.service.InfraService;
 
 @Controller
+@RequestMapping("infra")
 public class InfraController {
 
     @Autowired
     private UserRepository userRepository;
 
     @Autowired
-    private SimpleInfraService commonInfraService;
+    private InfraService infraService;
 
-    @RequestMapping(method = RequestMethod.POST, value = "/infra")
+    @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<CloudInstanceResult> createInfra(@CurrentUser User user, @RequestBody @Valid InfraRequest infraRequest) {
-        CloudInstanceResult cloudInstanceResult = commonInfraService.create(userRepository.findOneWithLists(user.getId()), infraRequest);
-        return new ResponseEntity<>(cloudInstanceResult, HttpStatus.CREATED);
+    public ResponseEntity<String> createInfra(@CurrentUser User user, @RequestBody @Valid InfraJson infraRequest) {
+        infraService.create(userRepository.findOneWithLists(user.getId()), infraRequest);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/infra")
+    @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<Set<InfraRequest>> getAllCloudInstance(@CurrentUser User user) {
-        return new ResponseEntity<>(commonInfraService.getAll(userRepository.findOneWithLists(user.getId())), HttpStatus.CREATED);
+    public ResponseEntity<Set<InfraJson>> getAllInfras(@CurrentUser User user) {
+        return new ResponseEntity<>(infraService.getAll(userRepository.findOneWithLists(user.getId())), HttpStatus.OK);
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/infra/{infraId}")
+    @RequestMapping(method = RequestMethod.GET, value = "{infraId}")
     @ResponseBody
-    public ResponseEntity<InfraRequest> getCloudInstance(@CurrentUser User user, @PathVariable Long infraId) {
-        InfraRequest infraRequest = commonInfraService.get(infraId);
-        if (infraRequest == null) {
-            new ResponseEntity<>(infraRequest, HttpStatus.NOT_FOUND);
-        }
-        return new ResponseEntity<>(infraRequest, HttpStatus.CREATED);
+    public ResponseEntity<InfraJson> getInfra(@CurrentUser User user, @PathVariable Long infraId) {
+        InfraJson infraRequest = infraService.get(infraId);
+        return new ResponseEntity<>(infraRequest, HttpStatus.OK);
     }
 
 }

@@ -3,8 +3,8 @@ package com.sequenceiq.provisioning.converter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.provisioning.controller.json.UserJson;
 import com.sequenceiq.provisioning.domain.User;
-import com.sequenceiq.provisioning.json.UserJson;
 
 @Component
 public class UserConverter extends AbstractConverter<UserJson, User> {
@@ -27,9 +27,9 @@ public class UserConverter extends AbstractConverter<UserJson, User> {
         userJson.setRoleArn(entity.getRoleArn() == null ? "" : entity.getRoleArn());
         userJson.setJks(entity.getJks() == null ? "" : entity.getJks());
         userJson.setSubscriptionId(entity.getSubscriptionId() == null ? "" : entity.getSubscriptionId());
-        userJson.setAwsInfraList(awsInfraConverter.convertAllEntityToJson(entity.getAwsInfraList()));
-        userJson.setAzureInfraList(azureInfraConverter.convertAllEntityToJson(entity.getAzureInfraList()));
-        userJson.setCloudList(cloudInstanceConverter.convertAllEntityToJson(entity.getCloudInstances()));
+        userJson.setAwsInfras(awsInfraConverter.convertAllEntityToJson(entity.getAwsInfras()));
+        userJson.setAzureInfras(azureInfraConverter.convertAllEntityToJson(entity.getAzureInfras()));
+        userJson.setCloudInstances(cloudInstanceConverter.convertAllEntityToJson(entity.getCloudInstances()));
         return userJson;
     }
 
@@ -42,9 +42,9 @@ public class UserConverter extends AbstractConverter<UserJson, User> {
         user.setRoleArn(json.getRoleArn());
         user.setJks(json.getJks());
         user.setSubscriptionId(json.getSubscriptionId());
-        user.setAwsInfraList(awsInfraConverter.convertAllJsonToEntity(json.getAwsInfraList()));
-        user.setAzureInfraList(azureInfraConverter.convertAllJsonToEntity(json.getAzureInfraList()));
-        user.setCloudInstances(cloudInstanceConverter.convertAllJsonToEntity(json.getCloudList()));
+        user.setAwsInfras(awsInfraConverter.convertAllJsonToEntity(json.getAwsInfras()));
+        user.setAzureInfras(azureInfraConverter.convertAllJsonToEntity(json.getAzureInfras()));
+        user.setCloudInstances(cloudInstanceConverter.convertAllJsonToEntity(json.getCloudInstances()));
         return user;
     }
 }

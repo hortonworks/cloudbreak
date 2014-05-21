@@ -5,17 +5,17 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.provisioning.controller.json.InfraRequest;
+import com.sequenceiq.provisioning.controller.json.InfraJson;
 import com.sequenceiq.provisioning.controller.validation.RequiredAzureInfraParam;
 import com.sequenceiq.provisioning.domain.AzureInfra;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
 
 @Component
-public class AzureInfraConverter extends AbstractConverter<InfraRequest, AzureInfra> {
+public class AzureInfraConverter extends AbstractConverter<InfraJson, AzureInfra> {
 
     @Override
-    public InfraRequest convert(AzureInfra entity) {
-        InfraRequest azureStackJson = new InfraRequest();
+    public InfraJson convert(AzureInfra entity) {
+        InfraJson azureStackJson = new InfraJson();
         azureStackJson.setClusterName(entity.getName());
         azureStackJson.setCloudPlatform(CloudPlatform.AZURE);
         azureStackJson.setId(entity.getId());
@@ -36,7 +36,7 @@ public class AzureInfraConverter extends AbstractConverter<InfraRequest, AzureIn
     }
 
     @Override
-    public AzureInfra convert(InfraRequest json) {
+    public AzureInfra convert(InfraJson json) {
         AzureInfra azureInfra = new AzureInfra();
         azureInfra.setName(json.getClusterName());
         azureInfra.setDeploymentSlot(json.getParameters().get(RequiredAzureInfraParam.DEPLOYMENTSLOT.getName()));

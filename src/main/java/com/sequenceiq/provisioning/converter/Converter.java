@@ -2,8 +2,8 @@ package com.sequenceiq.provisioning.converter;
 
 import java.util.Collection;
 
+import com.sequenceiq.provisioning.controller.json.JsonEntity;
 import com.sequenceiq.provisioning.domain.ProvisionEntity;
-import com.sequenceiq.provisioning.json.JsonEntity;
 
 public interface Converter<J extends JsonEntity, E extends ProvisionEntity> {
 

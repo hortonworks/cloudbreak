@@ -49,7 +49,7 @@ public class CredentialController {
 
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
-    public List<CredentialJson> listCredentials(@CurrentUser User user) {
+    public ResponseEntity<List<CredentialJson>> listCredentials(@CurrentUser User user) {
         List<CredentialJson> credentials = new ArrayList<>();
         for (CredentialService credentialService : credentialServices.values()) {
             try {
@@ -59,15 +59,15 @@ public class CredentialController {
                 LOGGER.info(e.getMessage());
             }
         }
-        return credentials;
+        return new ResponseEntity<>(credentials, HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/{cloudPlatform}")
     @ResponseBody
-    public CredentialJson getCredential(@CurrentUser User user, @PathVariable String cloudPlatform) {
+    public ResponseEntity<CredentialJson> getCredential(@CurrentUser User user, @PathVariable String cloudPlatform) {
         try {
             CredentialService credentialService = credentialServices.get(CloudPlatform.valueOf(cloudPlatform.toUpperCase()));
-            return credentialService.retrieveCredentials(user);
+            return new ResponseEntity<>(credentialService.retrieveCredentials(user), HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             throw new BadRequestException("Unknown cloud platform: " + cloudPlatform, e);
         }

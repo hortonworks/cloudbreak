@@ -42,7 +42,7 @@ public class UserInitializer implements InitializingBean {
         awsCloudInstance.setClusterSize(CLUSTER_SIZE);
         awsCloudInstance.setUser(user2);
 
-        user2.getAwsInfraList().add(awsInfra);
+        user2.getAwsInfras().add(awsInfra);
         user2.getCloudInstances().add(awsCloudInstance);
 
         AzureInfra azureInfra = new AzureInfra();
@@ -62,7 +62,7 @@ public class UserInitializer implements InitializingBean {
         azureCloudInstance.setClusterSize(CLUSTER_SIZE);
         azureCloudInstance.setUser(user2);
 
-        user2.getAzureInfraList().add(azureInfra);
+        user2.getAzureInfras().add(azureInfra);
         user2.getCloudInstances().add(azureCloudInstance);
 
         userRepository.save(user2);
