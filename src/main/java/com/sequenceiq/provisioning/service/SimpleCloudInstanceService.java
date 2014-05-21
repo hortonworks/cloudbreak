@@ -10,6 +10,7 @@ import javax.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.provisioning.controller.NotFoundException;
 import com.sequenceiq.provisioning.controller.json.CloudInstanceRequest;
 import com.sequenceiq.provisioning.controller.json.CloudInstanceResult;
 import com.sequenceiq.provisioning.converter.CloudInstanceConverter;
@@ -44,11 +45,11 @@ public class SimpleCloudInstanceService implements CloudInstanceService {
 
     @Override
     public CloudInstanceRequest get(Long id) {
-        CloudInstance one = cloudInstanceRepository.findOne(id);
-        if (one == null) {
-            throw new EntityNotFoundException(String.format("CloudInstance '%s' not found", id));
+        CloudInstance cloudInstance = cloudInstanceRepository.findOne(id);
+        if (cloudInstance == null) {
+            throw new NotFoundException(String.format("CloudInstance '%s' not found", id));
         } else {
-            return cloudInstanceConverter.convert(one);
+            return cloudInstanceConverter.convert(cloudInstance);
         }
     }
 

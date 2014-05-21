@@ -21,6 +21,7 @@ import com.sequenceiq.provisioning.security.CurrentUser;
 import com.sequenceiq.provisioning.service.InfraService;
 
 @Controller
+@RequestMapping("infra")
 public class InfraController {
 
     @Autowired
@@ -29,20 +30,20 @@ public class InfraController {
     @Autowired
     private InfraService infraService;
 
-    @RequestMapping(method = RequestMethod.POST, value = "/infra")
+    @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<String> createInfra(@CurrentUser User user, @RequestBody @Valid InfraRequest infraRequest) {
         infraService.create(userRepository.findOneWithLists(user.getId()), infraRequest);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/infra")
+    @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<Set<InfraRequest>> getAllInfras(@CurrentUser User user) {
         return new ResponseEntity<>(infraService.getAll(userRepository.findOneWithLists(user.getId())), HttpStatus.OK);
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/infra/{infraId}")
+    @RequestMapping(method = RequestMethod.GET, value = "{infraId}")
     @ResponseBody
     public ResponseEntity<InfraRequest> getInfra(@CurrentUser User user, @PathVariable Long infraId) {
         InfraRequest infraRequest = infraService.get(infraId);

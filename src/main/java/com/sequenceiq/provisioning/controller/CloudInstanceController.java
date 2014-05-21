@@ -22,6 +22,7 @@ import com.sequenceiq.provisioning.security.CurrentUser;
 import com.sequenceiq.provisioning.service.CloudInstanceService;
 
 @Controller
+@RequestMapping("cloud")
 public class CloudInstanceController {
 
     @Autowired
@@ -30,27 +31,24 @@ public class CloudInstanceController {
     @Autowired
     private CloudInstanceService cloudInstanceService;
 
-    @RequestMapping(method = RequestMethod.POST, value = "/cloud")
+    @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<CloudInstanceResult> createCloudInstance(@CurrentUser User user, @RequestBody @Valid CloudInstanceRequest cloudInstanceRequest) {
         return new ResponseEntity<>(cloudInstanceService.create(userRepository.findOneWithLists(user.getId()), cloudInstanceRequest),
                 HttpStatus.CREATED);
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/cloud")
+    @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<Set<CloudInstanceRequest>> getAllCloudInstance(@CurrentUser User user) {
+    public ResponseEntity<Set<CloudInstanceRequest>> getAllCloudInstances(@CurrentUser User user) {
         User currentUser = userRepository.findOneWithLists(user.getId());
         return new ResponseEntity<>(cloudInstanceService.getAll(currentUser), HttpStatus.OK);
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/cloud/{cloudId}")
+    @RequestMapping(method = RequestMethod.GET, value = "{cloudId}")
     @ResponseBody
     public ResponseEntity<CloudInstanceRequest> getCloudInstance(@CurrentUser User user, @PathVariable Long cloudId) {
         CloudInstanceRequest cloudInstanceRequest = cloudInstanceService.get(cloudId);
-        if (cloudInstanceRequest == null) {
-            new ResponseEntity<>(cloudInstanceRequest, HttpStatus.NOT_FOUND);
-        }
         return new ResponseEntity<>(cloudInstanceRequest, HttpStatus.OK);
     }
 
