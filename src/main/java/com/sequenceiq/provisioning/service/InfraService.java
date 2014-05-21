@@ -13,4 +13,6 @@ public interface InfraService {
 
     void create(User user, InfraJson infraRequest);
 
+    void delete(Long id);
+
 }

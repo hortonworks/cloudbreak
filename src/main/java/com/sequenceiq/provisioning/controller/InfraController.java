@@ -50,4 +50,11 @@ public class InfraController {
         return new ResponseEntity<>(infraRequest, HttpStatus.OK);
     }
 
+    @RequestMapping(method = RequestMethod.DELETE, value = "{infraId}")
+    @ResponseBody
+    public ResponseEntity<InfraJson> deleteInfra(@CurrentUser User user, @PathVariable Long infraId) {
+        infraService.delete(infraId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
 }

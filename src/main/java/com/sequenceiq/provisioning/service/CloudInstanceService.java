@@ -14,4 +14,6 @@ public interface CloudInstanceService {
 
     CloudInstanceResult create(User user, CloudInstanceJson cloudInstanceRequest);
 
+    void delete(Long id);
+
 }

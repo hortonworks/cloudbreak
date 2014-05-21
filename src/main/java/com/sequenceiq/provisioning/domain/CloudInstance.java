@@ -5,10 +5,15 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
 @Entity
+@NamedQuery(
+        name = "CloudInstance.findAllCloudForInfra",
+        query = "SELECT c FROM CloudInstance c "
+                + "WHERE c.infra.id= :id")
 public class CloudInstance implements ProvisionEntity {
 
     @Id
