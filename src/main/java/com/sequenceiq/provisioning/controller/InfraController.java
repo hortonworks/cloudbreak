@@ -18,7 +18,7 @@ import com.sequenceiq.provisioning.controller.json.InfraRequest;
 import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.repository.UserRepository;
 import com.sequenceiq.provisioning.security.CurrentUser;
-import com.sequenceiq.provisioning.service.SimpleInfraService;
+import com.sequenceiq.provisioning.service.InfraService;
 
 @Controller
 public class InfraController {
@@ -27,25 +27,25 @@ public class InfraController {
     private UserRepository userRepository;
 
     @Autowired
-    private SimpleInfraService commonInfraService;
+    private InfraService infraService;
 
     @RequestMapping(method = RequestMethod.POST, value = "/infra")
     @ResponseBody
     public ResponseEntity<String> createInfra(@CurrentUser User user, @RequestBody @Valid InfraRequest infraRequest) {
-        commonInfraService.create(userRepository.findOneWithLists(user.getId()), infraRequest);
+        infraService.create(userRepository.findOneWithLists(user.getId()), infraRequest);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/infra")
     @ResponseBody
-    public ResponseEntity<Set<InfraRequest>> getAllCloudInstance(@CurrentUser User user) {
-        return new ResponseEntity<>(commonInfraService.getAll(userRepository.findOneWithLists(user.getId())), HttpStatus.OK);
+    public ResponseEntity<Set<InfraRequest>> getAllInfras(@CurrentUser User user) {
+        return new ResponseEntity<>(infraService.getAll(userRepository.findOneWithLists(user.getId())), HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/infra/{infraId}")
     @ResponseBody
-    public ResponseEntity<InfraRequest> getCloudInstance(@CurrentUser User user, @PathVariable Long infraId) {
-        InfraRequest infraRequest = commonInfraService.get(infraId);
+    public ResponseEntity<InfraRequest> getInfra(@CurrentUser User user, @PathVariable Long infraId) {
+        InfraRequest infraRequest = infraService.get(infraId);
         return new ResponseEntity<>(infraRequest, HttpStatus.OK);
     }
 
