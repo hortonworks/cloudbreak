@@ -9,7 +9,6 @@ import javax.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.provisioning.controller.json.CloudInstanceResult;
 import com.sequenceiq.provisioning.controller.json.InfraRequest;
 import com.sequenceiq.provisioning.converter.AwsInfraConverter;
 import com.sequenceiq.provisioning.converter.AzureInfraConverter;
@@ -57,7 +56,7 @@ public class SimpleInfraService implements InfraService {
     }
 
     @Override
-    public CloudInstanceResult create(User user, InfraRequest infraRequest) {
+    public void create(User user, InfraRequest infraRequest) {
         switch (infraRequest.getCloudPlatform()) {
         case AWS:
             Infra awsInfra = awsInfraConverter.convert(infraRequest);
@@ -72,7 +71,6 @@ public class SimpleInfraService implements InfraService {
         default:
             throw new UnknownFormatConversionException("The cloudPlatform type not supported.");
         }
-        return new CloudInstanceResult("OK");
     }
 
 }

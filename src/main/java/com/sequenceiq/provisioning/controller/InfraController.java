@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.sequenceiq.provisioning.controller.json.CloudInstanceResult;
 import com.sequenceiq.provisioning.controller.json.InfraRequest;
 import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.repository.UserRepository;
@@ -32,9 +31,9 @@ public class InfraController {
 
     @RequestMapping(method = RequestMethod.POST, value = "/infra")
     @ResponseBody
-    public ResponseEntity<CloudInstanceResult> createInfra(@CurrentUser User user, @RequestBody @Valid InfraRequest infraRequest) {
-        CloudInstanceResult cloudInstanceResult = commonInfraService.create(userRepository.findOneWithLists(user.getId()), infraRequest);
-        return new ResponseEntity<>(cloudInstanceResult, HttpStatus.CREATED);
+    public ResponseEntity<String> createInfra(@CurrentUser User user, @RequestBody @Valid InfraRequest infraRequest) {
+        commonInfraService.create(userRepository.findOneWithLists(user.getId()), infraRequest);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/infra")
