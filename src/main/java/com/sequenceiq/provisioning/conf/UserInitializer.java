@@ -52,6 +52,7 @@ public class UserInitializer implements InitializingBean {
         azureInfra.setImageName("image");
         azureInfra.setLocation("location");
         azureInfra.setName("azurename");
+        azureInfra.setUserName("username");
         azureInfra.setPassword("pass");
         azureInfra.setSubnetAddressPrefix("prefix");
         azureInfra.setVmType("small");
