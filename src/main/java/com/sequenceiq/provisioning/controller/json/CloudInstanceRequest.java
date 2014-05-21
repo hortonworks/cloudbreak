@@ -18,6 +18,7 @@ public class CloudInstanceRequest implements JsonEntity {
     public CloudInstanceRequest() {
     }
 
+    @JsonProperty("id")
     public Long getId() {
         return id;
     }
