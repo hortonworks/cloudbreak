@@ -12,6 +12,8 @@ public interface ProvisionService {
 
     CloudInstanceDescription describeCloudInstance(User user, CloudInstance cloudInstance);
 
+    CloudInstanceDescription describeCloudInstanceWithResources(User user, CloudInstance cloudInstance);
+
     CloudPlatform getCloudPlatform();
 
 }

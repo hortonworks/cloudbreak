@@ -114,7 +114,13 @@ public class AzureProvisionService implements ProvisionService {
 
     @Override
     public CloudInstanceDescription describeCloudInstance(User user, CloudInstance cloudInstance) {
-        // TODO Auto-generated method stub
+        // TODO
+        return null;
+    }
+
+    @Override
+    public CloudInstanceDescription describeCloudInstanceWithResources(User user, CloudInstance cloudInstance) {
+        // TODO
         return null;
     }
 

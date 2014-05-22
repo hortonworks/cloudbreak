@@ -22,6 +22,7 @@ import com.sequenceiq.provisioning.domain.CloudFormationTemplate;
 import com.sequenceiq.provisioning.domain.CloudInstance;
 import com.sequenceiq.provisioning.domain.CloudInstanceDescription;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
+import com.sequenceiq.provisioning.domain.DetailedAwsCloudInstanceDescription;
 import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.service.ProvisionService;
 
@@ -73,9 +74,21 @@ public class AwsProvisionService implements ProvisionService {
         amazonCloudFormationClient.setRegion(Region.getRegion(Regions.fromName(awsInfra.getRegion())));
         DescribeStacksRequest stackRequest = new DescribeStacksRequest().withStackName(cloudInstance.getName());
         DescribeStacksResult stackResult = amazonCloudFormationClient.describeStacks(stackRequest);
+        return new AwsCloudInstanceDescription(stackResult);
+    }
+
+    @Override
+    public CloudInstanceDescription describeCloudInstanceWithResources(User user, CloudInstance cloudInstance) {
+        AwsInfra awsInfra = (AwsInfra) cloudInstance.getInfra();
+        BasicSessionCredentials basicSessionCredentials = credentialsProvider.retrieveSessionCredentials(SESSION_CREDENTIALS_DURATION, "provision-ambari",
+                user.getRoleArn());
+        AmazonCloudFormationClient amazonCloudFormationClient = new AmazonCloudFormationClient(basicSessionCredentials);
+        amazonCloudFormationClient.setRegion(Region.getRegion(Regions.fromName(awsInfra.getRegion())));
+        DescribeStacksRequest stackRequest = new DescribeStacksRequest().withStackName(cloudInstance.getName());
+        DescribeStacksResult stackResult = amazonCloudFormationClient.describeStacks(stackRequest);
         DescribeStackResourcesRequest resourcesRequest = new DescribeStackResourcesRequest().withStackName(cloudInstance.getName());
         DescribeStackResourcesResult resourcesResult = amazonCloudFormationClient.describeStackResources(resourcesRequest);
-        return new AwsCloudInstanceDescription(stackResult, resourcesResult);
+        return new DetailedAwsCloudInstanceDescription(stackResult, resourcesResult);
     }
 
     @Override

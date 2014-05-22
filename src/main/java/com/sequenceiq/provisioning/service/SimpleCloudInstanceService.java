@@ -40,7 +40,11 @@ public class SimpleCloudInstanceService implements CloudInstanceService {
     @Override
     public Set<CloudInstanceJson> getAll(User user) {
         Set<CloudInstanceJson> result = new HashSet<>();
-        result.addAll(cloudInstanceConverter.convertAllEntityToJson(user.getCloudInstances()));
+        for (CloudInstance cloudInstance : user.getCloudInstances()) {
+            CloudPlatform cp = cloudInstance.getInfra().cloudPlatform();
+            CloudInstanceDescription description = provisionServices.get(cp).describeCloudInstance(user, cloudInstance);
+            result.add(cloudInstanceConverter.convert(cloudInstance, description));
+        }
         return result;
     }
 
@@ -51,7 +55,7 @@ public class SimpleCloudInstanceService implements CloudInstanceService {
             throw new NotFoundException(String.format("CloudInstance '%s' not found", id));
         } else {
             CloudPlatform cp = cloudInstance.getInfra().cloudPlatform();
-            CloudInstanceDescription description = provisionServices.get(cp).describeCloudInstance(user, cloudInstance);
+            CloudInstanceDescription description = provisionServices.get(cp).describeCloudInstanceWithResources(user, cloudInstance);
             return cloudInstanceConverter.convert(cloudInstance, description);
         }
     }
