@@ -11,6 +11,8 @@ import com.amazonaws.services.cloudformation.model.CreateStackRequest;
 import com.amazonaws.services.cloudformation.model.CreateStackResult;
 import com.amazonaws.services.cloudformation.model.DescribeStackResourcesRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStackResourcesResult;
+import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
+import com.amazonaws.services.cloudformation.model.DescribeStacksResult;
 import com.amazonaws.services.cloudformation.model.Parameter;
 import com.sequenceiq.provisioning.controller.json.AWSCloudInstanceResult;
 import com.sequenceiq.provisioning.controller.json.CloudInstanceResult;
@@ -65,16 +67,15 @@ public class AwsProvisionService implements ProvisionService {
     @Override
     public CloudInstanceDescription describeCloudInstance(User user, CloudInstance cloudInstance) {
         AwsInfra awsInfra = (AwsInfra) cloudInstance.getInfra();
-        Regions region = Regions.fromName(awsInfra.getRegion());
         BasicSessionCredentials basicSessionCredentials = credentialsProvider.retrieveSessionCredentials(SESSION_CREDENTIALS_DURATION, "provision-ambari",
                 user.getRoleArn());
         AmazonCloudFormationClient amazonCloudFormationClient = new AmazonCloudFormationClient(basicSessionCredentials);
-        amazonCloudFormationClient.setRegion(Region.getRegion(region));
-        DescribeStackResourcesRequest request = new DescribeStackResourcesRequest().withStackName(cloudInstance.getName());
-        DescribeStackResourcesResult result = amazonCloudFormationClient.describeStackResources(request);
-        AwsCloudInstanceDescription description = new AwsCloudInstanceDescription();
-        description.setDescribeStackResourcesResult(result);
-        return description;
+        amazonCloudFormationClient.setRegion(Region.getRegion(Regions.fromName(awsInfra.getRegion())));
+        DescribeStacksRequest stackRequest = new DescribeStacksRequest().withStackName(cloudInstance.getName());
+        DescribeStacksResult stackResult = amazonCloudFormationClient.describeStacks(stackRequest);
+        DescribeStackResourcesRequest resourcesRequest = new DescribeStackResourcesRequest().withStackName(cloudInstance.getName());
+        DescribeStackResourcesResult resourcesResult = amazonCloudFormationClient.describeStackResources(resourcesRequest);
+        return new AwsCloudInstanceDescription(stackResult, resourcesResult);
     }
 
     @Override
