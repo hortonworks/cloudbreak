@@ -23,7 +23,8 @@ public class AzureInfraConverter extends AbstractConverter<InfraJson, AzureInfra
         putProperty(props, RequiredAzureInfraParam.NAME.getName(), entity.getName());
         putProperty(props, RequiredAzureInfraParam.LOCATION.getName(), entity.getLocation());
         putProperty(props, RequiredAzureInfraParam.DESCRIPTION.getName(), entity.getDescription());
-        putProperty(props, RequiredAzureInfraParam.ADDRESSPREFIX.getName(), entity.getSubnetAddressPrefix());
+        putProperty(props, RequiredAzureInfraParam.SUBNETADDRESSPREFIX.getName(), entity.getSubnetAddressPrefix());
+        putProperty(props, RequiredAzureInfraParam.ADDRESSPREFIX.getName(), entity.getAddressPrefix());
         putProperty(props, RequiredAzureInfraParam.DEPLOYMENTSLOT.getName(), entity.getDeploymentSlot());
         putProperty(props, RequiredAzureInfraParam.IMAGENAME.getName(), entity.getImageName());
         putProperty(props, RequiredAzureInfraParam.VMTYPE.getName(), entity.getVmType());
@@ -47,7 +48,8 @@ public class AzureInfraConverter extends AbstractConverter<InfraJson, AzureInfra
         azureInfra.setLocation(json.getParameters().get(RequiredAzureInfraParam.LOCATION.getName()));
         azureInfra.setName(json.getClusterName());
         azureInfra.setPassword(json.getParameters().get(RequiredAzureInfraParam.PASSWORD.getName()));
-        azureInfra.setSubnetAddressPrefix(json.getParameters().get(RequiredAzureInfraParam.ADDRESSPREFIX.getName()));
+        azureInfra.setSubnetAddressPrefix(json.getParameters().get(RequiredAzureInfraParam.SUBNETADDRESSPREFIX.getName()));
+        azureInfra.setAddressPrefix(json.getParameters().get(RequiredAzureInfraParam.ADDRESSPREFIX.getName()));
         azureInfra.setUserName(json.getParameters().get(RequiredAzureInfraParam.USERNAME.getName()));
         azureInfra.setVmType(json.getParameters().get(RequiredAzureInfraParam.VMTYPE.getName()));
         return azureInfra;
