@@ -6,6 +6,7 @@ public enum RequiredAzureInfraParam {
     LOCATION("location"),
     DESCRIPTION("description"),
     ADDRESSPREFIX("addressPrefix"),
+    SUBNETADDRESSPREFIX("subnetAddressPrefix"),
     DEPLOYMENTSLOT("deploymentSlot"),
     IMAGENAME("imageName"),
     USERNAME("username"),

@@ -10,6 +10,7 @@ public class AzureInfra extends Infra implements ProvisionEntity {
     private String name;
     private String description;
     private String subnetAddressPrefix;
+    private String addressPrefix;
     private String deploymentSlot;
     private Boolean disableSshPasswordAuthentication;
     private String vmType;
@@ -105,6 +106,14 @@ public class AzureInfra extends Infra implements ProvisionEntity {
 
     public User getUser() {
         return user;
+    }
+
+    public String getAddressPrefix() {
+        return addressPrefix;
+    }
+
+    public void setAddressPrefix(String addressPrefix) {
+        this.addressPrefix = addressPrefix;
     }
 
     @Override
