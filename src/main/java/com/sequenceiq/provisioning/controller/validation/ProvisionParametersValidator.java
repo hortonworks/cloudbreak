@@ -23,15 +23,17 @@ public class ProvisionParametersValidator implements ConstraintValidator<ValidPr
     @Autowired
     private RequiredParametersValidator requiredParametersValidator;
 
-    private List<String> requiredAWSParams = new ArrayList<>();
-    private List<String> requiredAzureParams = new ArrayList<>();
+    private List<TemplateParam> requiredAWSParams = new ArrayList<>();
+    private List<TemplateParam> requiredAzureParams = new ArrayList<>();
 
     @Override
     public void initialize(ValidProvisionRequest constraintAnnotation) {
         for (RequiredAwsTemplateParam param : RequiredAwsTemplateParam.values()) {
-            requiredAWSParams.add(param.getName());
+            requiredAWSParams.add(param);
         }
-        // TODO: required Azure params
+        for (RequiredAzureTemplateParam param : RequiredAzureTemplateParam.values()) {
+            requiredAzureParams.add(param);
+        }
     }
 
     @Override

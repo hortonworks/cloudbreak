@@ -15,16 +15,16 @@ public class CredentialParametersValidator implements ConstraintValidator<ValidC
     @Autowired
     private RequiredParametersValidator requiredParametersValidator;
 
-    private List<String> requiredAWSParams = new ArrayList<>();
-    private List<String> requiredAzureParams = new ArrayList<>();
+    private List<TemplateParam> requiredAWSParams = new ArrayList<>();
+    private List<TemplateParam> requiredAzureParams = new ArrayList<>();
 
     @Override
     public void initialize(ValidCredentialRequest constraintAnnotation) {
         for (RequiredAWSCredentialParam param : RequiredAWSCredentialParam.values()) {
-            requiredAWSParams.add(param.getName());
+            requiredAWSParams.add(param);
         }
         for (RequiredAzureCredentialParam param : RequiredAzureCredentialParam.values()) {
-            requiredAzureParams.add(param.getName());
+            requiredAzureParams.add(param);
         }
 
     }
