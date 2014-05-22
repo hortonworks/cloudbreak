@@ -4,6 +4,7 @@ import javax.validation.constraints.Min;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sequenceiq.provisioning.domain.CloudInstanceDescription;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
 
 public class CloudInstanceJson implements JsonEntity {
@@ -14,6 +15,7 @@ public class CloudInstanceJson implements JsonEntity {
     private String cloudName;
     private Long infraId;
     private CloudPlatform cloudPlatform;
+    private CloudInstanceDescription description;
 
     public CloudInstanceJson() {
     }
@@ -60,5 +62,13 @@ public class CloudInstanceJson implements JsonEntity {
     @JsonIgnore
     public void setCloudPlatform(CloudPlatform cloudPlatform) {
         this.cloudPlatform = cloudPlatform;
+    }
+
+    public CloudInstanceDescription getDescription() {
+        return description;
+    }
+
+    public void setDescription(CloudInstanceDescription description) {
+        this.description = description;
     }
 }

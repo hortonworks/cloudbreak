@@ -35,7 +35,7 @@ public class UserInitializer implements InitializingBean {
         awsInfra.setName("userAzureStack");
         awsInfra.setKeyName("smaple_key");
         awsInfra.setName("template1");
-        awsInfra.setRegion("region-1");
+        awsInfra.setRegion("eu-west-1");
         awsInfra.setAmiId("ami-2918e35e");
         awsInfra.setInstanceType(InstanceType.M1Small);
         awsInfra.setSshLocation("0.0.0.0/0");

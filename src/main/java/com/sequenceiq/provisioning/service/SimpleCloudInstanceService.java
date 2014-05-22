@@ -15,6 +15,7 @@ import com.sequenceiq.provisioning.controller.json.CloudInstanceJson;
 import com.sequenceiq.provisioning.controller.json.CloudInstanceResult;
 import com.sequenceiq.provisioning.converter.CloudInstanceConverter;
 import com.sequenceiq.provisioning.domain.CloudInstance;
+import com.sequenceiq.provisioning.domain.CloudInstanceDescription;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
 import com.sequenceiq.provisioning.domain.Infra;
 import com.sequenceiq.provisioning.domain.User;
@@ -39,17 +40,23 @@ public class SimpleCloudInstanceService implements CloudInstanceService {
     @Override
     public Set<CloudInstanceJson> getAll(User user) {
         Set<CloudInstanceJson> result = new HashSet<>();
-        result.addAll(cloudInstanceConverter.convertAllEntityToJson(user.getCloudInstances()));
+        for (CloudInstance cloudInstance : user.getCloudInstances()) {
+            CloudPlatform cp = cloudInstance.getInfra().cloudPlatform();
+            CloudInstanceDescription description = provisionServices.get(cp).describeCloudInstance(user, cloudInstance);
+            result.add(cloudInstanceConverter.convert(cloudInstance, description));
+        }
         return result;
     }
 
     @Override
-    public CloudInstanceJson get(Long id) {
+    public CloudInstanceJson get(User user, Long id) {
         CloudInstance cloudInstance = cloudInstanceRepository.findOne(id);
         if (cloudInstance == null) {
             throw new NotFoundException(String.format("CloudInstance '%s' not found", id));
         } else {
-            return cloudInstanceConverter.convert(cloudInstance);
+            CloudPlatform cp = cloudInstance.getInfra().cloudPlatform();
+            CloudInstanceDescription description = provisionServices.get(cp).describeCloudInstanceWithResources(user, cloudInstance);
+            return cloudInstanceConverter.convert(cloudInstance, description);
         }
     }
 

@@ -14,6 +14,7 @@ import com.sequenceiq.provisioning.controller.json.AzureCloudInstanceResult;
 import com.sequenceiq.provisioning.controller.json.CloudInstanceResult;
 import com.sequenceiq.provisioning.domain.AzureInfra;
 import com.sequenceiq.provisioning.domain.CloudInstance;
+import com.sequenceiq.provisioning.domain.CloudInstanceDescription;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
 import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.service.ProvisionService;
@@ -112,8 +113,19 @@ public class AzureProvisionService implements ProvisionService {
     }
 
     @Override
+    public CloudInstanceDescription describeCloudInstance(User user, CloudInstance cloudInstance) {
+        // TODO
+        return null;
+    }
+
+    @Override
+    public CloudInstanceDescription describeCloudInstanceWithResources(User user, CloudInstance cloudInstance) {
+        // TODO
+        return null;
+    }
+
+    @Override
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.AZURE;
     }
-
 }

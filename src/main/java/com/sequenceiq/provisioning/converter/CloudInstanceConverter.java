@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.provisioning.controller.json.CloudInstanceJson;
 import com.sequenceiq.provisioning.domain.CloudInstance;
+import com.sequenceiq.provisioning.domain.CloudInstanceDescription;
 import com.sequenceiq.provisioning.repository.InfraRepository;
 
 @Component
@@ -21,6 +22,16 @@ public class CloudInstanceConverter extends AbstractConverter<CloudInstanceJson,
         cloudInstanceJson.setCloudName(entity.getName());
         cloudInstanceJson.setId(entity.getId());
         cloudInstanceJson.setCloudPlatform(entity.getInfra().cloudPlatform());
+        return cloudInstanceJson;
+    }
+
+    public CloudInstanceJson convert(CloudInstance entity, CloudInstanceDescription description) {
+        CloudInstanceJson cloudInstanceJson = new CloudInstanceJson();
+        cloudInstanceJson.setInfraId(entity.getInfra().getId());
+        cloudInstanceJson.setClusterSize(entity.getClusterSize());
+        cloudInstanceJson.setId(entity.getId());
+        cloudInstanceJson.setCloudPlatform(entity.getInfra().cloudPlatform());
+        cloudInstanceJson.setDescription(description);
         return cloudInstanceJson;
     }
 
