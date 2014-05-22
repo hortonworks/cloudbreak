@@ -1,12 +1,12 @@
 package com.sequenceiq.provisioning.controller.validation;
 
-import com.amazonaws.regions.Region;
+import com.amazonaws.regions.Regions;
 import com.amazonaws.services.ec2.model.InstanceType;
 
 public enum RequiredAwsTemplateParam implements TemplateParam {
 
     KEY_NAME("keyName", String.class),
-    REGION("region", Region.class),
+    REGION("region", Regions.class),
     AMI_ID("amiId", String.class),
     INSTANCE_TYPE("instanceType", InstanceType.class);
 
