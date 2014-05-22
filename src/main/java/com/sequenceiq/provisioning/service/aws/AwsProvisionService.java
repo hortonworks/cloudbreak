@@ -66,7 +66,7 @@ public class AwsProvisionService implements ProvisionService {
     }
 
     @Override
-    public StackDescription describeCloudInstance(User user, Stack stack) {
+    public StackDescription describeStack(User user, Stack stack) {
         AwsTemplate awsInfra = (AwsTemplate) stack.getTemplate();
         BasicSessionCredentials basicSessionCredentials = credentialsProvider.retrieveSessionCredentials(SESSION_CREDENTIALS_DURATION, "provision-ambari",
                 user.getRoleArn());
@@ -78,7 +78,7 @@ public class AwsProvisionService implements ProvisionService {
     }
 
     @Override
-    public StackDescription describeCloudInstanceWithResources(User user, Stack stack) {
+    public StackDescription describeStackWithResources(User user, Stack stack) {
         AwsTemplate awsInfra = (AwsTemplate) stack.getTemplate();
         BasicSessionCredentials basicSessionCredentials = credentialsProvider.retrieveSessionCredentials(SESSION_CREDENTIALS_DURATION, "provision-ambari",
                 user.getRoleArn());

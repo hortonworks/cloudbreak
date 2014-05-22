@@ -113,13 +113,13 @@ public class AzureProvisionService implements ProvisionService {
     }
 
     @Override
-    public StackDescription describeCloudInstance(User user, Stack stack) {
+    public StackDescription describeStack(User user, Stack stack) {
         // TODO
         return null;
     }
 
     @Override
-    public StackDescription describeCloudInstanceWithResources(User user, Stack stack) {
+    public StackDescription describeStackWithResources(User user, Stack stack) {
         // TODO
         return null;
     }

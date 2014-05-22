@@ -10,9 +10,9 @@ public interface ProvisionService {
 
     StackResult createStack(User user, Stack stack);
 
-    StackDescription describeCloudInstance(User user, Stack stack);
+    StackDescription describeStack(User user, Stack stack);
 
-    StackDescription describeCloudInstanceWithResources(User user, Stack stack);
+    StackDescription describeStackWithResources(User user, Stack stack);
 
     CloudPlatform getCloudPlatform();
 

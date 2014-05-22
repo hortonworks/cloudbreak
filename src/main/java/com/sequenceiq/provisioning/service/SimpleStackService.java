@@ -42,7 +42,7 @@ public class SimpleStackService implements StackService {
         Set<StackJson> result = new HashSet<>();
         for (Stack cloudInstance : user.getStacks()) {
             CloudPlatform cp = cloudInstance.getTemplate().cloudPlatform();
-            StackDescription description = provisionServices.get(cp).describeCloudInstance(user, cloudInstance);
+            StackDescription description = provisionServices.get(cp).describeStack(user, cloudInstance);
             result.add(stackConverter.convert(cloudInstance, description));
         }
         return result;
@@ -55,7 +55,7 @@ public class SimpleStackService implements StackService {
             throw new NotFoundException(String.format("CloudInstance '%s' not found", id));
         } else {
             CloudPlatform cp = cloudInstance.getTemplate().cloudPlatform();
-            StackDescription description = provisionServices.get(cp).describeCloudInstanceWithResources(user, cloudInstance);
+            StackDescription description = provisionServices.get(cp).describeStackWithResources(user, cloudInstance);
             return stackConverter.convert(cloudInstance, description);
         }
     }
