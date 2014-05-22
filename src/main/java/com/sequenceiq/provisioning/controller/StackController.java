@@ -1,6 +1,6 @@
 package com.sequenceiq.provisioning.controller;
 
-import java.util.List;
+import java.util.Set;
 
 import javax.validation.Valid;
 
@@ -14,34 +14,49 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.sequenceiq.provisioning.controller.json.BlueprintJson;
+import com.sequenceiq.provisioning.controller.json.StackJson;
+import com.sequenceiq.provisioning.controller.json.StackResult;
+import com.sequenceiq.provisioning.controller.json.TemplateJson;
 import com.sequenceiq.provisioning.domain.User;
+import com.sequenceiq.provisioning.repository.UserRepository;
 import com.sequenceiq.provisioning.security.CurrentUser;
-import com.sequenceiq.provisioning.service.AmbariBlueprintService;
+import com.sequenceiq.provisioning.service.StackService;
 
 @Controller
-@RequestMapping("/cloud/{cloudId}/stack")
+@RequestMapping("stack")
 public class StackController {
 
     @Autowired
-    private AmbariBlueprintService ambariBlueprintService;
+    private UserRepository userRepository;
+
+    @Autowired
+    private StackService stackService;
 
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<String> addBlueprint(@CurrentUser User user, @PathVariable Long cloudId, @RequestBody @Valid BlueprintJson blueprintRequest) {
-        ambariBlueprintService.addBlueprint(user, cloudId, blueprintRequest);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+    public ResponseEntity<StackResult> createStack(@CurrentUser User user, @RequestBody @Valid StackJson stackRequest) {
+        return new ResponseEntity<>(stackService.create(userRepository.findOneWithLists(user.getId()), stackRequest), HttpStatus.CREATED);
     }
 
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<List<BlueprintJson>> retrieveBlueprints(@CurrentUser User user, @PathVariable Long cloudId) {
-        return new ResponseEntity<>(ambariBlueprintService.retrieveBlueprints(user, cloudId), HttpStatus.OK);
+    public ResponseEntity<Set<StackJson>> getAllStack(@CurrentUser User user) {
+        User currentUser = userRepository.findOneWithLists(user.getId());
+        return new ResponseEntity<>(stackService.getAll(currentUser), HttpStatus.OK);
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "{id}")
+    @RequestMapping(method = RequestMethod.GET, value = "{stackId}")
     @ResponseBody
-    public ResponseEntity<BlueprintJson> retrieveBlueprint(@CurrentUser User user, @PathVariable Long cloudId, @PathVariable String id) {
-        return new ResponseEntity<>(ambariBlueprintService.retrieveBlueprint(user, cloudId, id), HttpStatus.OK);
+    public ResponseEntity<StackJson> getStack(@CurrentUser User user, @PathVariable Long stackId) {
+        StackJson stackJson = stackService.get(user, stackId);
+        return new ResponseEntity<>(stackJson, HttpStatus.OK);
     }
+
+    @RequestMapping(method = RequestMethod.DELETE, value = "{stackId}")
+    @ResponseBody
+    public ResponseEntity<TemplateJson> deleteStack(@CurrentUser User user, @PathVariable Long stackId) {
+        stackService.delete(stackId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
 }

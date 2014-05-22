@@ -10,13 +10,13 @@ import com.sequenceiq.provisioning.domain.User;
 public class UserConverter extends AbstractConverter<UserJson, User> {
 
     @Autowired
-    private AzureInfraConverter azureInfraConverter;
+    private AzureTemplateConverter azureTemplateConverter;
 
     @Autowired
-    private AwsInfraConverter awsInfraConverter;
+    private AwsTemplateConverter awsTemplateConverter;
 
     @Autowired
-    private CloudInstanceConverter cloudInstanceConverter;
+    private StackConverter stackConverter;
 
     @Override
     public UserJson convert(User entity) {
@@ -27,9 +27,9 @@ public class UserConverter extends AbstractConverter<UserJson, User> {
         userJson.setRoleArn(entity.getRoleArn() == null ? "" : entity.getRoleArn());
         userJson.setJks(entity.getJks() == null ? "" : entity.getJks());
         userJson.setSubscriptionId(entity.getSubscriptionId() == null ? "" : entity.getSubscriptionId());
-        userJson.setAwsInfras(awsInfraConverter.convertAllEntityToJson(entity.getAwsInfras()));
-        userJson.setAzureInfras(azureInfraConverter.convertAllEntityToJson(entity.getAzureInfras()));
-        userJson.setCloudInstances(cloudInstanceConverter.convertAllEntityToJson(entity.getCloudInstances()));
+        userJson.setAwsTemplates(awsTemplateConverter.convertAllEntityToJson(entity.getAwsTemplates()));
+        userJson.setAzureTemplates(azureTemplateConverter.convertAllEntityToJson(entity.getAzureTemplates()));
+        userJson.setStacks(stackConverter.convertAllEntityToJson(entity.getStacks()));
         return userJson;
     }
 
@@ -42,9 +42,9 @@ public class UserConverter extends AbstractConverter<UserJson, User> {
         user.setRoleArn(json.getRoleArn());
         user.setJks(json.getJks());
         user.setSubscriptionId(json.getSubscriptionId());
-        user.setAwsInfras(awsInfraConverter.convertAllJsonToEntity(json.getAwsInfras()));
-        user.setAzureInfras(azureInfraConverter.convertAllJsonToEntity(json.getAzureInfras()));
-        user.setCloudInstances(cloudInstanceConverter.convertAllJsonToEntity(json.getCloudInstances()));
+        user.setAwsTemplates(awsTemplateConverter.convertAllJsonToEntity(json.getAwsTemplates()));
+        user.setAzureTemplates(azureTemplateConverter.convertAllJsonToEntity(json.getAzureTemplates()));
+        user.setStacks(stackConverter.convertAllJsonToEntity(json.getStacks()));
         return user;
     }
 }

@@ -9,7 +9,7 @@ import javax.validation.ConstraintValidatorContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.provisioning.controller.json.InfraJson;
+import com.sequenceiq.provisioning.controller.json.TemplateJson;
 
 /**
  * Validates a provision request. Because different parameters belong to
@@ -18,7 +18,7 @@ import com.sequenceiq.provisioning.controller.json.InfraJson;
  * format.
  */
 @Component
-public class ProvisionParametersValidator implements ConstraintValidator<ValidProvisionRequest, InfraJson> {
+public class ProvisionParametersValidator implements ConstraintValidator<ValidProvisionRequest, TemplateJson> {
 
     @Autowired
     private RequiredParametersValidator requiredParametersValidator;
@@ -28,14 +28,14 @@ public class ProvisionParametersValidator implements ConstraintValidator<ValidPr
 
     @Override
     public void initialize(ValidProvisionRequest constraintAnnotation) {
-        for (RequiredAwsInfraParam param : RequiredAwsInfraParam.values()) {
+        for (RequiredAwsTemplateParam param : RequiredAwsTemplateParam.values()) {
             requiredAWSParams.add(param.getName());
         }
         // TODO: required Azure params
     }
 
     @Override
-    public boolean isValid(InfraJson request, ConstraintValidatorContext context) {
+    public boolean isValid(TemplateJson request, ConstraintValidatorContext context) {
         boolean valid = true;
         switch (request.getCloudPlatform()) {
         case AWS:
@@ -50,11 +50,11 @@ public class ProvisionParametersValidator implements ConstraintValidator<ValidPr
         return valid;
     }
 
-    private boolean validateAzureParams(InfraJson request, ConstraintValidatorContext context) {
+    private boolean validateAzureParams(TemplateJson request, ConstraintValidatorContext context) {
         return requiredParametersValidator.validate(request.getParameters(), context, requiredAzureParams);
     }
 
-    private boolean validateAWSParams(InfraJson request, ConstraintValidatorContext context) {
+    private boolean validateAWSParams(TemplateJson request, ConstraintValidatorContext context) {
         // TODO: validate instanceType, sshLocation, etc.. with regex
         return requiredParametersValidator.validate(request.getParameters(), context, requiredAWSParams);
     }

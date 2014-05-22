@@ -19,7 +19,7 @@ import com.sequenceiq.provisioning.security.CurrentUser;
 import com.sequenceiq.provisioning.service.AmbariClusterService;
 
 @Controller
-@RequestMapping("/cloud/{cloudId}/cluster")
+@RequestMapping("/stackId/{stackId}/cluster")
 public class ClusterController {
 
     @Autowired
@@ -27,15 +27,15 @@ public class ClusterController {
 
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<String> createCluser(@CurrentUser User user, @PathVariable Long cloudId, @RequestBody @Valid ClusterRequest clusterRequest) {
-        ambariClusterService.createCluster(user, cloudId, clusterRequest);
+    public ResponseEntity<String> createCluser(@CurrentUser User user, @PathVariable Long stackId, @RequestBody @Valid ClusterRequest clusterRequest) {
+        ambariClusterService.createCluster(user, stackId, clusterRequest);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<ClusterResponse> retrieveClusters(@CurrentUser User user, @PathVariable Long cloudId) {
-        return new ResponseEntity<>(ambariClusterService.retrieveCluster(user, cloudId), HttpStatus.OK);
+    public ResponseEntity<ClusterResponse> retrieveClusters(@CurrentUser User user, @PathVariable Long stackId) {
+        return new ResponseEntity<>(ambariClusterService.retrieveCluster(user, stackId), HttpStatus.OK);
     }
 
 }

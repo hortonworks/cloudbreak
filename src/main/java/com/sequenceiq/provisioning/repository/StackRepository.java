@@ -6,12 +6,12 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.security.access.prepost.PostAuthorize;
 
-import com.sequenceiq.provisioning.domain.CloudInstance;
+import com.sequenceiq.provisioning.domain.Stack;
 
-public interface CloudInstanceRepository extends CrudRepository<CloudInstance, Long> {
+public interface StackRepository extends CrudRepository<Stack, Long> {
 
     @PostAuthorize("returnObject?.user?.id == principal?.id")
-    CloudInstance findOne(Long id);
+    Stack findOne(Long id);
 
-    List<CloudInstance> findAllCloudForInfra(@Param("id")Long id);
+    List<Stack> findAllStackForTemplate(@Param("id") Long id);
 }

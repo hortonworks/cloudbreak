@@ -1,6 +1,6 @@
 package com.sequenceiq.provisioning.controller.validation;
 
-public enum RequiredAwsInfraParam {
+public enum RequiredAwsTemplateParam {
 
     KEY_NAME("keyName"),
     REGION("region"),
@@ -9,7 +9,7 @@ public enum RequiredAwsInfraParam {
 
     private final String paramName;
 
-    private RequiredAwsInfraParam(String paramName) {
+    private RequiredAwsTemplateParam(String paramName) {
         this.paramName = paramName;
     }
 

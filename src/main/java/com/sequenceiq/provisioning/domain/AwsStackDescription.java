@@ -2,11 +2,11 @@ package com.sequenceiq.provisioning.domain;
 
 import com.amazonaws.services.cloudformation.model.DescribeStacksResult;
 
-public class AwsCloudInstanceDescription extends CloudInstanceDescription {
+public class AwsStackDescription extends StackDescription {
 
     private DescribeStacksResult stack;
 
-    public AwsCloudInstanceDescription(DescribeStacksResult stack) {
+    public AwsStackDescription(DescribeStacksResult stack) {
         this.stack = stack;
     }
 

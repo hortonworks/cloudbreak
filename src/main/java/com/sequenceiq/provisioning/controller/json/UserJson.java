@@ -17,11 +17,11 @@ public class UserJson implements JsonEntity {
 
     private String jks;
 
-    private Set<InfraJson> azureInfras = new HashSet<>();
+    private Set<TemplateJson> azureTemplates = new HashSet<>();
 
-    private Set<InfraJson> awsInfras = new HashSet<>();
+    private Set<TemplateJson> awsTemplates = new HashSet<>();
 
-    private Set<CloudInstanceJson> cloudInstances = new HashSet<>();
+    private Set<StackJson> stacks = new HashSet<>();
 
     public UserJson() {
 
@@ -75,28 +75,28 @@ public class UserJson implements JsonEntity {
         this.jks = jks;
     }
 
-    public Set<InfraJson> getAwsInfras() {
-        return awsInfras;
+    public Set<TemplateJson> getAwsTemplates() {
+        return awsTemplates;
     }
 
-    public void setAwsInfras(Set<InfraJson> awsInfras) {
-        this.awsInfras = awsInfras;
+    public void setAwsTemplates(Set<TemplateJson> awsTemplates) {
+        this.awsTemplates = awsTemplates;
     }
 
-    public Set<InfraJson> getAzureInfras() {
-        return azureInfras;
+    public Set<TemplateJson> getAzureTemplates() {
+        return azureTemplates;
     }
 
-    public void setAzureInfras(Set<InfraJson> azureInfras) {
-        this.azureInfras = azureInfras;
+    public void setAzureTemplates(Set<TemplateJson> azureTemplates) {
+        this.azureTemplates = azureTemplates;
     }
 
-    public Set<CloudInstanceJson> getCloudInstances() {
-        return cloudInstances;
+    public Set<StackJson> getStacks() {
+        return stacks;
     }
 
-    public void setCloudInstances(Set<CloudInstanceJson> cloudInstances) {
-        this.cloudInstances = cloudInstances;
+    public void setStacks(Set<StackJson> stacks) {
+        this.stacks = stacks;
     }
 
 }

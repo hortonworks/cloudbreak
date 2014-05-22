@@ -7,14 +7,14 @@ import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 
 @Entity
-public abstract class Infra {
+public abstract class Template {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "infra_generator")
-    @SequenceGenerator(name = "infra_generator", sequenceName = "sequence_table")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "template_generator")
+    @SequenceGenerator(name = "template_generator", sequenceName = "sequence_table")
     private Long id;
 
-    public Infra() {
+    public Template() {
 
     }
 

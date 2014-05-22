@@ -6,7 +6,7 @@ import javax.persistence.ManyToOne;
 import com.amazonaws.services.ec2.model.InstanceType;
 
 @Entity
-public class AwsInfra extends Infra implements ProvisionEntity {
+public class AwsTemplate extends Template implements ProvisionEntity {
 
     private String name;
     private String region;
@@ -18,7 +18,7 @@ public class AwsInfra extends Infra implements ProvisionEntity {
     @ManyToOne
     private User user;
 
-    public AwsInfra() {
+    public AwsTemplate() {
     }
 
     public String getName() {

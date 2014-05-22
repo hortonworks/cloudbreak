@@ -1,12 +1,12 @@
 package com.sequenceiq.provisioning.controller.validation;
 
-public enum OptionalAwsInfraParam {
+public enum OptionalAwsTemplateParam {
 
     SSH_LOCATION("sshLocation");
 
     private final String paramName;
 
-    private OptionalAwsInfraParam(String paramName) {
+    private OptionalAwsTemplateParam(String paramName) {
         this.paramName = paramName;
     }
 
