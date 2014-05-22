@@ -53,7 +53,7 @@ public class AwsProvisionService implements ProvisionService {
         AmazonCloudFormationClient amazonCloudFormationClient = new AmazonCloudFormationClient(basicSessionCredentials);
         amazonCloudFormationClient.setRegion(Region.getRegion(Regions.fromName(awsInfra.getRegion())));
         CreateStackRequest createStackRequest = new CreateStackRequest()
-                .withStackName(cloudInstance.getName())
+                .withStackName(String.format("%s-%s", cloudInstance.getName(), cloudInstance.getId()))
                 .withTemplateBody(template.getBody())
                 .withParameters(
                         new Parameter().withParameterKey("KeyName").withParameterValue(awsInfra.getKeyName()),
