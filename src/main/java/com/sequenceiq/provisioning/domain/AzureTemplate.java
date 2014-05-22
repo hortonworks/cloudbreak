@@ -4,7 +4,7 @@ import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 
 @Entity
-public class AzureInfra extends Infra implements ProvisionEntity {
+public class AzureTemplate extends Template implements ProvisionEntity {
 
     private String location;
     private String name;
@@ -20,7 +20,7 @@ public class AzureInfra extends Infra implements ProvisionEntity {
     @ManyToOne
     private User user;
 
-    public AzureInfra() {
+    public AzureTemplate() {
     }
 
     public String getLocation() {

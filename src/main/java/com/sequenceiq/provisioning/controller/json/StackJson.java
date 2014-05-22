@@ -4,20 +4,20 @@ import javax.validation.constraints.Min;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sequenceiq.provisioning.domain.CloudInstanceDescription;
+import com.sequenceiq.provisioning.domain.StackDescription;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
 
-public class CloudInstanceJson implements JsonEntity {
+public class StackJson implements JsonEntity {
 
     private Long id;
     @Min(value = 2)
     private int clusterSize;
     private String cloudName;
-    private Long infraId;
+    private Long templateId;
     private CloudPlatform cloudPlatform;
-    private CloudInstanceDescription description;
+    private StackDescription description;
 
-    public CloudInstanceJson() {
+    public StackJson() {
     }
 
     @JsonProperty("id")
@@ -46,12 +46,12 @@ public class CloudInstanceJson implements JsonEntity {
         this.cloudName = cloudName;
     }
 
-    public Long getInfraId() {
-        return infraId;
+    public Long getTemplateId() {
+        return templateId;
     }
 
-    public void setInfraId(Long infraId) {
-        this.infraId = infraId;
+    public void setTemplateId(Long templateId) {
+        this.templateId = templateId;
     }
 
     @JsonProperty("cloudPlatform")
@@ -64,11 +64,11 @@ public class CloudInstanceJson implements JsonEntity {
         this.cloudPlatform = cloudPlatform;
     }
 
-    public CloudInstanceDescription getDescription() {
+    public StackDescription getDescription() {
         return description;
     }
 
-    public void setDescription(CloudInstanceDescription description) {
+    public void setDescription(StackDescription description) {
         this.description = description;
     }
 }

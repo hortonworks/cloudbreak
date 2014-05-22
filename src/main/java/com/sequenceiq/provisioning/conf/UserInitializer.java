@@ -5,9 +5,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.services.ec2.model.InstanceType;
-import com.sequenceiq.provisioning.domain.AwsInfra;
-import com.sequenceiq.provisioning.domain.AzureInfra;
-import com.sequenceiq.provisioning.domain.CloudInstance;
+import com.sequenceiq.provisioning.domain.AwsTemplate;
+import com.sequenceiq.provisioning.domain.AzureTemplate;
+import com.sequenceiq.provisioning.domain.Stack;
 import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.repository.UserRepository;
 
@@ -31,44 +31,44 @@ public class UserInitializer implements InitializingBean {
         user2.setJks("test123");
         user2.setRoleArn("arnrole");
 
-        AwsInfra awsInfra = new AwsInfra();
-        awsInfra.setName("userAzureStack");
-        awsInfra.setKeyName("smaple_key");
-        awsInfra.setName("template1");
-        awsInfra.setRegion("eu-west-1");
-        awsInfra.setAmiId("ami-2918e35e");
-        awsInfra.setInstanceType(InstanceType.M1Small);
-        awsInfra.setSshLocation("0.0.0.0/0");
-        awsInfra.setUser(user2);
+        AwsTemplate awsTemplate = new AwsTemplate();
+        awsTemplate.setName("userAzureStack");
+        awsTemplate.setKeyName("smaple_key");
+        awsTemplate.setName("template1");
+        awsTemplate.setRegion("region-1");
+        awsTemplate.setAmiId("ami-2918e35e");
+        awsTemplate.setInstanceType(InstanceType.M1Small);
+        awsTemplate.setSshLocation("0.0.0.0/0");
+        awsTemplate.setUser(user2);
 
-        CloudInstance awsCloudInstance = new CloudInstance();
-        awsCloudInstance.setInfra(awsInfra);
-        awsCloudInstance.setClusterSize(CLUSTER_SIZE);
-        awsCloudInstance.setUser(user2);
+        Stack awsStack = new Stack();
+        awsStack.setTemplate(awsTemplate);
+        awsStack.setClusterSize(CLUSTER_SIZE);
+        awsStack.setUser(user2);
 
-        user2.getAwsInfras().add(awsInfra);
-        user2.getCloudInstances().add(awsCloudInstance);
+        user2.getAwsTemplates().add(awsTemplate);
+        user2.getStacks().add(awsStack);
 
-        AzureInfra azureInfra = new AzureInfra();
-        azureInfra.setDeploymentSlot("slot");
-        azureInfra.setDescription("azure desc");
-        azureInfra.setDisableSshPasswordAuthentication(false);
-        azureInfra.setImageName("image");
-        azureInfra.setLocation("location");
-        azureInfra.setName("azurename");
-        azureInfra.setUserName("username");
-        azureInfra.setPassword("pass");
-        azureInfra.setSubnetAddressPrefix("prefix");
-        azureInfra.setVmType("small");
-        azureInfra.setUser(user2);
+        AzureTemplate azureTemplate = new AzureTemplate();
+        azureTemplate.setDeploymentSlot("slot");
+        azureTemplate.setDescription("azure desc");
+        azureTemplate.setDisableSshPasswordAuthentication(false);
+        azureTemplate.setImageName("image");
+        azureTemplate.setLocation("location");
+        azureTemplate.setName("azurename");
+        azureTemplate.setUserName("username");
+        azureTemplate.setPassword("pass");
+        azureTemplate.setSubnetAddressPrefix("prefix");
+        azureTemplate.setVmType("small");
+        azureTemplate.setUser(user2);
 
-        CloudInstance azureCloudInstance = new CloudInstance();
-        azureCloudInstance.setInfra(azureInfra);
-        azureCloudInstance.setClusterSize(CLUSTER_SIZE);
-        azureCloudInstance.setUser(user2);
+        Stack azureStack = new Stack();
+        azureStack.setTemplate(azureTemplate);
+        azureStack.setClusterSize(CLUSTER_SIZE);
+        azureStack.setUser(user2);
 
-        user2.getAzureInfras().add(azureInfra);
-        user2.getCloudInstances().add(azureCloudInstance);
+        user2.getAzureTemplates().add(azureTemplate);
+        user2.getStacks().add(azureStack);
 
         userRepository.save(user2);
 

@@ -11,14 +11,14 @@ import javax.persistence.SequenceGenerator;
 
 @Entity
 @NamedQuery(
-        name = "CloudInstance.findAllCloudForInfra",
-        query = "SELECT c FROM CloudInstance c "
-                + "WHERE c.infra.id= :id")
-public class CloudInstance implements ProvisionEntity {
+        name = "Stack.findAllStackForTemplate",
+        query = "SELECT c FROM Stack c "
+                + "WHERE c.template.id= :id")
+public class Stack implements ProvisionEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "cloudinstance_generator")
-    @SequenceGenerator(name = "cloudinstance_generator", sequenceName = "cloudsequence_table")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "stack_generator")
+    @SequenceGenerator(name = "stack_generator", sequenceName = "stack_table")
     private Long id;
 
     private Integer clusterSize;
@@ -26,7 +26,7 @@ public class CloudInstance implements ProvisionEntity {
     private String name;
 
     @OneToOne
-    private Infra infra;
+    private Template template;
 
     @ManyToOne
     private User user;
@@ -55,12 +55,12 @@ public class CloudInstance implements ProvisionEntity {
         this.name = name;
     }
 
-    public Infra getInfra() {
-        return infra;
+    public Template getTemplate() {
+        return template;
     }
 
-    public void setInfra(Infra infra) {
-        this.infra = infra;
+    public void setTemplate(Template template) {
+        this.template = template;
     }
 
     public User getUser() {

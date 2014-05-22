@@ -1,18 +1,18 @@
 package com.sequenceiq.provisioning.service;
 
-import com.sequenceiq.provisioning.controller.json.CloudInstanceResult;
-import com.sequenceiq.provisioning.domain.CloudInstance;
-import com.sequenceiq.provisioning.domain.CloudInstanceDescription;
+import com.sequenceiq.provisioning.domain.StackDescription;
+import com.sequenceiq.provisioning.controller.json.StackResult;
+import com.sequenceiq.provisioning.domain.Stack;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
 import com.sequenceiq.provisioning.domain.User;
 
 public interface ProvisionService {
 
-    CloudInstanceResult createCloudInstance(User user, CloudInstance cloudInstance);
+    StackResult createStack(User user, Stack stack);
 
-    CloudInstanceDescription describeCloudInstance(User user, CloudInstance cloudInstance);
+    StackDescription describeCloudInstance(User user, Stack stack);
 
-    CloudInstanceDescription describeCloudInstanceWithResources(User user, CloudInstance cloudInstance);
+    StackDescription describeCloudInstanceWithResources(User user, Stack stack);
 
     CloudPlatform getCloudPlatform();
 

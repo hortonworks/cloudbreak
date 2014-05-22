@@ -1,6 +1,6 @@
 package com.sequenceiq.provisioning.controller.validation;
 
-public enum RequiredAzureInfraParam {
+public enum RequiredAzureTemplateParam {
 
     NAME("name"),
     LOCATION("location"),
@@ -15,7 +15,7 @@ public enum RequiredAzureInfraParam {
 
     private final String paramName;
 
-    private RequiredAzureInfraParam(String paramName) {
+    private RequiredAzureTemplateParam(String paramName) {
         this.paramName = paramName;
     }
 

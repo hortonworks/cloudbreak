@@ -3,12 +3,12 @@ package com.sequenceiq.provisioning.domain;
 import com.amazonaws.services.cloudformation.model.DescribeStackResourcesResult;
 import com.amazonaws.services.cloudformation.model.DescribeStacksResult;
 
-public class DetailedAwsCloudInstanceDescription extends CloudInstanceDescription {
+public class DetailedAwsStackDescription extends StackDescription {
 
     private DescribeStacksResult stack;
     private DescribeStackResourcesResult resources;
 
-    public DetailedAwsCloudInstanceDescription(DescribeStacksResult stack, DescribeStackResourcesResult resources) {
+    public DetailedAwsStackDescription(DescribeStacksResult stack, DescribeStackResourcesResult resources) {
         this.stack = stack;
         this.resources = resources;
     }

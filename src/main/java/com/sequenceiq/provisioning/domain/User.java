@@ -19,9 +19,9 @@ import org.hibernate.validator.constraints.NotEmpty;
 @NamedQuery(
         name = "User.findOneWithLists",
         query = "SELECT u FROM User u "
-                + "LEFT JOIN FETCH u.azureInfras "
-                + "LEFT JOIN FETCH u.awsInfras "
-                + "LEFT JOIN FETCH u.cloudInstances "
+                + "LEFT JOIN FETCH u.azureTemplates "
+                + "LEFT JOIN FETCH u.awsTemplates "
+                + "LEFT JOIN FETCH u.stacks "
                 + "WHERE u.id= :id")
 public class User implements ProvisionEntity {
     @Id
@@ -49,13 +49,13 @@ public class User implements ProvisionEntity {
     private String password;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<AzureInfra> azureInfras = new HashSet<>();
+    private Set<AzureTemplate> azureTemplates = new HashSet<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<AwsInfra> awsInfras = new HashSet<>();
+    private Set<AwsTemplate> awsTemplates = new HashSet<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<CloudInstance> cloudInstances = new HashSet<>();
+    private Set<Stack> stacks = new HashSet<>();
 
     public User() {
     }
@@ -66,12 +66,12 @@ public class User implements ProvisionEntity {
         this.lastName = user.lastName;
         this.email = user.email;
         this.password = user.password;
-        this.awsInfras = user.awsInfras;
-        this.azureInfras = user.azureInfras;
+        this.awsTemplates = user.awsTemplates;
+        this.azureTemplates = user.azureTemplates;
         this.jks = user.jks;
         this.subscriptionId = user.subscriptionId;
         this.roleArn = user.roleArn;
-        this.cloudInstances = user.cloudInstances;
+        this.stacks = user.stacks;
     }
 
     public String getPassword() {
@@ -114,20 +114,20 @@ public class User implements ProvisionEntity {
         this.email = email;
     }
 
-    public Set<AwsInfra> getAwsInfras() {
-        return awsInfras;
+    public Set<AwsTemplate> getAwsTemplates() {
+        return awsTemplates;
     }
 
-    public void setAwsInfras(Set<AwsInfra> awsInfras) {
-        this.awsInfras = awsInfras;
+    public void setAwsTemplates(Set<AwsTemplate> awsTemplates) {
+        this.awsTemplates = awsTemplates;
     }
 
-    public Set<AzureInfra> getAzureInfras() {
-        return azureInfras;
+    public Set<AzureTemplate> getAzureTemplates() {
+        return azureTemplates;
     }
 
-    public void setAzureInfras(Set<AzureInfra> azureInfras) {
-        this.azureInfras = azureInfras;
+    public void setAzureTemplates(Set<AzureTemplate> azureTemplates) {
+        this.azureTemplates = azureTemplates;
     }
 
     public String getRoleArn() {
@@ -154,12 +154,12 @@ public class User implements ProvisionEntity {
         this.jks = jks;
     }
 
-    public Set<CloudInstance> getCloudInstances() {
-        return cloudInstances;
+    public Set<Stack> getStacks() {
+        return stacks;
     }
 
-    public void setCloudInstances(Set<CloudInstance> cloudInstances) {
-        this.cloudInstances = cloudInstances;
+    public void setStacks(Set<Stack> stacks) {
+        this.stacks = stacks;
     }
 
     public String emailAsFolder() {
