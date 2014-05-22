@@ -18,6 +18,7 @@ public class CloudInstanceConverter extends AbstractConverter<CloudInstanceJson,
         CloudInstanceJson cloudInstanceJson = new CloudInstanceJson();
         cloudInstanceJson.setInfraId(entity.getInfra().getId());
         cloudInstanceJson.setClusterSize(entity.getClusterSize());
+        cloudInstanceJson.setCloudName(entity.getName());
         cloudInstanceJson.setId(entity.getId());
         cloudInstanceJson.setCloudPlatform(entity.getInfra().cloudPlatform());
         return cloudInstanceJson;
@@ -27,6 +28,7 @@ public class CloudInstanceConverter extends AbstractConverter<CloudInstanceJson,
     public CloudInstance convert(CloudInstanceJson json) {
         CloudInstance cloudInstance = new CloudInstance();
         cloudInstance.setClusterSize(json.getClusterSize());
+        cloudInstance.setName(json.getCloudName());
         cloudInstance.setInfra(infraRepository.findOne(Long.valueOf(json.getInfraId())));
         return cloudInstance;
     }

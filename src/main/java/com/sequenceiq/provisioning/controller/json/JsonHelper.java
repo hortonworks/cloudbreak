@@ -20,7 +20,7 @@ public class JsonHelper {
             JsonParser jp = factory.createParser(jsonString);
             return mapper.readTree(jp);
         } catch (IOException e) {
-            throw new InternalServerException("Failed to parse JSON string.");
+            throw new InternalServerException("Failed to parse JSON string.", e);
         }
     }
 

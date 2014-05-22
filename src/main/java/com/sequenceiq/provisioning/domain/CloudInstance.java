@@ -23,6 +23,8 @@ public class CloudInstance implements ProvisionEntity {
 
     private Integer clusterSize;
 
+    private String name;
+
     @OneToOne
     private Infra infra;
 
@@ -43,6 +45,14 @@ public class CloudInstance implements ProvisionEntity {
 
     public void setClusterSize(Integer clusterSize) {
         this.clusterSize = clusterSize;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public Infra getInfra() {

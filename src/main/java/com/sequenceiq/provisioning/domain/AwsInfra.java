@@ -3,14 +3,17 @@ package com.sequenceiq.provisioning.domain;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 
+import com.amazonaws.services.ec2.model.InstanceType;
+
 @Entity
 public class AwsInfra extends Infra implements ProvisionEntity {
 
     private String name;
-
     private String region;
-
     private String keyName;
+    private String amiId;
+    private InstanceType instanceType;
+    private String sshLocation;
 
     @ManyToOne
     private User user;
@@ -40,6 +43,30 @@ public class AwsInfra extends Infra implements ProvisionEntity {
 
     public void setKeyName(String keyName) {
         this.keyName = keyName;
+    }
+
+    public String getAmiId() {
+        return amiId;
+    }
+
+    public void setAmiId(String amiId) {
+        this.amiId = amiId;
+    }
+
+    public InstanceType getInstanceType() {
+        return instanceType;
+    }
+
+    public void setInstanceType(InstanceType instanceType) {
+        this.instanceType = instanceType;
+    }
+
+    public String getSshLocation() {
+        return sshLocation;
+    }
+
+    public void setSshLocation(String sshLocation) {
+        this.sshLocation = sshLocation;
     }
 
     public User getUser() {
