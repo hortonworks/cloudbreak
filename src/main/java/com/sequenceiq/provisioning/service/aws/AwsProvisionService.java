@@ -14,15 +14,15 @@ import com.amazonaws.services.cloudformation.model.DescribeStackResourcesResult;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStacksResult;
 import com.amazonaws.services.cloudformation.model.Parameter;
-import com.sequenceiq.provisioning.domain.AwsStackDescription;
-import com.sequenceiq.provisioning.domain.CloudFormationTemplate;
-import com.sequenceiq.provisioning.domain.DetailedAwsStackDescription;
-import com.sequenceiq.provisioning.domain.StackDescription;
 import com.sequenceiq.provisioning.controller.json.AWSStackResult;
 import com.sequenceiq.provisioning.controller.json.StackResult;
+import com.sequenceiq.provisioning.domain.AwsStackDescription;
 import com.sequenceiq.provisioning.domain.AwsTemplate;
-import com.sequenceiq.provisioning.domain.Stack;
+import com.sequenceiq.provisioning.domain.CloudFormationTemplate;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
+import com.sequenceiq.provisioning.domain.DetailedAwsStackDescription;
+import com.sequenceiq.provisioning.domain.Stack;
+import com.sequenceiq.provisioning.domain.StackDescription;
 import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.service.ProvisionService;
 
@@ -53,7 +53,7 @@ public class AwsProvisionService implements ProvisionService {
         AmazonCloudFormationClient amazonCloudFormationClient = new AmazonCloudFormationClient(basicSessionCredentials);
         amazonCloudFormationClient.setRegion(Region.getRegion(Regions.fromName(awsTemplate.getRegion())));
         CreateStackRequest createStackRequest = new CreateStackRequest()
-                .withStackName(String.format("%s-%s", awsTemplate.getName(), awsTemplate.getId()))
+                .withStackName(String.format("%s-%s", stack.getName(), stack.getId()))
                 .withTemplateBody(template.getBody())
                 .withParameters(
                         new Parameter().withParameterKey("KeyName").withParameterValue(awsTemplate.getKeyName()),
@@ -72,7 +72,7 @@ public class AwsProvisionService implements ProvisionService {
                 user.getRoleArn());
         AmazonCloudFormationClient amazonCloudFormationClient = new AmazonCloudFormationClient(basicSessionCredentials);
         amazonCloudFormationClient.setRegion(Region.getRegion(Regions.fromName(awsInfra.getRegion())));
-        DescribeStacksRequest stackRequest = new DescribeStacksRequest().withStackName(stack.getName());
+        DescribeStacksRequest stackRequest = new DescribeStacksRequest().withStackName(String.format("%s-%s", stack.getName(), stack.getId()));
         DescribeStacksResult stackResult = amazonCloudFormationClient.describeStacks(stackRequest);
         return new AwsStackDescription(stackResult);
     }
@@ -84,9 +84,10 @@ public class AwsProvisionService implements ProvisionService {
                 user.getRoleArn());
         AmazonCloudFormationClient amazonCloudFormationClient = new AmazonCloudFormationClient(basicSessionCredentials);
         amazonCloudFormationClient.setRegion(Region.getRegion(Regions.fromName(awsInfra.getRegion())));
-        DescribeStacksRequest stackRequest = new DescribeStacksRequest().withStackName(stack.getName());
+        DescribeStacksRequest stackRequest = new DescribeStacksRequest().withStackName(String.format("%s-%s", stack.getName(), stack.getId()));
         DescribeStacksResult stackResult = amazonCloudFormationClient.describeStacks(stackRequest);
-        DescribeStackResourcesRequest resourcesRequest = new DescribeStackResourcesRequest().withStackName(stack.getName());
+        DescribeStackResourcesRequest resourcesRequest = new DescribeStackResourcesRequest().withStackName(String.format("%s-%s", stack.getName(),
+                stack.getId()));
         DescribeStackResourcesResult resourcesResult = amazonCloudFormationClient.describeStackResources(resourcesRequest);
         return new DetailedAwsStackDescription(stackResult, resourcesResult);
     }
