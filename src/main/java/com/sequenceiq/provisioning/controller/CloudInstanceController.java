@@ -49,7 +49,7 @@ public class CloudInstanceController {
     @RequestMapping(method = RequestMethod.GET, value = "{cloudId}")
     @ResponseBody
     public ResponseEntity<CloudInstanceJson> getCloudInstance(@CurrentUser User user, @PathVariable Long cloudId) {
-        CloudInstanceJson cloudInstanceJson = cloudInstanceService.get(cloudId);
+        CloudInstanceJson cloudInstanceJson = cloudInstanceService.get(user, cloudId);
         return new ResponseEntity<>(cloudInstanceJson, HttpStatus.OK);
     }
 

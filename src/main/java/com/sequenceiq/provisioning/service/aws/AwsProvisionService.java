@@ -9,12 +9,16 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.CreateStackRequest;
 import com.amazonaws.services.cloudformation.model.CreateStackResult;
+import com.amazonaws.services.cloudformation.model.DescribeStackResourcesRequest;
+import com.amazonaws.services.cloudformation.model.DescribeStackResourcesResult;
 import com.amazonaws.services.cloudformation.model.Parameter;
 import com.sequenceiq.provisioning.controller.json.AWSCloudInstanceResult;
 import com.sequenceiq.provisioning.controller.json.CloudInstanceResult;
+import com.sequenceiq.provisioning.domain.AwsCloudInstanceDescription;
 import com.sequenceiq.provisioning.domain.AwsInfra;
 import com.sequenceiq.provisioning.domain.CloudFormationTemplate;
 import com.sequenceiq.provisioning.domain.CloudInstance;
+import com.sequenceiq.provisioning.domain.CloudInstanceDescription;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
 import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.service.ProvisionService;
@@ -56,6 +60,21 @@ public class AwsProvisionService implements ProvisionService {
                         new Parameter().withParameterKey("SSHLocation").withParameterValue(awsInfra.getSshLocation()));
         CreateStackResult createStackResult = amazonCloudFormationClient.createStack(createStackRequest);
         return new AWSCloudInstanceResult(OK_STATUS, createStackResult);
+    }
+
+    @Override
+    public CloudInstanceDescription describeCloudInstance(User user, CloudInstance cloudInstance) {
+        AwsInfra awsInfra = (AwsInfra) cloudInstance.getInfra();
+        Regions region = Regions.fromName(awsInfra.getRegion());
+        BasicSessionCredentials basicSessionCredentials = credentialsProvider.retrieveSessionCredentials(SESSION_CREDENTIALS_DURATION, "provision-ambari",
+                user.getRoleArn());
+        AmazonCloudFormationClient amazonCloudFormationClient = new AmazonCloudFormationClient(basicSessionCredentials);
+        amazonCloudFormationClient.setRegion(Region.getRegion(region));
+        DescribeStackResourcesRequest request = new DescribeStackResourcesRequest().withStackName(cloudInstance.getName());
+        DescribeStackResourcesResult result = amazonCloudFormationClient.describeStackResources(request);
+        AwsCloudInstanceDescription description = new AwsCloudInstanceDescription();
+        description.setDescribeStackResourcesResult(result);
+        return description;
     }
 
     @Override

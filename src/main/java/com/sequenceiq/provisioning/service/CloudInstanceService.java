@@ -8,7 +8,7 @@ import com.sequenceiq.provisioning.domain.User;
 
 public interface CloudInstanceService {
 
-    CloudInstanceJson get(Long id);
+    CloudInstanceJson get(User user, Long id);
 
     Set<CloudInstanceJson> getAll(User user);
 
