@@ -40,7 +40,7 @@ public class AwsTemplateConverter extends AbstractConverter<TemplateJson, AwsTem
         awsTemplate.setRegion(json.getParameters().get(RequiredAwsTemplateParam.REGION.getName()));
         awsTemplate.setKeyName(json.getParameters().get(RequiredAwsTemplateParam.KEY_NAME.getName()));
         awsTemplate.setAmiId(json.getParameters().get(RequiredAwsTemplateParam.AMI_ID.getName()));
-        awsTemplate.setInstanceType(InstanceType.fromValue(json.getParameters().get(RequiredAwsTemplateParam.INSTANCE_TYPE.getName())));
+        awsTemplate.setInstanceType(InstanceType.valueOf(json.getParameters().get(RequiredAwsTemplateParam.INSTANCE_TYPE.getName())));
         String sshLocation = json.getParameters().containsKey(OptionalAwsTemplateParam.SSH_LOCATION.getName())
                 ? json.getParameters().get(OptionalAwsTemplateParam.SSH_LOCATION.getName()) : DEFAULT_SSH_LOCATION;
         awsTemplate.setSshLocation(sshLocation);
