@@ -25,7 +25,7 @@ public class OptionalParametersValidator extends AbstractParameterValidator {
 
     @Override
     public ValidatorType getValidatorType() {
-        return ValidatorType.OPTIONAL;
+        return ValidatorType.CLASS;
     }
 
 

@@ -63,13 +63,13 @@ public class ProvisionParametersValidator implements ConstraintValidator<ValidPr
 
     private boolean validateAzureParams(TemplateJson request, ConstraintValidatorContext context) {
         return parameterValidators.get(ValidatorType.REQUIRED).validate(request.getParameters(), context, requiredAzureParams)
-                && parameterValidators.get(ValidatorType.OPTIONAL).validate(request.getParameters(), context, optionalAzureParams);
+                && parameterValidators.get(ValidatorType.CLASS).validate(request.getParameters(), context, optionalAzureParams);
     }
 
     private boolean validateAWSParams(TemplateJson request, ConstraintValidatorContext context) {
         // TODO: validate instanceType, sshLocation, etc.. with regex
         return parameterValidators.get(ValidatorType.REQUIRED).validate(request.getParameters(), context, requiredAWSParams)
-                && parameterValidators.get(ValidatorType.OPTIONAL).validate(request.getParameters(), context, optionalAWSParams);
+                && parameterValidators.get(ValidatorType.CLASS).validate(request.getParameters(), context, optionalAWSParams);
     }
 
 }
