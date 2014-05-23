@@ -48,7 +48,7 @@ public class AzureTemplateConverter extends AbstractConverter<TemplateJson, Azur
         azureTemplate.setPassword(json.getParameters().get(RequiredAzureTemplateParam.PASSWORD.getName()));
         azureTemplate.setSshPublicKeyFingerprint(json.getParameters().get(RequiredAzureTemplateParam.SSH_PUBLIC_KEY_FINGERPRINT.getName()));
         azureTemplate.setSshPublicKeyPath(json.getParameters().get(RequiredAzureTemplateParam.SSH_PUBLIC_KEY_PATH.getName()));
-        azureTemplate.setSubnetAddressPrefix(json.getParameters().get(RequiredAzureTemplateParam.ADDRESSPREFIX.getName()));
+        azureTemplate.setAddressPrefix(json.getParameters().get(RequiredAzureTemplateParam.ADDRESSPREFIX.getName()));
         azureTemplate.setUserName(json.getParameters().get(RequiredAzureTemplateParam.USERNAME.getName()));
         azureTemplate.setVmType(json.getParameters().get(RequiredAzureTemplateParam.VMTYPE.getName()));
         azureTemplate.setSubnetAddressPrefix(json.getParameters().get(RequiredAzureTemplateParam.SUBNETADDRESSPREFIX.getName()));
