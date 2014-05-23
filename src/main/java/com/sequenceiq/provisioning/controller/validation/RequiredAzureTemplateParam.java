@@ -5,10 +5,10 @@ import com.sequenceiq.provisioning.service.azure.AzureVmType;
 
 public enum RequiredAzureTemplateParam implements TemplateParam {
 
-    NAME("name", true, String.class),
     LOCATION("location", true, AzureLocation.class),
     DESCRIPTION("description", true, String.class),
     ADDRESSPREFIX("addressPrefix", true, String.class),
+    SUBNETADDRESSPREFIX("subnetAddressPrefix", true, String.class),
     DEPLOYMENTSLOT("deploymentSlot", true, String.class),
     IMAGENAME("imageName", true, String.class),
     USERNAME("username", true, String.class),
