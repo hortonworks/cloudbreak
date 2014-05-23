@@ -11,11 +11,12 @@ public class AzureTemplate extends Template implements ProvisionEntity {
     private String description;
     private String subnetAddressPrefix;
     private String deploymentSlot;
-    private Boolean disableSshPasswordAuthentication;
     private String vmType;
     private String imageName;
     private String userName;
     private String password;
+    private String sshPublicKeyFingerprint;
+    private String sshPublicKeyPath;
 
     @ManyToOne
     private User user;
@@ -63,14 +64,6 @@ public class AzureTemplate extends Template implements ProvisionEntity {
         this.deploymentSlot = deploymentSlot;
     }
 
-    public Boolean getDisableSshPasswordAuthentication() {
-        return disableSshPasswordAuthentication;
-    }
-
-    public void setDisableSshPasswordAuthentication(Boolean disableSshPasswordAuthentication) {
-        this.disableSshPasswordAuthentication = disableSshPasswordAuthentication;
-    }
-
     public String getImageName() {
         return imageName;
     }
@@ -101,6 +94,22 @@ public class AzureTemplate extends Template implements ProvisionEntity {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getSshPublicKeyFingerprint() {
+        return sshPublicKeyFingerprint;
+    }
+
+    public void setSshPublicKeyFingerprint(String sshPublicKeyFingerprint) {
+        this.sshPublicKeyFingerprint = sshPublicKeyFingerprint;
+    }
+
+    public String getSshPublicKeyPath() {
+        return sshPublicKeyPath;
+    }
+
+    public void setSshPublicKeyPath(String sshPublicKeyPath) {
+        this.sshPublicKeyPath = sshPublicKeyPath;
     }
 
     public User getUser() {

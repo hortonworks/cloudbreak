@@ -53,7 +53,6 @@ public class UserInitializer implements InitializingBean {
         AzureTemplate azureTemplate = new AzureTemplate();
         azureTemplate.setDeploymentSlot("slot");
         azureTemplate.setDescription("azure desc");
-        azureTemplate.setDisableSshPasswordAuthentication(false);
         azureTemplate.setImageName("image");
         azureTemplate.setLocation("location");
         azureTemplate.setName("azurename");

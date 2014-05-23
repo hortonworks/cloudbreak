@@ -21,17 +21,19 @@ import com.sequenceiq.provisioning.controller.json.TemplateJson;
 public class ProvisionParametersValidator implements ConstraintValidator<ValidProvisionRequest, TemplateJson> {
 
     @Autowired
-    private RequiredParametersValidator requiredParametersValidator;
+    private List<ParameterValidator> parameterValidators;
 
-    private List<String> requiredAWSParams = new ArrayList<>();
-    private List<String> requiredAzureParams = new ArrayList<>();
+    private List<TemplateParam> awsParams = new ArrayList<>();
+    private List<TemplateParam> azureParams = new ArrayList<>();
 
     @Override
     public void initialize(ValidProvisionRequest constraintAnnotation) {
         for (RequiredAwsTemplateParam param : RequiredAwsTemplateParam.values()) {
-            requiredAWSParams.add(param.getName());
+            awsParams.add(param);
         }
-        // TODO: required Azure params
+        for (RequiredAzureTemplateParam param : RequiredAzureTemplateParam.values()) {
+            azureParams.add(param);
+        }
     }
 
     @Override
@@ -51,12 +53,21 @@ public class ProvisionParametersValidator implements ConstraintValidator<ValidPr
     }
 
     private boolean validateAzureParams(TemplateJson request, ConstraintValidatorContext context) {
-        return requiredParametersValidator.validate(request.getParameters(), context, requiredAzureParams);
+        for (ParameterValidator validator : parameterValidators) {
+            if (!validator.validate(request.getParameters(), context, azureParams)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private boolean validateAWSParams(TemplateJson request, ConstraintValidatorContext context) {
-        // TODO: validate instanceType, sshLocation, etc.. with regex
-        return requiredParametersValidator.validate(request.getParameters(), context, requiredAWSParams);
+        for (ParameterValidator validator : parameterValidators) {
+            if (!validator.validate(request.getParameters(), context, awsParams)) {
+                return false;
+            }
+        }
+        return true;
     }
 
 }
