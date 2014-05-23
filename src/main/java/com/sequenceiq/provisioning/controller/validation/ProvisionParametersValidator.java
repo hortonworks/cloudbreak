@@ -24,24 +24,16 @@ public class ProvisionParametersValidator implements ConstraintValidator<ValidPr
     @Resource
     private Map<ValidatorType, ParameterValidator> parameterValidators;
 
-    private List<TemplateParam> requiredAWSParams = new ArrayList<>();
-    private List<TemplateParam> requiredAzureParams = new ArrayList<>();
-    private List<TemplateParam> optionalAWSParams = new ArrayList<>();
-    private List<TemplateParam> optionalAzureParams = new ArrayList<>();
+    private List<TemplateParam> awsParams = new ArrayList<>();
+    private List<TemplateParam> azureParams = new ArrayList<>();
 
     @Override
     public void initialize(ValidProvisionRequest constraintAnnotation) {
         for (RequiredAwsTemplateParam param : RequiredAwsTemplateParam.values()) {
-            requiredAWSParams.add(param);
+            awsParams.add(param);
         }
         for (RequiredAzureTemplateParam param : RequiredAzureTemplateParam.values()) {
-            requiredAzureParams.add(param);
-        }
-        for (OptionalAwsTemplateParam param : OptionalAwsTemplateParam.values()) {
-            optionalAWSParams.add(param);
-        }
-        for (OptionalAzureTemplateParam param : OptionalAzureTemplateParam.values()) {
-            optionalAzureParams.add(param);
+            azureParams.add(param);
         }
     }
 
@@ -62,14 +54,14 @@ public class ProvisionParametersValidator implements ConstraintValidator<ValidPr
     }
 
     private boolean validateAzureParams(TemplateJson request, ConstraintValidatorContext context) {
-        return parameterValidators.get(ValidatorType.REQUIRED).validate(request.getParameters(), context, requiredAzureParams)
-                && parameterValidators.get(ValidatorType.CLASS).validate(request.getParameters(), context, optionalAzureParams);
+        return parameterValidators.get(ValidatorType.REQUIRED).validate(request.getParameters(), context, azureParams)
+                && parameterValidators.get(ValidatorType.CLASS).validate(request.getParameters(), context, azureParams);
     }
 
     private boolean validateAWSParams(TemplateJson request, ConstraintValidatorContext context) {
         // TODO: validate instanceType, sshLocation, etc.. with regex
-        return parameterValidators.get(ValidatorType.REQUIRED).validate(request.getParameters(), context, requiredAWSParams)
-                && parameterValidators.get(ValidatorType.CLASS).validate(request.getParameters(), context, optionalAWSParams);
+        return parameterValidators.get(ValidatorType.REQUIRED).validate(request.getParameters(), context, awsParams)
+                && parameterValidators.get(ValidatorType.CLASS).validate(request.getParameters(), context, awsParams);
     }
 
 }

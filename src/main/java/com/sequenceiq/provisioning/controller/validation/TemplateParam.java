@@ -5,4 +5,6 @@ public interface TemplateParam {
     String getName();
 
     Class getClazz();
+
+    Boolean getRequired();
 }

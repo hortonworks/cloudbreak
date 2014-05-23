@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 
 import com.amazonaws.services.ec2.model.InstanceType;
 import com.sequenceiq.provisioning.controller.json.TemplateJson;
-import com.sequenceiq.provisioning.controller.validation.OptionalAwsTemplateParam;
 import com.sequenceiq.provisioning.controller.validation.RequiredAwsTemplateParam;
 import com.sequenceiq.provisioning.domain.AwsTemplate;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
@@ -27,7 +26,7 @@ public class AwsTemplateConverter extends AbstractConverter<TemplateJson, AwsTem
         props.put(RequiredAwsTemplateParam.REGION.getName(), entity.getRegion());
         props.put(RequiredAwsTemplateParam.AMI_ID.getName(), entity.getAmiId());
         props.put(RequiredAwsTemplateParam.INSTANCE_TYPE.getName(), entity.getInstanceType().toString());
-        props.put(OptionalAwsTemplateParam.SSH_LOCATION.getName(), entity.getSshLocation());
+        props.put(RequiredAwsTemplateParam.SSH_LOCATION.getName(), entity.getSshLocation());
         templateJson.setParameters(props);
         templateJson.setCloudPlatform(CloudPlatform.AWS);
         return templateJson;
@@ -41,8 +40,8 @@ public class AwsTemplateConverter extends AbstractConverter<TemplateJson, AwsTem
         awsTemplate.setKeyName(json.getParameters().get(RequiredAwsTemplateParam.KEY_NAME.getName()));
         awsTemplate.setAmiId(json.getParameters().get(RequiredAwsTemplateParam.AMI_ID.getName()));
         awsTemplate.setInstanceType(InstanceType.valueOf(json.getParameters().get(RequiredAwsTemplateParam.INSTANCE_TYPE.getName())));
-        String sshLocation = json.getParameters().containsKey(OptionalAwsTemplateParam.SSH_LOCATION.getName())
-                ? json.getParameters().get(OptionalAwsTemplateParam.SSH_LOCATION.getName()) : DEFAULT_SSH_LOCATION;
+        String sshLocation = json.getParameters().containsKey(RequiredAwsTemplateParam.SSH_LOCATION.getName())
+                ? json.getParameters().get(RequiredAwsTemplateParam.SSH_LOCATION.getName()) : DEFAULT_SSH_LOCATION;
         awsTemplate.setSshLocation(sshLocation);
         return awsTemplate;
     }

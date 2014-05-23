@@ -6,7 +6,6 @@ import java.util.Map;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.provisioning.controller.json.TemplateJson;
-import com.sequenceiq.provisioning.controller.validation.OptionalAzureTemplateParam;
 import com.sequenceiq.provisioning.controller.validation.RequiredAzureTemplateParam;
 import com.sequenceiq.provisioning.domain.AzureTemplate;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
@@ -29,9 +28,9 @@ public class AzureTemplateConverter extends AbstractConverter<TemplateJson, Azur
         putProperty(props, RequiredAzureTemplateParam.IMAGENAME.getName(), entity.getImageName());
         putProperty(props, RequiredAzureTemplateParam.VMTYPE.getName(), entity.getVmType());
         putProperty(props, RequiredAzureTemplateParam.USERNAME.getName(), entity.getUserName());
-        putProperty(props, OptionalAzureTemplateParam.PASSWORD.getName(), entity.getPassword());
-        putProperty(props, OptionalAzureTemplateParam.SSH_PUBLIC_KEY_FINGERPRINT.getName(), entity.getSshPublicKeyFingerprint());
-        putProperty(props, OptionalAzureTemplateParam.SSH_PUBLIC_KEY_PATH.getName(), entity.getSshPublicKeyPath());
+        putProperty(props, RequiredAzureTemplateParam.PASSWORD.getName(), entity.getPassword());
+        putProperty(props, RequiredAzureTemplateParam.SSH_PUBLIC_KEY_FINGERPRINT.getName(), entity.getSshPublicKeyFingerprint());
+        putProperty(props, RequiredAzureTemplateParam.SSH_PUBLIC_KEY_PATH.getName(), entity.getSshPublicKeyPath());
         azureTemplateJson.setCloudPlatform(CloudPlatform.AZURE);
         azureTemplateJson.setParameters(props);
         return azureTemplateJson;
@@ -46,9 +45,9 @@ public class AzureTemplateConverter extends AbstractConverter<TemplateJson, Azur
         azureTemplate.setImageName(json.getParameters().get(RequiredAzureTemplateParam.IMAGENAME.getName()));
         azureTemplate.setLocation(json.getParameters().get(RequiredAzureTemplateParam.LOCATION.getName()));
         azureTemplate.setName(json.getClusterName());
-        azureTemplate.setPassword(json.getParameters().get(OptionalAzureTemplateParam.PASSWORD.getName()));
-        azureTemplate.setSshPublicKeyFingerprint(json.getParameters().get(OptionalAzureTemplateParam.SSH_PUBLIC_KEY_FINGERPRINT.getName()));
-        azureTemplate.setSshPublicKeyPath(json.getParameters().get(OptionalAzureTemplateParam.SSH_PUBLIC_KEY_PATH.getName()));
+        azureTemplate.setPassword(json.getParameters().get(RequiredAzureTemplateParam.PASSWORD.getName()));
+        azureTemplate.setSshPublicKeyFingerprint(json.getParameters().get(RequiredAzureTemplateParam.SSH_PUBLIC_KEY_FINGERPRINT.getName()));
+        azureTemplate.setSshPublicKeyPath(json.getParameters().get(RequiredAzureTemplateParam.SSH_PUBLIC_KEY_PATH.getName()));
         azureTemplate.setSubnetAddressPrefix(json.getParameters().get(RequiredAzureTemplateParam.ADDRESSPREFIX.getName()));
         azureTemplate.setUserName(json.getParameters().get(RequiredAzureTemplateParam.USERNAME.getName()));
         azureTemplate.setVmType(json.getParameters().get(RequiredAzureTemplateParam.VMTYPE.getName()));

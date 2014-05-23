@@ -5,20 +5,26 @@ import com.sequenceiq.provisioning.service.azure.AzureVmType;
 
 public enum RequiredAzureTemplateParam implements TemplateParam {
 
-    NAME("name", String.class),
-    LOCATION("location", AzureLocation.class),
-    DESCRIPTION("description", String.class),
-    ADDRESSPREFIX("addressPrefix", String.class),
-    DEPLOYMENTSLOT("deploymentSlot", String.class),
-    IMAGENAME("imageName", String.class),
-    USERNAME("username", String.class),
-    VMTYPE("vmType", AzureVmType.class);
+    NAME("name", true, String.class),
+    LOCATION("location", true, AzureLocation.class),
+    DESCRIPTION("description", true, String.class),
+    ADDRESSPREFIX("addressPrefix", true, String.class),
+    DEPLOYMENTSLOT("deploymentSlot", true, String.class),
+    IMAGENAME("imageName", true, String.class),
+    USERNAME("username", true, String.class),
+    VMTYPE("vmType", true, AzureVmType.class),
+
+    SSH_PUBLIC_KEY_FINGERPRINT("sshPublicKeyFingerprint", false, String.class),
+    PASSWORD("password", false, String.class),
+    SSH_PUBLIC_KEY_PATH("sshPublicKeyPath", false, String.class);
 
     private final String paramName;
     private final Class clazz;
+    private final boolean required;
 
-    private RequiredAzureTemplateParam(String paramName, Class clazz) {
+    private RequiredAzureTemplateParam(String paramName, Boolean required, Class clazz) {
         this.paramName = paramName;
+        this.required = required;
         this.clazz = clazz;
     }
 
@@ -32,6 +38,9 @@ public enum RequiredAzureTemplateParam implements TemplateParam {
         return clazz;
     }
 
-    // TODO: add other required params
+    @Override
+    public Boolean getRequired() {
+        return required;
+    }
 
 }
