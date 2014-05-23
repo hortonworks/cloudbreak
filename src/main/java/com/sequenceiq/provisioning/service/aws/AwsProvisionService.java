@@ -48,8 +48,8 @@ public class AwsProvisionService implements ProvisionService {
     @Override
     public StackResult createStack(User user, Stack stack) {
         AwsTemplate awsTemplate = (AwsTemplate) stack.getTemplate();
-        BasicSessionCredentials basicSessionCredentials = credentialsProvider.retrieveSessionCredentials(SESSION_CREDENTIALS_DURATION, "provision-ambari",
-                user.getRoleArn());
+        BasicSessionCredentials basicSessionCredentials = credentialsProvider
+                .retrieveSessionCredentials(SESSION_CREDENTIALS_DURATION, "provision-ambari", user);
         AmazonCloudFormationClient amazonCloudFormationClient = new AmazonCloudFormationClient(basicSessionCredentials);
         amazonCloudFormationClient.setRegion(Region.getRegion(Regions.fromName(awsTemplate.getRegion())));
         CreateStackRequest createStackRequest = new CreateStackRequest()
@@ -68,8 +68,8 @@ public class AwsProvisionService implements ProvisionService {
     @Override
     public StackDescription describeStack(User user, Stack stack) {
         AwsTemplate awsInfra = (AwsTemplate) stack.getTemplate();
-        BasicSessionCredentials basicSessionCredentials = credentialsProvider.retrieveSessionCredentials(SESSION_CREDENTIALS_DURATION, "provision-ambari",
-                user.getRoleArn());
+        BasicSessionCredentials basicSessionCredentials = credentialsProvider
+                .retrieveSessionCredentials(SESSION_CREDENTIALS_DURATION, "provision-ambari", user);
         AmazonCloudFormationClient amazonCloudFormationClient = new AmazonCloudFormationClient(basicSessionCredentials);
         amazonCloudFormationClient.setRegion(Region.getRegion(Regions.fromName(awsInfra.getRegion())));
         DescribeStacksRequest stackRequest = new DescribeStacksRequest().withStackName(String.format("%s-%s", stack.getName(), stack.getId()));
@@ -80,8 +80,8 @@ public class AwsProvisionService implements ProvisionService {
     @Override
     public StackDescription describeStackWithResources(User user, Stack stack) {
         AwsTemplate awsInfra = (AwsTemplate) stack.getTemplate();
-        BasicSessionCredentials basicSessionCredentials = credentialsProvider.retrieveSessionCredentials(SESSION_CREDENTIALS_DURATION, "provision-ambari",
-                user.getRoleArn());
+        BasicSessionCredentials basicSessionCredentials = credentialsProvider
+                .retrieveSessionCredentials(SESSION_CREDENTIALS_DURATION, "provision-ambari", user);
         AmazonCloudFormationClient amazonCloudFormationClient = new AmazonCloudFormationClient(basicSessionCredentials);
         amazonCloudFormationClient.setRegion(Region.getRegion(Regions.fromName(awsInfra.getRegion())));
         DescribeStacksRequest stackRequest = new DescribeStacksRequest().withStackName(String.format("%s-%s", stack.getName(), stack.getId()));

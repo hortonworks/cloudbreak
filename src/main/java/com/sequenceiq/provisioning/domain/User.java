@@ -11,6 +11,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -40,6 +41,9 @@ public class User implements ProvisionEntity {
     private String email;
 
     private String roleArn;
+
+    @OneToOne
+    private TemporaryAwsCredentials temporaryAwsCredentials;
 
     private String subscriptionId;
 
@@ -136,6 +140,14 @@ public class User implements ProvisionEntity {
 
     public void setRoleArn(String roleArn) {
         this.roleArn = roleArn;
+    }
+
+    public TemporaryAwsCredentials getTemporaryAwsCredentials() {
+        return temporaryAwsCredentials;
+    }
+
+    public void setTemporaryAwsCredentials(TemporaryAwsCredentials temporaryAwsCredentials) {
+        this.temporaryAwsCredentials = temporaryAwsCredentials;
     }
 
     public String getSubscriptionId() {

@@ -44,6 +44,7 @@ public class UserInitializer implements InitializingBean {
         Stack awsStack = new Stack();
         awsStack.setTemplate(awsTemplate);
         awsStack.setClusterSize(CLUSTER_SIZE);
+        awsStack.setName("coreos");
         awsStack.setUser(user2);
 
         user2.getAwsTemplates().add(awsTemplate);
