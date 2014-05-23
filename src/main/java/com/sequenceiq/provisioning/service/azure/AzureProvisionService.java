@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
@@ -43,6 +44,7 @@ public class AzureProvisionService implements ProvisionService {
     private static final String SSHPUBLICKEYPATH = "sshPublicKeyPath";
 
     @Override
+    @Async
     public StackResult createStack(User user, Stack stack) {
 
         AzureTemplate azureTemplate = (AzureTemplate) stack.getTemplate();
@@ -70,7 +72,7 @@ public class AzureProvisionService implements ProvisionService {
         props.put(NAME, azureTemplate.getName());
         props.put(AFFINITYGROUP, azureTemplate.getName());
         props.put(SUBNETNAME, azureTemplate.getSubnetAddressPrefix());
-        props.put(ADDRESSPREFIX, azureTemplate.getSubnetAddressPrefix());
+        props.put(ADDRESSPREFIX, azureTemplate.getAddressPrefix());
         props.put(SUBNETADDRESSPREFIX, azureTemplate.getSubnetAddressPrefix());
         HttpResponseDecorator virtualNetworkResponse = (HttpResponseDecorator) azureClient.createVirtualNetwork(props);
         requestId = (String) azureClient.getRequestId(virtualNetworkResponse);

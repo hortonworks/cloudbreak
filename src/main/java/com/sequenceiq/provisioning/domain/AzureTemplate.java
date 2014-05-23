@@ -10,6 +10,7 @@ public class AzureTemplate extends Template implements ProvisionEntity {
     private String name;
     private String description;
     private String subnetAddressPrefix;
+    private String addressPrefix;
     private String deploymentSlot;
     private String vmType;
     private String imageName;
@@ -110,6 +111,14 @@ public class AzureTemplate extends Template implements ProvisionEntity {
 
     public void setSshPublicKeyPath(String sshPublicKeyPath) {
         this.sshPublicKeyPath = sshPublicKeyPath;
+    }
+
+    public String getAddressPrefix() {
+        return addressPrefix;
+    }
+
+    public void setAddressPrefix(String addressPrefix) {
+        this.addressPrefix = addressPrefix;
     }
 
     public User getUser() {

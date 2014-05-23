@@ -20,7 +20,6 @@ public class AzureTemplateConverter extends AbstractConverter<TemplateJson, Azur
         azureTemplateJson.setCloudPlatform(CloudPlatform.AZURE);
         azureTemplateJson.setId(entity.getId());
         Map<String, String> props = new HashMap<>();
-        putProperty(props, RequiredAzureTemplateParam.NAME.getName(), entity.getName());
         putProperty(props, RequiredAzureTemplateParam.LOCATION.getName(), entity.getLocation());
         putProperty(props, RequiredAzureTemplateParam.DESCRIPTION.getName(), entity.getDescription());
         putProperty(props, RequiredAzureTemplateParam.ADDRESSPREFIX.getName(), entity.getSubnetAddressPrefix());
@@ -31,6 +30,7 @@ public class AzureTemplateConverter extends AbstractConverter<TemplateJson, Azur
         putProperty(props, RequiredAzureTemplateParam.PASSWORD.getName(), entity.getPassword());
         putProperty(props, RequiredAzureTemplateParam.SSH_PUBLIC_KEY_FINGERPRINT.getName(), entity.getSshPublicKeyFingerprint());
         putProperty(props, RequiredAzureTemplateParam.SSH_PUBLIC_KEY_PATH.getName(), entity.getSshPublicKeyPath());
+        putProperty(props, RequiredAzureTemplateParam.SUBNETADDRESSPREFIX.getName(), entity.getSubnetAddressPrefix());
         azureTemplateJson.setCloudPlatform(CloudPlatform.AZURE);
         azureTemplateJson.setParameters(props);
         return azureTemplateJson;
@@ -48,9 +48,10 @@ public class AzureTemplateConverter extends AbstractConverter<TemplateJson, Azur
         azureTemplate.setPassword(json.getParameters().get(RequiredAzureTemplateParam.PASSWORD.getName()));
         azureTemplate.setSshPublicKeyFingerprint(json.getParameters().get(RequiredAzureTemplateParam.SSH_PUBLIC_KEY_FINGERPRINT.getName()));
         azureTemplate.setSshPublicKeyPath(json.getParameters().get(RequiredAzureTemplateParam.SSH_PUBLIC_KEY_PATH.getName()));
-        azureTemplate.setSubnetAddressPrefix(json.getParameters().get(RequiredAzureTemplateParam.ADDRESSPREFIX.getName()));
+        azureTemplate.setAddressPrefix(json.getParameters().get(RequiredAzureTemplateParam.ADDRESSPREFIX.getName()));
         azureTemplate.setUserName(json.getParameters().get(RequiredAzureTemplateParam.USERNAME.getName()));
         azureTemplate.setVmType(json.getParameters().get(RequiredAzureTemplateParam.VMTYPE.getName()));
+        azureTemplate.setSubnetAddressPrefix(json.getParameters().get(RequiredAzureTemplateParam.SUBNETADDRESSPREFIX.getName()));
         return azureTemplate;
     }
 
