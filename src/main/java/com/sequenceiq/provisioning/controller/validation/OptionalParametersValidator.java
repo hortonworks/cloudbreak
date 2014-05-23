@@ -15,7 +15,9 @@ public class OptionalParametersValidator extends AbstractParameterValidator {
         boolean valid = true;
         for (TemplateParam param : paramList) {
             if (parameters.containsKey(param.getName())) {
-                valid = validateClass(parameters, context, param);
+                if (!validateClass(parameters, context, param)) {
+                    valid = false;
+                }
             }
         }
         return valid;

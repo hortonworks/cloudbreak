@@ -18,7 +18,9 @@ public class RequiredParametersValidator extends AbstractParameterValidator {
                 addParameterConstraintViolation(context, param.getName(), String.format("%s is required.", param.getName()));
                 valid = false;
             } else {
-                valid = validateClass(parameters, context, param);
+                if (!validateClass(parameters, context, param)) {
+                    valid = false;
+                }
             }
         }
         return valid;
