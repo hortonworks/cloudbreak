@@ -4,15 +4,15 @@ import javax.validation.constraints.Min;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sequenceiq.provisioning.domain.StackDescription;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
+import com.sequenceiq.provisioning.domain.StackDescription;
 
 public class StackJson implements JsonEntity {
 
     private Long id;
     @Min(value = 2)
     private int clusterSize;
-    private String cloudName;
+    private String name;
     private Long templateId;
     private CloudPlatform cloudPlatform;
     private StackDescription description;
@@ -38,12 +38,12 @@ public class StackJson implements JsonEntity {
         this.clusterSize = clusterSize;
     }
 
-    public String getCloudName() {
-        return cloudName;
+    public String getName() {
+        return name;
     }
 
-    public void setCloudName(String cloudName) {
-        this.cloudName = cloudName;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public Long getTemplateId() {

@@ -48,7 +48,7 @@ public class StackController {
     @RequestMapping(method = RequestMethod.GET, value = "{stackId}")
     @ResponseBody
     public ResponseEntity<StackJson> getStack(@CurrentUser User user, @PathVariable Long stackId) {
-        StackJson stackJson = stackService.get(user, stackId);
+        StackJson stackJson = stackService.get(userRepository.findOneWithLists(user.getId()), stackId);
         return new ResponseEntity<>(stackJson, HttpStatus.OK);
     }
 
