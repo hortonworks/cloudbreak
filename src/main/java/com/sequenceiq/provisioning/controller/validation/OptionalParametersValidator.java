@@ -8,16 +8,13 @@ import javax.validation.ConstraintValidatorContext;
 import org.springframework.stereotype.Component;
 
 @Component
-public class RequiredParametersValidator extends AbstractParameterValidator {
+public class OptionalParametersValidator extends AbstractParameterValidator {
 
     @Override
     public boolean validate(Map<String, String> parameters, ConstraintValidatorContext context, List<TemplateParam> paramList) {
         boolean valid = true;
         for (TemplateParam param : paramList) {
-            if (!parameters.containsKey(param.getName())) {
-                addParameterConstraintViolation(context, param.getName(), String.format("%s is required.", param.getName()));
-                valid = false;
-            } else {
+            if (parameters.containsKey(param.getName())) {
                 valid = validateClass(parameters, context, param);
             }
         }
@@ -26,7 +23,8 @@ public class RequiredParametersValidator extends AbstractParameterValidator {
 
     @Override
     public ValidatorType getValidatorType() {
-        return ValidatorType.REQUIRED;
+        return ValidatorType.OPTIONAL;
     }
+
 
 }
