@@ -2,12 +2,11 @@ package com.sequenceiq.provisioning.controller.validation;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import javax.annotation.Resource;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.provisioning.controller.json.TemplateJson;
@@ -21,8 +20,8 @@ import com.sequenceiq.provisioning.controller.json.TemplateJson;
 @Component
 public class ProvisionParametersValidator implements ConstraintValidator<ValidProvisionRequest, TemplateJson> {
 
-    @Resource
-    private Map<ValidatorType, ParameterValidator> parameterValidators;
+    @Autowired
+    private List<ParameterValidator> parameterValidators;
 
     private List<TemplateParam> awsParams = new ArrayList<>();
     private List<TemplateParam> azureParams = new ArrayList<>();
@@ -54,14 +53,21 @@ public class ProvisionParametersValidator implements ConstraintValidator<ValidPr
     }
 
     private boolean validateAzureParams(TemplateJson request, ConstraintValidatorContext context) {
-        return parameterValidators.get(ValidatorType.REQUIRED).validate(request.getParameters(), context, azureParams)
-                && parameterValidators.get(ValidatorType.CLASS).validate(request.getParameters(), context, azureParams);
+        for (ParameterValidator validator : parameterValidators) {
+            if (!validator.validate(request.getParameters(), context, azureParams)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private boolean validateAWSParams(TemplateJson request, ConstraintValidatorContext context) {
-        // TODO: validate instanceType, sshLocation, etc.. with regex
-        return parameterValidators.get(ValidatorType.REQUIRED).validate(request.getParameters(), context, awsParams)
-                && parameterValidators.get(ValidatorType.CLASS).validate(request.getParameters(), context, awsParams);
+        for (ParameterValidator validator : parameterValidators) {
+            if (!validator.validate(request.getParameters(), context, awsParams)) {
+                return false;
+            }
+        }
+        return true;
     }
 
 }

@@ -2,18 +2,18 @@ package com.sequenceiq.provisioning.controller.validation;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import javax.annotation.Resource;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
+
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.sequenceiq.provisioning.controller.json.CredentialJson;
 
 public class CredentialParametersValidator implements ConstraintValidator<ValidCredentialRequest, CredentialJson> {
 
-    @Resource
-    private Map<ValidatorType, ParameterValidator> parameterValidators;
+    @Autowired
+    private List<ParameterValidator> parameterValidators;
 
     private List<TemplateParam> requiredAWSParams = new ArrayList<>();
     private List<TemplateParam> requiredAzureParams = new ArrayList<>();
@@ -46,11 +46,21 @@ public class CredentialParametersValidator implements ConstraintValidator<ValidC
     }
 
     private boolean validateAzureParams(CredentialJson request, ConstraintValidatorContext context) {
-        return parameterValidators.get(ValidatorType.REQUIRED).validate(request.getParameters(), context, requiredAzureParams);
+        for (ParameterValidator validator : parameterValidators) {
+            if (!validator.validate(request.getParameters(), context, requiredAzureParams)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private boolean validateAWSParams(CredentialJson request, ConstraintValidatorContext context) {
-        return parameterValidators.get(ValidatorType.REQUIRED).validate(request.getParameters(), context, requiredAWSParams);
+        for (ParameterValidator validator : parameterValidators) {
+            if (!validator.validate(request.getParameters(), context, requiredAWSParams)) {
+                return false;
+            }
+        }
+        return true;
     }
 
 }

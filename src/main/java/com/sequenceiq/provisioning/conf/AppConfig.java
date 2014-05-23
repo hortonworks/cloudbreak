@@ -9,8 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.sequenceiq.provisioning.controller.validation.ParameterValidator;
-import com.sequenceiq.provisioning.controller.validation.ValidatorType;
 import com.sequenceiq.provisioning.domain.CloudFormationTemplate;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
 import com.sequenceiq.provisioning.service.CredentialService;
@@ -31,9 +29,6 @@ public class AppConfig {
     @Autowired
     private List<CredentialService> credentialServices;
 
-    @Autowired
-    private List<ParameterValidator> parameterValidators;
-
     @Bean
     public CloudFormationTemplate defaultTemplate() throws IOException {
         return templateReader.readTemplateFromFile(DEFAULT_TEMPLATE_NAME);
@@ -44,15 +39,6 @@ public class AppConfig {
         Map<CloudPlatform, ProvisionService> map = new HashMap<>();
         for (ProvisionService provisionService : provisionServices) {
             map.put(provisionService.getCloudPlatform(), provisionService);
-        }
-        return map;
-    }
-
-    @Bean
-    public Map<ValidatorType, ParameterValidator> parameterValidators() {
-        Map<ValidatorType, ParameterValidator> map = new HashMap<>();
-        for (ParameterValidator parameterValidator : parameterValidators) {
-            map.put(parameterValidator.getValidatorType(), parameterValidator);
         }
         return map;
     }
