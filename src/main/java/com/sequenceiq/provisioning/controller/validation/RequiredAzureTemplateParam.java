@@ -12,8 +12,6 @@ public enum RequiredAzureTemplateParam implements TemplateParam {
     DEPLOYMENTSLOT("deploymentSlot", String.class),
     IMAGENAME("imageName", String.class),
     USERNAME("username", String.class),
-    PASSWORD("password", String.class),
-    DISABLESSHPASSWORDAUTHENTICATION("disableSshPasswordAuthentication", String.class),
     VMTYPE("vmType", AzureVmType.class);
 
     private final String paramName;

@@ -7,10 +7,13 @@ import javax.validation.ConstraintValidatorContext;
 
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Optional;
+
 @Component
 public class RequiredParametersValidator {
 
-    public boolean validate(Map<String, String> parameters, ConstraintValidatorContext context, List<TemplateParam> requiredParams) {
+    public boolean validate(Map<String, String> parameters, ConstraintValidatorContext context, List<TemplateParam> requiredParams,
+            Optional<List<TemplateParam>> optionalParams) {
         boolean valid = true;
         for (TemplateParam param : requiredParams) {
             if (!parameters.containsKey(param.getName())) {
@@ -26,6 +29,23 @@ public class RequiredParametersValidator {
             } else if (!parameters.get(param.getName()).getClass().isAssignableFrom(param.getClazz())) {
                 addParameterConstraintViolation(context, param.getName(), String.format("%s is not valid type.", param.getName()));
                 valid = false;
+            }
+        }
+        if (optionalParams.isPresent()) {
+            for (TemplateParam param : optionalParams.get()) {
+                if (parameters.containsKey(param.getName())) {
+                    if (param.getClazz().isEnum()) {
+                        try {
+                            param.getClazz().getField(parameters.get(param.getName()));
+                        } catch (NoSuchFieldException e) {
+                            addParameterConstraintViolation(context, param.getName(), String.format("%s is not valid type.", param.getName()));
+                            valid = false;
+                        }
+                    } else if (!parameters.get(param.getName()).getClass().isAssignableFrom(param.getClazz())) {
+                        addParameterConstraintViolation(context, param.getName(), String.format("%s is not valid type.", param.getName()));
+                        valid = false;
+                    }
+                }
             }
         }
 

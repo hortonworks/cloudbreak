@@ -9,6 +9,7 @@ import javax.validation.ConstraintValidatorContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Optional;
 import com.sequenceiq.provisioning.controller.json.TemplateJson;
 
 /**
@@ -25,6 +26,8 @@ public class ProvisionParametersValidator implements ConstraintValidator<ValidPr
 
     private List<TemplateParam> requiredAWSParams = new ArrayList<>();
     private List<TemplateParam> requiredAzureParams = new ArrayList<>();
+    private List<TemplateParam> optionalAWSParams = new ArrayList<>();
+    private List<TemplateParam> optionalAzureParams = new ArrayList<>();
 
     @Override
     public void initialize(ValidProvisionRequest constraintAnnotation) {
@@ -33,6 +36,12 @@ public class ProvisionParametersValidator implements ConstraintValidator<ValidPr
         }
         for (RequiredAzureTemplateParam param : RequiredAzureTemplateParam.values()) {
             requiredAzureParams.add(param);
+        }
+        for (OptionalAwsTemplateParam param : OptionalAwsTemplateParam.values()) {
+            optionalAWSParams.add(param);
+        }
+        for (OptionalAzureTemplateParam param : OptionalAzureTemplateParam.values()) {
+            optionalAzureParams.add(param);
         }
     }
 
@@ -53,12 +62,12 @@ public class ProvisionParametersValidator implements ConstraintValidator<ValidPr
     }
 
     private boolean validateAzureParams(TemplateJson request, ConstraintValidatorContext context) {
-        return requiredParametersValidator.validate(request.getParameters(), context, requiredAzureParams);
+        return requiredParametersValidator.validate(request.getParameters(), context, requiredAzureParams, Optional.of(optionalAzureParams));
     }
 
     private boolean validateAWSParams(TemplateJson request, ConstraintValidatorContext context) {
         // TODO: validate instanceType, sshLocation, etc.. with regex
-        return requiredParametersValidator.validate(request.getParameters(), context, requiredAWSParams);
+        return requiredParametersValidator.validate(request.getParameters(), context, requiredAWSParams, Optional.of(optionalAWSParams));
     }
 
 }

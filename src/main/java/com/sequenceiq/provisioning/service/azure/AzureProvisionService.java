@@ -1,7 +1,5 @@
 package com.sequenceiq.provisioning.service.azure;
 
-import groovyx.net.http.HttpResponseDecorator;
-
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,14 +8,16 @@ import org.apache.commons.codec.binary.Base64;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
-import com.sequenceiq.provisioning.domain.StackDescription;
 import com.sequenceiq.provisioning.controller.json.AzureStackResult;
 import com.sequenceiq.provisioning.controller.json.StackResult;
 import com.sequenceiq.provisioning.domain.AzureTemplate;
-import com.sequenceiq.provisioning.domain.Stack;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
+import com.sequenceiq.provisioning.domain.Stack;
+import com.sequenceiq.provisioning.domain.StackDescription;
 import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.service.ProvisionService;
+
+import groovyx.net.http.HttpResponseDecorator;
 
 @Service
 public class AzureProvisionService implements ProvisionService {
@@ -35,11 +35,12 @@ public class AzureProvisionService implements ProvisionService {
     private static final String HOSTNAME = "hostname";
     private static final String USERNAME = "username";
     private static final String PASSWORD = "password";
-    private static final String DISABLESSHPASSWORDAUTHENTICATION = "disableSshPasswordAuthentication";
     private static final String SUBNETNAME = "subnetName";
     private static final String VIRTUALNETWORKNAME = "virtualNetworkName";
     private static final String VMTYPE = "vmType";
     private static final String DATADIR = "userdatas";
+    private static final String SSHPUBLICKEYFINGERPRINT = "sshPublicKeyFingerprint";
+    private static final String SSHPUBLICKEYPATH = "sshPublicKeyPath";
 
     @Override
     public StackResult createStack(User user, Stack stack) {
@@ -93,11 +94,16 @@ public class AzureProvisionService implements ProvisionService {
             props.put(IMAGENAME, azureTemplate.getImageName());
             props.put(IMAGESTOREURI,
                     String.format("http://%s.blob.core.windows.net/vhd-store/%s.vhd", azureTemplate.getName(), vmName)
-                    );
+            );
             props.put(HOSTNAME, vmName);
             props.put(USERNAME, azureTemplate.getUserName());
-            props.put(PASSWORD, azureTemplate.getPassword());
-            props.put(DISABLESSHPASSWORDAUTHENTICATION, Boolean.valueOf(azureTemplate.getDisableSshPasswordAuthentication()).toString());
+            if (azureTemplate.getPassword() != null) {
+                props.put(PASSWORD, azureTemplate.getPassword());
+            } else {
+                props.put(SSHPUBLICKEYFINGERPRINT, azureTemplate.getSshPublicKeyFingerprint());
+                props.put(SSHPUBLICKEYPATH, azureTemplate.getSshPublicKeyPath());
+            }
+
             props.put(SUBNETNAME, azureTemplate.getName());
             props.put(VIRTUALNETWORKNAME, azureTemplate.getName());
             props.put(VMTYPE, AzureVmType.valueOf(azureTemplate.getVmType()).vmType());

@@ -8,6 +8,7 @@ import javax.validation.ConstraintValidatorContext;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.google.common.base.Optional;
 import com.sequenceiq.provisioning.controller.json.CredentialJson;
 
 public class CredentialParametersValidator implements ConstraintValidator<ValidCredentialRequest, CredentialJson> {
@@ -46,11 +47,11 @@ public class CredentialParametersValidator implements ConstraintValidator<ValidC
     }
 
     private boolean validateAzureParams(CredentialJson request, ConstraintValidatorContext context) {
-        return requiredParametersValidator.validate(request.getParameters(), context, requiredAzureParams);
+        return requiredParametersValidator.validate(request.getParameters(), context, requiredAzureParams, Optional.<List<TemplateParam>>absent());
     }
 
     private boolean validateAWSParams(CredentialJson request, ConstraintValidatorContext context) {
-        return requiredParametersValidator.validate(request.getParameters(), context, requiredAWSParams);
+        return requiredParametersValidator.validate(request.getParameters(), context, requiredAWSParams, Optional.<List<TemplateParam>>absent());
     }
 
 }
