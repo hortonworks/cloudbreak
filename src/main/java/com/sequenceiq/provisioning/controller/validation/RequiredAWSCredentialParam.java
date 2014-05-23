@@ -1,18 +1,21 @@
 package com.sequenceiq.provisioning.controller.validation;
 
+import com.google.common.base.Optional;
+
 public enum RequiredAWSCredentialParam implements TemplateParam {
 
-    ROLE_ARN("roleArn", true, String.class);
+    ROLE_ARN("roleArn", true, String.class, Optional.<String>absent());
 
     private final String paramName;
     private final Class clazz;
     private final boolean required;
     private final Optional<String> regex;
 
-    private RequiredAWSCredentialParam(String paramName, Boolean required, Class clazz) {
+    private RequiredAWSCredentialParam(String paramName, Boolean required, Class clazz, Optional<String> regex) {
         this.paramName = paramName;
         this.clazz = clazz;
         this.required = required;
+        this.regex = regex;
     }
 
     @Override
@@ -31,8 +34,8 @@ public enum RequiredAWSCredentialParam implements TemplateParam {
     }
 
     @Override
-    public String getRegex() {
-
+    public Optional<String> getRegex() {
+        return regex;
     }
 
 }

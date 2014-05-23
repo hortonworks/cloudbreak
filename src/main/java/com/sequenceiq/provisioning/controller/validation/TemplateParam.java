@@ -1,5 +1,7 @@
 package com.sequenceiq.provisioning.controller.validation;
 
+import com.google.common.base.Optional;
+
 public interface TemplateParam {
 
     String getName();
@@ -8,5 +10,5 @@ public interface TemplateParam {
 
     Boolean getRequired();
 
-    String getRegex();
+    Optional<String> getRegex();
 }
