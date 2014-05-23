@@ -19,36 +19,34 @@ public class RequiredParametersValidator {
             if (!parameters.containsKey(param.getName())) {
                 addParameterConstraintViolation(context, param.getName(), String.format("%s is required.", param.getName()));
                 valid = false;
-            } else if (param.getClazz().isEnum()) {
-                try {
-                    param.getClazz().getField(parameters.get(param.getName()));
-                } catch (NoSuchFieldException e) {
-                    addParameterConstraintViolation(context, param.getName(), String.format("%s is not valid type.", param.getName()));
-                    valid = false;
-                }
-            } else if (!parameters.get(param.getName()).getClass().isAssignableFrom(param.getClazz())) {
-                addParameterConstraintViolation(context, param.getName(), String.format("%s is not valid type.", param.getName()));
-                valid = false;
+            } else {
+                valid = validateClass(parameters, context, param);
             }
         }
         if (optionalParams.isPresent()) {
             for (TemplateParam param : optionalParams.get()) {
                 if (parameters.containsKey(param.getName())) {
-                    if (param.getClazz().isEnum()) {
-                        try {
-                            param.getClazz().getField(parameters.get(param.getName()));
-                        } catch (NoSuchFieldException e) {
-                            addParameterConstraintViolation(context, param.getName(), String.format("%s is not valid type.", param.getName()));
-                            valid = false;
-                        }
-                    } else if (!parameters.get(param.getName()).getClass().isAssignableFrom(param.getClazz())) {
-                        addParameterConstraintViolation(context, param.getName(), String.format("%s is not valid type.", param.getName()));
-                        valid = false;
-                    }
+                    valid = validateClass(parameters, context, param);
                 }
             }
         }
 
+        return valid;
+    }
+
+    private boolean validateClass(Map<String, String> parameters, ConstraintValidatorContext context, TemplateParam param) {
+        boolean valid = true;
+        if (param.getClazz().isEnum()) {
+            try {
+                param.getClazz().getField(parameters.get(param.getName()));
+            } catch (NoSuchFieldException e) {
+                addParameterConstraintViolation(context, param.getName(), String.format("%s is not valid type.", param.getName()));
+                valid = false;
+            }
+        } else if (!parameters.get(param.getName()).getClass().isAssignableFrom(param.getClazz())) {
+            addParameterConstraintViolation(context, param.getName(), String.format("%s is not valid type.", param.getName()));
+            valid = false;
+        }
         return valid;
     }
 
