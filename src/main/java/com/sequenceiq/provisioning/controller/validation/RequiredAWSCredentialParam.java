@@ -7,6 +7,7 @@ public enum RequiredAWSCredentialParam implements TemplateParam {
     private final String paramName;
     private final Class clazz;
     private final boolean required;
+    private final Optional<String> regex;
 
     private RequiredAWSCredentialParam(String paramName, Boolean required, Class clazz) {
         this.paramName = paramName;
@@ -27,6 +28,11 @@ public enum RequiredAWSCredentialParam implements TemplateParam {
     @Override
     public Boolean getRequired() {
         return required;
+    }
+
+    @Override
+    public String getRegex() {
+
     }
 
 }

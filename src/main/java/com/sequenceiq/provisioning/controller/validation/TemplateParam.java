@@ -7,4 +7,6 @@ public interface TemplateParam {
     Class getClazz();
 
     Boolean getRequired();
+
+    String getRegex();
 }
