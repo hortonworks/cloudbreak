@@ -14,9 +14,9 @@ import com.sequenceiq.provisioning.controller.NotFoundException;
 import com.sequenceiq.provisioning.controller.json.StackJson;
 import com.sequenceiq.provisioning.controller.json.StackResult;
 import com.sequenceiq.provisioning.converter.StackConverter;
-import com.sequenceiq.provisioning.domain.StackDescription;
-import com.sequenceiq.provisioning.domain.Stack;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
+import com.sequenceiq.provisioning.domain.Stack;
+import com.sequenceiq.provisioning.domain.StackDescription;
 import com.sequenceiq.provisioning.domain.Template;
 import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.repository.StackRepository;
@@ -40,31 +40,30 @@ public class SimpleStackService implements StackService {
     @Override
     public Set<StackJson> getAll(User user) {
         Set<StackJson> result = new HashSet<>();
-        for (Stack cloudInstance : user.getStacks()) {
-            CloudPlatform cp = cloudInstance.getTemplate().cloudPlatform();
-            StackDescription description = provisionServices.get(cp).describeStack(user, cloudInstance);
-            result.add(stackConverter.convert(cloudInstance, description));
+        for (Stack stack : user.getStacks()) {
+            CloudPlatform cp = stack.getTemplate().cloudPlatform();
+            StackDescription description = provisionServices.get(cp).describeStack(user, stack);
+            result.add(stackConverter.convert(stack, description));
         }
         return result;
     }
 
     @Override
     public StackJson get(User user, Long id) {
-        Stack cloudInstance = stackRepository.findOne(id);
-        if (cloudInstance == null) {
-            throw new NotFoundException(String.format("CloudInstance '%s' not found", id));
-        } else {
-            CloudPlatform cp = cloudInstance.getTemplate().cloudPlatform();
-            StackDescription description = provisionServices.get(cp).describeStackWithResources(user, cloudInstance);
-            return stackConverter.convert(cloudInstance, description);
+        Stack stack = stackRepository.findOne(id);
+        if (stack == null) {
+            throw new NotFoundException(String.format("Stack '%s' not found", id));
         }
+        CloudPlatform cp = stack.getTemplate().cloudPlatform();
+        StackDescription description = provisionServices.get(cp).describeStackWithResources(user, stack);
+        return stackConverter.convert(stack, description);
     }
 
     @Override
     public StackResult create(User user, StackJson stackRequest) {
         Template template = templateRepository.findOne(stackRequest.getTemplateId());
         if (template == null) {
-            throw new EntityNotFoundException(String.format("Infrastructure '%s' not found", stackRequest.getTemplateId()));
+            throw new EntityNotFoundException(String.format("Template '%s' not found", stackRequest.getTemplateId()));
         }
         Stack stack = stackConverter.convert(stackRequest);
         stack.setUser(user);
@@ -75,12 +74,14 @@ public class SimpleStackService implements StackService {
     }
 
     @Override
-    public void delete(Long id) {
+    public void delete(User user, Long id) {
         Stack stack = stackRepository.findOne(id);
         if (stack == null) {
-            throw new NotFoundException(String.format("Stack '%s' not found.", id));
+            throw new NotFoundException(String.format("Stack '%s' not found", id));
         }
-        stackRepository.delete(stack);
+        CloudPlatform cp = stack.getTemplate().cloudPlatform();
+        provisionServices.get(cp).deleteStack(user, stack);
+        stackRepository.delete(id);
     }
 
 }

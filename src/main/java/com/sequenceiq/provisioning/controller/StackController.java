@@ -55,8 +55,8 @@ public class StackController {
     @RequestMapping(method = RequestMethod.DELETE, value = "{stackId}")
     @ResponseBody
     public ResponseEntity<TemplateJson> deleteStack(@CurrentUser User user, @PathVariable Long stackId) {
-        stackService.delete(stackId);
-        return new ResponseEntity<>(HttpStatus.OK);
+        stackService.delete(userRepository.findOneWithLists(user.getId()), stackId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
 }

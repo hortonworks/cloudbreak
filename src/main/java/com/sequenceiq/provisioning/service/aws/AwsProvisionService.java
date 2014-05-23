@@ -88,7 +88,7 @@ public class AwsProvisionService implements ProvisionService {
     public void deleteStack(User user, Stack stack) {
         AwsTemplate awsInfra = (AwsTemplate) stack.getTemplate();
         AmazonCloudFormationClient client = createCloudFormationClient(user, awsInfra.getRegion());
-        DeleteStackRequest deleteStackRequest = new DeleteStackRequest().withStackName(stack.getName());
+        DeleteStackRequest deleteStackRequest = new DeleteStackRequest().withStackName(String.format("%s-%s", stack.getName(), stack.getId()));
         client.deleteStack(deleteStackRequest);
     }
 
