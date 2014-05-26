@@ -4,7 +4,7 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.ec2.model.InstanceType;
 import com.google.common.base.Optional;
 
-public enum RequiredAwsTemplateParam implements TemplateParam {
+public enum AwsTemplateParam implements TemplateParam {
 
     KEY_NAME("keyName", true, String.class, Optional.<String>absent()),
     REGION("region", true, Regions.class, Optional.<String>absent()),
@@ -17,7 +17,7 @@ public enum RequiredAwsTemplateParam implements TemplateParam {
     private final boolean required;
     private final Optional<String> regex;
 
-    private RequiredAwsTemplateParam(String paramName, Boolean required, Class clazz, Optional<String> regex) {
+    private AwsTemplateParam(String paramName, Boolean required, Class clazz, Optional<String> regex) {
         this.paramName = paramName;
         this.required = required;
         this.clazz = clazz;

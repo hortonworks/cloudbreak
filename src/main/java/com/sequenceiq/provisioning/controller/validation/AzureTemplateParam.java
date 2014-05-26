@@ -4,7 +4,7 @@ import com.google.common.base.Optional;
 import com.sequenceiq.provisioning.service.azure.AzureLocation;
 import com.sequenceiq.provisioning.service.azure.AzureVmType;
 
-public enum RequiredAzureTemplateParam implements TemplateParam {
+public enum AzureTemplateParam implements TemplateParam {
 
     LOCATION("location", true, AzureLocation.class, Optional.<String>absent()),
     DESCRIPTION("description", true, String.class, Optional.<String>absent()),
@@ -24,7 +24,7 @@ public enum RequiredAzureTemplateParam implements TemplateParam {
     private final boolean required;
     private final Optional<String> regex;
 
-    private RequiredAzureTemplateParam(String paramName, Boolean required, Class clazz, Optional<String> regex) {
+    private AzureTemplateParam(String paramName, Boolean required, Class clazz, Optional<String> regex) {
         this.paramName = paramName;
         this.required = required;
         this.clazz = clazz;
