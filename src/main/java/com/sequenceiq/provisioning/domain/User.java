@@ -24,6 +24,8 @@ import org.hibernate.validator.constraints.NotEmpty;
                 + "LEFT JOIN FETCH u.awsTemplates "
                 + "LEFT JOIN FETCH u.stacks "
                 + "LEFT JOIN FETCH u.blueprints "
+                + "LEFT JOIN FETCH u.awsCredentials "
+                + "LEFT JOIN FETCH u.azureCredentials "
                 + "WHERE u.id= :id")
 public class User implements ProvisionEntity {
     @Id
@@ -42,10 +44,10 @@ public class User implements ProvisionEntity {
     private String email;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Credential> awsCredentials = new HashSet<>();
+    private Set<AwsCredential> awsCredentials = new HashSet<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Credential> azureCredentials = new HashSet<>();
+    private Set<AzureCredential> azureCredentials = new HashSet<>();
 
     @OneToOne
     private TemporaryAwsCredentials temporaryAwsCredentials;
@@ -146,20 +148,20 @@ public class User implements ProvisionEntity {
         this.temporaryAwsCredentials = temporaryAwsCredentials;
     }
 
-    public Set<Credential> getAzureCredentials() {
+    public Set<AzureCredential> getAzureCredentials() {
         return azureCredentials;
     }
 
-    public void setAzureCredentials(Set<Credential> azureCredentials) {
+    public void setAzureCredentials(Set<AzureCredential> azureCredentials) {
         this.azureCredentials = azureCredentials;
     }
 
-    public Set<Credential> getAwsCredentials() {
+    public Set<AwsCredential> getAwsCredentials() {
 
         return awsCredentials;
     }
 
-    public void setAwsCredentials(Set<Credential> awsCredentials) {
+    public void setAwsCredentials(Set<AwsCredential> awsCredentials) {
         this.awsCredentials = awsCredentials;
     }
 

@@ -1,16 +1,16 @@
 package com.sequenceiq.provisioning.service.aws;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.provisioning.controller.NotFoundException;
 import com.sequenceiq.provisioning.controller.json.CredentialJson;
-import com.sequenceiq.provisioning.controller.validation.RequiredAWSCredentialParam;
+import com.sequenceiq.provisioning.converter.AwsCredentialConverter;
+import com.sequenceiq.provisioning.domain.AwsCredential;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
 import com.sequenceiq.provisioning.domain.User;
+import com.sequenceiq.provisioning.repository.AwsCredentialRepository;
 import com.sequenceiq.provisioning.repository.UserRepository;
 import com.sequenceiq.provisioning.service.CredentialService;
 
@@ -20,24 +20,22 @@ public class AWSCredentialService implements CredentialService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private AwsCredentialRepository awsCredentialRepository;
+
+    @Autowired
+    private AwsCredentialConverter awsCredentialConverter;
+
     @Override
     public void saveCredentials(User user, CredentialJson credentialRequest) {
-        User managedUser = userRepository.findByEmail(user.getEmail());
-        managedUser.setRoleArn(credentialRequest.getParameters().get(RequiredAWSCredentialParam.ROLE_ARN.getName()));
-        userRepository.save(managedUser);
+        AwsCredential awsCredential = awsCredentialConverter.convert(credentialRequest);
+        awsCredential.setUser(user);
+        awsCredentialRepository.save(awsCredential);
     }
 
     @Override
-    public CredentialJson retrieveCredentials(User user) {
-        if (user.getRoleArn() == null) {
-            throw new NotFoundException("Aws credentials (IAM Role ARN) not found.");
-        }
-        CredentialJson credentialJson = new CredentialJson();
-        credentialJson.setCloudPlatform(CloudPlatform.AWS);
-        Map<String, String> parameters = new HashMap<>();
-        parameters.put(RequiredAWSCredentialParam.ROLE_ARN.getName(), user.getRoleArn());
-        credentialJson.setParameters(parameters);
-        return credentialJson;
+    public Set<CredentialJson> retrieveCredentials(User user) {
+        return awsCredentialConverter.convertAllEntityToJson(user.getAwsCredentials());
     }
 
     @Override

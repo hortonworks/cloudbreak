@@ -6,7 +6,7 @@ import com.sequenceiq.provisioning.controller.validation.ValidCredentialRequest;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
 
 @ValidCredentialRequest
-public class CredentialJson {
+public class CredentialJson implements JsonEntity {
 
     private CloudPlatform cloudPlatform;
     private Map<String, String> parameters;
