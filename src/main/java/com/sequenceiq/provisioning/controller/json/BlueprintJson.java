@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 public class BlueprintJson implements JsonEntity {
 
+    private String id;
     private String name;
     private String url;
     private String ambariBlueprint;
@@ -36,5 +37,15 @@ public class BlueprintJson implements JsonEntity {
     @JsonProperty("url")
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    @JsonProperty("id")
+    public String getId() {
+        return id;
+    }
+
+    @JsonIgnore
+    public void setId(String id) {
+        this.id = id;
     }
 }
