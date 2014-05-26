@@ -9,6 +9,7 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.CreateStackRequest;
 import com.amazonaws.services.cloudformation.model.CreateStackResult;
+import com.amazonaws.services.cloudformation.model.DeleteStackRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStackResourcesRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStackResourcesResult;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
@@ -48,10 +49,7 @@ public class AwsProvisionService implements ProvisionService {
     @Override
     public StackResult createStack(User user, Stack stack) {
         AwsTemplate awsTemplate = (AwsTemplate) stack.getTemplate();
-        BasicSessionCredentials basicSessionCredentials = credentialsProvider
-                .retrieveSessionCredentials(SESSION_CREDENTIALS_DURATION, "provision-ambari", user);
-        AmazonCloudFormationClient amazonCloudFormationClient = new AmazonCloudFormationClient(basicSessionCredentials);
-        amazonCloudFormationClient.setRegion(Region.getRegion(Regions.fromName(awsTemplate.getRegion())));
+        AmazonCloudFormationClient client = createCloudFormationClient(user, awsTemplate.getRegion());
         CreateStackRequest createStackRequest = new CreateStackRequest()
                 .withStackName(String.format("%s-%s", stack.getName(), stack.getId()))
                 .withTemplateBody(template.getBody())
@@ -61,35 +59,37 @@ public class AwsProvisionService implements ProvisionService {
                         new Parameter().withParameterKey("AmbariAgentCount").withParameterValue(String.valueOf(stack.getClusterSize() - 1)),
                         new Parameter().withParameterKey("ClusterNodeInstanceType").withParameterValue(awsTemplate.getInstanceType().toString()),
                         new Parameter().withParameterKey("SSHLocation").withParameterValue(awsTemplate.getSshLocation()));
-        CreateStackResult createStackResult = amazonCloudFormationClient.createStack(createStackRequest);
+        CreateStackResult createStackResult = client.createStack(createStackRequest);
         return new AWSStackResult(OK_STATUS, createStackResult);
     }
 
     @Override
     public StackDescription describeStack(User user, Stack stack) {
         AwsTemplate awsInfra = (AwsTemplate) stack.getTemplate();
-        BasicSessionCredentials basicSessionCredentials = credentialsProvider
-                .retrieveSessionCredentials(SESSION_CREDENTIALS_DURATION, "provision-ambari", user);
-        AmazonCloudFormationClient amazonCloudFormationClient = new AmazonCloudFormationClient(basicSessionCredentials);
-        amazonCloudFormationClient.setRegion(Region.getRegion(Regions.fromName(awsInfra.getRegion())));
+        AmazonCloudFormationClient client = createCloudFormationClient(user, awsInfra.getRegion());
         DescribeStacksRequest stackRequest = new DescribeStacksRequest().withStackName(String.format("%s-%s", stack.getName(), stack.getId()));
-        DescribeStacksResult stackResult = amazonCloudFormationClient.describeStacks(stackRequest);
+        DescribeStacksResult stackResult = client.describeStacks(stackRequest);
         return new AwsStackDescription(stackResult);
     }
 
     @Override
     public StackDescription describeStackWithResources(User user, Stack stack) {
         AwsTemplate awsInfra = (AwsTemplate) stack.getTemplate();
-        BasicSessionCredentials basicSessionCredentials = credentialsProvider
-                .retrieveSessionCredentials(SESSION_CREDENTIALS_DURATION, "provision-ambari", user);
-        AmazonCloudFormationClient amazonCloudFormationClient = new AmazonCloudFormationClient(basicSessionCredentials);
-        amazonCloudFormationClient.setRegion(Region.getRegion(Regions.fromName(awsInfra.getRegion())));
+        AmazonCloudFormationClient client = createCloudFormationClient(user, awsInfra.getRegion());
         DescribeStacksRequest stackRequest = new DescribeStacksRequest().withStackName(String.format("%s-%s", stack.getName(), stack.getId()));
-        DescribeStacksResult stackResult = amazonCloudFormationClient.describeStacks(stackRequest);
+        DescribeStacksResult stackResult = client.describeStacks(stackRequest);
         DescribeStackResourcesRequest resourcesRequest = new DescribeStackResourcesRequest().withStackName(String.format("%s-%s", stack.getName(),
                 stack.getId()));
-        DescribeStackResourcesResult resourcesResult = amazonCloudFormationClient.describeStackResources(resourcesRequest);
+        DescribeStackResourcesResult resourcesResult = client.describeStackResources(resourcesRequest);
         return new DetailedAwsStackDescription(stackResult, resourcesResult);
+    }
+
+    @Override
+    public void deleteStack(User user, Stack stack) {
+        AwsTemplate awsInfra = (AwsTemplate) stack.getTemplate();
+        AmazonCloudFormationClient client = createCloudFormationClient(user, awsInfra.getRegion());
+        DeleteStackRequest deleteStackRequest = new DeleteStackRequest().withStackName(String.format("%s-%s", stack.getName(), stack.getId()));
+        client.deleteStack(deleteStackRequest);
     }
 
     @Override
@@ -97,4 +97,11 @@ public class AwsProvisionService implements ProvisionService {
         return CloudPlatform.AWS;
     }
 
+    private AmazonCloudFormationClient createCloudFormationClient(User user, String region) {
+        BasicSessionCredentials basicSessionCredentials = credentialsProvider
+                .retrieveSessionCredentials(SESSION_CREDENTIALS_DURATION, "provision-ambari", user);
+        AmazonCloudFormationClient amazonCloudFormationClient = new AmazonCloudFormationClient(basicSessionCredentials);
+        amazonCloudFormationClient.setRegion(Region.getRegion(Regions.fromName(region)));
+        return amazonCloudFormationClient;
+    }
 }

@@ -14,6 +14,6 @@ public interface StackService {
 
     StackResult create(User user, StackJson stackRequest);
 
-    void delete(Long id);
+    void delete(User user, Long id);
 
 }

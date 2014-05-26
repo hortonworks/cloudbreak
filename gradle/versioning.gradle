@@ -1,3 +1,5 @@
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import org.ajoberstar.grgit.*
 
 buildscript {
@@ -5,8 +7,12 @@ buildscript {
     dependencies { classpath 'org.ajoberstar:gradle-git:0.8.0' }
 }
 
+Calendar calendar = Calendar.getInstance();
+DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss")
+def buildId = dateFormat.format(calendar.getTime())
+
 def grgit = Grgit.open(project.file('.'))
-def buildNumber = System.getenv("BUILD_NUMBER")
+def jobName = System.getenv("JOB_NAME")
 def branch = grgit.branch.current.name
 if ("HEAD".equals(branch)) {
     if (System.getenv("GIT_BRANCH") != null) {
@@ -17,7 +23,7 @@ if ("HEAD".equals(branch)) {
     }
 }
 
-version = new ProjectVersion(0, 1, buildNumber != null ? buildNumber : "dev", branch)
+version = new ProjectVersion(0, 1, jobName != null ? buildId : "DEV", branch)
 
 class ProjectVersion {
     Integer major
