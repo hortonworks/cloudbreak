@@ -1,18 +1,22 @@
 package com.sequenceiq.provisioning.controller.validation;
 
+import com.google.common.base.Optional;
+
 public enum RequiredAzureCredentialParam implements TemplateParam {
 
-    SUBSCRIPTION_ID("subscriptionId", true, String.class),
-    JKS_PASSWORD("jksPassword", true, String.class);
+    SUBSCRIPTION_ID("subscriptionId", true, String.class, Optional.<String>absent()),
+    JKS_PASSWORD("jksPassword", true, String.class, Optional.<String>absent());
 
     private final String paramName;
     private final Class clazz;
     private final boolean required;
+    private final Optional<String> regex;
 
-    private RequiredAzureCredentialParam(String paramName, Boolean required, Class clazz) {
+    private RequiredAzureCredentialParam(String paramName, Boolean required, Class clazz, Optional<String> regex) {
         this.paramName = paramName;
         this.clazz = clazz;
         this.required = required;
+        this.regex = regex;
     }
 
     @Override
@@ -28,5 +32,10 @@ public enum RequiredAzureCredentialParam implements TemplateParam {
     @Override
     public Boolean getRequired() {
         return required;
+    }
+
+    @Override
+    public Optional<String> getRegex() {
+        return regex;
     }
 }

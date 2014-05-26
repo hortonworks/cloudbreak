@@ -28,10 +28,10 @@ public class ProvisionParametersValidator implements ConstraintValidator<ValidPr
 
     @Override
     public void initialize(ValidProvisionRequest constraintAnnotation) {
-        for (RequiredAwsTemplateParam param : RequiredAwsTemplateParam.values()) {
+        for (AwsTemplateParam param : AwsTemplateParam.values()) {
             awsParams.add(param);
         }
-        for (RequiredAzureTemplateParam param : RequiredAzureTemplateParam.values()) {
+        for (AzureTemplateParam param : AzureTemplateParam.values()) {
             azureParams.add(param);
         }
     }

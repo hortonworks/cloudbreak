@@ -1,20 +1,26 @@
 package com.sequenceiq.provisioning.controller.validation;
 
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.ec2.model.InstanceType;
 import com.google.common.base.Optional;
 
-public enum RequiredAWSCredentialParam implements TemplateParam {
+public enum AwsTemplateParam implements TemplateParam {
 
-    ROLE_ARN("roleArn", true, String.class, Optional.<String>absent());
+    KEY_NAME("keyName", true, String.class, Optional.<String>absent()),
+    REGION("region", true, Regions.class, Optional.<String>absent()),
+    AMI_ID("amiId", true, String.class, Optional.<String>absent()),
+    INSTANCE_TYPE("instanceType", true, InstanceType.class, Optional.<String>absent()),
+    SSH_LOCATION("sshLocation", false, String.class, Optional.<String>absent());
 
     private final String paramName;
     private final Class clazz;
     private final boolean required;
     private final Optional<String> regex;
 
-    private RequiredAWSCredentialParam(String paramName, Boolean required, Class clazz, Optional<String> regex) {
+    private AwsTemplateParam(String paramName, Boolean required, Class clazz, Optional<String> regex) {
         this.paramName = paramName;
-        this.clazz = clazz;
         this.required = required;
+        this.clazz = clazz;
         this.regex = regex;
     }
 
