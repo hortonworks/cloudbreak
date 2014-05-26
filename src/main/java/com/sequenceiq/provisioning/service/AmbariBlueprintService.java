@@ -38,4 +38,11 @@ public class AmbariBlueprintService {
         }
         return blueprintConverter.convert(blueprint);
     }
+
+    public void delete(Long id) {
+        Blueprint blueprint = blueprintRepository.findOne(id);
+        if (blueprint == null) {
+            throw new NotFoundException(String.format("Blueprint '%s' not found.", id));
+        }
+    }
 }

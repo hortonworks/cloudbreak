@@ -48,4 +48,11 @@ public class BlueprintController {
     public ResponseEntity<BlueprintJson> retrieveBlueprint(@CurrentUser User user, @PathVariable Long id) {
         return new ResponseEntity<>(ambariBlueprintService.get(id), HttpStatus.OK);
     }
+
+    @RequestMapping(method = RequestMethod.DELETE, value = "{id}")
+    @ResponseBody
+    public ResponseEntity<BlueprintJson> deleteBlueprint(@CurrentUser User user, @PathVariable Long id) {
+        ambariBlueprintService.delete(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }
