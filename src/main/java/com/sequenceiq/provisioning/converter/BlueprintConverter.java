@@ -10,8 +10,6 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.TextNode;
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.sequenceiq.provisioning.controller.BadRequestException;
