@@ -44,5 +44,6 @@ public class AmbariBlueprintService {
         if (blueprint == null) {
             throw new NotFoundException(String.format("Blueprint '%s' not found.", id));
         }
+        blueprintRepository.delete(blueprint);
     }
 }
