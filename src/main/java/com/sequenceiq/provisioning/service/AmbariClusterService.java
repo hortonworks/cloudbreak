@@ -20,7 +20,9 @@ import com.sequenceiq.provisioning.controller.json.ClusterRequest;
 import com.sequenceiq.provisioning.controller.json.ClusterResponse;
 import com.sequenceiq.provisioning.controller.json.HostGroupMappingJson;
 import com.sequenceiq.provisioning.controller.json.JsonHelper;
+import com.sequenceiq.provisioning.domain.Blueprint;
 import com.sequenceiq.provisioning.domain.User;
+import com.sequenceiq.provisioning.repository.BlueprintRepository;
 
 import groovyx.net.http.HttpResponseException;
 
@@ -30,8 +32,12 @@ public class AmbariClusterService {
     @Autowired
     private JsonHelper jsonHelper;
 
+    @Autowired
+    private BlueprintRepository blueprintRepository;
+
     public void createCluster(User user, Long cloudId, ClusterRequest clusterRequest) {
         try {
+            addBlueprint(user, cloudId, blueprintRepository.findOne(clusterRequest.getBlueprintId()));
             // TODO: get server and port from cloudService
             AmbariClient ambariClient = new AmbariClient("172.17.0.2", "8080");
             // TODO: get hostnames in from cloudService
@@ -48,6 +54,7 @@ public class AmbariClusterService {
                 hostGroupMappings.put(hostGroupMappingJson.getName(), hostsInGroup);
             }
             ambariClient.createCluster(clusterRequest.getClusterName(), clusterRequest.getBlueprintId(), hostGroupMappings);
+
         } catch (HttpResponseException e) {
             throw new InternalServerException("Failed to create cluster", e);
         }
@@ -75,11 +82,11 @@ public class AmbariClusterService {
         return clusterResponse;
     }
 
-    public void addBlueprint(User user, Long cloudId, BlueprintJson blueprintJson) {
+    public void addBlueprint(User user, Long cloudId, Blueprint blueprint) {
         // TODO get ambari client host and port from cloud service
         AmbariClient ambariClient = new AmbariClient("172.17.0.2", "8080");
         try {
-            ambariClient.addBlueprint(blueprintJson.getAmbariBlueprint());
+            ambariClient.addBlueprint(blueprint.getBlueprintText());
         } catch (HttpResponseException e) {
             if ("Conflict".equals(e.getMessage())) {
                 throw new BadRequestException("Ambari blueprint already exists.", e);
