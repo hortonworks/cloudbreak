@@ -1,9 +1,11 @@
 package com.sequenceiq.provisioning.domain;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 
@@ -15,6 +17,8 @@ public class Blueprint implements ProvisionEntity {
     @SequenceGenerator(name = "blueprint_generator", sequenceName = "blueprint_table")
     private Long id;
 
+    @Column(length = 1000000)
+    @Lob
     private String blueprintText;
 
     private String name;

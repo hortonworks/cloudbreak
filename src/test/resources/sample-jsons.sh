@@ -4,6 +4,8 @@ curl -u user@seq.com:test123 -X GET -H "Content-Type:application/json"  http://l
 
 curl -u user@seq.com:test123 -X POST -H "Content-Type:application/json" -d '{"cloudPlatform":"AZURE","parameters":{"subscriptionId":"a8b8dac0-2b84-41da-a08b-1e45297e0d2b","jksPassword":"pw1234"}}' http://localhost:8080/credential
 
+curl -u user@seq.com:test123 -X POST -H "Content-Type:application/json" -d '{"name":"smap123","url":"https://gist.githubusercontent.com/lalyos/53eeda2d3f6287656d84/raw/install-mac.sh"}' http://localhost:8080/blueprint
+
 curl -u user@seq.com:test123 -X POST -H "Content-Type:application/json" -d '{"cloudPlatform":"AWS","clusterSize":2, "infraId":"1"}' http://localhost:8080/cloud
 
 curl -u user@seq.com:test123 -sX POST -H "Content-Type: application/json" -d '{"cloudPlatform":"AWS","clusterName":"my-infra-1","parameters":{"region":"EU_WEST_1", "amiId":"1234", "keyName":"sequence-eu","addressPrefix":"172.16.0.0/16","subnetAddressPrefix":"172.16.0.0/24","instanceType":"M3Xlarge"}}' http://localhost:8080/template | jq .

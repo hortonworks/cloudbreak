@@ -23,6 +23,7 @@ public class BlueprintConverter extends AbstractConverter<BlueprintJson, Bluepri
     @Override
     public BlueprintJson convert(Blueprint entity) {
         BlueprintJson blueprintJson = new BlueprintJson();
+        blueprintJson.setId(String.valueOf(entity.getId()));
         blueprintJson.setName(entity.getName());
         JsonNode node = new TextNode(entity.getBlueprintText());
         blueprintJson.setAmbariBlueprint(node);
@@ -35,7 +36,7 @@ public class BlueprintConverter extends AbstractConverter<BlueprintJson, Bluepri
         blueprint.setName(json.getName());
         if (json.getUrl() != null) {
             try {
-                blueprint.setBlueprintText(readUrl(json.getAmbariBlueprint()));
+                blueprint.setBlueprintText(readUrl(json.getUrl()));
             } catch (IOException e) {
                 throw new BadRequestException("Cannot download ambari blueprint from: " + json.getUrl());
             }
@@ -58,6 +59,9 @@ public class BlueprintConverter extends AbstractConverter<BlueprintJson, Bluepri
     }
 
     private String readUrl(String url) throws IOException {
+        if (!url.startsWith("http://") && !url.startsWith("https://")) {
+            url = "http://" + url;
+        }
         BufferedReader in = new BufferedReader(new InputStreamReader(new URL(url).openStream()));
         String str;
         StringBuffer sb = new StringBuffer();
