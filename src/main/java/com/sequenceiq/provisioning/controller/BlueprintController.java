@@ -1,6 +1,6 @@
 package com.sequenceiq.provisioning.controller;
 
-import java.util.List;
+import java.util.Set;
 
 import javax.validation.Valid;
 
@@ -16,32 +16,43 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sequenceiq.provisioning.controller.json.BlueprintJson;
 import com.sequenceiq.provisioning.domain.User;
+import com.sequenceiq.provisioning.repository.UserRepository;
 import com.sequenceiq.provisioning.security.CurrentUser;
-import com.sequenceiq.provisioning.service.AmbariBlueprintService;
+import com.sequenceiq.provisioning.service.BlueprintService;
 
 @Controller
-@RequestMapping("/stack/{stackId}/blueprint")
+@RequestMapping("blueprint")
 public class BlueprintController {
 
     @Autowired
-    private AmbariBlueprintService ambariBlueprintService;
+    private BlueprintService blueprintService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<String> addBlueprint(@CurrentUser User user, @PathVariable Long stackId, @RequestBody @Valid BlueprintJson blueprintRequest) {
-        ambariBlueprintService.addBlueprint(user, stackId, blueprintRequest);
+    public ResponseEntity<String> addBlueprint(@CurrentUser User user, @RequestBody @Valid BlueprintJson blueprintRequest) {
+        blueprintService.addBlueprint(user, blueprintRequest);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<List<BlueprintJson>> retrieveBlueprints(@CurrentUser User user, @PathVariable Long stackId) {
-        return new ResponseEntity<>(ambariBlueprintService.retrieveBlueprints(user, stackId), HttpStatus.OK);
+    public ResponseEntity<Set<BlueprintJson>> retrieveBlueprints(@CurrentUser User user) {
+        return new ResponseEntity<>(blueprintService.getAll(userRepository.findOne(user.getId())), HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "{id}")
     @ResponseBody
-    public ResponseEntity<BlueprintJson> retrieveBlueprint(@CurrentUser User user, @PathVariable Long stackId, @PathVariable String id) {
-        return new ResponseEntity<>(ambariBlueprintService.retrieveBlueprint(user, stackId, id), HttpStatus.OK);
+    public ResponseEntity<BlueprintJson> retrieveBlueprint(@CurrentUser User user, @PathVariable Long id) {
+        return new ResponseEntity<>(blueprintService.get(id), HttpStatus.OK);
+    }
+
+    @RequestMapping(method = RequestMethod.DELETE, value = "{id}")
+    @ResponseBody
+    public ResponseEntity<BlueprintJson> deleteBlueprint(@CurrentUser User user, @PathVariable Long id) {
+        blueprintService.delete(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

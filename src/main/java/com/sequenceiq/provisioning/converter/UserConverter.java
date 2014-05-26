@@ -18,6 +18,9 @@ public class UserConverter extends AbstractConverter<UserJson, User> {
     @Autowired
     private StackConverter stackConverter;
 
+    @Autowired
+    private BlueprintConverter blueprintConverter;
+
     @Override
     public UserJson convert(User entity) {
         UserJson userJson = new UserJson();
@@ -30,6 +33,7 @@ public class UserConverter extends AbstractConverter<UserJson, User> {
         userJson.setAwsTemplates(awsTemplateConverter.convertAllEntityToJson(entity.getAwsTemplates()));
         userJson.setAzureTemplates(azureTemplateConverter.convertAllEntityToJson(entity.getAzureTemplates()));
         userJson.setStacks(stackConverter.convertAllEntityToJson(entity.getStacks()));
+        userJson.setBlueprints(blueprintConverter.convertAllToIdList(entity.getBlueprints()));
         return userJson;
     }
 

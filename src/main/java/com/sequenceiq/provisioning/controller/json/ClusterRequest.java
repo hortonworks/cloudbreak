@@ -6,7 +6,7 @@ import java.util.List;
 public class ClusterRequest {
 
     private String clusterName;
-    private String blueprintName;
+    private Long blueprintId;
     private List<HostGroupMappingJson> hostGroups;
 
     public String getClusterName() {
@@ -17,12 +17,12 @@ public class ClusterRequest {
         this.clusterName = clusterName;
     }
 
-    public String getBlueprintName() {
-        return blueprintName;
+    public Long getBlueprintId() {
+        return blueprintId;
     }
 
-    public void setBlueprintName(String blueprintName) {
-        this.blueprintName = blueprintName;
+    public void setBlueprintId(Long blueprintId) {
+        this.blueprintId = blueprintId;
     }
 
     public List<HostGroupMappingJson> getHostGroups() {

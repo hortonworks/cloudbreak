@@ -23,6 +23,8 @@ public class UserJson implements JsonEntity {
 
     private Set<StackJson> stacks = new HashSet<>();
 
+    private Set<BlueprintJson> blueprints = new HashSet<>();
+
     public UserJson() {
 
     }
@@ -99,4 +101,11 @@ public class UserJson implements JsonEntity {
         this.stacks = stacks;
     }
 
+    public Set<BlueprintJson> getBlueprints() {
+        return blueprints;
+    }
+
+    public void setBlueprints(Set<BlueprintJson> blueprints) {
+        this.blueprints = blueprints;
+    }
 }
