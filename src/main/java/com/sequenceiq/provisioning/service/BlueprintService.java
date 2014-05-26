@@ -13,7 +13,7 @@ import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.repository.BlueprintRepository;
 
 @Service
-public class AmbariBlueprintService {
+public class BlueprintService {
 
     @Autowired
     private BlueprintRepository blueprintRepository;

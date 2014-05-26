@@ -18,14 +18,14 @@ import com.sequenceiq.provisioning.controller.json.BlueprintJson;
 import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.repository.UserRepository;
 import com.sequenceiq.provisioning.security.CurrentUser;
-import com.sequenceiq.provisioning.service.AmbariBlueprintService;
+import com.sequenceiq.provisioning.service.BlueprintService;
 
 @Controller
 @RequestMapping("blueprint")
 public class BlueprintController {
 
     @Autowired
-    private AmbariBlueprintService ambariBlueprintService;
+    private BlueprintService blueprintService;
 
     @Autowired
     private UserRepository userRepository;
@@ -33,26 +33,26 @@ public class BlueprintController {
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<String> addBlueprint(@CurrentUser User user, @RequestBody @Valid BlueprintJson blueprintRequest) {
-        ambariBlueprintService.addBlueprint(user, blueprintRequest);
+        blueprintService.addBlueprint(user, blueprintRequest);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<Set<BlueprintJson>> retrieveBlueprints(@CurrentUser User user) {
-        return new ResponseEntity<>(ambariBlueprintService.getAll(userRepository.findOne(user.getId())), HttpStatus.OK);
+        return new ResponseEntity<>(blueprintService.getAll(userRepository.findOne(user.getId())), HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "{id}")
     @ResponseBody
     public ResponseEntity<BlueprintJson> retrieveBlueprint(@CurrentUser User user, @PathVariable Long id) {
-        return new ResponseEntity<>(ambariBlueprintService.get(id), HttpStatus.OK);
+        return new ResponseEntity<>(blueprintService.get(id), HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.DELETE, value = "{id}")
     @ResponseBody
     public ResponseEntity<BlueprintJson> deleteBlueprint(@CurrentUser User user, @PathVariable Long id) {
-        ambariBlueprintService.delete(id);
+        blueprintService.delete(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
