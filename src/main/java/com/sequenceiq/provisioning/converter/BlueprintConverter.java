@@ -7,6 +7,7 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -15,18 +16,21 @@ import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.sequenceiq.provisioning.controller.BadRequestException;
 import com.sequenceiq.provisioning.controller.json.BlueprintJson;
+import com.sequenceiq.provisioning.controller.json.JsonHelper;
 import com.sequenceiq.provisioning.domain.Blueprint;
 
 @Component
 public class BlueprintConverter extends AbstractConverter<BlueprintJson, Blueprint> {
+
+    @Autowired
+    private JsonHelper jsonHelper;
 
     @Override
     public BlueprintJson convert(Blueprint entity) {
         BlueprintJson blueprintJson = new BlueprintJson();
         blueprintJson.setId(String.valueOf(entity.getId()));
         blueprintJson.setName(entity.getName());
-        JsonNode node = new TextNode(entity.getBlueprintText());
-        blueprintJson.setAmbariBlueprint(node);
+        blueprintJson.setAmbariBlueprint(jsonHelper.createJsonFromString(entity.getBlueprintText()));
         return blueprintJson;
     }
 
