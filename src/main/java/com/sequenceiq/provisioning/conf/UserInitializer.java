@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import com.amazonaws.services.ec2.model.InstanceType;
 import com.sequenceiq.provisioning.domain.AwsTemplate;
 import com.sequenceiq.provisioning.domain.AzureTemplate;
+import com.sequenceiq.provisioning.domain.Blueprint;
 import com.sequenceiq.provisioning.domain.Stack;
 import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.repository.UserRepository;
@@ -67,6 +68,18 @@ public class UserInitializer implements InitializingBean {
         azureStack.setClusterSize(CLUSTER_SIZE);
         azureStack.setUser(user2);
 
+        Blueprint blueprint1 = new Blueprint();
+        blueprint1.setName("sample blueprint 1");
+        blueprint1.setBlueprintText("sample text");
+        blueprint1.setUser(user2);
+
+        Blueprint blueprint2 = new Blueprint();
+        blueprint2.setName("sample blueprint 1");
+        blueprint2.setBlueprintText("sample text");
+        blueprint2.setUser(user2);
+
+        user2.getBlueprints().add(blueprint1);
+        user2.getBlueprints().add(blueprint2);
         user2.getAzureTemplates().add(azureTemplate);
         user2.getStacks().add(azureStack);
 

@@ -23,6 +23,7 @@ import org.hibernate.validator.constraints.NotEmpty;
                 + "LEFT JOIN FETCH u.azureTemplates "
                 + "LEFT JOIN FETCH u.awsTemplates "
                 + "LEFT JOIN FETCH u.stacks "
+                + "LEFT JOIN FETCH u.blueprints "
                 + "WHERE u.id= :id")
 public class User implements ProvisionEntity {
     @Id
