@@ -41,21 +41,21 @@ public class StackController {
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<Set<StackJson>> getAllStack(@CurrentUser User user) {
-        User currentUser = userRepository.findOneWithLists(user.getId());
+        User currentUser = userRepository.findOne(user.getId());
         return new ResponseEntity<>(stackService.getAll(currentUser), HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "{stackId}")
     @ResponseBody
     public ResponseEntity<StackJson> getStack(@CurrentUser User user, @PathVariable Long stackId) {
-        StackJson stackJson = stackService.get(userRepository.findOneWithLists(user.getId()), stackId);
+        StackJson stackJson = stackService.get(userRepository.findOne(user.getId()), stackId);
         return new ResponseEntity<>(stackJson, HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.DELETE, value = "{stackId}")
     @ResponseBody
     public ResponseEntity<TemplateJson> deleteStack(@CurrentUser User user, @PathVariable Long stackId) {
-        stackService.delete(userRepository.findOneWithLists(user.getId()), stackId);
+        stackService.delete(userRepository.findOne(user.getId()), stackId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
