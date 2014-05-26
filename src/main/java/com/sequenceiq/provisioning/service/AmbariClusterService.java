@@ -47,7 +47,7 @@ public class AmbariClusterService {
                 }
                 hostGroupMappings.put(hostGroupMappingJson.getName(), hostsInGroup);
             }
-            ambariClient.createCluster(clusterRequest.getClusterName(), clusterRequest.getBlueprintName(), hostGroupMappings);
+            ambariClient.createCluster(clusterRequest.getClusterName(), clusterRequest.getBlueprintId(), hostGroupMappings);
         } catch (HttpResponseException e) {
             throw new InternalServerException("Failed to create cluster", e);
         }
