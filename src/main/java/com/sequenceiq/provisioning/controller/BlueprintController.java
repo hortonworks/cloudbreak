@@ -1,6 +1,6 @@
 package com.sequenceiq.provisioning.controller;
 
-import java.util.List;
+import java.util.Set;
 
 import javax.validation.Valid;
 
@@ -39,7 +39,7 @@ public class BlueprintController {
 
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<List<BlueprintJson>> retrieveBlueprints(@CurrentUser User user, @PathVariable Long stackId) {
+    public ResponseEntity<Set<BlueprintJson>> retrieveBlueprints(@CurrentUser User user, @PathVariable Long stackId) {
         return new ResponseEntity<>(ambariBlueprintService.retrieveBlueprints(userRepository.findOne(user.getId())), HttpStatus.OK);
     }
 

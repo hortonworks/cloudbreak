@@ -1,6 +1,6 @@
 package com.sequenceiq.provisioning.service;
 
-import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,8 +23,8 @@ public class AmbariBlueprintService {
 
     }
 
-    public List<BlueprintJson> retrieveBlueprints(User user) {
-        return user.get
+    public Set<BlueprintJson> retrieveBlueprints(User user) {
+        return blueprintConverter.convertAllEntityToJson(user.getBlueprints());
     }
 
     public BlueprintJson retrieveBlueprint(User user, String id) {

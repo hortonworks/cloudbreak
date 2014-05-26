@@ -61,6 +61,9 @@ public class User implements ProvisionEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Stack> stacks = new HashSet<>();
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Blueprint> blueprints = new HashSet<>();
+
     public User() {
     }
 
@@ -76,6 +79,7 @@ public class User implements ProvisionEntity {
         this.subscriptionId = user.subscriptionId;
         this.roleArn = user.roleArn;
         this.stacks = user.stacks;
+        this.blueprints = user.blueprints;
     }
 
     public String getPassword() {
@@ -172,6 +176,14 @@ public class User implements ProvisionEntity {
 
     public void setStacks(Set<Stack> stacks) {
         this.stacks = stacks;
+    }
+
+    public Set<Blueprint> getBlueprints() {
+        return blueprints;
+    }
+
+    public void setBlueprints(Set<Blueprint> blueprints) {
+        this.blueprints = blueprints;
     }
 
     public String emailAsFolder() {
