@@ -11,11 +11,7 @@ public class UserJson implements JsonEntity {
 
     private String email;
 
-    private String roleArn;
-
-    private String subscriptionId;
-
-    private String jks;
+    private Set<CredentialJson> credentials;
 
     private Set<TemplateJson> azureTemplates = new HashSet<>();
 
@@ -53,30 +49,6 @@ public class UserJson implements JsonEntity {
         this.email = email;
     }
 
-    public String getRoleArn() {
-        return roleArn;
-    }
-
-    public void setRoleArn(String roleArn) {
-        this.roleArn = roleArn;
-    }
-
-    public String getSubscriptionId() {
-        return subscriptionId;
-    }
-
-    public void setSubscriptionId(String subscriptionId) {
-        this.subscriptionId = subscriptionId;
-    }
-
-    public String getJks() {
-        return jks;
-    }
-
-    public void setJks(String jks) {
-        this.jks = jks;
-    }
-
     public Set<TemplateJson> getAwsTemplates() {
         return awsTemplates;
     }
@@ -107,5 +79,13 @@ public class UserJson implements JsonEntity {
 
     public void setBlueprints(Set<BlueprintJson> blueprints) {
         this.blueprints = blueprints;
+    }
+
+    public Set<CredentialJson> getCredentials() {
+        return credentials;
+    }
+
+    public void setCredentials(Set<CredentialJson> credentials) {
+        this.credentials = credentials;
     }
 }

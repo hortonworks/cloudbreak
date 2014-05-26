@@ -5,7 +5,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.services.ec2.model.InstanceType;
+import com.sequenceiq.provisioning.domain.AwsCredential;
 import com.sequenceiq.provisioning.domain.AwsTemplate;
+import com.sequenceiq.provisioning.domain.AzureCredential;
 import com.sequenceiq.provisioning.domain.AzureTemplate;
 import com.sequenceiq.provisioning.domain.Blueprint;
 import com.sequenceiq.provisioning.domain.Stack;
@@ -28,9 +30,18 @@ public class UserInitializer implements InitializingBean {
         user2.setFirstName("seq");
         user2.setLastName("test");
         user2.setPassword("test123");
-        user2.setSubscriptionId("1234-45567-123213-12312");
-        user2.setJks("test123");
-        user2.setRoleArn("arnrole");
+
+        AzureCredential azureCredential = new AzureCredential();
+        azureCredential.setSubscriptionId("1234-45567-123213-12312");
+        azureCredential.setJks("test123");
+        azureCredential.setUser(user2);
+
+        AwsCredential awsCredential = new AwsCredential();
+        awsCredential.setRoleArn("arnrole");
+        awsCredential.setUser(user2);
+
+        user2.getAwsCredentials().add(awsCredential);
+        user2.getAzureCredentials().add(azureCredential);
 
         AwsTemplate awsTemplate = new AwsTemplate();
         awsTemplate.setName("userAzureStack");

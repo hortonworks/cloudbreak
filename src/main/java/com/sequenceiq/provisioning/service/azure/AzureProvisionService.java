@@ -1,7 +1,5 @@
 package com.sequenceiq.provisioning.service.azure;
 
-import groovyx.net.http.HttpResponseDecorator;
-
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,12 +11,16 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.provisioning.controller.json.AzureStackResult;
 import com.sequenceiq.provisioning.controller.json.StackResult;
+import com.sequenceiq.provisioning.domain.AzureCredential;
 import com.sequenceiq.provisioning.domain.AzureTemplate;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
+import com.sequenceiq.provisioning.domain.Credential;
 import com.sequenceiq.provisioning.domain.Stack;
 import com.sequenceiq.provisioning.domain.StackDescription;
 import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.service.ProvisionService;
+
+import groovyx.net.http.HttpResponseDecorator;
 
 @Service
 public class AzureProvisionService implements ProvisionService {
@@ -45,13 +47,17 @@ public class AzureProvisionService implements ProvisionService {
 
     @Override
     @Async
-    public StackResult createStack(User user, Stack stack) {
+    public StackResult createStack(User user, Stack stack, Credential credential) {
 
         AzureTemplate azureTemplate = (AzureTemplate) stack.getTemplate();
 
         String filePath = getUserJksFileName(user.emailAsFolder());
         File file = new File(filePath);
-        AzureClient azureClient = new AzureClient(user.getSubscriptionId(), file.getAbsolutePath(), user.getJks());
+        AzureClient azureClient = new AzureClient(
+                ((AzureCredential) credential).getSubscriptionId(),
+                file.getAbsolutePath(),
+                ((AzureCredential) credential).getJks()
+        );
         Map<String, String> props = new HashMap<>();
         props.put(NAME, azureTemplate.getName());
         props.put(LOCATION, AzureLocation.valueOf(azureTemplate.getLocation()).location());
@@ -96,7 +102,7 @@ public class AzureProvisionService implements ProvisionService {
             props.put(IMAGENAME, azureTemplate.getImageName());
             props.put(IMAGESTOREURI,
                     String.format("http://%s.blob.core.windows.net/vhd-store/%s.vhd", azureTemplate.getName(), vmName)
-                    );
+            );
             props.put(HOSTNAME, vmName);
             props.put(USERNAME, azureTemplate.getUserName());
             if (azureTemplate.getPassword() != null) {
@@ -121,19 +127,19 @@ public class AzureProvisionService implements ProvisionService {
     }
 
     @Override
-    public StackDescription describeStack(User user, Stack stack) {
+    public StackDescription describeStack(User user, Stack stack, Credential credential) {
         // TODO
         return null;
     }
 
     @Override
-    public StackDescription describeStackWithResources(User user, Stack stack) {
+    public StackDescription describeStackWithResources(User user, Stack stack, Credential credential) {
         // TODO
         return null;
     }
 
     @Override
-    public void deleteStack(User user, Stack stack) {
+    public void deleteStack(User user, Stack stack, Credential credential) {
         // TODO
     }
 

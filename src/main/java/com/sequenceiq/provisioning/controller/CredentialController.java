@@ -2,16 +2,15 @@ package com.sequenceiq.provisioning.controller;
 
 import java.io.File;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -36,38 +35,38 @@ public class CredentialController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialController.class);
 
-    @Resource
-    private Map<CloudPlatform, CredentialService> credentialServices;
+    @Autowired
+    private CredentialService credentialService;
+
+    @Autowired
+    private AzureCredentialService azureCredentialService;
 
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<String> saveCredential(@CurrentUser User user, @Valid @RequestBody CredentialJson credentialRequest) throws Exception {
-        CredentialService credentialService = credentialServices.get(credentialRequest.getCloudPlatform());
-        credentialService.saveCredentials(user, credentialRequest);
+        credentialService.save(user, credentialRequest);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<List<CredentialJson>> listCredentials(@CurrentUser User user) {
-        List<CredentialJson> credentials = new ArrayList<>();
-        for (CredentialService credentialService : credentialServices.values()) {
-            try {
-                CredentialJson credential = credentialService.retrieveCredentials(user);
-                credentials.add(credential);
-            } catch (NotFoundException e) {
-                LOGGER.info(e.getMessage());
-            }
+    public ResponseEntity<Set<CredentialJson>> listCredentials(@CurrentUser User user) {
+        Set<CredentialJson> credentials = new HashSet<>();
+        try {
+            Set<CredentialJson> credentialSet = credentialService.getAll(user);
+            credentials.addAll(credentialSet);
+        } catch (NotFoundException e) {
+            LOGGER.info(e.getMessage());
         }
         return new ResponseEntity<>(credentials, HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/{cloudPlatform}")
     @ResponseBody
-    public ResponseEntity<CredentialJson> getCredential(@CurrentUser User user, @PathVariable String cloudPlatform) {
+    public ResponseEntity<CredentialJson> getCredential(@CurrentUser User user, @PathVariable Long cloudPlatform) {
         try {
-            CredentialService credentialService = credentialServices.get(CloudPlatform.valueOf(cloudPlatform.toUpperCase()));
-            return new ResponseEntity<>(credentialService.retrieveCredentials(user), HttpStatus.OK);
+            CredentialJson credentialJson = credentialService.get(cloudPlatform);
+            return new ResponseEntity<>(credentialJson, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             throw new BadRequestException("Unknown cloud platform: " + cloudPlatform, e);
         }
@@ -76,7 +75,6 @@ public class CredentialController {
     @RequestMapping(method = RequestMethod.GET, value = "/certificate")
     @ResponseBody
     public ModelAndView getJksFile(@CurrentUser User user, HttpServletResponse response) throws Exception {
-        AzureCredentialService azureCredentialService = (AzureCredentialService) credentialServices.get(CloudPlatform.AZURE);
         File cerFile = azureCredentialService.getCertificateFile(user);
         response.setContentType("application/octet-stream");
         response.setHeader("Content-Disposition", "attachment;filename=" + user.emailAsFolder() + ".cer");

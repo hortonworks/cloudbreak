@@ -28,6 +28,9 @@ public class Stack implements ProvisionEntity {
     @OneToOne
     private Template template;
 
+    @OneToOne
+    private Credential credential;
+
     @ManyToOne
     private User user;
 
@@ -71,4 +74,11 @@ public class Stack implements ProvisionEntity {
         this.user = user;
     }
 
+    public Credential getCredential() {
+        return credential;
+    }
+
+    public void setCredential(Credential credential) {
+        this.credential = credential;
+    }
 }
