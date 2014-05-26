@@ -24,6 +24,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.sequenceiq.provisioning.controller.json.CredentialJson;
 import com.sequenceiq.provisioning.domain.User;
+import com.sequenceiq.provisioning.repository.UserRepository;
 import com.sequenceiq.provisioning.security.CurrentUser;
 import com.sequenceiq.provisioning.service.CredentialService;
 import com.sequenceiq.provisioning.service.azure.AzureCredentialService;
@@ -40,6 +41,9 @@ public class CredentialController {
     @Autowired
     private AzureCredentialService azureCredentialService;
 
+    @Autowired
+    private UserRepository userRepository;
+
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<String> saveCredential(@CurrentUser User user, @Valid @RequestBody CredentialJson credentialRequest) throws Exception {
@@ -52,7 +56,7 @@ public class CredentialController {
     public ResponseEntity<Set<CredentialJson>> listCredentials(@CurrentUser User user) {
         Set<CredentialJson> credentials = new HashSet<>();
         try {
-            Set<CredentialJson> credentialSet = credentialService.getAll(user);
+            Set<CredentialJson> credentialSet = credentialService.getAll(userRepository.findOneWithLists(user.getId()));
             credentials.addAll(credentialSet);
         } catch (NotFoundException e) {
             LOGGER.info(e.getMessage());

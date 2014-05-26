@@ -17,6 +17,7 @@ public class AzureCredentialConverter extends AbstractConverter<CredentialJson, 
     @Override
     public CredentialJson convert(AzureCredential entity) {
         CredentialJson credentialJson = new CredentialJson();
+        credentialJson.setId(entity.getId());
         credentialJson.setCloudPlatform(CloudPlatform.AZURE);
         Map<String, String> params = new HashMap<>();
         params.put(RequiredAzureCredentialParam.JKS_PASSWORD.getName(), entity.getJks());
