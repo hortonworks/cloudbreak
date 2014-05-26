@@ -39,13 +39,13 @@ public class BlueprintController {
 
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<Set<BlueprintJson>> retrieveBlueprints(@CurrentUser User user, @PathVariable Long stackId) {
-        return new ResponseEntity<>(ambariBlueprintService.retrieveBlueprints(userRepository.findOne(user.getId())), HttpStatus.OK);
+    public ResponseEntity<Set<BlueprintJson>> retrieveBlueprints(@CurrentUser User user) {
+        return new ResponseEntity<>(ambariBlueprintService.getAll(userRepository.findOne(user.getId())), HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "{id}")
     @ResponseBody
-    public ResponseEntity<BlueprintJson> retrieveBlueprint(@CurrentUser User user, @PathVariable String id) {
-        return new ResponseEntity<>(ambariBlueprintService.retrieveBlueprint(user, stackId, id), HttpStatus.OK);
+    public ResponseEntity<BlueprintJson> retrieveBlueprint(@CurrentUser User user, @PathVariable Long id) {
+        return new ResponseEntity<>(ambariBlueprintService.get(id), HttpStatus.OK);
     }
 }
