@@ -10,6 +10,7 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.node.TextNode;
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.sequenceiq.provisioning.controller.BadRequestException;
@@ -28,7 +29,11 @@ public class BlueprintConverter extends AbstractConverter<BlueprintJson, Bluepri
         BlueprintJson blueprintJson = new BlueprintJson();
         blueprintJson.setId(String.valueOf(entity.getId()));
         blueprintJson.setName(entity.getName());
-        blueprintJson.setAmbariBlueprint(jsonHelper.createJsonFromString(entity.getBlueprintText()));
+        try {
+            blueprintJson.setAmbariBlueprint(jsonHelper.createJsonFromString(entity.getBlueprintText()));
+        } catch (Exception ex) {
+            blueprintJson.setAmbariBlueprint(new TextNode(ex.getMessage()));
+        }
         return blueprintJson;
     }
 
@@ -38,7 +43,9 @@ public class BlueprintConverter extends AbstractConverter<BlueprintJson, Bluepri
         blueprint.setName(json.getName());
         if (json.getUrl() != null) {
             try {
-                blueprint.setBlueprintText(readUrl(json.getUrl()));
+                String urlText = readUrl(json.getUrl());
+                jsonHelper.createJsonFromString(urlText);
+                blueprint.setBlueprintText(urlText);
             } catch (IOException e) {
                 throw new BadRequestException("Cannot download ambari blueprint from: " + json.getUrl());
             }

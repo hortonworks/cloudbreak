@@ -70,12 +70,12 @@ public class UserInitializer implements InitializingBean {
 
         Blueprint blueprint1 = new Blueprint();
         blueprint1.setName("sample blueprint 1");
-        blueprint1.setBlueprintText("sample text");
+        blueprint1.setBlueprintText("{\"data\": {}}");
         blueprint1.setUser(user2);
 
         Blueprint blueprint2 = new Blueprint();
         blueprint2.setName("sample blueprint 1");
-        blueprint2.setBlueprintText("sample text");
+        blueprint2.setBlueprintText("{\"data\": {}}");
         blueprint2.setUser(user2);
 
         user2.getBlueprints().add(blueprint1);
