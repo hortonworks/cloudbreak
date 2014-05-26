@@ -4,7 +4,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 
 @Entity
@@ -17,9 +16,6 @@ public abstract class Credential {
     private Long id;
 
     private CloudPlatform cloudPlatform;
-
-    @ManyToOne
-    private User user;
 
     public Credential() {
 
@@ -39,14 +35,6 @@ public abstract class Credential {
 
     public void setCloudPlatform(CloudPlatform cloudPlatform) {
         this.cloudPlatform = cloudPlatform;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 
     public abstract CloudPlatform cloudPlatform();

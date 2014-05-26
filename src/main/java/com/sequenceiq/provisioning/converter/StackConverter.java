@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.provisioning.controller.json.StackJson;
 import com.sequenceiq.provisioning.domain.Stack;
 import com.sequenceiq.provisioning.domain.StackDescription;
+import com.sequenceiq.provisioning.repository.CredentialRepository;
 import com.sequenceiq.provisioning.repository.TemplateRepository;
 
 @Component
@@ -13,6 +14,9 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
 
     @Autowired
     private TemplateRepository templateRepository;
+
+    @Autowired
+    private CredentialRepository credentialRepository;
 
     @Override
     public StackJson convert(Stack entity) {
@@ -22,6 +26,7 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
         stackJson.setName(entity.getName());
         stackJson.setId(entity.getId());
         stackJson.setCloudPlatform(entity.getTemplate().cloudPlatform());
+        stackJson.setCredentialId(entity.getCredential().getId());
         return stackJson;
     }
 
@@ -30,6 +35,7 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
         stackJson.setTemplateId(entity.getTemplate().getId());
         stackJson.setClusterSize(entity.getClusterSize());
         stackJson.setId(entity.getId());
+        stackJson.setCredentialId(entity.getCredential().getId());
         stackJson.setCloudPlatform(entity.getTemplate().cloudPlatform());
         stackJson.setDescription(description);
         return stackJson;
@@ -40,6 +46,7 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
         Stack stack = new Stack();
         stack.setClusterSize(json.getClusterSize());
         stack.setName(json.getName());
+        stack.setCredential(credentialRepository.findOne(json.getCredentialId()));
         stack.setTemplate(templateRepository.findOne(Long.valueOf(json.getTemplateId())));
         return stack;
     }

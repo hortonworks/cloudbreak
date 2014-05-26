@@ -58,6 +58,7 @@ public class UserInitializer implements InitializingBean {
         awsStack.setClusterSize(CLUSTER_SIZE);
         awsStack.setName("coreos");
         awsStack.setUser(user2);
+        awsStack.setCredential(awsCredential);
 
         user2.getAwsTemplates().add(awsTemplate);
         user2.getStacks().add(awsStack);
@@ -78,6 +79,7 @@ public class UserInitializer implements InitializingBean {
         azureStack.setTemplate(azureTemplate);
         azureStack.setClusterSize(CLUSTER_SIZE);
         azureStack.setUser(user2);
+        azureStack.setCredential(azureCredential);
 
         Blueprint blueprint1 = new Blueprint();
         blueprint1.setName("sample blueprint 1");
