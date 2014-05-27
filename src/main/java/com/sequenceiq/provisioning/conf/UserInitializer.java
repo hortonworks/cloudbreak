@@ -61,7 +61,7 @@ public class UserInitializer implements InitializingBean {
         awsStack.setCredential(awsCredential);
 
         user2.getAwsTemplates().add(awsTemplate);
-       // user2.getStacks().add(awsStack);
+        // user2.getStacks().add(awsStack);
 
         AzureTemplate azureTemplate = new AzureTemplate();
         azureTemplate.setDeploymentSlot("slot");
