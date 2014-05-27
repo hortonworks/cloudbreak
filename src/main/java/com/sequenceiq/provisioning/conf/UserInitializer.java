@@ -61,7 +61,7 @@ public class UserInitializer implements InitializingBean {
         awsStack.setCredential(awsCredential);
 
         user2.getAwsTemplates().add(awsTemplate);
-        user2.getStacks().add(awsStack);
+       // user2.getStacks().add(awsStack);
 
         AzureTemplate azureTemplate = new AzureTemplate();
         azureTemplate.setDeploymentSlot("slot");
@@ -80,6 +80,7 @@ public class UserInitializer implements InitializingBean {
         azureStack.setClusterSize(CLUSTER_SIZE);
         azureStack.setUser(user2);
         azureStack.setCredential(azureCredential);
+        azureStack.setName("azure stack");
 
         Blueprint blueprint1 = new Blueprint();
         blueprint1.setName("sample blueprint 1");

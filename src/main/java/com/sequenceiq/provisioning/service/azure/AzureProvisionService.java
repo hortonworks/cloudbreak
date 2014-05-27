@@ -1,17 +1,10 @@
 package com.sequenceiq.provisioning.service.azure;
 
-import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.apache.commons.codec.binary.Base64;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.provisioning.controller.json.AzureStackResult;
 import com.sequenceiq.provisioning.controller.json.StackResult;
-import com.sequenceiq.provisioning.domain.AzureCredential;
 import com.sequenceiq.provisioning.domain.AzureTemplate;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
 import com.sequenceiq.provisioning.domain.Credential;
@@ -19,8 +12,6 @@ import com.sequenceiq.provisioning.domain.Stack;
 import com.sequenceiq.provisioning.domain.StackDescription;
 import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.service.ProvisionService;
-
-import groovyx.net.http.HttpResponseDecorator;
 
 @Service
 public class AzureProvisionService implements ProvisionService {
@@ -51,7 +42,7 @@ public class AzureProvisionService implements ProvisionService {
 
         AzureTemplate azureTemplate = (AzureTemplate) stack.getTemplate();
 
-        String filePath = getUserJksFileName(user.emailAsFolder());
+       /* String filePath = getUserJksFileName(user.emailAsFolder());
         File file = new File(filePath);
         AzureClient azureClient = new AzureClient(
                 ((AzureCredential) credential).getSubscriptionId(),
@@ -118,7 +109,7 @@ public class AzureProvisionService implements ProvisionService {
             HttpResponseDecorator virtualMachineResponse = (HttpResponseDecorator) azureClient.createVirtualMachine(props);
             requestId = (String) azureClient.getRequestId(virtualMachineResponse);
             azureClient.waitUntilComplete(requestId);
-        }
+        }*/
         return new AzureStackResult(OK_STATUS);
     }
 

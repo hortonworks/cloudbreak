@@ -35,6 +35,7 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
         stackJson.setTemplateId(entity.getTemplate().getId());
         stackJson.setClusterSize(entity.getClusterSize());
         stackJson.setId(entity.getId());
+        stackJson.setName(entity.getName());
         stackJson.setCredentialId(entity.getCredential().getId());
         stackJson.setCloudPlatform(entity.getTemplate().cloudPlatform());
         stackJson.setDescription(description);

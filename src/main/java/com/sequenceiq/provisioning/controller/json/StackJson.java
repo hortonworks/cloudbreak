@@ -73,10 +73,12 @@ public class StackJson implements JsonEntity {
         this.cloudPlatform = cloudPlatform;
     }
 
+    @JsonProperty("description")
     public StackDescription getDescription() {
         return description;
     }
 
+    @JsonIgnore
     public void setDescription(StackDescription description) {
         this.description = description;
     }
