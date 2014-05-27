@@ -104,6 +104,5 @@ public class UserInitializer implements InitializingBean {
 
             userRepository.save(user2);
         }
-
     }
 }
