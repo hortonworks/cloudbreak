@@ -185,19 +185,19 @@ public class AzureProvisionService implements ProvisionService {
             Object affinityGroup = azureClient.getAffinityGroup(templateName);
             detailedAzureStackDescription.setAffinityGroup(jsonHelper.createJsonFromString(affinityGroup.toString()));
         } catch (Exception ex) {
-            detailedAzureStackDescription.setAffinityGroup(jsonHelper.createJsonFromString(""));
+            detailedAzureStackDescription.setAffinityGroup(jsonHelper.createJsonFromString("{\"AffinityGroup\": {}}"));
         }
         try {
             Object cloudService = azureClient.getCloudService(templateName);
             detailedAzureStackDescription.setCloudService(jsonHelper.createJsonFromString(cloudService.toString()));
         } catch (Exception ex) {
-            detailedAzureStackDescription.setCloudService(jsonHelper.createJsonFromString(""));
+            detailedAzureStackDescription.setCloudService(jsonHelper.createJsonFromString("{\"HostedService\": {}}"));
         }
         try {
             Object storageAccount = azureClient.getStorageAccount(templateName);
             detailedAzureStackDescription.setStorageAccount(jsonHelper.createJsonFromString(storageAccount.toString()));
         } catch (Exception ex) {
-            detailedAzureStackDescription.setStorageAccount(jsonHelper.createJsonFromString(""));
+            detailedAzureStackDescription.setStorageAccount(jsonHelper.createJsonFromString("{\"StorageService\": {}}"));
         }
         for (int i = 0; i < stack.getClusterSize(); i++) {
             String vmName = getVmName(templateName, i);
@@ -208,7 +208,7 @@ public class AzureProvisionService implements ProvisionService {
                 Object virtualMachine = azureClient.getVirtualMachine(props);
                 detailedAzureStackDescription.getVirtualMachines().add(jsonHelper.createJsonFromString(virtualMachine.toString()).toString());
             } catch (Exception ex) {
-                detailedAzureStackDescription.getVirtualMachines().add(jsonHelper.createJsonFromString(ex.getMessage()).toString());
+                detailedAzureStackDescription.getVirtualMachines().add(jsonHelper.createJsonFromString("{\"Deployment\": {}}").toString());
             }
         }
         return detailedAzureStackDescription;
