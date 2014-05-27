@@ -7,8 +7,6 @@ import com.fasterxml.jackson.annotation.JsonRawValue;
 import com.fasterxml.jackson.databind.JsonNode;
 
 public class AzureStackDescription extends StackDescription {
-
-
     private String cloudService;
 
     private List<String> virtualMachines = new ArrayList<>();

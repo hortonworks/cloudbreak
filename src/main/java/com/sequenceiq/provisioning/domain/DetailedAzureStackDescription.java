@@ -16,7 +16,6 @@ public class DetailedAzureStackDescription extends StackDescription {
     public DetailedAzureStackDescription() {
 
     }
-
     @JsonRawValue
     public String getAffinityGroup() {
         return affinityGroup;
@@ -31,8 +30,8 @@ public class DetailedAzureStackDescription extends StackDescription {
         return cloudService;
     }
 
-    public void setCloudService(JsonNode cloudService) {
-        this.cloudService = cloudService.toString();
+    public void setCloudService(String cloudService) {
+        this.cloudService = cloudService;
     }
 
     @JsonRawValue
