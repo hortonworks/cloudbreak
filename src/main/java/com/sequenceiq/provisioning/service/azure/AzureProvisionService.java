@@ -12,9 +12,11 @@ import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.provisioning.controller.json.AzureStackResult;
 import com.sequenceiq.provisioning.controller.json.StackResult;
 import com.sequenceiq.provisioning.domain.AzureCredential;
+import com.sequenceiq.provisioning.domain.AzureStackDescription;
 import com.sequenceiq.provisioning.domain.AzureTemplate;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
 import com.sequenceiq.provisioning.domain.Credential;
+import com.sequenceiq.provisioning.domain.DetailedAzureStackDescription;
 import com.sequenceiq.provisioning.domain.Stack;
 import com.sequenceiq.provisioning.domain.StackDescription;
 import com.sequenceiq.provisioning.domain.User;
@@ -44,6 +46,7 @@ public class AzureProvisionService implements ProvisionService {
     private static final String DATADIR = "userdatas";
     private static final String SSHPUBLICKEYFINGERPRINT = "sshPublicKeyFingerprint";
     private static final String SSHPUBLICKEYPATH = "sshPublicKeyPath";
+    private static final String SERVICENAME = "serviceName";
 
     @Override
     @Async
@@ -85,7 +88,7 @@ public class AzureProvisionService implements ProvisionService {
         azureClient.waitUntilComplete(requestId);
 
         for (int i = 0; i < stack.getClusterSize(); i++) {
-            String vmName = String.format("%s-1", azureTemplate.getName());
+            String vmName = getVmName(azureTemplate.getName(), i);
             props = new HashMap<>();
             props.put(NAME, vmName);
             props.put(DESCRIPTION, azureTemplate.getDescription());
@@ -122,16 +125,86 @@ public class AzureProvisionService implements ProvisionService {
         return new AzureStackResult(OK_STATUS);
     }
 
+    private String getVmName(String azureTemplate, int i) {
+        return String.format("%s-%s", azureTemplate, i);
+    }
+
     @Override
     public StackDescription describeStack(User user, Stack stack, Credential credential) {
-        // TODO
-        return null;
+        String filePath =  AzureCredentialService.getUserJksFileName(credential, user.emailAsFolder());
+        File file = new File(filePath);
+        AzureClient azureClient = new AzureClient(
+                ((AzureCredential) credential).getSubscriptionId(),
+                file.getAbsolutePath(),
+                ((AzureCredential) credential).getJks()
+        );
+
+        AzureStackDescription azureStackDescription = new AzureStackDescription();
+        String templateName = ((AzureTemplate) stack.getTemplate()).getName();
+        try {
+            Object cloudService = azureClient.getCloudService(templateName);
+            azureStackDescription.setCloudService(cloudService.toString());
+        } catch (Exception ex) {
+            azureStackDescription.setCloudService("");
+        }
+        for (int i = 0; i< stack.getClusterSize(); i++){
+            String vmName = getVmName(templateName, i);
+            Map<String, String> props = new HashMap<>();
+            props.put(SERVICENAME, templateName);
+            props.put(NAME, vmName);
+            try {
+                Object virtualMachine = azureClient.getVirtualMachine(props);
+                azureStackDescription.getVirtualMachines().add(virtualMachine.toString());
+            } catch (Exception ex) {
+                azureStackDescription.getVirtualMachines().add(ex.getMessage());
+            }
+        }
+        return azureStackDescription;
     }
 
     @Override
     public StackDescription describeStackWithResources(User user, Stack stack, Credential credential) {
-        // TODO
-        return null;
+        String filePath =  AzureCredentialService.getUserJksFileName(credential, user.emailAsFolder());
+        File file = new File(filePath);
+        AzureClient azureClient = new AzureClient(
+                ((AzureCredential) credential).getSubscriptionId(),
+                file.getAbsolutePath(),
+                ((AzureCredential) credential).getJks()
+        );
+
+        DetailedAzureStackDescription detailedAzureStackDescription = new DetailedAzureStackDescription();
+        String templateName = ((AzureTemplate) stack.getTemplate()).getName();
+        try {
+            Object affinityGroup = azureClient.getAffinityGroup(templateName);
+            detailedAzureStackDescription.setAffinityGroup(affinityGroup.toString());
+        } catch (Exception ex) {
+            detailedAzureStackDescription.setAffinityGroup("");
+        }
+        try {
+            Object cloudService = azureClient.getCloudService(templateName);
+            detailedAzureStackDescription.setCloudService(cloudService.toString());
+        } catch (Exception ex) {
+            detailedAzureStackDescription.setCloudService("");
+        }
+        try {
+            Object storageAccount = azureClient.getStorageAccount(templateName);
+            detailedAzureStackDescription.setStorageAccount(storageAccount.toString());
+        } catch (Exception ex) {
+            detailedAzureStackDescription.setStorageAccount("");
+        }
+        for (int i = 0; i< stack.getClusterSize(); i++){
+            String vmName = getVmName(templateName, i);
+            Map<String, String> props = new HashMap<>();
+            props.put(SERVICENAME, templateName);
+            props.put(NAME, vmName);
+            try {
+                Object virtualMachine = azureClient.getVirtualMachine(props);
+                detailedAzureStackDescription.getVirtualMachines().add(virtualMachine.toString());
+            } catch (Exception ex) {
+                detailedAzureStackDescription.getVirtualMachines().add(ex.getMessage());
+            }
+        }
+        return detailedAzureStackDescription;
     }
 
     @Override
