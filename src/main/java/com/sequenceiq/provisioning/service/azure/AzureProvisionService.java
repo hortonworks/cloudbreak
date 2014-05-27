@@ -51,7 +51,7 @@ public class AzureProvisionService implements ProvisionService {
 
         AzureTemplate azureTemplate = (AzureTemplate) stack.getTemplate();
 
-        String filePath = getUserJksFileName(user.emailAsFolder());
+        String filePath =  AzureCredentialService.getUserJksFileName(credential, user.emailAsFolder());
         File file = new File(filePath);
         AzureClient azureClient = new AzureClient(
                 ((AzureCredential) credential).getSubscriptionId(),
@@ -120,10 +120,6 @@ public class AzureProvisionService implements ProvisionService {
             azureClient.waitUntilComplete(requestId);
         }
         return new AzureStackResult(OK_STATUS);
-    }
-
-    private String getUserJksFileName(String user) {
-        return String.format("%s/%s/%s.jks", DATADIR, user, user);
     }
 
     @Override
