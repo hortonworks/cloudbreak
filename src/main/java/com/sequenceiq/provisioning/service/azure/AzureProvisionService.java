@@ -5,11 +5,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.provisioning.controller.json.AzureStackResult;
+import com.sequenceiq.provisioning.controller.json.JsonHelper;
 import com.sequenceiq.provisioning.controller.json.StackResult;
 import com.sequenceiq.provisioning.domain.AzureCredential;
 import com.sequenceiq.provisioning.domain.AzureStackDescription;
@@ -47,6 +49,9 @@ public class AzureProvisionService implements ProvisionService {
     private static final String SSHPUBLICKEYFINGERPRINT = "sshPublicKeyFingerprint";
     private static final String SSHPUBLICKEYPATH = "sshPublicKeyPath";
     private static final String SERVICENAME = "serviceName";
+
+    @Autowired
+    private JsonHelper jsonHelper;
 
     @Override
     @Async
@@ -144,9 +149,9 @@ public class AzureProvisionService implements ProvisionService {
         String templateName = ((AzureTemplate) stack.getTemplate()).getName();
         try {
             Object cloudService = azureClient.getCloudService(templateName);
-            azureStackDescription.setCloudService(cloudService.toString());
+            azureStackDescription.setCloudService(jsonHelper.createJsonFromString(cloudService.toString()));
         } catch (Exception ex) {
-            azureStackDescription.setCloudService("");
+            azureStackDescription.setCloudService(jsonHelper.createJsonFromString(""));
         }
         for (int i = 0; i < stack.getClusterSize(); i++) {
             String vmName = getVmName(templateName, i);
@@ -155,9 +160,9 @@ public class AzureProvisionService implements ProvisionService {
             props.put(NAME, vmName);
             try {
                 Object virtualMachine = azureClient.getVirtualMachine(props);
-                azureStackDescription.getVirtualMachines().add(virtualMachine.toString());
+                azureStackDescription.getVirtualMachines().add(jsonHelper.createJsonFromString(virtualMachine.toString()).toString());
             } catch (Exception ex) {
-                azureStackDescription.getVirtualMachines().add(ex.getMessage());
+                azureStackDescription.getVirtualMachines().add(jsonHelper.createJsonFromString(ex.getMessage()).toString());
             }
         }
         return azureStackDescription;
@@ -178,21 +183,21 @@ public class AzureProvisionService implements ProvisionService {
         String templateName = ((AzureTemplate) stack.getTemplate()).getName();
         try {
             Object affinityGroup = azureClient.getAffinityGroup(templateName);
-            detailedAzureStackDescription.setAffinityGroup(affinityGroup.toString());
+            detailedAzureStackDescription.setAffinityGroup(jsonHelper.createJsonFromString(affinityGroup.toString()));
         } catch (Exception ex) {
-            detailedAzureStackDescription.setAffinityGroup("");
+            detailedAzureStackDescription.setAffinityGroup(jsonHelper.createJsonFromString(""));
         }
         try {
             Object cloudService = azureClient.getCloudService(templateName);
-            detailedAzureStackDescription.setCloudService(cloudService.toString());
+            detailedAzureStackDescription.setCloudService(jsonHelper.createJsonFromString(cloudService.toString()));
         } catch (Exception ex) {
-            detailedAzureStackDescription.setCloudService("");
+            detailedAzureStackDescription.setCloudService(jsonHelper.createJsonFromString(""));
         }
         try {
             Object storageAccount = azureClient.getStorageAccount(templateName);
-            detailedAzureStackDescription.setStorageAccount(storageAccount.toString());
+            detailedAzureStackDescription.setStorageAccount(jsonHelper.createJsonFromString(storageAccount.toString()));
         } catch (Exception ex) {
-            detailedAzureStackDescription.setStorageAccount("");
+            detailedAzureStackDescription.setStorageAccount(jsonHelper.createJsonFromString(""));
         }
         for (int i = 0; i < stack.getClusterSize(); i++) {
             String vmName = getVmName(templateName, i);
@@ -201,9 +206,9 @@ public class AzureProvisionService implements ProvisionService {
             props.put(NAME, vmName);
             try {
                 Object virtualMachine = azureClient.getVirtualMachine(props);
-                detailedAzureStackDescription.getVirtualMachines().add(virtualMachine.toString());
+                detailedAzureStackDescription.getVirtualMachines().add(jsonHelper.createJsonFromString(virtualMachine.toString()).toString());
             } catch (Exception ex) {
-                detailedAzureStackDescription.getVirtualMachines().add(ex.getMessage());
+                detailedAzureStackDescription.getVirtualMachines().add(jsonHelper.createJsonFromString(ex.getMessage()).toString());
             }
         }
         return detailedAzureStackDescription;

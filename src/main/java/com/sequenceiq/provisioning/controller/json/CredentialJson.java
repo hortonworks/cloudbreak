@@ -11,6 +11,7 @@ import com.sequenceiq.provisioning.domain.CloudPlatform;
 public class CredentialJson implements JsonEntity {
 
     private Long id;
+    private String name;
     private CloudPlatform cloudPlatform;
     private Map<String, String> parameters;
 
@@ -26,6 +27,14 @@ public class CredentialJson implements JsonEntity {
     @JsonIgnore
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public CloudPlatform getCloudPlatform() {

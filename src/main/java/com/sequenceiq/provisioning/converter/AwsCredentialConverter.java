@@ -19,6 +19,7 @@ public class AwsCredentialConverter extends AbstractConverter<CredentialJson, Aw
         CredentialJson credentialJson = new CredentialJson();
         credentialJson.setId(entity.getId());
         credentialJson.setCloudPlatform(CloudPlatform.AWS);
+        credentialJson.setName(entity.getName());
         Map<String, String> params = new HashMap<>();
         params.put(RequiredAWSCredentialParam.ROLE_ARN.getName(), entity.getRoleArn());
         credentialJson.setParameters(params);
@@ -28,6 +29,7 @@ public class AwsCredentialConverter extends AbstractConverter<CredentialJson, Aw
     @Override
     public AwsCredential convert(CredentialJson json) {
         AwsCredential awsCredential = new AwsCredential();
+        awsCredential.setName(json.getName());
         awsCredential.setRoleArn(json.getParameters().get(RequiredAWSCredentialParam.ROLE_ARN.getName()));
         awsCredential.setCloudPlatform(CloudPlatform.AWS);
         return awsCredential;

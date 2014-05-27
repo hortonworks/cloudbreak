@@ -3,7 +3,11 @@ package com.sequenceiq.provisioning.domain;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonRawValue;
+import com.fasterxml.jackson.databind.JsonNode;
+
 public class AzureStackDescription extends StackDescription {
+
 
     private String cloudService;
 
@@ -13,14 +17,16 @@ public class AzureStackDescription extends StackDescription {
 
     }
 
+    @JsonRawValue
     public String getCloudService() {
         return cloudService;
     }
 
-    public void setCloudService(String cloudService) {
-        this.cloudService = cloudService;
+    public void setCloudService(JsonNode cloudService) {
+        this.cloudService = cloudService.toString();
     }
 
+    @JsonRawValue
     public List<String> getVirtualMachines() {
         return virtualMachines;
     }

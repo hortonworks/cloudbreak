@@ -5,10 +5,10 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
+import javax.validation.constraints.Size;
 
 @Entity
 public abstract class Credential {
-
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "credential_generator")
@@ -17,8 +17,19 @@ public abstract class Credential {
 
     private CloudPlatform cloudPlatform;
 
+    @Size(max = 20)
+    private String name;
+
     public Credential() {
 
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public Long getId() {
