@@ -151,7 +151,7 @@ public class AzureProvisionService implements ProvisionService {
             Object cloudService = azureClient.getCloudService(templateName);
             azureStackDescription.setCloudService(jsonHelper.createJsonFromString(cloudService.toString()));
         } catch (Exception ex) {
-            azureStackDescription.setCloudService(jsonHelper.createJsonFromString(""));
+            azureStackDescription.setCloudService(jsonHelper.createJsonFromString("{\"HostedService\": {}}"));
         }
         for (int i = 0; i < stack.getClusterSize(); i++) {
             String vmName = getVmName(templateName, i);
@@ -162,7 +162,7 @@ public class AzureProvisionService implements ProvisionService {
                 Object virtualMachine = azureClient.getVirtualMachine(props);
                 azureStackDescription.getVirtualMachines().add(jsonHelper.createJsonFromString(virtualMachine.toString()).toString());
             } catch (Exception ex) {
-                azureStackDescription.getVirtualMachines().add(jsonHelper.createJsonFromString(ex.getMessage()).toString());
+                azureStackDescription.getVirtualMachines().add(jsonHelper.createJsonFromString("{\"Deployment\": {}}").toString());
             }
         }
         return azureStackDescription;
