@@ -9,6 +9,7 @@ import com.amazonaws.auth.BasicSessionCredentials;
 import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClient;
 import com.amazonaws.services.securitytoken.model.AssumeRoleRequest;
 import com.amazonaws.services.securitytoken.model.AssumeRoleResult;
+import com.sequenceiq.provisioning.domain.AwsCredential;
 import com.sequenceiq.provisioning.domain.TemporaryAwsCredentials;
 import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.repository.TemporaryAwsCredentialsRepository;
@@ -36,7 +37,7 @@ public class CrossAccountCredentialsProvider {
     @Autowired
     private UserRepository userRepository;
 
-    public BasicSessionCredentials retrieveSessionCredentials(int durationInSeconds, String externalId, User user) {
+    public BasicSessionCredentials retrieveSessionCredentials(int durationInSeconds, String externalId, User user, AwsCredential awsCredential) {
 
         BasicSessionCredentials cachedSessionCredentials = getCachedCredentials(user);
         if (cachedSessionCredentials != null) {
@@ -47,7 +48,7 @@ public class CrossAccountCredentialsProvider {
         AssumeRoleRequest assumeRoleRequest = new AssumeRoleRequest()
                 .withDurationSeconds(durationInSeconds)
                 .withExternalId(externalId)
-                .withRoleArn(user.getRoleArn())
+                .withRoleArn(awsCredential.getRoleArn())
                 .withRoleSessionName("hadoop-provisioning");
         AssumeRoleResult result = client.assumeRole(assumeRoleRequest);
 

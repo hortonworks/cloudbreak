@@ -24,6 +24,8 @@ import org.hibernate.validator.constraints.NotEmpty;
                 + "LEFT JOIN FETCH u.awsTemplates "
                 + "LEFT JOIN FETCH u.stacks "
                 + "LEFT JOIN FETCH u.blueprints "
+                + "LEFT JOIN FETCH u.awsCredentials "
+                + "LEFT JOIN FETCH u.azureCredentials "
                 + "WHERE u.id= :id")
 public class User implements ProvisionEntity {
     @Id
@@ -41,14 +43,14 @@ public class User implements ProvisionEntity {
     @Column(unique = true, nullable = false)
     private String email;
 
-    private String roleArn;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<AwsCredential> awsCredentials = new HashSet<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<AzureCredential> azureCredentials = new HashSet<>();
 
     @OneToOne
     private TemporaryAwsCredentials temporaryAwsCredentials;
-
-    private String subscriptionId;
-
-    private String jks;
 
     @NotEmpty
     private String password;
@@ -76,9 +78,8 @@ public class User implements ProvisionEntity {
         this.password = user.password;
         this.awsTemplates = user.awsTemplates;
         this.azureTemplates = user.azureTemplates;
-        this.jks = user.jks;
-        this.subscriptionId = user.subscriptionId;
-        this.roleArn = user.roleArn;
+        this.awsCredentials = user.awsCredentials;
+        this.azureCredentials = user.azureCredentials;
         this.stacks = user.stacks;
         this.blueprints = user.blueprints;
     }
@@ -139,14 +140,6 @@ public class User implements ProvisionEntity {
         this.azureTemplates = azureTemplates;
     }
 
-    public String getRoleArn() {
-        return roleArn;
-    }
-
-    public void setRoleArn(String roleArn) {
-        this.roleArn = roleArn;
-    }
-
     public TemporaryAwsCredentials getTemporaryAwsCredentials() {
         return temporaryAwsCredentials;
     }
@@ -155,20 +148,21 @@ public class User implements ProvisionEntity {
         this.temporaryAwsCredentials = temporaryAwsCredentials;
     }
 
-    public String getSubscriptionId() {
-        return subscriptionId;
+    public Set<AzureCredential> getAzureCredentials() {
+        return azureCredentials;
     }
 
-    public void setSubscriptionId(String subscriptionId) {
-        this.subscriptionId = subscriptionId;
+    public void setAzureCredentials(Set<AzureCredential> azureCredentials) {
+        this.azureCredentials = azureCredentials;
     }
 
-    public String getJks() {
-        return jks;
+    public Set<AwsCredential> getAwsCredentials() {
+
+        return awsCredentials;
     }
 
-    public void setJks(String jks) {
-        this.jks = jks;
+    public void setAwsCredentials(Set<AwsCredential> awsCredentials) {
+        this.awsCredentials = awsCredentials;
     }
 
     public Set<Stack> getStacks() {

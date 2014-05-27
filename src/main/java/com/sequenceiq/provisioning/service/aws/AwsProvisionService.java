@@ -17,10 +17,12 @@ import com.amazonaws.services.cloudformation.model.DescribeStacksResult;
 import com.amazonaws.services.cloudformation.model.Parameter;
 import com.sequenceiq.provisioning.controller.json.AWSStackResult;
 import com.sequenceiq.provisioning.controller.json.StackResult;
+import com.sequenceiq.provisioning.domain.AwsCredential;
 import com.sequenceiq.provisioning.domain.AwsStackDescription;
 import com.sequenceiq.provisioning.domain.AwsTemplate;
 import com.sequenceiq.provisioning.domain.CloudFormationTemplate;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
+import com.sequenceiq.provisioning.domain.Credential;
 import com.sequenceiq.provisioning.domain.DetailedAwsStackDescription;
 import com.sequenceiq.provisioning.domain.Stack;
 import com.sequenceiq.provisioning.domain.StackDescription;
@@ -47,9 +49,9 @@ public class AwsProvisionService implements ProvisionService {
     private CrossAccountCredentialsProvider credentialsProvider;
 
     @Override
-    public StackResult createStack(User user, Stack stack) {
+    public StackResult createStack(User user, Stack stack, Credential credential) {
         AwsTemplate awsTemplate = (AwsTemplate) stack.getTemplate();
-        AmazonCloudFormationClient client = createCloudFormationClient(user, awsTemplate.getRegion());
+        AmazonCloudFormationClient client = createCloudFormationClient(user, awsTemplate.getRegion(), credential);
         CreateStackRequest createStackRequest = new CreateStackRequest()
                 .withStackName(String.format("%s-%s", stack.getName(), stack.getId()))
                 .withTemplateBody(template.getBody())
@@ -64,18 +66,18 @@ public class AwsProvisionService implements ProvisionService {
     }
 
     @Override
-    public StackDescription describeStack(User user, Stack stack) {
+    public StackDescription describeStack(User user, Stack stack, Credential credential) {
         AwsTemplate awsInfra = (AwsTemplate) stack.getTemplate();
-        AmazonCloudFormationClient client = createCloudFormationClient(user, awsInfra.getRegion());
+        AmazonCloudFormationClient client = createCloudFormationClient(user, awsInfra.getRegion(), credential);
         DescribeStacksRequest stackRequest = new DescribeStacksRequest().withStackName(String.format("%s-%s", stack.getName(), stack.getId()));
         DescribeStacksResult stackResult = client.describeStacks(stackRequest);
         return new AwsStackDescription(stackResult);
     }
 
     @Override
-    public StackDescription describeStackWithResources(User user, Stack stack) {
+    public StackDescription describeStackWithResources(User user, Stack stack, Credential credential) {
         AwsTemplate awsInfra = (AwsTemplate) stack.getTemplate();
-        AmazonCloudFormationClient client = createCloudFormationClient(user, awsInfra.getRegion());
+        AmazonCloudFormationClient client = createCloudFormationClient(user, awsInfra.getRegion(), credential);
         DescribeStacksRequest stackRequest = new DescribeStacksRequest().withStackName(String.format("%s-%s", stack.getName(), stack.getId()));
         DescribeStacksResult stackResult = client.describeStacks(stackRequest);
         DescribeStackResourcesRequest resourcesRequest = new DescribeStackResourcesRequest().withStackName(String.format("%s-%s", stack.getName(),
@@ -85,9 +87,9 @@ public class AwsProvisionService implements ProvisionService {
     }
 
     @Override
-    public void deleteStack(User user, Stack stack) {
+    public void deleteStack(User user, Stack stack, Credential credential) {
         AwsTemplate awsInfra = (AwsTemplate) stack.getTemplate();
-        AmazonCloudFormationClient client = createCloudFormationClient(user, awsInfra.getRegion());
+        AmazonCloudFormationClient client = createCloudFormationClient(user, awsInfra.getRegion(), credential);
         DeleteStackRequest deleteStackRequest = new DeleteStackRequest().withStackName(String.format("%s-%s", stack.getName(), stack.getId()));
         client.deleteStack(deleteStackRequest);
     }
@@ -97,9 +99,9 @@ public class AwsProvisionService implements ProvisionService {
         return CloudPlatform.AWS;
     }
 
-    private AmazonCloudFormationClient createCloudFormationClient(User user, String region) {
+    private AmazonCloudFormationClient createCloudFormationClient(User user, String region, Credential credential) {
         BasicSessionCredentials basicSessionCredentials = credentialsProvider
-                .retrieveSessionCredentials(SESSION_CREDENTIALS_DURATION, "provision-ambari", user);
+                .retrieveSessionCredentials(SESSION_CREDENTIALS_DURATION, "provision-ambari", user, (AwsCredential) credential);
         AmazonCloudFormationClient amazonCloudFormationClient = new AmazonCloudFormationClient(basicSessionCredentials);
         amazonCloudFormationClient.setRegion(Region.getRegion(Regions.fromName(region)));
         return amazonCloudFormationClient;

@@ -42,7 +42,7 @@ public class SimpleStackService implements StackService {
         Set<StackJson> result = new HashSet<>();
         for (Stack stack : user.getStacks()) {
             CloudPlatform cp = stack.getTemplate().cloudPlatform();
-            StackDescription description = provisionServices.get(cp).describeStack(user, stack);
+            StackDescription description = provisionServices.get(cp).describeStack(user, stack, stack.getCredential());
             result.add(stackConverter.convert(stack, description));
         }
         return result;
@@ -55,7 +55,7 @@ public class SimpleStackService implements StackService {
             throw new NotFoundException(String.format("Stack '%s' not found", id));
         }
         CloudPlatform cp = stack.getTemplate().cloudPlatform();
-        StackDescription description = provisionServices.get(cp).describeStackWithResources(user, stack);
+        StackDescription description = provisionServices.get(cp).describeStackWithResources(user, stack, stack.getCredential());
         return stackConverter.convert(stack, description);
     }
 
@@ -70,7 +70,7 @@ public class SimpleStackService implements StackService {
         stackRepository.save(stack);
 
         ProvisionService provisionService = provisionServices.get(template.cloudPlatform());
-        return provisionService.createStack(user, stack);
+        return provisionService.createStack(user, stack, stack.getCredential());
     }
 
     @Override
@@ -80,7 +80,7 @@ public class SimpleStackService implements StackService {
             throw new NotFoundException(String.format("Stack '%s' not found", id));
         }
         CloudPlatform cp = stack.getTemplate().cloudPlatform();
-        provisionServices.get(cp).deleteStack(user, stack);
+        provisionServices.get(cp).deleteStack(user, stack, stack.getCredential());
         stackRepository.delete(id);
     }
 

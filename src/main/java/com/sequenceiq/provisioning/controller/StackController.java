@@ -41,7 +41,7 @@ public class StackController {
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<Set<StackJson>> getAllStack(@CurrentUser User user) {
-        User currentUser = userRepository.findOne(user.getId());
+        User currentUser = userRepository.findOneWithLists(user.getId());
         return new ResponseEntity<>(stackService.getAll(currentUser), HttpStatus.OK);
     }
 

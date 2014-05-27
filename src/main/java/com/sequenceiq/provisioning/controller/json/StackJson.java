@@ -16,6 +16,7 @@ public class StackJson implements JsonEntity {
     private Long templateId;
     private CloudPlatform cloudPlatform;
     private StackDescription description;
+    private Long credentialId;
 
     public StackJson() {
     }
@@ -59,15 +60,25 @@ public class StackJson implements JsonEntity {
         return cloudPlatform;
     }
 
+    public Long getCredentialId() {
+        return credentialId;
+    }
+
+    public void setCredentialId(Long credentialId) {
+        this.credentialId = credentialId;
+    }
+
     @JsonIgnore
     public void setCloudPlatform(CloudPlatform cloudPlatform) {
         this.cloudPlatform = cloudPlatform;
     }
 
+    @JsonProperty("description")
     public StackDescription getDescription() {
         return description;
     }
 
+    @JsonIgnore
     public void setDescription(StackDescription description) {
         this.description = description;
     }
