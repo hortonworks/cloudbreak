@@ -12,6 +12,7 @@ import javax.persistence.Id;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.Table;
 
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -27,6 +28,7 @@ import org.hibernate.validator.constraints.NotEmpty;
                 + "LEFT JOIN FETCH u.awsCredentials "
                 + "LEFT JOIN FETCH u.azureCredentials "
                 + "WHERE u.id= :id")
+@Table(name = "cloudbreakuser")
 public class User implements ProvisionEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
