@@ -6,6 +6,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 import org.postgresql.Driver;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
@@ -22,13 +23,28 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 public class DatabaseConfig {
 
+    @Value("${DB_ENV_USER}")
+    private String dbUser;
+
+    @Value("${DB_ENV_PASS}")
+    private String dbPassword;
+
+    @Value("${DB_PORT_5432_TCP_ADDR}")
+    private String dbHost;
+
+    @Value("${DB_PORT_5432_TCP_PORT}")
+    private String dbPort;
+
+    @Value("${HBM2DDL_STRATEGY}")
+    private String hbm2ddlStrategy;
+
     @Bean
     public DataSource dataSource() {
         SimpleDriverDataSource dataSource = new SimpleDriverDataSource();
         dataSource.setDriverClass(Driver.class);
-        dataSource.setUrl("jdbc:postgresql://172.17.0.3:5432/cloudbreak");
-        dataSource.setUsername("seqadmin");
-        dataSource.setPassword("seq123_");
+        dataSource.setUrl(String.format("jdbc:postgresql://%s:%s/cloudbreak", dbHost, dbPort));
+        dataSource.setUsername(dbUser);
+        dataSource.setPassword(dbPassword);
         return dataSource;
     }
 
@@ -63,7 +79,7 @@ public class DatabaseConfig {
 
     private Properties jpaProperties() {
         Properties properties = new Properties();
-        properties.setProperty("hibernate.hbm2ddl.auto", "create");
+        properties.setProperty("hibernate.hbm2ddl.auto", hbm2ddlStrategy);
         properties.setProperty("hibernate.show_sql", "false");
         properties.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
         return properties;
