@@ -89,10 +89,10 @@ public class CredentialController {
     }
 
 
-    @RequestMapping(method = RequestMethod.GET, value = "/certificate")
+    @RequestMapping(method = RequestMethod.GET, value = "/certificate/{credentialId}")
     @ResponseBody
-    public ModelAndView getJksFile(@CurrentUser User user, HttpServletResponse response) throws Exception {
-        File cerFile = azureCredentialService.getCertificateFile(user);
+    public ModelAndView getJksFile(@CurrentUser User user, @PathVariable Long credentialId, HttpServletResponse response) throws Exception {
+        File cerFile = azureCredentialService.getCertificateFile(credentialId, user);
         response.setContentType("application/octet-stream");
         response.setHeader("Content-Disposition", "attachment;filename=" + user.emailAsFolder() + ".cer");
         FileCopyUtils.copy(Files.readAllBytes(cerFile.toPath()), response.getOutputStream());

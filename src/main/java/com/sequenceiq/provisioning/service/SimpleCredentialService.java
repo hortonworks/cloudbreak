@@ -18,6 +18,7 @@ import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.repository.AwsCredentialRepository;
 import com.sequenceiq.provisioning.repository.AzureCredentialRepository;
 import com.sequenceiq.provisioning.repository.CredentialRepository;
+import com.sequenceiq.provisioning.service.azure.AzureCredentialService;
 
 @Service
 public class SimpleCredentialService implements CredentialService {
@@ -36,6 +37,9 @@ public class SimpleCredentialService implements CredentialService {
 
     @Autowired
     private AwsCredentialRepository awsCredentialRepository;
+
+    @Autowired
+    private AzureCredentialService azureCredentialService;
 
     public Set<CredentialJson> getAll(User user) {
         Set<CredentialJson> result = new HashSet<>();
@@ -71,6 +75,7 @@ public class SimpleCredentialService implements CredentialService {
                 AzureCredential azureCredential = azureCredentialConverter.convert(credentialJson);
                 azureCredential.setUser(user);
                 azureCredentialRepository.save(azureCredential);
+                azureCredentialService.generateCertificate(azureCredential, user);
                 break;
             default:
                 throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", credentialJson.getCloudPlatform()));

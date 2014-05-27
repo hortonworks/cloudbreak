@@ -1,6 +1,7 @@
 package com.sequenceiq.provisioning.controller.json;
 
 import javax.validation.constraints.Min;
+import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -12,6 +13,7 @@ public class StackJson implements JsonEntity {
     private Long id;
     @Min(value = 2)
     private int clusterSize;
+    @Size(max = 20)
     private String name;
     private Long templateId;
     private CloudPlatform cloudPlatform;
