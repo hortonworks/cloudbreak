@@ -82,7 +82,9 @@ public class CredentialController {
             credentialService.delete(credentialId);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
-            throw new BadRequestException(String.format("Deletion of: %s was not success. Delete all resources before you delete the credential.", credentialId), e);
+            throw new BadRequestException(
+                    String.format("Deletion of: %s was not success. Delete all resources before you delete the credential.", credentialId), e
+            );
         }
     }
 
