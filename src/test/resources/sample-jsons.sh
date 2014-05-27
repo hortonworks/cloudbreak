@@ -2,7 +2,7 @@
 
 curl -u user@seq.com:test123 -X GET -H "Content-Type:application/json"  http://localhost:8080/me | jq .
 
-curl -u user@seq.com:test123 -X POST -H "Content-Type:application/json" -d '{"cloudPlatform":"AZURE","parameters":{"subscriptionId":"a8b8dac0-2b84-41da-a08b-1e45297e0d2b","jksPassword":"pw1234"}}' http://localhost:8080/credential | jq .
+curl -u user@seq.com:test123 -X POST -H "Content-Type:application/json" -d '{"cloudPlatform":"AWS","parameters":{"roleArn":"a8b8dac0-2b84-41da-a08b-1e45297e0d2b"}}' http://localhost:8080/credential | jq .
 
 curl -u user@seq.com:test123 -X POST -H "Content-Type:application/json" -d '{"name":"smap123","url":"https://gist.githubusercontent.com/lalyos/53eeda2d3f6287656d84/raw/install-mac.sh"}' http://localhost:8080/blueprint | jq .
 

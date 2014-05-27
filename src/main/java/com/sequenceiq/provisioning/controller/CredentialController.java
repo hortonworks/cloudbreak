@@ -64,16 +64,28 @@ public class CredentialController {
         return new ResponseEntity<>(credentials, HttpStatus.OK);
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/{cloudPlatform}")
+    @RequestMapping(method = RequestMethod.GET, value = "/{credentialId}")
     @ResponseBody
-    public ResponseEntity<CredentialJson> getCredential(@CurrentUser User user, @PathVariable Long cloudPlatform) {
+    public ResponseEntity<CredentialJson> getCredential(@CurrentUser User user, @PathVariable Long credentialId) {
         try {
-            CredentialJson credentialJson = credentialService.get(cloudPlatform);
+            CredentialJson credentialJson = credentialService.get(credentialId);
             return new ResponseEntity<>(credentialJson, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
-            throw new BadRequestException("Unknown cloud platform: " + cloudPlatform, e);
+            throw new BadRequestException("Unknown cloud platform: " + credentialId, e);
         }
     }
+
+    @RequestMapping(method = RequestMethod.DELETE, value = "/{credentialId}")
+    @ResponseBody
+    public ResponseEntity<CredentialJson> deleteCredential(@CurrentUser User user, @PathVariable Long credentialId) {
+        try {
+            credentialService.delete(credentialId);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception e) {
+            throw new BadRequestException(String.format("Deletion of: %s was not success. Delete all resources before you delete the credential.", credentialId), e);
+        }
+    }
+
 
     @RequestMapping(method = RequestMethod.GET, value = "/certificate")
     @ResponseBody
