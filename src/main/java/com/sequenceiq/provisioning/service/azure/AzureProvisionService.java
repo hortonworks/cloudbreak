@@ -54,7 +54,7 @@ public class AzureProvisionService implements ProvisionService {
 
         AzureTemplate azureTemplate = (AzureTemplate) stack.getTemplate();
 
-        String filePath =  AzureCredentialService.getUserJksFileName(credential, user.emailAsFolder());
+        String filePath = AzureCredentialService.getUserJksFileName(credential, user.emailAsFolder());
         File file = new File(filePath);
         AzureClient azureClient = new AzureClient(
                 ((AzureCredential) credential).getSubscriptionId(),
@@ -131,7 +131,7 @@ public class AzureProvisionService implements ProvisionService {
 
     @Override
     public StackDescription describeStack(User user, Stack stack, Credential credential) {
-        String filePath =  AzureCredentialService.getUserJksFileName(credential, user.emailAsFolder());
+        String filePath = AzureCredentialService.getUserJksFileName(credential, user.emailAsFolder());
         File file = new File(filePath);
         AzureClient azureClient = new AzureClient(
                 ((AzureCredential) credential).getSubscriptionId(),
@@ -147,7 +147,7 @@ public class AzureProvisionService implements ProvisionService {
         } catch (Exception ex) {
             azureStackDescription.setCloudService("");
         }
-        for (int i = 0; i< stack.getClusterSize(); i++){
+        for (int i = 0; i < stack.getClusterSize(); i++) {
             String vmName = getVmName(templateName, i);
             Map<String, String> props = new HashMap<>();
             props.put(SERVICENAME, templateName);
@@ -164,7 +164,7 @@ public class AzureProvisionService implements ProvisionService {
 
     @Override
     public StackDescription describeStackWithResources(User user, Stack stack, Credential credential) {
-        String filePath =  AzureCredentialService.getUserJksFileName(credential, user.emailAsFolder());
+        String filePath = AzureCredentialService.getUserJksFileName(credential, user.emailAsFolder());
         File file = new File(filePath);
         AzureClient azureClient = new AzureClient(
                 ((AzureCredential) credential).getSubscriptionId(),
@@ -192,7 +192,7 @@ public class AzureProvisionService implements ProvisionService {
         } catch (Exception ex) {
             detailedAzureStackDescription.setStorageAccount("");
         }
-        for (int i = 0; i< stack.getClusterSize(); i++){
+        for (int i = 0; i < stack.getClusterSize(); i++) {
             String vmName = getVmName(templateName, i);
             Map<String, String> props = new HashMap<>();
             props.put(SERVICENAME, templateName);
