@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.amazonaws.regions.Regions;
 import com.amazonaws.services.ec2.model.InstanceType;
 import com.sequenceiq.provisioning.domain.AwsCredential;
 import com.sequenceiq.provisioning.domain.AwsTemplate;
@@ -51,7 +52,7 @@ public class UserInitializer implements InitializingBean {
             awsTemplate.setName("userAzureStack");
             awsTemplate.setKeyName("smaple_key");
             awsTemplate.setName("template1");
-            awsTemplate.setRegion("eu-west-1");
+            awsTemplate.setRegion(Regions.valueOf("EU_WEST_1"));
             awsTemplate.setAmiId("ami-2918e35e");
             awsTemplate.setInstanceType(InstanceType.M1Small);
             awsTemplate.setSshLocation("0.0.0.0/0");
