@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.sequenceiq.provisioning.controller.json.IdJson;
 import com.sequenceiq.provisioning.controller.json.TemplateJson;
 import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.repository.UserRepository;
@@ -32,9 +33,9 @@ public class TemplateController {
 
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<String> createTemplate(@CurrentUser User user, @RequestBody @Valid TemplateJson templateRequest) {
-        templateService.create(userRepository.findOneWithLists(user.getId()), templateRequest);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+    public ResponseEntity<IdJson> createTemplate(@CurrentUser User user, @RequestBody @Valid TemplateJson templateRequest) {
+        IdJson idJson = templateService.create(userRepository.findOneWithLists(user.getId()), templateRequest);
+        return new ResponseEntity<>(idJson, HttpStatus.CREATED);
     }
 
     @RequestMapping(method = RequestMethod.GET)

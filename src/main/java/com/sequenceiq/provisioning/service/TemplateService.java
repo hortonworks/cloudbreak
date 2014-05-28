@@ -2,6 +2,7 @@ package com.sequenceiq.provisioning.service;
 
 import java.util.Set;
 
+import com.sequenceiq.provisioning.controller.json.IdJson;
 import com.sequenceiq.provisioning.controller.json.TemplateJson;
 import com.sequenceiq.provisioning.domain.User;
 
@@ -11,7 +12,7 @@ public interface TemplateService {
 
     TemplateJson get(Long id);
 
-    void create(User user, TemplateJson templateRequest);
+    IdJson create(User user, TemplateJson templateRequest);
 
     void delete(Long id);
 

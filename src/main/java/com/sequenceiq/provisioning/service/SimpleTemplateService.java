@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.provisioning.controller.BadRequestException;
 import com.sequenceiq.provisioning.controller.NotFoundException;
+import com.sequenceiq.provisioning.controller.json.IdJson;
 import com.sequenceiq.provisioning.controller.json.TemplateJson;
 import com.sequenceiq.provisioning.converter.AwsTemplateConverter;
 import com.sequenceiq.provisioning.converter.AzureTemplateConverter;
@@ -62,18 +63,18 @@ public class SimpleTemplateService implements TemplateService {
     }
 
     @Override
-    public void create(User user, TemplateJson templateRequest) {
+    public IdJson create(User user, TemplateJson templateRequest) {
         switch (templateRequest.getCloudPlatform()) {
             case AWS:
                 Template awsTemplate = awsTemplateConverter.convert(templateRequest);
                 awsTemplate.setUser(user);
                 templateRepository.save(awsTemplate);
-                break;
+                return new IdJson(awsTemplate.getId());
             case AZURE:
                 Template azureTemplate = azureTemplateConverter.convert(templateRequest);
                 azureTemplate.setUser(user);
                 templateRepository.save(azureTemplate);
-                break;
+                return new IdJson(azureTemplate.getId());
             default:
                 throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", templateRequest.getCloudPlatform()));
         }

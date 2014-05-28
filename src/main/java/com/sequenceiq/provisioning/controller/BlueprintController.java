@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sequenceiq.provisioning.controller.json.BlueprintJson;
+import com.sequenceiq.provisioning.controller.json.IdJson;
 import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.repository.UserRepository;
 import com.sequenceiq.provisioning.security.CurrentUser;
@@ -32,9 +33,9 @@ public class BlueprintController {
 
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<String> addBlueprint(@CurrentUser User user, @RequestBody @Valid BlueprintJson blueprintRequest) {
-        blueprintService.addBlueprint(user, blueprintRequest);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+    public ResponseEntity<IdJson> addBlueprint(@CurrentUser User user, @RequestBody @Valid BlueprintJson blueprintRequest) {
+        IdJson idJson = blueprintService.addBlueprint(user, blueprintRequest);
+        return new ResponseEntity<>(idJson, HttpStatus.CREATED);
     }
 
     @RequestMapping(method = RequestMethod.GET)

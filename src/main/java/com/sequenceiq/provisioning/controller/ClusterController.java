@@ -27,7 +27,7 @@ public class ClusterController {
 
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<String> createCluser(@CurrentUser User user, @PathVariable Long stackId, @RequestBody @Valid ClusterRequest clusterRequest) {
+    public ResponseEntity<String> createCluster(@CurrentUser User user, @PathVariable Long stackId, @RequestBody @Valid ClusterRequest clusterRequest) {
         ambariClusterService.createCluster(user, stackId, clusterRequest);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }

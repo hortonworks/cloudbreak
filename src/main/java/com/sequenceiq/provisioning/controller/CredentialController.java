@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.sequenceiq.provisioning.controller.json.CredentialJson;
+import com.sequenceiq.provisioning.controller.json.IdJson;
 import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.repository.UserRepository;
 import com.sequenceiq.provisioning.security.CurrentUser;
@@ -46,9 +47,9 @@ public class CredentialController {
 
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<String> saveCredential(@CurrentUser User user, @Valid @RequestBody CredentialJson credentialRequest) throws Exception {
-        credentialService.save(user, credentialRequest);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+    public ResponseEntity<IdJson> saveCredential(@CurrentUser User user, @Valid @RequestBody CredentialJson credentialRequest) throws Exception {
+        IdJson save = credentialService.save(user, credentialRequest);
+        return new ResponseEntity<>(save, HttpStatus.CREATED);
     }
 
     @RequestMapping(method = RequestMethod.GET)
