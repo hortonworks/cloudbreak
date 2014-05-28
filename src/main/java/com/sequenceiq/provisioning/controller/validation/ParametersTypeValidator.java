@@ -1,5 +1,6 @@
 package com.sequenceiq.provisioning.controller.validation;
 
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 
@@ -9,6 +10,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ParametersTypeValidator extends AbstractParameterValidator {
+
+    private static final String SEPARATOR = ", ";
 
     @Override
     public boolean validate(Map<String, String> parameters, ConstraintValidatorContext context, List<TemplateParam> paramList) {
@@ -20,7 +23,9 @@ public class ParametersTypeValidator extends AbstractParameterValidator {
                     try {
                         entry.getClazz().getField(parameters.get(entry.getName()));
                     } catch (NoSuchFieldException e) {
-                        addParameterConstraintViolation(context, entry.getName(), String.format("%s is not valid type.", entry.getName()));
+                        addParameterConstraintViolation(context, entry.getName(), String.format("%s is not valid type. The valid fields are [%s]",
+                                entry.getName(),
+                                fieldList(entry.getClazz().getFields())));
                         valid = false;
                     }
                 } else if (!parameters.get(entry.getName()).getClass().isAssignableFrom(entry.getClazz())) {
@@ -30,6 +35,16 @@ public class ParametersTypeValidator extends AbstractParameterValidator {
             }
         }
         return valid;
+    }
+
+    private String fieldList(Field[] fields) {
+        StringBuilder sb = new StringBuilder();
+        for (Field field : fields) {
+            sb.append(field.getName());
+            sb.append(SEPARATOR);
+        }
+        sb.replace(sb.toString().lastIndexOf(SEPARATOR), sb.toString().lastIndexOf(SEPARATOR) + 2, "");
+        return sb.toString();
     }
 
     @Override
