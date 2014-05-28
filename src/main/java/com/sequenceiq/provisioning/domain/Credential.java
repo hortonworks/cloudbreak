@@ -5,7 +5,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
-import javax.validation.constraints.Size;
 
 @Entity
 public abstract class Credential {
@@ -17,7 +16,6 @@ public abstract class Credential {
 
     private CloudPlatform cloudPlatform;
 
-    @Size(max = 20)
     private String name;
 
     public Credential() {

@@ -2,6 +2,8 @@ package com.sequenceiq.provisioning.controller.json;
 
 import java.util.Map;
 
+import javax.validation.constraints.Size;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.provisioning.controller.validation.ValidCredentialRequest;
@@ -11,6 +13,7 @@ import com.sequenceiq.provisioning.domain.CloudPlatform;
 public class CredentialJson implements JsonEntity {
 
     private Long id;
+    @Size(max = 20)
     private String name;
     private CloudPlatform cloudPlatform;
     private Map<String, String> parameters;
