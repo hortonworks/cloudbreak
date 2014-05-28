@@ -28,7 +28,6 @@ public class UserInitializer implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-
         if ("create".equals(hbm2ddlStrategy) || "create-drop".equals(hbm2ddlStrategy)) {
             User user2 = new User();
             user2.setEmail("user@seq.com");
@@ -104,6 +103,5 @@ public class UserInitializer implements InitializingBean {
 
             userRepository.save(user2);
         }
-
     }
 }

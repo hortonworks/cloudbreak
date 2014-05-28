@@ -9,7 +9,6 @@ import javax.persistence.SequenceGenerator;
 @Entity
 public abstract class Credential {
 
-
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "credential_generator")
     @SequenceGenerator(name = "credential_generator", sequenceName = "credential_table")
@@ -17,8 +16,18 @@ public abstract class Credential {
 
     private CloudPlatform cloudPlatform;
 
+    private String name;
+
     public Credential() {
 
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public Long getId() {
