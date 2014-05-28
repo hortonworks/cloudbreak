@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.provisioning.controller.InternalServerException;
 import com.sequenceiq.provisioning.controller.json.JsonHelper;
-import com.sequenceiq.provisioning.controller.json.StackResult;
 import com.sequenceiq.provisioning.domain.AzureCredential;
 import com.sequenceiq.provisioning.domain.AzureStackDescription;
 import com.sequenceiq.provisioning.domain.AzureTemplate;
@@ -63,7 +62,7 @@ public class AzureProvisionService implements ProvisionService {
 
     @Override
     @Async
-    public StackResult createStack(User user, Stack stack, Credential credential) {
+    public void createStack(User user, Stack stack, Credential credential) {
 
         AzureTemplate azureTemplate = (AzureTemplate) stack.getTemplate();
 
@@ -135,7 +134,6 @@ public class AzureProvisionService implements ProvisionService {
             requestId = (String) azureClient.getRequestId(virtualMachineResponse);
             azureClient.waitUntilComplete(requestId);
         }
-        return new StackResult(OK_STATUS);
     }
 
     private String getVmName(String azureTemplate, int i) {

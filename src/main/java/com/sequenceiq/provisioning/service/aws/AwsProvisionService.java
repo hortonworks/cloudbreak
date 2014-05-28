@@ -1,6 +1,7 @@
 package com.sequenceiq.provisioning.service.aws;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.auth.BasicSessionCredentials;
@@ -15,8 +16,7 @@ import com.amazonaws.services.cloudformation.model.DescribeStackResourcesResult;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStacksResult;
 import com.amazonaws.services.cloudformation.model.Parameter;
-import com.sequenceiq.provisioning.controller.json.AWSStackResult;
-import com.sequenceiq.provisioning.controller.json.StackResult;
+import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.sequenceiq.provisioning.domain.AwsCredential;
 import com.sequenceiq.provisioning.domain.AwsStackDescription;
 import com.sequenceiq.provisioning.domain.AwsTemplate;
@@ -49,11 +49,14 @@ public class AwsProvisionService implements ProvisionService {
     private CrossAccountCredentialsProvider credentialsProvider;
 
     @Override
-    public StackResult createStack(User user, Stack stack, Credential credential) {
+    @Async
+    public void createStack(User user, Stack stack, Credential credential) {
         AwsTemplate awsTemplate = (AwsTemplate) stack.getTemplate();
-        AmazonCloudFormationClient client = createCloudFormationClient(user, awsTemplate.getRegion(), credential);
+        AmazonCloudFormationClient client = createCloudFormationClient(user,
+                awsTemplate.getRegion(), credential);
         CreateStackRequest createStackRequest = new CreateStackRequest()
-                .withStackName(String.format("%s-%s", stack.getName(), stack.getId()))
+                .withStackName(String.format("%s-%s", stack.getName(),
+                        stack.getId()))
                 .withTemplateBody(template.getBody())
                 .withParameters(
                         new Parameter().withParameterKey("KeyName").withParameterValue(awsTemplate.getKeyName()),
@@ -62,7 +65,6 @@ public class AwsProvisionService implements ProvisionService {
                         new Parameter().withParameterKey("ClusterNodeInstanceType").withParameterValue(awsTemplate.getInstanceType().toString()),
                         new Parameter().withParameterKey("SSHLocation").withParameterValue(awsTemplate.getSshLocation()));
         CreateStackResult createStackResult = client.createStack(createStackRequest);
-        return new AWSStackResult(OK_STATUS, createStackResult);
     }
 
     @Override
@@ -99,11 +101,19 @@ public class AwsProvisionService implements ProvisionService {
         return CloudPlatform.AWS;
     }
 
-    private AmazonCloudFormationClient createCloudFormationClient(User user, String region, Credential credential) {
+    private AmazonCloudFormationClient createCloudFormationClient(User user, Regions regions, Credential credential) {
         BasicSessionCredentials basicSessionCredentials = credentialsProvider
                 .retrieveSessionCredentials(SESSION_CREDENTIALS_DURATION, "provision-ambari", user, (AwsCredential) credential);
         AmazonCloudFormationClient amazonCloudFormationClient = new AmazonCloudFormationClient(basicSessionCredentials);
-        amazonCloudFormationClient.setRegion(Region.getRegion(Regions.fromName(region)));
+        amazonCloudFormationClient.setRegion(Region.getRegion(regions));
         return amazonCloudFormationClient;
+    }
+
+    private AmazonEC2Client createEC2Client(User user, Regions regions, Credential credential) {
+        BasicSessionCredentials basicSessionCredentials = credentialsProvider
+                .retrieveSessionCredentials(SESSION_CREDENTIALS_DURATION, "provision-ambari", user, (AwsCredential) credential);
+        AmazonEC2Client amazonEC2Client = new AmazonEC2Client(basicSessionCredentials);
+        amazonEC2Client.setRegion(Region.getRegion(regions));
+        return amazonEC2Client;
     }
 }
