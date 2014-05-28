@@ -239,7 +239,7 @@ public class AzureProvisionService implements ProvisionService {
             try {
                 Object deleteVirtualMachineResult = azureClient.deleteVirtualMachine(props);
             } catch (Exception ex) {
-                LOGGER.error(ex.getStackTrace().toString());
+                LOGGER.error(ex.toString());
             }
         }
         try {
@@ -247,21 +247,21 @@ public class AzureProvisionService implements ProvisionService {
             props.put(NAME, templateName);
             Object deleteCloudServiceResult = azureClient.deleteCloudService(props);
         } catch (Exception ex) {
-            LOGGER.error(ex.getStackTrace().toString());
+            LOGGER.error(ex.toString());
         }
         try {
             Map<String, String> props = new HashMap<>();
             props.put(NAME, templateName);
             Object deleteStorageAccountResult = azureClient.deleteStorageAccount(props);
         } catch (Exception ex) {
-            LOGGER.error(ex.getStackTrace().toString());
+            LOGGER.error(ex.toString());
         }
         try {
             Map<String, String> props = new HashMap<>();
             props.put(NAME, templateName);
             Object affinityGroup = azureClient.deleteAffinityGroup(props);
         } catch (Exception ex) {
-            LOGGER.error(ex.getStackTrace().toString());
+            LOGGER.error(ex.toString());
         }
 
     }
