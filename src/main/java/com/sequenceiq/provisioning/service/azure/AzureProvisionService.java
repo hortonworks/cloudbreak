@@ -5,11 +5,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
+import com.sequenceiq.provisioning.controller.InternalServerException;
 import com.sequenceiq.provisioning.controller.json.AzureStackResult;
 import com.sequenceiq.provisioning.controller.json.JsonHelper;
 import com.sequenceiq.provisioning.controller.json.StackResult;
@@ -25,9 +28,13 @@ import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.service.ProvisionService;
 
 import groovyx.net.http.HttpResponseDecorator;
+import groovyx.net.http.HttpResponseException;
 
 @Service
 public class AzureProvisionService implements ProvisionService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AzureProvisionService.class);
+
     private static final String OK_STATUS = "ok";
     private static final String LOCATION = "location";
     private static final String NAME = "name";
@@ -50,9 +57,11 @@ public class AzureProvisionService implements ProvisionService {
     private static final String SSHPUBLICKEYPATH = "sshPublicKeyPath";
     private static final String SERVICENAME = "serviceName";
     private static final String ERROR = "\"error\":\"Could not fetch data from azure\"";
+    private static final int NOT_FOUND = 404;
 
     @Autowired
     private JsonHelper jsonHelper;
+
 
     @Override
     @Async
@@ -217,7 +226,63 @@ public class AzureProvisionService implements ProvisionService {
 
     @Override
     public void deleteStack(User user, Stack stack, Credential credential) {
-        // TODO
+        String filePath = AzureCredentialService.getUserJksFileName(credential, user.emailAsFolder());
+        File file = new File(filePath);
+        AzureClient azureClient = new AzureClient(
+                ((AzureCredential) credential).getSubscriptionId(),
+                file.getAbsolutePath(),
+                ((AzureCredential) credential).getJks()
+        );
+        String templateName = ((AzureTemplate) stack.getTemplate()).getName();
+        for (int i = 0; i < stack.getClusterSize(); i++) {
+            String vmName = getVmName(templateName, i);
+            Map<String, String> props = new HashMap<>();
+            props.put(SERVICENAME, templateName);
+            props.put(NAME, vmName);
+            try {
+                Object deleteVirtualMachineResult = azureClient.deleteVirtualMachine(props);
+            } catch (HttpResponseException ex) {
+                httpResponseExceptionHandler(ex, vmName, user.getId());
+            } catch (Exception ex) {
+                throw new InternalServerException(ex.getMessage());
+            }
+
+        }
+        try {
+            Map<String, String> props = new HashMap<>();
+            props.put(NAME, templateName);
+            Object deleteCloudServiceResult = azureClient.deleteCloudService(props);
+        } catch (HttpResponseException ex) {
+            httpResponseExceptionHandler(ex, templateName, user.getId());
+        } catch (Exception ex) {
+            throw new InternalServerException(ex.getMessage());
+        }
+        try {
+            Map<String, String> props = new HashMap<>();
+            props.put(NAME, templateName);
+            Object deleteStorageAccountResult = azureClient.deleteStorageAccount(props);
+        } catch (HttpResponseException ex) {
+            httpResponseExceptionHandler(ex, templateName, user.getId());
+        } catch (Exception ex) {
+            throw new InternalServerException(ex.getMessage());
+        }
+        try {
+            Map<String, String> props = new HashMap<>();
+            props.put(NAME, templateName);
+            Object affinityGroup = azureClient.deleteAffinityGroup(props);
+        } catch (HttpResponseException ex) {
+            httpResponseExceptionHandler(ex, templateName, user.getId());
+        } catch (Exception ex) {
+            throw new InternalServerException(ex.getMessage());
+        }
+    }
+
+    private void httpResponseExceptionHandler(HttpResponseException ex, String resourceName, Long userId) {
+        if (ex.getStatusCode() != NOT_FOUND) {
+            throw new InternalServerException(ex.getMessage());
+        } else {
+            LOGGER.info(String.format("Azure resource not found with %s name for %s userId.", resourceName, userId));
+        }
     }
 
     @Override
