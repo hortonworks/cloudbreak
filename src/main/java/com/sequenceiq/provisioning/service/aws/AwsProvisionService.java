@@ -1,7 +1,9 @@
 package com.sequenceiq.provisioning.service.aws;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.auth.BasicSessionCredentials;
@@ -9,14 +11,15 @@ import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.CreateStackRequest;
-import com.amazonaws.services.cloudformation.model.CreateStackResult;
 import com.amazonaws.services.cloudformation.model.DeleteStackRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStackResourcesRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStackResourcesResult;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStacksResult;
+import com.amazonaws.services.cloudformation.model.Output;
 import com.amazonaws.services.cloudformation.model.Parameter;
 import com.amazonaws.services.ec2.AmazonEC2Client;
+import com.amazonaws.services.ec2.model.RunInstancesRequest;
 import com.sequenceiq.provisioning.domain.AwsCredential;
 import com.sequenceiq.provisioning.domain.AwsStackDescription;
 import com.sequenceiq.provisioning.domain.AwsTemplate;
@@ -49,22 +52,54 @@ public class AwsProvisionService implements ProvisionService {
     private CrossAccountCredentialsProvider credentialsProvider;
 
     @Override
-    @Async
     public void createStack(User user, Stack stack, Credential credential) {
         AwsTemplate awsTemplate = (AwsTemplate) stack.getTemplate();
         AmazonCloudFormationClient client = createCloudFormationClient(user,
                 awsTemplate.getRegion(), credential);
         CreateStackRequest createStackRequest = new CreateStackRequest()
-                .withStackName(String.format("%s-%s", stack.getName(),
-                        stack.getId()))
+                .withStackName(String.format("%s-%s", stack.getName(), stack.getId()))
                 .withTemplateBody(template.getBody())
-                .withParameters(
-                        new Parameter().withParameterKey("KeyName").withParameterValue(awsTemplate.getKeyName()),
-                        new Parameter().withParameterKey("AMIId").withParameterValue(awsTemplate.getAmiId()),
-                        new Parameter().withParameterKey("AmbariAgentCount").withParameterValue(String.valueOf(stack.getClusterSize() - 1)),
-                        new Parameter().withParameterKey("ClusterNodeInstanceType").withParameterValue(awsTemplate.getInstanceType().toString()),
-                        new Parameter().withParameterKey("SSHLocation").withParameterValue(awsTemplate.getSshLocation()));
-        CreateStackResult createStackResult = client.createStack(createStackRequest);
+                .withParameters(new Parameter().withParameterKey("SSHLocation").withParameterValue(awsTemplate.getSshLocation()));
+        client.createStack(createStackRequest);
+
+        String stackStatus = "CREATE_IN_PROGRESS";
+        DescribeStacksResult stackResult = null;
+        while ("CREATE_IN_PROGRESS".equals(stackStatus)) {
+            DescribeStacksRequest stackRequest = new DescribeStacksRequest().withStackName(String.format("%s-%s", stack.getName(), stack.getId()));
+            stackResult = client.describeStacks(stackRequest);
+            stackStatus = stackResult.getStacks().get(0).getStackStatus();
+            System.out.println(stackStatus);
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+
+        if ("CREATE_COMPLETE".equals(stackStatus)) {
+            String subnetId = null;
+            String securityGroupId = null;
+            List<Output> outputs = stackResult.getStacks().get(0).getOutputs();
+            for (Output output : outputs) {
+                if ("Subnet".equals(output.getOutputKey())) {
+                    subnetId = output.getOutputValue();
+                } else if ("SecurityGroup".equals(output.getOutputKey())) {
+                    securityGroupId = output.getOutputValue();
+                }
+            }
+            AmazonEC2Client amazonEC2Client = createEC2Client(user, awsTemplate.getRegion(), credential);
+            RunInstancesRequest runInstancesRequest = new RunInstancesRequest(awsTemplate.getAmiId(), stack.getClusterSize(), stack.getClusterSize());
+            runInstancesRequest.setKeyName(awsTemplate.getKeyName());
+            runInstancesRequest.setInstanceType(awsTemplate.getInstanceType());
+            runInstancesRequest.setSecurityGroupIds(Arrays.asList(securityGroupId));
+            runInstancesRequest.setSubnetId(subnetId);
+            // runInstancesRequest.setUserData("");
+            amazonEC2Client.runInstances(runInstancesRequest);
+        } else if ("CREATE_FAILED".equals(stackStatus)) {
+            // TODO
+        }
+
     }
 
     @Override
