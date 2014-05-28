@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.provisioning.controller.NotFoundException;
 import com.sequenceiq.provisioning.controller.json.BlueprintJson;
+import com.sequenceiq.provisioning.controller.json.IdJson;
 import com.sequenceiq.provisioning.converter.BlueprintConverter;
 import com.sequenceiq.provisioning.domain.Blueprint;
 import com.sequenceiq.provisioning.domain.User;
@@ -21,10 +22,11 @@ public class BlueprintService {
     @Autowired
     private BlueprintConverter blueprintConverter;
 
-    public void addBlueprint(User user, BlueprintJson blueprintJson) {
+    public IdJson addBlueprint(User user, BlueprintJson blueprintJson) {
         Blueprint blueprint = blueprintConverter.convert(blueprintJson);
         blueprint.setUser(user);
         blueprintRepository.save(blueprint);
+        return new IdJson(blueprint.getId());
     }
 
     public Set<BlueprintJson> getAll(User user) {
