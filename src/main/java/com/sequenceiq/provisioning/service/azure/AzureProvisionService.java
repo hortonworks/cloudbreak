@@ -49,6 +49,7 @@ public class AzureProvisionService implements ProvisionService {
     private static final String SSHPUBLICKEYFINGERPRINT = "sshPublicKeyFingerprint";
     private static final String SSHPUBLICKEYPATH = "sshPublicKeyPath";
     private static final String SERVICENAME = "serviceName";
+    private static final String ERROR = "\"error\":\"Could not fetch data from azure\"";
 
     @Autowired
     private JsonHelper jsonHelper;
@@ -150,7 +151,7 @@ public class AzureProvisionService implements ProvisionService {
             Object cloudService = azureClient.getCloudService(templateName);
             azureStackDescription.setCloudService(jsonHelper.createJsonFromString(cloudService.toString()));
         } catch (Exception ex) {
-            azureStackDescription.setCloudService(jsonHelper.createJsonFromString("{\"HostedService\": {}}"));
+            azureStackDescription.setCloudService(jsonHelper.createJsonFromString(String.format("{\"HostedService\": {%s}}", ERROR)));
         }
         for (int i = 0; i < stack.getClusterSize(); i++) {
             String vmName = getVmName(templateName, i);
@@ -161,7 +162,7 @@ public class AzureProvisionService implements ProvisionService {
                 Object virtualMachine = azureClient.getVirtualMachine(props);
                 azureStackDescription.getVirtualMachines().add(jsonHelper.createJsonFromString(virtualMachine.toString()).toString());
             } catch (Exception ex) {
-                azureStackDescription.getVirtualMachines().add(jsonHelper.createJsonFromString("{\"Deployment\": {}}").toString());
+                azureStackDescription.getVirtualMachines().add(jsonHelper.createJsonFromString(String.format("{\"Deployment\": {%s}}", ERROR)).toString());
             }
         }
         return azureStackDescription;
@@ -183,19 +184,19 @@ public class AzureProvisionService implements ProvisionService {
             Object affinityGroup = azureClient.getAffinityGroup(templateName);
             detailedAzureStackDescription.setAffinityGroup(jsonHelper.createJsonFromString(affinityGroup.toString()));
         } catch (Exception ex) {
-            detailedAzureStackDescription.setAffinityGroup(jsonHelper.createJsonFromString("{\"AffinityGroup\": {}}"));
+            detailedAzureStackDescription.setAffinityGroup(jsonHelper.createJsonFromString(String.format("{\"AffinityGroup\": {%s}}", ERROR)));
         }
         try {
             Object cloudService = azureClient.getCloudService(templateName);
             detailedAzureStackDescription.setCloudService(jsonHelper.createJsonFromString(cloudService.toString()).toString());
         } catch (Exception ex) {
-            detailedAzureStackDescription.setCloudService(jsonHelper.createJsonFromString("{\"HostedService\": {}}").toString());
+            detailedAzureStackDescription.setCloudService(jsonHelper.createJsonFromString(String.format("{\"HostedService\": {%s}}", ERROR)).toString());
         }
         try {
             Object storageAccount = azureClient.getStorageAccount(templateName);
             detailedAzureStackDescription.setStorageAccount(jsonHelper.createJsonFromString(storageAccount.toString()));
         } catch (Exception ex) {
-            detailedAzureStackDescription.setStorageAccount(jsonHelper.createJsonFromString("{\"StorageService\": {}}"));
+            detailedAzureStackDescription.setStorageAccount(jsonHelper.createJsonFromString(String.format("{\"StorageService\": {%s}}", ERROR)));
         }
 
         for (int i = 0; i < stack.getClusterSize(); i++) {
@@ -207,7 +208,8 @@ public class AzureProvisionService implements ProvisionService {
                 Object virtualMachine = azureClient.getVirtualMachine(props);
                 detailedAzureStackDescription.getVirtualMachines().add(jsonHelper.createJsonFromString(virtualMachine.toString()).toString());
             } catch (Exception ex) {
-                detailedAzureStackDescription.getVirtualMachines().add(jsonHelper.createJsonFromString("{\"Deployment\": {}}").toString());
+                detailedAzureStackDescription.getVirtualMachines().add(
+                        jsonHelper.createJsonFromString(String.format("{\"Deployment\": {%s}}", ERROR)).toString());
             }
         }
         return detailedAzureStackDescription;
