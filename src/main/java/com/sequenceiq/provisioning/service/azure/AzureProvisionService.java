@@ -280,8 +280,6 @@ public class AzureProvisionService implements ProvisionService {
     private void httpResponseExceptionHandler(HttpResponseException ex) {
         if (ex.getStatusCode() != NOT_FOUND) {
             throw new InternalServerException(ex.getMessage());
-        } else {
-            throw new InternalServerException(ex.getMessage());
         }
     }
 
