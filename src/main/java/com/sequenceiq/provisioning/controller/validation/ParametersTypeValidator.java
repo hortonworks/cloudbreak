@@ -20,7 +20,9 @@ public class ParametersTypeValidator extends AbstractParameterValidator {
                     try {
                         entry.getClazz().getField(parameters.get(entry.getName()));
                     } catch (NoSuchFieldException e) {
-                        addParameterConstraintViolation(context, entry.getName(), String.format("%s is not valid type.", entry.getName()));
+                        addParameterConstraintViolation(context, entry.getName(), String.format("%s is not valid type. The valid fields are %s",
+                                entry.getName(),
+                                entry.getClass().getDeclaredFields()));
                         valid = false;
                     }
                 } else if (!parameters.get(entry.getName()).getClass().isAssignableFrom(entry.getClazz())) {
