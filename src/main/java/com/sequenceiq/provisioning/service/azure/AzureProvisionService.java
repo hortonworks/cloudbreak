@@ -242,7 +242,7 @@ public class AzureProvisionService implements ProvisionService {
             try {
                 Object deleteVirtualMachineResult = azureClient.deleteVirtualMachine(props);
             } catch (HttpResponseException ex) {
-                httpResponseExceptionHandler(ex);
+                httpResponseExceptionHandler(ex, vmName, user.getId());
             } catch (Exception ex) {
                 throw new InternalServerException(ex.getMessage());
             }
@@ -253,7 +253,7 @@ public class AzureProvisionService implements ProvisionService {
             props.put(NAME, templateName);
             Object deleteCloudServiceResult = azureClient.deleteCloudService(props);
         } catch (HttpResponseException ex) {
-            httpResponseExceptionHandler(ex);
+            httpResponseExceptionHandler(ex, templateName, user.getId());
         } catch (Exception ex) {
             throw new InternalServerException(ex.getMessage());
         }
@@ -262,7 +262,7 @@ public class AzureProvisionService implements ProvisionService {
             props.put(NAME, templateName);
             Object deleteStorageAccountResult = azureClient.deleteStorageAccount(props);
         } catch (HttpResponseException ex) {
-            httpResponseExceptionHandler(ex);
+            httpResponseExceptionHandler(ex, templateName, user.getId());
         } catch (Exception ex) {
             throw new InternalServerException(ex.getMessage());
         }
@@ -271,15 +271,17 @@ public class AzureProvisionService implements ProvisionService {
             props.put(NAME, templateName);
             Object affinityGroup = azureClient.deleteAffinityGroup(props);
         } catch (HttpResponseException ex) {
-            httpResponseExceptionHandler(ex);
+            httpResponseExceptionHandler(ex, templateName, user.getId());
         } catch (Exception ex) {
             throw new InternalServerException(ex.getMessage());
         }
     }
 
-    private void httpResponseExceptionHandler(HttpResponseException ex) {
+    private void httpResponseExceptionHandler(HttpResponseException ex, String resourceName, Long userId) {
         if (ex.getStatusCode() != NOT_FOUND) {
             throw new InternalServerException(ex.getMessage());
+        } else {
+            LOGGER.info(String.format("Azure resource not found with %s name for %s userId.", resourceName, userId));
         }
     }
 
