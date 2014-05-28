@@ -49,12 +49,9 @@ public class AzureProvisionService implements ProvisionService {
     private static final String SSHPUBLICKEYFINGERPRINT = "sshPublicKeyFingerprint";
     private static final String SSHPUBLICKEYPATH = "sshPublicKeyPath";
     private static final String SERVICENAME = "serviceName";
-<<<<<<< HEAD
 
     @Autowired
     private JsonHelper jsonHelper;
-=======
->>>>>>> azure describe added
 
     @Override
     @Async
@@ -139,12 +136,7 @@ public class AzureProvisionService implements ProvisionService {
 
     @Override
     public StackDescription describeStack(User user, Stack stack, Credential credential) {
-<<<<<<< HEAD
-        String filePath = AzureCredentialService.getUserJksFileName(credential, user.emailAsFolder());
-
-=======
         String filePath =  AzureCredentialService.getUserJksFileName(credential, user.emailAsFolder());
->>>>>>> azure describe added
         File file = new File(filePath);
         AzureClient azureClient = new AzureClient(
                 ((AzureCredential) credential).getSubscriptionId(),
@@ -156,34 +148,20 @@ public class AzureProvisionService implements ProvisionService {
         String templateName = ((AzureTemplate) stack.getTemplate()).getName();
         try {
             Object cloudService = azureClient.getCloudService(templateName);
-<<<<<<< HEAD
             azureStackDescription.setCloudService(jsonHelper.createJsonFromString(cloudService.toString()));
         } catch (Exception ex) {
             azureStackDescription.setCloudService(jsonHelper.createJsonFromString("{\"HostedService\": {}}"));
         }
-        for (int i = 0; i < stack.getClusterSize(); i++) {
-=======
-            azureStackDescription.setCloudService(cloudService.toString());
-        } catch (Exception ex) {
-            azureStackDescription.setCloudService("");
-        }
         for (int i = 0; i< stack.getClusterSize(); i++){
->>>>>>> azure describe added
             String vmName = getVmName(templateName, i);
             Map<String, String> props = new HashMap<>();
             props.put(SERVICENAME, templateName);
             props.put(NAME, vmName);
             try {
                 Object virtualMachine = azureClient.getVirtualMachine(props);
-<<<<<<< HEAD
                 azureStackDescription.getVirtualMachines().add(jsonHelper.createJsonFromString(virtualMachine.toString()).toString());
             } catch (Exception ex) {
                 azureStackDescription.getVirtualMachines().add(jsonHelper.createJsonFromString("{\"Deployment\": {}}").toString());
-=======
-                azureStackDescription.getVirtualMachines().add(virtualMachine.toString());
-            } catch (Exception ex) {
-                azureStackDescription.getVirtualMachines().add(ex.getMessage());
->>>>>>> azure describe added
             }
         }
         return azureStackDescription;
@@ -191,12 +169,7 @@ public class AzureProvisionService implements ProvisionService {
 
     @Override
     public StackDescription describeStackWithResources(User user, Stack stack, Credential credential) {
-<<<<<<< HEAD
-        String filePath = AzureCredentialService.getUserJksFileName(credential, user.emailAsFolder());
-
-=======
         String filePath =  AzureCredentialService.getUserJksFileName(credential, user.emailAsFolder());
->>>>>>> azure describe added
         File file = new File(filePath);
         AzureClient azureClient = new AzureClient(
                 ((AzureCredential) credential).getSubscriptionId(),
@@ -208,16 +181,15 @@ public class AzureProvisionService implements ProvisionService {
         String templateName = ((AzureTemplate) stack.getTemplate()).getName();
         try {
             Object affinityGroup = azureClient.getAffinityGroup(templateName);
-<<<<<<< HEAD
             detailedAzureStackDescription.setAffinityGroup(jsonHelper.createJsonFromString(affinityGroup.toString()));
         } catch (Exception ex) {
             detailedAzureStackDescription.setAffinityGroup(jsonHelper.createJsonFromString("{\"AffinityGroup\": {}}"));
         }
         try {
             Object cloudService = azureClient.getCloudService(templateName);
-            detailedAzureStackDescription.setCloudService(jsonHelper.createJsonFromString(cloudService.toString()));
+            detailedAzureStackDescription.setCloudService(jsonHelper.createJsonFromString(cloudService.toString()).toString());
         } catch (Exception ex) {
-            detailedAzureStackDescription.setCloudService(jsonHelper.createJsonFromString("{\"HostedService\": {}}"));
+            detailedAzureStackDescription.setCloudService(jsonHelper.createJsonFromString("{\"HostedService\": {}}").toString());
         }
         try {
             Object storageAccount = azureClient.getStorageAccount(templateName);
@@ -225,41 +197,17 @@ public class AzureProvisionService implements ProvisionService {
         } catch (Exception ex) {
             detailedAzureStackDescription.setStorageAccount(jsonHelper.createJsonFromString("{\"StorageService\": {}}"));
         }
-        for (int i = 0; i < stack.getClusterSize(); i++) {
-=======
-            detailedAzureStackDescription.setAffinityGroup(affinityGroup.toString());
-        } catch (Exception ex) {
-            detailedAzureStackDescription.setAffinityGroup("");
-        }
-        try {
-            Object cloudService = azureClient.getCloudService(templateName);
-            detailedAzureStackDescription.setCloudService(cloudService.toString());
-        } catch (Exception ex) {
-            detailedAzureStackDescription.setCloudService("");
-        }
-        try {
-            Object storageAccount = azureClient.getStorageAccount(templateName);
-            detailedAzureStackDescription.setStorageAccount(storageAccount.toString());
-        } catch (Exception ex) {
-            detailedAzureStackDescription.setStorageAccount("");
-        }
+
         for (int i = 0; i< stack.getClusterSize(); i++){
->>>>>>> azure describe added
             String vmName = getVmName(templateName, i);
             Map<String, String> props = new HashMap<>();
             props.put(SERVICENAME, templateName);
             props.put(NAME, vmName);
             try {
                 Object virtualMachine = azureClient.getVirtualMachine(props);
-<<<<<<< HEAD
                 detailedAzureStackDescription.getVirtualMachines().add(jsonHelper.createJsonFromString(virtualMachine.toString()).toString());
             } catch (Exception ex) {
                 detailedAzureStackDescription.getVirtualMachines().add(jsonHelper.createJsonFromString("{\"Deployment\": {}}").toString());
-=======
-                detailedAzureStackDescription.getVirtualMachines().add(virtualMachine.toString());
-            } catch (Exception ex) {
-                detailedAzureStackDescription.getVirtualMachines().add(ex.getMessage());
->>>>>>> azure describe added
             }
         }
         return detailedAzureStackDescription;
