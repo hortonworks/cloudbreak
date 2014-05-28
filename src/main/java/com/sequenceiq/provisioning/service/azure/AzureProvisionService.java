@@ -12,6 +12,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
+import com.sequenceiq.provisioning.controller.InternalServerException;
 import com.sequenceiq.provisioning.controller.json.AzureStackResult;
 import com.sequenceiq.provisioning.controller.json.JsonHelper;
 import com.sequenceiq.provisioning.controller.json.StackResult;
@@ -27,6 +28,7 @@ import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.service.ProvisionService;
 
 import groovyx.net.http.HttpResponseDecorator;
+import groovyx.net.http.HttpResponseException;
 
 @Service
 public class AzureProvisionService implements ProvisionService {
@@ -55,6 +57,7 @@ public class AzureProvisionService implements ProvisionService {
     private static final String SSHPUBLICKEYPATH = "sshPublicKeyPath";
     private static final String SERVICENAME = "serviceName";
     private static final String ERROR = "\"error\":\"Could not fetch data from azure\"";
+    private static final int NOT_FOUND = 404;
 
     @Autowired
     private JsonHelper jsonHelper;
@@ -239,7 +242,7 @@ public class AzureProvisionService implements ProvisionService {
             try {
                 Object deleteVirtualMachineResult = azureClient.deleteVirtualMachine(props);
             } catch (Exception ex) {
-                LOGGER.error(ex.toString());
+                exceptionHandler(ex);
             }
         }
         try {
@@ -247,23 +250,32 @@ public class AzureProvisionService implements ProvisionService {
             props.put(NAME, templateName);
             Object deleteCloudServiceResult = azureClient.deleteCloudService(props);
         } catch (Exception ex) {
-            LOGGER.error(ex.toString());
+            exceptionHandler(ex);
         }
         try {
             Map<String, String> props = new HashMap<>();
             props.put(NAME, templateName);
             Object deleteStorageAccountResult = azureClient.deleteStorageAccount(props);
         } catch (Exception ex) {
-            LOGGER.error(ex.toString());
+            exceptionHandler(ex);
         }
         try {
             Map<String, String> props = new HashMap<>();
             props.put(NAME, templateName);
             Object affinityGroup = azureClient.deleteAffinityGroup(props);
         } catch (Exception ex) {
-            LOGGER.error(ex.toString());
+            exceptionHandler(ex);
         }
+    }
 
+    private void exceptionHandler(Exception ex) {
+        if (ex instanceof  HttpResponseException) {
+            if (((HttpResponseException) ex).getStatusCode() != NOT_FOUND) {
+                throw new InternalServerException(ex.getMessage());
+            }
+        } else {
+            throw new InternalServerException(ex.getMessage());
+        }
     }
 
     @Override
