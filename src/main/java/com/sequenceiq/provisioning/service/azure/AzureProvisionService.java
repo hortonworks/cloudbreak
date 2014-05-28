@@ -241,38 +241,45 @@ public class AzureProvisionService implements ProvisionService {
             props.put(NAME, vmName);
             try {
                 Object deleteVirtualMachineResult = azureClient.deleteVirtualMachine(props);
+            } catch (HttpResponseException ex) {
+                httpResponseExceptionHandler(ex);
             } catch (Exception ex) {
-                exceptionHandler(ex);
+                throw new InternalServerException(ex.getMessage());
             }
+
         }
         try {
             Map<String, String> props = new HashMap<>();
             props.put(NAME, templateName);
             Object deleteCloudServiceResult = azureClient.deleteCloudService(props);
+        } catch (HttpResponseException ex) {
+            httpResponseExceptionHandler(ex);
         } catch (Exception ex) {
-            exceptionHandler(ex);
+            throw new InternalServerException(ex.getMessage());
         }
         try {
             Map<String, String> props = new HashMap<>();
             props.put(NAME, templateName);
             Object deleteStorageAccountResult = azureClient.deleteStorageAccount(props);
+        } catch (HttpResponseException ex) {
+            httpResponseExceptionHandler(ex);
         } catch (Exception ex) {
-            exceptionHandler(ex);
+            throw new InternalServerException(ex.getMessage());
         }
         try {
             Map<String, String> props = new HashMap<>();
             props.put(NAME, templateName);
             Object affinityGroup = azureClient.deleteAffinityGroup(props);
+        } catch (HttpResponseException ex) {
+            httpResponseExceptionHandler(ex);
         } catch (Exception ex) {
-            exceptionHandler(ex);
+            throw new InternalServerException(ex.getMessage());
         }
     }
 
-    private void exceptionHandler(Exception ex) {
-        if (ex instanceof  HttpResponseException) {
-            if (((HttpResponseException) ex).getStatusCode() != NOT_FOUND) {
-                throw new InternalServerException(ex.getMessage());
-            }
+    private void httpResponseExceptionHandler(HttpResponseException ex) {
+        if (ex.getStatusCode() != NOT_FOUND) {
+            throw new InternalServerException(ex.getMessage());
         } else {
             throw new InternalServerException(ex.getMessage());
         }
