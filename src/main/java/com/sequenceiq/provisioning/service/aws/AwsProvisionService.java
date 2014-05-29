@@ -76,6 +76,10 @@ public class AwsProvisionService implements ProvisionService {
     @Override
     public void createStack(User user, Stack stack, Credential credential) {
         AwsTemplate awsTemplate = (AwsTemplate) stack.getTemplate();
+
+        stack.setStatus(Status.CREATE_IN_PROGRESS);
+        stackRepository.save(stack);
+
         AmazonCloudFormationClient client = createCloudFormationClient(user,
                 awsTemplate.getRegion(), credential);
         CreateStackRequest createStackRequest = new CreateStackRequest()
