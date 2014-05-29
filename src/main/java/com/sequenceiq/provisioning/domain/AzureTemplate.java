@@ -5,9 +5,8 @@ import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 
 @Entity
 public class AzureTemplate extends Template implements ProvisionEntity {
@@ -24,8 +23,7 @@ public class AzureTemplate extends Template implements ProvisionEntity {
     private String password;
     private String sshPublicKeyFingerprint;
     private String sshPublicKeyPath;
-    @ManyToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "azureTemplate_ports")
+    @OneToMany(mappedBy = "azureTemplate", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Port> ports = new HashSet<>();
 
     @ManyToOne

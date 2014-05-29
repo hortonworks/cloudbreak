@@ -3,6 +3,9 @@ package com.sequenceiq.provisioning.domain;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 public class Port {
@@ -14,6 +17,8 @@ public class Port {
     private String name;
     private String port;
     private String protocol;
+    @ManyToOne
+    private AzureTemplate azureTemplate;
 
     public Port() {
     }
@@ -56,5 +61,15 @@ public class Port {
 
     public void setProtocol(String protocol) {
         this.protocol = protocol;
+    }
+
+    @JsonIgnore
+    public AzureTemplate getAzureTemplate() {
+        return azureTemplate;
+    }
+
+    @JsonIgnore
+    public void setAzureTemplate(AzureTemplate azureTemplate) {
+        this.azureTemplate = azureTemplate;
     }
 }

@@ -84,6 +84,7 @@ public class UserInitializer implements InitializingBean {
             port.setName("local");
             port.setProtocol("TCP");
             port.setPort("8080");
+            port.setAzureTemplate(azureTemplate);
             azureTemplate.getPorts().add(port);
             azureTemplate.setUser(user2);
 

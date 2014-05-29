@@ -65,6 +65,7 @@ public class AzureTemplateConverter extends AbstractConverter<TemplateJson, Azur
             port.setName(portEntry.get("name"));
             port.setPort(portEntry.get("port"));
             port.setProtocol(portEntry.get("protocol"));
+            port.setAzureTemplate(azureTemplate);
             ports.add(port);
         }
         azureTemplate.setPorts(ports);
