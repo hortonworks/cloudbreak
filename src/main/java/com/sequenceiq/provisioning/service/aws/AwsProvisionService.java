@@ -1,5 +1,6 @@
 package com.sequenceiq.provisioning.service.aws;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -19,7 +20,15 @@ import com.amazonaws.services.cloudformation.model.DescribeStacksResult;
 import com.amazonaws.services.cloudformation.model.Output;
 import com.amazonaws.services.cloudformation.model.Parameter;
 import com.amazonaws.services.ec2.AmazonEC2Client;
+import com.amazonaws.services.ec2.model.CreateTagsRequest;
+import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
+import com.amazonaws.services.ec2.model.DescribeInstancesResult;
+import com.amazonaws.services.ec2.model.Filter;
+import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.RunInstancesRequest;
+import com.amazonaws.services.ec2.model.RunInstancesResult;
+import com.amazonaws.services.ec2.model.Tag;
+import com.sequenceiq.provisioning.controller.InternalServerException;
 import com.sequenceiq.provisioning.domain.AwsCredential;
 import com.sequenceiq.provisioning.domain.AwsStackDescription;
 import com.sequenceiq.provisioning.domain.AwsTemplate;
@@ -42,6 +51,7 @@ import com.sequenceiq.provisioning.service.ProvisionService;
 @Service
 public class AwsProvisionService implements ProvisionService {
 
+    private static final String INSTANCE_TAG_KEY = "CloudbreakStackId";
     private static final int SESSION_CREDENTIALS_DURATION = 3600;
     private static final String OK_STATUS = "ok";
 
@@ -68,12 +78,10 @@ public class AwsProvisionService implements ProvisionService {
             DescribeStacksRequest stackRequest = new DescribeStacksRequest().withStackName(String.format("%s-%s", stack.getName(), stack.getId()));
             stackResult = client.describeStacks(stackRequest);
             stackStatus = stackResult.getStacks().get(0).getStackStatus();
-            System.out.println(stackStatus);
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                throw new InternalServerException("Thread interrupted.", e);
             }
         }
 
@@ -95,7 +103,17 @@ public class AwsProvisionService implements ProvisionService {
             runInstancesRequest.setSecurityGroupIds(Arrays.asList(securityGroupId));
             runInstancesRequest.setSubnetId(subnetId);
             // runInstancesRequest.setUserData("");
-            amazonEC2Client.runInstances(runInstancesRequest);
+            RunInstancesResult runInstancesResult = amazonEC2Client.runInstances(runInstancesRequest);
+
+            List<String> instanceIds = new ArrayList<>();
+            for (Instance instance : runInstancesResult.getReservation().getInstances()) {
+                instanceIds.add(instance.getInstanceId());
+            }
+
+            CreateTagsRequest createTagsRequest = new CreateTagsRequest().withResources(instanceIds)
+                    .withTags(new Tag(INSTANCE_TAG_KEY, stack.getName()));
+            amazonEC2Client.createTags(createTagsRequest);
+
         } else if ("CREATE_FAILED".equals(stackStatus)) {
             // TODO
         }
@@ -108,7 +126,13 @@ public class AwsProvisionService implements ProvisionService {
         AmazonCloudFormationClient client = createCloudFormationClient(user, awsInfra.getRegion(), credential);
         DescribeStacksRequest stackRequest = new DescribeStacksRequest().withStackName(String.format("%s-%s", stack.getName(), stack.getId()));
         DescribeStacksResult stackResult = client.describeStacks(stackRequest);
-        return new AwsStackDescription(stackResult);
+
+        AmazonEC2Client ec2Client = createEC2Client(user, awsInfra.getRegion(), credential);
+        DescribeInstancesRequest instancesRequest = new DescribeInstancesRequest()
+                .withFilters(new Filter().withName("tag:" + INSTANCE_TAG_KEY).withValues(stack.getName()));
+        DescribeInstancesResult instancesResult = ec2Client.describeInstances(instancesRequest);
+
+        return new AwsStackDescription(stackResult, instancesResult);
     }
 
     @Override
@@ -117,10 +141,17 @@ public class AwsProvisionService implements ProvisionService {
         AmazonCloudFormationClient client = createCloudFormationClient(user, awsInfra.getRegion(), credential);
         DescribeStacksRequest stackRequest = new DescribeStacksRequest().withStackName(String.format("%s-%s", stack.getName(), stack.getId()));
         DescribeStacksResult stackResult = client.describeStacks(stackRequest);
+
         DescribeStackResourcesRequest resourcesRequest = new DescribeStackResourcesRequest().withStackName(String.format("%s-%s", stack.getName(),
                 stack.getId()));
         DescribeStackResourcesResult resourcesResult = client.describeStackResources(resourcesRequest);
-        return new DetailedAwsStackDescription(stackResult, resourcesResult);
+
+        AmazonEC2Client ec2Client = createEC2Client(user, awsInfra.getRegion(), credential);
+        DescribeInstancesRequest instancesRequest = new DescribeInstancesRequest()
+                .withFilters(new Filter().withName("tag:" + INSTANCE_TAG_KEY).withValues(stack.getName()));
+        DescribeInstancesResult instancesResult = ec2Client.describeInstances(instancesRequest);
+
+        return new DetailedAwsStackDescription(stackResult, resourcesResult, instancesResult);
     }
 
     @Override
@@ -128,6 +159,7 @@ public class AwsProvisionService implements ProvisionService {
         AwsTemplate awsInfra = (AwsTemplate) stack.getTemplate();
         AmazonCloudFormationClient client = createCloudFormationClient(user, awsInfra.getRegion(), credential);
         DeleteStackRequest deleteStackRequest = new DeleteStackRequest().withStackName(String.format("%s-%s", stack.getName(), stack.getId()));
+
         client.deleteStack(deleteStackRequest);
     }
 
