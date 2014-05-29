@@ -30,6 +30,7 @@ import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.RunInstancesRequest;
 import com.amazonaws.services.ec2.model.RunInstancesResult;
 import com.amazonaws.services.ec2.model.Tag;
+import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 import com.sequenceiq.provisioning.controller.ExceptionControllerAdvice;
 import com.sequenceiq.provisioning.controller.InternalServerException;
 import com.sequenceiq.provisioning.domain.AwsCredential;
@@ -163,6 +164,20 @@ public class AwsProvisionService implements ProvisionService {
     @Override
     public void deleteStack(User user, Stack stack, Credential credential) {
         AwsTemplate awsInfra = (AwsTemplate) stack.getTemplate();
+
+        AmazonEC2Client ec2Client = createEC2Client(user, awsInfra.getRegion(), credential);
+        DescribeInstancesRequest instancesRequest = new DescribeInstancesRequest()
+                .withFilters(new Filter().withName("tag:" + INSTANCE_TAG_KEY).withValues(stack.getName()));
+        DescribeInstancesResult instancesResult = ec2Client.describeInstances(instancesRequest);
+
+        List<String> instanceIds = new ArrayList<>();
+        for (Instance instance : instancesResult.getReservations().get(0).getInstances()) {
+            instanceIds.add(instance.getInstanceId());
+        }
+
+        TerminateInstancesRequest terminateInstancesRequest = new TerminateInstancesRequest().withInstanceIds(instanceIds);
+        ec2Client.terminateInstances(terminateInstancesRequest);
+
         AmazonCloudFormationClient client = createCloudFormationClient(user, awsInfra.getRegion(), credential);
         DeleteStackRequest deleteStackRequest = new DeleteStackRequest().withStackName(String.format("%s-%s", stack.getName(), stack.getId()));
 
