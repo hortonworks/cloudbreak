@@ -17,7 +17,7 @@ public class AwsTemplate extends Template implements ProvisionEntity {
     private String sshLocation;
 
     @ManyToOne
-    private User user;
+    private User awsTemplateOwner;
 
     public AwsTemplate() {
     }
@@ -70,13 +70,17 @@ public class AwsTemplate extends Template implements ProvisionEntity {
         this.sshLocation = sshLocation;
     }
 
-    public User getUser() {
-        return user;
+    public User getAwsTemplateOwner() {
+        return awsTemplateOwner;
+    }
+
+    public void setAwsTemplateOwner(User awsTemplateOwner) {
+        this.awsTemplateOwner = awsTemplateOwner;
     }
 
     @Override
     public void setUser(User user) {
-        this.user = user;
+        this.awsTemplateOwner = user;
     }
 
     @Override

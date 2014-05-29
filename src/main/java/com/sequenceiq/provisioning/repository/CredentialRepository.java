@@ -7,6 +7,6 @@ import com.sequenceiq.provisioning.domain.Credential;
 
 public interface CredentialRepository extends CrudRepository<Credential, Long> {
 
-    @PostAuthorize("returnObject?.user?.id == principal?.id")
+    @PostAuthorize("returnObject?.awsCredentialOwner?.id == principal?.id || returnObject?.azureCredentialOwner?.id == principal?.id")
     Credential findOne(Long id);
 }

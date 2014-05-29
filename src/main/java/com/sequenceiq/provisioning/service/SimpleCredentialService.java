@@ -55,31 +55,31 @@ public class SimpleCredentialService implements CredentialService {
             throw new NotFoundException(String.format("Template '%s' not found.", id));
         } else {
             switch (credential.cloudPlatform()) {
-                case AWS:
-                    return awsCredentialConverter.convert((AwsCredential) credential);
-                case AZURE:
-                    return azureCredentialConverter.convert((AzureCredential) credential);
-                default:
-                    throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", credential.cloudPlatform()));
+            case AWS:
+                return awsCredentialConverter.convert((AwsCredential) credential);
+            case AZURE:
+                return azureCredentialConverter.convert((AzureCredential) credential);
+            default:
+                throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", credential.cloudPlatform()));
             }
         }
     }
 
     public IdJson save(User user, CredentialJson credentialJson) {
         switch (credentialJson.getCloudPlatform()) {
-            case AWS:
-                AwsCredential awsCredential = awsCredentialConverter.convert(credentialJson);
-                awsCredential.setUser(user);
-                awsCredentialRepository.save(awsCredential);
-                return new IdJson(awsCredential.getId());
-            case AZURE:
-                AzureCredential azureCredential = azureCredentialConverter.convert(credentialJson);
-                azureCredential.setUser(user);
-                azureCredentialRepository.save(azureCredential);
-                azureCredentialService.generateCertificate(azureCredential, user);
-                return new IdJson(azureCredential.getId());
-            default:
-                throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", credentialJson.getCloudPlatform()));
+        case AWS:
+            AwsCredential awsCredential = awsCredentialConverter.convert(credentialJson);
+            awsCredential.setAwsCredentialOwner(user);
+            awsCredentialRepository.save(awsCredential);
+            return new IdJson(awsCredential.getId());
+        case AZURE:
+            AzureCredential azureCredential = azureCredentialConverter.convert(credentialJson);
+            azureCredential.setAzureCredentialOwner(user);
+            azureCredentialRepository.save(azureCredential);
+            azureCredentialService.generateCertificate(azureCredential, user);
+            return new IdJson(azureCredential.getId());
+        default:
+            throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", credentialJson.getCloudPlatform()));
         }
     }
 
