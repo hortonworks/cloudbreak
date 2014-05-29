@@ -1,6 +1,7 @@
 package com.sequenceiq.provisioning.service;
 
-import com.sequenceiq.provisioning.controller.json.StackResult;
+import org.springframework.scheduling.annotation.Async;
+
 import com.sequenceiq.provisioning.domain.CloudPlatform;
 import com.sequenceiq.provisioning.domain.Credential;
 import com.sequenceiq.provisioning.domain.Stack;
@@ -9,7 +10,8 @@ import com.sequenceiq.provisioning.domain.User;
 
 public interface ProvisionService {
 
-    StackResult createStack(User user, Stack stack, Credential credential);
+    @Async
+    void createStack(User user, Stack stack, Credential credential);
 
     StackDescription describeStack(User user, Stack stack, Credential credential);
 

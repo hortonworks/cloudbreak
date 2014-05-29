@@ -70,7 +70,8 @@ public class SimpleStackService implements StackService {
         stackRepository.save(stack);
 
         ProvisionService provisionService = provisionServices.get(template.cloudPlatform());
-        return provisionService.createStack(user, stack, stack.getCredential());
+        provisionService.createStack(user, stack, stack.getCredential());
+        return new StackResult("Create in progess");
     }
 
     @Override

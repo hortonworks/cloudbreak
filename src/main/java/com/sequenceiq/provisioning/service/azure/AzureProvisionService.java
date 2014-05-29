@@ -1,5 +1,8 @@
 package com.sequenceiq.provisioning.service.azure;
 
+import groovyx.net.http.HttpResponseDecorator;
+import groovyx.net.http.HttpResponseException;
+
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,9 +16,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.provisioning.controller.InternalServerException;
-import com.sequenceiq.provisioning.controller.json.AzureStackResult;
 import com.sequenceiq.provisioning.controller.json.JsonHelper;
-import com.sequenceiq.provisioning.controller.json.StackResult;
 import com.sequenceiq.provisioning.domain.AzureCredential;
 import com.sequenceiq.provisioning.domain.AzureStackDescription;
 import com.sequenceiq.provisioning.domain.AzureTemplate;
@@ -26,9 +27,6 @@ import com.sequenceiq.provisioning.domain.Stack;
 import com.sequenceiq.provisioning.domain.StackDescription;
 import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.service.ProvisionService;
-
-import groovyx.net.http.HttpResponseDecorator;
-import groovyx.net.http.HttpResponseException;
 
 @Service
 public class AzureProvisionService implements ProvisionService {
@@ -62,10 +60,9 @@ public class AzureProvisionService implements ProvisionService {
     @Autowired
     private JsonHelper jsonHelper;
 
-
     @Override
     @Async
-    public StackResult createStack(User user, Stack stack, Credential credential) {
+    public void createStack(User user, Stack stack, Credential credential) {
 
         AzureTemplate azureTemplate = (AzureTemplate) stack.getTemplate();
 
@@ -75,7 +72,7 @@ public class AzureProvisionService implements ProvisionService {
                 ((AzureCredential) credential).getSubscriptionId(),
                 file.getAbsolutePath(),
                 ((AzureCredential) credential).getJks()
-        );
+                );
         Map<String, String> props = new HashMap<>();
         props.put(NAME, azureTemplate.getName());
         props.put(LOCATION, AzureLocation.valueOf(azureTemplate.getLocation()).location());
@@ -120,7 +117,7 @@ public class AzureProvisionService implements ProvisionService {
             props.put(IMAGENAME, azureTemplate.getImageName());
             props.put(IMAGESTOREURI,
                     String.format("http://%s.blob.core.windows.net/vhd-store/%s.vhd", azureTemplate.getName(), vmName)
-            );
+                    );
             props.put(HOSTNAME, vmName);
             props.put(USERNAME, azureTemplate.getUserName());
             if (azureTemplate.getPassword() != null) {
@@ -137,7 +134,6 @@ public class AzureProvisionService implements ProvisionService {
             requestId = (String) azureClient.getRequestId(virtualMachineResponse);
             azureClient.waitUntilComplete(requestId);
         }
-        return new AzureStackResult(OK_STATUS);
     }
 
     private String getVmName(String azureTemplate, int i) {
@@ -152,7 +148,7 @@ public class AzureProvisionService implements ProvisionService {
                 ((AzureCredential) credential).getSubscriptionId(),
                 file.getAbsolutePath(),
                 ((AzureCredential) credential).getJks()
-        );
+                );
 
         AzureStackDescription azureStackDescription = new AzureStackDescription();
         String templateName = ((AzureTemplate) stack.getTemplate()).getName();
@@ -185,7 +181,7 @@ public class AzureProvisionService implements ProvisionService {
                 ((AzureCredential) credential).getSubscriptionId(),
                 file.getAbsolutePath(),
                 ((AzureCredential) credential).getJks()
-        );
+                );
 
         DetailedAzureStackDescription detailedAzureStackDescription = new DetailedAzureStackDescription();
         String templateName = ((AzureTemplate) stack.getTemplate()).getName();
@@ -232,7 +228,7 @@ public class AzureProvisionService implements ProvisionService {
                 ((AzureCredential) credential).getSubscriptionId(),
                 file.getAbsolutePath(),
                 ((AzureCredential) credential).getJks()
-        );
+                );
         String templateName = ((AzureTemplate) stack.getTemplate()).getName();
         for (int i = 0; i < stack.getClusterSize(); i++) {
             String vmName = getVmName(templateName, i);

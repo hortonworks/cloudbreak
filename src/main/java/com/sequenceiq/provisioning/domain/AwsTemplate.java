@@ -3,13 +3,14 @@ package com.sequenceiq.provisioning.domain;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 
+import com.amazonaws.regions.Regions;
 import com.amazonaws.services.ec2.model.InstanceType;
 
 @Entity
 public class AwsTemplate extends Template implements ProvisionEntity {
 
     private String name;
-    private String region;
+    private Regions region;
     private String keyName;
     private String amiId;
     private InstanceType instanceType;
@@ -29,11 +30,11 @@ public class AwsTemplate extends Template implements ProvisionEntity {
         this.name = name;
     }
 
-    public String getRegion() {
+    public Regions getRegion() {
         return region;
     }
 
-    public void setRegion(String region) {
+    public void setRegion(Regions region) {
         this.region = region;
     }
 

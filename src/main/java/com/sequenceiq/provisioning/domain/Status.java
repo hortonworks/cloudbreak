@@ -1,7 +1,9 @@
 package com.sequenceiq.provisioning.domain;
 
 public enum Status {
-    CREATED,
-    INPROGRESS,
-    FINISHED;
+    CREATE_IN_PROGRESS,
+    CREATE_COMPLETED,
+    CREATE_FAILED,
+    DELETE_IN_PROGRESS,
+    DELETE_COMPLETED;
 }

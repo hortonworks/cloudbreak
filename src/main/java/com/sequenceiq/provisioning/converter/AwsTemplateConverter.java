@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
+import com.amazonaws.regions.Regions;
 import com.amazonaws.services.ec2.model.InstanceType;
 import com.sequenceiq.provisioning.controller.json.TemplateJson;
 import com.sequenceiq.provisioning.controller.validation.AwsTemplateParam;
@@ -23,7 +24,7 @@ public class AwsTemplateConverter extends AbstractConverter<TemplateJson, AwsTem
         templateJson.setClusterName(entity.getName());
         Map<String, String> props = new HashMap<>();
         props.put(AwsTemplateParam.KEY_NAME.getName(), entity.getKeyName());
-        props.put(AwsTemplateParam.REGION.getName(), entity.getRegion());
+        props.put(AwsTemplateParam.REGION.getName(), entity.getRegion().toString());
         props.put(AwsTemplateParam.AMI_ID.getName(), entity.getAmiId());
         props.put(AwsTemplateParam.INSTANCE_TYPE.getName(), entity.getInstanceType().toString());
         props.put(AwsTemplateParam.SSH_LOCATION.getName(), entity.getSshLocation());
@@ -36,7 +37,7 @@ public class AwsTemplateConverter extends AbstractConverter<TemplateJson, AwsTem
     public AwsTemplate convert(TemplateJson json) {
         AwsTemplate awsTemplate = new AwsTemplate();
         awsTemplate.setName(json.getClusterName());
-        awsTemplate.setRegion(json.getParameters().get(AwsTemplateParam.REGION.getName()));
+        awsTemplate.setRegion(Regions.valueOf(json.getParameters().get(AwsTemplateParam.REGION.getName())));
         awsTemplate.setKeyName(json.getParameters().get(AwsTemplateParam.KEY_NAME.getName()));
         awsTemplate.setAmiId(json.getParameters().get(AwsTemplateParam.AMI_ID.getName()));
         awsTemplate.setInstanceType(InstanceType.valueOf(json.getParameters().get(AwsTemplateParam.INSTANCE_TYPE.getName())));

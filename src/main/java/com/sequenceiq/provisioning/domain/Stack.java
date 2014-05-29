@@ -25,6 +25,8 @@ public class Stack implements ProvisionEntity {
 
     private String name;
 
+    private Status status;
+
     @OneToOne
     private Template template;
 
@@ -80,5 +82,13 @@ public class Stack implements ProvisionEntity {
 
     public void setCredential(Credential credential) {
         this.credential = credential;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
     }
 }
