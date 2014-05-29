@@ -1,5 +1,7 @@
 package com.sequenceiq.provisioning.domain;
 
+import java.util.List;
+
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 
@@ -18,6 +20,7 @@ public class AzureTemplate extends Template implements ProvisionEntity {
     private String password;
     private String sshPublicKeyFingerprint;
     private String sshPublicKeyPath;
+    private List<Port> ports;
 
     @ManyToOne
     private User user;
@@ -119,6 +122,14 @@ public class AzureTemplate extends Template implements ProvisionEntity {
 
     public void setAddressPrefix(String addressPrefix) {
         this.addressPrefix = addressPrefix;
+    }
+
+    public List<Port> getPorts() {
+        return ports;
+    }
+
+    public void setPorts(List<Port> ports) {
+        this.ports = ports;
     }
 
     public User getUser() {

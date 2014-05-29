@@ -31,6 +31,7 @@ public class AzureTemplateConverter extends AbstractConverter<TemplateJson, Azur
         putProperty(props, AzureTemplateParam.SSH_PUBLIC_KEY_FINGERPRINT.getName(), entity.getSshPublicKeyFingerprint());
         putProperty(props, AzureTemplateParam.SSH_PUBLIC_KEY_PATH.getName(), entity.getSshPublicKeyPath());
         putProperty(props, AzureTemplateParam.SUBNETADDRESSPREFIX.getName(), entity.getSubnetAddressPrefix());
+        putProperty(props, AzureTemplateParam.PORTS.getName(), entity.getPorts());
         azureTemplateJson.setCloudPlatform(CloudPlatform.AZURE);
         azureTemplateJson.setParameters(props);
         return azureTemplateJson;
@@ -52,6 +53,7 @@ public class AzureTemplateConverter extends AbstractConverter<TemplateJson, Azur
         azureTemplate.setUserName(json.getParameters().get(AzureTemplateParam.USERNAME.getName()));
         azureTemplate.setVmType(json.getParameters().get(AzureTemplateParam.VMTYPE.getName()));
         azureTemplate.setSubnetAddressPrefix(json.getParameters().get(AzureTemplateParam.SUBNETADDRESSPREFIX.getName()));
+        azureTemplate.setPorts(json.getParameters().get(AzureTemplateParam.PORTS.getName()));
         return azureTemplate;
     }
 
