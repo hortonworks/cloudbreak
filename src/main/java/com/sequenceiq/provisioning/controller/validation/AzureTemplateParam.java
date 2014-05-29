@@ -1,6 +1,6 @@
 package com.sequenceiq.provisioning.controller.validation;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import com.google.common.base.Optional;
 import com.sequenceiq.provisioning.service.azure.AzureLocation;
@@ -20,7 +20,7 @@ public enum AzureTemplateParam implements TemplateParam {
     SSH_PUBLIC_KEY_FINGERPRINT("sshPublicKeyFingerprint", false, String.class, Optional.<String>absent()),
     PASSWORD("password", false, String.class, Optional.<String>absent()),
     SSH_PUBLIC_KEY_PATH("sshPublicKeyPath", false, String.class, Optional.<String>absent()),
-    PORTS("ports", false, List.class, Optional.<String>absent());
+    PORTS("ports", false, ArrayList.class, Optional.<String>absent());
 
     private final String paramName;
     private final Class clazz;

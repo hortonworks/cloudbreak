@@ -11,12 +11,12 @@ import org.springframework.stereotype.Component;
 public class ParametersRegexValidator extends AbstractParameterValidator {
 
     @Override
-    public boolean validate(Map<String, String> parameters, ConstraintValidatorContext context, List<TemplateParam> paramsList) {
+    public boolean validate(Map<String, Object> parameters, ConstraintValidatorContext context, List<TemplateParam> paramsList) {
         boolean valid = true;
         for (TemplateParam param : paramsList) {
             if (param.getRegex().isPresent()) {
                 if (parameters.containsKey(param.getName())) {
-                    if (!parameters.get(param.getName()).matches(param.getRegex().get())) {
+                    if (!String.valueOf(parameters.get(param.getName())).matches(param.getRegex().get())) {
                         addParameterConstraintViolation(context, param.getName(), String.format("%s is not valid for regex: %s.",
                                 param.getName(), param.getRegex().get()));
                         valid = false;

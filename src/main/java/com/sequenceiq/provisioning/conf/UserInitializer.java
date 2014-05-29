@@ -12,6 +12,7 @@ import com.sequenceiq.provisioning.domain.AwsTemplate;
 import com.sequenceiq.provisioning.domain.AzureCredential;
 import com.sequenceiq.provisioning.domain.AzureTemplate;
 import com.sequenceiq.provisioning.domain.Blueprint;
+import com.sequenceiq.provisioning.domain.Port;
 import com.sequenceiq.provisioning.domain.Stack;
 import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.repository.UserRepository;
@@ -78,6 +79,12 @@ public class UserInitializer implements InitializingBean {
             azureTemplate.setPassword("pass");
             azureTemplate.setSubnetAddressPrefix("prefix");
             azureTemplate.setVmType("small");
+            Port port = new Port();
+            port.setLocalPort("8080");
+            port.setName("local");
+            port.setProtocol("TCP");
+            port.setPort("8080");
+            azureTemplate.getPorts().add(port);
             azureTemplate.setUser(user2);
 
             Stack azureStack = new Stack();
@@ -86,7 +93,6 @@ public class UserInitializer implements InitializingBean {
             azureStack.setUser(user2);
             azureStack.setCredential(azureCredential);
             azureStack.setName("azure stack");
-
             Blueprint blueprint1 = new Blueprint();
             blueprint1.setName("sample blueprint 1");
             blueprint1.setBlueprintText("{\"data\": {}}");
