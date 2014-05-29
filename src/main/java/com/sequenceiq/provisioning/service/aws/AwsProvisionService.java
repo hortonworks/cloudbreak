@@ -79,99 +79,104 @@ public class AwsProvisionService implements ProvisionService {
 
     @Override
     public void createStack(User user, Stack stack, Credential credential) {
-        AwsTemplate awsTemplate = (AwsTemplate) stack.getTemplate();
+        try {
+            AwsTemplate awsTemplate = (AwsTemplate) stack.getTemplate();
 
-        stack.setStatus(Status.CREATE_IN_PROGRESS);
-        stackRepository.save(stack);
+            stack.setStatus(Status.CREATE_IN_PROGRESS);
+            stackRepository.save(stack);
 
-        AmazonCloudFormationClient client = createCloudFormationClient(user,
-                awsTemplate.getRegion(), credential);
-        CreateStackRequest createStackRequest = new CreateStackRequest()
-                .withStackName(String.format("%s-%s", stack.getName(), stack.getId()))
-                .withTemplateBody(template.getBody())
-                .withParameters(new Parameter().withParameterKey("SSHLocation").withParameterValue(awsTemplate.getSshLocation()));
-        client.createStack(createStackRequest);
+            AmazonCloudFormationClient client = createCloudFormationClient(user,
+                    awsTemplate.getRegion(), credential);
+            CreateStackRequest createStackRequest = new CreateStackRequest()
+                    .withStackName(String.format("%s-%s", stack.getName(), stack.getId()))
+                    .withTemplateBody(template.getBody())
+                    .withParameters(new Parameter().withParameterKey("SSHLocation").withParameterValue(awsTemplate.getSshLocation()));
+            client.createStack(createStackRequest);
 
-        String stackStatus = "CREATE_IN_PROGRESS";
-        DescribeStacksResult stackResult = null;
-        while ("CREATE_IN_PROGRESS".equals(stackStatus)) {
-            DescribeStacksRequest stackRequest = new DescribeStacksRequest().withStackName(String.format("%s-%s", stack.getName(), stack.getId()));
-            stackResult = client.describeStacks(stackRequest);
-            stackStatus = stackResult.getStacks().get(0).getStackStatus();
-            try {
-                Thread.sleep(ONE_SECOND);
-            } catch (InterruptedException e) {
-                throw new InternalServerException("Thread interrupted.", e);
+            String stackStatus = "CREATE_IN_PROGRESS";
+            DescribeStacksResult stackResult = null;
+            while ("CREATE_IN_PROGRESS".equals(stackStatus)) {
+                DescribeStacksRequest stackRequest = new DescribeStacksRequest().withStackName(String.format("%s-%s", stack.getName(), stack.getId()));
+                stackResult = client.describeStacks(stackRequest);
+                stackStatus = stackResult.getStacks().get(0).getStackStatus();
+                try {
+                    Thread.sleep(ONE_SECOND);
+                } catch (InterruptedException e) {
+                    throw new InternalServerException("Thread interrupted.", e);
+                }
             }
-        }
 
-        if ("CREATE_COMPLETE".equals(stackStatus)) {
-            try {
-                String subnetId = null;
-                String securityGroupId = null;
-                List<Output> outputs = stackResult.getStacks().get(0).getOutputs();
-                for (Output output : outputs) {
-                    if ("Subnet".equals(output.getOutputKey())) {
-                        subnetId = output.getOutputValue();
-                    } else if ("SecurityGroup".equals(output.getOutputKey())) {
-                        securityGroupId = output.getOutputValue();
-                    }
-                }
-                AmazonEC2Client amazonEC2Client = createEC2Client(user, awsTemplate.getRegion(), credential);
-                RunInstancesRequest runInstancesRequest = new RunInstancesRequest(awsTemplate.getAmiId(), stack.getClusterSize(), stack.getClusterSize());
-                runInstancesRequest.setKeyName(awsTemplate.getKeyName());
-                runInstancesRequest.setInstanceType(awsTemplate.getInstanceType());
-                runInstancesRequest.setSecurityGroupIds(Arrays.asList(securityGroupId));
-                runInstancesRequest.setSubnetId(subnetId);
-                // runInstancesRequest.setUserData("");
-                RunInstancesResult runInstancesResult = amazonEC2Client.runInstances(runInstancesRequest);
-
-                List<String> instanceIds = new ArrayList<>();
-                for (Instance instance : runInstancesResult.getReservation().getInstances()) {
-                    instanceIds.add(instance.getInstanceId());
-                }
-
-                CreateTagsRequest createTagsRequest = new CreateTagsRequest().withResources(instanceIds)
-                        .withTags(new Tag(INSTANCE_TAG_KEY, stack.getName()));
-                amazonEC2Client.createTags(createTagsRequest);
-
-                // TODO: poll instances if they already started -> poll Ambari?
-                boolean stop = false;
-                while (!stop) {
-                    try {
-                        Thread.sleep(ONE_SECOND);
-                    } catch (InterruptedException e) {
-                        throw new InternalServerException("Thread interrupted.", e);
-                    }
-                    DescribeInstanceStatusRequest instanceStatusRequest = new DescribeInstanceStatusRequest()
-                            .withInstanceIds(instanceIds);
-                    DescribeInstanceStatusResult instanceStatusResult = amazonEC2Client.describeInstanceStatus(instanceStatusRequest);
-                    if (instanceStatusResult.getInstanceStatuses().size() > 0) {
-                        InstanceStatus status = instanceStatusResult.getInstanceStatuses().get(0);
-                        stop = "running".equals(status.getInstanceState().getName());
-                        stop = stop && "ok".equals(status.getInstanceStatus().getStatus());
-                        for (InstanceStatusDetails details : status.getInstanceStatus().getDetails()) {
-                            if ("reachability".equals(details.getName())) {
-                                stop = stop && "passed".equals(details.getStatus());
-                                // initializing
-                            }
+            if ("CREATE_COMPLETE".equals(stackStatus)) {
+                try {
+                    String subnetId = null;
+                    String securityGroupId = null;
+                    List<Output> outputs = stackResult.getStacks().get(0).getOutputs();
+                    for (Output output : outputs) {
+                        if ("Subnet".equals(output.getOutputKey())) {
+                            subnetId = output.getOutputValue();
+                        } else if ("SecurityGroup".equals(output.getOutputKey())) {
+                            securityGroupId = output.getOutputValue();
                         }
                     }
+                    AmazonEC2Client amazonEC2Client = createEC2Client(user, awsTemplate.getRegion(), credential);
+                    RunInstancesRequest runInstancesRequest = new RunInstancesRequest(awsTemplate.getAmiId(), stack.getClusterSize(), stack.getClusterSize());
+                    runInstancesRequest.setKeyName(awsTemplate.getKeyName());
+                    runInstancesRequest.setInstanceType(awsTemplate.getInstanceType());
+                    runInstancesRequest.setSecurityGroupIds(Arrays.asList(securityGroupId));
+                    runInstancesRequest.setSubnetId(subnetId);
+                    // runInstancesRequest.setUserData("");
+                    RunInstancesResult runInstancesResult = amazonEC2Client.runInstances(runInstancesRequest);
 
-                    // TODO: what if failed?
+                    List<String> instanceIds = new ArrayList<>();
+                    for (Instance instance : runInstancesResult.getReservation().getInstances()) {
+                        instanceIds.add(instance.getInstanceId());
+                    }
+
+                    CreateTagsRequest createTagsRequest = new CreateTagsRequest().withResources(instanceIds)
+                            .withTags(new Tag(INSTANCE_TAG_KEY, stack.getName()));
+                    amazonEC2Client.createTags(createTagsRequest);
+
+                    // TODO: poll instances if they already started -> poll
+                    // Ambari?
+                    boolean stop = false;
+                    while (!stop) {
+                        try {
+                            Thread.sleep(ONE_SECOND);
+                        } catch (InterruptedException e) {
+                            throw new InternalServerException("Thread interrupted.", e);
+                        }
+                        DescribeInstanceStatusRequest instanceStatusRequest = new DescribeInstanceStatusRequest()
+                                .withInstanceIds(instanceIds);
+                        DescribeInstanceStatusResult instanceStatusResult = amazonEC2Client.describeInstanceStatus(instanceStatusRequest);
+                        if (instanceStatusResult.getInstanceStatuses().size() > 0) {
+                            InstanceStatus status = instanceStatusResult.getInstanceStatuses().get(0);
+                            stop = "running".equals(status.getInstanceState().getName());
+                            stop = stop && "ok".equals(status.getInstanceStatus().getStatus());
+                            for (InstanceStatusDetails details : status.getInstanceStatus().getDetails()) {
+                                if ("reachability".equals(details.getName())) {
+                                    stop = stop && "passed".equals(details.getStatus());
+                                    // initializing
+                                }
+                            }
+                        }
+
+                        // TODO: what if failed?
+                    }
+
+                    stack.setStatus(Status.CREATE_COMPLETED);
+                    stackRepository.save(stack);
+                } catch (AmazonClientException e) {
+                    LOGGER.error("Failed to run EC2 instances", e);
+                    stack.setStatus(Status.CREATE_FAILED);
                 }
 
-                stack.setStatus(Status.CREATE_COMPLETED);
-                stackRepository.save(stack);
-            } catch (AmazonClientException e) {
-                LOGGER.error("Failed to run EC2 instances", e);
+            } else {
+                LOGGER.error(String.format("Stack creation failed. id: '%s'", stack.getId()));
                 stack.setStatus(Status.CREATE_FAILED);
+                stackRepository.save(stack);
             }
-
-        } else {
-            LOGGER.error(String.format("Stack creation failed. id: '%s'", stack.getId()));
-            stack.setStatus(Status.CREATE_FAILED);
-            stackRepository.save(stack);
+        } catch (Throwable t) {
+            LOGGER.error("Unhandled exception occured while creating stack on AWS.", t);
         }
 
     }
