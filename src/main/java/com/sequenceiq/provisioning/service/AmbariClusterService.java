@@ -139,4 +139,14 @@ public class AmbariClusterService {
         return blueprintJson;
     }
 
+    public String startAllService(User user, Long stackId) {
+        //todo define startall
+        return "";
+    }
+
+    public String stopAllService(User user, Long stackId) {
+        //todo define stopall
+        return "";
+    }
+
 }

@@ -38,4 +38,16 @@ public class ClusterController {
         return new ResponseEntity<>(ambariClusterService.retrieveCluster(user, stackId), HttpStatus.OK);
     }
 
+    @RequestMapping(method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity<String> startAllServiceOnCLuster(@CurrentUser User user, @PathVariable Long stackId) {
+        return new ResponseEntity<>(ambariClusterService.startAllService(user, stackId), HttpStatus.OK);
+    }
+
+    @RequestMapping(method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity<String> stopAllServiceOnCLuster(@CurrentUser User user, @PathVariable Long stackId) {
+        return new ResponseEntity<>(ambariClusterService.stopAllService(user, stackId), HttpStatus.OK);
+    }
+
 }
