@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +30,7 @@ import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.RunInstancesRequest;
 import com.amazonaws.services.ec2.model.RunInstancesResult;
 import com.amazonaws.services.ec2.model.Tag;
+import com.sequenceiq.provisioning.controller.ExceptionControllerAdvice;
 import com.sequenceiq.provisioning.controller.InternalServerException;
 import com.sequenceiq.provisioning.domain.AwsCredential;
 import com.sequenceiq.provisioning.domain.AwsStackDescription;
@@ -51,9 +54,11 @@ import com.sequenceiq.provisioning.service.ProvisionService;
 @Service
 public class AwsProvisionService implements ProvisionService {
 
+    private static final int ONE_SECOND = 1000;
     private static final String INSTANCE_TAG_KEY = "CloudbreakStackId";
     private static final int SESSION_CREDENTIALS_DURATION = 3600;
-    private static final String OK_STATUS = "ok";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExceptionControllerAdvice.class);
 
     @Autowired
     private CloudFormationTemplate template;
@@ -79,7 +84,7 @@ public class AwsProvisionService implements ProvisionService {
             stackResult = client.describeStacks(stackRequest);
             stackStatus = stackResult.getStacks().get(0).getStackStatus();
             try {
-                Thread.sleep(1000);
+                Thread.sleep(ONE_SECOND);
             } catch (InterruptedException e) {
                 throw new InternalServerException("Thread interrupted.", e);
             }
@@ -116,6 +121,7 @@ public class AwsProvisionService implements ProvisionService {
 
         } else if ("CREATE_FAILED".equals(stackStatus)) {
             // TODO
+            LOGGER.error("Aws stack creation failed.");
         }
 
     }
