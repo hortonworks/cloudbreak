@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.amazonaws.AmazonClientException;
 import com.amazonaws.auth.BasicSessionCredentials;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
@@ -42,7 +43,9 @@ import com.sequenceiq.provisioning.domain.Credential;
 import com.sequenceiq.provisioning.domain.DetailedAwsStackDescription;
 import com.sequenceiq.provisioning.domain.Stack;
 import com.sequenceiq.provisioning.domain.StackDescription;
+import com.sequenceiq.provisioning.domain.Status;
 import com.sequenceiq.provisioning.domain.User;
+import com.sequenceiq.provisioning.repository.StackRepository;
 import com.sequenceiq.provisioning.service.ProvisionService;
 
 /**
@@ -66,6 +69,9 @@ public class AwsProvisionService implements ProvisionService {
 
     @Autowired
     private CrossAccountCredentialsProvider credentialsProvider;
+
+    @Autowired
+    private StackRepository stackRepository;
 
     @Override
     public void createStack(User user, Stack stack, Credential credential) {
@@ -92,37 +98,46 @@ public class AwsProvisionService implements ProvisionService {
         }
 
         if ("CREATE_COMPLETE".equals(stackStatus)) {
-            String subnetId = null;
-            String securityGroupId = null;
-            List<Output> outputs = stackResult.getStacks().get(0).getOutputs();
-            for (Output output : outputs) {
-                if ("Subnet".equals(output.getOutputKey())) {
-                    subnetId = output.getOutputValue();
-                } else if ("SecurityGroup".equals(output.getOutputKey())) {
-                    securityGroupId = output.getOutputValue();
+            try {
+                String subnetId = null;
+                String securityGroupId = null;
+                List<Output> outputs = stackResult.getStacks().get(0).getOutputs();
+                for (Output output : outputs) {
+                    if ("Subnet".equals(output.getOutputKey())) {
+                        subnetId = output.getOutputValue();
+                    } else if ("SecurityGroup".equals(output.getOutputKey())) {
+                        securityGroupId = output.getOutputValue();
+                    }
                 }
+                AmazonEC2Client amazonEC2Client = createEC2Client(user, awsTemplate.getRegion(), credential);
+                RunInstancesRequest runInstancesRequest = new RunInstancesRequest(awsTemplate.getAmiId(), stack.getClusterSize(), stack.getClusterSize());
+                runInstancesRequest.setKeyName(awsTemplate.getKeyName());
+                runInstancesRequest.setInstanceType(awsTemplate.getInstanceType());
+                runInstancesRequest.setSecurityGroupIds(Arrays.asList(securityGroupId));
+                runInstancesRequest.setSubnetId(subnetId);
+                // runInstancesRequest.setUserData("");
+                RunInstancesResult runInstancesResult = amazonEC2Client.runInstances(runInstancesRequest);
+
+                List<String> instanceIds = new ArrayList<>();
+                for (Instance instance : runInstancesResult.getReservation().getInstances()) {
+                    instanceIds.add(instance.getInstanceId());
+                }
+
+                CreateTagsRequest createTagsRequest = new CreateTagsRequest().withResources(instanceIds)
+                        .withTags(new Tag(INSTANCE_TAG_KEY, stack.getName()));
+                amazonEC2Client.createTags(createTagsRequest);
+
+                stack.setStatus(Status.CREATE_COMPLETED);
+                stackRepository.save(stack);
+            } catch (AmazonClientException e) {
+                LOGGER.error("Failed to run EC2 instances", e);
+                stack.setStatus(Status.CREATE_FAILED);
             }
-            AmazonEC2Client amazonEC2Client = createEC2Client(user, awsTemplate.getRegion(), credential);
-            RunInstancesRequest runInstancesRequest = new RunInstancesRequest(awsTemplate.getAmiId(), stack.getClusterSize(), stack.getClusterSize());
-            runInstancesRequest.setKeyName(awsTemplate.getKeyName());
-            runInstancesRequest.setInstanceType(awsTemplate.getInstanceType());
-            runInstancesRequest.setSecurityGroupIds(Arrays.asList(securityGroupId));
-            runInstancesRequest.setSubnetId(subnetId);
-            // runInstancesRequest.setUserData("");
-            RunInstancesResult runInstancesResult = amazonEC2Client.runInstances(runInstancesRequest);
 
-            List<String> instanceIds = new ArrayList<>();
-            for (Instance instance : runInstancesResult.getReservation().getInstances()) {
-                instanceIds.add(instance.getInstanceId());
-            }
-
-            CreateTagsRequest createTagsRequest = new CreateTagsRequest().withResources(instanceIds)
-                    .withTags(new Tag(INSTANCE_TAG_KEY, stack.getName()));
-            amazonEC2Client.createTags(createTagsRequest);
-
-        } else if ("CREATE_FAILED".equals(stackStatus)) {
-            // TODO
-            LOGGER.error("Aws stack creation failed.");
+        } else {
+            LOGGER.error(String.format("Stack creation failed. id: '%s'", stack.getId()));
+            stack.setStatus(Status.CREATE_FAILED);
+            stackRepository.save(stack);
         }
 
     }
