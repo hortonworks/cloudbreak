@@ -67,7 +67,7 @@ public class SimpleStackService implements StackService {
         }
         Stack stack = stackConverter.convert(stackRequest);
         stack.setUser(user);
-        stackRepository.save(stack);
+        stack = stackRepository.save(stack);
 
         ProvisionService provisionService = provisionServices.get(template.cloudPlatform());
         provisionService.createStack(user, stack, stack.getCredential());

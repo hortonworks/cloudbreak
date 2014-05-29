@@ -24,10 +24,14 @@ import com.amazonaws.services.cloudformation.model.Output;
 import com.amazonaws.services.cloudformation.model.Parameter;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.CreateTagsRequest;
+import com.amazonaws.services.ec2.model.DescribeInstanceStatusRequest;
+import com.amazonaws.services.ec2.model.DescribeInstanceStatusResult;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.Filter;
 import com.amazonaws.services.ec2.model.Instance;
+import com.amazonaws.services.ec2.model.InstanceStatus;
+import com.amazonaws.services.ec2.model.InstanceStatusDetails;
 import com.amazonaws.services.ec2.model.RunInstancesRequest;
 import com.amazonaws.services.ec2.model.RunInstancesResult;
 import com.amazonaws.services.ec2.model.Tag;
@@ -130,6 +134,32 @@ public class AwsProvisionService implements ProvisionService {
                 CreateTagsRequest createTagsRequest = new CreateTagsRequest().withResources(instanceIds)
                         .withTags(new Tag(INSTANCE_TAG_KEY, stack.getName()));
                 amazonEC2Client.createTags(createTagsRequest);
+
+                // TODO: poll instances if they already started -> poll Ambari?
+                boolean stop = false;
+                while (!stop) {
+                    try {
+                        Thread.sleep(ONE_SECOND);
+                    } catch (InterruptedException e) {
+                        throw new InternalServerException("Thread interrupted.", e);
+                    }
+                    DescribeInstanceStatusRequest instanceStatusRequest = new DescribeInstanceStatusRequest()
+                            .withInstanceIds(instanceIds);
+                    DescribeInstanceStatusResult instanceStatusResult = amazonEC2Client.describeInstanceStatus(instanceStatusRequest);
+                    if (instanceStatusResult.getInstanceStatuses().size() > 0) {
+                        InstanceStatus status = instanceStatusResult.getInstanceStatuses().get(0);
+                        stop = "running".equals(status.getInstanceState().getName());
+                        stop = stop && "ok".equals(status.getInstanceStatus().getStatus());
+                        for (InstanceStatusDetails details : status.getInstanceStatus().getDetails()) {
+                            if ("reachability".equals(details.getName())) {
+                                stop = stop && "passed".equals(details.getStatus());
+                                // initializing
+                            }
+                        }
+                    }
+
+                    // TODO: what if failed?
+                }
 
                 stack.setStatus(Status.CREATE_COMPLETED);
                 stackRepository.save(stack);
