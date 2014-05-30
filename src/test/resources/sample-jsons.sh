@@ -2,7 +2,7 @@
 
 curl -u user@seq.com:test123 -X GET -H "Content-Type:application/json"  http://localhost:8080/me | jq .
 
-curl -u user@seq.com:test123 -X PUT -H "Content-Type:application/json" -d '{"START"}' http://localhost:8080/stack/50 | jq .
+curl -u user@seq.com:test123 -X PUT -H "Content-Type:application/json" -d '{"statusRequest": "START"}' http://localhost:8080/stack/50 | jq .
 
 curl -u user@seq.com:test123 -X POST -H "Content-Type:application/json" -d '{"cloudPlatform":"AWS","parameters":{"roleArn":"a8b8dac0-2b84-41da-a08b-1e45297e0d2b"}}' http://localhost:8080/credential | jq .
 
