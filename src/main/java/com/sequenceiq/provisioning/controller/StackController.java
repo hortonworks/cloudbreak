@@ -18,7 +18,6 @@ import com.sequenceiq.provisioning.controller.json.StackJson;
 import com.sequenceiq.provisioning.controller.json.StackResult;
 import com.sequenceiq.provisioning.controller.json.StatusRequestJson;
 import com.sequenceiq.provisioning.controller.json.TemplateJson;
-import com.sequenceiq.provisioning.domain.StatusRequest;
 import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.repository.UserRepository;
 import com.sequenceiq.provisioning.security.CurrentUser;
@@ -65,12 +64,14 @@ public class StackController {
     @ResponseBody
     public ResponseEntity<Boolean> startOrStopAllOnStack(@CurrentUser User user, @PathVariable Long stackId,
             @RequestBody StatusRequestJson statusRequestJson) {
-        if (StatusRequest.START.equals(statusRequestJson.getStatusRequest())) {
-            return new ResponseEntity<>(stackService.startAll(user, stackId), HttpStatus.OK);
-        } else if (StatusRequest.STOP.equals(statusRequestJson.getStatusRequest())) {
-            return new ResponseEntity<>(stackService.stopAll(user, stackId), HttpStatus.OK);
+        switch (statusRequestJson.getStatusRequest()) {
+            case STOP:
+                return new ResponseEntity<>(stackService.stopAll(user, stackId), HttpStatus.OK);
+            case START:
+                return new ResponseEntity<>(stackService.startAll(user, stackId), HttpStatus.OK);
+            default:
+                throw new BadRequestException("The requested status not valid.");
         }
-        throw new BadRequestException("The requested status not valid.");
     }
 
 }

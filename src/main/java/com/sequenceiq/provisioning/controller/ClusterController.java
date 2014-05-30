@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.sequenceiq.provisioning.controller.json.ClusterRequest;
 import com.sequenceiq.provisioning.controller.json.ClusterResponse;
 import com.sequenceiq.provisioning.controller.json.StatusRequestJson;
-import com.sequenceiq.provisioning.domain.StatusRequest;
 import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.security.CurrentUser;
 import com.sequenceiq.provisioning.service.AmbariClusterService;
@@ -44,12 +43,14 @@ public class ClusterController {
     @ResponseBody
     public ResponseEntity<String> startOrStopAllServiceOnCLuster(@CurrentUser User user, @PathVariable Long stackId,
             @RequestBody StatusRequestJson statusRequestJson) {
-        if (StatusRequest.START.equals(statusRequestJson.getStatusRequest())) {
-            return new ResponseEntity<>(ambariClusterService.startAllService(user, stackId), HttpStatus.OK);
-        } else if (StatusRequest.STOP.equals(statusRequestJson.getStatusRequest())) {
-            return new ResponseEntity<>(ambariClusterService.stopAllService(user, stackId), HttpStatus.OK);
+        switch (statusRequestJson.getStatusRequest()) {
+            case STOP:
+                return new ResponseEntity<>(ambariClusterService.stopAllService(user, stackId), HttpStatus.OK);
+            case START:
+                return new ResponseEntity<>(ambariClusterService.stopAllService(user, stackId), HttpStatus.OK);
+            default:
+                throw new BadRequestException("The requested status not valid.");
         }
-        throw new BadRequestException("The requested status not valid.");
     }
 
 }
