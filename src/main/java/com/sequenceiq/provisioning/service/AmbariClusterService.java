@@ -141,11 +141,13 @@ public class AmbariClusterService {
 
     public String startAllService(User user, Long stackId) {
         //todo define startall
+        AmbariClient ambariClient = new AmbariClient("172.17.0.2", "8080");
         return "";
     }
 
     public String stopAllService(User user, Long stackId) {
         //todo define stopall
+        AmbariClient ambariClient = new AmbariClient("172.17.0.2", "8080");
         return "";
     }
 

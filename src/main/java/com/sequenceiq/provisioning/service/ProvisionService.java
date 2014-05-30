@@ -21,4 +21,8 @@ public interface ProvisionService {
 
     CloudPlatform getCloudPlatform();
 
+    Boolean startAll(User user, Long stackId);
+
+    Boolean stopAll(User user, Long stackId);
+
 }
