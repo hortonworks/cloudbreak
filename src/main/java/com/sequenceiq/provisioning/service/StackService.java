@@ -16,4 +16,7 @@ public interface StackService {
 
     void delete(User user, Long id);
 
+    Boolean startAll(User user, Long stackId);
+
+    Boolean stopAll(User user, Long stackId);
 }

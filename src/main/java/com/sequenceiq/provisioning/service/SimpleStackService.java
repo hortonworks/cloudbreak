@@ -85,4 +85,14 @@ public class SimpleStackService implements StackService {
         stackRepository.delete(id);
     }
 
+    @Override
+    public Boolean startAll(User user, Long stackId) {
+        return Boolean.TRUE;
+    }
+
+    @Override
+    public Boolean stopAll(User user, Long stackId) {
+        return Boolean.TRUE;
+    }
+
 }

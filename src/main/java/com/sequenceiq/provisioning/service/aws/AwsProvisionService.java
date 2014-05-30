@@ -208,6 +208,16 @@ public class AwsProvisionService implements ProvisionService {
         return CloudPlatform.AWS;
     }
 
+    @Override
+    public Boolean startAll(User user, Long stackId) {
+        return Boolean.TRUE;
+    }
+
+    @Override
+    public Boolean stopAll(User user, Long stackId) {
+        return Boolean.TRUE;
+    }
+
     private AmazonCloudFormationClient createCloudFormationClient(User user, Regions regions, Credential credential) {
         BasicSessionCredentials basicSessionCredentials = credentialsProvider
                 .retrieveSessionCredentials(SESSION_CREDENTIALS_DURATION, "provision-ambari", user, (AwsCredential) credential);

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sequenceiq.provisioning.controller.json.StackJson;
 import com.sequenceiq.provisioning.controller.json.StackResult;
+import com.sequenceiq.provisioning.controller.json.StatusRequestJson;
 import com.sequenceiq.provisioning.controller.json.TemplateJson;
 import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.repository.UserRepository;
@@ -57,6 +58,20 @@ public class StackController {
     public ResponseEntity<TemplateJson> deleteStack(@CurrentUser User user, @PathVariable Long stackId) {
         stackService.delete(userRepository.findOne(user.getId()), stackId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @RequestMapping(method = RequestMethod.PUT, value = "{stackId}")
+    @ResponseBody
+    public ResponseEntity<Boolean> startOrStopAllOnStack(@CurrentUser User user, @PathVariable Long stackId,
+            @RequestBody StatusRequestJson statusRequestJson) {
+        switch (statusRequestJson.getStatusRequest()) {
+            case STOP:
+                return new ResponseEntity<>(stackService.stopAll(user, stackId), HttpStatus.OK);
+            case START:
+                return new ResponseEntity<>(stackService.startAll(user, stackId), HttpStatus.OK);
+            default:
+                throw new BadRequestException("The requested status not valid.");
+        }
     }
 
 }

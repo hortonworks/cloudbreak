@@ -1,8 +1,5 @@
 package com.sequenceiq.provisioning.service.azure;
 
-import groovyx.net.http.HttpResponseDecorator;
-import groovyx.net.http.HttpResponseException;
-
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,6 +24,9 @@ import com.sequenceiq.provisioning.domain.Stack;
 import com.sequenceiq.provisioning.domain.StackDescription;
 import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.service.ProvisionService;
+
+import groovyx.net.http.HttpResponseDecorator;
+import groovyx.net.http.HttpResponseException;
 
 @Service
 public class AzureProvisionService implements ProvisionService {
@@ -284,5 +284,15 @@ public class AzureProvisionService implements ProvisionService {
     @Override
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.AZURE;
+    }
+
+    @Override
+    public Boolean startAll(User user, Long stackId) {
+        return Boolean.TRUE;
+    }
+
+    @Override
+    public Boolean stopAll(User user, Long stackId) {
+        return Boolean.TRUE;
     }
 }

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sequenceiq.provisioning.controller.json.ClusterRequest;
 import com.sequenceiq.provisioning.controller.json.ClusterResponse;
+import com.sequenceiq.provisioning.controller.json.StatusRequestJson;
 import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.security.CurrentUser;
 import com.sequenceiq.provisioning.service.AmbariClusterService;
@@ -36,6 +37,20 @@ public class ClusterController {
     @ResponseBody
     public ResponseEntity<ClusterResponse> retrieveClusters(@CurrentUser User user, @PathVariable Long stackId) {
         return new ResponseEntity<>(ambariClusterService.retrieveCluster(user, stackId), HttpStatus.OK);
+    }
+
+    @RequestMapping(method = RequestMethod.PUT)
+    @ResponseBody
+    public ResponseEntity<String> startOrStopAllServiceOnCLuster(@CurrentUser User user, @PathVariable Long stackId,
+            @RequestBody StatusRequestJson statusRequestJson) {
+        switch (statusRequestJson.getStatusRequest()) {
+            case STOP:
+                return new ResponseEntity<>(ambariClusterService.stopAllService(user, stackId), HttpStatus.OK);
+            case START:
+                return new ResponseEntity<>(ambariClusterService.stopAllService(user, stackId), HttpStatus.OK);
+            default:
+                throw new BadRequestException("The requested status not valid.");
+        }
     }
 
 }
