@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sequenceiq.provisioning.controller.json.StackJson;
 import com.sequenceiq.provisioning.controller.json.StackResult;
+import com.sequenceiq.provisioning.controller.json.StatusRequestJson;
 import com.sequenceiq.provisioning.controller.json.TemplateJson;
 import com.sequenceiq.provisioning.domain.StatusRequest;
 import com.sequenceiq.provisioning.domain.User;
@@ -62,10 +63,11 @@ public class StackController {
 
     @RequestMapping(method = RequestMethod.PUT, value = "{stackId}")
     @ResponseBody
-    public ResponseEntity<Boolean> startOrStopAllOnStack(@CurrentUser User user, @PathVariable Long stackId, @RequestBody StatusRequest statusRequest) {
-        if (StatusRequest.START.equals(statusRequest)) {
+    public ResponseEntity<Boolean> startOrStopAllOnStack(@CurrentUser User user, @PathVariable Long stackId,
+            @RequestBody StatusRequestJson statusRequestJson) {
+        if (StatusRequest.START.equals(statusRequestJson.getStatusRequest())) {
             return new ResponseEntity<>(stackService.startAll(user, stackId), HttpStatus.OK);
-        } else if (StatusRequest.STOP.equals(statusRequest)) {
+        } else if (StatusRequest.STOP.equals(statusRequestJson.getStatusRequest())) {
             return new ResponseEntity<>(stackService.stopAll(user, stackId), HttpStatus.OK);
         }
         throw new BadRequestException("The requested status not valid.");
