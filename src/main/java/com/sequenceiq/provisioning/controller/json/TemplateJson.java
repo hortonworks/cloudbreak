@@ -1,5 +1,6 @@
 package com.sequenceiq.provisioning.controller.json;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.validation.constraints.Size;
@@ -16,7 +17,7 @@ public class TemplateJson implements JsonEntity {
     private CloudPlatform cloudPlatform;
     @Size(max = 20)
     private String clusterName;
-    private Map<String, String> parameters;
+    private Map<String, Object> parameters = new HashMap<>();
 
     @JsonProperty("id")
     public Long getId() {
@@ -44,11 +45,11 @@ public class TemplateJson implements JsonEntity {
         this.clusterName = clusterName;
     }
 
-    public Map<String, String> getParameters() {
+    public Map<String, Object> getParameters() {
         return parameters;
     }
 
-    public void setParameters(Map<String, String> parameters) {
+    public void setParameters(Map<String, Object> parameters) {
         this.parameters = parameters;
     }
 

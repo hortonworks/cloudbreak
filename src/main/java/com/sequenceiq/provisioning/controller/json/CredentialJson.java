@@ -1,5 +1,6 @@
 package com.sequenceiq.provisioning.controller.json;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.validation.constraints.Size;
@@ -16,7 +17,7 @@ public class CredentialJson implements JsonEntity {
     @Size(max = 20)
     private String name;
     private CloudPlatform cloudPlatform;
-    private Map<String, String> parameters;
+    private Map<String, Object> parameters = new HashMap<>();
 
     public CredentialJson() {
 
@@ -48,11 +49,11 @@ public class CredentialJson implements JsonEntity {
         this.cloudPlatform = cloudPlatform;
     }
 
-    public Map<String, String> getParameters() {
+    public Map<String, Object> getParameters() {
         return parameters;
     }
 
-    public void setParameters(Map<String, String> parameters) {
+    public void setParameters(Map<String, Object> parameters) {
         this.parameters = parameters;
     }
 

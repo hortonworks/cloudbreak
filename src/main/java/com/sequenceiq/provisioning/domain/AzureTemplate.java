@@ -1,7 +1,12 @@
 package com.sequenceiq.provisioning.domain;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 
 @Entity
 public class AzureTemplate extends Template implements ProvisionEntity {
@@ -18,6 +23,8 @@ public class AzureTemplate extends Template implements ProvisionEntity {
     private String password;
     private String sshPublicKeyFingerprint;
     private String sshPublicKeyPath;
+    @OneToMany(mappedBy = "azureTemplate", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Port> ports = new HashSet<>();
 
     @ManyToOne
     private User user;
@@ -119,6 +126,14 @@ public class AzureTemplate extends Template implements ProvisionEntity {
 
     public void setAddressPrefix(String addressPrefix) {
         this.addressPrefix = addressPrefix;
+    }
+
+    public Set<Port> getPorts() {
+        return ports;
+    }
+
+    public void setPorts(Set<Port> ports) {
+        this.ports = ports;
     }
 
     public User getUser() {

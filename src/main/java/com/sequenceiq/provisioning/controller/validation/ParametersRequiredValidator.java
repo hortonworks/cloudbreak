@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 public class ParametersRequiredValidator extends AbstractParameterValidator {
 
     @Override
-    public boolean validate(Map<String, String> parameters, ConstraintValidatorContext context, List<TemplateParam> paramList) {
+    public boolean validate(Map<String, Object> parameters, ConstraintValidatorContext context, List<TemplateParam> paramList) {
         boolean valid = true;
         for (TemplateParam param : paramList) {
             if (Boolean.TRUE.equals(param.getRequired())) {

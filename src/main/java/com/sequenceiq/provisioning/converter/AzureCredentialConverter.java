@@ -20,7 +20,7 @@ public class AzureCredentialConverter extends AbstractConverter<CredentialJson, 
         credentialJson.setId(entity.getId());
         credentialJson.setCloudPlatform(CloudPlatform.AZURE);
         credentialJson.setName(entity.getName());
-        Map<String, String> params = new HashMap<>();
+        Map<String, Object> params = new HashMap<>();
         params.put(RequiredAzureCredentialParam.JKS_PASSWORD.getName(), entity.getJks());
         params.put(RequiredAzureCredentialParam.SUBSCRIPTION_ID.getName(), entity.getSubscriptionId());
         credentialJson.setParameters(params);
@@ -30,9 +30,9 @@ public class AzureCredentialConverter extends AbstractConverter<CredentialJson, 
     @Override
     public AzureCredential convert(CredentialJson json) {
         AzureCredential azureCredential = new AzureCredential();
-        azureCredential.setJks(json.getParameters().get(RequiredAzureCredentialParam.JKS_PASSWORD.getName()));
+        azureCredential.setJks(String.valueOf(json.getParameters().get(RequiredAzureCredentialParam.JKS_PASSWORD.getName())));
         azureCredential.setName(json.getName());
-        azureCredential.setSubscriptionId(json.getParameters().get(RequiredAzureCredentialParam.SUBSCRIPTION_ID.getName()));
+        azureCredential.setSubscriptionId(String.valueOf(json.getParameters().get(RequiredAzureCredentialParam.SUBSCRIPTION_ID.getName())));
         azureCredential.setCloudPlatform(CloudPlatform.AZURE);
         return azureCredential;
     }

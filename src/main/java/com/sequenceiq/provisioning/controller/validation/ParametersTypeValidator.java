@@ -14,14 +14,14 @@ public class ParametersTypeValidator extends AbstractParameterValidator {
     private static final String SEPARATOR = ", ";
 
     @Override
-    public boolean validate(Map<String, String> parameters, ConstraintValidatorContext context, List<TemplateParam> paramList) {
+    public boolean validate(Map<String, Object> parameters, ConstraintValidatorContext context, List<TemplateParam> paramList) {
         boolean valid = true;
         for (TemplateParam entry : paramList) {
-            String param = parameters.get(entry.getName());
+            Object param = parameters.get(entry.getName());
             if (param != null) {
                 if (entry.getClazz().isEnum()) {
                     try {
-                        entry.getClazz().getField(parameters.get(entry.getName()));
+                        entry.getClazz().getField(String.valueOf(parameters.get(entry.getName())));
                     } catch (NoSuchFieldException e) {
                         addParameterConstraintViolation(context, entry.getName(), String.format("%s is not valid type. The valid fields are [%s]",
                                 entry.getName(),

@@ -7,7 +7,7 @@ import javax.validation.ConstraintValidatorContext;
 
 public interface ParameterValidator {
 
-    boolean validate(Map<String, String> parameters, ConstraintValidatorContext context, List<TemplateParam> paramsList);
+    boolean validate(Map<String, Object> parameters, ConstraintValidatorContext context, List<TemplateParam> paramsList);
 
     ValidatorType getValidatorType();
 }
