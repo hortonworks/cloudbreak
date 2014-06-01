@@ -8,6 +8,9 @@ import org.springframework.core.io.ClassPathResource;
 
 public class FileReaderUtils {
 
+    private FileReaderUtils() {
+    }
+
     public static final String readFileFromClasspath(String fileName) throws IOException {
         StringBuilder sb = new StringBuilder();
         BufferedReader br;
