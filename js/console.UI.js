@@ -94,6 +94,7 @@
 					// must force isotope redraw, its container height set 0 by some fucking shite
 					$container.isotope();
 				});
+				// toggle fa-angle-up/down icon and sort button
 				$('.cluster-block').on('hidden.bs.collapse', function() {
   				$('#toggle-cluster-block-btn i').removeClass('fa-angle-up').addClass('fa-angle-down');
 					$('#sort-clusters-btn').addClass('disabled');
@@ -141,14 +142,14 @@
 					$("#notification-n-filtering").prop( "disabled", false );
 				});
 				
-// main template/blueprint/credential panels show hide
-				$('#panel-templates-collapse').on('hidden.bs.collapse', function() {
+// main template/blueprint/credential panels icon toggle
+				$('.panel-btn-in-header-collapse').on('hidden.bs.collapse', function() {
   				$(this).parent().find('.panel-heading .btn i').removeClass('fa-angle-up').addClass('fa-angle-down');
 				});
-				$('#panel-templates-collapse').on('shown.bs.collapse', function() {
+				$('.panel-btn-in-header-collapse').on('shown.bs.collapse', function() {
   				$(this).parent().find('.panel-heading .btn i').removeClass('fa-angle-down').addClass('fa-angle-up');
 				});
-// create panels
+// create * panels
 				$('.panel-under-btn-collapse').on('shown.bs.collapse', function() {
   				$(this).parent().prev()
 						.find('.btn').fadeTo("fast", 0, function() { 

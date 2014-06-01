@@ -121,7 +121,7 @@
 						<!-- create cluster button -->
 						<div class="col-sm-3 col-xs-2"><a href="#" id="create-cluster-btn" class="btn btn-success btn-block btn-collapse-title disabled" role="button"><i class="fa fa-plus fa-fw"></i><span> create cluster</span></a></div>
 					
-					</div><!-- .notification-controls -->
+					</div><!-- .row .notification-controls -->
 					
 					
 					<div class="carousel-inner">
@@ -255,7 +255,7 @@
 						
 					<div class="item">
 					
-					<div class="row cluster-details collapse in">
+					<div class="row cluster-details">
 						<div class="col-sm-11 col-md-9 col-lg-9">
 							
 							<div class="panel panel-default panel-docking">
@@ -263,12 +263,13 @@
 									<a href="#" id="cluster-details-back-btn" class="btn btn-info btn-fa-2x" role="button"><i class="fa fa-angle-left fa-2x fa-fw-forced"></i></a>
 									<h4>Cluster_name_20_char</h4>
 								</div>
+
 								<div class="panel-body">
-									
-									<p class="btn-row text-right"><a href="#" class="btn btn-info" role="button">
-										<i class="fa fa-pause fa-fw"></i><span> stop</span></a> 
-										
-										<a href="#" id="terminate-btn" class="btn btn-danger" role="button" data-toggle="modal" data-target="#modal01"><i class="fa fa-times fa-fw"></i><span> terminate stack/cluster</span></a></p>
+
+									<p class="text-right">
+										<a href="#" class="btn btn-info" role="button"><i class="fa fa-pause fa-fw"></i><span> stop</span></a> 
+										<a href="#" id="terminate-btn" class="btn btn-danger" role="button" data-toggle="modal" data-target="#modal01"><i class="fa fa-times fa-fw"></i><span> terminate</span></a>
+									</p>
 									
 									<form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
 
@@ -456,13 +457,12 @@
 						
 <!-- .... TEMPLATES PANEL ................................................. -->
 					
-					<!-- <div class="row templates"> -->
 						<div class="col-md-12 col-lg-6">
 							
 							<div class="panel panel-default">
 								<div class="panel-heading panel-heading-nav">
-									<a href="#panel-templates-collapse" id="templates-btn" class="btn btn-info btn-fa-2x" role="button" data-toggle="collapse"><i class="fa fa-angle-down fa-2x fa-fw-forced"></i></a>
-									<h4><span class="badge pull-right">2</span> Manage templates</h4>
+									<a href="#panel-templates-collapse" id="templates-btn" class="btn btn-info btn-fa-2x" role="button" data-toggle="collapse" data-target="#panel-templates-collapse"><i class="fa fa-angle-down fa-2x fa-fw-forced"></i></a>
+									<h4><span class="badge pull-right">2</span> manage templates</h4>
 								</div>
 								
 								<div id="panel-templates-collapse" class="panel-collapse panel-btn-in-header-collapse collapse">
@@ -591,15 +591,18 @@
 									
 									<div class="panel-group" id="templete-list-accordion">
 										
+<!-- .............. TEMPLATE .............................................. -->	
+										
 										<div class="panel panel-default">
 											<div class="panel-heading">
-												<h5><a href="#panel-template-collapse01" data-toggle="collapse" data-parent="#templete-list-accordion" data-targer="#panel-template-collapse01"><i class="fa fa-file-o fa-fw"></i> Template_name_001</a></h5>
+												<h5><a href="#panel-template-collapse01" data-toggle="collapse" data-parent="#templete-list-accordion" data-target="#panel-template-collapse01"><i class="fa fa-file-o fa-fw"></i> Template_name_001</a></h5>
 											</div>
 											<div id="panel-template-collapse01" class="panel-collapse collapse">
+												
+											<p class="btn-row-over-panel"><a href="#" class="btn btn-danger" role="button"><i class="fa fa-times fa-fw"></i><span> delete</span></a></p>
+
 											<div class="panel-body">
 												
-												<p class="btn-row text-right"><a href="#" class="btn btn-danger" role="button"><i class="fa fa-times fa-fw"></i><span> delete</span></a></p>
-
 												<form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
 
 													<div class="form-group">
@@ -638,15 +641,18 @@
 											</div>
 										</div><!-- .panel -->
 										
+<!-- .............. TEMPLATE .............................................. -->											
+										
 										<div class="panel panel-default">
 											<div class="panel-heading">
-												<h5><a href="#panel-template-collapse02" data-toggle="collapse" data-parent="#templete-list-accordion"><i class="fa fa-file-o fa-fw"></i> Template_name_002</a></h5>
+												<h5><a href="#panel-template-collapse02" data-toggle="collapse" data-target="panel-template-collapse02" data-parent="#templete-list-accordion"><i class="fa fa-file-o fa-fw"></i> Template_name_002</a></h5>
 											</div>
 											<div id="panel-template-collapse02" class="panel-collapse collapse">
+												
+											<p class="btn-row-over-panel"><a href="#" class="btn btn-danger" role="button"><i class="fa fa-times fa-fw"></i><span> delete</span></a></p>
+
 											<div class="panel-body">
 												
-												<p class="btn-row text-right"><a href="#" class="btn btn-danger" role="button"><i class="fa fa-times fa-fw"></i><span> delete</span></a></p>
-
 												<form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
 
 													<div class="form-group">
@@ -693,23 +699,22 @@
 							</div><!-- .panel -->
 							
 						</div><!-- .col- -->
-					<!-- /div><!-- .row .templates -->
 
 <!-- .... BLUEPRINTS PANEL ................................................. -->
 					
-					<!-- <div class="row blueprints"> -->
 						<div class="col-md-12 col-lg-6">
 							
 							<div class="panel panel-default">
 								<div class="panel-heading panel-heading-nav">
-									<a href="#panel-blueprints-collapse" id="templates-btn" class="btn btn-info btn-fa-2x" role="button" data-toggle="collapse"><i class="fa fa-angle-down fa-2x fa-fw-forced"></i></a>
-									<h4><span class="badge pull-right">1</span> Manage blueprints</h4>
-								</div>
+									<a href="#" id="templates-btn" class="btn btn-info btn-fa-2x" role="button" data-toggle="collapse" data-target="#panel-blueprints-collapse"><i class="fa fa-angle-down fa-2x fa-fw-forced"></i></a>
+									<h4><span class="badge pull-right">1</span> manage blueprints</h4>
+								</div>								
 								<div id="panel-blueprints-collapse" class="panel-collapse panel-btn-in-header-collapse collapse">
-								<div class="panel-body">
-									
+																	
+									<div class="panel-body">
+										
 									<p class="btn-row-over-panel"><a href="#panel-create-blueprint-collapse" class="btn btn-success" role="button" data-toggle="collapse" data-target="#panel-create-blueprint-collapse"><i class="fa fa-plus fa-fw"></i><span> create blueprint</span></a></p>
-
+									
 <!-- ............ CREATE FORM ............................................. -->
 									
 									<div class="panel panel-default">
@@ -753,9 +758,13 @@
 											<div class="panel-heading">
 												<h5><a href="#panel-blueprint-collapse01" data-toggle="collapse" data-parent="#blueprint-list-accordion"><i class="fa fa-th fa-fw"></i> Blueprint_name_001</a></h5>
 											</div>
-											<div id="panel-blueprint-collapse01" class="panel-collapse collapse">
-											<div class="panel-body">
 
+											<div id="panel-blueprint-collapse01" class="panel-collapse collapse">
+											
+											<p class="btn-row-over-panel text-right"><a href="#" class="btn btn-danger" role="button"><i class="fa fa-times fa-fw"></i><span> delete</span></a></p>
+		
+											<div class="panel-body">
+												
 												<form class="form-horizontal" role="document">
 
 													<div class="form-group">
@@ -829,7 +838,7 @@
 										</div><!-- .panel -->
 
 																			
-								</div><!-- #template-list-accordion -->
+									</div><!-- #blueprint-list-accordion -->
 								
 								</div><!-- .panel-body -->
 							
@@ -837,20 +846,18 @@
 							</div><!-- .panel -->
 							
 						</div><!-- .col- -->
-					<!-- </div><!-- .row .blueprints -->
 						
-					</div>
+					</div><!-- .row -->
 					<div class="row">
 										
 <!-- .... CREDENTIALS PANEL ................................................ -->
 					
-					<!-- <div class="row credentials"> -->
 						<div class="col-md-12 col-lg-6">
 							
 							<div class="panel panel-default">
 								<div class="panel-heading panel-heading-nav">
 									<a href="#panel-credentials-collapse" id="credentials-btn" class="btn btn-info btn-fa-2x" role="button" data-toggle="collapse"><i class="fa fa-angle-down fa-2x fa-fw-forced"></i></a>
-									<h4><span class="badge pull-right">2</span> Manage credentials</h4>
+									<h4><span class="badge pull-right">2</span> manage credentials</h4>
 								</div>
 								
 								<div id="panel-credentials-collapse" class="panel-collapse panel-btn-in-header-collapse collapse">
@@ -978,15 +985,19 @@
 <!-- ............ CREDENTIAL LIST ........................................... -->									
 									
 									<div class="panel-group" id="credential-list-accordion">
+									
+<!-- ............. CREDENTIAL ............................................... -->											
 										
 										<div class="panel panel-default">
 											<div class="panel-heading">
-												<h5><a href="#panel-credential-collapse01" data-toggle="collapse" data-parent="#credential-list-accordion" data-target="# panel-credential-collapse01"><i class="fa fa-tag fa-fw"></i> Credential_name_001</a></h5>
+												<h5><a href="#panel-credential-collapse01" data-toggle="collapse" data-parent="#credential-list-accordion" data-target="#panel-credential-collapse01"><i class="fa fa-tag fa-fw"></i> Credential_name_001</a></h5>
 											</div>
 											<div id="panel-credential-collapse01" class="panel-collapse collapse">
-											<div class="panel-body">
+											
+												<p class="btn-row-over-panel"><a href="#" class="btn btn-danger" role="button"><i class="fa fa-times fa-fw"></i><span> delete</span></a></p>
 												
-												<p class="btn-row text-right"><a href="#" class="btn btn-danger" role="button"><i class="fa fa-times fa-fw"></i><span> delete</span></a></p>
+												<div class="panel-body">
+												
 
 												<form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
 
@@ -1026,52 +1037,6 @@
 											</div>
 										</div><!-- .panel -->
 										
-										<div class="panel panel-default">
-											<div class="panel-heading">
-												<h5><a href="#panel-credential-collapse02" data-toggle="collapse" data-parent="#credential-list-accordion"><i class="fa fa-tag fa-fw"></i> Credential_name_002</a></h5>
-											</div>
-											<div id="panel-credential-collapse02" class="panel-collapse collapse">
-											<div class="panel-body">
-												
-												<p class="btn-row text-right"><a href="#" class="btn btn-danger" role="button"><i class="fa fa-times fa-fw"></i><span> delete</span></a></p>
-
-												<form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
-
-													<div class="form-group">
-														<label class="col-sm-3 control-label" for="parameter1">parameter1</label>
-														<div class="col-sm-9">
-															<p id="parameter1" class="form-control-static">Parameter 1</p>
-														</div><!-- .col-sm-9 -->
-													</div><!-- .form-group -->
-													<div class="form-group">
-														<label class="col-sm-3 control-label" for="parameter1">parameter1</label>
-														<div class="col-sm-9">
-															<p id="parameter1" class="form-control-static">Parameter 1</p>
-														</div><!-- .col-sm-9 -->
-													</div><!-- .form-group -->
-													<div class="form-group">
-														<label class="col-sm-3 control-label" for="parameter1">parameter1</label>
-														<div class="col-sm-9">
-															<p id="parameter1" class="form-control-static">Parameter 1</p>
-														</div><!-- .col-sm-9 -->
-													</div><!-- .form-group -->
-													<div class="form-group">
-														<label class="col-sm-3 control-label" for="parameter1">parameter1</label>
-														<div class="col-sm-9">
-															<p id="parameter1" class="form-control-static">Parameter 1</p>
-														</div><!-- .col-sm-9 -->
-													</div><!-- .form-group -->
-													<div class="form-group">
-														<label class="col-sm-3 control-label" for="parameter1">parameter1</label>
-														<div class="col-sm-9">
-															<p id="parameter1" class="form-control-static">Parameter 1</p>
-														</div><!-- .col-sm-9 -->
-													</div><!-- .form-group -->
-													
-												</form>
-											</div>
-											</div>
-										</div><!-- .panel -->
 																																						
 									</div><!-- #credential-list-accordion -->
 									
@@ -1081,7 +1046,6 @@
 							</div><!-- .panel -->
 							
 						</div><!-- .col- -->
-					<!-- </div><!-- .row .credentials -->
 						
 					</div><!-- .row -->				
 				</div><!-- .container-fluid -->
@@ -1099,16 +1063,20 @@
 
 <!-- ............. modals ................. -->
 			
-			<div class="modal fade " id="modal01" tabindex="-1" role="dialog" aria-labelledby="modal01-title" aria-hidden="true">
+			<div class="modal fade" id="modal01" tabindex="-1" role="dialog" aria-labelledby="modal01-title" aria-hidden="true">
 				<div class="modal-dialog modal-sm">
 					<div class="modal-content">
 						<div class="modal-header">
         			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        			<h5 class="modal-title" id="modal01-title">............</h5>
+        			<h5 class="modal-title" id="modal01-title"> </h5>
       			</div><!-- .modal-header -->
       			<div class="modal-body">
-							      				    			
+							 <p>Terminate cluster <strong>Cluster_name_20_char</strong> and its stack?</p>
       			</div><!-- .modal-body -->
+						<div class="modal-footer">
+							<button type="button" class="btn btn-default" data-dismiss="modal">cancel</button>
+              <button type="button" class="btn btn-danger">terminate</button>
+						</div><!-- .modal-footer -->
 					</div><!-- .modal-content -->
 				</div><!-- .modal-dialog -->
 			</div><!-- .modal .login-modal-sm -->
