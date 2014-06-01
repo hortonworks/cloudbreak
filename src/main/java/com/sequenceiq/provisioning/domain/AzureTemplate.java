@@ -27,7 +27,7 @@ public class AzureTemplate extends Template implements ProvisionEntity {
     private Set<Port> ports = new HashSet<>();
 
     @ManyToOne
-    private User user;
+    private User azureTemplateOwner;
 
     public AzureTemplate() {
     }
@@ -136,13 +136,18 @@ public class AzureTemplate extends Template implements ProvisionEntity {
         this.ports = ports;
     }
 
-    public User getUser() {
-        return user;
+    public User getAzureTemplateOwner() {
+        return azureTemplateOwner;
+    }
+
+    public void setAzureTemplateOwner(User azureTemplateOwner) {
+        this.azureTemplateOwner = azureTemplateOwner;
+
     }
 
     @Override
     public void setUser(User user) {
-        this.user = user;
+        this.azureTemplateOwner = user;
     }
 
     @Override

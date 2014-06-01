@@ -45,10 +45,10 @@ public class User implements ProvisionEntity {
     @Column(unique = true, nullable = false)
     private String email;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "awsCredentialOwner", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<AwsCredential> awsCredentials = new HashSet<>();
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "azureCredentialOwner", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<AzureCredential> azureCredentials = new HashSet<>();
 
     @OneToOne
@@ -57,10 +57,10 @@ public class User implements ProvisionEntity {
     @NotEmpty
     private String password;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "azureTemplateOwner", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<AzureTemplate> azureTemplates = new HashSet<>();
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "awsTemplateOwner", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<AwsTemplate> awsTemplates = new HashSet<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)

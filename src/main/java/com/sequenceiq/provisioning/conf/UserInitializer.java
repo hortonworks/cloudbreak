@@ -40,11 +40,11 @@ public class UserInitializer implements InitializingBean {
             AzureCredential azureCredential = new AzureCredential();
             azureCredential.setSubscriptionId("1234-45567-123213-12312");
             azureCredential.setJks("test123");
-            azureCredential.setUser(user2);
+            azureCredential.setAzureCredentialOwner(user2);
 
             AwsCredential awsCredential = new AwsCredential();
             awsCredential.setRoleArn("arnrole");
-            awsCredential.setUser(user2);
+            awsCredential.setAwsCredentialOwner(user2);
 
             user2.getAwsCredentials().add(awsCredential);
             user2.getAzureCredentials().add(azureCredential);

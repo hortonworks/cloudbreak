@@ -11,7 +11,7 @@ public class AzureCredential extends Credential implements ProvisionEntity {
     private String jks;
 
     @ManyToOne
-    private User user;
+    private User azureCredentialOwner;
 
     public AzureCredential() {
 
@@ -33,12 +33,12 @@ public class AzureCredential extends Credential implements ProvisionEntity {
         this.jks = jks;
     }
 
-    public User getUser() {
-        return user;
+    public User getAzureCredentialOwner() {
+        return azureCredentialOwner;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setAzureCredentialOwner(User azureCredentialOwner) {
+        this.azureCredentialOwner = azureCredentialOwner;
     }
 
     @Override

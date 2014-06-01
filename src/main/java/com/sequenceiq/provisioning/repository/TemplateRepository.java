@@ -7,6 +7,6 @@ import com.sequenceiq.provisioning.domain.Template;
 
 public interface TemplateRepository extends CrudRepository<Template, Long> {
 
-    @PostAuthorize("returnObject?.user?.id == principal?.id")
+    @PostAuthorize("returnObject?.awsTemplateOwner?.id == principal?.id || returnObject?.azureTemplateOwner?.id == principal?.id")
     Template findOne(Long id);
 }

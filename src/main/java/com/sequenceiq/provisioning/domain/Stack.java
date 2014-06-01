@@ -27,6 +27,8 @@ public class Stack implements ProvisionEntity {
 
     private Status status;
 
+    private String ambariIp;
+
     @OneToOne
     private Template template;
 
@@ -90,5 +92,13 @@ public class Stack implements ProvisionEntity {
 
     public void setStatus(Status status) {
         this.status = status;
+    }
+
+    public String getAmbariIp() {
+        return ambariIp;
+    }
+
+    public void setAmbariIp(String ambariIp) {
+        this.ambariIp = ambariIp;
     }
 }

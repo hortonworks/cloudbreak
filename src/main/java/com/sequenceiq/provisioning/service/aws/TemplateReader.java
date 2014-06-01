@@ -1,25 +1,17 @@
 package com.sequenceiq.provisioning.service.aws;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.provisioning.domain.CloudFormationTemplate;
+import com.sequenceiq.provisioning.util.FileReaderUtils;
 
 @Component
 public class TemplateReader {
 
     public CloudFormationTemplate readTemplateFromFile(String templateName) throws IOException {
-        StringBuilder sb = new StringBuilder();
-        BufferedReader br;
-        br = new BufferedReader(new InputStreamReader(new ClassPathResource(templateName).getInputStream(), "UTF-8"));
-        for (int c = br.read(); c != -1; c = br.read()) {
-            sb.append((char) c);
-        }
-        return new CloudFormationTemplate(sb.toString());
+        return new CloudFormationTemplate(FileReaderUtils.readFileFromClasspath(templateName));
     }
 
 }

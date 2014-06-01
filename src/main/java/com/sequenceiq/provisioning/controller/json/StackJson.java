@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
 import com.sequenceiq.provisioning.domain.StackDescription;
+import com.sequenceiq.provisioning.domain.Status;
 
 public class StackJson implements JsonEntity {
 
@@ -19,6 +20,8 @@ public class StackJson implements JsonEntity {
     private CloudPlatform cloudPlatform;
     private StackDescription description;
     private Long credentialId;
+    private Status status;
+    private String ambariServerIp;
 
     public StackJson() {
     }
@@ -83,5 +86,25 @@ public class StackJson implements JsonEntity {
     @JsonIgnore
     public void setDescription(StackDescription description) {
         this.description = description;
+    }
+
+    @JsonProperty("status")
+    public Status getStatus() {
+        return status;
+    }
+
+    @JsonIgnore
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    @JsonProperty("ambariServerIp")
+    public String getAmbariServerIp() {
+        return ambariServerIp;
+    }
+
+    @JsonIgnore
+    public void setAmbariServerIp(String ambariServerIp) {
+        this.ambariServerIp = ambariServerIp;
     }
 }

@@ -13,7 +13,6 @@ import com.sequenceiq.provisioning.domain.CloudPlatform;
 @Component
 public class AwsCredentialConverter extends AbstractConverter<CredentialJson, AwsCredential> {
 
-
     @Override
     public CredentialJson convert(AwsCredential entity) {
         CredentialJson credentialJson = new CredentialJson();
@@ -22,6 +21,7 @@ public class AwsCredentialConverter extends AbstractConverter<CredentialJson, Aw
         credentialJson.setName(entity.getName());
         Map<String, Object> params = new HashMap<>();
         params.put(RequiredAWSCredentialParam.ROLE_ARN.getName(), entity.getRoleArn());
+        params.put(RequiredAWSCredentialParam.INSTANCE_PROFILE_ROLE_ARN.getName(), entity.getInstanceProfileRoleArn());
         credentialJson.setParameters(params);
         return credentialJson;
     }
@@ -31,6 +31,7 @@ public class AwsCredentialConverter extends AbstractConverter<CredentialJson, Aw
         AwsCredential awsCredential = new AwsCredential();
         awsCredential.setName(json.getName());
         awsCredential.setRoleArn(String.valueOf(json.getParameters().get(RequiredAWSCredentialParam.ROLE_ARN.getName())));
+        awsCredential.setInstanceProfileRoleArn(String.valueOf(json.getParameters().get(RequiredAWSCredentialParam.INSTANCE_PROFILE_ROLE_ARN.getName())));
         awsCredential.setCloudPlatform(CloudPlatform.AWS);
         return awsCredential;
     }

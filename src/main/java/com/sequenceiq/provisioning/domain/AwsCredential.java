@@ -7,20 +7,21 @@ import javax.persistence.ManyToOne;
 public class AwsCredential extends Credential implements ProvisionEntity {
 
     private String roleArn;
+    private String instanceProfileRoleArn;
 
     @ManyToOne
-    private User user;
+    private User awsCredentialOwner;
 
     public AwsCredential() {
 
     }
 
-    public User getUser() {
-        return user;
+    public User getAwsCredentialOwner() {
+        return awsCredentialOwner;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setAwsCredentialOwner(User awsCredentialOwner) {
+        this.awsCredentialOwner = awsCredentialOwner;
     }
 
     public String getRoleArn() {
@@ -29,6 +30,14 @@ public class AwsCredential extends Credential implements ProvisionEntity {
 
     public void setRoleArn(String roleArn) {
         this.roleArn = roleArn;
+    }
+
+    public String getInstanceProfileRoleArn() {
+        return instanceProfileRoleArn;
+    }
+
+    public void setInstanceProfileRoleArn(String instanceProfileRoleArn) {
+        this.instanceProfileRoleArn = instanceProfileRoleArn;
     }
 
     @Override
