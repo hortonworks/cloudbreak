@@ -41,7 +41,7 @@ public class ClusterController {
 
     @RequestMapping(method = RequestMethod.PUT)
     @ResponseBody
-    public ResponseEntity<String> startOrStopAllServiceOnCLuster(@CurrentUser User user, @PathVariable Long stackId,
+    public ResponseEntity<String> startOrStopAllServiceOnCluster(@CurrentUser User user, @PathVariable Long stackId,
             @RequestBody StatusRequestJson statusRequestJson) {
         switch (statusRequestJson.getStatusRequest()) {
         case STOP:

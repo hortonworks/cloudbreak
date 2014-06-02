@@ -39,6 +39,7 @@ public class AmbariClusterService {
     @Autowired
     private StackRepository stackRepository;
 
+    @Async
     public void createCluster(User user, Long stackId, ClusterRequest clusterRequest) {
         try {
             Stack stack = stackRepository.findOne(stackId);
