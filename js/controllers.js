@@ -23,6 +23,10 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
         if($scope.templates === null || $scope.templates === undefined ) {
             $scope.templates = [];
         }
+        if($scope.blueprints === null || $scope.blueprints === undefined ) {
+            $scope.blueprints = [];
+        }
+
         $scope.reloadCtrl = function(){
             console.log('reloading...');
             $route.reload();
@@ -74,10 +78,27 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             });
         }
 
+        $scope.getBluePrints = function() {
+            $http({
+                method: 'GET',
+                dataType: 'json',
+                withCredentials: true,
+                url:  $rootScope.apiUrl + "/blueprint",
+                headers: {
+                    'Authorization': 'Basic ' + $rootScope.basic_auth,
+                    'Content-Type': 'application/json'
+                }
+            }).success(function (data, status, headers, config) {
+                $scope.blueprints = data;
+            }).error(function (data, status, headers, config) {
+                console.log("unsuccess");
+            });
+        }
+
         $scope.doQuerys = function() {
             $scope.getCredentials();
             $scope.getTemplates();
-            //$scope.getCloudInstances();
+            $scope.getBluePrints();
         }
 
         if (typeof (Storage) !== "undefined") {

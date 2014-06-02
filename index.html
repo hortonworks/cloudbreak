@@ -879,11 +879,11 @@
 
     <div class="col-md-12 col-lg-6">
 
-        <div class="panel panel-default">
+        <div class="panel panel-default" >
             <div class="panel-heading panel-heading-nav">
                 <a href="#" id="templates-btn" class="btn btn-info btn-fa-2x" role="button" data-toggle="collapse" data-target="#panel-blueprints-collapse"><i
                         class="fa fa-angle-down fa-2x fa-fw-forced"></i></a>
-                <h4><span class="badge pull-right">1</span> manage blueprints</h4>
+                <h4><span class="badge pull-right">{{blueprints.length}}</span> manage blueprints</h4>
             </div>
             <div id="panel-blueprints-collapse" class="panel-collapse panel-btn-in-header-collapse collapse">
 
@@ -939,10 +939,10 @@
 
                     <div class="panel-group" id="blueprint-list-accordion">
 
-                        <div class="panel panel-default">
+                        <div class="panel panel-default" ng-repeat="blueprint in blueprints">
                             <div class="panel-heading">
                                 <h5><a href="#panel-blueprint-collapse01" data-toggle="collapse" data-parent="#blueprint-list-accordion"><i
-                                        class="fa fa-th fa-fw"></i> Blueprint_name_001</a></h5>
+                                        class="fa fa-th fa-fw"></i>{{blueprint.name}}</a></h5>
                             </div>
 
                             <div id="panel-blueprint-collapse01" class="panel-collapse collapse">
@@ -958,65 +958,9 @@
                                             <label class="col-sm-3 control-label" for="source">source</label>
 
                                             <div class="col-sm-9">
-                                                                <pre id="source" class="form-control-static blueprint-source">{ "host_groups" : [
-        { "name" : "host_group_1",
-          "components" : [
-            { "name" : "ZOOKEEPER_SERVER" },
-            { "name" : "ZOOKEEPER_CLIENT" },
-            { "name" : "PIG" },
-            { "name" : "HISTORYSERVER" },
-            { "name" : "SUPERVISOR" },
-            { "name" : "NAGIOS_SERVER" },
-            { "name" : "TEZ_CLIENT" },
-            { "name" : "AMBARI_SERVER" },
-            { "name" : "APP_TIMELINE_SERVER" },
-            { "name" : "GANGLIA_SERVER" },
-            { "name" : "HDFS_CLIENT" },
-            { "name" : "NODEMANAGER" },
-            { "name" : "YARN_CLIENT" },
-            { "name" : "MAPREDUCE2_CLIENT" },
-            { "name" : "DATANODE" },
-            { "name" : "GANGLIA_MONITOR" },
-            { "name" : "RESOURCEMANAGER" } ],
-          "cardinality" : "1" },
-        { "name" : "host_group_2",
-          "components" : [
-            { "name" : "ZOOKEEPER_SERVER" },
-            { "name" : "ZOOKEEPER_CLIENT" },
-            { "name" : "PIG" },
-            { "name" : "STORM_REST_API" },
-            { "name" : "STORM_UI_SERVER" },
-            { "name" : "SUPERVISOR" },
-            { "name" : "SECONDARY_NAMENODE" },
-            { "name" : "TEZ_CLIENT" },
-            { "name" : "HDFS_CLIENT" },
-            { "name" : "NODEMANAGER" },
-            { "name" : "YARN_CLIENT" },
-            { "name" : "MAPREDUCE2_CLIENT" },
-            { "name" : "DATANODE" },
-            { "name" : "GANGLIA_MONITOR" },
-            { "name" : "DRPC_SERVER" },
-            { "name" : "NIMBUS" } ],
-          "cardinality" : "1" },
-        { "name" : "host_group_3",
-          "components" : [
-            { "name" : "ZOOKEEPER_SERVER" },
-            { "name" : "ZOOKEEPER_CLIENT" },
-            { "name" : "PIG" },
-            { "name" : "NAMENODE" },
-            { "name" : "SUPERVISOR" },
-            { "name" : "TEZ_CLIENT" },
-            { "name" : "HDFS_CLIENT" },
-            { "name" : "NODEMANAGER" },
-            { "name" : "YARN_CLIENT" },
-            { "name" : "MAPREDUCE2_CLIENT" },
-            { "name" : "DATANODE" },
-            { "name" : "GANGLIA_MONITOR" } ],
-          "cardinality" : "1" } ],
-      "Blueprints" : {
-        "blueprint_name" : "blueprint-c1",
-        "stack_name" : "HDP",
-        "stack_version" : "2.1" } }</pre>
+                                                                <pre id="source" class="form-control-static blueprint-source">
+{{blueprint.ambariBlueprint}}
+                                                                </pre>
                                             </div>
                                             <!-- .col-sm-9 -->
                                         </div>
@@ -1055,7 +999,7 @@
     <div class="panel-heading panel-heading-nav">
         <a href="#panel-credentials-collapse" id="credentials-btn" class="btn btn-info btn-fa-2x" role="button" data-toggle="collapse"><i
                 class="fa fa-angle-down fa-2x fa-fw-forced"></i></a>
-        <h4><span class="badge pull-right">2</span> manage credentials</h4>
+        <h4><span class="badge pull-right">{{templates.length}}</span> manage credentials</h4>
     </div>
 
     <div id="panel-credentials-collapse" class="panel-collapse panel-btn-in-header-collapse collapse">
