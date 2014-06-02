@@ -9,7 +9,6 @@ public class ClusterRequest {
     private Long blueprintId;
     private List<HostGroupMappingJson> hostGroups;
     private String ambariIp;
-    private String port;
 
     public String getClusterName() {
         return clusterName;
@@ -47,11 +46,4 @@ public class ClusterRequest {
         this.ambariIp = ambariIp;
     }
 
-    public String getPort() {
-        return port;
-    }
-
-    public void setPort(String port) {
-        this.port = port;
-    }
 }

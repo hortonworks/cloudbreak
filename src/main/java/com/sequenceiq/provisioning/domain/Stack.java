@@ -101,4 +101,6 @@ public class Stack implements ProvisionEntity {
     public void setAmbariIp(String ambariIp) {
         this.ambariIp = ambariIp;
     }
+
+
 }
