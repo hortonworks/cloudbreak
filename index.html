@@ -81,9 +81,7 @@
                             <i class="fa fa-tag fa-fw"></i> <span class="text-danger">select a credential</span> <b class="caret"></b>
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a href="#" data-value="cred-001">Credential_Name_20ch</a></li>
-                            <li><a href="#" data-value="cred-002">AWS_Cred_02</a></li>
-                            <li><a href="#" data-value="cred-003">lalyos' VIP cred</a></li>
+                            <li  ng-repeat="credential in credentials"><a href="#" data-value="{{credential.id}}">{{credential.name}}</a></li>
                             <li class="divider"></li>
                             <li><a href="#" class="not-option" data-toggle="collapse" data-target="#panel-credentials-collapse"><i class="fa fa-edit fa-fw"></i>
                                 manage credentials</a></li>

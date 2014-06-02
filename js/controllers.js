@@ -17,6 +17,9 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
         if($rootScope.basic_auth === null || $rootScope.basic_auth === undefined ) {
             $rootScope.basic_auth = "dXNlckBzZXEuY29tOnRlc3QxMjM=";
         }
+        if($scope.credentials === null || $scope.credentials === undefined ) {
+            $scope.credentials = [];
+        }
 
         $scope.reloadCtrl = function(){
             console.log('reloading...');
@@ -35,13 +38,38 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             localStorage.signedIn = false;
         }
 
+        $scope.getCredentials = function() {
+            $http({
+                method: 'GET',
+                dataType: 'json',
+                withCredentials: true,
+                url:  $rootScope.apiUrl + "/credential",
+                headers: {
+                    'Authorization': 'Basic ' + $rootScope.basic_auth,
+                    'Content-Type': 'application/json'
+                }
+            }).success(function (data, status, headers, config) {
+                $scope.credentials = data;
+            }).error(function (data, status, headers, config) {
+                console.log("unsuccess");
+            });
+        }
+
+        $scope.doQuerys = function() {
+            $scope.getCredentials();
+            //$scope.getInfras();
+            //$scope.getCloudInstances();
+        }
+
         if (typeof (Storage) !== "undefined") {
             if (localStorage.signedIn === 'true') {
                 $rootScope.signedIn = true;
+                $scope.doQuerys();
             }
         } else {
             console.log("No localstorage support!");
         }
+
 
     }
 ]);
