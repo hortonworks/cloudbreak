@@ -2,8 +2,8 @@ package com.sequenceiq.provisioning.service;
 
 import java.util.Set;
 
+import com.sequenceiq.provisioning.controller.json.IdJson;
 import com.sequenceiq.provisioning.controller.json.StackJson;
-import com.sequenceiq.provisioning.controller.json.StackResult;
 import com.sequenceiq.provisioning.domain.User;
 
 public interface StackService {
@@ -12,7 +12,7 @@ public interface StackService {
 
     Set<StackJson> getAll(User user);
 
-    StackResult create(User user, StackJson stackRequest);
+    IdJson create(User user, StackJson stackRequest);
 
     void delete(User user, Long id);
 

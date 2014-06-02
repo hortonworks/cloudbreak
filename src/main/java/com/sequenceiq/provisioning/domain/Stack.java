@@ -21,7 +21,7 @@ public class Stack implements ProvisionEntity {
     @SequenceGenerator(name = "stack_generator", sequenceName = "stack_table")
     private Long id;
 
-    private Integer clusterSize;
+    private Integer nodeCount;
 
     private String name;
 
@@ -46,12 +46,12 @@ public class Stack implements ProvisionEntity {
         this.id = id;
     }
 
-    public Integer getClusterSize() {
-        return clusterSize;
+    public Integer getNodeCount() {
+        return nodeCount;
     }
 
-    public void setClusterSize(Integer clusterSize) {
-        this.clusterSize = clusterSize;
+    public void setNodeCount(Integer nodeCount) {
+        this.nodeCount = nodeCount;
     }
 
     public String getName() {

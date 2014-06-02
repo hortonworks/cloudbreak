@@ -62,11 +62,14 @@ import com.sequenceiq.provisioning.service.ProvisionService;
 import com.sequenceiq.provisioning.util.FileReaderUtils;
 
 /**
- * Provisions an Ambari based Hadoop cluster on a client's Amazon EC2 account by
- * calling the CloudFormation API with a pre-composed template and with
- * parameters coming from the JSON request. Authentication to the AWS API is
- * established through cross-account session credentials. See
- * {@link CrossAccountCredentialsProvider}.
+ * Provisions an Ambari based Hadoop cluster on a client Amazon EC2 account by
+ * calling the CloudFormation API with a pre-composed template to create a VPC
+ * with a public subnet, security group and internet gateway with parameters
+ * coming from the JSON request. Instances are run by a plain EC2 client after
+ * the VPC is ready because CloudFormation cannot handle multiple instances in
+ * one reservation group that is currently used by the user data script.
+ * Authentication to the AWS API is established through cross-account session
+ * credentials. See {@link CrossAccountCredentialsProvider}.
  */
 @Service
 public class AwsProvisionService implements ProvisionService {
@@ -114,22 +117,22 @@ public class AwsProvisionService implements ProvisionService {
                     disableSourceDestCheck(amazonEC2Client, instanceIds);
                     String ambariIp = pollAmbariServer(amazonEC2Client, stack.getId(), instanceIds);
                     if (ambariIp != null) {
-                        setAndSaveStatus(stack, Status.CREATE_COMPLETED);
+                        createSuccess(stack, ambariIp);
                     } else {
-                        setAndSaveStatus(stack, Status.CREATE_FAILED);
+                        createFailed(stack);
                     }
                 } catch (AmazonClientException e) {
                     LOGGER.error("Failed to run EC2 instances", e);
-                    setAndSaveStatus(stack, Status.CREATE_FAILED);
+                    createFailed(stack);
                 }
 
             } else {
                 LOGGER.error(String.format("Stack creation failed. id: '%s'", stack.getId()));
-                setAndSaveStatus(stack, Status.CREATE_FAILED);
+                createFailed(stack);
             }
         } catch (Throwable t) {
             LOGGER.error("Unhandled exception occured while creating stack on AWS.", t);
-            setAndSaveStatus(stack, Status.CREATE_FAILED);
+            createFailed(stack);
         }
 
     }
@@ -155,8 +158,14 @@ public class AwsProvisionService implements ProvisionService {
 
     }
 
-    private void setAndSaveStatus(Stack stack, Status status) {
-        stack.setStatus(status);
+    private void createFailed(Stack stack) {
+        stack.setStatus(Status.CREATE_FAILED);
+        stackRepository.save(stack);
+    }
+
+    private void createSuccess(Stack stack, String ambariIp) {
+        stack.setStatus(Status.CREATE_COMPLETED);
+        stack.setAmbariIp(ambariIp);
         stackRepository.save(stack);
     }
 
@@ -254,7 +263,7 @@ public class AwsProvisionService implements ProvisionService {
                 securityGroupId = output.getOutputValue();
             }
         }
-        RunInstancesRequest runInstancesRequest = new RunInstancesRequest(awsTemplate.getAmiId(), stack.getClusterSize(), stack.getClusterSize());
+        RunInstancesRequest runInstancesRequest = new RunInstancesRequest(awsTemplate.getAmiId(), stack.getNodeCount(), stack.getNodeCount());
         runInstancesRequest.setKeyName(awsTemplate.getKeyName());
         runInstancesRequest.setInstanceType(awsTemplate.getInstanceType());
         runInstancesRequest.setUserData(ec2userDataScript);
@@ -352,13 +361,14 @@ public class AwsProvisionService implements ProvisionService {
                 .withFilters(new Filter().withName("tag:" + INSTANCE_TAG_KEY).withValues(stack.getName()));
         DescribeInstancesResult instancesResult = ec2Client.describeInstances(instancesRequest);
 
-        List<String> instanceIds = new ArrayList<>();
-        for (Instance instance : instancesResult.getReservations().get(0).getInstances()) {
-            instanceIds.add(instance.getInstanceId());
+        if (instancesResult.getReservations().size() > 0) {
+            List<String> instanceIds = new ArrayList<>();
+            for (Instance instance : instancesResult.getReservations().get(0).getInstances()) {
+                instanceIds.add(instance.getInstanceId());
+            }
+            TerminateInstancesRequest terminateInstancesRequest = new TerminateInstancesRequest().withInstanceIds(instanceIds);
+            ec2Client.terminateInstances(terminateInstancesRequest);
         }
-
-        TerminateInstancesRequest terminateInstancesRequest = new TerminateInstancesRequest().withInstanceIds(instanceIds);
-        ec2Client.terminateInstances(terminateInstancesRequest);
 
         AmazonCloudFormationClient client = createCloudFormationClient(user, awsInfra.getRegion(), awsCredential);
         DeleteStackRequest deleteStackRequest = new DeleteStackRequest().withStackName(String.format("%s-%s", stack.getName(), stack.getId()));

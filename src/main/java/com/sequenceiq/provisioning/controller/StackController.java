@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.sequenceiq.provisioning.controller.json.IdJson;
 import com.sequenceiq.provisioning.controller.json.StackJson;
-import com.sequenceiq.provisioning.controller.json.StackResult;
 import com.sequenceiq.provisioning.controller.json.StatusRequestJson;
 import com.sequenceiq.provisioning.controller.json.TemplateJson;
 import com.sequenceiq.provisioning.domain.User;
@@ -35,7 +35,7 @@ public class StackController {
 
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<StackResult> createStack(@CurrentUser User user, @RequestBody @Valid StackJson stackRequest) {
+    public ResponseEntity<IdJson> createStack(@CurrentUser User user, @RequestBody @Valid StackJson stackRequest) {
         return new ResponseEntity<>(stackService.create(userRepository.findOneWithLists(user.getId()), stackRequest), HttpStatus.CREATED);
     }
 
@@ -65,12 +65,12 @@ public class StackController {
     public ResponseEntity<Boolean> startOrStopAllOnStack(@CurrentUser User user, @PathVariable Long stackId,
             @RequestBody StatusRequestJson statusRequestJson) {
         switch (statusRequestJson.getStatusRequest()) {
-            case STOP:
-                return new ResponseEntity<>(stackService.stopAll(user, stackId), HttpStatus.OK);
-            case START:
-                return new ResponseEntity<>(stackService.startAll(user, stackId), HttpStatus.OK);
-            default:
-                throw new BadRequestException("The requested status not valid.");
+        case STOP:
+            return new ResponseEntity<>(stackService.stopAll(user, stackId), HttpStatus.OK);
+        case START:
+            return new ResponseEntity<>(stackService.startAll(user, stackId), HttpStatus.OK);
+        default:
+            throw new BadRequestException("The requested status not valid.");
         }
     }
 

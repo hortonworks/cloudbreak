@@ -23,7 +23,7 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
     public StackJson convert(Stack entity) {
         StackJson stackJson = new StackJson();
         stackJson.setTemplateId(entity.getTemplate().getId());
-        stackJson.setClusterSize(entity.getClusterSize());
+        stackJson.setNodeCount(entity.getNodeCount());
         stackJson.setName(entity.getName());
         stackJson.setId(entity.getId());
         stackJson.setCloudPlatform(entity.getTemplate().cloudPlatform());
@@ -36,7 +36,7 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
     public StackJson convert(Stack entity, StackDescription description) {
         StackJson stackJson = new StackJson();
         stackJson.setTemplateId(entity.getTemplate().getId());
-        stackJson.setClusterSize(entity.getClusterSize());
+        stackJson.setNodeCount(entity.getNodeCount());
         stackJson.setId(entity.getId());
         stackJson.setName(entity.getName());
         stackJson.setCredentialId(entity.getCredential().getId());
@@ -50,7 +50,7 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
     @Override
     public Stack convert(StackJson json) {
         Stack stack = new Stack();
-        stack.setClusterSize(json.getClusterSize());
+        stack.setNodeCount(json.getNodeCount());
         stack.setName(json.getName());
         stack.setCredential(credentialRepository.findOne(json.getCredentialId()));
         stack.setTemplate(templateRepository.findOne(Long.valueOf(json.getTemplateId())));

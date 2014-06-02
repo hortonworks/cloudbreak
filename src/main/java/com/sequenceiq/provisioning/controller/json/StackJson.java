@@ -13,7 +13,7 @@ public class StackJson implements JsonEntity {
 
     private Long id;
     @Min(value = 2)
-    private int clusterSize;
+    private int nodeCount;
     @Size(max = 20)
     private String name;
     private Long templateId;
@@ -36,12 +36,12 @@ public class StackJson implements JsonEntity {
         this.id = id;
     }
 
-    public int getClusterSize() {
-        return clusterSize;
+    public int getNodeCount() {
+        return nodeCount;
     }
 
-    public void setClusterSize(int clusterSize) {
-        this.clusterSize = clusterSize;
+    public void setNodeCount(int nodeCount) {
+        this.nodeCount = nodeCount;
     }
 
     public String getName() {

@@ -20,7 +20,7 @@ import com.sequenceiq.provisioning.repository.UserRepository;
 @Component
 public class UserInitializer implements InitializingBean {
 
-    private static final Integer CLUSTER_SIZE = 3;
+    private static final Integer NODE_COUNT = 3;
 
     @Value("${HBM2DDL_STRATEGY}")
     private String hbm2ddlStrategy;
@@ -61,7 +61,7 @@ public class UserInitializer implements InitializingBean {
 
             Stack awsStack = new Stack();
             awsStack.setTemplate(awsTemplate);
-            awsStack.setClusterSize(CLUSTER_SIZE);
+            awsStack.setNodeCount(NODE_COUNT);
             awsStack.setName("coreos");
             awsStack.setUser(user2);
             awsStack.setCredential(awsCredential);
@@ -90,7 +90,7 @@ public class UserInitializer implements InitializingBean {
 
             Stack azureStack = new Stack();
             azureStack.setTemplate(azureTemplate);
-            azureStack.setClusterSize(CLUSTER_SIZE);
+            azureStack.setNodeCount(NODE_COUNT);
             azureStack.setUser(user2);
             azureStack.setCredential(azureCredential);
             azureStack.setName("azure stack");

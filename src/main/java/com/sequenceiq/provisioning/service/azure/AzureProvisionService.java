@@ -99,7 +99,7 @@ public class AzureProvisionService implements ProvisionService {
         requestId = (String) azureClient.getRequestId(virtualNetworkResponse);
         azureClient.waitUntilComplete(requestId);
 
-        for (int i = 0; i < stack.getClusterSize(); i++) {
+        for (int i = 0; i < stack.getNodeCount(); i++) {
             String vmName = getVmName(azureTemplate.getName(), i);
             props = new HashMap<>();
             props.put(NAME, vmName);
@@ -158,7 +158,7 @@ public class AzureProvisionService implements ProvisionService {
         } catch (Exception ex) {
             azureStackDescription.setCloudService(jsonHelper.createJsonFromString(String.format("{\"HostedService\": {%s}}", ERROR)));
         }
-        for (int i = 0; i < stack.getClusterSize(); i++) {
+        for (int i = 0; i < stack.getNodeCount(); i++) {
             String vmName = getVmName(templateName, i);
             Map<String, String> props = new HashMap<>();
             props.put(SERVICENAME, templateName);
@@ -204,7 +204,7 @@ public class AzureProvisionService implements ProvisionService {
             detailedAzureStackDescription.setStorageAccount(jsonHelper.createJsonFromString(String.format("{\"StorageService\": {%s}}", ERROR)));
         }
 
-        for (int i = 0; i < stack.getClusterSize(); i++) {
+        for (int i = 0; i < stack.getNodeCount(); i++) {
             String vmName = getVmName(templateName, i);
             Map<String, String> props = new HashMap<>();
             props.put(SERVICENAME, templateName);
@@ -230,7 +230,7 @@ public class AzureProvisionService implements ProvisionService {
                 ((AzureCredential) credential).getJks()
                 );
         String templateName = ((AzureTemplate) stack.getTemplate()).getName();
-        for (int i = 0; i < stack.getClusterSize(); i++) {
+        for (int i = 0; i < stack.getNodeCount(); i++) {
             String vmName = getVmName(templateName, i);
             Map<String, String> props = new HashMap<>();
             props.put(SERVICENAME, templateName);

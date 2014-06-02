@@ -11,8 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.provisioning.controller.NotFoundException;
+import com.sequenceiq.provisioning.controller.json.IdJson;
 import com.sequenceiq.provisioning.controller.json.StackJson;
-import com.sequenceiq.provisioning.controller.json.StackResult;
 import com.sequenceiq.provisioning.converter.StackConverter;
 import com.sequenceiq.provisioning.domain.CloudPlatform;
 import com.sequenceiq.provisioning.domain.Stack;
@@ -60,7 +60,7 @@ public class SimpleStackService implements StackService {
     }
 
     @Override
-    public StackResult create(User user, StackJson stackRequest) {
+    public IdJson create(User user, StackJson stackRequest) {
         Template template = templateRepository.findOne(stackRequest.getTemplateId());
         if (template == null) {
             throw new EntityNotFoundException(String.format("Template '%s' not found", stackRequest.getTemplateId()));
@@ -71,7 +71,7 @@ public class SimpleStackService implements StackService {
 
         ProvisionService provisionService = provisionServices.get(template.cloudPlatform());
         provisionService.createStack(user, stack, stack.getCredential());
-        return new StackResult("Create in progess");
+        return new IdJson(stack.getId());
     }
 
     @Override
