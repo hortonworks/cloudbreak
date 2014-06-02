@@ -42,12 +42,7 @@ public class AmbariClusterService {
         try {
             Blueprint blueprint = blueprintRepository.findOne(clusterRequest.getBlueprintId());
             addBlueprint(user, cloudId, blueprint, clusterRequest);
-            // TODO: get server and port from cloudService
             AmbariClient ambariClient = new AmbariClient(clusterRequest.getAmbariIp(), PORT);
-            // TODO: get hostnames in from cloudService
-            //Map<String, String> hosts = ambariClient.getHostNames();
-
-            // ambariClient.getClustersAsJson();
             // TODO: validate that sum cardinality is the same as host.size
             ambariClient.createCluster(
                     clusterRequest.getClusterName(),
@@ -61,7 +56,6 @@ public class AmbariClusterService {
     }
 
     public ClusterResponse retrieveCluster(User user, Long stackId) {
-        // TODO: get server and port from cloudService
         Stack stack = stackRepository.findOne(stackId);
         AmbariClient ambariClient = new AmbariClient(stack.getAmbariIp(), PORT);
         try {
@@ -84,7 +78,6 @@ public class AmbariClusterService {
     }
 
     public void addBlueprint(User user, Long cloudId, Blueprint blueprint, ClusterRequest clusterRequest) {
-        // TODO get ambari client host and port from cloud service
         AmbariClient ambariClient = new AmbariClient(clusterRequest.getAmbariIp(), PORT);
         try {
             ambariClient.addBlueprint(blueprint.getBlueprintText());
