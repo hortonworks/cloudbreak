@@ -263,7 +263,7 @@ public class AwsProvisionService implements ProvisionService {
                 securityGroupId = output.getOutputValue();
             }
         }
-        RunInstancesRequest runInstancesRequest = new RunInstancesRequest(awsTemplate.getAmiId(), stack.getClusterSize(), stack.getClusterSize());
+        RunInstancesRequest runInstancesRequest = new RunInstancesRequest(awsTemplate.getAmiId(), stack.getNodeCount(), stack.getNodeCount());
         runInstancesRequest.setKeyName(awsTemplate.getKeyName());
         runInstancesRequest.setInstanceType(awsTemplate.getInstanceType());
         runInstancesRequest.setUserData(ec2userDataScript);
