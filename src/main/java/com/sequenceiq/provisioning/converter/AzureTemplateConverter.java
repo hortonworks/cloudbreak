@@ -21,7 +21,7 @@ public class AzureTemplateConverter extends AbstractConverter<TemplateJson, Azur
     @Override
     public TemplateJson convert(AzureTemplate entity) {
         TemplateJson azureTemplateJson = new TemplateJson();
-        azureTemplateJson.setClusterName(entity.getName());
+        azureTemplateJson.setName(entity.getName());
         azureTemplateJson.setCloudPlatform(CloudPlatform.AZURE);
         azureTemplateJson.setId(entity.getId());
         Map<String, Object> props = new HashMap<>();
@@ -45,12 +45,12 @@ public class AzureTemplateConverter extends AbstractConverter<TemplateJson, Azur
     @Override
     public AzureTemplate convert(TemplateJson json) {
         AzureTemplate azureTemplate = new AzureTemplate();
-        azureTemplate.setName(json.getClusterName());
+        azureTemplate.setName(json.getName());
         azureTemplate.setDeploymentSlot(String.valueOf(json.getParameters().get(AzureTemplateParam.DEPLOYMENTSLOT.getName())));
         azureTemplate.setDescription(String.valueOf(json.getParameters().get(AzureTemplateParam.DESCRIPTION.getName())));
         azureTemplate.setImageName(String.valueOf(json.getParameters().get(AzureTemplateParam.IMAGENAME.getName())));
         azureTemplate.setLocation(String.valueOf(json.getParameters().get(AzureTemplateParam.LOCATION.getName())));
-        azureTemplate.setName(String.valueOf(json.getClusterName()));
+        azureTemplate.setName(String.valueOf(json.getName()));
         azureTemplate.setPassword(String.valueOf(json.getParameters().get(AzureTemplateParam.PASSWORD.getName())));
         azureTemplate.setSshPublicKeyFingerprint(String.valueOf(json.getParameters().get(AzureTemplateParam.SSH_PUBLIC_KEY_FINGERPRINT.getName())));
         azureTemplate.setSshPublicKeyPath(String.valueOf(json.getParameters().get(AzureTemplateParam.SSH_PUBLIC_KEY_PATH.getName())));

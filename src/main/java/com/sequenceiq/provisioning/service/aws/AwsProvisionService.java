@@ -62,11 +62,14 @@ import com.sequenceiq.provisioning.service.ProvisionService;
 import com.sequenceiq.provisioning.util.FileReaderUtils;
 
 /**
- * Provisions an Ambari based Hadoop cluster on a client's Amazon EC2 account by
- * calling the CloudFormation API with a pre-composed template and with
- * parameters coming from the JSON request. Authentication to the AWS API is
- * established through cross-account session credentials. See
- * {@link CrossAccountCredentialsProvider}.
+ * Provisions an Ambari based Hadoop cluster on a client Amazon EC2 account by
+ * calling the CloudFormation API with a pre-composed template to create a VPC
+ * with a public subnet, security group and internet gateway with parameters
+ * coming from the JSON request. Instances are run by a plain EC2 client after
+ * the VPC is ready because CloudFormation cannot handle multiple instances in
+ * one reservation group that is currently used by the user data script.
+ * Authentication to the AWS API is established through cross-account session
+ * credentials. See {@link CrossAccountCredentialsProvider}.
  */
 @Service
 public class AwsProvisionService implements ProvisionService {

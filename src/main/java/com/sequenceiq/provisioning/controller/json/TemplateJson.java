@@ -16,7 +16,7 @@ public class TemplateJson implements JsonEntity {
     private Long id;
     private CloudPlatform cloudPlatform;
     @Size(max = 20)
-    private String clusterName;
+    private String name;
     private Map<String, Object> parameters = new HashMap<>();
 
     @JsonProperty("id")
@@ -37,12 +37,12 @@ public class TemplateJson implements JsonEntity {
         this.cloudPlatform = type;
     }
 
-    public String getClusterName() {
-        return clusterName;
+    public String getName() {
+        return name;
     }
 
-    public void setClusterName(String clusterName) {
-        this.clusterName = clusterName;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public Map<String, Object> getParameters() {
