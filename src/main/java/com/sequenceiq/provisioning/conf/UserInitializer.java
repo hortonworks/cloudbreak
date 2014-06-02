@@ -94,9 +94,15 @@ public class UserInitializer implements InitializingBean {
             azureStack.setUser(user2);
             azureStack.setCredential(azureCredential);
             azureStack.setName("azure stack");
+
             Blueprint blueprint1 = new Blueprint();
-            blueprint1.setName("sample blueprint 1");
-            blueprint1.setBlueprintText("{\"data\": {}}");
+            blueprint1.setName("single-node-hdfs-yarn");
+            blueprint1.setBlueprintText("{\"host_groups\":[{\"name\":\"host_group_1\",\"components\":[{\"name\":\"NAMENODE\"},"
+                    + "{\"name\":\"SECONDARY_NAMENODE\"},"
+                    + "{\"name\":\"DATANODE\"},{\"name\":\"HDFS_CLIENT\"},{\"name\":\"RESOURCEMANAGER\"},{\"name\":\"NODEMANAGER\"},"
+                    + "{\"name\":\"YARN_CLIENT\"},{\"name\":\"HISTORYSERVER\"},{\"name\":\"MAPREDUCE2_CLIENT\"},"
+                    + "{\"name\":\"ZOOKEEPER_SERVER\"},{\"name\":\"ZOOKEEPER_CLIENT\"}],\"cardinality\":\"1\"}],\"Blueprints\":"
+                    + "{\"blueprint_name\":\"single-node-hdfs-yarn\",\"stack_name\":\"HDP\",\"stack_version\":\"2.0\"}}");
             blueprint1.setUser(user2);
 
             Blueprint blueprint2 = new Blueprint();

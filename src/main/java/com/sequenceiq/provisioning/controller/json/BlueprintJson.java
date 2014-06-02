@@ -21,10 +21,12 @@ public class BlueprintJson implements JsonEntity {
         this.ambariBlueprint = node.toString();
     }
 
+    @JsonProperty("name")
     public String getName() {
         return name;
     }
 
+    @JsonIgnore
     public void setName(String name) {
         this.name = name;
     }

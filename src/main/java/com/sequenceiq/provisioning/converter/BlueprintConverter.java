@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -40,7 +42,6 @@ public class BlueprintConverter extends AbstractConverter<BlueprintJson, Bluepri
     @Override
     public Blueprint convert(BlueprintJson json) {
         Blueprint blueprint = new Blueprint();
-        blueprint.setName(json.getName());
         if (json.getUrl() != null) {
             try {
                 String urlText = readUrl(json.getUrl());
@@ -51,6 +52,13 @@ public class BlueprintConverter extends AbstractConverter<BlueprintJson, Bluepri
             }
         } else {
             blueprint.setBlueprintText(json.getAmbariBlueprint());
+        }
+        Pattern p = Pattern.compile("\"blueprint_name\"(.*):(.*)\"(.*),");
+        Matcher m = p.matcher(blueprint.getBlueprintText());
+        if (m.find()) {
+            blueprint.setName(m.group().replaceAll(",(.*)\"(.*)stack_name(.*)", "").replaceAll("\"blueprint_name\"(.*):", "").trim().replaceAll("\"", ""));
+        } else {
+            throw new BadRequestException("Cannot parse ambari blueprint");
         }
         return blueprint;
     }

@@ -20,7 +20,7 @@ import com.sequenceiq.provisioning.security.CurrentUser;
 import com.sequenceiq.provisioning.service.AmbariClusterService;
 
 @Controller
-@RequestMapping("/stackId/{stackId}/cluster")
+@RequestMapping("/stack/{stackId}/cluster")
 public class ClusterController {
 
     @Autowired

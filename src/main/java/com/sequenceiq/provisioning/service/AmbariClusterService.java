@@ -2,10 +2,7 @@ package com.sequenceiq.provisioning.service;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,16 +15,19 @@ import com.sequenceiq.provisioning.controller.NotFoundException;
 import com.sequenceiq.provisioning.controller.json.BlueprintJson;
 import com.sequenceiq.provisioning.controller.json.ClusterRequest;
 import com.sequenceiq.provisioning.controller.json.ClusterResponse;
-import com.sequenceiq.provisioning.controller.json.HostGroupMappingJson;
 import com.sequenceiq.provisioning.controller.json.JsonHelper;
 import com.sequenceiq.provisioning.domain.Blueprint;
+import com.sequenceiq.provisioning.domain.Stack;
 import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.repository.BlueprintRepository;
+import com.sequenceiq.provisioning.repository.StackRepository;
 
 import groovyx.net.http.HttpResponseException;
 
 @Service
 public class AmbariClusterService {
+
+    private static final String PORT = "8080";
 
     @Autowired
     private JsonHelper jsonHelper;
@@ -35,28 +35,19 @@ public class AmbariClusterService {
     @Autowired
     private BlueprintRepository blueprintRepository;
 
-    public void createCluster(User user, Long cloudId, ClusterRequest clusterRequest) {
-        try {
-            addBlueprint(user, cloudId, blueprintRepository.findOne(clusterRequest.getBlueprintId()));
-            // TODO: get server and port from cloudService
-            AmbariClient ambariClient = new AmbariClient("172.17.0.2", "8080");
-            // TODO: get hostnames in from cloudService
-            List<String> hosts = Arrays.asList("node1.mykorp.kom", "node2.mykorp.kom", "node3.mykorp.kom", "node4.mykorp.kom");
+    @Autowired
+    private StackRepository stackRepository;
 
-            // TODO: validate that sum cardinality is the same as host.size
-            Map<String, List<String>> hostGroupMappings = new HashMap<>();
-            int hostIndex = 0;
-            for (HostGroupMappingJson hostGroupMappingJson : clusterRequest.getHostGroups()) {
-                List<String> hostsInGroup = new ArrayList<>();
-                for (int i = 0; i < hostGroupMappingJson.getCardinality(); i++) {
-                    hostsInGroup.add(hosts.get(hostIndex++));
-                }
-                hostGroupMappings.put(hostGroupMappingJson.getName(), hostsInGroup);
-            }
+    public void createCluster(User user, Long stackId, ClusterRequest clusterRequest) {
+        try {
+            Stack stack = stackRepository.findOne(stackId);
+            Blueprint blueprint = blueprintRepository.findOne(clusterRequest.getBlueprintId());
+            addBlueprint(user, stackId, blueprint, clusterRequest);
+            AmbariClient ambariClient = new AmbariClient(stack.getAmbariIp(), PORT);
             ambariClient.createCluster(
                     clusterRequest.getClusterName(),
-                    blueprintRepository.findOne(clusterRequest.getBlueprintId()).getName(),
-                    hostGroupMappings
+                    blueprint.getName(),
+                    ambariClient.recommendAssignments(blueprint.getName())
             );
 
         } catch (HttpResponseException e) {
@@ -64,9 +55,9 @@ public class AmbariClusterService {
         }
     }
 
-    public ClusterResponse retrieveCluster(User user, Long cloudId) {
-        // TODO: get server and port from cloudService
-        AmbariClient ambariClient = new AmbariClient("172.17.0.2", "8080");
+    public ClusterResponse retrieveCluster(User user, Long stackId) {
+        Stack stack = stackRepository.findOne(stackId);
+        AmbariClient ambariClient = new AmbariClient(stack.getAmbariIp(), PORT);
         try {
             return createClusterJsonFromString(ambariClient.getClusterAsJson());
         } catch (HttpResponseException e) {
@@ -86,9 +77,9 @@ public class AmbariClusterService {
         return clusterResponse;
     }
 
-    public void addBlueprint(User user, Long cloudId, Blueprint blueprint) {
-        // TODO get ambari client host and port from cloud service
-        AmbariClient ambariClient = new AmbariClient("172.17.0.2", "8080");
+    public void addBlueprint(User user, Long stackId, Blueprint blueprint, ClusterRequest clusterRequest) {
+        Stack stack = stackRepository.findOne(stackId);
+        AmbariClient ambariClient = new AmbariClient(stack.getAmbariIp(), PORT);
         try {
             ambariClient.addBlueprint(blueprint.getBlueprintText());
         } catch (HttpResponseException e) {
@@ -102,11 +93,11 @@ public class AmbariClusterService {
         }
     }
 
-    public List<BlueprintJson> retrieveBlueprints(User user, Long cloudId) {
+    public List<BlueprintJson> retrieveBlueprints(User user, Long stackId) {
         try {
             List<BlueprintJson> blueprints = new ArrayList<>();
-            // TODO get ambari client host and port from cloud service
-            AmbariClient ambariClient = new AmbariClient("172.17.0.2", "8080");
+            Stack stack = stackRepository.findOne(stackId);
+            AmbariClient ambariClient = new AmbariClient(stack.getAmbariIp(), PORT);
             Set<String> blueprintNames = ambariClient.getBlueprintsMap().keySet();
             for (String blueprintName : blueprintNames) {
                 blueprints.add(createBlueprintJsonFromString(ambariClient.getBlueprintAsJson(blueprintName)));
@@ -117,9 +108,9 @@ public class AmbariClusterService {
         }
     }
 
-    public BlueprintJson retrieveBlueprint(User user, Long cloudId, String id) {
-        // TODO get ambari client host and port from cloud service
-        AmbariClient ambariClient = new AmbariClient("172.17.0.2", "8080");
+    public BlueprintJson retrieveBlueprint(User user, Long stackId, String id) {
+        Stack stack = stackRepository.findOne(stackId);
+        AmbariClient ambariClient = new AmbariClient(stack.getAmbariIp(), PORT);
         try {
             return createBlueprintJsonFromString(ambariClient.getBlueprintAsJson(id));
         } catch (HttpResponseException e) {
@@ -140,14 +131,15 @@ public class AmbariClusterService {
     }
 
     public String startAllService(User user, Long stackId) {
-        //todo define startall
-        AmbariClient ambariClient = new AmbariClient("172.17.0.2", "8080");
+        Stack stack = stackRepository.findOne(stackId);
+        AmbariClient ambariClient = new AmbariClient(stack.getAmbariIp(), PORT);
+        //ambariClient.
         return "";
     }
 
     public String stopAllService(User user, Long stackId) {
-        //todo define stopall
-        AmbariClient ambariClient = new AmbariClient("172.17.0.2", "8080");
+        Stack stack = stackRepository.findOne(stackId);
+        AmbariClient ambariClient = new AmbariClient(stack.getAmbariIp(), PORT);
         return "";
     }
 
