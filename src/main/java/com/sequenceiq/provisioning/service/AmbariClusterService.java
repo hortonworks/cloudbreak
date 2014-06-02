@@ -132,6 +132,7 @@ public class AmbariClusterService {
     public String startAllService(User user, Long stackId) {
         Stack stack = stackRepository.findOne(stackId);
         AmbariClient ambariClient = new AmbariClient(stack.getAmbariIp(), PORT);
+        //ambariClient.
         return "";
     }
 

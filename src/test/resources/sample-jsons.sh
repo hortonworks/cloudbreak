@@ -8,7 +8,7 @@ curl -u user@seq.com:test123 -X POST -H "Content-Type:application/json" -d '{"cl
 
 curl -u user@seq.com:test123 -X POST -H "Content-Type:application/json" -d '{"cloudPlatform":"AZURE","parameters":{"subscriptionId":"a8b8dac0-2b84-41da-a08b-1e45297e0d2b", "jksPassword": "tet123"}}' http://localhost:8080/credential | jq .
 
-curl -u user@seq.com:test123 -X POST -H "Content-Type:application/json" -d '{"name":"smap123","url":"https://gist.githubusercontent.com/lalyos/53eeda2d3f6287656d84/raw/install-mac.sh"}' http://localhost:8080/blueprint | jq .
+curl -u user@seq.com:test123 -X POST -H "Content-Type:application/json" -d '{"name":"smap123","url":"https://gist.githubusercontent.com/doktoric/11eb550f45416e54fe60/raw/1a7d302c162ee5fb91866766ec1a1fd18fd98ed3/gistfile1.txt"}' http://localhost:8080/blueprint | jq .
 
 curl -u user@seq.com:test123 -X POST -H "Content-Type:application/json" -d '{"cloudPlatform":"AZURE","clusterSize":2, "templateId":"51", "name":"my azure", "credentialId":"51"}' http://localhost:8080/stack | jq .
 
