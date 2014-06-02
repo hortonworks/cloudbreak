@@ -96,7 +96,7 @@ public class UserInitializer implements InitializingBean {
             azureStack.setName("azure stack");
 
             Blueprint blueprint1 = new Blueprint();
-            blueprint1.setName("sample");
+            blueprint1.setName("single-node-hdfs-yarn");
             blueprint1.setBlueprintText("{\"host_groups\":[{\"name\":\"host_group_1\",\"components\":[{\"name\":\"NAMENODE\"},"
                     + "{\"name\":\"SECONDARY_NAMENODE\"},"
                     + "{\"name\":\"DATANODE\"},{\"name\":\"HDFS_CLIENT\"},{\"name\":\"RESOURCEMANAGER\"},{\"name\":\"NODEMANAGER\"},"

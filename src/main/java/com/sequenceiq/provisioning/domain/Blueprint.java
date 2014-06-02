@@ -21,8 +21,6 @@ public class Blueprint implements ProvisionEntity {
 
     private String name;
 
-    private String blueprintName;
-
     @ManyToOne
     private User user;
 
@@ -60,13 +58,5 @@ public class Blueprint implements ProvisionEntity {
 
     public void setUser(User user) {
         this.user = user;
-    }
-
-    public String getBlueprintName() {
-        return blueprintName;
-    }
-
-    public void setBlueprintName(String blueprintName) {
-        this.blueprintName = blueprintName;
     }
 }
