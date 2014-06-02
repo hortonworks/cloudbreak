@@ -1067,7 +1067,7 @@
 
     <!-- ............ CREATE FORM ............................................. -->
 
-    <div class="panel panel-default">
+    <div class="panel panel-default" >
         <div id="panel-create-credential-collapse" class="panel-collapse panel-under-btn-collapse collapse">
             <div class="panel-body">
 
@@ -1212,66 +1212,82 @@
 
         <!-- ............. CREDENTIAL ............................................... -->
 
-        <div class="panel panel-default">
+        <div class="panel panel-default" ng-repeat="credential in credentials">
             <div class="panel-heading">
                 <h5><a href="#panel-credential-collapse01" data-toggle="collapse" data-parent="#credential-list-accordion"
-                       data-target="#panel-credential-collapse01"><i class="fa fa-tag fa-fw"></i> Credential_name_001</a></h5>
+                       data-target="#panel-credential-collapse01"><i class="fa fa-tag fa-fw"></i>{{credential.id}}: {{credential.name}}</a></h5>
             </div>
             <div id="panel-credential-collapse01" class="panel-collapse collapse">
 
                 <p class="btn-row-over-panel"><a href="#" class="btn btn-danger" role="button"><i
                         class="fa fa-times fa-fw"></i><span> delete</span></a></p>
 
-                <div class="panel-body">
+                <div class="panel-body" ng-if="credential.cloudPlatform == 'AZURE' ">
 
 
                     <form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
 
                         <div class="form-group">
-                            <label class="col-sm-3 control-label" for="parameter1">parameter1</label>
+                            <label class="col-sm-3 control-label" for="name">name</label>
 
                             <div class="col-sm-9">
-                                <p id="parameter1" class="form-control-static">Parameter 1</p>
+                                <p id="name" class="form-control-static">{{credential.name}}</p>
                             </div>
                             <!-- .col-sm-9 -->
                         </div>
                         <!-- .form-group -->
                         <div class="form-group">
-                            <label class="col-sm-3 control-label" for="parameter1">parameter1</label>
+                            <label class="col-sm-3 control-label" for="subscriptionId">subscriptionId</label>
 
                             <div class="col-sm-9">
-                                <p id="parameter1" class="form-control-static">Parameter 1</p>
+                                <p id="subscriptionId" class="form-control-static">{{credential.parameters.subscriptionId}}</p>
                             </div>
                             <!-- .col-sm-9 -->
                         </div>
                         <!-- .form-group -->
                         <div class="form-group">
-                            <label class="col-sm-3 control-label" for="parameter1">parameter1</label>
+                            <label class="col-sm-3 control-label" for="jksPassword">jksPassword</label>
 
                             <div class="col-sm-9">
-                                <p id="parameter1" class="form-control-static">Parameter 1</p>
+                                <p id="jksPassword" class="form-control-static">{{credential.parameters.jksPassword}}</p>
+                            </div>
+                            <!-- .col-sm-9 -->
+                        </div>
+
+                    </form>
+                </div>
+
+                <div class="panel-body" ng-if="credential.cloudPlatform == 'AWS' ">
+
+
+                    <form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
+
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label" for="name">name</label>
+
+                            <div class="col-sm-9">
+                                <p id="name" class="form-control-static">{{credential.name}}</p>
                             </div>
                             <!-- .col-sm-9 -->
                         </div>
                         <!-- .form-group -->
                         <div class="form-group">
-                            <label class="col-sm-3 control-label" for="parameter1">parameter1</label>
+                            <label class="col-sm-3 control-label" for="roleArn">roleArn</label>
 
                             <div class="col-sm-9">
-                                <p id="parameter1" class="form-control-static">Parameter 1</p>
+                                <p id="roleArn" class="form-control-static">{{credential.parameters.roleArn}}</p>
                             </div>
                             <!-- .col-sm-9 -->
                         </div>
                         <!-- .form-group -->
                         <div class="form-group">
-                            <label class="col-sm-3 control-label" for="parameter1">parameter1</label>
+                            <label class="col-sm-3 control-label" for="instanceProfileRoleArn">instanceProfileRoleArn</label>
 
                             <div class="col-sm-9">
-                                <p id="parameter1" class="form-control-static">Parameter 1</p>
+                                <p id="instanceProfileRoleArn" class="form-control-static">{{credential.parameters.instanceProfileRoleArn}}</p>
                             </div>
                             <!-- .col-sm-9 -->
                         </div>
-                        <!-- .form-group -->
 
                     </form>
                 </div>
