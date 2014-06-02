@@ -27,45 +27,20 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             if(emailFieldLogin.value === "user@seq.com" && passwFieldLogin.value === "test123") {
                 localStorage.signedIn = true;
                 $rootScope.signedIn = true;
-                $location.path("/console");
             }
         }
-
-        if (typeof (Storage) !== "undefined") {
-            if (localStorage.signedIn === 'true') {
-                $rootScope.signedIn = true;
-                $location.path("/console");
-            }
-        } else {
-            console.log("No localstorage support!");
-        }
-
-    }
-]);
-
-cloudbreakControllers.controller('consoleController', ['$scope', '$http', 'Templates', '$location', '$rootScope',
-    function ($scope, $http, Templates, $location, $rootScope) {
-        $scope.form = undefined;
-        $http.defaults.useXDomain = true;
-        delete $http.defaults.headers.common['X-Requested-With'];
-        $http.defaults.headers.common['Content-Type']= 'application/json';
 
         $scope.signOut = function() {
             $rootScope.signedIn = false;
             localStorage.signedIn = false;
         }
 
-        $scope.reloadCtrl = function(){
-            console.log('reloading...');
-            $route.reload();
-        }
-
         if (typeof (Storage) !== "undefined") {
-            if (localStorage.signedIn === 'false' || localStorage.signedIn === undefined) {
-                $location.path("/");
+            if (localStorage.signedIn === 'true') {
+                $rootScope.signedIn = true;
             }
         } else {
-            $location.path("/");
+            console.log("No localstorage support!");
         }
 
     }

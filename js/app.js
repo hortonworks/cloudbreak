@@ -6,7 +6,6 @@ var cloudbreakApp = angular.module('cloudbreakApp', ['ngRoute', 'cloudbreakContr
 
 cloudbreakApp.config([ '$routeProvider', function($routeProvider) {
     $routeProvider.when('/', {
-        templateUrl : 'partials/login.html',
         controller: 'cloudbreakController'
     }) .otherwise({
         redirectTo : '/'
