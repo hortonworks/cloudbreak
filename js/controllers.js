@@ -95,11 +95,73 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             });
         }
 
+        $scope.createAwsCredentialRequest = function() {
+            $scope.azureCredential = false;
+            $scope.awsCredential = true;
+        }
+
+        $scope.createAzureCredentialRequest = function() {
+            $scope.azureCredential = true;
+            $scope.awsCredential = false;
+        }
+
+
+        $scope.createAwsCredential = function() {
+            console.log("create aws");
+            $http({
+                method: 'POST',
+                dataType: 'json',
+                withCredentials: true,
+                url:  $rootScope.apiUrl + "/credential",
+                headers: {
+                    'Authorization': 'Basic ' + $rootScope.basic_auth
+                },
+                data: {
+                    cloudPlatform: "AWS",
+                    parameters: {
+                        roleArn: roleArn.value,
+                        instanceProfileRoleArn: instanceProfileRoleArn.value
+                    }
+                }
+            }).success(function (data, status, headers, config) {
+                $location.path("/");
+            }).error(function (data, status, headers, config) {
+                console.log("unsuccess");
+                $scope.isFailedCreation = true;
+            });
+        }
+
+        $scope.createAzureCredential = function() {
+            $http({
+                method: 'POST',
+                dataType: 'json',
+                withCredentials: true,
+                url:  $rootScope.apiUrl + "/credential",
+                headers: {
+                    'Authorization': 'Basic ' + $rootScope.basic_auth,
+                },
+                data: {
+                    cloudPlatform: "AZURE",
+                    parameters: {
+                        subscriptionId: subscriptionId.value,
+                        jksPassword: jksPassword.value
+                    }
+                }
+            }).success(function (data, status, headers, config) {
+                $location.path("/");
+            }).error(function (data, status, headers, config) {
+                console.log("unsuccess");
+                $scope.isFailedCreation = true;
+            });
+        }
+
         $scope.doQuerys = function() {
             $scope.getCredentials();
             $scope.getTemplates();
             $scope.getBluePrints();
         }
+
+
 
         if (typeof (Storage) !== "undefined") {
             if (localStorage.signedIn === 'true') {

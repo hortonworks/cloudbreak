@@ -491,7 +491,7 @@
                             </div>
                             <!-- .form-group -->
                             <div class="form-group">
-                                <label class="col-sm-3 control-label" for="selectBlueprint">blueprint</label>
+                                <label class="col-sm-3 control-label" for="Blueprint">blueprint</label>
 
                                 <div class="col-sm-9">
                                     <select class="form-control" id="selectBlueprint">
@@ -560,7 +560,10 @@
     <div class="panel panel-default">
         <div id="panel-create-template-collapse" class="panel-collapse panel-under-btn-collapse collapse">
             <div class="panel-body">
-
+                <div class="row">
+                    <button id="awsTemplateChange" type="button" class="btn btn-default" ng-click="createAwsTemplateRequest()">Aws</button>
+                    <button id="azureTemplateChange" type="button" class="btn btn-default" ng-click="createAzureTemplateRequest()">Azure</button>
+                </div>
                 <form class="form-horizontal" role="form">
 
                     <div class="form-group">
@@ -1014,132 +1017,85 @@
     <div class="panel panel-default" >
         <div id="panel-create-credential-collapse" class="panel-collapse panel-under-btn-collapse collapse">
             <div class="panel-body">
+                <div class="row">
+                    <button id="awsChange" type="button" class="btn btn-default" ng-click="createAwsCredentialRequest()">Aws</button>
+                    <button id="azureChange" type="button" class="btn btn-default" ng-click="createAzureCredentialRequest()">Azure</button>
+                </div>
 
-                <form class="form-horizontal" role="form">
-
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label" for="textfield">credential name</label>
-
-                        <div class="col-sm-9">
-                            <input type="text" class="form-control" id="textfield" placeholder="max. 20 char">
-                        </div>
-                        <!-- .col-sm-9 -->
-
-                    </div>
-                    <!-- .form-group -->
-                    <div class="form-group has-feedback has-error">
-                        <label class="col-sm-3 control-label" for="textfieldwitherror">textfieldwitherror</label>
-
-                        <div class="col-sm-9">
-                            <!-- no div.inputgroup without add-on -->
-                            <input type="text" class="form-control" id="textfieldwitherror" placeholder="placeholder text"
-                                   value="textfieldwitherror">
-                            <i class="fa fa-warning form-control-feedback"></i>
-                            <!-- no div.inputgroup without add-on -->
-                            <span class="help-block">Invalid textfieldwitherror</span>
-                        </div>
-                        <!-- .col-sm-9 -->
-                    </div>
-                    <!-- .form-group -->
+                <form class="form-horizontal" role="form" ng-show="azureCredential">
 
                     <div class="form-group">
-                        <label class="col-sm-3 control-label" for="textarea">textarea</label>
+                        <label class="col-sm-3 control-label" for="name">name</label>
 
                         <div class="col-sm-9">
-                            <textarea class="form-control" id="textarea" placeholder="placeholder text" rows="3"></textarea>
+                            <input type="text" class="form-control" id="name" placeholder="max. 20 char">
                         </div>
                         <!-- .col-sm-9 -->
+
                     </div>
                     <!-- .form-group -->
-
                     <div class="form-group">
-                        <label class="col-sm-3 control-label" for="inlinecheckbox">inlinecheckbox</label>
-
-                        <div class="col-sm-9" id="inlinecheckbox">
-                            <div class="checkbox-inline">
-                                <label>
-                                    <input type="checkbox" value="">
-                                    Option 1
-                                </label>
-                            </div>
-                            <div class="checkbox-inline">
-                                <label>
-                                    <input type="checkbox" value="">
-                                    Option 2
-                                </label>
-                            </div>
-                            <div class="checkbox-inline">
-                                <label>
-                                    <input type="checkbox" value="">
-                                    Option 3
-                                </label>
-                            </div>
-                        </div>
-                        <!-- .col-sm-9 -->
-                    </div>
-                    <!-- .form-group -->
-
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label" for="inlineradio">inlineradio</label>
-
-                        <div class="col-sm-9" id="inlineradio">
-                            <div class="radio-inline">
-                                <label>
-                                    <input type="radio" name="optionsRadios" id="optionsRadios1" value="option1">Option 1
-                                </label>
-                            </div>
-                            <div class="radio-inline">
-                                <label>
-                                    <input type="radio" name="optionsRadios" id="optionsRadios2" value="option2">Option 2
-                                </label>
-                            </div>
-                            <div class="radio-inline">
-                                <label>
-                                    <input type="radio" name="optionsRadios" id="optionsRadios3" value="option3">Option 3
-                                </label>
-                            </div>
-                        </div>
-                        <!-- .col-sm-9 -->
-                    </div>
-                    <!-- .form-group -->
-
-                    <div class="form-group has-feedback has-error">
-                        <label class="col-sm-3 control-label" for="select">select</label>
+                        <label class="col-sm-3 control-label" for="subscriptionId">subscriptionId</label>
 
                         <div class="col-sm-9">
-                            <select class="form-control" id="select">
-                                <option>– select option –</option>
-                                <option>1</option>
-                                <option>2</option>
-                                <option>3</option>
-                                <option>4</option>
-                                <option>5</option>
-                            </select>
-                            <span class="help-block">MUST select</span>
+                            <input type="text" class="form-control" id="subscriptionId" placeholder="max. 20 char">
                         </div>
                         <!-- .col-sm-9 -->
+
                     </div>
-                    <!-- .form-group -->
 
                     <div class="form-group">
-                        <label class="col-sm-3 control-label" for="multiselect">multiselect</label>
+                        <label class="col-sm-3 control-label" for="jksPassword">jksPassword</label>
 
                         <div class="col-sm-9">
-                            <select multiple class="form-control" id="multiselect">
-                                <option>1</option>
-                                <option>2</option>
-                                <option>3</option>
-                                <option>4</option>
-                                <option>5</option>
-                            </select>
+                            <input type="text" class="form-control" id="jksPassword" placeholder="max. 20 char">
                         </div>
                         <!-- .col-sm-9 -->
-                    </div>
-                    <!-- .form-group -->
 
+                    </div>
                     <div class="row btn-row">
                         <div class="col-sm-9 col-sm-offset-3">
-                            <a href="#" id="createCredential" class="btn btn-success btn-block" role="button"><i class="fa fa-plus fa-fw"></i>
+                            <a href="#" id="createAzureCredential" class="btn btn-success btn-block" ng-click="createAzureCredential()" role="button"><i class="fa fa-plus fa-fw"></i>
+                                create credential</a>
+                        </div>
+                    </div>
+
+                </form>
+
+                <form class="form-horizontal" role="form" ng-show="awsCredential">
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="name">name</label>
+
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="name" placeholder="max. 20 char">
+                        </div>
+                        <!-- .col-sm-9 -->
+
+                    </div>
+                    <!-- .form-group -->
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="roleArn">roleArn</label>
+
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="roleArn" placeholder="max. 20 char">
+                        </div>
+                        <!-- .col-sm-9 -->
+
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="instanceProfileRoleArn">instanceProfileRoleArn</label>
+
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="instanceProfileRoleArn" placeholder="max. 20 char">
+                        </div>
+                        <!-- .col-sm-9 -->
+
+                    </div>
+                    <div class="row btn-row">
+                        <div class="col-sm-9 col-sm-offset-3">
+                            <a href="#" id="createAwsCredential" ng-click="createAwsCredential()" class="btn btn-success btn-block" role="button"><i class="fa fa-plus fa-fw"></i>
                                 create credential</a>
                         </div>
                     </div>
