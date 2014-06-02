@@ -20,7 +20,9 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
         if($scope.credentials === null || $scope.credentials === undefined ) {
             $scope.credentials = [];
         }
-
+        if($scope.templates === null || $scope.templates === undefined ) {
+            $scope.templates = [];
+        }
         $scope.reloadCtrl = function(){
             console.log('reloading...');
             $route.reload();
@@ -55,9 +57,26 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             });
         }
 
+        $scope.getTemplates = function() {
+            $http({
+                method: 'GET',
+                dataType: 'json',
+                withCredentials: true,
+                url:  $rootScope.apiUrl + "/template",
+                headers: {
+                    'Authorization': 'Basic ' + $rootScope.basic_auth,
+                    'Content-Type': 'application/json'
+                }
+            }).success(function (data, status, headers, config) {
+                $scope.templates = data;
+            }).error(function (data, status, headers, config) {
+                console.log("unsuccess");
+            });
+        }
+
         $scope.doQuerys = function() {
             $scope.getCredentials();
-            //$scope.getInfras();
+            $scope.getTemplates();
             //$scope.getCloudInstances();
         }
 

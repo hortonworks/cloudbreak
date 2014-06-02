@@ -76,7 +76,7 @@
 
                     <!-- ........ CREDENTIALS DROPDOWN ......................................... -->
 
-                    <li class="dropdown" id="menu-credential">
+                    <li class="dropdown" id="menu-credefntial">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                             <i class="fa fa-tag fa-fw"></i> <span class="text-danger">select a credential</span> <b class="caret"></b>
                         </a>
@@ -700,138 +700,167 @@
 
         <!-- .............. TEMPLATE .............................................. -->
 
-        <div class="panel panel-default">
+        <div class="panel panel-default"  ng-repeat="template in templates">
+
             <div class="panel-heading">
                 <h5><a href="#panel-template-collapse01" data-toggle="collapse" data-parent="#templete-list-accordion" data-target="#panel-template-collapse01"><i
-                        class="fa fa-file-o fa-fw"></i> Template_name_001</a></h5>
+                        class="fa fa-file-o fa-fw"></i>{{template.id}}: {{template.clusterName}}</a></h5>
             </div>
-            <div id="panel-template-collapse01" class="panel-collapse collapse">
+            <div id="panel-template-collapse01" class="panel-collapse collapse" >
 
                 <p class="btn-row-over-panel"><a href="#" class="btn btn-danger" role="button"><i class="fa fa-times fa-fw"></i><span> delete</span></a></p>
 
-                <div class="panel-body">
+                <div class="panel-body" ng-if="template.cloudPlatform == 'AZURE' ">
 
                     <form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
 
                         <div class="form-group">
-                            <label class="col-sm-3 control-label" for="parameter1">parameter1</label>
+                            <label class="col-sm-3 control-label" for="clusterName">clusterName</label>
 
                             <div class="col-sm-9">
-                                <p id="parameter1" class="form-control-static">Parameter 1</p>
+                                <p id="clusterName" class="form-control-static">{{template.clusterName}}</p>
                             </div>
                             <!-- .col-sm-9 -->
                         </div>
                         <!-- .form-group -->
                         <div class="form-group">
-                            <label class="col-sm-3 control-label" for="parameter1">parameter1</label>
+                            <label class="col-sm-3 control-label" for="password">password</label>
 
                             <div class="col-sm-9">
-                                <p id="parameter1" class="form-control-static">Parameter 1</p>
+                                <p id="password" class="form-control-static">{{template.parameters.password}}</p>
                             </div>
                             <!-- .col-sm-9 -->
                         </div>
                         <!-- .form-group -->
                         <div class="form-group">
-                            <label class="col-sm-3 control-label" for="parameter1">parameter1</label>
+                            <label class="col-sm-3 control-label" for="deploymentSlot">deploymentSlot</label>
 
                             <div class="col-sm-9">
-                                <p id="parameter1" class="form-control-static">Parameter 1</p>
+                                <p id="deploymentSlot" class="form-control-static">{{template.parameters.deploymentSlot}}</p>
                             </div>
                             <!-- .col-sm-9 -->
                         </div>
                         <!-- .form-group -->
                         <div class="form-group">
-                            <label class="col-sm-3 control-label" for="parameter1">parameter1</label>
+                            <label class="col-sm-3 control-label" for="username">username</label>
 
                             <div class="col-sm-9">
-                                <p id="parameter1" class="form-control-static">Parameter 1</p>
+                                <p id="username" class="form-control-static">{{template.parameters.username}}</p>
                             </div>
                             <!-- .col-sm-9 -->
                         </div>
                         <!-- .form-group -->
                         <div class="form-group">
-                            <label class="col-sm-3 control-label" for="parameter1">parameter1</label>
+                            <label class="col-sm-3 control-label" for="subnetAddressPrefix">subnetAddressPrefix</label>
 
                             <div class="col-sm-9">
-                                <p id="parameter1" class="form-control-static">Parameter 1</p>
+                                <p id="subnetAddressPrefix" class="form-control-static">{{template.parameters.subnetAddressPrefix}}</p>
                             </div>
                             <!-- .col-sm-9 -->
                         </div>
                         <!-- .form-group -->
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label" for="addressPrefix">addressPrefix</label>
 
+                            <div class="col-sm-9">
+                                <p id="addressPrefix" class="form-control-static">{{template.parameters.addressPrefix}}</p>
+                            </div>
+                            <!-- .col-sm-9 -->
+                        </div>
+                        <!-- .form-group -->
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label" for="vmType">vmType</label>
+
+                            <div class="col-sm-9">
+                                <p id="vmType" class="form-control-static">{{template.parameters.vmType}}</p>
+                            </div>
+                            <!-- .col-sm-9 -->
+                        </div>
+                        <!-- .form-group -->
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label" for="imageName">imageName</label>
+
+                            <div class="col-sm-9">
+                                <p id="imageName" class="form-control-static">{{template.parameters.imageName}}</p>
+                            </div>
+                            <!-- .col-sm-9 -->
+                        </div>
+                        <!-- .form-group -->
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label" for="location">location</label>
+
+                            <div class="col-sm-9">
+                                <p id="location" class="form-control-static">{{template.parameters.location}}</p>
+                            </div>
+                            <!-- .col-sm-9 -->
+                        </div>
+                        <!-- .form-group -->
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label" for="description">description</label>
+
+                            <div class="col-sm-9">
+                                <p id="description" class="form-control-static">{{template.parameters.description}}</p>
+                            </div>
+                            <!-- .col-sm-9 -->
+                        </div>
+                    </form>
+                </div>
+
+                <div class="panel-body"  ng-if="template.cloudPlatform == 'AWS' ">
+                    <form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label" for="clusterName">clusterName</label>
+
+                            <div class="col-sm-9">
+                                <p id="clusterName" class="form-control-static">{{template.clusterName}}</p>
+                            </div>
+                            <!-- .col-sm-9 -->
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label" for="amiId">amiId</label>
+
+                            <div class="col-sm-9">
+                                <p id="amiId" class="form-control-static">{{template.parameters.amiId}}</p>
+                            </div>
+                            <!-- .col-sm-9 -->
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label" for="sshLocation">sshLocation</label>
+
+                            <div class="col-sm-9">
+                                <p id="sshLocation" class="form-control-static">{{template.parameters.sshLocation}}</p>
+                            </div>
+                            <!-- .col-sm-9 -->
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label" for="keyName">keyName</label>
+
+                            <div class="col-sm-9">
+                                <p id="keyName" class="form-control-static">{{template.parameters.keyName}}</p>
+                            </div>
+                            <!-- .col-sm-9 -->
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label" for="region">region</label>
+
+                            <div class="col-sm-9">
+                                <p id="region" class="form-control-static">{{template.parameters.region}}</p>
+                            </div>
+                            <!-- .col-sm-9 -->
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label" for="instanceType">instanceType</label>
+
+                            <div class="col-sm-9">
+                                <p id="instanceType" class="form-control-static">{{template.parameters.instanceType}}</p>
+                            </div>
+                            <!-- .col-sm-9 -->
+                        </div>
                     </form>
                 </div>
             </div>
         </div>
         <!-- .panel -->
-
-        <!-- .............. TEMPLATE .............................................. -->
-
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h5><a href="#panel-template-collapse02" data-toggle="collapse" data-target="panel-template-collapse02" data-parent="#templete-list-accordion"><i
-                        class="fa fa-file-o fa-fw"></i> Template_name_002</a></h5>
-            </div>
-            <div id="panel-template-collapse02" class="panel-collapse collapse">
-
-                <p class="btn-row-over-panel"><a href="#" class="btn btn-danger" role="button"><i class="fa fa-times fa-fw"></i><span> delete</span></a></p>
-
-                <div class="panel-body">
-
-                    <form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
-
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label" for="parameter1">parameter1</label>
-
-                            <div class="col-sm-9">
-                                <p id="parameter1" class="form-control-static">Parameter 1</p>
-                            </div>
-                            <!-- .col-sm-9 -->
-                        </div>
-                        <!-- .form-group -->
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label" for="parameter1">parameter1</label>
-
-                            <div class="col-sm-9">
-                                <p id="parameter1" class="form-control-static">Parameter 1</p>
-                            </div>
-                            <!-- .col-sm-9 -->
-                        </div>
-                        <!-- .form-group -->
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label" for="parameter1">parameter1</label>
-
-                            <div class="col-sm-9">
-                                <p id="parameter1" class="form-control-static">Parameter 1</p>
-                            </div>
-                            <!-- .col-sm-9 -->
-                        </div>
-                        <!-- .form-group -->
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label" for="parameter1">parameter1</label>
-
-                            <div class="col-sm-9">
-                                <p id="parameter1" class="form-control-static">Parameter 1</p>
-                            </div>
-                            <!-- .col-sm-9 -->
-                        </div>
-                        <!-- .form-group -->
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label" for="parameter1">parameter1</label>
-
-                            <div class="col-sm-9">
-                                <p id="parameter1" class="form-control-static">Parameter 1</p>
-                            </div>
-                            <!-- .col-sm-9 -->
-                        </div>
-                        <!-- .form-group -->
-
-                    </form>
-                </div>
-            </div>
-        </div>
-        <!-- .panel -->
-
     </div>
     <!-- #template-list-accordion -->
 
