@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
@@ -135,17 +136,18 @@ public class AmbariClusterService {
         return blueprintJson;
     }
 
-    public String startAllService(User user, Long stackId) {
+    @Async
+    public void startAllService(User user, Long stackId) {
         Stack stack = stackRepository.findOne(stackId);
         AmbariClient ambariClient = new AmbariClient(stack.getAmbariIp(), PORT);
-        // ambariClient.
-        return "";
+        ambariClient.startAllServices();
     }
 
-    public String stopAllService(User user, Long stackId) {
+    @Async
+    public void stopAllService(User user, Long stackId) {
         Stack stack = stackRepository.findOne(stackId);
         AmbariClient ambariClient = new AmbariClient(stack.getAmbariIp(), PORT);
-        return "";
+        ambariClient.stopAllServices();
     }
 
 }
