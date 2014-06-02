@@ -361,13 +361,14 @@ public class AwsProvisionService implements ProvisionService {
                 .withFilters(new Filter().withName("tag:" + INSTANCE_TAG_KEY).withValues(stack.getName()));
         DescribeInstancesResult instancesResult = ec2Client.describeInstances(instancesRequest);
 
-        List<String> instanceIds = new ArrayList<>();
-        for (Instance instance : instancesResult.getReservations().get(0).getInstances()) {
-            instanceIds.add(instance.getInstanceId());
+        if (instancesResult.getReservations().size() > 0) {
+            List<String> instanceIds = new ArrayList<>();
+            for (Instance instance : instancesResult.getReservations().get(0).getInstances()) {
+                instanceIds.add(instance.getInstanceId());
+            }
+            TerminateInstancesRequest terminateInstancesRequest = new TerminateInstancesRequest().withInstanceIds(instanceIds);
+            ec2Client.terminateInstances(terminateInstancesRequest);
         }
-
-        TerminateInstancesRequest terminateInstancesRequest = new TerminateInstancesRequest().withInstanceIds(instanceIds);
-        ec2Client.terminateInstances(terminateInstancesRequest);
 
         AmazonCloudFormationClient client = createCloudFormationClient(user, awsInfra.getRegion(), awsCredential);
         DeleteStackRequest deleteStackRequest = new DeleteStackRequest().withStackName(String.format("%s-%s", stack.getName(), stack.getId()));
