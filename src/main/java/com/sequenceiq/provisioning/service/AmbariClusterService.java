@@ -1,5 +1,7 @@
 package com.sequenceiq.provisioning.service;
 
+import groovyx.net.http.HttpResponseException;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,8 +23,6 @@ import com.sequenceiq.provisioning.domain.Stack;
 import com.sequenceiq.provisioning.domain.User;
 import com.sequenceiq.provisioning.repository.BlueprintRepository;
 import com.sequenceiq.provisioning.repository.StackRepository;
-
-import groovyx.net.http.HttpResponseException;
 
 @Service
 public class AmbariClusterService {
@@ -48,7 +48,7 @@ public class AmbariClusterService {
                     clusterRequest.getClusterName(),
                     blueprint.getName(),
                     ambariClient.recommendAssignments(blueprint.getName())
-            );
+                    );
 
         } catch (HttpResponseException e) {
             throw new InternalServerException("Failed to create cluster", e);
@@ -59,7 +59,12 @@ public class AmbariClusterService {
         Stack stack = stackRepository.findOne(stackId);
         AmbariClient ambariClient = new AmbariClient(stack.getAmbariIp(), PORT);
         try {
-            return createClusterJsonFromString(ambariClient.getClusterAsJson());
+            String clusterJson = ambariClient.getClusterAsJson();
+            if (clusterJson == null) {
+                throw new InternalServerException(String.format("Cluster response coming from Ambari server was null. [Stack: '%s', Ambari Server IP: '%s']",
+                        stackId, stack.getAmbariIp()));
+            }
+            return createClusterJsonFromString(clusterJson);
         } catch (HttpResponseException e) {
             if ("Not Found".equals(e.getMessage())) {
                 throw new NotFoundException("Ambari blueprint not found.", e);
@@ -133,7 +138,7 @@ public class AmbariClusterService {
     public String startAllService(User user, Long stackId) {
         Stack stack = stackRepository.findOne(stackId);
         AmbariClient ambariClient = new AmbariClient(stack.getAmbariIp(), PORT);
-        //ambariClient.
+        // ambariClient.
         return "";
     }
 
