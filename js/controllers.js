@@ -95,6 +95,17 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             });
         }
 
+
+        $scope.createAwsTemplateRequest = function() {
+            $scope.azureTemplate = false;
+            $scope.awsTemplate = true;
+        }
+
+        $scope.createAzureTemplateRequest = function() {
+            $scope.azureTemplate = true;
+            $scope.awsTemplate = false;
+        }
+
         $scope.createAwsCredentialRequest = function() {
             $scope.azureCredential = false;
             $scope.awsCredential = true;
@@ -105,6 +116,67 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             $scope.awsCredential = false;
         }
 
+        $scope.createAwsTemplate = function() {
+            console.log("aws cluster creation started...");
+            $http({
+                method: 'POST',
+                dataType: 'json',
+                withCredentials: true,
+                url:  $rootScope.apiUrl + "/template",
+                headers: {
+                    'Authorization': 'Basic ' + $rootScope.basic_auth
+                },
+                data: {
+                    cloudPlatform: "AWS",
+                    clusterName: clname.value,
+                    parameters: {
+                        region: cllocation.value,
+                        keyName:  keyname.value
+                    }
+                }
+            }).success(function (data, status, headers, config) {
+                $location.path("/");
+            }).error(function (data, status, headers, config) {
+                console.log("unsuccess");
+                $scope.isFailedCreation = true;
+            });
+        }
+
+        $scope.createAzureTemplate = function() {
+            $scope.isSuccessCreation = true;
+            $scope.isFailedCreation = false;
+            $http({
+                method: 'POST',
+                dataType: 'json',
+                withCredentials: true,
+                url:  $rootScope.apiUrl + "/template",
+                headers: {
+                    'Authorization': 'Basic ' + $rootScope.basic_auth
+                },
+                data: {
+                    cloudPlatform: "AZURE",
+                    clusterName: clname.value,
+                    parameters: {
+                        location: cllocation.value,
+                        name: clname.value,
+                        description: description.value,
+                        addressPrefix: subnetAddressPrefix.value,
+                        deploymentSlot: deploymentSlot.value,
+                        disableSshPasswordAuthentication: disableSshPasswordAuthentication.value,
+                        vmType: vmType.value,
+                        imageName: imageName.value,
+                        userName: userName.value,
+                        password: clpassword.value,
+                        sshString: sshString.value
+                    }
+                }
+            }).success(function (data, status, headers, config) {
+                $location.path("/");
+            }).error(function (data, status, headers, config) {
+                console.log("unsuccess");
+                $scope.isFailedCreation = true;
+            });
+        }
 
         $scope.createAwsCredential = function() {
             console.log("create aws");
