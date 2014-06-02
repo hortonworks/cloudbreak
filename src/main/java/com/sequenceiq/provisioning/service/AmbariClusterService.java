@@ -38,12 +38,12 @@ public class AmbariClusterService {
     @Autowired
     private StackRepository stackRepository;
 
-    public void createCluster(User user, Long cloudId, ClusterRequest clusterRequest) {
+    public void createCluster(User user, Long stackId, ClusterRequest clusterRequest) {
         try {
+            Stack stack = stackRepository.findOne(stackId);
             Blueprint blueprint = blueprintRepository.findOne(clusterRequest.getBlueprintId());
-            addBlueprint(user, cloudId, blueprint, clusterRequest);
-            AmbariClient ambariClient = new AmbariClient(clusterRequest.getAmbariIp(), PORT);
-            // TODO: validate that sum cardinality is the same as host.size
+            addBlueprint(user, stackId, blueprint, clusterRequest);
+            AmbariClient ambariClient = new AmbariClient(stack.getAmbariIp(), PORT);
             ambariClient.createCluster(
                     clusterRequest.getClusterName(),
                     blueprint.getName(),
@@ -77,8 +77,9 @@ public class AmbariClusterService {
         return clusterResponse;
     }
 
-    public void addBlueprint(User user, Long cloudId, Blueprint blueprint, ClusterRequest clusterRequest) {
-        AmbariClient ambariClient = new AmbariClient(clusterRequest.getAmbariIp(), PORT);
+    public void addBlueprint(User user, Long stackId, Blueprint blueprint, ClusterRequest clusterRequest) {
+        Stack stack = stackRepository.findOne(stackId);
+        AmbariClient ambariClient = new AmbariClient(stack.getAmbariIp(), PORT);
         try {
             ambariClient.addBlueprint(blueprint.getBlueprintText());
         } catch (HttpResponseException e) {
