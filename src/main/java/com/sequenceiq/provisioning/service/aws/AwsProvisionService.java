@@ -114,22 +114,22 @@ public class AwsProvisionService implements ProvisionService {
                     disableSourceDestCheck(amazonEC2Client, instanceIds);
                     String ambariIp = pollAmbariServer(amazonEC2Client, stack.getId(), instanceIds);
                     if (ambariIp != null) {
-                        setAndSaveStatus(stack, Status.CREATE_COMPLETED);
+                        createSuccess(stack, ambariIp);
                     } else {
-                        setAndSaveStatus(stack, Status.CREATE_FAILED);
+                        createFailed(stack);
                     }
                 } catch (AmazonClientException e) {
                     LOGGER.error("Failed to run EC2 instances", e);
-                    setAndSaveStatus(stack, Status.CREATE_FAILED);
+                    createFailed(stack);
                 }
 
             } else {
                 LOGGER.error(String.format("Stack creation failed. id: '%s'", stack.getId()));
-                setAndSaveStatus(stack, Status.CREATE_FAILED);
+                createFailed(stack);
             }
         } catch (Throwable t) {
             LOGGER.error("Unhandled exception occured while creating stack on AWS.", t);
-            setAndSaveStatus(stack, Status.CREATE_FAILED);
+            createFailed(stack);
         }
 
     }
@@ -155,8 +155,14 @@ public class AwsProvisionService implements ProvisionService {
 
     }
 
-    private void setAndSaveStatus(Stack stack, Status status) {
-        stack.setStatus(status);
+    private void createFailed(Stack stack) {
+        stack.setStatus(Status.CREATE_FAILED);
+        stackRepository.save(stack);
+    }
+
+    private void createSuccess(Stack stack, String ambariIp) {
+        stack.setStatus(Status.CREATE_COMPLETED);
+        stack.setAmbariIp(ambariIp);
         stackRepository.save(stack);
     }
 
