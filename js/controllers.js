@@ -190,9 +190,10 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                         deploymentSlot: azure_tdeploymentSlot.value,
                         vmType: azure_tvmType.value,
                         imageName: azure_timageName.value,
-                        userName: azure_tuserName.value,
-                        password: azure_tclpassword.value,
-                        sshString: azure_tsshString.value
+                        username: azure_tusername.value,
+                        password: azure_tpassword.value,
+                        sshString: azure_tsshString.value,
+                        ports:[]
                     }
                 }
             }).success(function (data, status, headers, config) {
