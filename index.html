@@ -67,7 +67,7 @@
 
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                            <i class="fa fa-user fa-fw"></i> lalyos_the_Impaler <b class="caret"></b>
+                            <i class="fa fa-user fa-fw"></i> {{activeUser}} <b class="caret"></b>
                         </a>
                         <ul class="dropdown-menu">
                             <li><a href="index1.html" data-value="cred-001"><i class="fa fa-sign-out fa-fw"></i> logout</a></li>
@@ -78,7 +78,7 @@
 
                     <li class="dropdown" id="menu-credefntial">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                            <i class="fa fa-tag fa-fw"></i> <span class="text-danger">select a credential</span> <b class="caret"></b>
+                            <i class="fa fa-tag fa-fw"></i> <span class="text-danger"> a credential</span> <b class="caret"></b>
                         </a>
                         <ul class="dropdown-menu">
                             <li  ng-repeat="credential in credentials"><a href="#" data-value="{{credential.id}}">{{credential.name}}</a></li>
@@ -566,23 +566,200 @@
                 </div>
                 <form class="form-horizontal" role="form" ng-show="azureTemplate">
 
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="clusterName">clusterName</label>
 
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="clusterName" placeholder="max. 20 char">
+                        </div>
+                        <!-- .col-sm-9 -->
+
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="description">description</label>
+
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="description" placeholder="max. 20 char">
+                        </div>
+                        <!-- .col-sm-9 -->
+
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="location">location</label>
+
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="location">
+                        </div>
+                        <!-- .col-sm-9 -->
+
+                    </div>
+
+                    <div class="form-group">
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label" for="location">location</label>
+                            <div class="col-sm-9">
+                                <select class="form-control" id="location">
+                                    <option value="EAST_ASIA">East Asia</option>
+                                    <option value="SOUTHEAST_ASIA">Southeast Asia</option>
+                                    <option value="NORTH_EUROPE">North Europe</option>
+                                    <option value="EAST_US">East US</option>
+                                    <option value="WEST_US">West US</option>
+                                    <option value="JAPAN_EAST">Japan East</option>
+                                    <option value="JAPAN_WEST">Japan West</option>
+                                    <option value="BRAZIL_SOUTH">Brazil South</option>
+                                </select>
+                            </div>
+                            <!-- .col-sm-9 -->
+                        </div>
+
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="imageName">imageName</label>
+
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="imageName">
+                        </div>
+                        <!-- .col-sm-9 -->
+
+                    </div>
+                    <div class="form-group">
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label" for="location">location</label>
+                            <div class="col-sm-9">
+                                <select class="form-control" id="location">
+                                    <option value="EXTRA_SMALL">Extra Small</option>
+                                    <option value="SMALL">Small</option>
+                                    <option value="MEDIUM">Medium</option>
+                                    <option value="LARGE">Large</option>
+                                    <option value="EXTRA_LARGE">Extra Large</option>
+                                </select>
+                            </div>
+                            <!-- .col-sm-9 -->
+                        </div>
+
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="addressPrefix">addressPrefix</label>
+
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="addressPrefix">
+                        </div>
+                        <!-- .col-sm-9 -->
+
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="subnetAddressPrefix">subnetAddressPrefix</label>
+
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="subnetAddressPrefix">
+                        </div>
+                        <!-- .col-sm-9 -->
+
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="username">username</label>
+
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="username">
+                        </div>
+                        <!-- .col-sm-9 -->
+
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="deploymentSlot">deploymentSlot</label>
+
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="deploymentSlot">
+                        </div>
+                        <!-- .col-sm-9 -->
+
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="password">password</label>
+
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="password">
+                        </div>
+                        <!-- .col-sm-9 -->
+
+                    </div>
 
                     <div class="row btn-row">
                         <div class="col-sm-9 col-sm-offset-3">
-                            <a href="#" id="createTemplate" class="btn btn-success btn-block" ng-click="createAzureTemplate()" role="button"><i class="fa fa-plus fa-fw"></i> create template</a>
+                            <a href="#" id="createAzureTemplate" class="btn btn-success btn-block" ng-click="createAzureTemplate()" role="button"><i class="fa fa-plus fa-fw"></i> create template</a>
                         </div>
                     </div>
 
                 </form>
 
                 <form class="form-horizontal" role="form" ng-show="awsTemplate">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="amiId">amiId</label>
 
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="amiId">
+                        </div>
+                        <!-- .col-sm-9 -->
 
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="sshLocation">sshLocation</label>
+
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="sshLocation">
+                        </div>
+                        <!-- .col-sm-9 -->
+
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="sshLocation">sshLocation</label>
+
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="sshLocation">
+                        </div>
+                        <!-- .col-sm-9 -->
+
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="keyName">keyName</label>
+
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="keyName">
+                        </div>
+                        <!-- .col-sm-9 -->
+
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="region">region</label>
+
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="region">
+                        </div>
+                        <!-- .col-sm-9 -->
+
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="instanceType">instanceType</label>
+
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="instanceType">
+                        </div>
+                        <!-- .col-sm-9 -->
+
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="clusterName">clusterName</label>
+
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="clusterName">
+                        </div>
+                        <!-- .col-sm-9 -->
+
+                    </div>
 
                     <div class="row btn-row">
                         <div class="col-sm-9 col-sm-offset-3">
-                            <a href="#" id="createTemplate" class="btn btn-success btn-block" ng-click="createAwsTemplate()" role="button"><i class="fa fa-plus fa-fw"></i> create template</a>
+                            <a href="#" id="createAwsTemplate" class="btn btn-success btn-block" ng-click="createAwsTemplate()" role="button"><i class="fa fa-plus fa-fw"></i> create template</a>
                         </div>
                     </div>
 
