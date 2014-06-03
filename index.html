@@ -825,7 +825,7 @@
             </div>
             <div id="panel-template-collapse01" class="panel-collapse collapse" >
 
-                <p class="btn-row-over-panel"><a href="#" class="btn btn-danger" role="button"><i class="fa fa-times fa-fw"></i><span> delete</span></a></p>
+                <p class="btn-row-over-panel"><a href="#" class="btn btn-danger" role="button" ng-click="deleteTemplate(template.id)"><i class="fa fa-times fa-fw"></i><span> delete</span></a></p>
 
                 <div class="panel-body" ng-if="template.cloudPlatform == 'AZURE' ">
 
@@ -1064,7 +1064,7 @@
 
                             <div id="panel-blueprint-collapse01" class="panel-collapse collapse">
 
-                                <p class="btn-row-over-panel text-right"><a href="#" class="btn btn-danger" role="button"><i class="fa fa-times fa-fw"></i><span> delete</span></a>
+                                <p class="btn-row-over-panel text-right"><a href="#" class="btn btn-danger" role="button" ng-click="deleteBluePrint(blueprint.id)"><i class="fa fa-times fa-fw"></i><span> delete</span></a>
                                 </p>
 
                                 <div class="panel-body">
@@ -1233,7 +1233,7 @@
             </div>
             <div id="panel-credential-collapse01" class="panel-collapse collapse">
 
-                <p class="btn-row-over-panel"><a href="#" class="btn btn-danger" role="button"><i
+                <p class="btn-row-over-panel"><a href="#" class="btn btn-danger" role="button" ng-click="deleteStack(credential.id)"><i
                         class="fa fa-times fa-fw"></i><span> delete</span></a></p>
 
                 <div class="panel-body" ng-if="credential.cloudPlatform == 'AZURE' ">

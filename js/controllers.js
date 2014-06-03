@@ -79,6 +79,23 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             });
         }
 
+        $scope.deleteCredential = function(id) {
+            $http({
+                method: 'DELETE',
+                dataType: 'json',
+                withCredentials: true,
+                url:  $rootScope.apiUrl + "/credential/" +id,
+                headers: {
+                    'Authorization': 'Basic ' + $rootScope.basic_auth,
+                    'Content-Type': 'application/json'
+                }
+            }).success(function (data, status, headers, config) {
+                $scope.credentials = data;
+            }).error(function (data, status, headers, config) {
+                console.log("unsuccess");
+            });
+        }
+
         $scope.getCredential = function(id) {
             var deferred = $q.defer();
             $http({
@@ -104,6 +121,23 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 dataType: 'json',
                 withCredentials: true,
                 url:  $rootScope.apiUrl + "/stack",
+                headers: {
+                    'Authorization': 'Basic ' + $rootScope.basic_auth,
+                    'Content-Type': 'application/json'
+                }
+            }).success(function (data, status, headers, config) {
+                $scope.stacks = data;
+            }).error(function (data, status, headers, config) {
+                console.log("unsuccess");
+            });
+        }
+
+        $scope.deleteStack = function(id) {
+            $http({
+                method: 'DELETE',
+                dataType: 'json',
+                withCredentials: true,
+                url:  $rootScope.apiUrl + "/stack" +id,
                 headers: {
                     'Authorization': 'Basic ' + $rootScope.basic_auth,
                     'Content-Type': 'application/json'
@@ -152,12 +186,48 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             return deferred.promise;
         }
 
+        $scope.deleteTemplate = function(id) {
+            var deferred = $q.defer();
+            $http({
+                method: 'DELETE',
+                dataType: 'json',
+                withCredentials: true,
+                url:  $rootScope.apiUrl + "/template/" + id,
+                headers: {
+                    'Authorization': 'Basic ' + $rootScope.basic_auth,
+                    'Content-Type': 'application/json'
+                }
+            }).success(function (data, status, headers, config) {
+                deferred.resolve(data);
+            }).error(function (data, status, headers, config) {
+                return deferred.reject();
+            });
+            return deferred.promise;
+        }
+
         $scope.getBluePrints = function() {
             $http({
                 method: 'GET',
                 dataType: 'json',
                 withCredentials: true,
                 url:  $rootScope.apiUrl + "/blueprint",
+                headers: {
+                    'Authorization': 'Basic ' + $rootScope.basic_auth,
+                    'Content-Type': 'application/json'
+                }
+            }).success(function (data, status, headers, config) {
+                $scope.blueprints = data;
+            }).error(function (data, status, headers, config) {
+                console.log("unsuccess");
+            });
+        }
+
+        $scope.deleteBluePrint = function(id) {
+            $http({
+                method: 'DELETE',
+                dataType: 'json',
+                withCredentials: true,
+                url:  $rootScope.apiUrl + "/blueprint/" +id,
                 headers: {
                     'Authorization': 'Basic ' + $rootScope.basic_auth,
                     'Content-Type': 'application/json'
