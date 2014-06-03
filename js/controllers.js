@@ -129,8 +129,8 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     'Authorization': 'Basic ' + $rootScope.basic_auth
                 },
                 data: {
-                    url: blueprintName.value,
-                    ambariBlueprint: blueprintText.value
+                    url: blueprintUrl.value,
+                    ambariBlueprint: bluePrintText.value
                 }
             }).success(function (data, status, headers, config) {
                 $scope.getBluePrints()
