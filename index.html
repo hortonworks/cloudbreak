@@ -78,10 +78,10 @@
 
                     <li class="dropdown" id="menu-credefntial">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                            <i class="fa fa-tag fa-fw"></i> <span class="text-danger">{{activeCredential}}</span> <b class="caret"></b>
+                            <i class="fa fa-tag fa-fw"></i> <span class="text-danger">{{activeCredential.name}}</span> <b class="caret"></b>
                         </a>
                         <ul class="dropdown-menu">
-                            <li  ng-repeat="credential in credentials"><a href="#" id="{{credential.id}}" value="{{credential.name}}" ng-click="changeActiveCredential(credential.id, credential.name)">{{credential.name}}</a></li>
+                            <li  ng-repeat="credential in credentials"><a href="#" id="{{credential.id}}" value="{{credential.name}}" ng-click="changeActiveCredential(credential.id)">{{credential.name}}</a></li>
                             <li class="divider"></li>
                             <li><a href="#" class="not-option" data-toggle="collapse" data-target="#panel-credentials-collapse"><i class="fa fa-edit fa-fw"></i>
                                 manage credentials</a></li>
@@ -143,7 +143,7 @@
         </div>
 
         <!-- create cluster button -->
-        <div class="col-sm-3 col-xs-2"><a href="#" id="create-cluster-btn" class="btn btn-success btn-block btn-collapse-title" ng-show="activeCredentialId != -1" role="button"><i
+        <div class="col-sm-3 col-xs-2"><a href="#" id="create-cluster-btn" class="btn btn-success btn-block btn-collapse-title" ng-show="activeCredential.id != -1" role="button"><i
                 class="fa fa-plus fa-fw"></i><span> create cluster</span></a></div>
 
     </div>
@@ -468,20 +468,35 @@
                         <form class="form-horizontal" role="form">
 
                             <div class="form-group">
-                                <label class="col-sm-3 control-label" for="clusterName">cluster name</label>
+                                <label class="col-sm-3 control-label" for="cl_clusterName">cluster name</label>
 
                                 <div class="col-sm-9">
-                                    <input type="text" class="form-control" id="clusterName" placeholder="max. 20 char">
+                                    <input type="text" class="form-control" id="cl_clusterName" placeholder="max. 20 char">
                                 </div>
                                 <!-- .col-sm-9 -->
                             </div>
-                            <!-- .form-group -->
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label" for="cl_clusterSize">cluster size</label>
+
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control" id="cl_clusterSize">
+                                </div>
+                                <!-- .col-sm-9 -->
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label" for="cl_description">description</label>
+
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control" id="cl_description">
+                                </div>
+                                <!-- .col-sm-9 -->
+                            </div>
                             <div class="form-group">
                                 <label class="col-sm-3 control-label" for="selectTemplate">template</label>
 
                                 <div class="col-sm-9">
                                     <select class="form-control" id="selectTemplate">
-                                        <option ng-repeat="template in templates" id="{{template.id}}">{{template.clusterName}}</option>
+                                        <option ng-repeat="template in templates" id="{{template.id}}" ng-if="template.cloudPlatform == activeCredential.cloudPlatform">{{template.clusterName}}</option>
                                     </select>
                                 </div>
                                 <!-- .col-sm-9 -->

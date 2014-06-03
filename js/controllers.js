@@ -27,8 +27,10 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             $scope.blueprints = [];
         }
         if($rootScope.activeCredential === null || $rootScope.activeCredential === undefined ) {
-            $rootScope.activeCredential = "a credential";
-            $rootScope.activeCredentialId = -1;
+            $rootScope.activeCredential = {
+                name: "a credential",
+                id: -1
+            };
         }
 
         $scope.reloadCtrl = function(){
@@ -123,9 +125,57 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
         }
 
 
-        $scope.changeActiveCredential = function(id, value) {
-            $rootScope.activeCredential = value;
-            $rootScope.activeCredentialId = id;
+        $scope.changeActiveCredential = function(id) {
+            for (var i = 0; i < $scope.credentials.length; i++) {
+                if ($scope.credentials[i].id == id) {
+                    $rootScope.activeCredential = $scope.credentials[i];
+                    break;
+                }
+            }
+        }
+
+        $scope.createStack = function() {
+            console.log("stack creation started...");
+            var stackId = -1;
+            $http({
+                method: 'POST',
+                dataType: 'json',
+                withCredentials: true,
+                url:  $rootScope.apiUrl + "/stack",
+                headers: {
+                    'Authorization': 'Basic ' + $rootScope.basic_auth
+                },
+                data: {
+                    clusterSize: stack_clusterSize.value,
+                    name: stack_name.value,
+                    templateId: stack_templateId.value,
+                    credentialId: $scope.activeCredentialId
+                }
+            }).success(function (data, status, headers, config) {
+                console.log("ok");
+                stackId = data.id;
+            }).error(function (data, status, headers, config) {
+                console.log("unsuccess");
+            });
+            $http({
+                method: 'POST',
+                dataType: 'json',
+                withCredentials: true,
+                url:  $rootScope.apiUrl + "/stack/" +stackId+ "/blueprint",
+                headers: {
+                    'Authorization': 'Basic ' + $rootScope.basic_auth
+                },
+                data: {
+                    clusterSize: stack_clusterSize.value,
+                    name: stack_name.value,
+                    templateId: stack_templateId.value,
+                    credentialId: $scope.activeCredentialId
+                }
+            }).success(function (data, status, headers, config) {
+                console.log("ok");
+            }).error(function (data, status, headers, config) {
+                console.log("unsuccess");
+            });
         }
 
         $scope.createBlueprint = function() {
