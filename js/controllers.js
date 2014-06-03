@@ -152,10 +152,13 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 },
                 data: {
                     cloudPlatform: "AWS",
-                    clusterName: clname.value,
+                    name: tname.value,
+                    amiId: tamiId.value,
                     parameters: {
-                        region: cllocation.value,
-                        keyName:  keyname.value
+                        keyName: tkeyName.value,
+                        region: tregion.value,
+                        instanceType: tinstanceType.value,
+                        clusterName: tclusterName.value
                     }
                 }
             }).success(function (data, status, headers, config) {
@@ -213,13 +216,11 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 },
                 data: {
                     cloudPlatform: "AWS",
-                    name: tname.value,
-                    amiId: tamiId.value,
+                    name: awscname.value,
                     parameters: {
-                        keyName: tkeyName.value,
-                        region: tregion.value,
-                        instanceType: tinstanceType.value,
-                        clusterName: tclusterName.value
+                        amiId: tamiId.value,
+                        roleArn: croleArn.value,
+                        instanceProfileRoleArn: cinstanceProfileRoleArn.value
                     }
                 }
             }).success(function (data, status, headers, config) {
