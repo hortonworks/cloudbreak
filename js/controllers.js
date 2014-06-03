@@ -90,9 +90,9 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     'Content-Type': 'application/json'
                 }
             }).success(function (data, status, headers, config) {
-                $scope.credentials = data;
+                $scope.getCredentials();
             }).error(function (data, status, headers, config) {
-                console.log("unsuccess");
+                $scope.getCredentials();
             });
         }
 
@@ -143,9 +143,9 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     'Content-Type': 'application/json'
                 }
             }).success(function (data, status, headers, config) {
-                $scope.stacks = data;
+                $scope.getStacks();
             }).error(function (data, status, headers, config) {
-                console.log("unsuccess");
+                $scope.getStacks();
             });
         }
 
@@ -187,7 +187,6 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
         }
 
         $scope.deleteTemplate = function(id) {
-            var deferred = $q.defer();
             $http({
                 method: 'DELETE',
                 dataType: 'json',
@@ -198,11 +197,10 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     'Content-Type': 'application/json'
                 }
             }).success(function (data, status, headers, config) {
-                deferred.resolve(data);
+                $scope.getTemplates();
             }).error(function (data, status, headers, config) {
-                return deferred.reject();
+                $scope.getTemplates();
             });
-            return deferred.promise;
         }
 
         $scope.getBluePrints = function() {
@@ -233,9 +231,9 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     'Content-Type': 'application/json'
                 }
             }).success(function (data, status, headers, config) {
-                $scope.blueprints = data;
+                $scope.getBluePrints();
             }).error(function (data, status, headers, config) {
-                console.log("unsuccess");
+                $scope.getBluePrints();
             });
         }
 
