@@ -26,6 +26,9 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
         if($scope.blueprints === null || $scope.blueprints === undefined ) {
             $scope.blueprints = [];
         }
+        if($scope.stacks === null || $scope.stacks === undefined ) {
+            $scope.stacks = [];
+        }
         if($rootScope.activeCredential === null || $rootScope.activeCredential === undefined ) {
             $rootScope.activeCredential = {
                 name: "a credential",
@@ -64,6 +67,23 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 }
             }).success(function (data, status, headers, config) {
                 $scope.credentials = data;
+            }).error(function (data, status, headers, config) {
+                console.log("unsuccess");
+            });
+        }
+
+        $scope.getStacks = function() {
+            $http({
+                method: 'GET',
+                dataType: 'json',
+                withCredentials: true,
+                url:  $rootScope.apiUrl + "/stack",
+                headers: {
+                    'Authorization': 'Basic ' + $rootScope.basic_auth,
+                    'Content-Type': 'application/json'
+                }
+            }).success(function (data, status, headers, config) {
+                $scope.stacks = data;
             }).error(function (data, status, headers, config) {
                 console.log("unsuccess");
             });
@@ -161,6 +181,8 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             });
             return deferred.promise;
         }
+
+
 
         $scope.createStack = function() {
             console.log("stack creation started...");
@@ -329,6 +351,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             $scope.getCredentials();
             $scope.getTemplates();
             $scope.getBluePrints();
+            $scope.getStacks();
         }
 
 

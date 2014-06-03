@@ -109,7 +109,7 @@ $jq(document).ready(function () {
     // init
     $jq('.carousel').carousel('pause');
     // show cluster details
-    $jq(".cluster h4 .btn-cluster").click(function () {
+    $jq(document).on("click", ".cluster h4 .btn-cluster", function() {
         $jq('.carousel').carousel(1);
         $jq('#toggle-cluster-block-btn').addClass('disabled');
         $jq('#sort-clusters-btn').addClass('disabled');
