@@ -152,13 +152,12 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 },
                 data: {
                     cloudPlatform: "AWS",
-                    name: tname.value,
-                    amiId: tamiId.value,
+                    clusterName: aws_tclusterName.value,
                     parameters: {
-                        keyName: tkeyName.value,
-                        region: tregion.value,
-                        instanceType: tinstanceType.value,
-                        clusterName: tclusterName.value
+                        keyName: aws_tkeyName.value,
+                        region: aws_tregion.value,
+                        instanceType: aws_tinstanceType.value,
+                        amiId: aws_tamiId.value
                     }
                 }
             }).success(function (data, status, headers, config) {
@@ -182,18 +181,18 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 },
                 data: {
                     cloudPlatform: "AZURE",
-                    clusterName: tclusterName.value,
+                    clusterName: azure_tclusterName.value,
                     parameters: {
-                        location: tlocation.value,
-                        description: tdescription.value,
-                        subnetAddressPrefix: tsubnetAddressPrefix.value,
-                        addressPrefix: taddressPrefix.value,
-                        deploymentSlot: tdeploymentSlot.value,
-                        vmType: tvmType.value,
-                        imageName: timageName.value,
-                        userName: tuserName.value,
-                        password: tclpassword.value,
-                        sshString: tsshString.value
+                        location: azure_tlocation.value,
+                        description: azure_tdescription.value,
+                        subnetAddressPrefix: azure_tsubnetAddressPrefix.value,
+                        addressPrefix: azure_taddressPrefix.value,
+                        deploymentSlot: azure_tdeploymentSlot.value,
+                        vmType: azure_tvmType.value,
+                        imageName: azure_timageName.value,
+                        userName: azure_tuserName.value,
+                        password: azure_tclpassword.value,
+                        sshString: azure_tsshString.value
                     }
                 }
             }).success(function (data, status, headers, config) {
