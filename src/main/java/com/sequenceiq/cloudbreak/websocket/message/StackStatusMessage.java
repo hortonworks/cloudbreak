@@ -6,7 +6,6 @@ public class StackStatusMessage {
     private String status;
 
     public StackStatusMessage(Long id, String status) {
-        super();
         this.id = id;
         this.status = status;
     }

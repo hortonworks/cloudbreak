@@ -14,7 +14,7 @@ public class PropertyConfiguration {
     @Bean
     public PropertyPlaceholderConfigurer propertyConfigurer() throws IOException {
         PropertyPlaceholderConfigurer props = new PropertyPlaceholderConfigurer();
-        props.setLocations(new Resource[] { new ClassPathResource("default_db.properties") });
+        props.setLocations(new Resource[] { new ClassPathResource("default.properties") });
         props.setSystemPropertiesModeName("SYSTEM_PROPERTIES_MODE_OVERRIDE");
         return props;
     }
