@@ -567,28 +567,19 @@
                 <form class="form-horizontal" role="form" ng-show="azureTemplate">
 
                     <div class="form-group">
-                        <label class="col-sm-3 control-label" for="clusterName">clusterName</label>
+                        <label class="col-sm-3 control-label" for="tclusterName">clusterName</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" id="clusterName" placeholder="max. 20 char">
+                            <input type="text" class="form-control" id="tclusterName" placeholder="max. 20 char">
                         </div>
                         <!-- .col-sm-9 -->
 
                     </div>
                     <div class="form-group">
-                        <label class="col-sm-3 control-label" for="description">description</label>
+                        <label class="col-sm-3 control-label" for="tdescription">description</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" id="description" placeholder="max. 20 char">
-                        </div>
-                        <!-- .col-sm-9 -->
-
-                    </div>
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label" for="location">location</label>
-
-                        <div class="col-sm-9">
-                            <input type="text" class="form-control" id="location">
+                            <input type="text" class="form-control" id="tdescription" placeholder="max. 20 char">
                         </div>
                         <!-- .col-sm-9 -->
 
@@ -596,9 +587,9 @@
 
                     <div class="form-group">
                         <div class="form-group">
-                            <label class="col-sm-3 control-label" for="location">location</label>
+                            <label class="col-sm-3 control-label" for="tlocation">location</label>
                             <div class="col-sm-9">
-                                <select class="form-control" id="location">
+                                <select class="form-control" id="tlocation">
                                     <option value="EAST_ASIA">East Asia</option>
                                     <option value="SOUTHEAST_ASIA">Southeast Asia</option>
                                     <option value="NORTH_EUROPE">North Europe</option>
@@ -614,19 +605,19 @@
 
                     </div>
                     <div class="form-group">
-                        <label class="col-sm-3 control-label" for="imageName">imageName</label>
+                        <label class="col-sm-3 control-label" for="timageName">imageName</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" id="imageName">
+                            <input type="text" class="form-control" id="timageName">
                         </div>
                         <!-- .col-sm-9 -->
 
                     </div>
                     <div class="form-group">
                         <div class="form-group">
-                            <label class="col-sm-3 control-label" for="location">location</label>
+                            <label class="col-sm-3 control-label" for="tlocation">location</label>
                             <div class="col-sm-9">
-                                <select class="form-control" id="location">
+                                <select class="form-control" id="tlocation">
                                     <option value="EXTRA_SMALL">Extra Small</option>
                                     <option value="SMALL">Small</option>
                                     <option value="MEDIUM">Medium</option>
@@ -639,46 +630,46 @@
 
                     </div>
                     <div class="form-group">
-                        <label class="col-sm-3 control-label" for="addressPrefix">addressPrefix</label>
+                        <label class="col-sm-3 control-label" for="taddressPrefix">addressPrefix</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" id="addressPrefix">
+                            <input type="text" class="form-control" id="taddressPrefix">
                         </div>
                         <!-- .col-sm-9 -->
 
                     </div>
                     <div class="form-group">
-                        <label class="col-sm-3 control-label" for="subnetAddressPrefix">subnetAddressPrefix</label>
+                        <label class="col-sm-3 control-label" for="tsubnetAddressPrefix">subnetAddressPrefix</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" id="subnetAddressPrefix">
+                            <input type="text" class="form-control" id="tsubnetAddressPrefix">
                         </div>
                         <!-- .col-sm-9 -->
 
                     </div>
                     <div class="form-group">
-                        <label class="col-sm-3 control-label" for="username">username</label>
+                        <label class="col-sm-3 control-label" for="tusername">username</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" id="username">
+                            <input type="text" class="form-control" id="tusername">
                         </div>
                         <!-- .col-sm-9 -->
 
                     </div>
                     <div class="form-group">
-                        <label class="col-sm-3 control-label" for="deploymentSlot">deploymentSlot</label>
+                        <label class="col-sm-3 control-label" for="tdeploymentSlot">deploymentSlot</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" id="deploymentSlot">
+                            <input type="text" class="form-control" id="tdeploymentSlot">
                         </div>
                         <!-- .col-sm-9 -->
 
                     </div>
                     <div class="form-group">
-                        <label class="col-sm-3 control-label" for="password">password</label>
+                        <label class="col-sm-3 control-label" for="tpassword">password</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" id="password">
+                            <input type="text" class="form-control" id="tpassword">
                         </div>
                         <!-- .col-sm-9 -->
 
@@ -694,64 +685,55 @@
 
                 <form class="form-horizontal" role="form" ng-show="awsTemplate">
                     <div class="form-group">
-                        <label class="col-sm-3 control-label" for="amiId">amiId</label>
+                        <label class="col-sm-3 control-label" for="tamiId">amiId</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" id="amiId">
+                            <input type="text" class="form-control" id="tamiId">
                         </div>
                         <!-- .col-sm-9 -->
 
                     </div>
                     <div class="form-group">
-                        <label class="col-sm-3 control-label" for="sshLocation">sshLocation</label>
+                        <label class="col-sm-3 control-label" for="tsshLocation">sshLocation</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" id="sshLocation">
+                            <input type="text" class="form-control" id="tsshLocation">
                         </div>
                         <!-- .col-sm-9 -->
 
                     </div>
                     <div class="form-group">
-                        <label class="col-sm-3 control-label" for="sshLocation">sshLocation</label>
+                        <label class="col-sm-3 control-label" for="tkeyName">keyName</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" id="sshLocation">
+                            <input type="text" class="form-control" id="tkeyName">
                         </div>
                         <!-- .col-sm-9 -->
 
                     </div>
                     <div class="form-group">
-                        <label class="col-sm-3 control-label" for="keyName">keyName</label>
+                        <label class="col-sm-3 control-label" for="tregion">region</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" id="keyName">
+                            <input type="text" class="form-control" id="tregion">
                         </div>
                         <!-- .col-sm-9 -->
 
                     </div>
                     <div class="form-group">
-                        <label class="col-sm-3 control-label" for="region">region</label>
+                        <label class="col-sm-3 control-label" for="tinstanceType">instanceType</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" id="region">
+                            <input type="text" class="form-control" id="tinstanceType">
                         </div>
                         <!-- .col-sm-9 -->
 
                     </div>
                     <div class="form-group">
-                        <label class="col-sm-3 control-label" for="instanceType">instanceType</label>
+                        <label class="col-sm-3 control-label" for="tclusterName">clusterName</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" id="instanceType">
-                        </div>
-                        <!-- .col-sm-9 -->
-
-                    </div>
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label" for="clusterName">clusterName</label>
-
-                        <div class="col-sm-9">
-                            <input type="text" class="form-control" id="clusterName">
+                            <input type="text" class="form-control" id="tclusterName">
                         </div>
                         <!-- .col-sm-9 -->
 
@@ -977,20 +959,20 @@
                                 <form class="form-horizontal" role="form">
 
                                     <div class="form-group">
-                                        <label class="col-sm-3 control-label" for="textfield">source URL</label>
+                                        <label class="col-sm-3 control-label" for="blueprintName">source URL</label>
 
                                         <div class="col-sm-9">
-                                            <input type="text" class="form-control" id="textfield" placeholder="set blueprint URL">
+                                            <input type="text" class="form-control" id="blueprintName" placeholder="set blueprint URL">
                                         </div>
                                         <!-- .col-sm-9 -->
                                     </div>
                                     <!-- .form-group -->
 
                                     <div class="form-group">
-                                        <label class="col-sm-3 control-label" for="textarea">manual copy</label>
+                                        <label class="col-sm-3 control-label" for="bluePrintText">manual copy</label>
 
                                         <div class="col-sm-9">
-                                            <textarea class="form-control" id="textarea" placeholder="paste blueprint text here" rows="10"></textarea>
+                                            <textarea class="form-control" id="bluePrintText" placeholder="paste blueprint text here" rows="10"></textarea>
                                         </div>
                                         <!-- .col-sm-9 -->
                                     </div>
@@ -999,7 +981,7 @@
 
                                     <div class="row btn-row">
                                         <div class="col-sm-9 col-sm-offset-3">
-                                            <a href="#" id="createBlueprint" class="btn btn-success btn-block" role="button"><i class="fa fa-plus fa-fw"></i> create
+                                            <a href="#" id="createBlueprint" ng-click="createBlueprint()" class="btn btn-success btn-block" role="button"><i class="fa fa-plus fa-fw"></i> create
                                                 blueprint</a>
                                         </div>
                                     </div>
@@ -1097,30 +1079,30 @@
                 <form class="form-horizontal" role="form" ng-show="azureCredential">
 
                     <div class="form-group">
-                        <label class="col-sm-3 control-label" for="name">name</label>
+                        <label class="col-sm-3 control-label" for="cname">name</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" id="name" placeholder="max. 20 char">
+                            <input type="text" class="form-control" id="cname" placeholder="max. 20 char">
                         </div>
                         <!-- .col-sm-9 -->
 
                     </div>
                     <!-- .form-group -->
                     <div class="form-group">
-                        <label class="col-sm-3 control-label" for="subscriptionId">subscriptionId</label>
+                        <label class="col-sm-3 control-label" for="csubscriptionId">subscriptionId</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" id="subscriptionId" placeholder="max. 20 char">
+                            <input type="text" class="form-control" id="csubscriptionId" placeholder="max. 20 char">
                         </div>
                         <!-- .col-sm-9 -->
 
                     </div>
 
                     <div class="form-group">
-                        <label class="col-sm-3 control-label" for="jksPassword">jksPassword</label>
+                        <label class="col-sm-3 control-label" for="cjksPassword">jksPassword</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" id="jksPassword" placeholder="max. 20 char">
+                            <input type="text" class="form-control" id="cjksPassword" placeholder="max. 20 char">
                         </div>
                         <!-- .col-sm-9 -->
 
@@ -1137,30 +1119,30 @@
                 <form class="form-horizontal" role="form" ng-show="awsCredential">
 
                     <div class="form-group">
-                        <label class="col-sm-3 control-label" for="name">name</label>
+                        <label class="col-sm-3 control-label" for="cname">name</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" id="name" placeholder="max. 20 char">
+                            <input type="text" class="form-control" id="cname" placeholder="max. 20 char">
                         </div>
                         <!-- .col-sm-9 -->
 
                     </div>
                     <!-- .form-group -->
                     <div class="form-group">
-                        <label class="col-sm-3 control-label" for="roleArn">roleArn</label>
+                        <label class="col-sm-3 control-label" for="croleArn">roleArn</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" id="roleArn" placeholder="max. 20 char">
+                            <input type="text" class="form-control" id="croleArn" placeholder="max. 20 char">
                         </div>
                         <!-- .col-sm-9 -->
 
                     </div>
 
                     <div class="form-group">
-                        <label class="col-sm-3 control-label" for="instanceProfileRoleArn">instanceProfileRoleArn</label>
+                        <label class="col-sm-3 control-label" for="cinstanceProfileRoleArn">instanceProfileRoleArn</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" id="instanceProfileRoleArn" placeholder="max. 20 char">
+                            <input type="text" class="form-control" id="cinstanceProfileRoleArn" placeholder="max. 20 char">
                         </div>
                         <!-- .col-sm-9 -->
 

@@ -118,6 +118,28 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             $scope.awsCredential = false;
         }
 
+        $scope.createBlueprint = function() {
+            console.log("blueprint creation started...");
+            $http({
+                method: 'POST',
+                dataType: 'json',
+                withCredentials: true,
+                url:  $rootScope.apiUrl + "/blueprint",
+                headers: {
+                    'Authorization': 'Basic ' + $rootScope.basic_auth
+                },
+                data: {
+                    url: blueprintName.value,
+                    ambariBlueprint: blueprintText.value
+                }
+            }).success(function (data, status, headers, config) {
+                $scope.getBluePrints()
+            }).error(function (data, status, headers, config) {
+                console.log("unsuccess");
+                $scope.isFailedCreation = true;
+            });
+        }
+
         $scope.createAwsTemplate = function() {
             console.log("aws cluster creation started...");
             $http({
@@ -137,7 +159,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     }
                 }
             }).success(function (data, status, headers, config) {
-                $location.path("/");
+                $scope.getTemplates();
             }).error(function (data, status, headers, config) {
                 console.log("unsuccess");
                 $scope.isFailedCreation = true;
@@ -157,23 +179,22 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 },
                 data: {
                     cloudPlatform: "AZURE",
-                    clusterName: clname.value,
+                    clusterName: tclusterName.value,
                     parameters: {
-                        location: cllocation.value,
-                        name: clname.value,
-                        description: description.value,
-                        addressPrefix: subnetAddressPrefix.value,
-                        deploymentSlot: deploymentSlot.value,
-                        disableSshPasswordAuthentication: disableSshPasswordAuthentication.value,
-                        vmType: vmType.value,
-                        imageName: imageName.value,
-                        userName: userName.value,
-                        password: clpassword.value,
-                        sshString: sshString.value
+                        location: tlocation.value,
+                        description: tdescription.value,
+                        subnetAddressPrefix: tsubnetAddressPrefix.value,
+                        addressPrefix: taddressPrefix.value,
+                        deploymentSlot: tdeploymentSlot.value,
+                        vmType: tvmType.value,
+                        imageName: timageName.value,
+                        userName: tuserName.value,
+                        password: tclpassword.value,
+                        sshString: tsshString.value
                     }
                 }
             }).success(function (data, status, headers, config) {
-                $location.path("/");
+                $scope.getTemplates();
             }).error(function (data, status, headers, config) {
                 console.log("unsuccess");
                 $scope.isFailedCreation = true;
@@ -192,13 +213,17 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 },
                 data: {
                     cloudPlatform: "AWS",
+                    name: tname.value,
+                    amiId: tamiId.value,
                     parameters: {
-                        roleArn: roleArn.value,
-                        instanceProfileRoleArn: instanceProfileRoleArn.value
+                        keyName: tkeyName.value,
+                        region: tregion.value,
+                        instanceType: tinstanceType.value,
+                        clusterName: tclusterName.value
                     }
                 }
             }).success(function (data, status, headers, config) {
-                $location.path("/");
+                $scope.getCredentials();
             }).error(function (data, status, headers, config) {
                 console.log("unsuccess");
                 $scope.isFailedCreation = true;
@@ -216,13 +241,14 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 },
                 data: {
                     cloudPlatform: "AZURE",
+                    name: cname.value,
                     parameters: {
-                        subscriptionId: subscriptionId.value,
-                        jksPassword: jksPassword.value
+                        subscriptionId: csubscriptionId.value,
+                        jksPassword: cjksPassword.value
                     }
                 }
             }).success(function (data, status, headers, config) {
-                $location.path("/");
+                $scope.getCredentials();
             }).error(function (data, status, headers, config) {
                 console.log("unsuccess");
                 $scope.isFailedCreation = true;
