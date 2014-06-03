@@ -60,6 +60,8 @@ import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.ProvisionService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import com.sequenceiq.cloudbreak.websocket.WebsocketService;
+import com.sequenceiq.cloudbreak.websocket.message.StackStatusMessage;
 
 /**
  * Provisions an Ambari based Hadoop cluster on a client Amazon EC2 account by
@@ -89,6 +91,9 @@ public class AwsProvisionService implements ProvisionService {
 
     @Autowired
     private StackRepository stackRepository;
+
+    @Autowired
+    private WebsocketService websocketService;
 
     private String ec2userDataScript;
 
@@ -161,12 +166,14 @@ public class AwsProvisionService implements ProvisionService {
     private void createFailed(Stack stack) {
         stack.setStatus(Status.CREATE_FAILED);
         stackRepository.save(stack);
+        websocketService.send("/topic/stack", new StackStatusMessage(stack.getId(), Status.CREATE_FAILED.name()));
     }
 
     private void createSuccess(Stack stack, String ambariIp) {
         stack.setStatus(Status.CREATE_COMPLETED);
         stack.setAmbariIp(ambariIp);
         stackRepository.save(stack);
+        websocketService.send("/topic/stack", new StackStatusMessage(stack.getId(), Status.CREATE_COMPLETED.name()));
     }
 
     private String pollAmbariServer(AmazonEC2Client amazonEC2Client, Long stackId, List<String> instanceIds) {

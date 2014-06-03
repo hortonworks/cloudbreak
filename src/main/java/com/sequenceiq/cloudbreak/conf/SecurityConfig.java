@@ -29,7 +29,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .contentTypeOptions()
                 .and()
                 .authorizeRequests()
-                .antMatchers("/h2/**").permitAll()
+                .antMatchers("/notification/**").permitAll()
+                .antMatchers("/topic/**").permitAll()
+                .antMatchers("/app/**").permitAll()
                 .anyRequest().authenticated().and()
                 .httpBasic();
     }
