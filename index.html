@@ -496,18 +496,18 @@
 
                                 <div class="col-sm-9">
                                     <select class="form-control" id="selectTemplate">
-                                        <option ng-repeat="template in templates" id="{{template.id}}" ng-if="template.cloudPlatform == activeCredential.cloudPlatform">{{template.clusterName}}</option>
+                                        <option ng-repeat="template in templates" data-value="{{template.id}}" value="{{template.id}}" id="{{template.id}}" ng-if="template.cloudPlatform == activeCredential.cloudPlatform">{{template.name}}</option>
                                     </select>
                                 </div>
                                 <!-- .col-sm-9 -->
                             </div>
                             <!-- .form-group -->
                             <div class="form-group">
-                                <label class="col-sm-3 control-label" for="Blueprint">blueprint</label>
+                                <label class="col-sm-3 control-label" for="selectBlueprint">blueprint</label>
 
                                 <div class="col-sm-9">
                                     <select class="form-control" id="selectBlueprint">
-                                        <option  ng-repeat="blueprint in blueprints" id="{{blueprint.id}}">{{blueprint.name}}</option>
+                                        <option  ng-repeat="blueprint in blueprints" data-value="{{blueprint.id}}" value="{{blueprint.id}}" id="{{blueprint.id}}">{{blueprint.name}}</option>
                                     </select>
                                 </div>
                                 <!-- .col-sm-9 -->
@@ -516,7 +516,7 @@
 
                             <div class="row btn-row">
                                 <div class="col-sm-9 col-sm-offset-3">
-                                    <a href="#" id="createCluster" class="btn btn-success btn-block" role="button"><i class="fa fa-plus fa-fw"></i>create and start
+                                    <a href="#" id="createCluster" class="btn btn-success btn-block" role="button" ng-click="createStack()"><i class="fa fa-plus fa-fw"></i>create and start
                                         cluster</a>
                                 </div>
                             </div>
@@ -780,7 +780,7 @@
 
             <div class="panel-heading">
                 <h5><a href="#panel-template-collapse01" data-toggle="collapse" data-parent="#templete-list-accordion" data-target="#panel-template-collapse01"><i
-                        class="fa fa-file-o fa-fw"></i>{{template.id}}: {{template.clusterName}}</a></h5>
+                        class="fa fa-file-o fa-fw"></i>{{template.id}}: {{template.name}}</a></h5>
             </div>
             <div id="panel-template-collapse01" class="panel-collapse collapse" >
 
@@ -794,7 +794,7 @@
                             <label class="col-sm-3 control-label" for="clusterName">clusterName</label>
 
                             <div class="col-sm-9">
-                                <p id="clusterName" class="form-control-static">{{template.clusterName}}</p>
+                                <p id="clusterName" class="form-control-static">{{template.name}}</p>
                             </div>
                             <!-- .col-sm-9 -->
                         </div>
@@ -888,7 +888,7 @@
                             <label class="col-sm-3 control-label" for="awsclusterName">clusterName</label>
 
                             <div class="col-sm-9">
-                                <p id="awsclusterName" class="form-control-static">{{template.clusterName}}</p>
+                                <p id="awsclusterName" class="form-control-static">{{template.name}}</p>
                             </div>
                             <!-- .col-sm-9 -->
                         </div>

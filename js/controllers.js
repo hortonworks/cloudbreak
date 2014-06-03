@@ -4,8 +4,8 @@
 
 var cloudbreakControllers = angular.module('cloudbreakControllers', []);
 
-cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Templates', '$location', '$rootScope',
-    function ($scope, $http, Templates, $location, $rootScope) {
+cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Templates', '$location', '$rootScope', '$q',
+    function ($scope, $http, Templates, $location, $rootScope, $q) {
         $scope.form = undefined;
         $http.defaults.useXDomain = true;
         delete $http.defaults.headers.common['X-Requested-With'];
@@ -81,6 +81,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 }
             }).success(function (data, status, headers, config) {
                 $scope.templates = data;
+                console.log($scope.templates);
             }).error(function (data, status, headers, config) {
                 console.log("unsuccess");
             });
@@ -129,14 +130,14 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             for (var i = 0; i < $scope.credentials.length; i++) {
                 if ($scope.credentials[i].id == id) {
                     $rootScope.activeCredential = $scope.credentials[i];
+                    console.log($rootScope.activeCredential);
                     break;
                 }
             }
         }
 
-        $scope.createStack = function() {
-            console.log("stack creation started...");
-            var stackId = -1;
+        $scope.createFullStack = function() {
+            var deferred = $q.defer();
             $http({
                 method: 'POST',
                 dataType: 'json',
@@ -146,36 +147,44 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     'Authorization': 'Basic ' + $rootScope.basic_auth
                 },
                 data: {
-                    clusterSize: stack_clusterSize.value,
-                    name: stack_name.value,
-                    templateId: stack_templateId.value,
-                    credentialId: $scope.activeCredentialId
+                    nodeCount: cl_clusterSize.value,
+                    name: cl_clusterName.value,
+                    templateId: selectTemplate.value,
+                    credentialId: $scope.activeCredential.id
                 }
             }).success(function (data, status, headers, config) {
                 console.log("ok");
-                stackId = data.id;
+                deferred.resolve(data.id);
+
             }).error(function (data, status, headers, config) {
-                console.log("unsuccess");
+                return deferred.reject();
             });
-            $http({
-                method: 'POST',
-                dataType: 'json',
-                withCredentials: true,
-                url:  $rootScope.apiUrl + "/stack/" +stackId+ "/blueprint",
-                headers: {
-                    'Authorization': 'Basic ' + $rootScope.basic_auth
-                },
-                data: {
-                    clusterSize: stack_clusterSize.value,
-                    name: stack_name.value,
-                    templateId: stack_templateId.value,
-                    credentialId: $scope.activeCredentialId
-                }
-            }).success(function (data, status, headers, config) {
-                console.log("ok");
-            }).error(function (data, status, headers, config) {
-                console.log("unsuccess");
-            });
+            return deferred.promise;
+        }
+
+        $scope.createStack = function() {
+            console.log("stack creation started...");
+            $scope.createFullStack().then(function(data) {
+                $http({
+                    method: 'POST',
+                    dataType: 'json',
+                    withCredentials: true,
+                    url:  $rootScope.apiUrl + "/stack/" + data + "/cluster",
+                    headers: {
+                        'Authorization': 'Basic ' + $rootScope.basic_auth
+                    },
+                    data: {
+                        clusterName: cl_clusterName.value,
+                        blueprintId: selectBlueprint.value
+                    }
+                }).success(function (data, status, headers, config) {
+                    console.log("ok");
+                }).error(function (data, status, headers, config) {
+                    console.log("unsuccess");
+                });
+            }, function(reason) {
+                console.log("Failed");
+            })
         }
 
         $scope.createBlueprint = function() {
@@ -212,7 +221,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 },
                 data: {
                     cloudPlatform: "AWS",
-                    clusterName: aws_tclusterName.value,
+                    name: aws_tclusterName.value,
                     parameters: {
                         keyName: aws_tkeyName.value,
                         region: aws_tregion.value,
@@ -241,7 +250,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 },
                 data: {
                     cloudPlatform: "AZURE",
-                    clusterName: azure_tclusterName.value,
+                    name: azure_tclusterName.value,
                     parameters: {
                         location: azure_tlocation.value,
                         description: azure_tdescription.value,
