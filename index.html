@@ -164,7 +164,7 @@
 
 
                 <div class="cluster" id="cluster-{{stack.id}}" data-state="6" ng-repeat="stack in stacks">
-                    <h4><a href="#" class="btn btn-cluster btn-block" role="button">{{stack.name}}<i class="fa fa-angle-right fa-25x"></i></a></h4>
+                    <h4><a href="#" class="btn btn-cluster btn-block" role="button" ng-click="changeActiveStack(stack.id)">{{stack.name}}<i class="fa fa-angle-right fa-25x"></i></a></h4>
                     <dl class="mod-uptime">
                         <dt>uptime</dt>
                         <dd class="big-numeral">9999<sup>h</sup>99<sup>m</sup></dd>
@@ -198,7 +198,7 @@
                     <div class="panel-heading panel-heading-nav">
                         <a href="#" id="cluster-details-back-btn" class="btn btn-info btn-fa-2x" role="button"><i
                                 class="fa fa-angle-left fa-2x fa-fw-forced"></i></a>
-                        <h4>Cluster_name_20_char</h4>
+                        <h4>{{activeStack.data.name}}</h4>
                     </div>
 
                     <div class="panel-body">
@@ -212,61 +212,214 @@
                         <form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
 
                             <div class="form-group">
-                                <label class="col-sm-3 control-label" for="parameter1">parameter1</label>
+                                <label class="col-sm-3 control-label" for="sl_ambariServerIp">ambariServerIp</label>
 
                                 <div class="col-sm-9">
-                                    <p id="parameter1" class="form-control-static">Parameter 1</p>
+                                    <p id="sl_ambariServerIp" class="form-control-static">{{activeStack.data.ambariServerIp}}</p>
                                 </div>
                                 <!-- .col-sm-9 -->
                             </div>
                             <!-- .form-group -->
                             <div class="form-group">
-                                <label class="col-sm-3 control-label" for="parameter1">parameter1</label>
+                                <label class="col-sm-3 control-label" for="sl_cloudPlatform">cloudPlatform</label>
 
                                 <div class="col-sm-9">
-                                    <p id="parameter1" class="form-control-static">Parameter 1</p>
+                                    <p id="sl_cloudPlatform" class="form-control-static">{{activeStack.data.cloudPlatform}}</p>
                                 </div>
                                 <!-- .col-sm-9 -->
                             </div>
                             <!-- .form-group -->
                             <div class="form-group">
-                                <label class="col-sm-3 control-label" for="parameter1">parameter1</label>
+                                <label class="col-sm-3 control-label" for="sl_description">description</label>
 
                                 <div class="col-sm-9">
-                                    <p id="parameter1" class="form-control-static">Parameter 1</p>
+                                    <p id="sl_description" class="form-control-static">{{activeStack.data.description}}</p>
                                 </div>
                                 <!-- .col-sm-9 -->
                             </div>
                             <!-- .form-group -->
                             <div class="form-group">
-                                <label class="col-sm-3 control-label" for="parameter1">parameter1</label>
+                                <label class="col-sm-3 control-label" for="sl_id">id</label>
 
                                 <div class="col-sm-9">
-                                    <p id="parameter1" class="form-control-static">Parameter 1</p>
+                                    <p id="sl_id" class="form-control-static">{{activeStack.data.id}}</p>
                                 </div>
                                 <!-- .col-sm-9 -->
                             </div>
                             <!-- .form-group -->
                             <div class="form-group">
-                                <label class="col-sm-3 control-label" for="parameter1">parameter1</label>
+                                <label class="col-sm-3 control-label" for="sl_name">name</label>
 
                                 <div class="col-sm-9">
-                                    <p id="parameter1" class="form-control-static">Parameter 1</p>
+                                    <p id="sl_name" class="form-control-static">{{activeStack.data.name}}</p>
                                 </div>
                                 <!-- .col-sm-9 -->
                             </div>
                             <!-- .form-group -->
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label" for="sl_nodeCount">nodeCount</label>
+
+                                <div class="col-sm-9">
+                                    <p id="sl_nodeCount" class="form-control-static">{{activeStack.data.nodeCount}}</p>
+                                </div>
+                                <!-- .col-sm-9 -->
+                            </div>
+
 
                         </form>
 
                         <div class="panel panel-default">
                             <div class="panel-heading">
-                                <h5><a href="#panel-collapse01" data-toggle="collapse"><i class="fa fa-file-o fa-fw"></i> Template_name</a></h5>
+                                <h5><a href="#panel-collapse01" data-toggle="collapse"><i class="fa fa-file-o fa-fw"></i>{{activeStack.template.name}}</a></h5>
                             </div>
                             <div id="panel-collapse01" class="panel-collapse collapse">
-                                <div class="panel-body">
+                                <div class="panel-body" ng-if="activeStack.template.cloudPlatform == 'AZURE' ">
 
+                                    <form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
 
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label" for="clusterName">clusterName</label>
+
+                                            <div class="col-sm-9">
+                                                <p id="clusterName" class="form-control-static">{{activeStack.template.name}}</p>
+                                            </div>
+                                            <!-- .col-sm-9 -->
+                                        </div>
+                                        <!-- .form-group -->
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label" for="password">password</label>
+
+                                            <div class="col-sm-9">
+                                                <p id="password" class="form-control-static">{{activeStack.template.parameters.password}}</p>
+                                            </div>
+                                            <!-- .col-sm-9 -->
+                                        </div>
+                                        <!-- .form-group -->
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label" for="deploymentSlot">deploymentSlot</label>
+
+                                            <div class="col-sm-9">
+                                                <p id="deploymentSlot" class="form-control-static">{{activeStack.template.parameters.deploymentSlot}}</p>
+                                            </div>
+                                            <!-- .col-sm-9 -->
+                                        </div>
+                                        <!-- .form-group -->
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label" for="username">username</label>
+
+                                            <div class="col-sm-9">
+                                                <p id="username" class="form-control-static">{{activeStack.template.parameters.username}}</p>
+                                            </div>
+                                            <!-- .col-sm-9 -->
+                                        </div>
+                                        <!-- .form-group -->
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label" for="subnetAddressPrefix">subnetAddressPrefix</label>
+
+                                            <div class="col-sm-9">
+                                                <p id="subnetAddressPrefix" class="form-control-static">{{activeStack.template.parameters.subnetAddressPrefix}}</p>
+                                            </div>
+                                            <!-- .col-sm-9 -->
+                                        </div>
+                                        <!-- .form-group -->
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label" for="addressPrefix">addressPrefix</label>
+
+                                            <div class="col-sm-9">
+                                                <p id="addressPrefix" class="form-control-static">{{activeStack.template.parameters.addressPrefix}}</p>
+                                            </div>
+                                            <!-- .col-sm-9 -->
+                                        </div>
+                                        <!-- .form-group -->
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label" for="vmType">vmType</label>
+
+                                            <div class="col-sm-9">
+                                                <p id="vmType" class="form-control-static">{{activeStack.template.parameters.vmType}}</p>
+                                            </div>
+                                            <!-- .col-sm-9 -->
+                                        </div>
+                                        <!-- .form-group -->
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label" for="imageName">imageName</label>
+
+                                            <div class="col-sm-9">
+                                                <p id="imageName" class="form-control-static">{{activeStack.template.parameters.imageName}}</p>
+                                            </div>
+                                            <!-- .col-sm-9 -->
+                                        </div>
+                                        <!-- .form-group -->
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label" for="location">location</label>
+
+                                            <div class="col-sm-9">
+                                                <p id="location" class="form-control-static">{{activeStack.template.parameters.location}}</p>
+                                            </div>
+                                            <!-- .col-sm-9 -->
+                                        </div>
+                                        <!-- .form-group -->
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label" for="description">description</label>
+
+                                            <div class="col-sm-9">
+                                                <p id="description" class="form-control-static">{{activeStack.template.parameters.description}}</p>
+                                            </div>
+                                            <!-- .col-sm-9 -->
+                                        </div>
+                                    </form>
+                                </div>
+
+                                <div class="panel-body"  ng-if="activeStack.template.cloudPlatform == 'AWS' ">
+                                    <form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label" for="awsclusterName">clusterName</label>
+
+                                            <div class="col-sm-9">
+                                                <p id="awsclusterName" class="form-control-static">{{activeStack.template.name}}</p>
+                                            </div>
+                                            <!-- .col-sm-9 -->
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label" for="awsamiId">amiId</label>
+
+                                            <div class="col-sm-9">
+                                                <p id="awsamiId" class="form-control-static">{{activeStack.template.parameters.amiId}}</p>
+                                            </div>
+                                            <!-- .col-sm-9 -->
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label" for="awssshLocation">sshLocation</label>
+
+                                            <div class="col-sm-9">
+                                                <p id="awssshLocation" class="form-control-static">{{activeStack.template.parameters.sshLocation}}</p>
+                                            </div>
+                                            <!-- .col-sm-9 -->
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label" for="awskeyName">keyName</label>
+
+                                            <div class="col-sm-9">
+                                                <p id="awskeyName" class="form-control-static">{{activeStack.template.parameters.keyName}}</p>
+                                            </div>
+                                            <!-- .col-sm-9 -->
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label" for="awsregion">region</label>
+
+                                            <div class="col-sm-9">
+                                                <p id="awsregion" class="form-control-static">{{activeStack.template.parameters.region}}</p>
+                                            </div>
+                                            <!-- .col-sm-9 -->
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label" for="awsinstanceType">instanceType</label>
+
+                                            <div class="col-sm-9">
+                                                <p id="awsinstanceType" class="form-control-static">{{activeStack.template.parameters.instanceType}}</p>
+                                            </div>
+                                            <!-- .col-sm-9 -->
+                                        </div>
+                                    </form>
                                 </div>
                             </div>
                         </div>
@@ -278,57 +431,39 @@
 
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <h4>Stack_name</h4>
+                        <h4>{{activeStack.credential.name}}</h4>
                     </div>
                     <div class="panel-body">
 
                         <form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
 
                             <div class="form-group">
-                                <label class="col-sm-3 control-label" for="parameter1">parameter1</label>
+                                <label class="col-sm-3 control-label" for="cred_id">id</label>
 
                                 <div class="col-sm-9">
-                                    <p id="parameter1" class="form-control-static">Parameter 1</p>
+                                    <p id="cred_id" class="form-control-static">{{activeStack.credential.id}}</p>
                                 </div>
                                 <!-- .col-sm-9 -->
                             </div>
                             <!-- .form-group -->
                             <div class="form-group">
-                                <label class="col-sm-3 control-label" for="parameter1">parameter1</label>
+                                <label class="col-sm-3 control-label" for="cred_name">name</label>
 
                                 <div class="col-sm-9">
-                                    <p id="parameter1" class="form-control-static">Parameter 1</p>
+                                    <p id="cred_name" class="form-control-static">{{activeStack.credential.name}}</p>
                                 </div>
                                 <!-- .col-sm-9 -->
                             </div>
                             <!-- .form-group -->
                             <div class="form-group">
-                                <label class="col-sm-3 control-label" for="parameter1">parameter1</label>
+                                <label class="col-sm-3 control-label" for="cred_cloudPlatform">cloudPlatform</label>
 
                                 <div class="col-sm-9">
-                                    <p id="parameter1" class="form-control-static">Parameter 1</p>
+                                    <p id="cred_cloudPlatform" class="form-control-static">{{activeStack.credential.cloudPlatform}}</p>
                                 </div>
                                 <!-- .col-sm-9 -->
                             </div>
-                            <!-- .form-group -->
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label" for="parameter1">parameter1</label>
 
-                                <div class="col-sm-9">
-                                    <p id="parameter1" class="form-control-static">Parameter 1</p>
-                                </div>
-                                <!-- .col-sm-9 -->
-                            </div>
-                            <!-- .form-group -->
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label" for="parameter1">parameter1</label>
-
-                                <div class="col-sm-9">
-                                    <p id="parameter1" class="form-control-static">Parameter 1</p>
-                                </div>
-                                <!-- .col-sm-9 -->
-                            </div>
-                            <!-- .form-group -->
 
                         </form>
 

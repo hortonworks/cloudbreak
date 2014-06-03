@@ -35,6 +35,13 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 id: -1
             };
         }
+        if($rootScope.activeStack === null || $rootScope.activeStack === undefined ) {
+            $rootScope.activeStack = {
+                credential: null,
+                data: null,
+                template: null
+            };
+        }
 
         $scope.reloadCtrl = function(){
             console.log('reloading...');
@@ -72,6 +79,25 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             });
         }
 
+        $scope.getCredential = function(id) {
+            var deferred = $q.defer();
+            $http({
+                method: 'GET',
+                dataType: 'json',
+                withCredentials: true,
+                url:  $rootScope.apiUrl + "/credential/" + id,
+                headers: {
+                    'Authorization': 'Basic ' + $rootScope.basic_auth,
+                    'Content-Type': 'application/json'
+                }
+            }).success(function (data, status, headers, config) {
+                deferred.resolve(data);
+            }).error(function (data, status, headers, config) {
+                return deferred.reject();
+            });
+            return deferred.promise;
+        }
+
         $scope.getStacks = function() {
             $http({
                 method: 'GET',
@@ -105,6 +131,25 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             }).error(function (data, status, headers, config) {
                 console.log("unsuccess");
             });
+        }
+
+        $scope.getTemplate = function(id) {
+            var deferred = $q.defer();
+            $http({
+                method: 'GET',
+                dataType: 'json',
+                withCredentials: true,
+                url:  $rootScope.apiUrl + "/template/" + id,
+                headers: {
+                    'Authorization': 'Basic ' + $rootScope.basic_auth,
+                    'Content-Type': 'application/json'
+                }
+            }).success(function (data, status, headers, config) {
+                deferred.resolve(data);
+            }).error(function (data, status, headers, config) {
+                return deferred.reject();
+            });
+            return deferred.promise;
         }
 
         $scope.getBluePrints = function() {
@@ -151,6 +196,23 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 if ($scope.credentials[i].id == id) {
                     $rootScope.activeCredential = $scope.credentials[i];
                     console.log($rootScope.activeCredential);
+                    break;
+                }
+            }
+        }
+
+        $scope.changeActiveStack = function(id) {
+            console.log("active stack change");
+            for (var i = 0; i < $scope.stacks.length; i++) {
+                if ($scope.stacks[i].id == id) {
+                    $scope.getCredential($scope.stacks[i].credentialId).then(function(data){
+                        $scope.activeStack.credential = data;
+                    });
+                    $scope.getTemplate($scope.stacks[i].templateId).then(function(data){
+                        $scope.activeStack.template = data;
+                    });
+                    $scope.activeStack.data = $scope.stacks[i];
+                    console.log($scope.activeStack);
                     break;
                 }
             }
@@ -329,7 +391,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 withCredentials: true,
                 url:  $rootScope.apiUrl + "/credential",
                 headers: {
-                    'Authorization': 'Basic ' + $rootScope.basic_auth,
+                    'Authorization': 'Basic ' + $rootScope.basic_auth
                 },
                 data: {
                     cloudPlatform: "AZURE",
