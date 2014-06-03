@@ -26,6 +26,10 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
         if($scope.blueprints === null || $scope.blueprints === undefined ) {
             $scope.blueprints = [];
         }
+        if($rootScope.activeCredential === null || $rootScope.activeCredential === undefined ) {
+            $rootScope.activeCredential = "a credential";
+            $rootScope.activeCredentialId = -1;
+        }
 
         $scope.reloadCtrl = function(){
             console.log('reloading...');
@@ -116,6 +120,12 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
         $scope.createAzureCredentialRequest = function() {
             $scope.azureCredential = true;
             $scope.awsCredential = false;
+        }
+
+
+        $scope.changeActiveCredential = function(id, value) {
+            $rootScope.activeCredential = value;
+            $rootScope.activeCredentialId = id;
         }
 
         $scope.createBlueprint = function() {
