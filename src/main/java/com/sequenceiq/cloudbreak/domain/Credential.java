@@ -48,4 +48,6 @@ public abstract class Credential {
 
     public abstract CloudPlatform cloudPlatform();
 
+    public abstract User getOwner();
+
 }

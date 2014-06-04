@@ -142,7 +142,6 @@ public class AzureTemplate extends Template implements ProvisionEntity {
 
     public void setAzureTemplateOwner(User azureTemplateOwner) {
         this.azureTemplateOwner = azureTemplateOwner;
-
     }
 
     @Override
@@ -153,5 +152,10 @@ public class AzureTemplate extends Template implements ProvisionEntity {
     @Override
     public CloudPlatform cloudPlatform() {
         return CloudPlatform.AZURE;
+    }
+
+    @Override
+    public User getOwner() {
+        return azureTemplateOwner;
     }
 }
