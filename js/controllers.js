@@ -23,6 +23,10 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
         if($scope.stacks === null || $scope.stacks === undefined ) {
             $scope.stacks = [];
         }
+        if($scope.statusMessage === null || $scope.statusMessage === undefined) {
+            $scope.statusMessage = "Nothing happened...";
+        }
+
         if($rootScope.activeCredential === null || $rootScope.activeCredential === undefined ) {
             $rootScope.activeCredential = {
                 name: "a credential",
@@ -47,6 +51,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 localStorage.signedIn = true;
                 $rootScope.signedIn = true;
                 $rootScope.activeUser = emailFieldLogin.value;
+                connect();
                 $scope.doQuerys();
             }
         }
@@ -69,7 +74,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             }).success(function (data, status, headers, config) {
                 $scope.credentials = data;
             }).error(function (data, status, headers, config) {
-                console.log("unsuccess");
+                $scope.statusMessage = data;
             });
         }
 
@@ -85,7 +90,9 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 }
             }).success(function (data, status, headers, config) {
                 $scope.getCredentials();
+                $scope.statusMessage = "The deletion of credential " + id + " was success";
             }).error(function (data, status, headers, config) {
+                $scope.statusMessage = data;
                 $scope.getCredentials();
             });
         }
@@ -104,6 +111,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             }).success(function (data, status, headers, config) {
                 deferred.resolve(data);
             }).error(function (data, status, headers, config) {
+                $scope.statusMessage = data;
                 return deferred.reject();
             });
             return deferred.promise;
@@ -138,6 +146,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 }
             }).success(function (data, status, headers, config) {
                 $scope.getStacks();
+                $scope.statusMessage = "The deletion of stack " + id + " was success";
             }).error(function (data, status, headers, config) {
                 $scope.getStacks();
             });
@@ -155,7 +164,6 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 }
             }).success(function (data, status, headers, config) {
                 $scope.templates = data;
-                console.log($scope.templates);
             }).error(function (data, status, headers, config) {
                 console.log("unsuccess");
             });
@@ -192,6 +200,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 }
             }).success(function (data, status, headers, config) {
                 $scope.getTemplates();
+                $scope.statusMessage = "The deletion of template " + id + " was success";
             }).error(function (data, status, headers, config) {
                 $scope.getTemplates();
             });
@@ -226,6 +235,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 }
             }).success(function (data, status, headers, config) {
                 $scope.getBluePrints();
+                $scope.statusMessage = "The deletion of blueprint " + id + " was success";
             }).error(function (data, status, headers, config) {
                 $scope.getBluePrints();
             });
@@ -257,7 +267,6 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             for (var i = 0; i < $scope.credentials.length; i++) {
                 if ($scope.credentials[i].id == id) {
                     $rootScope.activeCredential = $scope.credentials[i];
-                    console.log($rootScope.activeCredential);
                     break;
                 }
             }
@@ -274,7 +283,6 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                         $scope.activeStack.template = data;
                     });
                     $scope.activeStack.data = $scope.stacks[i];
-                    console.log($scope.activeStack);
                     break;
                 }
             }
@@ -297,7 +305,6 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     credentialId: $scope.activeCredential.id
                 }
             }).success(function (data, status, headers, config) {
-                console.log("ok");
                 deferred.resolve(data.id);
 
             }).error(function (data, status, headers, config) {
@@ -324,8 +331,9 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                         blueprintId: selectBlueprint.value
                     }
                 }).success(function (data, status, headers, config) {
-                    console.log("ok");
+                    $scope.statusMessage = "The creation of stack " + data + " was success";
                 }).error(function (data, status, headers, config) {
+                    $scope.statusMessage = "The creation of stack was unsuccess: " + data;
                     console.log("unsuccess");
                 });
             }, function(reason) {
@@ -348,9 +356,10 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     ambariBlueprint: bluePrintText.value
                 }
             }).success(function (data, status, headers, config) {
+                $scope.statusMessage = "The creation of blueprint " + data + " was success";
                 $scope.getBluePrints()
             }).error(function (data, status, headers, config) {
-                console.log("unsuccess");
+                $scope.statusMessage = "The creation of blueprint was unsuccess: " + data;
                 $scope.isFailedCreation = true;
             });
         }
@@ -376,10 +385,10 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     }
                 }
             }).success(function (data, status, headers, config) {
+                $scope.statusMessage = "The creation of aws template " +data+ " was success: ";
                 $scope.getTemplates();
             }).error(function (data, status, headers, config) {
-                console.log("unsuccess");
-                $scope.isFailedCreation = true;
+                $scope.statusMessage = "The creation of aws template was unsuccess: " + data;
             });
         }
 
@@ -412,10 +421,10 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     }
                 }
             }).success(function (data, status, headers, config) {
+                $scope.statusMessage = "The creation of azure template " + data + " was success: ";
                 $scope.getTemplates();
             }).error(function (data, status, headers, config) {
-                console.log("unsuccess");
-                $scope.isFailedCreation = true;
+                $scope.statusMessage = "The creation of azure template was unsuccess: " + data;
             });
         }
 
@@ -439,9 +448,10 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     }
                 }
             }).success(function (data, status, headers, config) {
+                $scope.statusMessage = "The creation of aws credential " + data + " was success: ";
                 $scope.getCredentials();
             }).error(function (data, status, headers, config) {
-                console.log("unsuccess");
+                $scope.statusMessage = "The creation of aws template was unsuccess: " + data;
                 $scope.isFailedCreation = true;
             });
         }
@@ -465,9 +475,10 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 }
             }).success(function (data, status, headers, config) {
                 $scope.getCredentials();
+                $scope.statusMessage = "The creation of azure credential " + data + " was success";
+
             }).error(function (data, status, headers, config) {
-                console.log("unsuccess");
-                $scope.isFailedCreation = true;
+                $scope.statusMessage = "The creation of azure credential was unsuccess: " + data;
             });
         }
 
@@ -482,11 +493,33 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             });
         }
 
+        var stompClient = null;
+        function connect() {
+            var socket = new SockJS('http://localhost:8080/notification');
+            stompClient = Stomp.over(socket);
+            stompClient.connect({}, function(frame) {
+                stompClient.subscribe('/topic/stack', function(stackInfo){
+                    logStackInfo(JSON.parse(stackInfo.body), JSON.parse(stackInfo.body).id);
+                });
+            });
+        }
+
+        function disconnect() {
+            stompClient.disconnect();
+            setConnected(false);
+            console.log("Disconnected");
+        }
+
+        function logStackInfo(body, message) {
+            $scope.statusMessage = "message arrived: " + message;
+            console.log(body);
+        }
 
         if (typeof (Storage) !== "undefined") {
             if (localStorage.signedIn === 'true') {
                 $rootScope.signedIn = true;
                 $rootScope.activeUser = "user@seq.com";
+                connect();
                 $scope.doQuerys();
             }
         } else {
