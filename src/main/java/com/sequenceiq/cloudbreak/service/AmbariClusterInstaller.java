@@ -4,6 +4,8 @@ import groovyx.net.http.HttpResponseException;
 
 import java.math.BigDecimal;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -15,11 +17,16 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
+import com.sequenceiq.cloudbreak.service.aws.AwsProvisionService;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.ClusterStatusMessage;
 
 @Service
 public class AmbariClusterInstaller {
+
+    private static final double COMPLETED = 100.0;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AwsProvisionService.class);
 
     @Autowired
     private WebsocketService websocketService;
@@ -29,8 +36,6 @@ public class AmbariClusterInstaller {
         try {
             Cluster cluster = stack.getCluster();
             if (stack.getCluster() != null && stack.getCluster().getStatus().equals(Status.REQUESTED)) {
-                // Blueprint blueprint =
-                // blueprintRepository.findOne(clusterRequest.getBlueprintId());
                 Blueprint blueprint = cluster.getBlueprint();
                 addBlueprint(stack.getAmbariIp(), blueprint);
                 AmbariClient ambariClient = new AmbariClient(stack.getAmbariIp(), AmbariClusterService.PORT);
@@ -41,11 +46,13 @@ public class AmbariClusterInstaller {
                         );
 
                 BigDecimal installProgress = new BigDecimal(0);
-                while (installProgress.doubleValue() != 100.0) {
+                while (installProgress.doubleValue() != COMPLETED) {
                     installProgress = ambariClient.getInstallProgress();
                     // TODO: timeout
                 }
                 websocketService.send("/topic/cluster", new ClusterStatusMessage(cluster.getName(), Status.CREATE_COMPLETED.name()));
+            } else {
+                LOGGER.info("There were no cluster request to this stack, won't install cluster now. [stack: {}]", stack.getId());
             }
 
         } catch (HttpResponseException e) {

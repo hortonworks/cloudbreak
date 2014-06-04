@@ -59,6 +59,7 @@ import com.sequenceiq.cloudbreak.domain.StackDescription;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.AmbariClusterInstaller;
 import com.sequenceiq.cloudbreak.service.ProvisionService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
@@ -95,6 +96,9 @@ public class AwsProvisionService implements ProvisionService {
 
     @Autowired
     private WebsocketService websocketService;
+
+    @Autowired
+    private AmbariClusterInstaller ambariClusterInstaller;
 
     private String ec2userDataScript;
 
@@ -175,6 +179,8 @@ public class AwsProvisionService implements ProvisionService {
         stack.setAmbariIp(ambariIp);
         stackRepository.save(stack);
         websocketService.send("/topic/stack", new StackStatusMessage(stack.getId(), Status.CREATE_COMPLETED.name()));
+        ambariClusterInstaller.installAmbariCluster(stack);
+
     }
 
     private String pollAmbariServer(AmazonEC2Client amazonEC2Client, Long stackId, List<String> instanceIds) {
