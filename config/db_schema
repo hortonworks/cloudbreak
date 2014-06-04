@@ -10,14 +10,14 @@ SET check_function_bodies = false;
 SET client_min_messages = warning;
 
 --
--- Name: plpgsql; Type: EXTENSION; Schema: -; Owner:
+-- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
 --
 
 CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
 
 
 --
--- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner:
+-- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
 --
 
 COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
@@ -30,7 +30,7 @@ SET default_tablespace = '';
 SET default_with_oids = false;
 
 --
--- Name: blueprint; Type: TABLE; Schema: public; Owner: seqadmin; Tablespace:
+-- Name: blueprint; Type: TABLE; Schema: public; Owner: seqadmin; Tablespace: 
 --
 
 CREATE TABLE blueprint (
@@ -53,12 +53,11 @@ CREATE SEQUENCE blueprint_table
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
-
-
+    
 ALTER TABLE public.blueprint_table OWNER TO seqadmin;
 
 --
--- Name: cloudbreakuser; Type: TABLE; Schema: public; Owner: seqadmin; Tablespace:
+-- Name: cloudbreakuser; Type: TABLE; Schema: public; Owner: seqadmin; Tablespace: 
 --
 
 CREATE TABLE cloudbreakuser (
@@ -74,17 +73,20 @@ CREATE TABLE cloudbreakuser (
 ALTER TABLE public.cloudbreakuser OWNER TO seqadmin;
 
 --
--- Name: credential; Type: TABLE; Schema: public; Owner: seqadmin; Tablespace:
+-- Name: credential; Type: TABLE; Schema: public; Owner: seqadmin; Tablespace: 
 --
 
 CREATE TABLE credential (
     dtype character varying(31) NOT NULL,
     id bigint NOT NULL,
     cloudplatform integer,
-    rolearn character varying(255),
+    name character varying(255),
     jks character varying(255),
     subscriptionid character varying(255),
-    user_id bigint
+    instanceprofilerolearn character varying(255),
+    rolearn character varying(255),
+    azurecredentialowner_id bigint,
+    awscredentialowner_id bigint
 );
 
 
@@ -119,6 +121,22 @@ CREATE SEQUENCE hibernate_sequence
 ALTER TABLE public.hibernate_sequence OWNER TO seqadmin;
 
 --
+-- Name: port; Type: TABLE; Schema: public; Owner: seqadmin; Tablespace: 
+--
+
+CREATE TABLE port (
+    id bigint NOT NULL,
+    localport character varying(255),
+    name character varying(255),
+    port character varying(255),
+    protocol character varying(255),
+    azuretemplate_id bigint
+);
+
+
+ALTER TABLE public.port OWNER TO seqadmin;
+
+--
 -- Name: sequence_table; Type: SEQUENCE; Schema: public; Owner: seqadmin
 --
 
@@ -133,13 +151,15 @@ CREATE SEQUENCE sequence_table
 ALTER TABLE public.sequence_table OWNER TO seqadmin;
 
 --
--- Name: stack; Type: TABLE; Schema: public; Owner: seqadmin; Tablespace:
+-- Name: stack; Type: TABLE; Schema: public; Owner: seqadmin; Tablespace: 
 --
 
 CREATE TABLE stack (
     id bigint NOT NULL,
-    clustersize integer,
+    ambariip character varying(255),
     name character varying(255),
+    nodecount integer,
+    status integer,
     credential_id bigint,
     template_id bigint,
     user_id bigint
@@ -163,37 +183,38 @@ CREATE SEQUENCE stack_table
 ALTER TABLE public.stack_table OWNER TO seqadmin;
 
 --
--- Name: template; Type: TABLE; Schema: public; Owner: seqadmin; Tablespace:
+-- Name: template; Type: TABLE; Schema: public; Owner: seqadmin; Tablespace: 
 --
 
 CREATE TABLE template (
     dtype character varying(31) NOT NULL,
     id bigint NOT NULL,
+    amiid character varying(255),
+    instancetype integer,
+    keyname character varying(255),
+    name character varying(255),
+    region integer,
+    sshlocation character varying(255),
     addressprefix character varying(255),
     deploymentslot character varying(255),
     description character varying(255),
     imagename character varying(255),
     location character varying(255),
-    name character varying(255),
     password character varying(255),
     sshpublickeyfingerprint character varying(255),
     sshpublickeypath character varying(255),
     subnetaddressprefix character varying(255),
     username character varying(255),
     vmtype character varying(255),
-    amiid character varying(255),
-    instancetype integer,
-    keyname character varying(255),
-    region character varying(255),
-    sshlocation character varying(255),
-    user_id bigint
+    awstemplateowner_id bigint,
+    azuretemplateowner_id bigint
 );
 
 
 ALTER TABLE public.template OWNER TO seqadmin;
 
 --
--- Name: temporaryawscredentials; Type: TABLE; Schema: public; Owner: seqadmin; Tablespace:
+-- Name: temporaryawscredentials; Type: TABLE; Schema: public; Owner: seqadmin; Tablespace: 
 --
 
 CREATE TABLE temporaryawscredentials (
@@ -207,7 +228,7 @@ CREATE TABLE temporaryawscredentials (
 ALTER TABLE public.temporaryawscredentials OWNER TO seqadmin;
 
 --
--- Name: blueprint_pkey; Type: CONSTRAINT; Schema: public; Owner: seqadmin; Tablespace:
+-- Name: blueprint_pkey; Type: CONSTRAINT; Schema: public; Owner: seqadmin; Tablespace: 
 --
 
 ALTER TABLE ONLY blueprint
@@ -215,7 +236,7 @@ ALTER TABLE ONLY blueprint
 
 
 --
--- Name: cloudbreakuser_pkey; Type: CONSTRAINT; Schema: public; Owner: seqadmin; Tablespace:
+-- Name: cloudbreakuser_pkey; Type: CONSTRAINT; Schema: public; Owner: seqadmin; Tablespace: 
 --
 
 ALTER TABLE ONLY cloudbreakuser
@@ -223,7 +244,7 @@ ALTER TABLE ONLY cloudbreakuser
 
 
 --
--- Name: credential_pkey; Type: CONSTRAINT; Schema: public; Owner: seqadmin; Tablespace:
+-- Name: credential_pkey; Type: CONSTRAINT; Schema: public; Owner: seqadmin; Tablespace: 
 --
 
 ALTER TABLE ONLY credential
@@ -231,7 +252,15 @@ ALTER TABLE ONLY credential
 
 
 --
--- Name: stack_pkey; Type: CONSTRAINT; Schema: public; Owner: seqadmin; Tablespace:
+-- Name: port_pkey; Type: CONSTRAINT; Schema: public; Owner: seqadmin; Tablespace: 
+--
+
+ALTER TABLE ONLY port
+    ADD CONSTRAINT port_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: stack_pkey; Type: CONSTRAINT; Schema: public; Owner: seqadmin; Tablespace: 
 --
 
 ALTER TABLE ONLY stack
@@ -239,7 +268,7 @@ ALTER TABLE ONLY stack
 
 
 --
--- Name: template_pkey; Type: CONSTRAINT; Schema: public; Owner: seqadmin; Tablespace:
+-- Name: template_pkey; Type: CONSTRAINT; Schema: public; Owner: seqadmin; Tablespace: 
 --
 
 ALTER TABLE ONLY template
@@ -247,7 +276,7 @@ ALTER TABLE ONLY template
 
 
 --
--- Name: temporaryawscredentials_pkey; Type: CONSTRAINT; Schema: public; Owner: seqadmin; Tablespace:
+-- Name: temporaryawscredentials_pkey; Type: CONSTRAINT; Schema: public; Owner: seqadmin; Tablespace: 
 --
 
 ALTER TABLE ONLY temporaryawscredentials
@@ -255,11 +284,19 @@ ALTER TABLE ONLY temporaryawscredentials
 
 
 --
--- Name: uk_l41rkedr7lukrwjgm7ao3x2q0; Type: CONSTRAINT; Schema: public; Owner: seqadmin; Tablespace:
+-- Name: uk_lox64g52iy3k5kibbol37ht8w; Type: CONSTRAINT; Schema: public; Owner: seqadmin; Tablespace: 
 --
 
 ALTER TABLE ONLY cloudbreakuser
-    ADD CONSTRAINT uk_l41rkedr7lukrwjgm7ao3x2q0 UNIQUE (email);
+    ADD CONSTRAINT uk_lox64g52iy3k5kibbol37ht8w UNIQUE (email);
+
+
+--
+-- Name: fk_10jipmg10swrqmqubgo4dy7k2; Type: FK CONSTRAINT; Schema: public; Owner: seqadmin
+--
+
+ALTER TABLE ONLY port
+    ADD CONSTRAINT fk_10jipmg10swrqmqubgo4dy7k2 FOREIGN KEY (azuretemplate_id) REFERENCES template(id);
 
 
 --
@@ -279,27 +316,35 @@ ALTER TABLE ONLY stack
 
 
 --
--- Name: fk_cnbj7ol5qsib7l5ojq2wywwxk; Type: FK CONSTRAINT; Schema: public; Owner: seqadmin
+-- Name: fk_egeykstsqask9ix76p457v7l1; Type: FK CONSTRAINT; Schema: public; Owner: seqadmin
 --
 
 ALTER TABLE ONLY credential
-    ADD CONSTRAINT fk_cnbj7ol5qsib7l5ojq2wywwxk FOREIGN KEY (user_id) REFERENCES cloudbreakuser(id);
+    ADD CONSTRAINT fk_egeykstsqask9ix76p457v7l1 FOREIGN KEY (awscredentialowner_id) REFERENCES cloudbreakuser(id);
 
 
 --
--- Name: fk_d2qqvku09ggf31cwdmboudoeu; Type: FK CONSTRAINT; Schema: public; Owner: seqadmin
+-- Name: fk_gcg011lvnsifaj7c2xnspsutw; Type: FK CONSTRAINT; Schema: public; Owner: seqadmin
 --
 
 ALTER TABLE ONLY template
-    ADD CONSTRAINT fk_d2qqvku09ggf31cwdmboudoeu FOREIGN KEY (user_id) REFERENCES cloudbreakuser(id);
+    ADD CONSTRAINT fk_gcg011lvnsifaj7c2xnspsutw FOREIGN KEY (awstemplateowner_id) REFERENCES cloudbreakuser(id);
 
 
 --
--- Name: fk_ivd95qyxtv9eo2fo026l5s998; Type: FK CONSTRAINT; Schema: public; Owner: seqadmin
+-- Name: fk_i6psb9h62yi1ngw4qmctmcva9; Type: FK CONSTRAINT; Schema: public; Owner: seqadmin
 --
 
 ALTER TABLE ONLY cloudbreakuser
-    ADD CONSTRAINT fk_ivd95qyxtv9eo2fo026l5s998 FOREIGN KEY (temporaryawscredentials_accesskeyid) REFERENCES temporaryawscredentials(accesskeyid);
+    ADD CONSTRAINT fk_i6psb9h62yi1ngw4qmctmcva9 FOREIGN KEY (temporaryawscredentials_accesskeyid) REFERENCES temporaryawscredentials(accesskeyid);
+
+
+--
+-- Name: fk_k7ax5dsobijpt2jwctvi6h4w1; Type: FK CONSTRAINT; Schema: public; Owner: seqadmin
+--
+
+ALTER TABLE ONLY credential
+    ADD CONSTRAINT fk_k7ax5dsobijpt2jwctvi6h4w1 FOREIGN KEY (azurecredentialowner_id) REFERENCES cloudbreakuser(id);
 
 
 --
@@ -308,6 +353,14 @@ ALTER TABLE ONLY cloudbreakuser
 
 ALTER TABLE ONLY blueprint
     ADD CONSTRAINT fk_n271gunf8dbikvsr0pbre30ci FOREIGN KEY (user_id) REFERENCES cloudbreakuser(id);
+
+
+--
+-- Name: fk_qeabv5ven9q4f6qqfkhia795v; Type: FK CONSTRAINT; Schema: public; Owner: seqadmin
+--
+
+ALTER TABLE ONLY template
+    ADD CONSTRAINT fk_qeabv5ven9q4f6qqfkhia795v FOREIGN KEY (azuretemplateowner_id) REFERENCES cloudbreakuser(id);
 
 
 --
@@ -331,3 +384,4 @@ GRANT ALL ON SCHEMA public TO PUBLIC;
 --
 -- PostgreSQL database dump complete
 --
+
