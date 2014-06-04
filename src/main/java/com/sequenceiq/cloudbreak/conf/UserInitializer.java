@@ -9,10 +9,7 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.ec2.model.InstanceType;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
-import com.sequenceiq.cloudbreak.domain.AzureCredential;
-import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.Port;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.User;
@@ -38,19 +35,20 @@ public class UserInitializer implements InitializingBean {
             user2.setLastName("test");
             user2.setPassword("test123");
 
-            AzureCredential azureCredential = new AzureCredential();
-            azureCredential.setSubscriptionId("1234-45567-123213-12312");
-            azureCredential.setJks("test123");
-            azureCredential.setAzureCredentialOwner(user2);
-            azureCredential.setName("azure_credential");
+            // AzureCredential azureCredential = new AzureCredential();
+            // azureCredential.setSubscriptionId("1234-45567-123213-12312");
+            // azureCredential.setJks("test123");
+            // azureCredential.setAzureCredentialOwner(user2);
+            // azureCredential.setName("azure_credential");
 
             AwsCredential awsCredential = new AwsCredential();
-            awsCredential.setRoleArn("arnrole");
+            awsCredential.setRoleArn("arn:aws:iam::755047402263:role/seq-self-cf");
+            awsCredential.setInstanceProfileRoleArn("arn:aws:iam::755047402263:instance-profile/readonly-role");
             awsCredential.setAwsCredentialOwner(user2);
             awsCredential.setName("aws_credential");
 
             user2.getAwsCredentials().add(awsCredential);
-            user2.getAzureCredentials().add(azureCredential);
+            // user2.getAzureCredentials().add(azureCredential);
 
             AwsTemplate awsTemplate = new AwsTemplate();
             awsTemplate.setName("userAzureStack");
@@ -74,31 +72,31 @@ public class UserInitializer implements InitializingBean {
             user2.getAwsTemplates().add(awsTemplate);
             // user2.getStacks().add(awsStack);
 
-            AzureTemplate azureTemplate = new AzureTemplate();
-            azureTemplate.setDeploymentSlot("slot");
-            azureTemplate.setDescription("azure desc");
-            azureTemplate.setImageName("image");
-            azureTemplate.setLocation("location");
-            azureTemplate.setName("azurename");
-            azureTemplate.setUserName("username");
-            azureTemplate.setPassword("pass");
-            azureTemplate.setSubnetAddressPrefix("prefix");
-            azureTemplate.setVmType("small");
-            Port port = new Port();
-            port.setLocalPort("8080");
-            port.setName("local");
-            port.setProtocol("TCP");
-            port.setPort("8080");
-            port.setAzureTemplate(azureTemplate);
-            azureTemplate.getPorts().add(port);
-            azureTemplate.setUser(user2);
+            // AzureTemplate azureTemplate = new AzureTemplate();
+            // azureTemplate.setDeploymentSlot("slot");
+            // azureTemplate.setDescription("azure desc");
+            // azureTemplate.setImageName("image");
+            // azureTemplate.setLocation("location");
+            // azureTemplate.setName("azurename");
+            // azureTemplate.setUserName("username");
+            // azureTemplate.setPassword("pass");
+            // azureTemplate.setSubnetAddressPrefix("prefix");
+            // azureTemplate.setVmType("small");
+            // Port port = new Port();
+            // port.setLocalPort("8080");
+            // port.setName("local");
+            // port.setProtocol("TCP");
+            // port.setPort("8080");
+            // port.setAzureTemplate(azureTemplate);
+            // azureTemplate.getPorts().add(port);
+            // azureTemplate.setUser(user2);
 
-            Stack azureStack = new Stack();
-            azureStack.setTemplate(azureTemplate);
-            azureStack.setNodeCount(NODE_COUNT);
-            azureStack.setUser(user2);
-            azureStack.setCredential(azureCredential);
-            azureStack.setName("azure stack");
+            // Stack azureStack = new Stack();
+            // azureStack.setTemplate(azureTemplate);
+            // azureStack.setNodeCount(NODE_COUNT);
+            // azureStack.setUser(user2);
+            // azureStack.setCredential(azureCredential);
+            // azureStack.setName("azure stack");
             awsStack.setAmbariIp("12.23.35.45");
             awsStack.setStatus(Status.CREATE_COMPLETED);
 
@@ -119,8 +117,8 @@ public class UserInitializer implements InitializingBean {
 
             user2.getBlueprints().add(blueprint1);
             user2.getBlueprints().add(blueprint2);
-            user2.getAzureTemplates().add(azureTemplate);
-            user2.getStacks().add(azureStack);
+            // user2.getAzureTemplates().add(azureTemplate);
+            // user2.getStacks().add(azureStack);
             user2.getStacks().add(awsStack);
 
             userRepository.save(user2);

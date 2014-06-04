@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.AmazonClientException;
+import com.amazonaws.AmazonServiceException;
 import com.amazonaws.auth.BasicSessionCredentials;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
@@ -327,15 +328,26 @@ public class AwsProvisionService implements ProvisionService {
     public StackDescription describeStack(User user, Stack stack, Credential credential) {
         AwsTemplate awsInfra = (AwsTemplate) stack.getTemplate();
         AwsCredential awsCredential = (AwsCredential) credential;
-        AmazonCloudFormationClient client = createCloudFormationClient(user, awsInfra.getRegion(), awsCredential);
-        DescribeStacksRequest stackRequest = new DescribeStacksRequest().withStackName(String.format("%s-%s", stack.getName(), stack.getId()));
-        DescribeStacksResult stackResult = client.describeStacks(stackRequest);
+        DescribeStacksResult stackResult = null;
+        DescribeInstancesResult instancesResult = null;
+        String cfStackName = String.format("%s-%s", stack.getName(), stack.getId());
 
+        try {
+            AmazonCloudFormationClient client = createCloudFormationClient(user, awsInfra.getRegion(), awsCredential);
+            DescribeStacksRequest stackRequest = new DescribeStacksRequest().withStackName(cfStackName);
+            stackResult = client.describeStacks(stackRequest);
+        } catch (AmazonServiceException e) {
+            if ("AmazonCloudFormation".equals(e.getServiceName()) && e.getErrorMessage().equals(String.format("Stack:%s does not exist", cfStackName))) {
+                LOGGER.error("Amazon CloudFormation stack {} does not exist. Returning null in describeStack.", cfStackName);
+                stackResult = new DescribeStacksResult();
+            } else {
+                throw e;
+            }
+        }
         AmazonEC2Client ec2Client = createEC2Client(user, awsInfra.getRegion(), awsCredential);
         DescribeInstancesRequest instancesRequest = new DescribeInstancesRequest()
                 .withFilters(new Filter().withName("tag:" + INSTANCE_TAG_KEY).withValues(stack.getName()));
-        DescribeInstancesResult instancesResult = ec2Client.describeInstances(instancesRequest);
-
+        instancesResult = ec2Client.describeInstances(instancesRequest);
         return new AwsStackDescription(stackResult, instancesResult);
     }
 
@@ -343,13 +355,26 @@ public class AwsProvisionService implements ProvisionService {
     public StackDescription describeStackWithResources(User user, Stack stack, Credential credential) {
         AwsTemplate awsInfra = (AwsTemplate) stack.getTemplate();
         AwsCredential awsCredential = (AwsCredential) credential;
-        AmazonCloudFormationClient client = createCloudFormationClient(user, awsInfra.getRegion(), awsCredential);
-        DescribeStacksRequest stackRequest = new DescribeStacksRequest().withStackName(String.format("%s-%s", stack.getName(), stack.getId()));
-        DescribeStacksResult stackResult = client.describeStacks(stackRequest);
+        DescribeStacksResult stackResult = null;
+        DescribeStackResourcesResult resourcesResult = null;
+        String cfStackName = String.format("%s-%s", stack.getName(), stack.getId());
 
-        DescribeStackResourcesRequest resourcesRequest = new DescribeStackResourcesRequest().withStackName(String.format("%s-%s", stack.getName(),
-                stack.getId()));
-        DescribeStackResourcesResult resourcesResult = client.describeStackResources(resourcesRequest);
+        try {
+            AmazonCloudFormationClient client = createCloudFormationClient(user, awsInfra.getRegion(), awsCredential);
+            DescribeStacksRequest stackRequest = new DescribeStacksRequest().withStackName(String.format("%s-%s", stack.getName(), stack.getId()));
+            stackResult = client.describeStacks(stackRequest);
+
+            DescribeStackResourcesRequest resourcesRequest = new DescribeStackResourcesRequest().withStackName(String.format("%s-%s", stack.getName(),
+                    stack.getId()));
+            resourcesResult = client.describeStackResources(resourcesRequest);
+        } catch (AmazonServiceException e) {
+            if ("AmazonCloudFormation".equals(e.getServiceName()) && e.getErrorMessage().equals(String.format("Stack:%s does not exist", cfStackName))) {
+                LOGGER.error("Amazon CloudFormation stack {} does not exist. Returning null in describeStack.", cfStackName);
+                stackResult = new DescribeStacksResult();
+            } else {
+                throw e;
+            }
+        }
 
         AmazonEC2Client ec2Client = createEC2Client(user, awsInfra.getRegion(), awsCredential);
         DescribeInstancesRequest instancesRequest = new DescribeInstancesRequest()
