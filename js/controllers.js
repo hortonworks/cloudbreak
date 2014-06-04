@@ -51,7 +51,6 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 localStorage.signedIn = true;
                 $rootScope.signedIn = true;
                 $rootScope.activeUser = emailFieldLogin.value;
-                connect();
                 $scope.doQuerys();
             }
         }
@@ -490,12 +489,13 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 $scope.getTemplates();
                 $scope.getBluePrints();
                 $scope.getStacks();
+                connect($rootScope.apiUrl);
             });
         }
 
         var stompClient = null;
-        function connect() {
-            var socket = new SockJS('http://cloudbreak-api.sequenceiq.com/notification');
+        function connect(url) {
+            var socket = new SockJS(url + '/notification');
             stompClient = Stomp.over(socket);
             stompClient.connect({}, function(frame) {
                 stompClient.subscribe('/topic/stack', function(stackInfo){
@@ -519,7 +519,6 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             if (localStorage.signedIn === 'true') {
                 $rootScope.signedIn = true;
                 $rootScope.activeUser = "user@seq.com";
-                connect();
                 $scope.doQuerys();
             }
         } else {
