@@ -14,7 +14,7 @@ public class StackJson implements JsonEntity {
     private Long id;
     @Min(value = 2)
     private int nodeCount;
-    @Size(max = 20)
+    @Size(max = 20, min = 2)
     private String name;
     private Long templateId;
     private CloudPlatform cloudPlatform;
