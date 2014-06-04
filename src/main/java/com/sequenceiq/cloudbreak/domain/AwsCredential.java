@@ -45,4 +45,9 @@ public class AwsCredential extends Credential implements ProvisionEntity {
         return CloudPlatform.AWS;
     }
 
+    @Override
+    public User getOwner() {
+        return awsCredentialOwner;
+    }
+
 }

@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Port;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
 
@@ -41,10 +42,12 @@ public class UserInitializer implements InitializingBean {
             azureCredential.setSubscriptionId("1234-45567-123213-12312");
             azureCredential.setJks("test123");
             azureCredential.setAzureCredentialOwner(user2);
+            azureCredential.setName("azure_credential");
 
             AwsCredential awsCredential = new AwsCredential();
             awsCredential.setRoleArn("arnrole");
             awsCredential.setAwsCredentialOwner(user2);
+            awsCredential.setName("aws_credential");
 
             user2.getAwsCredentials().add(awsCredential);
             user2.getAzureCredentials().add(azureCredential);
@@ -65,6 +68,8 @@ public class UserInitializer implements InitializingBean {
             awsStack.setName("coreos");
             awsStack.setUser(user2);
             awsStack.setCredential(awsCredential);
+            awsStack.setAmbariIp("12.23.35.45");
+            awsStack.setStatus(Status.CREATE_COMPLETED);
 
             user2.getAwsTemplates().add(awsTemplate);
             // user2.getStacks().add(awsStack);
@@ -94,6 +99,8 @@ public class UserInitializer implements InitializingBean {
             azureStack.setUser(user2);
             azureStack.setCredential(azureCredential);
             azureStack.setName("azure stack");
+            awsStack.setAmbariIp("12.23.35.45");
+            awsStack.setStatus(Status.CREATE_COMPLETED);
 
             Blueprint blueprint1 = new Blueprint();
             blueprint1.setName("single-node-hdfs-yarn");
@@ -114,6 +121,7 @@ public class UserInitializer implements InitializingBean {
             user2.getBlueprints().add(blueprint2);
             user2.getAzureTemplates().add(azureTemplate);
             user2.getStacks().add(azureStack);
+            user2.getStacks().add(awsStack);
 
             userRepository.save(user2);
         }

@@ -87,4 +87,9 @@ public class AwsTemplate extends Template implements ProvisionEntity {
     public CloudPlatform cloudPlatform() {
         return CloudPlatform.AWS;
     }
+
+    @Override
+    public User getOwner() {
+        return awsTemplateOwner;
+    }
 }

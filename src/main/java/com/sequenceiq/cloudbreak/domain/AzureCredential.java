@@ -45,4 +45,9 @@ public class AzureCredential extends Credential implements ProvisionEntity {
     public CloudPlatform cloudPlatform() {
         return CloudPlatform.AZURE;
     }
+
+    @Override
+    public User getOwner() {
+        return azureCredentialOwner;
+    }
 }

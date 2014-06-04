@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service;
 
-import groovyx.net.http.HttpResponseException;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +22,8 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+
+import groovyx.net.http.HttpResponseException;
 
 @Service
 public class AmbariClusterService {

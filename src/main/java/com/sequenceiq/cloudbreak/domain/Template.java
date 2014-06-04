@@ -30,4 +30,6 @@ public abstract class Template {
 
     public abstract CloudPlatform cloudPlatform();
 
+    public abstract User getOwner();
+
 }
