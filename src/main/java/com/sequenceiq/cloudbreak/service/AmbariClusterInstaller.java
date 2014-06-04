@@ -28,6 +28,8 @@ public class AmbariClusterInstaller {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsProvisionService.class);
 
+    private static final long POLLING_INTERVAL = 3000;
+
     @Autowired
     private WebsocketService websocketService;
 
@@ -47,7 +49,13 @@ public class AmbariClusterInstaller {
 
                 BigDecimal installProgress = new BigDecimal(0);
                 while (installProgress.doubleValue() != COMPLETED) {
+                    try {
+                        Thread.sleep(POLLING_INTERVAL);
+                    } catch (InterruptedException e) {
+                        throw new InternalServerException("Thread interrupted");
+                    }
                     installProgress = ambariClient.getInstallProgress();
+                    LOGGER.info("Ambari Cluster installing. [Stack: '{}', Cluster: '{}', Progress: {}]", stack.getId(), cluster.getName(), installProgress);
                     // TODO: timeout
                 }
                 websocketService.send("/topic/cluster", new ClusterStatusMessage(cluster.getName(), Status.CREATE_COMPLETED.name()));
