@@ -35,6 +35,9 @@ public class Stack implements ProvisionEntity {
     @OneToOne
     private Credential credential;
 
+    @OneToOne
+    private Cluster cluster;
+
     @ManyToOne
     private User user;
 
@@ -70,6 +73,14 @@ public class Stack implements ProvisionEntity {
         this.template = template;
     }
 
+    public Cluster getCluster() {
+        return cluster;
+    }
+
+    public void setCluster(Cluster cluster) {
+        this.cluster = cluster;
+    }
+
     public User getUser() {
         return user;
     }
@@ -101,6 +112,5 @@ public class Stack implements ProvisionEntity {
     public void setAmbariIp(String ambariIp) {
         this.ambariIp = ambariIp;
     }
-
 
 }

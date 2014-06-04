@@ -27,6 +27,7 @@ import org.hibernate.validator.constraints.NotEmpty;
                 + "LEFT JOIN FETCH u.blueprints "
                 + "LEFT JOIN FETCH u.awsCredentials "
                 + "LEFT JOIN FETCH u.azureCredentials "
+                + "LEFT JOIN FETCH u.clusters "
                 + "WHERE u.id= :id")
 @Table(name = "cloudbreakuser")
 public class User implements ProvisionEntity {
@@ -68,6 +69,9 @@ public class User implements ProvisionEntity {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Blueprint> blueprints = new HashSet<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Cluster> clusters = new HashSet<>();
 
     public User() {
     }
@@ -181,6 +185,14 @@ public class User implements ProvisionEntity {
 
     public void setBlueprints(Set<Blueprint> blueprints) {
         this.blueprints = blueprints;
+    }
+
+    public Set<Cluster> getClusters() {
+        return clusters;
+    }
+
+    public void setClusters(Set<Cluster> clusters) {
+        this.clusters = clusters;
     }
 
     public String emailAsFolder() {

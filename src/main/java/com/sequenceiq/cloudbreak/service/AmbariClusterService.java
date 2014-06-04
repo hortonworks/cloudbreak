@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service;
 
+import groovyx.net.http.HttpResponseException;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,18 +19,19 @@ import com.sequenceiq.cloudbreak.controller.json.BlueprintJson;
 import com.sequenceiq.cloudbreak.controller.json.ClusterRequest;
 import com.sequenceiq.cloudbreak.controller.json.ClusterResponse;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.converter.ClusterConverter;
+import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
+import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-
-import groovyx.net.http.HttpResponseException;
 
 @Service
 public class AmbariClusterService {
 
-    private static final String PORT = "8080";
+    public static final String PORT = "8080";
 
     @Autowired
     private JsonHelper jsonHelper;
@@ -39,22 +42,31 @@ public class AmbariClusterService {
     @Autowired
     private StackRepository stackRepository;
 
-    @Async
-    public void createCluster(User user, Long stackId, ClusterRequest clusterRequest) {
-        try {
-            Stack stack = stackRepository.findOne(stackId);
-            Blueprint blueprint = blueprintRepository.findOne(clusterRequest.getBlueprintId());
-            addBlueprint(user, stackId, blueprint, clusterRequest);
-            AmbariClient ambariClient = new AmbariClient(stack.getAmbariIp(), PORT);
-            ambariClient.createCluster(
-                    clusterRequest.getClusterName(),
-                    blueprint.getName(),
-                    ambariClient.recommendAssignments(blueprint.getName())
-                    );
+    @Autowired
+    private ClusterConverter clusterConverter;
 
-        } catch (HttpResponseException e) {
-            throw new InternalServerException("Failed to create cluster", e);
+    @Autowired
+    private ClusterRepository clusterRepository;
+
+    @Autowired
+    private AmbariClusterInstaller ambariClusterInstaller;
+
+    public void createCluster(User user, Long stackId, ClusterRequest clusterRequest) {
+        Stack stack = stackRepository.findOne(stackId);
+        if (stack.getCluster() != null) {
+            throw new BadRequestException(String.format("A cluster is already created on this stack! [stack: '%s', cluster: '%s']", stackId, stack.getCluster()
+                    .getName()));
         }
+        Cluster cluster = clusterConverter.convert(clusterRequest);
+        cluster.setUser(user);
+        cluster = clusterRepository.save(cluster);
+
+        stack.setCluster(cluster);
+        stack = stackRepository.save(stack);
+        if (stack.getStatus().equals(Status.CREATE_COMPLETED)) {
+            ambariClusterInstaller.installAmbariCluster(stack);
+        }
+
     }
 
     public ClusterResponse retrieveCluster(User user, Long stackId) {
@@ -82,22 +94,6 @@ public class AmbariClusterService {
         ClusterResponse clusterResponse = new ClusterResponse();
         clusterResponse.setCluster(jsonHelper.createJsonFromString(cluster));
         return clusterResponse;
-    }
-
-    public void addBlueprint(User user, Long stackId, Blueprint blueprint, ClusterRequest clusterRequest) {
-        Stack stack = stackRepository.findOne(stackId);
-        AmbariClient ambariClient = new AmbariClient(stack.getAmbariIp(), PORT);
-        try {
-            ambariClient.addBlueprint(blueprint.getBlueprintText());
-        } catch (HttpResponseException e) {
-            if ("Conflict".equals(e.getMessage())) {
-                throw new BadRequestException("Ambari blueprint already exists.", e);
-            } else if ("Bad Request".equals(e.getMessage())) {
-                throw new BadRequestException("Failed to validate Ambari blueprint.", e);
-            } else {
-                throw new InternalServerException("Something went wrong", e);
-            }
-        }
     }
 
     public List<BlueprintJson> retrieveBlueprints(User user, Long stackId) {
