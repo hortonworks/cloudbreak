@@ -59,6 +59,7 @@ import com.sequenceiq.cloudbreak.domain.StackDescription;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.AmbariClusterInstaller;
 import com.sequenceiq.cloudbreak.service.ProvisionService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
@@ -95,6 +96,9 @@ public class AwsProvisionService implements ProvisionService {
 
     @Autowired
     private WebsocketService websocketService;
+
+    @Autowired
+    private AmbariClusterInstaller ambariClusterInstaller;
 
     private String ec2userDataScript;
 
@@ -165,16 +169,20 @@ public class AwsProvisionService implements ProvisionService {
     }
 
     private void createFailed(Stack stack) {
-        stack.setStatus(Status.CREATE_FAILED);
-        stackRepository.save(stack);
-        websocketService.send("/topic/stack", new StackStatusMessage(stack.getId(), Status.CREATE_FAILED.name()));
+        Stack updatedStack = stackRepository.findById(stack.getId());
+        updatedStack.setStatus(Status.CREATE_FAILED);
+        stackRepository.save(updatedStack);
+        websocketService.send("/topic/stack", new StackStatusMessage(updatedStack.getId(), Status.CREATE_FAILED.name()));
     }
 
     private void createSuccess(Stack stack, String ambariIp) {
-        stack.setStatus(Status.CREATE_COMPLETED);
-        stack.setAmbariIp(ambariIp);
-        stackRepository.save(stack);
-        websocketService.send("/topic/stack", new StackStatusMessage(stack.getId(), Status.CREATE_COMPLETED.name()));
+        Stack updatedStack = stackRepository.findById(stack.getId());
+        updatedStack.setStatus(Status.CREATE_COMPLETED);
+        updatedStack.setAmbariIp(ambariIp);
+        stackRepository.save(updatedStack);
+        websocketService.send("/topic/stack", new StackStatusMessage(updatedStack.getId(), Status.CREATE_COMPLETED.name()));
+        ambariClusterInstaller.installAmbariCluster(updatedStack);
+
     }
 
     private String pollAmbariServer(AmazonEC2Client amazonEC2Client, Long stackId, List<String> instanceIds) {

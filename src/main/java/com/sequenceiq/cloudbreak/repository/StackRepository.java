@@ -13,5 +13,7 @@ public interface StackRepository extends CrudRepository<Stack, Long> {
     @PostAuthorize("returnObject?.user?.id == principal?.id")
     Stack findOne(Long id);
 
+    Stack findById(Long id);
+
     List<Stack> findAllStackForTemplate(@Param("id") Long id);
 }
