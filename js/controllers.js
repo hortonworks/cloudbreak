@@ -495,7 +495,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
 
         var stompClient = null;
         function connect() {
-            var socket = new SockJS('http://localhost:8080/notification');
+            var socket = new SockJS('http://cloudbreak-api.sequenceiq.com/notification');
             stompClient = Stomp.over(socket);
             stompClient.connect({}, function(frame) {
                 stompClient.subscribe('/topic/stack', function(stackInfo){
