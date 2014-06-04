@@ -12,7 +12,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
         $http.defaults.headers.common['Content-Type']= 'application/json';
 
         if($rootScope.apiUrl === null || $rootScope.apiUrl === undefined ) {
-            $rootScope.apiUrl = "http://uluwatu.sequenceiq.com";
+            $rootScope.apiUrl = "http://cloudbreak.sequenceiq.com";
         }
         if($rootScope.basic_auth === null || $rootScope.basic_auth === undefined ) {
             $rootScope.basic_auth = "dXNlckBzZXEuY29tOnRlc3QxMjM=";
