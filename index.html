@@ -233,7 +233,7 @@
                                 <label class="col-sm-3 control-label" for="sl_description">description</label>
 
                                 <div class="col-sm-9">
-                                    <p id="sl_description" class="form-control-static">{{activeStack.data.description}}</p>
+                                    <p id="sl_description" class="form-control-static">{{activeStack.data.description | json}}</p>
                                 </div>
                                 <!-- .col-sm-9 -->
                             </div>
@@ -362,7 +362,7 @@
                                             <label class="col-sm-3 control-label" for="description">description</label>
 
                                             <div class="col-sm-9">
-                                                <p id="description" class="form-control-static">{{activeStack.template.parameters.description}}</p>
+                                                <p id="description" class="form-control-static">{{activeStack.template.parameters.description | json}}</p>
                                             </div>
                                             <!-- .col-sm-9 -->
                                         </div>
@@ -596,7 +596,7 @@
     <div class="panel-heading panel-heading-nav">
         <a href="#panel-templates-collapse" id="templates-btn" class="btn btn-info btn-fa-2x" role="button" data-toggle="collapse"
            data-target="#panel-templates-collapse"><i class="fa fa-angle-down fa-2x fa-fw-forced"></i></a>
-        <h4><span class="badge pull-right">2</span> manage templates</h4>
+        <h4><span class="badge pull-right">{{templates.length}}</span> manage templates</h4>
     </div>
 
     <div id="panel-templates-collapse" class="panel-collapse panel-btn-in-header-collapse collapse">
@@ -1076,7 +1076,7 @@
 
                                             <div class="col-sm-9">
                                                                 <pre id="source" class="form-control-static blueprint-source">
-{{blueprint.ambariBlueprint}}
+{{blueprint.ambariBlueprint | json}}
                                                                 </pre>
                                             </div>
                                             <!-- .col-sm-9 -->

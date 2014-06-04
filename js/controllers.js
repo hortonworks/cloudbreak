@@ -11,12 +11,6 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
         delete $http.defaults.headers.common['X-Requested-With'];
         $http.defaults.headers.common['Content-Type']= 'application/json';
 
-        if($rootScope.apiUrl === null || $rootScope.apiUrl === undefined ) {
-            $rootScope.apiUrl = "http://cloudbreak.sequenceiq.com";
-        }
-        if($rootScope.basic_auth === null || $rootScope.basic_auth === undefined ) {
-            $rootScope.basic_auth = "dXNlckBzZXEuY29tOnRlc3QxMjM=";
-        }
         if($scope.credentials === null || $scope.credentials === undefined ) {
             $scope.credentials = [];
         }
@@ -478,12 +472,15 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
         }
 
         $scope.doQuerys = function() {
-            $scope.getCredentials();
-            $scope.getTemplates();
-            $scope.getBluePrints();
-            $scope.getStacks();
+            $http.get('connection.properties').then(function (response) {
+                $rootScope.apiUrl = response.data.backend_url;
+                $rootScope.basic_auth = response.data.password64;
+                $scope.getCredentials();
+                $scope.getTemplates();
+                $scope.getBluePrints();
+                $scope.getStacks();
+            });
         }
-
 
 
         if (typeof (Storage) !== "undefined") {
