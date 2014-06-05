@@ -355,10 +355,10 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     ambariBlueprint: bluePrintText.value
                 }
             }).success(function (data, status, headers, config) {
-                $scope.statusMessage = "The creation of blueprint " + data.id + " was success";
+                $scope.statusMessage = "Blueprint "+ data.id + " created succesfully.";
                 $scope.getBluePrints()
             }).error(function (data, status, headers, config) {
-                $scope.statusMessage = "The creation of blueprint was unsuccess: " + data;
+                $scope.statusMessage = "The creation of blueprint failed: " + data;
                 $scope.isFailedCreation = true;
             });
         }
