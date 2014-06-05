@@ -55,7 +55,7 @@ public class UserInitializer implements InitializingBean {
             awsTemplate.setInstanceType(InstanceType.M1Small);
             awsTemplate.setSshLocation("0.0.0.0/0");
             awsTemplate.setUser(user2);
-/*
+            /*
 
             Stack awsStack = new Stack();
             awsStack.setTemplate(awsTemplate);
@@ -65,7 +65,7 @@ public class UserInitializer implements InitializingBean {
             awsStack.setCredential(awsCredential);
             awsStack.setAmbariIp("12.23.35.45");
             awsStack.setStatus(Status.CREATE_COMPLETED);
-*/
+            */
 
             user2.getAwsTemplates().add(awsTemplate);
             // user2.getStacks().add(awsStack);
@@ -98,7 +98,7 @@ public class UserInitializer implements InitializingBean {
             // awsStack.setAmbariIp("12.23.35.45");
             // awsStack.setStatus(Status.CREATE_COMPLETED);
 
-        /*    Blueprint blueprint1 = new Blueprint();
+            /*    Blueprint blueprint1 = new Blueprint();
             blueprint1.setName("single-node-hdfs-yarn");
             blueprint1.setBlueprintText("{\"host_groups\":[{\"name\":\"host_group_1\",\"components\":[{\"name\":\"NAMENODE\"},"
                     + "{\"name\":\"SECONDARY_NAMENODE\"},"
@@ -108,13 +108,13 @@ public class UserInitializer implements InitializingBean {
                     + "{\"blueprint_name\":\"single-node-hdfs-yarn\",\"stack_name\":\"HDP\",\"stack_version\":\"2.0\"}}");
             blueprint1.setUser(user2);*/
 
-          /*  Blueprint blueprint2 = new Blueprint();
+            /*  Blueprint blueprint2 = new Blueprint();
             blueprint2.setName("sample blueprint 1");
             blueprint2.setBlueprintText("{\"data\": {}}");
             blueprint2.setUser(user2);*/
 
-           // user2.getBlueprints().add(blueprint1);
-           // user2.getBlueprints().add(blueprint2);
+            // user2.getBlueprints().add(blueprint1);
+            // user2.getBlueprints().add(blueprint2);
             // user2.getAzureTemplates().add(azureTemplate);
             // user2.getStacks().add(azureStack);
             //user2.getStacks().add(awsStack);
