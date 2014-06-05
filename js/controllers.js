@@ -330,9 +330,9 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                         blueprintId: selectBlueprint.value
                     }
                 }).success(function (data, status, headers, config) {
-                    $scope.statusMessage = "The creation of stack " + data.id + " was success";
+                    $scope.statusMessage = "Stack " + data.id + " created succesfully.";
                 }).error(function (data, status, headers, config) {
-                    $scope.statusMessage = "The creation of stack was unsuccess: " + data;
+                    $scope.statusMessage = "The creation of stack failed: " + data;
                     console.log("unsuccess");
                 });
             }, function(reason) {
