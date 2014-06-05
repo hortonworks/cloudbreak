@@ -5,15 +5,22 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
 @Entity
-@NamedQuery(
-        name = "Stack.findAllStackForTemplate",
-        query = "SELECT c FROM Stack c "
-                + "WHERE c.template.id= :id")
+@NamedQueries({
+        @NamedQuery(
+                name = "Stack.findAllStackForTemplate",
+                query = "SELECT c FROM Stack c "
+                        + "WHERE c.template.id= :id"),
+        @NamedQuery(
+                name = "Stack.findStackForCluster",
+                query = "SELECT c FROM Stack c "
+                        + "WHERE c.cluster.id= :id")
+})
 public class Stack implements ProvisionEntity {
 
     @Id
