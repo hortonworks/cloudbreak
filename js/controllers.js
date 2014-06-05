@@ -515,13 +515,6 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             console.log("Disconnected");
         }
 
-        REQUESTED,
-            CREATE_IN_PROGRESS,
-            CREATE_COMPLETED,
-            CREATE_FAILED,
-            DELETE_IN_PROGRESS,
-            DELETE_COMPLETED;
-
         function logStackInfo(body) {
             if(body.status === 'CREATE_COMPLETED') {
                 $scope.statusMessage = "Stack creation was success: " + message.name;
