@@ -499,7 +499,12 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             stompClient = Stomp.over(socket);
             stompClient.connect({}, function(frame) {
                 stompClient.subscribe('/topic/stack', function(stackInfo){
+                    $scope.getStacks();
                     logStackInfo(JSON.parse(stackInfo.body), JSON.parse(stackInfo.body).id);
+                });
+                stompClient.subscribe('/topic/cluster', function(stackInfo){
+                    $scope.getStacks();
+                    logStackInfo(JSON.parse(stackInfo.body), JSON.parse(stackInfo.body).name);
                 });
             });
         }
