@@ -9,8 +9,6 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.ec2.model.InstanceType;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
-import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
 
@@ -57,18 +55,17 @@ public class UserInitializer implements InitializingBean {
             awsTemplate.setInstanceType(InstanceType.M1Small);
             awsTemplate.setSshLocation("0.0.0.0/0");
             awsTemplate.setUser(user2);
-
-            Stack awsStack = new Stack();
-            awsStack.setTemplate(awsTemplate);
-            awsStack.setNodeCount(NODE_COUNT);
-            awsStack.setName("coreos");
-            awsStack.setUser(user2);
-            awsStack.setCredential(awsCredential);
-            awsStack.setAmbariIp("12.23.35.45");
-            awsStack.setStatus(Status.CREATE_COMPLETED);
+            /*
+             * 
+             * Stack awsStack = new Stack(); awsStack.setTemplate(awsTemplate);
+             * awsStack.setNodeCount(NODE_COUNT); awsStack.setName("coreos");
+             * awsStack.setUser(user2); awsStack.setCredential(awsCredential);
+             * awsStack.setAmbariIp("12.23.35.45");
+             * awsStack.setStatus(Status.CREATE_COMPLETED);
+             */
 
             user2.getAwsTemplates().add(awsTemplate);
-            user2.getStacks().add(awsStack);
+            // user2.getStacks().add(awsStack);
 
             // AzureTemplate azureTemplate = new AzureTemplate();
             // azureTemplate.setDeploymentSlot("slot");
