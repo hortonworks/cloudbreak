@@ -9,9 +9,6 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.ec2.model.InstanceType;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
 
@@ -51,14 +48,14 @@ public class UserInitializer implements InitializingBean {
             // user2.getAzureCredentials().add(azureCredential);
 
             AwsTemplate awsTemplate = new AwsTemplate();
-            awsTemplate.setName("userAzureStack");
             awsTemplate.setKeyName("sequence-eu");
-            awsTemplate.setName("template1");
+            awsTemplate.setName("Aws development environment");
             awsTemplate.setRegion(Regions.EU_WEST_1);
             awsTemplate.setAmiId("ami-2f39f458");
             awsTemplate.setInstanceType(InstanceType.M1Small);
             awsTemplate.setSshLocation("0.0.0.0/0");
             awsTemplate.setUser(user2);
+            /*
 
             Stack awsStack = new Stack();
             awsStack.setTemplate(awsTemplate);
@@ -68,6 +65,7 @@ public class UserInitializer implements InitializingBean {
             awsStack.setCredential(awsCredential);
             awsStack.setAmbariIp("12.23.35.45");
             awsStack.setStatus(Status.CREATE_COMPLETED);
+            */
 
             user2.getAwsTemplates().add(awsTemplate);
             // user2.getStacks().add(awsStack);
@@ -97,10 +95,10 @@ public class UserInitializer implements InitializingBean {
             // azureStack.setUser(user2);
             // azureStack.setCredential(azureCredential);
             // azureStack.setName("azure stack");
-            awsStack.setAmbariIp("12.23.35.45");
-            awsStack.setStatus(Status.CREATE_COMPLETED);
+            // awsStack.setAmbariIp("12.23.35.45");
+            // awsStack.setStatus(Status.CREATE_COMPLETED);
 
-            Blueprint blueprint1 = new Blueprint();
+            /*    Blueprint blueprint1 = new Blueprint();
             blueprint1.setName("single-node-hdfs-yarn");
             blueprint1.setBlueprintText("{\"host_groups\":[{\"name\":\"host_group_1\",\"components\":[{\"name\":\"NAMENODE\"},"
                     + "{\"name\":\"SECONDARY_NAMENODE\"},"
@@ -108,18 +106,18 @@ public class UserInitializer implements InitializingBean {
                     + "{\"name\":\"YARN_CLIENT\"},{\"name\":\"HISTORYSERVER\"},{\"name\":\"MAPREDUCE2_CLIENT\"},"
                     + "{\"name\":\"ZOOKEEPER_SERVER\"},{\"name\":\"ZOOKEEPER_CLIENT\"}],\"cardinality\":\"1\"}],\"Blueprints\":"
                     + "{\"blueprint_name\":\"single-node-hdfs-yarn\",\"stack_name\":\"HDP\",\"stack_version\":\"2.0\"}}");
-            blueprint1.setUser(user2);
+            blueprint1.setUser(user2);*/
 
-            Blueprint blueprint2 = new Blueprint();
+            /*  Blueprint blueprint2 = new Blueprint();
             blueprint2.setName("sample blueprint 1");
             blueprint2.setBlueprintText("{\"data\": {}}");
-            blueprint2.setUser(user2);
+            blueprint2.setUser(user2);*/
 
-            user2.getBlueprints().add(blueprint1);
-            user2.getBlueprints().add(blueprint2);
+            // user2.getBlueprints().add(blueprint1);
+            // user2.getBlueprints().add(blueprint2);
             // user2.getAzureTemplates().add(azureTemplate);
             // user2.getStacks().add(azureStack);
-            user2.getStacks().add(awsStack);
+            //user2.getStacks().add(awsStack);
 
             userRepository.save(user2);
         }
