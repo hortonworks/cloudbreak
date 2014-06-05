@@ -500,11 +500,11 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             stompClient.connect({}, function(frame) {
                 stompClient.subscribe('/topic/stack', function(stackInfo){
                     $scope.getStacks();
-                    logStackInfo(JSON.parse(stackInfo.body), JSON.parse(stackInfo.body).id);
+                    logStackInfo(JSON.parse(stackInfo.body));
                 });
                 stompClient.subscribe('/topic/cluster', function(stackInfo){
                     $scope.getStacks();
-                    logStackInfo(JSON.parse(stackInfo.body), JSON.parse(stackInfo.body).name);
+                    logClusterInfo(JSON.parse(stackInfo.body));
                 });
             });
         }
@@ -515,9 +515,47 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             console.log("Disconnected");
         }
 
-        function logStackInfo(body, message) {
-            $scope.statusMessage = "message arrived: " + message;
-            console.log(body);
+        REQUESTED,
+            CREATE_IN_PROGRESS,
+            CREATE_COMPLETED,
+            CREATE_FAILED,
+            DELETE_IN_PROGRESS,
+            DELETE_COMPLETED;
+
+        function logStackInfo(body) {
+            if(body.status === 'CREATE_COMPLETED') {
+                $scope.statusMessage = "Stack creation was success: " + message.name;
+            } else if(body.status === 'REQUESTED')  {
+                $scope.statusMessage = "Stack request was success: " + message.name;
+            }  else if(body.status === 'CREATE_IN_PROGRESS')  {
+                $scope.statusMessage = "Stack creation in progress: " + message.name;
+            }  else if(body.status === 'CREATE_FAILED')  {
+                $scope.statusMessage = "Stack creation failed: " + message.name;
+            }  else if(body.status === 'DELETE_IN_PROGRESS')  {
+                $scope.statusMessage = "Stack creation in progress: " + message.name;
+            }  else if(body.status === 'DELETE_COMPLETED')  {
+                $scope.statusMessage = "Stack deletion was success: " + message.name;
+            } else {
+                $scope.statusMessage = "Problem with stack: " + message.name;
+            }
+        }
+
+        function logClusterInfo(body) {
+            if(body.status === 'CREATE_COMPLETED') {
+                $scope.statusMessage = "Cluster creation was success: " + message.name;
+            } else if(body.status === 'REQUESTED')  {
+                $scope.statusMessage = "Cluster request was success: " + message.name;
+            }  else if(body.status === 'CREATE_IN_PROGRESS')  {
+                $scope.statusMessage = "Cluster creation in progress: " + message.name;
+            }  else if(body.status === 'CREATE_FAILED')  {
+                $scope.statusMessage = "Cluster creation failed: " + message.name;
+            }  else if(body.status === 'DELETE_IN_PROGRESS')  {
+                $scope.statusMessage = "Cluster creation in progress: " + message.name;
+            }  else if(body.status === 'DELETE_COMPLETED')  {
+                $scope.statusMessage = "Cluster deletion was success: " + message.name;
+            } else {
+                $scope.statusMessage = "Problem with cluster: " + message.name;
+            }
         }
 
         if (typeof (Storage) !== "undefined") {
