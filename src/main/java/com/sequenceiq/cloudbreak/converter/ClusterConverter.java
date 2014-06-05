@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import java.util.Date;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -39,7 +41,8 @@ public class ClusterConverter {
         clusterResponse.setId(cluster.getId());
         clusterResponse.setStatus(cluster.getStatus().name());
         if (cluster.getCreationFinished() != null) {
-            long createFinished = cluster.getCreationFinished();
+            long now = new Date().getTime();
+            long createFinished = now - cluster.getCreationFinished();
             int minutes = (int) ((createFinished / (MILLIS_PER_SECOND * SECONDS_PER_MINUTE)) % SECONDS_PER_MINUTE);
             int hours = (int) ((createFinished / (MILLIS_PER_SECOND * SECONDS_PER_MINUTE * SECONDS_PER_MINUTE)));
             clusterResponse.setHoursUp(hours);
