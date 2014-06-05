@@ -508,9 +508,12 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     $scope.getStacks();
                     logStackInfo(JSON.parse(stackInfo.body));
                 });
-                stompClient.subscribe('/topic/cluster', function(stackInfo){
+                stompClient.subscribe('/topic/cluster', function(clusterInfo){
                     $scope.getStacks();
-                    logClusterInfo(JSON.parse(stackInfo.body));
+                    logClusterInfo(JSON.parse(clusterInfo.body));
+                });
+                stompClient.subscribe('/topic/time', function(timeInfo){
+                    console.log(JSON.parse(timeInfo.body));
                 });
             });
         }
