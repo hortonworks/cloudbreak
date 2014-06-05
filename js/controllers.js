@@ -384,7 +384,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     }
                 }
             }).success(function (data, status, headers, config) {
-                $scope.statusMessage = "The creation of aws template " + data.id + " was success: ";
+                $scope.statusMessage = "The creation of aws template " + data.id + " was success";
                 $scope.getTemplates();
             }).error(function (data, status, headers, config) {
                 $scope.statusMessage = "The creation of aws template was unsuccess: " + data;
@@ -420,7 +420,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     }
                 }
             }).success(function (data, status, headers, config) {
-                $scope.statusMessage = "The creation of azure template " + data.id + " was success: ";
+                $scope.statusMessage = "The creation of azure template " + data.id + " was success";
                 $scope.getTemplates();
             }).error(function (data, status, headers, config) {
                 $scope.statusMessage = "The creation of azure template was unsuccess: " + data;
@@ -447,7 +447,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     }
                 }
             }).success(function (data, status, headers, config) {
-                $scope.statusMessage = "The creation of aws credential " + data.id + " was success: ";
+                $scope.statusMessage = "The creation of aws credential " + data.id + " was success";
                 $scope.getCredentials();
             }).error(function (data, status, headers, config) {
                 $scope.statusMessage = "The creation of aws template was unsuccess: " + data;
