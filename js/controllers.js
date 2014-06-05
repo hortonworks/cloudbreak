@@ -24,7 +24,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             $scope.stacks = [];
         }
         if($scope.statusMessage === null || $scope.statusMessage === undefined) {
-            $scope.statusMessage = "Nothing happened...";
+            $scope.statusMessage = "";
         }
 
         if($rootScope.activeCredential === null || $rootScope.activeCredential === undefined ) {
