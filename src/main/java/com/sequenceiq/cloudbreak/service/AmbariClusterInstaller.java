@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.service;
 
+import groovyx.net.http.HttpResponseException;
+
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -17,18 +20,16 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.service.aws.AwsProvisionService;
+import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
-
-import groovyx.net.http.HttpResponseException;
 
 @Service
 public class AmbariClusterInstaller {
 
     private static final double COMPLETED = 100.0;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AwsProvisionService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AmbariClusterInstaller.class);
 
     private static final long POLLING_INTERVAL = 3000;
     private static final int MILLIS = 1000;
@@ -36,11 +37,16 @@ public class AmbariClusterInstaller {
     @Autowired
     private WebsocketService websocketService;
 
+    @Autowired
+    private ClusterRepository clusterRepository;
+
     @Async
     public void installAmbariCluster(Stack stack) {
         try {
             Cluster cluster = stack.getCluster();
             if (stack.getCluster() != null && stack.getCluster().getStatus().equals(Status.REQUESTED)) {
+                cluster.setCreationStarted(new Date().getTime());
+                cluster = clusterRepository.save(cluster);
                 Blueprint blueprint = cluster.getBlueprint();
                 addBlueprint(stack.getAmbariIp(), blueprint);
                 AmbariClient ambariClient = new AmbariClient(stack.getAmbariIp(), AmbariClusterService.PORT);
@@ -48,7 +54,7 @@ public class AmbariClusterInstaller {
                         cluster.getName(),
                         blueprint.getName(),
                         recommend(stack, ambariClient, blueprint.getName())
-                );
+                        );
 
                 BigDecimal installProgress = new BigDecimal(0);
                 while (installProgress.doubleValue() != COMPLETED) {
@@ -63,6 +69,9 @@ public class AmbariClusterInstaller {
                     // TODO: timeout
                 }
                 websocketService.send("/topic/cluster", new StatusMessage(cluster.getId(), cluster.getName(), Status.CREATE_COMPLETED.name()));
+                cluster.setStatus(Status.CREATE_COMPLETED);
+                cluster.setCreationFinished(new Date().getTime());
+                clusterRepository.save(cluster);
             } else {
                 LOGGER.info("There were no cluster request to this stack, won't install cluster now. [stack: {}]", stack.getId());
             }

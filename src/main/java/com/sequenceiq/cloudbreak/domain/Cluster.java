@@ -22,6 +22,10 @@ public class Cluster {
 
     private Status status;
 
+    private Long creationStarted;
+
+    private Long creationFinished;
+
     public Long getId() {
         return id;
     }
@@ -60,6 +64,22 @@ public class Cluster {
 
     public void setStatus(Status status) {
         this.status = status;
+    }
+
+    public Long getCreationStarted() {
+        return creationStarted;
+    }
+
+    public void setCreationStarted(Long creationStarted) {
+        this.creationStarted = creationStarted;
+    }
+
+    public Long getCreationFinished() {
+        return creationFinished;
+    }
+
+    public void setCreationFinished(Long creationFinished) {
+        this.creationFinished = creationFinished;
     }
 
 }
