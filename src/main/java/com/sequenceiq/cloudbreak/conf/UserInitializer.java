@@ -52,10 +52,10 @@ public class UserInitializer implements InitializingBean {
 
             AwsTemplate awsTemplate = new AwsTemplate();
             awsTemplate.setName("userAzureStack");
-            awsTemplate.setKeyName("smaple_key");
+            awsTemplate.setKeyName("sequence-eu");
             awsTemplate.setName("template1");
             awsTemplate.setRegion(Regions.EU_WEST_1);
-            awsTemplate.setAmiId("ami-2918e35e");
+            awsTemplate.setAmiId("ami-2f39f458");
             awsTemplate.setInstanceType(InstanceType.M1Small);
             awsTemplate.setSshLocation("0.0.0.0/0");
             awsTemplate.setUser(user2);
