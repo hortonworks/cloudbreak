@@ -118,7 +118,7 @@
                                         <a href="#" id="toggle-cluster-block-btn" class="btn btn-fa-2x btn-info" role="button" title="toggle cluster panel"><i
                                                 class="fa fa-angle-up fa-2x fa-fw-forced"></i></a>
                                     </span>
-                <input id="notification-n-filtering" role="alert" type="text" class="form-control" placeholder="type cluster name"
+                <input id="notification-n-filtering" role="alert" type="text" disabled class="form-control" placeholder="type cluster name"
                        value="{{statusMessage}}"><!-- OPTIONAL HTML:
                                         value: 'time' 'cluster name' 'state' - after cluster state changed
                                         -->
@@ -743,7 +743,7 @@
                 <form class="form-horizontal" role="form" ng-show="awsTemplate">
                     <div class="form-group">
 
-                        <label class="col-sm-3 control-label" for="aws_tamiId">amiId</label>
+                        <label class="col-sm-3 control-label" for="aws_tamiId">AMI</label>
                         <div class="col-sm-9">
                             <select class="form-control" id="aws_tamiId">
                                 <option value="ami-2f39f458">ami-2f39f458</option>
@@ -753,7 +753,7 @@
 
                     </div>
                     <div class="form-group">
-                        <label class="col-sm-3 control-label" for="aws_tsshLocation">sshLocation</label>
+                        <label class="col-sm-3 control-label" for="aws_tsshLocation">SSH location</label>
 
                         <div class="col-sm-9">
                             <input type="text" class="form-control" id="aws_tsshLocation">
@@ -762,7 +762,7 @@
 
                     </div>
                     <div class="form-group">
-                        <label class="col-sm-3 control-label" for="aws_tkeyName">keyName</label>
+                        <label class="col-sm-3 control-label" for="aws_tkeyName">SSH key name</label>
 
                         <div class="col-sm-9">
                             <input type="text" class="form-control" id="aws_tkeyName">
@@ -771,7 +771,7 @@
 
                     </div>
                     <div class="form-group">
-                        <label class="col-sm-3 control-label" for="aws_tregion">region</label>
+                        <label class="col-sm-3 control-label" for="aws_tregion">Region</label>
                         <div class="col-sm-9">
                             <div class="col-sm-9">
                                 <select class="form-control" id="aws_tregion">
@@ -792,7 +792,7 @@
 
                     </div>
                     <div class="form-group">
-                        <label class="col-sm-3 control-label" for="aws_tinstanceType">instanceType</label>
+                        <label class="col-sm-3 control-label" for="aws_tinstanceType">Instance type</label>
 
                         <div class="col-sm-9">
                             <div class="col-sm-9">
@@ -809,7 +809,7 @@
 
                     </div>
                     <div class="form-group">
-                        <label class="col-sm-3 control-label" for="aws_tclusterName">clusterName</label>
+                        <label class="col-sm-3 control-label" for="aws_tclusterName">Name</label>
 
                         <div class="col-sm-9">
                             <input type="text" class="form-control" id="aws_tclusterName">
@@ -1038,7 +1038,7 @@
                                 <form class="form-horizontal" role="form">
 
                                     <div class="form-group">
-                                        <label class="col-sm-3 control-label" for="blueprintUrl">source URL</label>
+                                        <label class="col-sm-3 control-label" for="blueprintUrl">Source URL</label>
 
                                         <div class="col-sm-9">
                                             <input type="text" class="form-control" id="blueprintUrl" placeholder="set blueprint URL">
@@ -1048,7 +1048,7 @@
                                     <!-- .form-group -->
 
                                     <div class="form-group">
-                                        <label class="col-sm-3 control-label" for="bluePrintText">manual copy</label>
+                                        <label class="col-sm-3 control-label" for="bluePrintText">Manual copy</label>
 
                                         <div class="col-sm-9">
                                             <textarea class="form-control" id="bluePrintText" placeholder="paste blueprint text here" rows="10"></textarea>
@@ -1198,7 +1198,7 @@
                 <form class="form-horizontal" role="form" ng-show="awsCredential">
 
                     <div class="form-group">
-                        <label class="col-sm-3 control-label" for="awscname">name</label>
+                        <label class="col-sm-3 control-label" for="awscname">Name</label>
 
                         <div class="col-sm-9">
                             <input type="text" class="form-control" id="awscname" placeholder="max. 20 char">
@@ -1208,20 +1208,20 @@
                     </div>
                     <!-- .form-group -->
                     <div class="form-group">
-                        <label class="col-sm-3 control-label" for="croleArn">roleArn</label>
+                        <label class="col-sm-3 control-label" for="croleArn">Role ARN</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" id="croleArn" placeholder="max. 20 char">
+                            <input type="text" class="form-control" id="croleArn" >
                         </div>
                         <!-- .col-sm-9 -->
 
                     </div>
 
                     <div class="form-group">
-                        <label class="col-sm-3 control-label" for="cinstanceProfileRoleArn">instance RoleArn</label>
+                        <label class="col-sm-3 control-label" for="cinstanceProfileRoleArn">Instance role ARN</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" id="cinstanceProfileRoleArn" placeholder="max. 20 char">
+                            <input type="text" class="form-control" id="cinstanceProfileRoleArn">
                         </div>
                         <!-- .col-sm-9 -->
 
