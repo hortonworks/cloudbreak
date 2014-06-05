@@ -517,37 +517,29 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
 
         function logStackInfo(body) {
             if(body.status === 'CREATE_COMPLETED') {
-                $scope.statusMessage = "Stack creation was success: " + message.name;
-            } else if(body.status === 'REQUESTED')  {
-                $scope.statusMessage = "Stack request was success: " + message.name;
-            }  else if(body.status === 'CREATE_IN_PROGRESS')  {
-                $scope.statusMessage = "Stack creation in progress: " + message.name;
+                $scope.statusMessage = message.name + ": Nodes started, Ambari server is available. Starting cluster installation...";
+            } else if(body.status === 'CREATE_IN_PROGRESS')  {
+                $scope.statusMessage = message.name + ": Creating VPC and nodes...";
             }  else if(body.status === 'CREATE_FAILED')  {
-                $scope.statusMessage = "Stack creation failed: " + message.name;
+                $scope.statusMessage = message.name + ": Failed to create nodes.";
             }  else if(body.status === 'DELETE_IN_PROGRESS')  {
-                $scope.statusMessage = "Stack creation in progress: " + message.name;
+                $scope.statusMessage = message.name + ": Terminating nodes...";
             }  else if(body.status === 'DELETE_COMPLETED')  {
-                $scope.statusMessage = "Stack deletion was success: " + message.name;
+                $scope.statusMessage = message.name + ": Nodes terminated successfully.";
             } else {
-                $scope.statusMessage = "Problem with stack: " + message.name;
+                $scope.statusMessage = message.name + ": Something went wrong.";
             }
         }
 
         function logClusterInfo(body) {
             if(body.status === 'CREATE_COMPLETED') {
-                $scope.statusMessage = "Cluster creation was success: " + message.name;
-            } else if(body.status === 'REQUESTED')  {
-                $scope.statusMessage = "Cluster request was success: " + message.name;
-            }  else if(body.status === 'CREATE_IN_PROGRESS')  {
-                $scope.statusMessage = "Cluster creation in progress: " + message.name;
-            }  else if(body.status === 'CREATE_FAILED')  {
-                $scope.statusMessage = "Cluster creation failed: " + message.name;
-            }  else if(body.status === 'DELETE_IN_PROGRESS')  {
-                $scope.statusMessage = "Cluster creation in progress: " + message.name;
-            }  else if(body.status === 'DELETE_COMPLETED')  {
-                $scope.statusMessage = "Cluster deletion was success: " + message.name;
+                $scope.statusMessage = message.name + ": Hadoop cluster created successfully.";
+            } else if(body.status === 'CREATE_IN_PROGRESS')  {
+                $scope.statusMessage = message.name + "Creating Hadoop cluster with Ambari...";
+            }  else if(body.status === 'CREATE_FAILED') {
+                $scope.statusMessage = message.name + ": Failed to create Hadoop cluster.";
             } else {
-                $scope.statusMessage = "Problem with cluster: " + message.name;
+                $scope.statusMessage = message.name + ": Something went wrong.";
             }
         }
 
