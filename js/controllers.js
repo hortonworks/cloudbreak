@@ -330,7 +330,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                         blueprintId: selectBlueprint.value
                     }
                 }).success(function (data, status, headers, config) {
-                    $scope.statusMessage = "The creation of stack " + data + " was success";
+                    $scope.statusMessage = "The creation of stack " + data.id + " was success";
                 }).error(function (data, status, headers, config) {
                     $scope.statusMessage = "The creation of stack was unsuccess: " + data;
                     console.log("unsuccess");
@@ -355,7 +355,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     ambariBlueprint: bluePrintText.value
                 }
             }).success(function (data, status, headers, config) {
-                $scope.statusMessage = "The creation of blueprint " + data + " was success";
+                $scope.statusMessage = "The creation of blueprint " + data.id + " was success";
                 $scope.getBluePrints()
             }).error(function (data, status, headers, config) {
                 $scope.statusMessage = "The creation of blueprint was unsuccess: " + data;
@@ -384,7 +384,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     }
                 }
             }).success(function (data, status, headers, config) {
-                $scope.statusMessage = "The creation of aws template " +data+ " was success: ";
+                $scope.statusMessage = "The creation of aws template " + data.id + " was success: ";
                 $scope.getTemplates();
             }).error(function (data, status, headers, config) {
                 $scope.statusMessage = "The creation of aws template was unsuccess: " + data;
@@ -420,7 +420,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     }
                 }
             }).success(function (data, status, headers, config) {
-                $scope.statusMessage = "The creation of azure template " + data + " was success: ";
+                $scope.statusMessage = "The creation of azure template " + data.id + " was success: ";
                 $scope.getTemplates();
             }).error(function (data, status, headers, config) {
                 $scope.statusMessage = "The creation of azure template was unsuccess: " + data;
@@ -447,7 +447,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     }
                 }
             }).success(function (data, status, headers, config) {
-                $scope.statusMessage = "The creation of aws credential " + data + " was success: ";
+                $scope.statusMessage = "The creation of aws credential " + data.id + " was success: ";
                 $scope.getCredentials();
             }).error(function (data, status, headers, config) {
                 $scope.statusMessage = "The creation of aws template was unsuccess: " + data;
@@ -474,7 +474,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 }
             }).success(function (data, status, headers, config) {
                 $scope.getCredentials();
-                $scope.statusMessage = "The creation of azure credential " + data + " was success";
+                $scope.statusMessage = "The creation of azure credential " + data.id + " was success";
 
             }).error(function (data, status, headers, config) {
                 $scope.statusMessage = "The creation of azure credential was unsuccess: " + data;
