@@ -63,7 +63,7 @@ import com.sequenceiq.cloudbreak.service.AmbariClusterInstaller;
 import com.sequenceiq.cloudbreak.service.ProvisionService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
-import com.sequenceiq.cloudbreak.websocket.message.StackStatusMessage;
+import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
 /**
  * Provisions an Ambari based Hadoop cluster on a client Amazon EC2 account by
@@ -172,7 +172,7 @@ public class AwsProvisionService implements ProvisionService {
         Stack updatedStack = stackRepository.findById(stack.getId());
         updatedStack.setStatus(Status.CREATE_FAILED);
         stackRepository.save(updatedStack);
-        websocketService.send("/topic/stack", new StackStatusMessage(updatedStack.getId(), Status.CREATE_FAILED.name()));
+        websocketService.send("/topic/stack", new StatusMessage(updatedStack.getId(), updatedStack.getName(), Status.CREATE_FAILED.name()));
     }
 
     private void createSuccess(Stack stack, String ambariIp) {
@@ -180,7 +180,7 @@ public class AwsProvisionService implements ProvisionService {
         updatedStack.setStatus(Status.CREATE_COMPLETED);
         updatedStack.setAmbariIp(ambariIp);
         stackRepository.save(updatedStack);
-        websocketService.send("/topic/stack", new StackStatusMessage(updatedStack.getId(), Status.CREATE_COMPLETED.name()));
+        websocketService.send("/topic/stack", new StatusMessage(updatedStack.getId(), updatedStack.getName(), Status.CREATE_COMPLETED.name()));
         ambariClusterInstaller.installAmbariCluster(updatedStack);
 
     }
@@ -230,7 +230,8 @@ public class AwsProvisionService implements ProvisionService {
         try {
             Thread.sleep(POLLING_INTERVAL);
         } catch (InterruptedException e) {
-            throw new InternalServerException("Thread interrupted.", e);
+            LOGGER.info("Interrupted exception occured during polling.", e);
+            Thread.currentThread().interrupt();
         }
     }
 

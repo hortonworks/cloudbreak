@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.service.aws.AwsProvisionService;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
-import com.sequenceiq.cloudbreak.websocket.message.ClusterStatusMessage;
+import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
 import groovyx.net.http.HttpResponseException;
 
@@ -55,13 +55,14 @@ public class AmbariClusterInstaller {
                     try {
                         Thread.sleep(POLLING_INTERVAL);
                     } catch (InterruptedException e) {
-                        throw new InternalServerException("Thread interrupted");
+                        LOGGER.info("Interrupted exception occured during polling.", e);
+                        Thread.currentThread().interrupt();
                     }
                     installProgress = ambariClient.getInstallProgress();
                     LOGGER.info("Ambari Cluster installing. [Stack: '{}', Cluster: '{}', Progress: {}]", stack.getId(), cluster.getName(), installProgress);
                     // TODO: timeout
                 }
-                websocketService.send("/topic/cluster", new ClusterStatusMessage(cluster.getName(), Status.CREATE_COMPLETED.name()));
+                websocketService.send("/topic/cluster", new StatusMessage(cluster.getId(), cluster.getName(), Status.CREATE_COMPLETED.name()));
             } else {
                 LOGGER.info("There were no cluster request to this stack, won't install cluster now. [stack: {}]", stack.getId());
             }
