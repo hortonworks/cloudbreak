@@ -41,6 +41,11 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             };
         }
 
+        $scope.azureTemplate = false;
+        $scope.awsTemplate = true;
+        $scope.azureCredential = false;
+        $scope.awsCredential = true;
+
         $scope.reloadCtrl = function(){
             console.log('reloading...');
             $route.reload();
@@ -330,7 +335,8 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                         blueprintId: selectBlueprint.value
                     }
                 }).success(function (data, status, headers, config) {
-                    $scope.statusMessage = "Stack " + data.id + " created succesfully.";
+                    console.log(data);
+                    $scope.statusMessage = "Cluster created succesfully.";
                 }).error(function (data, status, headers, config) {
                     $scope.statusMessage = "The creation of stack failed: " + data;
                     console.log("unsuccess");

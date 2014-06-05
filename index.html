@@ -607,9 +607,17 @@
     <div class="panel panel-default">
         <div id="panel-create-template-collapse" class="panel-collapse panel-under-btn-collapse collapse">
             <div class="panel-body">
-                <div class="row">
-                    <button id="awsTemplateChange" type="button" class="btn btn-default" ng-click="createAwsTemplateRequest()">Aws</button>
-                    <button id="azureTemplateChange" type="button" class="btn btn-default" ng-click="createAzureTemplateRequest()">Azure</button>
+                <div class="row " style="padding-bottom: 10px">
+                    <div class="btn-segmented-control" id="providerSelector2">
+                        <div class="btn-group btn-group-justified">
+                            <div class="btn-group">
+                                <button id="awsTemplateChange" type="button" class="btn btn-info" role="button" ng-click="createAwsTemplateRequest()">Aws</button>
+                            </div>
+                            <div class="btn-group">
+                                <button id="azureTemplateChange" class="btn btn-info" role="button" ng-click="createAzureTemplateRequest()">Azure</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <form class="form-horizontal" role="form" ng-show="azureTemplate">
 
@@ -773,7 +781,6 @@
                     <div class="form-group">
                         <label class="col-sm-3 control-label" for="aws_tregion">Region</label>
                         <div class="col-sm-9">
-                            <div class="col-sm-9">
                                 <select class="form-control" id="aws_tregion">
                                     <option value="GovCloud">us-gov-west-1</option>
                                     <option value="US_EAST_1">us-east-1</option>
@@ -786,7 +793,6 @@
                                     <option value="SA_EAST_1">sa-east-1</option>
                                     <option value="CN_NORTH_1">cn-north-1</option>
                                 </select>
-                            </div>
                         </div>
                         <!-- .col-sm-9 -->
 
@@ -795,7 +801,6 @@
                         <label class="col-sm-3 control-label" for="aws_tinstanceType">Instance type</label>
 
                         <div class="col-sm-9">
-                            <div class="col-sm-9">
                                 <select class="form-control" id="aws_tinstanceType">
                                     <option value="T1Micro">t1.micro</option>
                                     <option value="M1Small">m1.small</option>
@@ -803,7 +808,6 @@
                                     <option value="M1Large">m1.large</option>
                                     <option value="M1Xlarge">m1.xlarge</option>
                                 </select>
-                            </div>
                         </div>
                         <!-- .col-sm-9 -->
 
@@ -1150,9 +1154,17 @@
     <div class="panel panel-default" >
         <div id="panel-create-credential-collapse" class="panel-collapse panel-under-btn-collapse collapse">
             <div class="panel-body">
-                <div class="row">
-                    <button id="awsChange" type="button" class="btn btn-default" ng-click="createAwsCredentialRequest()">Aws</button>
-                    <button id="azureChange" type="button" class="btn btn-default" ng-click="createAzureCredentialRequest()">Azure</button>
+                <div class="row " style="padding-bottom: 10px">
+                    <div class="btn-segmented-control" id="providerSelector1">
+                        <div class="btn-group btn-group-justified">
+                            <div class="btn-group">
+                                <button id="awsChange" type="button" class="btn btn-info" ng-click="createAwsCredentialRequest()">Aws</button>
+                            </div>
+                            <div class="btn-group">
+                                <button id="azureChange" type="button" class="btn btn-info" ng-click="createAzureCredentialRequest()">Azure</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <form class="form-horizontal" role="form" ng-show="azureCredential">
