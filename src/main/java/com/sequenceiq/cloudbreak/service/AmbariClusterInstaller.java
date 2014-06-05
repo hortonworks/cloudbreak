@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.service;
 
-import groovyx.net.http.HttpResponseException;
-
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +21,8 @@ import com.sequenceiq.cloudbreak.service.aws.AwsProvisionService;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.ClusterStatusMessage;
 
+import groovyx.net.http.HttpResponseException;
+
 @Service
 public class AmbariClusterInstaller {
 
@@ -29,6 +31,7 @@ public class AmbariClusterInstaller {
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsProvisionService.class);
 
     private static final long POLLING_INTERVAL = 3000;
+    private static final int MILLIS = 1000;
 
     @Autowired
     private WebsocketService websocketService;
@@ -44,8 +47,8 @@ public class AmbariClusterInstaller {
                 ambariClient.createCluster(
                         cluster.getName(),
                         blueprint.getName(),
-                        ambariClient.recommendAssignments(blueprint.getName())
-                        );
+                        recommend(stack, ambariClient, blueprint.getName())
+                );
 
                 BigDecimal installProgress = new BigDecimal(0);
                 while (installProgress.doubleValue() != COMPLETED) {
@@ -66,6 +69,24 @@ public class AmbariClusterInstaller {
         } catch (HttpResponseException e) {
             throw new InternalServerException("Failed to create cluster", e);
         }
+    }
+
+    private Map<String, List<String>> recommend(Stack stack, AmbariClient ambariClient, String blueprintName) {
+        Map<String, List<String>> stringListMap = ambariClient.recommendAssignments(blueprintName);
+        int nodeCount = 0;
+        while (nodeCount != stack.getNodeCount()) {
+            nodeCount = 0;
+            stringListMap = ambariClient.recommendAssignments(blueprintName);
+            try {
+                Thread.sleep(MILLIS);
+            } catch (InterruptedException e) {
+                LOGGER.info("Interrupted exception in recommendation. stackId: {} blueprintName: {} exception: {}", stack.getId(), blueprintName, e);
+            }
+            for (Map.Entry<String, List<String>> s : stringListMap.entrySet()) {
+                nodeCount += s.getValue().size();
+            }
+        }
+        return stringListMap;
     }
 
     public void addBlueprint(String ambariIp, Blueprint blueprint) {
