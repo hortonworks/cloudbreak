@@ -21,11 +21,6 @@ public class AsyncConfig implements AsyncConfigurer, SchedulingConfigurer {
     private static final int MAX_POOL_SIZE = 42;
     private static final int QUEUE_CAPACITY = 11;
 
-    // @Bean
-    // UptimeNotifier uptimeNotifier() {
-    // return new UptimeNotifier();
-    // }
-
     @Override
     public Executor getAsyncExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
