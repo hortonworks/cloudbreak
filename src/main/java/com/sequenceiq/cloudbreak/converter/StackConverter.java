@@ -19,6 +19,9 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
     @Autowired
     private CredentialRepository credentialRepository;
 
+    @Autowired
+    private ClusterConverter clusterConverter;
+
     @Override
     public StackJson convert(Stack entity) {
         StackJson stackJson = new StackJson();
@@ -30,6 +33,9 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
         stackJson.setCredentialId(entity.getCredential().getId());
         stackJson.setStatus(entity.getStatus());
         stackJson.setAmbariServerIp(entity.getAmbariIp());
+        if (entity.getCluster() != null) {
+            stackJson.setCluster(clusterConverter.convert(entity.getCluster(), "{}"));
+        }
         return stackJson;
     }
 
@@ -44,6 +50,9 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
         stackJson.setDescription(description);
         stackJson.setStatus(entity.getStatus());
         stackJson.setAmbariServerIp(entity.getAmbariIp());
+        if (entity.getCluster() != null) {
+            stackJson.setCluster(clusterConverter.convert(entity.getCluster(), "{}"));
+        }
         return stackJson;
     }
 

@@ -2,11 +2,6 @@ package com.sequenceiq.cloudbreak.service;
 
 import groovyx.net.http.HttpResponseException;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -15,10 +10,8 @@ import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.controller.json.BlueprintJson;
 import com.sequenceiq.cloudbreak.controller.json.ClusterRequest;
 import com.sequenceiq.cloudbreak.controller.json.ClusterResponse;
-import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.converter.ClusterConverter;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -32,9 +25,6 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 public class AmbariClusterService {
 
     public static final String PORT = "8080";
-
-    @Autowired
-    private JsonHelper jsonHelper;
 
     @Autowired
     private BlueprintRepository blueprintRepository;
@@ -78,60 +68,57 @@ public class AmbariClusterService {
                 throw new InternalServerException(String.format("Cluster response coming from Ambari server was null. [Stack: '%s', Ambari Server IP: '%s']",
                         stackId, stack.getAmbariIp()));
             }
-            return createClusterJsonFromString(clusterJson);
+            return clusterConverter.convert(stack.getCluster(), clusterJson);
         } catch (HttpResponseException e) {
             if ("Not Found".equals(e.getMessage())) {
                 throw new NotFoundException("Ambari blueprint not found.", e);
             } else {
                 throw new InternalServerException("Something went wrong", e);
             }
-        } catch (IOException e) {
-            throw new InternalServerException("Failed to parse cluster json coming from Ambari.", e);
         }
     }
 
-    private ClusterResponse createClusterJsonFromString(String cluster) throws IOException {
-        ClusterResponse clusterResponse = new ClusterResponse();
-        clusterResponse.setCluster(jsonHelper.createJsonFromString(cluster));
-        return clusterResponse;
-    }
-
-    public List<BlueprintJson> retrieveBlueprints(User user, Long stackId) {
-        try {
-            List<BlueprintJson> blueprints = new ArrayList<>();
-            Stack stack = stackRepository.findOne(stackId);
-            AmbariClient ambariClient = new AmbariClient(stack.getAmbariIp(), PORT);
-            Set<String> blueprintNames = ambariClient.getBlueprintsMap().keySet();
-            for (String blueprintName : blueprintNames) {
-                blueprints.add(createBlueprintJsonFromString(ambariClient.getBlueprintAsJson(blueprintName)));
-            }
-            return blueprints;
-        } catch (IOException e) {
-            throw new InternalServerException("Jackson failed to parse blueprint JSON.", e);
-        }
-    }
-
-    public BlueprintJson retrieveBlueprint(User user, Long stackId, String id) {
-        Stack stack = stackRepository.findOne(stackId);
-        AmbariClient ambariClient = new AmbariClient(stack.getAmbariIp(), PORT);
-        try {
-            return createBlueprintJsonFromString(ambariClient.getBlueprintAsJson(id));
-        } catch (HttpResponseException e) {
-            if ("Not Found".equals(e.getMessage())) {
-                throw new NotFoundException("Ambari blueprint not found.", e);
-            } else {
-                throw new InternalServerException("Something went wrong", e);
-            }
-        } catch (IOException e) {
-            throw new InternalServerException("Jackson failed to parse blueprint JSON.", e);
-        }
-    }
-
-    private BlueprintJson createBlueprintJsonFromString(String blueprint) throws IOException {
-        BlueprintJson blueprintJson = new BlueprintJson();
-        blueprintJson.setAmbariBlueprint(jsonHelper.createJsonFromString(blueprint));
-        return blueprintJson;
-    }
+    // public List<BlueprintJson> retrieveBlueprints(User user, Long stackId) {
+    // try {
+    // List<BlueprintJson> blueprints = new ArrayList<>();
+    // Stack stack = stackRepository.findOne(stackId);
+    // AmbariClient ambariClient = new AmbariClient(stack.getAmbariIp(), PORT);
+    // Set<String> blueprintNames = ambariClient.getBlueprintsMap().keySet();
+    // for (String blueprintName : blueprintNames) {
+    // blueprints.add(createBlueprintJsonFromString(ambariClient.getBlueprintAsJson(blueprintName)));
+    // }
+    // return blueprints;
+    // } catch (IOException e) {
+    // throw new
+    // InternalServerException("Jackson failed to parse blueprint JSON.", e);
+    // }
+    // }
+    //
+    // public BlueprintJson retrieveBlueprint(User user, Long stackId, String
+    // id) {
+    // Stack stack = stackRepository.findOne(stackId);
+    // AmbariClient ambariClient = new AmbariClient(stack.getAmbariIp(), PORT);
+    // try {
+    // return
+    // createBlueprintJsonFromString(ambariClient.getBlueprintAsJson(id));
+    // } catch (HttpResponseException e) {
+    // if ("Not Found".equals(e.getMessage())) {
+    // throw new NotFoundException("Ambari blueprint not found.", e);
+    // } else {
+    // throw new InternalServerException("Something went wrong", e);
+    // }
+    // } catch (IOException e) {
+    // throw new
+    // InternalServerException("Jackson failed to parse blueprint JSON.", e);
+    // }
+    // }
+    //
+    // private BlueprintJson createBlueprintJsonFromString(String blueprint)
+    // throws IOException {
+    // BlueprintJson blueprintJson = new BlueprintJson();
+    // blueprintJson.setAmbariBlueprint(jsonHelper.createJsonFromString(blueprint));
+    // return blueprintJson;
+    // }
 
     @Async
     public void startAllService(User user, Long stackId) {
