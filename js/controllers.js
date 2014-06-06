@@ -134,6 +134,21 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 }
             }).success(function (data, status, headers, config) {
                 $scope.stacks = data;
+                for (var i = 0; i < $scope.stacks.length; i++) {
+                  if($scope.stacks[i].status === 'CREATE_COMPLETED') {
+                      $scope.stacks[i].statSign = 'run'
+                  } else if($scope.stacks[i].status === 'CREATE_IN_PROGRESS')  {
+                      $scope.stacks[i].statSign = 'ready'
+                  }  else if($scope.stacks[i].status === 'CREATE_FAILED')  {
+                      $scope.stacks[i].statSign = 'stop'
+                  }  else if($scope.stacks[i].status === 'DELETE_IN_PROGRESS')  {
+                      $scope.stacks[i].statSign = 'ready'
+                  }  else if($scope.stacks[i].status === 'DELETE_COMPLETED')  {
+                      $scope.stacks[i].statSign = 'stop'
+                  } else {
+                      $scope.statusMessage = message.name + ": Something went wrong.";
+                  }
+                }
             }).error(function (data, status, headers, config) {
                 console.log("unsuccess");
             });
@@ -332,6 +347,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     credentialId: $scope.activeCredential.id
                 }
             }).success(function (data, status, headers, config) {
+                $scope.getStacks()
                 deferred.resolve(data.id);
                 cl_clusterSize.value = "";
                 cl_clusterName.value = "";
@@ -587,27 +603,43 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
 
         function logStackInfo(body) {
             if(body.status === 'CREATE_COMPLETED') {
-                $scope.statusMessage = message.name + ": Nodes started, Ambari server is available. Starting cluster installation...";
+                $scope.statusMessage = body.name + ": Nodes started, Ambari server is available. Starting cluster installation...";
+                setStatSign(body.id,'ready')
             } else if(body.status === 'CREATE_IN_PROGRESS')  {
-                $scope.statusMessage = message.name + ": Creating VPC and nodes...";
+                $scope.statusMessage = body.name + ": Creating VPC and nodes...";
+                setStatSign(body.id,'ready')
             }  else if(body.status === 'CREATE_FAILED')  {
-                $scope.statusMessage = message.name + ": Failed to create nodes.";
+                $scope.statusMessage = body.name + ": Failed to create nodes.";
+                setStatSign(body.id,'stop')
             }  else if(body.status === 'DELETE_IN_PROGRESS')  {
-                $scope.statusMessage = message.name + ": Terminating nodes...";
+                $scope.statusMessage = body.name + ": Terminating nodes...";
+                setStatSign(body.id,'ready')
             }  else if(body.status === 'DELETE_COMPLETED')  {
-                $scope.statusMessage = message.name + ": Nodes terminated successfully.";
+                $scope.statusMessage = body.name + ": Nodes terminated successfully.";
+                setStatSign(body.id,'stop')
             } else {
-                $scope.statusMessage = message.name + ": Something went wrong.";
+                $scope.statusMessage = body.name + ": Something went wrong.";
             }
+        }
+
+        function setStatSign(id, statSign){
+          for(var i = 0; i < $scope.stacks.length; i++) {
+            if ($scope.stacks[i].id === id) {
+              $scope.stacks[i].statSign = statSign
+            }
+          }
         }
 
         function logClusterInfo(body) {
             if(body.status === 'CREATE_COMPLETED') {
                 $scope.statusMessage = message.name + ": Hadoop cluster created successfully.";
+                setStatSign(body.id,'run')
             } else if(body.status === 'CREATE_IN_PROGRESS')  {
                 $scope.statusMessage = message.name + "Creating Hadoop cluster with Ambari...";
+                setStatSign(body.id,'ready')
             }  else if(body.status === 'CREATE_FAILED') {
                 $scope.statusMessage = message.name + ": Failed to create Hadoop cluster.";
+                setStatSign(body.id,'stop')
             } else {
                 $scope.statusMessage = message.name + ": Something went wrong.";
             }
