@@ -509,7 +509,8 @@
                                 <label class="col-sm-3 control-label" for="cl_clusterName">Cluster name</label>
 
                                 <div class="col-sm-9">
-                                    <input type="text" class="form-control" id="cl_clusterName" placeholder="max. 20 char">
+                                    <input type="text" class="form-control" id="cl_clusterName" placeholder="max. 20 char" ng-model="cl_clusterName" ng-pattern="/[a-zA-Z]/">
+                                    <div class="alert-danger" ng-show="clusterCreationForm.cl_clusterName.$dirty && clusterCreationForm.cl_clusterName.$invalid">Name has to be match for regex: [a-zA-Z][-a-zA-Z0-9]*</div>
                                 </div>
                                 <!-- .col-sm-9 -->
                             </div>
@@ -1038,13 +1039,14 @@
                         <div id="panel-create-blueprint-collapse" class="panel-collapse panel-under-btn-collapse collapse">
                             <div class="panel-body">
 
-                                <form class="form-horizontal" role="form">
+                                <form class="form-horizontal" role="form" name="blueprintForm">
 
                                     <div class="form-group">
                                         <label class="col-sm-3 control-label" for="blueprintUrl">Source URL</label>
 
                                         <div class="col-sm-9">
-                                            <input type="text" class="form-control" id="blueprintUrl" placeholder="set blueprint URL">
+                                            <input type="url" class="form-control" id="blueprintUrl" ng-model="blueprintUrl" name="blueprintUrl" placeholder="set blueprint URL">
+                                            <div class="alert-danger" ng-show="blueprintForm.blueprintUrl.$dirty && blueprintForm.blueprintUrl.$invalid">Url has to be a valid url</div>
                                         </div>
                                         <!-- .col-sm-9 -->
                                     </div>
