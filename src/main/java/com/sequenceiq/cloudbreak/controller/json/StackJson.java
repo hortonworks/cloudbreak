@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
+import javax.validation.constraints.Digits;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -12,9 +14,11 @@ import com.sequenceiq.cloudbreak.domain.Status;
 public class StackJson implements JsonEntity {
 
     private Long id;
-    @Min(value = 2)
+    @Min(value = 2, message = "Count of nodes has to be min 2")
+    @Digits(fraction = 0, integer = 10, message = "Count of has to be a number")
     private int nodeCount;
-    @Size(max = 20, min = 2)
+    @Size(max = 20, min = 2,  message = "Name has to be min 2 letter maximum 20 length")
+    @Pattern(regexp = "([a-zA-Z][-a-zA-Z0-9]*)", message = "Name has to be match for this regexp: ([a-zA-Z][-a-zA-Z0-9]*)")
     private String name;
     private Long templateId;
     private CloudPlatform cloudPlatform;
