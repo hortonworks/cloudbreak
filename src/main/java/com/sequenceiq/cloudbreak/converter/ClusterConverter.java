@@ -51,6 +51,7 @@ public class ClusterConverter {
             clusterResponse.setHoursUp(0);
             clusterResponse.setMinutesUp(0);
         }
+        clusterResponse.setBlueprintId(cluster.getBlueprint().getId());
         return clusterResponse;
     }
 

@@ -10,6 +10,7 @@ public class ClusterResponse {
     private int hoursUp;
     private int minutesUp;
     private String cluster;
+    private Long blueprintId;
 
     public Long getId() {
         return id;
@@ -52,4 +53,11 @@ public class ClusterResponse {
         this.cluster = node.toString();
     }
 
+    public Long getBlueprintId() {
+        return blueprintId;
+    }
+
+    public void setBlueprintId(Long blueprintId) {
+        this.blueprintId = blueprintId;
+    }
 }
