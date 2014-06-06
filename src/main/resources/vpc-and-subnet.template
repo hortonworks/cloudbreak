@@ -109,6 +109,9 @@
           { "IpProtocol" : "icmp", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : "10.0.0.0/24"} ,
 		  { "IpProtocol" : "tcp", "FromPort" : "0", "ToPort" : "65535", "CidrIp" : "10.0.0.0/24"} ,
 		  { "IpProtocol" : "udp", "FromPort" : "0", "ToPort" : "65535", "CidrIp" : "10.0.0.0/24"} ,
+		  { "IpProtocol" : "icmp", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : "172.17.0.0/16"} ,
+		  { "IpProtocol" : "tcp", "FromPort" : "0", "ToPort" : "65535", "CidrIp" : "172.17.0.0/16"} ,
+		  { "IpProtocol" : "udp", "FromPort" : "0", "ToPort" : "65535", "CidrIp" : "172.17.0.0/16"} ,
           { "IpProtocol" : "tcp", "FromPort" : "22", "ToPort" : "22", "CidrIp" : { "Ref" : "SSHLocation" } } ]
       }
     }
