@@ -63,3 +63,9 @@ CMD=$CMD
 EOF
 
 $CMD
+
+#######################
+# Update POSTROUTING rule created by Docker to support interhost package routing
+#######################
+iptables -t nat -D POSTROUTING 1
+iptables -t nat -A POSTROUTING -s 172.17.1${LAUNCH_IDX}.0/24 ! -d 172.17.0.0/16 -j MASQUERADE
