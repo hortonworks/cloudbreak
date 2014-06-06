@@ -525,14 +525,6 @@
                                 <!-- .col-sm-9 -->
                             </div>
                             <div class="form-group">
-                                <label class="col-sm-3 control-label" for="cl_description">Description</label>
-
-                                <div class="col-sm-9">
-                                    <input type="text" class="form-control" id="cl_description">
-                                </div>
-                                <!-- .col-sm-9 -->
-                            </div>
-                            <div class="form-group">
                                 <label class="col-sm-3 control-label" for="selectTemplate">Template</label>
 
                                 <div class="col-sm-9">
@@ -1383,12 +1375,12 @@
                 </div>
                 <!-- .modal-header -->
                 <div class="modal-body">
-                    <p>Terminate cluster <strong>Cluster_name_20_char</strong> and its stack?</p>
+                    <p>Terminate cluster <strong>{{activeStack.data.name}}</strong> and its stack?</p>
                 </div>
                 <!-- .modal-body -->
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">cancel</button>
-                    <button type="button" class="btn btn-danger">terminate</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal" id="terminateStackBtn" ng-click="deleteStack(activeStack.data.id)">terminate</button>
                 </div>
                 <!-- .modal-footer -->
             </div>

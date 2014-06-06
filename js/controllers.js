@@ -159,7 +159,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 method: 'DELETE',
                 dataType: 'json',
                 withCredentials: true,
-                url:  $rootScope.apiUrl + "/stack" +id,
+                url:  $rootScope.apiUrl + "/stack/" +id,
                 headers: {
                     'Authorization': 'Basic ' + $rootScope.basic_auth,
                     'Content-Type': 'application/json'
