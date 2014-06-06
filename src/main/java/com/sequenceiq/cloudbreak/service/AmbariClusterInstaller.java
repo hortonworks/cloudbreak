@@ -44,7 +44,9 @@ public class AmbariClusterInstaller {
     public void installAmbariCluster(Stack stack) {
         try {
             Cluster cluster = stack.getCluster();
+            LOGGER.info("Trying to install Ambari cluster for stack '{}'", stack.getId());
             if (stack.getCluster() != null && stack.getCluster().getStatus().equals(Status.REQUESTED)) {
+                LOGGER.info("Starting Ambari cluster installation for stack '{}' [Ambari server address: {}]", stack.getId(), stack.getAmbariIp());
                 cluster.setCreationStarted(new Date().getTime());
                 cluster = clusterRepository.save(cluster);
                 Blueprint blueprint = cluster.getBlueprint();
@@ -77,7 +79,9 @@ public class AmbariClusterInstaller {
             }
 
         } catch (HttpResponseException e) {
-            throw new InternalServerException("Failed to create cluster", e);
+            LOGGER.error("HttpResponseException occured while communicating with Ambari server.", e);
+        } catch (Throwable t) {
+            LOGGER.error("Unhandled exception occured while installing Ambari cluster.", t);
         }
     }
 
@@ -86,6 +90,8 @@ public class AmbariClusterInstaller {
         int nodeCount = 0;
         while (nodeCount != stack.getNodeCount()) {
             nodeCount = 0;
+            LOGGER.info("Asking Ambari client to recommend automatic host-hostGroup mapping [Stack: {}, Ambari server address: {}]", stack.getId(),
+                    stack.getAmbariIp());
             stringListMap = ambariClient.recommendAssignments(blueprintName);
             try {
                 Thread.sleep(MILLIS);
@@ -95,6 +101,8 @@ public class AmbariClusterInstaller {
             for (Map.Entry<String, List<String>> s : stringListMap.entrySet()) {
                 nodeCount += s.getValue().size();
             }
+            LOGGER.info("Ambari client found {} hosts while trying to recommend assignments [Stack: {}, Ambari server address: {}]",
+                    stack.getId(), stack.getAmbariIp());
         }
         return stringListMap;
     }
@@ -103,6 +111,7 @@ public class AmbariClusterInstaller {
         AmbariClient ambariClient = new AmbariClient(ambariIp, AmbariClusterService.PORT);
         try {
             ambariClient.addBlueprint(blueprint.getBlueprintText());
+            LOGGER.info("Blueprint added [Ambari server: {}, blueprint: '{}']", ambariIp, blueprint.getId());
         } catch (HttpResponseException e) {
             if ("Conflict".equals(e.getMessage())) {
                 throw new BadRequestException("Ambari blueprint already exists.", e);
