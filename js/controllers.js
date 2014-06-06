@@ -37,7 +37,8 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             $rootScope.activeStack = {
                 credential: null,
                 data: null,
-                template: null
+                template: null,
+                blueprint: null
             };
         }
 
@@ -227,6 +228,25 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             });
         }
 
+        $scope.getBluePrint = function(id) {
+            var deferred = $q.defer();
+            $http({
+                method: 'GET',
+                dataType: 'json',
+                withCredentials: true,
+                url:  $rootScope.apiUrl + "/blueprint/" +id,
+                headers: {
+                    'Authorization': 'Basic ' + $rootScope.basic_auth,
+                    'Content-Type': 'application/json'
+                }
+            }).success(function (data, status, headers, config) {
+                deferred.resolve(data);
+            }).error(function (data, status, headers, config) {
+                return deferred.reject();
+            });
+            return deferred.promise;
+        }
+
         $scope.deleteBluePrint = function(id) {
             $http({
                 method: 'DELETE',
@@ -285,6 +305,9 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     });
                     $scope.getTemplate($scope.stacks[i].templateId).then(function(data){
                         $scope.activeStack.template = data;
+                    });
+                    $scope.getBluePrint($scope.stacks[i].cluster.blueprintId).then(function(data){
+                        $scope.activeStack.blueprint = data;
                     });
                     $scope.activeStack.data = $scope.stacks[i];
                     break;

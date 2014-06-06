@@ -466,12 +466,13 @@
 
                         <div class="panel panel-default">
                             <div class="panel-heading">
-                                <h5><a href="#panel-collapse02" data-toggle="collapse"><i class="fa fa-th fa-fw"></i>Blueprint name</a></h5>
+                                <h5><a href="#panel-collapse02" data-toggle="collapse"><i class="fa fa-th fa-fw"></i>{{activeStack.blueprint.name}}</a></h5>
                             </div>
                             <div id="panel-collapse02" class="panel-collapse collapse">
                                 <div class="panel-body">
-
-
+                                    <pre id="blueprintPanelBody" class="form-control-static blueprint-source">
+{{activeStack.blueprint.ambariBlueprint | json}}
+                                    </pre>
                                 </div>
                             </div>
                         </div>
