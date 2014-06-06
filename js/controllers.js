@@ -512,10 +512,25 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     $scope.getStacks();
                     logClusterInfo(JSON.parse(clusterInfo.body));
                 });
-                stompClient.subscribe('/topic/time', function(timeInfo){
-                    console.log(JSON.parse(timeInfo.body));
+                stompClient.subscribe('/topic/uptime', function(timeInfo){
+                    $scope.updateTimeInfo(timeInfo);
+                    //console.log(JSON.parse(timeInfo.body));
                 });
             });
+        }
+
+        $scope.updateTimeInfo = function(timeInfo) {
+            $scope.getStacks();
+            /*for(var i = 0; i < $scope.stacks.length; i++) {
+                for(var j = 0; j < JSON.parse(timeInfo.body).length; j++) {
+                    if($scope.stacks[i].id === JSON.parse(timeInfo.body)[j].stackId) {
+                        var calc = JSON.parse(timeInfo.body)[j].uptime;
+                        $scope.stacks[i].hoursUp = ((calc / (1000 * 60 * 60)));
+                        $scope.stacks[i].minutesUp =  ((calc / (1000 * 60)) % 60);
+                    }
+                }
+            }*/
+            $scope.$apply();
         }
 
         function disconnect() {
