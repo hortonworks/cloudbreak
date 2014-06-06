@@ -102,7 +102,7 @@ public class AmbariClusterInstaller {
                 nodeCount += s.getValue().size();
             }
             LOGGER.info("Ambari client found {} hosts while trying to recommend assignments [Stack: {}, Ambari server address: {}]",
-                    stack.getId(), stack.getAmbariIp());
+                    nodeCount, stack.getId(), stack.getAmbariIp());
         }
         return stringListMap;
     }
