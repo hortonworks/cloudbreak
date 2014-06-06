@@ -195,4 +195,17 @@ $jq(document).ready(function () {
     });
 
 
+    $jq('.btn-segmented-control a').click(function (e) {
+        var selected = 'btn-info';
+        var active = 'btn-default';
+        var control = $jq(this).parent().parent();
+        e.preventDefault();
+        control.find('a').each(function () {
+            $jq(this).removeClass(selected).addClass(active);
+        });
+        $jq(this).removeClass(active).addClass(selected);
+
+        // do something...
+    });
+
 });
