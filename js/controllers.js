@@ -314,6 +314,8 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 cl_clusterName.value = "";
                 selectTemplate.value = "";
             }).error(function (data, status, headers, config) {
+                $scope.statusMessage = "The creation of stack failed";
+                console.log(data);
                 return deferred.reject();
             });
             return deferred.promise;
@@ -341,7 +343,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     $scope.statusMessage = "Cluster created succesfully.";
                     cl_clusterName.value = "";
                 }).error(function (data, status, headers, config) {
-                    $scope.statusMessage = "The creation of stack failed: " + data;
+                    $scope.statusMessage = "The creation of cluster failed";
                     console.log("unsuccess");
                 });
             }, function(reason) {

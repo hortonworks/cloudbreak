@@ -503,7 +503,7 @@
                     </div>
                     <div class="panel-body">
 
-                        <form class="form-horizontal" role="form">
+                        <form class="form-horizontal" role="form" name="clusterCreationForm">
 
                             <div class="form-group">
                                 <label class="col-sm-3 control-label" for="cl_clusterName">Cluster name</label>
@@ -517,7 +517,8 @@
                                 <label class="col-sm-3 control-label" for="cl_clusterSize">Cluster size</label>
 
                                 <div class="col-sm-9">
-                                    <input type="text" class="form-control" id="cl_clusterSize">
+                                    <input type="number" name="cl_clusterSize" class="form-control" ng-model="cl_clusterSize" id="cl_clusterSize" min="2" max="999" required>
+                                    <div class="alert-danger" ng-show="clusterCreationForm.cl_clusterSize.$dirty && clusterCreationForm.cl_clusterSize.$invalid">Required and has to be a number which is bigger than 2</div>
                                 </div>
                                 <!-- .col-sm-9 -->
                             </div>
