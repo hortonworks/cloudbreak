@@ -169,4 +169,16 @@ $jq(document).ready(function () {
                 $jq(this).fadeTo("slow", 1);
             });
     });
+
+    $jq('#createCluster').on('click', function () {
+
+        // must force isotope redraw, its container height set 0 by by some fucking shite
+        $container.isotope();
+        $jq('.carousel').carousel(0);
+        // enable toolbar buttons
+        $jq('#toggle-cluster-block-btn').removeClass('disabled');
+        $jq('#sort-clusters-btn').removeClass('disabled');
+        $jq('#create-cluster-btn').removeClass('disabled');
+        $jq("#notification-n-filtering").prop("disabled", false);
+    });
 });
