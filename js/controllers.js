@@ -631,16 +631,16 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
 
         function logClusterInfo(body) {
             if(body.status === 'CREATE_COMPLETED') {
-                $scope.statusMessage = message.name + ": Hadoop cluster created successfully.";
+                $scope.statusMessage = body.name + ": Hadoop cluster created successfully.";
                 setStatSign(body.id,'run')
             } else if(body.status === 'CREATE_IN_PROGRESS')  {
-                $scope.statusMessage = message.name + "Creating Hadoop cluster with Ambari...";
+                $scope.statusMessage = body.name + "Creating Hadoop cluster with Ambari...";
                 setStatSign(body.id,'ready')
             }  else if(body.status === 'CREATE_FAILED') {
-                $scope.statusMessage = message.name + ": Failed to create Hadoop cluster.";
+                $scope.statusMessage = body.name + ": Failed to create Hadoop cluster.";
                 setStatSign(body.id,'stop')
             } else {
-                $scope.statusMessage = message.name + ": Something went wrong.";
+                $scope.statusMessage = body.name + ": Something went wrong.";
             }
         }
 
