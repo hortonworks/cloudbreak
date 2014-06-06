@@ -310,7 +310,9 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 }
             }).success(function (data, status, headers, config) {
                 deferred.resolve(data.id);
-
+                cl_clusterSize.value = "";
+                cl_clusterName.value = "";
+                selectTemplate.value = "";
             }).error(function (data, status, headers, config) {
                 return deferred.reject();
             });
@@ -337,6 +339,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 }).success(function (data, status, headers, config) {
                     console.log(data);
                     $scope.statusMessage = "Cluster created succesfully.";
+                    cl_clusterName.value = "";
                 }).error(function (data, status, headers, config) {
                     $scope.statusMessage = "The creation of stack failed: " + data;
                     console.log("unsuccess");
@@ -362,6 +365,8 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 }
             }).success(function (data, status, headers, config) {
                 $scope.statusMessage = "Blueprint "+ data.id + " created succesfully.";
+                blueprintUrl.value = "";
+                bluePrintText.value = "";
                 $scope.getBluePrints()
             }).error(function (data, status, headers, config) {
                 $scope.statusMessage = "The creation of blueprint failed: " + data;
@@ -392,6 +397,9 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             }).success(function (data, status, headers, config) {
                 $scope.statusMessage = "The creation of aws template " + data.id + " was success";
                 $scope.getTemplates();
+                aws_tclusterName.value = "";
+                aws_tkeyName.value = "";
+                aws_tamiId.value = "";
             }).error(function (data, status, headers, config) {
                 $scope.statusMessage = "The creation of aws template was unsuccess: " + data;
             });
@@ -428,6 +436,15 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             }).success(function (data, status, headers, config) {
                 $scope.statusMessage = "The creation of azure template " + data.id + " was success";
                 $scope.getTemplates();
+                azure_tclusterName.value = "";
+                azure_tdescription.value = "";
+                azure_tsubnetAddressPrefix.value = "";
+                azure_taddressPrefix.value = "";
+                azure_tdeploymentSlot.value = "";
+                azure_timageName.value = "";
+                azure_tusername.value = "";
+                azure_tpassword.value = "";
+                azure_tsshString.value = "";
             }).error(function (data, status, headers, config) {
                 $scope.statusMessage = "The creation of azure template was unsuccess: " + data;
             });
@@ -455,6 +472,10 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             }).success(function (data, status, headers, config) {
                 $scope.statusMessage = "The creation of aws credential " + data.id + " was success";
                 $scope.getCredentials();
+                awscname.value = "";
+                tamiId.value = "";
+                croleArn.value = "";
+                cinstanceProfileRoleArn.value = "";
             }).error(function (data, status, headers, config) {
                 $scope.statusMessage = "The creation of aws template was unsuccess: " + data;
                 $scope.isFailedCreation = true;
@@ -481,7 +502,9 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             }).success(function (data, status, headers, config) {
                 $scope.getCredentials();
                 $scope.statusMessage = "The creation of azure credential " + data.id + " was success";
-
+                cname.value = "";
+                csubscriptionId.value = "";
+                cjksPassword.value = "";
             }).error(function (data, status, headers, config) {
                 $scope.statusMessage = "The creation of azure credential was unsuccess: " + data;
             });
