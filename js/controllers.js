@@ -136,13 +136,21 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 $scope.stacks = data;
                 for (var i = 0; i < $scope.stacks.length; i++) {
                   if($scope.stacks[i].status === 'CREATE_COMPLETED') {
+                    if ($scope.stacks[i].cluster.status === 'CREATE_COMPLETED') {
                       $scope.stacks[i].statSign = 'run'
+                    } else if($scope.stacks[i].cluster.status === 'CREATE_IN_PROGRESS')  {
+                        $scope.stacks[i].statSign = 'ready-blink'
+                    } else if($scope.stacks[i].cluster.status === 'CREATE_FAILED')  {
+                      $scope.stacks[i].statSign = 'stop'
+                    } else if($scope.stacks[i].cluster.status === 'REQUESTED')  {
+                      $scope.stacks[i].statSign = 'ready-blink'
+                    }
                   } else if($scope.stacks[i].status === 'CREATE_IN_PROGRESS')  {
-                      $scope.stacks[i].statSign = 'ready'
+                      $scope.stacks[i].statSign = 'ready-blink'
                   }  else if($scope.stacks[i].status === 'CREATE_FAILED')  {
                       $scope.stacks[i].statSign = 'stop'
                   }  else if($scope.stacks[i].status === 'DELETE_IN_PROGRESS')  {
-                      $scope.stacks[i].statSign = 'ready'
+                      $scope.stacks[i].statSign = 'ready-blink'
                   }  else if($scope.stacks[i].status === 'DELETE_COMPLETED')  {
                       $scope.stacks[i].statSign = 'stop'
                   } else {
@@ -603,16 +611,16 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
         function logStackInfo(body) {
             if(body.status === 'CREATE_COMPLETED') {
                 $scope.statusMessage = body.name + ": Nodes started, Ambari server is available. Starting cluster installation...";
-                setStatSign(body.id,'ready')
+                setStatSign(body.id,'ready-blink')
             } else if(body.status === 'CREATE_IN_PROGRESS')  {
                 $scope.statusMessage = body.name + ": Creating VPC and nodes...";
-                setStatSign(body.id,'ready')
+                setStatSign(body.id,'ready-blink')
             }  else if(body.status === 'CREATE_FAILED')  {
                 $scope.statusMessage = body.name + ": Failed to create nodes.";
                 setStatSign(body.id,'stop')
             }  else if(body.status === 'DELETE_IN_PROGRESS')  {
                 $scope.statusMessage = body.name + ": Terminating nodes...";
-                setStatSign(body.id,'ready')
+                setStatSign(body.id,'ready-blink')
             }  else if(body.status === 'DELETE_COMPLETED')  {
                 $scope.statusMessage = body.name + ": Nodes terminated successfully.";
                 setStatSign(body.id,'stop')
@@ -635,7 +643,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 setStatSign(body.id,'run')
             } else if(body.status === 'CREATE_IN_PROGRESS')  {
                 $scope.statusMessage = body.name + "Creating Hadoop cluster with Ambari...";
-                setStatSign(body.id,'ready')
+                setStatSign(body.id,'ready-blink')
             }  else if(body.status === 'CREATE_FAILED') {
                 $scope.statusMessage = body.name + ": Failed to create Hadoop cluster.";
                 setStatSign(body.id,'stop')
