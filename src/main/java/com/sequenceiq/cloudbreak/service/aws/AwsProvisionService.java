@@ -144,7 +144,6 @@ public class AwsProvisionService implements ProvisionService {
             LOGGER.error("Unhandled exception occured while creating stack on AWS.", t);
             createFailed(stack);
         }
-
     }
 
     private void disableSourceDestCheck(AmazonEC2Client amazonEC2Client, List<String> instanceIds) {
@@ -228,7 +227,7 @@ public class AwsProvisionService implements ProvisionService {
 
     private void sleep(int duration) {
         try {
-            Thread.sleep(POLLING_INTERVAL);
+            Thread.sleep(duration);
         } catch (InterruptedException e) {
             LOGGER.info("Interrupted exception occured during polling.", e);
             Thread.currentThread().interrupt();

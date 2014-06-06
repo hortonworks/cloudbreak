@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.converter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.controller.json.ClusterResponse;
 import com.sequenceiq.cloudbreak.controller.json.StackJson;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackDescription;
@@ -35,6 +36,8 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
         stackJson.setAmbariServerIp(entity.getAmbariIp());
         if (entity.getCluster() != null) {
             stackJson.setCluster(clusterConverter.convert(entity.getCluster(), "{}"));
+        } else {
+            stackJson.setCluster(new ClusterResponse());
         }
         return stackJson;
     }
@@ -52,6 +55,8 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
         stackJson.setAmbariServerIp(entity.getAmbariIp());
         if (entity.getCluster() != null) {
             stackJson.setCluster(clusterConverter.convert(entity.getCluster(), "{}"));
+        } else {
+            stackJson.setCluster(new ClusterResponse());
         }
         return stackJson;
     }
