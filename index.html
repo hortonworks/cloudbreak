@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="">
     <meta name="author" content="">
-     <link rel="shortcut icon" href="favicon.ico">
+    <link rel="shortcut icon" href="favicon.ico">
 
     <title>Cloudbreak</title>
     <script src="js/lib/jquery-1.11.0.min.js" type="text/javascript"></script>
@@ -21,10 +21,10 @@
     <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
 
-    <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
     <script src="https://rawgit.com/jmesnil/stomp-websocket/master/lib/stomp.js"></script>
     <script src="http://cdn.sockjs.org/sockjs-0.3.4.min.js"></script>
     <script src="js/lib/retina.min.js" type="text/javascript"></script>
+    <script src="js/lib/log4javascript.js" type="text/javascript"></script>
     <script src="js/lib/angular.js"></script>
     <script src="js/lib/angular-route.js"></script>
     <script src="js/lib/angular-resource.js"></script>
@@ -42,476 +42,494 @@
 </div>-->
 
 <div ng-show="signedIn">
-    <div data-spy="scroll" data-target="#notification-controls">
+<div data-spy="scroll" data-target="#notification-controls">
 
-    <!-- NAVBAR ............................................................... -->
+<!-- NAVBAR ............................................................... -->
 
-    <nav class="navbar navbar-default" role="navigation">
-        <div class="container-fluid">
+<nav class="navbar navbar-default" role="navigation">
+    <div class="container-fluid">
 
-            <div class="navbar-header">
-                            <span class="navbar-brand">
-                                CLOUDBREAK
-                            </span>
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-1">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-            </div>
-            <!-- .navbar-header -->
-
-            <div class="collapse navbar-collapse" id="navbar-collapse-1">
-
-                <ul class="nav navbar-nav navbar-right">
-
-                    <!-- ........ USER DROPDOWN ................................................ -->
-
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                            <i class="fa fa-user fa-fw"></i> {{activeUser}} <b class="caret"></b>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a ng-click="signOut()" data-value="cred-001"><i class="fa fa-sign-out fa-fw"></i> logout</a></li>
-                        </ul>
-                    </li>
-
-                    <!-- ........ CREDENTIALS DROPDOWN ......................................... -->
-
-                    <li class="dropdown" id="menu-credefntial">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                            <i class="fa fa-tag fa-fw"></i> <span class="text-danger">{{activeCredential.name}}</span> <b class="caret"></b>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li  ng-repeat="credential in credentials"><a href="#" id="{{credential.id}}" value="{{credential.name}}" ng-click="changeActiveCredential(credential.id)">{{credential.name}}</a></li>
-                            <li class="divider"></li>
-                            <li><a href="#" class="not-option" data-toggle="collapse" data-target="#panel-credentials-collapse"><i class="fa fa-edit fa-fw"></i>
-                                manage credentials</a></li>
-                        </ul>
-                    </li>
-
-                </ul>
-                <!-- .navbar-nav -->
-
-            </div>
-            <!-- navbar-collapse -->
-
+        <div class="navbar-header">
+                <span class="navbar-brand">
+                    CLOUDBREAK
+                </span>
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-1">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
         </div>
-        <!-- .container -->
-    </nav>
+        <!-- .navbar-header -->
 
+        <div class="collapse navbar-collapse" id="navbar-collapse-1">
 
-    <section class="clusters">
-    <div class="container-fluid carousel slide">
+            <ul class="nav navbar-nav navbar-right">
 
-    <!-- .... CLUSTERS PANEL NOTIFICATION AND CONTROLS BAR ...................... -->
+                <!-- ........ USER DROPDOWN ................................................ -->
 
-    <div class="row notification-controls" id="notification-controls" data-spy="affix" data-offset-top="52"><!-- data-offset-top = @navbar-height -->
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                        <i class="fa fa-user fa-fw"></i> {{activeUser}} <b class="caret"></b>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a ng-click="signOut()" data-value="cred-001"><i class="fa fa-sign-out fa-fw"></i> logout</a></li>
+                    </ul>
+                </li>
 
-        <!-- collapse/open button and notification -->
-        <div class="col-sm-7 col-xs-8 notification has-feedback has-error"><!-- OPTIONAL HTML:
-                                class: 'has-feedback' 'has-error' - cluster stopping or stopped because of error not by stop button (v.02?)
-                                -->
-            <div class="input-group">
-                                    <span class="input-group-btn">
-                                        <a href="#" id="toggle-cluster-block-btn" class="btn btn-fa-2x btn-info" role="button" title="toggle cluster panel"><i
-                                                class="fa fa-angle-up fa-2x fa-fw-forced"></i></a>
-                                    </span>
-                <input id="notification-n-filtering" role="alert" type="text" disabled class="form-control"
-                       value="{{statusMessage}}"><!-- OPTIONAL HTML:
-                                        value: 'time' 'cluster name' 'state' - after cluster state changed
-                                        -->
-                <i class="fa form-control-feedback"></i>
-            </div>
-            <!-- .input-group -->
+                <!-- ........ CREDENTIALS DROPDOWN ......................................... -->
+
+                <li class="dropdown" id="menu-credential">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                        <i class="fa fa-tag fa-fw"></i> <span class="text-danger">{{activeCredential.name}}</span> <b class="caret"></b>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li ng-repeat="credential in credentials"><a href="#" id="{{credential.id}}" value="{{credential.name}}"
+                                                                     ng-click="changeActiveCredential(credential.id)">{{credential.name}}</a></li>
+                        <li class="divider"></li>
+                        <li><a href="#" class="not-option" data-toggle="collapse" data-target="#panel-credentials-collapse"><i class="fa fa-edit fa-fw"></i>
+                            manage credentials</a></li>
+                    </ul>
+                </li>
+            </ul>
+            <!-- .navbar-nav -->
         </div>
-
-        <!-- cluster list controls - sort -->
-        <div class="col-sm-2 col-xs-2">
-            <div class="dropdown">
-                <button class="btn btn-info btn-block btn-collapse-title dropdown-toggle" type="button" id="sort-clusters-btn" data-toggle="dropdown">
-                    <i class="fa fa-sort-amount-asc fa-fw"></i><span class="sr-only">sorted by </span><span class="title"> state</span>
-                    <span class="caret"></span>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                    <li class="dropdown-header">Sort by</li>
-                    <li class="disabled"><a href="#" data-sort-by="state" data-sort-asc="true">state</a></li>
-                    <li><a href="#" data-sort-by="name" data-sort-asc="true">name</a></li>
-                    <li><a href="#" data-sort-by="nodes" data-sort-asc="false">nodes</a></li>
-                    <li><a href="#" data-sort-by="uptime" data-sort-asc="false">uptime</a></li>
-                </ul>
-            </div>
-            <!-- .dropdown -->
-        </div>
-
-        <!-- create cluster button -->
-        <div class="col-sm-3 col-xs-2"><a href="#" id="create-cluster-btn" class="btn btn-success btn-block btn-collapse-title" ng-show="activeCredential.id != -1" role="button"><i
-                class="fa fa-plus fa-fw"></i><span> create cluster</span></a></div>
-
+        <!-- navbar-collapse -->
     </div>
-    <!-- .row .notification-controls -->
+    <!-- .container -->
+</nav>
 
 
-    <div class="carousel-inner">
+<section class="clusters">
+<div class="container-fluid carousel slide">
 
-    <!-- .... CLUSTERS "SLIDE 1" ................................................ -->
+<!-- .... CLUSTERS PANEL NOTIFICATION AND CONTROLS BAR ...................... -->
 
-    <div class="item active"><!-- this slide is active at start -->
+<div class="row" id="clusters-bar" data-spy="affix" data-offset-top="52"><!-- data-offset-top = @navbar-height -->
 
-        <div class="row cluster-block collapse in">
-            <div class="isotope-wrapper">
+    <!-- collapse/open button and notification -->
+    <div class="col-sm-7 col-xs-8 combo-box">
+        <!-- OPTIONAL HTML:
+                            class: 'has-feedback' 'has-error' - cluster stopping or stopped because of error not by stop button (v.02?)
+                            -->
+        <div class="input-group">
+                <span class="input-group-btn">
+                    <a href="#" id="toggle-cluster-block-btn" class="btn btn-fa-2x btn-info" role="button" title="toggle cluster panel"><i
+                            class="fa fa-angle-up fa-2x fa-fw-forced"></i></a>
+                </span>
+            <input id="notification-n-filtering" role="alert" type="text" disabled class="form-control" placeholder="type cluster name"
+                   value="{{statusMessage}}">
+            <!-- OPTIONAL HTML: value: 'time' 'cluster name' 'state' - after cluster state changed  -->
+            <i class="fa fa-warning form-control-feedback hidden"></i>
+        </div>
+        <!-- .input-group -->
+    </div>
 
-                <div class="cluster" id="cluster-{{stack.id}}" data-state="6" ng-repeat="stack in stacks">
-                    <h4><a href="#" class="btn btn-cluster btn-block" role="button" ng-click="changeActiveStack(stack.id)">{{stack.name}}<i class="fa fa-angle-right fa-25x"></i></a></h4>
-                    <dl class="mod-uptime">
-                        <dt>uptime</dt>
-                        <dd class="big-numeral">{{stack.cluster.hoursUp}}<sup>h</sup>{{stack.cluster.minutesUp}}<sup>m</sup></dd>
-                    </dl>
-                    <dl class="mod-nodes">
-                        <dt>nodes</dt>
-                        <dd class="big-numeral">{{stack.nodeCount}}</dd>
-                    </dl>
-                    <div class="stat-{{stack.statSign}}"><span>running</span></div>
-                    <a href="#" class="btn btn-cluster btn-block" role="button" title="stop cluster"><i class="fa fa-pause fa-lg"></i></a>
+    <!-- cluster list controls - sort -->
+    <div class="col-sm-2 col-xs-2">
+        <div class="dropdown">
+            <button class="btn btn-info btn-block btn-collapse-title dropdown-toggle" type="button" id="sort-clusters-btn" data-toggle="dropdown">
+                <i class="fa fa-sort-amount-asc fa-fw"></i><span class="sr-only">sorted by </span><span class="title"> state</span>
+                <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                <li class="dropdown-header">Sort by</li>
+                <li class="disabled"><a href="#" data-sort-by="state" data-sort-asc="true">state</a></li>
+                <li><a href="#" data-sort-by="name" data-sort-asc="true">name</a></li>
+                <li><a href="#" data-sort-by="nodes" data-sort-asc="false">nodes</a></li>
+                <li><a href="#" data-sort-by="uptime" data-sort-asc="false">uptime</a></li>
+            </ul>
+        </div>
+        <!-- .dropdown -->
+    </div>
+
+    <!-- create cluster button -->
+    <div class="col-sm-3 col-xs-2">
+        <a href="#" id="create-cluster-btn" ng-disabled="activeCredential.id == -1" class="btn btn-success btn-block btn-collapse-title" role="button">
+            <i class="fa fa-plus fa-fw"></i>
+            <span> create cluster</span>
+        </a>
+    </div>
+
+</div>
+<!-- .row .notification-controls -->
+
+
+<div class="carousel-inner">
+
+<!-- .... CLUSTERS "SLIDE 1" ................................................ -->
+
+<div class="item active"><!-- this slide is active at start -->
+
+    <div class="row cluster-block collapse in">
+        <div class="isotope-wrapper">
+
+            <div class="cluster" id="cluster-{{stack.id}}" ng-repeat="stack in stacks">
+                <h4><a href="#" class="btn btn-cluster btn-block" role="button" ng-click="changeActiveStack(stack.id)">{{stack.name}}<i
+                        class="fa fa-angle-right fa-25x"></i></a></h4>
+                <dl class="mod-uptime">
+                    <dt>uptime</dt>
+                    <dd class="big-numeral">{{stack.cluster.hoursUp}}<sup>h</sup>{{stack.cluster.minutesUp}}<sup>m</sup></dd>
+                </dl>
+                <dl class="mod-nodes">
+                    <dt>nodes</dt>
+                    <dd class="big-numeral">{{stack.nodeCount}}</dd>
+                </dl>
+                <!--TODO-->
+                <div class="mod-LED">
+                    <span ng-class="getLedStyle(stack.status)">running</span>
+                </div>
+                <a href="#" class="mod-start-stop btn btn-cluster btn-block" role="button" title="stop cluster"><i class="fa fa-pause fa-lg"></i></a>
+            </div>
+
+        </div>
+        <!-- .isotope-wrapper -->
+    </div>
+    <!-- .cluster-block -->
+
+</div>
+<!-- .item -->
+
+<!-- .... CLUSTER DETAILS "SLIDE 2" ......................................... -->
+
+<div class="item">
+
+<div class="row cluster-details">
+<div class="col-sm-11 col-md-9 col-lg-9">
+
+<div class="panel panel-default">
+<div class="panel-heading panel-heading-nav">
+    <a href="#" id="cluster-details-back-btn" class="btn btn-info btn-fa-2x" role="button"><i class="fa fa-angle-left fa-2x fa-fw-forced"></i></a>
+    <h4>{{activeStack.data.name}}</h4>
+</div>
+<div id="cluster-details-panel-collapse">
+<div class="panel-body">
+
+<p class="text-right">
+    <a href="#" class="btn btn-info" role="button"><i class="fa fa-pause fa-fw"></i><span> stop</span></a>
+    <a href="#" id="terminate-btn" class="btn btn-danger" role="button" data-toggle="modal" data-target="#modal-terminate"><i
+            class="fa fa-times fa-fw"></i><span> terminate</span></a>
+</p>
+
+<form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
+
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="sl_ambariServerIp">Ambari server adress</label>
+
+        <div class="col-sm-9">
+            <p id="sl_ambariServerIp" class="form-control-static">{{activeStack.data.ambariServerIp}}</p>
+        </div>
+        <!-- .col-sm-9 -->
+    </div>
+    <!-- .form-group -->
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="sl_cloudPlatform">Cloud platform</label>
+
+        <div class="col-sm-9">
+            <p id="sl_cloudPlatform" class="form-control-static">{{activeStack.data.cloudPlatform}}</p>
+        </div>
+        <!-- .col-sm-9 -->
+    </div>
+    <!-- .form-group -->
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="sl_description">Description</label>
+
+        <div class="col-sm-9">
+            <pre id="sl_description" class="form-control-static">{{activeStack.data.description | json}}</pre>
+        </div>
+        <!-- .col-sm-9 -->
+    </div>
+    <!-- .form-group -->
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="sl_id">ID</label>
+
+        <div class="col-sm-9">
+            <p id="sl_id" class="form-control-static">{{activeStack.data.id}}</p>
+        </div>
+        <!-- .col-sm-9 -->
+    </div>
+    <!-- .form-group -->
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="sl_name">Name</label>
+
+        <div class="col-sm-9">
+            <p id="sl_name" class="form-control-static">{{activeStack.data.name}}</p>
+        </div>
+        <!-- .col-sm-9 -->
+    </div>
+    <!-- .form-group -->
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="sl_nodeCount">Number of nodes</label>
+
+        <div class="col-sm-9">
+            <p id="sl_nodeCount" class="form-control-static">{{activeStack.data.nodeCount}}</p>
+        </div>
+        <!-- .col-sm-9 -->
+    </div>
+
+
+</form>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h5><a href="#panel-collapse01" data-toggle="collapse"><i class="fa fa-file-o fa-fw"></i>{{activeStack.template.name}}</a></h5>
+    </div>
+    <div id="panel-collapse01" class="panel-collapse collapse">
+        <div class="panel-body" ng-if="activeStack.template.cloudPlatform == 'AZURE' ">
+
+            <form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label" for="clusterName">name</label>
+
+                    <div class="col-sm-9">
+                        <p id="clusterName" class="form-control-static">{{activeStack.template.name}}</p>
+                    </div>
+                    <!-- .col-sm-9 -->
+                </div>
+                <!-- .form-group -->
+                <div class="form-group">
+                    <label class="col-sm-3 control-label" for="password">Password</label>
+
+                    <div class="col-sm-9">
+                        <p id="password" class="form-control-static">{{activeStack.template.parameters.password}}</p>
+                    </div>
+                    <!-- .col-sm-9 -->
+                </div>
+                <!-- .form-group -->
+                <div class="form-group">
+                    <label class="col-sm-3 control-label" for="deploymentSlot">Deployment slot</label>
+
+                    <div class="col-sm-9">
+                        <p id="deploymentSlot" class="form-control-static">{{activeStack.template.parameters.deploymentSlot}}</p>
+                    </div>
+                    <!-- .col-sm-9 -->
+                </div>
+                <!-- .form-group -->
+                <div class="form-group">
+                    <label class="col-sm-3 control-label" for="username">Username</label>
+
+                    <div class="col-sm-9">
+                        <p id="username" class="form-control-static">{{activeStack.template.parameters.username}}</p>
+                    </div>
+                    <!-- .col-sm-9 -->
+                </div>
+                <!-- .form-group -->
+                <div class="form-group">
+                    <label class="col-sm-3 control-label" for="subnetAddressPrefix">Subnet address prefix</label>
+
+                    <div class="col-sm-9">
+                        <p id="subnetAddressPrefix" class="form-control-static">{{activeStack.template.parameters.subnetAddressPrefix}}</p>
+                    </div>
+                    <!-- .col-sm-9 -->
+                </div>
+                <!-- .form-group -->
+                <div class="form-group">
+                    <label class="col-sm-3 control-label" for="addressPrefix">Address prefix</label>
+
+                    <div class="col-sm-9">
+                        <p id="addressPrefix" class="form-control-static">{{activeStack.template.parameters.addressPrefix}}</p>
+                    </div>
+                    <!-- .col-sm-9 -->
+                </div>
+                <!-- .form-group -->
+                <div class="form-group">
+                    <label class="col-sm-3 control-label" for="vmType">VM type</label>
+
+                    <div class="col-sm-9">
+                        <p id="vmType" class="form-control-static">{{activeStack.template.parameters.vmType}}</p>
+                    </div>
+                    <!-- .col-sm-9 -->
+                </div>
+                <!-- .form-group -->
+                <div class="form-group">
+                    <label class="col-sm-3 control-label" for="imageName">Image name</label>
+
+                    <div class="col-sm-9">
+                        <p id="imageName" class="form-control-static">{{activeStack.template.parameters.imageName}}</p>
+                    </div>
+                    <!-- .col-sm-9 -->
+                </div>
+                <!-- .form-group -->
+                <div class="form-group">
+                    <label class="col-sm-3 control-label" for="location">Location</label>
+
+                    <div class="col-sm-9">
+                        <p id="location" class="form-control-static">{{activeStack.template.parameters.location}}</p>
+                    </div>
+                    <!-- .col-sm-9 -->
+                </div>
+                <!-- .form-group -->
+                <div class="form-group">
+                    <label class="col-sm-3 control-label" for="description">Description</label>
+
+                    <div class="col-sm-9">
+                        <p id="description" class="form-control-static">{{activeStack.template.parameters.description | json}}</p>
+                    </div>
+                    <!-- .col-sm-9 -->
+                </div>
+            </form>
+        </div>
+
+        <div class="panel-body" ng-if="activeStack.template.cloudPlatform == 'AWS' ">
+            <form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
+                <div class="form-group">
+                    <label class="col-sm-3 control-label" for="awsclusterName">Name</label>
+
+                    <div class="col-sm-9">
+                        <p id="awsclusterName" class="form-control-static">{{activeStack.template.name}}</p>
+                    </div>
+                    <!-- .col-sm-9 -->
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label" for="awsamiId">AMI</label>
+
+                    <div class="col-sm-9">
+                        <p id="awsamiId" class="form-control-static">{{activeStack.template.parameters.amiId}}</p>
+                    </div>
+                    <!-- .col-sm-9 -->
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label" for="awssshLocation">SSH location</label>
+
+                    <div class="col-sm-9">
+                        <p id="awssshLocation" class="form-control-static">{{activeStack.template.parameters.sshLocation}}</p>
+                    </div>
+                    <!-- .col-sm-9 -->
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label" for="awskeyName">keyName</label>
+
+                    <div class="col-sm-9">
+                        <p id="awskeyName" class="form-control-static">{{activeStack.template.parameters.keyName}}</p>
+                    </div>
+                    <!-- .col-sm-9 -->
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label" for="awsregion">Region</label>
+
+                    <div class="col-sm-9">
+                        <p id="awsregion" class="form-control-static">{{activeStack.template.parameters.region}}</p>
+                    </div>
+                    <!-- .col-sm-9 -->
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label" for="awsinstanceType">Instance type</label>
+
+                    <div class="col-sm-9">
+                        <p id="awsinstanceType" class="form-control-static">{{activeStack.template.parameters.instanceType}}</p>
+                    </div>
+                    <!-- .col-sm-9 -->
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- .panel -->
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4>{{activeStack.credential.name}}</h4>
+        </div>
+        <div class="panel-body">
+
+            <form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label" for="cred_id">ID</label>
+
+                    <div class="col-sm-9">
+                        <p id="cred_id" class="form-control-static">{{activeStack.credential.id}}</p>
+                    </div>
+                    <!-- .col-sm-9 -->
+                </div>
+                <!-- .form-group -->
+                <div class="form-group">
+                    <label class="col-sm-3 control-label" for="cred_name">Name</label>
+
+                    <div class="col-sm-9">
+                        <p id="cred_name" class="form-control-static">{{activeStack.credential.name}}</p>
+                    </div>
+                    <!-- .col-sm-9 -->
+                </div>
+                <!-- .form-group -->
+                <div class="form-group">
+                    <label class="col-sm-3 control-label" for="cred_cloudPlatform">Cloud platform</label>
+
+                    <div class="col-sm-9">
+                        <p id="cred_cloudPlatform" class="form-control-static">{{activeStack.credential.cloudPlatform}}</p>
+                    </div>
+                    <!-- .col-sm-9 -->
                 </div>
 
-            </div>
-            <!-- .isotope-wrapper -->
+
+            </form>
+
+
+            <!-- .panel -->
+
         </div>
-        <!-- .cluster-block -->
-
     </div>
-    <!-- .item -->
-
-    <!-- .... CLUSTER DETAILS "SLIDE 2" ......................................... -->
-
-    <div class="item">
-
-        <div class="row cluster-details">
-            <div class="col-sm-11 col-md-9 col-lg-9">
-
-                <div class="panel panel-default panel-docking">
-                    <div class="panel-heading panel-heading-nav">
-                        <a href="#" id="cluster-details-back-btn" class="btn btn-info btn-fa-2x" role="button"><i
-                                class="fa fa-angle-left fa-2x fa-fw-forced"></i></a>
-                        <h4>{{activeStack.data.name}}</h4>
-                    </div>
-
-                    <div class="panel-body">
-
-                        <p class="text-right">
-                            <a href="#" class="btn btn-info" role="button"><i class="fa fa-pause fa-fw"></i><span> stop</span></a>
-                            <a href="#" id="terminate-btn" class="btn btn-danger" role="button" data-toggle="modal" data-target="#modal01"><i
-                                    class="fa fa-times fa-fw"></i><span> terminate</span></a>
-                        </p>
-
-                        <form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
-
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label" for="sl_ambariServerIp">Ambari server adress</label>
-
-                                <div class="col-sm-9">
-                                    <p id="sl_ambariServerIp" class="form-control-static">{{activeStack.data.ambariServerIp}}</p>
-                                </div>
-                                <!-- .col-sm-9 -->
-                            </div>
-                            <!-- .form-group -->
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label" for="sl_cloudPlatform">Cloud platform</label>
-
-                                <div class="col-sm-9">
-                                    <p id="sl_cloudPlatform" class="form-control-static">{{activeStack.data.cloudPlatform}}</p>
-                                </div>
-                                <!-- .col-sm-9 -->
-                            </div>
-                            <!-- .form-group -->
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label" for="sl_description">Description</label>
-
-                                <div class="col-sm-9">
-                                    <pre id="sl_description" class="form-control-static">{{activeStack.data.description | json}}</pre>
-                                </div>
-                                <!-- .col-sm-9 -->
-                            </div>
-                            <!-- .form-group -->
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label" for="sl_id">ID</label>
-
-                                <div class="col-sm-9">
-                                    <p id="sl_id" class="form-control-static">{{activeStack.data.id}}</p>
-                                </div>
-                                <!-- .col-sm-9 -->
-                            </div>
-                            <!-- .form-group -->
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label" for="sl_name">Name</label>
-
-                                <div class="col-sm-9">
-                                    <p id="sl_name" class="form-control-static">{{activeStack.data.name}}</p>
-                                </div>
-                                <!-- .col-sm-9 -->
-                            </div>
-                            <!-- .form-group -->
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label" for="sl_nodeCount">Number of nodes</label>
-
-                                <div class="col-sm-9">
-                                    <p id="sl_nodeCount" class="form-control-static">{{activeStack.data.nodeCount}}</p>
-                                </div>
-                                <!-- .col-sm-9 -->
-                            </div>
+    <!-- .panel -->
 
 
-                        </form>
-
-                        <div class="panel panel-default">
-                            <div class="panel-heading">
-                                <h5><a href="#panel-collapse01" data-toggle="collapse"><i class="fa fa-file-o fa-fw"></i>{{activeStack.template.name}}</a></h5>
-                            </div>
-                            <div id="panel-collapse01" class="panel-collapse collapse">
-                                <div class="panel-body" ng-if="activeStack.template.cloudPlatform == 'AZURE' ">
-
-                                    <form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
-
-                                        <div class="form-group">
-                                            <label class="col-sm-3 control-label" for="clusterName">name</label>
-
-                                            <div class="col-sm-9">
-                                                <p id="clusterName" class="form-control-static">{{activeStack.template.name}}</p>
-                                            </div>
-                                            <!-- .col-sm-9 -->
-                                        </div>
-                                        <!-- .form-group -->
-                                        <div class="form-group">
-                                            <label class="col-sm-3 control-label" for="password">Password</label>
-
-                                            <div class="col-sm-9">
-                                                <p id="password" class="form-control-static">{{activeStack.template.parameters.password}}</p>
-                                            </div>
-                                            <!-- .col-sm-9 -->
-                                        </div>
-                                        <!-- .form-group -->
-                                        <div class="form-group">
-                                            <label class="col-sm-3 control-label" for="deploymentSlot">Deployment slot</label>
-
-                                            <div class="col-sm-9">
-                                                <p id="deploymentSlot" class="form-control-static">{{activeStack.template.parameters.deploymentSlot}}</p>
-                                            </div>
-                                            <!-- .col-sm-9 -->
-                                        </div>
-                                        <!-- .form-group -->
-                                        <div class="form-group">
-                                            <label class="col-sm-3 control-label" for="username">Username</label>
-
-                                            <div class="col-sm-9">
-                                                <p id="username" class="form-control-static">{{activeStack.template.parameters.username}}</p>
-                                            </div>
-                                            <!-- .col-sm-9 -->
-                                        </div>
-                                        <!-- .form-group -->
-                                        <div class="form-group">
-                                            <label class="col-sm-3 control-label" for="subnetAddressPrefix">Subnet address prefix</label>
-
-                                            <div class="col-sm-9">
-                                                <p id="subnetAddressPrefix" class="form-control-static">{{activeStack.template.parameters.subnetAddressPrefix}}</p>
-                                            </div>
-                                            <!-- .col-sm-9 -->
-                                        </div>
-                                        <!-- .form-group -->
-                                        <div class="form-group">
-                                            <label class="col-sm-3 control-label" for="addressPrefix">Address prefix</label>
-
-                                            <div class="col-sm-9">
-                                                <p id="addressPrefix" class="form-control-static">{{activeStack.template.parameters.addressPrefix}}</p>
-                                            </div>
-                                            <!-- .col-sm-9 -->
-                                        </div>
-                                        <!-- .form-group -->
-                                        <div class="form-group">
-                                            <label class="col-sm-3 control-label" for="vmType">VM type</label>
-
-                                            <div class="col-sm-9">
-                                                <p id="vmType" class="form-control-static">{{activeStack.template.parameters.vmType}}</p>
-                                            </div>
-                                            <!-- .col-sm-9 -->
-                                        </div>
-                                        <!-- .form-group -->
-                                        <div class="form-group">
-                                            <label class="col-sm-3 control-label" for="imageName">Image name</label>
-
-                                            <div class="col-sm-9">
-                                                <p id="imageName" class="form-control-static">{{activeStack.template.parameters.imageName}}</p>
-                                            </div>
-                                            <!-- .col-sm-9 -->
-                                        </div>
-                                        <!-- .form-group -->
-                                        <div class="form-group">
-                                            <label class="col-sm-3 control-label" for="location">Location</label>
-
-                                            <div class="col-sm-9">
-                                                <p id="location" class="form-control-static">{{activeStack.template.parameters.location}}</p>
-                                            </div>
-                                            <!-- .col-sm-9 -->
-                                        </div>
-                                        <!-- .form-group -->
-                                        <div class="form-group">
-                                            <label class="col-sm-3 control-label" for="description">Description</label>
-
-                                            <div class="col-sm-9">
-                                                <p id="description" class="form-control-static">{{activeStack.template.parameters.description | json}}</p>
-                                            </div>
-                                            <!-- .col-sm-9 -->
-                                        </div>
-                                    </form>
-                                </div>
-
-                                <div class="panel-body"  ng-if="activeStack.template.cloudPlatform == 'AWS' ">
-                                    <form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
-                                        <div class="form-group">
-                                            <label class="col-sm-3 control-label" for="awsclusterName">Name</label>
-
-                                            <div class="col-sm-9">
-                                                <p id="awsclusterName" class="form-control-static">{{activeStack.template.name}}</p>
-                                            </div>
-                                            <!-- .col-sm-9 -->
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="col-sm-3 control-label" for="awsamiId">AMI</label>
-
-                                            <div class="col-sm-9">
-                                                <p id="awsamiId" class="form-control-static">{{activeStack.template.parameters.amiId}}</p>
-                                            </div>
-                                            <!-- .col-sm-9 -->
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="col-sm-3 control-label" for="awssshLocation">SSH location</label>
-
-                                            <div class="col-sm-9">
-                                                <p id="awssshLocation" class="form-control-static">{{activeStack.template.parameters.sshLocation}}</p>
-                                            </div>
-                                            <!-- .col-sm-9 -->
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="col-sm-3 control-label" for="awskeyName">keyName</label>
-
-                                            <div class="col-sm-9">
-                                                <p id="awskeyName" class="form-control-static">{{activeStack.template.parameters.keyName}}</p>
-                                            </div>
-                                            <!-- .col-sm-9 -->
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="col-sm-3 control-label" for="awsregion">Region</label>
-
-                                            <div class="col-sm-9">
-                                                <p id="awsregion" class="form-control-static">{{activeStack.template.parameters.region}}</p>
-                                            </div>
-                                            <!-- .col-sm-9 -->
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="col-sm-3 control-label" for="awsinstanceType">Instance type</label>
-
-                                            <div class="col-sm-9">
-                                                <p id="awsinstanceType" class="form-control-static">{{activeStack.template.parameters.instanceType}}</p>
-                                            </div>
-                                            <!-- .col-sm-9 -->
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- .panel -->
-
-                    </div>
-                </div>
-                <!-- .panel -->
-
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h4>{{activeStack.credential.name}}</h4>
-                    </div>
-                    <div class="panel-body">
-
-                        <form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
-
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label" for="cred_id">ID</label>
-
-                                <div class="col-sm-9">
-                                    <p id="cred_id" class="form-control-static">{{activeStack.credential.id}}</p>
-                                </div>
-                                <!-- .col-sm-9 -->
-                            </div>
-                            <!-- .form-group -->
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label" for="cred_name">Name</label>
-
-                                <div class="col-sm-9">
-                                    <p id="cred_name" class="form-control-static">{{activeStack.credential.name}}</p>
-                                </div>
-                                <!-- .col-sm-9 -->
-                            </div>
-                            <!-- .form-group -->
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label" for="cred_cloudPlatform">Cloud platform</label>
-
-                                <div class="col-sm-9">
-                                    <p id="cred_cloudPlatform" class="form-control-static">{{activeStack.credential.cloudPlatform}}</p>
-                                </div>
-                                <!-- .col-sm-9 -->
-                            </div>
-
-
-                        </form>
-
-                        <div class="panel panel-default">
-                            <div class="panel-heading">
-                                <h5><a href="#panel-collapse02" data-toggle="collapse"><i class="fa fa-th fa-fw"></i>{{activeStack.blueprint.name}}</a></h5>
-                            </div>
-                            <div id="panel-collapse02" class="panel-collapse collapse">
-                                <div class="panel-body">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h5><a href="#panel-collapse02" data-toggle="collapse"><i class="fa fa-th fa-fw"></i>{{activeStack.blueprint.name}}</a></h5>
+        </div>
+        <div id="panel-collapse02" class="panel-collapse collapse">
+            <div class="panel-body">
                                     <pre id="blueprintPanelBody" class="form-control-static blueprint-source">
 {{activeStack.blueprint.ambariBlueprint | json}}
                                     </pre>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- .panel -->
-
-                    </div>
-                </div>
-                <!-- .panel -->
-
             </div>
         </div>
-        <!-- .cluster-details -->
-
     </div>
-    <!-- .item -->
 
-    <!-- .... CREATE CLUSTER "SLIDE 3" .......................................... -->
+</div>
+</div>
 
-    <div class="item">
+</div>
 
-        <div class="row create-cluster">
-            <div class="col-sm-11 col-md-9 col-lg-9">
+<!-- .upper panel end -->
 
-                <div class="panel panel-default">
-                    <div class="panel-heading panel-heading-nav">
-                        <a href="#" id="create-cluster-back-btn" class="btn btn-info btn-fa-2x" role="button"><i
-                                class="fa fa-angle-left fa-2x fa-fw-forced"></i></a>
-                        <h4>Create cluster</h4>
-                    </div>
+
+
+</div>
+</div>
+<!-- .cluster-details -->
+
+</div>
+<!-- .item -->
+
+<!-- .... CREATE CLUSTER "SLIDE 3" .......................................... -->
+
+<div class="item">
+
+    <div class="row create-cluster">
+        <div class="col-sm-11 col-md-9 col-lg-9">
+
+            <div class="panel panel-default">
+                <div class="panel-heading panel-heading-nav">
+                    <a href="#" id="create-cluster-back-btn" class="btn btn-info btn-fa-2x" role="button"><i
+                            class="fa fa-angle-left fa-2x fa-fw-forced"></i></a>
+                    <h4>Create cluster</h4>
+                </div>
+                <div id="create-cluster-panel-collapse" class="panel panel-default">
                     <div class="panel-body">
-
                         <form class="form-horizontal" role="form" name="clusterCreationForm">
 
                             <div class="form-group">
                                 <label class="col-sm-3 control-label" for="cl_clusterName">Cluster name</label>
 
                                 <div class="col-sm-9">
-                                    <input type="text" class="form-control" id="cl_clusterName" placeholder="max. 20 char" ng-model="cl_clusterName" ng-pattern="/[a-zA-Z]/">
-                                    <div class="alert-danger" ng-show="clusterCreationForm.cl_clusterName.$dirty && clusterCreationForm.cl_clusterName.$invalid">Name has to be match for regex: [a-zA-Z][-a-zA-Z0-9]*</div>
+                                    <input type="text" class="form-control" id="cl_clusterName" placeholder="max. 20 char" ng-model="cl_clusterName"
+                                           ng-pattern="/[a-zA-Z]/">
+
+                                    <div class="alert-danger"
+                                         ng-show="clusterCreationForm.cl_clusterName.$dirty && clusterCreationForm.cl_clusterName.$invalid">Name has to be match
+                                        for regex: [a-zA-Z][-a-zA-Z0-9]*
+                                    </div>
                                 </div>
                                 <!-- .col-sm-9 -->
                             </div>
@@ -519,8 +537,13 @@
                                 <label class="col-sm-3 control-label" for="cl_clusterSize">Cluster size</label>
 
                                 <div class="col-sm-9">
-                                    <input type="number" name="cl_clusterSize" class="form-control" ng-model="cl_clusterSize" id="cl_clusterSize" min="2" max="999" required>
-                                    <div class="alert-danger" ng-show="clusterCreationForm.cl_clusterSize.$dirty && clusterCreationForm.cl_clusterSize.$invalid">Required and has to be a number which is bigger than 2</div>
+                                    <input type="number" name="cl_clusterSize" class="form-control" ng-model="cl_clusterSize" id="cl_clusterSize" min="2"
+                                           max="999" required>
+
+                                    <div class="alert-danger"
+                                         ng-show="clusterCreationForm.cl_clusterSize.$dirty && clusterCreationForm.cl_clusterSize.$invalid">Required and has to
+                                        be a number which is bigger than 2
+                                    </div>
                                 </div>
                                 <!-- .col-sm-9 -->
                             </div>
@@ -529,7 +552,9 @@
 
                                 <div class="col-sm-9">
                                     <select class="form-control" id="selectTemplate">
-                                        <option ng-repeat="template in templates" data-value="{{template.id}}" value="{{template.id}}" id="{{template.id}}" ng-if="template.cloudPlatform == activeCredential.cloudPlatform">{{template.name}}</option>
+                                        <option ng-repeat="template in templates" data-value="{{template.id}}" value="{{template.id}}" id="{{template.id}}"
+                                                ng-if="template.cloudPlatform == activeCredential.cloudPlatform">{{template.name}}
+                                        </option>
                                     </select>
                                 </div>
                                 <!-- .col-sm-9 -->
@@ -540,7 +565,9 @@
 
                                 <div class="col-sm-9">
                                     <select class="form-control" id="selectBlueprint">
-                                        <option  ng-repeat="blueprint in blueprints" data-value="{{blueprint.id}}" value="{{blueprint.id}}" id="{{blueprint.id}}">{{blueprint.name}}</option>
+                                        <option ng-repeat="blueprint in blueprints" data-value="{{blueprint.id}}" value="{{blueprint.id}}"
+                                                id="{{blueprint.id}}">{{blueprint.name}}
+                                        </option>
                                     </select>
                                 </div>
                                 <!-- .col-sm-9 -->
@@ -549,519 +576,571 @@
 
                             <div class="row btn-row">
                                 <div class="col-sm-9 col-sm-offset-3">
-                                    <a href="#" id="createCluster" class="btn btn-success btn-block" role="button" ng-click="createStack()"><i class="fa fa-plus fa-fw"></i>create and start
+                                    <a href="#" id="createCluster" class="btn btn-success btn-block" role="button" ng-click="createStack()"><i
+                                            class="fa fa-plus fa-fw"></i>create and start
                                         cluster</a>
                                 </div>
                             </div>
 
                         </form>
+                    </div>
+                </div>
+            </div>
+            <!-- .panel -->
+        </div>
+    </div>
+    <!-- .create-cluster -->
 
+</div>
+<!-- .item -->
+
+</div>
+<!-- .carousel-inner -->
+
+
+</div>
+<!-- .container-fluid carousel -->
+</section>
+
+
+<section class="management-panels">
+<div class="container-fluid">
+<div class="row">
+
+<!-- .... TEMPLATES PANEL ................................................. -->
+
+<div class="col-md-12 col-lg-6">
+
+<div class="panel panel-default">
+<div class="panel-heading panel-heading-nav">
+    <a href="#panel-templates-collapse" id="templates-btn" class="btn btn-info btn-fa-2x" role="button" data-toggle="collapse"
+       data-target="#panel-templates-collapse"><i class="fa fa-angle-down fa-2x fa-fw-forced"></i></a>
+    <h4><span class="badge pull-right">{{templates.length}}</span> manage templates</h4>
+</div>
+
+<div id="panel-templates-collapse" class="panel-collapse panel-btn-in-header-collapse collapse">
+<div class="panel-body">
+
+<p class="btn-row-over-panel"><a href="#panel-create-template-collapse" class="btn btn-success" role="button" data-toggle="collapse"
+                                 data-target="#panel-create-template-collapse"><i class="fa fa-plus fa-fw"></i><span> create template</span></a></p>
+
+<!-- ............ CREATE FORM ............................................. -->
+
+<div class="panel panel-default">
+<div id="panel-create-template-collapse" class="panel-collapse panel-under-btn-collapse collapse">
+<div class="panel-body">
+<div class="row " style="padding-bottom: 10px">
+    <div class="btn-segmented-control" id="providerSelector2">
+        <div class="btn-group btn-group-justified">
+            <a id="awsTemplateChange" type="button" class="btn btn-info" role="button" ng-click="createAwsTemplateRequest()">Aws</a>
+
+            <a id="azureTemplateChange" class="btn btn-default" role="button" ng-click="createAzureTemplateRequest()">Azure</a>
+
+        </div>
+    </div>
+</div>
+<form class="form-horizontal" role="form" ng-show="azureTemplate">
+
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="azure_tclusterName">Cluster name</label>
+
+        <div class="col-sm-9">
+            <input type="text" class="form-control" id="azure_tclusterName" placeholder="max. 20 char">
+        </div>
+        <!-- .col-sm-9 -->
+
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="azure_tdescription">Description</label>
+
+        <div class="col-sm-9">
+            <input type="text" class="form-control" id="azure_tdescription" placeholder="max. 20 char">
+        </div>
+        <!-- .col-sm-9 -->
+
+    </div>
+
+    <div class="form-group">
+        <div class="form-group">
+            <label class="col-sm-3 control-label" for="azure_tlocation">Location</label>
+
+            <div class="col-sm-9">
+                <select class="form-control" id="azure_tlocation">
+                    <option value="EAST_ASIA">East Asia</option>
+                    <option value="SOUTHEAST_ASIA">Southeast Asia</option>
+                    <option value="NORTH_EUROPE">North Europe</option>
+                    <option value="EAST_US">East US</option>
+                    <option value="WEST_US">West US</option>
+                    <option value="JAPAN_EAST">Japan East</option>
+                    <option value="JAPAN_WEST">Japan West</option>
+                    <option value="BRAZIL_SOUTH">Brazil South</option>
+                </select>
+            </div>
+            <!-- .col-sm-9 -->
+        </div>
+
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="azure_timageName">Image name</label>
+
+        <div class="col-sm-9">
+            <input type="text" class="form-control" id="azure_timageName">
+        </div>
+        <!-- .col-sm-9 -->
+
+    </div>
+    <div class="form-group">
+        <div class="form-group">
+            <label class="col-sm-3 control-label" for="azure_tvmType">Location</label>
+
+            <div class="col-sm-9">
+                <select class="form-control" id="azure_tvmType">
+                    <option value="EXTRA_SMALL">Extra Small</option>
+                    <option value="SMALL">Small</option>
+                    <option value="MEDIUM">Medium</option>
+                    <option value="LARGE">Large</option>
+                    <option value="EXTRA_LARGE">Extra Large</option>
+                </select>
+            </div>
+            <!-- .col-sm-9 -->
+        </div>
+
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="azure_taddressPrefix">Address prefix</label>
+
+        <div class="col-sm-9">
+            <input type="text" class="form-control" id="azure_taddressPrefix">
+        </div>
+        <!-- .col-sm-9 -->
+
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="azure_tsubnetAddressPrefix">Subnet address prefix</label>
+
+        <div class="col-sm-9">
+            <input type="text" class="form-control" id="azure_tsubnetAddressPrefix">
+        </div>
+        <!-- .col-sm-9 -->
+
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="azure_tusername">Username</label>
+
+        <div class="col-sm-9">
+            <input type="text" class="form-control" id="azure_tusername">
+        </div>
+        <!-- .col-sm-9 -->
+
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="azure_tdeploymentSlot">Deployment slot</label>
+
+        <div class="col-sm-9">
+            <input type="text" class="form-control" id="azure_tdeploymentSlot">
+        </div>
+        <!-- .col-sm-9 -->
+
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="azure_tpassword">Password</label>
+
+        <div class="col-sm-9">
+            <input type="text" class="form-control" id="azure_tpassword">
+        </div>
+        <!-- .col-sm-9 -->
+
+    </div>
+
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="azure_tsshString">SSH string</label>
+
+        <div class="col-sm-9">
+            <input type="text" class="form-control" id="azure_tsshString">
+        </div>
+        <!-- .col-sm-9 -->
+
+    </div>
+
+    <div class="row btn-row">
+        <div class="col-sm-9 col-sm-offset-3">
+            <a href="#" id="createAzureTemplate" class="btn btn-success btn-block" ng-click="createAzureTemplate()" role="button"><i
+                    class="fa fa-plus fa-fw"></i> create template</a>
+        </div>
+    </div>
+
+</form>
+
+<form class="form-horizontal" role="form" ng-show="awsTemplate">
+    <div class="form-group">
+
+        <label class="col-sm-3 control-label" for="aws_tamiId">AMI</label>
+
+        <div class="col-sm-9">
+            <select class="form-control" id="aws_tamiId">
+                <option value="ami-2f39f458">ami-2f39f458</option>
+            </select>
+        </div>
+        <!-- .col-sm-9 -->
+
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="aws_tsshLocation">SSH location</label>
+
+        <div class="col-sm-9">
+            <input type="text" class="form-control" id="aws_tsshLocation">
+        </div>
+        <!-- .col-sm-9 -->
+
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="aws_tkeyName">SSH key name</label>
+
+        <div class="col-sm-9">
+            <input type="text" class="form-control" id="aws_tkeyName">
+        </div>
+        <!-- .col-sm-9 -->
+
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="aws_tregion">Region</label>
+
+        <div class="col-sm-9">
+            <select class="form-control" id="aws_tregion">
+                <option value="GovCloud">us-gov-west-1</option>
+                <option value="US_EAST_1">us-east-1</option>
+                <option value="US_WEST_1">us-west-1</option>
+                <option value="US_WEST_2">us-west-2</option>
+                <option value="EU_WEST_1">eu-west-1</option>
+                <option value="AP_SOUTHEAST_1">ap-southeast-1</option>
+                <option value="AP_SOUTHEAST_2">ap-southeast-2</option>
+                <option value="AP_NORTHEAST_1">ap-northeast-1</option>
+                <option value="SA_EAST_1">sa-east-1</option>
+                <option value="CN_NORTH_1">cn-north-1</option>
+            </select>
+        </div>
+        <!-- .col-sm-9 -->
+
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="aws_tinstanceType">Instance type</label>
+
+        <div class="col-sm-9">
+            <select class="form-control" id="aws_tinstanceType">
+                <option value="T1Micro">t1.micro</option>
+                <option value="M1Small">m1.small</option>
+                <option value="M1Medium">m1.medium</option>
+                <option value="M1Large">m1.large</option>
+                <option value="M1Xlarge">m1.xlarge</option>
+            </select>
+        </div>
+        <!-- .col-sm-9 -->
+
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="aws_tclusterName">Name</label>
+
+        <div class="col-sm-9">
+            <input type="text" class="form-control" id="aws_tclusterName">
+        </div>
+        <!-- .col-sm-9 -->
+
+    </div>
+
+    <div class="row btn-row">
+        <div class="col-sm-9 col-sm-offset-3">
+            <a href="#" id="createAwsTemplate" class="btn btn-success btn-block" ng-click="createAwsTemplate()" role="button"><i class="fa fa-plus fa-fw"></i>
+                create template</a>
+        </div>
+    </div>
+
+</form>
+</div>
+</div>
+</div>
+<!-- .panel -->
+
+<!-- ............ TEMPLATE LIST ........................................... -->
+
+<div class="panel-group" id="templete-list-accordion">
+
+    <!-- .............. TEMPLATE .............................................. -->
+
+    <div class="panel panel-default" ng-repeat="template in templates">
+
+        <div class="panel-heading">
+            <h5><a href="#panel-template-collapse{{template.id}}" data-toggle="collapse" data-parent="#templete-list-accordion"
+                   data-target="#panel-template-collapse{{template.id}}"><i
+                    class="fa fa-file-o fa-fw"></i>{{template.id}}: {{template.name}}</a></h5>
+        </div>
+        <div id="panel-template-collapse{{template.id}}" class="panel-collapse collapse">
+
+            <p class="btn-row-over-panel"><a href="#" class="btn btn-danger" role="button" ng-click="deleteTemplate(template.id)"><i
+                    class="fa fa-times fa-fw"></i><span> delete</span></a></p>
+
+            <div class="panel-body" ng-if="template.cloudPlatform == 'AZURE' ">
+
+                <form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="clusterName">Name</label>
+
+                        <div class="col-sm-9">
+                            <p id="clusterName" class="form-control-static">{{template.name}}</p>
+                        </div>
+                        <!-- .col-sm-9 -->
+                    </div>
+                    <!-- .form-group -->
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="password">Password</label>
+
+                        <div class="col-sm-9">
+                            <p id="password" class="form-control-static">{{template.parameters.password}}</p>
+                        </div>
+                        <!-- .col-sm-9 -->
+                    </div>
+                    <!-- .form-group -->
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="deploymentSlot">Deployment Slot</label>
+
+                        <div class="col-sm-9">
+                            <p id="deploymentSlot" class="form-control-static">{{template.parameters.deploymentSlot}}</p>
+                        </div>
+                        <!-- .col-sm-9 -->
+                    </div>
+                    <!-- .form-group -->
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="username">Username</label>
+
+                        <div class="col-sm-9">
+                            <p id="username" class="form-control-static">{{template.parameters.username}}</p>
+                        </div>
+                        <!-- .col-sm-9 -->
+                    </div>
+                    <!-- .form-group -->
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="subnetAddressPrefix">Subnet address prefix</label>
+
+                        <div class="col-sm-9">
+                            <p id="subnetAddressPrefix" class="form-control-static">{{template.parameters.subnetAddressPrefix}}</p>
+                        </div>
+                        <!-- .col-sm-9 -->
+                    </div>
+                    <!-- .form-group -->
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="addressPrefix">Address prefix</label>
+
+                        <div class="col-sm-9">
+                            <p id="addressPrefix" class="form-control-static">{{template.parameters.addressPrefix}}</p>
+                        </div>
+                        <!-- .col-sm-9 -->
+                    </div>
+                    <!-- .form-group -->
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="vmType">VM type</label>
+
+                        <div class="col-sm-9">
+                            <p id="vmType" class="form-control-static">{{template.parameters.vmType}}</p>
+                        </div>
+                        <!-- .col-sm-9 -->
+                    </div>
+                    <!-- .form-group -->
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="imageName">Image name</label>
+
+                        <div class="col-sm-9">
+                            <p id="imageName" class="form-control-static">{{template.parameters.imageName}}</p>
+                        </div>
+                        <!-- .col-sm-9 -->
+                    </div>
+                    <!-- .form-group -->
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="location">Location</label>
+
+                        <div class="col-sm-9">
+                            <p id="location" class="form-control-static">{{template.parameters.location}}</p>
+                        </div>
+                        <!-- .col-sm-9 -->
+                    </div>
+                    <!-- .form-group -->
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="description">Description</label>
+
+                        <div class="col-sm-9">
+                            <p id="description" class="form-control-static">{{template.parameters.description}}</p>
+                        </div>
+                        <!-- .col-sm-9 -->
+                    </div>
+                </form>
+            </div>
+
+            <div class="panel-body" ng-if="template.cloudPlatform == 'AWS' ">
+                <form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="awsclusterName">Name</label>
+
+                        <div class="col-sm-9">
+                            <p id="awsclusterName" class="form-control-static">{{template.name}}</p>
+                        </div>
+                        <!-- .col-sm-9 -->
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="awsamiId">AMI</label>
+
+                        <div class="col-sm-9">
+                            <p id="awsamiId" class="form-control-static">{{template.parameters.amiId}}</p>
+                        </div>
+                        <!-- .col-sm-9 -->
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="awssshLocation">SSH location</label>
+
+                        <div class="col-sm-9">
+                            <p id="awssshLocation" class="form-control-static">{{template.parameters.sshLocation}}</p>
+                        </div>
+                        <!-- .col-sm-9 -->
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="awskeyName">SSH key name</label>
+
+                        <div class="col-sm-9">
+                            <p id="awskeyName" class="form-control-static">{{template.parameters.keyName}}</p>
+                        </div>
+                        <!-- .col-sm-9 -->
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="awsregion">Region</label>
+
+                        <div class="col-sm-9">
+                            <p id="awsregion" class="form-control-static">{{template.parameters.region}}</p>
+                        </div>
+                        <!-- .col-sm-9 -->
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="awsinstanceType">Instance type</label>
+
+                        <div class="col-sm-9">
+                            <p id="awsinstanceType" class="form-control-static">{{template.parameters.instanceType}}</p>
+                        </div>
+                        <!-- .col-sm-9 -->
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- .panel -->
+</div>
+<!-- #template-list-accordion -->
+
+</div>
+<!-- .panel-body -->
+
+</div>
+<!-- .panel-collapse -->
+</div>
+<!-- .panel -->
+</div>
+
+<!-- .col- -->
+
+<!-- .... BLUEPRINTS PANEL ................................................. -->
+
+<div class="col-md-12 col-lg-6">
+
+    <div class="panel panel-default">
+        <div class="panel-heading panel-heading-nav">
+            <a href="#" id="templates-btn" class="btn btn-info btn-fa-2x" role="button" data-toggle="collapse" data-target="#panel-blueprints-collapse"><i
+                    class="fa fa-angle-down fa-2x fa-fw-forced"></i></a>
+            <h4><span class="badge pull-right">{{blueprints.length}}</span> manage blueprints</h4>
+        </div>
+        <div id="panel-blueprints-collapse" class="panel-collapse panel-btn-in-header-collapse collapse">
+
+            <div class="panel-body">
+
+                <p class="btn-row-over-panel"><a href="#panel-create-blueprint-collapse" class="btn btn-success" role="button" data-toggle="collapse"
+                                                 data-target="#panel-create-blueprint-collapse"><i
+                        class="fa fa-plus fa-fw"></i><span> create blueprint</span></a></p>
+
+                <!-- ............ CREATE FORM ............................................. -->
+
+                <div class="panel panel-default">
+                    <div id="panel-create-blueprint-collapse" class="panel-collapse panel-under-btn-collapse collapse">
+                        <div class="panel-body">
+
+                            <form class="form-horizontal" role="form" name="blueprintForm">
+
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="blueprintUrl">Source URL</label>
+
+                                    <div class="col-sm-9">
+                                        <input type="url" class="form-control" id="blueprintUrl" ng-model="blueprintUrl" name="blueprintUrl"
+                                               placeholder="set blueprint URL">
+
+                                        <div class="alert-danger" ng-show="blueprintForm.blueprintUrl.$dirty && blueprintForm.blueprintUrl.$invalid">Url has to
+                                            be a valid url
+                                        </div>
+                                    </div>
+                                    <!-- .col-sm-9 -->
+                                </div>
+                                <!-- .form-group -->
+
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="bluePrintText">Manual copy</label>
+
+                                    <div class="col-sm-9">
+                                        <textarea class="form-control" id="bluePrintText" placeholder="paste blueprint text here" rows="10"></textarea>
+                                    </div>
+                                    <!-- .col-sm-9 -->
+                                </div>
+                                <!-- .form-group -->
+
+
+                                <div class="row btn-row">
+                                    <div class="col-sm-9 col-sm-offset-3">
+                                        <a href="#" id="createBlueprint" ng-click="createBlueprint()" class="btn btn-success btn-block" role="button"><i
+                                                class="fa fa-plus fa-fw"></i> create
+                                            blueprint</a>
+                                    </div>
+                                </div>
+
+                            </form>
+                        </div>
                     </div>
                 </div>
                 <!-- .panel -->
 
-            </div>
-        </div>
-        <!-- .create-cluster -->
+                <!-- ............ BLUEPRINT LIST .......................................... -->
 
-    </div>
-    <!-- .item -->
+                <div class="panel-group" id="blueprint-list-accordion">
 
-    </div>
-    <!-- .carousel-inner -->
-
-
-    </div>
-    <!-- .container-fluid carousel -->
-    </section>
-
-
-    <section class="management-panels">
-    <div class="container-fluid">
-    <div class="row">
-
-    <!-- .... TEMPLATES PANEL ................................................. -->
-
-    <div class="col-md-12 col-lg-6">
-
-    <div class="panel panel-default">
-    <div class="panel-heading panel-heading-nav">
-        <a href="#panel-templates-collapse" id="templates-btn" class="btn btn-info btn-fa-2x" role="button" data-toggle="collapse"
-           data-target="#panel-templates-collapse"><i class="fa fa-angle-down fa-2x fa-fw-forced"></i></a>
-        <h4><span class="badge pull-right">{{templates.length}}</span> manage templates</h4>
-    </div>
-
-    <div id="panel-templates-collapse" class="panel-collapse panel-btn-in-header-collapse collapse">
-    <div class="panel-body">
-
-    <p class="btn-row-over-panel"><a href="#panel-create-template-collapse" class="btn btn-success" role="button" data-toggle="collapse"
-                                     data-target="#panel-create-template-collapse"><i class="fa fa-plus fa-fw"></i><span> create template</span></a></p>
-
-    <!-- ............ CREATE FORM ............................................. -->
-
-    <div class="panel panel-default">
-        <div id="panel-create-template-collapse" class="panel-collapse panel-under-btn-collapse collapse">
-            <div class="panel-body">
-                <div class="row " style="padding-bottom: 10px">
-                    <div class="btn-segmented-control" id="providerSelector2">
-                        <div class="btn-group btn-group-justified">
-                                <a id="awsTemplateChange" type="button" class="btn btn-info" role="button" ng-click="createAwsTemplateRequest()">Aws</a>
-
-                                <a id="azureTemplateChange" class="btn btn-default" role="button" ng-click="createAzureTemplateRequest()">Azure</a>
-
-                        </div>
-                    </div>
-                </div>
-                <form class="form-horizontal" role="form" ng-show="azureTemplate">
-
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label" for="azure_tclusterName">Cluster name</label>
-
-                        <div class="col-sm-9">
-                            <input type="text" class="form-control" id="azure_tclusterName" placeholder="max. 20 char">
-                        </div>
-                        <!-- .col-sm-9 -->
-
-                    </div>
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label" for="azure_tdescription">Description</label>
-
-                        <div class="col-sm-9">
-                            <input type="text" class="form-control" id="azure_tdescription" placeholder="max. 20 char">
-                        </div>
-                        <!-- .col-sm-9 -->
-
-                    </div>
-
-                    <div class="form-group">
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label" for="azure_tlocation">Location</label>
-                            <div class="col-sm-9">
-                                <select class="form-control" id="azure_tlocation">
-                                    <option value="EAST_ASIA">East Asia</option>
-                                    <option value="SOUTHEAST_ASIA">Southeast Asia</option>
-                                    <option value="NORTH_EUROPE">North Europe</option>
-                                    <option value="EAST_US">East US</option>
-                                    <option value="WEST_US">West US</option>
-                                    <option value="JAPAN_EAST">Japan East</option>
-                                    <option value="JAPAN_WEST">Japan West</option>
-                                    <option value="BRAZIL_SOUTH">Brazil South</option>
-                                </select>
-                            </div>
-                            <!-- .col-sm-9 -->
+                    <div class="panel panel-default" ng-repeat="blueprint in blueprints">
+                        <div class="panel-heading">
+                            <h5><a href="#panel-blueprint-collapse{{blueprint.id}}" data-toggle="collapse" data-parent="#blueprint-list-accordion"><i
+                                    class="fa fa-th fa-fw"></i>{{blueprint.name}}</a></h5>
                         </div>
 
-                    </div>
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label" for="azure_timageName">Image name</label>
+                        <div id="panel-blueprint-collapse{{blueprint.id}}" class="panel-collapse collapse">
 
-                        <div class="col-sm-9">
-                            <input type="text" class="form-control" id="azure_timageName">
-                        </div>
-                        <!-- .col-sm-9 -->
+                            <p class="btn-row-over-panel text-right"><a href="#" class="btn btn-danger" role="button"
+                                                                        ng-click="deleteBluePrint(blueprint.id)"><i
+                                    class="fa fa-times fa-fw"></i><span> delete</span></a>
+                            </p>
 
-                    </div>
-                    <div class="form-group">
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label" for="azure_tvmType">Location</label>
-                            <div class="col-sm-9">
-                                <select class="form-control" id="azure_tvmType">
-                                    <option value="EXTRA_SMALL">Extra Small</option>
-                                    <option value="SMALL">Small</option>
-                                    <option value="MEDIUM">Medium</option>
-                                    <option value="LARGE">Large</option>
-                                    <option value="EXTRA_LARGE">Extra Large</option>
-                                </select>
-                            </div>
-                            <!-- .col-sm-9 -->
-                        </div>
-
-                    </div>
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label" for="azure_taddressPrefix">Address prefix</label>
-
-                        <div class="col-sm-9">
-                            <input type="text" class="form-control" id="azure_taddressPrefix">
-                        </div>
-                        <!-- .col-sm-9 -->
-
-                    </div>
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label" for="azure_tsubnetAddressPrefix">Subnet address prefix</label>
-
-                        <div class="col-sm-9">
-                            <input type="text" class="form-control" id="azure_tsubnetAddressPrefix">
-                        </div>
-                        <!-- .col-sm-9 -->
-
-                    </div>
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label" for="azure_tusername">Username</label>
-
-                        <div class="col-sm-9">
-                            <input type="text" class="form-control" id="azure_tusername">
-                        </div>
-                        <!-- .col-sm-9 -->
-
-                    </div>
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label" for="azure_tdeploymentSlot">Deployment slot</label>
-
-                        <div class="col-sm-9">
-                            <input type="text" class="form-control" id="azure_tdeploymentSlot">
-                        </div>
-                        <!-- .col-sm-9 -->
-
-                    </div>
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label" for="azure_tpassword">Password</label>
-
-                        <div class="col-sm-9">
-                            <input type="text" class="form-control" id="azure_tpassword">
-                        </div>
-                        <!-- .col-sm-9 -->
-
-                    </div>
-
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label" for="azure_tsshString">SSH string</label>
-
-                        <div class="col-sm-9">
-                            <input type="text" class="form-control" id="azure_tsshString">
-                        </div>
-                        <!-- .col-sm-9 -->
-
-                    </div>
-
-                    <div class="row btn-row">
-                        <div class="col-sm-9 col-sm-offset-3">
-                            <a href="#" id="createAzureTemplate" class="btn btn-success btn-block" ng-click="createAzureTemplate()" role="button"><i class="fa fa-plus fa-fw"></i> create template</a>
-                        </div>
-                    </div>
-
-                </form>
-
-                <form class="form-horizontal" role="form" ng-show="awsTemplate">
-                    <div class="form-group">
-
-                        <label class="col-sm-3 control-label" for="aws_tamiId">AMI</label>
-                        <div class="col-sm-9">
-                            <select class="form-control" id="aws_tamiId">
-                                <option value="ami-2f39f458">ami-2f39f458</option>
-                            </select>
-                        </div>
-                        <!-- .col-sm-9 -->
-
-                    </div>
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label" for="aws_tsshLocation">SSH location</label>
-
-                        <div class="col-sm-9">
-                            <input type="text" class="form-control" id="aws_tsshLocation">
-                        </div>
-                        <!-- .col-sm-9 -->
-
-                    </div>
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label" for="aws_tkeyName">SSH key name</label>
-
-                        <div class="col-sm-9">
-                            <input type="text" class="form-control" id="aws_tkeyName">
-                        </div>
-                        <!-- .col-sm-9 -->
-
-                    </div>
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label" for="aws_tregion">Region</label>
-                        <div class="col-sm-9">
-                                <select class="form-control" id="aws_tregion">
-                                    <option value="GovCloud">us-gov-west-1</option>
-                                    <option value="US_EAST_1">us-east-1</option>
-                                    <option value="US_WEST_1">us-west-1</option>
-                                    <option value="US_WEST_2">us-west-2</option>
-                                    <option value="EU_WEST_1">eu-west-1</option>
-                                    <option value="AP_SOUTHEAST_1">ap-southeast-1</option>
-                                    <option value="AP_SOUTHEAST_2">ap-southeast-2</option>
-                                    <option value="AP_NORTHEAST_1">ap-northeast-1</option>
-                                    <option value="SA_EAST_1">sa-east-1</option>
-                                    <option value="CN_NORTH_1">cn-north-1</option>
-                                </select>
-                        </div>
-                        <!-- .col-sm-9 -->
-
-                    </div>
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label" for="aws_tinstanceType">Instance type</label>
-
-                        <div class="col-sm-9">
-                                <select class="form-control" id="aws_tinstanceType">
-                                    <option value="T1Micro">t1.micro</option>
-                                    <option value="M1Small">m1.small</option>
-                                    <option value="M1Medium">m1.medium</option>
-                                    <option value="M1Large">m1.large</option>
-                                    <option value="M1Xlarge">m1.xlarge</option>
-                                </select>
-                        </div>
-                        <!-- .col-sm-9 -->
-
-                    </div>
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label" for="aws_tclusterName">Name</label>
-
-                        <div class="col-sm-9">
-                            <input type="text" class="form-control" id="aws_tclusterName">
-                        </div>
-                        <!-- .col-sm-9 -->
-
-                    </div>
-
-                    <div class="row btn-row">
-                        <div class="col-sm-9 col-sm-offset-3">
-                            <a href="#" id="createAwsTemplate" class="btn btn-success btn-block" ng-click="createAwsTemplate()" role="button"><i class="fa fa-plus fa-fw"></i> create template</a>
-                        </div>
-                    </div>
-
-                </form>
-            </div>
-        </div>
-    </div>
-    <!-- .panel -->
-
-    <!-- ............ TEMPLATE LIST ........................................... -->
-
-    <div class="panel-group" id="templete-list-accordion">
-
-        <!-- .............. TEMPLATE .............................................. -->
-
-        <div class="panel panel-default"  ng-repeat="template in templates">
-
-            <div class="panel-heading">
-                <h5><a href="#panel-template-collapse{{template.id}}" data-toggle="collapse" data-parent="#templete-list-accordion" data-target="#panel-template-collapse{{template.id}}"><i
-                        class="fa fa-file-o fa-fw"></i>{{template.id}}: {{template.name}}</a></h5>
-            </div>
-            <div id="panel-template-collapse{{template.id}}" class="panel-collapse collapse" >
-
-                <p class="btn-row-over-panel"><a href="#" class="btn btn-danger" role="button" ng-click="deleteTemplate(template.id)"><i class="fa fa-times fa-fw"></i><span> delete</span></a></p>
-
-                <div class="panel-body" ng-if="template.cloudPlatform == 'AZURE' ">
-
-                    <form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
-
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label" for="clusterName">Name</label>
-
-                            <div class="col-sm-9">
-                                <p id="clusterName" class="form-control-static">{{template.name}}</p>
-                            </div>
-                            <!-- .col-sm-9 -->
-                        </div>
-                        <!-- .form-group -->
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label" for="password">Password</label>
-
-                            <div class="col-sm-9">
-                                <p id="password" class="form-control-static">{{template.parameters.password}}</p>
-                            </div>
-                            <!-- .col-sm-9 -->
-                        </div>
-                        <!-- .form-group -->
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label" for="deploymentSlot">Deployment Slot</label>
-
-                            <div class="col-sm-9">
-                                <p id="deploymentSlot" class="form-control-static">{{template.parameters.deploymentSlot}}</p>
-                            </div>
-                            <!-- .col-sm-9 -->
-                        </div>
-                        <!-- .form-group -->
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label" for="username">Username</label>
-
-                            <div class="col-sm-9">
-                                <p id="username" class="form-control-static">{{template.parameters.username}}</p>
-                            </div>
-                            <!-- .col-sm-9 -->
-                        </div>
-                        <!-- .form-group -->
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label" for="subnetAddressPrefix">Subnet address prefix</label>
-
-                            <div class="col-sm-9">
-                                <p id="subnetAddressPrefix" class="form-control-static">{{template.parameters.subnetAddressPrefix}}</p>
-                            </div>
-                            <!-- .col-sm-9 -->
-                        </div>
-                        <!-- .form-group -->
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label" for="addressPrefix">Address prefix</label>
-
-                            <div class="col-sm-9">
-                                <p id="addressPrefix" class="form-control-static">{{template.parameters.addressPrefix}}</p>
-                            </div>
-                            <!-- .col-sm-9 -->
-                        </div>
-                        <!-- .form-group -->
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label" for="vmType">VM type</label>
-
-                            <div class="col-sm-9">
-                                <p id="vmType" class="form-control-static">{{template.parameters.vmType}}</p>
-                            </div>
-                            <!-- .col-sm-9 -->
-                        </div>
-                        <!-- .form-group -->
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label" for="imageName">Image name</label>
-
-                            <div class="col-sm-9">
-                                <p id="imageName" class="form-control-static">{{template.parameters.imageName}}</p>
-                            </div>
-                            <!-- .col-sm-9 -->
-                        </div>
-                        <!-- .form-group -->
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label" for="location">Location</label>
-
-                            <div class="col-sm-9">
-                                <p id="location" class="form-control-static">{{template.parameters.location}}</p>
-                            </div>
-                            <!-- .col-sm-9 -->
-                        </div>
-                        <!-- .form-group -->
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label" for="description">Description</label>
-
-                            <div class="col-sm-9">
-                                <p id="description" class="form-control-static">{{template.parameters.description}}</p>
-                            </div>
-                            <!-- .col-sm-9 -->
-                        </div>
-                    </form>
-                </div>
-
-                <div class="panel-body"  ng-if="template.cloudPlatform == 'AWS' ">
-                    <form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label" for="awsclusterName">Name</label>
-
-                            <div class="col-sm-9">
-                                <p id="awsclusterName" class="form-control-static">{{template.name}}</p>
-                            </div>
-                            <!-- .col-sm-9 -->
-                        </div>
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label" for="awsamiId">AMI</label>
-
-                            <div class="col-sm-9">
-                                <p id="awsamiId" class="form-control-static">{{template.parameters.amiId}}</p>
-                            </div>
-                            <!-- .col-sm-9 -->
-                        </div>
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label" for="awssshLocation">SSH location</label>
-
-                            <div class="col-sm-9">
-                                <p id="awssshLocation" class="form-control-static">{{template.parameters.sshLocation}}</p>
-                            </div>
-                            <!-- .col-sm-9 -->
-                        </div>
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label" for="awskeyName">SSH key name</label>
-
-                            <div class="col-sm-9">
-                                <p id="awskeyName" class="form-control-static">{{template.parameters.keyName}}</p>
-                            </div>
-                            <!-- .col-sm-9 -->
-                        </div>
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label" for="awsregion">Region</label>
-
-                            <div class="col-sm-9">
-                                <p id="awsregion" class="form-control-static">{{template.parameters.region}}</p>
-                            </div>
-                            <!-- .col-sm-9 -->
-                        </div>
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label" for="awsinstanceType">Instance type</label>
-
-                            <div class="col-sm-9">
-                                <p id="awsinstanceType" class="form-control-static">{{template.parameters.instanceType}}</p>
-                            </div>
-                            <!-- .col-sm-9 -->
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-        <!-- .panel -->
-    </div>
-    <!-- #template-list-accordion -->
-
-    </div>
-    <!-- .panel-body -->
-
-    </div>
-    <!-- .panel-collapse -->
-    </div>
-    <!-- .panel -->
-
-    </div>
-    <!-- .col- -->
-
-    <!-- .... BLUEPRINTS PANEL ................................................. -->
-
-    <div class="col-md-12 col-lg-6">
-
-        <div class="panel panel-default" >
-            <div class="panel-heading panel-heading-nav">
-                <a href="#" id="templates-btn" class="btn btn-info btn-fa-2x" role="button" data-toggle="collapse" data-target="#panel-blueprints-collapse"><i
-                        class="fa fa-angle-down fa-2x fa-fw-forced"></i></a>
-                <h4><span class="badge pull-right">{{blueprints.length}}</span> manage blueprints</h4>
-            </div>
-            <div id="panel-blueprints-collapse" class="panel-collapse panel-btn-in-header-collapse collapse">
-
-                <div class="panel-body">
-
-                    <p class="btn-row-over-panel"><a href="#panel-create-blueprint-collapse" class="btn btn-success" role="button" data-toggle="collapse"
-                                                     data-target="#panel-create-blueprint-collapse"><i
-                            class="fa fa-plus fa-fw"></i><span> create blueprint</span></a></p>
-
-                    <!-- ............ CREATE FORM ............................................. -->
-
-                    <div class="panel panel-default">
-                        <div id="panel-create-blueprint-collapse" class="panel-collapse panel-under-btn-collapse collapse">
                             <div class="panel-body">
 
-                                <form class="form-horizontal" role="form" name="blueprintForm">
+                                <form class="form-horizontal" role="document">
 
                                     <div class="form-group">
-                                        <label class="col-sm-3 control-label" for="blueprintUrl">Source URL</label>
+                                        <label class="col-sm-3 control-label" for="source">Source</label>
 
                                         <div class="col-sm-9">
-                                            <input type="url" class="form-control" id="blueprintUrl" ng-model="blueprintUrl" name="blueprintUrl" placeholder="set blueprint URL">
-                                            <div class="alert-danger" ng-show="blueprintForm.blueprintUrl.$dirty && blueprintForm.blueprintUrl.$invalid">Url has to be a valid url</div>
+                                                                    <pre id="source" class="form-control-static blueprint-source">
+    {{blueprint.ambariBlueprint | json}}
+                                                                    </pre>
                                         </div>
                                         <!-- .col-sm-9 -->
                                     </div>
                                     <!-- .form-group -->
-
-                                    <div class="form-group">
-                                        <label class="col-sm-3 control-label" for="bluePrintText">Manual copy</label>
-
-                                        <div class="col-sm-9">
-                                            <textarea class="form-control" id="bluePrintText" placeholder="paste blueprint text here" rows="10"></textarea>
-                                        </div>
-                                        <!-- .col-sm-9 -->
-                                    </div>
-                                    <!-- .form-group -->
-
-
-                                    <div class="row btn-row">
-                                        <div class="col-sm-9 col-sm-offset-3">
-                                            <a href="#" id="createBlueprint" ng-click="createBlueprint()" class="btn btn-success btn-block" role="button"><i class="fa fa-plus fa-fw"></i> create
-                                                blueprint</a>
-                                        </div>
-                                    </div>
 
                                 </form>
                             </div>
@@ -1069,75 +1148,38 @@
                     </div>
                     <!-- .panel -->
 
-                    <!-- ............ BLUEPRINT LIST .......................................... -->
-
-                    <div class="panel-group" id="blueprint-list-accordion">
-
-                        <div class="panel panel-default" ng-repeat="blueprint in blueprints">
-                            <div class="panel-heading">
-                                <h5><a href="#panel-blueprint-collapse{{blueprint.id}}" data-toggle="collapse" data-parent="#blueprint-list-accordion"><i
-                                        class="fa fa-th fa-fw"></i>{{blueprint.name}}</a></h5>
-                            </div>
-
-                            <div id="panel-blueprint-collapse{{blueprint.id}}" class="panel-collapse collapse">
-
-                                <p class="btn-row-over-panel text-right"><a href="#" class="btn btn-danger" role="button" ng-click="deleteBluePrint(blueprint.id)"><i class="fa fa-times fa-fw"></i><span> delete</span></a>
-                                </p>
-
-                                <div class="panel-body">
-
-                                    <form class="form-horizontal" role="document">
-
-                                        <div class="form-group">
-                                            <label class="col-sm-3 control-label" for="source">Source</label>
-
-                                            <div class="col-sm-9">
-                                                                <pre id="source" class="form-control-static blueprint-source">
-{{blueprint.ambariBlueprint | json}}
-                                                                </pre>
-                                            </div>
-                                            <!-- .col-sm-9 -->
-                                        </div>
-                                        <!-- .form-group -->
-
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- .panel -->
-
-
-                    </div>
-                    <!-- #blueprint-list-accordion -->
 
                 </div>
-                <!-- .panel-body -->
+                <!-- #blueprint-list-accordion -->
 
             </div>
-            <!-- .panel-collapse -->
+            <!-- .panel-body -->
+
         </div>
-        <!-- .panel -->
-
+        <!-- .panel-collapse -->
     </div>
-    <!-- .col- -->
+    <!-- .panel -->
 
-    </div>
-    <!-- .row -->
-    <div class="row">
+</div>
+<!-- .col- -->
 
-    <!-- .... CREDENTIALS PANEL ................................................ -->
+</div>
+<!-- .row -->
+<div class="row">
 
-    <div class="col-md-12 col-lg-6">
+<!-- .... CREDENTIALS PANEL ................................................ -->
 
-    <div class="panel panel-default">
-    <div class="panel-heading panel-heading-nav">
-        <a href="#panel-credentials-collapse" id="credentials-btn" class="btn btn-info btn-fa-2x" role="button" data-toggle="collapse"><i
-                class="fa fa-angle-down fa-2x fa-fw-forced"></i></a>
-        <h4><span class="badge pull-right">{{templates.length}}</span> manage credentials</h4>
-    </div>
+<div class="col-md-12 col-lg-6">
 
-    <div id="panel-credentials-collapse" class="panel-collapse panel-btn-in-header-collapse collapse">
-    <div class="panel-body">
+<div class="panel panel-default">
+<div class="panel-heading panel-heading-nav">
+    <a href="#panel-credentials-collapse" id="credentials-btn" class="btn btn-info btn-fa-2x" role="button" data-toggle="collapse"><i
+            class="fa fa-angle-down fa-2x fa-fw-forced"></i></a>
+    <h4><span class="badge pull-right">{{templates.length}}</span> manage credentials</h4>
+</div>
+
+<div id="panel-credentials-collapse" class="panel-collapse panel-btn-in-header-collapse collapse">
+<div class="panel-body">
 
     <p class="btn-row-over-panel"><a href="#panel-create-template-collapse" class="btn btn-success" role="button" data-toggle="collapse"
                                      data-target="#panel-create-credential-collapse"><i
@@ -1145,14 +1187,14 @@
 
     <!-- ............ CREATE FORM ............................................. -->
 
-    <div class="panel panel-default" >
+    <div class="panel panel-default">
         <div id="panel-create-credential-collapse" class="panel-collapse panel-under-btn-collapse collapse">
             <div class="panel-body">
                 <div class="row " style="padding-bottom: 10px">
                     <div class="btn-segmented-control" id="providerSelector1">
                         <div class="btn-group btn-group-justified">
-                                <a id="awsChange" type="button" class="btn btn-info" ng-click="createAwsCredentialRequest()">Aws</a>
-                                <a id="azureChange" type="button" class="btn btn-default" ng-click="createAzureCredentialRequest()">Azure</a>
+                            <a id="awsChange" type="button" class="btn btn-info" ng-click="createAwsCredentialRequest()">Aws</a>
+                            <a id="azureChange" type="button" class="btn btn-default" ng-click="createAzureCredentialRequest()">Azure</a>
 
                         </div>
                     </div>
@@ -1191,7 +1233,8 @@
                     </div>
                     <div class="row btn-row">
                         <div class="col-sm-9 col-sm-offset-3">
-                            <a href="#" id="createAzureCredential" class="btn btn-success btn-block" ng-click="createAzureCredential()" role="button"><i class="fa fa-plus fa-fw"></i>
+                            <a href="#" id="createAzureCredential" class="btn btn-success btn-block" ng-click="createAzureCredential()" role="button"><i
+                                    class="fa fa-plus fa-fw"></i>
                                 create credential</a>
                         </div>
                     </div>
@@ -1214,7 +1257,7 @@
                         <label class="col-sm-3 control-label" for="croleArn">Role ARN</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" id="croleArn" >
+                            <input type="text" class="form-control" id="croleArn">
                         </div>
                         <!-- .col-sm-9 -->
 
@@ -1231,7 +1274,8 @@
                     </div>
                     <div class="row btn-row">
                         <div class="col-sm-9 col-sm-offset-3">
-                            <a href="#" id="createAwsCredential" ng-click="createAwsCredential()" class="btn btn-success btn-block" role="button"><i class="fa fa-plus fa-fw"></i>
+                            <a href="#" id="createAwsCredential" ng-click="createAwsCredential()" class="btn btn-success btn-block" role="button"><i
+                                    class="fa fa-plus fa-fw"></i>
                                 create credential</a>
                         </div>
                     </div>
@@ -1335,63 +1379,67 @@
     </div>
     <!-- #credential-list-accordion -->
 
-    </div>
-    <!-- .panel-body -->
+</div>
+<!-- .panel-body -->
 
-    </div>
-    <!-- .panel-collapse -->
-    </div>
-    <!-- .panel -->
+</div>
+<!-- .panel-collapse -->
+</div>
+<!-- .panel -->
 
-    </div>
-    <!-- .col- -->
+</div>
+<!-- .col- -->
 
-    </div>
-    <!-- .row -->
-    </div>
-    <!-- .container-fluid -->
-    </section>
+</div>
+<!-- .row -->
+</div>
+<!-- .container-fluid -->
+</section>
 
 
-    <footer>
-        <div class="container">
-            <div class="row">
-
+<footer>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-xs-3">
+                <a href="http://sequenceiq.com"><img src="img/logo-sm.png" alt="logo"></a>
             </div>
-            <!-- .row -->
-        </div>
-        <!-- .container -->
-    </footer>
-
-
-    <!-- ............. modals ................. -->
-
-    <div class="modal fade" id="modal01" tabindex="-1" role="dialog" aria-labelledby="modal01-title" aria-hidden="true">
-        <div class="modal-dialog modal-sm">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    <h5 class="modal-title" id="modal01-title"></h5>
-                </div>
-                <!-- .modal-header -->
-                <div class="modal-body">
-                    <p>Terminate cluster <strong>{{activeStack.data.name}}</strong> and its stack?</p>
-                </div>
-                <!-- .modal-body -->
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">cancel</button>
-                    <button type="button" class="btn btn-danger" data-dismiss="modal" id="terminateStackBtn" ng-click="deleteStack(activeStack.data.id)">terminate</button>
-                </div>
-                <!-- .modal-footer -->
+            <div class="col-xs-9">
+                <p class="text-right">© SequenceIQ Inc. 2014. <span class="hidden-xs">All rights reserved.</span>
+                    <br><a href="pp.html">Privacy Policy</a> &nbsp; <a href="tos.html">Terms of Service</a></p>
             </div>
-            <!-- .modal-content -->
+        </div><!-- .row -->
+    </div><!-- .container -->
+</footer>
+
+<!-- ............. modals ................. -->
+
+<div class="modal fade" id="modal-terminate" tabindex="-1" role="dialog" aria-labelledby="modal01-title" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h5 class="modal-title" id="modal01-title"></h5>
+            </div>
+            <!-- .modal-header -->
+            <div class="modal-body">
+                <p>Terminate cluster <strong>{{activeStack.data.name}}</strong> and its stack?</p>
+            </div>
+            <!-- .modal-body -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-block btn-default" data-dismiss="modal">cancel</button>
+                <button type="button" class="btn btn-block btn-danger" data-dismiss="modal" id="terminateStackBtn" ng-click="deleteStack(activeStack.data.id)"><i class="fa fa-times fa-fw"></i>terminate
+                </button>
+            </div>
+            <!-- .modal-footer -->
         </div>
-        <!-- .modal-dialog -->
+        <!-- .modal-content -->
     </div>
-    <!-- .modal .login-modal-sm -->
+    <!-- .modal-dialog -->
+</div>
+<!-- .modal .login-modal-sm -->
 
 
-    </div>
+</div>
 </div>
 
 <div class="container" ng-hide="signedIn">
@@ -1502,6 +1550,7 @@
     </div>
 </div>
 <script src="js/lib/isotope.pkgd.min.js" type="text/javascript"></script>
+<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
 <script src="js/console.UI.js" type="text/javascript"></script>
 </body>
 

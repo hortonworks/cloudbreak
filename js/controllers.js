@@ -2,6 +2,10 @@
 
 /* Controllers */
 
+var log = log4javascript.getLogger("cloudbreak-logger");
+var popUpAppender = new log4javascript.PopUpAppender();
+var layout = new log4javascript.PatternLayout("[%-5p] %m");
+popUpAppender.setLayout(layout);
 var cloudbreakControllers = angular.module('cloudbreakControllers', []);
 
 cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Templates', '$location', '$rootScope', '$q',
@@ -48,7 +52,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
         $scope.awsCredential = true;
 
         $scope.reloadCtrl = function(){
-            console.log('reloading...');
+            log.info('reloading...');
             $route.reload();
         }
 
@@ -64,6 +68,24 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
         $scope.signOut = function() {
             $rootScope.signedIn = false;
             localStorage.signedIn = false;
+        }
+
+        $scope.getLedStyle = function(status) {
+            switch(status) {
+                case "REQUESTED":
+                    return "state1-ready-blink";
+                case "CREATE_IN_PROGRESS":
+                    return "state2-run-blink";
+                case "CREATE_COMPLETED":
+                    return "state5-run";
+                case "CREATE_FAILED":
+                    return "state3-stop";
+                case "DELETE_IN_PROGRESS":
+                    return "state0-stop-blink";
+                case "DELETE_COMPLETED":
+                    return "state3-stop";
+                default: return "state3-stop";
+            }
         }
 
         $scope.getCredentials = function() {
@@ -158,7 +180,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                   }
                 }
             }).error(function (data, status, headers, config) {
-                console.log("unsuccess");
+                log.info("getStack was unsucces: " + data);
             });
         }
 
@@ -193,7 +215,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             }).success(function (data, status, headers, config) {
                 $scope.templates = data;
             }).error(function (data, status, headers, config) {
-                console.log("unsuccess");
+                log.info("getTemplates was unsuccess: " + data);
             });
         }
 
@@ -247,7 +269,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             }).success(function (data, status, headers, config) {
                 $scope.blueprints = data;
             }).error(function (data, status, headers, config) {
-                console.log("unsuccess");
+                log.info("getBluePrints was unsucces: " + data);
             });
         }
 
@@ -320,7 +342,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
         }
 
         $scope.changeActiveStack = function(id) {
-            console.log("active stack change");
+            log.info("active stack change");
             for (var i = 0; i < $scope.stacks.length; i++) {
                 if ($scope.stacks[i].id == id) {
                     $scope.getCredential($scope.stacks[i].credentialId).then(function(data){
@@ -361,7 +383,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 selectTemplate.value = "";
             }).error(function (data, status, headers, config) {
                 $scope.statusMessage = "The creation of stack failed";
-                console.log(data);
+                log.info("Creation of full stack was unsucces: " + data);
                 return deferred.reject();
             });
             return deferred.promise;
@@ -370,7 +392,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
 
 
         $scope.createStack = function() {
-            console.log("stack creation started...");
+            log.info("stack creation started...");
             $scope.createFullStack().then(function(data) {
                 $http({
                     method: 'POST',
@@ -385,20 +407,21 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                         blueprintId: selectBlueprint.value
                     }
                 }).success(function (data, status, headers, config) {
-                    console.log(data);
                     $scope.statusMessage = "Cluster '" + cl_clusterName.value + "' was created succesfully.";
+                    log.info("Stack creation was succes: " + data);
+                    $scope.statusMessage = "Cluster created succesfully.";
                     cl_clusterName.value = "";
                 }).error(function (data, status, headers, config) {
                     $scope.statusMessage = "The creation of cluster failed";
-                    console.log("unsuccess");
+                    log.info("Stack creation was unsuccess: " + data);
                 });
             }, function(reason) {
-                console.log("Failed");
+                log.info("Full Stack creation failed...");
             })
         }
 
         $scope.createBlueprint = function() {
-            console.log("blueprint creation started...");
+            log.info("blueprint creation started...");
             $http({
                 method: 'POST',
                 dataType: 'json',
@@ -423,7 +446,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
         }
 
         $scope.createAwsTemplate = function() {
-            console.log("aws cluster creation started...");
+            log.info("aws cluster creation started...");
             $http({
                 method: 'POST',
                 dataType: 'json',
@@ -499,7 +522,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
         }
 
         $scope.createAwsCredential = function() {
-            console.log("create aws");
+            log.info("create aws credential");
             $http({
                 method: 'POST',
                 dataType: 'json',
@@ -605,7 +628,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
         function disconnect() {
             stompClient.disconnect();
             setConnected(false);
-            console.log("Disconnected");
+            log.info("Disconnected");
         }
 
         function logStackInfo(body) {
@@ -659,7 +682,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 $scope.doQuerys();
             }
         } else {
-            console.log("No localstorage support!");
+            log.info("No localstorage support!");
         }
 
 
