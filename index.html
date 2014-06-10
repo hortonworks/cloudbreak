@@ -663,7 +663,6 @@
     </div>
 
     <div class="form-group">
-        <div class="form-group">
             <label class="col-sm-3 control-label" for="azure_tlocation">Location</label>
 
             <div class="col-sm-9">
@@ -679,34 +678,31 @@
                 </select>
             </div>
             <!-- .col-sm-9 -->
-        </div>
 
     </div>
     <div class="form-group">
         <label class="col-sm-3 control-label" for="azure_timageName">Image name</label>
 
         <div class="col-sm-9">
-            <input type="text" class="form-control" id="azure_timageName">
+            <select class="form-control" id="azure_timageName">
+                <option value="c290a6b031d841e09f2da759bbabe71f__Oracle-Linux-6">Oracle Linux</option>
+            </select>
         </div>
         <!-- .col-sm-9 -->
 
     </div>
     <div class="form-group">
-        <div class="form-group">
-            <label class="col-sm-3 control-label" for="azure_tvmType">Location</label>
-
-            <div class="col-sm-9">
-                <select class="form-control" id="azure_tvmType">
-                    <option value="EXTRA_SMALL">Extra Small</option>
-                    <option value="SMALL">Small</option>
-                    <option value="MEDIUM">Medium</option>
-                    <option value="LARGE">Large</option>
-                    <option value="EXTRA_LARGE">Extra Large</option>
-                </select>
-            </div>
-            <!-- .col-sm-9 -->
+        <label class="col-sm-3 control-label" for="azure_tvmType">Location</label>
+        <div class="col-sm-9">
+            <select class="form-control" id="azure_tvmType">
+                <option value="EXTRA_SMALL">Extra Small</option>
+                <option value="SMALL">Small</option>
+                <option value="MEDIUM">Medium</option>
+                <option value="LARGE">Large</option>
+                <option value="EXTRA_LARGE">Extra Large</option>
+            </select>
         </div>
-
+        <!-- .col-sm-9 -->
     </div>
     <div class="form-group">
         <label class="col-sm-3 control-label" for="azure_taddressPrefix">Address prefix</label>
@@ -736,11 +732,13 @@
 
     </div>
     <div class="form-group">
-        <label class="col-sm-3 control-label" for="azure_tdeploymentSlot">Deployment slot</label>
+            <label class="col-sm-3 control-label" for="azure_tdeploymentSlot">Deployment slot</label>
 
-        <div class="col-sm-9">
-            <input type="text" class="form-control" id="azure_tdeploymentSlot">
-        </div>
+            <div class="col-sm-9">
+                <select class="form-control" id="azure_tdeploymentSlot">
+                    <option value="production">production</option>
+                </select>
+            </div>
         <!-- .col-sm-9 -->
 
     </div>
