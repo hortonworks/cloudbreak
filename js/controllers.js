@@ -88,6 +88,24 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             }
         }
 
+        $scope.getButtonStyle = function(status) {
+            switch(status) {
+                case "REQUESTED":
+                    return "fa-stop";
+                case "CREATE_IN_PROGRESS":
+                    return "fa-pause";
+                case "CREATE_COMPLETED":
+                    return "fa-stop";
+                case "CREATE_FAILED":
+                    return "fa-play";
+                case "DELETE_IN_PROGRESS":
+                    return "fa-pause";
+                case "DELETE_COMPLETED":
+                    return "fa-stop";
+                default: return "fa-stop";
+            }
+        }
+
         $scope.getCredentials = function() {
             $http({
                 method: 'GET',
@@ -646,7 +664,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 $scope.statusMessage = body.name + ": Something went wrong.";
             }
         }
-        
+
         function logClusterInfo(body) {
             if(body.status === 'CREATE_COMPLETED') {
                 $scope.statusMessage = body.name + ": Hadoop cluster was created successfully.";
