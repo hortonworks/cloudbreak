@@ -22,8 +22,12 @@ import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.DetailedAzureStackDescription;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackDescription;
+import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.ProvisionService;
+import com.sequenceiq.cloudbreak.websocket.WebsocketService;
+import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
 import groovyx.net.http.HttpResponseDecorator;
 import groovyx.net.http.HttpResponseException;
@@ -60,12 +64,17 @@ public class AzureProvisionService implements ProvisionService {
     @Autowired
     private JsonHelper jsonHelper;
 
+    @Autowired
+    private StackRepository stackRepository;
+
+    @Autowired
+    private WebsocketService websocketService;
+
     @Override
     @Async
     public void createStack(User user, Stack stack, Credential credential) {
-
         AzureTemplate azureTemplate = (AzureTemplate) stack.getTemplate();
-
+        updatedStackStatus(stack.getId(), Status.REQUESTED);
         String filePath = AzureCredentialService.getUserJksFileName(credential, user.emailAsFolder());
         File file = new File(filePath);
         AzureClient azureClient = new AzureClient(
@@ -73,7 +82,96 @@ public class AzureProvisionService implements ProvisionService {
                 file.getAbsolutePath(),
                 ((AzureCredential) credential).getJks()
         );
+        updatedStackStatus(stack.getId(), Status.CREATE_IN_PROGRESS);
         String name = stack.getName().replaceAll("\\s+", "");
+        createAffinityGroup(azureClient, azureTemplate, name);
+        createStorageAccount(azureClient, azureTemplate, name);
+        createVirtualNetwork(azureClient, azureTemplate, name);
+
+        for (int i = 0; i < stack.getNodeCount(); i++) {
+            try {
+                String vmName = getVmName(name, i);
+                createCloudService(azureClient, azureTemplate, name, vmName);
+                createVirtualMachine(azureClient, azureTemplate, name, vmName);
+            } catch (Exception ex) {
+                LOGGER.info("Problem wiht the stack creation: " + ex.getMessage());
+                updatedStackStatus(stack.getId(), Status.CREATE_FAILED);
+                return;
+            }
+        }
+        updatedStackStatus(stack.getId(), Status.CREATE_COMPLETED);
+    }
+
+    private void updatedStackStatus(Long id, Status status) {
+        Stack updatedStack = stackRepository.findById(id);
+        updatedStack.setStatus(status);
+        stackRepository.save(updatedStack);
+        websocketService.send("/topic/stack", new StatusMessage(updatedStack.getId(), updatedStack.getName(), status.name()));
+    }
+
+
+    private void createVirtualMachine(AzureClient azureClient, AzureTemplate azureTemplate, String name, String vmName) {
+        byte[] encoded = Base64.encodeBase64(vmName.getBytes());
+        String label = new String(encoded);
+        Map<String, String> props = new HashMap<>();
+        props.put(NAME, vmName);
+        props.put(DEPLOYMENTSLOT, azureTemplate.getDeploymentSlot());
+        props.put(LABEL, label);
+        props.put(IMAGENAME, azureTemplate.getImageName());
+        props.put(IMAGESTOREURI,
+                String.format("http://%s.blob.core.windows.net/vhd-store/%s.vhd", name, vmName)
+        );
+        props.put(HOSTNAME, vmName);
+        props.put(USERNAME, azureTemplate.getUserName());
+        if (azureTemplate.getPassword() != null) {
+            props.put(PASSWORD, azureTemplate.getPassword());
+        } else {
+            props.put(SSHPUBLICKEYFINGERPRINT, azureTemplate.getSshPublicKeyFingerprint());
+            props.put(SSHPUBLICKEYPATH, azureTemplate.getSshPublicKeyPath());
+        }
+        props.put(SERVICENAME, vmName);
+        props.put(SUBNETNAME, name);
+        props.put(VIRTUALNETWORKNAME, name);
+        props.put(VMTYPE, AzureVmType.valueOf(azureTemplate.getVmType()).vmType().replaceAll(" ", ""));
+        HttpResponseDecorator virtualMachineResponse = (HttpResponseDecorator) azureClient.createVirtualMachine(props);
+        String requestId = (String) azureClient.getRequestId(virtualMachineResponse);
+        azureClient.waitUntilComplete(requestId);
+    }
+
+    private void createCloudService(AzureClient azureClient, AzureTemplate azureTemplate, String name, String vmName) {
+        Map<String, String> props = new HashMap<>();
+        props.put(NAME, vmName);
+        props.put(DESCRIPTION, azureTemplate.getDescription());
+        props.put(AFFINITYGROUP, name);
+        HttpResponseDecorator cloudServiceResponse = (HttpResponseDecorator) azureClient.createCloudService(props);
+        String requestId = (String) azureClient.getRequestId(cloudServiceResponse);
+        azureClient.waitUntilComplete(requestId);
+    }
+
+
+    private void createVirtualNetwork(AzureClient azureClient, AzureTemplate azureTemplate, String name) {
+        Map<String, String> props = new HashMap<>();
+        props.put(NAME, name);
+        props.put(AFFINITYGROUP, name);
+        props.put(SUBNETNAME, name);
+        props.put(ADDRESSPREFIX, azureTemplate.getAddressPrefix());
+        props.put(SUBNETADDRESSPREFIX, azureTemplate.getSubnetAddressPrefix());
+        HttpResponseDecorator virtualNetworkResponse = (HttpResponseDecorator) azureClient.createVirtualNetwork(props);
+        String requestId = (String) azureClient.getRequestId(virtualNetworkResponse);
+        azureClient.waitUntilComplete(requestId);
+    }
+
+    private void createStorageAccount(AzureClient azureClient, AzureTemplate azureTemplate, String name) {
+        Map<String, String> props = new HashMap<>();
+        props.put(NAME, name);
+        props.put(DESCRIPTION, azureTemplate.getDescription());
+        props.put(AFFINITYGROUP, name);
+        HttpResponseDecorator storageResponse = (HttpResponseDecorator) azureClient.createStorageAccount(props);
+        String requestId = (String) azureClient.getRequestId(storageResponse);
+        azureClient.waitUntilComplete(requestId);
+    }
+
+    private void createAffinityGroup(AzureClient azureClient, AzureTemplate azureTemplate, String name) {
         Map<String, String> props = new HashMap<>();
         props.put(NAME, name);
         props.put(LOCATION, AzureLocation.valueOf(azureTemplate.getLocation()).location());
@@ -81,66 +179,6 @@ public class AzureProvisionService implements ProvisionService {
         HttpResponseDecorator affinityResponse = (HttpResponseDecorator) azureClient.createAffinityGroup(props);
         String requestId = (String) azureClient.getRequestId(affinityResponse);
         azureClient.waitUntilComplete(requestId);
-
-        props = new HashMap<>();
-        props.put(NAME, name);
-        props.put(DESCRIPTION, azureTemplate.getDescription());
-        props.put(AFFINITYGROUP, name);
-        HttpResponseDecorator storageResponse = (HttpResponseDecorator) azureClient.createStorageAccount(props);
-        requestId = (String) azureClient.getRequestId(storageResponse);
-        azureClient.waitUntilComplete(requestId);
-
-        props = new HashMap<>();
-        props.put(NAME, name);
-        props.put(AFFINITYGROUP, name);
-        props.put(SUBNETNAME, name);
-        props.put(ADDRESSPREFIX, azureTemplate.getAddressPrefix());
-        props.put(SUBNETADDRESSPREFIX, azureTemplate.getSubnetAddressPrefix());
-        HttpResponseDecorator virtualNetworkResponse = (HttpResponseDecorator) azureClient.createVirtualNetwork(props);
-        requestId = (String) azureClient.getRequestId(virtualNetworkResponse);
-        azureClient.waitUntilComplete(requestId);
-
-
-        for (int i = 0; i < stack.getNodeCount(); i++) {
-            try {
-                String vmName = getVmName(name, i);
-                props = new HashMap<>();
-                props.put(NAME, vmName);
-                props.put(DESCRIPTION, azureTemplate.getDescription());
-                props.put(AFFINITYGROUP, name);
-                HttpResponseDecorator cloudServiceResponse = (HttpResponseDecorator) azureClient.createCloudService(props);
-                requestId = (String) azureClient.getRequestId(cloudServiceResponse);
-                azureClient.waitUntilComplete(requestId);
-                byte[] encoded = Base64.encodeBase64(vmName.getBytes());
-                String label = new String(encoded);
-                props = new HashMap<>();
-                props.put(NAME, vmName);
-                props.put(DEPLOYMENTSLOT, azureTemplate.getDeploymentSlot());
-                props.put(LABEL, label);
-                props.put(IMAGENAME, azureTemplate.getImageName());
-                props.put(IMAGESTOREURI,
-                        String.format("http://%s.blob.core.windows.net/vhd-store/%s.vhd", name, vmName)
-                );
-                props.put(HOSTNAME, vmName);
-                props.put(USERNAME, azureTemplate.getUserName());
-                if (azureTemplate.getPassword() != null) {
-                    props.put(PASSWORD, azureTemplate.getPassword());
-                } else {
-                    props.put(SSHPUBLICKEYFINGERPRINT, azureTemplate.getSshPublicKeyFingerprint());
-                    props.put(SSHPUBLICKEYPATH, azureTemplate.getSshPublicKeyPath());
-                }
-                props.put(SERVICENAME, vmName);
-                props.put(SUBNETNAME, name);
-                props.put(VIRTUALNETWORKNAME, name);
-                props.put(VMTYPE, AzureVmType.valueOf(azureTemplate.getVmType()).vmType().replaceAll(" ", ""));
-                HttpResponseDecorator virtualMachineResponse = (HttpResponseDecorator) azureClient.createVirtualMachine(props);
-                requestId = (String) azureClient.getRequestId(virtualMachineResponse);
-                azureClient.waitUntilComplete(requestId);
-            } catch (Exception ex) {
-                LOGGER.info(ex.getMessage());
-                LOGGER.info(ex.getStackTrace().toString());
-            }
-        }
     }
 
     private String getVmName(String azureTemplate, int i) {
