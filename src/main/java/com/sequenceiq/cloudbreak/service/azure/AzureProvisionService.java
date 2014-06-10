@@ -73,8 +73,9 @@ public class AzureProvisionService implements ProvisionService {
                 file.getAbsolutePath(),
                 ((AzureCredential) credential).getJks()
                 );
+        String name = stack.getName().replaceAll("\\s+","");
         Map<String, String> props = new HashMap<>();
-        props.put(NAME, azureTemplate.getName());
+        props.put(NAME, name);
         props.put(LOCATION, AzureLocation.valueOf(azureTemplate.getLocation()).location());
         props.put(DESCRIPTION, azureTemplate.getDescription());
         HttpResponseDecorator affinityResponse = (HttpResponseDecorator) azureClient.createAffinityGroup(props);
@@ -82,57 +83,63 @@ public class AzureProvisionService implements ProvisionService {
         azureClient.waitUntilComplete(requestId);
 
         props = new HashMap<>();
-        props.put(NAME, azureTemplate.getName());
+        props.put(NAME, name);
         props.put(DESCRIPTION, azureTemplate.getDescription());
-        props.put(AFFINITYGROUP, azureTemplate.getName());
+        props.put(AFFINITYGROUP, name);
         HttpResponseDecorator storageResponse = (HttpResponseDecorator) azureClient.createStorageAccount(props);
         requestId = (String) azureClient.getRequestId(storageResponse);
         azureClient.waitUntilComplete(requestId);
 
         props = new HashMap<>();
-        props.put(NAME, azureTemplate.getName());
-        props.put(AFFINITYGROUP, azureTemplate.getName());
-        props.put(SUBNETNAME, azureTemplate.getSubnetAddressPrefix());
+        props.put(NAME, name);
+        props.put(AFFINITYGROUP, name);
+        props.put(SUBNETNAME, name);
         props.put(ADDRESSPREFIX, azureTemplate.getAddressPrefix());
         props.put(SUBNETADDRESSPREFIX, azureTemplate.getSubnetAddressPrefix());
         HttpResponseDecorator virtualNetworkResponse = (HttpResponseDecorator) azureClient.createVirtualNetwork(props);
         requestId = (String) azureClient.getRequestId(virtualNetworkResponse);
         azureClient.waitUntilComplete(requestId);
 
-        for (int i = 0; i < stack.getNodeCount(); i++) {
-            String vmName = getVmName(azureTemplate.getName(), i);
-            props = new HashMap<>();
-            props.put(NAME, vmName);
-            props.put(DESCRIPTION, azureTemplate.getDescription());
-            props.put(AFFINITYGROUP, azureTemplate.getName());
-            HttpResponseDecorator cloudServiceResponse = (HttpResponseDecorator) azureClient.createCloudService(props);
-            requestId = (String) azureClient.getRequestId(cloudServiceResponse);
-            azureClient.waitUntilComplete(requestId);
-            byte[] encoded = Base64.encodeBase64(vmName.getBytes());
-            String label = new String(encoded);
-            props = new HashMap<>();
-            props.put(NAME, vmName);
-            props.put(DEPLOYMENTSLOT, azureTemplate.getDeploymentSlot());
-            props.put(LABEL, label);
-            props.put(IMAGENAME, azureTemplate.getImageName());
-            props.put(IMAGESTOREURI,
-                    String.format("http://%s.blob.core.windows.net/vhd-store/%s.vhd", azureTemplate.getName(), vmName)
-                    );
-            props.put(HOSTNAME, vmName);
-            props.put(USERNAME, azureTemplate.getUserName());
-            if (azureTemplate.getPassword() != null) {
-                props.put(PASSWORD, azureTemplate.getPassword());
-            } else {
-                props.put(SSHPUBLICKEYFINGERPRINT, azureTemplate.getSshPublicKeyFingerprint());
-                props.put(SSHPUBLICKEYPATH, azureTemplate.getSshPublicKeyPath());
-            }
 
-            props.put(SUBNETNAME, azureTemplate.getName());
-            props.put(VIRTUALNETWORKNAME, azureTemplate.getName());
-            props.put(VMTYPE, AzureVmType.valueOf(azureTemplate.getVmType()).vmType());
-            HttpResponseDecorator virtualMachineResponse = (HttpResponseDecorator) azureClient.createVirtualMachine(props);
-            requestId = (String) azureClient.getRequestId(virtualMachineResponse);
-            azureClient.waitUntilComplete(requestId);
+        for (int i = 0; i < stack.getNodeCount(); i++) {
+            try {
+                String vmName = getVmName(name, i);
+                props = new HashMap<>();
+                props.put(NAME, vmName);
+                props.put(DESCRIPTION, azureTemplate.getDescription());
+                props.put(AFFINITYGROUP, name);
+                HttpResponseDecorator cloudServiceResponse = (HttpResponseDecorator) azureClient.createCloudService(props);
+                requestId = (String) azureClient.getRequestId(cloudServiceResponse);
+                azureClient.waitUntilComplete(requestId);
+                byte[] encoded = Base64.encodeBase64(vmName.getBytes());
+                String label = new String(encoded);
+                props = new HashMap<>();
+                props.put(NAME, vmName);
+                props.put(DEPLOYMENTSLOT, azureTemplate.getDeploymentSlot());
+                props.put(LABEL, label);
+                props.put(IMAGENAME, azureTemplate.getImageName());
+                props.put(IMAGESTOREURI,
+                        String.format("http://%s.blob.core.windows.net/vhd-store/%s.vhd", name, vmName)
+                );
+                props.put(HOSTNAME, vmName);
+                props.put(USERNAME, azureTemplate.getUserName());
+                if (azureTemplate.getPassword() != null) {
+                    props.put(PASSWORD, azureTemplate.getPassword());
+                } else {
+                    props.put(SSHPUBLICKEYFINGERPRINT, azureTemplate.getSshPublicKeyFingerprint());
+                    props.put(SSHPUBLICKEYPATH, azureTemplate.getSshPublicKeyPath());
+                }
+                props.put(SERVICENAME, vmName);
+                props.put(SUBNETNAME, name);
+                props.put(VIRTUALNETWORKNAME, name);
+                props.put(VMTYPE, AzureVmType.valueOf(azureTemplate.getVmType()).vmType().replaceAll(" ",""));
+                HttpResponseDecorator virtualMachineResponse = (HttpResponseDecorator) azureClient.createVirtualMachine(props);
+                requestId = (String) azureClient.getRequestId(virtualMachineResponse);
+                azureClient.waitUntilComplete(requestId);
+            } catch (Exception ex) {
+                LOGGER.info(ex.getMessage());
+                LOGGER.info(ex.getStackTrace().toString());
+            }
         }
     }
 
@@ -151,7 +158,7 @@ public class AzureProvisionService implements ProvisionService {
                 );
 
         AzureStackDescription azureStackDescription = new AzureStackDescription();
-        String templateName = ((AzureTemplate) stack.getTemplate()).getName();
+        String templateName = stack.getName();
         try {
             Object cloudService = azureClient.getCloudService(templateName);
             azureStackDescription.setCloudService(jsonHelper.createJsonFromString(cloudService.toString()));
@@ -184,7 +191,7 @@ public class AzureProvisionService implements ProvisionService {
                 );
 
         DetailedAzureStackDescription detailedAzureStackDescription = new DetailedAzureStackDescription();
-        String templateName = ((AzureTemplate) stack.getTemplate()).getName();
+        String templateName = stack.getName();
         try {
             Object affinityGroup = azureClient.getAffinityGroup(templateName);
             detailedAzureStackDescription.setAffinityGroup(jsonHelper.createJsonFromString(affinityGroup.toString()));
@@ -229,7 +236,7 @@ public class AzureProvisionService implements ProvisionService {
                 file.getAbsolutePath(),
                 ((AzureCredential) credential).getJks()
                 );
-        String templateName = ((AzureTemplate) stack.getTemplate()).getName();
+        String templateName = stack.getName();
         for (int i = 0; i < stack.getNodeCount(); i++) {
             String vmName = getVmName(templateName, i);
             Map<String, String> props = new HashMap<>();
