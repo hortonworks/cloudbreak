@@ -72,8 +72,8 @@ public class AzureProvisionService implements ProvisionService {
                 ((AzureCredential) credential).getSubscriptionId(),
                 file.getAbsolutePath(),
                 ((AzureCredential) credential).getJks()
-                );
-        String name = stack.getName().replaceAll("\\s+","");
+        );
+        String name = stack.getName().replaceAll("\\s+", "");
         Map<String, String> props = new HashMap<>();
         props.put(NAME, name);
         props.put(LOCATION, AzureLocation.valueOf(azureTemplate.getLocation()).location());
@@ -132,7 +132,7 @@ public class AzureProvisionService implements ProvisionService {
                 props.put(SERVICENAME, vmName);
                 props.put(SUBNETNAME, name);
                 props.put(VIRTUALNETWORKNAME, name);
-                props.put(VMTYPE, AzureVmType.valueOf(azureTemplate.getVmType()).vmType().replaceAll(" ",""));
+                props.put(VMTYPE, AzureVmType.valueOf(azureTemplate.getVmType()).vmType().replaceAll(" ", ""));
                 HttpResponseDecorator virtualMachineResponse = (HttpResponseDecorator) azureClient.createVirtualMachine(props);
                 requestId = (String) azureClient.getRequestId(virtualMachineResponse);
                 azureClient.waitUntilComplete(requestId);
@@ -155,7 +155,7 @@ public class AzureProvisionService implements ProvisionService {
                 ((AzureCredential) credential).getSubscriptionId(),
                 file.getAbsolutePath(),
                 ((AzureCredential) credential).getJks()
-                );
+        );
 
         AzureStackDescription azureStackDescription = new AzureStackDescription();
         String templateName = stack.getName();
@@ -188,7 +188,7 @@ public class AzureProvisionService implements ProvisionService {
                 ((AzureCredential) credential).getSubscriptionId(),
                 file.getAbsolutePath(),
                 ((AzureCredential) credential).getJks()
-                );
+        );
 
         DetailedAzureStackDescription detailedAzureStackDescription = new DetailedAzureStackDescription();
         String templateName = stack.getName();
@@ -235,7 +235,7 @@ public class AzureProvisionService implements ProvisionService {
                 ((AzureCredential) credential).getSubscriptionId(),
                 file.getAbsolutePath(),
                 ((AzureCredential) credential).getJks()
-                );
+        );
         String templateName = stack.getName();
         for (int i = 0; i < stack.getNodeCount(); i++) {
             String vmName = getVmName(templateName, i);
