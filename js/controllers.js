@@ -8,8 +8,8 @@ var layout = new log4javascript.PatternLayout("[%-5p] %m");
 popUpAppender.setLayout(layout);
 var cloudbreakControllers = angular.module('cloudbreakControllers', []);
 
-cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Templates', '$location', '$rootScope', '$q',
-    function ($scope, $http, Templates, $location, $rootScope, $q) {
+cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Templates', '$location', '$rootScope', '$q', '$window',
+    function ($scope, $http, Templates, $location, $rootScope, $q, $window) {
         $scope.form = undefined;
         $http.defaults.useXDomain = true;
         delete $http.defaults.headers.common['X-Requested-With'];
@@ -608,6 +608,25 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 $scope.getBluePrints();
                 $scope.getStacks();
                 connect($rootScope.apiUrl);
+            });
+        }
+
+        $scope.getAzureCertification = function(credentialId){
+            $http({
+                method: 'GET',
+                dataType: 'json',
+                withCredentials: true,
+                url:  $rootScope.apiUrl + "/credential/certificate/" + credentialId,
+                headers: {
+                    'Authorization': 'Basic ' + $rootScope.basic_auth,
+                    'Content-Type': 'application/json'
+                }
+            }).success(function (data, status, headers, config) {
+                console.log("Azure certificate request was succes: " + data);
+                var blob = new Blob([data], { type: 'text/plain' });
+                saveAs(blob, 'azure.cer');
+            }).error(function (data, status, headers, config) {
+                log.info("Azure certificate request was unsucces: " + data);
             });
         }
 

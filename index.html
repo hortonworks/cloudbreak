@@ -23,6 +23,8 @@
 
     <script src="https://rawgit.com/jmesnil/stomp-websocket/master/lib/stomp.js"></script>
     <script src="http://cdn.sockjs.org/sockjs-0.3.4.min.js"></script>
+    <script src="js/lib/blob.js" type="text/javascript"></script>
+    <script src="js/lib/filesaver.js" type="text/javascript"></script>
     <script src="js/lib/retina.min.js" type="text/javascript"></script>
     <script src="js/lib/log4javascript.js" type="text/javascript"></script>
     <script src="js/lib/angular.js"></script>
@@ -1175,7 +1177,7 @@
 <div class="panel-heading panel-heading-nav">
     <a href="#panel-credentials-collapse" id="credentials-btn" class="btn btn-info btn-fa-2x" role="button" data-toggle="collapse"><i
             class="fa fa-angle-down fa-2x fa-fw-forced"></i></a>
-    <h4><span class="badge pull-right">{{templates.length}}</span> manage credentials</h4>
+    <h4><span class="badge pull-right">{{credentials.length}}</span> manage credentials</h4>
 </div>
 
 <div id="panel-credentials-collapse" class="panel-collapse panel-btn-in-header-collapse collapse">
@@ -1330,6 +1332,17 @@
 
                             <div class="col-sm-9">
                                 <p id="jksPassword" class="form-control-static">{{credential.parameters.jksPassword}}</p>
+                            </div>
+                            <!-- .col-sm-9 -->
+                        </div>
+                        <!-- .form-group -->
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label" for="jksFile">Certification file</label>
+
+                            <div class="col-sm-9">
+                                <a href="#" id="jksFile" ng-click="getAzureCertification(credential.id)" download="file.cer" class="btn btn-success btn-block" role="button"><i
+                                        class="fa fa-file fa-fw"></i>
+                                    Download certificate file</a>
                             </div>
                             <!-- .col-sm-9 -->
                         </div>
