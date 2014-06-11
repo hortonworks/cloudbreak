@@ -525,12 +525,11 @@
                                 <label class="col-sm-3 control-label" for="cl_clusterName">Cluster name</label>
 
                                 <div class="col-sm-9">
-                                    <input type="text" class="form-control" id="cl_clusterName" placeholder="max. 20 char" ng-model="cl_clusterName"
-                                           ng-pattern="/[a-zA-Z]/">
+                                    <input type="text" name="cl_clusterName" class="form-control" id="cl_clusterName" placeholder="max. 20 char" ng-model="cl_clusterName"
+                                           ng-pattern="/^[a-zA-Z][-a-zA-Z0-9]*$/" ng-minlength="3" ng-maxlength="20" required>
 
                                     <div class="alert-danger"
-                                         ng-show="clusterCreationForm.cl_clusterName.$dirty && clusterCreationForm.cl_clusterName.$invalid">Name has to be match
-                                        for regex: [a-zA-Z][-a-zA-Z0-9]*
+                                         ng-show="clusterCreationForm.cl_clusterName.$dirty && clusterCreationForm.cl_clusterName.$invalid">Must contain only alphanumeric characters and hyphens and start with an alpha character (min 3, max 20 characters).
                                     </div>
                                 </div>
                                 <!-- .col-sm-9 -->
