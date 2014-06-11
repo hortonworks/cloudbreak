@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.service.azure;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
@@ -58,6 +60,7 @@ public class AzureProvisionService implements ProvisionService {
     private static final String SSHPUBLICKEYFINGERPRINT = "sshPublicKeyFingerprint";
     private static final String SSHPUBLICKEYPATH = "sshPublicKeyPath";
     private static final String SERVICENAME = "serviceName";
+    private static final String PORTS = "ports";
     private static final String ERROR = "\"error\":\"Could not fetch data from azure\"";
     private static final int NOT_FOUND = 404;
 
@@ -113,7 +116,17 @@ public class AzureProvisionService implements ProvisionService {
     private void createVirtualMachine(AzureClient azureClient, AzureTemplate azureTemplate, String name, String vmName) {
         byte[] encoded = Base64.encodeBase64(vmName.getBytes());
         String label = new String(encoded);
-        Map<String, String> props = new HashMap<>();
+        Map<String, Object> props = new HashMap<>();
+        List<Port> ports = new ArrayList<>();
+        ports.add(new Port("Ambari", "8080", "8080", "tcp"));
+        ports.add(new Port("NameNode", "50070", "50070", "tcp"));
+        ports.add(new Port("ResourceManager", "8088", "8088", "tcp"));
+        ports.add(new Port("Job History Server", "19888", "19888", "tcp"));
+        ports.add(new Port("HBase Master", "60010", "60010", "tcp"));
+        ports.add(new Port("Falcon", "15000", "15000", "tcp"));
+        ports.add(new Port("Storm", "8744", "8744", "tcp"));
+        ports.add(new Port("Oozie", "11000", "11000", "tcp"));
+        ports.add(new Port("HTTP", "80", "80", "tcp"));
         props.put(NAME, vmName);
         props.put(DEPLOYMENTSLOT, azureTemplate.getDeploymentSlot());
         props.put(LABEL, label);
@@ -132,6 +145,7 @@ public class AzureProvisionService implements ProvisionService {
         props.put(SERVICENAME, vmName);
         props.put(SUBNETNAME, name);
         props.put(VIRTUALNETWORKNAME, name);
+        props.put(PORTS, ports);
         props.put(VMTYPE, AzureVmType.valueOf(azureTemplate.getVmType()).vmType().replaceAll(" ", ""));
         HttpResponseDecorator virtualMachineResponse = (HttpResponseDecorator) azureClient.createVirtualMachine(props);
         String requestId = (String) azureClient.getRequestId(virtualMachineResponse);
