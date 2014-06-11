@@ -91,9 +91,9 @@ sonarRunner {
 
 repositories {
     mavenCentral()
+    maven { url "http://maven.sequenceiq.com/snapshots" }
     maven { url "http://seq-repo.s3-website-eu-west-1.amazonaws.com/releases" }
     maven { url "http://seq-repo.s3-website-eu-west-1.amazonaws.com/snapshots" }
-    maven { url "http://maven.sequenceiq.com/snapshots" }
 }
 
 dependencies {

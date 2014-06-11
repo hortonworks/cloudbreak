@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.service.azure;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
@@ -22,8 +24,12 @@ import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.DetailedAzureStackDescription;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackDescription;
+import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.ProvisionService;
+import com.sequenceiq.cloudbreak.websocket.WebsocketService;
+import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
 import groovyx.net.http.HttpResponseDecorator;
 import groovyx.net.http.HttpResponseException;
@@ -54,86 +60,139 @@ public class AzureProvisionService implements ProvisionService {
     private static final String SSHPUBLICKEYFINGERPRINT = "sshPublicKeyFingerprint";
     private static final String SSHPUBLICKEYPATH = "sshPublicKeyPath";
     private static final String SERVICENAME = "serviceName";
+    private static final String PORTS = "ports";
     private static final String ERROR = "\"error\":\"Could not fetch data from azure\"";
     private static final int NOT_FOUND = 404;
 
     @Autowired
     private JsonHelper jsonHelper;
 
+    @Autowired
+    private StackRepository stackRepository;
+
+    @Autowired
+    private WebsocketService websocketService;
+
     @Override
     @Async
     public void createStack(User user, Stack stack, Credential credential) {
-
         AzureTemplate azureTemplate = (AzureTemplate) stack.getTemplate();
-
+        updatedStackStatus(stack.getId(), Status.REQUESTED);
         String filePath = AzureCredentialService.getUserJksFileName(credential, user.emailAsFolder());
         File file = new File(filePath);
         AzureClient azureClient = new AzureClient(
                 ((AzureCredential) credential).getSubscriptionId(),
                 file.getAbsolutePath(),
                 ((AzureCredential) credential).getJks()
-                );
+        );
+        updatedStackStatus(stack.getId(), Status.CREATE_IN_PROGRESS);
+        String name = stack.getName().replaceAll("\\s+", "");
+        createAffinityGroup(azureClient, azureTemplate, name);
+        createStorageAccount(azureClient, azureTemplate, name);
+        createVirtualNetwork(azureClient, azureTemplate, name);
+
+        for (int i = 0; i < stack.getNodeCount(); i++) {
+            try {
+                String vmName = getVmName(name, i);
+                createCloudService(azureClient, azureTemplate, name, vmName);
+                createVirtualMachine(azureClient, azureTemplate, name, vmName);
+            } catch (Exception ex) {
+                LOGGER.info("Problem wiht the stack creation: " + ex.getMessage());
+                updatedStackStatus(stack.getId(), Status.CREATE_FAILED);
+                return;
+            }
+        }
+        updatedStackStatus(stack.getId(), Status.CREATE_COMPLETED);
+    }
+
+    private void updatedStackStatus(Long id, Status status) {
+        Stack updatedStack = stackRepository.findById(id);
+        updatedStack.setStatus(status);
+        stackRepository.save(updatedStack);
+        websocketService.send("/topic/stack", new StatusMessage(updatedStack.getId(), updatedStack.getName(), status.name()));
+    }
+
+
+    private void createVirtualMachine(AzureClient azureClient, AzureTemplate azureTemplate, String name, String vmName) {
+        byte[] encoded = Base64.encodeBase64(vmName.getBytes());
+        String label = new String(encoded);
+        Map<String, Object> props = new HashMap<>();
+        List<Port> ports = new ArrayList<>();
+        ports.add(new Port("Ambari", "8080", "8080", "tcp"));
+        ports.add(new Port("NameNode", "50070", "50070", "tcp"));
+        ports.add(new Port("ResourceManager", "8088", "8088", "tcp"));
+        ports.add(new Port("Job History Server", "19888", "19888", "tcp"));
+        ports.add(new Port("HBase Master", "60010", "60010", "tcp"));
+        ports.add(new Port("Falcon", "15000", "15000", "tcp"));
+        ports.add(new Port("Storm", "8744", "8744", "tcp"));
+        ports.add(new Port("Oozie", "11000", "11000", "tcp"));
+        ports.add(new Port("HTTP", "80", "80", "tcp"));
+        props.put(NAME, vmName);
+        props.put(DEPLOYMENTSLOT, azureTemplate.getDeploymentSlot());
+        props.put(LABEL, label);
+        props.put(IMAGENAME, azureTemplate.getImageName());
+        props.put(IMAGESTOREURI,
+                String.format("http://%s.blob.core.windows.net/vhd-store/%s.vhd", name, vmName)
+        );
+        props.put(HOSTNAME, vmName);
+        props.put(USERNAME, azureTemplate.getUserName());
+        if (azureTemplate.getPassword() != null) {
+            props.put(PASSWORD, azureTemplate.getPassword());
+        } else {
+            props.put(SSHPUBLICKEYFINGERPRINT, azureTemplate.getSshPublicKeyFingerprint());
+            props.put(SSHPUBLICKEYPATH, azureTemplate.getSshPublicKeyPath());
+        }
+        props.put(SERVICENAME, vmName);
+        props.put(SUBNETNAME, name);
+        props.put(VIRTUALNETWORKNAME, name);
+        props.put(PORTS, ports);
+        props.put(VMTYPE, AzureVmType.valueOf(azureTemplate.getVmType()).vmType().replaceAll(" ", ""));
+        HttpResponseDecorator virtualMachineResponse = (HttpResponseDecorator) azureClient.createVirtualMachine(props);
+        String requestId = (String) azureClient.getRequestId(virtualMachineResponse);
+        azureClient.waitUntilComplete(requestId);
+    }
+
+    private void createCloudService(AzureClient azureClient, AzureTemplate azureTemplate, String name, String vmName) {
         Map<String, String> props = new HashMap<>();
-        props.put(NAME, azureTemplate.getName());
+        props.put(NAME, vmName);
+        props.put(DESCRIPTION, azureTemplate.getDescription());
+        props.put(AFFINITYGROUP, name);
+        HttpResponseDecorator cloudServiceResponse = (HttpResponseDecorator) azureClient.createCloudService(props);
+        String requestId = (String) azureClient.getRequestId(cloudServiceResponse);
+        azureClient.waitUntilComplete(requestId);
+    }
+
+
+    private void createVirtualNetwork(AzureClient azureClient, AzureTemplate azureTemplate, String name) {
+        Map<String, String> props = new HashMap<>();
+        props.put(NAME, name);
+        props.put(AFFINITYGROUP, name);
+        props.put(SUBNETNAME, name);
+        props.put(ADDRESSPREFIX, azureTemplate.getAddressPrefix());
+        props.put(SUBNETADDRESSPREFIX, azureTemplate.getSubnetAddressPrefix());
+        HttpResponseDecorator virtualNetworkResponse = (HttpResponseDecorator) azureClient.createVirtualNetwork(props);
+        String requestId = (String) azureClient.getRequestId(virtualNetworkResponse);
+        azureClient.waitUntilComplete(requestId);
+    }
+
+    private void createStorageAccount(AzureClient azureClient, AzureTemplate azureTemplate, String name) {
+        Map<String, String> props = new HashMap<>();
+        props.put(NAME, name);
+        props.put(DESCRIPTION, azureTemplate.getDescription());
+        props.put(AFFINITYGROUP, name);
+        HttpResponseDecorator storageResponse = (HttpResponseDecorator) azureClient.createStorageAccount(props);
+        String requestId = (String) azureClient.getRequestId(storageResponse);
+        azureClient.waitUntilComplete(requestId);
+    }
+
+    private void createAffinityGroup(AzureClient azureClient, AzureTemplate azureTemplate, String name) {
+        Map<String, String> props = new HashMap<>();
+        props.put(NAME, name);
         props.put(LOCATION, AzureLocation.valueOf(azureTemplate.getLocation()).location());
         props.put(DESCRIPTION, azureTemplate.getDescription());
         HttpResponseDecorator affinityResponse = (HttpResponseDecorator) azureClient.createAffinityGroup(props);
         String requestId = (String) azureClient.getRequestId(affinityResponse);
         azureClient.waitUntilComplete(requestId);
-
-        props = new HashMap<>();
-        props.put(NAME, azureTemplate.getName());
-        props.put(DESCRIPTION, azureTemplate.getDescription());
-        props.put(AFFINITYGROUP, azureTemplate.getName());
-        HttpResponseDecorator storageResponse = (HttpResponseDecorator) azureClient.createStorageAccount(props);
-        requestId = (String) azureClient.getRequestId(storageResponse);
-        azureClient.waitUntilComplete(requestId);
-
-        props = new HashMap<>();
-        props.put(NAME, azureTemplate.getName());
-        props.put(AFFINITYGROUP, azureTemplate.getName());
-        props.put(SUBNETNAME, azureTemplate.getSubnetAddressPrefix());
-        props.put(ADDRESSPREFIX, azureTemplate.getAddressPrefix());
-        props.put(SUBNETADDRESSPREFIX, azureTemplate.getSubnetAddressPrefix());
-        HttpResponseDecorator virtualNetworkResponse = (HttpResponseDecorator) azureClient.createVirtualNetwork(props);
-        requestId = (String) azureClient.getRequestId(virtualNetworkResponse);
-        azureClient.waitUntilComplete(requestId);
-
-        for (int i = 0; i < stack.getNodeCount(); i++) {
-            String vmName = getVmName(azureTemplate.getName(), i);
-            props = new HashMap<>();
-            props.put(NAME, vmName);
-            props.put(DESCRIPTION, azureTemplate.getDescription());
-            props.put(AFFINITYGROUP, azureTemplate.getName());
-            HttpResponseDecorator cloudServiceResponse = (HttpResponseDecorator) azureClient.createCloudService(props);
-            requestId = (String) azureClient.getRequestId(cloudServiceResponse);
-            azureClient.waitUntilComplete(requestId);
-            byte[] encoded = Base64.encodeBase64(vmName.getBytes());
-            String label = new String(encoded);
-            props = new HashMap<>();
-            props.put(NAME, vmName);
-            props.put(DEPLOYMENTSLOT, azureTemplate.getDeploymentSlot());
-            props.put(LABEL, label);
-            props.put(IMAGENAME, azureTemplate.getImageName());
-            props.put(IMAGESTOREURI,
-                    String.format("http://%s.blob.core.windows.net/vhd-store/%s.vhd", azureTemplate.getName(), vmName)
-                    );
-            props.put(HOSTNAME, vmName);
-            props.put(USERNAME, azureTemplate.getUserName());
-            if (azureTemplate.getPassword() != null) {
-                props.put(PASSWORD, azureTemplate.getPassword());
-            } else {
-                props.put(SSHPUBLICKEYFINGERPRINT, azureTemplate.getSshPublicKeyFingerprint());
-                props.put(SSHPUBLICKEYPATH, azureTemplate.getSshPublicKeyPath());
-            }
-
-            props.put(SUBNETNAME, azureTemplate.getName());
-            props.put(VIRTUALNETWORKNAME, azureTemplate.getName());
-            props.put(VMTYPE, AzureVmType.valueOf(azureTemplate.getVmType()).vmType());
-            HttpResponseDecorator virtualMachineResponse = (HttpResponseDecorator) azureClient.createVirtualMachine(props);
-            requestId = (String) azureClient.getRequestId(virtualMachineResponse);
-            azureClient.waitUntilComplete(requestId);
-        }
     }
 
     private String getVmName(String azureTemplate, int i) {
@@ -148,10 +207,10 @@ public class AzureProvisionService implements ProvisionService {
                 ((AzureCredential) credential).getSubscriptionId(),
                 file.getAbsolutePath(),
                 ((AzureCredential) credential).getJks()
-                );
+        );
 
         AzureStackDescription azureStackDescription = new AzureStackDescription();
-        String templateName = ((AzureTemplate) stack.getTemplate()).getName();
+        String templateName = stack.getName();
         try {
             Object cloudService = azureClient.getCloudService(templateName);
             azureStackDescription.setCloudService(jsonHelper.createJsonFromString(cloudService.toString()));
@@ -181,10 +240,10 @@ public class AzureProvisionService implements ProvisionService {
                 ((AzureCredential) credential).getSubscriptionId(),
                 file.getAbsolutePath(),
                 ((AzureCredential) credential).getJks()
-                );
+        );
 
         DetailedAzureStackDescription detailedAzureStackDescription = new DetailedAzureStackDescription();
-        String templateName = ((AzureTemplate) stack.getTemplate()).getName();
+        String templateName = stack.getName();
         try {
             Object affinityGroup = azureClient.getAffinityGroup(templateName);
             detailedAzureStackDescription.setAffinityGroup(jsonHelper.createJsonFromString(affinityGroup.toString()));
@@ -228,8 +287,8 @@ public class AzureProvisionService implements ProvisionService {
                 ((AzureCredential) credential).getSubscriptionId(),
                 file.getAbsolutePath(),
                 ((AzureCredential) credential).getJks()
-                );
-        String templateName = ((AzureTemplate) stack.getTemplate()).getName();
+        );
+        String templateName = stack.getName();
         for (int i = 0; i < stack.getNodeCount(); i++) {
             String vmName = getVmName(templateName, i);
             Map<String, String> props = new HashMap<>();
