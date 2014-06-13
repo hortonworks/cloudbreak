@@ -3,7 +3,7 @@ set -x
 
 : ${NODE_PREFIX=amb}
 : ${MYDOMAIN:=mycorp.kom}
-: ${IMAGE:="sequenceiq/ambari:dns"}
+: ${IMAGE:="sequenceiq/ambari"}
 
 RESERV=$(curl -s 169.254.169.254/latest/meta-data/reservation-id)
 INS_ID=$(curl -s 169.254.169.254/latest/meta-data/instance-id)
@@ -30,14 +30,15 @@ create_routes() {
   done
 }
 
+route delete -net 172.17.0.0/16
 aws ec2 describe-instances --instance-ids $OTHER_INSTANCES --query Reservations[].Instances[].[AmiLaunchIndex,PrivateIpAddress] --out text | create_routes
 
 netstat -nr
 
-sh -c "cat > /etc/sysconfig/docker" <<"EOF"
-other_args="-b bridge0 -H unix:// -H tcp://0.0.0.0:4243"
+sh -c "cat > /etc/default/docker" <<"EOF"
+DOCKER_OPTS="-b bridge0 -H unix:// -H tcp://0.0.0.0:4243"
 EOF
-/etc/init.d/docker restart
+service docker restart
 #KOMMENT
 
 LAUNCH_IDX_OF_FIST_OTHER=$(aws ec2 describe-instances --instance-ids $OTHER_INSTANCES --query Reservations[].Instances[0].AmiLaunchIndex --out text)
@@ -52,7 +53,7 @@ IMAGE=ambari-warmup
 
 #docker run -e SERF_JOIN_IP=$SERF_JOIN_IP -d --dns 127.0.0.1 -h node-$LAUNCH_IDX.mycorp.kom $IMAGE
 
-[ $LAUNCH_IDX -eq 0 ] && AMBARI_ROLE="--tag ambari-role=server,agent" || AMBARI_ROLE=""
+[ $LAUNCH_IDX -eq 0 ] && AMBARI_ROLE="--tag ambari-server=true" || AMBARI_ROLE=""
 
 CMD="docker run -d -p 8080:8080 -e SERF_JOIN_IP=$SERF_JOIN_IP --dns 127.0.0.1 --name ${NODE_PREFIX}${LAUNCH_IDX} -h ${NODE_PREFIX}${LAUNCH_IDX}.${MYDOMAIN} --entrypoint /usr/local/serf/bin/start-serf-agent.sh  $IMAGE $AMBARI_ROLE"
 
