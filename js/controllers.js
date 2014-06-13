@@ -484,7 +484,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     }
                 }
             }).success(function (data, status, headers, config) {
-                $scope.statusMessage = "AWS template '" + data.id + "' deleted successfully";
+                $scope.statusMessage = "AWS template '" + data.id + "' was created successfully";
                 $scope.getTemplates();
                 aws_tclusterName.value = "";
                 aws_tkeyName.value = "";
