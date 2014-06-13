@@ -88,15 +88,16 @@ public class AzureProvisionService implements ProvisionService {
         );
         updatedStackStatus(stack.getId(), Status.CREATE_IN_PROGRESS);
         String name = stack.getName().replaceAll("\\s+", "");
-        createAffinityGroup(azureClient, azureTemplate, name);
-        createStorageAccount(azureClient, azureTemplate, name);
-        createVirtualNetwork(azureClient, azureTemplate, name);
+        String commonName = credential.getName().replaceAll("\\s+", "");
+        createAffinityGroup(azureClient, azureTemplate, commonName);
+        createStorageAccount(azureClient, azureTemplate, commonName);
+        createVirtualNetwork(azureClient, azureTemplate, name, commonName);
 
         for (int i = 0; i < stack.getNodeCount(); i++) {
             try {
                 String vmName = getVmName(name, i);
-                createCloudService(azureClient, azureTemplate, name, vmName);
-                createVirtualMachine(azureClient, azureTemplate, name, vmName);
+                createCloudService(azureClient, azureTemplate, name, vmName, commonName);
+                createVirtualMachine(azureClient, azureTemplate, name, vmName, commonName);
             } catch (Exception ex) {
                 LOGGER.info("Problem wiht the stack creation: " + ex.getMessage());
                 updatedStackStatus(stack.getId(), Status.CREATE_FAILED);
@@ -115,7 +116,7 @@ public class AzureProvisionService implements ProvisionService {
     }
 
 
-    private void createVirtualMachine(AzureClient azureClient, AzureTemplate azureTemplate, String name, String vmName) {
+    private void createVirtualMachine(AzureClient azureClient, AzureTemplate azureTemplate, String name, String vmName, String commonName) {
         byte[] encoded = Base64.encodeBase64(vmName.getBytes());
         String label = new String(encoded);
         Map<String, Object> props = new HashMap<>();
@@ -134,7 +135,7 @@ public class AzureProvisionService implements ProvisionService {
         props.put(LABEL, label);
         props.put(IMAGENAME, azureTemplate.getImageName());
         props.put(IMAGESTOREURI,
-                String.format("http://%s.blob.core.windows.net/vhd-store/%s.vhd", name, vmName)
+                String.format("http://%s.blob.core.windows.net/vhd-store/%s.vhd", commonName, vmName)
         );
         props.put(HOSTNAME, vmName);
         props.put(USERNAME, azureTemplate.getUserName());
@@ -154,21 +155,21 @@ public class AzureProvisionService implements ProvisionService {
         azureClient.waitUntilComplete(requestId);
     }
 
-    private void createCloudService(AzureClient azureClient, AzureTemplate azureTemplate, String name, String vmName) {
+    private void createCloudService(AzureClient azureClient, AzureTemplate azureTemplate, String name, String vmName, String commonName) {
         Map<String, String> props = new HashMap<>();
         props.put(NAME, vmName);
         props.put(DESCRIPTION, azureTemplate.getDescription());
-        props.put(AFFINITYGROUP, name);
+        props.put(AFFINITYGROUP, commonName);
         HttpResponseDecorator cloudServiceResponse = (HttpResponseDecorator) azureClient.createCloudService(props);
         String requestId = (String) azureClient.getRequestId(cloudServiceResponse);
         azureClient.waitUntilComplete(requestId);
     }
 
 
-    private void createVirtualNetwork(AzureClient azureClient, AzureTemplate azureTemplate, String name) {
+    private void createVirtualNetwork(AzureClient azureClient, AzureTemplate azureTemplate, String name, String commonName) {
         Map<String, String> props = new HashMap<>();
         props.put(NAME, name);
-        props.put(AFFINITYGROUP, name);
+        props.put(AFFINITYGROUP, commonName);
         props.put(SUBNETNAME, name);
         props.put(ADDRESSPREFIX, azureTemplate.getAddressPrefix());
         props.put(SUBNETADDRESSPREFIX, azureTemplate.getSubnetAddressPrefix());
@@ -177,24 +178,32 @@ public class AzureProvisionService implements ProvisionService {
         azureClient.waitUntilComplete(requestId);
     }
 
-    private void createStorageAccount(AzureClient azureClient, AzureTemplate azureTemplate, String name) {
-        Map<String, String> props = new HashMap<>();
-        props.put(NAME, name);
-        props.put(DESCRIPTION, azureTemplate.getDescription());
-        props.put(AFFINITYGROUP, name);
-        HttpResponseDecorator storageResponse = (HttpResponseDecorator) azureClient.createStorageAccount(props);
-        String requestId = (String) azureClient.getRequestId(storageResponse);
-        azureClient.waitUntilComplete(requestId);
+    private void createStorageAccount(AzureClient azureClient, AzureTemplate azureTemplate, String commonName) {
+        try {
+            azureClient.getStorageAccount(commonName);
+        } catch (Exception ex) {
+            Map<String, String> props = new HashMap<>();
+            props.put(NAME, commonName);
+            props.put(DESCRIPTION, azureTemplate.getDescription());
+            props.put(AFFINITYGROUP, commonName);
+            HttpResponseDecorator storageResponse = (HttpResponseDecorator) azureClient.createStorageAccount(props);
+            String requestId = (String) azureClient.getRequestId(storageResponse);
+            azureClient.waitUntilComplete(requestId);
+        }
     }
 
     private void createAffinityGroup(AzureClient azureClient, AzureTemplate azureTemplate, String name) {
-        Map<String, String> props = new HashMap<>();
-        props.put(NAME, name);
-        props.put(LOCATION, AzureLocation.valueOf(azureTemplate.getLocation()).location());
-        props.put(DESCRIPTION, azureTemplate.getDescription());
-        HttpResponseDecorator affinityResponse = (HttpResponseDecorator) azureClient.createAffinityGroup(props);
-        String requestId = (String) azureClient.getRequestId(affinityResponse);
-        azureClient.waitUntilComplete(requestId);
+        try {
+            azureClient.getAffinityGroup(name);
+        } catch (Exception ex) {
+            Map<String, String> props = new HashMap<>();
+            props.put(NAME, name);
+            props.put(LOCATION, AzureLocation.valueOf(azureTemplate.getLocation()).location());
+            props.put(DESCRIPTION, azureTemplate.getDescription());
+            HttpResponseDecorator affinityResponse = (HttpResponseDecorator) azureClient.createAffinityGroup(props);
+            String requestId = (String) azureClient.getRequestId(affinityResponse);
+            azureClient.waitUntilComplete(requestId);
+        }
     }
 
     private String getVmName(String azureTemplate, int i) {
