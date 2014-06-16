@@ -133,8 +133,8 @@ public class AwsProvisionService implements ProvisionService {
                 LOGGER.error("Stack creation failed. id: '{}'", stack.getId());
                 createFailed(stack);
             }
-        } catch (Throwable t) {
-            LOGGER.error("Unhandled exception occured while creating stack on AWS.", t);
+        } catch (Exception e) {
+            LOGGER.error("Unhandled exception occured while creating stack on AWS.", e);
             createFailed(stack);
         }
     }

@@ -80,8 +80,8 @@ public class AmbariClusterInstaller {
 
         } catch (HttpResponseException e) {
             LOGGER.error("HttpResponseException occured while communicating with Ambari server.", e);
-        } catch (Throwable t) {
-            LOGGER.error("Unhandled exception occured while installing Ambari cluster.", t);
+        } catch (Exception e) {
+            LOGGER.error("Unhandled exception occured while installing Ambari cluster.", e);
         }
     }
 

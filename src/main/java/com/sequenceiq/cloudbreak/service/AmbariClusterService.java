@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.User;
-import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 
@@ -25,9 +24,6 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 public class AmbariClusterService {
 
     public static final String PORT = "8080";
-
-    @Autowired
-    private BlueprintRepository blueprintRepository;
 
     @Autowired
     private StackRepository stackRepository;
