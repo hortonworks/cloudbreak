@@ -114,6 +114,8 @@ dependencies {
     compile ('com.sequenceiq.azure:azure-client:1.0-SNAPSHOT') {
         exclude group: 'log4j';
     }
+    compile 'com.sequenceiq.azure:azure-client:1.0-SNAPSHOT'
+    compile 'org.apache.commons:commons-lang3:3.3.2'
     compile ('com.sequenceiq.ambari:ambari-client:1.0-SNAPSHOT'){
         exclude group: "org.slf4j";
     }
