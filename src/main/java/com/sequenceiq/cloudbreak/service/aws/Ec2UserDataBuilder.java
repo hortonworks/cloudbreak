@@ -17,7 +17,7 @@ public class Ec2UserDataBuilder {
 
     @PostConstruct
     public void readUserDataScript() throws IOException {
-        String ec2userDataScript = FileReaderUtils.readFileFromClasspath("ec2-init.sh");
+        ec2userDataScript = FileReaderUtils.readFileFromClasspath("ec2-init.sh");
     }
 
     public String buildUserData(Map<String, String> parameters) {
