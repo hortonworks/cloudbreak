@@ -114,7 +114,8 @@ public class AwsProvisionService implements ProvisionService {
             if ("CREATE_COMPLETE".equals(stackStatus)) {
                 try {
                     AmazonEC2Client amazonEC2Client = createEC2Client(user, awsTemplate.getRegion(), awsCredential);
-                    List<String> instanceIds = runInstancesInSubnet(stack, awsTemplate, stackResult, amazonEC2Client, awsCredential.getInstanceProfileRoleArn());
+                    List<String> instanceIds = runInstancesInSubnet(stack, awsTemplate, stackResult, amazonEC2Client,
+                            awsCredential.getInstanceProfileRoleArn(), user.getEmail());
                     tagInstances(stack, amazonEC2Client, instanceIds);
                     disableSourceDestCheck(amazonEC2Client, instanceIds);
                     String ambariIp = pollAmbariServer(amazonEC2Client, stack.getId(), instanceIds);
@@ -260,7 +261,7 @@ public class AwsProvisionService implements ProvisionService {
     }
 
     private List<String> runInstancesInSubnet(Stack stack, AwsTemplate awsTemplate, DescribeStacksResult stackResult, AmazonEC2Client amazonEC2Client,
-            String instanceArn) {
+            String instanceArn, String email) {
         String subnetId = null;
         String securityGroupId = null;
         List<Output> outputs = stackResult.getStacks().get(0).getOutputs();
@@ -276,6 +277,7 @@ public class AwsProvisionService implements ProvisionService {
         runInstancesRequest.setInstanceType(awsTemplate.getInstanceType());
 
         Map<String, String> userDataVariables = new HashMap<>();
+        userDataVariables.put("KEYCHAIN", email);
         runInstancesRequest.setUserData(encode(userDataBuilder.buildUserData(userDataVariables)));
         IamInstanceProfileSpecification iamInstanceProfileSpecification = new IamInstanceProfileSpecification()
                 .withArn(instanceArn);

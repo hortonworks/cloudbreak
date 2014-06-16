@@ -52,7 +52,7 @@ IMAGE=ambari-warmup
 
 [ $LAUNCH_IDX -eq 0 ] && AMBARI_ROLE="--tag ambari-server=true" || AMBARI_ROLE=""
 
-CMD="docker run -d -p 8080:8080 -e SERF_JOIN_IP=$SERF_JOIN_IP --dns 127.0.0.1 --name ${NODE_PREFIX}${LAUNCH_IDX} -h ${NODE_PREFIX}${LAUNCH_IDX}.${MYDOMAIN} --entrypoint /usr/local/serf/bin/start-serf-agent.sh  $IMAGE $AMBARI_ROLE"
+CMD="docker run -d -p 8080:8080 -p 8088:8088 -p 8050:8050 -p 8020:8020 -p 10020:10020 -p 19888:19888 -e SERF_JOIN_IP=$SERF_JOIN_IP -e KEYCHAIN=$KEYCHAIN --dns 127.0.0.1 --name ${NODE_PREFIX}${LAUNCH_IDX} -h ${NODE_PREFIX}${LAUNCH_IDX}.${MYDOMAIN} --entrypoint /usr/local/serf/bin/start-serf-agent.sh  $IMAGE $AMBARI_ROLE"
 
 cat << EOF
 =========================================
