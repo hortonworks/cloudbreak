@@ -27,7 +27,7 @@ public class UserInitializer implements InitializingBean {
     public void afterPropertiesSet() throws Exception {
         if ("create".equals(hbm2ddlStrategy) || "create-drop".equals(hbm2ddlStrategy)) {
             User user2 = new User();
-            user2.setEmail("user@seq.com");
+            user2.setEmail("cbuser@sequenceiq.com");
             user2.setFirstName("seq");
             user2.setLastName("test");
             user2.setPassword("test123");
