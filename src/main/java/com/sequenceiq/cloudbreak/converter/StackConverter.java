@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.converter;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
@@ -15,6 +17,8 @@ import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 
 @Component
 public class StackConverter extends AbstractConverter<StackJson, Stack> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackConverter.class);
 
     public static final int HASH1 = 0xFF;
     public static final int HASH2 = 0x100;
@@ -101,6 +105,7 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
             }
             return sb.toString();
         } catch (java.security.NoSuchAlgorithmException e) {
+            LOGGER.info("Not supported algorithm type under the MD5 generation: {}", e.getMessage());
         }
         return null;
     }
