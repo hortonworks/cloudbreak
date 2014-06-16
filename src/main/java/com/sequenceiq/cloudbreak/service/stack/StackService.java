@@ -19,4 +19,6 @@ public interface StackService {
     Boolean startAll(User user, Long stackId);
 
     Boolean stopAll(User user, Long stackId);
+
+    String getMetaData(User one, String hash);
 }

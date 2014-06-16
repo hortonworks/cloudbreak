@@ -104,10 +104,6 @@ public class SimpleTemplateService implements TemplateService {
         AwsTemplate awsTemplate = awsTemplateConverter.convert(templateRequest);
         awsTemplate.setUser(user);
         templateRepository.save(awsTemplate);
-        Object shhPublicKey = templateRequest.getParameters().get(AzureTemplateParam.SSH_PUBLIC_KEY.getName());
-        if (shhPublicKey != null) {
-            azureCredentialService.generateSshCertificate(user, (AzureTemplate) azureTemplate, String.valueOf(shhPublicKey));
-        }
         return new IdJson(awsTemplate.getId());
     }
 
@@ -115,6 +111,10 @@ public class SimpleTemplateService implements TemplateService {
         Template azureTemplate = azureTemplateConverter.convert(templateRequest);
         azureTemplate.setUser(user);
         templateRepository.save(azureTemplate);
+        Object shhPublicKey = templateRequest.getParameters().get(AzureTemplateParam.SSH_PUBLIC_KEY.getName());
+        if (shhPublicKey != null) {
+            azureCredentialService.generateSshCertificate(user, (AzureTemplate) azureTemplate, String.valueOf(shhPublicKey));
+        }
         return new IdJson(azureTemplate.getId());
     }
 

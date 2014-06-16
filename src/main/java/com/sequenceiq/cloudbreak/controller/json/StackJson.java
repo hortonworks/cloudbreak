@@ -27,6 +27,7 @@ public class StackJson implements JsonEntity {
     private Long credentialId;
     private Status status;
     private String ambariServerIp;
+    private String hash;
     private ClusterResponse cluster;
 
     public StackJson() {
@@ -112,6 +113,16 @@ public class StackJson implements JsonEntity {
     @JsonIgnore
     public void setAmbariServerIp(String ambariServerIp) {
         this.ambariServerIp = ambariServerIp;
+    }
+
+    @JsonProperty("hash")
+    public String getHash() {
+        return hash;
+    }
+
+    @JsonIgnore
+    public void setHash(String hash) {
+        this.hash = hash;
     }
 
     @JsonProperty("cluster")

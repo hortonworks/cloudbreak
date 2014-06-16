@@ -74,4 +74,11 @@ public class StackController {
         }
     }
 
+    @RequestMapping(method = RequestMethod.GET, value = "/meta-data/{hash}")
+    @ResponseBody
+    public ResponseEntity<String> getStack(@CurrentUser User user, @PathVariable String hash) {
+        String metaData = stackService.getMetaData(userRepository.findOne(user.getId()), hash);
+        return new ResponseEntity<>(metaData, HttpStatus.OK);
+    }
+
 }

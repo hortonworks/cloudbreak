@@ -99,4 +99,10 @@ public class SimpleStackService implements StackService {
         return Boolean.TRUE;
     }
 
+    @Override
+    public String getMetaData(User one, String hash) {
+        Stack stack = stackRepository.findStackByHash(hash);
+        return "hello";
+    }
+
 }

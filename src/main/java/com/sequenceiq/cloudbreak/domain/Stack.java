@@ -58,6 +58,8 @@ public class Stack implements ProvisionEntity {
     @Column(columnDefinition = "TEXT")
     private String statusReason;
 
+    private String hash;
+
     @OneToOne
     private Template template;
 
@@ -193,4 +195,11 @@ public class Stack implements ProvisionEntity {
         this.version = version;
     }
 
+    public String getHash() {
+        return hash;
+    }
+
+    public void setHash(String hash) {
+        this.hash = hash;
+    }
 }
