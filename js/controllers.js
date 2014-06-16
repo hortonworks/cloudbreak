@@ -57,7 +57,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
         }
 
         $scope.signIn = function() {
-            if(emailFieldLogin.value === "user@seq.com" && passwFieldLogin.value === "test123") {
+            if(emailFieldLogin.value === "cbuser@sequenceiq.com" && passwFieldLogin.value === "test123") {
                 localStorage.signedIn = true;
                 $rootScope.signedIn = true;
                 $rootScope.activeUser = emailFieldLogin.value;
@@ -699,7 +699,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
         if (typeof (Storage) !== "undefined") {
             if (localStorage.signedIn === 'true') {
                 $rootScope.signedIn = true;
-                $rootScope.activeUser = "user@seq.com";
+                $rootScope.activeUser = "cbuser@sequenceiq.com";
                 $scope.doQuerys();
             }
         } else {
