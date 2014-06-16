@@ -15,8 +15,6 @@ import com.sequenceiq.cloudbreak.repository.UserRepository;
 @Component
 public class UserInitializer implements InitializingBean {
 
-    private static final Integer NODE_COUNT = 3;
-
     @Value("${HBM2DDL_STRATEGY}")
     private String hbm2ddlStrategy;
 

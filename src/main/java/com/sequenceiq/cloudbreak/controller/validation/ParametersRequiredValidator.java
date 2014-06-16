@@ -14,11 +14,9 @@ public class ParametersRequiredValidator extends AbstractParameterValidator {
     public boolean validate(Map<String, Object> parameters, ConstraintValidatorContext context, List<TemplateParam> paramList) {
         boolean valid = true;
         for (TemplateParam param : paramList) {
-            if (Boolean.TRUE.equals(param.getRequired())) {
-                if (!parameters.containsKey(param.getName())) {
-                    addParameterConstraintViolation(context, param.getName(), String.format("%s is required.", param.getName()));
-                    valid = false;
-                }
+            if (Boolean.TRUE.equals(param.getRequired()) && !parameters.containsKey(param.getName())) {
+                addParameterConstraintViolation(context, param.getName(), String.format("%s is required.", param.getName()));
+                valid = false;
             }
         }
         return valid;

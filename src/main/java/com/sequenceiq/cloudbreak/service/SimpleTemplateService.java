@@ -25,6 +25,10 @@ import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 @Service
 public class SimpleTemplateService implements TemplateService {
 
+    private static final String CLOUD_PLATFORM_NOT_SUPPORTED_MSG = "The cloudPlatform '%s' is not supported.";
+
+    private static final String TEMPLATE_NOT_FOUND_MSG = "Template '%s' not found.";
+
     @Autowired
     private TemplateRepository templateRepository;
 
@@ -49,7 +53,7 @@ public class SimpleTemplateService implements TemplateService {
     public TemplateJson get(Long id) {
         Template template = templateRepository.findOne(id);
         if (template == null) {
-            throw new NotFoundException(String.format("Template '%s' not found.", id));
+            throw new NotFoundException(String.format(TEMPLATE_NOT_FOUND_MSG, id));
         } else {
             switch (template.cloudPlatform()) {
                 case AWS:
@@ -57,7 +61,7 @@ public class SimpleTemplateService implements TemplateService {
                 case AZURE:
                     return azureTemplateConverter.convert((AzureTemplate) template);
                 default:
-                    throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", template.cloudPlatform()));
+                    throw new UnknownFormatConversionException(String.format(CLOUD_PLATFORM_NOT_SUPPORTED_MSG, template.cloudPlatform()));
             }
         }
     }
@@ -76,7 +80,7 @@ public class SimpleTemplateService implements TemplateService {
                 templateRepository.save(azureTemplate);
                 return new IdJson(azureTemplate.getId());
             default:
-                throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", templateRequest.getCloudPlatform()));
+                throw new UnknownFormatConversionException(String.format(CLOUD_PLATFORM_NOT_SUPPORTED_MSG, templateRequest.getCloudPlatform()));
         }
     }
 
@@ -84,7 +88,7 @@ public class SimpleTemplateService implements TemplateService {
     public void delete(Long id) {
         Template template = templateRepository.findOne(id);
         if (template == null) {
-            throw new NotFoundException(String.format("Template '%s' not found.", id));
+            throw new NotFoundException(String.format(TEMPLATE_NOT_FOUND_MSG, id));
         }
         List<Stack> allStackForTemplate = getAllStackForTemplate(id);
         if (allStackForTemplate.size() == 0) {

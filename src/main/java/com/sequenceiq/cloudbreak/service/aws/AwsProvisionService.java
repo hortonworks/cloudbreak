@@ -130,11 +130,11 @@ public class AwsProvisionService implements ProvisionService {
                 }
 
             } else {
-                LOGGER.error(String.format("Stack creation failed. id: '%s'", stack.getId()));
+                LOGGER.error("Stack creation failed. id: '{}'", stack.getId());
                 createFailed(stack);
             }
-        } catch (Throwable t) {
-            LOGGER.error("Unhandled exception occured while creating stack on AWS.", t);
+        } catch (Exception e) {
+            LOGGER.error("Unhandled exception occured while creating stack on AWS.", e);
             createFailed(stack);
         }
     }
@@ -156,7 +156,7 @@ public class AwsProvisionService implements ProvisionService {
             amazonEC2Client.modifyNetworkInterfaceAttribute(modifyNetworkInterfaceAttributeRequest);
         }
 
-        LOGGER.debug(String.format("Disabled sourceDestCheck. (instances: '%s', network interfaces: '%s')", instanceIds, enis));
+        LOGGER.info("Disabled sourceDestCheck. (instances: '{}', network interfaces: '{}')", instanceIds, enis);
 
     }
 
@@ -182,24 +182,24 @@ public class AwsProvisionService implements ProvisionService {
         boolean stop = false;
         AmbariClient ambariClient = null;
         String ambariServerPublicIp = null;
-        LOGGER.debug(String.format("Starting polling of instance reachability and Ambari server's status (stack: '%s').", stackId));
+        LOGGER.info("Starting polling of instance reachability and Ambari server's status (stack: '{}').", stackId);
         while (!stop) {
             sleep(POLLING_INTERVAL);
             if (instancesReachable(amazonEC2Client, stackId, instanceIds)) {
                 if (ambariClient == null) {
                     ambariServerPublicIp = getAmbariServerIp(amazonEC2Client, instanceIds);
-                    LOGGER.debug(String.format("Ambari server public ip for stack: '%s': '%s'.", stackId, ambariServerPublicIp));
+                    LOGGER.info("Ambari server public ip for stack: '{}': '{}'.", stackId, ambariServerPublicIp);
                     ambariClient = new AmbariClient(ambariServerPublicIp);
                 }
                 try {
                     String ambariHealth = ambariClient.healthCheck();
-                    LOGGER.debug(String.format("Ambari health check returned: %s", ambariHealth));
+                    LOGGER.info("Ambari health check returned: {} [stack: '{}']", ambariHealth, stackId);
                     if ("RUNNING".equals(ambariHealth)) {
                         stop = true;
                     }
                 } catch (Exception e) {
                     // org.apache.http.conn.HttpHostConnectException
-                    LOGGER.debug("Ambari unreachable. Trying again in next polling interval.");
+                    LOGGER.info("Ambari unreachable. Trying again in next polling interval.");
                 }
 
             }
@@ -237,10 +237,10 @@ public class AwsProvisionService implements ProvisionService {
                 instancesReachable = instancesReachable && "running".equals(status.getInstanceState().getName());
                 instancesReachable = instancesReachable && "ok".equals(status.getInstanceStatus().getStatus());
                 for (InstanceStatusDetails details : status.getInstanceStatus().getDetails()) {
-                    LOGGER.debug(String.format("Polling instance reachability. (stack id: '%s', instanceId: '%s', status: '%s:%s', '%s:%s')",
+                    LOGGER.info("Polling instance reachability. (stack id: '{}', instanceId: '{}', status: '{}:{}', '{}:{}')",
                             stackId, status.getInstanceId(),
                             status.getInstanceState().getName(), status.getInstanceStatus().getStatus(),
-                            details.getName(), details.getStatus()));
+                            details.getName(), details.getStatus());
                     if ("reachability".equals(details.getName())) {
                         instancesReachable = instancesReachable && "passed".equals(details.getStatus());
                     }
@@ -257,7 +257,7 @@ public class AwsProvisionService implements ProvisionService {
                 new Tag(INSTANCE_TAG_KEY, stack.getName()),
                 new Tag(INSTANCE_NAME_TAG, stack.getName()));
         amazonEC2Client.createTags(createTagsRequest);
-        LOGGER.debug(String.format("Tagged instances for stack '%s', with Name tag: '%s')", stack.getId(), stack.getName()));
+        LOGGER.info("Tagged instances for stack '{}', with Name tag: '{}')", stack.getId(), stack.getName());
     }
 
     private List<String> runInstancesInSubnet(Stack stack, AwsTemplate awsTemplate, DescribeStacksResult stackResult, AmazonEC2Client amazonEC2Client,
@@ -292,13 +292,13 @@ public class AwsProvisionService implements ProvisionService {
         runInstancesRequest.setNetworkInterfaces(Arrays.asList(nwIf));
         RunInstancesResult runInstancesResult = amazonEC2Client.runInstances(runInstancesRequest);
 
-        LOGGER.debug(String.format("Started instances in subnet created by the CloudFormation stack. (stack: '%s', subnet: '%s')", stack.getId(), subnetId));
+        LOGGER.info("Started instances in subnet created by the CloudFormation stack. (stack: '{}', subnet: '{}')", stack.getId(), subnetId);
 
         List<String> instanceIds = new ArrayList<>();
         for (Instance instance : runInstancesResult.getReservation().getInstances()) {
             instanceIds.add(instance.getInstanceId());
         }
-        LOGGER.debug(String.format("Instances started for stack '%s': '%s')", stack.getId(), instanceIds));
+        LOGGER.info("Instances started for stack '{}': '{}')", stack.getId(), instanceIds);
         return instanceIds;
     }
 
@@ -309,20 +309,20 @@ public class AwsProvisionService implements ProvisionService {
                 .withTemplateBody(template.getBody())
                 .withParameters(new Parameter().withParameterKey("SSHLocation").withParameterValue(awsTemplate.getSshLocation()));
         client.createStack(createStackRequest);
-        LOGGER.debug(String.format("CloudFormation stack creation request sent with stack name: '%s' for stack: '%s'", stackName, stack.getId()));
+        LOGGER.info("CloudFormation stack creation request sent with stack name: '{}' for stack: '{}'", stackName, stack.getId());
     }
 
     private DescribeStacksResult pollStackCreation(Stack stack, AmazonCloudFormationClient client) {
         String stackStatus = "CREATE_IN_PROGRESS";
         String stackName = String.format("%s-%s", stack.getName(), stack.getId());
         DescribeStacksResult stackResult = null;
-        LOGGER.debug(String.format("Starting polling of CloudFormation stack '%s' (stack id: '%s').", stackName, stack.getId()));
+        LOGGER.info("Starting polling of CloudFormation stack '{}' (stack id: '{}').", stackName, stack.getId());
         while ("CREATE_IN_PROGRESS".equals(stackStatus)) {
             DescribeStacksRequest stackRequest = new DescribeStacksRequest().withStackName(stackName);
             stackResult = client.describeStacks(stackRequest);
             stackStatus = stackResult.getStacks().get(0).getStackStatus();
-            LOGGER.debug(String.format("Polling CloudFormation stack creation. (stack id: '%s', stackName: '%s', status: '%s')", stack.getId(), stackName,
-                    stackStatus));
+            LOGGER.info("Polling CloudFormation stack creation. (stack id: '{}', stackName: '{}', status: '%{}')", stack.getId(), stackName,
+                    stackStatus);
             sleep(POLLING_INTERVAL);
         }
         return stackResult;
@@ -437,7 +437,7 @@ public class AwsProvisionService implements ProvisionService {
                 .retrieveSessionCredentials(SESSION_CREDENTIALS_DURATION, "provision-ambari", user, credential);
         AmazonCloudFormationClient amazonCloudFormationClient = new AmazonCloudFormationClient(basicSessionCredentials);
         amazonCloudFormationClient.setRegion(Region.getRegion(regions));
-        LOGGER.debug("Amazon CloudFormation client successfully created.");
+        LOGGER.info("Amazon CloudFormation client successfully created.");
         return amazonCloudFormationClient;
     }
 
@@ -446,7 +446,7 @@ public class AwsProvisionService implements ProvisionService {
                 .retrieveSessionCredentials(SESSION_CREDENTIALS_DURATION, "provision-ambari", user, credential);
         AmazonEC2Client amazonEC2Client = new AmazonEC2Client(basicSessionCredentials);
         amazonEC2Client.setRegion(Region.getRegion(regions));
-        LOGGER.debug("Amazon EC2 client successfully created.");
+        LOGGER.info("Amazon EC2 client successfully created.");
         return amazonEC2Client;
     }
 }

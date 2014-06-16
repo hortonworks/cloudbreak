@@ -14,14 +14,12 @@ public class ParametersRegexValidator extends AbstractParameterValidator {
     public boolean validate(Map<String, Object> parameters, ConstraintValidatorContext context, List<TemplateParam> paramsList) {
         boolean valid = true;
         for (TemplateParam param : paramsList) {
-            if (param.getRegex().isPresent()) {
-                if (parameters.containsKey(param.getName())) {
-                    if (!String.valueOf(parameters.get(param.getName())).matches(param.getRegex().get())) {
-                        addParameterConstraintViolation(context, param.getName(), String.format("%s is not valid for regex: %s.",
-                                param.getName(), param.getRegex().get()));
-                        valid = false;
-                    }
-                }
+            if (param.getRegex().isPresent()
+                    && parameters.containsKey(param.getName())
+                    && !String.valueOf(parameters.get(param.getName())).matches(param.getRegex().get())) {
+                addParameterConstraintViolation(context, param.getName(), String.format("%s is not valid for regex: %s.",
+                        param.getName(), param.getRegex().get()));
+                valid = false;
             }
         }
         return valid;

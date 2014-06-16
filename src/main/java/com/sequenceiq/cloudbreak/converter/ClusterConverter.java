@@ -16,7 +16,6 @@ import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 @Component
 public class ClusterConverter {
 
-    private static final int HOURS_PER_DAY = 24;
     private static final int SECONDS_PER_MINUTE = 60;
     private static final int MILLIS_PER_SECOND = 1000;
 
@@ -44,7 +43,7 @@ public class ClusterConverter {
             long now = new Date().getTime();
             long createFinished = now - cluster.getCreationFinished();
             int minutes = (int) ((createFinished / (MILLIS_PER_SECOND * SECONDS_PER_MINUTE)) % SECONDS_PER_MINUTE);
-            int hours = (int) ((createFinished / (MILLIS_PER_SECOND * SECONDS_PER_MINUTE * SECONDS_PER_MINUTE)));
+            int hours = (int) (createFinished / (MILLIS_PER_SECOND * SECONDS_PER_MINUTE * SECONDS_PER_MINUTE));
             clusterResponse.setHoursUp(hours);
             clusterResponse.setMinutesUp(minutes);
         } else {

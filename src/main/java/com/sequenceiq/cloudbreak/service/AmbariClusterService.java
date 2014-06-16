@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.User;
-import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 
@@ -25,9 +24,6 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 public class AmbariClusterService {
 
     public static final String PORT = "8080";
-
-    @Autowired
-    private BlueprintRepository blueprintRepository;
 
     @Autowired
     private StackRepository stackRepository;
@@ -77,48 +73,6 @@ public class AmbariClusterService {
             }
         }
     }
-
-    // public List<BlueprintJson> retrieveBlueprints(User user, Long stackId) {
-    // try {
-    // List<BlueprintJson> blueprints = new ArrayList<>();
-    // Stack stack = stackRepository.findOne(stackId);
-    // AmbariClient ambariClient = new AmbariClient(stack.getAmbariIp(), PORT);
-    // Set<String> blueprintNames = ambariClient.getBlueprintsMap().keySet();
-    // for (String blueprintName : blueprintNames) {
-    // blueprints.add(createBlueprintJsonFromString(ambariClient.getBlueprintAsJson(blueprintName)));
-    // }
-    // return blueprints;
-    // } catch (IOException e) {
-    // throw new
-    // InternalServerException("Jackson failed to parse blueprint JSON.", e);
-    // }
-    // }
-    //
-    // public BlueprintJson retrieveBlueprint(User user, Long stackId, String
-    // id) {
-    // Stack stack = stackRepository.findOne(stackId);
-    // AmbariClient ambariClient = new AmbariClient(stack.getAmbariIp(), PORT);
-    // try {
-    // return
-    // createBlueprintJsonFromString(ambariClient.getBlueprintAsJson(id));
-    // } catch (HttpResponseException e) {
-    // if ("Not Found".equals(e.getMessage())) {
-    // throw new NotFoundException("Ambari blueprint not found.", e);
-    // } else {
-    // throw new InternalServerException("Something went wrong", e);
-    // }
-    // } catch (IOException e) {
-    // throw new
-    // InternalServerException("Jackson failed to parse blueprint JSON.", e);
-    // }
-    // }
-    //
-    // private BlueprintJson createBlueprintJsonFromString(String blueprint)
-    // throws IOException {
-    // BlueprintJson blueprintJson = new BlueprintJson();
-    // blueprintJson.setAmbariBlueprint(jsonHelper.createJsonFromString(blueprint));
-    // return blueprintJson;
-    // }
 
     @Async
     public void startAllService(User user, Long stackId) {
