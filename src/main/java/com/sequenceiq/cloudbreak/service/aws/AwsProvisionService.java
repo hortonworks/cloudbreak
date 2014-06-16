@@ -1,11 +1,10 @@
 package com.sequenceiq.cloudbreak.service.aws;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
-
-import javax.annotation.PostConstruct;
+import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
@@ -61,7 +60,6 @@ import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.AmbariClusterInstaller;
 import com.sequenceiq.cloudbreak.service.ProvisionService;
-import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
@@ -100,14 +98,8 @@ public class AwsProvisionService implements ProvisionService {
     @Autowired
     private AmbariClusterInstaller ambariClusterInstaller;
 
-    private String ec2userDataScript;
-
-    @PostConstruct
-    public void readUserDataScript() throws IOException {
-        String content = FileReaderUtils.readFileFromClasspath("ec2-init.sh");
-        byte[] encoded = Base64.encodeBase64(content.getBytes());
-        ec2userDataScript = new String(encoded);
-    }
+    @Autowired
+    private Ec2UserDataBuilder userDataBuilder;
 
     @Override
     public void createStack(User user, Stack stack, Credential credential) {
@@ -282,7 +274,9 @@ public class AwsProvisionService implements ProvisionService {
         RunInstancesRequest runInstancesRequest = new RunInstancesRequest(awsTemplate.getAmiId(), stack.getNodeCount(), stack.getNodeCount());
         runInstancesRequest.setKeyName(awsTemplate.getKeyName());
         runInstancesRequest.setInstanceType(awsTemplate.getInstanceType());
-        runInstancesRequest.setUserData(ec2userDataScript);
+
+        Map<String, String> userDataVariables = new HashMap<>();
+        runInstancesRequest.setUserData(encode(userDataBuilder.buildUserData(userDataVariables)));
         IamInstanceProfileSpecification iamInstanceProfileSpecification = new IamInstanceProfileSpecification()
                 .withArn(instanceArn);
         runInstancesRequest.setIamInstanceProfile(iamInstanceProfileSpecification);
@@ -429,6 +423,11 @@ public class AwsProvisionService implements ProvisionService {
     @Override
     public Boolean stopAll(User user, Long stackId) {
         return Boolean.TRUE;
+    }
+
+    private String encode(String userData) {
+        byte[] encoded = Base64.encodeBase64(userData.getBytes());
+        return new String(encoded);
     }
 
     private AmazonCloudFormationClient createCloudFormationClient(User user, Regions regions, AwsCredential credential) {
