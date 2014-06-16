@@ -107,6 +107,16 @@ public class AzureProvisionService implements ProvisionService {
                 return;
             }
         }
+        Map<String, String> metaData = new HashMap<>();
+        for (int i = 0; i < stack.getNodeCount(); i++) {
+            String vmName = getVmName(name, i);
+            Map<String, Object> props = new HashMap<>();
+            props.put(NAME, vmName);
+            props.put(SERVICENAME, vmName);
+            Object virtualMachine = azureClient.getVirtualMachine(props);
+        }
+        stack.setMetadata(metaData);
+        stackRepository.save(stack);
         updatedStackStatus(stack.getId(), Status.CREATE_COMPLETED);
     }
 

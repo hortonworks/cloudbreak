@@ -1,6 +1,10 @@
 package com.sequenceiq.cloudbreak.domain;
 
 import javax.persistence.Column;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -59,6 +63,9 @@ public class Stack implements ProvisionEntity {
     private String statusReason;
 
     private String hash;
+
+    @ElementCollection
+    private Map<String, String> metadata = new HashMap<>();
 
     @OneToOne
     private Template template;
@@ -197,6 +204,14 @@ public class Stack implements ProvisionEntity {
 
     public String getHash() {
         return hash;
+    }
+
+    public Map<String, String> getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(Map<String, String> metadata) {
+        this.metadata = metadata;
     }
 
     public void setHash(String hash) {

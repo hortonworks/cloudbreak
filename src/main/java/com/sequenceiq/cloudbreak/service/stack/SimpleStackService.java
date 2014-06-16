@@ -100,9 +100,12 @@ public class SimpleStackService implements StackService {
     }
 
     @Override
-    public String getMetaData(User one, String hash) {
+    public Map<String, String> getMetaData(User one, String hash) {
         Stack stack = stackRepository.findStackByHash(hash);
-        return "hello";
+        if (stack != null && !stack.getMetadata().isEmpty()) {
+            return stack.getMetadata();
+        }
+        throw new EntityNotFoundException("Metadata not found on stack.");
     }
 
 }
