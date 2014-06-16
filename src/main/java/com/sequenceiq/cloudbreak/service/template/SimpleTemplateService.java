@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.template;
 
+import java.io.File;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -16,11 +17,13 @@ import com.sequenceiq.cloudbreak.converter.AwsTemplateConverter;
 import com.sequenceiq.cloudbreak.converter.AzureTemplateConverter;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
+import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
+import com.sequenceiq.cloudbreak.service.azure.AzureCredentialService;
 
 @Service
 public class SimpleTemplateService implements TemplateService {
@@ -40,6 +43,9 @@ public class SimpleTemplateService implements TemplateService {
 
     @Autowired
     private StackRepository stackRepository;
+
+    @Autowired
+    private AzureCredentialService azureCredentialService;
 
     @Override
     public Set<TemplateJson> getAll(User user) {
@@ -105,6 +111,16 @@ public class SimpleTemplateService implements TemplateService {
         azureTemplate.setUser(user);
         templateRepository.save(azureTemplate);
         return new IdJson(azureTemplate.getId());
+    }
+
+    @Override
+    public File getSshPublicKeyFile(User user, Long templateId) {
+        Template one = templateRepository.findOne(templateId);
+        if (CloudPlatform.AZURE.equals(one.cloudPlatform())) {
+            return azureCredentialService.getSshPublicKeyFile(user, templateId);
+        } else {
+            throw new UnsupportedOperationException("Ssh key function supported only on Azure platform.");
+        }
     }
 
     private List<Stack> getAllStackForTemplate(Long id) {

@@ -162,4 +162,8 @@ public class AzureTemplate extends Template implements ProvisionEntity {
     public User getOwner() {
         return azureTemplateOwner;
     }
+
+    public String nameAsFolder() {
+        return name.replaceAll("@", "_").replace(".", "_").replace(" ", "_");
+    }
 }
