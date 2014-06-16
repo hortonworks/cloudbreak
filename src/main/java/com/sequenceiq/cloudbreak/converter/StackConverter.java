@@ -18,8 +18,7 @@ import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 @Component
 public class StackConverter extends AbstractConverter<StackJson, Stack> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StackConverter.class);
-
+    public static final Logger LOGGER = LoggerFactory.getLogger(StackConverter.class);
     public static final int HASH1 = 0xFF;
     public static final int HASH2 = 0x100;
     public static final int END_INDEX = 3;
