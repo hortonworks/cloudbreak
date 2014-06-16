@@ -33,8 +33,6 @@ public class AzureTemplateConverter extends AbstractConverter<TemplateJson, Azur
         putProperty(props, AzureTemplateParam.VMTYPE.getName(), entity.getVmType());
         putProperty(props, AzureTemplateParam.USERNAME.getName(), entity.getUserName());
         putProperty(props, AzureTemplateParam.PASSWORD.getName(), entity.getPassword());
-        putProperty(props, AzureTemplateParam.SSH_PUBLIC_KEY_FINGERPRINT.getName(), entity.getSshPublicKeyFingerprint());
-        putProperty(props, AzureTemplateParam.SSH_PUBLIC_KEY_PATH.getName(), entity.getSshPublicKeyPath());
         putProperty(props, AzureTemplateParam.SUBNETADDRESSPREFIX.getName(), entity.getSubnetAddressPrefix());
         props.put(AzureTemplateParam.PORTS.getName(), entity.getPorts());
         azureTemplateJson.setCloudPlatform(CloudPlatform.AZURE);
@@ -53,21 +51,22 @@ public class AzureTemplateConverter extends AbstractConverter<TemplateJson, Azur
         azureTemplate.setLocation(String.valueOf(json.getParameters().get(AzureTemplateParam.LOCATION.getName())));
         azureTemplate.setName(String.valueOf(json.getName()));
         azureTemplate.setPassword(String.valueOf(json.getParameters().get(AzureTemplateParam.PASSWORD.getName())));
-        azureTemplate.setSshPublicKeyFingerprint(String.valueOf(json.getParameters().get(AzureTemplateParam.SSH_PUBLIC_KEY_FINGERPRINT.getName())));
-        azureTemplate.setSshPublicKeyPath(String.valueOf(json.getParameters().get(AzureTemplateParam.SSH_PUBLIC_KEY_PATH.getName())));
         azureTemplate.setAddressPrefix(String.valueOf(json.getParameters().get(AzureTemplateParam.ADDRESSPREFIX.getName())));
         azureTemplate.setUserName(String.valueOf(json.getParameters().get(AzureTemplateParam.USERNAME.getName())));
         azureTemplate.setVmType(String.valueOf(json.getParameters().get(AzureTemplateParam.VMTYPE.getName())));
         azureTemplate.setSubnetAddressPrefix(String.valueOf(json.getParameters().get(AzureTemplateParam.SUBNETADDRESSPREFIX.getName())));
         Set<Port> ports = new HashSet<>();
-        for (Map<String, String> portEntry : (ArrayList<LinkedHashMap<String, String>>) json.getParameters().get(AzureTemplateParam.PORTS.getName())) {
-            Port port = new Port();
-            port.setLocalPort(portEntry.get("localPort"));
-            port.setName(portEntry.get("name"));
-            port.setPort(portEntry.get("port"));
-            port.setProtocol(portEntry.get("protocol"));
-            port.setAzureTemplate(azureTemplate);
-            ports.add(port);
+        Object portObject = json.getParameters().get(AzureTemplateParam.PORTS.getName());
+        if (portObject != null) {
+            for (Map<String, String> portEntry : (ArrayList<LinkedHashMap<String, String>>) portObject) {
+                Port port = new Port();
+                port.setLocalPort(portEntry.get("localPort"));
+                port.setName(portEntry.get("name"));
+                port.setPort(portEntry.get("port"));
+                port.setProtocol(portEntry.get("protocol"));
+                port.setAzureTemplate(azureTemplate);
+                ports.add(port);
+            }
         }
         azureTemplate.setDescription(json.getDescription());
         azureTemplate.setPorts(ports);

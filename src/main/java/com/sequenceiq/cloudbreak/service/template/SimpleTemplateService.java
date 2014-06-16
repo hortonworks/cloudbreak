@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
 import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
+import com.sequenceiq.cloudbreak.controller.validation.AzureTemplateParam;
 import com.sequenceiq.cloudbreak.converter.AwsTemplateConverter;
 import com.sequenceiq.cloudbreak.converter.AzureTemplateConverter;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
@@ -103,6 +104,10 @@ public class SimpleTemplateService implements TemplateService {
         AwsTemplate awsTemplate = awsTemplateConverter.convert(templateRequest);
         awsTemplate.setUser(user);
         templateRepository.save(awsTemplate);
+        Object shhPublicKey = templateRequest.getParameters().get(AzureTemplateParam.SSH_PUBLIC_KEY.getName());
+        if (shhPublicKey != null) {
+            azureCredentialService.generateSshCertificate(user, (AzureTemplate) azureTemplate, String.valueOf(shhPublicKey));
+        }
         return new IdJson(awsTemplate.getId());
     }
 

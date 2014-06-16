@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.service.azure;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -97,9 +100,9 @@ public class AzureProvisionService implements ProvisionService {
             try {
                 String vmName = getVmName(name, i);
                 createCloudService(azureClient, azureTemplate, name, vmName, commonName);
-                createVirtualMachine(azureClient, azureTemplate, name, vmName, commonName);
+                createVirtualMachine(azureClient, azureTemplate, name, vmName, commonName, user);
             } catch (Exception ex) {
-                LOGGER.info("Problem wiht the stack creation: " + ex.getMessage());
+                LOGGER.info("Problem with the stack creation: " + ex.getMessage());
                 updatedStackStatus(stack.getId(), Status.CREATE_FAILED);
                 return;
             }
@@ -116,7 +119,7 @@ public class AzureProvisionService implements ProvisionService {
     }
 
 
-    private void createVirtualMachine(AzureClient azureClient, AzureTemplate azureTemplate, String name, String vmName, String commonName) {
+    private void createVirtualMachine(AzureClient azureClient, AzureTemplate azureTemplate, String name, String vmName, String commonName, User user) {
         byte[] encoded = Base64.encodeBase64(vmName.getBytes());
         String label = new String(encoded);
         Map<String, Object> props = new HashMap<>();
@@ -142,8 +145,24 @@ public class AzureProvisionService implements ProvisionService {
         if (azureTemplate.getPassword() != null) {
             props.put(PASSWORD, azureTemplate.getPassword());
         } else {
-            props.put(SSHPUBLICKEYFINGERPRINT, azureTemplate.getSshPublicKeyFingerprint());
-            props.put(SSHPUBLICKEYPATH, azureTemplate.getSshPublicKeyPath());
+            try {
+                X509Certificate sshCert = new X509Certificate(AzureCredentialService.getCerFile(user.emailAsFolder(), azureTemplate.getId()));
+                props.put(SSHPUBLICKEYFINGERPRINT, sshCert.getSha1Fingerprint());
+                props.put(SSHPUBLICKEYPATH, String.format("/home/%s/.ssh/authorized_keys", azureTemplate.getUserName()));
+            } catch (FileNotFoundException e) {
+                LOGGER.info("Problem with the ssh file because not found: " + e.getMessage());
+                updatedStackStatus(azureTemplate.getId(), Status.CREATE_FAILED);
+                return;
+            } catch (CertificateException e) {
+                LOGGER.info("Problem wiht the certificate file: " + e.getMessage());
+                updatedStackStatus(azureTemplate.getId(), Status.CREATE_FAILED);
+                return;
+            } catch (NoSuchAlgorithmException e) {
+                LOGGER.info("Problem wiht the fingerprint: " + e.getMessage());
+                updatedStackStatus(azureTemplate.getId(), Status.CREATE_FAILED);
+                return;
+            }
+
         }
         props.put(SERVICENAME, vmName);
         props.put(SUBNETNAME, name);

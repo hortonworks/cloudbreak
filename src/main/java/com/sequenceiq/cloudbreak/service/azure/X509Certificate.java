@@ -10,7 +10,7 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 
-import org.apache.commons.lang.StringUtils;
+import com.google.common.base.Strings;
 
 
 public class X509Certificate {
@@ -28,7 +28,7 @@ public class X509Certificate {
         MessageDigest messageDigest = MessageDigest.getInstance("SHA1");
         messageDigest.update(cert.getEncoded());
         String digest = new BigInteger(1, messageDigest.digest()).toString(RADIX);
-        return StringUtils.leftPad(digest, SIZE, "0");
+        return Strings.padStart(digest, SIZE, '0');
     }
 
     public byte[] getPem() throws CertificateEncodingException {

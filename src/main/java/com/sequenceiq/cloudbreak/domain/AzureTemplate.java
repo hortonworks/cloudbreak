@@ -24,8 +24,6 @@ public class AzureTemplate extends Template implements ProvisionEntity {
     private String imageName;
     private String userName;
     private String password;
-    private String sshPublicKeyFingerprint;
-    private String sshPublicKeyPath;
     @OneToMany(mappedBy = "azureTemplate", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Port> ports = new HashSet<>();
 
@@ -106,22 +104,6 @@ public class AzureTemplate extends Template implements ProvisionEntity {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public String getSshPublicKeyFingerprint() {
-        return sshPublicKeyFingerprint;
-    }
-
-    public void setSshPublicKeyFingerprint(String sshPublicKeyFingerprint) {
-        this.sshPublicKeyFingerprint = sshPublicKeyFingerprint;
-    }
-
-    public String getSshPublicKeyPath() {
-        return sshPublicKeyPath;
-    }
-
-    public void setSshPublicKeyPath(String sshPublicKeyPath) {
-        this.sshPublicKeyPath = sshPublicKeyPath;
     }
 
     public String getAddressPrefix() {
