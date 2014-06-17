@@ -7,8 +7,10 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -29,6 +31,7 @@ import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.DetailedAzureStackDescription;
+import com.sequenceiq.cloudbreak.domain.MetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackDescription;
 import com.sequenceiq.cloudbreak.domain.Status;
@@ -115,7 +118,14 @@ public class AzureProvisionService implements ProvisionService {
                 return;
             }
         }
-        Map<String, String> metaData = new HashMap<>();
+        stack.setMetaData(collectMetaData(stack, azureClient, name));
+        stack.setHash(getMD5(stack));
+        stackRepository.save(stack);
+        updatedStackStatus(stack.getId(), Status.CREATE_COMPLETED);
+    }
+
+    private Set<MetaData> collectMetaData(Stack stack, AzureClient azureClient, String name) {
+        Set<MetaData> metaDatas = new HashSet<>();
         for (int i = 0; i < stack.getNodeCount(); i++) {
             String vmName = getVmName(name, i);
             Map<String, Object> props = new HashMap<>();
@@ -123,15 +133,16 @@ public class AzureProvisionService implements ProvisionService {
             props.put(SERVICENAME, vmName);
             Object virtualMachine = azureClient.getVirtualMachine(props);
             try {
-                metaData.put(getVirtualIP((String) virtualMachine), getPrivateIP((String) virtualMachine));
+                MetaData metaData = new MetaData();
+                metaData.setPrivateIp(getPrivateIP((String) virtualMachine));
+                metaData.setPublicIp(getVirtualIP((String) virtualMachine));
+                metaData.setStack(stack);
+                metaDatas.add(metaData);
             } catch (IOException e) {
                 LOGGER.info("The instance {} was not reacheable: ", vmName, e.getMessage());
             }
         }
-        stack.setMetadata(metaData);
-        stack.setHash(getMD5(stack));
-        stackRepository.save(stack);
-        updatedStackStatus(stack.getId(), Status.CREATE_COMPLETED);
+        return metaDatas;
     }
 
     public String getMD5(Stack stack) {

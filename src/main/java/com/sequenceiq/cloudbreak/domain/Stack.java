@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.domain;
 
-import javax.persistence.Column;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
-import javax.persistence.ElementCollection;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -14,6 +14,7 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Version;
@@ -64,8 +65,8 @@ public class Stack implements ProvisionEntity {
 
     private String hash;
 
-    @ElementCollection
-    private Map<String, String> metadata = new HashMap<>();
+    @OneToMany(mappedBy = "stack", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<MetaData> metaData = new HashSet<>();
 
     @OneToOne
     private Template template;
@@ -206,12 +207,12 @@ public class Stack implements ProvisionEntity {
         return hash;
     }
 
-    public Map<String, String> getMetadata() {
-        return metadata;
+    public Set<MetaData> getMetaData() {
+        return metaData;
     }
 
-    public void setMetadata(Map<String, String> metadata) {
-        this.metadata = metadata;
+    public void setMetaData(Set<MetaData> metaData) {
+        this.metaData = metaData;
     }
 
     public void setHash(String hash) {

@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import java.util.Map;
 import java.util.Set;
 
 import javax.validation.Valid;
@@ -19,6 +18,7 @@ import com.sequenceiq.cloudbreak.controller.json.IdJson;
 import com.sequenceiq.cloudbreak.controller.json.StackJson;
 import com.sequenceiq.cloudbreak.controller.json.StatusRequestJson;
 import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
+import com.sequenceiq.cloudbreak.domain.MetaData;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
 import com.sequenceiq.cloudbreak.security.CurrentUser;
@@ -77,8 +77,8 @@ public class StackController {
 
     @RequestMapping(method = RequestMethod.GET, value = "/meta-data/{hash}")
     @ResponseBody
-    public ResponseEntity<Map<String, String>> getStack(@CurrentUser User user, @PathVariable String hash) {
-        Map<String, String> metaData = stackService.getMetaData(userRepository.findOne(user.getId()), hash);
+    public ResponseEntity<Set<MetaData>> getStack(@CurrentUser User user, @PathVariable String hash) {
+        Set<MetaData> metaData = stackService.getMetaData(userRepository.findOne(user.getId()), hash);
         return new ResponseEntity<>(metaData, HttpStatus.OK);
     }
 

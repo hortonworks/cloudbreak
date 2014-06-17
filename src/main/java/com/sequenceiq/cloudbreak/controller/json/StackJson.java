@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.Min;
@@ -32,7 +32,7 @@ public class StackJson implements JsonEntity {
     private String ambariServerIp;
     private String hash;
     private ClusterResponse cluster;
-    private Map<String, String> metadata = new HashMap<>();
+    private Set<MetaDataJson> metadata = new HashSet<>();
 
     public StackJson() {
     }
@@ -130,12 +130,12 @@ public class StackJson implements JsonEntity {
     }
 
     @JsonProperty("metadata")
-    public Map<String, String> getMetadata() {
+    public Set<MetaDataJson> getMetadata() {
         return metadata;
     }
 
     @JsonIgnore
-    public void setMetadata(Map<String, String> metadata) {
+    public void setMetadata(Set<MetaDataJson> metadata) {
         this.metadata = metadata;
     }
 

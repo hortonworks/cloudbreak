@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
-import java.util.Map;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
 import com.sequenceiq.cloudbreak.controller.json.StackJson;
+import com.sequenceiq.cloudbreak.domain.MetaData;
 import com.sequenceiq.cloudbreak.domain.User;
 
 public interface StackService {
@@ -21,5 +21,5 @@ public interface StackService {
 
     Boolean stopAll(User user, Long stackId);
 
-    Map<String, String> getMetaData(User one, String hash);
+    Set<MetaData> getMetaData(User one, String hash);
 }

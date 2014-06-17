@@ -24,6 +24,9 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
     @Autowired
     private ClusterConverter clusterConverter;
 
+    @Autowired
+    private MetaDataConverter metaDataConverter;
+
     @Override
     public StackJson convert(Stack entity) {
         StackJson stackJson = new StackJson();
@@ -36,7 +39,7 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
         stackJson.setStatus(entity.getStatus());
         stackJson.setAmbariServerIp(entity.getAmbariIp());
         stackJson.setHash(entity.getHash());
-        stackJson.setMetadata(entity.getMetadata());
+        stackJson.setMetadata(metaDataConverter.convertAllEntityToJson(entity.getMetaData()));
         if (entity.getCluster() != null) {
             stackJson.setCluster(clusterConverter.convert(entity.getCluster(), "{}"));
         } else {
@@ -56,7 +59,7 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
         stackJson.setDescription(description);
         stackJson.setStatus(entity.getStatus());
         stackJson.setHash(entity.getHash());
-        stackJson.setMetadata(entity.getMetadata());
+        stackJson.setMetadata(metaDataConverter.convertAllEntityToJson(entity.getMetaData()));
         stackJson.setAmbariServerIp(entity.getAmbariIp());
         if (entity.getCluster() != null) {
             stackJson.setCluster(clusterConverter.convert(entity.getCluster(), "{}"));
