@@ -13,10 +13,11 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
+import com.sequenceiq.cloudbreak.controller.json.MetaDataJson;
 import com.sequenceiq.cloudbreak.controller.json.StackJson;
+import com.sequenceiq.cloudbreak.converter.MetaDataConverter;
 import com.sequenceiq.cloudbreak.converter.StackConverter;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
-import com.sequenceiq.cloudbreak.domain.MetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackDescription;
 import com.sequenceiq.cloudbreak.domain.Template;
@@ -31,6 +32,9 @@ public class SimpleStackService implements StackService {
 
     @Autowired
     private StackConverter stackConverter;
+
+    @Autowired
+    private MetaDataConverter metaDataConverter;
 
     @Autowired
     private StackRepository stackRepository;
@@ -101,10 +105,10 @@ public class SimpleStackService implements StackService {
     }
 
     @Override
-    public Set<MetaData> getMetaData(User one, String hash) {
+    public Set<MetaDataJson> getMetaData(User one, String hash) {
         Stack stack = stackRepository.findStackByHash(hash);
         if (stack != null && !stack.getMetaData().isEmpty()) {
-            return stack.getMetaData();
+            return metaDataConverter.convertAllEntityToJson(stack.getMetaData());
         }
         throw new EntityNotFoundException("Metadata not found on stack.");
     }
