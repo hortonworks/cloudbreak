@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.azure;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
@@ -10,12 +11,15 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
@@ -42,7 +46,11 @@ import groovyx.net.http.HttpResponseException;
 public class AzureProvisionService implements ProvisionService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureProvisionService.class);
-
+    private static final int HASH1 = 0xFF;
+    private static final int HASH2 = 0x100;
+    private static final int END_INDEX = 3;
+    private static final int BEGIN_INDEX = 1;
+    private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final String OK_STATUS = "ok";
     private static final String LOCATION = "location";
     private static final String NAME = "name";
@@ -114,10 +122,42 @@ public class AzureProvisionService implements ProvisionService {
             props.put(NAME, vmName);
             props.put(SERVICENAME, vmName);
             Object virtualMachine = azureClient.getVirtualMachine(props);
+            try {
+                metaData.put(getVirtualIP((String) virtualMachine), getPrivateIP((String) virtualMachine));
+            } catch (IOException e) {
+                LOGGER.info("The instance {} was not reacheable: ", vmName, e.getMessage());
+            }
         }
         stack.setMetadata(metaData);
+        stack.setHash(getMD5(stack));
         stackRepository.save(stack);
         updatedStackStatus(stack.getId(), Status.CREATE_COMPLETED);
+    }
+
+    public String getMD5(Stack stack) {
+        try {
+            int hashCode = HashCodeBuilder.reflectionHashCode(stack);
+            java.security.MessageDigest md = java.security.MessageDigest.getInstance("MD5");
+            byte[] array = md.digest(String.valueOf(hashCode).getBytes());
+            StringBuffer sb = new StringBuffer();
+            for (int i = 0; i < array.length; ++i) {
+                sb.append(Integer.toHexString((array[i] & HASH1) | HASH2).substring(BEGIN_INDEX, END_INDEX));
+            }
+            return sb.toString();
+        } catch (java.security.NoSuchAlgorithmException e) {
+            LOGGER.info("Not supported algorithm type under the MD5 generation: {}", e.getMessage());
+        }
+        return null;
+    }
+
+    private String getVirtualIP(String response) throws IOException {
+        JsonNode actualObj = MAPPER.readValue(response, JsonNode.class);
+        return actualObj.get("Deployment").get("VirtualIPs").get("VirtualIP").get("Address").asText();
+    }
+
+    private String getPrivateIP(String response) throws IOException {
+        JsonNode actualObj = MAPPER.readValue(response, JsonNode.class);
+        return actualObj.get("Deployment").get("RoleInstanceList").get("RoleInstance").get("IpAddress").asText();
     }
 
     private void updatedStackStatus(Long id, Status status) {
@@ -196,15 +236,17 @@ public class AzureProvisionService implements ProvisionService {
 
 
     private void createVirtualNetwork(AzureClient azureClient, AzureTemplate azureTemplate, String name, String commonName) {
-        Map<String, String> props = new HashMap<>();
-        props.put(NAME, name);
-        props.put(AFFINITYGROUP, commonName);
-        props.put(SUBNETNAME, name);
-        props.put(ADDRESSPREFIX, azureTemplate.getAddressPrefix());
-        props.put(SUBNETADDRESSPREFIX, azureTemplate.getSubnetAddressPrefix());
-        HttpResponseDecorator virtualNetworkResponse = (HttpResponseDecorator) azureClient.createVirtualNetwork(props);
-        String requestId = (String) azureClient.getRequestId(virtualNetworkResponse);
-        azureClient.waitUntilComplete(requestId);
+        if (!azureClient.getVirtualNetworkConfiguration().toString().contains(name)) {
+            Map<String, String> props = new HashMap<>();
+            props.put(NAME, name);
+            props.put(AFFINITYGROUP, commonName);
+            props.put(SUBNETNAME, name);
+            props.put(ADDRESSPREFIX, azureTemplate.getAddressPrefix());
+            props.put(SUBNETADDRESSPREFIX, azureTemplate.getSubnetAddressPrefix());
+            HttpResponseDecorator virtualNetworkResponse = (HttpResponseDecorator) azureClient.createVirtualNetwork(props);
+            String requestId = (String) azureClient.getRequestId(virtualNetworkResponse);
+            azureClient.waitUntilComplete(requestId);
+        }
     }
 
     private void createStorageAccount(AzureClient azureClient, AzureTemplate azureTemplate, String commonName) {

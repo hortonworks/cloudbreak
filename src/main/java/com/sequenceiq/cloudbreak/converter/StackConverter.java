@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
@@ -17,12 +14,6 @@ import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 
 @Component
 public class StackConverter extends AbstractConverter<StackJson, Stack> {
-
-    public static final Logger LOGGER = LoggerFactory.getLogger(StackConverter.class);
-    public static final int HASH1 = 0xFF;
-    public static final int HASH2 = 0x100;
-    public static final int END_INDEX = 3;
-    public static final int BEGIN_INDEX = 1;
 
     @Autowired
     private TemplateRepository templateRepository;
@@ -45,6 +36,7 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
         stackJson.setStatus(entity.getStatus());
         stackJson.setAmbariServerIp(entity.getAmbariIp());
         stackJson.setHash(entity.getHash());
+        stackJson.setMetadata(entity.getMetadata());
         if (entity.getCluster() != null) {
             stackJson.setCluster(clusterConverter.convert(entity.getCluster(), "{}"));
         } else {
@@ -64,6 +56,7 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
         stackJson.setDescription(description);
         stackJson.setStatus(entity.getStatus());
         stackJson.setHash(entity.getHash());
+        stackJson.setMetadata(entity.getMetadata());
         stackJson.setAmbariServerIp(entity.getAmbariIp());
         if (entity.getCluster() != null) {
             stackJson.setCluster(clusterConverter.convert(entity.getCluster(), "{}"));
@@ -93,19 +86,4 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
 
     }
 
-    public String getMD5(Stack stack) {
-        try {
-            int hashCode = HashCodeBuilder.reflectionHashCode(stack);
-            java.security.MessageDigest md = java.security.MessageDigest.getInstance("MD5");
-            byte[] array = md.digest(String.valueOf(hashCode).getBytes());
-            StringBuffer sb = new StringBuffer();
-            for (int i = 0; i < array.length; ++i) {
-                sb.append(Integer.toHexString((array[i] & HASH1) | HASH2).substring(BEGIN_INDEX, END_INDEX));
-            }
-            return sb.toString();
-        } catch (java.security.NoSuchAlgorithmException e) {
-            LOGGER.info("Not supported algorithm type under the MD5 generation: {}", e.getMessage());
-        }
-        return null;
-    }
 }
