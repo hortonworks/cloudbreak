@@ -2,17 +2,18 @@ package com.sequenceiq.cloudbreak.controller.validation;
 
 import com.google.common.base.Optional;
 
-public enum RequiredAWSCredentialParam implements TemplateParam {
+public enum AWSCredentialParam implements TemplateParam {
 
     ROLE_ARN("roleArn", true, String.class, Optional.<String>absent()),
-    INSTANCE_PROFILE_ROLE_ARN("instanceProfileRoleArn", true, String.class, Optional.<String>absent());
+    INSTANCE_PROFILE_ROLE_ARN("instanceProfileRoleArn", true, String.class, Optional.<String>absent()),
+    NOTIFICATION_ARN("notificationArn", false, String.class, Optional.<String>absent());
 
     private final String paramName;
     private final Class clazz;
     private final boolean required;
     private final Optional<String> regex;
 
-    private RequiredAWSCredentialParam(String paramName, Boolean required, Class clazz, Optional<String> regex) {
+    private AWSCredentialParam(String paramName, Boolean required, Class clazz, Optional<String> regex) {
         this.paramName = paramName;
         this.clazz = clazz;
         this.required = required;

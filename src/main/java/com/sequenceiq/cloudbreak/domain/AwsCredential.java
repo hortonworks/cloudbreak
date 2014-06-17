@@ -8,7 +8,7 @@ public class AwsCredential extends Credential implements ProvisionEntity {
 
     private String roleArn;
     private String instanceProfileRoleArn;
-    private String awsNotificationArn;
+    private String notificationArn;
 
     @ManyToOne
     private User awsCredentialOwner;
@@ -41,12 +41,12 @@ public class AwsCredential extends Credential implements ProvisionEntity {
         this.instanceProfileRoleArn = instanceProfileRoleArn;
     }
 
-    public String getAwsNotificationArn() {
-        return awsNotificationArn;
+    public String getNotificationArn() {
+        return notificationArn;
     }
 
-    public void setAwsNotificationArn(String awsNotificationArn) {
-        this.awsNotificationArn = awsNotificationArn;
+    public void setNotificationArn(String notificationArn) {
+        this.notificationArn = notificationArn;
     }
 
     @Override

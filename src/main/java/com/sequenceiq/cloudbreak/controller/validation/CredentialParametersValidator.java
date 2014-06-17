@@ -20,7 +20,7 @@ public class CredentialParametersValidator implements ConstraintValidator<ValidC
 
     @Override
     public void initialize(ValidCredentialRequest constraintAnnotation) {
-        for (RequiredAWSCredentialParam param : RequiredAWSCredentialParam.values()) {
+        for (AWSCredentialParam param : AWSCredentialParam.values()) {
             requiredAWSParams.add(param);
         }
         for (RequiredAzureCredentialParam param : RequiredAzureCredentialParam.values()) {

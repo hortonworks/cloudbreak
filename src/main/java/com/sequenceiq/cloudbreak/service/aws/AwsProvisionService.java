@@ -308,7 +308,7 @@ public class AwsProvisionService implements ProvisionService {
                 .withStackName(stackName)
                 .withTemplateBody(template.getBody())
                 .withParameters(new Parameter().withParameterKey("SSHLocation").withParameterValue(awsTemplate.getSshLocation()))
-                .withNotificationARNs(credential.getAwsNotificationArn());
+                .withNotificationARNs(credential.getNotificationArn());
         client.createStack(createStackRequest);
         LOGGER.info("CloudFormation stack creation request sent with stack name: '{}' for stack: '{}'", stackName, stack.getId());
     }
