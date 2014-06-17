@@ -56,12 +56,12 @@ public class SimpleTemplateService implements TemplateService {
             throw new NotFoundException(String.format(TEMPLATE_NOT_FOUND_MSG, id));
         } else {
             switch (template.cloudPlatform()) {
-                case AWS:
-                    return awsTemplateConverter.convert((AwsTemplate) template);
-                case AZURE:
-                    return azureTemplateConverter.convert((AzureTemplate) template);
-                default:
-                    throw new UnknownFormatConversionException(String.format(CLOUD_PLATFORM_NOT_SUPPORTED_MSG, template.cloudPlatform()));
+            case AWS:
+                return awsTemplateConverter.convert((AwsTemplate) template);
+            case AZURE:
+                return azureTemplateConverter.convert((AzureTemplate) template);
+            default:
+                throw new UnknownFormatConversionException(String.format(CLOUD_PLATFORM_NOT_SUPPORTED_MSG, template.cloudPlatform()));
             }
         }
     }
@@ -69,18 +69,18 @@ public class SimpleTemplateService implements TemplateService {
     @Override
     public IdJson create(User user, TemplateJson templateRequest) {
         switch (templateRequest.getCloudPlatform()) {
-            case AWS:
-                Template awsTemplate = awsTemplateConverter.convert(templateRequest);
-                awsTemplate.setUser(user);
-                templateRepository.save(awsTemplate);
-                return new IdJson(awsTemplate.getId());
-            case AZURE:
-                Template azureTemplate = azureTemplateConverter.convert(templateRequest);
-                azureTemplate.setUser(user);
-                templateRepository.save(azureTemplate);
-                return new IdJson(azureTemplate.getId());
-            default:
-                throw new UnknownFormatConversionException(String.format(CLOUD_PLATFORM_NOT_SUPPORTED_MSG, templateRequest.getCloudPlatform()));
+        case AWS:
+            Template awsTemplate = awsTemplateConverter.convert(templateRequest);
+            awsTemplate.setUser(user);
+            templateRepository.save(awsTemplate);
+            return new IdJson(awsTemplate.getId());
+        case AZURE:
+            Template azureTemplate = azureTemplateConverter.convert(templateRequest);
+            azureTemplate.setUser(user);
+            templateRepository.save(azureTemplate);
+            return new IdJson(azureTemplate.getId());
+        default:
+            throw new UnknownFormatConversionException(String.format(CLOUD_PLATFORM_NOT_SUPPORTED_MSG, templateRequest.getCloudPlatform()));
         }
     }
 
@@ -91,7 +91,7 @@ public class SimpleTemplateService implements TemplateService {
             throw new NotFoundException(String.format(TEMPLATE_NOT_FOUND_MSG, id));
         }
         List<Stack> allStackForTemplate = getAllStackForTemplate(id);
-        if (allStackForTemplate.size() == 0) {
+        if (allStackForTemplate.isEmpty()) {
             templateRepository.delete(template);
         } else {
             throw new BadRequestException(String.format("Template '%s' has some cloud dependency please remove clouds before the deletion.", id));

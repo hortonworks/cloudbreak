@@ -41,6 +41,7 @@ public class UserInitializer implements InitializingBean {
             awsCredential.setInstanceProfileRoleArn("arn:aws:iam::755047402263:instance-profile/readonly-role");
             awsCredential.setAwsCredentialOwner(user2);
             awsCredential.setName("aws_credential");
+            awsCredential.setAwsNotificationArn("arn:aws:sns:eu-west-1:755047402263:cb-notif-2");
 
             user2.getAwsCredentials().add(awsCredential);
             // user2.getAzureCredentials().add(azureCredential);

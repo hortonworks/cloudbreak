@@ -107,7 +107,7 @@ public class AwsProvisionService implements ProvisionService {
             AwsTemplate awsTemplate = (AwsTemplate) stack.getTemplate();
             AwsCredential awsCredential = (AwsCredential) credential;
             AmazonCloudFormationClient client = createCloudFormationClient(user, awsTemplate.getRegion(), awsCredential);
-            createStack(stack, awsTemplate, client);
+            createStack(awsCredential, stack, awsTemplate, client);
             String stackStatus = "CREATE_IN_PROGRESS";
             DescribeStacksResult stackResult = pollStackCreation(stack, client);
             stackStatus = stackResult.getStacks().get(0).getStackStatus();
@@ -232,7 +232,7 @@ public class AwsProvisionService implements ProvisionService {
         boolean instancesReachable = true;
         DescribeInstanceStatusRequest instanceStatusRequest = new DescribeInstanceStatusRequest().withInstanceIds(instanceIds);
         DescribeInstanceStatusResult instanceStatusResult = amazonEC2Client.describeInstanceStatus(instanceStatusRequest);
-        if (instanceStatusResult.getInstanceStatuses().size() > 0) {
+        if (!instanceStatusResult.getInstanceStatuses().isEmpty()) {
             for (InstanceStatus status : instanceStatusResult.getInstanceStatuses()) {
                 instancesReachable = instancesReachable && "running".equals(status.getInstanceState().getName());
                 instancesReachable = instancesReachable && "ok".equals(status.getInstanceStatus().getStatus());
@@ -302,12 +302,13 @@ public class AwsProvisionService implements ProvisionService {
         return instanceIds;
     }
 
-    private void createStack(Stack stack, AwsTemplate awsTemplate, AmazonCloudFormationClient client) {
+    private void createStack(AwsCredential credential, Stack stack, AwsTemplate awsTemplate, AmazonCloudFormationClient client) {
         String stackName = String.format("%s-%s", stack.getName(), stack.getId());
         CreateStackRequest createStackRequest = new CreateStackRequest()
                 .withStackName(stackName)
                 .withTemplateBody(template.getBody())
-                .withParameters(new Parameter().withParameterKey("SSHLocation").withParameterValue(awsTemplate.getSshLocation()));
+                .withParameters(new Parameter().withParameterKey("SSHLocation").withParameterValue(awsTemplate.getSshLocation()))
+                .withNotificationARNs(credential.getAwsNotificationArn());
         client.createStack(createStackRequest);
         LOGGER.info("CloudFormation stack creation request sent with stack name: '{}' for stack: '{}'", stackName, stack.getId());
     }
@@ -397,7 +398,7 @@ public class AwsProvisionService implements ProvisionService {
                 .withFilters(new Filter().withName("tag:" + INSTANCE_TAG_KEY).withValues(stack.getName()));
         DescribeInstancesResult instancesResult = ec2Client.describeInstances(instancesRequest);
 
-        if (instancesResult.getReservations().size() > 0) {
+        if (!instancesResult.getReservations().isEmpty()) {
             List<String> instanceIds = new ArrayList<>();
             for (Instance instance : instancesResult.getReservations().get(0).getInstances()) {
                 instanceIds.add(instance.getInstanceId());
