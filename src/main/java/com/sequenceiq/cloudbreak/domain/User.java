@@ -30,18 +30,7 @@ import org.hibernate.validator.constraints.NotEmpty;
                         + "LEFT JOIN FETCH u.awsCredentials "
                         + "LEFT JOIN FETCH u.azureCredentials "
                         + "LEFT JOIN FETCH u.clusters "
-                        + "WHERE u.id= :id"),
-        @NamedQuery(
-                name = "User.findByEmailAndPassword",
-                query = "SELECT u FROM User u "
-                        + "LEFT JOIN FETCH u.azureTemplates "
-                        + "LEFT JOIN FETCH u.awsTemplates "
-                        + "LEFT JOIN FETCH u.stacks "
-                        + "LEFT JOIN FETCH u.blueprints "
-                        + "LEFT JOIN FETCH u.awsCredentials "
-                        + "LEFT JOIN FETCH u.azureCredentials "
-                        + "LEFT JOIN FETCH u.clusters "
-                        + "WHERE u.email= :email AND u.password= :password")
+                        + "WHERE u.id= :id")
 })
 @Table(name = "cloudbreakuser")
 public class User implements ProvisionEntity {
