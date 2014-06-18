@@ -5,7 +5,6 @@ import java.util.Set;
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
 import com.sequenceiq.cloudbreak.controller.json.MetaDataJson;
 import com.sequenceiq.cloudbreak.controller.json.StackJson;
-import com.sequenceiq.cloudbreak.domain.MetaData;
 import com.sequenceiq.cloudbreak.domain.User;
 
 public interface StackService {
