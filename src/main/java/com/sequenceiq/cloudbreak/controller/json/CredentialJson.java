@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 public class CredentialJson implements JsonEntity {
 
     private Long id;
-    @Size(max = 20)
+    @Size(max = 20, min = 5)
     private String name;
     private CloudPlatform cloudPlatform;
     private Map<String, Object> parameters = new HashMap<>();
