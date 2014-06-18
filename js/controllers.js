@@ -553,7 +553,6 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     cloudPlatform: "AWS",
                     name: awscname.value,
                     parameters: {
-                        amiId: tamiId.value,
                         roleArn: croleArn.value,
                         instanceProfileRoleArn: cinstanceProfileRoleArn.value
                     }
@@ -562,7 +561,6 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 $scope.statusMessage = "AWS credential '" + data.id + "' was created successfully";
                 $scope.getCredentials();
                 awscname.value = "";
-                tamiId.value = "";
                 croleArn.value = "";
                 cinstanceProfileRoleArn.value = "";
             }).error(function (data, status, headers, config) {
