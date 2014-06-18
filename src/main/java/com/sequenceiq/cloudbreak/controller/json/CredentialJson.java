@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.controller.json;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -14,6 +15,7 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 public class CredentialJson implements JsonEntity {
 
     private Long id;
+    @NotNull
     @Size(max = 20, min = 5)
     private String name;
     private CloudPlatform cloudPlatform;
