@@ -57,15 +57,26 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
         }
 
         $scope.signIn = function() {
-            if(emailFieldLogin.value === "cbuser@sequenceiq.com" && passwFieldLogin.value === "test123") {
-                localStorage.signedIn = true;
-                $rootScope.signedIn = true;
-                localStorage.activeUser = emailFieldLogin.value;
-                $rootScope.activeUser = localStorage.activeUser;
-                localStorage.password64 = Base64.encode(emailFieldLogin.value + ":" + passwFieldLogin.value);
-                $rootScope.password64 = localStorage.password64;
-                $scope.doQuerys();
-            }
+                $http({
+                    method: 'GET',
+                    dataType: 'json',
+                    withCredentials: true,
+                    url:  $rootScope.apiUrl + "/login",
+                    headers: {
+                        'Authorization': 'Basic ' + Base64.encode(emailFieldLogin.value + ":" + passwFieldLogin.value),
+                        'Content-Type': 'application/json'
+                    }
+                }).success(function (data, status, headers, config) {
+                    localStorage.signedIn = true;
+                    $rootScope.signedIn = true;
+                    localStorage.activeUser = emailFieldLogin.value;
+                    $rootScope.activeUser = localStorage.activeUser;
+                    localStorage.password64 = Base64.encode(emailFieldLogin.value + ":" + passwFieldLogin.value);
+                    $rootScope.password64 = localStorage.password64;
+                    $scope.doQuerys();
+                }).error(function (data, status, headers, config) {
+                    $scope.statusMessage = data;
+                });
         }
 
         $scope.signOut = function() {
