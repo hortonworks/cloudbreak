@@ -31,7 +31,7 @@ import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.DetailedAzureStackDescription;
-import com.sequenceiq.cloudbreak.domain.MetaData;
+import com.sequenceiq.cloudbreak.domain.Metadata;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackDescription;
 import com.sequenceiq.cloudbreak.domain.Status;
@@ -124,8 +124,8 @@ public class AzureProvisionService implements ProvisionService {
         updatedStackStatus(stack.getId(), Status.CREATE_COMPLETED);
     }
 
-    private Set<MetaData> collectMetaData(Stack stack, AzureClient azureClient, String name) {
-        Set<MetaData> metaDatas = new HashSet<>();
+    private Set<Metadata> collectMetaData(Stack stack, AzureClient azureClient, String name) {
+        Set<Metadata> metaDatas = new HashSet<>();
         for (int i = 0; i < stack.getNodeCount(); i++) {
             String vmName = getVmName(name, i);
             Map<String, Object> props = new HashMap<>();
@@ -133,7 +133,7 @@ public class AzureProvisionService implements ProvisionService {
             props.put(SERVICENAME, vmName);
             Object virtualMachine = azureClient.getVirtualMachine(props);
             try {
-                MetaData metaData = new MetaData();
+                Metadata metaData = new Metadata();
                 metaData.setPrivateIp(getPrivateIP((String) virtualMachine));
                 metaData.setPublicIp(getVirtualIP((String) virtualMachine));
                 metaData.setStack(stack);

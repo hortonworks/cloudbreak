@@ -66,7 +66,7 @@ public class Stack implements ProvisionEntity {
     private String hash;
 
     @OneToMany(mappedBy = "stack", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<MetaData> metaData = new HashSet<>();
+    private Set<Metadata> metaData = new HashSet<>();
 
     @OneToOne
     private Template template;
@@ -207,11 +207,11 @@ public class Stack implements ProvisionEntity {
         return hash;
     }
 
-    public Set<MetaData> getMetaData() {
+    public Set<Metadata> getMetaData() {
         return metaData;
     }
 
-    public void setMetaData(Set<MetaData> metaData) {
+    public void setMetaData(Set<Metadata> metaData) {
         this.metaData = metaData;
     }
 
