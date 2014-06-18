@@ -9,6 +9,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
@@ -18,17 +19,19 @@ import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 
 @Entity
-@NamedQuery(
-        name = "User.findOneWithLists",
-        query = "SELECT u FROM User u "
-                + "LEFT JOIN FETCH u.azureTemplates "
-                + "LEFT JOIN FETCH u.awsTemplates "
-                + "LEFT JOIN FETCH u.stacks "
-                + "LEFT JOIN FETCH u.blueprints "
-                + "LEFT JOIN FETCH u.awsCredentials "
-                + "LEFT JOIN FETCH u.azureCredentials "
-                + "LEFT JOIN FETCH u.clusters "
-                + "WHERE u.id= :id")
+@NamedQueries({
+        @NamedQuery(
+                name = "User.findOneWithLists",
+                query = "SELECT u FROM User u "
+                        + "LEFT JOIN FETCH u.azureTemplates "
+                        + "LEFT JOIN FETCH u.awsTemplates "
+                        + "LEFT JOIN FETCH u.stacks "
+                        + "LEFT JOIN FETCH u.blueprints "
+                        + "LEFT JOIN FETCH u.awsCredentials "
+                        + "LEFT JOIN FETCH u.azureCredentials "
+                        + "LEFT JOIN FETCH u.clusters "
+                        + "WHERE u.id= :id")
+})
 @Table(name = "cloudbreakuser")
 public class User implements ProvisionEntity {
     @Id
