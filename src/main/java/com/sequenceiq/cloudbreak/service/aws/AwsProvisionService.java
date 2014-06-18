@@ -79,7 +79,6 @@ public class AwsProvisionService implements ProvisionService {
     private static final String INSTANCE_NAME_TAG = "Name";
     private static final int POLLING_INTERVAL = 3000;
     private static final String INSTANCE_TAG_KEY = "CloudbreakStackId";
-    private static final int SESSION_CREDENTIALS_DURATION = 3600;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsProvisionService.class);
 
@@ -106,14 +105,14 @@ public class AwsProvisionService implements ProvisionService {
         try {
             AwsTemplate awsTemplate = (AwsTemplate) stack.getTemplate();
             AwsCredential awsCredential = (AwsCredential) credential;
-            AmazonCloudFormationClient client = createCloudFormationClient(user, awsTemplate.getRegion(), awsCredential);
+            AmazonCloudFormationClient client = createCloudFormationClient(awsTemplate.getRegion(), awsCredential);
             createStack(awsCredential, stack, awsTemplate, client);
             String stackStatus = "CREATE_IN_PROGRESS";
             DescribeStacksResult stackResult = pollStackCreation(stack, client);
             stackStatus = stackResult.getStacks().get(0).getStackStatus();
             if ("CREATE_COMPLETE".equals(stackStatus)) {
                 try {
-                    AmazonEC2Client amazonEC2Client = createEC2Client(user, awsTemplate.getRegion(), awsCredential);
+                    AmazonEC2Client amazonEC2Client = createEC2Client(awsTemplate.getRegion(), awsCredential);
                     List<String> instanceIds = runInstancesInSubnet(stack, awsTemplate, stackResult, amazonEC2Client,
                             awsCredential.getInstanceProfileRoleArn(), user.getEmail());
                     tagInstances(stack, amazonEC2Client, instanceIds);
@@ -307,8 +306,9 @@ public class AwsProvisionService implements ProvisionService {
         CreateStackRequest createStackRequest = new CreateStackRequest()
                 .withStackName(stackName)
                 .withTemplateBody(template.getBody())
-                .withParameters(new Parameter().withParameterKey("SSHLocation").withParameterValue(awsTemplate.getSshLocation()))
-                .withNotificationARNs(credential.getNotificationArn());
+                .withParameters(new Parameter().withParameterKey("SSHLocation").withParameterValue(awsTemplate.getSshLocation()));
+        // TODO:
+        // .withNotificationARNs(credential.getSnsTopicForRegion(awsTemplate.getRegion()));
         client.createStack(createStackRequest);
         LOGGER.info("CloudFormation stack creation request sent with stack name: '{}' for stack: '{}'", stackName, stack.getId());
     }
@@ -331,14 +331,14 @@ public class AwsProvisionService implements ProvisionService {
 
     @Override
     public StackDescription describeStack(User user, Stack stack, Credential credential) {
-        AwsTemplate awsInfra = (AwsTemplate) stack.getTemplate();
+        AwsTemplate awsTemplate = (AwsTemplate) stack.getTemplate();
         AwsCredential awsCredential = (AwsCredential) credential;
         DescribeStacksResult stackResult = null;
         DescribeInstancesResult instancesResult = null;
         String cfStackName = String.format("%s-%s", stack.getName(), stack.getId());
 
         try {
-            AmazonCloudFormationClient client = createCloudFormationClient(user, awsInfra.getRegion(), awsCredential);
+            AmazonCloudFormationClient client = createCloudFormationClient(awsTemplate.getRegion(), awsCredential);
             DescribeStacksRequest stackRequest = new DescribeStacksRequest().withStackName(cfStackName);
             stackResult = client.describeStacks(stackRequest);
         } catch (AmazonServiceException e) {
@@ -349,7 +349,7 @@ public class AwsProvisionService implements ProvisionService {
                 throw e;
             }
         }
-        AmazonEC2Client ec2Client = createEC2Client(user, awsInfra.getRegion(), awsCredential);
+        AmazonEC2Client ec2Client = createEC2Client(awsTemplate.getRegion(), awsCredential);
         DescribeInstancesRequest instancesRequest = new DescribeInstancesRequest()
                 .withFilters(new Filter().withName("tag:" + INSTANCE_TAG_KEY).withValues(stack.getName()));
         instancesResult = ec2Client.describeInstances(instancesRequest);
@@ -365,7 +365,7 @@ public class AwsProvisionService implements ProvisionService {
         String cfStackName = String.format("%s-%s", stack.getName(), stack.getId());
 
         try {
-            AmazonCloudFormationClient client = createCloudFormationClient(user, awsInfra.getRegion(), awsCredential);
+            AmazonCloudFormationClient client = createCloudFormationClient(awsInfra.getRegion(), awsCredential);
             DescribeStacksRequest stackRequest = new DescribeStacksRequest().withStackName(String.format("%s-%s", stack.getName(), stack.getId()));
             stackResult = client.describeStacks(stackRequest);
 
@@ -381,7 +381,7 @@ public class AwsProvisionService implements ProvisionService {
             }
         }
 
-        AmazonEC2Client ec2Client = createEC2Client(user, awsInfra.getRegion(), awsCredential);
+        AmazonEC2Client ec2Client = createEC2Client(awsInfra.getRegion(), awsCredential);
         DescribeInstancesRequest instancesRequest = new DescribeInstancesRequest()
                 .withFilters(new Filter().withName("tag:" + INSTANCE_TAG_KEY).withValues(stack.getName()));
         DescribeInstancesResult instancesResult = ec2Client.describeInstances(instancesRequest);
@@ -393,7 +393,7 @@ public class AwsProvisionService implements ProvisionService {
     public void deleteStack(User user, Stack stack, Credential credential) {
         AwsTemplate awsInfra = (AwsTemplate) stack.getTemplate();
         AwsCredential awsCredential = (AwsCredential) credential;
-        AmazonEC2Client ec2Client = createEC2Client(user, awsInfra.getRegion(), awsCredential);
+        AmazonEC2Client ec2Client = createEC2Client(awsInfra.getRegion(), awsCredential);
         DescribeInstancesRequest instancesRequest = new DescribeInstancesRequest()
                 .withFilters(new Filter().withName("tag:" + INSTANCE_TAG_KEY).withValues(stack.getName()));
         DescribeInstancesResult instancesResult = ec2Client.describeInstances(instancesRequest);
@@ -407,7 +407,7 @@ public class AwsProvisionService implements ProvisionService {
             ec2Client.terminateInstances(terminateInstancesRequest);
         }
 
-        AmazonCloudFormationClient client = createCloudFormationClient(user, awsInfra.getRegion(), awsCredential);
+        AmazonCloudFormationClient client = createCloudFormationClient(awsInfra.getRegion(), awsCredential);
         DeleteStackRequest deleteStackRequest = new DeleteStackRequest().withStackName(String.format("%s-%s", stack.getName(), stack.getId()));
 
         client.deleteStack(deleteStackRequest);
@@ -433,18 +433,18 @@ public class AwsProvisionService implements ProvisionService {
         return new String(encoded);
     }
 
-    private AmazonCloudFormationClient createCloudFormationClient(User user, Regions regions, AwsCredential credential) {
+    private AmazonCloudFormationClient createCloudFormationClient(Regions regions, AwsCredential credential) {
         BasicSessionCredentials basicSessionCredentials = credentialsProvider
-                .retrieveSessionCredentials(SESSION_CREDENTIALS_DURATION, "provision-ambari", user, credential);
+                .retrieveSessionCredentials(CrossAccountCredentialsProvider.DEFAULT_SESSION_CREDENTIALS_DURATION, "provision-ambari", credential);
         AmazonCloudFormationClient amazonCloudFormationClient = new AmazonCloudFormationClient(basicSessionCredentials);
         amazonCloudFormationClient.setRegion(Region.getRegion(regions));
         LOGGER.info("Amazon CloudFormation client successfully created.");
         return amazonCloudFormationClient;
     }
 
-    private AmazonEC2Client createEC2Client(User user, Regions regions, AwsCredential credential) {
+    private AmazonEC2Client createEC2Client(Regions regions, AwsCredential credential) {
         BasicSessionCredentials basicSessionCredentials = credentialsProvider
-                .retrieveSessionCredentials(SESSION_CREDENTIALS_DURATION, "provision-ambari", user, credential);
+                .retrieveSessionCredentials(CrossAccountCredentialsProvider.DEFAULT_SESSION_CREDENTIALS_DURATION, "provision-ambari", credential);
         AmazonEC2Client amazonEC2Client = new AmazonEC2Client(basicSessionCredentials);
         amazonEC2Client.setRegion(Region.getRegion(regions));
         LOGGER.info("Amazon EC2 client successfully created.");

@@ -76,18 +76,9 @@ public class SimpleCredentialService implements CredentialService {
     public IdJson save(User user, CredentialJson credentialJson) {
         switch (credentialJson.getCloudPlatform()) {
         case AWS:
-            AwsCredential awsCredential = awsCredentialConverter.convert(credentialJson);
-            awsCredential.setAwsCredentialOwner(user);
-            awsCredentialRepository.save(awsCredential);
-            websocketService.send(ENDPOINT, new StatusMessage(awsCredential.getId(), awsCredential.getName(), Status.CREATE_COMPLETED.name()));
-            return new IdJson(awsCredential.getId());
+            return saveAwsCredential(user, credentialJson);
         case AZURE:
-            AzureCredential azureCredential = azureCredentialConverter.convert(credentialJson);
-            azureCredential.setAzureCredentialOwner(user);
-            azureCredentialRepository.save(azureCredential);
-            azureCredentialService.generateCertificate(azureCredential, user);
-            websocketService.send(ENDPOINT, new StatusMessage(azureCredential.getId(), azureCredential.getName(), Status.CREATE_COMPLETED.name()));
-            return new IdJson(azureCredential.getId());
+            return saveAzureCredential(user, credentialJson);
         default:
             websocketService.send(ENDPOINT, new StatusMessage(-1L, credentialJson.getName(), Status.CREATE_FAILED.name()));
             throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", credentialJson.getCloudPlatform()));
@@ -102,6 +93,23 @@ public class SimpleCredentialService implements CredentialService {
         }
         credentialRepository.delete(credential);
         websocketService.send(ENDPOINT, new StatusMessage(credential.getId(), credential.getName(), Status.DELETE_COMPLETED.name()));
+    }
+
+    private IdJson saveAwsCredential(User user, CredentialJson credentialJson) {
+        AwsCredential awsCredential = awsCredentialConverter.convert(credentialJson);
+        awsCredential.setAwsCredentialOwner(user);
+        awsCredentialRepository.save(awsCredential);
+        websocketService.send(ENDPOINT, new StatusMessage(awsCredential.getId(), awsCredential.getName(), Status.CREATE_COMPLETED.name()));
+        return new IdJson(awsCredential.getId());
+    }
+
+    private IdJson saveAzureCredential(User user, CredentialJson credentialJson) {
+        AzureCredential azureCredential = azureCredentialConverter.convert(credentialJson);
+        azureCredential.setAzureCredentialOwner(user);
+        azureCredentialRepository.save(azureCredential);
+        azureCredentialService.generateCertificate(azureCredential, user);
+        websocketService.send(ENDPOINT, new StatusMessage(azureCredential.getId(), azureCredential.getName(), Status.CREATE_COMPLETED.name()));
+        return new IdJson(azureCredential.getId());
     }
 
 }
