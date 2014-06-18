@@ -2,23 +2,23 @@ package com.sequenceiq.cloudbreak.converter;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.controller.json.MetadataJson;
-import com.sequenceiq.cloudbreak.domain.Metadata;
+import com.sequenceiq.cloudbreak.controller.json.MetaDataJson;
+import com.sequenceiq.cloudbreak.domain.MetaData;
 
 @Component
-public class MetaDataConverter extends AbstractConverter<MetadataJson, Metadata> {
+public class MetaDataConverter extends AbstractConverter<MetaDataJson, MetaData> {
 
     @Override
-    public MetadataJson convert(Metadata entity) {
-        MetadataJson metaDataJson = new MetadataJson();
+    public MetaDataJson convert(MetaData entity) {
+        MetaDataJson metaDataJson = new MetaDataJson();
         metaDataJson.setPrivateIp(entity.getPrivateIp());
         metaDataJson.setPublicIp(entity.getPublicIp());
         return metaDataJson;
     }
 
     @Override
-    public Metadata convert(MetadataJson json) {
-        Metadata metaData = new Metadata();
+    public MetaData convert(MetaDataJson json) {
+        MetaData metaData = new MetaData();
         metaData.setPrivateIp(json.getPrivateIp());
         metaData.setPublicIp(json.getPublicIp());
         return metaData;

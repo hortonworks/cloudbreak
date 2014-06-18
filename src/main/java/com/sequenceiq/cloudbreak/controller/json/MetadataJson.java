@@ -1,11 +1,11 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
-public class MetadataJson implements JsonEntity {
+public class MetaDataJson implements JsonEntity {
 
     private String privateIp;
     private String publicIp;
 
-    public MetadataJson() {
+    public MetaDataJson() {
 
     }
 

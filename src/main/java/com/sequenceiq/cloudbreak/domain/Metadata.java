@@ -6,7 +6,7 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
 @Entity
-public class Metadata implements ProvisionEntity {
+public class MetaData implements ProvisionEntity {
 
     @Id
     @GeneratedValue
@@ -16,7 +16,7 @@ public class Metadata implements ProvisionEntity {
     @ManyToOne
     private Stack stack;
 
-    public Metadata() {
+    public MetaData() {
 
     }
 

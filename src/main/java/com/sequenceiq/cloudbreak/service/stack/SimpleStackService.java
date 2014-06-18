@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
-import com.sequenceiq.cloudbreak.controller.json.MetadataJson;
+import com.sequenceiq.cloudbreak.controller.json.MetaDataJson;
 import com.sequenceiq.cloudbreak.controller.json.StackJson;
 import com.sequenceiq.cloudbreak.converter.MetaDataConverter;
 import com.sequenceiq.cloudbreak.converter.StackConverter;
@@ -105,7 +105,7 @@ public class SimpleStackService implements StackService {
     }
 
     @Override
-    public Set<MetadataJson> getMetaData(User one, String hash) {
+    public Set<MetaDataJson> getMetaData(User one, String hash) {
         Stack stack = stackRepository.findStackByHash(hash);
         if (stack != null && !stack.getMetaData().isEmpty()) {
             return metaDataConverter.convertAllEntityToJson(stack.getMetaData());
