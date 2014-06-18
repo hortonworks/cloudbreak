@@ -15,7 +15,7 @@ public class TemplateJson implements JsonEntity {
 
     private Long id;
     private CloudPlatform cloudPlatform;
-    @Size(max = 20)
+    @Size(max = 20, min = 5)
     private String name;
     private Map<String, Object> parameters = new HashMap<>();
 
