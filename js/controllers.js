@@ -711,6 +711,9 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
         }
 
         if (typeof (Storage) !== "undefined") {
+            $http.get('connection.properties').then(function (response) {
+                $rootScope.apiUrl = response.data.backend_url;
+            });
             if (localStorage.signedIn === 'true' && localStorage.activeUser && localStorage.password64) {
                 $rootScope.signedIn = true;
                 $rootScope.activeUser = localStorage.activeUser;
