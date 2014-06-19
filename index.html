@@ -1589,13 +1589,13 @@
 </div>
 </div>
 
-<div class="container" ng-hide="signedIn">
+
+<div  ng-hide="signedIn">
     <div id="page-home">
         <div class="fill-bg">
             <img src="img/bg-login-page.jpg" alt="">
         </div>
-
-        <header>
+        <header ng-hide="signedIn">
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-sm-6">
@@ -1604,8 +1604,7 @@
                 </div><!-- .row -->
             </div><!-- .container -->
         </header>
-
-        <section>
+        <section class="container">
             <div class="container">
                 <div class="row">
                     <div class="col-sm-8 col-sm-offset-2">
@@ -1673,7 +1672,7 @@
         </section>
 
 
-        
+
 
 
         <script type="text/javascript">
