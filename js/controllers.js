@@ -466,12 +466,16 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 },
                 data: {
                     url: blueprintUrl.value,
-                    ambariBlueprint: bluePrintText.value
+                    ambariBlueprint: bluePrintText.value,
+                    name: bluePrintName.value,
+                    description: bluePrintDescription.value
                 }
             }).success(function (data, status, headers, config) {
                 $scope.statusMessage = "Blueprint '"+ data.id + "' was created succesfully.";
                 blueprintUrl.value = "";
                 bluePrintText.value = "";
+                bluePrintName.value = "";
+                bluePrintDescription.value = "";
                 $scope.getBluePrints()
             }).error(function (data, status, headers, config) {
                 $scope.statusMessage = "The creation of blueprint failed: " + data;
@@ -492,6 +496,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 data: {
                     cloudPlatform: "AWS",
                     name: aws_tclusterName.value,
+                    description: aws_tdescription.value,
                     parameters: {
                         keyName: aws_tkeyName.value,
                         region: aws_tregion.value,
@@ -505,6 +510,8 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 aws_tclusterName.value = "";
                 aws_tkeyName.value = "";
                 aws_tamiId.value = "";
+                aws_tdescription.value = "";
+                aws_tsshLocation.value= "";
             }).error(function (data, status, headers, config) {
                 $scope.statusMessage = "Creation of AWS template failed: " + data;
             });
@@ -568,6 +575,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 data: {
                     cloudPlatform: "AWS",
                     name: awscname.value,
+                    description: awscdescription.value,
                     parameters: {
                         roleArn: croleArn.value,
                         instanceProfileRoleArn: cinstanceProfileRoleArn.value
@@ -579,6 +587,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 awscname.value = "";
                 croleArn.value = "";
                 cinstanceProfileRoleArn.value = "";
+                awscdescription.value = "";
             }).error(function (data, status, headers, config) {
                 $scope.statusMessage = "AWS template creation failed: " + data;
                 $scope.isFailedCreation = true;
@@ -597,6 +606,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 data: {
                     cloudPlatform: "AZURE",
                     name: cname.value,
+                    description: cdescription.value,
                     parameters: {
                         subscriptionId: csubscriptionId.value,
                         jksPassword: cjksPassword.value

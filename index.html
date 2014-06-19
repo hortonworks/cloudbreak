@@ -780,6 +780,16 @@
         <!-- .col-sm-9 -->
 
     </div>
+
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="aws_tdescription">Description</label>
+
+        <div class="col-sm-9">
+            <input type="text" class="form-control" id="aws_tdescription" placeholder="max. 20 char">
+        </div>
+        <!-- .col-sm-9 -->
+
+    </div>
     <div class="form-group">
 
         <label class="col-sm-3 control-label" for="aws_tamiId">AMI</label>
@@ -892,6 +902,14 @@
                     </div>
                     <!-- .form-group -->
                     <div class="form-group">
+                        <label class="col-sm-3 control-label" for="clusterDesc">Description</label>
+
+                        <div class="col-sm-9">
+                            <p id="clusterDesc" class="form-control-static">{{template.description}}</p>
+                        </div>
+                        <!-- .col-sm-9 -->
+                    </div>
+                    <div class="form-group">
                         <label class="col-sm-3 control-label" for="password">Password</label>
 
                         <div class="col-sm-9">
@@ -985,6 +1003,14 @@
                         <!-- .col-sm-9 -->
                     </div>
                     <div class="form-group">
+                        <label class="col-sm-3 control-label" for="awsclusterDesc">Description</label>
+
+                        <div class="col-sm-9">
+                            <p id="awsclusterDesc" class="form-control-static">{{template.description}}</p>
+                        </div>
+                        <!-- .col-sm-9 -->
+                    </div>
+                    <div class="form-group">
                         <label class="col-sm-3 control-label" for="awsamiId">AMI</label>
 
                         <div class="col-sm-9">
@@ -1070,6 +1096,34 @@
                             <form class="form-horizontal" role="form" name="blueprintForm">
 
                                 <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="bluePrintName">Name</label>
+
+                                    <div class="col-sm-9">
+                                        <input type="text" class="form-control" id="bluePrintName" ng-model="bluePrintName" name="bluePrintName"
+                                               placeholder="set blueprint name">
+
+                                        <div class="alert-danger" ng-show="blueprintForm.bluePrintName.$dirty && blueprintForm.bluePrintName.$invalid">Name can not be null
+                                        </div>
+                                    </div>
+
+
+                                    <!-- .col-sm-9 -->
+                                </div>
+                                <!-- .form-group -->
+
+
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="bluePrintDescription">Description</label>
+
+                                    <div class="col-sm-9">
+                                        <input type="text" class="form-control" id="bluePrintDescription" ng-model="bluePrintDescription" name="bluePrintDescription"
+                                               placeholder="description">
+                                    </div>
+                                    <!-- .col-sm-9 -->
+                                </div>
+                                <!-- .form-group -->
+
+                                <div class="form-group">
                                     <label class="col-sm-3 control-label" for="blueprintUrl">Source URL</label>
 
                                     <div class="col-sm-9">
@@ -1080,6 +1134,8 @@
                                             be a valid url
                                         </div>
                                     </div>
+
+
                                     <!-- .col-sm-9 -->
                                 </div>
                                 <!-- .form-group -->
@@ -1129,6 +1185,24 @@
                             <div class="panel-body">
 
                                 <form class="form-horizontal" role="document">
+
+                                    <div class="form-group">
+                                        <label class="col-sm-3 control-label" for="name">Name</label>
+
+                                        <div class="col-sm-9">
+                                            <p id="name" class="form-control-static">{{blueprint.blueprintName}}</p>
+                                        </div>
+                                        <!-- .col-sm-9 -->
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-sm-3 control-label" for="name">Description</label>
+
+                                        <div class="col-sm-9">
+                                            <p id="name" class="form-control-static">{{blueprint.description}}</p>
+                                        </div>
+                                        <!-- .col-sm-9 -->
+                                    </div>
 
                                     <div class="form-group">
                                         <label class="col-sm-3 control-label" for="source">Source</label>
@@ -1211,6 +1285,17 @@
                         <!-- .col-sm-9 -->
 
                     </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="cdescription">Description</label>
+
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="cdescription" placeholder="max. 20 char">
+                        </div>
+                        <!-- .col-sm-9 -->
+
+                    </div>
+
                     <!-- .form-group -->
                     <div class="form-group">
                         <label class="col-sm-3 control-label" for="csubscriptionId">Subscription ID</label>
@@ -1252,6 +1337,17 @@
                         <!-- .col-sm-9 -->
 
                     </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="awscdescription">Description</label>
+
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="awscdescription" placeholder="max. 20 char">
+                        </div>
+                        <!-- .col-sm-9 -->
+
+                    </div>
+
                     <!-- .form-group -->
                     <div class="form-group">
                         <label class="col-sm-3 control-label" for="croleArn">Role ARN</label>
@@ -1315,6 +1411,15 @@
                             </div>
                             <!-- .col-sm-9 -->
                         </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label" for="azuredescriptionfield">Description</label>
+
+                            <div class="col-sm-9">
+                                <p id="azuredescriptionfield" class="form-control-static">{{credential.description}}</p>
+                            </div>
+                            <!-- .col-sm-9 -->
+                        </div>
                         <!-- .form-group -->
                         <div class="form-group">
                             <label class="col-sm-3 control-label" for="subscriptionId">Subscription ID</label>
@@ -1358,6 +1463,15 @@
 
                             <div class="col-sm-9">
                                 <p id="name" class="form-control-static">{{credential.name}}</p>
+                            </div>
+                            <!-- .col-sm-9 -->
+                        </div>
+                        <!-- .form-group -->
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label" for="awsdescriptionfield">Description</label>
+
+                            <div class="col-sm-9">
+                                <p id="awsdescriptionfield" class="form-control-static">{{credential.description}}</p>
                             </div>
                             <!-- .col-sm-9 -->
                         </div>
