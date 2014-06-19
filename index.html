@@ -219,7 +219,7 @@
         <label class="col-sm-3 control-label" for="sl_ambariServerIp">Ambari server adress</label>
 
         <div class="col-sm-9">
-            <p id="sl_ambariServerIp" class="form-control-static">http://{{activeStack.data.ambariServerIp}}:8080</p>
+            <p id="sl_ambariServerIp" class="form-control-static"><a href="http://{{activeStack.data.ambariServerIp}}:8080">http://{{activeStack.data.ambariServerIp}}:8080</a></p>
         </div>
         <!-- .col-sm-9 -->
     </div>
@@ -267,7 +267,7 @@
     <div id="panel-collapse0002" class="panel-collapse collapse">
         <div class="panel-body">
                     <pre id="sl_description" class="form-control-static">{{activeStack.data.description | json}}</pre>
-               
+
         </div>
     </div>
 </div>
@@ -452,14 +452,6 @@
 
                 <form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
 
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label" for="cred_id">ID</label>
-
-                        <div class="col-sm-9">
-                            <p id="cred_id" class="form-control-static">{{activeStack.credential.id}}</p>
-                        </div>
-                        <!-- .col-sm-9 -->
-                    </div>
                     <!-- .form-group -->
                     <div class="form-group">
                         <label class="col-sm-3 control-label" for="cred_name">Name</label>
