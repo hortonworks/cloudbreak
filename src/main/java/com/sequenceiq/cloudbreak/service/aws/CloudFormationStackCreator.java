@@ -18,7 +18,8 @@ import com.sequenceiq.cloudbreak.domain.SnsTopic;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.repository.UserRepository;
+import com.sequenceiq.cloudbreak.websocket.WebsocketService;
+import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
 @Service
 public class CloudFormationStackCreator {
@@ -35,20 +36,21 @@ public class CloudFormationStackCreator {
     private StackRepository stackRepository;
 
     @Autowired
-    private UserRepository userRepository;
+    private WebsocketService websocketService;
 
     public synchronized void createCloudFormationStack(Stack stack, AwsCredential awsCredential, SnsTopic notificationTopic) {
         try {
             Stack currentStack = stackRepository.findById(stack.getId());
             if (currentStack.getStatus().equals(Status.REQUESTED)) {
-                stack.setStatus(Status.CREATE_IN_PROGRESS);
-                stack = stackRepository.save(stack);
-                AwsTemplate awsTemplate = (AwsTemplate) stack.getTemplate();
+                currentStack.setStatus(Status.CREATE_IN_PROGRESS);
+                currentStack = stackRepository.save(currentStack);
+                websocketService.send("/topic/stack", new StatusMessage(stack.getId(), currentStack.getName(), currentStack.getStatus().name()));
+                AwsTemplate awsTemplate = (AwsTemplate) currentStack.getTemplate();
                 AmazonCloudFormationClient client = awsStackUtil.createCloudFormationClient(awsTemplate.getRegion(), awsCredential);
-                createStack(stack, awsTemplate, notificationTopic, client);
+                createStack(currentStack, awsTemplate, notificationTopic, client);
             } else {
                 LOGGER.info("CloudFormation stack creation was requested for a stack, that is not in REQUESTED status anymore. [stackId: '{}', status: '{}']",
-                        stack.getId(), stack.getStatus());
+                        currentStack.getId(), currentStack.getStatus());
             }
         } catch (Exception e) {
             LOGGER.error("Unhandled exception occured while creating stack on AWS.", e);

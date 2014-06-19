@@ -59,8 +59,7 @@ public class Ec2InstanceRunner {
             AwsCredential awsCredential = (AwsCredential) stack.getCredential();
 
             AmazonCloudFormationClient cfClient = awsStackUtil.createCloudFormationClient(awsTemplate.getRegion(), awsCredential);
-            String stackName = String.format("%s-%s", stack.getName(), stack.getId());
-            DescribeStacksRequest stackRequest = new DescribeStacksRequest().withStackName(stackName);
+            DescribeStacksRequest stackRequest = new DescribeStacksRequest().withStackName(stack.getCfStackName());
             DescribeStacksResult stackResult = cfClient.describeStacks(stackRequest);
 
             AmazonEC2Client ec2Client = awsStackUtil.createEC2Client(awsTemplate.getRegion(), awsCredential);
