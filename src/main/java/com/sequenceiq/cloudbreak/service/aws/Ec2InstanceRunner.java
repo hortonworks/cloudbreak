@@ -51,9 +51,10 @@ public class Ec2InstanceRunner {
     @Autowired
     private Ec2UserDataBuilder userDataBuilder;
 
-    public void runEc2Instances(Stack stack, AwsCredential awsCredential) {
+    public void runEc2Instances(Stack stack) {
         try {
             AwsTemplate awsTemplate = (AwsTemplate) stack.getTemplate();
+            AwsCredential awsCredential = (AwsCredential) stack.getCredential();
 
             AmazonCloudFormationClient cfClient = awsStackUtil.createCloudFormationClient(awsTemplate.getRegion(), awsCredential);
             String stackName = String.format("%s-%s", stack.getName(), stack.getId());

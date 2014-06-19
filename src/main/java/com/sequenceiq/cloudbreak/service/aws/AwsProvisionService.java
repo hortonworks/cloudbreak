@@ -96,15 +96,15 @@ public class AwsProvisionService implements ProvisionService {
         AwsCredential awsCredential = (AwsCredential) credential;
         DescribeStacksResult stackResult = null;
         DescribeInstancesResult instancesResult = null;
-        String cfStackName = String.format("%s-%s", stack.getName(), stack.getId());
 
         try {
             AmazonCloudFormationClient client = awsStackUtil.createCloudFormationClient(awsTemplate.getRegion(), awsCredential);
-            DescribeStacksRequest stackRequest = new DescribeStacksRequest().withStackName(cfStackName);
+            DescribeStacksRequest stackRequest = new DescribeStacksRequest().withStackName(stack.getCfStackName());
             stackResult = client.describeStacks(stackRequest);
         } catch (AmazonServiceException e) {
-            if ("AmazonCloudFormation".equals(e.getServiceName()) && e.getErrorMessage().equals(String.format("Stack:%s does not exist", cfStackName))) {
-                LOGGER.error("Amazon CloudFormation stack {} does not exist. Returning null in describeStack.", cfStackName);
+            if ("AmazonCloudFormation".equals(e.getServiceName())
+                    && e.getErrorMessage().equals(String.format("Stack:%s does not exist", stack.getCfStackName()))) {
+                LOGGER.error("Amazon CloudFormation stack {} does not exist. Returning null in describeStack.", stack.getCfStackName());
                 stackResult = new DescribeStacksResult();
             } else {
                 throw e;
@@ -123,19 +123,18 @@ public class AwsProvisionService implements ProvisionService {
         AwsCredential awsCredential = (AwsCredential) credential;
         DescribeStacksResult stackResult = null;
         DescribeStackResourcesResult resourcesResult = null;
-        String cfStackName = String.format("%s-%s", stack.getName(), stack.getId());
 
         try {
             AmazonCloudFormationClient client = awsStackUtil.createCloudFormationClient(awsInfra.getRegion(), awsCredential);
-            DescribeStacksRequest stackRequest = new DescribeStacksRequest().withStackName(String.format("%s-%s", stack.getName(), stack.getId()));
+            DescribeStacksRequest stackRequest = new DescribeStacksRequest().withStackName(stack.getCfStackName());
             stackResult = client.describeStacks(stackRequest);
 
-            DescribeStackResourcesRequest resourcesRequest = new DescribeStackResourcesRequest().withStackName(String.format("%s-%s", stack.getName(),
-                    stack.getId()));
+            DescribeStackResourcesRequest resourcesRequest = new DescribeStackResourcesRequest().withStackName(stack.getCfStackName());
             resourcesResult = client.describeStackResources(resourcesRequest);
         } catch (AmazonServiceException e) {
-            if ("AmazonCloudFormation".equals(e.getServiceName()) && e.getErrorMessage().equals(String.format("Stack:%s does not exist", cfStackName))) {
-                LOGGER.error("Amazon CloudFormation stack {} does not exist. Returning null in describeStack.", cfStackName);
+            if ("AmazonCloudFormation".equals(e.getServiceName())
+                    && e.getErrorMessage().equals(String.format("Stack:%s does not exist", stack.getCfStackName()))) {
+                LOGGER.error("Amazon CloudFormation stack {} does not exist. Returning null in describeStack.", stack.getCfStackName());
                 stackResult = new DescribeStacksResult();
             } else {
                 throw e;
@@ -169,14 +168,9 @@ public class AwsProvisionService implements ProvisionService {
         }
 
         AmazonCloudFormationClient client = awsStackUtil.createCloudFormationClient(awsInfra.getRegion(), awsCredential);
-        DeleteStackRequest deleteStackRequest = new DeleteStackRequest().withStackName(String.format("%s-%s", stack.getName(), stack.getId()));
+        DeleteStackRequest deleteStackRequest = new DeleteStackRequest().withStackName(stack.getCfStackName());
 
         client.deleteStack(deleteStackRequest);
-    }
-
-    @Override
-    public CloudPlatform getCloudPlatform() {
-        return CloudPlatform.AWS;
     }
 
     @Override
@@ -187,5 +181,10 @@ public class AwsProvisionService implements ProvisionService {
     @Override
     public Boolean stopAll(User user, Long stackId) {
         return Boolean.TRUE;
+    }
+
+    @Override
+    public CloudPlatform getCloudPlatform() {
+        return CloudPlatform.AWS;
     }
 }

@@ -43,6 +43,10 @@ public class Stack implements ProvisionEntity {
 
     private Status status;
 
+    private String cfStackName;
+
+    private String cfStackId;
+
     private String ambariIp;
 
     @OneToOne
@@ -127,6 +131,22 @@ public class Stack implements ProvisionEntity {
 
     public void setStatus(Status status) {
         this.status = status;
+    }
+
+    public String getCfStackId() {
+        return cfStackId;
+    }
+
+    public void setCfStackId(String cfStackId) {
+        this.cfStackId = cfStackId;
+    }
+
+    public String getCfStackName() {
+        return cfStackName;
+    }
+
+    public void setCfStackName(String cfStackName) {
+        this.cfStackName = cfStackName;
     }
 
     public String getAmbariIp() {

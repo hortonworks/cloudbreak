@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.CreateStackRequest;
+import com.amazonaws.services.cloudformation.model.CreateStackResult;
 import com.amazonaws.services.cloudformation.model.Parameter;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
@@ -66,7 +67,10 @@ public class CloudFormationStackCreator {
                 .withTemplateBody(cfTemplate.getBody())
                 .withNotificationARNs(snstopic.getTopicArn())
                 .withParameters(new Parameter().withParameterKey("SSHLocation").withParameterValue(awsTemplate.getSshLocation()));
-        client.createStack(createStackRequest);
+        CreateStackResult createStackResult = client.createStack(createStackRequest);
+        stack.setCfStackId(createStackResult.getStackId());
+        stack.setCfStackName(stackName);
+        stackRepository.save(stack);
         LOGGER.info("CloudFormation stack creation request sent with stack name: '{}' for stack: '{}'", stackName, stack.getId());
     }
 

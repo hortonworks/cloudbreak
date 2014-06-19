@@ -15,6 +15,8 @@ public interface StackRepository extends CrudRepository<Stack, Long> {
 
     Stack findById(Long id);
 
+    Stack findByCfStackId(String cfStackId);
+
     List<Stack> findAllStackForTemplate(@Param("id") Long id);
 
     Stack findStackForCluster(@Param("id") Long id);
