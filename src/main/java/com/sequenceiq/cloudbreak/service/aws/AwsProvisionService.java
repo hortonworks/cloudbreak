@@ -151,6 +151,7 @@ public class AwsProvisionService implements ProvisionService {
 
     @Override
     public void deleteStack(User user, Stack stack, Credential credential) {
+        LOGGER.info("Deleting stack: {}", stack.getId(), stack.getCfStackId());
         AwsTemplate awsInfra = (AwsTemplate) stack.getTemplate();
         AwsCredential awsCredential = (AwsCredential) credential;
         AmazonEC2Client ec2Client = awsStackUtil.createEC2Client(awsInfra.getRegion(), awsCredential);
@@ -163,11 +164,13 @@ public class AwsProvisionService implements ProvisionService {
             for (Instance instance : instancesResult.getReservations().get(0).getInstances()) {
                 instanceIds.add(instance.getInstanceId());
             }
+            LOGGER.info("Terminating instances for stack: {} [instances: {}]", stack.getId(), instanceIds);
             TerminateInstancesRequest terminateInstancesRequest = new TerminateInstancesRequest().withInstanceIds(instanceIds);
             ec2Client.terminateInstances(terminateInstancesRequest);
         }
 
         AmazonCloudFormationClient client = awsStackUtil.createCloudFormationClient(awsInfra.getRegion(), awsCredential);
+        LOGGER.info("Deleting CloudFormation stack for stack: {} [cf stack id: {}]", stack.getId(), stack.getCfStackId());
         DeleteStackRequest deleteStackRequest = new DeleteStackRequest().withStackName(stack.getCfStackName());
 
         client.deleteStack(deleteStackRequest);
