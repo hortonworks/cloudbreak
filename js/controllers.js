@@ -75,7 +75,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     $rootScope.password64 = localStorage.password64;
                     $scope.doQuerys();
                 }).error(function (data, status, headers, config) {
-                    $scope.statusMessage = data;
+                    alert("Your credentials are not valid! Try again");
                 });
         }
 
