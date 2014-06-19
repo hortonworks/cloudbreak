@@ -219,38 +219,20 @@
         <label class="col-sm-3 control-label" for="sl_ambariServerIp">Ambari server adress</label>
 
         <div class="col-sm-9">
-            <p id="sl_ambariServerIp" class="form-control-static">{{activeStack.data.ambariServerIp}}</p>
+            <p id="sl_ambariServerIp" class="form-control-static">http://{{activeStack.data.ambariServerIp}}:8080</p>
         </div>
         <!-- .col-sm-9 -->
     </div>
     <!-- .form-group -->
     <div class="form-group">
-        <label class="col-sm-3 control-label" for="sl_cloudPlatform">Cloud platform</label>
+        <label class="col-sm-3 control-label" for="sl_cloudPlatform">Platform</label>
 
         <div class="col-sm-9">
             <p id="sl_cloudPlatform" class="form-control-static">{{activeStack.data.cloudPlatform}}</p>
         </div>
         <!-- .col-sm-9 -->
     </div>
-    <!-- .form-group -->
-    <div class="form-group">
-        <label class="col-sm-3 control-label" for="sl_description">Description</label>
 
-        <div class="col-sm-9">
-            <pre id="sl_description" class="form-control-static">{{activeStack.data.description | json}}</pre>
-        </div>
-        <!-- .col-sm-9 -->
-    </div>
-    <!-- .form-group -->
-    <div class="form-group">
-        <label class="col-sm-3 control-label" for="sl_id">ID</label>
-
-        <div class="col-sm-9">
-            <p id="sl_id" class="form-control-static">{{activeStack.data.id}}</p>
-        </div>
-        <!-- .col-sm-9 -->
-    </div>
-    <!-- .form-group -->
     <div class="form-group">
         <label class="col-sm-3 control-label" for="sl_name">Name</label>
 
@@ -259,6 +241,12 @@
         </div>
         <!-- .col-sm-9 -->
     </div>
+    <!-- .form-group -->
+
+    <!-- .form-group -->
+
+    <!-- .form-group -->
+
     <!-- .form-group -->
     <div class="form-group">
         <label class="col-sm-3 control-label" for="sl_nodeCount">Number of nodes</label>
@@ -274,7 +262,20 @@
 
 <div class="panel panel-default">
     <div class="panel-heading">
-        <h5><a href="#panel-collapse01" data-toggle="collapse"><i class="fa fa-file-o fa-fw"></i>{{activeStack.template.name}}</a></h5>
+        <h5><a href="#panel-collapse0002" data-toggle="collapse"><i class="fa fa-th fa-fw"></i>Cloud stack description: {{activeStack.data.name}}</a></h5>
+    </div>
+    <div id="panel-collapse0002" class="panel-collapse collapse">
+        <div class="panel-body">
+                    <pre id="sl_description" class="form-control-static">{{activeStack.data.description | json}}</pre>
+               
+        </div>
+    </div>
+</div>
+
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h5><a href="#panel-collapse01" data-toggle="collapse"><i class="fa fa-file-o fa-fw"></i>Template: {{activeStack.template.name}}</a></h5>
     </div>
     <div id="panel-collapse01" class="panel-collapse collapse">
         <div class="panel-body" ng-if="activeStack.template.cloudPlatform == 'AZURE' ">
@@ -429,9 +430,22 @@
 </div>
 <!-- .panel -->
 
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h5><a href="#panel-collapse02" data-toggle="collapse"><i class="fa fa-th fa-fw"></i>Blueprint: {{activeStack.blueprint.name}}</a></h5>
+    </div>
+    <div id="panel-collapse02" class="panel-collapse collapse">
+        <div class="panel-body">
+                                    <pre id="blueprintPanelBody" class="form-control-static blueprint-source">
+{{activeStack.blueprint.ambariBlueprint | json}}
+                                    </pre>
+        </div>
+    </div>
+</div>
+
     <div class="panel panel-default">
         <div class="panel-heading">
-            <h5><a href="#panel-collapse001" data-toggle="collapse"><i class="fa fa-file-o fa-fw"></i>{{activeStack.credential.name}}</a></h5>
+            <h5><a href="#panel-collapse001" data-toggle="collapse"><i class="fa fa-tag fa-fw"></i>Credential: {{activeStack.credential.name}}</a></h5>
         </div>
         <div id="panel-collapse001" class="panel-collapse collapse">
             <div class="panel-body">
@@ -477,18 +491,7 @@
     <!-- .panel -->
 
 
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            <h5><a href="#panel-collapse02" data-toggle="collapse"><i class="fa fa-th fa-fw"></i>{{activeStack.blueprint.name}}</a></h5>
-        </div>
-        <div id="panel-collapse02" class="panel-collapse collapse">
-            <div class="panel-body">
-                                    <pre id="blueprintPanelBody" class="form-control-static blueprint-source">
-{{activeStack.blueprint.ambariBlueprint | json}}
-                                    </pre>
-            </div>
-        </div>
-    </div>
+
 
 </div>
 </div>
