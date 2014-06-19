@@ -89,7 +89,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
         $scope.getLedStyle = function(status) {
             switch(status) {
                 case "REQUESTED":
-                    return "state1-ready-blink";
+                    return "state2-run-blink";
                 case "CREATE_IN_PROGRESS":
                     return "state2-run-blink";
                 case "CREATE_COMPLETED":
@@ -107,7 +107,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
         $scope.getButtonStyle = function(status) {
             switch(status) {
                 case "REQUESTED":
-                    return "fa-stop";
+                    return "fa-pause";
                 case "CREATE_IN_PROGRESS":
                     return "fa-pause";
                 case "CREATE_COMPLETED":
@@ -190,29 +190,6 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 }
             }).success(function (data, status, headers, config) {
                 $scope.stacks = data;
-                for (var i = 0; i < $scope.stacks.length; i++) {
-                  if($scope.stacks[i].status === 'CREATE_COMPLETED') {
-                    if ($scope.stacks[i].cluster.status === 'CREATE_COMPLETED') {
-                      $scope.stacks[i].statSign = 'run'
-                    } else if($scope.stacks[i].cluster.status === 'CREATE_IN_PROGRESS')  {
-                        $scope.stacks[i].statSign = 'ready-blink'
-                    } else if($scope.stacks[i].cluster.status === 'CREATE_FAILED')  {
-                      $scope.stacks[i].statSign = 'stop'
-                    } else if($scope.stacks[i].cluster.status === 'REQUESTED')  {
-                      $scope.stacks[i].statSign = 'ready-blink'
-                    }
-                  } else if($scope.stacks[i].status === 'CREATE_IN_PROGRESS')  {
-                      $scope.stacks[i].statSign = 'ready-blink'
-                  }  else if($scope.stacks[i].status === 'CREATE_FAILED')  {
-                      $scope.stacks[i].statSign = 'stop'
-                  }  else if($scope.stacks[i].status === 'DELETE_IN_PROGRESS')  {
-                      $scope.stacks[i].statSign = 'ready-blink'
-                  }  else if($scope.stacks[i].status === 'DELETE_COMPLETED')  {
-                      $scope.stacks[i].statSign = 'stop'
-                  } else {
-                      $scope.statusMessage = message.name + ": Something went wrong.";
-                  }
-                }
             }).error(function (data, status, headers, config) {
                 log.info("getStack was unsucces: " + data);
             });
