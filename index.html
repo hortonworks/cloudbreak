@@ -643,7 +643,7 @@
 <form class="form-horizontal" role="form" ng-show="azureTemplate">
 
     <div class="form-group">
-        <label class="col-sm-3 control-label" for="azure_tclusterName">Cluster name</label>
+        <label class="col-sm-3 control-label" for="azure_tclusterName">Name</label>
 
         <div class="col-sm-9">
             <input type="text" class="form-control" id="azure_tclusterName" placeholder="max. 20 char">
@@ -772,6 +772,15 @@
 
 <form class="form-horizontal" role="form" ng-show="awsTemplate">
     <div class="form-group">
+        <label class="col-sm-3 control-label" for="aws_tclusterName">Name</label>
+
+        <div class="col-sm-9">
+            <input type="text" class="form-control" id="aws_tclusterName">
+        </div>
+        <!-- .col-sm-9 -->
+
+    </div>
+    <div class="form-group">
 
         <label class="col-sm-3 control-label" for="aws_tamiId">AMI</label>
 
@@ -836,15 +845,7 @@
         <!-- .col-sm-9 -->
 
     </div>
-    <div class="form-group">
-        <label class="col-sm-3 control-label" for="aws_tclusterName">Name</label>
 
-        <div class="col-sm-9">
-            <input type="text" class="form-control" id="aws_tclusterName">
-        </div>
-        <!-- .col-sm-9 -->
-
-    </div>
 
     <div class="row btn-row">
         <div class="col-sm-9 col-sm-offset-3">
