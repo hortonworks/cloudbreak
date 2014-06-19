@@ -32,6 +32,7 @@ public class BlueprintConverter extends AbstractConverter<BlueprintJson, Bluepri
         blueprintJson.setId(String.valueOf(entity.getId()));
         blueprintJson.setBlueprintName(entity.getBlueprintName());
         blueprintJson.setName(entity.getName());
+        blueprintJson.setDescription(entity.getDescription() == null ? "" : entity.getDescription());
         try {
             blueprintJson.setAmbariBlueprint(jsonHelper.createJsonFromString(entity.getBlueprintText()));
         } catch (Exception ex) {
@@ -57,6 +58,7 @@ public class BlueprintConverter extends AbstractConverter<BlueprintJson, Bluepri
         Pattern p = Pattern.compile("\"blueprint_name\"(.*):(.*)\"(.*),");
         Matcher m = p.matcher(blueprint.getBlueprintText());
         blueprint.setName(json.getName());
+        blueprint.setDescription(json.getDescription());
         if (m.find()) {
             blueprint.setBlueprintName(m.group()
                     .replaceAll(",(.*)\"(.*)stack_name(.*)", "")
