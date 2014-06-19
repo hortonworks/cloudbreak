@@ -20,10 +20,14 @@ public class SnsRequest {
     private String signature;
     @JsonProperty("SigningCertURL")
     private String signingCertURL;
+    @JsonProperty("SubscribeURL")
+    private String subscribeURL;
     @JsonProperty("UnsubscribeURL")
     private String unsubscribeURL;
     @JsonProperty("Message")
     private String message;
+    @JsonProperty("Token")
+    private String token;
 
     public String getType() {
         return type;
@@ -89,6 +93,14 @@ public class SnsRequest {
         this.signingCertURL = signingCertURL;
     }
 
+    public String getSubscribeURL() {
+        return subscribeURL;
+    }
+
+    public void setSubscribeURL(String subscribeURL) {
+        this.subscribeURL = subscribeURL;
+    }
+
     public String getUnsubscribeURL() {
         return unsubscribeURL;
     }
@@ -105,11 +117,11 @@ public class SnsRequest {
         this.message = message;
     }
 
-    @Override
-    public String toString() {
-        return "SnsRequest [type=" + type + ", messageId=" + messageId + ", topicArn=" + topicArn + ", subject=" + subject + ", timestamp=" + timestamp
-                + ", signatureVersion=" + signatureVersion + ", signature=" + signature + ", signingCertURL=" + signingCertURL + ", unsubscribeURL="
-                + unsubscribeURL + ", message=" + message + "]";
+    public String getToken() {
+        return token;
     }
 
+    public void setToken(String token) {
+        this.token = token;
+    }
 }

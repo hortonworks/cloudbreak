@@ -68,7 +68,7 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
         stack.setName(json.getName());
         stack.setCredential(credentialRepository.findOne(json.getCredentialId()));
         stack.setTemplate(templateRepository.findOne(Long.valueOf(json.getTemplateId())));
-        stack.setStatus(Status.CREATE_IN_PROGRESS);
+        stack.setStatus(Status.REQUESTED);
         return stack;
     }
 }

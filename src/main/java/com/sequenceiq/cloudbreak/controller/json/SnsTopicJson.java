@@ -8,6 +8,7 @@ public class SnsTopicJson implements JsonEntity {
     private String name;
     private String topicArn;
     private Regions region;
+    private boolean confirmed;
 
     public Long getId() {
         return id;
@@ -41,4 +42,11 @@ public class SnsTopicJson implements JsonEntity {
         this.region = region;
     }
 
+    public boolean isConfirmed() {
+        return confirmed;
+    }
+
+    public void setConfirmed(boolean confirmed) {
+        this.confirmed = confirmed;
+    }
 }

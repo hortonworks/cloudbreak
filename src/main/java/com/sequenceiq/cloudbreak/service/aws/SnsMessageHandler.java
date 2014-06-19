@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service;
+package com.sequenceiq.cloudbreak.service.aws;
 
 import java.util.Map;
 
@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.domain.SnsRequest;
-import com.sequenceiq.cloudbreak.service.aws.SnsMessageParser;
 
 @Service
 public class SnsMessageHandler {
@@ -20,6 +19,9 @@ public class SnsMessageHandler {
     @Autowired
     private SnsMessageParser snsMessageParser;
 
+    @Autowired
+    private SnsTopicManager snsTopicManager;
+
     public void handleMessage(SnsRequest snsRequest) {
         if (snsRequest.getSubject() != null && CLOUDFORMATION_SUBJECT.equals(snsRequest.getSubject())) {
             Map<String, String> cfMessage = snsMessageParser.parseCFMessage(snsRequest.getMessage());
@@ -30,7 +32,9 @@ public class SnsMessageHandler {
                 // AwsMessageConsumer.notify(cfMessage.get("StackId"));
                 LOGGER.info("****************************");
             }
-
+        } else if ("SubscriptionConfirmation".equals(snsRequest.getType())) {
+            snsTopicManager.confirmSubscription(snsRequest);
         }
+
     }
 }

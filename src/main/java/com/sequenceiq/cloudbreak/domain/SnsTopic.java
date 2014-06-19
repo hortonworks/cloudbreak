@@ -4,10 +4,15 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQuery;
 
 import com.amazonaws.regions.Regions;
 
 @Entity
+@NamedQuery(name = "SnsTopic.findOneForCredentialInRegion",
+        query = "SELECT s FROM SnsTopic s "
+                + "WHERE s.credential.id= :credentialId "
+                + "AND s.region= :region")
 public class SnsTopic implements ProvisionEntity {
 
     @Id
@@ -16,6 +21,7 @@ public class SnsTopic implements ProvisionEntity {
     private String name;
     private String topicArn;
     private Regions region;
+    private boolean confirmed;
 
     @ManyToOne
     private AwsCredential credential;
@@ -50,6 +56,14 @@ public class SnsTopic implements ProvisionEntity {
 
     public void setRegion(Regions region) {
         this.region = region;
+    }
+
+    public boolean isConfirmed() {
+        return confirmed;
+    }
+
+    public void setConfirmed(boolean confirmed) {
+        this.confirmed = confirmed;
     }
 
     public AwsCredential getCredential() {

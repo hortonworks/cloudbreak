@@ -15,6 +15,7 @@ public class SnsTopicConverter extends AbstractConverter<SnsTopicJson, SnsTopic>
         snsTopicJson.setName(entity.getName());
         snsTopicJson.setRegion(entity.getRegion());
         snsTopicJson.setTopicArn(entity.getTopicArn());
+        snsTopicJson.setConfirmed(entity.isConfirmed());
         return snsTopicJson;
     }
 

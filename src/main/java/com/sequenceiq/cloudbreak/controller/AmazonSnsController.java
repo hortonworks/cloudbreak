@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sequenceiq.cloudbreak.domain.SnsRequest;
-import com.sequenceiq.cloudbreak.service.SnsMessageHandler;
+import com.sequenceiq.cloudbreak.service.aws.SnsMessageHandler;
 import com.sequenceiq.cloudbreak.service.aws.SnsMessageParser;
 
 @Controller

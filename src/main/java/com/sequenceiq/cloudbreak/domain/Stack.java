@@ -20,7 +20,12 @@ import javax.persistence.SequenceGenerator;
         @NamedQuery(
                 name = "Stack.findStackForCluster",
                 query = "SELECT c FROM Stack c "
-                        + "WHERE c.cluster.id= :id")
+                        + "WHERE c.cluster.id= :id"),
+        @NamedQuery(
+                name = "Stack.findRequestedStacksWithCredential",
+                query = "SELECT c FROM Stack c "
+                        + "WHERE c.credential.id= :credentialId "
+                        + "AND c.status= 0")
 })
 public class Stack implements ProvisionEntity {
 
