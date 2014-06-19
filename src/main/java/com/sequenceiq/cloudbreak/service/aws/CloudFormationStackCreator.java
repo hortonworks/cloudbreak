@@ -37,15 +37,19 @@ public class CloudFormationStackCreator {
     @Autowired
     private UserRepository userRepository;
 
-    public void createCloudFormationStack(Stack stack, AwsCredential awsCredential, SnsTopic notificationTopic) {
+    public synchronized void createCloudFormationStack(Stack stack, AwsCredential awsCredential, SnsTopic notificationTopic) {
         try {
-            // TODO: this method should be thread safe and insert another check
-            // here if the stack is still requested
-            stack.setStatus(Status.CREATE_IN_PROGRESS);
-            stack = stackRepository.save(stack);
-            AwsTemplate awsTemplate = (AwsTemplate) stack.getTemplate();
-            AmazonCloudFormationClient client = awsStackUtil.createCloudFormationClient(awsTemplate.getRegion(), awsCredential);
-            createStack(stack, awsTemplate, notificationTopic, client);
+            Stack currentStack = stackRepository.findById(stack.getId());
+            if (currentStack.getStatus().equals(Status.REQUESTED)) {
+                stack.setStatus(Status.CREATE_IN_PROGRESS);
+                stack = stackRepository.save(stack);
+                AwsTemplate awsTemplate = (AwsTemplate) stack.getTemplate();
+                AmazonCloudFormationClient client = awsStackUtil.createCloudFormationClient(awsTemplate.getRegion(), awsCredential);
+                createStack(stack, awsTemplate, notificationTopic, client);
+            } else {
+                LOGGER.info("CloudFormation stack creation was requested for a stack, that is not in REQUESTED status anymore. [stackId: '{}', status: '{}']",
+                        stack.getId(), stack.getStatus());
+            }
         } catch (Exception e) {
             LOGGER.error("Unhandled exception occured while creating stack on AWS.", e);
             awsStackUtil.createFailed(stack);
