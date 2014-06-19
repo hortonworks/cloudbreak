@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service;
 
+import groovyx.net.http.HttpResponseException;
+
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -22,12 +24,11 @@ import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
-import groovyx.net.http.HttpResponseException;
-
 @Service
 public class AmbariClusterInstaller {
 
     private static final double COMPLETED = 100.0;
+    private static final double FAILED = -1.0;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariClusterInstaller.class);
 
@@ -59,7 +60,7 @@ public class AmbariClusterInstaller {
                         );
 
                 BigDecimal installProgress = new BigDecimal(0);
-                while (installProgress.doubleValue() != COMPLETED) {
+                while (installProgress.doubleValue() != COMPLETED && installProgress.doubleValue() != FAILED) {
                     try {
                         Thread.sleep(POLLING_INTERVAL);
                     } catch (InterruptedException e) {
@@ -70,10 +71,17 @@ public class AmbariClusterInstaller {
                     LOGGER.info("Ambari Cluster installing. [Stack: '{}', Cluster: '{}', Progress: {}]", stack.getId(), cluster.getName(), installProgress);
                     // TODO: timeout
                 }
-                websocketService.send("/topic/cluster", new StatusMessage(cluster.getId(), cluster.getName(), Status.CREATE_COMPLETED.name()));
-                cluster.setStatus(Status.CREATE_COMPLETED);
-                cluster.setCreationFinished(new Date().getTime());
-                clusterRepository.save(cluster);
+                if (installProgress.doubleValue() == COMPLETED) {
+                    websocketService.send("/topic/cluster", new StatusMessage(cluster.getId(), cluster.getName(), Status.CREATE_COMPLETED.name()));
+                    cluster.setStatus(Status.CREATE_COMPLETED);
+                    cluster.setCreationFinished(new Date().getTime());
+                    clusterRepository.save(cluster);
+                } else if (installProgress.doubleValue() == FAILED) {
+                    websocketService.send("/topic/cluster", new StatusMessage(cluster.getId(), cluster.getName(), Status.CREATE_FAILED.name()));
+                    cluster.setStatus(Status.CREATE_FAILED);
+                    cluster.setCreationFinished(new Date().getTime());
+                    clusterRepository.save(cluster);
+                }
             } else {
                 LOGGER.info("There were no cluster request to this stack, won't install cluster now. [stack: {}]", stack.getId());
             }
