@@ -31,17 +31,36 @@ public class SnsMessageHandler {
     private StackRepository stackRepository;
 
     public void handleMessage(SnsRequest snsRequest) {
-        if (snsRequest.getSubject() != null && CLOUDFORMATION_SUBJECT.equals(snsRequest.getSubject())) {
+        if (isCloudFormationMessage(snsRequest)) {
             Map<String, String> cfMessage = snsMessageParser.parseCFMessage(snsRequest.getMessage());
-            if ("AWS::CloudFormation::Stack".equals(cfMessage.get("ResourceType")) && "CREATE_COMPLETE".equals(cfMessage.get("ResourceStatus"))) {
-                Stack stack = stackRepository.findByCfStackId(cfMessage.get("StackId"));
-                LOGGER.info("CloudFormation stack creation completed. (Id: '{}', CFStackId '{}') Notifying instance runner to start instances...",
-                        stack.getId(), stack.getCfStackId());
-                ec2InstanceRunner.runEc2Instances(stack);
+            if (isStackCreateCompleteMessage(cfMessage)) {
+                handleCfStackCreateComplete(cfMessage);
             }
-        } else if ("SubscriptionConfirmation".equals(snsRequest.getType())) {
+        } else if (isSubscriptionConfirmationMessage(snsRequest)) {
             snsTopicManager.confirmSubscription(snsRequest);
         }
+    }
 
+    private boolean isCloudFormationMessage(SnsRequest snsRequest) {
+        return snsRequest.getSubject() != null && CLOUDFORMATION_SUBJECT.equals(snsRequest.getSubject());
+    }
+
+    private boolean isSubscriptionConfirmationMessage(SnsRequest snsRequest) {
+        return "SubscriptionConfirmation".equals(snsRequest.getType());
+    }
+
+    private boolean isStackCreateCompleteMessage(Map<String, String> cfMessage) {
+        return "AWS::CloudFormation::Stack".equals(cfMessage.get("ResourceType")) && "CREATE_COMPLETE".equals(cfMessage.get("ResourceStatus"));
+    }
+
+    private synchronized void handleCfStackCreateComplete(Map<String, String> cfMessage) {
+        Stack stack = stackRepository.findByCfStackId(cfMessage.get("StackId"));
+        if (!stack.isCfStackCompleted()) {
+            LOGGER.info("CloudFormation stack creation completed. (Id: '{}', CFStackId '{}') Notifying instance runner to start instances...",
+                    stack.getId(), stack.getCfStackId());
+            ec2InstanceRunner.runEc2Instances(stack);
+            stack.setCfStackCompleted(true);
+            stackRepository.save(stack);
+        }
     }
 }

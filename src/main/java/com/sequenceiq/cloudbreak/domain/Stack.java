@@ -47,6 +47,8 @@ public class Stack implements ProvisionEntity {
 
     private String cfStackId;
 
+    private boolean cfStackCompleted;
+
     private String ambariIp;
 
     @OneToOne
@@ -147,6 +149,14 @@ public class Stack implements ProvisionEntity {
 
     public void setCfStackName(String cfStackName) {
         this.cfStackName = cfStackName;
+    }
+
+    public boolean isCfStackCompleted() {
+        return cfStackCompleted;
+    }
+
+    public void setCfStackCompleted(boolean cfStackCompleted) {
+        this.cfStackCompleted = cfStackCompleted;
     }
 
     public String getAmbariIp() {

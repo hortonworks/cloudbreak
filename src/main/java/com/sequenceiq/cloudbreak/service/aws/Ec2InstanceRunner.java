@@ -9,6 +9,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.AmazonClientException;
@@ -51,6 +52,7 @@ public class Ec2InstanceRunner {
     @Autowired
     private Ec2UserDataBuilder userDataBuilder;
 
+    @Async
     public void runEc2Instances(Stack stack) {
         try {
             AwsTemplate awsTemplate = (AwsTemplate) stack.getTemplate();
