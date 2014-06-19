@@ -431,45 +431,47 @@
 
     <div class="panel panel-default">
         <div class="panel-heading">
-            <h4>{{activeStack.credential.name}}</h4>
+            <h5><a href="#panel-collapse001" data-toggle="collapse"><i class="fa fa-file-o fa-fw"></i>{{activeStack.credential.name}}</a></h5>
         </div>
-        <div class="panel-body">
+        <div id="panel-collapse001" class="panel-collapse collapse">
+            <div class="panel-body">
 
-            <form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
+                <form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
 
-                <div class="form-group">
-                    <label class="col-sm-3 control-label" for="cred_id">ID</label>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="cred_id">ID</label>
 
-                    <div class="col-sm-9">
-                        <p id="cred_id" class="form-control-static">{{activeStack.credential.id}}</p>
+                        <div class="col-sm-9">
+                            <p id="cred_id" class="form-control-static">{{activeStack.credential.id}}</p>
+                        </div>
+                        <!-- .col-sm-9 -->
                     </div>
-                    <!-- .col-sm-9 -->
-                </div>
-                <!-- .form-group -->
-                <div class="form-group">
-                    <label class="col-sm-3 control-label" for="cred_name">Name</label>
+                    <!-- .form-group -->
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="cred_name">Name</label>
 
-                    <div class="col-sm-9">
-                        <p id="cred_name" class="form-control-static">{{activeStack.credential.name}}</p>
+                        <div class="col-sm-9">
+                            <p id="cred_name" class="form-control-static">{{activeStack.credential.name}}</p>
+                        </div>
+                        <!-- .col-sm-9 -->
                     </div>
-                    <!-- .col-sm-9 -->
-                </div>
-                <!-- .form-group -->
-                <div class="form-group">
-                    <label class="col-sm-3 control-label" for="cred_cloudPlatform">Cloud platform</label>
+                    <!-- .form-group -->
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="cred_cloudPlatform">Cloud platform</label>
 
-                    <div class="col-sm-9">
-                        <p id="cred_cloudPlatform" class="form-control-static">{{activeStack.credential.cloudPlatform}}</p>
+                        <div class="col-sm-9">
+                            <p id="cred_cloudPlatform" class="form-control-static">{{activeStack.credential.cloudPlatform}}</p>
+                        </div>
+                        <!-- .col-sm-9 -->
                     </div>
-                    <!-- .col-sm-9 -->
-                </div>
 
 
-            </form>
+                </form>
 
 
-            <!-- .panel -->
+                <!-- .panel -->
 
+            </div>
         </div>
     </div>
     <!-- .panel -->
