@@ -9,8 +9,10 @@ public class BlueprintJson implements JsonEntity {
 
     private String id;
     private String name;
+    private String blueprintName;
     private String url;
     private String ambariBlueprint;
+    private String description;
 
     @JsonRawValue
     public String getAmbariBlueprint() {
@@ -19,6 +21,22 @@ public class BlueprintJson implements JsonEntity {
 
     public void setAmbariBlueprint(JsonNode node) {
         this.ambariBlueprint = node.toString();
+    }
+
+    public String getBlueprintName() {
+        return blueprintName;
+    }
+
+    public void setBlueprintName(String blueprintName) {
+        this.blueprintName = blueprintName;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     @JsonProperty("name")

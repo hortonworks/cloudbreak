@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -18,13 +19,24 @@ public class Cluster {
     @ManyToOne
     private User user;
 
+    @Column(unique = true, nullable = false)
     private String name;
+
+    private String description;
 
     private Status status;
 
     private Long creationStarted;
 
     private Long creationFinished;
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     public Long getId() {
         return id;

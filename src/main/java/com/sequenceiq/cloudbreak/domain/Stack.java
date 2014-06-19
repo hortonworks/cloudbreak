@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -30,7 +31,10 @@ public class Stack implements ProvisionEntity {
 
     private Integer nodeCount;
 
+    @Column(unique = true, nullable = false)
     private String name;
+
+    private String description;
 
     private Status status;
 
@@ -47,6 +51,14 @@ public class Stack implements ProvisionEntity {
 
     @ManyToOne
     private User user;
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     public Long getId() {
         return id;

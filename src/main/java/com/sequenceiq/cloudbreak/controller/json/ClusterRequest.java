@@ -4,6 +4,15 @@ public class ClusterRequest {
 
     private String clusterName;
     private Long blueprintId;
+    private String description;
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     public String getClusterName() {
         return clusterName;

@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service;
 
-import groovyx.net.http.HttpResponseException;
-
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -23,6 +21,8 @@ import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
+
+import groovyx.net.http.HttpResponseException;
 
 @Service
 public class AmbariClusterInstaller {
@@ -54,8 +54,8 @@ public class AmbariClusterInstaller {
                 AmbariClient ambariClient = new AmbariClient(stack.getAmbariIp(), AmbariClusterService.PORT);
                 ambariClient.createCluster(
                         cluster.getName(),
-                        blueprint.getName(),
-                        recommend(stack, ambariClient, blueprint.getName())
+                        blueprint.getBlueprintName(),
+                        recommend(stack, ambariClient, blueprint.getBlueprintName())
                         );
 
                 BigDecimal installProgress = new BigDecimal(0);

@@ -11,6 +11,15 @@ public class ClusterResponse {
     private int minutesUp;
     private String cluster;
     private Long blueprintId;
+    private String description;
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     public Long getId() {
         return id;
