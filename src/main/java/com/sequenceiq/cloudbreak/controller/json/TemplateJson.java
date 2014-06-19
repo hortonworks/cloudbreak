@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.controller.json;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -15,6 +16,7 @@ public class TemplateJson implements JsonEntity {
 
     private Long id;
     private CloudPlatform cloudPlatform;
+    @NotNull
     @Size(max = 20, min = 5)
     private String name;
     private Map<String, Object> parameters = new HashMap<>();
