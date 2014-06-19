@@ -20,6 +20,7 @@ public class TemplateJson implements JsonEntity {
     @Size(max = 20, min = 5)
     private String name;
     private Map<String, Object> parameters = new HashMap<>();
+    private String description;
 
     @JsonProperty("id")
     public Long getId() {
@@ -29,6 +30,14 @@ public class TemplateJson implements JsonEntity {
     @JsonIgnore
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public CloudPlatform getCloudPlatform() {

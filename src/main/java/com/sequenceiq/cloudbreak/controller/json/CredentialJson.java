@@ -20,9 +20,18 @@ public class CredentialJson implements JsonEntity {
     private String name;
     private CloudPlatform cloudPlatform;
     private Map<String, Object> parameters = new HashMap<>();
+    private String description;
 
     public CredentialJson() {
 
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     @JsonProperty("id")

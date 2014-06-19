@@ -39,6 +39,7 @@ public class AzureTemplateConverter extends AbstractConverter<TemplateJson, Azur
         props.put(AzureTemplateParam.PORTS.getName(), entity.getPorts());
         azureTemplateJson.setCloudPlatform(CloudPlatform.AZURE);
         azureTemplateJson.setParameters(props);
+        azureTemplateJson.setDescription(entity.getDescription() == null ? "" : entity.getDescription());
         return azureTemplateJson;
     }
 
@@ -68,6 +69,7 @@ public class AzureTemplateConverter extends AbstractConverter<TemplateJson, Azur
             port.setAzureTemplate(azureTemplate);
             ports.add(port);
         }
+        azureTemplate.setDescription(json.getDescription());
         azureTemplate.setPorts(ports);
         return azureTemplate;
     }

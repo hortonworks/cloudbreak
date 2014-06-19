@@ -19,13 +19,34 @@ public class Blueprint implements ProvisionEntity {
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String blueprintText;
 
+    private String blueprintName;
+
+    @Column(unique = true, nullable = false)
     private String name;
+
+    private String description;
 
     @ManyToOne
     private User user;
 
     public Blueprint() {
 
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public Long getId() {
@@ -44,12 +65,12 @@ public class Blueprint implements ProvisionEntity {
         this.blueprintText = blueprintText;
     }
 
-    public String getName() {
-        return name;
+    public String getBlueprintName() {
+        return blueprintName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setBlueprintName(String blueprintName) {
+        this.blueprintName = blueprintName;
     }
 
     public User getUser() {

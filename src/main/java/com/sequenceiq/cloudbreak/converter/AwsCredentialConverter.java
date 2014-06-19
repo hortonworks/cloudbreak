@@ -23,6 +23,7 @@ public class AwsCredentialConverter extends AbstractConverter<CredentialJson, Aw
         params.put(RequiredAWSCredentialParam.ROLE_ARN.getName(), entity.getRoleArn());
         params.put(RequiredAWSCredentialParam.INSTANCE_PROFILE_ROLE_ARN.getName(), entity.getInstanceProfileRoleArn());
         credentialJson.setParameters(params);
+        credentialJson.setDescription(entity.getDescription() == null ? "" : entity.getDescription());
         return credentialJson;
     }
 
@@ -33,6 +34,7 @@ public class AwsCredentialConverter extends AbstractConverter<CredentialJson, Aw
         awsCredential.setRoleArn(String.valueOf(json.getParameters().get(RequiredAWSCredentialParam.ROLE_ARN.getName())));
         awsCredential.setInstanceProfileRoleArn(String.valueOf(json.getParameters().get(RequiredAWSCredentialParam.INSTANCE_PROFILE_ROLE_ARN.getName())));
         awsCredential.setCloudPlatform(CloudPlatform.AWS);
+        awsCredential.setDescription(json.getDescription());
         return awsCredential;
     }
 }

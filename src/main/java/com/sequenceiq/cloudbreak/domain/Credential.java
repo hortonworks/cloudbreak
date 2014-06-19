@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -16,10 +17,21 @@ public abstract class Credential {
 
     private CloudPlatform cloudPlatform;
 
+    @Column(unique = true, nullable = false)
     private String name;
+
+    private String description;
 
     public Credential() {
 
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getName() {

@@ -31,6 +31,7 @@ public class ClusterConverter {
         cluster.setBlueprint(blueprint);
         cluster.setName(clusterRequest.getClusterName());
         cluster.setStatus(Status.REQUESTED);
+        cluster.setDescription(clusterRequest.getDescription());
         return cluster;
     }
 
@@ -51,6 +52,7 @@ public class ClusterConverter {
             clusterResponse.setMinutesUp(0);
         }
         clusterResponse.setBlueprintId(cluster.getBlueprint().getId());
+        clusterResponse.setDescription(cluster.getDescription() == null ? "" : cluster.getDescription());
         return clusterResponse;
     }
 

@@ -30,6 +30,7 @@ public class AwsTemplateConverter extends AbstractConverter<TemplateJson, AwsTem
         props.put(AwsTemplateParam.SSH_LOCATION.getName(), entity.getSshLocation());
         templateJson.setParameters(props);
         templateJson.setCloudPlatform(CloudPlatform.AWS);
+        templateJson.setDescription(entity.getDescription() == null ? "" : entity.getDescription());
         return templateJson;
     }
 
@@ -44,6 +45,7 @@ public class AwsTemplateConverter extends AbstractConverter<TemplateJson, AwsTem
         String sshLocation = json.getParameters().containsKey(AwsTemplateParam.SSH_LOCATION.getName())
                 ? String.valueOf(json.getParameters().get(AwsTemplateParam.SSH_LOCATION.getName())) : DEFAULT_SSH_LOCATION;
         awsTemplate.setSshLocation(sshLocation);
+        awsTemplate.setDescription(json.getDescription());
         return awsTemplate;
     }
 }

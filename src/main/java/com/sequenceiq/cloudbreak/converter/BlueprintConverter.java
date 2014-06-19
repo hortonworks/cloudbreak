@@ -30,6 +30,7 @@ public class BlueprintConverter extends AbstractConverter<BlueprintJson, Bluepri
     public BlueprintJson convert(Blueprint entity) {
         BlueprintJson blueprintJson = new BlueprintJson();
         blueprintJson.setId(String.valueOf(entity.getId()));
+        blueprintJson.setBlueprintName(entity.getBlueprintName());
         blueprintJson.setName(entity.getName());
         try {
             blueprintJson.setAmbariBlueprint(jsonHelper.createJsonFromString(entity.getBlueprintText()));
@@ -55,8 +56,13 @@ public class BlueprintConverter extends AbstractConverter<BlueprintJson, Bluepri
         }
         Pattern p = Pattern.compile("\"blueprint_name\"(.*):(.*)\"(.*),");
         Matcher m = p.matcher(blueprint.getBlueprintText());
+        blueprint.setName(json.getName());
         if (m.find()) {
-            blueprint.setName(m.group().replaceAll(",(.*)\"(.*)stack_name(.*)", "").replaceAll("\"blueprint_name\"(.*):", "").trim().replaceAll("\"", ""));
+            blueprint.setBlueprintName(m.group()
+                    .replaceAll(",(.*)\"(.*)stack_name(.*)", "")
+                    .replaceAll("\"blueprint_name\"(.*):", "")
+                    .trim()
+                    .replaceAll("\"", ""));
         } else {
             throw new BadRequestException("Cannot parse ambari blueprint");
         }
@@ -69,6 +75,7 @@ public class BlueprintConverter extends AbstractConverter<BlueprintJson, Bluepri
             public BlueprintJson apply(Blueprint e) {
                 BlueprintJson blueprintJson = new BlueprintJson();
                 blueprintJson.setName(e.getName());
+                blueprintJson.setBlueprintName(e.getBlueprintName());
                 blueprintJson.setId(String.valueOf(e.getId()));
                 return convert(e);
             }
