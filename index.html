@@ -179,7 +179,7 @@
                 </dl>
                 <!--TODO-->
                 <div class="mod-LED">
-                    <span ng-class="getLedStyle(stack.status)">running</span>
+                    <span ng-class="getLedStyle(stack.status)"></span>
                 </div>
                 <a href="#" class="mod-start-stop btn btn-cluster btn-block" role="button" title="stop cluster"><i class="fa fa-lg" ng-class="getButtonStyle(stack.status)"></i></a>
             </div>
@@ -219,7 +219,7 @@
         <label class="col-sm-3 control-label" for="sl_ambariServerIp">Ambari server adress</label>
 
         <div class="col-sm-9">
-            <p id="sl_ambariServerIp" class="form-control-static"><a href="http://{{activeStack.data.ambariServerIp}}:8080">http://{{activeStack.data.ambariServerIp}}:8080</a></p>
+            <p id="sl_ambariServerIp" class="form-control-static"><a ng-show="{{activeStack.data.ambariServerIp}}" href="http://{{activeStack.data.ambariServerIp}}:8080">http://{{activeStack.data.ambariServerIp}}:8080</a></p>
         </div>
         <!-- .col-sm-9 -->
     </div>
@@ -546,7 +546,7 @@
                             <div class="form-group">
                                 <label class="col-sm-3 control-label" for="cl_clusterName">Cluster name</label>
 
-                                <div class="col-sm-9"> 
+                                <div class="col-sm-9">
                                     <input type="text" name="cl_clusterName" class="form-control" id="cl_clusterName" placeholder="max. 20 char" ng-model="cl_clusterName"
                                            ng-pattern="/^[a-zA-Z][-a-zA-Z0-9]*$/" ng-minlength="3" ng-maxlength="20" required>
 
@@ -1565,20 +1565,24 @@
 <div class="modal fade" id="modal-terminate" tabindex="-1" role="dialog" aria-labelledby="modal01-title" aria-hidden="true">
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h5 class="modal-title" id="modal01-title"></h5>
-            </div>
             <!-- .modal-header -->
             <div class="modal-body">
                 <p>Terminate cluster <strong>{{activeStack.data.name}}</strong> and its stack?</p>
             </div>
             <!-- .modal-body -->
+
             <div class="modal-footer">
-                <button type="button" class="btn btn-block btn-default" data-dismiss="modal">cancel</button>
-                <button type="button" class="btn btn-block btn-danger" data-dismiss="modal" id="terminateStackBtn" ng-click="deleteStack(activeStack.data.id)"><i class="fa fa-times fa-fw"></i>terminate
-                </button>
-            </div>
+                <div class="row">
+                    <div class="col-xs-6">
+                        <button type="button" class="btn btn-block btn-default" data-dismiss="modal">cancel</button>
+
+                    </div>
+                    <div class="col-xs-6">
+                        <button type="button" class="btn btn-block btn-danger" data-dismiss="modal" id="terminateStackBtn" ng-click="deleteStack(activeStack.data.id)"><i class="fa fa-times fa-fw"></i>terminate
+                        </button>
+                    </div>
+                </div>
+            </div><!-- .modal-footer -->
             <!-- .modal-footer -->
         </div>
         <!-- .modal-content -->
