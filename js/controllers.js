@@ -33,7 +33,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
 
         if($rootScope.activeCredential === null || $rootScope.activeCredential === undefined ) {
             $rootScope.activeCredential = {
-                name: "credential",
+                name: "select a credential",
                 id: -1
             };
         }
