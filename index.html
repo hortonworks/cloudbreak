@@ -550,8 +550,8 @@
                                     <input type="text" name="cl_clusterName" class="form-control" id="cl_clusterName" placeholder="max. 20 char" ng-model="cl_clusterName"
                                            ng-pattern="/^[a-zA-Z][-a-zA-Z0-9]*$/" ng-minlength="3" ng-maxlength="20" required>
 
-                                    <div class="alert-danger"
-                                         ng-show="clusterCreationForm.cl_clusterName.$dirty && clusterCreationForm.cl_clusterName.$invalid">Must contain only alphanumeric characters and hyphens and start with an alpha character (min 3, max 20 characters).
+                                    <div class="help-block"
+                                         ng-show="clusterCreationForm.cl_clusterName.$dirty && clusterCreationForm.cl_clusterName.$invalid"><i class="fa fa-warning"></i>Must contain only alphanumeric characters and hyphens and start with an alpha character (min 3, max 20 characters).
                                     </div>
                                 </div>
                                 <!-- .col-sm-9 -->
@@ -563,9 +563,9 @@
                                     <input type="number" name="cl_clusterSize" class="form-control" ng-model="cl_clusterSize" id="cl_clusterSize" min="2"
                                            max="999" required>
 
-                                    <div class="alert-danger"
-                                         ng-show="clusterCreationForm.cl_clusterSize.$dirty && clusterCreationForm.cl_clusterSize.$invalid">Required and has to
-                                        be a number which is bigger than 2
+                                    <div class="help-block"
+                                         ng-show="clusterCreationForm.cl_clusterSize.$dirty && clusterCreationForm.cl_clusterSize.$invalid"><i class="fa fa-warning"></i>
+                                        Required and has to be a number which is bigger than 2
                                     </div>
                                 </div>
                                 <!-- .col-sm-9 -->
@@ -1125,7 +1125,8 @@
                                         <input type="text" class="form-control" id="bluePrintName" ng-model="bluePrintName" name="bluePrintName"
                                                placeholder="set blueprint name">
 
-                                        <div class="alert-danger" ng-show="blueprintForm.bluePrintName.$dirty && blueprintForm.bluePrintName.$invalid">Name can not be null
+                                        <div class="help-block" ng-show="blueprintForm.bluePrintName.$dirty && blueprintForm.bluePrintName.$invalid"><i class="fa fa-warning"></i>
+                                            Name can not be null
                                         </div>
                                     </div>
 
@@ -1153,8 +1154,8 @@
                                         <input type="url" class="form-control" id="blueprintUrl" ng-model="blueprintUrl" name="blueprintUrl"
                                                placeholder="set blueprint URL">
 
-                                        <div class="alert-danger" ng-show="blueprintForm.blueprintUrl.$dirty && blueprintForm.blueprintUrl.$invalid">Url has to
-                                            be a valid url
+                                        <div class="help-block" ng-show="blueprintForm.blueprintUrl.$dirty && blueprintForm.blueprintUrl.$invalid">
+                                            <i class="fa fa-warning"></i>Url has to be a valid url
                                         </div>
                                     </div>
 
