@@ -179,7 +179,7 @@
                 </dl>
                 <!--TODO-->
                 <div class="mod-LED">
-                    <span ng-class="getLedStyle(stack.status)"></span>
+                    <span ng-class="getLedStyle(stack.status)" title="{{getTitleStatus(stack.status)}}"></span>
                 </div>
                 <a href="#" class="mod-start-stop btn btn-cluster btn-block" role="button" title="stop cluster"><i class="fa fa-lg" ng-class="getButtonStyle(stack.status)"></i></a>
             </div>

@@ -104,6 +104,24 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             }
         }
 
+        $scope.getTitleStatus = function(status) {
+            switch(status) {
+                case "REQUESTED":
+                    return "requested";
+                case "CREATE_IN_PROGRESS":
+                    return "creation in progress";
+                case "CREATE_COMPLETED":
+                    return "creation completed";
+                case "CREATE_FAILED":
+                    return "creation failed";
+                case "DELETE_IN_PROGRESS":
+                    return "deletion in progress";
+                case "DELETE_COMPLETED":
+                    return "deletion completed";
+                default: return "stopped";
+            }
+        }
+
         $scope.getButtonStyle = function(status) {
             switch(status) {
                 case "REQUESTED":
