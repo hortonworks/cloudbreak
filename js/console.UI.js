@@ -169,7 +169,46 @@ $jq(document).ready(function () {
         $jq(this).parent().find('.panel-heading .btn i').removeClass('fa-angle-down').addClass('fa-angle-up');
     });*/
 // create * panels
-    $jq('.panel-under-btn-collapse').on('shown.bs.collapse', function () {
+    // panel collapse page scrolling
+    // solo/accordion panel click
+    $jq('.panel-heading > h5 > a').click(function (e) {
+        e.preventDefault();
+        accordion = $jq(this).attr("data-parent");
+        if (accordion != "") {
+            $jq(accordion).find('.in').collapse('hide');
+        }
+        $jq(this).parent().parent().next().collapse('toggle');
+    });
+    // create panel click
+    $jq('.btn-row-over-panel > a').click(function (e) {
+        e.preventDefault();
+        $jq(this).parent().parent().next().collapse('toggle');
+    });
+    // management panel click
+    $jq('.panel-panel-container > .panel-heading > a').click(function (e) {
+        e.preventDefault();
+        $jq(this).parent().next().collapse('toggle');
+    });
+
+    // solo panel or in accordion shown
+    $jq('.panel-collapse').on('shown.bs.collapse', function (e) {
+        e.stopPropagation();
+        var panel = $jq(this).parent();		// panel
+        var offset = panel.offset().top;
+        if(offset) {
+            $jq('html,body').animate({
+                scrollTop: offset - 64
+            }, 500);
+        }
+    });
+    // solo panel or in accordion hidden
+    $jq('.panel-collapse').on('hidden.bs.collapse', function (e) {
+        e.stopPropagation();
+    });
+    // create template/blueprint/credential panel shown
+    $jq('.panel-under-btn-collapse').on('shown.bs.collapse', function (e) {
+        e.stopPropagation();
+        // button switch
         $jq(this).parent().prev()
             .find('.btn').fadeTo("fast", 0, function () {
                 $jq(this).removeClass('btn-success').addClass('btn-info')
@@ -177,8 +216,18 @@ $jq(document).ready(function () {
                     .parent().find('span').addClass('hidden');
                 $jq(this).fadeTo("slow", 1);
             });
+        // scroll
+        var panel = $jq(this).parent().prev();	// btn-row-over-panel
+        var offset = panel.offset().top;
+        if(offset) {
+            $jq('html,body').animate({
+                scrollTop: offset - 64
+            }, 500);
+        }
     });
-    $jq('.panel-under-btn-collapse').on('hidden.bs.collapse', function () {
+    // create template/blueprint/credential panel hidden
+    $jq('.panel-under-btn-collapse').on('hidden.bs.collapse', function (e) {
+        e.stopPropagation();
         $jq(this).parent().prev()
             .find('.btn').fadeTo("fast", 0, function () {
                 $jq(this).removeClass('btn-info').addClass('btn-success')
@@ -186,6 +235,24 @@ $jq(document).ready(function () {
                     .parent().find('span').removeClass('hidden');
                 $jq(this).fadeTo("slow", 1);
             });
+    });
+    // management panel shown
+    $jq('.panel-btn-in-header-collapse').on('shown.bs.collapse', function (e) {
+        // button switch
+        $jq(this).parent().find('.panel-heading .btn i').removeClass('fa-angle-down').addClass('fa-angle-up');
+        // scroll
+        var panel = $jq(this).parent().parent();	// panel
+        var offset = panel.offset().top;
+        if(offset) {
+            $jq('html,body').animate({
+                scrollTop: offset - 64
+            }, 500);
+        }
+    });
+    // management panel hidden
+    $jq('.panel-btn-in-header-collapse').on('hidden.bs.collapse', function (e) {
+        // button switch
+        $jq(this).parent().find('.panel-heading .btn i').removeClass('fa-angle-up').addClass('fa-angle-down');
     });
 
     $jq('#createCluster').on('click', function () {
