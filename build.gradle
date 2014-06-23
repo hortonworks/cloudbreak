@@ -32,6 +32,7 @@ jar {
 
 configurations {
     deployerJars
+    all*.exclude group: 'org.slf4j', module: 'slf4j-log4j12'
 }
 
 uploadArchives {
@@ -105,9 +106,14 @@ dependencies {
     compile 'org.springframework.security:spring-security-web:3.2.3.RELEASE'
     compile 'org.springframework:spring-messaging:4.0.3.RELEASE'
     compile 'org.postgresql:postgresql:9.3-1101-jdbc41'
-    compile 'com.amazonaws:aws-java-sdk:1.7.8.1'
+    compile ('com.amazonaws:aws-java-sdk:1.7.8.1') {
+        exclude group: 'commons-logging'
+    }
     compile 'org.hibernate:hibernate-validator:5.1.1.Final'
-    compile 'com.sequenceiq.azure:azure-client:1.0-SNAPSHOT'
+    compile ('com.sequenceiq.azure:azure-client:1.0-SNAPSHOT') {
+        exclude group: 'log4j';
+        //exclude group: 'commons-logging'
+    }
     compile ('com.sequenceiq.ambari:ambari-client:1.0-SNAPSHOT'){
         exclude group: "org.slf4j";
     }
@@ -121,7 +127,6 @@ dependencies {
         exclude group: "xml-apis";
         exclude group: "groovy"
     }
-
     testCompile 'org.springframework.boot:spring-boot-starter-test:1.0.2.RELEASE'
     deployerJars 'org.springframework.build.aws:org.springframework.build.aws.maven:3.0.0.RELEASE'
 }
