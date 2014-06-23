@@ -169,11 +169,12 @@ public class AwsProvisionService implements ProvisionService {
             ec2Client.terminateInstances(terminateInstancesRequest);
         }
 
-        AmazonCloudFormationClient client = awsStackUtil.createCloudFormationClient(awsInfra.getRegion(), awsCredential);
-        LOGGER.info("Deleting CloudFormation stack for stack: {} [cf stack id: {}]", stack.getId(), stack.getCfStackId());
-        DeleteStackRequest deleteStackRequest = new DeleteStackRequest().withStackName(stack.getCfStackName());
-
-        client.deleteStack(deleteStackRequest);
+        if (stack.getCfStackName() != null) {
+            AmazonCloudFormationClient client = awsStackUtil.createCloudFormationClient(awsInfra.getRegion(), awsCredential);
+            LOGGER.info("Deleting CloudFormation stack for stack: {} [cf stack id: {}]", stack.getId(), stack.getCfStackId());
+            DeleteStackRequest deleteStackRequest = new DeleteStackRequest().withStackName(stack.getCfStackName());
+            client.deleteStack(deleteStackRequest);
+        }
     }
 
     @Override
