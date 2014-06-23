@@ -14,8 +14,13 @@ public class WebsocketService {
     @Autowired
     private SimpMessageSendingOperations messageSendingOperations;
 
-    public void send(String destination, Object message) {
-        LOGGER.info("Sending message {} to {}", message, destination);
-        messageSendingOperations.convertAndSend(destination, message);
+    public void sendToTopic(Long userId, String destinationSuffix, Object message) {
+        LOGGER.info("Sending message {} to {}/{}/{}", message, userId, destinationSuffix);
+        messageSendingOperations.convertAndSend(String.format("%s/%s/%s", "/topic", userId, destinationSuffix), message);
+    }
+
+    public void send(Long userId, String destinationPrefix, String destinationSuffix, Object message) {
+        LOGGER.info("Sending message {} to {}/{}/{}", message, destinationPrefix, userId, destinationSuffix);
+        messageSendingOperations.convertAndSend(String.format("%s/%s/%s", destinationPrefix, userId, destinationSuffix), message);
     }
 }

@@ -2,7 +2,9 @@ package com.sequenceiq.cloudbreak.websocket;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,19 +34,26 @@ public class UptimeNotifier {
 
     @Scheduled(fixedDelay = 60000)
     public void sendUptime() {
-        List<UptimeMessage> uptimes = new ArrayList<>();
+        Map<Long, List<UptimeMessage>> uptimes = new HashMap<>();
         List<Cluster> clusters = (List<Cluster>) clusterRepository.findAll();
         long now = new Date().getTime();
         for (Cluster cluster : clusters) {
             Stack stack = stackRepository.findStackForCluster(cluster.getId());
             if (stack != null) {
                 Long uptime = cluster.getCreationFinished() == null ? 0L : now - cluster.getCreationFinished();
-                uptimes.add(new UptimeMessage(stack.getId(), uptime));
+                if (uptimes.containsKey(stack.getUser().getId())) {
+                    uptimes.get(stack.getUser().getId()).add(new UptimeMessage(stack.getId(), uptime));
+                } else {
+                    uptimes.put(stack.getUser().getId(), new ArrayList<UptimeMessage>());
+                    uptimes.get(stack.getUser().getId()).add(new UptimeMessage(stack.getId(), uptime));
+                }
             }
         }
         LOGGER.debug("uptimes: " + uptimes);
-        if (!uptimes.isEmpty()) {
-            websocketService.send("/topic/uptime", uptimes);
+        if (uptimes.size() > 0) {
+            for (Map.Entry<Long, List<UptimeMessage>> longListEntry : uptimes.entrySet()) {
+                websocketService.sendToTopic(longListEntry.getKey(), "/uptime", longListEntry.getValue());
+            }
         }
     }
 }
