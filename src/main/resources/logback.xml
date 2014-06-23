@@ -8,6 +8,24 @@
         </encoder>
     </appender>
 
+    <logger name="com.sequenceiq" level="INFO" additivity="false">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+    <logger name="org.hibernate.type" level="INFO">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+    <logger name="org.hibernate" level="INFO">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+    <logger name="org.hibernate.SQL" level="INFO">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+    <logger name="sql-log" level="INFO">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+    <logger name="org.hibernate.type.descriptor.sql.BasicBinder">
+        <level value="INFO"/>
+    </logger>
     <root level="INFO">
         <appender-ref ref="STDOUT"/>
     </root>
