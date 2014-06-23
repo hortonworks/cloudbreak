@@ -164,7 +164,7 @@ Registers an AWS IAM role ARN or the user's account.
 
 ## Associate a cloud credential to user [/credentials]
 ### Associate credential [POST]
-Adds a Azure JKS the user's account.
+Adds an Azure JKS the user's account.
 
 + Request
 
@@ -191,7 +191,7 @@ Adds a Azure JKS the user's account.
 
 ##Retrieves the cloud credentials of a user [/credentials]
 ### Retrieve credentials [GET]
-Retrieves associated cloud credentials of a user
+Retrieves registered cloud credentials  for a user
 
 + Request
 
@@ -224,9 +224,7 @@ Retrieves associated cloud credentials of a user
               }
           ]
 
-##Retrieves a cloud credential configuration for a user [/credentials/{id}]
-
-
+## Retrieves a specific cloud credential configuration for a user [/credentials/{id}]
 ### Retrieve credential [GET]
 
 Retrieves the cloud credential (AWS or Azure) associated with the user account
@@ -254,8 +252,8 @@ Retrieves the cloud credential (AWS or Azure) associated with the user account
         }
 
 
-##Deletes the specified cloud credential from the user account [/credentials/{id}]
-### Deletes the associated credential[DELETE]
+## Delete the specified cloud credentials from the user account [/credentials/{id}]
+### Deletes the specified cloud credentials [DELETE]
 
 + Parameters
     + id (required String `id`) ... The identifier of cloud `credential`.
@@ -274,7 +272,7 @@ Templates describe cloud infrastructures and are used for creating cloud stacks 
 
 ## Create cloud template [/templates]
 
-### Create ( AWS ) template [POST]
+### Create (AWS) template [POST]
 Creates an AWS template (vpc, subnet, internetGateway, routeTable, securityGroups, ACLs, instances). The template internally is using an Amazon AWS Cloudformation template.
 
 + Request
@@ -335,9 +333,8 @@ Creates an Azure cloud template. (vpc, subnet, instances)
               "infraId": "azure-infra-id"
           }
 
-## Retrieves all the templates for a user [/templates]
-
-### List infrastructures [GET]
+## Retrieve templates for a user [/templates]
+### List templates [GET]
 Retrieves a list with the cloud templates belonging to the user
 
 + Request
@@ -383,7 +380,7 @@ Retrieves a list with the cloud templates belonging to the user
           ]
 
 
-##Retrieves the given template for the user [/templates/{id}]
+## Retrieve the given template for the user [/templates/{id}]
 ### Retrieve a particular AWS or Azure template by id [GET]
 Retrieves the AWS or Azure template by submitting the template ID
 + Parameters
@@ -413,8 +410,8 @@ Retrieves the AWS or Azure template by submitting the template ID
       }
 
 
-##Delete the specified template from the database [/templates/{id}]
-### Deletes the infrastructure[DELETE]
+## Delete the specified template from the database [/templates/{id}]
+### Delete the specified template [DELETE]
 Deletes the specified template from the database, unless there is a cloud instance created from this template.
 
 + Parameters
@@ -435,7 +432,7 @@ Deletes the specified template from the database, unless there is a cloud instan
 # Group Cloud stacks
 Stacks related resources of the **Cloudbreak API**.
 Manages AWS or Azure clouds based on templates. Creates, launches, stops, deletes the specified number of instances in the selected template (infrastructure).
-## Creates the ( AWS or Azure) cloud [/stack]
+## Create the (AWS or Azure) cloud [/stack]
 ### Create stack [POST]
 Creates an AWS or Azure cloud from the template.
 
@@ -459,7 +456,7 @@ Creates an AWS or Azure cloud from the template.
           }
 
 
-## Retrieves all the stacks for a user [/stacks]
+## Retrieve stacks for a user [/stacks]
 ### List stacks [GET]
 Retrieves the cloud stacks belonging to the user
 
@@ -545,9 +542,8 @@ Retrieves the cloud stacks belonging to the user
               }
 
 
-##Retrieve a  stack [/stacks/{id}]
-### Retrieve a particulat AWS or Azure stack by id [GET]
-Retrieves the AWS or Azure stack by submitting the infrastcuture ID
+## Retrieve a  stack [/stacks/{id}]
+### Retrieve a particular (AWS or Azure) stack by id [GET]
 
 + Parameters
         + id (required String `aws-stack-id`) ... The identifier of the 'stack'
@@ -628,9 +624,9 @@ Retrieves the AWS or Azure stack by submitting the infrastcuture ID
 
 
 
-## Delete a cloud stack [/stacks/{id}]
+## Delete cloud stacks [/stacks/{id}]
 ### Deletes the specified cloud stack [DELETE]
-Deletes the specified stack from the Amazon on Azure cloud
+Deletes the specified stack from the (AWS or Azure) cloud
 WARNING: All data will be lost - unless there was no storage configured. It is the user's responsibilty to backup data or take snapshots uning the cloud interface.
 + Parameters
 
@@ -650,7 +646,6 @@ WARNING: All data will be lost - unless there was no storage configured. It is t
 
 # Group Hadoop blueprint configuration
 Hadoop blueprint  related resources of the **Cloudbreak API**.
-
 Handling Hadoop cluster blueprints. Allows configurations of different blueprints to be used later to create Hadoop cluster instances.
 
 
@@ -736,11 +731,9 @@ The cardinality specifies the desired number of nodes for the hostgroup. When th
 
             }
 
-## Creates a Hadoop blueprint [/blueprints]
-### Create blueprint [POST]
-Creates a Hadoop blueprint. The blueprint specifies the Hadoop services and other Hadoop specific configurations.
-The blueprint is available behind a URL. The cardinality specifies the desired number of nodes for the hostgroup.
-When the cluster is created this number can be overrided.
+## Create Hadoop blueprints [/blueprints]
+### Create a blueprint [POST]
+Creates a Hadoop blueprint using the provided `blueprintUrl`
 
 + Request
 
@@ -762,8 +755,8 @@ When the cluster is created this number can be overrided.
             }
 
 
-## Retrieves all the created Hadoop blueprints [/blueprints]
-### List blueprints [GET]
+## Retrieve Hadoop blueprints [/blueprints]
+### List blueprints for a user [GET]
 Retrieve all Hadoop cluster blueprints
 
 + Request
@@ -844,11 +837,11 @@ Retrieve all Hadoop cluster blueprints
 
 
 
-##Retrieve a Hadoop blueprint  [/blueprints/{id}]
-### Retrieve a particulat Hadoop cluster blueprint [GET]
-Retrieves one particular Hadoop cluster blueprint by submitting the stack id.
+## Retrieve a Hadoop blueprint  [/blueprints/{id}]
+### Retrieve a particular Hadoop cluster blueprint [GET]
+
 + Parameters
-    + id (required String `stack-id`) ... The identifier of the `blueprint`
+    + id (required String `id`) ... The identifier of the `blueprint`
 
 + Request
 
@@ -920,12 +913,12 @@ Retrieves one particular Hadoop cluster blueprint by submitting the stack id.
             }
 
 
-##Deletes the specified blueprint from database [/blueprints/{id}]
-### Deletes the stack[DELETE]
+## Delete blueprintd [/blueprints/{id}]
+### Deletes the specified blueprint [DELETE]
 WARNING: Deletes the specified blueprint from the database.
 
 + Parameters
-    + id (required String `blueprint-id`)
+    + id (required String `id`) ... The identifier of the `blueprint`
 
 + Request
 
@@ -943,11 +936,11 @@ WARNING: Deletes the specified blueprint from the database.
 # Group Hadoop cluster instances
 Hadoop cluster related resources of the **Cloudbreak API**.
 
-Creates a Hadoop cluster from the given stack.
+
 ## Managing Hadoop clusters [/clusters]
 ### Create cluster [POST]
 Creates a Hadoop cluster based on the blueprint. The blueprint specifies the Hadoop services, the number of hosts in the hostgroup and other Hadoop specific configurations.
-Number of hosts in hostgroups can be overridean at cluster creation time.
+Number of hosts in hostgroups can be overridden at cluster creation time.
 + Request
 
     + Headers
@@ -978,7 +971,7 @@ Number of hosts in hostgroups can be overridean at cluster creation time.
 
 
 
-## Retrieves all the created Hadoop clusters from a blueprint [/clusters]
+## Retrieve Hadoop clusters [/clusters]
 ### List clusters [GET]
 Retrieve all Hadoop clusters
 
@@ -1073,11 +1066,11 @@ Retrieve all Hadoop clusters
 
 
 
-##Describe one Hadoop cluster  [/clusters/{id}]
+## Describe one Hadoop cluster  [/clusters/{id}]
 ### Retrieve one particulat Hadoop cluster configuration [GET]
-Retrieves one particulat Hadoop cluster configuration by submitting the cluster id
+Retrieves a particular Hadoop cluster configuration
 + Parameters
-    + id (required String `cluster-id`)
+    + id (required String `id`) ... The identifier of the `cluster`
 
 + Request
 
@@ -1103,12 +1096,12 @@ Retrieves one particulat Hadoop cluster configuration by submitting the cluster 
             }
 
 
-##Deletes the specified Hadoop cluster [/clusters/{id}]
-### Deletes the cluster[DELETE]
+## Delete clusters [/clusters/{id}]
+### Deletes the specified cluster [DELETE]
 WARNING: Deletes the cluster - all data in HDFS will be lost. The cluster is destroyed.
 
 + Parameters
-    + id (required String `cluster-id`) ... The identifier of the cluster.
+    + id (required String `id`) ... The identifier of the cluster.
 
 + Request
 
