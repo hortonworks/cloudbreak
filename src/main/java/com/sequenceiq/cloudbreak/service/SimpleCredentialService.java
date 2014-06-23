@@ -89,7 +89,7 @@ public class SimpleCredentialService implements CredentialService {
             websocketService.send(ENDPOINT, new StatusMessage(azureCredential.getId(), azureCredential.getName(), Status.CREATE_COMPLETED.name()));
             return new IdJson(azureCredential.getId());
         default:
-            websocketService.send(ENDPOINT, new StatusMessage(-1l, credentialJson.getName(), Status.CREATE_FAILED.name()));
+            websocketService.send(ENDPOINT, new StatusMessage(-1L, credentialJson.getName(), Status.CREATE_FAILED.name()));
             throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", credentialJson.getCloudPlatform()));
         }
     }
