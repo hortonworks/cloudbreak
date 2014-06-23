@@ -43,9 +43,7 @@ After postgresql is running, Cloudbreak can be started locally in a Docker conta
 VERSION=0.1-20140623140412
 
 docker run -d --name sequenceiq-provisioning-api \
- -v $WORKSPACE/logs:/tmp/logs:rw \
- -e "ARTIFACT_VERSION=$ARTIFACT_VERSION" \
- -e "PROVISIONING_API_JAR=$PROVISIONING_API_JAR" \
+ -e "VERSION=$VERSION" \
  -e "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" \
  -e "AWS_SECRET_KEY=$AWS_SECRET_KEY" \
  -e "HBM2DDL_STRATEGY=create"\
