@@ -31,3 +31,21 @@ Supports different Hadoop cluster blueprints. Hostgroups defined in blueprints c
 
 ###Flexible
 You have the option to choose your favorite cloud provider and different pricing models. The API translated the calls towards different cloud vendors - you develop and use one common API, no need to rewrite you code when changing between cloud providers.
+
+##Running the Cloudbreak API
+Run Cloudbreak locally in a Docker container with this command:
+```
+VERSION=0.1-20140623140412
+
+docker run -d --name sequenceiq-provisioning-api \
+ -v $WORKSPACE/logs:/tmp/logs:rw \
+ -e "ARTIFACT_VERSION=$ARTIFACT_VERSION" \
+ -e "PROVISIONING_API_JAR=$PROVISIONING_API_JAR" \
+ -e "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" \
+ -e "AWS_SECRET_KEY=$AWS_SECRET_KEY" \
+ -e "HBM2DDL_STRATEGY=create"\
+ --link postgresql:db \
+ -p 8080:8080 \
+ dockerfile/java bash -c 'curl -o /tmp/cloudbreak-$VERSION.jar https://s3-eu-west-1.amazonaws.com/seq-repo/releases/com/sequenceiq/cloudbreak/$VERSION/cloudbreak-$VERSION.jar && java -jar /tmp/cloudbreak-$VERSION.jar'
+
+```
