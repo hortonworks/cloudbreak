@@ -33,7 +33,12 @@ Supports different Hadoop cluster blueprints. Hostgroups defined in blueprints c
 You have the option to choose your favorite cloud provider and different pricing models. The API translated the calls towards different cloud vendors - you develop and use one common API, no need to rewrite you code when changing between cloud providers.
 
 ##Running the Cloudbreak API
-Run Cloudbreak locally in a Docker container with this command:
+The only dependency that Cloudbreak needs is a postgresql database. The easiest way to spin up a postgresql is of course Docker. Run it first with this line:
+```
+docker run -d --name="postgresql" -p 5432:5432 -v /tmp/data:/data -e USER="seqadmin" -e DB="cloudbreak" -e PASS="seq123_" paintedfox/postgresql
+```
+
+After postgresql is running, Cloudbreak can be started locally in a Docker container with the following command. By linking the database container, the necessary environment variables for the connection are set. The postgresql address can be set explicitly through the environment variable: DB_PORT_5432_TCP_ADDR. 
 ```
 VERSION=0.1-20140623140412
 
@@ -49,3 +54,6 @@ docker run -d --name sequenceiq-provisioning-api \
  dockerfile/java bash -c 'curl -o /tmp/cloudbreak-$VERSION.jar https://s3-eu-west-1.amazonaws.com/seq-repo/releases/com/sequenceiq/cloudbreak/$VERSION/cloudbreak-$VERSION.jar && java -jar /tmp/cloudbreak-$VERSION.jar'
 
 ```
+
+To be able to use Cloudbreak, a keypair of an AWS IAM user must be specified. Because Cloudbreak creates AWS resources on third party accounts, the only permission this keypair needs is sts:assumeRole to be able to assume an IAM role to retrieve temporary credentials from AWS.
+
