@@ -6,5 +6,6 @@ public enum Status {
     CREATE_COMPLETED,
     CREATE_FAILED,
     DELETE_IN_PROGRESS,
+    DELETE_FAILED,
     DELETE_COMPLETED;
 }
