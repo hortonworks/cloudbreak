@@ -10,6 +10,7 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
+import javax.persistence.Version;
 
 @Entity
 @NamedQueries({
@@ -62,6 +63,9 @@ public class Stack implements ProvisionEntity {
 
     @ManyToOne
     private User user;
+
+    @Version
+    private Long version;
 
     public String getDescription() {
         return description;

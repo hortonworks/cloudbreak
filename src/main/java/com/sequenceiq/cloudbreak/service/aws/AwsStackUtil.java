@@ -14,7 +14,7 @@ import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.AmbariClusterInstaller;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
@@ -28,7 +28,7 @@ public class AwsStackUtil {
     private CrossAccountCredentialsProvider credentialsProvider;
 
     @Autowired
-    private StackRepository stackRepository;
+    private RetryingStackUpdater stackUpdater;
 
     @Autowired
     private WebsocketService websocketService;
@@ -55,19 +55,15 @@ public class AwsStackUtil {
     }
 
     public void createFailed(Stack stack) {
-        Stack updatedStack = stackRepository.findById(stack.getId());
-        updatedStack.setStatus(Status.CREATE_FAILED);
-        stackRepository.save(updatedStack);
-        websocketService.send("/topic/stack", new StatusMessage(updatedStack.getId(), updatedStack.getName(), Status.CREATE_FAILED.name()));
+        stack = stackUpdater.updateStackStatus(stack.getId(), Status.CREATE_FAILED);
+        websocketService.send("/topic/stack", new StatusMessage(stack.getId(), stack.getName(), Status.CREATE_FAILED.name()));
     }
 
     public void createSuccess(Stack stack, String ambariIp) {
-        Stack updatedStack = stackRepository.findById(stack.getId());
-        updatedStack.setStatus(Status.CREATE_COMPLETED);
-        updatedStack.setAmbariIp(ambariIp);
-        stackRepository.save(updatedStack);
-        websocketService.send("/topic/stack", new StatusMessage(updatedStack.getId(), updatedStack.getName(), Status.CREATE_COMPLETED.name()));
-        ambariClusterInstaller.installAmbariCluster(updatedStack);
+        stack = stackUpdater.updateAmbariIp(stack.getId(), ambariIp);
+        stack = stackUpdater.updateStackStatus(stack.getId(), Status.CREATE_COMPLETED);
+        websocketService.send("/topic/stack", new StatusMessage(stack.getId(), stack.getName(), Status.CREATE_COMPLETED.name()));
+        ambariClusterInstaller.installAmbariCluster(stack);
     }
 
     public String encode(String userData) {

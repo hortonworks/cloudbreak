@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.domain.SnsTopic;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
@@ -38,12 +39,14 @@ public class CloudFormationStackCreator {
     @Autowired
     private WebsocketService websocketService;
 
+    @Autowired
+    private RetryingStackUpdater stackUpdater;
+
     public synchronized void createCloudFormationStack(Stack stack, AwsCredential awsCredential, SnsTopic notificationTopic) {
         try {
             Stack currentStack = stackRepository.findById(stack.getId());
             if (currentStack.getStatus().equals(Status.REQUESTED)) {
-                currentStack.setStatus(Status.CREATE_IN_PROGRESS);
-                currentStack = stackRepository.save(currentStack);
+                currentStack = stackUpdater.updateStackStatus(stack.getId(), Status.CREATE_IN_PROGRESS);
                 websocketService.send("/topic/stack", new StatusMessage(stack.getId(), currentStack.getName(), currentStack.getStatus().name()));
                 AwsTemplate awsTemplate = (AwsTemplate) currentStack.getTemplate();
                 AmazonCloudFormationClient client = awsStackUtil.createCloudFormationClient(awsTemplate.getRegion(), awsCredential);
@@ -74,10 +77,7 @@ public class CloudFormationStackCreator {
                 .withNotificationARNs(snstopic.getTopicArn())
                 .withParameters(new Parameter().withParameterKey("SSHLocation").withParameterValue(awsTemplate.getSshLocation()));
         CreateStackResult createStackResult = client.createStack(createStackRequest);
-        stack.setCfStackId(createStackResult.getStackId());
-        stack.setCfStackName(stackName);
-        stackRepository.save(stack);
+        stack = stackUpdater.updateStackCfAttributes(stack.getId(), stackName, createStackResult.getStackId());
         LOGGER.info("CloudFormation stack creation request sent with stack name: '{}' for stack: '{}'", stackName, stack.getId());
     }
-
 }

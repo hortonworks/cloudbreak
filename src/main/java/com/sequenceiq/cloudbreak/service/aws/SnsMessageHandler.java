@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.domain.SnsRequest;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 
 @Service
@@ -29,6 +30,9 @@ public class SnsMessageHandler {
 
     @Autowired
     private StackRepository stackRepository;
+
+    @Autowired
+    private RetryingStackUpdater stackUpdater;
 
     public void handleMessage(SnsRequest snsRequest) {
         if (isCloudFormationMessage(snsRequest)) {
@@ -56,11 +60,10 @@ public class SnsMessageHandler {
     private synchronized void handleCfStackCreateComplete(Map<String, String> cfMessage) {
         Stack stack = stackRepository.findByCfStackId(cfMessage.get("StackId"));
         if (!stack.isCfStackCompleted()) {
+            stack = stackUpdater.updateCfStackCreateComplete(stack.getId());
             LOGGER.info("CloudFormation stack creation completed. (Id: '{}', CFStackId '{}') Notifying instance runner to start instances...",
                     stack.getId(), stack.getCfStackId());
             ec2InstanceRunner.runEc2Instances(stack);
-            stack.setCfStackCompleted(true);
-            stackRepository.save(stack);
         }
     }
 }
