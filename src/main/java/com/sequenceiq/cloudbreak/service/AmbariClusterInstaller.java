@@ -77,7 +77,7 @@ public class AmbariClusterInstaller {
                     cluster.setCreationFinished(new Date().getTime());
                     clusterRepository.save(cluster);
                 } else if (installProgress.doubleValue() == FAILED) {
-                    websocketService.sendToTopic(cluster.getUser().getId(), "cluster", new StatusMessage(cluster.getId(), cluster.getName(), Status.CREATE_FAILED.name()));
+                    websocketService.sendToTopic(cluster.getUser().getId(), "/cluster", new StatusMessage(cluster.getId(), cluster.getName(), Status.CREATE_FAILED.name()));
                     cluster.setStatus(Status.CREATE_FAILED);
                     cluster.setCreationFinished(new Date().getTime());
                     clusterRepository.save(cluster);

@@ -115,7 +115,8 @@ public class AwsProvisionService implements ProvisionService {
         Stack updatedStack = stackRepository.findById(stack.getId());
         updatedStack.setStatus(Status.CREATE_FAILED);
         stackRepository.save(updatedStack);
-        websocketService.sendToTopic(updatedStack.getUser().getId(), "/stack", new StatusMessage(updatedStack.getId(), updatedStack.getName(), Status.CREATE_FAILED.name()));
+        websocketService.sendToTopic(updatedStack.getUser().getId(), "/stack",
+                new StatusMessage(updatedStack.getId(), updatedStack.getName(), Status.CREATE_FAILED.name()));
     }
 
     private void createSuccess(Stack stack, String ambariIp) {
@@ -123,7 +124,8 @@ public class AwsProvisionService implements ProvisionService {
         updatedStack.setStatus(Status.CREATE_COMPLETED);
         updatedStack.setAmbariIp(ambariIp);
         stackRepository.save(updatedStack);
-        websocketService.sendToTopic(updatedStack.getUser().getId(), "/stack", new StatusMessage(updatedStack.getId(), updatedStack.getName(), Status.CREATE_COMPLETED.name()));
+        websocketService.sendToTopic(updatedStack.getUser().getId(), "/stack",
+                new StatusMessage(updatedStack.getId(), updatedStack.getName(), Status.CREATE_COMPLETED.name()));
         ambariClusterInstaller.installAmbariCluster(updatedStack);
 
     }
