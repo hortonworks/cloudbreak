@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.aws;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,15 +61,17 @@ public class SnsTopicManager {
      * method is synchronized.
      */
     public synchronized void confirmSubscription(SnsRequest snsRequest) {
-        SnsTopic snsTopic = snsTopicRepository.findByTopicArn(snsRequest.getTopicArn());
-        if (!snsTopic.isConfirmed()) {
-            AmazonSNSClient amazonSNSClient = createSnsClient(snsTopic.getCredential(), snsTopic.getRegion());
-            ConfirmSubscriptionResult result = amazonSNSClient.confirmSubscription(snsTopic.getTopicArn(), snsRequest.getToken());
-            LOGGER.info("Subscription to Amazon SNS topic confirmed. [topic ARN: '{}', subscription ARN: '{}', credential: '{}']",
-                    snsRequest.getTopicArn(), result.getSubscriptionArn(), snsTopic.getCredential().getId());
-            snsTopic.setConfirmed(true);
-            snsTopicRepository.save(snsTopic);
-            cloudFormationStackCreator.startAllRequestedStackCreationForTopic(snsTopic);
+        List<SnsTopic> snsTopics = snsTopicRepository.findByTopicArn(snsRequest.getTopicArn());
+        for (SnsTopic snsTopic : snsTopics) {
+            if (!snsTopic.isConfirmed()) {
+                AmazonSNSClient amazonSNSClient = createSnsClient(snsTopic.getCredential(), snsTopic.getRegion());
+                ConfirmSubscriptionResult result = amazonSNSClient.confirmSubscription(snsTopic.getTopicArn(), snsRequest.getToken());
+                LOGGER.info("Subscription to Amazon SNS topic confirmed. [topic ARN: '{}', subscription ARN: '{}', credential: '{}']",
+                        snsRequest.getTopicArn(), result.getSubscriptionArn(), snsTopic.getCredential().getId());
+                snsTopic.setConfirmed(true);
+                snsTopicRepository.save(snsTopic);
+                cloudFormationStackCreator.startAllRequestedStackCreationForTopic(snsTopic);
+            }
         }
     }
 
