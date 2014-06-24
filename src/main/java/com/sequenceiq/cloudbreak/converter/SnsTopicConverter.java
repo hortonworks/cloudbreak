@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.converter;
 
 import org.springframework.stereotype.Component;
 
+import com.amazonaws.services.sqs.model.UnsupportedOperationException;
 import com.sequenceiq.cloudbreak.controller.json.SnsTopicJson;
 import com.sequenceiq.cloudbreak.domain.SnsTopic;
 
@@ -21,7 +22,7 @@ public class SnsTopicConverter extends AbstractConverter<SnsTopicJson, SnsTopic>
 
     @Override
     public SnsTopic convert(SnsTopicJson json) {
-        return null;
+        throw new UnsupportedOperationException("Sns topics shouldn't be created from Json.");
     }
 
 }

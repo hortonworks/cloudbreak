@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.domain;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -26,7 +28,7 @@ import javax.persistence.Version;
                 name = "Stack.findRequestedStacksWithCredential",
                 query = "SELECT c FROM Stack c "
                         + "WHERE c.credential.id= :credentialId "
-                        + "AND c.status= 0")
+                        + "AND c.status= 'REQUESTED'")
 })
 public class Stack implements ProvisionEntity {
 
@@ -42,6 +44,7 @@ public class Stack implements ProvisionEntity {
 
     private String description;
 
+    @Enumerated(EnumType.STRING)
     private Status status;
 
     private String cfStackName;

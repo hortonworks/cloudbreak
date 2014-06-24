@@ -69,7 +69,7 @@ public class AwsProvisionService implements ProvisionService {
             AwsTemplate awsTemplate = (AwsTemplate) stack.getTemplate();
             AwsCredential awsCredential = (AwsCredential) credential;
 
-            SnsTopic snsTopic = (SnsTopic) snsTopicRepository.findOneForCredentialInRegion(awsCredential.getId(), awsTemplate.getRegion());
+            SnsTopic snsTopic = snsTopicRepository.findOneForCredentialInRegion(awsCredential.getId(), awsTemplate.getRegion());
             if (snsTopic == null) {
                 LOGGER.info("There is no SNS topic created for credential '{}' in region {}. Creating topic now.", awsCredential.getId(),
                         awsTemplate.getRegion().name());

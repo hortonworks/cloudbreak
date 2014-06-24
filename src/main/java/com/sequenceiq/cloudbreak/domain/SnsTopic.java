@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.domain;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
@@ -20,6 +22,7 @@ public class SnsTopic implements ProvisionEntity {
     private Long id;
     private String name;
     private String topicArn;
+    @Enumerated(EnumType.STRING)
     private Regions region;
     private boolean confirmed;
 
