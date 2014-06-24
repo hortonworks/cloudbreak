@@ -42,15 +42,7 @@ After postgresql is running, Cloudbreak can be started locally in a Docker conta
 ```
 VERSION=0.1-20140623140412
 
-docker run -d --name sequenceiq-provisioning-api \
- -e "VERSION=$VERSION" \
- -e "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" \
- -e "AWS_SECRET_KEY=$AWS_SECRET_KEY" \
- -e "HBM2DDL_STRATEGY=create"\
- --link postgresql:db \
- -p 8080:8080 \
- dockerfile/java bash -c 'curl -o /tmp/cloudbreak-$VERSION.jar https://s3-eu-west-1.amazonaws.com/seq-repo/releases/com/sequenceiq/cloudbreak/$VERSION/cloudbreak-$VERSION.jar && java -jar /tmp/cloudbreak-$VERSION.jar'
-
+docker run -d --name cloudbreak -e "VERSION=$VERSION" -e "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" -e "AWS_SECRET_KEY=$AWS_SECRET_KEY" -e "HBM2DDL_STRATEGY=create" --link postgresql:db -p 8080:8080 dockerfile/java bash -c 'curl -o /tmp/cloudbreak-$VERSION.jar https://s3-eu-west-1.amazonaws.com/seq-repo/releases/com/sequenceiq/cloudbreak/$VERSION/cloudbreak-$VERSION.jar && java -jar /tmp/cloudbreak-$VERSION.jar'
 ```
 
 To be able to use Cloudbreak, a keypair of an AWS IAM user must be specified. Because Cloudbreak creates AWS resources on third party accounts, the only permission this keypair needs is sts:assumeRole to be able to assume an IAM role to retrieve temporary credentials from AWS.
