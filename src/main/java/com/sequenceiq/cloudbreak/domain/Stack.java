@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.domain;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -10,6 +12,7 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
+import javax.persistence.Version;
 
 @Entity
 @NamedQueries({
@@ -20,7 +23,12 @@ import javax.persistence.SequenceGenerator;
         @NamedQuery(
                 name = "Stack.findStackForCluster",
                 query = "SELECT c FROM Stack c "
-                        + "WHERE c.cluster.id= :id")
+                        + "WHERE c.cluster.id= :id"),
+        @NamedQuery(
+                name = "Stack.findRequestedStacksWithCredential",
+                query = "SELECT c FROM Stack c "
+                        + "WHERE c.credential.id= :credentialId "
+                        + "AND c.status= 'REQUESTED'")
 })
 public class Stack implements ProvisionEntity {
 
@@ -36,7 +44,14 @@ public class Stack implements ProvisionEntity {
 
     private String description;
 
+    @Enumerated(EnumType.STRING)
     private Status status;
+
+    private String cfStackName;
+
+    private String cfStackId;
+
+    private boolean cfStackCompleted;
 
     private String ambariIp;
 
@@ -51,6 +66,9 @@ public class Stack implements ProvisionEntity {
 
     @ManyToOne
     private User user;
+
+    @Version
+    private Long version;
 
     public String getDescription() {
         return description;
@@ -122,6 +140,30 @@ public class Stack implements ProvisionEntity {
 
     public void setStatus(Status status) {
         this.status = status;
+    }
+
+    public String getCfStackId() {
+        return cfStackId;
+    }
+
+    public void setCfStackId(String cfStackId) {
+        this.cfStackId = cfStackId;
+    }
+
+    public String getCfStackName() {
+        return cfStackName;
+    }
+
+    public void setCfStackName(String cfStackName) {
+        this.cfStackName = cfStackName;
+    }
+
+    public boolean isCfStackCompleted() {
+        return cfStackCompleted;
+    }
+
+    public void setCfStackCompleted(boolean cfStackCompleted) {
+        this.cfStackCompleted = cfStackCompleted;
     }
 
     public String getAmbariIp() {

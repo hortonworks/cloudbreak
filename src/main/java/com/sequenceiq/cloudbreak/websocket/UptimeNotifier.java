@@ -43,7 +43,7 @@ public class UptimeNotifier {
             }
         }
         LOGGER.debug("uptimes: " + uptimes);
-        if (uptimes.size() > 0) {
+        if (!uptimes.isEmpty()) {
             websocketService.send("/topic/uptime", uptimes);
         }
     }

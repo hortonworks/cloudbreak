@@ -12,7 +12,6 @@ import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import org.hibernate.validator.constraints.Email;
@@ -55,9 +54,6 @@ public class User implements ProvisionEntity {
     @OneToMany(mappedBy = "azureCredentialOwner", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<AzureCredential> azureCredentials = new HashSet<>();
 
-    @OneToOne
-    private TemporaryAwsCredentials temporaryAwsCredentials;
-
     @NotEmpty
     private String password;
 
@@ -91,6 +87,7 @@ public class User implements ProvisionEntity {
         this.azureCredentials = user.azureCredentials;
         this.stacks = user.stacks;
         this.blueprints = user.blueprints;
+        this.clusters = user.clusters;
     }
 
     public String getPassword() {
@@ -147,14 +144,6 @@ public class User implements ProvisionEntity {
 
     public void setAzureTemplates(Set<AzureTemplate> azureTemplates) {
         this.azureTemplates = azureTemplates;
-    }
-
-    public TemporaryAwsCredentials getTemporaryAwsCredentials() {
-        return temporaryAwsCredentials;
-    }
-
-    public void setTemporaryAwsCredentials(TemporaryAwsCredentials temporaryAwsCredentials) {
-        this.temporaryAwsCredentials = temporaryAwsCredentials;
     }
 
     public Set<AzureCredential> getAzureCredentials() {

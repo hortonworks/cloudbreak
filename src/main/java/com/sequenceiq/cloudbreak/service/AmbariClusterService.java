@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
+import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 
 @Service
@@ -37,6 +38,9 @@ public class AmbariClusterService {
     @Autowired
     private AmbariClusterInstaller ambariClusterInstaller;
 
+    @Autowired
+    private RetryingStackUpdater stackUpdater;
+
     public void createCluster(User user, Long stackId, ClusterRequest clusterRequest) {
         Stack stack = stackRepository.findOne(stackId);
         if (stack.getCluster() != null) {
@@ -46,13 +50,10 @@ public class AmbariClusterService {
         Cluster cluster = clusterConverter.convert(clusterRequest);
         cluster.setUser(user);
         cluster = clusterRepository.save(cluster);
-
-        stack.setCluster(cluster);
-        stack = stackRepository.save(stack);
+        stack = stackUpdater.updateStackCluster(stack.getId(), cluster);
         if (stack.getStatus().equals(Status.CREATE_COMPLETED)) {
             ambariClusterInstaller.installAmbariCluster(stack);
         }
-
     }
 
     public ClusterResponse retrieveCluster(User user, Long stackId) {

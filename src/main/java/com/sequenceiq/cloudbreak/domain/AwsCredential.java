@@ -1,7 +1,13 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 
 @Entity
 public class AwsCredential extends Credential implements ProvisionEntity {
@@ -11,6 +17,12 @@ public class AwsCredential extends Credential implements ProvisionEntity {
 
     @ManyToOne
     private User awsCredentialOwner;
+
+    @OneToOne
+    private TemporaryAwsCredentials temporaryAwsCredentials;
+
+    @OneToMany(mappedBy = "credential", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<SnsTopic> snsTopics = new HashSet<>();
 
     public AwsCredential() {
 
@@ -38,6 +50,22 @@ public class AwsCredential extends Credential implements ProvisionEntity {
 
     public void setInstanceProfileRoleArn(String instanceProfileRoleArn) {
         this.instanceProfileRoleArn = instanceProfileRoleArn;
+    }
+
+    public TemporaryAwsCredentials getTemporaryAwsCredentials() {
+        return temporaryAwsCredentials;
+    }
+
+    public void setTemporaryAwsCredentials(TemporaryAwsCredentials temporaryAwsCredentials) {
+        this.temporaryAwsCredentials = temporaryAwsCredentials;
+    }
+
+    public Set<SnsTopic> getSnsTopics() {
+        return snsTopics;
+    }
+
+    public void setSnsTopics(Set<SnsTopic> snsTopics) {
+        this.snsTopics = snsTopics;
     }
 
     @Override

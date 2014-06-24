@@ -9,6 +9,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +25,8 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 @Component
 public class BlueprintConverter extends AbstractConverter<BlueprintJson, Blueprint> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintConverter.class);
+
     @Autowired
     private JsonHelper jsonHelper;
 
@@ -35,8 +39,9 @@ public class BlueprintConverter extends AbstractConverter<BlueprintJson, Bluepri
         blueprintJson.setDescription(entity.getDescription() == null ? "" : entity.getDescription());
         try {
             blueprintJson.setAmbariBlueprint(jsonHelper.createJsonFromString(entity.getBlueprintText()));
-        } catch (Exception ex) {
-            blueprintJson.setAmbariBlueprint(new TextNode(ex.getMessage()));
+        } catch (Exception e) {
+            LOGGER.error("Blueprint cannot be converted to JSON.", e);
+            blueprintJson.setAmbariBlueprint(new TextNode(e.getMessage()));
         }
         return blueprintJson;
     }
@@ -50,7 +55,7 @@ public class BlueprintConverter extends AbstractConverter<BlueprintJson, Bluepri
                 jsonHelper.createJsonFromString(urlText);
                 blueprint.setBlueprintText(urlText);
             } catch (IOException e) {
-                throw new BadRequestException("Cannot download ambari blueprint from: " + json.getUrl());
+                throw new BadRequestException("Cannot download ambari blueprint from: " + json.getUrl(), e);
             }
         } else {
             blueprint.setBlueprintText(json.getAmbariBlueprint());

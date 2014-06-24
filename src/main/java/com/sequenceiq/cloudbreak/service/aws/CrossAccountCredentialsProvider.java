@@ -11,9 +11,8 @@ import com.amazonaws.services.securitytoken.model.AssumeRoleRequest;
 import com.amazonaws.services.securitytoken.model.AssumeRoleResult;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.TemporaryAwsCredentials;
-import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.TemporaryAwsCredentialsRepository;
-import com.sequenceiq.cloudbreak.repository.UserRepository;
 
 /**
  * Provides temporary session credentials for cross account requests. The assume
@@ -27,19 +26,19 @@ import com.sequenceiq.cloudbreak.repository.UserRepository;
 @Component
 public class CrossAccountCredentialsProvider {
 
+    public static final int DEFAULT_SESSION_CREDENTIALS_DURATION = 3600;
     private static final int MILLISECONDS = 1000;
-
     private static final int FIVE_MINUTES = 300000;
 
     @Autowired
     private TemporaryAwsCredentialsRepository credentialsRepository;
 
     @Autowired
-    private UserRepository userRepository;
+    private CredentialRepository credentialRepository;
 
-    public BasicSessionCredentials retrieveSessionCredentials(int durationInSeconds, String externalId, User user, AwsCredential awsCredential) {
+    public BasicSessionCredentials retrieveSessionCredentials(int durationInSeconds, String externalId, AwsCredential awsCredential) {
 
-        BasicSessionCredentials cachedSessionCredentials = getCachedCredentials(user);
+        BasicSessionCredentials cachedSessionCredentials = getCachedCredentials(awsCredential);
         if (cachedSessionCredentials != null) {
             return cachedSessionCredentials;
         }
@@ -52,7 +51,7 @@ public class CrossAccountCredentialsProvider {
                 .withRoleSessionName("hadoop-provisioning");
         AssumeRoleResult result = client.assumeRole(assumeRoleRequest);
 
-        cacheSessionCredentials(result, durationInSeconds, user);
+        cacheSessionCredentials(result, durationInSeconds, awsCredential);
 
         return new BasicSessionCredentials(
                 result.getCredentials().getAccessKeyId(),
@@ -60,9 +59,9 @@ public class CrossAccountCredentialsProvider {
                 result.getCredentials().getSessionToken());
     }
 
-    private BasicSessionCredentials getCachedCredentials(User user) {
+    private BasicSessionCredentials getCachedCredentials(AwsCredential awsCredential) {
         long dateNow = new Date().getTime();
-        TemporaryAwsCredentials temporaryAwsCredentials = user.getTemporaryAwsCredentials();
+        TemporaryAwsCredentials temporaryAwsCredentials = awsCredential.getTemporaryAwsCredentials();
         if (temporaryAwsCredentials != null) {
             if (temporaryAwsCredentials.getValidUntil() > dateNow + FIVE_MINUTES) {
                 return new BasicSessionCredentials(
@@ -70,23 +69,23 @@ public class CrossAccountCredentialsProvider {
                         temporaryAwsCredentials.getSecretAccessKey(),
                         temporaryAwsCredentials.getSessionToken());
             } else {
-                user.setTemporaryAwsCredentials(null);
-                userRepository.save(user);
+                awsCredential.setTemporaryAwsCredentials(null);
+                credentialRepository.save(awsCredential);
                 credentialsRepository.delete(temporaryAwsCredentials);
             }
         }
         return null;
     }
 
-    private void cacheSessionCredentials(AssumeRoleResult result, int durationInSeconds, User user) {
+    private void cacheSessionCredentials(AssumeRoleResult result, int durationInSeconds, AwsCredential awsCredential) {
         TemporaryAwsCredentials temporaryAwsCredentials = new TemporaryAwsCredentials();
         temporaryAwsCredentials.setAccessKeyId(result.getCredentials().getAccessKeyId());
         temporaryAwsCredentials.setSecretAccessKey(result.getCredentials().getSecretAccessKey());
         temporaryAwsCredentials.setSessionToken(result.getCredentials().getSessionToken());
         temporaryAwsCredentials.setValidUntil(new Date().getTime() + durationInSeconds * MILLISECONDS);
         credentialsRepository.save(temporaryAwsCredentials);
-        user.setTemporaryAwsCredentials(temporaryAwsCredentials);
-        userRepository.save(user);
+        awsCredential.setTemporaryAwsCredentials(temporaryAwsCredentials);
+        credentialRepository.save(awsCredential);
 
     }
 }
