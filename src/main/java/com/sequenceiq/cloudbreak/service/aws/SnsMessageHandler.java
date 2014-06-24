@@ -59,7 +59,11 @@ public class SnsMessageHandler {
 
     private synchronized void handleCfStackCreateComplete(Map<String, String> cfMessage) {
         Stack stack = stackRepository.findByCfStackId(cfMessage.get("StackId"));
-        if (!stack.isCfStackCompleted()) {
+        if (stack == null) {
+            LOGGER.info(
+                    "Got message that CloudFormation stack created, but no matching stack found in the database [CFStackId: '{}']. Ignoring message.",
+                    cfMessage.get("StackId"));
+        } else if (!stack.isCfStackCompleted()) {
             stack = stackUpdater.updateCfStackCreateComplete(stack.getId());
             LOGGER.info("CloudFormation stack creation completed. (Id: '{}', CFStackId '{}') Notifying instance runner to start instances...",
                     stack.getId(), stack.getCfStackId());
