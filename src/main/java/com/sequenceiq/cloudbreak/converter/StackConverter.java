@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.converter;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.json.ClusterResponse;
@@ -66,9 +67,18 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
         Stack stack = new Stack();
         stack.setNodeCount(json.getNodeCount());
         stack.setName(json.getName());
-        stack.setCredential(credentialRepository.findOne(json.getCredentialId()));
-        stack.setTemplate(templateRepository.findOne(Long.valueOf(json.getTemplateId())));
+        try {
+            stack.setCredential(credentialRepository.findOne(json.getCredentialId()));
+        } catch (AccessDeniedException e) {
+            throw new AccessDeniedException(String.format("Access to credential '%s' is denied or credential does not exist.", json.getCredentialId()));
+        }
+        try {
+            stack.setTemplate(templateRepository.findOne(Long.valueOf(json.getTemplateId())));
+        } catch (AccessDeniedException e) {
+            throw new AccessDeniedException(String.format("Access to template '%s' is denied or template does not exist.", json.getTemplateId()));
+        }
         stack.setStatus(Status.REQUESTED);
         return stack;
+
     }
 }
