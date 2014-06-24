@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Resource;
-import javax.persistence.EntityNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -61,14 +60,10 @@ public class SimpleStackService implements StackService {
 
     @Override
     public IdJson create(User user, StackJson stackRequest) {
-        Template template = templateRepository.findOne(stackRequest.getTemplateId());
-        if (template == null) {
-            throw new EntityNotFoundException(String.format("Template '%s' not found", stackRequest.getTemplateId()));
-        }
         Stack stack = stackConverter.convert(stackRequest);
+        Template template = templateRepository.findOne(stackRequest.getTemplateId());
         stack.setUser(user);
         stack = stackRepository.save(stack);
-
         ProvisionService provisionService = provisionServices.get(template.cloudPlatform());
         provisionService.createStack(user, stack, stack.getCredential());
         return new IdJson(stack.getId());

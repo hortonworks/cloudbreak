@@ -3,12 +3,12 @@ package com.sequenceiq.cloudbreak.converter;
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.json.ClusterRequest;
 import com.sequenceiq.cloudbreak.controller.json.ClusterResponse;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
@@ -27,8 +27,11 @@ public class ClusterConverter {
 
     public Cluster convert(ClusterRequest clusterRequest) {
         Cluster cluster = new Cluster();
-        Blueprint blueprint = blueprintRepository.findOne(clusterRequest.getBlueprintId());
-        cluster.setBlueprint(blueprint);
+        try {
+            cluster.setBlueprint(blueprintRepository.findOne(clusterRequest.getBlueprintId()));
+        } catch (AccessDeniedException e) {
+            throw new AccessDeniedException(String.format("Access to blueprint '%s' is denied or blueprint does not exist.", clusterRequest.getBlueprintId()));
+        }
         cluster.setName(clusterRequest.getClusterName());
         cluster.setStatus(Status.REQUESTED);
         cluster.setDescription(clusterRequest.getDescription());
