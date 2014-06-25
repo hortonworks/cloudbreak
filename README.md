@@ -19,12 +19,11 @@ http://docs.cloudbreak.apiary.io/
    - [Database] (#database)
    - [Cloudbreak REST API] (#cloudbreak-rest-api)
   - [Running Cloudbreak API on the host] (#running-cloudbreak-api-on-the-host)
-  - [Configuring Cloudbreak] (#configuring-cloudbreak)
-   - [Configuration] (#aws-configuration)
-    - [Install and configure ngrok] (#install-and-configure-ngrok)
-    - [AWS Configuration] (#aws-configuration)
-     - [Cloudbreak deployer AWS configuration] (#cloudbreak-deployer-aws-configuration)
-     - [Cloudbreak user AWS configuration] (#cloudbreak-user-aws-configuration)
+  - [Configuration] (#configuration)
+   - [Install and configure ngrok] (#install-and-configure-ngrok)
+   - [AWS Configuration] (#aws-configuration)
+    - [Cloudbreak deployer AWS configuration] (#cloudbreak-deployer-aws-configuration)
+    - [Cloudbreak user AWS configuration] (#cloudbreak-user-aws-configuration)
 
 ##Overview
 
