@@ -21,7 +21,7 @@ http://docs.cloudbreak.apiary.io/
    - [AWS Configuration] (#aws-configuration)
     - [Cloudbreak deployer AWS configuration] (#cloudbreak-deployer-aws-configuration)
     - [Cloudbreak user AWS configuration] (#cloudbreak-user-aws-configuration)
-    - 
+    
 ##Overview
 
 Cloudbreak is a RESTful application development platform with the goal of helping developers to build solutions for deploying Hadoop YARN clusters in different environments. Once it is deployed in your favorite servlet container it exposes a REST API allowing to span up Hadoop clusters of arbitary sizes and cloud providers. Provisioning Hadoop has never been easier.
