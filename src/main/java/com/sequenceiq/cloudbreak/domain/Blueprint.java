@@ -5,10 +5,16 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 @Entity
+@Table(name = "Blueprint", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"blueprintuser", "name"})
+})
 public class Blueprint implements ProvisionEntity {
 
     @Id
@@ -21,12 +27,13 @@ public class Blueprint implements ProvisionEntity {
 
     private String blueprintName;
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     private String name;
 
     private String description;
 
     @ManyToOne
+    @JoinColumn(name = "blueprintuser")
     private User user;
 
     public Blueprint() {
