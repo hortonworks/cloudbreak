@@ -20,20 +20,20 @@ public class WebsocketService {
     @Autowired
     private UserRepository userRepository;
 
-    public void sendToTopic(Long userId, String destinationSuffix, Object message) {
-        LOGGER.info("Sending message {} to {}/{}/{}", message, userId, destinationSuffix);
-        messageSendingOperations.convertAndSend(String.format("/%s/%s/%s", "topic", userId, destinationSuffix), message);
+    public void sendToTopic(String destinationSuffix, Object message) {
+        LOGGER.info("Sending message {} to {}/{}", message, destinationSuffix);
+        messageSendingOperations.convertAndSend(String.format("/%s/%s", "topic", destinationSuffix), message);
     }
 
     public void sendToTopicUser(Long userId, WebsocketEndPoint websocketEndPoint, Object message) {
-        LOGGER.info("Sending message {} to {}/{}/{}", message, userId, websocketEndPoint.getValue());
+        LOGGER.info("Sending message {} to {}/{}", message, websocketEndPoint.getValue());
         messageSendingOperations.convertAndSendToUser(userRepository.findOne(userId).getEmail(),
-                String.format("/%s/%s/%s", "topic", userId, websocketEndPoint.getValue()), message);
+                String.format("/%s/%s", "topic", websocketEndPoint.getValue()), message);
     }
 
-    public void send(Long userId, String destinationPrefix, String destinationSuffix, Object message) {
-        LOGGER.info("Sending message {} to {}/{}/{}", message, destinationPrefix, userId, destinationSuffix);
-        messageSendingOperations.convertAndSend(String.format("%s/%s/%s", destinationPrefix, userId, destinationSuffix), message);
+    public void send(String destinationPrefix, String destinationSuffix, Object message) {
+        LOGGER.info("Sending message {} to {}/{}", message, destinationPrefix, destinationSuffix);
+        messageSendingOperations.convertAndSend(String.format("%s/%s", destinationPrefix, destinationSuffix), message);
     }
 
 }
