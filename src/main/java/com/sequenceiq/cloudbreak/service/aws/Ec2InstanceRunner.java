@@ -9,8 +9,10 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+
+import reactor.event.Event;
+import reactor.function.Consumer;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
@@ -40,7 +42,7 @@ import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.Stack;
 
 @Service
-public class Ec2InstanceRunner {
+public class Ec2InstanceRunner implements Consumer<Event<Stack>> {
 
     private static final int POLLING_INTERVAL = 3000;
 
@@ -52,8 +54,10 @@ public class Ec2InstanceRunner {
     @Autowired
     private Ec2UserDataBuilder userDataBuilder;
 
-    @Async
-    public void runEc2Instances(Stack stack) {
+    @Override
+    public void accept(Event<Stack> event) {
+        Stack stack = event.getData();
+        LOGGER.info("Accepted CF_STACK_COMPLETED event. Starting EC2 instances for stack '{}'", stack.getId());
         try {
             AwsTemplate awsTemplate = (AwsTemplate) stack.getTemplate();
             AwsCredential awsCredential = (AwsCredential) stack.getCredential();
@@ -63,8 +67,8 @@ public class Ec2InstanceRunner {
             DescribeStacksResult stackResult = cfClient.describeStacks(stackRequest);
 
             AmazonEC2Client ec2Client = awsStackUtil.createEC2Client(awsTemplate.getRegion(), awsCredential);
-            List<String> instanceIds = runInstancesInSubnet(stack, awsTemplate, stackResult, ec2Client,
-                    awsCredential.getInstanceProfileRoleArn(), awsCredential.getOwner().getEmail());
+            List<String> instanceIds = runInstancesInSubnet(stack, awsTemplate, stackResult, ec2Client, awsCredential.getInstanceProfileRoleArn(),
+                    awsCredential.getOwner().getEmail());
             tagInstances(stack, ec2Client, instanceIds);
             disableSourceDestCheck(ec2Client, instanceIds);
             String ambariIp = pollAmbariServer(ec2Client, stack.getId(), instanceIds);
@@ -139,7 +143,7 @@ public class Ec2InstanceRunner {
         runInstancesRequest.setNetworkInterfaces(Arrays.asList(nwIf));
         RunInstancesResult runInstancesResult = amazonEC2Client.runInstances(runInstancesRequest);
 
-        LOGGER.info("Started instances in subnet created by the CloudFormation stack. (stack: '{}', subnet: '{}')", stack.getId(), subnetId);
+        LOGGER.info("Started instances in subnet created by CloudFormation. (stack: '{}', subnet: '{}')", stack.getId(), subnetId);
 
         List<String> instanceIds = new ArrayList<>();
         for (Instance instance : runInstancesResult.getReservation().getInstances()) {
@@ -214,5 +218,4 @@ public class Ec2InstanceRunner {
         }
         throw new InternalServerException("No instance found with launch index 0");
     }
-
 }

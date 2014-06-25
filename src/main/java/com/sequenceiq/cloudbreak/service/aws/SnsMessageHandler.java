@@ -7,6 +7,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import reactor.core.Reactor;
+import reactor.event.Event;
+
+import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.SnsRequest;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
@@ -26,13 +30,13 @@ public class SnsMessageHandler {
     private SnsTopicManager snsTopicManager;
 
     @Autowired
-    private Ec2InstanceRunner ec2InstanceRunner;
-
-    @Autowired
     private StackRepository stackRepository;
 
     @Autowired
     private RetryingStackUpdater stackUpdater;
+
+    @Autowired
+    private Reactor reactor;
 
     public void handleMessage(SnsRequest snsRequest) {
         if (isCloudFormationMessage(snsRequest)) {
@@ -65,9 +69,9 @@ public class SnsMessageHandler {
                     cfMessage.get("StackId"));
         } else if (!stack.isCfStackCompleted()) {
             stack = stackUpdater.updateCfStackCreateComplete(stack.getId());
-            LOGGER.info("CloudFormation stack creation completed. (Id: '{}', CFStackId '{}') Notifying instance runner to start instances...",
-                    stack.getId(), stack.getCfStackId());
-            ec2InstanceRunner.runEc2Instances(stack);
+            LOGGER.info("CloudFormation stack creation completed. [Id: '{}', CFStackId '{}']", stack.getId(), stack.getCfStackId());
+            LOGGER.info("Publishing CF_STACK_COMPLETED event [StackId: '{}']", stack.getId());
+            reactor.notify(ReactorConfig.CF_STACK_COMPLETED_EVENT, Event.wrap(stack));
         }
     }
 }
