@@ -15,9 +15,11 @@ http://docs.cloudbreak.apiary.io/
    - [Scalable] (#scalable)
    - [Blueprints] (#blueprints)
    - [Flexible] (#flexible)
-  - [Running the Cloudbreak API] (#runing-the-cloudbreak-api)
+  - [Running Cloudbreak API using Docker] (#runing-cloudbreak-api-using-docker)
    - [Database] (#database)
    - [Cloudbreak REST API] (#cloudbreak-rest-api)
+  - [Running Cloudbreak API on the host] (#runing-cloudbreak-api-on-the-host)
+  - [Configuring Cloudbreak] (#configuring-cloudbreak)
    - [AWS Configuration] (#aws-configuration)
     - [Cloudbreak deployer AWS configuration] (#cloudbreak-deployer-aws-configuration)
     - [Cloudbreak user AWS configuration] (#cloudbreak-user-aws-configuration)
@@ -49,7 +51,7 @@ Supports different Hadoop cluster blueprints. Hostgroups defined in blueprints c
 ###Flexible
 You have the option to choose your favorite cloud provider and different pricing models. The API translated the calls towards different cloud vendors - you develop and use one common API, no need to rewrite you code when changing between cloud providers.
 
-##Running the Cloudbreak API
+##Running Cloudbreak API using Docker
 
 ###Database
 The only dependency that Cloudbreak needs is a postgresql database. The easiest way to spin up a postgresql is of course Docker. Run it first with this line:
@@ -64,10 +66,10 @@ VERSION=0.1-20140623140412
 docker run -d --name cloudbreak -e "VERSION=$VERSION" -e "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" -e "AWS_SECRET_KEY=$AWS_SECRET_KEY" -e "HBM2DDL_STRATEGY=create" --link postgresql:db -p 8080:8080 dockerfile/java bash -c 'curl -o /tmp/cloudbreak-$VERSION.jar https://s3-eu-west-1.amazonaws.com/seq-repo/releases/com/sequenceiq/cloudbreak/$VERSION/cloudbreak-$VERSION.jar && java -jar /tmp/cloudbreak-$VERSION.jar'
 ```
 
-### Running the cloudbreak without docker
+###Running Cloudbreak API on the host
 
-If you'd like to run the API outside of docker (e.g.: locally) you can find a convenience shell script to help you.
-After building the application do the following (from the project root ...)
+If you'd like to run Cloudbreak outside of a Docker container on the host you can use the following shell script to help.
+After building the application please run the following script from the project root:
 ```
 ./run_cloudbreak.sh <db-user> <db-pass> <db-host> <db-port> <host-address>
 ```
