@@ -105,6 +105,7 @@ dependencies {
     compile 'org.springframework.security:spring-security-config:3.2.3.RELEASE'
     compile 'org.springframework.security:spring-security-web:3.2.3.RELEASE'
     compile 'org.springframework:spring-messaging:4.0.3.RELEASE'
+    compile 'org.projectreactor:reactor-spring:1.0.1.RELEASE'
     compile 'org.postgresql:postgresql:9.3-1101-jdbc41'
     compile ('com.amazonaws:aws-java-sdk:1.7.8.1') {
         exclude group: 'commons-logging'

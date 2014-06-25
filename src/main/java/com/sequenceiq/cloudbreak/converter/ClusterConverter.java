@@ -30,7 +30,7 @@ public class ClusterConverter {
         try {
             cluster.setBlueprint(blueprintRepository.findOne(clusterRequest.getBlueprintId()));
         } catch (AccessDeniedException e) {
-            throw new AccessDeniedException(String.format("Access to blueprint '%s' is denied or blueprint does not exist.", clusterRequest.getBlueprintId()));
+            throw new AccessDeniedException(String.format("Access to blueprint '%s' is denied or blueprint doesn't exist.", clusterRequest.getBlueprintId()), e);
         }
         cluster.setName(clusterRequest.getClusterName());
         cluster.setStatus(Status.REQUESTED);

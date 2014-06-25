@@ -51,7 +51,7 @@ public class UptimeNotifier {
             }
         }
         LOGGER.debug("uptimes: " + uptimes);
-        if (uptimes.size() > 0) {
+        if (!uptimes.isEmpty()) {
             for (Map.Entry<String, List<UptimeMessage>> longListEntry : uptimes.entrySet()) {
                 websocketService.sendToTopicUser(longListEntry.getKey(), WebsocketEndPoint.UPTIME, longListEntry.getValue());
             }

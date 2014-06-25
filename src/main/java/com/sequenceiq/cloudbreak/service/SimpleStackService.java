@@ -6,6 +6,8 @@ import java.util.Set;
 
 import javax.annotation.Resource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +25,8 @@ import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 
 @Service
 public class SimpleStackService implements StackService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleStackService.class);
 
     @Autowired
     private StackConverter stackConverter;
@@ -60,6 +64,12 @@ public class SimpleStackService implements StackService {
 
     @Override
     public IdJson create(User user, StackJson stackRequest) {
+        LOGGER.info("Stack creation requested. [Platform: {}, CredentialId: {}, Name: {}, Node count: {}, TemplateId: {}]",
+                stackRequest.getCloudPlatform().name(),
+                stackRequest.getCredentialId(),
+                stackRequest.getName(),
+                stackRequest.getNodeCount(),
+                stackRequest.getTemplateId());
         Stack stack = stackConverter.convert(stackRequest);
         Template template = templateRepository.findOne(stackRequest.getTemplateId());
         stack.setUser(user);

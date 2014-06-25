@@ -16,19 +16,8 @@ public class WebsocketService {
     @Autowired
     private SimpMessageSendingOperations messageSendingOperations;
 
-    public void sendToTopic(String destinationSuffix, Object message) {
-        LOGGER.info("Sending message {} to {}/{}", message, destinationSuffix);
-        messageSendingOperations.convertAndSend(String.format("/%s/%s", "topic", destinationSuffix), message);
-    }
-
     public void sendToTopicUser(String userEmail, WebsocketEndPoint websocketEndPoint, Object message) {
-        LOGGER.info("Sending message {} to {}/{}", message, websocketEndPoint.getValue());
+        LOGGER.info("Sending message {} to {}{}", message, "topic", websocketEndPoint.getValue());
         messageSendingOperations.convertAndSendToUser(userEmail, String.format("/%s/%s", "topic", websocketEndPoint.getValue()), message);
     }
-
-    public void send(String destinationPrefix, String destinationSuffix, Object message) {
-        LOGGER.info("Sending message {} to {}/{}", message, destinationPrefix, destinationSuffix);
-        messageSendingOperations.convertAndSend(String.format("%s/%s", destinationPrefix, destinationSuffix), message);
-    }
-
 }
