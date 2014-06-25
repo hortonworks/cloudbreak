@@ -104,8 +104,8 @@ public class AwsProvisionService implements ProvisionService {
             stackResult = client.describeStacks(stackRequest);
         } catch (AmazonServiceException e) {
             if (CF_SERVICE_NAME.equals(e.getServiceName())
-                    && e.getErrorMessage().equals(String.format("Stack:%s does not exist", stack.getCfStackName()))) {
-                LOGGER.error("Amazon CloudFormation stack {} does not exist. Returning null in describeStack.", stack.getCfStackName());
+                    && e.getErrorMessage().equals(String.format("Stack:%s doesn't exist", stack.getCfStackName()))) {
+                LOGGER.error("Amazon CloudFormation stack {} doesn't exist. Returning null in describeStack.", stack.getCfStackName());
                 stackResult = new DescribeStacksResult();
             } else {
                 throw e;
@@ -134,8 +134,8 @@ public class AwsProvisionService implements ProvisionService {
             resourcesResult = client.describeStackResources(resourcesRequest);
         } catch (AmazonServiceException e) {
             if (CF_SERVICE_NAME.equals(e.getServiceName())
-                    && e.getErrorMessage().equals(String.format("Stack:%s does not exist", stack.getCfStackName()))) {
-                LOGGER.error("Amazon CloudFormation stack {} does not exist. Returning null in describeStack.", stack.getCfStackName());
+                    && e.getErrorMessage().equals(String.format("Stack:%s doesn't exist", stack.getCfStackName()))) {
+                LOGGER.error("Amazon CloudFormation stack {} doesn't exist. Returning null in describeStack.", stack.getCfStackName());
                 stackResult = new DescribeStacksResult();
             } else {
                 throw e;
