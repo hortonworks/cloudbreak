@@ -14,7 +14,7 @@ import com.amazonaws.services.ec2.model.InstanceType;
 
 @Entity
 @Table(name = "AwsTemplate", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "awsTemplateawsTemplateOwner", "name" })
+        @UniqueConstraint(columnNames = { "awsTemplate_awsTemplateOwner", "name" })
 })
 public class AwsTemplate extends Template implements ProvisionEntity {
 
@@ -30,7 +30,7 @@ public class AwsTemplate extends Template implements ProvisionEntity {
     private String sshLocation;
 
     @ManyToOne
-    @JoinColumn(name = "awsTemplateawsTemplateOwner")
+    @JoinColumn(name = "awsTemplate_awsTemplateOwner")
     private User awsTemplateOwner;
 
     public AwsTemplate() {

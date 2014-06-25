@@ -14,7 +14,7 @@ import javax.persistence.UniqueConstraint;
 
 @Entity
 @Table(name = "AwsTemplate", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "azureTemplateazureTemplateOwner", "name" })
+        @UniqueConstraint(columnNames = { "azureTemplate_azureTemplateOwner", "name" })
 })
 public class AzureTemplate extends Template implements ProvisionEntity {
 
@@ -35,7 +35,7 @@ public class AzureTemplate extends Template implements ProvisionEntity {
     private Set<Port> ports = new HashSet<>();
 
     @ManyToOne
-    @JoinColumn(name = "azureTemplateazureTemplateOwner")
+    @JoinColumn(name = "azureTemplate_azureTemplateOwner")
     private User azureTemplateOwner;
 
     public AzureTemplate() {

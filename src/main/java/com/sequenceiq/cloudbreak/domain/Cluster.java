@@ -11,7 +11,7 @@ import javax.persistence.UniqueConstraint;
 
 @Entity
 @Table(name = "Cluster", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "clusteruser", "name" })
+        @UniqueConstraint(columnNames = { "cluster_user", "name" })
 })
 public class Cluster {
 
@@ -23,7 +23,7 @@ public class Cluster {
     private Blueprint blueprint;
 
     @ManyToOne
-    @JoinColumn(name = "clusteruser")
+    @JoinColumn(name = "cluster_user")
     private User user;
 
     @Column(nullable = false)
