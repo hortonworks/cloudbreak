@@ -7,8 +7,6 @@ public enum WebsocketEndPoint {
     BLUEPRINT("/blueprint"),
     CREDENTIAL("/credential");
 
-
-
     private final String value;
 
     private WebsocketEndPoint(String value) {
