@@ -77,9 +77,9 @@ After building the application _(./gradlew clean build)_ please run the followin
 ```
 The arguments are as follows:
 
-`db-user` - your datbase user
+`db-user` - your database user
 
-`db-pass` - your password to the database
+`db-pass` - your password for the database
 
 `db-host` - the address of the machine hosting your database
 
@@ -91,7 +91,7 @@ The arguments are as follows:
 ##Configuration
 
 ###Install and configure ngrok
-On OSX you can do the following:
+Cloudbreak uses SNS to receive notifications. On OSX you can do the following:
 
 ```
 brew update && brew install ngrok
