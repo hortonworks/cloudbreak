@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.security.CurrentUser;
 import com.sequenceiq.cloudbreak.service.AmbariClusterService;
 
 @Controller
-@RequestMapping("/stack/{stackId}/cluster")
+@RequestMapping("/stacks/{stackId}/cluster")
 public class ClusterController {
 
     @Autowired

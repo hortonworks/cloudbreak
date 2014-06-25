@@ -31,7 +31,7 @@ import com.sequenceiq.cloudbreak.service.CredentialService;
 import com.sequenceiq.cloudbreak.service.azure.AzureCredentialService;
 
 @Controller
-@RequestMapping("credential")
+@RequestMapping("credentials")
 public class CredentialController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialController.class);

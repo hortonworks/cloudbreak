@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.security.CurrentUser;
 import com.sequenceiq.cloudbreak.service.BlueprintService;
 
 @Controller
-@RequestMapping("blueprint")
+@RequestMapping("blueprints")
 public class BlueprintController {
 
     @Autowired
