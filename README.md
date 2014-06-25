@@ -8,10 +8,10 @@ cloudbreak
 http://docs.cloudbreak.apiary.io/
 
 ## Table of Contents
-  - Overview [#overview]
-  - Benefits [#benefits] 
-   - Secure [#secure]
-  - Running the Cloudbreak API
+  - [Overview] (#overview)
+  - [Benefits] (#benefits) 
+   - [Secure] (#secure)
+  - [Running the Cloudbreak API](#runing-the-cloudbreak-api)
 
 ##Overview
 
