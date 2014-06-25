@@ -145,7 +145,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 method: 'GET',
                 dataType: 'json',
                 withCredentials: true,
-                url:  $rootScope.apiUrl + "/credential",
+                url:  $rootScope.apiUrl + "/credentials",
                 headers: {
                     'Authorization': 'Basic ' + $rootScope.basic_auth,
                     'Content-Type': 'application/json'
@@ -162,7 +162,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 method: 'DELETE',
                 dataType: 'json',
                 withCredentials: true,
-                url:  $rootScope.apiUrl + "/credential/" +id,
+                url:  $rootScope.apiUrl + "/credentials/" +id,
                 headers: {
                     'Authorization': 'Basic ' + $rootScope.basic_auth,
                     'Content-Type': 'application/json'
@@ -182,7 +182,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 method: 'GET',
                 dataType: 'json',
                 withCredentials: true,
-                url:  $rootScope.apiUrl + "/credential/" + id,
+                url:  $rootScope.apiUrl + "/credentials/" + id,
                 headers: {
                     'Authorization': 'Basic ' + $rootScope.basic_auth,
                     'Content-Type': 'application/json'
@@ -201,7 +201,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 method: 'GET',
                 dataType: 'json',
                 withCredentials: true,
-                url:  $rootScope.apiUrl + "/stack",
+                url:  $rootScope.apiUrl + "/stacks",
                 headers: {
                     'Authorization': 'Basic ' + $rootScope.basic_auth,
                     'Content-Type': 'application/json'
@@ -218,7 +218,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 method: 'DELETE',
                 dataType: 'json',
                 withCredentials: true,
-                url:  $rootScope.apiUrl + "/stack/" +id,
+                url:  $rootScope.apiUrl + "/stacks/" +id,
                 headers: {
                     'Authorization': 'Basic ' + $rootScope.basic_auth,
                     'Content-Type': 'application/json'
@@ -236,7 +236,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 method: 'GET',
                 dataType: 'json',
                 withCredentials: true,
-                url:  $rootScope.apiUrl + "/template",
+                url:  $rootScope.apiUrl + "/templates",
                 headers: {
                     'Authorization': 'Basic ' + $rootScope.basic_auth,
                     'Content-Type': 'application/json'
@@ -254,7 +254,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 method: 'GET',
                 dataType: 'json',
                 withCredentials: true,
-                url:  $rootScope.apiUrl + "/template/" + id,
+                url:  $rootScope.apiUrl + "/templates/" + id,
                 headers: {
                     'Authorization': 'Basic ' + $rootScope.basic_auth,
                     'Content-Type': 'application/json'
@@ -272,7 +272,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 method: 'DELETE',
                 dataType: 'json',
                 withCredentials: true,
-                url:  $rootScope.apiUrl + "/template/" + id,
+                url:  $rootScope.apiUrl + "/templates/" + id,
                 headers: {
                     'Authorization': 'Basic ' + $rootScope.basic_auth,
                     'Content-Type': 'application/json'
@@ -290,7 +290,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 method: 'GET',
                 dataType: 'json',
                 withCredentials: true,
-                url:  $rootScope.apiUrl + "/blueprint",
+                url:  $rootScope.apiUrl + "/blueprints",
                 headers: {
                     'Authorization': 'Basic ' + $rootScope.basic_auth,
                     'Content-Type': 'application/json'
@@ -308,7 +308,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 method: 'GET',
                 dataType: 'json',
                 withCredentials: true,
-                url:  $rootScope.apiUrl + "/blueprint/" +id,
+                url:  $rootScope.apiUrl + "/blueprints/" +id,
                 headers: {
                     'Authorization': 'Basic ' + $rootScope.basic_auth,
                     'Content-Type': 'application/json'
@@ -326,7 +326,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 method: 'DELETE',
                 dataType: 'json',
                 withCredentials: true,
-                url:  $rootScope.apiUrl + "/blueprint/" +id,
+                url:  $rootScope.apiUrl + "/blueprints/" +id,
                 headers: {
                     'Authorization': 'Basic ' + $rootScope.basic_auth,
                     'Content-Type': 'application/json'
@@ -395,7 +395,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 method: 'POST',
                 dataType: 'json',
                 withCredentials: true,
-                url:  $rootScope.apiUrl + "/stack",
+                url:  $rootScope.apiUrl + "/stacks",
                 headers: {
                     'Authorization': 'Basic ' + $rootScope.basic_auth
                 },
@@ -427,7 +427,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     method: 'POST',
                     dataType: 'json',
                     withCredentials: true,
-                    url:  $rootScope.apiUrl + "/stack/" + data + "/cluster",
+                    url:  $rootScope.apiUrl + "/stacks/" + data + "/cluster",
                     headers: {
                         'Authorization': 'Basic ' + $rootScope.basic_auth
                     },
@@ -455,7 +455,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 method: 'POST',
                 dataType: 'json',
                 withCredentials: true,
-                url:  $rootScope.apiUrl + "/blueprint",
+                url:  $rootScope.apiUrl + "/blueprints",
                 headers: {
                     'Authorization': 'Basic ' + $rootScope.basic_auth
                 },
@@ -484,7 +484,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 method: 'POST',
                 dataType: 'json',
                 withCredentials: true,
-                url:  $rootScope.apiUrl + "/template",
+                url:  $rootScope.apiUrl + "/templates",
                 headers: {
                     'Authorization': 'Basic ' + $rootScope.basic_auth
                 },
@@ -519,7 +519,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 method: 'POST',
                 dataType: 'json',
                 withCredentials: true,
-                url:  $rootScope.apiUrl + "/template",
+                url:  $rootScope.apiUrl + "/templates",
                 headers: {
                     'Authorization': 'Basic ' + $rootScope.basic_auth
                 },
@@ -563,7 +563,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 method: 'POST',
                 dataType: 'json',
                 withCredentials: true,
-                url:  $rootScope.apiUrl + "/credential",
+                url:  $rootScope.apiUrl + "/credentials",
                 headers: {
                     'Authorization': 'Basic ' + $rootScope.basic_auth
                 },
@@ -594,7 +594,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 method: 'POST',
                 dataType: 'json',
                 withCredentials: true,
-                url:  $rootScope.apiUrl + "/credential",
+                url:  $rootScope.apiUrl + "/credentials",
                 headers: {
                     'Authorization': 'Basic ' + $rootScope.basic_auth
                 },
@@ -635,7 +635,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 method: 'GET',
                 dataType: 'json',
                 withCredentials: true,
-                url:  $rootScope.apiUrl + "/credential/certificate/" + credentialId,
+                url:  $rootScope.apiUrl + "/credentials/certificate/" + credentialId,
                 headers: {
                     'Authorization': 'Basic ' + $rootScope.basic_auth,
                     'Content-Type': 'application/json'
