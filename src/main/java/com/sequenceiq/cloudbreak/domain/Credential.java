@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.domain;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -20,9 +19,6 @@ public abstract class Credential {
     @Enumerated(EnumType.STRING)
     private CloudPlatform cloudPlatform;
 
-    @Column(unique = true, nullable = false)
-    private String name;
-
     private String description;
 
     public Credential() {
@@ -35,14 +31,6 @@ public abstract class Credential {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public Long getId() {
@@ -64,5 +52,7 @@ public abstract class Credential {
     public abstract CloudPlatform cloudPlatform();
 
     public abstract User getOwner();
+
+    public abstract String getCredentialName();
 
 }
