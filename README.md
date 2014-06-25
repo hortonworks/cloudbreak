@@ -69,8 +69,9 @@ docker run -d --name cloudbreak -e "VERSION=$VERSION" -e "AWS_ACCESS_KEY_ID=$AWS
 
 ##Running Cloudbreak API on the host
 
-If you'd like to run Cloudbreak outside of a Docker container on the host you can use the following shell script to help.
-After building the application please run the following script from the project root:
+If you'd like to run Cloudbreak outside of a Docker container - directly on the host - we provide you a shell script.
+
+After building the application _(./gradlew clean build)_ please run the following script from the project root:
 ```
 ./run_cloudbreak.sh <db-user> <db-pass> <db-host> <db-port> <host-address>
 ```
