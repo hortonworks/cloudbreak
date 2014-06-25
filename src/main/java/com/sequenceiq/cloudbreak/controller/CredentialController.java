@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.controller;
 
 import java.io.File;
 import java.nio.file.Files;
-import java.util.HashSet;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
@@ -55,14 +54,7 @@ public class CredentialController {
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<Set<CredentialJson>> listCredentials(@CurrentUser User user) {
-        Set<CredentialJson> credentials = new HashSet<>();
-        try {
-            Set<CredentialJson> credentialSet = credentialService.getAll(userRepository.findOneWithLists(user.getId()));
-            credentials.addAll(credentialSet);
-        } catch (NotFoundException e) {
-            LOGGER.error(e.getMessage(), e);
-        }
-        return new ResponseEntity<>(credentials, HttpStatus.OK);
+        return new ResponseEntity<>(credentialService.getAll(userRepository.findOneWithLists(user.getId())), HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/{credentialId}")
