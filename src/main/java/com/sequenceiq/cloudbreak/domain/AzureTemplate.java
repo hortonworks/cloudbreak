@@ -14,7 +14,7 @@ import javax.persistence.UniqueConstraint;
 
 @Entity
 @Table(name = "AwsTemplate", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"azureTemplateazureTemplateOwner", "name"})
+        @UniqueConstraint(columnNames = { "azureTemplateazureTemplateOwner", "name" })
 })
 public class AzureTemplate extends Template implements ProvisionEntity {
 

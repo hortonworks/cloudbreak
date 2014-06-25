@@ -11,7 +11,7 @@ import javax.persistence.UniqueConstraint;
 
 @Entity
 @Table(name = "Cluster", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"clusteruser", "name"})
+        @UniqueConstraint(columnNames = { "clusteruser", "name" })
 })
 public class Cluster {
 

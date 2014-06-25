@@ -14,7 +14,7 @@ import com.amazonaws.services.ec2.model.InstanceType;
 
 @Entity
 @Table(name = "AwsTemplate", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"awsTemplateawsTemplateOwner", "name"})
+        @UniqueConstraint(columnNames = { "awsTemplateawsTemplateOwner", "name" })
 })
 public class AwsTemplate extends Template implements ProvisionEntity {
 

@@ -13,7 +13,7 @@ import javax.persistence.UniqueConstraint;
 
 @Entity
 @Table(name = "Blueprint", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"blueprintuser", "name"})
+        @UniqueConstraint(columnNames = { "blueprintuser", "name" })
 })
 public class Blueprint implements ProvisionEntity {
 
