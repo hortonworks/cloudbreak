@@ -654,16 +654,20 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             var socket = new SockJS(url + '/notification');
             stompClient = Stomp.over(socket);
             stompClient.connect({}, function(frame) {
-                stompClient.subscribe('/topic/stack', function(stackInfo){
+                self.username = localStorage.activeUser;
+                stompClient.subscribe('/user/topic/stack', function(stackInfo){
                     $scope.getStacks();
                     logStackInfo(JSON.parse(stackInfo.body));
                 });
-                stompClient.subscribe('/topic/cluster', function(clusterInfo){
+                stompClient.subscribe('/user/topic/cluster',  function(clusterInfo){
                     $scope.getStacks();
                     logClusterInfo(JSON.parse(clusterInfo.body));
                 });
-                stompClient.subscribe('/topic/uptime', function(timeInfo){
+                stompClient.subscribe('/user/topic/uptime', function(timeInfo){
                     $scope.updateTimeInfo(timeInfo);
+                });
+                stompClient.subscribe('/user/topic/blueprint', function(timeInfo){
+                    $scope.getBluePrints();
                 });
             });
         }
