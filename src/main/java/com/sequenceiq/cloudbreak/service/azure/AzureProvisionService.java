@@ -110,7 +110,7 @@ public class AzureProvisionService implements ProvisionService {
         Stack updatedStack = stackRepository.findById(id);
         updatedStack.setStatus(status);
         stackRepository.save(updatedStack);
-        websocketService.sendToTopicUser(updatedStack.getUser().getId(), WebsocketEndPoint.STACK,
+        websocketService.sendToTopicUser(updatedStack.getUser().getEmail(), WebsocketEndPoint.STACK,
                 new StatusMessage(updatedStack.getId(), updatedStack.getName(), status.name()));
     }
 

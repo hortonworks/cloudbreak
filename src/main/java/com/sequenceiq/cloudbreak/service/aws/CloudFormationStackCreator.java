@@ -48,7 +48,7 @@ public class CloudFormationStackCreator {
             Stack currentStack = stackRepository.findById(stack.getId());
             if (currentStack.getStatus().equals(Status.REQUESTED)) {
                 currentStack = stackUpdater.updateStackStatus(stack.getId(), Status.CREATE_IN_PROGRESS);
-                websocketService.sendToTopicUser(stack.getUser().getId(), WebsocketEndPoint.STACK,
+                websocketService.sendToTopicUser(stack.getUser().getEmail(), WebsocketEndPoint.STACK,
                         new StatusMessage(stack.getId(), currentStack.getName(), currentStack.getStatus().name()));
                 AwsTemplate awsTemplate = (AwsTemplate) currentStack.getTemplate();
                 AmazonCloudFormationClient client = awsStackUtil.createCloudFormationClient(awsTemplate.getRegion(), awsCredential);

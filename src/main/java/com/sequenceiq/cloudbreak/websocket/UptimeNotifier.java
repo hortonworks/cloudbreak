@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.repository.UserRepository;
 import com.sequenceiq.cloudbreak.websocket.message.UptimeMessage;
 
 @Component
@@ -32,6 +33,9 @@ public class UptimeNotifier {
 
     @Autowired
     private StackRepository stackRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Scheduled(fixedDelay = 60000)
     public void sendUptime() {
@@ -53,7 +57,7 @@ public class UptimeNotifier {
         LOGGER.debug("uptimes: " + uptimes);
         if (uptimes.size() > 0) {
             for (Map.Entry<Long, List<UptimeMessage>> longListEntry : uptimes.entrySet()) {
-                websocketService.sendToTopicUser(longListEntry.getKey(), WebsocketEndPoint.UPTIME, longListEntry.getValue());
+                websocketService.sendToTopicUser(userRepository.findOne(longListEntry.getKey()).getEmail(), WebsocketEndPoint.UPTIME, longListEntry.getValue());
             }
         }
     }
