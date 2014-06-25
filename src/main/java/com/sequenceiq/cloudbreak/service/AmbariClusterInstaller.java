@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service;
 
-import groovyx.net.http.HttpResponseException;
-
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -20,9 +18,12 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
+import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
+
+import groovyx.net.http.HttpResponseException;
 
 @Service
 public class AmbariClusterInstaller {
@@ -72,13 +73,13 @@ public class AmbariClusterInstaller {
                     // TODO: timeout
                 }
                 if (installProgress.doubleValue() == COMPLETED) {
-                    websocketService.sendToTopic(cluster.getUser().getId(), "/cluster",
+                    websocketService.sendToTopicUser(cluster.getUser().getId(), WebsocketEndPoint.CLUSTER,
                             new StatusMessage(cluster.getId(), cluster.getName(), Status.CREATE_COMPLETED.name()));
                     cluster.setStatus(Status.CREATE_COMPLETED);
                     cluster.setCreationFinished(new Date().getTime());
                     clusterRepository.save(cluster);
                 } else if (installProgress.doubleValue() == FAILED) {
-                    websocketService.sendToTopic(cluster.getUser().getId(), "/cluster",
+                    websocketService.sendToTopicUser(cluster.getUser().getId(), WebsocketEndPoint.CLUSTER,
                             new StatusMessage(cluster.getId(), cluster.getName(), Status.CREATE_FAILED.name()));
                     cluster.setStatus(Status.CREATE_FAILED);
                     cluster.setCreationFinished(new Date().getTime());

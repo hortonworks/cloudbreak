@@ -5,7 +5,8 @@ public enum WebsocketEndPoint {
     STACK("/stack"),
     UPTIME("/uptime"),
     BLUEPRINT("/blueprint"),
-    CREDENTIAL("/credential");
+    CREDENTIAL("/credential"),
+    CLUSTER("/cluster");
 
     private final String value;
 
