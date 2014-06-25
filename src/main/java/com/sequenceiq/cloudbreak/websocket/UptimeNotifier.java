@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.websocket.message.UptimeMessage;
@@ -52,7 +53,7 @@ public class UptimeNotifier {
         LOGGER.debug("uptimes: " + uptimes);
         if (uptimes.size() > 0) {
             for (Map.Entry<Long, List<UptimeMessage>> longListEntry : uptimes.entrySet()) {
-                websocketService.sendToTopicUser(longListEntry.getKey(), "/uptime", longListEntry.getValue());
+                websocketService.sendToTopicUser(longListEntry.getKey(), WebsocketEndPoint.UPTIME, longListEntry.getValue());
             }
         }
     }

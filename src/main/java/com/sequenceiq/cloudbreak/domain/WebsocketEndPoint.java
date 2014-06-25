@@ -1,0 +1,21 @@
+package com.sequenceiq.cloudbreak.domain;
+
+public enum WebsocketEndPoint {
+
+    STACK("/stack"),
+    UPTIME("/uptime"),
+    BLUEPRINT("/blueprint"),
+    CREDENTIAL("/credential");
+
+
+
+    private final String value;
+
+    private WebsocketEndPoint(String value) {
+        this.value = value;
+    }
+
+    public String getValue() {
+        return value;
+    }
+}
