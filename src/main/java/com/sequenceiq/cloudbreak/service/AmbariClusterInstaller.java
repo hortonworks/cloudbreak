@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service;
 
+import groovyx.net.http.HttpResponseException;
+
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -8,7 +10,6 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
@@ -22,8 +23,6 @@ import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
-
-import groovyx.net.http.HttpResponseException;
 
 @Service
 public class AmbariClusterInstaller {
@@ -42,51 +41,45 @@ public class AmbariClusterInstaller {
     @Autowired
     private ClusterRepository clusterRepository;
 
-    @Async
     public void installAmbariCluster(Stack stack) {
         try {
             Cluster cluster = stack.getCluster();
-            LOGGER.info("Trying to install Ambari cluster for stack '{}'", stack.getId());
-            if (stack.getCluster() != null && stack.getCluster().getStatus().equals(Status.REQUESTED)) {
-                LOGGER.info("Starting Ambari cluster installation for stack '{}' [Ambari server address: {}]", stack.getId(), stack.getAmbariIp());
-                cluster.setCreationStarted(new Date().getTime());
-                cluster = clusterRepository.save(cluster);
-                Blueprint blueprint = cluster.getBlueprint();
-                addBlueprint(stack.getAmbariIp(), blueprint);
-                AmbariClient ambariClient = new AmbariClient(stack.getAmbariIp(), AmbariClusterService.PORT);
-                ambariClient.createCluster(
-                        cluster.getName(),
-                        blueprint.getBlueprintName(),
-                        recommend(stack, ambariClient, blueprint.getBlueprintName())
-                        );
+            LOGGER.info("Starting Ambari cluster installation for stack '{}' [Ambari server address: {}]", stack.getId(), stack.getAmbariIp());
+            cluster.setCreationStarted(new Date().getTime());
+            cluster = clusterRepository.save(cluster);
+            Blueprint blueprint = cluster.getBlueprint();
+            addBlueprint(stack.getAmbariIp(), blueprint);
+            AmbariClient ambariClient = new AmbariClient(stack.getAmbariIp(), AmbariClusterService.PORT);
+            ambariClient.createCluster(
+                    cluster.getName(),
+                    blueprint.getBlueprintName(),
+                    recommend(stack, ambariClient, blueprint.getBlueprintName())
+                    );
 
-                BigDecimal installProgress = new BigDecimal(0);
-                while (installProgress.doubleValue() != COMPLETED && installProgress.doubleValue() != FAILED) {
-                    try {
-                        Thread.sleep(POLLING_INTERVAL);
-                    } catch (InterruptedException e) {
-                        LOGGER.info("Interrupted exception occured during polling.", e);
-                        Thread.currentThread().interrupt();
-                    }
-                    installProgress = ambariClient.getInstallProgress();
-                    LOGGER.info("Ambari Cluster installing. [Stack: '{}', Cluster: '{}', Progress: {}]", stack.getId(), cluster.getName(), installProgress);
-                    // TODO: timeout
+            BigDecimal installProgress = new BigDecimal(0);
+            while (installProgress.doubleValue() != COMPLETED && installProgress.doubleValue() != FAILED) {
+                try {
+                    Thread.sleep(POLLING_INTERVAL);
+                } catch (InterruptedException e) {
+                    LOGGER.info("Interrupted exception occured during polling.", e);
+                    Thread.currentThread().interrupt();
                 }
-                if (installProgress.doubleValue() == COMPLETED) {
-                    websocketService.sendToTopicUser(cluster.getUser().getEmail(), WebsocketEndPoint.CLUSTER,
-                            new StatusMessage(cluster.getId(), cluster.getName(), Status.CREATE_COMPLETED.name()));
-                    cluster.setStatus(Status.CREATE_COMPLETED);
-                    cluster.setCreationFinished(new Date().getTime());
-                    clusterRepository.save(cluster);
-                } else if (installProgress.doubleValue() == FAILED) {
-                    websocketService.sendToTopicUser(cluster.getUser().getEmail(), WebsocketEndPoint.CLUSTER,
-                            new StatusMessage(cluster.getId(), cluster.getName(), Status.CREATE_FAILED.name()));
-                    cluster.setStatus(Status.CREATE_FAILED);
-                    cluster.setCreationFinished(new Date().getTime());
-                    clusterRepository.save(cluster);
-                }
-            } else {
-                LOGGER.info("There were no cluster request to this stack, won't install cluster now. [stack: {}]", stack.getId());
+                installProgress = ambariClient.getInstallProgress();
+                LOGGER.info("Ambari Cluster installing. [Stack: '{}', Cluster: '{}', Progress: {}]", stack.getId(), cluster.getName(), installProgress);
+                // TODO: timeout
+            }
+            if (installProgress.doubleValue() == COMPLETED) {
+                websocketService.sendToTopicUser(cluster.getUser().getEmail(), WebsocketEndPoint.CLUSTER,
+                        new StatusMessage(cluster.getId(), cluster.getName(), Status.CREATE_COMPLETED.name()));
+                cluster.setStatus(Status.CREATE_COMPLETED);
+                cluster.setCreationFinished(new Date().getTime());
+                clusterRepository.save(cluster);
+            } else if (installProgress.doubleValue() == FAILED) {
+                websocketService.sendToTopicUser(cluster.getUser().getEmail(), WebsocketEndPoint.CLUSTER,
+                        new StatusMessage(cluster.getId(), cluster.getName(), Status.CREATE_FAILED.name()));
+                cluster.setStatus(Status.CREATE_FAILED);
+                cluster.setCreationFinished(new Date().getTime());
+                clusterRepository.save(cluster);
             }
 
         } catch (HttpResponseException e) {
@@ -118,7 +111,7 @@ public class AmbariClusterInstaller {
         return stringListMap;
     }
 
-    public void addBlueprint(String ambariIp, Blueprint blueprint) {
+    private void addBlueprint(String ambariIp, Blueprint blueprint) {
         AmbariClient ambariClient = new AmbariClient(ambariIp, AmbariClusterService.PORT);
         try {
             ambariClient.addBlueprint(blueprint.getBlueprintText());
@@ -133,5 +126,4 @@ public class AmbariClusterInstaller {
             }
         }
     }
-
 }

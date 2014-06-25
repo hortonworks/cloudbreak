@@ -60,7 +60,7 @@ public class CredentialController {
             Set<CredentialJson> credentialSet = credentialService.getAll(userRepository.findOneWithLists(user.getId()));
             credentials.addAll(credentialSet);
         } catch (NotFoundException e) {
-            LOGGER.info(e.getMessage());
+            LOGGER.error(e.getMessage(), e);
         }
         return new ResponseEntity<>(credentials, HttpStatus.OK);
     }
@@ -84,11 +84,9 @@ public class CredentialController {
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             throw new BadRequestException(
-                    String.format("Deletion of: %s was not success. Delete all resources before you delete the credential.", credentialId), e
-            );
+                    String.format("Deletion of: %s was not success. Delete all resources before you delete the credential.", credentialId), e);
         }
     }
-
 
     @RequestMapping(method = RequestMethod.GET, value = "/certificate/{credentialId}")
     @ResponseBody

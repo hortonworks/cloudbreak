@@ -6,17 +6,20 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import reactor.core.Reactor;
+import reactor.event.Event;
+
 import com.amazonaws.auth.BasicSessionCredentials;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.ec2.AmazonEC2Client;
+import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
-import com.sequenceiq.cloudbreak.service.AmbariClusterInstaller;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
@@ -35,7 +38,7 @@ public class AwsStackUtil {
     private WebsocketService websocketService;
 
     @Autowired
-    private AmbariClusterInstaller ambariClusterInstaller;
+    private Reactor reactor;
 
     public AmazonCloudFormationClient createCloudFormationClient(Regions regions, AwsCredential credential) {
         BasicSessionCredentials basicSessionCredentials = credentialsProvider
@@ -66,7 +69,8 @@ public class AwsStackUtil {
         stack = stackUpdater.updateStackStatus(stack.getId(), Status.CREATE_COMPLETED);
         websocketService.sendToTopicUser(stack.getUser().getEmail(), WebsocketEndPoint.STACK,
                 new StatusMessage(stack.getId(), stack.getName(), Status.CREATE_COMPLETED.name()));
-        ambariClusterInstaller.installAmbariCluster(stack);
+        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.AMBARI_STARTED_EVENT, stack.getId());
+        reactor.notify(ReactorConfig.AMBARI_STARTED_EVENT, Event.wrap(stack));
     }
 
     public String encode(String userData) {

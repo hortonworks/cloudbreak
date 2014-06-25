@@ -36,6 +36,7 @@ import com.amazonaws.services.ec2.model.RunInstancesRequest;
 import com.amazonaws.services.ec2.model.RunInstancesResult;
 import com.amazonaws.services.ec2.model.Tag;
 import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
@@ -57,7 +58,7 @@ public class Ec2InstanceRunner implements Consumer<Event<Stack>> {
     @Override
     public void accept(Event<Stack> event) {
         Stack stack = event.getData();
-        LOGGER.info("Accepted CF_STACK_COMPLETED event. Starting EC2 instances for stack '{}'", stack.getId());
+        LOGGER.info("Accepted {} event. Starting EC2 instances for stack '{}'", ReactorConfig.CF_STACK_COMPLETED_EVENT, stack.getId());
         try {
             AwsTemplate awsTemplate = (AwsTemplate) stack.getTemplate();
             AwsCredential awsCredential = (AwsCredential) stack.getCredential();
@@ -175,7 +176,7 @@ public class Ec2InstanceRunner implements Consumer<Event<Stack>> {
                     }
                 } catch (Exception e) {
                     // org.apache.http.conn.HttpHostConnectException
-                    LOGGER.info("Ambari unreachable. Trying again in next polling interval.");
+                    LOGGER.error("Ambari unreachable. Trying again in next polling interval.", e);
                 }
 
             }

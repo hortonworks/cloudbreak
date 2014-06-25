@@ -2,11 +2,17 @@ package com.sequenceiq.cloudbreak.service;
 
 import groovyx.net.http.HttpResponseException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import reactor.core.Reactor;
+import reactor.event.Event;
+
 import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
@@ -15,16 +21,18 @@ import com.sequenceiq.cloudbreak.controller.json.ClusterResponse;
 import com.sequenceiq.cloudbreak.converter.ClusterConverter;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.aws.AwsStackUtil;
 
 @Service
 public class AmbariClusterService {
 
     public static final String PORT = "8080";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AwsStackUtil.class);
 
     @Autowired
     private StackRepository stackRepository;
@@ -36,13 +44,14 @@ public class AmbariClusterService {
     private ClusterRepository clusterRepository;
 
     @Autowired
-    private AmbariClusterInstaller ambariClusterInstaller;
+    private RetryingStackUpdater stackUpdater;
 
     @Autowired
-    private RetryingStackUpdater stackUpdater;
+    private Reactor reactor;
 
     public void createCluster(User user, Long stackId, ClusterRequest clusterRequest) {
         Stack stack = stackRepository.findOne(stackId);
+        LOGGER.info("Cluster requested for stack '{}' [BlueprintId: {}]", stackId, clusterRequest.getBlueprintId());
         if (stack.getCluster() != null) {
             throw new BadRequestException(String.format("A cluster is already created on this stack! [stack: '%s', cluster: '%s']", stackId, stack.getCluster()
                     .getName()));
@@ -51,9 +60,8 @@ public class AmbariClusterService {
         cluster.setUser(user);
         cluster = clusterRepository.save(cluster);
         stack = stackUpdater.updateStackCluster(stack.getId(), cluster);
-        if (stack.getStatus().equals(Status.CREATE_COMPLETED)) {
-            ambariClusterInstaller.installAmbariCluster(stack);
-        }
+        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.CLUSTER_REQUESTED_EVENT, stack.getId());
+        reactor.notify(ReactorConfig.CLUSTER_REQUESTED_EVENT, Event.wrap(stack));
     }
 
     public ClusterResponse retrieveCluster(User user, Long stackId) {

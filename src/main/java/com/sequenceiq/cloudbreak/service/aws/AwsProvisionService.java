@@ -48,6 +48,7 @@ import com.sequenceiq.cloudbreak.service.ProvisionService;
 public class AwsProvisionService implements ProvisionService {
 
     public static final String INSTANCE_TAG_NAME = "Name";
+    private static final String CF_SERVICE_NAME = "AmazonCloudFormation";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsProvisionService.class);
 
@@ -102,7 +103,7 @@ public class AwsProvisionService implements ProvisionService {
             DescribeStacksRequest stackRequest = new DescribeStacksRequest().withStackName(stack.getCfStackName());
             stackResult = client.describeStacks(stackRequest);
         } catch (AmazonServiceException e) {
-            if ("AmazonCloudFormation".equals(e.getServiceName())
+            if (CF_SERVICE_NAME.equals(e.getServiceName())
                     && e.getErrorMessage().equals(String.format("Stack:%s does not exist", stack.getCfStackName()))) {
                 LOGGER.error("Amazon CloudFormation stack {} does not exist. Returning null in describeStack.", stack.getCfStackName());
                 stackResult = new DescribeStacksResult();
@@ -132,7 +133,7 @@ public class AwsProvisionService implements ProvisionService {
             DescribeStackResourcesRequest resourcesRequest = new DescribeStackResourcesRequest().withStackName(stack.getCfStackName());
             resourcesResult = client.describeStackResources(resourcesRequest);
         } catch (AmazonServiceException e) {
-            if ("AmazonCloudFormation".equals(e.getServiceName())
+            if (CF_SERVICE_NAME.equals(e.getServiceName())
                     && e.getErrorMessage().equals(String.format("Stack:%s does not exist", stack.getCfStackName()))) {
                 LOGGER.error("Amazon CloudFormation stack {} does not exist. Returning null in describeStack.", stack.getCfStackName());
                 stackResult = new DescribeStacksResult();

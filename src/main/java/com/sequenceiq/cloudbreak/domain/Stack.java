@@ -174,4 +174,12 @@ public class Stack implements ProvisionEntity {
         this.ambariIp = ambariIp;
     }
 
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
 }
