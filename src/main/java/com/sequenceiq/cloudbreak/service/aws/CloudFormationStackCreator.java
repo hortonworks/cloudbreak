@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 public class CloudFormationStackCreator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudFormationStackCreator.class);
+    private static final String ENDPOINT = "/stack";
 
     @Autowired
     private AwsStackUtil awsStackUtil;
@@ -47,7 +48,8 @@ public class CloudFormationStackCreator {
             Stack currentStack = stackRepository.findById(stack.getId());
             if (currentStack.getStatus().equals(Status.REQUESTED)) {
                 currentStack = stackUpdater.updateStackStatus(stack.getId(), Status.CREATE_IN_PROGRESS);
-                websocketService.send("/topic/stack", new StatusMessage(stack.getId(), currentStack.getName(), currentStack.getStatus().name()));
+                websocketService.sendToTopicUser(stack.getUser().getId(), ENDPOINT,
+                        new StatusMessage(stack.getId(), currentStack.getName(), currentStack.getStatus().name()));
                 AwsTemplate awsTemplate = (AwsTemplate) currentStack.getTemplate();
                 AmazonCloudFormationClient client = awsStackUtil.createCloudFormationClient(awsTemplate.getRegion(), awsCredential);
                 createStack(currentStack, awsTemplate, notificationTopic, client);

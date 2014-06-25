@@ -19,6 +19,8 @@ import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 @Service
 public class BlueprintService {
 
+    private static final String ENDPOINT = "/blueprint";
+
     @Autowired
     private BlueprintRepository blueprintRepository;
 
@@ -32,7 +34,7 @@ public class BlueprintService {
         Blueprint blueprint = blueprintConverter.convert(blueprintJson);
         blueprint.setUser(user);
         blueprintRepository.save(blueprint);
-        websocketService.send("/topic/blueprint", new StatusMessage(blueprint.getId(), blueprint.getName(), Status.CREATE_COMPLETED.name()));
+        websocketService.sendToTopicUser(user.getId(), ENDPOINT, new StatusMessage(blueprint.getId(), blueprint.getName(), Status.CREATE_COMPLETED.name()));
         return new IdJson(blueprint.getId());
     }
 
@@ -51,10 +53,11 @@ public class BlueprintService {
     public void delete(Long id) {
         Blueprint blueprint = blueprintRepository.findOne(id);
         if (blueprint == null) {
-            websocketService.send("/topic/blueprint", new StatusMessage(id, "null", Status.DELETE_FAILED.name()));
+            websocketService.sendToTopicUser(blueprint.getUser().getId(), ENDPOINT, new StatusMessage(id, "null", Status.DELETE_FAILED.name()));
             throw new NotFoundException(String.format("Blueprint '%s' not found.", id));
         }
         blueprintRepository.delete(blueprint);
-        websocketService.send("/topic/blueprint", new StatusMessage(blueprint.getId(), blueprint.getName(), Status.DELETE_COMPLETED.name()));
+        websocketService.sendToTopicUser(blueprint.getUser().getId(), ENDPOINT,
+                new StatusMessage(blueprint.getId(), blueprint.getName(), Status.DELETE_COMPLETED.name()));
     }
 }

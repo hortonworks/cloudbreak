@@ -56,13 +56,13 @@ public class AwsStackUtil {
 
     public void createFailed(Stack stack) {
         stack = stackUpdater.updateStackStatus(stack.getId(), Status.CREATE_FAILED);
-        websocketService.send("/topic/stack", new StatusMessage(stack.getId(), stack.getName(), Status.CREATE_FAILED.name()));
+        websocketService.sendToTopicUser(stack.getUser().getId(), "/stack", new StatusMessage(stack.getId(), stack.getName(), Status.CREATE_FAILED.name()));
     }
 
     public void createSuccess(Stack stack, String ambariIp) {
         stack = stackUpdater.updateAmbariIp(stack.getId(), ambariIp);
         stack = stackUpdater.updateStackStatus(stack.getId(), Status.CREATE_COMPLETED);
-        websocketService.send("/topic/stack", new StatusMessage(stack.getId(), stack.getName(), Status.CREATE_COMPLETED.name()));
+        websocketService.sendToTopicUser(stack.getUser().getId(), "/stack", new StatusMessage(stack.getId(), stack.getName(), Status.CREATE_COMPLETED.name()));
         ambariClusterInstaller.installAmbariCluster(stack);
     }
 
