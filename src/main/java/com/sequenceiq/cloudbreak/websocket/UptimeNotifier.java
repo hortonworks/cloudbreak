@@ -52,7 +52,7 @@ public class UptimeNotifier {
         LOGGER.debug("uptimes: " + uptimes);
         if (uptimes.size() > 0) {
             for (Map.Entry<Long, List<UptimeMessage>> longListEntry : uptimes.entrySet()) {
-                websocketService.sendToTopic(longListEntry.getKey(), "/uptime", longListEntry.getValue());
+                websocketService.sendToTopicUser(longListEntry.getKey(), "/uptime", longListEntry.getValue());
             }
         }
     }
