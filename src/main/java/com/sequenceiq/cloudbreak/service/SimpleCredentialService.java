@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.AwsCredentialRepository;
 import com.sequenceiq.cloudbreak.repository.AzureCredentialRepository;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
@@ -26,8 +27,6 @@ import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
 @Service
 public class SimpleCredentialService implements CredentialService {
-
-    public static final String ENDPOINT = "/topic/credential";
 
     @Autowired
     private CredentialRepository credentialRepository;
@@ -80,7 +79,8 @@ public class SimpleCredentialService implements CredentialService {
         case AZURE:
             return saveAzureCredential(user, credentialJson);
         default:
-            websocketService.send(ENDPOINT, new StatusMessage(-1L, credentialJson.getName(), Status.CREATE_FAILED.name()));
+            websocketService.sendToTopicUser(user.getEmail(), WebsocketEndPoint.CREDENTIAL,
+                    new StatusMessage(-1L, credentialJson.getName(), Status.CREATE_FAILED.name()));
             throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", credentialJson.getCloudPlatform()));
         }
     }
@@ -88,18 +88,21 @@ public class SimpleCredentialService implements CredentialService {
     public void delete(Long id) {
         Credential credential = credentialRepository.findOne(id);
         if (credential == null) {
-            websocketService.send(ENDPOINT, new StatusMessage(id, "null", Status.DELETE_FAILED.name()));
+            websocketService.sendToTopicUser(credential.getOwner().getEmail(), WebsocketEndPoint.CREDENTIAL,
+                    new StatusMessage(id, "null", Status.DELETE_FAILED.name()));
             throw new NotFoundException(String.format("Credential '%s' not found.", id));
         }
         credentialRepository.delete(credential);
-        websocketService.send(ENDPOINT, new StatusMessage(credential.getId(), credential.getName(), Status.DELETE_COMPLETED.name()));
+        websocketService.sendToTopicUser(credential.getOwner().getEmail(), WebsocketEndPoint.CREDENTIAL,
+                new StatusMessage(credential.getId(), credential.getName(), Status.DELETE_COMPLETED.name()));
     }
 
     private IdJson saveAwsCredential(User user, CredentialJson credentialJson) {
         AwsCredential awsCredential = awsCredentialConverter.convert(credentialJson);
         awsCredential.setAwsCredentialOwner(user);
         awsCredentialRepository.save(awsCredential);
-        websocketService.send(ENDPOINT, new StatusMessage(awsCredential.getId(), awsCredential.getName(), Status.CREATE_COMPLETED.name()));
+        websocketService.sendToTopicUser(user.getEmail(), WebsocketEndPoint.CREDENTIAL,
+                new StatusMessage(awsCredential.getId(), awsCredential.getName(), Status.CREATE_COMPLETED.name()));
         return new IdJson(awsCredential.getId());
     }
 
@@ -108,7 +111,8 @@ public class SimpleCredentialService implements CredentialService {
         azureCredential.setAzureCredentialOwner(user);
         azureCredentialRepository.save(azureCredential);
         azureCredentialService.generateCertificate(azureCredential, user);
-        websocketService.send(ENDPOINT, new StatusMessage(azureCredential.getId(), azureCredential.getName(), Status.CREATE_COMPLETED.name()));
+        websocketService.sendToTopicUser(user.getEmail(), WebsocketEndPoint.CREDENTIAL,
+                new StatusMessage(azureCredential.getId(), azureCredential.getName(), Status.CREATE_COMPLETED.name()));
         return new IdJson(azureCredential.getId());
     }
 

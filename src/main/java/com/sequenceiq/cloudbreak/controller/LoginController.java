@@ -17,7 +17,7 @@ public class LoginController {
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<Long> retrieveUser(@CurrentUser User user) {
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(user.getId(), HttpStatus.OK);
     }
 
 }

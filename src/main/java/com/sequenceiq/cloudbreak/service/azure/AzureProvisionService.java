@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackDescription;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.ProvisionService;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
@@ -109,7 +110,8 @@ public class AzureProvisionService implements ProvisionService {
         Stack updatedStack = stackRepository.findById(id);
         updatedStack.setStatus(status);
         stackRepository.save(updatedStack);
-        websocketService.send("/topic/stack", new StatusMessage(updatedStack.getId(), updatedStack.getName(), status.name()));
+        websocketService.sendToTopicUser(updatedStack.getUser().getEmail(), WebsocketEndPoint.STACK,
+                new StatusMessage(updatedStack.getId(), updatedStack.getName(), status.name()));
     }
 
 

@@ -14,6 +14,7 @@ import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
+import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.AmbariClusterInstaller;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
@@ -56,13 +57,15 @@ public class AwsStackUtil {
 
     public void createFailed(Stack stack) {
         stack = stackUpdater.updateStackStatus(stack.getId(), Status.CREATE_FAILED);
-        websocketService.send("/topic/stack", new StatusMessage(stack.getId(), stack.getName(), Status.CREATE_FAILED.name()));
+        websocketService.sendToTopicUser(stack.getUser().getEmail(), WebsocketEndPoint.STACK,
+                new StatusMessage(stack.getId(), stack.getName(), Status.CREATE_FAILED.name()));
     }
 
     public void createSuccess(Stack stack, String ambariIp) {
         stack = stackUpdater.updateAmbariIp(stack.getId(), ambariIp);
         stack = stackUpdater.updateStackStatus(stack.getId(), Status.CREATE_COMPLETED);
-        websocketService.send("/topic/stack", new StatusMessage(stack.getId(), stack.getName(), Status.CREATE_COMPLETED.name()));
+        websocketService.sendToTopicUser(stack.getUser().getEmail(), WebsocketEndPoint.STACK,
+                new StatusMessage(stack.getId(), stack.getName(), Status.CREATE_COMPLETED.name()));
         ambariClusterInstaller.installAmbariCluster(stack);
     }
 

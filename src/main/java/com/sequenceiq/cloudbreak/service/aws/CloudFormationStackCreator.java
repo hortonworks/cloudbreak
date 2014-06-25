@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.domain.CloudFormationTemplate;
 import com.sequenceiq.cloudbreak.domain.SnsTopic;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
+import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
@@ -47,7 +48,8 @@ public class CloudFormationStackCreator {
             Stack currentStack = stackRepository.findById(stack.getId());
             if (currentStack.getStatus().equals(Status.REQUESTED)) {
                 currentStack = stackUpdater.updateStackStatus(stack.getId(), Status.CREATE_IN_PROGRESS);
-                websocketService.send("/topic/stack", new StatusMessage(stack.getId(), currentStack.getName(), currentStack.getStatus().name()));
+                websocketService.sendToTopicUser(stack.getUser().getEmail(), WebsocketEndPoint.STACK,
+                        new StatusMessage(stack.getId(), currentStack.getName(), currentStack.getStatus().name()));
                 AwsTemplate awsTemplate = (AwsTemplate) currentStack.getTemplate();
                 AmazonCloudFormationClient client = awsStackUtil.createCloudFormationClient(awsTemplate.getRegion(), awsCredential);
                 createStack(currentStack, awsTemplate, notificationTopic, client);

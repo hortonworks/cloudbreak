@@ -2,7 +2,9 @@ package com.sequenceiq.cloudbreak.websocket;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.websocket.message.UptimeMessage;
@@ -32,19 +35,26 @@ public class UptimeNotifier {
 
     @Scheduled(fixedDelay = 60000)
     public void sendUptime() {
-        List<UptimeMessage> uptimes = new ArrayList<>();
+        Map<String, List<UptimeMessage>> uptimes = new HashMap<>();
         List<Cluster> clusters = (List<Cluster>) clusterRepository.findAll();
         long now = new Date().getTime();
         for (Cluster cluster : clusters) {
             Stack stack = stackRepository.findStackForCluster(cluster.getId());
             if (stack != null) {
                 Long uptime = cluster.getCreationFinished() == null ? 0L : now - cluster.getCreationFinished();
-                uptimes.add(new UptimeMessage(stack.getId(), uptime));
+                if (uptimes.containsKey(stack.getUser().getEmail())) {
+                    uptimes.get(stack.getUser().getEmail()).add(new UptimeMessage(stack.getId(), uptime));
+                } else {
+                    uptimes.put(stack.getUser().getEmail(), new ArrayList<UptimeMessage>());
+                    uptimes.get(stack.getUser().getEmail()).add(new UptimeMessage(stack.getId(), uptime));
+                }
             }
         }
         LOGGER.debug("uptimes: " + uptimes);
-        if (!uptimes.isEmpty()) {
-            websocketService.send("/topic/uptime", uptimes);
+        if (uptimes.size() > 0) {
+            for (Map.Entry<String, List<UptimeMessage>> longListEntry : uptimes.entrySet()) {
+                websocketService.sendToTopicUser(longListEntry.getKey(), WebsocketEndPoint.UPTIME, longListEntry.getValue());
+            }
         }
     }
 }
