@@ -9,7 +9,7 @@ http://docs.cloudbreak.apiary.io/
 
 ## Table of Contents
   - [Overview] (#overview)
-  - [Benefits] (#benefits) 
+  - [Benefits] (#benefits)
    - [Secure] (#secure)
    - [Elastic] (#elastic)
    - [Scalable] (#scalable)
@@ -21,11 +21,11 @@ http://docs.cloudbreak.apiary.io/
    - [AWS Configuration] (#aws-configuration)
     - [Cloudbreak deployer AWS configuration] (#cloudbreak-deployer-aws-configuration)
     - [Cloudbreak user AWS configuration] (#cloudbreak-user-aws-configuration)
-    
+
 ##Overview
 
 Cloudbreak is a RESTful application development platform with the goal of helping developers to build solutions for deploying Hadoop YARN clusters in different environments. Once it is deployed in your favorite servlet container it exposes a REST API allowing to span up Hadoop clusters of arbitary sizes and cloud providers. Provisioning Hadoop has never been easier.
-Cloudbreak is built on the foundation of cloud providers API (Amazon AWS, Microsoft Azure), Apache Ambari, Docker lightweight containers, Serf and dnsmasq. 
+Cloudbreak is built on the foundation of cloud providers API (Amazon AWS, Microsoft Azure), Apache Ambari, Docker lightweight containers, Serf and dnsmasq.
 
 
 ##Benefits
@@ -36,11 +36,11 @@ If the cluster is launched in a VPC network, the framework gonfigure firewall se
 Cloudbreak does not store or manages your cloud credentials - it is the end user's responsability to link Cloudbreak with her/his cloud account. We provide utilities to ease this process (IAM on Amazon, certificates on Azure).
 
 ###Elastic
-Using Cloudbreak API you can provision an arbitrary number of Hadoop nodes - the API does the hard work for you, and span up the cluster, configure the networks and the selected Hadoop services without any interaction. 
+Using Cloudbreak API you can provision an arbitrary number of Hadoop nodes - the API does the hard work for you, and span up the cluster, configure the networks and the selected Hadoop services without any interaction.
 POST once and use it anytime after.
 
 ###Scalable
-As your workload changes, the API allows you to add or remove nodes on the fly. Cloudbreak does the hard work of reconfiguring the infrastructure, provision or decomission Hadoop nodes and let the cluster be continuosely operational. 
+As your workload changes, the API allows you to add or remove nodes on the fly. Cloudbreak does the hard work of reconfiguring the infrastructure, provision or decomission Hadoop nodes and let the cluster be continuosely operational.
 Once provisioned, new nodes will take up the load and increase the cluster throughput.
 
 ###Blueprints
@@ -57,23 +57,43 @@ The only dependency that Cloudbreak needs is a postgresql database. The easiest 
 docker run -d --name="postgresql" -p 5432:5432 -v /tmp/data:/data -e USER="seqadmin" -e DB="cloudbreak" -e PASS="seq123_" paintedfox/postgresql
 ```
 ###Cloudbreak REST API
-After postgresql is running, Cloudbreak can be started locally in a Docker container with the following command. By linking the database container, the necessary environment variables for the connection are set. The postgresql address can be set explicitly through the environment variable: DB_PORT_5432_TCP_ADDR. 
+After postgresql is running, Cloudbreak can be started locally in a Docker container with the following command. By linking the database container, the necessary environment variables for the connection are set. The postgresql address can be set explicitly through the environment variable: DB_PORT_5432_TCP_ADDR.
 ```
 VERSION=0.1-20140623140412
 
 docker run -d --name cloudbreak -e "VERSION=$VERSION" -e "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" -e "AWS_SECRET_KEY=$AWS_SECRET_KEY" -e "HBM2DDL_STRATEGY=create" --link postgresql:db -p 8080:8080 dockerfile/java bash -c 'curl -o /tmp/cloudbreak-$VERSION.jar https://s3-eu-west-1.amazonaws.com/seq-repo/releases/com/sequenceiq/cloudbreak/$VERSION/cloudbreak-$VERSION.jar && java -jar /tmp/cloudbreak-$VERSION.jar'
 ```
-###AWS Configuration 
 
-Cloudbreak requires two types of AWS configuration. 
+### Running the cloudbreak without docker
+
+If you'd like to run the API outside of docker (e.g.: locally) you can find a convenience shell script to help you.
+After building the application do the following (from the project root ...)
+```
+./run_cloudbreak.sh <db-user> <db-pass> <db-host> <db-port> <host-address>
+```
+The arguments are as follows:
+
+`db-user` - your datbase user
+
+`db-pass` - your password to the database
+
+`db-host` - the address of the machine hosting your database
+
+`db-port` - the port where you can connect to the database
+
+`host-address` - the ngrok generated address to receive SNS notifications
+
+
+###AWS Configuration
+
+Cloudbreak requires two types of AWS configuration.
 
 ####Cloudbreak deployer AWS configuration
 To be able to use Cloudbreak, a keypair of an AWS IAM user must be specified. Because Cloudbreak creates AWS resources on third party accounts, the only permission this keypair needs is sts:assumeRole to be able to assume an IAM role to retrieve temporary credentials from AWS.
 
 ####Cloudbreak user AWS configuration
-Cloudbreak users allow the Cloudbreak deployer to span up clusters on their behalf. In order to allow tis, the user will need to provide two IAM roles. 
+Cloudbreak users allow the Cloudbreak deployer to span up clusters on their behalf. In order to allow tis, the user will need to provide two IAM roles.
   1. Role ARN
   2. Instance profile ARN
 
 For further description about how-to create these roles please follow this [link](###)
-
