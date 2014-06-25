@@ -20,9 +20,11 @@ http://docs.cloudbreak.apiary.io/
    - [Cloudbreak REST API] (#cloudbreak-rest-api)
   - [Running Cloudbreak API on the host] (#running-cloudbreak-api-on-the-host)
   - [Configuring Cloudbreak] (#configuring-cloudbreak)
-   - [AWS Configuration] (#aws-configuration)
-    - [Cloudbreak deployer AWS configuration] (#cloudbreak-deployer-aws-configuration)
-    - [Cloudbreak user AWS configuration] (#cloudbreak-user-aws-configuration)
+   - [Configuration] (#aws-configuration)
+    - [Install and configure ngrok] (#install-and-configure-ngrok)
+    - [AWS Configuration] (#aws-configuration)
+     - [Cloudbreak deployer AWS configuration] (#cloudbreak-deployer-aws-configuration)
+     - [Cloudbreak user AWS configuration] (#cloudbreak-user-aws-configuration)
 
 ##Overview
 
@@ -66,7 +68,7 @@ VERSION=0.1-20140623140412
 docker run -d --name cloudbreak -e "VERSION=$VERSION" -e "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" -e "AWS_SECRET_KEY=$AWS_SECRET_KEY" -e "HBM2DDL_STRATEGY=create" --link postgresql:db -p 8080:8080 dockerfile/java bash -c 'curl -o /tmp/cloudbreak-$VERSION.jar https://s3-eu-west-1.amazonaws.com/seq-repo/releases/com/sequenceiq/cloudbreak/$VERSION/cloudbreak-$VERSION.jar && java -jar /tmp/cloudbreak-$VERSION.jar'
 ```
 
-###Running Cloudbreak API on the host
+##Running Cloudbreak API on the host
 
 If you'd like to run Cloudbreak outside of a Docker container on the host you can use the following shell script to help.
 After building the application please run the following script from the project root:
@@ -86,9 +88,18 @@ The arguments are as follows:
 `host-address` - the ngrok generated address to receive SNS notifications
 
 
-###AWS Configuration
+##Configuration
 
-Cloudbreak requires two types of AWS configuration.
+###Install and configure ngrok
+On OSX you can do the following:
+
+```
+brew update && brew install ngrok
+ngrok 8080
+```
+_Note: In the terminal window you'll find displayed a value - this is the last argument `host-address` of the `run_cloudbreak.sh` script_
+
+###AWS Configuration
 
 ####Cloudbreak deployer AWS configuration
 To be able to use Cloudbreak, a keypair of an AWS IAM user must be specified. Because Cloudbreak creates AWS resources on third party accounts, the only permission this keypair needs is sts:assumeRole to be able to assume an IAM role to retrieve temporary credentials from AWS.
