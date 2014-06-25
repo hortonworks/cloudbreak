@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.security.CurrentUser;
 import com.sequenceiq.cloudbreak.service.StackService;
 
 @Controller
-@RequestMapping("stack")
+@RequestMapping("stacks")
 public class StackController {
 
     @Autowired

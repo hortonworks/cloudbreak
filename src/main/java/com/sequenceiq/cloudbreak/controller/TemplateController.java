@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.security.CurrentUser;
 import com.sequenceiq.cloudbreak.service.TemplateService;
 
 @Controller
-@RequestMapping("template")
+@RequestMapping("templates")
 public class TemplateController {
 
     @Autowired
