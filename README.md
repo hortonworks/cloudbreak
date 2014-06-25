@@ -66,8 +66,8 @@ docker run -d --name cloudbreak -e "VERSION=$VERSION" -e "AWS_ACCESS_KEY_ID=$AWS
 
 ### Running the cloudbreak without docker
 
-If you'd like to run the API outside of docker (e.g.: locally) you can find a convenience shell script to help you.
-After building the application do the following (from the project root ...)
+If you'd like to run the API outside of docker (e.g.: locally) in the project root you can find a convenience shell script to help you.
+After building the application do the following:
 ```
 ./run_cloudbreak.sh <db-user> <db-pass> <db-host> <db-port> <host-address>
 ```
@@ -83,6 +83,12 @@ The arguments are as follows:
 
 `host-address` - the ngrok generated address to receive SNS notifications
 
+Note: to install and start ngrok (on mac):
+```
+brew update && brew install ngrok
+ngrok 8080
+```
+(In the terminal window you'll find displayed the value of the last argument to the script)
 
 ###AWS Configuration
 
