@@ -27,13 +27,13 @@ import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 @Service
 public class AmbariClusterInstaller {
 
-    private static final double COMPLETED = 100.0;
-    private static final double FAILED = -1.0;
-
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariClusterInstaller.class);
 
     private static final long POLLING_INTERVAL = 3000;
     private static final int MILLIS = 1000;
+
+    private static final BigDecimal COMPLETED = new BigDecimal(100.0);
+    private static final BigDecimal FAILED = new BigDecimal(-1.0);
 
     @Autowired
     private WebsocketService websocketService;
@@ -57,7 +57,7 @@ public class AmbariClusterInstaller {
                     );
 
             BigDecimal installProgress = new BigDecimal(0);
-            while (installProgress.doubleValue() != COMPLETED && installProgress.doubleValue() != FAILED) {
+            while (installProgress.compareTo(COMPLETED) != 0 && installProgress.compareTo(FAILED) != 0) {
                 try {
                     Thread.sleep(POLLING_INTERVAL);
                 } catch (InterruptedException e) {
@@ -68,13 +68,13 @@ public class AmbariClusterInstaller {
                 LOGGER.info("Ambari Cluster installing. [Stack: '{}', Cluster: '{}', Progress: {}]", stack.getId(), cluster.getName(), installProgress);
                 // TODO: timeout
             }
-            if (installProgress.doubleValue() == COMPLETED) {
+            if (installProgress.compareTo(COMPLETED) == 0) {
                 websocketService.sendToTopicUser(cluster.getUser().getEmail(), WebsocketEndPoint.CLUSTER,
                         new StatusMessage(cluster.getId(), cluster.getName(), Status.CREATE_COMPLETED.name()));
                 cluster.setStatus(Status.CREATE_COMPLETED);
                 cluster.setCreationFinished(new Date().getTime());
                 clusterRepository.save(cluster);
-            } else if (installProgress.doubleValue() == FAILED) {
+            } else if (installProgress.compareTo(FAILED) == 0) {
                 websocketService.sendToTopicUser(cluster.getUser().getEmail(), WebsocketEndPoint.CLUSTER,
                         new StatusMessage(cluster.getId(), cluster.getName(), Status.CREATE_FAILED.name()));
                 cluster.setStatus(Status.CREATE_FAILED);
