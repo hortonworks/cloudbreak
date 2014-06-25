@@ -39,25 +39,25 @@ public class UptimeNotifier {
 
     @Scheduled(fixedDelay = 60000)
     public void sendUptime() {
-        Map<Long, List<UptimeMessage>> uptimes = new HashMap<>();
+        Map<String, List<UptimeMessage>> uptimes = new HashMap<>();
         List<Cluster> clusters = (List<Cluster>) clusterRepository.findAll();
         long now = new Date().getTime();
         for (Cluster cluster : clusters) {
             Stack stack = stackRepository.findStackForCluster(cluster.getId());
             if (stack != null) {
                 Long uptime = cluster.getCreationFinished() == null ? 0L : now - cluster.getCreationFinished();
-                if (uptimes.containsKey(stack.getUser().getId())) {
-                    uptimes.get(stack.getUser().getId()).add(new UptimeMessage(stack.getId(), uptime));
+                if (uptimes.containsKey(stack.getUser().getEmail())) {
+                    uptimes.get(stack.getUser().getEmail()).add(new UptimeMessage(stack.getId(), uptime));
                 } else {
-                    uptimes.put(stack.getUser().getId(), new ArrayList<UptimeMessage>());
-                    uptimes.get(stack.getUser().getId()).add(new UptimeMessage(stack.getId(), uptime));
+                    uptimes.put(stack.getUser().getEmail(), new ArrayList<UptimeMessage>());
+                    uptimes.get(stack.getUser().getEmail()).add(new UptimeMessage(stack.getId(), uptime));
                 }
             }
         }
         LOGGER.debug("uptimes: " + uptimes);
         if (uptimes.size() > 0) {
-            for (Map.Entry<Long, List<UptimeMessage>> longListEntry : uptimes.entrySet()) {
-                websocketService.sendToTopicUser(userRepository.findOne(longListEntry.getKey()).getEmail(), WebsocketEndPoint.UPTIME, longListEntry.getValue());
+            for (Map.Entry<String, List<UptimeMessage>> longListEntry : uptimes.entrySet()) {
+                websocketService.sendToTopicUser(longListEntry.getKey(), WebsocketEndPoint.UPTIME, longListEntry.getValue());
             }
         }
     }
