@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import reactor.core.Reactor;
 import reactor.event.Event;
 import reactor.function.Consumer;
 
@@ -41,6 +42,8 @@ import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.service.event.StackCreationFailure;
+import com.sequenceiq.cloudbreak.service.event.StackCreationSuccess;
 
 @Service
 public class Ec2InstanceRunner implements Consumer<Event<Stack>> {
@@ -54,6 +57,9 @@ public class Ec2InstanceRunner implements Consumer<Event<Stack>> {
 
     @Autowired
     private Ec2UserDataBuilder userDataBuilder;
+
+    @Autowired
+    private Reactor reactor;
 
     @Override
     public void accept(Event<Stack> event) {
@@ -74,13 +80,19 @@ public class Ec2InstanceRunner implements Consumer<Event<Stack>> {
             disableSourceDestCheck(ec2Client, instanceIds);
             String ambariIp = pollAmbariServer(ec2Client, stack.getId(), instanceIds);
             if (ambariIp != null) {
-                awsStackUtil.createSuccess(stack, ambariIp);
+                StackCreationSuccess stackCreationSuccess = new StackCreationSuccess(stack, ambariIp);
+                LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_CREATE_SUCCESS_EVENT, stack.getId());
+                reactor.notify(ReactorConfig.STACK_CREATE_SUCCESS_EVENT, Event.wrap(stackCreationSuccess));
             } else {
-                awsStackUtil.createFailed(stack);
+                StackCreationFailure stackCreationFailure = new StackCreationFailure(stack, "Couldn't retrieve Ambari server IP.");
+                LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_CREATE_FAILED_EVENT, stack.getId());
+                reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(stackCreationFailure));
             }
         } catch (AmazonClientException e) {
             LOGGER.error("Failed to run EC2 instances", e);
-            awsStackUtil.createFailed(stack);
+            StackCreationFailure stackCreationFailure = new StackCreationFailure(stack, "Failed to run EC2 instances");
+            LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_CREATE_FAILED_EVENT, stack.getId());
+            reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(stackCreationFailure));
         }
     }
 

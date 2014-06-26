@@ -7,10 +7,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import reactor.core.Reactor;
+import reactor.event.Event;
+
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.CreateStackRequest;
 import com.amazonaws.services.cloudformation.model.CreateStackResult;
 import com.amazonaws.services.cloudformation.model.Parameter;
+import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudFormationTemplate;
@@ -18,8 +22,9 @@ import com.sequenceiq.cloudbreak.domain.SnsTopic;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.event.StackCreationFailure;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
@@ -43,6 +48,9 @@ public class CloudFormationStackCreator {
     @Autowired
     private RetryingStackUpdater stackUpdater;
 
+    @Autowired
+    private Reactor reactor;
+
     public synchronized void createCloudFormationStack(Stack stack, AwsCredential awsCredential, SnsTopic notificationTopic) {
         try {
             Stack currentStack = stackRepository.findById(stack.getId());
@@ -59,7 +67,9 @@ public class CloudFormationStackCreator {
             }
         } catch (Exception e) {
             LOGGER.error("Unhandled exception occured while creating stack on AWS.", e);
-            awsStackUtil.createFailed(stack);
+            LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_CREATE_FAILED_EVENT, stack.getId());
+            StackCreationFailure stackCreationFailure = new StackCreationFailure(stack, "Internal server error occured while creating CloudFormation stack.");
+            reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(stackCreationFailure));
         }
     }
 

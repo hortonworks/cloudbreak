@@ -8,6 +8,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import reactor.core.Reactor;
+import reactor.event.Event;
+
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.DeleteStackRequest;
@@ -21,6 +24,7 @@ import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.Filter;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
+import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsStackDescription;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
@@ -33,6 +37,7 @@ import com.sequenceiq.cloudbreak.domain.StackDescription;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.SnsTopicRepository;
 import com.sequenceiq.cloudbreak.service.ProvisionService;
+import com.sequenceiq.cloudbreak.service.event.StackCreationFailure;
 
 /**
  * Provisions an Ambari based Hadoop cluster on a client Amazon EC2 account by
@@ -64,6 +69,9 @@ public class AwsProvisionService implements ProvisionService {
     @Autowired
     private CloudFormationStackCreator cfStackCreator;
 
+    @Autowired
+    private Reactor reactor;
+
     @Override
     public void createStack(User user, Stack stack, Credential credential) {
         try {
@@ -87,7 +95,9 @@ public class AwsProvisionService implements ProvisionService {
             }
         } catch (Exception e) {
             LOGGER.error("Unhandled exception occured when trying to create stack [id: '{}']", stack.getId(), e);
-            awsStackUtil.createFailed(stack);
+            LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_CREATE_FAILED_EVENT, stack.getId());
+            StackCreationFailure stackCreationFailure = new StackCreationFailure(stack, "Internal server error occured while creating stack.");
+            reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(stackCreationFailure));
         }
     }
 

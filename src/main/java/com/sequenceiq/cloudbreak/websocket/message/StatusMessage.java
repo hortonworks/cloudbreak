@@ -5,11 +5,19 @@ public class StatusMessage {
     private Long id;
     private String name;
     private String status;
+    private String detailedMessage;
 
     public StatusMessage(Long id, String name, String status) {
         this.id = id;
         this.name = name;
         this.status = status;
+    }
+
+    public StatusMessage(Long id, String name, String status, String detailedMessage) {
+        this.id = id;
+        this.name = name;
+        this.status = status;
+        this.detailedMessage = detailedMessage;
     }
 
     public Long getId() {
@@ -34,6 +42,19 @@ public class StatusMessage {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getDetailedMessage() {
+        return detailedMessage;
+    }
+
+    public void setDetailedMessage(String detailedMessage) {
+        this.detailedMessage = detailedMessage;
+    }
+
+    @Override
+    public String toString() {
+        return "StatusMessage [id=" + id + ", name=" + name + ", status=" + status + ", detailedMessage=" + detailedMessage + "]";
     }
 
 }
