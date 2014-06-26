@@ -80,17 +80,17 @@ public class Ec2InstanceRunner implements Consumer<Event<Stack>> {
             disableSourceDestCheck(ec2Client, instanceIds);
             String ambariIp = pollAmbariServer(ec2Client, stack.getId(), instanceIds);
             if (ambariIp != null) {
-                StackCreationSuccess stackCreationSuccess = new StackCreationSuccess(stack, ambariIp);
+                StackCreationSuccess stackCreationSuccess = new StackCreationSuccess(stack.getId(), ambariIp);
                 LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_CREATE_SUCCESS_EVENT, stack.getId());
                 reactor.notify(ReactorConfig.STACK_CREATE_SUCCESS_EVENT, Event.wrap(stackCreationSuccess));
             } else {
-                StackCreationFailure stackCreationFailure = new StackCreationFailure(stack, "Couldn't retrieve Ambari server IP.");
+                StackCreationFailure stackCreationFailure = new StackCreationFailure(stack.getId(), "Couldn't retrieve Ambari server IP.");
                 LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_CREATE_FAILED_EVENT, stack.getId());
                 reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(stackCreationFailure));
             }
         } catch (AmazonClientException e) {
             LOGGER.error("Failed to run EC2 instances", e);
-            StackCreationFailure stackCreationFailure = new StackCreationFailure(stack, "Failed to run EC2 instances");
+            StackCreationFailure stackCreationFailure = new StackCreationFailure(stack.getId(), "Failed to run EC2 instances");
             LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_CREATE_FAILED_EVENT, stack.getId());
             reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(stackCreationFailure));
         }

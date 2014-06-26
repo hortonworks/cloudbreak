@@ -68,7 +68,8 @@ public class CloudFormationStackCreator {
         } catch (Exception e) {
             LOGGER.error("Unhandled exception occured while creating stack on AWS.", e);
             LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_CREATE_FAILED_EVENT, stack.getId());
-            StackCreationFailure stackCreationFailure = new StackCreationFailure(stack, "Internal server error occured while creating CloudFormation stack.");
+            StackCreationFailure stackCreationFailure = new StackCreationFailure(stack.getId(),
+                    "Internal server error occured while creating CloudFormation stack.");
             reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(stackCreationFailure));
         }
     }

@@ -96,7 +96,7 @@ public class AwsProvisionService implements ProvisionService {
         } catch (Exception e) {
             LOGGER.error("Unhandled exception occured when trying to create stack [id: '{}']", stack.getId(), e);
             LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_CREATE_FAILED_EVENT, stack.getId());
-            StackCreationFailure stackCreationFailure = new StackCreationFailure(stack, "Internal server error occured while creating stack.");
+            StackCreationFailure stackCreationFailure = new StackCreationFailure(stack.getId(), "Internal server error occured while creating stack.");
             reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(stackCreationFailure));
         }
     }

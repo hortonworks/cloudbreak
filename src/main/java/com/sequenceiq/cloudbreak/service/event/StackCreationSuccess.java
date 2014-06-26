@@ -1,23 +1,22 @@
 package com.sequenceiq.cloudbreak.service.event;
 
-import com.sequenceiq.cloudbreak.domain.Stack;
 
 public class StackCreationSuccess {
 
-    private Stack stack;
+    private Long stackId;
     private String ambariIp;
 
-    public StackCreationSuccess(Stack stack, String ambariIp) {
-        this.stack = stack;
+    public StackCreationSuccess(Long stackId, String ambariIp) {
+        this.stackId = stackId;
         this.ambariIp = ambariIp;
     }
 
-    public Stack getStack() {
-        return stack;
+    public Long getStackId() {
+        return stackId;
     }
 
-    public void setStack(Stack stack) {
-        this.stack = stack;
+    public void setStackId(Long stackId) {
+        this.stackId = stackId;
     }
 
     public String getAmbariIp() {

@@ -35,14 +35,14 @@ public class StackCreationSuccessHandler implements Consumer<Event<StackCreation
     @Override
     public void accept(Event<StackCreationSuccess> event) {
         StackCreationSuccess stackCreationSuccess = event.getData();
-        Stack stack = stackCreationSuccess.getStack();
-        LOGGER.info("Accepted {} event.", ReactorConfig.STACK_CREATE_SUCCESS_EVENT, stack.getId());
+        Long stackId = stackCreationSuccess.getStackId();
+        LOGGER.info("Accepted {} event.", ReactorConfig.STACK_CREATE_SUCCESS_EVENT, stackId);
         String ambariIp = stackCreationSuccess.getAmbariIp();
-        stack = stackUpdater.updateAmbariIp(stack.getId(), ambariIp);
-        stack = stackUpdater.updateStackStatus(stack.getId(), Status.CREATE_COMPLETED);
+        Stack stack = stackUpdater.updateAmbariIp(stackId, ambariIp);
+        stack = stackUpdater.updateStackStatus(stackId, Status.CREATE_COMPLETED);
         websocketService.sendToTopicUser(stack.getUser().getEmail(), WebsocketEndPoint.STACK,
-                new StatusMessage(stack.getId(), stack.getName(), Status.CREATE_COMPLETED.name()));
-        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.AMBARI_STARTED_EVENT, stack.getId());
+                new StatusMessage(stackId, stack.getName(), Status.CREATE_COMPLETED.name()));
+        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.AMBARI_STARTED_EVENT, stackId);
         reactor.notify(ReactorConfig.AMBARI_STARTED_EVENT, Event.wrap(stack));
     }
 

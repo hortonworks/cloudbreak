@@ -31,12 +31,12 @@ public class StackCreationFailureHandler implements Consumer<Event<StackCreation
     @Override
     public void accept(Event<StackCreationFailure> event) {
         StackCreationFailure stackCreationFailure = event.getData();
-        Stack stack = stackCreationFailure.getStack();
-        LOGGER.info("Accepted {} event.", ReactorConfig.STACK_CREATE_FAILED_EVENT, stack.getId());
+        Long stackId = stackCreationFailure.getStackId();
+        LOGGER.info("Accepted {} event.", ReactorConfig.STACK_CREATE_FAILED_EVENT, stackId);
         String detailedMessage = stackCreationFailure.getDetailedMessage();
-        stack = stackUpdater.updateStackStatus(stack.getId(), Status.CREATE_FAILED);
+        Stack stack = stackUpdater.updateStackStatus(stackId, Status.CREATE_FAILED);
         websocketService.sendToTopicUser(stack.getUser().getEmail(), WebsocketEndPoint.STACK,
-                new StatusMessage(stack.getId(), stack.getName(), Status.CREATE_FAILED.name(), detailedMessage));
+                new StatusMessage(stackId, stack.getName(), Status.CREATE_FAILED.name(), detailedMessage));
     }
 
 }
