@@ -55,6 +55,9 @@ public class Stack implements ProvisionEntity {
 
     private String ambariIp;
 
+    @Column(columnDefinition = "TEXT")
+    private String statusReason;
+
     @OneToOne
     private Template template;
 
@@ -172,6 +175,14 @@ public class Stack implements ProvisionEntity {
 
     public void setAmbariIp(String ambariIp) {
         this.ambariIp = ambariIp;
+    }
+
+    public String getStatusReason() {
+        return statusReason;
+    }
+
+    public void setStatusReason(String statusReason) {
+        this.statusReason = statusReason;
     }
 
     public Long getVersion() {

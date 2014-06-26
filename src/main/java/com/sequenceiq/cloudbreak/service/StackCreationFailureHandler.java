@@ -34,7 +34,7 @@ public class StackCreationFailureHandler implements Consumer<Event<StackCreation
         Long stackId = stackCreationFailure.getStackId();
         LOGGER.info("Accepted {} event.", ReactorConfig.STACK_CREATE_FAILED_EVENT, stackId);
         String detailedMessage = stackCreationFailure.getDetailedMessage();
-        Stack stack = stackUpdater.updateStackStatus(stackId, Status.CREATE_FAILED);
+        Stack stack = stackUpdater.updateStackStatus(stackId, Status.CREATE_FAILED, detailedMessage);
         websocketService.sendToTopicUser(stack.getUser().getEmail(), WebsocketEndPoint.STACK,
                 new StatusMessage(stackId, stack.getName(), Status.CREATE_FAILED.name(), detailedMessage));
     }

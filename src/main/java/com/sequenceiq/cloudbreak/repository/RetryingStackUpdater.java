@@ -24,14 +24,18 @@ public class RetryingStackUpdater {
     private StackRepository stackRepository;
 
     public Stack updateStackStatus(Long stackId, Status status) {
+        return updateStackStatus(stackId, status, null);
+    }
+
+    public Stack updateStackStatus(Long stackId, Status status, String statusReason) {
         int attempt = 1;
         try {
-            return doUpdateStackStatus(stackId, status);
+            return doUpdateStackStatus(stackId, status, statusReason);
         } catch (OptimisticLockException | OptimisticLockingFailureException e) {
             LOGGER.info("Failed to update stack status. [id: '{}', attempt: '{}', Cause: {}]. Trying to save it again.",
                     stackId, attempt++, e.getClass().getSimpleName());
             if (attempt <= MAX_RETRIES) {
-                return doUpdateStackStatus(stackId, status);
+                return doUpdateStackStatus(stackId, status, statusReason);
             } else {
                 throw new InternalServerException(String.format("Failed to update stack '%s' in 5 attempts. (while trying to update status)", stackId), e);
             }
@@ -100,11 +104,14 @@ public class RetryingStackUpdater {
         }
     }
 
-    private Stack doUpdateStackStatus(Long stackId, Status status) {
+    private Stack doUpdateStackStatus(Long stackId, Status status, String statusReason) {
         Stack stack = stackRepository.findById(stackId);
         stack.setStatus(status);
+        if (statusReason != null) {
+            stack.setStatusReason(statusReason);
+        }
         stack = stackRepository.save(stack);
-        LOGGER.info("Updated stack: [stack: '{}' status: '{}'].", stackId, status.name());
+        LOGGER.info("Updated stack: [stack: '{}', status: '{}', statusReason: '{}'].", stackId, status.name(), statusReason);
         return stack;
     }
 
