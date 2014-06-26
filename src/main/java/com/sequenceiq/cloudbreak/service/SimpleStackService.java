@@ -64,8 +64,7 @@ public class SimpleStackService implements StackService {
 
     @Override
     public IdJson create(User user, StackJson stackRequest) {
-        LOGGER.info("Stack creation requested. [Platform: {}, CredentialId: {}, Name: {}, Node count: {}, TemplateId: {}]",
-                stackRequest.getCloudPlatform().name(),
+        LOGGER.info("Stack creation requested. [CredentialId: {}, Name: {}, Node count: {}, TemplateId: {}]",
                 stackRequest.getCredentialId(),
                 stackRequest.getName(),
                 stackRequest.getNodeCount(),
