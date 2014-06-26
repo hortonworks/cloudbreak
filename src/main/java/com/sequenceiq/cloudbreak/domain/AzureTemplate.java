@@ -9,13 +9,8 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 
 @Entity
-@Table(name = "AwsTemplate", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "azureTemplate_azureTemplateOwner", "name" })
-})
 public class AzureTemplate extends Template implements ProvisionEntity {
 
     private String location;

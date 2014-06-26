@@ -6,16 +6,11 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.ec2.model.InstanceType;
 
 @Entity
-@Table(name = "AwsTemplate", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "awsTemplate_awsTemplateOwner", "name" })
-})
 public class AwsTemplate extends Template implements ProvisionEntity {
 
     @Column(nullable = false)
