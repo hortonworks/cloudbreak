@@ -7,8 +7,6 @@ import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,8 +30,6 @@ import com.sequenceiq.cloudbreak.service.azure.AzureCredentialService;
 @Controller
 @RequestMapping("credentials")
 public class CredentialController {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(CredentialController.class);
 
     @Autowired
     private CredentialService credentialService;
