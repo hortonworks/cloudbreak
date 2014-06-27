@@ -28,7 +28,7 @@ import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.ProvisionService;
+import com.sequenceiq.cloudbreak.service.stack.ProvisionService;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 

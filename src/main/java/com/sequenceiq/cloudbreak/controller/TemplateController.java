@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
 import com.sequenceiq.cloudbreak.security.CurrentUser;
-import com.sequenceiq.cloudbreak.service.TemplateService;
+import com.sequenceiq.cloudbreak.service.template.TemplateService;
 
 @Controller
 @RequestMapping("templates")
