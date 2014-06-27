@@ -90,7 +90,7 @@ public class CloudFormationStackCreator {
                 .withNotificationARNs(snstopic.getTopicArn())
                 .withParameters(new Parameter().withParameterKey("SSHLocation").withParameterValue(awsTemplate.getSshLocation()));
         CreateStackResult createStackResult = client.createStack(createStackRequest);
-        stack = stackUpdater.updateStackCfAttributes(stack.getId(), stackName, createStackResult.getStackId());
-        LOGGER.info("CloudFormation stack creation request sent with stack name: '{}' for stack: '{}'", stackName, stack.getId());
+        Stack updatedStack = stackUpdater.updateStackCfAttributes(stack.getId(), stackName, createStackResult.getStackId());
+        LOGGER.info("CloudFormation stack creation request sent with stack name: '{}' for stack: '{}'", stackName, updatedStack.getId());
     }
 }
