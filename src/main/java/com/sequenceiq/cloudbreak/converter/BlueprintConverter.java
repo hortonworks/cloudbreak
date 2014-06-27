@@ -50,12 +50,13 @@ public class BlueprintConverter extends AbstractConverter<BlueprintJson, Bluepri
     public Blueprint convert(BlueprintJson json) {
         Blueprint blueprint = new Blueprint();
         if (json.getUrl() != null) {
+            String sourceUrl = json.getUrl().trim();
             try {
-                String urlText = readUrl(json.getUrl());
+                String urlText = readUrl(sourceUrl);
                 jsonHelper.createJsonFromString(urlText);
                 blueprint.setBlueprintText(urlText);
             } catch (IOException e) {
-                throw new BadRequestException("Cannot download ambari blueprint from: " + json.getUrl(), e);
+                throw new BadRequestException("Cannot download ambari blueprint from: " + sourceUrl, e);
             }
         } else {
             blueprint.setBlueprintText(json.getAmbariBlueprint());
