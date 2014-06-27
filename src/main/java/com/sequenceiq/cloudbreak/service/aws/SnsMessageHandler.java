@@ -92,7 +92,7 @@ public class SnsMessageHandler {
         if (stack == null) {
             LOGGER.info("Got message that CloudFormation stack creation failed, but no matching stack found in the db. [CFStackId: '{}']. Ignoring message.",
                     cfMessage.get("StackId"));
-        } else if (!stack.isCfStackCompleted() && !stack.getStatus().equals(Status.CREATE_FAILED)) {
+        } else if (!stack.isCfStackCompleted() && !Status.CREATE_FAILED.equals(stack.getStatus())) {
             LOGGER.info("CloudFormation stack creation failed. [Id: '{}', CFStackId '{}']", stack.getId(), stack.getCfStackId());
             StackCreationFailure stackCreationFailure = new StackCreationFailure(stack.getId(), "Error while creating CloudFormation stack: "
                     + cfMessage.get("ResourceStatusReason"));
