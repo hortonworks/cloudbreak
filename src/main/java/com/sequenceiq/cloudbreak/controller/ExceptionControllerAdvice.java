@@ -6,6 +6,7 @@ import javax.persistence.EntityNotFoundException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -54,5 +55,11 @@ public class ExceptionControllerAdvice {
     public ResponseEntity<ExceptionResult> serverError(Exception e) {
         LOGGER.error(e.getMessage(), e);
         return new ResponseEntity<>(new ExceptionResult("Internal server error"), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler({ DataIntegrityViolationException.class })
+    public ResponseEntity<ExceptionResult> constaintViolation(Exception e) {
+        LOGGER.error(e.getMessage(), e);
+        return new ResponseEntity<>(new ExceptionResult("This name is taken, please choose a different one"), HttpStatus.BAD_REQUEST);
     }
 }
