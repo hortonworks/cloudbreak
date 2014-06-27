@@ -37,6 +37,8 @@ public class Cluster {
 
     private Long creationFinished;
 
+    private String statusReason;
+
     public String getDescription() {
         return description;
     }
@@ -99,6 +101,14 @@ public class Cluster {
 
     public void setCreationFinished(Long creationFinished) {
         this.creationFinished = creationFinished;
+    }
+
+    public String getStatusReason() {
+        return statusReason;
+    }
+
+    public void setStatusReason(String statusReason) {
+        this.statusReason = statusReason;
     }
 
 }

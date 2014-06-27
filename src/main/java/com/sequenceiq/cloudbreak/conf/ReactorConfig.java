@@ -15,6 +15,8 @@ public class ReactorConfig {
     public static final String AMBARI_STARTED_EVENT = "AMBARI_STARTED";
     public static final String STACK_CREATE_SUCCESS_EVENT = "STACK_CREATE_SUCCESS";
     public static final String STACK_CREATE_FAILED_EVENT = "STACK_CREATE_FAILED";
+    public static final String CLUSTER_CREATE_SUCCESS_EVENT = "CLUSTER_CREATE_SUCCESS";
+    public static final String CLUSTER_CREATE_FAILED_EVENT = "CLUSTER_CREATE_FAILED";
 
     @Bean
     public Environment env() {

@@ -15,7 +15,6 @@ import reactor.core.Reactor;
 import reactor.event.Event;
 import reactor.function.Consumer;
 
-import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStacksResult;
@@ -42,6 +41,9 @@ import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.service.AmbariHostsUnavailableException;
+import com.sequenceiq.cloudbreak.service.AmbariServerIpUnavailableException;
+import com.sequenceiq.cloudbreak.service.NodeStartTimedOutException;
 import com.sequenceiq.cloudbreak.service.event.StackCreationFailure;
 import com.sequenceiq.cloudbreak.service.event.StackCreationSuccess;
 
@@ -49,6 +51,11 @@ import com.sequenceiq.cloudbreak.service.event.StackCreationSuccess;
 public class Ec2InstanceRunner implements Consumer<Event<Stack>> {
 
     private static final int POLLING_INTERVAL = 3000;
+    private static final int MS_PER_SEC = 1000;
+    private static final int SEC_PER_MIN = 60;
+    private static final int MAX_POLLING_ATTEMPTS = SEC_PER_MIN / (POLLING_INTERVAL / MS_PER_SEC) * 10;
+
+    private static final String UNHANDLED_EXCEPTION_MSG = "Failed to run EC2 instances";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Ec2InstanceRunner.class);
 
@@ -80,19 +87,16 @@ public class Ec2InstanceRunner implements Consumer<Event<Stack>> {
             disableSourceDestCheck(ec2Client, instanceIds);
             String ambariIp = pollAmbariServer(ec2Client, stack.getId(), instanceIds);
             if (ambariIp != null) {
-                StackCreationSuccess stackCreationSuccess = new StackCreationSuccess(stack.getId(), ambariIp);
-                LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_CREATE_SUCCESS_EVENT, stack.getId());
-                reactor.notify(ReactorConfig.STACK_CREATE_SUCCESS_EVENT, Event.wrap(stackCreationSuccess));
+                stackCreateSuccess(stack.getId(), ambariIp);
             } else {
-                StackCreationFailure stackCreationFailure = new StackCreationFailure(stack.getId(), "Couldn't retrieve Ambari server IP.");
-                LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_CREATE_FAILED_EVENT, stack.getId());
-                reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(stackCreationFailure));
+                throw new AmbariServerIpUnavailableException("Couldn't retrieve Ambari server IP.");
             }
-        } catch (AmazonClientException e) {
-            LOGGER.error("Failed to run EC2 instances", e);
-            StackCreationFailure stackCreationFailure = new StackCreationFailure(stack.getId(), "Failed to run EC2 instances");
-            LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_CREATE_FAILED_EVENT, stack.getId());
-            reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(stackCreationFailure));
+        } catch (NodeStartTimedOutException | AmbariServerIpUnavailableException e) {
+            LOGGER.error(e.getMessage(), e);
+            stackCreateFailed(stack.getId(), e.getMessage());
+        } catch (Exception e) {
+            LOGGER.error(UNHANDLED_EXCEPTION_MSG, e);
+            stackCreateFailed(stack.getId(), UNHANDLED_EXCEPTION_MSG);
         }
     }
 
@@ -167,13 +171,12 @@ public class Ec2InstanceRunner implements Consumer<Event<Stack>> {
     }
 
     private String pollAmbariServer(AmazonEC2Client amazonEC2Client, Long stackId, List<String> instanceIds) {
-        // TODO: timeout
-        boolean stop = false;
+        boolean ambariRunning = false;
+        int pollingAttempt = 0;
         AmbariClient ambariClient = null;
         String ambariServerPublicIp = null;
         LOGGER.info("Starting polling of instance reachability and Ambari server's status (stack: '{}').", stackId);
-        while (!stop) {
-            awsStackUtil.sleep(POLLING_INTERVAL);
+        while (!ambariRunning && !(pollingAttempt >= MAX_POLLING_ATTEMPTS)) {
             if (instancesReachable(amazonEC2Client, stackId, instanceIds)) {
                 if (ambariClient == null) {
                     ambariServerPublicIp = getAmbariServerIp(amazonEC2Client, instanceIds);
@@ -184,20 +187,23 @@ public class Ec2InstanceRunner implements Consumer<Event<Stack>> {
                     String ambariHealth = ambariClient.healthCheck();
                     LOGGER.info("Ambari health check returned: {} [stack: '{}']", ambariHealth, stackId);
                     if ("RUNNING".equals(ambariHealth)) {
-                        stop = true;
+                        ambariRunning = true;
                     }
                 } catch (Exception e) {
-                    // org.apache.http.conn.HttpHostConnectException
                     LOGGER.error("Ambari unreachable. Trying again in next polling interval.", e);
                 }
-
             }
+            awsStackUtil.sleep(POLLING_INTERVAL);
+            pollingAttempt++;
+        }
+        if (pollingAttempt >= MAX_POLLING_ATTEMPTS) {
+            throw new AmbariHostsUnavailableException(String.format("Operation timed out. Failed to start all Ambari nodes in %s seconds.",
+                    MAX_POLLING_ATTEMPTS * POLLING_INTERVAL / MS_PER_SEC));
         }
         return ambariServerPublicIp;
     }
 
     private boolean instancesReachable(AmazonEC2Client amazonEC2Client, Long stackId, List<String> instanceIds) {
-        // TODO: timeout? failed to run?
         boolean instancesReachable = true;
         DescribeInstanceStatusRequest instanceStatusRequest = new DescribeInstanceStatusRequest().withInstanceIds(instanceIds);
         DescribeInstanceStatusResult instanceStatusResult = amazonEC2Client.describeInstanceStatus(instanceStatusRequest);
@@ -230,5 +236,15 @@ public class Ec2InstanceRunner implements Consumer<Event<Stack>> {
             }
         }
         throw new InternalServerException("No instance found with launch index 0");
+    }
+
+    private void stackCreateSuccess(Long stackId, String ambariIp) {
+        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_CREATE_SUCCESS_EVENT, stackId);
+        reactor.notify(ReactorConfig.STACK_CREATE_SUCCESS_EVENT, Event.wrap(new StackCreationSuccess(stackId, ambariIp)));
+    }
+
+    private void stackCreateFailed(Long stackId, String message) {
+        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_CREATE_FAILED_EVENT, stackId);
+        reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(new StackCreationFailure(stackId, message)));
     }
 }
