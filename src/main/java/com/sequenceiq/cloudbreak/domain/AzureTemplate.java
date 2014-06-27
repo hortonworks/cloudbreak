@@ -19,10 +19,8 @@ public class AzureTemplate extends Template implements ProvisionEntity {
     private String description;
     private String subnetAddressPrefix;
     private String addressPrefix;
-    private String deploymentSlot;
     private String vmType;
     private String imageName;
-    private String userName;
     private String password;
     @OneToMany(mappedBy = "azureTemplate", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Port> ports = new HashSet<>();
@@ -66,14 +64,6 @@ public class AzureTemplate extends Template implements ProvisionEntity {
         this.subnetAddressPrefix = subnetAddressPrefix;
     }
 
-    public String getDeploymentSlot() {
-        return deploymentSlot;
-    }
-
-    public void setDeploymentSlot(String deploymentSlot) {
-        this.deploymentSlot = deploymentSlot;
-    }
-
     public String getImageName() {
         return imageName;
     }
@@ -88,14 +78,6 @@ public class AzureTemplate extends Template implements ProvisionEntity {
 
     public void setVmType(String vmType) {
         this.vmType = vmType;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
     }
 
     public String getPassword() {

@@ -110,7 +110,7 @@ public class SimpleStackService implements StackService {
         if (stack != null && !stack.getMetaData().isEmpty()) {
             return metaDataConverter.convertAllEntityToJson(stack.getMetaData());
         }
-        throw new EntityNotFoundException("Metadata not found on stack.");
+        throw new NotFoundException("Metadata not found on stack.");
     }
 
 }

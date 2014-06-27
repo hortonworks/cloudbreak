@@ -78,6 +78,8 @@ public class AzureProvisionService implements ProvisionService {
     private static final String PORTS = "ports";
     private static final String ERROR = "\"error\":\"Could not fetch data from azure\"";
     private static final int NOT_FOUND = 404;
+    private static final String DEFAULT_USER_NAME = "ubuntu";
+    private static final String PRODUCTION = "production";
 
     @Autowired
     private JsonHelper jsonHelper;
@@ -102,7 +104,7 @@ public class AzureProvisionService implements ProvisionService {
         );
         updatedStackStatus(stack.getId(), Status.CREATE_IN_PROGRESS);
         String name = stack.getName().replaceAll("\\s+", "");
-        String commonName = credential.getName().replaceAll("\\s+", "");
+        String commonName = ((AzureCredential) credential).getName().replaceAll("\\s+", "");
         createAffinityGroup(azureClient, azureTemplate, commonName);
         createStorageAccount(azureClient, azureTemplate, commonName);
         createVirtualNetwork(azureClient, azureTemplate, name, commonName);
@@ -195,21 +197,21 @@ public class AzureProvisionService implements ProvisionService {
         ports.add(new Port("Oozie", "11000", "11000", "tcp"));
         ports.add(new Port("HTTP", "80", "80", "tcp"));
         props.put(NAME, vmName);
-        props.put(DEPLOYMENTSLOT, azureTemplate.getDeploymentSlot());
+        props.put(DEPLOYMENTSLOT, PRODUCTION);
         props.put(LABEL, label);
         props.put(IMAGENAME, azureTemplate.getImageName());
         props.put(IMAGESTOREURI,
                 String.format("http://%s.blob.core.windows.net/vhd-store/%s.vhd", commonName, vmName)
         );
         props.put(HOSTNAME, vmName);
-        props.put(USERNAME, azureTemplate.getUserName());
+        props.put(USERNAME, DEFAULT_USER_NAME);
         if (azureTemplate.getPassword() != null) {
             props.put(PASSWORD, azureTemplate.getPassword());
         } else {
             try {
                 X509Certificate sshCert = new X509Certificate(AzureCredentialService.getCerFile(user.emailAsFolder(), azureTemplate.getId()));
                 props.put(SSHPUBLICKEYFINGERPRINT, sshCert.getSha1Fingerprint());
-                props.put(SSHPUBLICKEYPATH, String.format("/home/%s/.ssh/authorized_keys", azureTemplate.getUserName()));
+                props.put(SSHPUBLICKEYPATH, String.format("/home/%s/.ssh/authorized_keys", DEFAULT_USER_NAME));
             } catch (FileNotFoundException e) {
                 LOGGER.info("Problem with the ssh file because not found: " + e.getMessage());
                 updatedStackStatus(azureTemplate.getId(), Status.CREATE_FAILED);
