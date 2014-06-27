@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.domain;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -8,8 +7,14 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 @Entity
+@Table(uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "azureCredential_azureCredentialOwner", "name" }),
+        @UniqueConstraint(columnNames = { "awsCredential_awsCredentialOwner", "name" })
+})
 public abstract class Credential {
 
     @Id
@@ -19,9 +24,6 @@ public abstract class Credential {
 
     @Enumerated(EnumType.STRING)
     private CloudPlatform cloudPlatform;
-
-    @Column(unique = true, nullable = false)
-    private String name;
 
     private String description;
 
@@ -35,14 +37,6 @@ public abstract class Credential {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public Long getId() {
@@ -64,5 +58,7 @@ public abstract class Credential {
     public abstract CloudPlatform cloudPlatform();
 
     public abstract User getOwner();
+
+    public abstract String getCredentialName();
 
 }

@@ -4,7 +4,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
@@ -16,7 +18,11 @@ public class AwsCredential extends Credential implements ProvisionEntity {
     private String instanceProfileRoleArn;
 
     @ManyToOne
+    @JoinColumn(name = "awsCredential_awsCredentialOwner")
     private User awsCredentialOwner;
+
+    @Column(nullable = false)
+    private String name;
 
     @OneToOne
     private TemporaryAwsCredentials temporaryAwsCredentials;
@@ -26,6 +32,14 @@ public class AwsCredential extends Credential implements ProvisionEntity {
 
     public AwsCredential() {
 
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public User getAwsCredentialOwner() {
@@ -76,6 +90,11 @@ public class AwsCredential extends Credential implements ProvisionEntity {
     @Override
     public User getOwner() {
         return awsCredentialOwner;
+    }
+
+    @Override
+    public String getCredentialName() {
+        return name;
     }
 
 }

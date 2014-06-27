@@ -94,7 +94,7 @@ public class SimpleCredentialService implements CredentialService {
         }
         credentialRepository.delete(credential);
         websocketService.sendToTopicUser(credential.getOwner().getEmail(), WebsocketEndPoint.CREDENTIAL,
-                new StatusMessage(credential.getId(), credential.getName(), Status.DELETE_COMPLETED.name()));
+                new StatusMessage(credential.getId(), credential.getCredentialName(), Status.DELETE_COMPLETED.name()));
     }
 
     private IdJson saveAwsCredential(User user, CredentialJson credentialJson) {

@@ -4,6 +4,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
 import com.amazonaws.regions.Regions;
@@ -12,7 +13,7 @@ import com.amazonaws.services.ec2.model.InstanceType;
 @Entity
 public class AwsTemplate extends Template implements ProvisionEntity {
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     private String name;
     private String description;
     @Enumerated(EnumType.STRING)
@@ -24,6 +25,7 @@ public class AwsTemplate extends Template implements ProvisionEntity {
     private String sshLocation;
 
     @ManyToOne
+    @JoinColumn(name = "awsTemplate_awsTemplateOwner")
     private User awsTemplateOwner;
 
     public AwsTemplate() {

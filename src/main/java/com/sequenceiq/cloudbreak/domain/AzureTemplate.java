@@ -6,6 +6,7 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
@@ -13,7 +14,7 @@ import javax.persistence.OneToMany;
 public class AzureTemplate extends Template implements ProvisionEntity {
 
     private String location;
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     private String name;
     private String description;
     private String subnetAddressPrefix;
@@ -29,6 +30,7 @@ public class AzureTemplate extends Template implements ProvisionEntity {
     private Set<Port> ports = new HashSet<>();
 
     @ManyToOne
+    @JoinColumn(name = "azureTemplate_azureTemplateOwner")
     private User azureTemplateOwner;
 
     public AzureTemplate() {
