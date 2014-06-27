@@ -531,10 +531,8 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                         description: azure_tdescription.value,
                         subnetAddressPrefix: azure_tsubnetAddressPrefix.value,
                         addressPrefix: azure_taddressPrefix.value,
-                        deploymentSlot: azure_tdeploymentSlot.value,
                         vmType: azure_tvmType.value,
                         imageName: azure_timageName.value,
-                        username: azure_tusername.value,
                         password: azure_tpassword.value,
                         sshString: azure_tsshString.value,
                         ports:[]
