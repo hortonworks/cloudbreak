@@ -209,7 +209,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             }).success(function (data, status, headers, config) {
                 $scope.stacks = data;
             }).error(function (data, status, headers, config) {
-                log.info("getStack was unsucces: " + data);
+                log.info("getStack was unsucces: " + data.message);
             });
         }
 
@@ -244,7 +244,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             }).success(function (data, status, headers, config) {
                 $scope.templates = data;
             }).error(function (data, status, headers, config) {
-                log.info("getTemplates was unsuccess: " + data);
+                log.info("getTemplates was unsuccess: " + data.message);
             });
         }
 
@@ -298,7 +298,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             }).success(function (data, status, headers, config) {
                 $scope.blueprints = data;
             }).error(function (data, status, headers, config) {
-                log.info("getBluePrints was unsucces: " + data);
+                log.info("getBluePrints was unsucces: " + data.message);
             });
         }
 
@@ -412,7 +412,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 selectTemplate.value = "";
             }).error(function (data, status, headers, config) {
                 $scope.statusMessage = "The creation of stack failed";
-                log.info("Creation of full stack was unsucces: " + data);
+                log.info("Creation of full stack was unsucces: " + data.message);
                 return deferred.reject();
             });
             return deferred.promise;
@@ -437,12 +437,12 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     }
                 }).success(function (data, status, headers, config) {
                     $scope.statusMessage = "Cluster '" + cl_clusterName.value + "' was created succesfully.";
-                    log.info("Stack creation was succes: " + data);
+                    log.info("Stack creation was succes: " + data.message);
                     $scope.statusMessage = "Cluster created succesfully.";
                     cl_clusterName.value = "";
                 }).error(function (data, status, headers, config) {
                     $scope.statusMessage = "The creation of cluster failed";
-                    log.info("Stack creation was unsuccess: " + data);
+                    log.info("Stack creation was unsuccess: " + data.message);
                 });
             }, function(reason) {
                 log.info("Full Stack creation failed...");
@@ -473,7 +473,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 bluePrintDescription.value = "";
                 $scope.getBluePrints()
             }).error(function (data, status, headers, config) {
-                $scope.statusMessage = "The creation of blueprint failed: " + data;
+                $scope.statusMessage = "The creation of blueprint failed: " + data.message;
                 $scope.isFailedCreation = true;
             });
         }
@@ -508,7 +508,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 aws_tdescription.value = "";
                 aws_tsshLocation.value= "";
             }).error(function (data, status, headers, config) {
-                $scope.statusMessage = "Creation of AWS template failed: " + data;
+                $scope.statusMessage = "Creation of AWS template failed: " + data.message;
             });
         }
 
@@ -553,7 +553,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 azure_tpassword.value = "";
                 azure_tsshString.value = "";
             }).error(function (data, status, headers, config) {
-                $scope.statusMessage = "Azure template creation failed: " + data;
+                $scope.statusMessage = "Azure template creation failed: " + data.message;
             });
         }
 
@@ -584,7 +584,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 cinstanceProfileRoleArn.value = "";
                 awscdescription.value = "";
             }).error(function (data, status, headers, config) {
-                $scope.statusMessage = "AWS template creation failed: " + data;
+                $scope.statusMessage = "AWS template creation failed: " + data.message;
                 $scope.isFailedCreation = true;
             });
         }
@@ -614,7 +614,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 csubscriptionId.value = "";
                 cjksPassword.value = "";
             }).error(function (data, status, headers, config) {
-                $scope.statusMessage = "Azure credential creation failed: " + data;
+                $scope.statusMessage = "Azure credential creation failed: " + data.message;
             });
         }
 
@@ -645,7 +645,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 var blob = new Blob([data], { type: 'text/plain' });
                 saveAs(blob, 'azure.cer');
             }).error(function (data, status, headers, config) {
-                log.info("Azure certificate request was unsucces: " + data);
+                log.info("Azure certificate request was unsucces: " + data.message);
             });
         }
 
