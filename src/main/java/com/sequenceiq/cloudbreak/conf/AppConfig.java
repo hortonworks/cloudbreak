@@ -11,8 +11,8 @@ import org.springframework.context.annotation.Configuration;
 
 import com.sequenceiq.cloudbreak.domain.CloudFormationTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
-import com.sequenceiq.cloudbreak.service.ProvisionService;
-import com.sequenceiq.cloudbreak.service.aws.TemplateReader;
+import com.sequenceiq.cloudbreak.service.stack.ProvisionService;
+import com.sequenceiq.cloudbreak.service.stack.aws.TemplateReader;
 
 @Configuration
 public class AppConfig {

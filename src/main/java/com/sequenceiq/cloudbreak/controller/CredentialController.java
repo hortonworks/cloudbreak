@@ -24,8 +24,8 @@ import com.sequenceiq.cloudbreak.controller.json.IdJson;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
 import com.sequenceiq.cloudbreak.security.CurrentUser;
-import com.sequenceiq.cloudbreak.service.CredentialService;
 import com.sequenceiq.cloudbreak.service.azure.AzureCredentialService;
+import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 
 @Controller
 @RequestMapping("credentials")

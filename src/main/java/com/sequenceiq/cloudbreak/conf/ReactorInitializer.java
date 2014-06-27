@@ -8,10 +8,12 @@ import org.springframework.stereotype.Component;
 
 import reactor.core.Reactor;
 
-import com.sequenceiq.cloudbreak.service.StackCreationFailureHandler;
-import com.sequenceiq.cloudbreak.service.StackCreationSuccessHandler;
-import com.sequenceiq.cloudbreak.service.aws.ClusterRequestHandler;
-import com.sequenceiq.cloudbreak.service.aws.Ec2InstanceRunner;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterCreationFailureHandler;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterCreationSuccessHandler;
+import com.sequenceiq.cloudbreak.service.stack.StackCreationFailureHandler;
+import com.sequenceiq.cloudbreak.service.stack.StackCreationSuccessHandler;
+import com.sequenceiq.cloudbreak.service.stack.aws.ClusterRequestHandler;
+import com.sequenceiq.cloudbreak.service.stack.aws.Ec2InstanceRunner;
 
 @Component
 public class ReactorInitializer implements InitializingBean {
@@ -29,6 +31,12 @@ public class ReactorInitializer implements InitializingBean {
     private StackCreationSuccessHandler stackCreationSuccessHandler;
 
     @Autowired
+    private ClusterCreationFailureHandler clusterCreationFailureHandler;
+
+    @Autowired
+    private ClusterCreationSuccessHandler clusterCreationSuccessHandler;
+
+    @Autowired
     private Reactor reactor;
 
     @Override
@@ -38,6 +46,8 @@ public class ReactorInitializer implements InitializingBean {
         reactor.on($(ReactorConfig.AMBARI_STARTED_EVENT), clusterRequestHandler);
         reactor.on($(ReactorConfig.STACK_CREATE_SUCCESS_EVENT), stackCreationSuccessHandler);
         reactor.on($(ReactorConfig.STACK_CREATE_FAILED_EVENT), stackCreationFailureHandler);
+        reactor.on($(ReactorConfig.CLUSTER_CREATE_SUCCESS_EVENT), clusterCreationSuccessHandler);
+        reactor.on($(ReactorConfig.CLUSTER_CREATE_FAILED_EVENT), clusterCreationFailureHandler);
     }
 
 }

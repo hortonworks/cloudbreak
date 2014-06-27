@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.controller.json.ClusterResponse;
 import com.sequenceiq.cloudbreak.controller.json.StatusRequestJson;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.security.CurrentUser;
-import com.sequenceiq.cloudbreak.service.AmbariClusterService;
+import com.sequenceiq.cloudbreak.service.cluster.AmbariClusterService;
 
 @Controller
 @RequestMapping("/stacks/{stackId}/cluster")

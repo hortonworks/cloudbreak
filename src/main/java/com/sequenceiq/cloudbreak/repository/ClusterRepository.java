@@ -10,4 +10,6 @@ public interface ClusterRepository extends CrudRepository<Cluster, Long> {
     @PostAuthorize("returnObject?.user?.id == principal?.id")
     Cluster findOne(Long id);
 
+    Cluster findById(Long id);
+
 }

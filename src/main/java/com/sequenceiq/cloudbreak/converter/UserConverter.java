@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.json.UserJson;
 import com.sequenceiq.cloudbreak.domain.User;
-import com.sequenceiq.cloudbreak.service.CredentialService;
+import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 
 @Component
 public class UserConverter extends AbstractConverter<UserJson, User> {

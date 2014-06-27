@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sequenceiq.cloudbreak.domain.SnsRequest;
-import com.sequenceiq.cloudbreak.service.aws.SnsMessageHandler;
-import com.sequenceiq.cloudbreak.service.aws.SnsMessageParser;
+import com.sequenceiq.cloudbreak.service.stack.aws.SnsMessageHandler;
+import com.sequenceiq.cloudbreak.service.stack.aws.SnsMessageParser;
 
 @Controller
 @RequestMapping("sns")
