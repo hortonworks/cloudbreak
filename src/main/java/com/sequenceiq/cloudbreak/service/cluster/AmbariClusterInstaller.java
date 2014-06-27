@@ -61,7 +61,6 @@ public class AmbariClusterInstaller {
                 sleep(POLLING_INTERVAL);
                 installProgress = ambariClient.getInstallProgress();
                 LOGGER.info("Ambari Cluster installing. [Stack: '{}', Cluster: '{}', Progress: {}]", stack.getId(), cluster.getName(), installProgress);
-                // TODO: timeout
             }
             if (installProgress.compareTo(COMPLETED) == 0) {
                 clusterCreateSuccess(cluster, new Date().getTime());
