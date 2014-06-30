@@ -68,7 +68,7 @@ public class TemplateController {
     public ModelAndView getSshFile(@CurrentUser User user, @PathVariable Long templateId, HttpServletResponse response) throws Exception {
         File cerFile = templateService.getSshPublicKeyFile(user, templateId);
         response.setContentType("application/octet-stream");
-        response.setHeader("Content-Disposition", "attachment;filename=private_key.pem");
+        response.setHeader("Content-Disposition", "attachment;filename=public_key.pem");
         FileCopyUtils.copy(Files.readAllBytes(cerFile.toPath()), response.getOutputStream());
         return null;
     }
