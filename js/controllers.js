@@ -409,7 +409,6 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 $scope.getStacks()
                 deferred.resolve(data.id);
                 cl_clusterSize.value = "";
-                cl_clusterName.value = "";
             }).error(function (data, status, headers, config) {
                 $scope.statusMessage = "The creation of stack failed";
                 log.info("Creation of full stack was unsucces: " + data.message);
