@@ -311,7 +311,7 @@ public class AzureProvisionService implements ProvisionService {
             Map<String, String> props = new HashMap<>();
             props.put(SERVICENAME, vmName);
             props.put(NAME, vmName);
-            try{
+            try {
                 Object cloudService = azureClient.getCloudService(vmName);
                 azureStackDescription.getCloudServices().add(jsonHelper.createJsonFromString(cloudService.toString()).toString());
             } catch (Exception ex) {
@@ -357,7 +357,7 @@ public class AzureProvisionService implements ProvisionService {
             Map<String, String> props = new HashMap<>();
             props.put(SERVICENAME, templateName);
             props.put(NAME, vmName);
-            try{
+            try {
                 Object cloudService = azureClient.getCloudService(vmName);
                 detailedAzureStackDescription.getCloudServices().add(jsonHelper.createJsonFromString(cloudService.toString()).toString());
             } catch (Exception ex) {
