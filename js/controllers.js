@@ -526,11 +526,9 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 data: {
                     cloudPlatform: "AZURE",
                     name: azure_tclusterName.value,
+                    description: azure_tdescription.value,
                     parameters: {
                         location: azure_tlocation.value,
-                        description: azure_tdescription.value,
-                        subnetAddressPrefix: azure_tsubnetAddressPrefix.value,
-                        addressPrefix: azure_taddressPrefix.value,
                         vmType: azure_tvmType.value,
                         imageName: azure_timageName.value,
                         password: azure_tpassword.value,
@@ -543,9 +541,6 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 $scope.getTemplates();
                 azure_tclusterName.value = "";
                 azure_tdescription.value = "";
-                azure_tsubnetAddressPrefix.value = "";
-                azure_taddressPrefix.value = "";
-                azure_tdeploymentSlot.value = "";
                 azure_tusername.value = "";
                 azure_tpassword.value = "";
                 azure_sshPublicKey.value = "";
