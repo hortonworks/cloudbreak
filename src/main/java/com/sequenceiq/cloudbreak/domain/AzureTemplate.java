@@ -17,8 +17,8 @@ public class AzureTemplate extends Template implements ProvisionEntity {
     @Column(nullable = false)
     private String name;
     private String description;
-    private String subnetAddressPrefix;
-    private String addressPrefix;
+    //private String subnetAddressPrefix;
+   // private String addressPrefix;
     private String vmType;
     private String imageName;
     private String password;
@@ -56,13 +56,13 @@ public class AzureTemplate extends Template implements ProvisionEntity {
         this.description = description;
     }
 
-    public String getSubnetAddressPrefix() {
+   /* public String getSubnetAddressPrefix() {
         return subnetAddressPrefix;
     }
 
     public void setSubnetAddressPrefix(String subnetAddressPrefix) {
         this.subnetAddressPrefix = subnetAddressPrefix;
-    }
+    }*/
 
     public String getImageName() {
         return imageName;
@@ -88,13 +88,13 @@ public class AzureTemplate extends Template implements ProvisionEntity {
         this.password = password;
     }
 
-    public String getAddressPrefix() {
+  /*  public String getAddressPrefix() {
         return addressPrefix;
     }
 
     public void setAddressPrefix(String addressPrefix) {
         this.addressPrefix = addressPrefix;
-    }
+    }*/
 
     public Set<Port> getPorts() {
         return ports;

@@ -254,8 +254,8 @@ public class AzureProvisionService implements ProvisionService {
             props.put(NAME, name);
             props.put(AFFINITYGROUP, commonName);
             props.put(SUBNETNAME, name);
-            props.put(ADDRESSPREFIX, azureTemplate.getAddressPrefix());
-            props.put(SUBNETADDRESSPREFIX, azureTemplate.getSubnetAddressPrefix());
+            props.put(ADDRESSPREFIX, "172.16.0.0/16");
+            props.put(SUBNETADDRESSPREFIX, "172.16.0.0/24");
             HttpResponseDecorator virtualNetworkResponse = (HttpResponseDecorator) azureClient.createVirtualNetwork(props);
             String requestId = (String) azureClient.getRequestId(virtualNetworkResponse);
             azureClient.waitUntilComplete(requestId);

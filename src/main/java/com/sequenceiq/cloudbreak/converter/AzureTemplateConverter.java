@@ -27,11 +27,11 @@ public class AzureTemplateConverter extends AbstractConverter<TemplateJson, Azur
         Map<String, Object> props = new HashMap<>();
         putProperty(props, AzureTemplateParam.LOCATION.getName(), entity.getLocation());
         putProperty(props, AzureTemplateParam.DESCRIPTION.getName(), entity.getDescription());
-        putProperty(props, AzureTemplateParam.ADDRESSPREFIX.getName(), entity.getSubnetAddressPrefix());
+      //  putProperty(props, AzureTemplateParam.ADDRESSPREFIX.getName(), entity.getSubnetAddressPrefix());
         putProperty(props, AzureTemplateParam.IMAGENAME.getName(), entity.getImageName());
         putProperty(props, AzureTemplateParam.VMTYPE.getName(), entity.getVmType());
         putProperty(props, AzureTemplateParam.PASSWORD.getName(), entity.getPassword());
-        putProperty(props, AzureTemplateParam.SUBNETADDRESSPREFIX.getName(), entity.getSubnetAddressPrefix());
+        //putProperty(props, AzureTemplateParam.SUBNETADDRESSPREFIX.getName(), entity.getSubnetAddressPrefix());
         props.put(AzureTemplateParam.PORTS.getName(), entity.getPorts());
         azureTemplateJson.setCloudPlatform(CloudPlatform.AZURE);
         azureTemplateJson.setParameters(props);
@@ -48,9 +48,9 @@ public class AzureTemplateConverter extends AbstractConverter<TemplateJson, Azur
         azureTemplate.setLocation(String.valueOf(json.getParameters().get(AzureTemplateParam.LOCATION.getName())));
         azureTemplate.setName(String.valueOf(json.getName()));
         azureTemplate.setPassword(String.valueOf(json.getParameters().get(AzureTemplateParam.PASSWORD.getName())));
-        azureTemplate.setAddressPrefix(String.valueOf(json.getParameters().get(AzureTemplateParam.ADDRESSPREFIX.getName())));
+      //  azureTemplate.setAddressPrefix(String.valueOf(json.getParameters().get(AzureTemplateParam.ADDRESSPREFIX.getName())));
         azureTemplate.setVmType(String.valueOf(json.getParameters().get(AzureTemplateParam.VMTYPE.getName())));
-        azureTemplate.setSubnetAddressPrefix(String.valueOf(json.getParameters().get(AzureTemplateParam.SUBNETADDRESSPREFIX.getName())));
+        //azureTemplate.setSubnetAddressPrefix(String.valueOf(json.getParameters().get(AzureTemplateParam.SUBNETADDRESSPREFIX.getName())));
         Set<Port> ports = new HashSet<>();
         Object portObject = json.getParameters().get(AzureTemplateParam.PORTS.getName());
         if (portObject != null) {
