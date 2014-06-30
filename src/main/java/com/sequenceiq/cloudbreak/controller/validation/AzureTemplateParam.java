@@ -3,8 +3,8 @@ package com.sequenceiq.cloudbreak.controller.validation;
 import java.util.ArrayList;
 
 import com.google.common.base.Optional;
-import com.sequenceiq.cloudbreak.service.azure.AzureLocation;
-import com.sequenceiq.cloudbreak.service.azure.AzureVmType;
+import com.sequenceiq.cloudbreak.domain.AzureLocation;
+import com.sequenceiq.cloudbreak.domain.AzureVmType;
 
 public enum AzureTemplateParam implements TemplateParam {
 

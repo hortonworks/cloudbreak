@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.azure;
+package com.sequenceiq.cloudbreak.service.credential.azure;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.AzureCredentialRepository;
+import com.sequenceiq.cloudbreak.service.stack.azure.KeyGeneratorService;
 
 @Service
 public class AzureCredentialService {

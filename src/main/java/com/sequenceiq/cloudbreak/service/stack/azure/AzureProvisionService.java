@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.azure;
+package com.sequenceiq.cloudbreak.service.stack.azure;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -26,18 +26,21 @@ import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
+import com.sequenceiq.cloudbreak.domain.AzureLocation;
 import com.sequenceiq.cloudbreak.domain.AzureStackDescription;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
+import com.sequenceiq.cloudbreak.domain.AzureVmType;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.DetailedAzureStackDescription;
 import com.sequenceiq.cloudbreak.domain.MetaData;
+import com.sequenceiq.cloudbreak.domain.Port;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackDescription;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.credential.azure.AzureCredentialService;
 import com.sequenceiq.cloudbreak.service.stack.ProvisionService;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 

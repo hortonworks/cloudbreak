@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
-import com.sequenceiq.cloudbreak.service.azure.AzureCredentialService;
+import com.sequenceiq.cloudbreak.service.credential.azure.AzureCredentialService;
 
 @Service
 public class SimpleTemplateService implements TemplateService {

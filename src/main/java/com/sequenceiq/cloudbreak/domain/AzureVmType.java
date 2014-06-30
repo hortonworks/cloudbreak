@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.azure;
+package com.sequenceiq.cloudbreak.domain;
 
 public enum AzureVmType {
 

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.azure;
+package com.sequenceiq.cloudbreak.service.stack.azure;
 
 import java.io.IOException;
 

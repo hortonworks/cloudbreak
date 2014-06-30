@@ -23,6 +23,13 @@ public class Port {
     public Port() {
     }
 
+    public Port(String name, String port, String localPort, String protocol) {
+        this.name = name;
+        this.localPort = localPort;
+        this.port = port;
+        this.protocol = protocol;
+    }
+
     public Long getId() {
         return id;
     }
