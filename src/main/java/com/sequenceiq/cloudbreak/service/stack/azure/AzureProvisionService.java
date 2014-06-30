@@ -45,7 +45,6 @@ import com.sequenceiq.cloudbreak.service.credential.azure.AzureCredentialService
 import com.sequenceiq.cloudbreak.service.stack.ProvisionService;
 import com.sequenceiq.cloudbreak.service.stack.StackCreationFailure;
 import com.sequenceiq.cloudbreak.service.stack.StackCreationSuccess;
-import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 
 import groovyx.net.http.HttpResponseDecorator;
 import groovyx.net.http.HttpResponseException;
