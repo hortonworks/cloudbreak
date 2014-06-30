@@ -24,7 +24,7 @@ import javax.persistence.Version;
 
 @Entity
 @Table(name = "Stack", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "stack_user", "name" } )
+        @UniqueConstraint(columnNames = { "stack_user", "name" })
 })
 @NamedQueries({
         @NamedQuery(

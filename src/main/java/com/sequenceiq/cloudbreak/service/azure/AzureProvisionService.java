@@ -189,7 +189,8 @@ public class AzureProvisionService implements ProvisionService {
         return actualObj.get("Deployment").get("RoleInstanceList").get("RoleInstance").get("IpAddress").asText();
     }
 
-    private void createVirtualMachine(AzureClient azureClient, AzureTemplate azureTemplate, String name, String vmName, String commonName, User user) throws FileNotFoundException, CertificateException, NoSuchAlgorithmException {
+    private void createVirtualMachine(AzureClient azureClient, AzureTemplate azureTemplate, String name, String vmName, String commonName, User user)
+            throws FileNotFoundException, CertificateException, NoSuchAlgorithmException {
         byte[] encoded = Base64.encodeBase64(vmName.getBytes());
         String label = new String(encoded);
         Map<String, Object> props = new HashMap<>();
@@ -361,7 +362,8 @@ public class AzureProvisionService implements ProvisionService {
                 Object cloudService = azureClient.getCloudService(vmName);
                 detailedAzureStackDescription.getCloudServices().add(jsonHelper.createJsonFromString(cloudService.toString()).toString());
             } catch (Exception ex) {
-                detailedAzureStackDescription.getCloudServices().add(jsonHelper.createJsonFromString(String.format("{\"HostedService\": {%s}}", ERROR)).toString());
+                detailedAzureStackDescription.getCloudServices()
+                        .add(jsonHelper.createJsonFromString(String.format("{\"HostedService\": {%s}}", ERROR)).toString());
             }
             try {
                 Object virtualMachine = azureClient.getVirtualMachine(props);
