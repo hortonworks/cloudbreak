@@ -135,7 +135,7 @@ public class AzureCredentialService {
     }
 
     public static String getCerFile(String user, Long templateId) {
-        return String.format("%s.cer", getSshFolderForTemplate(user, templateId));
+        return String.format("%s/%s.cer", getSshFolderForTemplate(user, templateId), user);
     }
 
     public static String getCertificateFolder(Credential credential, String user) {

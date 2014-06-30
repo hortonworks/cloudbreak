@@ -36,11 +36,10 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackDescription;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.User;
-import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
+import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.ProvisionService;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
-import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
 import groovyx.net.http.HttpResponseDecorator;
 import groovyx.net.http.HttpResponseException;
@@ -76,6 +75,7 @@ public class AzureProvisionService implements ProvisionService {
     private static final String SSHPUBLICKEYPATH = "sshPublicKeyPath";
     private static final String SERVICENAME = "serviceName";
     private static final String PORTS = "ports";
+    private static final String DATA = "data";
     private static final String ERROR = "\"error\":\"Could not fetch data from azure\"";
     private static final int NOT_FOUND = 404;
     private static final String DEFAULT_USER_NAME = "ubuntu";
@@ -90,11 +90,14 @@ public class AzureProvisionService implements ProvisionService {
     @Autowired
     private WebsocketService websocketService;
 
+    @Autowired
+    private RetryingStackUpdater retryingStackUpdater;
+
     @Override
     @Async
     public void createStack(User user, Stack stack, Credential credential) {
         AzureTemplate azureTemplate = (AzureTemplate) stack.getTemplate();
-        updatedStackStatus(stack.getId(), Status.REQUESTED);
+        retryingStackUpdater.updateStackStatus(stack.getId(), Status.REQUESTED);
         String filePath = AzureCredentialService.getUserJksFileName(credential, user.emailAsFolder());
         File file = new File(filePath);
         AzureClient azureClient = new AzureClient(
@@ -102,28 +105,41 @@ public class AzureProvisionService implements ProvisionService {
                 file.getAbsolutePath(),
                 ((AzureCredential) credential).getJks()
         );
-        updatedStackStatus(stack.getId(), Status.CREATE_IN_PROGRESS);
+        retryingStackUpdater.updateStackStatus(stack.getId(), Status.CREATE_IN_PROGRESS);
         String name = stack.getName().replaceAll("\\s+", "");
         String commonName = ((AzureCredential) credential).getName().replaceAll("\\s+", "");
         createAffinityGroup(azureClient, azureTemplate, commonName);
         createStorageAccount(azureClient, azureTemplate, commonName);
         createVirtualNetwork(azureClient, azureTemplate, name, commonName);
 
+
         for (int i = 0; i < stack.getNodeCount(); i++) {
             try {
                 String vmName = getVmName(name, i);
                 createCloudService(azureClient, azureTemplate, name, vmName, commonName);
+                createServiceCertificate(azureClient, azureTemplate, vmName, commonName, user);
                 createVirtualMachine(azureClient, azureTemplate, name, vmName, commonName, user);
+            } catch (FileNotFoundException e) {
+                LOGGER.info("Problem with the ssh file because not found: " + e.getMessage());
+                retryingStackUpdater.updateStackStatus(azureTemplate.getId(), Status.CREATE_FAILED);
+                return;
+            } catch (CertificateException e) {
+                LOGGER.info("Problem wiht the certificate file: " + e.getMessage());
+                retryingStackUpdater.updateStackStatus(azureTemplate.getId(), Status.CREATE_FAILED);
+                return;
+            } catch (NoSuchAlgorithmException e) {
+                LOGGER.info("Problem wiht the fingerprint: " + e.getMessage());
+                retryingStackUpdater.updateStackStatus(azureTemplate.getId(), Status.CREATE_FAILED);
+                return;
             } catch (Exception ex) {
                 LOGGER.info("Problem with the stack creation: " + ex.getMessage());
-                updatedStackStatus(stack.getId(), Status.CREATE_FAILED);
+                retryingStackUpdater.updateStackStatus(stack.getId(), Status.CREATE_FAILED);
                 return;
             }
         }
-        stack.setMetaData(collectMetaData(stack, azureClient, name));
-        stack.setHash(getMD5(stack));
-        stackRepository.save(stack);
-        updatedStackStatus(stack.getId(), Status.CREATE_COMPLETED);
+        retryingStackUpdater.updateStackMetaData(stack.getId(), collectMetaData(stack, azureClient, name));
+        retryingStackUpdater.doUpdateStackHash(stack.getId(), getMD5(stack));
+        retryingStackUpdater.updateStackStatus(stack.getId(), Status.CREATE_COMPLETED);
     }
 
     private Set<MetaData> collectMetaData(Stack stack, AzureClient azureClient, String name) {
@@ -173,16 +189,7 @@ public class AzureProvisionService implements ProvisionService {
         return actualObj.get("Deployment").get("RoleInstanceList").get("RoleInstance").get("IpAddress").asText();
     }
 
-    private void updatedStackStatus(Long id, Status status) {
-        Stack updatedStack = stackRepository.findById(id);
-        updatedStack.setStatus(status);
-        stackRepository.save(updatedStack);
-        websocketService.sendToTopicUser(updatedStack.getUser().getEmail(), WebsocketEndPoint.STACK,
-                new StatusMessage(updatedStack.getId(), updatedStack.getName(), status.name()));
-    }
-
-
-    private void createVirtualMachine(AzureClient azureClient, AzureTemplate azureTemplate, String name, String vmName, String commonName, User user) {
+    private void createVirtualMachine(AzureClient azureClient, AzureTemplate azureTemplate, String name, String vmName, String commonName, User user) throws FileNotFoundException, CertificateException, NoSuchAlgorithmException {
         byte[] encoded = Base64.encodeBase64(vmName.getBytes());
         String label = new String(encoded);
         Map<String, Object> props = new HashMap<>();
@@ -205,27 +212,12 @@ public class AzureProvisionService implements ProvisionService {
         );
         props.put(HOSTNAME, vmName);
         props.put(USERNAME, DEFAULT_USER_NAME);
-        if (azureTemplate.getPassword() != null) {
+        if (azureTemplate.getPassword() != null && !azureTemplate.getPassword().isEmpty()) {
             props.put(PASSWORD, azureTemplate.getPassword());
         } else {
-            try {
-                X509Certificate sshCert = new X509Certificate(AzureCredentialService.getCerFile(user.emailAsFolder(), azureTemplate.getId()));
-                props.put(SSHPUBLICKEYFINGERPRINT, sshCert.getSha1Fingerprint());
-                props.put(SSHPUBLICKEYPATH, String.format("/home/%s/.ssh/authorized_keys", DEFAULT_USER_NAME));
-            } catch (FileNotFoundException e) {
-                LOGGER.info("Problem with the ssh file because not found: " + e.getMessage());
-                updatedStackStatus(azureTemplate.getId(), Status.CREATE_FAILED);
-                return;
-            } catch (CertificateException e) {
-                LOGGER.info("Problem wiht the certificate file: " + e.getMessage());
-                updatedStackStatus(azureTemplate.getId(), Status.CREATE_FAILED);
-                return;
-            } catch (NoSuchAlgorithmException e) {
-                LOGGER.info("Problem wiht the fingerprint: " + e.getMessage());
-                updatedStackStatus(azureTemplate.getId(), Status.CREATE_FAILED);
-                return;
-            }
-
+            X509Certificate sshCert = new X509Certificate(AzureCredentialService.getCerFile(user.emailAsFolder(), azureTemplate.getId()));
+            props.put(SSHPUBLICKEYFINGERPRINT, sshCert.getSha1Fingerprint());
+            props.put(SSHPUBLICKEYPATH, String.format("/home/%s/.ssh/authorized_keys", DEFAULT_USER_NAME));
         }
         props.put(SERVICENAME, vmName);
         props.put(SUBNETNAME, name);
@@ -247,6 +239,16 @@ public class AzureProvisionService implements ProvisionService {
         azureClient.waitUntilComplete(requestId);
     }
 
+    private void createServiceCertificate(AzureClient azureClient, AzureTemplate azureTemplate, String name, String commonName, User user)
+            throws FileNotFoundException, CertificateException {
+        Map<String, String> props = new HashMap<>();
+        props.put(NAME, name);
+        X509Certificate sshCert = new X509Certificate(AzureCredentialService.getCerFile(user.emailAsFolder(), azureTemplate.getId()));
+        props.put(DATA, new String(sshCert.getPem()));
+        HttpResponseDecorator serviceCertificate = (HttpResponseDecorator) azureClient.createServiceCertificate(props);
+        String requestId = (String) azureClient.getRequestId(serviceCertificate);
+        azureClient.waitUntilComplete(requestId);
+    }
 
     private void createVirtualNetwork(AzureClient azureClient, AzureTemplate azureTemplate, String name, String commonName) {
         if (!azureClient.getVirtualNetworkConfiguration().toString().contains(name)) {
@@ -303,20 +305,18 @@ public class AzureProvisionService implements ProvisionService {
                 file.getAbsolutePath(),
                 ((AzureCredential) credential).getJks()
         );
-
         AzureStackDescription azureStackDescription = new AzureStackDescription();
-        String templateName = stack.getName();
-        try {
-            Object cloudService = azureClient.getCloudService(templateName);
-            azureStackDescription.setCloudService(jsonHelper.createJsonFromString(cloudService.toString()));
-        } catch (Exception ex) {
-            azureStackDescription.setCloudService(jsonHelper.createJsonFromString(String.format("{\"HostedService\": {%s}}", ERROR)));
-        }
         for (int i = 0; i < stack.getNodeCount(); i++) {
-            String vmName = getVmName(templateName, i);
+            String vmName = getVmName(stack.getName(), i);
             Map<String, String> props = new HashMap<>();
-            props.put(SERVICENAME, templateName);
+            props.put(SERVICENAME, vmName);
             props.put(NAME, vmName);
+            try{
+                Object cloudService = azureClient.getCloudService(vmName);
+                azureStackDescription.getCloudServices().add(jsonHelper.createJsonFromString(cloudService.toString()).toString());
+            } catch (Exception ex) {
+                azureStackDescription.getCloudServices().add(jsonHelper.createJsonFromString(String.format("{\"HostedService\": {%s}}", ERROR)).toString());
+            }
             try {
                 Object virtualMachine = azureClient.getVirtualMachine(props);
                 azureStackDescription.getVirtualMachines().add(jsonHelper.createJsonFromString(virtualMachine.toString()).toString());
@@ -346,12 +346,6 @@ public class AzureProvisionService implements ProvisionService {
             detailedAzureStackDescription.setAffinityGroup(jsonHelper.createJsonFromString(String.format("{\"AffinityGroup\": {%s}}", ERROR)));
         }
         try {
-            Object cloudService = azureClient.getCloudService(templateName);
-            detailedAzureStackDescription.setCloudService(jsonHelper.createJsonFromString(cloudService.toString()).toString());
-        } catch (Exception ex) {
-            detailedAzureStackDescription.setCloudService(jsonHelper.createJsonFromString(String.format("{\"HostedService\": {%s}}", ERROR)).toString());
-        }
-        try {
             Object storageAccount = azureClient.getStorageAccount(templateName);
             detailedAzureStackDescription.setStorageAccount(jsonHelper.createJsonFromString(storageAccount.toString()));
         } catch (Exception ex) {
@@ -363,6 +357,12 @@ public class AzureProvisionService implements ProvisionService {
             Map<String, String> props = new HashMap<>();
             props.put(SERVICENAME, templateName);
             props.put(NAME, vmName);
+            try{
+                Object cloudService = azureClient.getCloudService(vmName);
+                detailedAzureStackDescription.getCloudServices().add(jsonHelper.createJsonFromString(cloudService.toString()).toString());
+            } catch (Exception ex) {
+                detailedAzureStackDescription.getCloudServices().add(jsonHelper.createJsonFromString(String.format("{\"HostedService\": {%s}}", ERROR)).toString());
+            }
             try {
                 Object virtualMachine = azureClient.getVirtualMachine(props);
                 detailedAzureStackDescription.getVirtualMachines().add(jsonHelper.createJsonFromString(virtualMachine.toString()).toString());
@@ -391,6 +391,7 @@ public class AzureProvisionService implements ProvisionService {
             props.put(NAME, vmName);
             try {
                 Object deleteVirtualMachineResult = azureClient.deleteVirtualMachine(props);
+                Object deleteCloudServiceResult = azureClient.deleteCloudService(props);
             } catch (HttpResponseException ex) {
                 httpResponseExceptionHandler(ex, vmName, user.getId());
             } catch (Exception ex) {
@@ -401,7 +402,7 @@ public class AzureProvisionService implements ProvisionService {
         try {
             Map<String, String> props = new HashMap<>();
             props.put(NAME, templateName);
-            Object deleteCloudServiceResult = azureClient.deleteCloudService(props);
+            Object deleteCloudServiceResult = azureClient.deleteVirtualNetwork(props);
         } catch (HttpResponseException ex) {
             httpResponseExceptionHandler(ex, templateName, user.getId());
         } catch (Exception ex) {

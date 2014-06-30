@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 public class DetailedAzureStackDescription extends StackDescription {
 
     private String affinityGroup;
-    private String cloudService;
+    private List<String> cloudServices = new ArrayList<>();
     private String storageAccount;
     private List<String> virtualMachines = new ArrayList<>();
 
@@ -26,12 +26,12 @@ public class DetailedAzureStackDescription extends StackDescription {
     }
 
     @JsonRawValue
-    public String getCloudService() {
-        return cloudService;
+    public List<String> getCloudServices() {
+        return cloudServices;
     }
 
-    public void setCloudService(String cloudService) {
-        this.cloudService = cloudService;
+    public void setCloudServices(List<String> cloudServices) {
+        this.cloudServices = cloudServices;
     }
 
     @JsonRawValue

@@ -4,10 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonRawValue;
-import com.fasterxml.jackson.databind.JsonNode;
 
 public class AzureStackDescription extends StackDescription {
-    private String cloudService;
+    private List<String> cloudServices = new ArrayList<>();
 
     private List<String> virtualMachines = new ArrayList<>();
 
@@ -16,12 +15,12 @@ public class AzureStackDescription extends StackDescription {
     }
 
     @JsonRawValue
-    public String getCloudService() {
-        return cloudService;
+    public List<String> getCloudServices() {
+        return cloudServices;
     }
 
-    public void setCloudService(JsonNode cloudService) {
-        this.cloudService = cloudService.toString();
+    public void setCloudServices(List<String> cloudServices) {
+        this.cloudServices = cloudServices;
     }
 
     @JsonRawValue
