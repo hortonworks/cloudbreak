@@ -9,10 +9,10 @@ import com.sequenceiq.cloudbreak.service.azure.AzureVmType;
 public enum AzureTemplateParam implements TemplateParam {
 
     LOCATION("location", true, AzureLocation.class, Optional.<String>absent()),
-    DESCRIPTION("description", true, String.class, Optional.<String>absent()),
-   // ADDRESSPREFIX("addressPrefix", true, String.class, Optional.of("\\b(?:[0-9]{1,3}\\.){3}[0-9]{1,3}\\/[0-9]{1,3}")),
-   // SUBNETADDRESSPREFIX("subnetAddressPrefix", true, String.class, Optional.of("\\b(?:[0-9]{1,3}\\.){3}[0-9]{1,3}\\/[0-9]{1,3}")),
-   // DEPLOYMENTSLOT("deploymentSlot", true, String.class, Optional.<String>absent()),
+    //DESCRIPTION("description", true, String.class, Optional.<String>absent()),
+    // ADDRESSPREFIX("addressPrefix", true, String.class, Optional.of("\\b(?:[0-9]{1,3}\\.){3}[0-9]{1,3}\\/[0-9]{1,3}")),
+    // SUBNETADDRESSPREFIX("subnetAddressPrefix", true, String.class, Optional.of("\\b(?:[0-9]{1,3}\\.){3}[0-9]{1,3}\\/[0-9]{1,3}")),
+    // DEPLOYMENTSLOT("deploymentSlot", true, String.class, Optional.<String>absent()),
     IMAGENAME("imageName", true, String.class, Optional.<String>absent()),
     //USERNAME("username", true, String.class, Optional.<String>absent()),
     VMTYPE("vmType", true, AzureVmType.class, Optional.<String>absent()),
