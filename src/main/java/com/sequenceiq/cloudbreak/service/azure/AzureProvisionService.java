@@ -52,8 +52,8 @@ public class AzureProvisionService implements ProvisionService {
     private static final int HASH2 = 0x100;
     private static final int END_INDEX = 3;
     private static final int BEGIN_INDEX = 1;
+    private static final int NOT_FOUND = 404;
     private static final ObjectMapper MAPPER = new ObjectMapper();
-    private static final String OK_STATUS = "ok";
     private static final String LOCATION = "location";
     private static final String NAME = "name";
     private static final String DESCRIPTION = "description";
@@ -70,22 +70,17 @@ public class AzureProvisionService implements ProvisionService {
     private static final String SUBNETNAME = "subnetName";
     private static final String VIRTUALNETWORKNAME = "virtualNetworkName";
     private static final String VMTYPE = "vmType";
-    private static final String DATADIR = "userdatas";
     private static final String SSHPUBLICKEYFINGERPRINT = "sshPublicKeyFingerprint";
     private static final String SSHPUBLICKEYPATH = "sshPublicKeyPath";
     private static final String SERVICENAME = "serviceName";
     private static final String PORTS = "ports";
     private static final String DATA = "data";
     private static final String ERROR = "\"error\":\"Could not fetch data from azure\"";
-    private static final int NOT_FOUND = 404;
     private static final String DEFAULT_USER_NAME = "ubuntu";
     private static final String PRODUCTION = "production";
 
     @Autowired
     private JsonHelper jsonHelper;
-
-    @Autowired
-    private StackRepository stackRepository;
 
     @Autowired
     private WebsocketService websocketService;
@@ -101,9 +96,7 @@ public class AzureProvisionService implements ProvisionService {
         String filePath = AzureCredentialService.getUserJksFileName(credential, user.emailAsFolder());
         File file = new File(filePath);
         AzureClient azureClient = new AzureClient(
-                ((AzureCredential) credential).getSubscriptionId(),
-                file.getAbsolutePath(),
-                ((AzureCredential) credential).getJks()
+                ((AzureCredential) credential).getSubscriptionId(), file.getAbsolutePath(), ((AzureCredential) credential).getJks()
         );
         retryingStackUpdater.updateStackStatus(stack.getId(), Status.CREATE_IN_PROGRESS);
         String name = stack.getName().replaceAll("\\s+", "");
@@ -140,6 +133,130 @@ public class AzureProvisionService implements ProvisionService {
         retryingStackUpdater.updateStackMetaData(stack.getId(), collectMetaData(stack, azureClient, name));
         retryingStackUpdater.doUpdateStackHash(stack.getId(), getMD5(stack));
         retryingStackUpdater.updateStackStatus(stack.getId(), Status.CREATE_COMPLETED);
+    }
+
+    @Override
+    public StackDescription describeStack(User user, Stack stack, Credential credential) {
+        String filePath = AzureCredentialService.getUserJksFileName(credential, user.emailAsFolder());
+        File file = new File(filePath);
+        AzureClient azureClient = new AzureClient(
+                ((AzureCredential) credential).getSubscriptionId(), file.getAbsolutePath(), ((AzureCredential) credential).getJks()
+        );
+        AzureStackDescription azureStackDescription = new AzureStackDescription();
+        for (int i = 0; i < stack.getNodeCount(); i++) {
+            String vmName = getVmName(stack.getName(), i);
+            Map<String, String> props = new HashMap<>();
+            props.put(SERVICENAME, vmName);
+            props.put(NAME, vmName);
+            try {
+                Object cloudService = azureClient.getCloudService(vmName);
+                azureStackDescription.getCloudServices().add(jsonHelper.createJsonFromString(cloudService.toString()).toString());
+            } catch (Exception ex) {
+                azureStackDescription.getCloudServices().add(jsonHelper.createJsonFromString(String.format("{\"HostedService\": {%s}}", ERROR)).toString());
+            }
+            try {
+                Object virtualMachine = azureClient.getVirtualMachine(props);
+                azureStackDescription.getVirtualMachines().add(jsonHelper.createJsonFromString(virtualMachine.toString()).toString());
+            } catch (Exception ex) {
+                azureStackDescription.getVirtualMachines().add(jsonHelper.createJsonFromString(String.format("{\"Deployment\": {%s}}", ERROR)).toString());
+            }
+        }
+        return azureStackDescription;
+    }
+
+    @Override
+    public StackDescription describeStackWithResources(User user, Stack stack, Credential credential) {
+        String filePath = AzureCredentialService.getUserJksFileName(credential, user.emailAsFolder());
+        File file = new File(filePath);
+        AzureClient azureClient = new AzureClient(
+                ((AzureCredential) credential).getSubscriptionId(),
+                file.getAbsolutePath(),
+                ((AzureCredential) credential).getJks()
+        );
+
+        DetailedAzureStackDescription detailedAzureStackDescription = new DetailedAzureStackDescription();
+        String templateName = stack.getName();
+        try {
+            Object affinityGroup = azureClient.getAffinityGroup(templateName);
+            detailedAzureStackDescription.setAffinityGroup(jsonHelper.createJsonFromString(affinityGroup.toString()));
+        } catch (Exception ex) {
+            detailedAzureStackDescription.setAffinityGroup(jsonHelper.createJsonFromString(String.format("{\"AffinityGroup\": {%s}}", ERROR)));
+        }
+        try {
+            Object storageAccount = azureClient.getStorageAccount(templateName);
+            detailedAzureStackDescription.setStorageAccount(jsonHelper.createJsonFromString(storageAccount.toString()));
+        } catch (Exception ex) {
+            detailedAzureStackDescription.setStorageAccount(jsonHelper.createJsonFromString(String.format("{\"StorageService\": {%s}}", ERROR)));
+        }
+
+        for (int i = 0; i < stack.getNodeCount(); i++) {
+            String vmName = getVmName(templateName, i);
+            Map<String, String> props = new HashMap<>();
+            props.put(SERVICENAME, templateName);
+            props.put(NAME, vmName);
+            try {
+                Object cloudService = azureClient.getCloudService(vmName);
+                detailedAzureStackDescription.getCloudServices().add(jsonHelper.createJsonFromString(cloudService.toString()).toString());
+            } catch (Exception ex) {
+                detailedAzureStackDescription.getCloudServices()
+                        .add(jsonHelper.createJsonFromString(String.format("{\"HostedService\": {%s}}", ERROR)).toString());
+            }
+            try {
+                Object virtualMachine = azureClient.getVirtualMachine(props);
+                detailedAzureStackDescription.getVirtualMachines().add(jsonHelper.createJsonFromString(virtualMachine.toString()).toString());
+            } catch (Exception ex) {
+                detailedAzureStackDescription.getVirtualMachines().add(
+                        jsonHelper.createJsonFromString(String.format("{\"Deployment\": {%s}}", ERROR)).toString());
+            }
+        }
+        return detailedAzureStackDescription;
+    }
+
+    @Override
+    public void deleteStack(User user, Stack stack, Credential credential) {
+        String filePath = AzureCredentialService.getUserJksFileName(credential, user.emailAsFolder());
+        File file = new File(filePath);
+        AzureClient azureClient = new AzureClient(
+                ((AzureCredential) credential).getSubscriptionId(), file.getAbsolutePath(), ((AzureCredential) credential).getJks()
+        );
+        for (int i = 0; i < stack.getNodeCount(); i++) {
+            String vmName = getVmName(stack.getName(), i);
+            Map<String, String> props;
+            try {
+                props = new HashMap<>();
+                props.put(SERVICENAME, vmName);
+                props.put(NAME, vmName);
+                HttpResponseDecorator deleteVirtualMachineResult = (HttpResponseDecorator) azureClient.deleteVirtualMachine(props);
+                String requestId = (String) azureClient.getRequestId(deleteVirtualMachineResult);
+                azureClient.waitUntilComplete(requestId);
+
+            } catch (HttpResponseException ex) {
+                httpResponseExceptionHandler(ex, vmName, user.getId());
+            } catch (Exception ex) {
+                throw new InternalServerException(ex.getMessage());
+            }
+            try {
+                props = new HashMap<>();
+                props.put(SERVICENAME, ((AzureCredential) credential).getName().replaceAll("\\s+", ""));
+                props.put(NAME, vmName);
+                HttpResponseDecorator deleteCloudServiceResult = (HttpResponseDecorator) azureClient.deleteCloudService(props);
+                String requestId = (String) azureClient.getRequestId(deleteCloudServiceResult);
+                azureClient.waitUntilComplete(requestId);
+            } catch (HttpResponseException ex) {
+                httpResponseExceptionHandler(ex, vmName, user.getId());
+            } catch (Exception ex) {
+                throw new InternalServerException(ex.getMessage());
+            }
+
+        }
+    }
+
+    private void httpResponseExceptionHandler(HttpResponseException ex, String resourceName, Long userId) {
+        if (ex.getStatusCode() != NOT_FOUND) {
+            throw new InternalServerException(ex.getMessage());
+        } else {
+            LOGGER.info(String.format("Azure resource not found with %s name for %s userId.", resourceName, userId));
+        }
     }
 
     private Set<MetaData> collectMetaData(Stack stack, AzureClient azureClient, String name) {
@@ -187,6 +304,10 @@ public class AzureProvisionService implements ProvisionService {
     private String getPrivateIP(String response) throws IOException {
         JsonNode actualObj = MAPPER.readValue(response, JsonNode.class);
         return actualObj.get("Deployment").get("RoleInstanceList").get("RoleInstance").get("IpAddress").asText();
+    }
+
+    private String getVmName(String azureTemplate, int i) {
+        return String.format("%s-%s", azureTemplate, i);
     }
 
     private void createVirtualMachine(AzureClient azureClient, AzureTemplate azureTemplate, String name, String vmName, String commonName, User user)
@@ -290,151 +411,6 @@ public class AzureProvisionService implements ProvisionService {
             HttpResponseDecorator affinityResponse = (HttpResponseDecorator) azureClient.createAffinityGroup(props);
             String requestId = (String) azureClient.getRequestId(affinityResponse);
             azureClient.waitUntilComplete(requestId);
-        }
-    }
-
-    private String getVmName(String azureTemplate, int i) {
-        return String.format("%s-%s", azureTemplate, i);
-    }
-
-    @Override
-    public StackDescription describeStack(User user, Stack stack, Credential credential) {
-        String filePath = AzureCredentialService.getUserJksFileName(credential, user.emailAsFolder());
-        File file = new File(filePath);
-        AzureClient azureClient = new AzureClient(
-                ((AzureCredential) credential).getSubscriptionId(),
-                file.getAbsolutePath(),
-                ((AzureCredential) credential).getJks()
-        );
-        AzureStackDescription azureStackDescription = new AzureStackDescription();
-        for (int i = 0; i < stack.getNodeCount(); i++) {
-            String vmName = getVmName(stack.getName(), i);
-            Map<String, String> props = new HashMap<>();
-            props.put(SERVICENAME, vmName);
-            props.put(NAME, vmName);
-            try {
-                Object cloudService = azureClient.getCloudService(vmName);
-                azureStackDescription.getCloudServices().add(jsonHelper.createJsonFromString(cloudService.toString()).toString());
-            } catch (Exception ex) {
-                azureStackDescription.getCloudServices().add(jsonHelper.createJsonFromString(String.format("{\"HostedService\": {%s}}", ERROR)).toString());
-            }
-            try {
-                Object virtualMachine = azureClient.getVirtualMachine(props);
-                azureStackDescription.getVirtualMachines().add(jsonHelper.createJsonFromString(virtualMachine.toString()).toString());
-            } catch (Exception ex) {
-                azureStackDescription.getVirtualMachines().add(jsonHelper.createJsonFromString(String.format("{\"Deployment\": {%s}}", ERROR)).toString());
-            }
-        }
-        return azureStackDescription;
-    }
-
-    @Override
-    public StackDescription describeStackWithResources(User user, Stack stack, Credential credential) {
-        String filePath = AzureCredentialService.getUserJksFileName(credential, user.emailAsFolder());
-        File file = new File(filePath);
-        AzureClient azureClient = new AzureClient(
-                ((AzureCredential) credential).getSubscriptionId(),
-                file.getAbsolutePath(),
-                ((AzureCredential) credential).getJks()
-        );
-
-        DetailedAzureStackDescription detailedAzureStackDescription = new DetailedAzureStackDescription();
-        String templateName = stack.getName();
-        try {
-            Object affinityGroup = azureClient.getAffinityGroup(templateName);
-            detailedAzureStackDescription.setAffinityGroup(jsonHelper.createJsonFromString(affinityGroup.toString()));
-        } catch (Exception ex) {
-            detailedAzureStackDescription.setAffinityGroup(jsonHelper.createJsonFromString(String.format("{\"AffinityGroup\": {%s}}", ERROR)));
-        }
-        try {
-            Object storageAccount = azureClient.getStorageAccount(templateName);
-            detailedAzureStackDescription.setStorageAccount(jsonHelper.createJsonFromString(storageAccount.toString()));
-        } catch (Exception ex) {
-            detailedAzureStackDescription.setStorageAccount(jsonHelper.createJsonFromString(String.format("{\"StorageService\": {%s}}", ERROR)));
-        }
-
-        for (int i = 0; i < stack.getNodeCount(); i++) {
-            String vmName = getVmName(templateName, i);
-            Map<String, String> props = new HashMap<>();
-            props.put(SERVICENAME, templateName);
-            props.put(NAME, vmName);
-            try {
-                Object cloudService = azureClient.getCloudService(vmName);
-                detailedAzureStackDescription.getCloudServices().add(jsonHelper.createJsonFromString(cloudService.toString()).toString());
-            } catch (Exception ex) {
-                detailedAzureStackDescription.getCloudServices()
-                        .add(jsonHelper.createJsonFromString(String.format("{\"HostedService\": {%s}}", ERROR)).toString());
-            }
-            try {
-                Object virtualMachine = azureClient.getVirtualMachine(props);
-                detailedAzureStackDescription.getVirtualMachines().add(jsonHelper.createJsonFromString(virtualMachine.toString()).toString());
-            } catch (Exception ex) {
-                detailedAzureStackDescription.getVirtualMachines().add(
-                        jsonHelper.createJsonFromString(String.format("{\"Deployment\": {%s}}", ERROR)).toString());
-            }
-        }
-        return detailedAzureStackDescription;
-    }
-
-    @Override
-    public void deleteStack(User user, Stack stack, Credential credential) {
-        String filePath = AzureCredentialService.getUserJksFileName(credential, user.emailAsFolder());
-        File file = new File(filePath);
-        AzureClient azureClient = new AzureClient(
-                ((AzureCredential) credential).getSubscriptionId(),
-                file.getAbsolutePath(),
-                ((AzureCredential) credential).getJks()
-        );
-        String templateName = stack.getName();
-        for (int i = 0; i < stack.getNodeCount(); i++) {
-            String vmName = getVmName(templateName, i);
-            Map<String, String> props = new HashMap<>();
-            props.put(SERVICENAME, templateName);
-            props.put(NAME, vmName);
-            try {
-                Object deleteVirtualMachineResult = azureClient.deleteVirtualMachine(props);
-                Object deleteCloudServiceResult = azureClient.deleteCloudService(props);
-            } catch (HttpResponseException ex) {
-                httpResponseExceptionHandler(ex, vmName, user.getId());
-            } catch (Exception ex) {
-                throw new InternalServerException(ex.getMessage());
-            }
-
-        }
-        try {
-            Map<String, String> props = new HashMap<>();
-            props.put(NAME, templateName);
-            Object deleteCloudServiceResult = azureClient.deleteVirtualNetwork(props);
-        } catch (HttpResponseException ex) {
-            httpResponseExceptionHandler(ex, templateName, user.getId());
-        } catch (Exception ex) {
-            throw new InternalServerException(ex.getMessage());
-        }
-        try {
-            Map<String, String> props = new HashMap<>();
-            props.put(NAME, templateName);
-            Object deleteStorageAccountResult = azureClient.deleteStorageAccount(props);
-        } catch (HttpResponseException ex) {
-            httpResponseExceptionHandler(ex, templateName, user.getId());
-        } catch (Exception ex) {
-            throw new InternalServerException(ex.getMessage());
-        }
-        try {
-            Map<String, String> props = new HashMap<>();
-            props.put(NAME, templateName);
-            Object affinityGroup = azureClient.deleteAffinityGroup(props);
-        } catch (HttpResponseException ex) {
-            httpResponseExceptionHandler(ex, templateName, user.getId());
-        } catch (Exception ex) {
-            throw new InternalServerException(ex.getMessage());
-        }
-    }
-
-    private void httpResponseExceptionHandler(HttpResponseException ex, String resourceName, Long userId) {
-        if (ex.getStatusCode() != NOT_FOUND) {
-            throw new InternalServerException(ex.getMessage());
-        } else {
-            LOGGER.info(String.format("Azure resource not found with %s name for %s userId.", resourceName, userId));
         }
     }
 
