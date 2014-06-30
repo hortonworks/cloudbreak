@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
@@ -42,10 +43,14 @@ import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.credential.azure.AzureCredentialService;
 import com.sequenceiq.cloudbreak.service.stack.ProvisionService;
+import com.sequenceiq.cloudbreak.service.stack.StackCreationFailure;
+import com.sequenceiq.cloudbreak.service.stack.StackCreationSuccess;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 
 import groovyx.net.http.HttpResponseDecorator;
 import groovyx.net.http.HttpResponseException;
+import reactor.core.Reactor;
+import reactor.event.Event;
 
 @Service
 public class AzureProvisionService implements ProvisionService {
@@ -86,7 +91,7 @@ public class AzureProvisionService implements ProvisionService {
     private JsonHelper jsonHelper;
 
     @Autowired
-    private WebsocketService websocketService;
+    private Reactor reactor;
 
     @Autowired
     private RetryingStackUpdater retryingStackUpdater;
@@ -117,25 +122,31 @@ public class AzureProvisionService implements ProvisionService {
                 createVirtualMachine(azureClient, azureTemplate, name, vmName, commonName, user);
             } catch (FileNotFoundException e) {
                 LOGGER.info("Problem with the ssh file because not found: " + e.getMessage());
-                retryingStackUpdater.updateStackStatus(azureTemplate.getId(), Status.CREATE_FAILED);
+                reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(new StackCreationFailure(stack.getId(),
+                        "Error while creating Azure stack: ssh file not found")));
                 return;
             } catch (CertificateException e) {
-                LOGGER.info("Problem wiht the certificate file: " + e.getMessage());
-                retryingStackUpdater.updateStackStatus(azureTemplate.getId(), Status.CREATE_FAILED);
+                LOGGER.info("Problem with the certificate file: " + e.getMessage());
+                reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(new StackCreationFailure(stack.getId(),
+                        "Error while creating Azure stack: certificate not correct")));
                 return;
             } catch (NoSuchAlgorithmException e) {
                 LOGGER.info("Problem wiht the fingerprint: " + e.getMessage());
-                retryingStackUpdater.updateStackStatus(azureTemplate.getId(), Status.CREATE_FAILED);
+                reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(new StackCreationFailure(stack.getId(),
+                        "Error while creating Azure stack: no such algorithm exception")));
                 return;
             } catch (Exception ex) {
                 LOGGER.info("Problem with the stack creation: " + ex.getMessage());
-                retryingStackUpdater.updateStackStatus(stack.getId(), Status.CREATE_FAILED);
+                reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(new StackCreationFailure(stack.getId(),
+                        "Error while creating Azure stack: " + ex.getMessage())));
                 return;
             }
         }
         retryingStackUpdater.updateStackMetaData(stack.getId(), collectMetaData(stack, azureClient, name));
         retryingStackUpdater.doUpdateStackHash(stack.getId(), getMD5(stack));
         retryingStackUpdater.updateStackStatus(stack.getId(), Status.CREATE_COMPLETED);
+        reactor.notify(ReactorConfig.STACK_CREATE_SUCCESS_EVENT, Event.wrap(new StackCreationSuccess(stack.getId(),
+                "The whole stack created succesfull.")));
     }
 
     @Override
