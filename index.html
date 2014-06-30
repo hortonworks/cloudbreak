@@ -726,21 +726,21 @@
         <!-- .col-sm-9 -->
 
     </div>
-    <div class="form-group">
+    <div class="form-group" ng-hide="azure_sshPublicKey.length">
         <label class="col-sm-3 control-label" for="azure_tpassword">Password</label>
 
         <div class="col-sm-9">
-            <input type="text" class="form-control" id="azure_tpassword">
+            <input type="text" class="form-control" ng-model="azure_tpassword" id="azure_tpassword">
         </div>
         <!-- .col-sm-9 -->
 
     </div>
 
-    <div class="form-group">
-        <label class="col-sm-3 control-label" for="azure_tsshString">SSH string</label>
+    <div class="form-group" ng-hide="azure_tpassword.length">
+        <label class="col-sm-3 control-label" for="azure_sshPublicKey">SSH public key:</label>
 
         <div class="col-sm-9">
-            <input type="text" class="form-control" id="azure_tsshString">
+            <textarea rows="4" type="text" class="form-control" ng-model="azure_sshPublicKey" id="azure_sshPublicKey"></textarea>
         </div>
         <!-- .col-sm-9 -->
 

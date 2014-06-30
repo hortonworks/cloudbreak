@@ -534,7 +534,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                         vmType: azure_tvmType.value,
                         imageName: azure_timageName.value,
                         password: azure_tpassword.value,
-                        sshString: azure_tsshString.value,
+                        sshPublicKey: azure_sshPublicKey.value,
                         ports:[]
                     }
                 }
@@ -546,10 +546,9 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 azure_tsubnetAddressPrefix.value = "";
                 azure_taddressPrefix.value = "";
                 azure_tdeploymentSlot.value = "";
-                azure_timageName.value = "";
                 azure_tusername.value = "";
                 azure_tpassword.value = "";
-                azure_tsshString.value = "";
+                azure_sshPublicKey.value = "";
             }).error(function (data, status, headers, config) {
                 $scope.statusMessage = "Azure template creation failed: " + data.message;
             });
