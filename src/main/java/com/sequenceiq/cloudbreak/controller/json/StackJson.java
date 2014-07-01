@@ -32,7 +32,7 @@ public class StackJson implements JsonEntity {
     private String ambariServerIp;
     private String hash;
     private ClusterResponse cluster;
-    private Set<MetaDataJson> metadata = new HashSet<>();
+    private Set<InstanceMetaDataJson> metadata = new HashSet<>();
 
     public StackJson() {
     }
@@ -130,12 +130,12 @@ public class StackJson implements JsonEntity {
     }
 
     @JsonProperty("metadata")
-    public Set<MetaDataJson> getMetadata() {
+    public Set<InstanceMetaDataJson> getMetadata() {
         return metadata;
     }
 
     @JsonIgnore
-    public void setMetadata(Set<MetaDataJson> metadata) {
+    public void setMetadata(Set<InstanceMetaDataJson> metadata) {
         this.metadata = metadata;
     }
 

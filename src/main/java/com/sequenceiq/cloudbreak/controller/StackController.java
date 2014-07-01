@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
-import com.sequenceiq.cloudbreak.controller.json.MetaDataJson;
+import com.sequenceiq.cloudbreak.controller.json.InstanceMetaDataJson;
 import com.sequenceiq.cloudbreak.controller.json.StackJson;
 import com.sequenceiq.cloudbreak.controller.json.StatusRequestJson;
 import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
@@ -75,10 +75,10 @@ public class StackController {
         }
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/meta-data/{hash}")
+    @RequestMapping(method = RequestMethod.GET, value = "/metadata/{hash}")
     @ResponseBody
-    public ResponseEntity<Set<MetaDataJson>> getStack(@CurrentUser User user, @PathVariable String hash) {
-        Set<MetaDataJson> metaData = stackService.getMetaData(user, hash);
+    public ResponseEntity<Set<InstanceMetaDataJson>> getStackMetadata(@CurrentUser User user, @PathVariable String hash) {
+        Set<InstanceMetaDataJson> metaData = stackService.getMetaData(user, hash);
         return new ResponseEntity<>(metaData, HttpStatus.OK);
     }
 

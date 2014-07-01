@@ -63,7 +63,7 @@ public class TemplateController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/ssh/{templateId}")
+    @RequestMapping(method = RequestMethod.GET, value = "{templateId}/sshkey")
     @ResponseBody
     public ModelAndView getSshFile(@CurrentUser User user, @PathVariable Long templateId, HttpServletResponse response) throws Exception {
         File cerFile = templateService.getSshPublicKeyFile(user, templateId);

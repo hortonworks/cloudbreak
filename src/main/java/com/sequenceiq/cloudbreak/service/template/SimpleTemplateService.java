@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
-import com.sequenceiq.cloudbreak.service.credential.azure.AzureCredentialService;
+import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
 
 @Service
 public class SimpleTemplateService implements TemplateService {
@@ -46,7 +46,7 @@ public class SimpleTemplateService implements TemplateService {
     private StackRepository stackRepository;
 
     @Autowired
-    private AzureCredentialService azureCredentialService;
+    private AzureCertificateService azureCertificateService;
 
     @Override
     public Set<TemplateJson> getAll(User user) {
@@ -113,7 +113,7 @@ public class SimpleTemplateService implements TemplateService {
         templateRepository.save(azureTemplate);
         Object shhPublicKey = templateRequest.getParameters().get(AzureTemplateParam.SSH_PUBLIC_KEY.getName());
         if (shhPublicKey != null) {
-            azureCredentialService.generateSshCertificate(user, (AzureTemplate) azureTemplate, String.valueOf(shhPublicKey));
+            azureCertificateService.generateSshCertificate(user, (AzureTemplate) azureTemplate, String.valueOf(shhPublicKey));
         }
         return new IdJson(azureTemplate.getId());
     }
@@ -122,7 +122,7 @@ public class SimpleTemplateService implements TemplateService {
     public File getSshPublicKeyFile(User user, Long templateId) {
         Template one = templateRepository.findOne(templateId);
         if (CloudPlatform.AZURE.equals(one.cloudPlatform())) {
-            return azureCredentialService.getSshPublicKeyFile(user, templateId);
+            return azureCertificateService.getSshPublicKeyFile(user, templateId);
         } else {
             throw new UnsupportedOperationException("Ssh key function supported only on Azure platform.");
         }

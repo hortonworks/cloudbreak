@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.MetaData;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 
@@ -45,22 +45,22 @@ public class RetryingStackUpdater {
         }
     }
 
-    public Stack updateStackMetaData(Long stackId, Set<MetaData> metaData) {
+    public Stack updateStackMetaData(Long stackId, Set<InstanceMetaData> instanceMetaData) {
         int attempt = 1;
         try {
-            return doUpdateMetaData(stackId, metaData);
+            return doUpdateMetaData(stackId, instanceMetaData);
         } catch (OptimisticLockException | OptimisticLockingFailureException e) {
             LOGGER.info("Failed to update stack status. [id: '{}', attempt: '{}', Cause: {}]. Trying to save it again.",
                     stackId, attempt++, e.getClass().getSimpleName());
             if (attempt <= MAX_RETRIES) {
-                return doUpdateMetaData(stackId, metaData);
+                return doUpdateMetaData(stackId, instanceMetaData);
             } else {
                 throw new InternalServerException(String.format("Failed to update stack '%s' in 5 attempts. (while trying to update metadata)", stackId), e);
             }
         }
     }
 
-    public Stack updateStackMetaData(Long stackId, String hash) {
+    public Stack updateStackHash(Long stackId, String hash) {
         int attempt = 1;
         try {
             return doUpdateStackHash(stackId, hash);
@@ -148,9 +148,9 @@ public class RetryingStackUpdater {
         return stack;
     }
 
-    private Stack doUpdateMetaData(Long stackId, Set<MetaData> metaData) {
+    private Stack doUpdateMetaData(Long stackId, Set<InstanceMetaData> instanceMetaData) {
         Stack stack = stackRepository.findById(stackId);
-        stack.setMetaData(metaData);
+        stack.setInstanceMetaData(instanceMetaData);
         stack = stackRepository.save(stack);
         LOGGER.info("Updated stack metadata: [stack: '{}', status: '{}', statusReason: '{}'].", stackId);
         return stack;

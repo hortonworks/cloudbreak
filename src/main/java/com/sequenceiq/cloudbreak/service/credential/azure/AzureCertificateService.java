@@ -2,11 +2,11 @@ package com.sequenceiq.cloudbreak.service.credential.azure;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.security.KeyStore;
-import java.security.SecureRandom;
 import java.security.cert.Certificate;
 
 import org.apache.commons.codec.binary.Base64;
@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
@@ -25,10 +26,9 @@ import com.sequenceiq.cloudbreak.repository.AzureCredentialRepository;
 import com.sequenceiq.cloudbreak.service.stack.azure.KeyGeneratorService;
 
 @Service
-public class AzureCredentialService {
+public class AzureCertificateService {
 
-    public static final Logger LOGGER = LoggerFactory.getLogger(AzureCredentialService.class);
-    private static final SecureRandom RANDOM = new SecureRandom();
+    public static final Logger LOGGER = LoggerFactory.getLogger(AzureCertificateService.class);
     private static final String DATADIR = "userdatas";
     private static final String CERTIFICATE_DATADIR = "certificate";
     private static final String SSH_DATADIR = "ssh";
@@ -64,9 +64,9 @@ public class AzureCredentialService {
             keyGeneratorService.generateKey(user, azureCredential, ENTRY, getUserJksFileName(azureCredential, user.emailAsFolder()));
             KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
             char[] pass = azureCredential.getJks().toCharArray();
-            java.io.FileInputStream fis = null;
+            FileInputStream fis = null;
             try {
-                fis = new java.io.FileInputStream(new File(getUserJksFileName(azureCredential, user.emailAsFolder())));
+                fis = new FileInputStream(new File(getUserJksFileName(azureCredential, user.emailAsFolder())));
                 ks.load(fis, pass);
             } finally {
                 if (fis != null) {
@@ -79,6 +79,7 @@ public class AzureCredentialService {
             os.close();
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
+            throw new InternalServerException("There was a problem with the certificate generation", e);
         }
     }
 
@@ -109,9 +110,11 @@ public class AzureCredentialService {
                 keyGeneratorService.generateSshKey(getSshFolderForTemplate(user.emailAsFolder(), azureTemplate.getId()) + "/" + user.emailAsFolder());
             } catch (InterruptedException e) {
                 LOGGER.error("An error occured under the ssh generation for {} template. The error was: {} {}", azureTemplate.getId(), e.getMessage(), e);
+                throw new InternalServerException(e.getMessage());
             }
         } catch (IOException ex) {
             LOGGER.error("An error occured under the ssh folder generation: {} {}", ex.getMessage(), ex);
+            throw new InternalServerException("There was a problem with the ssh key generation", ex);
         }
     }
 

@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.controller.json.IdJson;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
 import com.sequenceiq.cloudbreak.security.CurrentUser;
-import com.sequenceiq.cloudbreak.service.credential.azure.AzureCredentialService;
+import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 
 @Controller
@@ -35,7 +35,7 @@ public class CredentialController {
     private CredentialService credentialService;
 
     @Autowired
-    private AzureCredentialService azureCredentialService;
+    private AzureCertificateService azureCertificateService;
 
     @Autowired
     private UserRepository userRepository;
@@ -79,7 +79,7 @@ public class CredentialController {
     @RequestMapping(method = RequestMethod.GET, value = "/certificate/{credentialId}")
     @ResponseBody
     public ModelAndView getJksFile(@CurrentUser User user, @PathVariable Long credentialId, HttpServletResponse response) throws Exception {
-        File cerFile = azureCredentialService.getCertificateFile(credentialId, user);
+        File cerFile = azureCertificateService.getCertificateFile(credentialId, user);
         response.setContentType("application/octet-stream");
         response.setHeader("Content-Disposition", "attachment;filename=" + user.emailAsFolder() + ".cer");
         FileCopyUtils.copy(Files.readAllBytes(cerFile.toPath()), response.getOutputStream());

@@ -34,14 +34,14 @@ import com.sequenceiq.cloudbreak.domain.AzureVmType;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.DetailedAzureStackDescription;
-import com.sequenceiq.cloudbreak.domain.MetaData;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Port;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackDescription;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
-import com.sequenceiq.cloudbreak.service.credential.azure.AzureCredentialService;
+import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
 import com.sequenceiq.cloudbreak.service.stack.ProvisionService;
 import com.sequenceiq.cloudbreak.service.stack.StackCreationFailure;
 import com.sequenceiq.cloudbreak.service.stack.StackCreationSuccess;
@@ -100,7 +100,7 @@ public class AzureProvisionService implements ProvisionService {
     public void createStack(User user, Stack stack, Credential credential) {
         AzureTemplate azureTemplate = (AzureTemplate) stack.getTemplate();
         retryingStackUpdater.updateStackStatus(stack.getId(), Status.REQUESTED);
-        String filePath = AzureCredentialService.getUserJksFileName(credential, user.emailAsFolder());
+        String filePath = AzureCertificateService.getUserJksFileName(credential, user.emailAsFolder());
         File file = new File(filePath);
         AzureClient azureClient = new AzureClient(
                 ((AzureCredential) credential).getSubscriptionId(), file.getAbsolutePath(), ((AzureCredential) credential).getJks()
@@ -142,7 +142,7 @@ public class AzureProvisionService implements ProvisionService {
             }
         }
         retryingStackUpdater.updateStackMetaData(stack.getId(), collectMetaData(stack, azureClient, name));
-        retryingStackUpdater.doUpdateStackHash(stack.getId(), getMD5(stack));
+        retryingStackUpdater.updateStackHash(stack.getId(), getMD5(stack));
         retryingStackUpdater.updateStackStatus(stack.getId(), Status.CREATE_COMPLETED);
         reactor.notify(ReactorConfig.STACK_CREATE_SUCCESS_EVENT, Event.wrap(new StackCreationSuccess(stack.getId(),
                 "The whole stack created succesfull.")));
@@ -150,7 +150,7 @@ public class AzureProvisionService implements ProvisionService {
 
     @Override
     public StackDescription describeStack(User user, Stack stack, Credential credential) {
-        String filePath = AzureCredentialService.getUserJksFileName(credential, user.emailAsFolder());
+        String filePath = AzureCertificateService.getUserJksFileName(credential, user.emailAsFolder());
         File file = new File(filePath);
         AzureClient azureClient = new AzureClient(
                 ((AzureCredential) credential).getSubscriptionId(), file.getAbsolutePath(), ((AzureCredential) credential).getJks()
@@ -179,7 +179,7 @@ public class AzureProvisionService implements ProvisionService {
 
     @Override
     public StackDescription describeStackWithResources(User user, Stack stack, Credential credential) {
-        String filePath = AzureCredentialService.getUserJksFileName(credential, user.emailAsFolder());
+        String filePath = AzureCertificateService.getUserJksFileName(credential, user.emailAsFolder());
         File file = new File(filePath);
         AzureClient azureClient = new AzureClient(
                 ((AzureCredential) credential).getSubscriptionId(),
@@ -227,7 +227,7 @@ public class AzureProvisionService implements ProvisionService {
 
     @Override
     public void deleteStack(User user, Stack stack, Credential credential) {
-        String filePath = AzureCredentialService.getUserJksFileName(credential, user.emailAsFolder());
+        String filePath = AzureCertificateService.getUserJksFileName(credential, user.emailAsFolder());
         File file = new File(filePath);
         AzureClient azureClient = new AzureClient(
                 ((AzureCredential) credential).getSubscriptionId(), file.getAbsolutePath(), ((AzureCredential) credential).getJks()
@@ -272,8 +272,8 @@ public class AzureProvisionService implements ProvisionService {
         }
     }
 
-    private Set<MetaData> collectMetaData(Stack stack, AzureClient azureClient, String name) {
-        Set<MetaData> metaDatas = new HashSet<>();
+    private Set<InstanceMetaData> collectMetaData(Stack stack, AzureClient azureClient, String name) {
+        Set<InstanceMetaData> instanceMetaDatas = new HashSet<>();
         for (int i = 0; i < stack.getNodeCount(); i++) {
             String vmName = getVmName(name, i);
             Map<String, Object> props = new HashMap<>();
@@ -281,16 +281,16 @@ public class AzureProvisionService implements ProvisionService {
             props.put(SERVICENAME, vmName);
             Object virtualMachine = azureClient.getVirtualMachine(props);
             try {
-                MetaData metaData = new MetaData();
-                metaData.setPrivateIp(getPrivateIP((String) virtualMachine));
-                metaData.setPublicIp(getVirtualIP((String) virtualMachine));
-                metaData.setStack(stack);
-                metaDatas.add(metaData);
+                InstanceMetaData instanceMetaData = new InstanceMetaData();
+                instanceMetaData.setPrivateIp(getPrivateIP((String) virtualMachine));
+                instanceMetaData.setPublicIp(getVirtualIP((String) virtualMachine));
+                instanceMetaData.setStack(stack);
+                instanceMetaDatas.add(instanceMetaData);
             } catch (IOException e) {
                 LOGGER.info("The instance {} was not reacheable: ", vmName, e.getMessage());
             }
         }
-        return metaDatas;
+        return instanceMetaDatas;
     }
 
     public String getMD5(Stack stack) {
@@ -350,7 +350,7 @@ public class AzureProvisionService implements ProvisionService {
         if (azureTemplate.getPassword() != null && !azureTemplate.getPassword().isEmpty()) {
             props.put(PASSWORD, azureTemplate.getPassword());
         } else {
-            X509Certificate sshCert = new X509Certificate(AzureCredentialService.getCerFile(user.emailAsFolder(), azureTemplate.getId()));
+            X509Certificate sshCert = new X509Certificate(AzureCertificateService.getCerFile(user.emailAsFolder(), azureTemplate.getId()));
             props.put(SSHPUBLICKEYFINGERPRINT, sshCert.getSha1Fingerprint());
             props.put(SSHPUBLICKEYPATH, String.format("/home/%s/.ssh/authorized_keys", DEFAULT_USER_NAME));
         }
@@ -378,7 +378,7 @@ public class AzureProvisionService implements ProvisionService {
             throws FileNotFoundException, CertificateException {
         Map<String, String> props = new HashMap<>();
         props.put(NAME, name);
-        X509Certificate sshCert = new X509Certificate(AzureCredentialService.getCerFile(user.emailAsFolder(), azureTemplate.getId()));
+        X509Certificate sshCert = new X509Certificate(AzureCertificateService.getCerFile(user.emailAsFolder(), azureTemplate.getId()));
         props.put(DATA, new String(sshCert.getPem()));
         HttpResponseDecorator serviceCertificate = (HttpResponseDecorator) azureClient.createServiceCertificate(props);
         String requestId = (String) azureClient.getRequestId(serviceCertificate);
