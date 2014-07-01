@@ -1,12 +1,12 @@
 
 Client->Controller: POST: /stacks/{id}/cluster
 Controller->AmbariClusterService: create
-AmbariClusterService->CRepository: save
-CRepository-->AmbariClusterService: save
+AmbariClusterService->ClusterRepository: save
+ClusterRepository-->AmbariClusterService: save
 AmbariClusterService->ClusterRequestHandler: notify(CLUSTER_REQUESTED)
 AmbariClusterService-->Controller: create
-ClusterRequestHandler->CRepository: update(requested=true)
-CRepository-->ClusterRequestHandler: update
+ClusterRequestHandler->ClusterRepository: update(requested=true)
+ClusterRepository-->ClusterRequestHandler: update
 Controller-->Client: {id}
 
 opt stack.status == CREATE_COMPLETED
@@ -25,6 +25,6 @@ opt stack.status == CREATE_COMPLETED
     end
     AmbariClusterInstaller->ClusterCreationSuccessHandler: notify(CREATE_COMPLETE)
     ClusterCreationSuccessHandler->CRepository: update(CREATE_COMPLETE)
-    CRepository->ClusterCreationSuccessHandler: update
+    ClusterRepository->ClusterCreationSuccessHandler: update
     ClusterCreationSuccessHandler->Client: ws.send(CREATE_COMPLETE)
 end
