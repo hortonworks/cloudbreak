@@ -1,0 +1,22 @@
+
+Client->Controller: POST: /stacks
+Controller->StackService: create
+StackService->SRepository: save
+SRepository-->StackService: save
+StackService->ProvisionService: create
+StackService-->Controller: create
+Controller-->Client: {id}
+
+note right of ProvisionService
+    building VPC and
+    starting instances
+
+end note
+
+ProvisionService->StackCreationSuccessHandler: notify(CREATE_COMPLETE)
+StackCreationSuccessHandler->SRepository: update(CREATE_COMPLETE)
+SRepository-->StackCreationSuccessHandler: update
+StackCreationSuccessHandler->Client: ws.send(CREATE_COMPLETE)
+
+StackCreationSuccessHandler->ClusterRequestHandler: notify(AMBARI_STARTED)
+

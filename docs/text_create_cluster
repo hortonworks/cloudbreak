@@ -1,0 +1,30 @@
+
+Client->Controller: POST: /stacks/{id}/cluster
+Controller->AmbariClusterService: create
+AmbariClusterService->CRepository: save
+CRepository-->AmbariClusterService: save
+AmbariClusterService->ClusterRequestHandler: notify(CLUSTER_REQUESTED)
+AmbariClusterService-->Controller: create
+ClusterRequestHandler->CRepository: update(requested=true)
+CRepository-->ClusterRequestHandler: update
+Controller-->Client: {id}
+
+opt stack.status == CREATE_COMPLETED
+    ClusterRequestHandler->AmbariClusterInstaller: install
+    AmbariClusterInstaller->AmbariClient: addBlueprint(blueprint)
+    AmbariClient-->AmbariClusterInstaller: addBlueprint
+    loop until hosts.size==stack.nodeCount
+        AmbariClusterInstaller->AmbariClient: recommendAssignments
+        AmbariClient-->AmbariClusterInstaller: Map<hostGroup,List<host>>
+    end
+    AmbariClusterInstaller->AmbariClient: createCluster(blueprint, assignments)
+    AmbariClient->AmbariClusterInstaller: createCluster
+    loop until progress==100.0
+        AmbariClusterInstaller->AmbariClient: getInstallProgress
+        AmbariClient-->AmbariClusterInstaller: progress
+    end
+    AmbariClusterInstaller->ClusterCreationSuccessHandler: notify(CREATE_COMPLETE)
+    ClusterCreationSuccessHandler->CRepository: update(CREATE_COMPLETE)
+    CRepository->ClusterCreationSuccessHandler: update
+    ClusterCreationSuccessHandler->Client: ws.send(CREATE_COMPLETE)
+end
