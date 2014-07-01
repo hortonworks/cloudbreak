@@ -1,0 +1,46 @@
+AwsProvisionService->SnsTopicManager: createTopicAndSubscribe
+SnsTopicManager->AmazonClient: createTopic
+AmazonClient-->SnsTopicManager: createTopic 
+SnsTopicManager->AmazonClient: subscribe
+AmazonClient-->SnsTopicManager: subscribe 
+SnsTopicManager-->AwsProvisionService: createTopicAndSubscribe
+
+AWS SNS->AmazonSnsController: POST: /sns (subscription token)
+AmazonSnsController->SnsTopicManager: confirmSubscription
+SnsTopicManager->AmazonClient: confirmSubscription
+AmazonClient-->SnsTopicManager: confirmSubscription
+SnsTopicManager->CloudFormationStackCreator: createCloudFormationStack
+CloudFormationStackCreator->AmazonClient: createStack
+AmazonClient-->CloudFormationStackCreator: createStack
+CloudFormationStackCreator-->SnsTopicManager: createCloudFormationStack
+
+note right of AmazonClient
+    creating CloudFormation stack
+    VPC, 
+    subnet, 
+    internet gw
+
+end note
+AWS SNS->AmazonSnsController: POST: /sns (Stack::CREATE_COMPLETE)
+AmazonSnsController->Ec2InstanceRunner: notify(CREATE_COMPLETE)
+AmazonSnsController-->AWS SNS: 
+Ec2InstanceRunner->EC2Client: runInstances(init-script)
+EC2Client->EC2 Instance: start(init-script)
+EC2Client-->Ec2InstanceRunner: instanceIds
+Ec2InstanceRunner->EC2Client: tagInstances
+EC2Client-->Ec2InstanceRunner:
+Ec2InstanceRunner->EC2Client: disableSrcDestCheck
+EC2Client-->Ec2InstanceRunner:
+note right of EC2 Instance: init-script
+EC2 Instance->EC2 Instance: setup docker bridge
+EC2 Instance->EC2 Instance: setup routing table
+EC2 Instance->EC2 Instance: find Serf join-ip
+EC2 Instance->EC2 Instance: start docker service
+EC2 Instance->EC2 Instance: start ambari docker container
+EC2 Instance->EC2 Instance: setup iptables masquerading
+
+loop poll until reachable==true
+    Ec2InstanceRunner->EC2Client: isReachable
+    EC2Client->Ec2InstanceRunner: reachable
+end
+Ec2InstanceRunner->StackCreationSuccessHandler: notify(CREATE_COMPLETE)
