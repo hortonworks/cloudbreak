@@ -130,7 +130,7 @@ public class AzureProvisionService implements ProvisionService {
                         "Error while creating Azure stack: certificate not correct")));
                 return;
             } catch (NoSuchAlgorithmException e) {
-                LOGGER.info("Problem wiht the fingerprint: " + e.getMessage());
+                LOGGER.info("Problem with the fingerprint: " + e.getMessage());
                 reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(new StackCreationFailure(stack.getId(),
                         "Error while creating Azure stack: no such algorithm exception")));
                 return;

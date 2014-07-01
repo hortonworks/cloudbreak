@@ -189,7 +189,7 @@ public class RetryingStackUpdater {
         return stack;
     }
 
-    public Stack doUpdateStackHash(Long stackId, String hash) {
+    private Stack doUpdateStackHash(Long stackId, String hash) {
         Stack stack = stackRepository.findById(stackId);
         stack.setHash(hash);
         stack = stackRepository.save(stack);
