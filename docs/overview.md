@@ -10,19 +10,18 @@ http://docs.cloudbreak.apiary.io/
 
 ##Overview
 
-Cloudbreak is a RESTful application development platform with the goal of helping developers to build solutions for deploying Hadoop YARN clusters in different environments. Once it is deployed in your favorite servlet container it exposes a REST API allowing to span up Hadoop clusters of arbitary sizes and cloud providers. Provisioning Hadoop has never been easier.
-Cloudbreak is built on the foundation of cloud providers API (Amazon AWS, Microsoft Azure), Apache Ambari, Docker lightweight containers, Serf and dnsmasq.
+Cloudbreak is a RESTful Hadoop as a Service API. Once it is deployed in your favorite servlet container exposes a REST API allowing to span up Hadoop clusters of arbitary sizes on your selected cloud provider. Provisioning Hadoop has never been easier.
+Cloudbreak is built on the foundation of cloud providers API (Amazon AWS, Microsoft Azure, Google Cloud Compute...), Apache Ambari, Docker containers, Serf and dnsmasq.
 
 
 ##Benefits
 
 ###Secure
-It supports a token based and OAuth2 authentication model. The cluster is provisioned in a logically isolated network (Virtual Private Cloud) of your favorite cloud provider.
-If the cluster is launched in a VPC network, the framework configure firewall settings that control the network access of your launched instances. For example a Hadoop Resource Manager can be accessed from the internet, whereas non of the other nodes are available.
-Cloudbreak does not store or manages your cloud credentials - it is the end user's responsability to link Cloudbreak with her/his cloud account. We provide utilities to ease this process (IAM on Amazon, certificates on Azure).
+Supports basic, token based and OAuth2 authentication model. The cluster is provisioned in a logically isolated network (Virtual Private Cloud) of your favorite cloud provider.
+Cloudbreak does not store or manages your cloud credentials - it is the end user's responsability to link the Cloudbreak user with her/his cloud account. We provide utilities to ease this process (IAM on Amazon, certificates on Azure).
 
 ###Elastic
-Using Cloudbreak API you can provision an arbitrary number of Hadoop nodes - the API does the hard work for you, and span up the cluster, configure the networks and the selected Hadoop services without any user interaction.
+Using Cloudbreak API you can provision an arbitrary number of Hadoop nodes - the API does the hard work for you, and span up the infrastructure, configure the network and the selected Hadoop components and services without any user interaction.
 POST once and use it anytime after.
 
 ###Scalable
