@@ -141,11 +141,21 @@ public class AzureProvisionService implements ProvisionService {
                 return;
             }
         }
-        retryingStackUpdater.updateStackMetaData(stack.getId(), collectMetaData(stack, azureClient, name));
+        Set<InstanceMetaData> instanceMetaDatas = collectMetaData(stack, azureClient, name);
+        retryingStackUpdater.updateStackMetaData(stack.getId(), instanceMetaDatas);
         retryingStackUpdater.updateStackHash(stack.getId(), getMD5(stack));
         retryingStackUpdater.updateStackStatus(stack.getId(), Status.CREATE_COMPLETED);
         reactor.notify(ReactorConfig.STACK_CREATE_SUCCESS_EVENT, Event.wrap(new StackCreationSuccess(stack.getId(),
-                "The whole stack created succesfull.")));
+                getAmbariServer(instanceMetaDatas, stack.getId()).getPublicIp())));
+    }
+
+    private InstanceMetaData getAmbariServer(Set<InstanceMetaData> instanceMetaDatas, Long stackId) {
+        for (InstanceMetaData instanceMetaData : instanceMetaDatas) {
+            if (Boolean.TRUE.equals(instanceMetaData.getAmbariServer())) {
+                return instanceMetaData;
+            }
+        }
+        throw new InternalServerException(String.format("There is no Ambari server on %s stack.", stackId));
     }
 
     @Override
@@ -284,6 +294,11 @@ public class AzureProvisionService implements ProvisionService {
                 InstanceMetaData instanceMetaData = new InstanceMetaData();
                 instanceMetaData.setPrivateIp(getPrivateIP((String) virtualMachine));
                 instanceMetaData.setPublicIp(getVirtualIP((String) virtualMachine));
+                if (i == 0) {
+                    instanceMetaData.setAmbariServer(Boolean.TRUE);
+                } else {
+                    instanceMetaData.setAmbariServer(Boolean.FALSE);
+                }
                 instanceMetaData.setStack(stack);
                 instanceMetaDatas.add(instanceMetaData);
             } catch (IOException e) {

@@ -13,6 +13,7 @@ public class InstanceMetaData implements ProvisionEntity {
     private Long id;
     private String privateIp;
     private String publicIp;
+    private Boolean ambariServer;
     @ManyToOne
     private Stack stack;
 
@@ -42,6 +43,14 @@ public class InstanceMetaData implements ProvisionEntity {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Boolean getAmbariServer() {
+        return ambariServer;
+    }
+
+    public void setAmbariServer(Boolean ambariServer) {
+        this.ambariServer = ambariServer;
     }
 
     public Stack getStack() {
