@@ -1,19 +1,14 @@
 package com.sequenceiq.cloudbreak.service.stack.aws;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import reactor.core.Reactor;
-import reactor.event.Event;
-import reactor.function.Consumer;
 
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
@@ -40,12 +35,18 @@ import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
+import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariHostsUnavailableException;
 import com.sequenceiq.cloudbreak.service.stack.AmbariServerIpUnavailableException;
 import com.sequenceiq.cloudbreak.service.stack.NodeStartTimedOutException;
 import com.sequenceiq.cloudbreak.service.stack.StackCreationFailure;
 import com.sequenceiq.cloudbreak.service.stack.StackCreationSuccess;
+import com.sequenceiq.cloudbreak.service.stack.UserDataBuilder;
+
+import reactor.core.Reactor;
+import reactor.event.Event;
+import reactor.function.Consumer;
 
 @Service
 public class Ec2InstanceRunner implements Consumer<Event<Stack>> {
@@ -63,7 +64,7 @@ public class Ec2InstanceRunner implements Consumer<Event<Stack>> {
     private AwsStackUtil awsStackUtil;
 
     @Autowired
-    private Ec2UserDataBuilder userDataBuilder;
+    private UserDataBuilder userDataBuilder;
 
     @Autowired
     private Reactor reactor;
@@ -129,7 +130,7 @@ public class Ec2InstanceRunner implements Consumer<Event<Stack>> {
     }
 
     private List<String> runInstancesInSubnet(Stack stack, AwsTemplate awsTemplate, DescribeStacksResult stackResult, AmazonEC2Client amazonEC2Client,
-            String instanceArn, String email) {
+            String instanceArn, String email) throws IOException {
         String subnetId = null;
         String securityGroupId = null;
         List<Output> outputs = stackResult.getStacks().get(0).getOutputs();
@@ -144,9 +145,11 @@ public class Ec2InstanceRunner implements Consumer<Event<Stack>> {
         runInstancesRequest.setKeyName(awsTemplate.getKeyName());
         runInstancesRequest.setInstanceType(awsTemplate.getInstanceType());
 
-        Map<String, String> userDataVariables = new HashMap<>();
-        userDataVariables.put("KEYCHAIN", email);
-        runInstancesRequest.setUserData(awsStackUtil.encode(userDataBuilder.buildUserData(userDataVariables)));
+        UserDataBuilder dataBuilder = UserDataBuilder.builder()
+                .withCloudPlatform(CloudPlatform.AWS)
+                .withEnvironmentVariable("KEYCHAIN", email);
+
+        runInstancesRequest.setUserData(awsStackUtil.encode(dataBuilder.build()));
         IamInstanceProfileSpecification iamInstanceProfileSpecification = new IamInstanceProfileSpecification()
                 .withArn(instanceArn);
         runInstancesRequest.setIamInstanceProfile(iamInstanceProfileSpecification);
