@@ -48,7 +48,9 @@ public class User implements ProvisionEntity {
     @NotEmpty
     private String password;
 
-    private String token;
+    private String confToken;
+
+    private UserStatus status = UserStatus.PENDING;
 
 
     @OneToMany(mappedBy = "azureTemplateOwner", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -75,7 +77,7 @@ public class User implements ProvisionEntity {
         this.lastName = user.lastName;
         this.email = user.email;
         this.password = user.password;
-        this.token = user.token;
+        this.confToken = user.confToken;
         this.awsTemplates = user.awsTemplates;
         this.azureTemplates = user.azureTemplates;
         this.awsCredentials = user.awsCredentials;
@@ -83,6 +85,7 @@ public class User implements ProvisionEntity {
         this.stacks = user.stacks;
         this.blueprints = user.blueprints;
         this.clusters = user.clusters;
+        this.status = user.getStatus();
     }
 
     public String getPassword() {
@@ -186,11 +189,20 @@ public class User implements ProvisionEntity {
         return email.replaceAll("@", "_").replace(".", "_");
     }
 
-    public void setToken(String token) {
-        this.token = token;
+    public void setConfToken(String confToken) {
+        this.confToken = confToken;
     }
 
-    public String getToken() {
-        return this.token;
+    public String getConfToken() {
+        return this.confToken;
     }
+
+    public UserStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(UserStatus status) {
+        this.status = status;
+    }
+
 }

@@ -1,7 +1,8 @@
 package com.sequenceiq.cloudbreak.security;
 
-import java.util.Collection;
-
+import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.domain.UserStatus;
+import com.sequenceiq.cloudbreak.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
@@ -10,8 +11,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.domain.User;
-import com.sequenceiq.cloudbreak.repository.UserRepository;
+import java.util.Collection;
 
 @Component
 public class UserRepositoryUserDetailsService implements UserDetailsService {
@@ -46,12 +46,12 @@ public class UserRepositoryUserDetailsService implements UserDetailsService {
 
         @Override
         public boolean isAccountNonExpired() {
-            return true;
+            return !UserStatus.EXPIRED.equals(getStatus());
         }
 
         @Override
         public boolean isAccountNonLocked() {
-            return true;
+            return !UserStatus.DISABLED.equals(getStatus());
         }
 
         @Override
@@ -61,7 +61,7 @@ public class UserRepositoryUserDetailsService implements UserDetailsService {
 
         @Override
         public boolean isEnabled() {
-            return true;
+            return UserStatus.ACTIVE.equals(getStatus());
         }
 
     }

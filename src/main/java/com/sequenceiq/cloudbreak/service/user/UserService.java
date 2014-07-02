@@ -6,5 +6,5 @@ public interface UserService {
 
     Long registerUser(User user);
 
-    void confirmRegistration(String registrationId);
+    void confirmRegistration(String confToken);
 }

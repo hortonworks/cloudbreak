@@ -128,6 +128,10 @@ dependencies {
         exclude group: "xml-apis";
         exclude group: "groovy"
     }
+    runtime group:'javax.mail', name:'mail', version:'1.5.0-b01'
+    runtime group:'activation', name:'activation', version:'1.0.2'
+
+
     testCompile 'org.springframework.boot:spring-boot-starter-test:1.0.2.RELEASE'
     deployerJars 'org.springframework.build.aws:org.springframework.build.aws.maven:3.0.0.RELEASE'
 }

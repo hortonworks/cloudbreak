@@ -48,6 +48,8 @@ public class UserConverter extends AbstractConverter<UserJson, User> {
         user.setAwsTemplates(awsTemplateConverter.convertAllJsonToEntity(json.getAwsTemplates()));
         user.setAzureTemplates(azureTemplateConverter.convertAllJsonToEntity(json.getAzureTemplates()));
         user.setStacks(stackConverter.convertAllJsonToEntity(json.getStacks()));
+        // TODO encrypt password!
+        user.setPassword(json.getPassword());
         return user;
     }
 }
