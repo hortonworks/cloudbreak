@@ -17,15 +17,9 @@ public class AzureTemplate extends Template implements ProvisionEntity {
     @Column(nullable = false)
     private String name;
     private String description;
-    private String subnetAddressPrefix;
-    private String addressPrefix;
-    private String deploymentSlot;
     private String vmType;
     private String imageName;
-    private String userName;
     private String password;
-    private String sshPublicKeyFingerprint;
-    private String sshPublicKeyPath;
     @OneToMany(mappedBy = "azureTemplate", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Port> ports = new HashSet<>();
 
@@ -60,22 +54,6 @@ public class AzureTemplate extends Template implements ProvisionEntity {
         this.description = description;
     }
 
-    public String getSubnetAddressPrefix() {
-        return subnetAddressPrefix;
-    }
-
-    public void setSubnetAddressPrefix(String subnetAddressPrefix) {
-        this.subnetAddressPrefix = subnetAddressPrefix;
-    }
-
-    public String getDeploymentSlot() {
-        return deploymentSlot;
-    }
-
-    public void setDeploymentSlot(String deploymentSlot) {
-        this.deploymentSlot = deploymentSlot;
-    }
-
     public String getImageName() {
         return imageName;
     }
@@ -92,44 +70,12 @@ public class AzureTemplate extends Template implements ProvisionEntity {
         this.vmType = vmType;
     }
 
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
     public String getPassword() {
         return password;
     }
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public String getSshPublicKeyFingerprint() {
-        return sshPublicKeyFingerprint;
-    }
-
-    public void setSshPublicKeyFingerprint(String sshPublicKeyFingerprint) {
-        this.sshPublicKeyFingerprint = sshPublicKeyFingerprint;
-    }
-
-    public String getSshPublicKeyPath() {
-        return sshPublicKeyPath;
-    }
-
-    public void setSshPublicKeyPath(String sshPublicKeyPath) {
-        this.sshPublicKeyPath = sshPublicKeyPath;
-    }
-
-    public String getAddressPrefix() {
-        return addressPrefix;
-    }
-
-    public void setAddressPrefix(String addressPrefix) {
-        this.addressPrefix = addressPrefix;
     }
 
     public Set<Port> getPorts() {
@@ -161,5 +107,9 @@ public class AzureTemplate extends Template implements ProvisionEntity {
     @Override
     public User getOwner() {
         return azureTemplateOwner;
+    }
+
+    public String nameAsFolder() {
+        return name.replaceAll("@", "_").replace(".", "_").replace(" ", "_");
     }
 }

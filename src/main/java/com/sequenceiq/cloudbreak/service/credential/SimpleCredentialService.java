@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.AwsCredentialRepository;
 import com.sequenceiq.cloudbreak.repository.AzureCredentialRepository;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
-import com.sequenceiq.cloudbreak.service.azure.AzureCredentialService;
+import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
@@ -44,7 +44,7 @@ public class SimpleCredentialService implements CredentialService {
     private AwsCredentialRepository awsCredentialRepository;
 
     @Autowired
-    private AzureCredentialService azureCredentialService;
+    private AzureCertificateService azureCertificateService;
 
     @Autowired
     private WebsocketService websocketService;
@@ -110,7 +110,7 @@ public class SimpleCredentialService implements CredentialService {
         AzureCredential azureCredential = azureCredentialConverter.convert(credentialJson);
         azureCredential.setAzureCredentialOwner(user);
         azureCredentialRepository.save(azureCredential);
-        azureCredentialService.generateCertificate(azureCredential, user);
+        azureCertificateService.generateCertificate(azureCredential, user);
         websocketService.sendToTopicUser(user.getEmail(), WebsocketEndPoint.CREDENTIAL,
                 new StatusMessage(azureCredential.getId(), azureCredential.getName(), Status.CREATE_COMPLETED.name()));
         return new IdJson(azureCredential.getId());

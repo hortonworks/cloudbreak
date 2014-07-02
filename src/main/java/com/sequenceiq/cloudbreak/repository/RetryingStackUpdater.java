@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.repository;
 
+import java.util.Set;
+
 import javax.persistence.OptimisticLockException;
 
 import org.slf4j.Logger;
@@ -10,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 
@@ -38,6 +41,36 @@ public class RetryingStackUpdater {
                 return doUpdateStackStatus(stackId, status, statusReason);
             } else {
                 throw new InternalServerException(String.format("Failed to update stack '%s' in 5 attempts. (while trying to update status)", stackId), e);
+            }
+        }
+    }
+
+    public Stack updateStackMetaData(Long stackId, Set<InstanceMetaData> instanceMetaData) {
+        int attempt = 1;
+        try {
+            return doUpdateMetaData(stackId, instanceMetaData);
+        } catch (OptimisticLockException | OptimisticLockingFailureException e) {
+            LOGGER.info("Failed to update stack status. [id: '{}', attempt: '{}', Cause: {}]. Trying to save it again.",
+                    stackId, attempt++, e.getClass().getSimpleName());
+            if (attempt <= MAX_RETRIES) {
+                return doUpdateMetaData(stackId, instanceMetaData);
+            } else {
+                throw new InternalServerException(String.format("Failed to update stack '%s' in 5 attempts. (while trying to update metadata)", stackId), e);
+            }
+        }
+    }
+
+    public Stack updateStackHash(Long stackId, String hash) {
+        int attempt = 1;
+        try {
+            return doUpdateStackHash(stackId, hash);
+        } catch (OptimisticLockException | OptimisticLockingFailureException e) {
+            LOGGER.info("Failed to update stack status. [id: '{}', attempt: '{}', Cause: {}]. Trying to save it again.",
+                    stackId, attempt++, e.getClass().getSimpleName());
+            if (attempt <= MAX_RETRIES) {
+                return doUpdateStackHash(stackId, hash);
+            } else {
+                throw new InternalServerException(String.format("Failed to update stack '%s' in 5 attempts. (while trying to update hash)", stackId), e);
             }
         }
     }
@@ -115,6 +148,14 @@ public class RetryingStackUpdater {
         return stack;
     }
 
+    private Stack doUpdateMetaData(Long stackId, Set<InstanceMetaData> instanceMetaData) {
+        Stack stack = stackRepository.findById(stackId);
+        stack.setInstanceMetaData(instanceMetaData);
+        stack = stackRepository.save(stack);
+        LOGGER.info("Updated stack metadata: [stack: '{}', status: '{}', statusReason: '{}'].", stackId);
+        return stack;
+    }
+
     private Stack doUpdateAmbariIp(Long stackId, String ambariIp) {
         Stack stack = stackRepository.findById(stackId);
         stack.setAmbariIp(ambariIp);
@@ -148,4 +189,11 @@ public class RetryingStackUpdater {
         return stack;
     }
 
+    private Stack doUpdateStackHash(Long stackId, String hash) {
+        Stack stack = stackRepository.findById(stackId);
+        stack.setHash(hash);
+        stack = stackRepository.save(stack);
+        LOGGER.info("Updated stack: [stack: '{}' hash: '{}'].", stackId, hash);
+        return stack;
+    }
 }
