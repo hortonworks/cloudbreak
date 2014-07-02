@@ -10,9 +10,9 @@ import reactor.core.Reactor;
 
 import com.sequenceiq.cloudbreak.service.cluster.ClusterCreationFailureHandler;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterCreationSuccessHandler;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterRequestHandler;
 import com.sequenceiq.cloudbreak.service.stack.StackCreationFailureHandler;
 import com.sequenceiq.cloudbreak.service.stack.StackCreationSuccessHandler;
-import com.sequenceiq.cloudbreak.service.stack.aws.ClusterRequestHandler;
 import com.sequenceiq.cloudbreak.service.stack.aws.Ec2InstanceRunner;
 
 @Component

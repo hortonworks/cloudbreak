@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.stack.aws;
+package com.sequenceiq.cloudbreak.service.cluster;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +11,6 @@ import reactor.function.Consumer;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.service.cluster.AmbariClusterInstaller;
 
 @Service
 public class ClusterRequestHandler implements Consumer<Event<Stack>> {
