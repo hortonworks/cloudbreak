@@ -5,44 +5,31 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.commons.lang3.Validate;
+import javax.annotation.PostConstruct;
+
+import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
+@Component
 public class UserDataBuilder {
 
-    private Map<String, String> parameters = new HashMap<>();
-    private CloudPlatform cloudPlatform;
+    private Map<CloudPlatform, String> userDataScripts = new HashMap<>();
 
-    private UserDataBuilder() {
-
+    public void setUserDataScripts(Map<CloudPlatform, String> userDataScripts) {
+        this.userDataScripts = userDataScripts;
     }
 
-    public static UserDataBuilder builder() {
-        return new UserDataBuilder();
+    @PostConstruct
+    public void readUserDataScript() throws IOException {
+        for (CloudPlatform cloudPlatform : CloudPlatform.values()) {
+            userDataScripts.put(cloudPlatform, FileReaderUtils.readFileFromClasspath(String.format("%s-init.sh", cloudPlatform.getValue())));
+        }
     }
 
-    public UserDataBuilder withCloudPlatform(CloudPlatform cloudPlatform) {
-        this.cloudPlatform = cloudPlatform;
-        return this;
-    }
-
-    public UserDataBuilder withEnvironmentVariable(String key, String value) {
-        this.parameters.put(key, value);
-        return this;
-    }
-
-    public UserDataBuilder withEnvironmentVariables(Map<String, String> entries) {
-        this.parameters.putAll(entries);
-        return this;
-    }
-
-
-    public String build() throws IOException {
-        Validate.notNull(cloudPlatform);
-        Validate.notEmpty(parameters);
-        String ec2userDataScript = FileReaderUtils.readFileFromClasspath(String.format("%s-init.sh", cloudPlatform.getValue()));
+    public String build(CloudPlatform cloudPlatform, Map<String, String> parameters) {
+        String ec2userDataScript = userDataScripts.get(cloudPlatform);
         StringBuilder stringBuilder = new StringBuilder("#!/bin/bash\n");
         stringBuilder.append("set -x\n").append("\n");
         for (Entry<String, String> parameter : parameters.entrySet()) {

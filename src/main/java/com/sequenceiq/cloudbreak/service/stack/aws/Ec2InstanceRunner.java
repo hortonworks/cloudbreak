@@ -3,7 +3,9 @@ package com.sequenceiq.cloudbreak.service.stack.aws;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -145,11 +147,10 @@ public class Ec2InstanceRunner implements Consumer<Event<Stack>> {
         runInstancesRequest.setKeyName(awsTemplate.getKeyName());
         runInstancesRequest.setInstanceType(awsTemplate.getInstanceType());
 
-        UserDataBuilder dataBuilder = UserDataBuilder.builder()
-                .withCloudPlatform(CloudPlatform.AWS)
-                .withEnvironmentVariable("KEYCHAIN", email);
+        Map<String, String> map = new HashMap<>();
+        map.put("KEYCHAIN", email);
 
-        runInstancesRequest.setUserData(awsStackUtil.encode(dataBuilder.build()));
+        runInstancesRequest.setUserData(awsStackUtil.encode(userDataBuilder.build(CloudPlatform.AWS, map)));
         IamInstanceProfileSpecification iamInstanceProfileSpecification = new IamInstanceProfileSpecification()
                 .withArn(instanceArn);
         runInstancesRequest.setIamInstanceProfile(iamInstanceProfileSpecification);
