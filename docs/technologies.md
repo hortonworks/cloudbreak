@@ -31,5 +31,9 @@ The main features of Docker are:
 1. Lightweight, portable
 2. Build once, run anywhere
 3. VM - without the overhead of a VM
+  * Each virtualized application includes not only the application and the necessary binaries and libraries, but also an entire guest operating system
+
+  * The Docker Engine container comprises just the application and its dependencies. It runs as an isolated process in userspace on the host operating system, sharing the kernel with other containers.
+
 4. Containers are isolated
 5. It can be automated and scripted
