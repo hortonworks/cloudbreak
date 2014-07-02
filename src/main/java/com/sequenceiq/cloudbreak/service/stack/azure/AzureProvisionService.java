@@ -403,13 +403,17 @@ public class AzureProvisionService implements ProvisionService {
         try {
             azureClient.getStorageAccount(commonName);
         } catch (Exception ex) {
-            Map<String, String> props = new HashMap<>();
-            props.put(NAME, commonName);
-            props.put(DESCRIPTION, azureTemplate.getDescription());
-            props.put(AFFINITYGROUP, commonName);
-            HttpResponseDecorator storageResponse = (HttpResponseDecorator) azureClient.createStorageAccount(props);
-            String requestId = (String) azureClient.getRequestId(storageResponse);
-            azureClient.waitUntilComplete(requestId);
+            if (((HttpResponseException) ex).getStatusCode() == NOT_FOUND) {
+                Map<String, String> props = new HashMap<>();
+                props.put(NAME, commonName);
+                props.put(DESCRIPTION, azureTemplate.getDescription());
+                props.put(AFFINITYGROUP, commonName);
+                HttpResponseDecorator storageResponse = (HttpResponseDecorator) azureClient.createStorageAccount(props);
+                String requestId = (String) azureClient.getRequestId(storageResponse);
+                azureClient.waitUntilComplete(requestId);
+            } else {
+                throw new InternalServerException(ex.getMessage());
+            }
         }
     }
 
@@ -417,13 +421,17 @@ public class AzureProvisionService implements ProvisionService {
         try {
             azureClient.getAffinityGroup(name);
         } catch (Exception ex) {
-            Map<String, String> props = new HashMap<>();
-            props.put(NAME, name);
-            props.put(LOCATION, AzureLocation.valueOf(azureTemplate.getLocation()).location());
-            props.put(DESCRIPTION, azureTemplate.getDescription());
-            HttpResponseDecorator affinityResponse = (HttpResponseDecorator) azureClient.createAffinityGroup(props);
-            String requestId = (String) azureClient.getRequestId(affinityResponse);
-            azureClient.waitUntilComplete(requestId);
+            if (((HttpResponseException) ex).getStatusCode() == NOT_FOUND) {
+                Map<String, String> props = new HashMap<>();
+                props.put(NAME, name);
+                props.put(LOCATION, AzureLocation.valueOf(azureTemplate.getLocation()).location());
+                props.put(DESCRIPTION, azureTemplate.getDescription());
+                HttpResponseDecorator affinityResponse = (HttpResponseDecorator) azureClient.createAffinityGroup(props);
+                String requestId = (String) azureClient.getRequestId(affinityResponse);
+                azureClient.waitUntilComplete(requestId);
+            } else {
+                throw new InternalServerException(ex.getMessage());
+            }
         }
     }
 
