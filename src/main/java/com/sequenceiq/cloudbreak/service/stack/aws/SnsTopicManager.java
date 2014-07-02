@@ -87,7 +87,7 @@ public class SnsTopicManager {
         LOGGER.info("Amazon SNS subscription request sent. [topic ARN: '{}', endpoint: '{}']", topicArn, subscriptionEndpoint);
     }
 
-    private AmazonSNSClient createSnsClient(AwsCredential awsCredential, Regions region) {
+    protected AmazonSNSClient createSnsClient(AwsCredential awsCredential, Regions region) {
         BasicSessionCredentials basicSessionCredentials = credentialsProvider
                 .retrieveSessionCredentials(CrossAccountCredentialsProvider.DEFAULT_SESSION_CREDENTIALS_DURATION, "provision-ambari", awsCredential);
         AmazonSNSClient amazonSNSClient = new AmazonSNSClient(basicSessionCredentials);
