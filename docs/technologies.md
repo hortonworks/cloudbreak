@@ -1,6 +1,6 @@
 ##Technology
 
-Cloudbreak is built on the foundation of cloud providers API (Amazon AWS, Microsoft Azure, Google Cloud Compute...), Apache Ambari, Docker containers, Serf and dnsmasq.
+Cloudbreak is built on the foundation of cloud providers APIs, Apache Ambari, Docker containers, Serf and dnsmasq.
 
 ###Apache Ambari
 
@@ -21,3 +21,15 @@ Ambari enables System Administrators to:
 ..* Ambari leverages Nagios for system alerting and will send emails when your attention is needed (e.g., a node goes down, remaining disk space is low, etc).
 
 Ambari enables to integrate Hadoop provisioning, management, and monitoring capabilities into applications with the Ambari REST APIs.
+
+### Docker
+
+Docker is an open platform for developers and sysadmins to build, ship, and run distributed applications. Consisting of Docker Engine, a portable, lightweight runtime and packaging tool, and Docker Hub, a cloud service for sharing applications and automating workflows, Docker enables apps to be quickly assembled from components and eliminates the friction between development, QA, and production environments. As a result, IT can ship faster and run the same app, unchanged, on laptops, data center VMs, and any cloud.
+
+The main features of Docker are:
+
+1. Lightweight, portable
+2. Build once, run anywhere
+3. VM - without the overhead of a VM
+4. Containers are isolated
+5. It can be automated and scripted
