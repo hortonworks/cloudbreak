@@ -1,21 +1,11 @@
 package com.sequenceiq.cloudbreak.domain;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
+
+import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @NamedQueries({
@@ -30,6 +20,7 @@ import org.hibernate.validator.constraints.NotEmpty;
                         + "LEFT JOIN FETCH u.azureCredentials "
                         + "LEFT JOIN FETCH u.clusters "
                         + "WHERE u.id= :id")
+
 })
 @Table(name = "cloudbreakuser")
 public class User implements ProvisionEntity {
@@ -57,6 +48,9 @@ public class User implements ProvisionEntity {
     @NotEmpty
     private String password;
 
+    private String token;
+
+
     @OneToMany(mappedBy = "azureTemplateOwner", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<AzureTemplate> azureTemplates = new HashSet<>();
 
@@ -81,6 +75,7 @@ public class User implements ProvisionEntity {
         this.lastName = user.lastName;
         this.email = user.email;
         this.password = user.password;
+        this.token = user.token;
         this.awsTemplates = user.awsTemplates;
         this.azureTemplates = user.azureTemplates;
         this.awsCredentials = user.awsCredentials;
@@ -189,5 +184,13 @@ public class User implements ProvisionEntity {
 
     public String emailAsFolder() {
         return email.replaceAll("@", "_").replace(".", "_");
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public String getToken() {
+        return this.token;
     }
 }
