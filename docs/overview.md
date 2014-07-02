@@ -1,13 +1,3 @@
-Cloudbreak
-================
-
-*Cloudbreak is a powerful left surf that breaks over a coral reef, a mile off southwest the island of Tavarua, Fiji.*
-
-*Cloudbreak is a cloud agnostic Hadoop as a Service API. Abstracts the provisioning and ease management and monitoring of on-demand clusters.*
-
-http://docs.cloudbreak.apiary.io/
-
-
 ##Overview
 
 Cloudbreak is a RESTful Hadoop as a Service API. Once it is deployed in your favorite servlet container exposes a REST API allowing to span up Hadoop clusters of arbitary sizes on your selected cloud provider. Provisioning Hadoop has never been easier.
