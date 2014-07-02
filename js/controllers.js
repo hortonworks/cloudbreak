@@ -602,6 +602,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 $scope.getCredentials();
                 $scope.statusMessage = "Azure credential '" + data.id + "' was created successfully";
                 cname.value = "";
+                cdescription.value = "";
                 csubscriptionId.value = "";
                 cjksPassword.value = "";
             }).error(function (data, status, headers, config) {
