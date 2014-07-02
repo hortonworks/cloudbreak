@@ -32,8 +32,9 @@ The main features of Docker are:
 2. Build once, run anywhere
 3. VM - without the overhead of a VM
   * Each virtualized application includes not only the application and the necessary binaries and libraries, but also an entire guest operating system
-
   * The Docker Engine container comprises just the application and its dependencies. It runs as an isolated process in userspace on the host operating system, sharing the kernel with other containers.
+
+![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/documentation/docs/images/vm.png?token=6003104__eyJzY29wZSI6IlJhd0Jsb2I6c2VxdWVuY2VpcS9jbG91ZGJyZWFrL2RvY3VtZW50YXRpb24vZG9jcy9pbWFnZXMvdm0ucG5nIiwiZXhwaXJlcyI6MTQwNDkwOTg1NX0%3D--7d68aec8961722b08f985962c5ad56db62cee220)
 
 4. Containers are isolated
 5. It can be automated and scripted
