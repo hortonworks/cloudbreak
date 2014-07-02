@@ -38,11 +38,10 @@ The main features of Docker are:
 3. VM - without the overhead of a VM
   * Each virtualized application includes not only the application and the necessary binaries and libraries, but also an entire guest operating system
   * The Docker Engine container comprises just the application and its dependencies. It runs as an isolated process in userspace on the host operating system, sharing the kernel with other containers.
-  * ![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/documentation/docs/images/vm.png?token=6003104__eyJzY29wZSI6IlJhd0Jsb2I6c2VxdWVuY2VpcS9jbG91ZGJyZWFrL2RvY3VtZW50YXRpb24vZG9jcy9pbWFnZXMvdm0ucG5nIiwiZXhwaXJlcyI6MTQwNDkwOTg1NX0%3D--7d68aec8961722b08f985962c5ad56db62cee220)
+    ![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/documentation/docs/images/vm.png?token=6003104__eyJzY29wZSI6IlJhd0Jsb2I6c2VxdWVuY2VpcS9jbG91ZGJyZWFrL2RvY3VtZW50YXRpb24vZG9jcy9pbWFnZXMvdm0ucG5nIiwiZXhwaXJlcyI6MTQwNDkwOTg1NX0%3D--7d68aec8961722b08f985962c5ad56db62cee220)
 
 4. Containers are isolated
 5. It can be automated and scripted
-
 
 ###Serf
 
@@ -54,4 +53,4 @@ Serf uses an efficient gossip protocol to solve three major problems:
   * Failure detection and recovery: Serf automatically detects failed nodes within seconds, notifies the rest of the cluster, and executes handler scripts allowing you to handle these events. Serf will attempt to recover failed nodes by reconnecting to them periodically.
     ![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/documentation/docs/images/serf-gossip.png?token=6003104__eyJzY29wZSI6IlJhd0Jsb2I6c2VxdWVuY2VpcS9jbG91ZGJyZWFrL2RvY3VtZW50YXRpb24vZG9jcy9pbWFnZXMvc2VyZi1nb3NzaXAucG5nIiwiZXhwaXJlcyI6MTQwNDkxMTI3Nn0%3D--07a33c4fb45079236acee058388ac2ff090a3ae2)
   * Custom event propagation: Serf can broadcast custom events and queries to the cluster. These can be used to trigger deploys, propagate configuration, etc. Events are simply fire-and-forget broadcast, and Serf makes a best effort to deliver messages in the face of offline nodes or network partitions. Queries provide a simple realtime request/response mechanism.
-    ![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/documentation/docs/images/serf-gossip.png?token=6003104__eyJzY29wZSI6IlJhd0Jsb2I6c2VxdWVuY2VpcS9jbG91ZGJyZWFrL2RvY3VtZW50YXRpb24vZG9jcy9pbWFnZXMvc2VyZi1nb3NzaXAucG5nIiwiZXhwaXJlcyI6MTQwNDkxMTQzMH0%3D--66a9bdbcae60924b991947428d182a65ade70887)
+    ![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/documentation/docs/images/serf-event.png?token=6003104__eyJzY29wZSI6IlJhd0Jsb2I6c2VxdWVuY2VpcS9jbG91ZGJyZWFrL2RvY3VtZW50YXRpb24vZG9jcy9pbWFnZXMvc2VyZi1ldmVudC5wbmciLCJleHBpcmVzIjoxNDA0OTEyMzY4fQ%3D%3D--bac1c4778462053b40bad0ae2fcf141111d17c3f)
