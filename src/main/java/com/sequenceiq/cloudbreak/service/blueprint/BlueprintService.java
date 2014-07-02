@@ -53,8 +53,6 @@ public class BlueprintService {
     public void delete(Long id) {
         Blueprint blueprint = blueprintRepository.findOne(id);
         if (blueprint == null) {
-            websocketService.sendToTopicUser(blueprint.getUser().getEmail(), WebsocketEndPoint.BLUEPRINT,
-                    new StatusMessage(id, "null", Status.DELETE_FAILED.name()));
             throw new NotFoundException(String.format("Blueprint '%s' not found.", id));
         }
         blueprintRepository.delete(blueprint);

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
+import com.google.common.annotations.VisibleForTesting;
 import groovyx.net.http.HttpResponseException;
 
 import java.math.BigDecimal;
@@ -54,7 +55,7 @@ public class AmbariClusterInstaller {
             cluster = clusterRepository.save(cluster);
             Blueprint blueprint = cluster.getBlueprint();
             addBlueprint(stack.getAmbariIp(), blueprint);
-            AmbariClient ambariClient = new AmbariClient(stack.getAmbariIp(), AmbariClusterService.PORT);
+            AmbariClient ambariClient = createAmbariClient(stack.getAmbariIp());
             ambariClient.createCluster(cluster.getName(), blueprint.getBlueprintName(), recommend(stack, ambariClient, blueprint.getBlueprintName()));
             BigDecimal installProgress = new BigDecimal(0);
             while (installProgress.compareTo(COMPLETED) != 0 && installProgress.compareTo(FAILED) != 0) {
@@ -102,7 +103,7 @@ public class AmbariClusterInstaller {
     }
 
     private void addBlueprint(String ambariIp, Blueprint blueprint) {
-        AmbariClient ambariClient = new AmbariClient(ambariIp, AmbariClusterService.PORT);
+        AmbariClient ambariClient = createAmbariClient(ambariIp);
         try {
             ambariClient.addBlueprint(blueprint.getBlueprintText());
             LOGGER.info("Blueprint added [Ambari server: {}, blueprint: '{}']", ambariIp, blueprint.getId());
@@ -134,5 +135,10 @@ public class AmbariClusterInstaller {
             LOGGER.info("Interrupted exception occured during polling.", e);
             Thread.currentThread().interrupt();
         }
+    }
+
+    @VisibleForTesting
+    protected AmbariClient createAmbariClient(String ambariIp) {
+        return new AmbariClient(ambariIp, AmbariClusterService.PORT);
     }
 }
