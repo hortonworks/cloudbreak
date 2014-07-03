@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailMessage;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
@@ -43,15 +44,20 @@ public class SimpleUserService implements UserService {
     @Override
     public void confirmRegistration(String confToken) {
         User user = userRepository.findUserByConfToken(confToken);
-        user.setConfToken(null);
-        user.setStatus(UserStatus.ACTIVE);
-        userRepository.save(user);
+        if (null != user) {
+            user.setConfToken(null);
+            user.setStatus(UserStatus.ACTIVE);
+            userRepository.save(user);
+        } else {
+            LOGGER.warn("There's no user registration pending for confToken: {}", confToken);
+        }
     }
 
+    @Async
     private void sendConfirmationEmail(User user) {
         LOGGER.info("Sending confirmation email ...");
         message.setTo(user.getEmail());
-        message.setText("http://" + hostAddress + ":8080/users/confirm/" + user.getConfToken());
+        message.setText(hostAddress + "/users/confirm/" + user.getConfToken());
         mailSender.send((SimpleMailMessage) message);
         LOGGER.info("Confirmation email sent...");
     }
