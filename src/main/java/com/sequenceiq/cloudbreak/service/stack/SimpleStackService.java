@@ -6,10 +6,12 @@ import java.util.Set;
 
 import javax.annotation.Resource;
 
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.DigestUtils;
 
 import reactor.core.Reactor;
 import reactor.event.Event;
@@ -85,7 +87,8 @@ public class SimpleStackService implements StackService {
         Stack stack = stackConverter.convert(stackRequest);
         Template template = templateRepository.findOne(stackRequest.getTemplateId());
         stack.setUser(user);
-        // TODO: create and set hash
+        stack.setHash(generateHash(stack));
+        // TODO: fill metadata with indexes
         stack = stackRepository.save(stack);
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_REQUEST_EVENT, stack.getId());
         reactor.notify(ReactorConfig.PROVISION_REQUEST_EVENT, Event.wrap(new ProvisionRequest(template.cloudPlatform(), stack.getId())));
@@ -120,6 +123,11 @@ public class SimpleStackService implements StackService {
             return metaDataConverter.convertAllEntityToJson(stack.getInstanceMetaData());
         }
         throw new NotFoundException("Metadata not found on stack.");
+    }
+
+    private String generateHash(Stack stack) {
+        int hashCode = HashCodeBuilder.reflectionHashCode(stack);
+        return DigestUtils.md5DigestAsHex(String.valueOf(hashCode).getBytes());
     }
 
 }

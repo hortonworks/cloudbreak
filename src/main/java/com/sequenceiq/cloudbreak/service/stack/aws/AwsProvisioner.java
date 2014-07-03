@@ -5,7 +5,6 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
@@ -24,9 +23,6 @@ import com.sequenceiq.cloudbreak.service.stack.Provisioner;
 public class AwsProvisioner implements Provisioner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsProvisioner.class);
-
-    @Value("${HOST_ADDR}")
-    private String hostAddress;
 
     @Autowired
     private AwsStackUtil awsStackUtil;

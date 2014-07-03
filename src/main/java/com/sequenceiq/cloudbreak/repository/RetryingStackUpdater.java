@@ -60,21 +60,6 @@ public class RetryingStackUpdater {
         }
     }
 
-    public Stack updateStackHash(Long stackId, String hash) {
-        int attempt = 1;
-        try {
-            return doUpdateStackHash(stackId, hash);
-        } catch (OptimisticLockException | OptimisticLockingFailureException e) {
-            LOGGER.info("Failed to update stack status. [id: '{}', attempt: '{}', Cause: {}]. Trying to save it again.",
-                    stackId, attempt++, e.getClass().getSimpleName());
-            if (attempt <= MAX_RETRIES) {
-                return doUpdateStackHash(stackId, hash);
-            } else {
-                throw new InternalServerException(String.format("Failed to update stack '%s' in 5 attempts. (while trying to update hash)", stackId), e);
-            }
-        }
-    }
-
     public Stack updateAmbariIp(Long stackId, String ambariIp) {
         int attempt = 1;
         try {
@@ -186,14 +171,6 @@ public class RetryingStackUpdater {
         stack.setCfStackCompleted(true);
         stack = stackRepository.save(stack);
         LOGGER.info("Updated stack: [stack: '{}' cfStackCompleted: 'true'].", stackId);
-        return stack;
-    }
-
-    private Stack doUpdateStackHash(Long stackId, String hash) {
-        Stack stack = stackRepository.findById(stackId);
-        stack.setHash(hash);
-        stack = stackRepository.save(stack);
-        LOGGER.info("Updated stack: [stack: '{}' hash: '{}'].", stackId, hash);
         return stack;
     }
 }

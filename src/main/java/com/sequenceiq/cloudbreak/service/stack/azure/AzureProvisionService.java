@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.service.stack.azure;
 
+import groovyx.net.http.HttpResponseDecorator;
+import groovyx.net.http.HttpResponseException;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -13,12 +16,14 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+
+import reactor.core.Reactor;
+import reactor.event.Event;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -47,19 +52,10 @@ import com.sequenceiq.cloudbreak.service.stack.StackCreationFailure;
 import com.sequenceiq.cloudbreak.service.stack.StackCreationSuccess;
 import com.sequenceiq.cloudbreak.service.stack.UserDataBuilder;
 
-import groovyx.net.http.HttpResponseDecorator;
-import groovyx.net.http.HttpResponseException;
-import reactor.core.Reactor;
-import reactor.event.Event;
-
 @Service
 public class AzureProvisionService implements ProvisionService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureProvisionService.class);
-    private static final int HASH1 = 0xFF;
-    private static final int HASH2 = 0x100;
-    private static final int END_INDEX = 3;
-    private static final int BEGIN_INDEX = 1;
     private static final int NOT_FOUND = 404;
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final String LOCATION = "location";
@@ -103,14 +99,13 @@ public class AzureProvisionService implements ProvisionService {
     @Override
     @Async
     public void createStack(User user, Stack stack, Credential credential) {
-        String hash = getMD5(stack);
         AzureTemplate azureTemplate = (AzureTemplate) stack.getTemplate();
         retryingStackUpdater.updateStackStatus(stack.getId(), Status.REQUESTED);
         String filePath = AzureCertificateService.getUserJksFileName(credential, user.emailAsFolder());
         File file = new File(filePath);
         AzureClient azureClient = new AzureClient(
                 ((AzureCredential) credential).getSubscriptionId(), file.getAbsolutePath(), ((AzureCredential) credential).getJks()
-        );
+                );
         retryingStackUpdater.updateStackStatus(stack.getId(), Status.CREATE_IN_PROGRESS);
         String name = stack.getName().replaceAll("\\s+", "");
         String commonName = ((AzureCredential) credential).getName().replaceAll("\\s+", "");
@@ -118,13 +113,12 @@ public class AzureProvisionService implements ProvisionService {
         createStorageAccount(azureClient, azureTemplate, commonName);
         createVirtualNetwork(azureClient, azureTemplate, name, commonName);
 
-
         for (int i = 0; i < stack.getNodeCount(); i++) {
             try {
                 String vmName = getVmName(name, i);
                 createCloudService(azureClient, azureTemplate, name, vmName, commonName);
                 createServiceCertificate(azureClient, azureTemplate, vmName, commonName, user);
-                createVirtualMachine(azureClient, azureTemplate, name, vmName, commonName, user, hash);
+                createVirtualMachine(azureClient, azureTemplate, name, vmName, commonName, user, stack.getHash());
             } catch (FileNotFoundException e) {
                 LOGGER.info("Problem with the ssh file because not found: " + e.getMessage());
                 reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(new StackCreationFailure(stack.getId(),
@@ -149,7 +143,6 @@ public class AzureProvisionService implements ProvisionService {
         }
         Set<InstanceMetaData> instanceMetaDatas = collectMetaData(stack, azureClient, name);
         retryingStackUpdater.updateStackMetaData(stack.getId(), instanceMetaDatas);
-        retryingStackUpdater.updateStackHash(stack.getId(), hash);
         retryingStackUpdater.updateStackStatus(stack.getId(), Status.CREATE_COMPLETED);
         reactor.notify(ReactorConfig.STACK_CREATE_SUCCESS_EVENT, Event.wrap(new StackCreationSuccess(stack.getId(),
                 getAmbariServer(instanceMetaDatas, stack.getId()).getPublicIp())));
@@ -170,7 +163,7 @@ public class AzureProvisionService implements ProvisionService {
         File file = new File(filePath);
         AzureClient azureClient = new AzureClient(
                 ((AzureCredential) credential).getSubscriptionId(), file.getAbsolutePath(), ((AzureCredential) credential).getJks()
-        );
+                );
         AzureStackDescription azureStackDescription = new AzureStackDescription();
         for (int i = 0; i < stack.getNodeCount(); i++) {
             String vmName = getVmName(stack.getName(), i);
@@ -201,7 +194,7 @@ public class AzureProvisionService implements ProvisionService {
                 ((AzureCredential) credential).getSubscriptionId(),
                 file.getAbsolutePath(),
                 ((AzureCredential) credential).getJks()
-        );
+                );
 
         DetailedAzureStackDescription detailedAzureStackDescription = new DetailedAzureStackDescription();
         String templateName = stack.getName();
@@ -247,7 +240,7 @@ public class AzureProvisionService implements ProvisionService {
         File file = new File(filePath);
         AzureClient azureClient = new AzureClient(
                 ((AzureCredential) credential).getSubscriptionId(), file.getAbsolutePath(), ((AzureCredential) credential).getJks()
-        );
+                );
         for (int i = 0; i < stack.getNodeCount(); i++) {
             String vmName = getVmName(stack.getName(), i);
             Map<String, String> props;
@@ -314,22 +307,6 @@ public class AzureProvisionService implements ProvisionService {
         return instanceMetaDatas;
     }
 
-    public String getMD5(Stack stack) {
-        try {
-            int hashCode = HashCodeBuilder.reflectionHashCode(stack);
-            java.security.MessageDigest md = java.security.MessageDigest.getInstance("MD5");
-            byte[] array = md.digest(String.valueOf(hashCode).getBytes());
-            StringBuffer sb = new StringBuffer();
-            for (int i = 0; i < array.length; ++i) {
-                sb.append(Integer.toHexString((array[i] & HASH1) | HASH2).substring(BEGIN_INDEX, END_INDEX));
-            }
-            return sb.toString();
-        } catch (java.security.NoSuchAlgorithmException e) {
-            LOGGER.info("Not supported algorithm type under the MD5 generation: {}", e.getMessage());
-        }
-        return null;
-    }
-
     private String getVirtualIP(String response) throws IOException {
         JsonNode actualObj = MAPPER.readValue(response, JsonNode.class);
         return actualObj.get("Deployment").get("VirtualIPs").get("VirtualIP").get("Address").asText();
@@ -366,7 +343,7 @@ public class AzureProvisionService implements ProvisionService {
         props.put(IMAGENAME, azureTemplate.getImageName());
         props.put(IMAGESTOREURI,
                 String.format("http://%s.blob.core.windows.net/vhd-store/%s.vhd", commonName, vmName)
-        );
+                );
         props.put(HOSTNAME, vmName);
         props.put(USERNAME, DEFAULT_USER_NAME);
         if (azureTemplate.getPassword() != null && !azureTemplate.getPassword().isEmpty()) {

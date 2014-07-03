@@ -50,7 +50,9 @@ public class AwsProvisionSetup implements ProvisionSetup {
         } else {
             LOGGER.info("SNS topic found for credential '{}' in region {}. [arn: {}, id: {}]", awsCredential.getId(), awsTemplate.getRegion().name(),
                     snsTopic.getTopicArn(), snsTopic.getId());
-            reactor.notify(ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT, Event.wrap(new ProvisionSetupComplete(getCloudPlatform(), stack.getId())));
+            LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT, stack.getId());
+            reactor.notify(ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT, Event.wrap(new ProvisionSetupComplete(getCloudPlatform(), stack.getId())
+                    .withSetupProperty(SnsTopicManager.NOTIFICATION_TOPIC_ARN_KEY, snsTopic.getTopicArn())));
         }
 
     }
