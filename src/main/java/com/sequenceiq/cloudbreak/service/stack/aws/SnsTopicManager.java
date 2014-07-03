@@ -27,7 +27,7 @@ public class SnsTopicManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SnsTopicManager.class);
 
-    @Value("${HOST_ADDR}")
+    @Value("${host.addr}")
     private String hostAddress;
 
     @Autowired
