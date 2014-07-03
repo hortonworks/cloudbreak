@@ -12,19 +12,19 @@ import java.util.Properties;
 
 @Configuration
 public class MailSenderConfig {
-    @Value("${mail.sender.host:email-smtp.eu-west-1.amazonaws.com}")
+    @Value("${mail.sender.host}")
     private String host;
 
-    @Value("${mail.sender.port:587}")
+    @Value("${mail.sender.port}")
     private int port;
 
-    @Value("${mail.sender.username:AKIAIPUYXRHAMCDNUSLA}")
+    @Value("${mail.sender.username}")
     private String userName;
 
-    @Value("${mail.sender.password:Aviq2rAqS6wYNzVlBmDlHUQc/pkFgnuhaKEyxY3JWUNC}")
+    @Value("${mail.sender.password}")
     private String password;
 
-    @Value("${mail.sender.from:no-reply@sequenceiq.com}")
+    @Value("${mail.sender.from}")
     private String msgFrom;
 
     @Bean
