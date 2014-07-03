@@ -27,7 +27,7 @@ public class SimpleUserService implements UserService {
     @Autowired
     private MailMessage message;
 
-    @Value("${host.address}")
+    @Value("${host.addr}")
     private String hostAddress;
 
     @Override
