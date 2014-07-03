@@ -20,7 +20,7 @@ public class UserDataBuilderTest {
     public static void before() throws IOException {
         Map<CloudPlatform, String> userDataScripts = new HashMap<>();
         for (CloudPlatform cloudPlatform : CloudPlatform.values()) {
-            userDataScripts.put(cloudPlatform, FileReaderUtils.readFileFromClasspath(String.format("%s-init.sh", cloudPlatform.getValue())));
+            userDataScripts.put(cloudPlatform, FileReaderUtils.readFileFromClasspath(String.format("%s-init.sh", cloudPlatform.getInitScriptPrefix())));
         }
         userDataBuilder = new UserDataBuilder();
         userDataBuilder.setUserDataScripts(userDataScripts);

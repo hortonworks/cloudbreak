@@ -4,13 +4,13 @@ public enum CloudPlatform {
     AWS("ec2"),
     AZURE("azure");
 
-    private final String value;
+    private final String initScriptPrefix;
 
-    private CloudPlatform(String value) {
-        this.value = value;
+    private CloudPlatform(String initScriptPrefix) {
+        this.initScriptPrefix = initScriptPrefix;
     }
 
-    public String getValue() {
-        return value;
+    public String getInitScriptPrefix() {
+        return initScriptPrefix;
     }
 }

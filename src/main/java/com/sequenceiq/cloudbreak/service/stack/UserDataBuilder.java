@@ -24,7 +24,7 @@ public class UserDataBuilder {
     @PostConstruct
     public void readUserDataScript() throws IOException {
         for (CloudPlatform cloudPlatform : CloudPlatform.values()) {
-            userDataScripts.put(cloudPlatform, FileReaderUtils.readFileFromClasspath(String.format("%s-init.sh", cloudPlatform.getValue())));
+            userDataScripts.put(cloudPlatform, FileReaderUtils.readFileFromClasspath(String.format("%s-init.sh", cloudPlatform.getInitScriptPrefix())));
         }
     }
 
