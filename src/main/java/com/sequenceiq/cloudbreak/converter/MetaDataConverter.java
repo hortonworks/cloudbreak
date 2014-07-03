@@ -13,6 +13,7 @@ public class MetaDataConverter extends AbstractConverter<InstanceMetaDataJson, I
         InstanceMetaDataJson metaDataJson = new InstanceMetaDataJson();
         metaDataJson.setPrivateIp(entity.getPrivateIp());
         metaDataJson.setPublicIp(entity.getPublicIp());
+        metaDataJson.setAmbariServer(entity.getAmbariServer());
         return metaDataJson;
     }
 
@@ -21,6 +22,7 @@ public class MetaDataConverter extends AbstractConverter<InstanceMetaDataJson, I
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setPrivateIp(json.getPrivateIp());
         instanceMetaData.setPublicIp(json.getPublicIp());
+        instanceMetaData.setAmbariServer(json.getAmbariServer());
         return instanceMetaData;
     }
 }
