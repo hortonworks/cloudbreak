@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -96,6 +98,7 @@ public class UserJson implements JsonEntity {
         this.password = password;
     }
 
+    @JsonIgnore
     public String getPassword() {
         return password;
     }

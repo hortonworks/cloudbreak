@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.repository.UserRepository;
 @Component
 public class UserInitializer implements InitializingBean {
 
-    @Value("${HBM2DDL_STRATEGY}")
+    @Value("${hbm2ddl.strategy}")
     private String hbm2ddlStrategy;
 
     @Autowired
