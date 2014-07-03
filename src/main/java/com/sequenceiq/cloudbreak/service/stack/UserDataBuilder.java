@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 
 import javax.annotation.PostConstruct;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
@@ -14,6 +15,9 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @Component
 public class UserDataBuilder {
+
+    @Value("${HOST_ADDR}")
+    private String hostAddress;
 
     private Map<CloudPlatform, String> userDataScripts = new HashMap<>();
 
@@ -28,7 +32,9 @@ public class UserDataBuilder {
         }
     }
 
-    public String build(CloudPlatform cloudPlatform, Map<String, String> parameters) {
+    public String build(CloudPlatform cloudPlatform, String metadataHash, Map<String, String> parameters) {
+        parameters.put("METADATA_ADDRESS", hostAddress);
+        parameters.put("METADATA_HASH", metadataHash);
         String ec2userDataScript = userDataScripts.get(cloudPlatform);
         StringBuilder stringBuilder = new StringBuilder("#!/bin/bash\n");
         stringBuilder.append("set -x\n").append("\n");
@@ -37,5 +43,9 @@ public class UserDataBuilder {
         }
         stringBuilder.append("\n").append(ec2userDataScript);
         return stringBuilder.toString();
+    }
+
+    protected void setHostAddress(String hostAddress) {
+        this.hostAddress = hostAddress;
     }
 }

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.stack.aws;
+package com.sequenceiq.cloudbreak.service.stack;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -9,7 +9,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
-import com.sequenceiq.cloudbreak.service.stack.UserDataBuilder;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 public class UserDataBuilderTest {
@@ -24,6 +23,7 @@ public class UserDataBuilderTest {
         }
         userDataBuilder = new UserDataBuilder();
         userDataBuilder.setUserDataScripts(userDataScripts);
+        userDataBuilder.setHostAddress("http://cloudbreak.sequenceiq.com");
     }
 
     @Test
@@ -32,7 +32,7 @@ public class UserDataBuilderTest {
         Map<String, String> map = new HashMap<>();
         map.put("NODE_PREFIX", "testamb");
         map.put("MYDOMAIN", "test.kom");
-        Assert.assertEquals(expectedScript, userDataBuilder.build(CloudPlatform.AWS, map));
+        Assert.assertEquals(expectedScript, userDataBuilder.build(CloudPlatform.AWS, "hash123", map));
     }
 
     @Test
@@ -41,7 +41,7 @@ public class UserDataBuilderTest {
         Map<String, String> map = new HashMap<>();
         map.put("NODE_PREFIX", "testamb");
         map.put("MYDOMAIN", "test.kom");
-        Assert.assertEquals(expectedScript, userDataBuilder.build(CloudPlatform.AZURE, map));
+        Assert.assertEquals(expectedScript, userDataBuilder.build(CloudPlatform.AZURE, "hash123", map));
     }
 
 }

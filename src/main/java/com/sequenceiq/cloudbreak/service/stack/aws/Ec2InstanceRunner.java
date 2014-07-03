@@ -13,6 +13,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import reactor.core.Reactor;
+import reactor.event.Event;
+import reactor.function.Consumer;
+
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStacksResult;
@@ -46,10 +50,6 @@ import com.sequenceiq.cloudbreak.service.stack.NodeStartTimedOutException;
 import com.sequenceiq.cloudbreak.service.stack.StackCreationFailure;
 import com.sequenceiq.cloudbreak.service.stack.StackCreationSuccess;
 import com.sequenceiq.cloudbreak.service.stack.UserDataBuilder;
-
-import reactor.core.Reactor;
-import reactor.event.Event;
-import reactor.function.Consumer;
 
 @Service
 public class Ec2InstanceRunner implements Consumer<Event<Stack>> {
@@ -151,7 +151,7 @@ public class Ec2InstanceRunner implements Consumer<Event<Stack>> {
         Map<String, String> map = new HashMap<>();
         map.put("KEYCHAIN", email);
 
-        runInstancesRequest.setUserData(awsStackUtil.encode(userDataBuilder.build(CloudPlatform.AWS, map)));
+        runInstancesRequest.setUserData(awsStackUtil.encode(userDataBuilder.build(CloudPlatform.AWS, stack.getHash(), map)));
         IamInstanceProfileSpecification iamInstanceProfileSpecification = new IamInstanceProfileSpecification()
                 .withArn(instanceArn);
         runInstancesRequest.setIamInstanceProfile(iamInstanceProfileSpecification);

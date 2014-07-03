@@ -64,9 +64,9 @@ public class StackCreationContext implements Consumer<Event<ProvisionSetupComple
                 websocketService.sendToTopicUser(stack.getUser().getEmail(), WebsocketEndPoint.STACK, new StatusMessage(stack.getId(), stack.getName(), stack
                         .getStatus().name()));
                 Provisioner provisioner = provisioners.get(cloudPlatform);
-                Map<String, String> userDataParams = new HashMap<String, String>();
-                userDataParams.put("STACK_HASH", stack.getHash());
-                provisioner.buildStack(stack, userDataBuilder.build(cloudPlatform, userDataParams), provisionSetupComplete.getSetupProperties());
+                // TODO: figure out how these parameters could be set up
+                Map<String, String> params = new HashMap<String, String>();
+                provisioner.buildStack(stack, userDataBuilder.build(cloudPlatform, stack.getHash(), params), provisionSetupComplete.getSetupProperties());
             } else {
                 LOGGER.info("CloudFormation stack creation was requested for a stack, that is not in REQUESTED status anymore. [stackId: '{}', status: '{}']",
                         stack.getId(), stack.getStatus());
