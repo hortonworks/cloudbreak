@@ -1,13 +1,14 @@
 package com.sequenceiq.cloudbreak.conf;
 
+import freemarker.template.TemplateException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.mail.MailMessage;
 import org.springframework.mail.MailSender;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
+import java.io.IOException;
 import java.util.Properties;
 
 @Configuration
@@ -48,11 +49,12 @@ public class MailSenderConfig {
     }
 
     @Bean
-    public MailMessage mailMessage() {
-        SimpleMailMessage msg = new SimpleMailMessage();
-        msg.setFrom(msgFrom);
-        msg.setSubject("Cloudbreak - confirm registration");
-        return msg;
+    public freemarker.template.Configuration freemarkerConfiguration() throws IOException, TemplateException {
+        FreeMarkerConfigurationFactoryBean factoryBean = new FreeMarkerConfigurationFactoryBean();
+        factoryBean.setPreferFileSystemAccess(false);
+        factoryBean.setTemplateLoaderPath("classpath:/");
+        factoryBean.afterPropertiesSet();
+        return factoryBean.getObject();
     }
 
 }
