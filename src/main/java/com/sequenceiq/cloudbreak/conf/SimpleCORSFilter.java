@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class SimpleCORSFilter implements Filter {
 
-    @Value("${uluwatu.address}")
+    @Value("${uluwatu.addr}")
     private String uluwatuAddress;
 
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
