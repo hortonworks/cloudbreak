@@ -45,6 +45,7 @@ import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateServic
 import com.sequenceiq.cloudbreak.service.stack.ProvisionService;
 import com.sequenceiq.cloudbreak.service.stack.StackCreationFailure;
 import com.sequenceiq.cloudbreak.service.stack.StackCreationSuccess;
+import com.sequenceiq.cloudbreak.service.stack.UserDataBuilder;
 
 import groovyx.net.http.HttpResponseDecorator;
 import groovyx.net.http.HttpResponseException;
@@ -75,6 +76,7 @@ public class AzureProvisionService implements ProvisionService {
     private static final String USERNAME = "username";
     private static final String PASSWORD = "password";
     private static final String SUBNETNAME = "subnetName";
+    private static final String CUSTOMDATA = "customData";
     private static final String VIRTUALNETWORKNAME = "virtualNetworkName";
     private static final String VMTYPE = "vmType";
     private static final String SSHPUBLICKEYFINGERPRINT = "sshPublicKeyFingerprint";
@@ -90,6 +92,9 @@ public class AzureProvisionService implements ProvisionService {
     private JsonHelper jsonHelper;
 
     @Autowired
+    private UserDataBuilder userDataBuilder;
+
+    @Autowired
     private Reactor reactor;
 
     @Autowired
@@ -98,6 +103,7 @@ public class AzureProvisionService implements ProvisionService {
     @Override
     @Async
     public void createStack(User user, Stack stack, Credential credential) {
+        String hash = getMD5(stack);
         AzureTemplate azureTemplate = (AzureTemplate) stack.getTemplate();
         retryingStackUpdater.updateStackStatus(stack.getId(), Status.REQUESTED);
         String filePath = AzureCertificateService.getUserJksFileName(credential, user.emailAsFolder());
@@ -118,7 +124,7 @@ public class AzureProvisionService implements ProvisionService {
                 String vmName = getVmName(name, i);
                 createCloudService(azureClient, azureTemplate, name, vmName, commonName);
                 createServiceCertificate(azureClient, azureTemplate, vmName, commonName, user);
-                createVirtualMachine(azureClient, azureTemplate, name, vmName, commonName, user);
+                createVirtualMachine(azureClient, azureTemplate, name, vmName, commonName, user, hash);
             } catch (FileNotFoundException e) {
                 LOGGER.info("Problem with the ssh file because not found: " + e.getMessage());
                 reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(new StackCreationFailure(stack.getId(),
@@ -143,7 +149,7 @@ public class AzureProvisionService implements ProvisionService {
         }
         Set<InstanceMetaData> instanceMetaDatas = collectMetaData(stack, azureClient, name);
         retryingStackUpdater.updateStackMetaData(stack.getId(), instanceMetaDatas);
-        retryingStackUpdater.updateStackHash(stack.getId(), getMD5(stack));
+        retryingStackUpdater.updateStackHash(stack.getId(), hash);
         retryingStackUpdater.updateStackStatus(stack.getId(), Status.CREATE_COMPLETED);
         reactor.notify(ReactorConfig.STACK_CREATE_SUCCESS_EVENT, Event.wrap(new StackCreationSuccess(stack.getId(),
                 getAmbariServer(instanceMetaDatas, stack.getId()).getPublicIp())));
@@ -338,7 +344,8 @@ public class AzureProvisionService implements ProvisionService {
         return String.format("%s-%s", azureTemplate, i);
     }
 
-    private void createVirtualMachine(AzureClient azureClient, AzureTemplate azureTemplate, String name, String vmName, String commonName, User user)
+    private void createVirtualMachine(AzureClient azureClient, AzureTemplate azureTemplate,
+            String name, String vmName, String commonName, User user, String hash)
             throws FileNotFoundException, CertificateException, NoSuchAlgorithmException {
         byte[] encoded = Base64.encodeBase64(vmName.getBytes());
         String label = new String(encoded);
@@ -371,6 +378,9 @@ public class AzureProvisionService implements ProvisionService {
         }
         props.put(SERVICENAME, vmName);
         props.put(SUBNETNAME, name);
+        Map<String, String> map = new HashMap<>();
+        map.put("HASH", hash);
+        props.put(CUSTOMDATA, new String(Base64.encodeBase64(userDataBuilder.build(CloudPlatform.AZURE, map).getBytes())));
         props.put(VIRTUALNETWORKNAME, name);
         props.put(PORTS, ports);
         props.put(VMTYPE, AzureVmType.valueOf(azureTemplate.getVmType()).vmType().replaceAll(" ", ""));
