@@ -7,6 +7,7 @@ import com.sequenceiq.cloudbreak.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailMessage;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
@@ -25,6 +26,9 @@ public class SimpleUserService implements UserService {
 
     @Autowired
     private MailMessage message;
+
+    @Value("${host.address}")
+    private String hostAddress;
 
     @Override
     public Long registerUser(User user) {
@@ -47,7 +51,7 @@ public class SimpleUserService implements UserService {
     private void sendConfirmationEmail(User user) {
         LOGGER.info("Sending confirmation email ...");
         message.setTo(user.getEmail());
-        message.setText("http://localhost:8080/users/confirm/" + user.getConfToken());
+        message.setText("http://" + hostAddress + ":8080/users/confirm/" + user.getConfToken());
         mailSender.send((SimpleMailMessage) message);
         LOGGER.info("Confirmation email sent...");
     }
