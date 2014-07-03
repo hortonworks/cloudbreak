@@ -8,20 +8,30 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import reactor.core.Reactor;
+import reactor.event.Event;
+
 import com.amazonaws.auth.BasicSessionCredentials;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.sns.AmazonSNSClient;
 import com.amazonaws.services.sns.model.ConfirmSubscriptionResult;
 import com.amazonaws.services.sns.model.CreateTopicResult;
+import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
+import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.SnsRequest;
 import com.sequenceiq.cloudbreak.domain.SnsTopic;
+import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.SnsTopicRepository;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.credential.aws.CrossAccountCredentialsProvider;
+import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
 
 @Service
 public class SnsTopicManager {
+
+    public static final String NOTIFICATION_TOPIC_ARN_KEY = "notificationTopicArn";
 
     private static final String CB_TOPIC_NAME = "cloudbreak-notifications";
 
@@ -37,7 +47,10 @@ public class SnsTopicManager {
     private SnsTopicRepository snsTopicRepository;
 
     @Autowired
-    private CloudFormationStackCreator cloudFormationStackCreator;
+    private StackRepository stackRepository;
+
+    @Autowired
+    private Reactor reactor;
 
     public void createTopicAndSubscribe(AwsCredential awsCredential, Regions region) {
         AmazonSNSClient amazonSNSClient = createSnsClient(awsCredential, region);
@@ -71,8 +84,19 @@ public class SnsTopicManager {
                         snsRequest.getTopicArn(), result.getSubscriptionArn(), snsTopic.getCredential().getId());
                 snsTopic.setConfirmed(true);
                 snsTopicRepository.save(snsTopic);
-                cloudFormationStackCreator.startAllRequestedStackCreationForTopic(snsTopic);
+                notifyRequestedStacks(snsTopic);
             }
+        }
+    }
+
+    private void notifyRequestedStacks(SnsTopic snsTopic) {
+        AwsCredential awsCredential = snsTopic.getCredential();
+        List<Stack> requestedStacks = stackRepository.findRequestedStacksWithCredential(awsCredential.getId());
+        for (Stack stack : requestedStacks) {
+            LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT, stack.getId());
+            reactor.notify(ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT,
+                    Event.wrap(new ProvisionSetupComplete(CloudPlatform.AWS, stack.getId()).withSetupProperty(NOTIFICATION_TOPIC_ARN_KEY,
+                            snsTopic.getTopicArn())));
         }
     }
 

@@ -11,12 +11,14 @@ import reactor.core.Reactor;
 import reactor.event.Event;
 
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
+import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.SnsRequest;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.StackCreationFailure;
+import com.sequenceiq.cloudbreak.service.stack.event.StackCreateComplete;
 
 @Service
 public class SnsMessageHandler {
@@ -82,8 +84,8 @@ public class SnsMessageHandler {
         } else if (!stack.isCfStackCompleted()) {
             stack = stackUpdater.updateCfStackCreateComplete(stack.getId());
             LOGGER.info("CloudFormation stack creation completed. [Id: '{}', CFStackId '{}']", stack.getId(), stack.getCfStackId());
-            LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.CF_STACK_COMPLETED_EVENT, stack.getId());
-            reactor.notify(ReactorConfig.CF_STACK_COMPLETED_EVENT, Event.wrap(stack));
+            LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_CREATE_COMPLETE_EVENT, stack.getId());
+            reactor.notify(ReactorConfig.STACK_CREATE_COMPLETE_EVENT, Event.wrap(new StackCreateComplete(CloudPlatform.AWS, stack.getId())));
         }
     }
 

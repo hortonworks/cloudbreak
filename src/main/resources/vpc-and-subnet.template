@@ -12,6 +12,12 @@
       "MaxLength": "18",
       "AllowedPattern" : "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
       "ConstraintDescription" : "must be a valid CIDR range of the form x.x.x.x/x."
+    },
+    "CBUserData" : {
+      "Description" : "User data to be executed",
+      "Type" : "String",
+      "MinLength": "9",
+      "MaxLength": "50000"
     }
 
   },
@@ -95,6 +101,32 @@
       "Properties" : {
         "SubnetId" : { "Ref" : "PublicSubnet" },
         "RouteTableId" : { "Ref" : "PublicRouteTable" }
+      }
+    },
+    
+	"AmbariNodes" : {
+      "Type" : "AWS::AutoScaling::AutoScalingGroup",
+      "DependsOn" : "PublicSubnet",
+      "Properties" : {
+        "AvailabilityZones" : [{ "Fn::GetAtt" : [ "PublicSubnet", "AvailabilityZone" ] }],
+        "VPCZoneIdentifier" : [{ "Ref" : "PublicSubnet" }],
+        "LaunchConfigurationName" : { "Ref" : "AmbariNodeLaunchConfig"  },
+        "MinSize" : "1",
+        "MaxSize" : "10",
+        "DesiredCapacity" : "3",
+        "Tags" : [ { "Key" : "Network", "Value" : "Public", "PropagateAtLaunch" : "true" } ]
+      }
+    },
+
+    "AmbariNodeLaunchConfig"  : {
+      "Type" : "AWS::AutoScaling::LaunchConfiguration",
+      "Properties" : {
+        "ImageId"        : "ami-f39f5684",
+        "SecurityGroups" : [ { "Ref" : "ClusterNodeSecurityGroup" } ],
+        "InstanceType"   : "m1.small",
+        "KeyName"        : "sequence-eu",
+        "AssociatePublicIpAddress" : "true",
+        "UserData"       : { "Fn::Base64" : { "Ref" : "CBUserData"}}
       }
     },
     

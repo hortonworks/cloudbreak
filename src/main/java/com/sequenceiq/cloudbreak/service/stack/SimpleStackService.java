@@ -11,6 +11,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import reactor.core.Reactor;
+import reactor.event.Event;
+
+import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
 import com.sequenceiq.cloudbreak.controller.json.InstanceMetaDataJson;
@@ -24,6 +28,7 @@ import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
+import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
 
 @Service
 public class SimpleStackService implements StackService {
@@ -44,6 +49,9 @@ public class SimpleStackService implements StackService {
 
     @Resource
     private Map<CloudPlatform, ProvisionService> provisionServices;
+
+    @Autowired
+    private Reactor reactor;
 
     @Override
     public Set<StackJson> getAll(User user) {
@@ -77,9 +85,10 @@ public class SimpleStackService implements StackService {
         Stack stack = stackConverter.convert(stackRequest);
         Template template = templateRepository.findOne(stackRequest.getTemplateId());
         stack.setUser(user);
+        // TODO: create and set hash
         stack = stackRepository.save(stack);
-        ProvisionService provisionService = provisionServices.get(template.cloudPlatform());
-        provisionService.createStack(user, stack, stack.getCredential());
+        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_REQUEST_EVENT, stack.getId());
+        reactor.notify(ReactorConfig.PROVISION_REQUEST_EVENT, Event.wrap(new ProvisionRequest(template.cloudPlatform(), stack.getId())));
         return new IdJson(stack.getId());
     }
 

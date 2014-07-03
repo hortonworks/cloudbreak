@@ -14,6 +14,9 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterRequestHandler;
 import com.sequenceiq.cloudbreak.service.stack.StackCreationFailureHandler;
 import com.sequenceiq.cloudbreak.service.stack.StackCreationSuccessHandler;
 import com.sequenceiq.cloudbreak.service.stack.aws.Ec2InstanceRunner;
+import com.sequenceiq.cloudbreak.service.stack.handler.MetadataSetupContext;
+import com.sequenceiq.cloudbreak.service.stack.handler.ProvisionSetupContext;
+import com.sequenceiq.cloudbreak.service.stack.handler.StackCreationContext;
 
 @Component
 public class ReactorInitializer implements InitializingBean {
@@ -37,6 +40,15 @@ public class ReactorInitializer implements InitializingBean {
     private ClusterCreationSuccessHandler clusterCreationSuccessHandler;
 
     @Autowired
+    private ProvisionSetupContext provisionSetupContext;
+
+    @Autowired
+    private StackCreationContext stackCreationContext;
+
+    @Autowired
+    private MetadataSetupContext metadataSetupContext;
+
+    @Autowired
     private Reactor reactor;
 
     @Override
@@ -48,6 +60,12 @@ public class ReactorInitializer implements InitializingBean {
         reactor.on($(ReactorConfig.STACK_CREATE_FAILED_EVENT), stackCreationFailureHandler);
         reactor.on($(ReactorConfig.CLUSTER_CREATE_SUCCESS_EVENT), clusterCreationSuccessHandler);
         reactor.on($(ReactorConfig.CLUSTER_CREATE_FAILED_EVENT), clusterCreationFailureHandler);
+
+        reactor.on($(ReactorConfig.PROVISION_REQUEST_EVENT), provisionSetupContext);
+        reactor.on($(ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT), stackCreationContext);
+        reactor.on($(ReactorConfig.STACK_CREATE_COMPLETE_EVENT), metadataSetupContext);
+        reactor.on($(ReactorConfig.PROVISION_SUCCESS_EVENT), stackCreationSuccessHandler);
+
     }
 
 }

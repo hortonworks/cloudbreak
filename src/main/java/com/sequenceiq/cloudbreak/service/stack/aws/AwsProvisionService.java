@@ -8,9 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import reactor.core.Reactor;
-import reactor.event.Event;
-
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.DeleteStackRequest;
@@ -24,20 +21,16 @@ import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.Filter;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
-import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsStackDescription;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.DetailedAwsStackDescription;
-import com.sequenceiq.cloudbreak.domain.SnsTopic;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackDescription;
 import com.sequenceiq.cloudbreak.domain.User;
-import com.sequenceiq.cloudbreak.repository.SnsTopicRepository;
 import com.sequenceiq.cloudbreak.service.stack.ProvisionService;
-import com.sequenceiq.cloudbreak.service.stack.StackCreationFailure;
 
 /**
  * Provisions an Ambari based Hadoop cluster on a client Amazon EC2 account by
@@ -60,45 +53,9 @@ public class AwsProvisionService implements ProvisionService {
     @Autowired
     private AwsStackUtil awsStackUtil;
 
-    @Autowired
-    private SnsTopicRepository snsTopicRepository;
-
-    @Autowired
-    private SnsTopicManager snsTopicManager;
-
-    @Autowired
-    private CloudFormationStackCreator cfStackCreator;
-
-    @Autowired
-    private Reactor reactor;
-
     @Override
     public void createStack(User user, Stack stack, Credential credential) {
-        try {
-            AwsTemplate awsTemplate = (AwsTemplate) stack.getTemplate();
-            AwsCredential awsCredential = (AwsCredential) credential;
-
-            SnsTopic snsTopic = snsTopicRepository.findOneForCredentialInRegion(awsCredential.getId(), awsTemplate.getRegion());
-            if (snsTopic == null) {
-                LOGGER.info("There is no SNS topic created for credential '{}' in region {}. Creating topic now.", awsCredential.getId(),
-                        awsTemplate.getRegion().name());
-                snsTopicManager.createTopicAndSubscribe(awsCredential, awsTemplate.getRegion());
-            } else if (!snsTopic.isConfirmed()) {
-                LOGGER.info(
-                        "SNS topic found for credential '{}' in region {}, but the subscription is not confirmed. Trying to subscribe again [arn: {}, id: {}]",
-                        awsCredential.getId(), awsTemplate.getRegion().name(), snsTopic.getTopicArn(), snsTopic.getId());
-                snsTopicManager.subscribeToTopic(awsCredential, awsTemplate.getRegion(), snsTopic.getTopicArn());
-            } else {
-                LOGGER.info("SNS topic found for credential '{}' in region {}. [arn: {}, id: {}]", awsCredential.getId(), awsTemplate.getRegion().name(),
-                        snsTopic.getTopicArn(), snsTopic.getId());
-                cfStackCreator.createCloudFormationStack(stack, awsCredential, snsTopic);
-            }
-        } catch (Exception e) {
-            LOGGER.error("Unhandled exception occured when trying to create stack [id: '{}']", stack.getId(), e);
-            LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_CREATE_FAILED_EVENT, stack.getId());
-            StackCreationFailure stackCreationFailure = new StackCreationFailure(stack.getId(), "Internal server error occured while creating stack.");
-            reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(stackCreationFailure));
-        }
+        return;
     }
 
     @Override
