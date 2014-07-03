@@ -26,7 +26,7 @@ public class UserConverter extends AbstractConverter<UserJson, User> {
     private CredentialService credentialService;
 
     @Autowired
-    PasswordEncoder passwordEncoder;
+    private PasswordEncoder passwordEncoder;
 
     @Override
     public UserJson convert(User entity) {

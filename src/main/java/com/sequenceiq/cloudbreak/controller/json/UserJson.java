@@ -11,14 +11,6 @@ public class UserJson implements JsonEntity {
 
     private String email;
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
     private String password;
 
     private Set<CredentialJson> credentials;
@@ -98,5 +90,13 @@ public class UserJson implements JsonEntity {
 
     public void setCredentials(Set<CredentialJson> credentials) {
         this.credentials = credentials;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getPassword() {
+        return password;
     }
 }

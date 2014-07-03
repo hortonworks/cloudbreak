@@ -29,12 +29,12 @@ public class MailSenderConfig {
 
     @Bean
     public MailSender mailSender() {
-        JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-        mailSender.setHost(host);
-        mailSender.setPort(port);
-        mailSender.setUsername(userName);
-        mailSender.setPassword(password);
-        mailSender.setJavaMailProperties(getJavaMailProperties());
+        MailSender mailSender = new JavaMailSenderImpl();
+        ((JavaMailSenderImpl) mailSender).setHost(host);
+        ((JavaMailSenderImpl) mailSender).setPort(port);
+        ((JavaMailSenderImpl) mailSender).setUsername(userName);
+        ((JavaMailSenderImpl) mailSender).setPassword(password);
+        ((JavaMailSenderImpl) mailSender).setJavaMailProperties(getJavaMailProperties());
         return mailSender;
     }
 
