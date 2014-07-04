@@ -41,7 +41,6 @@ import javax.persistence.Version;
                         + "WHERE c.credential.id= :credentialId "
                         + "AND c.status= 'REQUESTED'")
 })
-
 public class Stack implements ProvisionEntity {
 
     @Id
@@ -215,6 +214,10 @@ public class Stack implements ProvisionEntity {
         return hash;
     }
 
+    public void setHash(String hash) {
+        this.hash = hash;
+    }
+
     public Set<InstanceMetaData> getInstanceMetaData() {
         return instanceMetaData;
     }
@@ -223,7 +226,4 @@ public class Stack implements ProvisionEntity {
         this.instanceMetaData = instanceMetaData;
     }
 
-    public void setHash(String hash) {
-        this.hash = hash;
-    }
 }

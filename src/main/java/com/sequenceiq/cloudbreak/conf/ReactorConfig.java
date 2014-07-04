@@ -21,6 +21,7 @@ public class ReactorConfig {
     public static final String PROVISION_REQUEST_EVENT = "PROVISION_REQUEST";
     public static final String PROVISION_SETUP_COMPLETE_EVENT = "PROVISION_SETUP_COMPLETE";
     public static final String STACK_CREATE_COMPLETE_EVENT = "STACK_CREATE_COMPLETE";
+    public static final String METADATA_SETUP_COMPLETE_EVENT = "METADATA_SETUP_COMPLETE";
     public static final String PROVISION_SUCCESS_EVENT = "PROVISION_SUCCESS";
 
     @Bean

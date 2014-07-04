@@ -88,7 +88,6 @@ public class SimpleStackService implements StackService {
         Template template = templateRepository.findOne(stackRequest.getTemplateId());
         stack.setUser(user);
         stack.setHash(generateHash(stack));
-        // TODO: fill metadata with indexes
         stack = stackRepository.save(stack);
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_REQUEST_EVENT, stack.getId());
         reactor.notify(ReactorConfig.PROVISION_REQUEST_EVENT, Event.wrap(new ProvisionRequest(template.cloudPlatform(), stack.getId())));
