@@ -16,6 +16,8 @@ public class UserJson implements JsonEntity {
 
     private String password;
 
+    private String company;
+
     private Set<CredentialJson> credentials;
 
     private Set<TemplateJson> azureTemplates = new HashSet<>();
@@ -53,6 +55,10 @@ public class UserJson implements JsonEntity {
     public void setEmail(String email) {
         this.email = email;
     }
+
+    public void setCompany(String company) { this.company = company; }
+
+    public String getCompany() { return company; }
 
     public Set<TemplateJson> getAwsTemplates() {
         return awsTemplates;
