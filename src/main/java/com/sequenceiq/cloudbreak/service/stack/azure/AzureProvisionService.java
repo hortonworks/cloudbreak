@@ -373,7 +373,7 @@ public class AzureProvisionService implements ProvisionService {
             props.put(PASSWORD, azureTemplate.getPassword());
         } else {
             X509Certificate sshCert = new X509Certificate(AzureCertificateService.getCerFile(user.emailAsFolder(), azureTemplate.getId()));
-            props.put(SSHPUBLICKEYFINGERPRINT, sshCert.getSha1Fingerprint());
+            props.put(SSHPUBLICKEYFINGERPRINT, sshCert.getSha1Fingerprint().toUpperCase());
             props.put(SSHPUBLICKEYPATH, String.format("/home/%s/.ssh/authorized_keys", DEFAULT_USER_NAME));
         }
         props.put(SERVICENAME, vmName);
