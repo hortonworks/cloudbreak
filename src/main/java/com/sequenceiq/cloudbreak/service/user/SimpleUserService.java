@@ -49,7 +49,8 @@ public class SimpleUserService implements UserService {
         user.setConfToken(confToken);
         User savedUser = userRepository.save(user);
         LOGGER.info("User {} successfully saved", user);
-        sendConfirmationEmail(user);
+        MimeMessagePreparator msgPreparator = prepareMessage(user);
+        sendConfirmationEmail(msgPreparator);
         return savedUser.getId();
     }
 
@@ -86,10 +87,8 @@ public class SimpleUserService implements UserService {
         return text;
     }
 
-    @Async
-    public void sendConfirmationEmail(final User user) {
-        LOGGER.info("Sending confirmation email ...");
-        MimeMessagePreparator preparator = new MimeMessagePreparator() {
+    private MimeMessagePreparator prepareMessage(final User user) {
+        return new MimeMessagePreparator() {
             public void prepare(MimeMessage mimeMessage) throws Exception {
                 MimeMessageHelper message = new MimeMessageHelper(mimeMessage);
                 message.setFrom(msgFrom);
@@ -98,6 +97,11 @@ public class SimpleUserService implements UserService {
                 message.setText(getEmailBody(user), true);
             }
         };
+    }
+
+    @Async
+    public void sendConfirmationEmail(final MimeMessagePreparator preparator) {
+        LOGGER.info("Sending confirmation email ...");
         ((JavaMailSender) mailSender).send(preparator);
         LOGGER.info("Confirmation email sent");
     }
