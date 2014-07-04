@@ -34,6 +34,7 @@ public class UserConverter extends AbstractConverter<UserJson, User> {
         userJson.setEmail(entity.getEmail());
         userJson.setFirstName(entity.getFirstName());
         userJson.setLastName(entity.getLastName());
+        userJson.setCompany(entity.getCompany());
         userJson.setCredentials(credentialService.getAll(entity));
         userJson.setAwsTemplates(awsTemplateConverter.convertAllEntityToJson(entity.getAwsTemplates()));
         userJson.setAzureTemplates(azureTemplateConverter.convertAllEntityToJson(entity.getAzureTemplates()));
@@ -48,6 +49,7 @@ public class UserConverter extends AbstractConverter<UserJson, User> {
         user.setEmail(json.getEmail());
         user.setFirstName(json.getFirstName());
         user.setLastName(json.getLastName());
+        user.setCompany(json.getCompany());
         user.setAwsTemplates(awsTemplateConverter.convertAllJsonToEntity(json.getAwsTemplates()));
         user.setAzureTemplates(azureTemplateConverter.convertAllJsonToEntity(json.getAzureTemplates()));
         user.setStacks(stackConverter.convertAllJsonToEntity(json.getStacks()));

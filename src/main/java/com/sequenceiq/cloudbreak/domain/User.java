@@ -48,6 +48,9 @@ public class User implements ProvisionEntity {
     @Column(unique = true, nullable = false)
     private String email;
 
+    @NotEmpty
+    private String company;
+
     @OneToMany(mappedBy = "awsCredentialOwner", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<AwsCredential> awsCredentials = new HashSet<>();
 
@@ -86,6 +89,7 @@ public class User implements ProvisionEntity {
         this.lastName = user.lastName;
         this.email = user.email;
         this.password = user.password;
+        this.company = user.company;
         this.confToken = user.confToken;
         this.awsTemplates = user.awsTemplates;
         this.azureTemplates = user.azureTemplates;
@@ -212,6 +216,14 @@ public class User implements ProvisionEntity {
 
     public void setStatus(UserStatus status) {
         this.status = status;
+    }
+
+    public void setCompany(String company) {
+        this.company = company;
+    }
+
+    public String getCompany() {
+        return company;
     }
 
 }

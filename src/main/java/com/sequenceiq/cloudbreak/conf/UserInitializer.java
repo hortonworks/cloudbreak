@@ -36,6 +36,7 @@ public class UserInitializer implements InitializingBean {
             user2.setLastName("test");
             user2.setPassword(passwordEncoder.encode("test123"));
             user2.setStatus(UserStatus.ACTIVE);
+            user2.setCompany("SequenceIQ");
 
             // AzureCredential azureCredential = new AzureCredential();
             // azureCredential.setSubscriptionId("1234-45567-123213-12312");
@@ -62,7 +63,7 @@ public class UserInitializer implements InitializingBean {
             awsTemplate.setSshLocation("0.0.0.0/0");
             awsTemplate.setUser(user2);
             /*
-             * 
+             *
              * Stack awsStack = new Stack(); awsStack.setTemplate(awsTemplate);
              * awsStack.setNodeCount(NODE_COUNT); awsStack.setBlueprintName("coreos");
              * awsStack.setUser(user2); awsStack.setCredential(awsCredential);
