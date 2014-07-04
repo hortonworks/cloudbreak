@@ -4,14 +4,18 @@
 </head>
 <body>
   <h1>
-    Yo ${user.firstName}, our beloved user!
+    Welcome ${user.firstName},
   </h1>
 
+</br>
   To activate your account please click <a href="${confirm}">here</a>
 
+<p>
   Thank you,
 
+  </br>
+  </br>
   The SequenceIQ Team
-
+</p>
 </body>
 </html>

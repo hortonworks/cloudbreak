@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.user;
 
 
+import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.UserStatus;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
@@ -13,6 +14,7 @@ import org.springframework.mail.MailSender;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.mail.javamail.MimeMessagePreparator;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import org.springframework.util.DigestUtils;
@@ -79,10 +81,12 @@ public class SimpleUserService implements UserService {
             text = FreeMarkerTemplateUtils.processTemplateIntoString(freemarkerConfiguration.getTemplate(template, "UTF-8"), model);
         } catch (Exception e) {
             LOGGER.error("Confirmation email assembling failed. Exception: {}", e);
+            throw new InternalServerException("Failed to assemble confirmation email message", e);
         }
         return text;
     }
 
+    @Async
     public void sendConfirmationEmail(final User user) {
         LOGGER.info("Sending confirmation email ...");
         MimeMessagePreparator preparator = new MimeMessagePreparator() {
