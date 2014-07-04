@@ -356,8 +356,7 @@ public class AzureProvisionService implements ProvisionService {
         props.put(SERVICENAME, vmName);
         props.put(SUBNETNAME, name);
         Map<String, String> map = new HashMap<>();
-        map.put("HASH", hash);
-        props.put(CUSTOMDATA, new String(Base64.encodeBase64(userDataBuilder.build(CloudPlatform.AZURE, map).getBytes())));
+        props.put(CUSTOMDATA, new String(Base64.encodeBase64(userDataBuilder.build(CloudPlatform.AZURE, hash, map).getBytes())));
         props.put(VIRTUALNETWORKNAME, name);
         props.put(PORTS, ports);
         props.put(VMTYPE, AzureVmType.valueOf(azureTemplate.getVmType()).vmType().replaceAll(" ", ""));
