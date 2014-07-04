@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -10,6 +13,8 @@ public class UserJson implements JsonEntity {
     private String lastName;
 
     private String email;
+
+    private String password;
 
     private Set<CredentialJson> credentials;
 
@@ -73,6 +78,7 @@ public class UserJson implements JsonEntity {
         this.stacks = stacks;
     }
 
+
     public Set<BlueprintJson> getBlueprints() {
         return blueprints;
     }
@@ -87,5 +93,15 @@ public class UserJson implements JsonEntity {
 
     public void setCredentials(Set<CredentialJson> credentials) {
         this.credentials = credentials;
+    }
+
+    @JsonProperty("password")
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    @JsonIgnore
+    public String getPassword() {
+        return password;
     }
 }

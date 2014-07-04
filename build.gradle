@@ -107,14 +107,14 @@ dependencies {
     compile 'org.springframework:spring-messaging:4.0.3.RELEASE'
     compile 'org.projectreactor:reactor-spring:1.0.1.RELEASE'
     compile 'org.postgresql:postgresql:9.3-1101-jdbc41'
-    compile ('com.amazonaws:aws-java-sdk:1.7.8.1') {
+    compile('com.amazonaws:aws-java-sdk:1.7.8.1') {
         exclude group: 'commons-logging'
     }
     compile 'org.hibernate:hibernate-validator:5.1.1.Final'
-    compile ('com.sequenceiq.azure:azure-client:1.0-SNAPSHOT') {
+    compile('com.sequenceiq.azure:azure-client:1.0-SNAPSHOT') {
         exclude group: 'log4j';
     }
-    compile ('com.sequenceiq.ambari:ambari-client:1.0-SNAPSHOT') {
+    compile('com.sequenceiq.ambari:ambari-client:1.0-SNAPSHOT') {
         exclude group: 'org.slf4j';
     }
     compile 'org.apache.commons:commons-lang3:3.3.2'
@@ -128,6 +128,13 @@ dependencies {
         exclude group: "xml-apis";
         exclude group: "groovy"
     }
+    compile group: 'javax.mail', name: 'mail', version: '1.5.0-b01'
+    compile group: 'org.freemarker', name: 'freemarker', version: '2.3.20'
+    runtime group: 'activation', name: 'activation', version: '1.0.2'
+
+
+
+
     testCompile 'org.springframework.boot:spring-boot-starter-test:1.0.2.RELEASE'
     deployerJars 'org.springframework.build.aws:org.springframework.build.aws.maven:3.0.0.RELEASE'
 }
@@ -137,7 +144,7 @@ task wrapper(type: Wrapper) { gradleVersion = "1.12" }
 task buildInfo(type: BuildInfoTask) {
     destination = file("$buildDir")
     basename = jar.baseName
-    buildVersion =  version
+    buildVersion = version
 }
 
 compileJava.dependsOn buildInfo
@@ -152,8 +159,9 @@ class BuildInfoTask extends DefaultTask {
         destination.mkdirs()
         new File(destination, "build.info").withWriter { out ->
             [
-                "ARTIFACT_BASENAME=" + basename,
-                "ARTIFACT_VERSION=" + buildVersion,
-            ].each { out.println it } }
+                    "ARTIFACT_BASENAME=" + basename,
+                    "ARTIFACT_VERSION=" + buildVersion,
+            ].each { out.println it }
+        }
     }
 }

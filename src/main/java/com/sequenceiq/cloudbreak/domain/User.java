@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.domain;
 
-import java.util.HashSet;
-import java.util.Set;
+import org.hibernate.validator.constraints.Email;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -13,9 +13,8 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-
-import org.hibernate.validator.constraints.Email;
-import org.hibernate.validator.constraints.NotEmpty;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @NamedQueries({
@@ -30,6 +29,7 @@ import org.hibernate.validator.constraints.NotEmpty;
                         + "LEFT JOIN FETCH u.azureCredentials "
                         + "LEFT JOIN FETCH u.clusters "
                         + "WHERE u.id= :id")
+
 })
 @Table(name = "cloudbreakuser")
 public class User implements ProvisionEntity {
@@ -57,6 +57,11 @@ public class User implements ProvisionEntity {
     @NotEmpty
     private String password;
 
+    private String confToken;
+
+    private UserStatus status = UserStatus.PENDING;
+
+
     @OneToMany(mappedBy = "azureTemplateOwner", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<AzureTemplate> azureTemplates = new HashSet<>();
 
@@ -81,6 +86,7 @@ public class User implements ProvisionEntity {
         this.lastName = user.lastName;
         this.email = user.email;
         this.password = user.password;
+        this.confToken = user.confToken;
         this.awsTemplates = user.awsTemplates;
         this.azureTemplates = user.azureTemplates;
         this.awsCredentials = user.awsCredentials;
@@ -88,6 +94,7 @@ public class User implements ProvisionEntity {
         this.stacks = user.stacks;
         this.blueprints = user.blueprints;
         this.clusters = user.clusters;
+        this.status = user.getStatus();
     }
 
     public String getPassword() {
@@ -190,4 +197,21 @@ public class User implements ProvisionEntity {
     public String emailAsFolder() {
         return email.replaceAll("@", "_").replace(".", "_");
     }
+
+    public void setConfToken(String confToken) {
+        this.confToken = confToken;
+    }
+
+    public String getConfToken() {
+        return this.confToken;
+    }
+
+    public UserStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(UserStatus status) {
+        this.status = status;
+    }
+
 }

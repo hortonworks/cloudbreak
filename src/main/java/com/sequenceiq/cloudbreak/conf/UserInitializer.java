@@ -1,34 +1,41 @@
 package com.sequenceiq.cloudbreak.conf;
 
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.ec2.model.InstanceType;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.domain.UserStatus;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
 
 @Component
 public class UserInitializer implements InitializingBean {
 
-    @Value("${HBM2DDL_STRATEGY}")
+    @Value("${hbm2ddl.strategy}")
     private String hbm2ddlStrategy;
 
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @Override
     public void afterPropertiesSet() throws Exception {
         if ("create".equals(hbm2ddlStrategy) || "create-drop".equals(hbm2ddlStrategy)) {
+
+
             User user2 = new User();
             user2.setEmail("cbuser@sequenceiq.com");
             user2.setFirstName("seq");
             user2.setLastName("test");
-            user2.setPassword("test123");
+            user2.setPassword(passwordEncoder.encode("test123"));
+            user2.setStatus(UserStatus.ACTIVE);
 
             // AzureCredential azureCredential = new AzureCredential();
             // azureCredential.setSubscriptionId("1234-45567-123213-12312");
