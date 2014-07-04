@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import com.amazonaws.auth.BasicSessionCredentials;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
+import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
@@ -38,6 +39,15 @@ public class AwsStackUtil {
         amazonEC2Client.setRegion(Region.getRegion(regions));
         LOGGER.info("Amazon EC2 client successfully created.");
         return amazonEC2Client;
+    }
+
+    public AmazonAutoScalingClient createAutoScalingClient(Regions regions, AwsCredential credential) {
+        BasicSessionCredentials basicSessionCredentials = credentialsProvider
+                .retrieveSessionCredentials(CrossAccountCredentialsProvider.DEFAULT_SESSION_CREDENTIALS_DURATION, "provision-ambari", credential);
+        AmazonAutoScalingClient amazonAutoScalingClient = new AmazonAutoScalingClient(basicSessionCredentials);
+        amazonAutoScalingClient.setRegion(Region.getRegion(regions));
+        LOGGER.info("Amazon Autoscaling client successfully created.");
+        return amazonAutoScalingClient;
     }
 
     public String encode(String userData) {

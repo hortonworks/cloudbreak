@@ -45,7 +45,8 @@ public class AwsProvisioner implements Provisioner {
                 .withNotificationARNs(setupProperties.get(SnsTopicManager.NOTIFICATION_TOPIC_ARN_KEY))
                 .withParameters(
                         new Parameter().withParameterKey("SSHLocation").withParameterValue(awsTemplate.getSshLocation()),
-                        new Parameter().withParameterKey("CBUserData").withParameterValue(userData)
+                        new Parameter().withParameterKey("CBUserData").withParameterValue(userData),
+                        new Parameter().withParameterKey("StackName").withParameterValue(stackName)
                 );
         CreateStackResult createStackResult = client.createStack(createStackRequest);
         Stack updatedStack = stackUpdater.updateStackCfAttributes(stack.getId(), stackName, createStackResult.getStackId());

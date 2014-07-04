@@ -45,6 +45,9 @@ public class SnsMessageHandler {
     @Autowired
     private AwsStackUtil awsStackUtil;
 
+    @Autowired
+    private AwsNetworkConfigurator awsNetworkConfigurator;
+
     public void handleMessage(SnsRequest snsRequest) {
         if (isCloudFormationMessage(snsRequest)) {
             Map<String, String> cfMessage = snsMessageParser.parseCFMessage(snsRequest.getMessage());
@@ -82,6 +85,7 @@ public class SnsMessageHandler {
                     "Got message that CloudFormation stack created, but no matching stack found in the database [CFStackId: '{}']. Ignoring message.",
                     cfMessage.get("StackId"));
         } else if (!stack.isCfStackCompleted()) {
+            awsNetworkConfigurator.disableSourceDestCheck(stack);
             stack = stackUpdater.updateCfStackCreateComplete(stack.getId());
             LOGGER.info("CloudFormation stack creation completed. [Id: '{}', CFStackId '{}']", stack.getId(), stack.getCfStackId());
             LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_CREATE_COMPLETE_EVENT, stack.getId());
