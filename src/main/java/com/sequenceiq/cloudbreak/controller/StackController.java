@@ -76,7 +76,7 @@ public class StackController {
         }
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/{hash}/metadata")
+    @RequestMapping(method = RequestMethod.GET, value = "/metadata/{hash}")
     @ResponseBody
     public ResponseEntity<Set<InstanceMetaDataJson>> getStackMetadata(@CurrentUser User user, @PathVariable String hash) {
         try {
