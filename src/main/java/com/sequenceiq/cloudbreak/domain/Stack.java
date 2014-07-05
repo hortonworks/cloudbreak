@@ -71,6 +71,8 @@ public class Stack implements ProvisionEntity {
 
     private String hash;
 
+    private boolean metadataReady;
+
     @OneToMany(mappedBy = "stack", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<InstanceMetaData> instanceMetaData = new HashSet<>();
 
@@ -216,6 +218,14 @@ public class Stack implements ProvisionEntity {
 
     public void setHash(String hash) {
         this.hash = hash;
+    }
+
+    public boolean isMetadataReady() {
+        return metadataReady;
+    }
+
+    public void setMetadataReady(boolean metadataReady) {
+        this.metadataReady = metadataReady;
     }
 
     public Set<InstanceMetaData> getInstanceMetaData() {

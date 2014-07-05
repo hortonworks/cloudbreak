@@ -118,8 +118,12 @@ public class SimpleStackService implements StackService {
     @Override
     public Set<InstanceMetaDataJson> getMetaData(User one, String hash) {
         Stack stack = stackRepository.findStackByHash(hash);
-        if (stack != null && !stack.getInstanceMetaData().isEmpty()) {
-            return metaDataConverter.convertAllEntityToJson(stack.getInstanceMetaData());
+        if (stack != null) {
+            if (!stack.isMetadataReady()) {
+                throw new MetadataIncompleteException("Instance metadata is incomplete.");
+            } else if (!stack.getInstanceMetaData().isEmpty()) {
+                return metaDataConverter.convertAllEntityToJson(stack.getInstanceMetaData());
+            }
         }
         throw new NotFoundException("Metadata not found on stack.");
     }

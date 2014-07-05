@@ -26,6 +26,8 @@ import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSuccess;
 @Component
 public class MetadataSetupCompleteHandler implements Consumer<Event<MetadataSetupComplete>> {
 
+    private static final String DOCKER_SUBNET_PREFIX = "172.17.1";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(MetadataSetupCompleteHandler.class);
 
     @Autowired
@@ -42,39 +44,45 @@ public class MetadataSetupCompleteHandler implements Consumer<Event<MetadataSetu
         MetadataSetupComplete metadataSetupComplete = event.getData();
         Long stackId = metadataSetupComplete.getStackId();
         Set<CoreInstanceMetaData> coreInstanceMetaData = metadataSetupComplete.getCoreInstanceMetaData();
-        LOGGER.info("Accepted {} event.", ReactorConfig.STACK_CREATE_COMPLETE_EVENT, stackId);
+        LOGGER.info("Accepted {} event.", ReactorConfig.METADATA_SETUP_COMPLETE_EVENT, stackId);
         try {
             Stack stack = stackRepository.findById(stackId);
-            if (coreInstanceMetaData.size() != stack.getNodeCount()) {
-                throw new WrongMetadataException(String.format(
-                        "Size of the collected metadata set does not equal the node count of the stack. [stack: '%s']", stack.getId()));
-            }
-            Set<InstanceMetaData> instanceMetaData = new HashSet<>();
-            int instanceIndex = 0;
-            String ambariIp = null;
-            for (CoreInstanceMetaData coreInstanceMetaDataEntry : coreInstanceMetaData) {
-                InstanceMetaData instanceMetaDataEntry = new InstanceMetaData();
-                instanceMetaDataEntry.setPrivateIp(coreInstanceMetaDataEntry.getPrivateIp());
-                instanceMetaDataEntry.setPublicIp(coreInstanceMetaDataEntry.getPublicIp());
-                instanceMetaDataEntry.setInstanceId(coreInstanceMetaDataEntry.getInstanceId());
-                instanceMetaDataEntry.setInstanceIndex(instanceIndex);
-                if (instanceIndex == 0) {
-                    instanceMetaDataEntry.setAmbariServer(Boolean.TRUE);
-                    ambariIp = instanceMetaDataEntry.getPublicIp();
-                    if (ambariIp == null) {
-                        throw new WrongMetadataException(String.format("Public IP of Ambari server cannot be null [stack: '%s', instanceId: '%s' ]",
-                                stackId, coreInstanceMetaDataEntry.getInstanceId()));
-                    }
-                } else {
-                    instanceMetaDataEntry.setAmbariServer(Boolean.FALSE);
+            if (!stack.isMetadataReady()) {
+                if (coreInstanceMetaData.size() != stack.getNodeCount()) {
+                    throw new WrongMetadataException(String.format(
+                            "Size of the collected metadata set does not equal the node count of the stack. [stack: '%s']", stack.getId()));
                 }
-                instanceIndex++;
-                instanceMetaDataEntry.setStack(stack);
-                instanceMetaData.add(instanceMetaDataEntry);
+                Set<InstanceMetaData> instanceMetaData = new HashSet<>();
+                int instanceIndex = 0;
+                String ambariIp = null;
+                for (CoreInstanceMetaData coreInstanceMetaDataEntry : coreInstanceMetaData) {
+                    InstanceMetaData instanceMetaDataEntry = new InstanceMetaData();
+                    instanceMetaDataEntry.setPrivateIp(coreInstanceMetaDataEntry.getPrivateIp());
+                    instanceMetaDataEntry.setPublicIp(coreInstanceMetaDataEntry.getPublicIp());
+                    instanceMetaDataEntry.setInstanceId(coreInstanceMetaDataEntry.getInstanceId());
+                    instanceMetaDataEntry.setInstanceIndex(instanceIndex);
+                    instanceMetaDataEntry.setDockerSubnet(DOCKER_SUBNET_PREFIX + instanceIndex);
+                    if (instanceIndex == 0) {
+                        instanceMetaDataEntry.setAmbariServer(Boolean.TRUE);
+                        ambariIp = instanceMetaDataEntry.getPublicIp();
+                        if (ambariIp == null) {
+                            throw new WrongMetadataException(String.format("Public IP of Ambari server cannot be null [stack: '%s', instanceId: '%s' ]",
+                                    stackId, coreInstanceMetaDataEntry.getInstanceId()));
+                        }
+                    } else {
+                        instanceMetaDataEntry.setAmbariServer(Boolean.FALSE);
+                    }
+                    instanceIndex++;
+                    instanceMetaDataEntry.setStack(stack);
+                    instanceMetaData.add(instanceMetaDataEntry);
+                }
+                stackUpdater.updateStackMetaData(stackId, instanceMetaData);
+                stackUpdater.updateMetadataReady(stackId);
+                LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_SUCCESS_EVENT, stackId);
+                reactor.notify(ReactorConfig.PROVISION_SUCCESS_EVENT, Event.wrap(new ProvisionSuccess(stackId, ambariIp)));
+            } else {
+                LOGGER.info("Metadata of stack '{}' is already created, ignoring '{}' event.", stackId, ReactorConfig.METADATA_SETUP_COMPLETE_EVENT);
             }
-            stackUpdater.updateStackMetaData(stackId, instanceMetaData);
-            LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_SUCCESS_EVENT, stackId);
-            reactor.notify(ReactorConfig.PROVISION_SUCCESS_EVENT, Event.wrap(new ProvisionSuccess(stackId, ambariIp)));
         } catch (WrongMetadataException e) {
             LOGGER.error(e.getMessage(), e);
             notifyStackCreateFailed(stackId, e.getMessage());
