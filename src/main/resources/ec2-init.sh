@@ -6,18 +6,30 @@
 curl -o /usr/bin/jq http://stedolan.github.io/jq/download/linux64/jq
 chmod +x /usr/bin/jq
 
-# gets the instance id from ec2 metadata
+# instance id from ec2 metadata
 INSTANCE_ID=$(curl -s 169.254.169.254/latest/meta-data/instance-id)
 
 # jq expression that selects the json entry of the current instance from the array returned by the metadata service
 INSTANCE_SELECTOR='. | map(select(.instanceId == "'$INSTANCE_ID'"))'
-# jq expression that selects all the other json entries that do not belong to the current instance
+# jq expression that selects all the other json entries
 OTHER_INSTANCES_SELECTOR='. | map(select(.instanceId != "'$INSTANCE_ID'"))'
 
-# retrieves metadata of the current stack from the cloudbreak metadata service
-METADATA_RESULT=$(curl -sX GET -H "Content-Type:application/json" $METADATA_ADDRESS/stacks/metadata/$METADATA_HASH)
+# metadata service returns '204: no-content' if metadata is not ready yet and '200: ok' if it's completed
+# every other http status codes mean that something unexpected happened
+METADATA_STATUS=204
+MAX_RETRIES=60
+RETRIES=0
+while [ $METADATA_STATUS -eq 204 ] && [ $RETRIES -ne $MAX_RETRIES ]; do
+  METADATA_STATUS=$(curl -s -o /tmp/metadata_result -w "%{http_code}" -X GET -H Content-Type:application/json $METADATA_ADDRESS/stacks/metadata/$METADATA_HASH);
+  echo "Metadata service returned status code: $METADATA_STATUS";
+  [ $METADATA_STATUS -eq 204 ] && sleep 5 && ((RETRIES++));
+done
 
-# select the docker subnet of the current instance from the metadata result
+[ $METADATA_STATUS -ne 200 ] && exit 1;
+
+METADATA_RESULT=$(cat /tmp/metadata_result)
+
+# select the docker subnet of the current instance
 DOCKER_SUBNET=$(echo $METADATA_RESULT | jq "$INSTANCE_SELECTOR" | jq '.[].dockerSubnet' | sed s/\"//g)
 
 # creates bridge for docker
@@ -26,7 +38,6 @@ brctl addbr bridge0  && ifconfig bridge0 ${DOCKER_SUBNET}.1  netmask 255.255.255
 
 # route to others
 # read from stdin <launch-idx> <priv-ip>
-# can be used as: ec2-desc-ins | create_routes
 create_routes() {
   while read SUBNET IP; do
     route add -net ${SUBNET}.0  netmask 255.255.255.0  gw $IP
@@ -35,10 +46,9 @@ create_routes() {
 
 route delete -net 172.17.0.0/16
 
-# selects every other instance's docker subnet and private ip from the metadata result and calls create_routes on them
+# selects every other instance's docker subnet and private ip and calls create_routes on them
 echo $METADATA_RESULT | jq "$OTHER_INSTANCES_SELECTOR" | jq '.[] | (.dockerSubnet + " " + .privateIp)' | sed s/\"//g | create_routes
 
-# to be able to read the netstat table in the logs
 netstat -nr
 
 # set bridge0 in docker opts 
@@ -55,7 +65,7 @@ SERF_JOIN_IP=${DOCKER_SUBNET_OF_FIRST_OTHER}.2
 # temporary, while AMI is created with the latest docker version and the latest sequenceiq/ambari image
 IMAGE=ambari-warmup
 
-# determines from metadata if this instance is the Ambari server or not and sets the tags accordingly
+# determines if this instance is the Ambari server or not and sets the tags accordingly
 AMBARI_SERVER=$(echo $METADATA_RESULT | jq "$INSTANCE_SELECTOR" | jq '.[].ambariServer' | sed s/\"//g)
 [ "$AMBARI_SERVER" == true ] && AMBARI_ROLE="--tag ambari-server=true" || AMBARI_ROLE=""
 
@@ -71,8 +81,6 @@ EOF
 
 $CMD
 
-#######################
 # Update POSTROUTING rule created by Docker to support interhost package routing
-#######################
 iptables -t nat -D POSTROUTING 1
 iptables -t nat -A POSTROUTING -s ${DOCKER_SUBNET}.0/24 ! -d 172.17.0.0/16 -j MASQUERADE

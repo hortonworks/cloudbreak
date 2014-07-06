@@ -72,7 +72,7 @@ public class AwsNetworkConfigurator {
             amazonEC2Client.modifyNetworkInterfaceAttribute(modifyNetworkInterfaceAttributeRequest);
         }
 
-        LOGGER.info("Disabled sourceDestCheck. (instances: '{}', network interfaces: '{}')", stack, enis);
+        LOGGER.info("Disabled sourceDestCheck. (stack: '{}', instances: '{}', network interfaces: '{}')", stack.getId(), instanceIds, enis);
 
     }
 }
