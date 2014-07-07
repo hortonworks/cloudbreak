@@ -34,7 +34,7 @@ public class AwsProvisioner implements Provisioner {
     private RetryingStackUpdater stackUpdater;
 
     @Override
-    public synchronized void buildStack(Stack stack, String userData, Map<String, String> setupProperties) {
+    public synchronized void buildStack(Stack stack, String userData, Map<String, Object> setupProperties) {
         AwsTemplate awsTemplate = (AwsTemplate) stack.getTemplate();
         AwsCredential awsCredential = (AwsCredential) stack.getCredential();
         AmazonCloudFormationClient client = awsStackUtil.createCloudFormationClient(awsTemplate.getRegion(), awsCredential);
@@ -42,7 +42,7 @@ public class AwsProvisioner implements Provisioner {
         CreateStackRequest createStackRequest = new CreateStackRequest()
                 .withStackName(stackName)
                 .withTemplateBody(cfTemplate.getBody())
-                .withNotificationARNs(setupProperties.get(SnsTopicManager.NOTIFICATION_TOPIC_ARN_KEY))
+                .withNotificationARNs((String) setupProperties.get(SnsTopicManager.NOTIFICATION_TOPIC_ARN_KEY))
                 .withParameters(
                         new Parameter().withParameterKey("SSHLocation").withParameterValue(awsTemplate.getSshLocation()),
                         new Parameter().withParameterKey("CBUserData").withParameterValue(userData),

@@ -7,7 +7,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 
 public interface Provisioner {
 
-    void buildStack(Stack stack, String userData, Map<String, String> setupProperties);
+    void buildStack(Stack stack, String userData, Map<String, Object> setupProperties);
 
     CloudPlatform getCloudPlatform();
 
