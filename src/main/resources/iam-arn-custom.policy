@@ -1,0 +1,45 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "Stmt1402490087000",
+      "Effect": "Allow",
+      "Action": [
+        "cloudformation:*"
+      ],
+      "Resource": [
+        "*"
+      ]
+    },
+    {
+      "Sid": "Stmt1402490096000",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:*"
+      ],
+      "Resource": [
+        "*"
+      ]
+    },
+    {
+      "Sid": "Stmt1402490110000",
+      "Effect": "Allow",
+      "Action": [
+        "iam:PassRole"
+      ],
+      "Resource": [
+        "*"
+      ]
+    },
+    {
+      "Sid": "Stmt1402490128000",
+      "Effect": "Allow",
+      "Action": [
+        "sns:*"
+      ],
+      "Resource": [
+        "*"
+      ]
+    }
+  ]
+}
