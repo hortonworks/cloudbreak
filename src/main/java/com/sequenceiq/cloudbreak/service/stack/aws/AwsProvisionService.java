@@ -44,11 +44,6 @@ public class AwsProvisionService implements ProvisionService {
     private AwsStackUtil awsStackUtil;
 
     @Override
-    public void createStack(User user, Stack stack, Credential credential) {
-        return;
-    }
-
-    @Override
     public StackDescription describeStack(User user, Stack stack, Credential credential) {
         AwsTemplate awsTemplate = (AwsTemplate) stack.getTemplate();
         AwsCredential awsCredential = (AwsCredential) credential;

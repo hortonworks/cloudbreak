@@ -1,5 +1,12 @@
 package com.sequenceiq.cloudbreak.service.stack.azure;
 
+import static com.sequenceiq.cloudbreak.service.stack.azure.AzureStackUtil.EMAILASFOLDER;
+import static com.sequenceiq.cloudbreak.service.stack.azure.AzureStackUtil.NAME;
+import static com.sequenceiq.cloudbreak.service.stack.azure.AzureStackUtil.NOT_FOUND;
+import static com.sequenceiq.cloudbreak.service.stack.azure.AzureStackUtil.SERVICENAME;
+import static com.sequenceiq.cloudbreak.service.stack.azure.AzureStackUtil.getVmName;
+import static com.sequenceiq.cloudbreak.service.stack.azure.AzureStackUtil.CREDENTIAL;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.security.NoSuchAlgorithmException;
@@ -40,13 +47,8 @@ import reactor.event.Event;
 @Component
 public class AzureProvisioner implements Provisioner {
 
-    public static final String CREDENTIAL = "credential";
-    public static final String EMAILASFOLDER = "emailAsFolder";
-
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureProvisioner.class);
-    private static final int NOT_FOUND = 404;
     private static final String LOCATION = "location";
-    private static final String NAME = "name";
     private static final String DESCRIPTION = "description";
     private static final String AFFINITYGROUP = "affinityGroup";
     private static final String ADDRESSPREFIX = "addressPrefix";
@@ -64,7 +66,6 @@ public class AzureProvisioner implements Provisioner {
     private static final String VMTYPE = "vmType";
     private static final String SSHPUBLICKEYFINGERPRINT = "sshPublicKeyFingerprint";
     private static final String SSHPUBLICKEYPATH = "sshPublicKeyPath";
-    private static final String SERVICENAME = "serviceName";
     private static final String PORTS = "ports";
     private static final String DATA = "data";
     private static final String DEFAULT_USER_NAME = "ubuntu";
@@ -128,10 +129,6 @@ public class AzureProvisioner implements Provisioner {
     @Override
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.AZURE;
-    }
-
-    private String getVmName(String azureTemplate, int i) {
-        return String.format("%s-%s", azureTemplate, i);
     }
 
     private void createVirtualMachine(AzureClient azureClient, AzureTemplate azureTemplate,

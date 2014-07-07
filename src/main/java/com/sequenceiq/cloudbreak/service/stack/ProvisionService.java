@@ -8,8 +8,6 @@ import com.sequenceiq.cloudbreak.domain.User;
 
 public interface ProvisionService {
 
-    void createStack(User user, Stack stack, Credential credential);
-
     StackDescription describeStack(User user, Stack stack, Credential credential);
 
     StackDescription describeStackWithResources(User user, Stack stack, Credential credential);

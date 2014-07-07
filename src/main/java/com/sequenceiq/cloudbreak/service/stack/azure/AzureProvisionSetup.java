@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.service.stack.azure;
 
+import static com.sequenceiq.cloudbreak.service.stack.azure.AzureStackUtil.CREDENTIAL;
+import static com.sequenceiq.cloudbreak.service.stack.azure.AzureStackUtil.EMAILASFOLDER;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,9 +30,9 @@ public class AzureProvisionSetup implements ProvisionSetup {
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT, stack.getId());
         reactor.notify(ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT,
                 Event.wrap(new ProvisionSetupComplete(getCloudPlatform(), stack.getId())
-                .withSetupProperty(AzureProvisioner.CREDENTIAL, stack.getCredential())
-                .withSetupProperty(AzureProvisioner.EMAILASFOLDER, stack.getUser().emailAsFolder())
-        ));
+                                .withSetupProperty(CREDENTIAL, stack.getCredential())
+                                .withSetupProperty(EMAILASFOLDER, stack.getUser().emailAsFolder())
+                ));
     }
 
     @Override
