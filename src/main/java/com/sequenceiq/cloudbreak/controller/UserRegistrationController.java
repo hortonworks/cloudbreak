@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 
 import javax.validation.Valid;
@@ -43,6 +44,30 @@ public class UserRegistrationController {
         LOGGER.debug("Confirming registration (token: {})... ", confToken);
         userService.confirmRegistration(confToken);
         LOGGER.debug("Registration confirmed (token: {})", confToken);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/reset", method = RequestMethod.POST)
+    public ResponseEntity<Void> forgotPassword(@RequestParam String email) {
+        LOGGER.debug("Reset password for: {} (email)", email);
+        userService.disableUser(email);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/reset/{confToken}", method = RequestMethod.GET)
+    public ResponseEntity<Void> validateResetPassword(@PathVariable String confToken) {
+        LOGGER.debug("Reset password token: {} (GET)", confToken);
+        if (userService.validateResetPassword(confToken)) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        } else {
+            throw new BadRequestException("The requested token is not valid.");
+        }
+    }
+
+    @RequestMapping(value = "/reset/{confToken}", method = RequestMethod.POST)
+    public ResponseEntity<Void> resetPassword(@PathVariable String confToken, @RequestParam String password) {
+        LOGGER.debug("Reset password token: {} (POST)", confToken);
+        userService.resetPassword(confToken, password);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

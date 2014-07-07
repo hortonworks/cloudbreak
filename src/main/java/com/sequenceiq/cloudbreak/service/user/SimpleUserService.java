@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.user;
 
 
+import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.UserStatus;
@@ -15,6 +16,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.mail.javamail.MimeMessagePreparator;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import org.springframework.util.DigestUtils;
@@ -22,6 +24,7 @@ import org.springframework.util.DigestUtils;
 import javax.mail.internet.MimeMessage;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class SimpleUserService implements UserService {
@@ -36,6 +39,9 @@ public class SimpleUserService implements UserService {
     @Autowired
     private Configuration freemarkerConfiguration;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @Value("${host.addr}")
     private String hostAddress;
 
@@ -49,7 +55,7 @@ public class SimpleUserService implements UserService {
         user.setConfToken(confToken);
         User savedUser = userRepository.save(user);
         LOGGER.info("User {} successfully saved", user);
-        MimeMessagePreparator msgPreparator = prepareMessage(user);
+        MimeMessagePreparator msgPreparator = prepareMessage(user, "templates/confirmation-email.ftl", "/users/confirm/");
         sendConfirmationEmail(msgPreparator);
         return savedUser.getId();
     }
@@ -66,19 +72,51 @@ public class SimpleUserService implements UserService {
         }
     }
 
+    @Override
+    public void disableUser(String email) {
+        User user = userRepository.findByEmail(email);
+        if (user != null) {
+            user.setStatus(UserStatus.DISABLED);
+            user.setPassword(UUID.randomUUID().toString());
+            String confToken = generateRegistrationId(user);
+            user.setConfToken(confToken);
+            userRepository.save(user);
+            MimeMessagePreparator msgPreparator = prepareMessage(user, "templates/reset-email.ftl", "/users/reset/");
+            sendConfirmationEmail(msgPreparator);
+        } else {
+            LOGGER.warn("There's no user for email: {} ", email);
+        }
+    }
+
+    @Override
+    public void resetPassword(String confToken, String password) {
+        User user = userRepository.findUserByConfToken(confToken);
+        if (user.getStatus().equals(UserStatus.DISABLED)) {
+            user.setPassword(passwordEncoder.encode(password));
+            user.setConfToken(null);
+            userRepository.save(user);
+        } else {
+            LOGGER.warn("There's no user for token: {}", confToken);
+        }
+    }
+
+    @Override
+    public boolean validateResetPassword(String confToken) {
+        return userRepository.findUserByConfToken(confToken) != null;
+    }
+
     private String generateRegistrationId(User user) {
         LOGGER.debug("Generating registration id ...");
         String textToDigest = user.getEmail() + user.getPassword();
         return DigestUtils.md5DigestAsHex(textToDigest.getBytes());
     }
 
-    private String getEmailBody(User user) {
+    private String getEmailBody(User user, String template, String confirmPath) {
         String text = null;
         try {
-            String template = "templates/confirmation-email.ftl";
             Map<String, Object> model = new HashMap<>();
             model.put("user", user);
-            model.put("confirm", hostAddress + "/users/confirm/" + user.getConfToken());
+            model.put("confirm", hostAddress + confirmPath + user.getConfToken());
             text = FreeMarkerTemplateUtils.processTemplateIntoString(freemarkerConfiguration.getTemplate(template, "UTF-8"), model);
         } catch (Exception e) {
             LOGGER.error("Confirmation email assembling failed. Exception: {}", e);
@@ -87,14 +125,15 @@ public class SimpleUserService implements UserService {
         return text;
     }
 
-    private MimeMessagePreparator prepareMessage(final User user) {
+    @VisibleForTesting
+    protected MimeMessagePreparator prepareMessage(final User user, final String template, final String confirmPath) {
         return new MimeMessagePreparator() {
             public void prepare(MimeMessage mimeMessage) throws Exception {
                 MimeMessageHelper message = new MimeMessageHelper(mimeMessage);
                 message.setFrom(msgFrom);
                 message.setTo(user.getEmail());
                 message.setSubject("Cloudbreak - confirm registration");
-                message.setText(getEmailBody(user), true);
+                message.setText(getEmailBody(user, template, confirmPath), true);
             }
         };
     }
