@@ -33,9 +33,9 @@ import groovyx.net.http.HttpResponseDecorator;
 import groovyx.net.http.HttpResponseException;
 
 @Service
-public class AzureProvisionService implements CloudPlatformConnector {
+public class AzureConnector implements CloudPlatformConnector {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AzureProvisionService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AzureConnector.class);
 
     @Autowired
     private JsonHelper jsonHelper;
