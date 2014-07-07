@@ -57,6 +57,7 @@ DOCKER_OPTS="-b bridge0 -H unix:// -H tcp://0.0.0.0:4243"
 EOF
 
 service docker restart
+sleep 5
 
 # find the docker subnet of the first instance from "other instances" - this is used to determine which IP Serf will use to join the cluster  
 DOCKER_SUBNET_OF_FIRST_OTHER=$(echo $METADATA_RESULT | jq "$OTHER_INSTANCES_SELECTOR" | jq '.[0].dockerSubnet' | sed s/\"//g)
