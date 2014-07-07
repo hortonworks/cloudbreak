@@ -14,7 +14,7 @@ We work around the concept that Identity and Access Management is fully controll
 
 ###Configuring the AWS EC2 account
 
-Once you have logged in Cloudbreak you will have to link your AWS account with the Cloudbreak one. In order to do that you will need to do the following steps:
+Once you have logged in Cloudbreak you will have to link your AWS account with the Cloudbreak one. In order to do that you will need to do configure two IAM Roes
 
 1. Log in AWS management console with the user account you'd like to use with Cloudbreak
 2. Go to IAM and select Roles
@@ -31,3 +31,8 @@ Once you have logged in Cloudbreak you will have to link your AWS account with t
   * Select AWS Service Role
     * Amazon EC2
     *  Select Policy template - Read Only Access 
+   
+
+Once these are configured, Cloudbreak is ready to launch Hadoop clusters on your behalf. The only thing Cloudbreak requires are the `Role ARN` (Role for Cross-Account access) and the `Instance Profile ARN(s)` (AWS Service Roles).
+
+
