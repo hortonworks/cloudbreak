@@ -10,16 +10,17 @@ import reactor.core.Reactor;
 
 import com.sequenceiq.cloudbreak.service.cluster.ClusterCreationFailureHandler;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterCreationSuccessHandler;
-import com.sequenceiq.cloudbreak.service.stack.StackCreationFailureHandler;
-import com.sequenceiq.cloudbreak.service.stack.StackCreationSuccessHandler;
-import com.sequenceiq.cloudbreak.service.stack.aws.ClusterRequestHandler;
-import com.sequenceiq.cloudbreak.service.stack.aws.Ec2InstanceRunner;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterRequestHandler;
+import com.sequenceiq.cloudbreak.service.stack.handler.AmbariRoleAllocationCompleteHandler;
+import com.sequenceiq.cloudbreak.service.stack.handler.MetadataSetupCompleteHandler;
+import com.sequenceiq.cloudbreak.service.stack.handler.ProvisionCompleteHandler;
+import com.sequenceiq.cloudbreak.service.stack.handler.ProvisionRequestHandler;
+import com.sequenceiq.cloudbreak.service.stack.handler.ProvisionSetupCompleteHandler;
+import com.sequenceiq.cloudbreak.service.stack.handler.StackCreationFailureHandler;
+import com.sequenceiq.cloudbreak.service.stack.handler.StackCreationSuccessHandler;
 
 @Component
 public class ReactorInitializer implements InitializingBean {
-
-    @Autowired
-    private Ec2InstanceRunner ec2InstanceRunner;
 
     @Autowired
     private ClusterRequestHandler clusterRequestHandler;
@@ -37,15 +38,35 @@ public class ReactorInitializer implements InitializingBean {
     private ClusterCreationSuccessHandler clusterCreationSuccessHandler;
 
     @Autowired
+    private ProvisionRequestHandler provisionRequestHandler;
+
+    @Autowired
+    private ProvisionSetupCompleteHandler provisionSetupCompleteHandler;
+
+    @Autowired
+    private ProvisionCompleteHandler provisionCompleteHandler;
+
+    @Autowired
+    private MetadataSetupCompleteHandler metadataSetupCompleteHandler;
+
+    @Autowired
+    private AmbariRoleAllocationCompleteHandler ambariRoleAllocationCompleteHandler;
+
+    @Autowired
     private Reactor reactor;
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        reactor.on($(ReactorConfig.CF_STACK_COMPLETED_EVENT), ec2InstanceRunner);
-        reactor.on($(ReactorConfig.CLUSTER_REQUESTED_EVENT), clusterRequestHandler);
-        reactor.on($(ReactorConfig.AMBARI_STARTED_EVENT), clusterRequestHandler);
+        reactor.on($(ReactorConfig.PROVISION_REQUEST_EVENT), provisionRequestHandler);
+        reactor.on($(ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT), provisionSetupCompleteHandler);
+        reactor.on($(ReactorConfig.PROVISION_COMPLETE_EVENT), provisionCompleteHandler);
+        reactor.on($(ReactorConfig.METADATA_SETUP_COMPLETE_EVENT), metadataSetupCompleteHandler);
+        reactor.on($(ReactorConfig.AMBARI_ROLE_ALLOCATION_COMPLETE_EVENT), ambariRoleAllocationCompleteHandler);
         reactor.on($(ReactorConfig.STACK_CREATE_SUCCESS_EVENT), stackCreationSuccessHandler);
         reactor.on($(ReactorConfig.STACK_CREATE_FAILED_EVENT), stackCreationFailureHandler);
+
+        reactor.on($(ReactorConfig.CLUSTER_REQUESTED_EVENT), clusterRequestHandler);
+        reactor.on($(ReactorConfig.AMBARI_STARTED_EVENT), clusterRequestHandler);
         reactor.on($(ReactorConfig.CLUSTER_CREATE_SUCCESS_EVENT), clusterCreationSuccessHandler);
         reactor.on($(ReactorConfig.CLUSTER_CREATE_FAILED_EVENT), clusterCreationFailureHandler);
     }

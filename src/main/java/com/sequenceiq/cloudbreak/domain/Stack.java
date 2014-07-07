@@ -41,7 +41,6 @@ import javax.persistence.Version;
                         + "WHERE c.credential.id= :credentialId "
                         + "AND c.status= 'REQUESTED'")
 })
-
 public class Stack implements ProvisionEntity {
 
     @Id
@@ -71,6 +70,8 @@ public class Stack implements ProvisionEntity {
     private String statusReason;
 
     private String hash;
+
+    private boolean metadataReady;
 
     @OneToMany(mappedBy = "stack", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<InstanceMetaData> instanceMetaData = new HashSet<>();
@@ -215,6 +216,18 @@ public class Stack implements ProvisionEntity {
         return hash;
     }
 
+    public void setHash(String hash) {
+        this.hash = hash;
+    }
+
+    public boolean isMetadataReady() {
+        return metadataReady;
+    }
+
+    public void setMetadataReady(boolean metadataReady) {
+        this.metadataReady = metadataReady;
+    }
+
     public Set<InstanceMetaData> getInstanceMetaData() {
         return instanceMetaData;
     }
@@ -223,7 +236,4 @@ public class Stack implements ProvisionEntity {
         this.instanceMetaData = instanceMetaData;
     }
 
-    public void setHash(String hash) {
-        this.hash = hash;
-    }
 }

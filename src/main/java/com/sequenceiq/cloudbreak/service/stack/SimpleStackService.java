@@ -6,11 +6,17 @@ import java.util.Set;
 
 import javax.annotation.Resource;
 
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.DigestUtils;
 
+import reactor.core.Reactor;
+import reactor.event.Event;
+
+import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
 import com.sequenceiq.cloudbreak.controller.json.InstanceMetaDataJson;
@@ -24,6 +30,9 @@ import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
+import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
+import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
+import com.sequenceiq.cloudbreak.service.stack.flow.MetadataIncompleteException;
 
 @Service
 public class SimpleStackService implements StackService {
@@ -43,7 +52,10 @@ public class SimpleStackService implements StackService {
     private TemplateRepository templateRepository;
 
     @Resource
-    private Map<CloudPlatform, ProvisionService> provisionServices;
+    private Map<CloudPlatform, CloudPlatformConnector> provisionServices;
+
+    @Autowired
+    private Reactor reactor;
 
     @Override
     public Set<StackJson> getAll(User user) {
@@ -77,9 +89,10 @@ public class SimpleStackService implements StackService {
         Stack stack = stackConverter.convert(stackRequest);
         Template template = templateRepository.findOne(stackRequest.getTemplateId());
         stack.setUser(user);
+        stack.setHash(generateHash(stack));
         stack = stackRepository.save(stack);
-        ProvisionService provisionService = provisionServices.get(template.cloudPlatform());
-        provisionService.createStack(user, stack, stack.getCredential());
+        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_REQUEST_EVENT, stack.getId());
+        reactor.notify(ReactorConfig.PROVISION_REQUEST_EVENT, Event.wrap(new ProvisionRequest(template.cloudPlatform(), stack.getId())));
         return new IdJson(stack.getId());
     }
 
@@ -107,10 +120,19 @@ public class SimpleStackService implements StackService {
     @Override
     public Set<InstanceMetaDataJson> getMetaData(User one, String hash) {
         Stack stack = stackRepository.findStackByHash(hash);
-        if (stack != null && !stack.getInstanceMetaData().isEmpty()) {
-            return metaDataConverter.convertAllEntityToJson(stack.getInstanceMetaData());
+        if (stack != null) {
+            if (!stack.isMetadataReady()) {
+                throw new MetadataIncompleteException("Instance metadata is incomplete.");
+            } else if (!stack.getInstanceMetaData().isEmpty()) {
+                return metaDataConverter.convertAllEntityToJson(stack.getInstanceMetaData());
+            }
         }
         throw new NotFoundException("Metadata not found on stack.");
+    }
+
+    private String generateHash(Stack stack) {
+        int hashCode = HashCodeBuilder.reflectionHashCode(stack);
+        return DigestUtils.md5DigestAsHex(String.valueOf(hashCode).getBytes());
     }
 
 }

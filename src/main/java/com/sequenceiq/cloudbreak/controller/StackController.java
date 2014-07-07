@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
 import com.sequenceiq.cloudbreak.security.CurrentUser;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.flow.MetadataIncompleteException;
 
 @Controller
 @RequestMapping("stacks")
@@ -78,8 +79,11 @@ public class StackController {
     @RequestMapping(method = RequestMethod.GET, value = "/metadata/{hash}")
     @ResponseBody
     public ResponseEntity<Set<InstanceMetaDataJson>> getStackMetadata(@CurrentUser User user, @PathVariable String hash) {
-        Set<InstanceMetaDataJson> metaData = stackService.getMetaData(user, hash);
-        return new ResponseEntity<>(metaData, HttpStatus.OK);
+        try {
+            Set<InstanceMetaDataJson> metaData = stackService.getMetaData(user, hash);
+            return new ResponseEntity<>(metaData, HttpStatus.OK);
+        } catch (MetadataIncompleteException e) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
     }
-
 }

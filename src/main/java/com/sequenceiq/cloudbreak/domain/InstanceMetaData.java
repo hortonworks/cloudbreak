@@ -13,7 +13,10 @@ public class InstanceMetaData implements ProvisionEntity {
     private Long id;
     private String privateIp;
     private String publicIp;
+    private String instanceId;
+    private int instanceIndex;
     private Boolean ambariServer;
+    private String dockerSubnet;
     @ManyToOne
     private Stack stack;
 
@@ -45,12 +48,36 @@ public class InstanceMetaData implements ProvisionEntity {
         this.id = id;
     }
 
+    public String getInstanceId() {
+        return instanceId;
+    }
+
+    public void setInstanceId(String instanceId) {
+        this.instanceId = instanceId;
+    }
+
+    public int getInstanceIndex() {
+        return instanceIndex;
+    }
+
+    public void setInstanceIndex(int instanceIndex) {
+        this.instanceIndex = instanceIndex;
+    }
+
     public Boolean getAmbariServer() {
         return ambariServer;
     }
 
     public void setAmbariServer(Boolean ambariServer) {
         this.ambariServer = ambariServer;
+    }
+
+    public String getDockerSubnet() {
+        return dockerSubnet;
+    }
+
+    public void setDockerSubnet(String dockerSubnet) {
+        this.dockerSubnet = dockerSubnet;
     }
 
     public Stack getStack() {

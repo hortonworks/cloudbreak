@@ -7,7 +7,6 @@ import com.google.common.base.Optional;
 public enum AWSCredentialParam implements TemplateParam {
 
     ROLE_ARN("roleArn", true, String.class, Optional.<String>absent()),
-    INSTANCE_PROFILE_ROLE_ARN("instanceProfileRoleArn", true, String.class, Optional.<String>absent()),
     SNS_TOPICS("snsTopics", false, Set.class, Optional.<String>absent());
 
     private final String paramName;

@@ -25,7 +25,6 @@ public class AwsCredentialConverter extends AbstractConverter<CredentialJson, Aw
         credentialJson.setName(entity.getName());
         Map<String, Object> params = new HashMap<>();
         params.put(AWSCredentialParam.ROLE_ARN.getName(), entity.getRoleArn());
-        params.put(AWSCredentialParam.INSTANCE_PROFILE_ROLE_ARN.getName(), entity.getInstanceProfileRoleArn());
         params.put(AWSCredentialParam.SNS_TOPICS.getName(), snsTopicConverter.convertAllEntityToJson(entity.getSnsTopics()));
         credentialJson.setParameters(params);
         credentialJson.setDescription(entity.getDescription() == null ? "" : entity.getDescription());
@@ -37,7 +36,6 @@ public class AwsCredentialConverter extends AbstractConverter<CredentialJson, Aw
         AwsCredential awsCredential = new AwsCredential();
         awsCredential.setName(json.getName());
         awsCredential.setRoleArn(String.valueOf(json.getParameters().get(AWSCredentialParam.ROLE_ARN.getName())));
-        awsCredential.setInstanceProfileRoleArn(String.valueOf(json.getParameters().get(AWSCredentialParam.INSTANCE_PROFILE_ROLE_ARN.getName())));
         awsCredential.setCloudPlatform(CloudPlatform.AWS);
         awsCredential.setDescription(json.getDescription());
         return awsCredential;

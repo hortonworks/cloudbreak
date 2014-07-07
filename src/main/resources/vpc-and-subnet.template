@@ -12,6 +12,25 @@
       "MaxLength": "18",
       "AllowedPattern" : "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
       "ConstraintDescription" : "must be a valid CIDR range of the form x.x.x.x/x."
+    },
+    "StackName" : {
+      "Description" : "Name of the CloudFormation stack that is used to tag instances",
+      "Type" : "String",
+      "MinLength": "1",
+      "MaxLength": "50"
+    },
+    "InstanceCount" : {
+      "Description" : "Number of instances that should be started in the stack.",
+      "Type" : "Number",
+      "Default" : "3",
+      "MinValue" : "2",
+      "MaxValue" : "99"
+    },
+    "CBUserData" : {
+      "Description" : "User data to be executed",
+      "Type" : "String",
+      "MinLength": "9",
+      "MaxLength": "50000"
     }
 
   },
@@ -95,6 +114,32 @@
       "Properties" : {
         "SubnetId" : { "Ref" : "PublicSubnet" },
         "RouteTableId" : { "Ref" : "PublicRouteTable" }
+      }
+    },
+    
+	"AmbariNodes" : {
+      "Type" : "AWS::AutoScaling::AutoScalingGroup",
+      "DependsOn" : "PublicSubnet",
+      "Properties" : {
+        "AvailabilityZones" : [{ "Fn::GetAtt" : [ "PublicSubnet", "AvailabilityZone" ] }],
+        "VPCZoneIdentifier" : [{ "Ref" : "PublicSubnet" }],
+        "LaunchConfigurationName" : { "Ref" : "AmbariNodeLaunchConfig" },
+        "MinSize" : { "Ref" : "InstanceCount" },
+        "MaxSize" : { "Ref" : "InstanceCount" },
+        "DesiredCapacity" : { "Ref" : "InstanceCount" },
+        "Tags" : [ { "Key" : "Name", "Value" : { "Ref" : "StackName" }, "PropagateAtLaunch" : "true" } ]
+      }
+    },
+
+    "AmbariNodeLaunchConfig"  : {
+      "Type" : "AWS::AutoScaling::LaunchConfiguration",
+      "Properties" : {
+        "ImageId"        : "ami-f39f5684",
+        "SecurityGroups" : [ { "Ref" : "ClusterNodeSecurityGroup" } ],
+        "InstanceType"   : "m1.small",
+        "KeyName"        : "sequence-eu",
+        "AssociatePublicIpAddress" : "true",
+        "UserData"       : { "Fn::Base64" : { "Ref" : "CBUserData"}}
       }
     },
     

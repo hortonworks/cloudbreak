@@ -14,15 +14,14 @@ public class MetaDataConverter extends AbstractConverter<InstanceMetaDataJson, I
         metaDataJson.setPrivateIp(entity.getPrivateIp());
         metaDataJson.setPublicIp(entity.getPublicIp());
         metaDataJson.setAmbariServer(entity.getAmbariServer());
+        metaDataJson.setInstanceId(entity.getInstanceId());
+        metaDataJson.setInstanceIndex(entity.getInstanceIndex());
+        metaDataJson.setDockerSubnet(entity.getDockerSubnet());
         return metaDataJson;
     }
 
     @Override
     public InstanceMetaData convert(InstanceMetaDataJson json) {
-        InstanceMetaData instanceMetaData = new InstanceMetaData();
-        instanceMetaData.setPrivateIp(json.getPrivateIp());
-        instanceMetaData.setPublicIp(json.getPublicIp());
-        instanceMetaData.setAmbariServer(json.getAmbariServer());
-        return instanceMetaData;
+        throw new UnsupportedOperationException("Instance metadata shouldn't be created from json.");
     }
 }

@@ -60,21 +60,6 @@ public class RetryingStackUpdater {
         }
     }
 
-    public Stack updateStackHash(Long stackId, String hash) {
-        int attempt = 1;
-        try {
-            return doUpdateStackHash(stackId, hash);
-        } catch (OptimisticLockException | OptimisticLockingFailureException e) {
-            LOGGER.info("Failed to update stack status. [id: '{}', attempt: '{}', Cause: {}]. Trying to save it again.",
-                    stackId, attempt++, e.getClass().getSimpleName());
-            if (attempt <= MAX_RETRIES) {
-                return doUpdateStackHash(stackId, hash);
-            } else {
-                throw new InternalServerException(String.format("Failed to update stack '%s' in 5 attempts. (while trying to update hash)", stackId), e);
-            }
-        }
-    }
-
     public Stack updateAmbariIp(Long stackId, String ambariIp) {
         int attempt = 1;
         try {
@@ -137,6 +122,22 @@ public class RetryingStackUpdater {
         }
     }
 
+    public Stack updateMetadataReady(Long stackId) {
+        int attempt = 1;
+        try {
+            return doUpdateMetadataReady(stackId);
+        } catch (OptimisticLockException | OptimisticLockingFailureException e) {
+            if (attempt <= MAX_RETRIES) {
+                LOGGER.info("Failed to update stack while trying to set 'metadataReady'. [id: '{}', attempt: '{}', Cause: {}]. Trying to save it again.",
+                        stackId, attempt++, e.getClass().getSimpleName());
+                return doUpdateCfStackCreateComplete(stackId);
+            } else {
+                throw new InternalServerException(String.format("Failed to update stack '%s' in 5 attempts. (while trying to set 'metadataReady')",
+                        stackId), e);
+            }
+        }
+    }
+
     private Stack doUpdateStackStatus(Long stackId, Status status, String statusReason) {
         Stack stack = stackRepository.findById(stackId);
         stack.setStatus(status);
@@ -189,11 +190,11 @@ public class RetryingStackUpdater {
         return stack;
     }
 
-    private Stack doUpdateStackHash(Long stackId, String hash) {
+    private Stack doUpdateMetadataReady(Long stackId) {
         Stack stack = stackRepository.findById(stackId);
-        stack.setHash(hash);
+        stack.setMetadataReady(true);
         stack = stackRepository.save(stack);
-        LOGGER.info("Updated stack: [stack: '{}' hash: '{}'].", stackId, hash);
+        LOGGER.info("Updated stack: [stack: '{}' metadataReady: 'true'].", stackId);
         return stack;
     }
 }
