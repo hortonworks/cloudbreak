@@ -1,5 +1,11 @@
 package com.sequenceiq.cloudbreak.conf;
 
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
+
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.ec2.model.InstanceType;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
@@ -7,11 +13,6 @@ import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.UserStatus;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
 
 @Component
 public class UserInitializer implements InitializingBean {
@@ -29,7 +30,6 @@ public class UserInitializer implements InitializingBean {
     public void afterPropertiesSet() throws Exception {
         if ("create".equals(hbm2ddlStrategy) || "create-drop".equals(hbm2ddlStrategy)) {
 
-
             User user2 = new User();
             user2.setEmail("cbuser@sequenceiq.com");
             user2.setFirstName("seq");
@@ -46,7 +46,6 @@ public class UserInitializer implements InitializingBean {
 
             AwsCredential awsCredential = new AwsCredential();
             awsCredential.setRoleArn("arn:aws:iam::755047402263:role/seq-self-cf");
-            awsCredential.setInstanceProfileRoleArn("arn:aws:iam::755047402263:instance-profile/readonly-role");
             awsCredential.setAwsCredentialOwner(user2);
             awsCredential.setName("aws_credential");
 
@@ -63,10 +62,11 @@ public class UserInitializer implements InitializingBean {
             awsTemplate.setSshLocation("0.0.0.0/0");
             awsTemplate.setUser(user2);
             /*
-             *
+             * 
              * Stack awsStack = new Stack(); awsStack.setTemplate(awsTemplate);
-             * awsStack.setNodeCount(NODE_COUNT); awsStack.setBlueprintName("coreos");
-             * awsStack.setUser(user2); awsStack.setCredential(awsCredential);
+             * awsStack.setNodeCount(NODE_COUNT);
+             * awsStack.setBlueprintName("coreos"); awsStack.setUser(user2);
+             * awsStack.setCredential(awsCredential);
              * awsStack.setAmbariIp("12.23.35.45");
              * awsStack.setStatus(Status.CREATE_COMPLETED);
              */
