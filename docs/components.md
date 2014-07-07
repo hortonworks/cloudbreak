@@ -5,7 +5,7 @@ Ambari supports the concept of stacks and associated services in a stack definit
 At high level the supported list of components can be grouped in to main categories: Master and Slave - and bundling them together form a Hadoop Service.
 
 | Services    | Components                                                              |
-| ----------- |:------------------------------------------------------------------------| 
+|:----------- |:------------------------------------------------------------------------| 
 | HDFS		    | DATANODE, HDFS_CLIENT, JOURNALNODE, NAMENODE, SECONDARY_NAMENODE, ZKFC  |
 | YARN		    | APP_TIMELINE_SERVER, NODEMANAGER, RESOURCEMANAGER, YARN_CLIENT          |
 | MAPREDUCE2	| HISTORYSERVER, MAPREDUCE2_CLIENT                                        | 
@@ -22,3 +22,19 @@ At high level the supported list of components can be grouped in to main categor
 | TEZ		      | TEZ_CLIENT                                                              | 
 | FALCON		  | FALCON_CLIENT, FALCON_SERVER                                            | 
 | ZOOKEEPER	  | ZOOKEEPER_CLIENT, ZOOKEEPER_SERVER                                      | 
+
+When you are creating clustom Blueprints you can use these components above to build Hadoop services and use them in your on-demand Hadoop cluster.
+
+We provide a list of default Hadoop cluster Blueprints for your convenience. 
+
+1. Simple single node
+
+This is a simple [Blueprint](https://raw.githubusercontent.com/sequenceiq/ambari-rest-client/master/src/main/resources/blueprints/single-node-hdfs-yarn) which allows you to launch a single node, pseudo-distributed Hadoop Cluster in the cloud. 
+
+It's allows you to use the following services: HDFS, YARN, MAPREDUCE2.
+
+2. Full stack single node - HDP
+
+This is a complex [Blueprint](https://raw.githubusercontent.com/sequenceiq/ambari-rest-client/master/src/main/resources/blueprints/hdp-singlenode-default) which allows you to launch a single node, pseudo-distributed Hadoop Cluster in the cloud. 
+
+It's allows you to use the following services: HDFS, YARN, MAPREDUCE2, GANGLIA, HBASE, HIVE, HCATALOG, WEBHCAT, NAGIOS, OOZIE, PIG, SQOOP, STORM, TEZ, FALCON, ZOOKEEPER.
