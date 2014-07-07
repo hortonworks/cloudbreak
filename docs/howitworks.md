@@ -18,12 +18,18 @@ For further information please visit our [API documentation](http://docs.cloudbr
 
 Stacks are template `instances` - a runnig cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks supports a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs. 
 
+For further information please visit our [API documentation](http://docs.cloudbreak.apiary.io/#stacks).
+
 ###Blueprints
 
 Ambari Blueprints are a declarative definition of a Hadoop cluster. With a Blueprint, you specify a stack, the component layout and the configurations to materialize a Hadoop cluster instance. Hostgroups defined in blueprints can be associated to different VPC subnets and availability zones, thus you can span up a highly available cluster running on different datacenters or availability zones.
 We have a few default blueprints available from single note to multi node blueprints and lamba architecture.
 
+For further information please visit our [API documentation](http://docs.cloudbreak.apiary.io/#blueprints).
+
 ###Cluster
 
 Clusters are materialized Hadoop clusters. They are built based on a Bluerint (running the components and services specified) and on a configured infrastructure Stack.
 Once a cluster is created and launched it can be used the usual way as any Hadoop cluster. We suggest to start with the Cluster's Ambari UI for an overview of your cluster.
+
+For further information please visit our [API documentation](http://docs.cloudbreak.apiary.io/#clusters).
