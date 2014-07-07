@@ -88,8 +88,6 @@ public class SimpleCredentialService implements CredentialService {
     public void delete(Long id) {
         Credential credential = credentialRepository.findOne(id);
         if (credential == null) {
-            websocketService.sendToTopicUser(credential.getOwner().getEmail(), WebsocketEndPoint.CREDENTIAL,
-                    new StatusMessage(id, "null", Status.DELETE_FAILED.name()));
             throw new NotFoundException(String.format("Credential '%s' not found.", id));
         }
         credentialRepository.delete(credential);

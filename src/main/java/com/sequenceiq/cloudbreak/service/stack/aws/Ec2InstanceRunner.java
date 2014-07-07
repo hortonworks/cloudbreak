@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -185,7 +186,7 @@ public class Ec2InstanceRunner implements Consumer<Event<Stack>> {
                 if (ambariClient == null) {
                     ambariServerPublicIp = getAmbariServerIp(amazonEC2Client, instanceIds);
                     LOGGER.info("Ambari server public ip for stack: '{}': '{}'.", stackId, ambariServerPublicIp);
-                    ambariClient = new AmbariClient(ambariServerPublicIp);
+                    ambariClient = createAmbariClient(ambariServerPublicIp);
                 }
                 try {
                     String ambariHealth = ambariClient.healthCheck();
@@ -250,5 +251,10 @@ public class Ec2InstanceRunner implements Consumer<Event<Stack>> {
     private void stackCreateFailed(Long stackId, String message) {
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_CREATE_FAILED_EVENT, stackId);
         reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(new StackCreationFailure(stackId, message)));
+    }
+
+    @VisibleForTesting
+    protected AmbariClient createAmbariClient(String ambariServerPublicIp) {
+        return new AmbariClient(ambariServerPublicIp);
     }
 }

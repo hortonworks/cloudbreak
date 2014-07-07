@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
+import com.google.common.annotations.VisibleForTesting;
 import groovyx.net.http.HttpResponseException;
 
 import org.slf4j.Logger;
@@ -25,14 +26,13 @@ import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.stack.aws.AwsStackUtil;
 
 @Service
 public class AmbariClusterService {
 
     public static final String PORT = "8080";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AwsStackUtil.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AmbariClusterService.class);
 
     @Autowired
     private StackRepository stackRepository;
@@ -66,7 +66,7 @@ public class AmbariClusterService {
 
     public ClusterResponse retrieveCluster(User user, Long stackId) {
         Stack stack = stackRepository.findOne(stackId);
-        AmbariClient ambariClient = new AmbariClient(stack.getAmbariIp(), PORT);
+        AmbariClient ambariClient = createAmbariClient(stack.getAmbariIp());
         try {
             String clusterJson = ambariClient.getClusterAsJson();
             if (clusterJson == null) {
@@ -86,15 +86,20 @@ public class AmbariClusterService {
     @Async
     public void startAllService(User user, Long stackId) {
         Stack stack = stackRepository.findOne(stackId);
-        AmbariClient ambariClient = new AmbariClient(stack.getAmbariIp(), PORT);
+        AmbariClient ambariClient = createAmbariClient(stack.getAmbariIp());
         ambariClient.startAllServices();
     }
 
     @Async
     public void stopAllService(User user, Long stackId) {
         Stack stack = stackRepository.findOne(stackId);
-        AmbariClient ambariClient = new AmbariClient(stack.getAmbariIp(), PORT);
+        AmbariClient ambariClient = createAmbariClient(stack.getAmbariIp());
         ambariClient.stopAllServices();
+    }
+
+    @VisibleForTesting
+    protected AmbariClient createAmbariClient(String ambariIp) {
+        return new AmbariClient(ambariIp, PORT);
     }
 
 }
