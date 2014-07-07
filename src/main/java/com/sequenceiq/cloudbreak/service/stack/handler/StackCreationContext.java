@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.stack.handler;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.annotation.Resource;
@@ -64,9 +63,11 @@ public class StackCreationContext implements Consumer<Event<ProvisionSetupComple
                 websocketService.sendToTopicUser(stack.getUser().getEmail(), WebsocketEndPoint.STACK, new StatusMessage(stack.getId(), stack.getName(), stack
                         .getStatus().name()));
                 Provisioner provisioner = provisioners.get(cloudPlatform);
-                // TODO: figure out how these parameters could be set up
-                Map<String, String> params = new HashMap<String, String>();
-                provisioner.buildStack(stack, userDataBuilder.build(cloudPlatform, stack.getHash(), params), provisionSetupComplete.getSetupProperties());
+                provisioner.buildStack(
+                        stack,
+                        userDataBuilder.build(cloudPlatform, stack.getHash(), provisionSetupComplete.getUserDataParams()),
+                        provisionSetupComplete.getSetupProperties()
+                        );
             } else {
                 LOGGER.info("CloudFormation stack creation was requested for a stack, that is not in REQUESTED status anymore. [stackId: '{}', status: '{}']",
                         stack.getId(), stack.getStatus());
