@@ -13,11 +13,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.sequenceiq.cloudbreak.domain.CloudFormationTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
-import com.sequenceiq.cloudbreak.service.stack.MetadataSetup;
-import com.sequenceiq.cloudbreak.service.stack.ProvisionService;
-import com.sequenceiq.cloudbreak.service.stack.ProvisionSetup;
-import com.sequenceiq.cloudbreak.service.stack.Provisioner;
-import com.sequenceiq.cloudbreak.service.stack.aws.TemplateReader;
+import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
+import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
+import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
+import com.sequenceiq.cloudbreak.service.stack.connector.Provisioner;
+import com.sequenceiq.cloudbreak.service.stack.connector.aws.TemplateReader;
 
 @Configuration
 public class AppConfig {
@@ -28,7 +28,7 @@ public class AppConfig {
     private TemplateReader templateReader;
 
     @Autowired
-    private List<ProvisionService> provisionServices;
+    private List<CloudPlatformConnector> provisionServices;
 
     @Autowired
     private List<ProvisionSetup> provisionSetups;
@@ -50,9 +50,9 @@ public class AppConfig {
     }
 
     @Bean
-    public Map<CloudPlatform, ProvisionService> provisionServices() {
-        Map<CloudPlatform, ProvisionService> map = new HashMap<>();
-        for (ProvisionService provisionService : provisionServices) {
+    public Map<CloudPlatform, CloudPlatformConnector> provisionServices() {
+        Map<CloudPlatform, CloudPlatformConnector> map = new HashMap<>();
+        for (CloudPlatformConnector provisionService : provisionServices) {
             map.put(provisionService.getCloudPlatform(), provisionService);
         }
         return map;

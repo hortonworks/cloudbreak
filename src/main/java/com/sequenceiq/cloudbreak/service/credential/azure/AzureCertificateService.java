@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.AzureCredentialRepository;
-import com.sequenceiq.cloudbreak.service.stack.azure.KeyGeneratorService;
+import com.sequenceiq.cloudbreak.service.stack.connector.azure.KeyGeneratorService;
 
 @Service
 public class AzureCertificateService {

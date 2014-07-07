@@ -30,7 +30,9 @@ import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
+import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
+import com.sequenceiq.cloudbreak.service.stack.flow.MetadataIncompleteException;
 
 @Service
 public class SimpleStackService implements StackService {
@@ -50,7 +52,7 @@ public class SimpleStackService implements StackService {
     private TemplateRepository templateRepository;
 
     @Resource
-    private Map<CloudPlatform, ProvisionService> provisionServices;
+    private Map<CloudPlatform, CloudPlatformConnector> provisionServices;
 
     @Autowired
     private Reactor reactor;

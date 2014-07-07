@@ -11,13 +11,13 @@ import reactor.core.Reactor;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterCreationFailureHandler;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterCreationSuccessHandler;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterRequestHandler;
-import com.sequenceiq.cloudbreak.service.stack.StackCreationFailureHandler;
-import com.sequenceiq.cloudbreak.service.stack.StackCreationSuccessHandler;
+import com.sequenceiq.cloudbreak.service.stack.handler.AmbariRoleAllocationCompleteHandler;
 import com.sequenceiq.cloudbreak.service.stack.handler.MetadataSetupCompleteHandler;
-import com.sequenceiq.cloudbreak.service.stack.handler.MetadataSetupContext;
-import com.sequenceiq.cloudbreak.service.stack.handler.ProvisionSetupContext;
-import com.sequenceiq.cloudbreak.service.stack.handler.ProvisionSuccessHandler;
-import com.sequenceiq.cloudbreak.service.stack.handler.StackCreationContext;
+import com.sequenceiq.cloudbreak.service.stack.handler.ProvisionCompleteHandler;
+import com.sequenceiq.cloudbreak.service.stack.handler.ProvisionRequestHandler;
+import com.sequenceiq.cloudbreak.service.stack.handler.ProvisionSetupCompleteHandler;
+import com.sequenceiq.cloudbreak.service.stack.handler.StackCreationFailureHandler;
+import com.sequenceiq.cloudbreak.service.stack.handler.StackCreationSuccessHandler;
 
 @Component
 public class ReactorInitializer implements InitializingBean {
@@ -38,30 +38,30 @@ public class ReactorInitializer implements InitializingBean {
     private ClusterCreationSuccessHandler clusterCreationSuccessHandler;
 
     @Autowired
-    private ProvisionSetupContext provisionSetupContext;
+    private ProvisionRequestHandler provisionRequestHandler;
 
     @Autowired
-    private StackCreationContext stackCreationContext;
+    private ProvisionSetupCompleteHandler provisionSetupCompleteHandler;
 
     @Autowired
-    private MetadataSetupContext metadataSetupContext;
+    private ProvisionCompleteHandler provisionCompleteHandler;
 
     @Autowired
     private MetadataSetupCompleteHandler metadataSetupCompleteHandler;
 
     @Autowired
-    private ProvisionSuccessHandler provisionSuccessHandler;
+    private AmbariRoleAllocationCompleteHandler ambariRoleAllocationCompleteHandler;
 
     @Autowired
     private Reactor reactor;
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        reactor.on($(ReactorConfig.PROVISION_REQUEST_EVENT), provisionSetupContext);
-        reactor.on($(ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT), stackCreationContext);
-        reactor.on($(ReactorConfig.STACK_CREATE_COMPLETE_EVENT), metadataSetupContext);
+        reactor.on($(ReactorConfig.PROVISION_REQUEST_EVENT), provisionRequestHandler);
+        reactor.on($(ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT), provisionSetupCompleteHandler);
+        reactor.on($(ReactorConfig.PROVISION_COMPLETE_EVENT), provisionCompleteHandler);
         reactor.on($(ReactorConfig.METADATA_SETUP_COMPLETE_EVENT), metadataSetupCompleteHandler);
-        reactor.on($(ReactorConfig.PROVISION_SUCCESS_EVENT), provisionSuccessHandler);
+        reactor.on($(ReactorConfig.AMBARI_ROLE_ALLOCATION_COMPLETE_EVENT), ambariRoleAllocationCompleteHandler);
         reactor.on($(ReactorConfig.STACK_CREATE_SUCCESS_EVENT), stackCreationSuccessHandler);
         reactor.on($(ReactorConfig.STACK_CREATE_FAILED_EVENT), stackCreationFailureHandler);
 

@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.User;
-import com.sequenceiq.cloudbreak.service.stack.aws.AwsStackTestUtil;
+import com.sequenceiq.cloudbreak.service.stack.connector.aws.AwsStackTestUtil;
 
 public class ClusterRequestHandlerTest {
     public static final String CLUSTER_REQUESTED = "CLUSTER_REQUESTED";

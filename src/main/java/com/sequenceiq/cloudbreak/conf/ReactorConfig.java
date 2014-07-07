@@ -10,19 +10,18 @@ import reactor.core.spec.Reactors;
 @Configuration
 public class ReactorConfig {
 
-    public static final String CF_STACK_COMPLETED_EVENT = "CF_STACK_COMPLETED";
-    public static final String CLUSTER_REQUESTED_EVENT = "CLUSTER_REQUESTED";
-    public static final String AMBARI_STARTED_EVENT = "AMBARI_STARTED";
-    public static final String STACK_CREATE_SUCCESS_EVENT = "STACK_CREATE_SUCCESS";
-    public static final String STACK_CREATE_FAILED_EVENT = "STACK_CREATE_FAILED";
-    public static final String CLUSTER_CREATE_SUCCESS_EVENT = "CLUSTER_CREATE_SUCCESS";
-    public static final String CLUSTER_CREATE_FAILED_EVENT = "CLUSTER_CREATE_FAILED";
-
     public static final String PROVISION_REQUEST_EVENT = "PROVISION_REQUEST";
     public static final String PROVISION_SETUP_COMPLETE_EVENT = "PROVISION_SETUP_COMPLETE";
-    public static final String STACK_CREATE_COMPLETE_EVENT = "STACK_CREATE_COMPLETE";
+    public static final String PROVISION_COMPLETE_EVENT = "PROVISION_COMPLETE";
     public static final String METADATA_SETUP_COMPLETE_EVENT = "METADATA_SETUP_COMPLETE";
-    public static final String PROVISION_SUCCESS_EVENT = "PROVISION_SUCCESS";
+    public static final String AMBARI_ROLE_ALLOCATION_COMPLETE_EVENT = "AMBARI_ROLE_ALLOCATION_COMPLETE";
+    public static final String STACK_CREATE_SUCCESS_EVENT = "STACK_CREATE_SUCCESS";
+    public static final String STACK_CREATE_FAILED_EVENT = "STACK_CREATE_FAILED";
+
+    public static final String CLUSTER_REQUESTED_EVENT = "CLUSTER_REQUESTED";
+    public static final String AMBARI_STARTED_EVENT = "AMBARI_STARTED";
+    public static final String CLUSTER_CREATE_SUCCESS_EVENT = "CLUSTER_CREATE_SUCCESS";
+    public static final String CLUSTER_CREATE_FAILED_EVENT = "CLUSTER_CREATE_FAILED";
 
     @Bean
     public Environment env() {
