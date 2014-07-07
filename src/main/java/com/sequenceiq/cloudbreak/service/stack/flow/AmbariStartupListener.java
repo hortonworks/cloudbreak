@@ -45,7 +45,7 @@ public class AmbariStartupListener {
                         ambariRunning = true;
                     }
                 } catch (Exception e) {
-                    LOGGER.info("Ambari health check failed, it is probably not ready yet. Trying again in next polling interval.", e);
+                    LOGGER.info("Ambari health check failed. {} Trying again in next polling interval.", e.getMessage());
                 }
                 awsStackUtil.sleep(POLLING_INTERVAL);
                 pollingAttempt++;
