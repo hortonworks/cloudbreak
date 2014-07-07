@@ -1,15 +1,15 @@
 package com.sequenceiq.cloudbreak.service.stack.aws;
 
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.sns.AmazonSNSClient;
-import com.amazonaws.services.sns.model.ConfirmSubscriptionResult;
-import com.amazonaws.services.sns.model.CreateTopicResult;
-import com.amazonaws.services.sns.model.SubscribeResult;
-import com.sequenceiq.cloudbreak.domain.AwsCredential;
-import com.sequenceiq.cloudbreak.domain.SnsTopic;
-import com.sequenceiq.cloudbreak.repository.SnsTopicRepository;
-import com.sequenceiq.cloudbreak.domain.SnsRequest;
-import com.sequenceiq.cloudbreak.service.credential.aws.CrossAccountCredentialsProvider;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -17,16 +17,23 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import reactor.core.Reactor;
+import reactor.event.Event;
 
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.times;
-import static org.mockito.BDDMockito.verify;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.sns.AmazonSNSClient;
+import com.amazonaws.services.sns.model.ConfirmSubscriptionResult;
+import com.amazonaws.services.sns.model.CreateTopicResult;
+import com.amazonaws.services.sns.model.SubscribeResult;
+import com.sequenceiq.cloudbreak.conf.ReactorConfig;
+import com.sequenceiq.cloudbreak.domain.AwsCredential;
+import com.sequenceiq.cloudbreak.domain.SnsRequest;
+import com.sequenceiq.cloudbreak.domain.SnsTopic;
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.repository.SnsTopicRepository;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.credential.aws.CrossAccountCredentialsProvider;
 
 public class SnsTopicManagerTest {
 
@@ -42,10 +49,13 @@ public class SnsTopicManagerTest {
     private SnsTopicRepository snsTopicRepository;
 
     @Mock
-    private CloudFormationStackCreator cloudFormationStackCreator;
+    private Reactor reactor;
 
     @Mock
     private AmazonSNSClient snsClient;
+
+    @Mock
+    private StackRepository stackRepository;
 
     private AwsCredential credential;
 
@@ -54,6 +64,10 @@ public class SnsTopicManagerTest {
     private ConfirmSubscriptionResult confirmSubscriptionResult;
 
     private SnsTopic snsTopic;
+
+    private Stack stack;
+
+    private User user;
 
     @Before
     public void setUp() {
@@ -64,57 +78,59 @@ public class SnsTopicManagerTest {
         confirmSubscriptionResult = new ConfirmSubscriptionResult();
         confirmSubscriptionResult.setSubscriptionArn(AwsStackTestUtil.DEFAULT_TOPIC_ARN);
         snsTopic = AwsStackTestUtil.createSnsTopic(AwsStackTestUtil.createAwsCredential());
+        user = AwsStackTestUtil.createUser();
+        stack = AwsStackTestUtil.createStack(user, credential, AwsStackTestUtil.createAwsTemplate(user));
     }
 
     @Test
     public void testCreateTopicAndSubscribe() {
-        //GIVEN
+        // GIVEN
         doReturn(snsClient).when(underTest).createSnsClient(credential, Regions.DEFAULT_REGION);
         given(snsClient.createTopic(anyString())).willReturn(createTopicResult);
         given(snsTopicRepository.save(any(SnsTopic.class))).willReturn(snsTopic);
         given(snsClient.subscribe(anyString(), anyString(), anyString())).willReturn(new SubscribeResult());
-        //WHEN
+        // WHEN
         underTest.createTopicAndSubscribe(credential, Regions.DEFAULT_REGION);
-        //THEN
+        // THEN
         verify(snsClient, times(1)).subscribe(anyString(), anyString(), anyString());
     }
 
     @Test
-    public void testConfirmSubscriptionWhenTopicIsNotConfirmedShouldConfirmOnlyOnce() {
-        //GIVEN
+    public void testConfirmSubscriptionWhenTopicIsNotConfirmedShouldNotifyAllRequestedStacks() {
+        // GIVEN
         doReturn(snsClient).when(underTest).createSnsClient(any(AwsCredential.class), any(Regions.class));
         SnsRequest snsRequest = createSnsRequest();
         given(snsTopicRepository.findByTopicArn(AwsStackTestUtil.DEFAULT_TOPIC_ARN)).willReturn(Arrays.asList(snsTopic, snsTopic));
         given(snsClient.confirmSubscription(anyString(), anyString())).willReturn(confirmSubscriptionResult);
         given(snsTopicRepository.save(any(SnsTopic.class))).willReturn(snsTopic);
-        doNothing().when(cloudFormationStackCreator).startAllRequestedStackCreationForTopic(snsTopic);
-        //WHEN
+        given(stackRepository.findRequestedStacksWithCredential(AwsStackTestUtil.DEFAULT_ID)).willReturn(Arrays.asList(stack, stack));
+        // WHEN
         underTest.confirmSubscription(snsRequest);
-        //THEN
-        verify(cloudFormationStackCreator, times(1)).startAllRequestedStackCreationForTopic(snsTopic);
+        // THEN
+        verify(reactor, times(2)).notify(any(ReactorConfig.class), any(Event.class));
     }
 
     @Test
     public void testConfirmSubscriptionWhenTopicIsAlreadyConfirmedShouldNotConfirmTopic() {
-        //GIVEN
+        // GIVEN
         SnsRequest snsRequest = createSnsRequest();
         snsTopic.setConfirmed(true);
         given(snsTopicRepository.findByTopicArn(AwsStackTestUtil.DEFAULT_TOPIC_ARN)).willReturn(Arrays.asList(snsTopic));
-        //WHEN
+        // WHEN
         underTest.confirmSubscription(snsRequest);
-        //THEN
-        verify(cloudFormationStackCreator, times(0)).startAllRequestedStackCreationForTopic(snsTopic);
+        // THEN
+        verify(reactor, times(0)).notify(any(ReactorConfig.class), any(Event.class));
     }
 
     @Test
     public void testConfirmSubscriptionWhenTopicsAreNotFoundShouldNotConfirmTopic() {
-        //GIVEN
+        // GIVEN
         SnsRequest snsRequest = createSnsRequest();
         given(snsTopicRepository.findByTopicArn(AwsStackTestUtil.DEFAULT_TOPIC_ARN)).willReturn(new ArrayList<SnsTopic>());
-        //WHEN
+        // WHEN
         underTest.confirmSubscription(snsRequest);
-        //THEN
-        verify(cloudFormationStackCreator, times(0)).startAllRequestedStackCreationForTopic(snsTopic);
+        // THEN
+        verify(reactor, times(0)).notify(any(ReactorConfig.class), any(Event.class));
     }
 
     private SnsRequest createSnsRequest() {

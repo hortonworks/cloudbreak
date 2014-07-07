@@ -3,16 +3,17 @@ package com.sequenceiq.cloudbreak.service.stack.aws;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.InstanceType;
-import com.sequenceiq.cloudbreak.domain.User;
-import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
+import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.SnsTopic;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.User;
 
 public class AwsStackTestUtil {
+    public static final Integer NODE_COUNT = 3;
     public static final long DEFAULT_ID = 1L;
     public static final String DEFAULT_TOPIC_ARN = "TOPIC_ARN";
     public static final String DUMMY_EMAIL = "gipszjakab@mymail.com";
@@ -21,6 +22,7 @@ public class AwsStackTestUtil {
     public static final String STACK_NAME = "stack_name";
     public static final String CF_STACK_NAME = "cfStackName";
     public static final String DEFAULT_KEY_NAME = "defaultKeyName";
+    public static final String SSH_LOCATION = "ssh_location";
 
     private AwsStackTestUtil() {
     }
@@ -40,6 +42,7 @@ public class AwsStackTestUtil {
         stack.setCredential(credential);
         stack.setUser(user);
         stack.setTemplate(awsTemplate);
+        stack.setNodeCount(NODE_COUNT);
         stack.setCfStackName(CF_STACK_NAME);
         stack.setStatus(Status.REQUESTED);
         return stack;
@@ -60,6 +63,7 @@ public class AwsStackTestUtil {
         awsTemplate.setRegion(Regions.DEFAULT_REGION);
         awsTemplate.setInstanceType(InstanceType.C1Medium);
         awsTemplate.setKeyName(DEFAULT_KEY_NAME);
+        awsTemplate.setSshLocation(SSH_LOCATION);
         return awsTemplate;
     }
 

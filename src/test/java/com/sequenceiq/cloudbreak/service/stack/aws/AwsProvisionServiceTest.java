@@ -1,48 +1,45 @@
 package com.sequenceiq.cloudbreak.service.stack.aws;
 
+import static org.junit.Assert.assertTrue;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import reactor.core.Reactor;
+
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
+import com.amazonaws.services.cloudformation.model.DeleteStackRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStackResourcesRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStackResourcesResult;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStacksResult;
-import com.amazonaws.services.cloudformation.model.DeleteStackRequest;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.Reservation;
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.conf.ReactorConfig;
-import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
+import com.sequenceiq.cloudbreak.domain.AwsStackDescription;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
-import com.sequenceiq.cloudbreak.domain.SnsTopic;
+import com.sequenceiq.cloudbreak.domain.DetailedAwsStackDescription;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackDescription;
-import com.sequenceiq.cloudbreak.domain.AwsStackDescription;
-import com.sequenceiq.cloudbreak.domain.DetailedAwsStackDescription;
-import com.sequenceiq.cloudbreak.repository.SnsTopicRepository;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import reactor.core.Reactor;
-import reactor.event.Event;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.times;
-import static org.mockito.BDDMockito.verify;
-
-import static org.junit.Assert.assertTrue;
+import com.sequenceiq.cloudbreak.domain.User;
 
 public class AwsProvisionServiceTest {
     private static final String DUMMY_NUMBER_STR = "1";
@@ -53,15 +50,6 @@ public class AwsProvisionServiceTest {
 
     @Mock
     private AwsStackUtil awsStackUtil;
-
-    @Mock
-    private SnsTopicRepository snsTopicRepository;
-
-    @Mock
-    private SnsTopicManager snsTopicManager;
-
-    @Mock
-    private CloudFormationStackCreator cfStackCreator;
 
     @Mock
     private Reactor reactor;
@@ -82,8 +70,6 @@ public class AwsProvisionServiceTest {
 
     private AwsTemplate awsTemplate;
 
-    private SnsTopic snsTopic;
-
     private DescribeStacksResult stackResult;
 
     private DescribeInstancesResult instancesResult;
@@ -98,49 +84,7 @@ public class AwsProvisionServiceTest {
         awsTemplate = AwsStackTestUtil.createAwsTemplate(user);
         credential = AwsStackTestUtil.createAwsCredential();
         stack = AwsStackTestUtil.createStack(user, credential, awsTemplate);
-        snsTopic = AwsStackTestUtil.createSnsTopic(credential);
         instancesResult = AwsStackTestUtil.createDescribeInstanceResult();
-    }
-
-    @Test
-    public void testCreateStackWhenNoCredentialInRegionsShouldCreateTopicAndSubscribe() {
-        // GIVEN
-        given(snsTopicRepository.findOneForCredentialInRegion(AwsStackTestUtil.DEFAULT_ID, Regions.DEFAULT_REGION)).willReturn(null);
-        // WHEN
-        underTest.createStack(user, stack, credential);
-        // THEN
-        verify(snsTopicManager, times(1)).createTopicAndSubscribe(credential, Regions.DEFAULT_REGION);
-    }
-
-    @Test
-    public void testCreateStackWhenHasCredentialInRegionsShouldSubscribeToTopic() {
-        // GIVEN
-        given(snsTopicRepository.findOneForCredentialInRegion(AwsStackTestUtil.DEFAULT_ID, Regions.DEFAULT_REGION)).willReturn(snsTopic);
-        // WHEN
-        underTest.createStack(user, stack, credential);
-        // THEN
-        verify(snsTopicManager, times(1)).subscribeToTopic(credential, Regions.DEFAULT_REGION, AwsStackTestUtil.DEFAULT_TOPIC_ARN);
-    }
-
-    @Test
-    public void testCreateStackWhenHasCredentialInRegionsAndConfirmedShouldCreateCloudFormationStack() {
-        // GIVEN
-        snsTopic.setConfirmed(true);
-        given(snsTopicRepository.findOneForCredentialInRegion(AwsStackTestUtil.DEFAULT_ID, Regions.DEFAULT_REGION)).willReturn(snsTopic);
-        // WHEN
-        underTest.createStack(user, stack, credential);
-        // THEN
-        verify(cfStackCreator, times(1)).createCloudFormationStack(stack, credential, snsTopic);
-    }
-
-    @Test
-    public void testCreateStackWhenThrowsErrorShouldCreateStackFailure() {
-        // GIVEN
-        given(snsTopicRepository.findOneForCredentialInRegion(AwsStackTestUtil.DEFAULT_ID, Regions.DEFAULT_REGION)).willThrow(new IllegalArgumentException());
-        // WHEN
-        underTest.createStack(user, stack, credential);
-        // THEN
-        verify(reactor, times(1)).notify(any(ReactorConfig.class), any(Event.class));
     }
 
     @Test
@@ -199,6 +143,7 @@ public class AwsProvisionServiceTest {
         verify(ec2Client, times(1)).describeInstances(any(DescribeInstancesRequest.class));
         assertTrue(result.getClass().isAssignableFrom(DetailedAwsStackDescription.class));
     }
+
     @Test
     public void testDescribeStackWithResourcesWhenDescribeStacksShouldThrowAmazonServiceException() {
         // GIVEN

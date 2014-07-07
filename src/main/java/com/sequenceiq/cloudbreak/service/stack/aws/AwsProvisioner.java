@@ -39,7 +39,7 @@ public class AwsProvisioner implements Provisioner {
         AwsCredential awsCredential = (AwsCredential) stack.getCredential();
         AmazonCloudFormationClient client = awsStackUtil.createCloudFormationClient(awsTemplate.getRegion(), awsCredential);
         String stackName = String.format("%s-%s", stack.getName(), stack.getId());
-        CreateStackRequest createStackRequest = new CreateStackRequest()
+        CreateStackRequest createStackRequest = createStackRequest()
                 .withStackName(stackName)
                 .withTemplateBody(cfTemplate.getBody())
                 .withNotificationARNs((String) setupProperties.get(SnsTopicManager.NOTIFICATION_TOPIC_ARN_KEY))
@@ -52,6 +52,10 @@ public class AwsProvisioner implements Provisioner {
         CreateStackResult createStackResult = client.createStack(createStackRequest);
         Stack updatedStack = stackUpdater.updateStackCfAttributes(stack.getId(), stackName, createStackResult.getStackId());
         LOGGER.info("CloudFormation stack creation request sent with stack name: '{}' for stack: '{}'", stackName, updatedStack.getId());
+    }
+
+    protected CreateStackRequest createStackRequest() {
+        return new CreateStackRequest();
     }
 
     @Override

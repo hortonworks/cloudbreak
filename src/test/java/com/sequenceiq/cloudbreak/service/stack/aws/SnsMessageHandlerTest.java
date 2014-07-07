@@ -1,31 +1,33 @@
 package com.sequenceiq.cloudbreak.service.stack.aws;
 
-import com.google.common.collect.Maps;
-import com.sequenceiq.cloudbreak.domain.User;
-import com.sequenceiq.cloudbreak.domain.AwsCredential;
-import com.sequenceiq.cloudbreak.domain.AwsTemplate;
-import com.sequenceiq.cloudbreak.domain.SnsRequest;
-import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.conf.ReactorConfig;
-import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+import java.util.Map;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
 import reactor.core.Reactor;
 import reactor.event.Event;
 
-import java.util.Map;
-
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.anyLong;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.times;
-import static org.mockito.BDDMockito.verify;
+import com.google.common.collect.Maps;
+import com.sequenceiq.cloudbreak.conf.ReactorConfig;
+import com.sequenceiq.cloudbreak.domain.AwsCredential;
+import com.sequenceiq.cloudbreak.domain.AwsTemplate;
+import com.sequenceiq.cloudbreak.domain.SnsRequest;
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.Status;
+import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
 
 public class SnsMessageHandlerTest {
 
@@ -47,6 +49,9 @@ public class SnsMessageHandlerTest {
 
     @Mock
     private RetryingStackUpdater stackUpdater;
+
+    @Mock
+    private AwsNetworkConfigurator awsNetworkConfigurator;
 
     @Mock
     private Reactor reactor;
@@ -71,66 +76,66 @@ public class SnsMessageHandlerTest {
 
     @Test
     public void testHandleMessageCreationComplete() {
-        //GIVEN
+        // GIVEN
         given(snsMessageParser.parseCFMessage(snsRequest.getMessage())).willReturn(createCFMessage());
         given(stackRepository.findByCfStackId(anyString())).willReturn(stack);
         given(stackUpdater.updateCfStackCreateComplete(anyLong())).willReturn(stack);
-        //WHEN
+        // WHEN
         underTest.handleMessage(snsRequest);
-        //THEN
+        // THEN
         verify(reactor, times(1)).notify(any(ReactorConfig.class), any(Event.class));
     }
 
     @Test
     public void testHandleMessageCreationCompleteNoStack() {
-        //GIVEN
+        // GIVEN
         given(snsMessageParser.parseCFMessage(snsRequest.getMessage())).willReturn(createCFMessage());
         given(stackRepository.findByCfStackId(anyString())).willReturn(null);
-        //WHEN
+        // WHEN
         underTest.handleMessage(snsRequest);
-        //THEN
+        // THEN
         verify(reactor, times(0)).notify(any(ReactorConfig.class), any(Event.class));
     }
 
     @Test
     public void testHandleMessageWhenStatusNotFailedAndCfNotCompletedShouldStackCreateFailed() {
-        //GIVEN
+        // GIVEN
         Map<String, String> cfMessage = createCFMessage();
         cfMessage.put(RESOURCE_TYPE, "AWS::CloudFormation::Stack");
         cfMessage.put(RESOURCE_STATUS, "ROLLBACK_IN_PROGRESS");
         stack.setStatus(Status.CREATE_IN_PROGRESS);
         given(snsMessageParser.parseCFMessage(snsRequest.getMessage())).willReturn(cfMessage);
         given(stackRepository.findByCfStackId(anyString())).willReturn(stack);
-        //WHEN
+        // WHEN
         underTest.handleMessage(snsRequest);
-        //THEN
+        // THEN
         verify(reactor, times(1)).notify(any(ReactorConfig.class), any(Event.class));
     }
 
     @Test
     public void testHandleMessageWhenStatusIsFailedShouldStackCreateAlreadyFailed() {
-        //GIVEN
+        // GIVEN
         Map<String, String> cfMessage = createCFMessage();
         cfMessage.put(RESOURCE_STATUS, "CREATE_FAILED");
         stack.setStatus(Status.CREATE_FAILED);
         given(snsMessageParser.parseCFMessage(snsRequest.getMessage())).willReturn(cfMessage);
         given(stackRepository.findByCfStackId(anyString())).willReturn(stack);
-        //WHEN
+        // WHEN
         underTest.handleMessage(snsRequest);
-        //THEN
+        // THEN
         verify(reactor, times(0)).notify(any(ReactorConfig.class), any(Event.class));
     }
 
     @Test
     public void testHandleMessageWhenStackNotFoundShouldStackCreationFailed() {
-        //GIVEN
+        // GIVEN
         Map<String, String> cfMessage = createCFMessage();
         cfMessage.put(RESOURCE_STATUS, "CREATE_FAILED");
         given(snsMessageParser.parseCFMessage(snsRequest.getMessage())).willReturn(cfMessage);
         given(stackRepository.findByCfStackId(anyString())).willReturn(null);
-        //WHEN
+        // WHEN
         underTest.handleMessage(snsRequest);
-        //THEN
+        // THEN
         verify(reactor, times(0)).notify(any(ReactorConfig.class), any(Event.class));
     }
 
