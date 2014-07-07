@@ -18,8 +18,8 @@ POST once and use it anytime after.
 As your workload changes, the API allows you to add or remove nodes on the fly. Cloudbreak does the hard work of reconfiguring the infrastructure, provision or decomission Hadoop nodes and let the cluster be continuosely operational.
 Once provisioned, new nodes will take up the load and increase the cluster throughput.
 
-###Blueprints
-Ambari Blueprints are a declarative definition of a Hadoop cluster. With a Blueprint, you specify a stack, the component layout and the configurations to materialize a Hadoop cluster instance. Hostgroups defined in blueprints can be associated to different VPC subnets and availability zones, thus you can span up a highly available cluster running on different datacenters or availability zones.
+###Declarative Hadoop clusters
+We support declarative Hadoop cluster creation - using blueprints. Blueprints are a declarative definition of a Hadoop cluster. With a blueprint, you specify a stack, the component layout and the configurations to materialize a Hadoop cluster instance. Hostgroups defined in blueprints can be associated to different VPC subnets and availability zones, thus you can span up a highly available cluster running on different datacenters or availability zones.
 
 ###Flexible
 You have the option to choose your favorite cloud provider and their different pricing models. The API translated the calls towards different vendors - you develop and use one common API, no need to rewrite your code when changing between cloud providers.
