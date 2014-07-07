@@ -84,7 +84,7 @@ public class AwsProvisionerTest {
                 String.format("%s-%s", stack.getName(), stack.getId()), STACK_ID)).willReturn(stack);
         given(underTest.createStackRequest()).willReturn(createStackRequest);
         given(cfTemplate.getBody()).willReturn("templatebody");
-        Map<String, String> setupProperties = new HashMap<>();
+        Map<String, Object> setupProperties = new HashMap<>();
         setupProperties.put(SnsTopicManager.NOTIFICATION_TOPIC_ARN_KEY, "topicArn");
         // WHEN
         underTest.buildStack(stack, "test-userdata", setupProperties);
