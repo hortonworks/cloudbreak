@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
 import com.sequenceiq.cloudbreak.service.stack.Provisioner;
 import com.sequenceiq.cloudbreak.service.stack.StackCreationFailure;
+import com.sequenceiq.cloudbreak.service.stack.event.StackCreateComplete;
 
 import groovyx.net.http.HttpResponseDecorator;
 import groovyx.net.http.HttpResponseException;
@@ -124,6 +125,7 @@ public class AzureProvisioner implements Provisioner {
                 return;
             }
         }
+        reactor.notify(ReactorConfig.STACK_CREATE_COMPLETE_EVENT, Event.wrap(new StackCreateComplete(CloudPlatform.AZURE, stack.getId())));
     }
 
     @Override

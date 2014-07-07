@@ -13,6 +13,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,6 +30,7 @@ import com.sequenceiq.cloudbreak.service.stack.event.MetadataSetupComplete;
 import reactor.core.Reactor;
 import reactor.event.Event;
 
+@Component
 public class AzureMetadataSetup implements MetadataSetup {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureMetadataSetup.class);
@@ -53,7 +55,7 @@ public class AzureMetadataSetup implements MetadataSetup {
         Set<CoreInstanceMetaData> instanceMetaDatas = collectMetaData(stack, azureClient, name);
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.METADATA_SETUP_COMPLETE_EVENT, stack.getId());
         reactor.notify(ReactorConfig.METADATA_SETUP_COMPLETE_EVENT,
-                Event.wrap(new MetadataSetupComplete(CloudPlatform.AWS, stack.getId(), instanceMetaDatas)));
+                Event.wrap(new MetadataSetupComplete(CloudPlatform.AZURE, stack.getId(), instanceMetaDatas)));
     }
 
     private Set<CoreInstanceMetaData> collectMetaData(Stack stack, AzureClient azureClient, String name) {
