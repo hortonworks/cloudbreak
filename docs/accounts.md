@@ -48,4 +48,4 @@ In order to create a Cloudbreak account associated with your Azure account you w
 
 You are done - from now on Cloudbreak can launch Azure instances on your behalf.
 
-_Note: Clodbreak does not store any login details into these instances - when you are creating Templates you can specify a `password` or `SSH Public key` which you can used to login into the launched instances.
+_Note: Clodbreak does not store any login details into these instances - when you are creating Templates you can specify a `password` or `SSH Public key` which you can used to login into the launched instances._
