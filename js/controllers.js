@@ -146,10 +146,10 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                         if (responseData && responseData.length != 0) {
                             $jq('.carousel').carousel(4);
                         } else {
-                            alert("There's no user found for "+ emailFieldLogin.value + " or cloudbreak-api is not running");
+                            alert("Internal server error");
                         }
                      }).error(function (data, status, headers, config){
-                        alert("Error. Check to ensure that cloudbreak-api is running.");
+                        alert("Internal server error");
                      });
                 });
         }
@@ -170,7 +170,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                         alert("Password change failed.")
                     }
                  }).error(function (data, status, headers, config){
-                    alert("Error. Check to ensure that cloudbreak-api is running.");
+                    alert("Internal server error.");
                  });
 
             });
