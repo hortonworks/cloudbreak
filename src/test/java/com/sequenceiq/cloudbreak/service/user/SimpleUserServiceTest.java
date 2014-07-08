@@ -12,6 +12,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.springframework.mail.javamail.MimeMessagePreparator;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.anyString;
@@ -85,7 +86,7 @@ public class SimpleUserServiceTest {
         given(passwordEncoder.encode(anyString())).willReturn(DUMMY_NEW_PASSWORD);
         given(userRepository.save(user)).willReturn(user);
         // WHEN
-        underTest.resetPassword(DUMMY_TOKEN, DUMMY_NEW_PASSWORD);
+        underTest.resetPassword(DUMMY_TOKEN, Base64Coder.encodeString(DUMMY_NEW_PASSWORD));
         // THEN
         verify(userRepository, times(1)).save(user);
 
@@ -96,7 +97,7 @@ public class SimpleUserServiceTest {
         // GIVEN
         given(userRepository.findUserByConfToken(DUMMY_TOKEN)).willReturn(user);
         // WHEN
-        underTest.resetPassword(DUMMY_TOKEN, DUMMY_NEW_PASSWORD);
+        underTest.resetPassword(DUMMY_TOKEN, Base64Coder.encodeString(DUMMY_NEW_PASSWORD));
         // THEN
         verify(passwordEncoder, times(0)).encode(anyString());
 

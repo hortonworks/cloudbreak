@@ -20,6 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import org.springframework.util.DigestUtils;
+import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 
 import javax.mail.internet.MimeMessage;
 import java.util.HashMap;
@@ -48,6 +49,9 @@ public class SimpleUserService implements UserService {
     @Value("${mail.sender.from}")
     private String msgFrom;
 
+    @Value("${uluwatu.addr}")
+    private String uiAddress;
+
 
     @Override
     public Long registerUser(User user) {
@@ -55,25 +59,27 @@ public class SimpleUserService implements UserService {
         user.setConfToken(confToken);
         User savedUser = userRepository.save(user);
         LOGGER.info("User {} successfully saved", user);
-        MimeMessagePreparator msgPreparator = prepareMessage(user, "templates/confirmation-email.ftl", "/users/confirm/");
+        MimeMessagePreparator msgPreparator = prepareMessage(user, "templates/confirmation-email.ftl", "#?confirmSignUpToken=");
         sendConfirmationEmail(msgPreparator);
         return savedUser.getId();
     }
 
     @Override
-    public void confirmRegistration(String confToken) {
+    public String confirmRegistration(String confToken) {
         User user = userRepository.findUserByConfToken(confToken);
         if (null != user) {
             user.setConfToken(null);
             user.setStatus(UserStatus.ACTIVE);
             userRepository.save(user);
+            return user.getEmail();
         } else {
             LOGGER.warn("There's no user registration pending for confToken: {}", confToken);
+            return null;
         }
     }
 
     @Override
-    public void disableUser(String email) {
+    public String disableUser(String email) {
         User user = userRepository.findByEmail(email);
         if (user != null) {
             user.setStatus(UserStatus.DISABLED);
@@ -81,28 +87,29 @@ public class SimpleUserService implements UserService {
             String confToken = generateRegistrationId(user);
             user.setConfToken(confToken);
             userRepository.save(user);
-            MimeMessagePreparator msgPreparator = prepareMessage(user, "templates/reset-email.ftl", "/users/reset/");
+            MimeMessagePreparator msgPreparator = prepareMessage(user, "templates/reset-email.ftl", "#?resetToken=");
             sendConfirmationEmail(msgPreparator);
+            return email;
         } else {
             LOGGER.warn("There's no user for email: {} ", email);
+            return null;
         }
     }
 
     @Override
-    public void resetPassword(String confToken, String password) {
+    public String resetPassword(String confToken, String password) {
         User user = userRepository.findUserByConfToken(confToken);
-        if (user.getStatus().equals(UserStatus.DISABLED)) {
-            user.setPassword(passwordEncoder.encode(password));
+        String decodedPassword = Base64Coder.decodeString(password);
+        if (user != null && UserStatus.DISABLED.equals(user.getStatus())) {
+            LOGGER.info("new password: " + decodedPassword);
+            user.setPassword(passwordEncoder.encode(decodedPassword));
             user.setConfToken(null);
             userRepository.save(user);
+            return confToken;
         } else {
             LOGGER.warn("There's no user for token: {}", confToken);
+            return null;
         }
-    }
-
-    @Override
-    public boolean validateResetPassword(String confToken) {
-        return userRepository.findUserByConfToken(confToken) != null;
     }
 
     private String generateRegistrationId(User user) {
@@ -116,7 +123,7 @@ public class SimpleUserService implements UserService {
         try {
             Map<String, Object> model = new HashMap<>();
             model.put("user", user);
-            model.put("confirm", hostAddress + confirmPath + user.getConfToken());
+            model.put("confirm", getConfirmLinkPath() + confirmPath + user.getConfToken());
             text = FreeMarkerTemplateUtils.processTemplateIntoString(freemarkerConfiguration.getTemplate(template, "UTF-8"), model);
         } catch (Exception e) {
             LOGGER.error("Confirmation email assembling failed. Exception: {}", e);
@@ -136,6 +143,10 @@ public class SimpleUserService implements UserService {
                 message.setText(getEmailBody(user, template, confirmPath), true);
             }
         };
+    }
+
+    private String getConfirmLinkPath() {
+        return uiAddress == null ? hostAddress : uiAddress;
     }
 
     @Async

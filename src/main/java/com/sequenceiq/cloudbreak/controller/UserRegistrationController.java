@@ -40,35 +40,25 @@ public class UserRegistrationController {
     }
 
     @RequestMapping(value = "/confirm/{confToken}", method = RequestMethod.GET)
-    public ResponseEntity<Void> confirmRegistration(@PathVariable String confToken) {
+    public ResponseEntity<String> confirmRegistration(@PathVariable String confToken) {
         LOGGER.debug("Confirming registration (token: {})... ", confToken);
-        userService.confirmRegistration(confToken);
-        LOGGER.debug("Registration confirmed (token: {})", confToken);
-        return new ResponseEntity<>(HttpStatus.OK);
+        String activeUser = userService.confirmRegistration(confToken);
+        LOGGER.debug("Registration confirmed (token: {}) for {}", new Object[]{confToken, activeUser});
+        return new ResponseEntity<>(activeUser, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/reset", method = RequestMethod.POST)
-    public ResponseEntity<Void> forgotPassword(@RequestParam String email) {
+    public ResponseEntity<String> forgotPassword(@RequestParam String email) {
         LOGGER.debug("Reset password for: {} (email)", email);
-        userService.disableUser(email);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    @RequestMapping(value = "/reset/{confToken}", method = RequestMethod.GET)
-    public ResponseEntity<Void> validateResetPassword(@PathVariable String confToken) {
-        LOGGER.debug("Reset password token: {} (GET)", confToken);
-        if (userService.validateResetPassword(confToken)) {
-            return new ResponseEntity<>(HttpStatus.OK);
-        } else {
-            throw new BadRequestException("The requested token is not valid.");
-        }
+        String user = userService.disableUser(email);
+        return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/reset/{confToken}", method = RequestMethod.POST)
-    public ResponseEntity<Void> resetPassword(@PathVariable String confToken, @RequestParam String password) {
-        LOGGER.debug("Reset password token: {} (POST)", confToken);
-        userService.resetPassword(confToken, password);
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<String> resetPassword(@PathVariable String confToken, @RequestParam String password) {
+        LOGGER.debug("Reset password token: {}", confToken);
+        String rToken = userService.resetPassword(confToken, password);
+        return new ResponseEntity<>(rToken, HttpStatus.OK);
     }
 
 }
