@@ -1,1 +1,4 @@
-docs/index.md
+periscope
+=========
+
+Periscope is a Hadoop QoS scheduler
