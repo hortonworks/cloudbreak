@@ -1,4 +1,6 @@
-cloudbreak
+<!--main.md-->
+
+Cloudbreak
 ================
 
 *Cloudbreak is a powerful left surf that breaks over a coral reef, a mile off southwest the island of Tavarua, Fiji.*
@@ -7,50 +9,78 @@ cloudbreak
 
 http://docs.cloudbreak.apiary.io/
 
+<!--main.md-->
+
 ## Table of Contents
   - [Overview] (#overview)
-  - [Benefits] (#benefits)
-   - [Secure] (#secure)
-   - [Elastic] (#elastic)
-   - [Scalable] (#scalable)
-   - [Blueprints] (#blueprints)
-   - [Flexible] (#flexible)
-  - [Running Cloudbreak API using Docker] (#running-cloudbreak-api-using-docker)
-   - [Database] (#database)
-   - [Cloudbreak REST API] (#cloudbreak-rest-api)
-  - [Running Cloudbreak API on the host] (#running-cloudbreak-api-on-the-host)
-  - [Configuration] (#configuration)
-   - [Install and configure ngrok] (#install-and-configure-ngrok)
-   - [AWS Configuration] (#aws-configuration)
-    - [Cloudbreak deployer AWS configuration] (#cloudbreak-deployer-aws-configuration)
-    - [Cloudbreak user AWS configuration] (#cloudbreak-user-aws-configuration)
+    - [Benefits] (#benefits)
+     - [Secure] (#secure)
+     - [Elastic] (#elastic)
+     - [Scalable] (#scalable)
+     - [Declarative Hadoop clusters] (#declarative-hadoop-clusters)
+     - [Flexible] (#flexible)
+  - [Quickstart and installation](#quickstart-and-installation)
+    - [Running Cloudbreak API using Docker] (#running-cloudbreak-api-using-docker)
+      - [Database] (#database)
+      - [Cloudbreak REST API] (#cloudbreak-rest-api)
+    - [Running Cloudbreak API on the host] (#running-cloudbreak-api-on-the-host)
+    - [Configuration] (#configuration)
+      - [Development] (#development)
+      - [Production] (#production)
+  - [How it works] (#how-it-works)
+    - [Temlates] (#temlates)
+    - [Stacks] (#stacks)
+    - [Blueprints] (#blueprints)
+    - [Clusters] (#clusters)
+  - [Technology] (#technology)
+    - [Apache Ambari](#apache-ambari)
+    - [Docker](#docker)
+    - [Serf](#serf)
+  - [Supported components](#supported-components)
+  - [Accounts](#accounts)
+    - [Cloudbreak account](#cloudbreak-account)
+    - [Configuring the AWS EC2 account](#configuring-the-aws-ec2-account)
+    - [Configuring the Microsoft Azure account](#configuring-the-microsoft-azure-account)
+  - [Cloudbreak UI](#cloudbreak-ui)
+    - [Manage credentials](#manage-credentials)
+    - [Manage templates](#manage-templates)
+    - [Manage blueprints](#manage-blueprints)
+    - [Create cluster](#create-cluster)
+  - [Add new cloud providers](#add-new-cloud-providers)
+  - [Releases](#releases)
+
+<!--overview.md-->
 
 ##Overview
 
-Cloudbreak is a RESTful application development platform with the goal of helping developers to build solutions for deploying Hadoop YARN clusters in different environments. Once it is deployed in your favorite servlet container it exposes a REST API allowing to span up Hadoop clusters of arbitary sizes and cloud providers. Provisioning Hadoop has never been easier.
-Cloudbreak is built on the foundation of cloud providers API (Amazon AWS, Microsoft Azure), Apache Ambari, Docker lightweight containers, Serf and dnsmasq.
-
+Cloudbreak is a RESTful Hadoop as a Service API. Once it is deployed in your favorite servlet container exposes a REST API allowing to span up Hadoop clusters of arbitary sizes on your selected cloud provider. Provisioning Hadoop has never been easier.
+Cloudbreak is built on the foundation of cloud providers API (Amazon AWS, Microsoft Azure, Google Cloud Compute...), Apache Ambari, Docker containers, Serf and dnsmasq.
 
 ##Benefits
 
 ###Secure
-It supports a token based and OAuth2 authentication model. The cluster is provisioned in a logically isolated network (Virtual Private Cloud) of your cloud favorite cloud provider.
-If the cluster is launched in a VPC network, the framework gonfigure firewall settings that control the network access of your launched instances. For example a Hadoop Resource Manager can be accessed from the internet, whereas non of the other nodes are available.
-Cloudbreak does not store or manages your cloud credentials - it is the end user's responsability to link Cloudbreak with her/his cloud account. We provide utilities to ease this process (IAM on Amazon, certificates on Azure).
+Supports basic, token based and OAuth2 authentication model. The cluster is provisioned in a logically isolated network (Virtual Private Cloud) of your favorite cloud provider.
+Cloudbreak does not store or manages your cloud credentials - it is the end user's responsability to link the Cloudbreak user with her/his cloud account. We provide utilities to ease this process (IAM on Amazon, certificates on Azure).
 
 ###Elastic
-Using Cloudbreak API you can provision an arbitrary number of Hadoop nodes - the API does the hard work for you, and span up the cluster, configure the networks and the selected Hadoop services without any interaction.
+Using Cloudbreak API you can provision an arbitrary number of Hadoop nodes - the API does the hard work for you, and span up the infrastructure, configure the network and the selected Hadoop components and services without any user interaction.
 POST once and use it anytime after.
 
 ###Scalable
 As your workload changes, the API allows you to add or remove nodes on the fly. Cloudbreak does the hard work of reconfiguring the infrastructure, provision or decomission Hadoop nodes and let the cluster be continuosely operational.
 Once provisioned, new nodes will take up the load and increase the cluster throughput.
 
-###Blueprints
-Supports different Hadoop cluster blueprints. Hostgroups defined in blueprints can be associated to different VPC subnets and availability zones, thus you can span up a cluster for deploying highly available applications.
+###Declarative Hadoop clusters
+We support declarative Hadoop cluster creation - using blueprints. Blueprints are a declarative definition of a Hadoop cluster. With a blueprint, you specify a stack, the component layout and the configurations to materialize a Hadoop cluster instance. Hostgroups defined in blueprints can be associated to different VPC subnets and availability zones, thus you can span up a highly available cluster running on different datacenters or availability zones.
 
 ###Flexible
-You have the option to choose your favorite cloud provider and different pricing models. The API translated the calls towards different cloud vendors - you develop and use one common API, no need to rewrite you code when changing between cloud providers.
+You have the option to choose your favorite cloud provider and their different pricing models. The API translated the calls towards different vendors - you develop and use one common API, no need to rewrite your code when changing between cloud providers.
+
+<!--overview.md-->
+
+<!--quickstart.md-->
+
+##Quickstart and installation
 
 ##Running Cloudbreak API using Docker
 
@@ -85,7 +115,7 @@ Note: The system properties prefixed with MAIL_SENDER_ are the SNMP settings req
 
 ##Running Cloudbreak API on the host
 
-If you'd like to run Cloudbreak outside of a Docker container - directly on the host - we provide you a shell script.
+If you'd like to run Cloudbreak outside of a Docker container - directly on the host - we provide you an installation shell script.
 
 After building the application _(./gradlew clean build)_ please run the following script from the project root:
 ```
@@ -106,6 +136,10 @@ The arguments are as follows:
 
 ##Configuration
 
+###Development
+
+In order to be able to receive Amazon push notifications on localhost, you will need to install a secure introspectable tunnel to localhost.
+
 ###Install and configure ngrok
 Cloudbreak uses SNS to receive notifications. On OSX you can do the following:
 
@@ -115,14 +149,412 @@ ngrok 8080
 ```
 _Note: In the terminal window you'll find displayed a value - this is the last argument `host-address` of the `run_cloudbreak.sh` script_
 
-###AWS Configuration
+###Production
 
-####Cloudbreak deployer AWS configuration
-To be able to use Cloudbreak, a keypair of an AWS IAM user must be specified. Because Cloudbreak creates AWS resources on third party accounts, the only permission this keypair needs is sts:assumeRole to be able to assume an IAM role to retrieve temporary credentials from AWS.
+TBD - add properties list !!!
 
-####Cloudbreak user AWS configuration
-Cloudbreak users allow the Cloudbreak deployer to span up clusters on their behalf. In order to allow tis, the user will need to provide two IAM roles.
-  1. Role ARN
-  2. Instance profile ARN
+<!--quickstart.md-->
 
-For further description about how-to create these roles please follow this [link](###)
+<!--howitworks.md-->
+
+##How it works?
+
+Cloudbreak launches on-demand Hadoop clusters on your favorite cloud provider in minutes. We have introduced 4 main notions - the core building block of the REST API.
+
+###Templates
+
+A template gives developers and systems administrators an easy way to create and manage a collection of cloud infrastructure related resources, maintaining and updating them in an orderly and predictable fashion.
+Templates are cloud specific - and on top of the infrastructural setup they collect the information such as the used machine images, the datacenter location, instance types, SSH setup and can capture and control region-specific infrastructure variations.
+
+A template can be used repeatedly to create identical copies of the same stack (or to use as a foundation to start a new stack).
+
+The infrastructure specific configuration is available under the Cloudbreak [resources](https://github.com/sequenceiq/cloudbreak/blob/master/src/main/resources/vpc-and-subnet.template).
+As an example, for Amazon EC2, we use [AWS Cloudformation](http://aws.amazon.com/cloudformation/) to define the cloud infrastructure .
+
+For further information please visit our [API documentation](http://docs.cloudbreak.apiary.io/#templates).
+
+###Stacks
+
+Stacks are template `instances` - a runnig cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks supports a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
+
+For further information please visit our [API documentation](http://docs.cloudbreak.apiary.io/#stacks).
+
+###Blueprints
+
+Ambari Blueprints are a declarative definition of a Hadoop cluster. With a Blueprint, you specify a stack, the component layout and the configurations to materialize a Hadoop cluster instance. Hostgroups defined in blueprints can be associated to different VPC subnets and availability zones, thus you can span up a highly available cluster running on different datacenters or availability zones.
+We have a few default blueprints available from single note to multi node blueprints and lamba architecture.
+
+For further information please visit our [API documentation](http://docs.cloudbreak.apiary.io/#blueprints).
+
+###Cluster
+
+Clusters are materialized Hadoop clusters. They are built based on a Bluerint (running the components and services specified) and on a configured infrastructure Stack.
+Once a cluster is created and launched it can be used the usual way as any Hadoop cluster. We suggest to start with the Cluster's Ambari UI for an overview of your cluster.
+
+For further information please visit our [API documentation](http://docs.cloudbreak.apiary.io/#clusters).
+
+<!--howitworks.md-->
+
+<!--technologies.md-->
+
+##Technology
+
+Cloudbreak is built on the foundation of cloud providers APIs, Apache Ambari, Docker containers, Serf and dnsmasq.
+
+###Apache Ambari
+
+The Apache Ambari project is aimed at making Hadoop management simpler by developing software for provisioning, managing, and monitoring Apache Hadoop clusters. Ambari provides an intuitive, easy-to-use Hadoop management web UI backed by its RESTful APIs.
+
+![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/ambari-overview.png?token=6003104__eyJzY29wZSI6IlJhd0Jsb2I6c2VxdWVuY2VpcS9jbG91ZGJyZWFrL21hc3Rlci9kb2NzL2ltYWdlcy9hbWJhcmktb3ZlcnZpZXcucG5nIiwiZXhwaXJlcyI6MTQwNTQyNTQ0NH0%3D--b5c7b0e5adc62ebd34c8a5b73806f6ac905faed2)
+
+Ambari enables System Administrators to:
+
+1. Provision a Hadoop Cluster
+  * Ambari provides a step-by-step wizard for installing Hadoop services across any number of hosts.
+  * Ambari handles configuration of Hadoop services for the cluster.
+
+2. Manage a Hadoop Cluster
+  * Ambari provides central management for starting, stopping, and reconfiguring Hadoop services across the entire cluster.
+
+3. Monitor a Hadoop Cluster
+  * Ambari provides a dashboard for monitoring health and status of the Hadoop cluster.
+  * Ambari leverages Ganglia for metrics collection.
+  * Ambari leverages Nagios for system alerting and will send emails when your attention is needed (e.g., a node goes down, remaining disk space is low, etc).
+
+Ambari enables to integrate Hadoop provisioning, management, and monitoring capabilities into applications with the Ambari REST APIs.
+Ambari Blueprints are a declarative definition of a cluster. With a Blueprint, you can specify a Stack, the Component layout and the Configurations to materialize a Hadoop cluster instance (via a REST API) without having to use the Ambari Cluster Install Wizard.
+
+![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/ambari-create-cluster.png?token=6003104__eyJzY29wZSI6IlJhd0Jsb2I6c2VxdWVuY2VpcS9jbG91ZGJyZWFrL21hc3Rlci9kb2NzL2ltYWdlcy9hbWJhcmktY3JlYXRlLWNsdXN0ZXIucG5nIiwiZXhwaXJlcyI6MTQwNTQyNTUxOH0%3D--4207ee222d43a67deeb6e5174029cef45ea4f271)
+
+###Docker
+
+Docker is an open platform for developers and sysadmins to build, ship, and run distributed applications. Consisting of Docker Engine, a portable, lightweight runtime and packaging tool, and Docker Hub, a cloud service for sharing applications and automating workflows, Docker enables apps to be quickly assembled from components and eliminates the friction between development, QA, and production environments. As a result, IT can ship faster and run the same app, unchanged, on laptops, data center VMs, and any cloud.
+
+The main features of Docker are:
+
+1. Lightweight, portable
+2. Build once, run anywhere
+3. VM - without the overhead of a VM
+  * Each virtualized application includes not only the application and the necessary binaries and libraries, but also an entire guest operating system
+  * The Docker Engine container comprises just the application and its dependencies. It runs as an isolated process in userspace on the host operating system, sharing the kernel with other containers.
+    ![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/vm.png?token=6003104__eyJzY29wZSI6IlJhd0Jsb2I6c2VxdWVuY2VpcS9jbG91ZGJyZWFrL21hc3Rlci9kb2NzL2ltYWdlcy92bS5wbmciLCJleHBpcmVzIjoxNDA1NDI1NTc1fQ%3D%3D--b07a90b876bd4e26f361f37eed901f874f71bf87)
+
+4. Containers are isolated
+5. It can be automated and scripted
+
+###Serf
+
+Serf is a tool for cluster membership, failure detection, and orchestration that is decentralized, fault-tolerant and highly available. Serf runs on every major platform: Linux, Mac OS X, and Windows. It is extremely lightweight.
+Serf uses an efficient gossip protocol to solve three major problems:
+
+  * Membership: Serf maintains cluster membership lists and is able to execute custom handler scripts when that membership changes. For example, Serf can maintain the list of Hadoop servers of a cluster and notify the members when nodes comes online or goes offline.
+
+  * Failure detection and recovery: Serf automatically detects failed nodes within seconds, notifies the rest of the cluster, and executes handler scripts allowing you to handle these events. Serf will attempt to recover failed nodes by reconnecting to them periodically.
+    ![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/serf-gossip.png?token=6003104__eyJzY29wZSI6IlJhd0Jsb2I6c2VxdWVuY2VpcS9jbG91ZGJyZWFrL21hc3Rlci9kb2NzL2ltYWdlcy9zZXJmLWdvc3NpcC5wbmciLCJleHBpcmVzIjoxNDA1NDI1NjA4fQ%3D%3D--358fedd73c8fbd20a105dcc74bdf66524d680134)
+  * Custom event propagation: Serf can broadcast custom events and queries to the cluster. These can be used to trigger deploys, propagate configuration, etc. Events are simply fire-and-forget broadcast, and Serf makes a best effort to deliver messages in the face of offline nodes or network partitions. Queries provide a simple realtime request/response mechanism.
+    ![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/serf-event.png?token=6003104__eyJzY29wZSI6IlJhd0Jsb2I6c2VxdWVuY2VpcS9jbG91ZGJyZWFrL21hc3Rlci9kb2NzL2ltYWdlcy9zZXJmLWV2ZW50LnBuZyIsImV4cGlyZXMiOjE0MDU0MjU2Mjh9--69ea14f7dc1db34dd1dd6585df42ad8f2dd2a9d1)
+
+<!--technologies.md-->
+
+<!--components.md-->
+
+##Supported components
+
+Ambari supports the concept of stacks and associated services in a stack definition. By leveraging the stack definition, Ambari has a consistent and defined interface to install, manage and monitor a set of services and provides extensibility model for new stacks and services to be introduced.
+
+At high level the supported list of components can be grouped in to main categories: Master and Slave - and bundling them together form a Hadoop Service.
+
+| Services    | Components                                                              |
+|:----------- |:------------------------------------------------------------------------|
+| HDFS		    | DATANODE, HDFS_CLIENT, JOURNALNODE, NAMENODE, SECONDARY_NAMENODE, ZKFC  |
+| YARN		    | APP_TIMELINE_SERVER, NODEMANAGER, RESOURCEMANAGER, YARN_CLIENT          |
+| MAPREDUCE2	| HISTORYSERVER, MAPREDUCE2_CLIENT                                        |
+| GANGLIA		  | GANGLIA_MONITOR, GANGLIA_SERVER                                         |
+| HBASE		    | HBASE_CLIENT, HBASE_MASTER, HBASE_REGIONSERVER                          |
+| HIVE		    | HIVE_CLIENT, HIVE_METASTORE, HIVE_SERVER, MYSQL_SERVER                  |
+| HCATALOG	  | HCAT                                                                    |
+| WEBHCAT		  | WEBHCAT_SERVER                                                          |
+| NAGIOS		  | NAGIOS_SERVER                                                           |
+| OOZIE		    | OOZIE_CLIENT, OOZIE_SERVER                                              |
+| PIG		      | PIG                                                                     |
+| SQOOP		    | SQOOP                                                                   |
+| STORM		    | DRPC_SERVER, NIMBUS, STORM_REST_API, STORM_UI_SERVER, SUPERVISOR        |
+| TEZ		      | TEZ_CLIENT                                                              |
+| FALCON		  | FALCON_CLIENT, FALCON_SERVER                                            |
+| ZOOKEEPER	  | ZOOKEEPER_CLIENT, ZOOKEEPER_SERVER                                      |
+
+
+We provide a list of default Hadoop cluster Blueprints for your convenience, however you can always build and use your own Blueprint.
+
+1. Simple single node - Apache Ambari blueprint
+
+This is a simple [Blueprint](https://raw.githubusercontent.com/sequenceiq/ambari-rest-client/master/src/main/resources/blueprints/single-node-hdfs-yarn) which allows you to launch a single node, pseudo-distributed Hadoop Cluster in the cloud.
+
+It's allows you to use the following services: HDFS, YARN, MAPREDUCE2.
+
+2. Full stack single node - HDP 2.1 blueprint
+
+This is a complex [Blueprint](https://raw.githubusercontent.com/sequenceiq/ambari-rest-client/master/src/main/resources/blueprints/hdp-singlenode-default) which allows you to launch a single node, pseudo-distributed Hadoop Cluster in the cloud.
+
+It's allows you to use the following services: HDFS, YARN, MAPREDUCE2, GANGLIA, HBASE, HIVE, HCATALOG, WEBHCAT, NAGIOS, OOZIE, PIG, SQOOP, STORM, TEZ, FALCON, ZOOKEEPER.
+
+3. Simple multi node - Apache Ambari blueprint
+
+This is a simple [Blueprint](https://raw.githubusercontent.com/sequenceiq/ambari-rest-client/master/src/main/resources/blueprints/multi-node-hdfs-yarn) which allows you to launch a multi node, fully distributed Hadoop Cluster in the cloud.
+
+It's allows you to use the following services: HDFS, YARN, MAPREDUCE2.
+
+4. Full stack multi node - HDP 2.1 blueprint
+
+This is a complex [Blueprint](https://raw.githubusercontent.com/sequenceiq/ambari-rest-client/master/src/main/resources/blueprints/hdp-multinode-default) which allows you to launch a multi node, fully distributed Hadoop Cluster in the cloud.
+
+It's allows you to use the following services: HDFS, YARN, MAPREDUCE2, GANGLIA, HBASE, HIVE, HCATALOG, WEBHCAT, NAGIOS, OOZIE, PIG, SQOOP, STORM, TEZ, FALCON, ZOOKEEPER.
+
+5. Custom blueprints
+
+We allow you to build your own Blueprint - for further instractions please check the Apache Ambari [documentation](https://cwiki.apache.org/confluence/display/AMBARI/Blueprints).
+
+When you are creating clustom Blueprints you can use the components above to build Hadoop services and use them in your on-demand Hadoop cluster.
+
+We are trying to figure out the hosts to hostgroups assignements - and order to do so you will need to follow the conventions below:
+
+_Note: Apache Ambari community and SequenceIQ is working on an auto-hostgroup assignement algorithm; in the meantime please follow our conventions and check the default blueprints as examples, or ask us to support you._
+
+1. When you are creating a Single node blueprint the name of the default host group has to be `master`.
+2. When yoy are creating a Multi node blueprint, all the worker node components (a.k.a. Slaves) will have to be grouped in host groups named `slave_*`. _Replace * with the number of Slave hostgroups_.
+
+The default rules are that for multi node clusters are there must be at least as many hosts as the number of host groups. Each NOT slave host groups (master, gateway, etc) will be launched wiht a cardinality of 1 (1 node per master, gateway, etc hosts), and all the rest of the nodes are equally distributed among Slave nodes (if there are multiple slave host groups).
+
+<!--components.md-->
+
+<!--accounts.md-->
+
+##Accounts
+
+###Cloudbreak account
+
+First and foremost in order to start launching Hadoop clusters you will need to create a Cloudbreak account. C
+loudbreak supports registration, forgotten and reset password, and login features at API level.
+All password are stored or sent are hashed - communication is always over a secure HTTPS channel. When you are deploying your own Cloudbreak instance we strongy suggest to configure an SSL certificate.
+Users create and launch Hadoop clusters on their own namespace and security context.
+
+Cloudbreak is launching Hadoop clusters on the user's behalf - on different cloud providers. One key point is that Cloudbreak **does not** store your Cloud provider account details (such as username, passord, keys, private SSL certificates, etc).
+We work around the concept that Identity and Access Management is fully controlled by you - the end user. The Cloudbreak *deployer* is purely acting on behalf of the end user - without having access to the user's account.
+
+**How does this work**?
+
+###Configuring the AWS EC2 account
+
+Once you have logged in Cloudbreak you will have to link your AWS account with the Cloudbreak one. In order to do that you will need to configure an IAM Role.
+
+1. Log in to the AWS management console with the user account you'd like to use with Cloudbreak
+2. Go to IAM and select Roles
+  * Select Role for Cross-Account access
+    *  Allows IAM users from a 3rd party AWS account to access this account.
+
+      **Account ID:** In case you are using our hosted solution you will need to pass SequenceIQ's account id: 755047402263
+
+      **External ID:** provision-ambari (association link)
+
+    * Custom policy
+      Use this policy [document](https://raw.githubusercontent.com/sequenceiq/cloudbreak/documentation/src/main/resources/iam-arn-custom.policy?token=6003104__eyJzY29wZSI6IlJhd0Jsb2I6c2VxdWVuY2VpcS9jbG91ZGJyZWFrL2RvY3VtZW50YXRpb24vc3JjL21haW4vcmVzb3VyY2VzL2lhbS1hcm4tY3VzdG9tLnBvbGljeSIsImV4cGlyZXMiOjE0MDUzMzc2MjV9--cde4acae8c67317e6245598526be8cf680a08914) to configure the permission to start EC2 instances on the end user's behalf, and use SNS to receive notifications.
+
+
+Once this is configured, Cloudbreak is ready to launch Hadoop clusters on your behalf. The only thing Cloudbreak requires is the `Role ARN` (Role for Cross-Account access).
+
+
+###Configuring the Microsoft Azure account
+
+Once you have logged in Cloudbreak you will have to link your Azure account with the Cloudbreak one. Cloudbreak asks for your Azure `Subscription Id`, and will generate a `JKS` file and a `certificate` for you with your configured `passphrase`.
+The JKS file and certificate (uploaded) will be used to encrypt the communication between Cloudbreak and Azure in both directions.
+Additionally when you are creating Templates you can specify a `password` or an `SSH public key` in order for you to be able to login in the launched instances. As you can see the communication is bith directions is secure, and we will not be able to login into your instances.
+
+In order to create a Cloudbreak account associated with your Azure account you will need to do the following steps.
+
+1. Log into Azure management console with the user account you'd like to use with Cloudbreak
+2. On Azure go to Settings and Subscriptions tab - Cloudbreak will need your `Subscription Id` to associate accounts
+3. On Cloudbreak API or UI you will have to add a password - this will be used as the `passphrase` for the JKS file and certificate we generate.
+4. You should download the generated `certification`
+5. On Azure go to Settings and `Management Certificates` and upload the `cert` file
+
+You are done - from now on Cloudbreak can launch Azure instances on your behalf.
+
+_Note: Clodbreak does not store any login details into these instances - when you are creating Templates you can specify a `password` or `SSH Public key` which you can used to login into the launched instances._
+
+<!--accounts.md-->
+
+<!--ui.md-->
+
+##Cloudbreak UI
+
+When we have started to work on Cloudbreak our main goal was to create an easy to use, cloud and Hadoop distribution agnostis Hadoop as a Service API. Though we always like to automate everything and aproach things with a very DevOps mindset, as a side project we have created a UI for Cloudbreak as well.
+The goal of the UI is to ease to process and allow you to create a Hadoop cluster on your favorite cloud provider in `one-click`.
+
+The UI is built on the foundation of the Cloudbreak REST API.
+
+###Manage credentials
+Using manage credentials you can link your cloud account with the Cloudbreak account.
+
+**Amazon AWS**
+
+`Name:` name of your credential
+
+`Description:` short description of your linked credential
+
+`Role ARN:` the role string - see Accounts
+
+**Azure**
+
+`Name:` name of your credential
+
+`Description:` short description of your linked credential
+
+`Subscription Id:` your Azure subscription id - see Accounts
+
+`File password:` your generated JKS file password - see Accounts
+
+###Manage templates
+
+Using manage templates you can create infrastructure templates.
+
+**Amazon AWS**
+
+`Name:` name of your template
+
+`Description:` short description of your template
+
+`AMI:` the AMI which contains the Docker containers
+
+`SSH location:` allowed inbound SSH access. Use 0.0.0.0/0 as default
+
+`SSH key name:` your SSH key name used on AWS
+
+`Region:` AWS region where you'd like to launch your cluster
+
+`Instance type:` the Amazon instance type to be used - we suggest to use at least small or medium instances
+
+**Azure**
+
+`Name:` name of your template
+
+`Description:` short description of your template
+
+`Location:` Azure datacenter location where you'd like to launch your cluster
+
+`Image name:` The Azure base image used
+
+`Instance type:` the Azure instance type to be used - we suggest to use at least small or medium instances
+
+`Password:` if you specify a password you can use it later to log into you launched instances
+
+`SSH public key` if you specify an SSH public key you can use your private key later to log into you launched instances
+
+###Manage blueprints
+Blueprints are your declarative definition of a Hadoop cluster.
+
+`Name:` name of your blueprint
+
+`Description:` short description of your blueprint
+
+`Source URL:` you can add a blueprint by pointing to a URL. As an example you can use this [blueprint](https://raw.githubusercontent.com/sequenceiq/ambari-rest-client/master/src/main/resources/blueprints/multi-node-hdfs-yarn).
+
+`Manual copy:` you can copy paste your blueprint in this text area
+
+_Note: Apache Ambari community and SequenceIQ is working on an auto-hostgroup assignement algorithm; in the meantime please follow our conventions and check the default blueprints as examples, or ask us to support you._
+
+_1. When you are creating a Single node blueprint the name of the default host group has to be `master`._
+_2. When yoy are creating a Multi node blueprint, all the worker node components (a.k.a. Slaves) will have to be grouped in host groups named `slave_*`. Replace * with the number of Slave hostgroups._
+
+_The default rules are that for multi node clusters are there must be at least as many hosts as the number of host groups. Each NOT slave host groups (master, gateway, etc) will be launched wiht a cardinality of 1 (1 node per master, gateway, etc hosts), and all the rest of the nodes are equally distributed among Slave nodes (if there are multiple slave host groups)._
+
+###Create cluster
+Using the create cluster functionality you will create a cloud Stack and a Hadoop Cluster. In order to create a cluster you will have to select a credential first.
+_Note: Cloudbreak can maintain multiple cloud credentials (even for the same provider)._
+
+`Cluster name:` your cluster name
+
+`Cluster size:` the number of nodes in your Hadoop cluster
+
+`Template:` your cloud infrastructure template to be used
+
+`Blueprint:` your Hadoop cluster blueprint
+
+Once you have launched the cluster creation you can track the progress either on Cloudbreak UI or your cloud provider management UI.
+
+<!--ui.md-->
+
+<!--addnewcloud.md-->
+
+##Add new cloud providers
+
+Cloudbreak is built from ground up on the idea of being cloud provider agnostic. All the external API's are cloud agnostic, and we have
+internally abstracted wokring with individual cloud providers API's. Nevertheless adding new cloud providers is extremely important for us, thus
+in order to speed up the process and linking the new provider API with Cloudbreak we came up with an SDK and list of responsibilities.
+Once these interfaces are implemented, and the different providers API calls are `translated` you are ready to go.
+
+Though we are working on a few popular providers to add to Cloudbreak we'd like to hear your voice as well - your ideas, provider requests or `contribution` is highly appreciated.
+
+1. Metadata service
+
+2. Notifications
+
+3. Account management
+
+<!--addnewcloud.md-->
+
+<!--releases.md-->
+
+##Releases
+
+When we have started to work on Cloudbreak the idea was to `democratize` the usage of Hadoop in the cloud and VMs. For us this was a necesity as we often had to deal with different Hadoop versions, distributions and cloud providers.
+
+Also we needed to find a way to speed up the process of adding new cloud providers, and be able to `ship` Hadoop between clouds without re-writing and re-engineering our code base each and every time - welcome **Docker**.
+
+All the Hadoop ecosystem related code, configuration and serivces are inside Docker containers - and these containers are launched on VMs of cloud providers or physical hardware - the end result is the same: a **resilient and dynamic** Hadoop cluster.
+
+We needed to find a unified way to provision, manage and configurure Hadoon clusters - welcome **Apache Ambari**.
+
+###Current release - 0.1
+The first public beta version of Cloudbreak supports Hadoop on Amazon's EC2 and Microsoft's Azure cloud providers. The currently supported Hadoop is the Hortonworks Data Platform - the 100% open source Hadoop distribution.
+
+Versions:
+
+CentOS - 6.5
+Hortonworks Data Platform - 2.1
+Apache Hadoop - 2.4.0
+Apache Tez - 0.4
+Apache Pig - 0.12.1
+Apache Hive & HCatalog - 0.13.0
+Apache HBase - 0.98.0
+Apache Phoenix - 4.0.0
+Apache Accumulo - 1.5.1
+Apache Storm - 0.9.1
+Apache Mahout - 0.9.0
+Apache Solr - 4.7.2
+Apache Falcon - 0.5.0
+Apache Sqoop - 1.4.4
+Apache Flume - 1.4.0
+Apache Ambari - 1.6.1
+Apache Oozie - 4.0.0
+Apache Zookeeper - 3.4.5
+Apache Knox - 0.4.0
+Docker - 1.1
+Serf - 0.5.0
+dnsmasq - 2.7
+
+###Future releases
+
+**Hadoop distributions**
+
+There is a great effort by the community and SequenceIQ to bring [Apache Bigtop](http://bigtop.apache.org/) - the Apache Hadoop distribution - under the umbrella of Apache Ambari. Once this effort is finished, Cloudbreak will support Apache Bigtop as a Hadoop distribution as well.
+
+In the meantime we have started an internal R&D project to bring Cloudera's CDH distribution under Apache Ambari - in case you would like to collaborate in this task with us or sounds interesting to you don't hesitate to let us know.
+
+**Cloud providers**
+
+While we have just released the first public beta version of Cloudbreak, we have already started working on other cloud providers - namely Google Cloud Compute and Digital Ocean.
+We have received many requests from people to integrate Cloudbreak wih 3d party hypervisors and cloud providers - as IBM's Softlayer. In case you'd like to have your favorite cloud provider listed don't hesitate to contact us or use our SDK and process to add yours.
+
+Enjoy Cloudbreak - the Hadoop as a Service API which brings you a Hadoop ecosystem in matters on minutes. You are literarily one click or two REST calls away from a fully functional, distributed Hadoop cluster.
+
+<!--releases.md-->

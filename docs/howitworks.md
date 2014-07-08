@@ -27,7 +27,7 @@ We have a few default blueprints available from single note to multi node bluepr
 
 For further information please visit our [API documentation](http://docs.cloudbreak.apiary.io/#blueprints).
 
-###Cluster
+###Clusters
 
 Clusters are materialized Hadoop clusters. They are built based on a Bluerint (running the components and services specified) and on a configured infrastructure Stack.
 Once a cluster is created and launched it can be used the usual way as any Hadoop cluster. We suggest to start with the Cluster's Ambari UI for an overview of your cluster.
