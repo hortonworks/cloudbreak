@@ -43,9 +43,6 @@ public class SnsMessageHandler {
     private Reactor reactor;
 
     @Autowired
-    private AwsStackUtil awsStackUtil;
-
-    @Autowired
     private AwsNetworkConfigurator awsNetworkConfigurator;
 
     public void handleMessage(SnsRequest snsRequest) {

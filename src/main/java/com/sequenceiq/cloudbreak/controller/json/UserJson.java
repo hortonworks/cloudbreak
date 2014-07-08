@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.HashSet;
 import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class UserJson implements JsonEntity {
 
@@ -56,9 +56,13 @@ public class UserJson implements JsonEntity {
         this.email = email;
     }
 
-    public void setCompany(String company) { this.company = company; }
+    public void setCompany(String company) {
+        this.company = company;
+    }
 
-    public String getCompany() { return company; }
+    public String getCompany() {
+        return company;
+    }
 
     public Set<TemplateJson> getAwsTemplates() {
         return awsTemplates;
@@ -83,7 +87,6 @@ public class UserJson implements JsonEntity {
     public void setStacks(Set<StackJson> stacks) {
         this.stacks = stacks;
     }
-
 
     public Set<BlueprintJson> getBlueprints() {
         return blueprints;
