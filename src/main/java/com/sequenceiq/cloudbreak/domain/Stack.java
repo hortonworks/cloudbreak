@@ -82,7 +82,7 @@ public class Stack implements ProvisionEntity {
     @OneToOne
     private Credential credential;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private Cluster cluster;
 
     @ManyToOne
