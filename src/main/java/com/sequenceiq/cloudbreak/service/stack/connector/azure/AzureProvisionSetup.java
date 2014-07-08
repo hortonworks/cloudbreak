@@ -42,7 +42,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
     private static final String LOCATION = "location";
     private static final String VM_COMMON_NAME = "cloudbreak";
     private static final String OS = "os";
-    private static final String MEDIALINK = "'mediaLink'";
+    private static final String MEDIALINK = "mediaLink";
 
     @Autowired
     private Reactor reactor;
@@ -61,24 +61,32 @@ public class AzureProvisionSetup implements ProvisionSetup {
         if (!azureClient.isImageAvailable(IMAGE_NAME)) {
             String baseImageUri = "http://vmdepoteastus.blob.core.windows.net/linux-community-store/community-62091-a59dcdc1-d82d-4e76-9094-27b8c018a4a1-1.vhd";
 
-            Map<String, String> params = new HashMap<>();
-            params.put(AzureStackUtil.NAME, VM_COMMON_NAME);
-            params.put(DESCRIPTION, VM_COMMON_NAME);
-            params.put(LOCATION, "East US");
-            azureClient.createAffinityGroup(params);
-
-            params = new HashMap<>();
-            params.put(AzureStackUtil.NAME, VM_COMMON_NAME);
-            params.put(DESCRIPTION, VM_COMMON_NAME);
-            params.put(AFFINITYGROUP, VM_COMMON_NAME);
-            HttpResponseDecorator response = (HttpResponseDecorator) azureClient.createStorageAccount(params);
-
-            azureClient.waitUntilComplete((String) azureClient.getRequestId(response));
             try {
-                String targetBlobContainerUri = "http://" + VM_COMMON_NAME + ".blob.core.windows.net/vm-images";
-                String targetImageUri = targetBlobContainerUri + '/' + VM_COMMON_NAME + ".vhd";
-                params = new HashMap<>();
+                Map<String, String> params = new HashMap<>();
                 params.put(AzureStackUtil.NAME, VM_COMMON_NAME);
+                params.put(DESCRIPTION, VM_COMMON_NAME);
+                params.put(LOCATION, "East US");
+                azureClient.createAffinityGroup(params);
+            } catch (Exception ex) {
+                LOGGER.info("There was a problem with the creation of the affinity group.");
+            }
+            String storageName = String.format("%s%s", VM_COMMON_NAME, stack.getId());
+            try {
+                Map<String, String> params = new HashMap<>();
+                params.put(AzureStackUtil.NAME, storageName);
+                params.put(DESCRIPTION, VM_COMMON_NAME);
+                params.put(AFFINITYGROUP, VM_COMMON_NAME);
+                HttpResponseDecorator response = (HttpResponseDecorator) azureClient.createStorageAccount(params);
+
+                azureClient.waitUntilComplete((String) azureClient.getRequestId(response));
+            } catch (Exception ex) {
+                LOGGER.info("There was a problem with the creation of the storage.");
+            }
+            try {
+                String targetBlobContainerUri = "http://" + storageName + ".blob.core.windows.net/vm-images";
+                String targetImageUri = targetBlobContainerUri + '/' + storageName + ".vhd";
+                Map<String, String> params = new HashMap<>();
+                params.put(AzureStackUtil.NAME, storageName);
                 String keyJson = (String) azureClient.getStorageAccountKeys(params);
 
                 JsonNode actualObj = MAPPER.readValue(keyJson, JsonNode.class);
