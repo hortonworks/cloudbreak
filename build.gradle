@@ -107,7 +107,7 @@ dependencies {
     compile 'org.springframework:spring-messaging:4.0.3.RELEASE'
     compile 'org.projectreactor:reactor-spring:1.0.1.RELEASE'
     compile 'org.postgresql:postgresql:9.3-1101-jdbc41'
-    compile('com.amazonaws:aws-java-sdk:1.7.8.1') {
+    compile('com.amazonaws:aws-java-sdk:1.8.3') {
         exclude group: 'commons-logging'
     }
     compile 'org.hibernate:hibernate-validator:5.1.1.Final'

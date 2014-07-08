@@ -11,8 +11,6 @@ import org.springframework.stereotype.Service;
 import reactor.core.Reactor;
 import reactor.event.Event;
 
-import com.amazonaws.auth.BasicSessionCredentials;
-import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.sns.AmazonSNSClient;
 import com.amazonaws.services.sns.model.ConfirmSubscriptionResult;
@@ -50,10 +48,13 @@ public class SnsTopicManager {
     private StackRepository stackRepository;
 
     @Autowired
+    private AwsStackUtil awsStackUtil;
+
+    @Autowired
     private Reactor reactor;
 
     public void createTopicAndSubscribe(AwsCredential awsCredential, Regions region) {
-        AmazonSNSClient amazonSNSClient = createSnsClient(awsCredential, region);
+        AmazonSNSClient amazonSNSClient = awsStackUtil.createSnsClient(region, awsCredential);
         LOGGER.info("Amazon SNS client successfully created.");
 
         CreateTopicResult createTopicResult = amazonSNSClient.createTopic(CB_TOPIC_NAME);
@@ -78,7 +79,7 @@ public class SnsTopicManager {
         List<SnsTopic> snsTopics = snsTopicRepository.findByTopicArn(snsRequest.getTopicArn());
         for (SnsTopic snsTopic : snsTopics) {
             if (!snsTopic.isConfirmed()) {
-                AmazonSNSClient amazonSNSClient = createSnsClient(snsTopic.getCredential(), snsTopic.getRegion());
+                AmazonSNSClient amazonSNSClient = awsStackUtil.createSnsClient(snsTopic.getRegion(), snsTopic.getCredential());
                 ConfirmSubscriptionResult result = amazonSNSClient.confirmSubscription(snsTopic.getTopicArn(), snsRequest.getToken());
                 LOGGER.info("Subscription to Amazon SNS topic confirmed. [topic ARN: '{}', subscription ARN: '{}', credential: '{}']",
                         snsRequest.getTopicArn(), result.getSubscriptionArn(), snsTopic.getCredential().getId());
@@ -101,7 +102,7 @@ public class SnsTopicManager {
     }
 
     public void subscribeToTopic(AwsCredential awsCredential, Regions region, String topicArn) {
-        AmazonSNSClient amazonSNSClient = createSnsClient(awsCredential, region);
+        AmazonSNSClient amazonSNSClient = awsStackUtil.createSnsClient(region, awsCredential);
         subscribeToTopic(amazonSNSClient, topicArn);
     }
 
@@ -110,13 +111,4 @@ public class SnsTopicManager {
         amazonSNSClient.subscribe(topicArn, "http", subscriptionEndpoint);
         LOGGER.info("Amazon SNS subscription request sent. [topic ARN: '{}', endpoint: '{}']", topicArn, subscriptionEndpoint);
     }
-
-    protected AmazonSNSClient createSnsClient(AwsCredential awsCredential, Regions region) {
-        BasicSessionCredentials basicSessionCredentials = credentialsProvider
-                .retrieveSessionCredentials(CrossAccountCredentialsProvider.DEFAULT_SESSION_CREDENTIALS_DURATION, "provision-ambari", awsCredential);
-        AmazonSNSClient amazonSNSClient = new AmazonSNSClient(basicSessionCredentials);
-        amazonSNSClient.setRegion(Region.getRegion(region));
-        return amazonSNSClient;
-    }
-
 }

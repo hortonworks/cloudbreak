@@ -50,8 +50,8 @@ public class UserInitializer implements InitializingBean {
             awsTemplate.setName("Aws development environment");
             awsTemplate.setDescription("description sample");
             awsTemplate.setRegion(Regions.EU_WEST_1);
-            awsTemplate.setAmiId("ami-f39f5684");
-            awsTemplate.setInstanceType(InstanceType.M1Small);
+            awsTemplate.setAmiId("ami-25dc0852");
+            awsTemplate.setInstanceType(InstanceType.T2Small);
             awsTemplate.setSshLocation("0.0.0.0/0");
             awsTemplate.setUser(user2);
 

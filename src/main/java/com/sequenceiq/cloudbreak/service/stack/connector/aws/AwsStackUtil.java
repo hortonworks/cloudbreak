@@ -12,6 +12,7 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.ec2.AmazonEC2Client;
+import com.amazonaws.services.sns.AmazonSNSClient;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.service.credential.aws.CrossAccountCredentialsProvider;
 
@@ -48,6 +49,15 @@ public class AwsStackUtil {
         amazonAutoScalingClient.setRegion(Region.getRegion(regions));
         LOGGER.info("Amazon Autoscaling client successfully created.");
         return amazonAutoScalingClient;
+    }
+
+    public AmazonSNSClient createSnsClient(Regions region, AwsCredential credential) {
+        BasicSessionCredentials basicSessionCredentials = credentialsProvider
+                .retrieveSessionCredentials(CrossAccountCredentialsProvider.DEFAULT_SESSION_CREDENTIALS_DURATION, "provision-ambari", credential);
+        AmazonSNSClient amazonSNSClient = new AmazonSNSClient(basicSessionCredentials);
+        amazonSNSClient.setRegion(Region.getRegion(region));
+        LOGGER.info("Amazon SNS client successfully created.");
+        return amazonSNSClient;
     }
 
     public String encode(String userData) {
