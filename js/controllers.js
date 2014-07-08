@@ -15,6 +15,35 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
         delete $http.defaults.headers.common['X-Requested-With'];
         $http.defaults.headers.common['Content-Type']= 'application/json';
 
+        var confirmSignUpToken = ($location.search()['confirmSignUpToken']);
+        if (confirmSignUpToken != null) {
+            $http.get('connection.properties').then(function (response) {
+                            $rootScope.apiUrl = response.data.backend_url;
+                            $http({
+                              url: $rootScope.apiUrl + '/users/confirm/' + confirmSignUpToken,
+                              method: "GET",
+                              headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+                              }).success(function(responseData){
+                                 if (responseData && responseData.length != 0) {
+                                    localStorage.signedIn = true;
+                                    $rootScope.signedIn = true;
+                                    localStorage.activeUser = responseData;
+                                    $rootScope.activeUser = localStorage.activeUser;
+                                 } else {
+                                    alert("Sign up confirmation is failed.")
+                                 }
+                              }).error(function (data, status, headers, config) {
+                                  alert("Sign up confirmation is failed.")
+                              });
+                        });
+        }
+
+        var resetToken = ($location.search()['resetToken']);
+        if (resetToken != null) {
+           $rootScope.resetToken = resetToken;
+           $jq('.carousel').carousel(5);
+        }
+
         if($scope.credentials === null || $scope.credentials === undefined ) {
             $scope.credentials = [];
         }
@@ -56,6 +85,25 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             $route.reload();
         }
 
+        $scope.signUp = function() {
+            if (signUpPasswField.value == signUpPassw2Field.value) {
+            $http({
+                method: 'POST',
+                dataType: 'json',
+                url:  $rootScope.apiUrl + "/users",
+                data: {
+                    email: signUpEmailField.value,
+                    firstName: signUpFirstNameField.value,
+                    lastName: signUpLastNameField.value,
+                    password: signUpPasswField.value,
+                    company: signUpCompanyField.value
+                }
+            });
+            } else {
+                alert("Passwords do not match.")
+            }
+        }
+
         $scope.signIn = function() {
                 $http({
                     method: 'GET',
@@ -84,6 +132,52 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             localStorage.signedIn = false;
             localStorage.removeItem('password64');
             localStorage.removeItem('activeUser');
+        }
+
+        $scope.forgotPassword = function() {
+            $http.get('connection.properties').then(function (response) {
+                $rootScope.apiUrl = response.data.backend_url;
+                    $http({
+                      method: 'POST',
+                      url: $rootScope.apiUrl + '/users/reset',
+                      params: { email: emailFieldLogin.value } ,
+                      headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+                     }).success(function (responseData) {
+                        if (responseData && responseData.length != 0) {
+                            $jq('.carousel').carousel(4);
+                        } else {
+                            alert("Internal server error");
+                        }
+                     }).error(function (data, status, headers, config){
+                        alert("Internal server error");
+                     });
+                });
+        }
+
+        $scope.resetPassword = function() {
+            if (resetPasswField.value == resetPassw2Field.value){
+            $http.get('connection.properties').then(function (response) {
+                 $rootScope.apiUrl = response.data.backend_url;
+                 $http({
+                      method: 'POST',
+                      url: $rootScope.apiUrl + '/users/reset/'+ $rootScope.resetToken,
+                      params: { password: Base64.encode(resetPasswField.value) },
+                      headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+                 }).success(function(responseData){
+                    if (responseData && responseData.length != 0 && responseData == $rootScope.resetToken){
+                        $jq('.carousel').carousel(1);
+                    } else {
+                        alert("Password change failed.")
+                    }
+                 }).error(function (data, status, headers, config){
+                    alert("Internal server error.");
+                 });
+
+            });
+            } else {
+                alert("Passwords do not match.")
+            }
+
         }
 
         $scope.getLedStyle = function(status) {
