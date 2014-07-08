@@ -32,3 +32,20 @@ Once you have logged in Cloudbreak you will have to link your AWS account with t
 Once this is configured, Cloudbreak is ready to launch Hadoop clusters on your behalf. The only thing Cloudbreak requires is the `Role ARN` (Role for Cross-Account access).
 
 
+###Configuring the Microsoft Azure account
+
+Once you have logged in Cloudbreak you will have to link your Azure account with the Cloudbreak one. Cloudbreak asks for your Azure `Subscription Id`, and will generate a `JKS` file and a `certificate` for you with your configured `passphrase`.
+The JKS file and certificate (uploaded) will be used to encrypt the communication between Cloudbreak and Azure in both directions. 
+Additionally when you are creating Templates you can specify a `password` or an `SSH public key` in order for you to be able to login in the launched instances. As you can see the communication is bith directions is secure, and we will not be able to login into your instances.
+
+In order to create a Cloudbreak account associated with your Azure account you will need to do the following steps.
+
+1. Log into Azure management console with the user account you'd like to use with Cloudbreak
+2. On Azure go to Settings and Subscriptions tab - Cloudbreak will need your `Subscription Id` to associate accounts
+3. On Cloudbreak API or UI you will have to add a password - this will be used as the `passphrase` for the JKS file and certificate we generate.
+4. You should download the generated `certification`
+5. On Azure go to Settings and `Management Certificates` and upload the `cert` file
+
+You are done - from now on Cloudbreak can launch Azure instances on your behalf.
+
+_Note: Clodbreak does not store any login details into these instances - when you are creating Templates you can specify a `password` or `SSH Public key` which you can used to login into the launched instances._
