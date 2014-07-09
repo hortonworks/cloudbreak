@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.user;
 
 
 import com.google.common.annotations.VisibleForTesting;
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.UserStatus;
@@ -55,13 +56,17 @@ public class SimpleUserService implements UserService {
 
     @Override
     public Long registerUser(User user) {
-        String confToken = generateRegistrationId(user);
-        user.setConfToken(confToken);
-        User savedUser = userRepository.save(user);
-        LOGGER.info("User {} successfully saved", user);
-        MimeMessagePreparator msgPreparator = prepareMessage(user, "templates/confirmation-email.ftl", "#?confirmSignUpToken=");
-        sendConfirmationEmail(msgPreparator);
-        return savedUser.getId();
+        if (userRepository.findByEmail(user.getEmail()) == null) {
+            String confToken = generateRegistrationId(user);
+            user.setConfToken(confToken);
+            User savedUser = userRepository.save(user);
+            LOGGER.info("User {} successfully saved", user);
+            MimeMessagePreparator msgPreparator = prepareMessage(user, "templates/confirmation-email.ftl", "#?confirmSignUpToken=");
+            sendConfirmationEmail(msgPreparator);
+            return savedUser.getId();
+        } else {
+            throw new BadRequestException("User already exists.");
+        }
     }
 
     @Override
@@ -74,7 +79,7 @@ public class SimpleUserService implements UserService {
             return user.getEmail();
         } else {
             LOGGER.warn("There's no user registration pending for confToken: {}", confToken);
-            return null;
+            throw new BadRequestException("There's no user registration pending for confToken: " + confToken);
         }
     }
 
@@ -92,7 +97,7 @@ public class SimpleUserService implements UserService {
             return email;
         } else {
             LOGGER.warn("There's no user for email: {} ", email);
-            return null;
+            throw new BadRequestException("There is no user for " + email);
         }
     }
 
@@ -108,7 +113,7 @@ public class SimpleUserService implements UserService {
             return confToken;
         } else {
             LOGGER.warn("There's no user for token: {}", confToken);
-            return null;
+            throw new BadRequestException("There's no user for token: " + confToken);
         }
     }
 
@@ -127,7 +132,7 @@ public class SimpleUserService implements UserService {
             text = FreeMarkerTemplateUtils.processTemplateIntoString(freemarkerConfiguration.getTemplate(template, "UTF-8"), model);
         } catch (Exception e) {
             LOGGER.error("Confirmation email assembling failed. Exception: {}", e);
-            throw new InternalServerException("Failed to assemble confirmation email message", e);
+            throw new BadRequestException("Failed to assemble confirmation email message", e);
         }
         return text;
     }
