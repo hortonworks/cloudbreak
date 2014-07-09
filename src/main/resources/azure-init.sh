@@ -40,22 +40,22 @@ brctl addbr bridge0  && ifconfig bridge0 ${DOCKER_SUBNET}.1  netmask 255.255.255
 
 # route to others
 # read from stdin <launch-idx> <priv-ip>
-create_routes() {
-  while read SUBNET IP; do
-    route add -net ${SUBNET}.0  netmask 255.255.255.0  gw $IP
-  done
-}
+#create_routes() {
+#  while read SUBNET IP; do
+#    route add -net ${SUBNET}.0  netmask 255.255.255.0  gw $IP
+#  done
+#}
 
-route delete -net 172.17.0.0/16
+#route delete -net 172.17.0.0/16
 
 # selects every other instance's docker subnet and private ip and calls create_routes on them
-echo $METADATA_RESULT | jq "$OTHER_INSTANCES_SELECTOR" | jq '.[] | (.dockerSubnet + " " + .privateIp)' | sed s/\"//g | create_routes
+#echo $METADATA_RESULT | jq "$OTHER_INSTANCES_SELECTOR" | jq '.[] | (.dockerSubnet + " " + .privateIp)' | sed s/\"//g | create_routes
 
 netstat -nr
 
 # set bridge0 in docker opts
 sh -c "cat > /etc/default/docker" <<"EOF"
-DOCKER_OPTS="-b bridge0 -H unix:// -H tcp://0.0.0.0:4243"
+DOCKER_OPTS="-b bridge0 -H unix:// -H tcp://0.0.0.0:2375"
 EOF
 
 service docker restart
@@ -83,5 +83,5 @@ EOF
 $CMD
 
 # Update POSTROUTING rule created by Docker to support interhost package routing
-iptables -t nat -D POSTROUTING 1
-iptables -t nat -A POSTROUTING -s ${DOCKER_SUBNET}.0/24 ! -d 172.17.0.0/16 -j MASQUERADE
+#iptables -t nat -D POSTROUTING 1
+#iptables -t nat -A POSTROUTING -s ${DOCKER_SUBNET}.0/24 ! -d 172.17.0.0/16 -j MASQUERADE
