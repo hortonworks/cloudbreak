@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
+import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
@@ -22,6 +23,9 @@ public class BlueprintService {
 
     @Autowired
     private BlueprintRepository blueprintRepository;
+
+    @Autowired
+    private ClusterRepository clusterRepository;
 
     @Autowired
     private BlueprintConverter blueprintConverter;
@@ -55,8 +59,18 @@ public class BlueprintService {
         if (blueprint == null) {
             throw new NotFoundException(String.format("Blueprint '%s' not found.", id));
         }
-        blueprintRepository.delete(blueprint);
-        websocketService.sendToTopicUser(blueprint.getUser().getEmail(), WebsocketEndPoint.BLUEPRINT,
-                new StatusMessage(blueprint.getId(), blueprint.getName(), Status.DELETE_COMPLETED.name()));
+        try {
+            blueprintRepository.delete(blueprint);
+            websocketService.sendToTopicUser(blueprint.getUser().getEmail(), WebsocketEndPoint.BLUEPRINT,
+                    new StatusMessage(blueprint.getId(), blueprint.getName(), Status.DELETE_COMPLETED.name()));
+        } catch (Exception ex) {
+            if (clusterRepository.findAllClusterByBlueprint(blueprint.getId()).isEmpty()) {
+                throw ex;
+            } else {
+                websocketService.sendToTopicUser(blueprint.getUser().getEmail(), WebsocketEndPoint.BLUEPRINT,
+                        new StatusMessage(blueprint.getId(), blueprint.getName(), Status.DELETE_FAILED.name(),
+                                "Please delete all dependency of this blueprint before you try to delete it"));
+            }
+        }
     }
 }
