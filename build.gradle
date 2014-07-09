@@ -302,12 +302,20 @@ uploadArchives {
 
 repositories {
     mavenCentral()
+    maven { url "http://maven.sequenceiq.com/snapshots" }
+    maven { url "http://seq-repo.s3-website-eu-west-1.amazonaws.com/public" }
+    maven { url "http://seq-repo.s3-website-eu-west-1.amazonaws.com/releases" }
+    maven { url "http://seq-repo.s3-website-eu-west-1.amazonaws.com/snapshots" }
 }
 
 dependencies {
     compile("org.springframework.boot:spring-boot-starter-web:1.0.2.RELEASE")
     compile("org.springframework.boot:spring-boot-starter-security:1.0.2.RELEASE")
     compile("org.springframework.boot:spring-boot-starter-actuator:1.0.2.RELEASE")
+    compile("org.apache.hadoop:hadoop-yarn-client:${hadoopVersion}")
+    compile("org.apache.hadoop:hadoop-yarn-server-resourcemanager:${hadoopVersion}")
+    compile("org.apache.hadoop:hadoop-common:${hadoopVersion}")
+    compile("com.sequenceiq.ambari:ambari-client:1.6.0-SNAPSHOT")
     testCompile("junit:junit:4.11")
 }
 
