@@ -6,5 +6,10 @@ public interface UserService {
 
     Long registerUser(User user);
 
-    void confirmRegistration(String confToken);
+    String confirmRegistration(String confToken);
+
+    String disableUser(String email);
+
+    String resetPassword(String confToken, String password);
+
 }
