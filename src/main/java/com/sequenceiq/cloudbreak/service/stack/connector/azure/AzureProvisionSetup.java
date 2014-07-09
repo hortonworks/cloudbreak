@@ -24,10 +24,10 @@ import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterCreationFailure;
 import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
+import com.sequenceiq.cloudbreak.service.stack.event.StackCreationFailure;
 
 import groovyx.net.http.HttpResponseDecorator;
 import groovyx.net.http.HttpResponseException;
@@ -46,7 +46,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
     private static final String OS = "os";
     private static final String MEDIALINK = "mediaLink";
 
-    @Value("${azure.image.v1}")
+    @Value("${azure.image.uri}")
     private String baseImageUri;
 
     @Autowired
@@ -68,7 +68,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
             try {
                 azureClient.getAffinityGroup(affinityGroupName);
             } catch (Exception ex) {
-                if (((HttpResponseException) ex).getStatusCode() == NOT_FOUND) {
+                if (ex instanceof  HttpResponseException && ((HttpResponseException) ex).getStatusCode() == NOT_FOUND) {
                     Map<String, String> params = new HashMap<>();
                     params.put(AzureStackUtil.NAME, affinityGroupName);
                     params.put(DESCRIPTION, VM_COMMON_NAME);
@@ -76,7 +76,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
                     azureClient.createAffinityGroup(params);
                 } else {
                     LOGGER.info("There was a problem with the creation of the affinity group.");
-                    reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(new ClusterCreationFailure(stack.getId(),
+                    reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(new StackCreationFailure(stack.getId(),
                             "The copy of the os image was not success")));
                 }
             }
@@ -84,7 +84,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
             try {
                 azureClient.getStorageAccount(affinityGroupName);
             } catch (Exception ex) {
-                if (((HttpResponseException) ex).getStatusCode() == NOT_FOUND) {
+                if (ex instanceof  HttpResponseException && ((HttpResponseException) ex).getStatusCode() == NOT_FOUND) {
                     Map<String, String> params = new HashMap<>();
                     params.put(AzureStackUtil.NAME, affinityGroupName);
                     params.put(DESCRIPTION, VM_COMMON_NAME);
@@ -93,10 +93,9 @@ public class AzureProvisionSetup implements ProvisionSetup {
                     azureClient.waitUntilComplete((String) azureClient.getRequestId(response));
                 } else {
                     LOGGER.info("There was a problem with the creation of the storage.");
-                    reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(new ClusterCreationFailure(stack.getId(),
+                    reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(new StackCreationFailure(stack.getId(),
                             "The copy of the os image was not success")));
                 }
-
             }
             try {
                 String targetBlobContainerUri = "http://" + affinityGroupName + ".blob.core.windows.net/vm-images";
@@ -117,7 +116,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
                 params.put(MEDIALINK, targetImageUri);
                 azureClient.addOsImage(params);
             } catch (IOException e) {
-                reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(new ClusterCreationFailure(stack.getId(),
+                reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(new StackCreationFailure(stack.getId(),
                         "There was a problem with the Json node parsing when tried to create the specific image.")));
             }
         }
