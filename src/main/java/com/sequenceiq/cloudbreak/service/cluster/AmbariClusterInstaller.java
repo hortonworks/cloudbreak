@@ -4,7 +4,6 @@ import groovyx.net.http.HttpResponseException;
 
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -81,19 +80,14 @@ public class AmbariClusterInstaller {
     }
 
     private Map<String, List<String>> recommend(Stack stack, AmbariClient ambariClient, String blueprintName) throws InvalidHostGroupHostAssociation {
-        Map<String, List<String>> stringListMap = new HashMap<>();
         int nodeCount = 0;
         int pollingAttempt = 0;
+        LOGGER.info("Waiting for hosts to connect. [Stack: {}, Ambari server address: {}]", stack.getId(), stack.getAmbariIp());
         while (nodeCount != stack.getNodeCount() && !(pollingAttempt >= MAX_RECOMMEND_POLLING_ATTEMPTS)) {
             nodeCount = 0;
-            LOGGER.info("Asking Ambari client to recommend automatic host-hostGroup mapping [Stack: {}, Ambari server address: {}]", stack.getId(),
-                    stack.getAmbariIp());
-            stringListMap = ambariClient.recommendAssignments(blueprintName);
-            for (Map.Entry<String, List<String>> s : stringListMap.entrySet()) {
-                nodeCount += s.getValue().size();
-            }
-            LOGGER.info("Ambari client found {} hosts while trying to recommend assignments [Stack: {}, Ambari server address: {}]",
-                    nodeCount, stack.getId(), stack.getAmbariIp());
+            Map<String, String> hostNames = ambariClient.getHostNames();
+            nodeCount = hostNames.size();
+            LOGGER.info("Ambari client found {} hosts. [Stack: {}, Ambari server address: {}]", nodeCount, stack.getId(), stack.getAmbariIp());
             sleep(POLLING_INTERVAL);
             pollingAttempt++;
         }
@@ -102,7 +96,8 @@ public class AmbariClusterInstaller {
                     MAX_RECOMMEND_POLLING_ATTEMPTS * POLLING_INTERVAL / MS_PER_SEC, nodeCount, stack.getNodeCount());
             throw new AmbariHostsUnavailableException(errorMessage);
         }
-        return stringListMap;
+        LOGGER.info("Asking Ambari client to recommend host-hostGroup mapping [Stack: {}, Ambari server address: {}]", stack.getId(), stack.getAmbariIp());
+        return ambariClient.recommendAssignments(blueprintName);
     }
 
     private void addBlueprint(String ambariIp, Blueprint blueprint) {
