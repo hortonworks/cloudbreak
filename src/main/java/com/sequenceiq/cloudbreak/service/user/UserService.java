@@ -8,7 +8,7 @@ public interface UserService {
 
     String confirmRegistration(String confToken);
 
-    String disableUser(String email);
+    String generatePasswordResetToken(String email);
 
     String resetPassword(String confToken, String password);
 
