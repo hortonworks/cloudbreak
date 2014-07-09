@@ -108,7 +108,11 @@ public class SnsTopicManager {
 
     private void subscribeToTopic(AmazonSNSClient amazonSNSClient, String topicArn) {
         String subscriptionEndpoint = hostAddress + "/sns";
-        amazonSNSClient.subscribe(topicArn, "http", subscriptionEndpoint);
+        if (subscriptionEndpoint.startsWith("https")) {
+            amazonSNSClient.subscribe(topicArn, "https", subscriptionEndpoint);
+        } else {
+            amazonSNSClient.subscribe(topicArn, "http", subscriptionEndpoint);
+        }
         LOGGER.info("Amazon SNS subscription request sent. [topic ARN: '{}', endpoint: '{}']", topicArn, subscriptionEndpoint);
     }
 }
