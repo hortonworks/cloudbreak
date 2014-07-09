@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import org.ajoberstar.gradle.git.release.opinion.Strategies
 import org.ajoberstar.gradle.git.release.opinion.Strategies.BuildMetadata
 import org.ajoberstar.gradle.git.release.opinion.Strategies.PreRelease
@@ -248,5 +249,104 @@ subprojects {
         mavenCentral()
         maven { url "http://maven.sequenceiq.com/releases" }
         mavenLocal()
+=======
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.0.2.RELEASE")
+    }
+}
+
+group = 'com.sequenceiq'
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'checkstyle'
+apply plugin: 'spring-boot'
+apply plugin: 'maven'
+apply plugin: 'groovy'
+apply plugin: 'jacoco'
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+def env = project.hasProperty('env') ? project.getProperty('env') : 'local'
+logger.quiet "Loading configuration for environment '$env'"
+
+repositories {
+    mavenCentral()
+}
+
+jar { baseName = 'periscope' }
+
+configurations {
+    deployerJars
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            configuration = configurations.deployerJars
+            repository(url: "s3://seq-repo/releases") {
+                authentication(userName: "$System.env.aws_access_key_id", passphrase: "$System.env.aws_secret_access_key")
+            }
+            snapshotRepository(url: "s3://seq-repo/snapshots") {
+                authentication(userName: "$System.env.aws_access_key_id", passphrase: "$System.env.aws_secret_access_key")
+            }
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile("org.springframework.boot:spring-boot-starter-web:1.0.2.RELEASE")
+    compile("org.springframework.boot:spring-boot-starter-security:1.0.2.RELEASE")
+    compile("org.springframework.boot:spring-boot-starter-actuator:1.0.2.RELEASE")
+    testCompile("junit:junit:4.11")
+}
+
+springBoot { mainClass = "com.sequenceiq.periscope.Periscope" }
+
+checkstyleMain {
+    ignoreFailures = false
+    configProperties = ['config_loc': "$projectDir/config/checkstyle"]
+}
+
+checkstyleTest {
+    ignoreFailures = false
+    configProperties = ['config_loc': "$projectDir/config/checkstyle"]
+}
+
+task wrapper(type: Wrapper) { gradleVersion = "2.0" }
+
+test {
+    include 'com/sequenceiq/**'
+    testLogging.showStandardStreams = true
+    ignoreFailures = false
+    beforeTest { descriptor ->
+        logger.lifecycle("Running test: " + descriptor)
+    }
+    onOutput { descriptor, event ->
+        logger.lifecycle("Test: " + descriptor + " produced standard out/err: " + event.message)
+    }
+}
+
+jacoco {
+    toolVersion = "0.6.2.201302030002"
+    reportsDir = file("$buildDir/reports/jacoco")
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled false
+        csv.enabled false
+        html.destination "${buildDir}/jacocoHtml"
+>>>>>>> 413c239... PERI-3 initial spring boot app
     }
 }

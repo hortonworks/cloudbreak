@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 
 <!DOCTYPE suppressions PUBLIC
+<<<<<<< HEAD
         "-//Puppy Crawl//DTD Suppressions 1.1//EN"
         "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
 
@@ -32,4 +33,32 @@
     <suppress id="printTrace" files="CloudbreakShell.java|ShellConfiguration.java" />
     <suppress checks="CyclomaticComplexity|ParameterNumber|NPathComplexity" files=".*Commands.java|ResponseTransformer.java" />
 
+=======
+    "-//Puppy Crawl//DTD Suppressions 1.1//EN"
+    "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
+
+<suppressions>
+    <!-- suppressing checks in tests -->
+    <suppress checks="Javadoc.*" files="test|Dummy|Mock" />
+    <suppress checks="ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="test|Dummy|Mock" />
+    <suppress checks="MagicNumberCheck" files="test|Dummy|Mock|simulator" />
+    <suppress id="IllegalTypeImpl" files="test" />
+    <suppress checks="IllegalCatch" files="test" />
+    <suppress checks="AbstractClassName" files="test" />
+    <suppress checks="EmptyBlock" files="test" />
+    <suppress checks="HideUtilityClassConstructor" files="Periscope.java" />
+    <suppress id="string-instantiation" files="AmbariConfigurationService.java"/>
+    <!-- -->
+
+    <!-- suppress everything in generated code -->
+    <suppress checks=".*" files="generated" />
+    <!-- -->
+
+    <!-- suppress everything in package level JavaDoc files -->
+    <suppress checks=".*" files="package-info.java" />
+    
+    <!-- mahout provided API forces this (declares the Cector interface abstract)-->
+    <suppress files="VectorType.java" checks="IllegalType"/>
+    
+>>>>>>> 413c239... PERI-3 initial spring boot app
 </suppressions>
