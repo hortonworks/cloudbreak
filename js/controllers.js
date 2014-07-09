@@ -99,7 +99,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     company: signUpCompanyField.value
                 }
             }).success(function(responseData){
-                $('.carousel').carousel(3);
+                $jq('.carousel').carousel(3);
             })
             .error(function (data, status, headers, config){
                 if (status == 400) {
@@ -148,7 +148,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 $rootScope.apiUrl = response.data.backend_url;
                     $http({
                       method: 'POST',
-                      url: $rootScope.apiUrl + '/users/reset',
+                      url: $rootScope.apiUrl + '/password/reset',
                       params: { email: emailFieldLogin.value } ,
                       headers: {'Content-Type': 'application/x-www-form-urlencoded'}
                      }).success(function (responseData) {
@@ -169,12 +169,13 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                  $rootScope.apiUrl = response.data.backend_url;
                  $http({
                       method: 'POST',
-                      url: $rootScope.apiUrl + '/users/reset/'+ $rootScope.resetToken,
+                      url: $rootScope.apiUrl + '/password/reset/'+ $rootScope.resetToken,
                       params: { password: Base64.encode(resetPasswField.value) },
                       headers: {'Content-Type': 'application/x-www-form-urlencoded'}
                  }).success(function(responseData){
                     if (responseData && responseData.length != 0 && responseData == $rootScope.resetToken){
                         $jq('.carousel').carousel(1);
+                        $rootScope.resetToken = null;
                     } else {
                         alert("Password change failed.")
                     }
