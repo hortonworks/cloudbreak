@@ -18,6 +18,7 @@ import reactor.event.Event;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.ambari.client.InvalidHostGroupHostAssociation;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
@@ -70,7 +71,7 @@ public class AmbariClusterInstaller {
             } else if (installProgress.compareTo(FAILED) == 0) {
                 throw new ClusterInstallFailedException("Ambari failed to install services.");
             }
-        } catch (AmbariHostsUnavailableException | ClusterInstallFailedException e) {
+        } catch (AmbariHostsUnavailableException | ClusterInstallFailedException | InvalidHostGroupHostAssociation e) {
             LOGGER.error(e.getMessage(), e);
             clusterCreateFailed(cluster, e.getMessage());
         } catch (Exception e) {
@@ -79,7 +80,7 @@ public class AmbariClusterInstaller {
         }
     }
 
-    private Map<String, List<String>> recommend(Stack stack, AmbariClient ambariClient, String blueprintName) {
+    private Map<String, List<String>> recommend(Stack stack, AmbariClient ambariClient, String blueprintName) throws InvalidHostGroupHostAssociation {
         Map<String, List<String>> stringListMap = new HashMap<>();
         int nodeCount = 0;
         int pollingAttempt = 0;
