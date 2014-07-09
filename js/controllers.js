@@ -98,6 +98,15 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     password: signUpPasswField.value,
                     company: signUpCompanyField.value
                 }
+            }).success(function(responseData){
+                $('.carousel').carousel(3);
+            })
+            .error(function (data, status, headers, config){
+                if (status == 400) {
+                    alert("User already exists.")
+                } else {
+                    alert("Internal server error.")
+                }
             });
             } else {
                 alert("Passwords do not match.")
