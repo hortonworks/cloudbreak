@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
 
 
 import javax.validation.Valid;
@@ -31,7 +30,6 @@ public class UserRegistrationController {
     @Autowired
     private UserConverter userConverter;
 
-
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<IdJson> registerUser(@RequestBody @Valid UserJson userJson) {
@@ -46,19 +44,4 @@ public class UserRegistrationController {
         LOGGER.debug("Registration confirmed (token: {}) for {}", new Object[]{confToken, activeUser});
         return new ResponseEntity<>(activeUser, HttpStatus.OK);
     }
-
-    @RequestMapping(value = "/reset", method = RequestMethod.POST)
-    public ResponseEntity<String> forgotPassword(@RequestParam String email) {
-        LOGGER.debug("Reset password for: {} (email)", email);
-        String user = userService.disableUser(email);
-        return new ResponseEntity<>(user, HttpStatus.OK);
-    }
-
-    @RequestMapping(value = "/reset/{confToken}", method = RequestMethod.POST)
-    public ResponseEntity<String> resetPassword(@PathVariable String confToken, @RequestParam String password) {
-        LOGGER.debug("Reset password token: {}", confToken);
-        String rToken = userService.resetPassword(confToken, password);
-        return new ResponseEntity<>(rToken, HttpStatus.OK);
-    }
-
 }

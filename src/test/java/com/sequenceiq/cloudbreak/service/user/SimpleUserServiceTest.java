@@ -2,9 +2,7 @@ package com.sequenceiq.cloudbreak.service.user;
 
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.User;
-import com.sequenceiq.cloudbreak.domain.UserStatus;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -64,7 +62,6 @@ public class SimpleUserServiceTest {
         underTest.disableUser(DUMMY_EMAIL);
         // THEN
         verify(underTest, times(1)).sendConfirmationEmail(mimeMessagePreparator);
-        Assert.assertEquals(user.getStatus(), UserStatus.DISABLED);
 
     }
 
@@ -79,7 +76,6 @@ public class SimpleUserServiceTest {
     @Test
     public void resetPassword() {
         // GIVEN
-        user.setStatus(UserStatus.DISABLED);
         given(userRepository.findUserByConfToken(DUMMY_TOKEN)).willReturn(user);
         given(passwordEncoder.encode(anyString())).willReturn(DUMMY_NEW_PASSWORD);
         given(userRepository.save(user)).willReturn(user);
@@ -91,9 +87,9 @@ public class SimpleUserServiceTest {
     }
 
     @Test(expected = NotFoundException.class)
-    public void resetPasswordWhenUserStatusIsNotDisabledShouldNotCreateNewPassword() {
+    public void resetPasswordWhenUserNotFound() {
         // GIVEN
-        given(userRepository.findUserByConfToken(DUMMY_TOKEN)).willReturn(user);
+        given(userRepository.findUserByConfToken(DUMMY_TOKEN)).willReturn(null);
         // WHEN
         underTest.resetPassword(DUMMY_TOKEN, Base64Coder.encodeString(DUMMY_NEW_PASSWORD));
     }
@@ -103,7 +99,6 @@ public class SimpleUserServiceTest {
         user.setEmail(DUMMY_EMAIL);
         user.setPassword(DUMMY_PASSWORD);
         user.setConfToken(DUMMY_TOKEN);
-        user.setStatus(UserStatus.ACTIVE);
         return user;
     }
 }

@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.user;
 
-
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
@@ -87,9 +86,8 @@ public class SimpleUserService implements UserService {
     public String disableUser(String email) {
         User user = userRepository.findByEmail(email);
         if (user != null) {
-            user.setStatus(UserStatus.DISABLED);
             user.setPassword(UUID.randomUUID().toString());
-            String confToken = generateRegistrationId(user);
+            String confToken = DigestUtils.md5DigestAsHex(UUID.randomUUID().toString().getBytes());
             user.setConfToken(confToken);
             userRepository.save(user);
             MimeMessagePreparator msgPreparator = prepareMessage(user, "templates/reset-email.ftl", "#?resetToken=");
@@ -105,7 +103,7 @@ public class SimpleUserService implements UserService {
     public String resetPassword(String confToken, String password) {
         User user = userRepository.findUserByConfToken(confToken);
         String decodedPassword = Base64Coder.decodeString(password);
-        if (user != null && UserStatus.DISABLED.equals(user.getStatus())) {
+        if (user != null) {
             LOGGER.info("new password: " + decodedPassword);
             user.setPassword(passwordEncoder.encode(decodedPassword));
             user.setConfToken(null);
