@@ -103,7 +103,7 @@ public class AzureProvisioner implements Provisioner {
                 String vmName = getVmName(name, i);
                 createCloudService(azureClient, azureTemplate, name, vmName, commonName);
                 createServiceCertificate(azureClient, azureTemplate, vmName, emailAsFolder);
-                createVirtualMachine(azureClient, azureTemplate, name, vmName, commonName, emailAsFolder, userData);
+                createVirtualMachine(azureClient, azureTemplate, credential, name, vmName, commonName, userData);
             } catch (FileNotFoundException e) {
                 LOGGER.info("Problem with the ssh file because not found: " + e.getMessage());
                 reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(new StackCreationFailure(stack.getId(),
@@ -135,8 +135,8 @@ public class AzureProvisioner implements Provisioner {
         return CloudPlatform.AZURE;
     }
 
-    private void createVirtualMachine(AzureClient azureClient, AzureTemplate azureTemplate,
-            String name, String vmName, String commonName, String emailAsFolder, String userData)
+    private void createVirtualMachine(AzureClient azureClient, AzureTemplate azureTemplate, Credential credential,
+            String name, String vmName, String commonName, String userData)
             throws FileNotFoundException, CertificateException, NoSuchAlgorithmException {
         byte[] encoded = Base64.encodeBase64(vmName.getBytes());
         String label = new String(encoded);
@@ -154,7 +154,8 @@ public class AzureProvisioner implements Provisioner {
         props.put(NAME, vmName);
         props.put(DEPLOYMENTSLOT, PRODUCTION);
         props.put(LABEL, label);
-        props.put(IMAGENAME, azureTemplate.getImageName());
+        props.put(IMAGENAME,
+                azureTemplate.getImageName().equals(AzureStackUtil.IMAGE_NAME) ? AzureStackUtil.getOsImageName(credential) : azureTemplate.getImageName());
         props.put(IMAGESTOREURI,
                 String.format("http://%s.blob.core.windows.net/vhd-store/%s.vhd", commonName, vmName)
                 );
@@ -163,7 +164,7 @@ public class AzureProvisioner implements Provisioner {
         if (azureTemplate.getPassword() != null && !azureTemplate.getPassword().isEmpty()) {
             props.put(PASSWORD, azureTemplate.getPassword());
         } else {
-            X509Certificate sshCert = new X509Certificate(AzureCertificateService.getCerFile(emailAsFolder, azureTemplate.getId()));
+            X509Certificate sshCert = new X509Certificate(AzureCertificateService.getCerFile(azureTemplate.getOwner().emailAsFolder(), azureTemplate.getId()));
             props.put(SSHPUBLICKEYFINGERPRINT, sshCert.getSha1Fingerprint().toUpperCase());
             props.put(SSHPUBLICKEYPATH, String.format("/home/%s/.ssh/authorized_keys", DEFAULT_USER_NAME));
         }
