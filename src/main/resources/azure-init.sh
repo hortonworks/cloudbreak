@@ -9,7 +9,7 @@ curl -o /usr/bin/jq http://stedolan.github.io/jq/download/linux64/jq
 chmod +x /usr/bin/jq
 
 # instance id from ec2 metadata
-INSTANCE_ID=$(sudo cat waagent/ovf-env.xml |grep -oPm1 "(?<=<HostName>)[^<]+")
+INSTANCE_ID=$(sudo cat /var/lib/waagent/ovf-env.xml |grep -oPm1 "(?<=<HostName>)[^<]+")
 
 # jq expression that selects the json entry of the current instance from the array returned by the metadata service
 INSTANCE_SELECTOR='. | map(select(.instanceId == "'$INSTANCE_ID'"))'
