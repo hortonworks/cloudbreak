@@ -65,7 +65,7 @@ public class AwsConnector implements CloudPlatformConnector {
         }
         AmazonEC2Client ec2Client = awsStackUtil.createEC2Client(awsTemplate.getRegion(), awsCredential);
         DescribeInstancesRequest instancesRequest = new DescribeInstancesRequest()
-                .withFilters(new Filter().withName("tag:" + INSTANCE_TAG_NAME).withValues(stack.getName()));
+                .withFilters(new Filter().withName("tag:" + INSTANCE_TAG_NAME).withValues(stack.getCfStackName()));
         instancesResult = ec2Client.describeInstances(instancesRequest);
         return new AwsStackDescription(stackResult, instancesResult);
     }
@@ -96,7 +96,7 @@ public class AwsConnector implements CloudPlatformConnector {
 
         AmazonEC2Client ec2Client = awsStackUtil.createEC2Client(awsInfra.getRegion(), awsCredential);
         DescribeInstancesRequest instancesRequest = new DescribeInstancesRequest()
-                .withFilters(new Filter().withName("tag:" + INSTANCE_TAG_NAME).withValues(stack.getName()));
+                .withFilters(new Filter().withName("tag:" + INSTANCE_TAG_NAME).withValues(stack.getCfStackName()));
         DescribeInstancesResult instancesResult = ec2Client.describeInstances(instancesRequest);
 
         return new DetailedAwsStackDescription(stackResult, resourcesResult, instancesResult);
