@@ -23,6 +23,7 @@ import org.springframework.util.DigestUtils;
 import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 
 import javax.mail.internet.MimeMessage;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -74,6 +75,7 @@ public class SimpleUserService implements UserService {
         if (null != user) {
             user.setConfToken(null);
             user.setStatus(UserStatus.ACTIVE);
+            user.setRegistrationDate(new Date());
             userRepository.save(user);
             return user.getEmail();
         } else {

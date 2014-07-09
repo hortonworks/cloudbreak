@@ -13,6 +13,7 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -64,6 +65,9 @@ public class User implements ProvisionEntity {
 
     private UserStatus status = UserStatus.PENDING;
 
+    private Date lastLogin;
+
+    private Date registrationDate;
 
     @OneToMany(mappedBy = "azureTemplateOwner", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<AzureTemplate> azureTemplates = new HashSet<>();
@@ -99,6 +103,8 @@ public class User implements ProvisionEntity {
         this.blueprints = user.blueprints;
         this.clusters = user.clusters;
         this.status = user.getStatus();
+        this.lastLogin = user.lastLogin;
+        this.registrationDate = user.registrationDate;
     }
 
     public String getPassword() {
@@ -226,4 +232,19 @@ public class User implements ProvisionEntity {
         return company;
     }
 
+    public Date getLastLogin() {
+        return lastLogin;
+    }
+
+    public void setLastLogin(Date lastLogin) {
+        this.lastLogin = lastLogin;
+    }
+
+    public Date getRegistrationDate() {
+        return registrationDate;
+    }
+
+    public void setRegistrationDate(Date registrationDate) {
+        this.registrationDate = registrationDate;
+    }
 }
