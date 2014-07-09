@@ -52,25 +52,25 @@ public class SimpleUserServiceTest {
     }
 
     @Test
-    public void testDisableUser() {
+    public void testGenerateResetPasswordToken() {
         // GIVEN
         given(userRepository.findByEmail(anyString())).willReturn(user);
         given(userRepository.save(user)).willReturn(user);
         doReturn(mimeMessagePreparator).when(underTest).prepareMessage(any(User.class), anyString(), anyString());
         doNothing().when(underTest).sendConfirmationEmail(mimeMessagePreparator);
         // WHEN
-        underTest.disableUser(DUMMY_EMAIL);
+        underTest.generatePasswordResetToken(DUMMY_EMAIL);
         // THEN
         verify(underTest, times(1)).sendConfirmationEmail(mimeMessagePreparator);
 
     }
 
     @Test(expected = NotFoundException.class)
-    public void testDisableUserWhenNoUserFoundForEmailShouldNotSendEmail() {
+    public void testGenerateResetPasswordTokenWhenNoUserFoundForEmailShouldNotSendEmail() {
         // GIVEN
         given(userRepository.findByEmail(anyString())).willReturn(null);
         // WHEN
-        underTest.disableUser(DUMMY_EMAIL);
+        underTest.generatePasswordResetToken(DUMMY_EMAIL);
     }
 
     @Test

@@ -23,7 +23,7 @@ public class PasswordResetController {
     @RequestMapping(value = "/reset", method = RequestMethod.POST)
     public ResponseEntity<String> forgotPassword(@RequestParam String email) {
         LOGGER.debug("Reset password for: {} (email)", email);
-        String user = userService.disableUser(email);
+        String user = userService.generatePasswordResetToken(email);
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 

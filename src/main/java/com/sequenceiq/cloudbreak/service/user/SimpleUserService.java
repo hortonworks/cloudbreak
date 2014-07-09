@@ -83,7 +83,7 @@ public class SimpleUserService implements UserService {
     }
 
     @Override
-    public String disableUser(String email) {
+    public String generatePasswordResetToken(String email) {
         User user = userRepository.findByEmail(email);
         if (user != null) {
             user.setPassword(UUID.randomUUID().toString());
@@ -104,7 +104,6 @@ public class SimpleUserService implements UserService {
         User user = userRepository.findUserByConfToken(confToken);
         String decodedPassword = Base64Coder.decodeString(password);
         if (user != null) {
-            LOGGER.info("new password: " + decodedPassword);
             user.setPassword(passwordEncoder.encode(decodedPassword));
             user.setConfToken(null);
             userRepository.save(user);
