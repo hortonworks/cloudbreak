@@ -36,7 +36,6 @@ public class AzureProvisionSetup implements ProvisionSetup {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureProvisionSetup.class);
     private static final ObjectMapper MAPPER = new ObjectMapper();
-    private static final String IMAGE_NAME = "ambari-docker-v1";
     private static final String DESCRIPTION = "description";
     private static final String AFFINITYGROUP = "affinityGroup";
     private static final String LOCATION = "location";
@@ -58,12 +57,12 @@ public class AzureProvisionSetup implements ProvisionSetup {
         AzureClient azureClient = new AzureClient(
                 ((AzureCredential) credential).getSubscriptionId(), file.getAbsolutePath(), ((AzureCredential) credential).getJks()
         );
-        if (!azureClient.isImageAvailable(IMAGE_NAME)) {
+        if (!azureClient.isImageAvailable(AzureStackUtil.getOsImageName(credential))) {
             String baseImageUri = "http://vmdepoteastus.blob.core.windows.net/linux-community-store/community-62091-a59dcdc1-d82d-4e76-9094-27b8c018a4a1-1.vhd";
-
+            String affinityGroupName = ((AzureCredential) credential).getName().replaceAll("\\s+", "");
             try {
                 Map<String, String> params = new HashMap<>();
-                params.put(AzureStackUtil.NAME, VM_COMMON_NAME);
+                params.put(AzureStackUtil.NAME, affinityGroupName);
                 params.put(DESCRIPTION, VM_COMMON_NAME);
                 params.put(LOCATION, "East US");
                 azureClient.createAffinityGroup(params);
@@ -73,9 +72,9 @@ public class AzureProvisionSetup implements ProvisionSetup {
             String storageName = String.format("%s%s", VM_COMMON_NAME, stack.getId());
             try {
                 Map<String, String> params = new HashMap<>();
-                params.put(AzureStackUtil.NAME, storageName);
+                params.put(AzureStackUtil.NAME, affinityGroupName);
                 params.put(DESCRIPTION, VM_COMMON_NAME);
-                params.put(AFFINITYGROUP, VM_COMMON_NAME);
+                params.put(AFFINITYGROUP, affinityGroupName);
                 HttpResponseDecorator response = (HttpResponseDecorator) azureClient.createStorageAccount(params);
 
                 azureClient.waitUntilComplete((String) azureClient.getRequestId(response));
@@ -83,10 +82,10 @@ public class AzureProvisionSetup implements ProvisionSetup {
                 LOGGER.info("There was a problem with the creation of the storage.");
             }
             try {
-                String targetBlobContainerUri = "http://" + storageName + ".blob.core.windows.net/vm-images";
+                String targetBlobContainerUri = "http://" + affinityGroupName + ".blob.core.windows.net/vm-images";
                 String targetImageUri = targetBlobContainerUri + '/' + storageName + ".vhd";
                 Map<String, String> params = new HashMap<>();
-                params.put(AzureStackUtil.NAME, storageName);
+                params.put(AzureStackUtil.NAME, affinityGroupName);
                 String keyJson = (String) azureClient.getStorageAccountKeys(params);
 
                 JsonNode actualObj = MAPPER.readValue(keyJson, JsonNode.class);
@@ -96,7 +95,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
                 AzureClientUtil.copyOsImage(storageAccountKey, baseImageUri, targetImageUri);
                 AzureClientUtil.imageCopyProgress(storageAccountKey, targetImageUri);
                 params = new HashMap<>();
-                params.put(AzureStackUtil.NAME, IMAGE_NAME);
+                params.put(AzureStackUtil.NAME, AzureStackUtil.getOsImageName(credential));
                 params.put(OS, "Linux");
                 params.put(MEDIALINK, targetImageUri);
                 azureClient.addOsImage(params);
