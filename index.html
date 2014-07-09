@@ -12,10 +12,10 @@
     <title>Cloudbreak</title>
     <script src="js/lib/jquery-1.11.0.min.js" type="text/javascript"></script>
 
-    <link href='http://fonts.googleapis.com/css?family=Roboto+Condensed:300,400,700&amp;subset=latin-ext' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Roboto+Condensed:300,400,700&amp;subset=latin-ext' rel='stylesheet' type='text/css'>
 
     <link href="css/Cloudbreak.min.css" rel="stylesheet">
-    <link href="//netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.css" rel="stylesheet">
+    <link href="https://netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.css" rel="stylesheet">
 
     <!--[if lt IE 9]>
     <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
@@ -23,7 +23,7 @@
     <![endif]-->
 
     <script src="https://rawgit.com/jmesnil/stomp-websocket/master/lib/stomp.js"></script>
-    <script src="http://cdn.sockjs.org/sockjs-0.3.4.min.js"></script>
+    <script src="https://cdn.sockjs.org/sockjs-0.3.4.min.js"></script>
     <script src="js/lib/blob.js" type="text/javascript"></script>
     <script src="js/lib/filesaver.js" type="text/javascript"></script>
     <script src="js/lib/retina.min.js" type="text/javascript"></script>
@@ -781,8 +781,7 @@
 
         <div class="col-sm-9">
             <select class="form-control" id="aws_tamiId">
-                <option value="ami-f39f5684">ami-f39f5684 (ambari-warmup)</option>
-                <option value="ami-190ac26e">ami-190ac26e (with-nagios)</option>
+                <option value="ami-25dc0852">ami-25dc0852 (ansible)</option>
             </select>
         </div>
         <!-- .col-sm-9 -->
@@ -831,11 +830,13 @@
 
         <div class="col-sm-9">
             <select class="form-control" id="aws_tinstanceType">
-                <option value="T1Micro">t1.micro</option>
-                <option value="M1Small">m1.small</option>
-                <option value="M1Medium">m1.medium</option>
-                <option value="M1Large">m1.large</option>
-                <option value="M1Xlarge">m1.xlarge</option>
+                <option value="T2Micro">t2.micro</option>
+                <option value="T2Small">t2.small</option>
+                <option value="T2Medium">t2.medium</option>
+                <option value="M3Medium">m3.medium</option>
+                <option value="M3Large">m3.large</option>
+                <option value="M3XLarge">m3.xlarge</option>
+                <option value="M32xlarge">m3.2xlarge</option>
             </select>
         </div>
         <!-- .col-sm-9 -->
