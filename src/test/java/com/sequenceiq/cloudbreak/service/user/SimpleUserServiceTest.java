@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.user;
 
+import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.UserStatus;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
@@ -67,15 +68,12 @@ public class SimpleUserServiceTest {
 
     }
 
-    @Test
+    @Test(expected = NotFoundException.class)
     public void testDisableUserWhenNoUserFoundForEmailShouldNotSendEmail() {
         // GIVEN
         given(userRepository.findByEmail(anyString())).willReturn(null);
         // WHEN
         underTest.disableUser(DUMMY_EMAIL);
-        // THEN
-        verify(underTest, times(0)).sendConfirmationEmail(mimeMessagePreparator);
-
     }
 
     @Test
@@ -92,15 +90,12 @@ public class SimpleUserServiceTest {
 
     }
 
-    @Test
+    @Test(expected = NotFoundException.class)
     public void resetPasswordWhenUserStatusIsNotDisabledShouldNotCreateNewPassword() {
         // GIVEN
         given(userRepository.findUserByConfToken(DUMMY_TOKEN)).willReturn(user);
         // WHEN
         underTest.resetPassword(DUMMY_TOKEN, Base64Coder.encodeString(DUMMY_NEW_PASSWORD));
-        // THEN
-        verify(passwordEncoder, times(0)).encode(anyString());
-
     }
 
     private User createUser() {
