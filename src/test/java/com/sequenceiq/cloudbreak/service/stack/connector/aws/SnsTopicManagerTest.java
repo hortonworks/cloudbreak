@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.service.stack.connector.aws;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -15,7 +14,6 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
 
 import reactor.core.Reactor;
 import reactor.event.Event;
@@ -39,7 +37,6 @@ public class SnsTopicManagerTest {
 
     public static final String DUMMY_TOKEN = "dummyToken";
     @InjectMocks
-    @Spy
     private SnsTopicManager underTest = new SnsTopicManager();
 
     @Mock
@@ -56,6 +53,9 @@ public class SnsTopicManagerTest {
 
     @Mock
     private StackRepository stackRepository;
+
+    @Mock
+    private AwsStackUtil awsStackUtil;
 
     private AwsCredential credential;
 
@@ -77,7 +77,7 @@ public class SnsTopicManagerTest {
         createTopicResult.setTopicArn(AwsStackTestUtil.DEFAULT_TOPIC_ARN);
         confirmSubscriptionResult = new ConfirmSubscriptionResult();
         confirmSubscriptionResult.setSubscriptionArn(AwsStackTestUtil.DEFAULT_TOPIC_ARN);
-        snsTopic = AwsStackTestUtil.createSnsTopic(AwsStackTestUtil.createAwsCredential());
+        snsTopic = AwsStackTestUtil.createSnsTopic(credential);
         user = AwsStackTestUtil.createUser();
         stack = AwsStackTestUtil.createStack(user, credential, AwsStackTestUtil.createAwsTemplate(user));
     }
@@ -85,7 +85,7 @@ public class SnsTopicManagerTest {
     @Test
     public void testCreateTopicAndSubscribe() {
         // GIVEN
-        doReturn(snsClient).when(underTest).createSnsClient(credential, Regions.DEFAULT_REGION);
+        given(awsStackUtil.createSnsClient(Regions.DEFAULT_REGION, credential)).willReturn(snsClient);
         given(snsClient.createTopic(anyString())).willReturn(createTopicResult);
         given(snsTopicRepository.save(any(SnsTopic.class))).willReturn(snsTopic);
         given(snsClient.subscribe(anyString(), anyString(), anyString())).willReturn(new SubscribeResult());
@@ -98,7 +98,7 @@ public class SnsTopicManagerTest {
     @Test
     public void testConfirmSubscriptionWhenTopicIsNotConfirmedShouldNotifyAllRequestedStacks() {
         // GIVEN
-        doReturn(snsClient).when(underTest).createSnsClient(any(AwsCredential.class), any(Regions.class));
+        given(awsStackUtil.createSnsClient(Regions.DEFAULT_REGION, credential)).willReturn(snsClient);
         SnsRequest snsRequest = createSnsRequest();
         given(snsTopicRepository.findByTopicArn(AwsStackTestUtil.DEFAULT_TOPIC_ARN)).willReturn(Arrays.asList(snsTopic, snsTopic));
         given(snsClient.confirmSubscription(anyString(), anyString())).willReturn(confirmSubscriptionResult);

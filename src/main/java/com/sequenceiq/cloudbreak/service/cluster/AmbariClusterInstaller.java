@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
-import com.google.common.annotations.VisibleForTesting;
 import groovyx.net.http.HttpResponseException;
 
 import java.math.BigDecimal;
@@ -17,6 +16,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.Reactor;
 import reactor.event.Event;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
@@ -56,7 +56,9 @@ public class AmbariClusterInstaller {
             Blueprint blueprint = cluster.getBlueprint();
             addBlueprint(stack.getAmbariIp(), blueprint);
             AmbariClient ambariClient = createAmbariClient(stack.getAmbariIp());
-            ambariClient.createCluster(cluster.getName(), blueprint.getBlueprintName(), recommend(stack, ambariClient, blueprint.getBlueprintName()));
+            Map<String, List<String>> hostGroupMappings = recommend(stack, ambariClient, blueprint.getBlueprintName());
+            LOGGER.info("recommeneded host-hostGroup mappings for stack {}: {}", stack.getId(), hostGroupMappings);
+            ambariClient.createCluster(cluster.getName(), blueprint.getBlueprintName(), hostGroupMappings);
             BigDecimal installProgress = new BigDecimal(0);
             while (installProgress.compareTo(COMPLETED) != 0 && installProgress.compareTo(FAILED) != 0) {
                 sleep(POLLING_INTERVAL);

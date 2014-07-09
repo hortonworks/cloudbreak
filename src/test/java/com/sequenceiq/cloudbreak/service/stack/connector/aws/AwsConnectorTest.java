@@ -228,7 +228,7 @@ public class AwsConnectorTest {
     }
 
     private AmazonServiceException createAmazonServiceException() {
-        AmazonServiceException e = new AmazonServiceException(String.format("Stack:%s doesn't exist", AwsStackTestUtil.CF_STACK_NAME));
+        AmazonServiceException e = new AmazonServiceException(String.format("Stack:%s does not exist", AwsStackTestUtil.CF_STACK_NAME));
         e.setServiceName("AmazonCloudFormation");
         e.setErrorCode(DUMMY_NUMBER_STR);
         e.setRequestId(DUMMY_NUMBER_STR);

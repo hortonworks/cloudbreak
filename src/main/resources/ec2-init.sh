@@ -2,10 +2,6 @@
 : ${MYDOMAIN:=mycorp.kom}
 : ${IMAGE:="sequenceiq/ambari"}
 
-# installs jq to process jsons easily
-curl -o /usr/bin/jq http://stedolan.github.io/jq/download/linux64/jq
-chmod +x /usr/bin/jq
-
 # instance id from ec2 metadata
 INSTANCE_ID=$(curl -s 169.254.169.254/latest/meta-data/instance-id)
 
@@ -62,9 +58,6 @@ sleep 5
 # find the docker subnet of the first instance from "other instances" - this is used to determine which IP Serf will use to join the cluster  
 DOCKER_SUBNET_OF_FIRST_OTHER=$(echo $METADATA_RESULT | jq "$OTHER_INSTANCES_SELECTOR" | jq '.[0].dockerSubnet' | sed s/\"//g)
 SERF_JOIN_IP=${DOCKER_SUBNET_OF_FIRST_OTHER}.2
-
-# temporary, while AMI is created with the latest docker version and the latest sequenceiq/ambari image
-IMAGE=ambari-warmup
 
 # determines if this instance is the Ambari server or not and sets the tags accordingly
 AMBARI_SERVER=$(echo $METADATA_RESULT | jq "$INSTANCE_SELECTOR" | jq '.[].ambariServer' | sed s/\"//g)
