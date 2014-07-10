@@ -99,7 +99,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     company: signUpCompanyField.value
                 }
             }).success(function(responseData){
-                $jq('.outerCarousel'').carousel(3);
+                $jq('.outerCarousel').carousel(3);
             })
             .error(function (data, status, headers, config){
                 if (status == 400) {
@@ -153,7 +153,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                       headers: {'Content-Type': 'application/x-www-form-urlencoded'}
                      }).success(function (responseData) {
                         if (responseData && responseData.length != 0) {
-                            $jq('.outerCarousel'').carousel(4);
+                            $jq('.outerCarousel').carousel(4);
                         } else {
                             alert("Internal server error");
                         }
@@ -174,7 +174,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                       headers: {'Content-Type': 'application/x-www-form-urlencoded'}
                  }).success(function(responseData){
                     if (responseData && responseData.length != 0 && responseData == $rootScope.resetToken){
-                        $jq('.outerCarousel'').carousel(1);
+                        $jq('.outerCarousel').carousel(1);
                         $rootScope.resetToken = null;
                     } else {
                         alert("Password change failed.")
