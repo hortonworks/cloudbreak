@@ -14,6 +14,6 @@ public class QueueInfoUpdateEventHandler implements ApplicationListener<QueueInf
 
     @Override
     public void onApplicationEvent(QueueInfoUpdateEvent event) {
-        LOGGER.info("We should do something with this event.. {}", event.getClusterId());
+        LOGGER.info("Queue metrics updated for cluster.. {}", event.getClusterId());
     }
 }

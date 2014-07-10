@@ -13,6 +13,7 @@ import com.sequenceiq.ambari.client.AmbariClient;
 public class AmbariConfigurationService implements ConfigurationService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariConfigurationService.class);
+    private static final String RETRY_COUNT = "1";
     private static final List<String> CONFIG_LIST = Arrays.asList(
             ConfigParam.MR_FRAMEWORK_NAME,
             ConfigParam.YARN_RM_ADDRESS,
@@ -38,6 +39,12 @@ public class AmbariConfigurationService implements ConfigurationService {
                 }
             }
         }
+        decorateConfiguration(configuration);
         return configuration;
+    }
+
+    private void decorateConfiguration(Configuration configuration) {
+        configuration.set(ConfigParam.RM_CONN_MAX_WAIT_MS, RETRY_COUNT);
+        configuration.set(ConfigParam.RM_CONN_RETRY_INTERVAL_MS, RETRY_COUNT);
     }
 }
