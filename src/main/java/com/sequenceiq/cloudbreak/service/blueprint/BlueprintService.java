@@ -5,6 +5,7 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.json.BlueprintJson;
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
@@ -59,18 +60,15 @@ public class BlueprintService {
         if (blueprint == null) {
             throw new NotFoundException(String.format("Blueprint '%s' not found.", id));
         }
-        try {
+        if (clusterRepository.findAllClusterByBlueprint(blueprint.getId()).isEmpty()) {
+
             blueprintRepository.delete(blueprint);
             websocketService.sendToTopicUser(blueprint.getUser().getEmail(), WebsocketEndPoint.BLUEPRINT,
                     new StatusMessage(blueprint.getId(), blueprint.getName(), Status.DELETE_COMPLETED.name()));
-        } catch (Exception ex) {
-            if (clusterRepository.findAllClusterByBlueprint(blueprint.getId()).isEmpty()) {
-                throw ex;
-            } else {
-                websocketService.sendToTopicUser(blueprint.getUser().getEmail(), WebsocketEndPoint.BLUEPRINT,
-                        new StatusMessage(blueprint.getId(), blueprint.getName(), Status.DELETE_FAILED.name(),
-                                "Please delete all dependency of this blueprint before you try to delete it"));
-            }
+        } else {
+            throw new BadRequestException(String.format(
+                    "There are stacks associated with blueprint '%s'. Please remove these before the deleting the blueprint.", id));
         }
+
     }
 }

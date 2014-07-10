@@ -20,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.dao.DataIntegrityViolationException;
 
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.json.BlueprintJson;
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
@@ -110,7 +111,7 @@ public class BlueprintServiceTest {
         underTest.delete(1L);
     }
 
-    @Test
+    @Test(expected = BadRequestException.class)
     public void testDeleteBlueprintWhenBlueprintDataIntegrityExceptionAndFindAllClusterByBlueprintReturnNotEmptyList() {
         //GIVEN
         given(blueprintRepository.findOne(anyLong())).willReturn(blueprint);
