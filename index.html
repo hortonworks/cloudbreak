@@ -1522,7 +1522,7 @@
             </div><!-- .container -->
         </header>
         <section class="container">
-            <div class="container carousel slide outerCarousel'">
+            <div class="container carousel slide outerCarousel">
                 <div class="row">
                     <div class="col-sm-8 col-sm-offset-2">
 
@@ -1708,7 +1708,7 @@
             $jq(document).ready(function ($) {
             // Bootstrap carousel as selector / login / sign up slider
  				// init
- 				$jq('.outerCarousel'').carousel('pause');
+ 				$jq('.outerCarousel').carousel('pause');
  				$jq('#select-login-btn').click(function () {
  					$('.outerCarousel').carousel(1);
  				});
@@ -1721,7 +1721,7 @@
   					e.preventDefault();
   				});
  				$jq('#select-signup-btn').click(function () {
- 					$('.outerCarousel'').carousel(2);
+ 					$('.outerCarousel').carousel(2);
  				});
             });
         </script>
