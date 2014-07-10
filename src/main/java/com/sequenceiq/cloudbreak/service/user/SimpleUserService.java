@@ -88,7 +88,9 @@ public class SimpleUserService implements UserService {
                     blueprintJson.setBlueprintName(blueprintName);
                     blueprintJson.setName(blueprintName);
                     blueprintJson.setDescription(blueprintName);
-                    blueprintJson.setAmbariBlueprint(jsonHelper.createJsonFromString(FileReaderUtils.readFileFromClasspath(String.format("blueprints/%s.bp", blueprintName))));
+                    blueprintJson.setAmbariBlueprint(
+                            jsonHelper.createJsonFromString(FileReaderUtils.readFileFromClasspath(String.format("blueprints/%s.bp", blueprintName)))
+                    );
 
                     Blueprint bp = blueprintConverter.convert(blueprintJson);
                     bp.setUser(user);
