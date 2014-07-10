@@ -1,8 +1,6 @@
 package com.sequenceiq.cloudbreak.service.user;
 
-import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -31,14 +29,10 @@ import java.util.UUID;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.controller.json.BlueprintJson;
-import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
-import com.sequenceiq.cloudbreak.converter.BlueprintConverter;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.UserStatus;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
-import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import com.sequenceiq.cloudbreak.service.blueprint.DefaultBlueprintLoaderService;
 
 import freemarker.template.Configuration;
 
@@ -67,39 +61,15 @@ public class SimpleUserService implements UserService {
     @Value("${uluwatu.addr}")
     private String uiAddress;
 
-    @Value("#{'${blueprint.defaults}'.split(',')}")
-    private List<String> blueprintArray;
-
     @Autowired
-    private BlueprintConverter blueprintConverter;
-
-    @Autowired
-    private JsonHelper jsonHelper;
-
+    private DefaultBlueprintLoaderService defaultBlueprintLoaderService;
 
     @Override
     public Long registerUser(User user) {
         if (userRepository.findByEmail(user.getEmail()) == null) {
             String confToken = generateRegistrationId(user);
             user.setConfToken(confToken);
-            for (String blueprintName : blueprintArray) {
-                try {
-                    BlueprintJson blueprintJson = new BlueprintJson();
-                    blueprintJson.setBlueprintName(blueprintName);
-                    blueprintJson.setName(blueprintName);
-                    blueprintJson.setDescription(blueprintName);
-                    blueprintJson.setAmbariBlueprint(
-                            jsonHelper.createJsonFromString(FileReaderUtils.readFileFromClasspath(String.format("blueprints/%s.bp", blueprintName)))
-                    );
-
-                    Blueprint bp = blueprintConverter.convert(blueprintJson);
-                    bp.setUser(user);
-
-                    user.getBlueprints().add(bp);
-                } catch (IOException ex) {
-                    LOGGER.error(blueprintName + " blueprint is not available.");
-                }
-            }
+            user.setBlueprints(defaultBlueprintLoaderService.loadBlueprints(user));
             User savedUser = userRepository.save(user);
             LOGGER.info("User {} successfully saved", user);
             MimeMessagePreparator msgPreparator = prepareMessage(user, "templates/confirmation-email.ftl", "#?confirmSignUpToken=");

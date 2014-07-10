@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.conf;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,9 +15,11 @@ import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.UserStatus;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
+import com.sequenceiq.cloudbreak.service.blueprint.DefaultBlueprintLoaderService;
 
 @Component
 public class UserInitializer implements InitializingBean {
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserInitializer.class);
 
     @Value("${hbm2ddl.strategy}")
     private String hbm2ddlStrategy;
@@ -25,6 +29,9 @@ public class UserInitializer implements InitializingBean {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private DefaultBlueprintLoaderService defaultBlueprintLoaderService;
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -56,6 +63,8 @@ public class UserInitializer implements InitializingBean {
             awsTemplate.setUser(user2);
 
             user2.getAwsTemplates().add(awsTemplate);
+
+            user2.setBlueprints(defaultBlueprintLoaderService.loadBlueprints(user2));
 
             userRepository.save(user2);
         }
