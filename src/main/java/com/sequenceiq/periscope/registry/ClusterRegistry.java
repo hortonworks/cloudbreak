@@ -2,7 +2,7 @@ package com.sequenceiq.periscope.registry;
 
 import java.util.Collection;
 
-import com.sequenceiq.periscope.model.AmbariServer;
+import com.sequenceiq.periscope.model.Ambari;
 
 public interface ClusterRegistry {
 
@@ -10,9 +10,9 @@ public interface ClusterRegistry {
      * Adds a new hadoop cluster to the registry.
      *
      * @param id           id of the cluster
-     * @param ambariServer ambari server parameters
+     * @param ambari ambari server parameters
      */
-    ClusterRegistration add(String id, AmbariServer ambariServer);
+    ClusterRegistration add(String id, Ambari ambari);
 
     /**
      * Removes a cluster from the registry.

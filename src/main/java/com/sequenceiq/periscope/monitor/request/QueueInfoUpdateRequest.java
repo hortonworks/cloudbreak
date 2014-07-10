@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.periscope.monitor.event.QueueInfoUpdateEvent;
-import com.sequenceiq.periscope.monitor.event.QueueInfoUpdateFailedEvent;
+import com.sequenceiq.periscope.monitor.event.UpdateFailedEvent;
 import com.sequenceiq.periscope.registry.ClusterRegistration;
 
 @Component
@@ -33,7 +33,7 @@ public class QueueInfoUpdateRequest extends AbstractEventPublisher implements Ru
             publishEvent(new QueueInfoUpdateEvent(clusterRegistration.getClusterId(), queues));
         } catch (IOException | YarnException e) {
             LOGGER.error("Error occurred during queue metrics update from cluster {}", clusterRegistration.getClusterId(), e);
-            publishEvent(new QueueInfoUpdateFailedEvent(clusterRegistration.getClusterId()));
+            publishEvent(new UpdateFailedEvent(clusterRegistration.getClusterId()));
         }
     }
 }

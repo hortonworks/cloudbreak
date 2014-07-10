@@ -2,13 +2,14 @@ package com.sequenceiq.periscope.monitor.event;
 
 import org.springframework.context.ApplicationEvent;
 
-public class QueueInfoUpdateFailedEvent extends ApplicationEvent {
+public class UpdateFailedEvent extends ApplicationEvent implements UpdateEvent {
 
-    public QueueInfoUpdateFailedEvent(String clusterId) {
+    public UpdateFailedEvent(String clusterId) {
         super(clusterId);
     }
 
+    @Override
     public String getClusterId() {
-        return (String) getSource();
+        return (String) source;
     }
 }

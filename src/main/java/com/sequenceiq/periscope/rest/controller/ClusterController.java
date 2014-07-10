@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.sequenceiq.periscope.model.AmbariServer;
+import com.sequenceiq.periscope.model.Ambari;
 import com.sequenceiq.periscope.registry.ClusterRegistry;
-import com.sequenceiq.periscope.rest.json.AmbariServerJson;
+import com.sequenceiq.periscope.rest.json.AmbariJson;
 import com.sequenceiq.periscope.rest.json.IdJson;
 
 @RestController
@@ -25,8 +25,8 @@ public class ClusterController {
     private ConversionService converter;
 
     @RequestMapping(value = "/{id}", method = RequestMethod.POST)
-    public ResponseEntity<IdJson> addCluster(@PathVariable String id, @RequestBody AmbariServerJson ambariServer) {
-        clusterRegistry.add(id, converter.convert(ambariServer, AmbariServer.class));
+    public ResponseEntity<IdJson> addCluster(@PathVariable String id, @RequestBody AmbariJson ambariServer) {
+        clusterRegistry.add(id, converter.convert(ambariServer, Ambari.class));
         return new ResponseEntity<>(new IdJson(id), HttpStatus.CREATED);
     }
 

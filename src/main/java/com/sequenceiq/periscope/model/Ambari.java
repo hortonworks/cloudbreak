@@ -1,13 +1,13 @@
 package com.sequenceiq.periscope.model;
 
-public class AmbariServer {
+public class Ambari {
 
     private final String host;
     private final String port;
     private final String user;
     private final String pass;
 
-    public AmbariServer(String host, String port, String user, String pass) {
+    public Ambari(String host, String port, String user, String pass) {
         this.host = host;
         this.port = port;
         this.user = user;

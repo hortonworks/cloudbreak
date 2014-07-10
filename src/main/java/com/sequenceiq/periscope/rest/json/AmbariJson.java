@@ -1,16 +1,16 @@
 package com.sequenceiq.periscope.rest.json;
 
-public class AmbariServerJson {
+public class AmbariJson {
 
     private String host;
     private String port;
     private String user;
     private String pass;
 
-    public AmbariServerJson() {
+    public AmbariJson() {
     }
 
-    public AmbariServerJson(String host, String port, String user, String pass) {
+    public AmbariJson(String host, String port, String user, String pass) {
         this.host = host;
         this.port = port;
         this.user = user;

@@ -3,7 +3,7 @@ package com.sequenceiq.periscope.registry;
 import org.apache.hadoop.yarn.client.api.YarnClient;
 
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.periscope.model.AmbariServer;
+import com.sequenceiq.periscope.model.Ambari;
 import com.sequenceiq.periscope.service.configuration.AmbariConfigurationService;
 
 public class ClusterRegistration {
@@ -13,7 +13,7 @@ public class ClusterRegistration {
     private final AmbariConfigurationService configurationService;
     private final YarnClient yarnClient;
 
-    public ClusterRegistration(String clusterId, AmbariServer ambari) {
+    public ClusterRegistration(String clusterId, Ambari ambari) {
         this.clusterId = clusterId;
         this.ambariClient = new AmbariClient(ambari.getHost(), ambari.getPort(), ambari.getUser(), ambari.getPass());
         this.configurationService = new AmbariConfigurationService(ambariClient);

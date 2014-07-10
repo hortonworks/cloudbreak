@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.periscope.model.AmbariServer;
+import com.sequenceiq.periscope.model.Ambari;
 
 @Component
 public class AmbariClusterRegistry implements ClusterRegistry {
@@ -17,10 +17,10 @@ public class AmbariClusterRegistry implements ClusterRegistry {
     private Map<String, ClusterRegistration> clusters = new ConcurrentHashMap<>();
 
     @Override
-    public ClusterRegistration add(String id, AmbariServer ambariServer) {
-        ClusterRegistration clusterRegistration = new ClusterRegistration(id, ambariServer);
+    public ClusterRegistration add(String id, Ambari ambari) {
+        ClusterRegistration clusterRegistration = new ClusterRegistration(id, ambari);
         clusters.put(id, clusterRegistration);
-        LOGGER.info("Cluster: {} registered with id: {}", ambariServer.getHost(), id);
+        LOGGER.info("Cluster: {} registered with id: {}", ambari.getHost(), id);
         return clusterRegistration;
     }
 
