@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
+import java.util.Date;
 
 @Component
 public class UserRepositoryUserDetailsService implements UserDetailsService {
@@ -25,6 +26,8 @@ public class UserRepositoryUserDetailsService implements UserDetailsService {
         if (user == null) {
             throw new UsernameNotFoundException("Could not find user: " + email);
         }
+        user.setLastLogin(new Date());
+        userRepository.save(user);
         return new UserRepositoryUserDetails(user);
     }
 
