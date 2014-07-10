@@ -46,8 +46,8 @@ public class DefaultBlueprintLoaderService {
                 Blueprint bp = blueprintConverter.convert(blueprintJson);
                 bp.setUser(user);
                 blueprints.add(bp);
-            } catch (IOException ex) {
-                LOGGER.error(blueprintName + " blueprint is not available.");
+            } catch (IOException e) {
+                LOGGER.error(blueprintName + " blueprint is not available.", e);
             }
         }
         return blueprints;
