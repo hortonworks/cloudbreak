@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.user;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -21,11 +22,6 @@ import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import org.springframework.util.DigestUtils;
 import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 
-import javax.mail.internet.MimeMessage;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
