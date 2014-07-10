@@ -5,6 +5,7 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.json.BlueprintJson;
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
@@ -14,6 +15,7 @@ import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
+import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
@@ -22,6 +24,9 @@ public class BlueprintService {
 
     @Autowired
     private BlueprintRepository blueprintRepository;
+
+    @Autowired
+    private ClusterRepository clusterRepository;
 
     @Autowired
     private BlueprintConverter blueprintConverter;
@@ -55,8 +60,15 @@ public class BlueprintService {
         if (blueprint == null) {
             throw new NotFoundException(String.format("Blueprint '%s' not found.", id));
         }
-        blueprintRepository.delete(blueprint);
-        websocketService.sendToTopicUser(blueprint.getUser().getEmail(), WebsocketEndPoint.BLUEPRINT,
-                new StatusMessage(blueprint.getId(), blueprint.getName(), Status.DELETE_COMPLETED.name()));
+        if (clusterRepository.findAllClusterByBlueprint(blueprint.getId()).isEmpty()) {
+
+            blueprintRepository.delete(blueprint);
+            websocketService.sendToTopicUser(blueprint.getUser().getEmail(), WebsocketEndPoint.BLUEPRINT,
+                    new StatusMessage(blueprint.getId(), blueprint.getName(), Status.DELETE_COMPLETED.name()));
+        } else {
+            throw new BadRequestException(String.format(
+                    "There are stacks associated with blueprint '%s'. Please remove these before the deleting the blueprint.", id));
+        }
+
     }
 }

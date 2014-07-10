@@ -6,6 +6,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
@@ -13,6 +14,10 @@ import javax.persistence.UniqueConstraint;
 @Table(name = "Cluster", uniqueConstraints = {
         @UniqueConstraint(columnNames = { "cluster_user", "name" })
 })
+@NamedQuery(
+        name = "Cluster.findAllClusterByBlueprint",
+        query = "SELECT c FROM Cluster c "
+                + "WHERE c.blueprint.id= :id")
 public class Cluster {
 
     @Id

@@ -1,28 +1,38 @@
 package com.sequenceiq.cloudbreak.service.blueprint;
 
-import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.controller.json.BlueprintJson;
-import com.sequenceiq.cloudbreak.controller.json.IdJson;
-import com.sequenceiq.cloudbreak.converter.BlueprintConverter;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.User;
-import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
-import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
-import com.sequenceiq.cloudbreak.websocket.WebsocketService;
-import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.times;
+import static org.mockito.BDDMockito.verify;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+
+import java.util.HashSet;
+import java.util.Set;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.times;
-import static org.mockito.BDDMockito.verify;
+import org.springframework.dao.DataIntegrityViolationException;
+
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.NotFoundException;
+import com.sequenceiq.cloudbreak.controller.json.BlueprintJson;
+import com.sequenceiq.cloudbreak.controller.json.IdJson;
+import com.sequenceiq.cloudbreak.converter.BlueprintConverter;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
+import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
+import com.sequenceiq.cloudbreak.repository.ClusterRepository;
+import com.sequenceiq.cloudbreak.websocket.WebsocketService;
+import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
 public class BlueprintServiceTest {
     @InjectMocks
@@ -30,6 +40,9 @@ public class BlueprintServiceTest {
 
     @Mock
     private BlueprintRepository blueprintRepository;
+
+    @Mock
+    private ClusterRepository clusterRepository;
 
     @Mock
     private BlueprintConverter blueprintConverter;
@@ -83,6 +96,29 @@ public class BlueprintServiceTest {
     public void testDeleteBlueprintWhenBlueprintNotFound() {
         //GIVEN
         given(blueprintRepository.findOne(anyLong())).willReturn(null);
+        //WHEN
+        underTest.delete(1L);
+    }
+
+    @Test(expected = DataIntegrityViolationException.class)
+    public void testDeleteBlueprintWhenBlueprintDataIntegrityExceptionAndFindAllClusterByBlueprintReturnEmptyList() {
+        //GIVEN
+        given(blueprintRepository.findOne(anyLong())).willReturn(blueprint);
+        doThrow(new DataIntegrityViolationException("test")).when(blueprintRepository).delete(blueprint);
+        Set<Cluster> clusters = new HashSet<>();
+        given(clusterRepository.findAllClusterByBlueprint(anyLong())).willReturn(clusters);
+        //WHEN
+        underTest.delete(1L);
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testDeleteBlueprintWhenBlueprintDataIntegrityExceptionAndFindAllClusterByBlueprintReturnNotEmptyList() {
+        //GIVEN
+        given(blueprintRepository.findOne(anyLong())).willReturn(blueprint);
+        doThrow(new DataIntegrityViolationException("test")).when(blueprintRepository).delete(blueprint);
+        Set<Cluster> clusters = new HashSet<>();
+        clusters.add(new Cluster());
+        given(clusterRepository.findAllClusterByBlueprint(anyLong())).willReturn(clusters);
         //WHEN
         underTest.delete(1L);
     }
