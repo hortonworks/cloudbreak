@@ -1,12 +1,12 @@
 package com.sequenceiq.cloudbreak.service.user;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.domain.User;
-import com.sequenceiq.cloudbreak.domain.UserStatus;
-import com.sequenceiq.cloudbreak.repository.UserRepository;
-import freemarker.template.Configuration;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.mail.internet.MimeMessage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,11 +22,15 @@ import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import org.springframework.util.DigestUtils;
 import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 
-import javax.mail.internet.MimeMessage;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import com.google.common.annotations.VisibleForTesting;
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.NotFoundException;
+import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.domain.UserStatus;
+import com.sequenceiq.cloudbreak.repository.UserRepository;
+import com.sequenceiq.cloudbreak.service.blueprint.DefaultBlueprintLoaderService;
+
+import freemarker.template.Configuration;
 
 @Service
 public class SimpleUserService implements UserService {
@@ -53,12 +57,15 @@ public class SimpleUserService implements UserService {
     @Value("${uluwatu.addr}")
     private String uiAddress;
 
+    @Autowired
+    private DefaultBlueprintLoaderService defaultBlueprintLoaderService;
 
     @Override
     public Long registerUser(User user) {
         if (userRepository.findByEmail(user.getEmail()) == null) {
             String confToken = generateRegistrationId(user);
             user.setConfToken(confToken);
+            user.setBlueprints(defaultBlueprintLoaderService.loadBlueprints(user));
             User savedUser = userRepository.save(user);
             LOGGER.info("User {} successfully saved", user);
             MimeMessagePreparator msgPreparator = prepareMessage(user, "templates/confirmation-email.ftl", "#?confirmSignUpToken=");
