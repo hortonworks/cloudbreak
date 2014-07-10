@@ -1,9 +1,6 @@
 package com.sequenceiq.periscope.monitor;
 
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationEventPublisherAware;
-
-public interface Monitor extends ApplicationEventPublisher, ApplicationEventPublisherAware {
+public interface Monitor {
 
     /**
      * Updates the metrics.

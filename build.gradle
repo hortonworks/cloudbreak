@@ -316,10 +316,11 @@ dependencies {
     compile("org.apache.hadoop:hadoop-yarn-server-resourcemanager:${hadoopVersion}")
     compile("org.apache.hadoop:hadoop-common:${hadoopVersion}")
     compile("com.sequenceiq.ambari:ambari-client:1.6.0-SNAPSHOT")
+    compile("javax.servlet:javax.servlet-api:3.0.1")
     testCompile("junit:junit:4.11")
 }
 
-springBoot { mainClass = "com.sequenceiq.periscope.Periscope" }
+springBoot { mainClass = "com.sequenceiq.periscope.PeriscopeApplication" }
 
 checkstyleMain {
     ignoreFailures = false

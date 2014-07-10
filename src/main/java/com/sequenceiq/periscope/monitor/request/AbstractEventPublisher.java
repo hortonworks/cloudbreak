@@ -1,20 +1,19 @@
-package com.sequenceiq.periscope.monitor;
+package com.sequenceiq.periscope.monitor.request;
 
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 
-public abstract class AbstractMonitor implements Monitor {
+public abstract class AbstractEventPublisher implements EventPublisher {
 
     private ApplicationEventPublisher eventPublisher;
 
     @Override
     public void publishEvent(ApplicationEvent event) {
-        eventPublisher.publishEvent(event);
+        this.eventPublisher.publishEvent(event);
     }
 
     @Override
     public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
         this.eventPublisher = applicationEventPublisher;
     }
-
 }

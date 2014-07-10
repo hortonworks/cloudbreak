@@ -1,38 +1,35 @@
 package com.sequenceiq.periscope.monitor;
 
-import java.io.IOException;
-import java.util.List;
+import java.util.concurrent.ExecutorService;
 
-import org.apache.hadoop.yarn.api.records.QueueInfo;
-import org.apache.hadoop.yarn.exceptions.YarnException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationContext;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.periscope.event.QueueInfoUpdateEvent;
+import com.sequenceiq.periscope.monitor.request.QueueInfoUpdateRequest;
 import com.sequenceiq.periscope.registry.ClusterRegistration;
 import com.sequenceiq.periscope.registry.ClusterRegistry;
 
 @Component
 @Qualifier("queue")
-public class QueueMonitor extends AbstractMonitor implements Monitor {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(QueueMonitor.class);
+public class QueueMonitor implements Monitor {
 
     @Autowired
     private ClusterRegistry clusterRegistry;
+    @Autowired
+    private ExecutorService executorService;
+    @Autowired
+    private ApplicationContext applicationContext;
 
     @Override
+    @Scheduled(fixedRate = MonitorUpdateRate.QUEUE_UPDATE_RATE)
     public void update() {
         for (ClusterRegistration clusterRegistration : clusterRegistry.getAll()) {
-            try {
-                List<QueueInfo> queues = clusterRegistration.getYarnClient().getAllQueues();
-                publishEvent(new QueueInfoUpdateEvent(clusterRegistration.getClusterId(), queues));
-            } catch (IOException | YarnException e) {
-                LOGGER.error("Error occurred during scheduler metrics update", e);
-            }
+            QueueInfoUpdateRequest request = (QueueInfoUpdateRequest)
+                    applicationContext.getBean("queueInfoUpdateRequest", clusterRegistration);
+            executorService.execute(request);
         }
     }
 

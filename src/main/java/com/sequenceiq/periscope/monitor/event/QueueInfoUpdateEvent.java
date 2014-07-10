@@ -1,4 +1,4 @@
-package com.sequenceiq.periscope.event;
+package com.sequenceiq.periscope.monitor.event;
 
 import java.util.List;
 
