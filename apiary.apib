@@ -65,7 +65,7 @@ Currently there are two user roles supported: regular users as  *COMPANY_USER* a
 
 ## User management [/users]
 ### Creates a new user [POST]
-Creates a new user with the specified username/password and role.
+Creates a new user with the specified username, password, company, role. The user will get an email with an accept token.
 
 + Request (application/json)
 
@@ -109,6 +109,34 @@ The information contains generic user info, cloud and Hadoop cluster configurati
             }
         ]
 
+## Reset password request management [/reset]
+### Request a password reset [POST]
+Send an email to the user with the password reset information
++ Request
+        [
+            {
+               "email": "frank.dean@surf.com"
+            }
+        ]
++ Response 200 (application/json)
+
+
+## Reset Password management [/reset/{resetToken}]
+### Change the actual password [POST]
+Change the actual password with a newer one
+
++ Parameters
+    + resetToken (required String `resetToken`) ... The token of the password reset request.
++ Request
+        [
+            {
+               "password": "newPassword123"
+            }
+        ]
+
++ Response 200 (application/json)
+
+
 ## User information [/me]
 Retrieve informations about the authenticated
 
@@ -127,6 +155,35 @@ The information contains generic user info, cloud and Hadoop cluster configurati
             {
                TBD
             }
+        }
+
+##  Confirmation of the registration [/confirm/{confToken}]
+### Confirm the registration [GET]
+
++ Parameters
+    + confToken (required String `confToken`) ... The token of the confirmation.
+
++ Request
+
++ Response 200 (application/json)
+
+        {
+          "frank.dean@surf.com"
+        }
+
+##  Reset a user[/reset]
+### Confirm the registration [POST]
+
++ Request
+    + Headers
+
+        x-auth-token: user:c45sdfdsfo234jgkhsdgf324
+
+
++ Response 200 (application/json)
+
+        {
+          "frank.dean@surf.com"
         }
 
 
