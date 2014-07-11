@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +35,7 @@ public class AmbariStartupListener {
     public void waitForAmbariServer(Long stackId, String ambariIp) {
         try {
             boolean ambariRunning = false;
-            AmbariClient ambariClient = new AmbariClient(ambariIp);
+            AmbariClient ambariClient = createAmbariClient(ambariIp);
             int pollingAttempt = 0;
             LOGGER.info("Starting polling of Ambari server's status [stack: '{}', Ambari server IP: '{}'].", stackId, ambariIp);
             while (!ambariRunning && !(pollingAttempt >= MAX_POLLING_ATTEMPTS)) {
@@ -63,5 +64,10 @@ public class AmbariStartupListener {
                     "Unhandled exception occured while trying to reach initializing Ambari server.");
             reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(stackCreationFailure));
         }
+    }
+
+    @VisibleForTesting
+    protected AmbariClient createAmbariClient(String ambariIp) {
+        return new AmbariClient(ambariIp);
     }
 }
