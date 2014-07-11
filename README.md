@@ -504,17 +504,47 @@ Connecting a new cloud provider means that the Cloudbreak rest API should handle
 When connecting a new cloud provider, the `CloudPlatform` enum that holds the providers should be extended first. It is used to find the implementations when a request arrives.
 The main idea is the same behind every method: deal with the database calls in the controller then call the correct implementation that communicates with the cloud platform. This enables the connectors to be detached from the repository calls, they should only deal with the communication with the providers.
 
+After an interface is implemented there is only one task to make it available: put the `@Service` annotation on the class. Spring will take care of the rest by discovering the bean when building the application context and putting it in the list that holds the different implementations (see `AppConfig`).
+
 #### POST
 Cloudbreak uses an event-driven flow to provision stacks in the cloud. It gives more freedom to the cloud provider implementations and allows developers to build async flows easily, yet unifies the process and takes off the responsiblity from the implementations to manage the lifecycle of a stack entity.
 It means that connecting a new provider involves implementing the necessary interfaces, and sending different 'completed' events after a specific step is done.
 
-The sequence diagram below shows the whole flow. It starts with the controller layer (`StackController` and `SimpleStackService`) that creates and persists the new stack domain object, then sends a `PROVISION_REQUEST_EVENT`. The whole provision flow runs async from this step, the controller returns the response with the newly created stack's id to the client.
+The flow is presented with the sequence diagrams below.
+The first diagram shows how the process is started when a `POST` request is sent to the API, the second one shows the actual provisioning flow's first part which contains the cloud platform specific services. The final diagram contains the last part of the provision flow that's common for every provider.
 
-***
-**Sequence diagram**
-***
+Sequence1
+![]()
 
-When adding a new provider, the following 3+1 steps should be implemented to handle the provisioning successfully. The first three steps are similar: they involve the implementation of different interfaces and they should send `complete` events after their task is done. Sending only events when a task is done enables the implementations themselves to use async processes. For example AWS provisioning uses such an implementation (See `Provisioner` for the details).
+The process starts with the controller layer (`StackController` and `SimpleStackService`) that creates and persists the new stack domain object, then sends a `PROVISION_REQUEST_EVENT`. The whole provision flow runs async from this step, the controller returns the response with the newly created stack's id to the client.
+
+Sequence2
+![]()
+
+The diagram's goal is to provide a high level design of the flow, it doesn't contain every little detail, there are some smaller steps and method calls left out, the method parameters are not shown and the class names are often abbreviated.
+
+*Notes:*
+- every notification event contains the stack id and the cloud platform
+- the stack object is retrieved from the database in every complete handler and passed to the invoked method
+- the ProvisionSetup event contains a `Map` that hold keys and values and passed to the Provision step
+- the MetadataSetup event contains a `Set` of `CoreMetadataInstance` that's processed by the complete handler
+- `ProvisionRH` = `ProvisionRequestHandler`
+- `ProvisionSetupCH` = `ProvisionSetupCompleteHandler`
+- `ProvisionRH` = `ProvisionRequestHandler`
+- `MetadataSetupCH` = `MetadataSetupCompleteHandler`
+
+Sequence3
+![]()
+
+*Notes:*
+- Ambari server is not shown on the diagram, but health check is basically a call to the Ambari REST API's health endpoint
+- `MetadataSetupCH` = `MetadataSetupCompleteHandler`
+- `AmbariRoleAllocationCH` = `AmbariRoleAllocationCompleteHandler`
+- `StackCreationSH` = `StackCreationSuccessHandler`
+- `ClusterRequestH` = `ClusterRequestHandler`
+
+
+When adding a new provider, the following **3+1 steps** should be implemented to handle the provisioning successfully. The first three steps are similar: they involve the implementation of different interfaces and they should send `complete` events after their task is done. Sending only events when a task is done enables the implementations themselves to use async processes. For example AWS provisioning uses such an implementation (See `Provisioner` for the details).
 The last step is a bit different because it requires the implementation of the user-data bash script that runs on every cloud machine instance after they are started.
 - `ProvisionSetup`: This step should create every cloud provider resource that will be used during the provisioning. For example the EC2 implementation uses SNS topics to notify Cloudbreak when an EC2 resource creation is completed. These topics are created (or retrieved) in this step, and the identifiers are sent in the `PROVISION_SETUP_COMPLETE` event as a key-value pair. (see `AwsProvisionSetup`)
 
