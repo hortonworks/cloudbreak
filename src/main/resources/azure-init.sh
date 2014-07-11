@@ -62,8 +62,8 @@ service docker restart
 sleep 5
 
 # find the docker subnet of the first instance from "other instances" - this is used to determine which IP Serf will use to join the cluster
-DOCKER_SUBNET_OF_FIRST_OTHER=$(echo $METADATA_RESULT | jq "$OTHER_INSTANCES_SELECTOR" | jq '.[0].dockerSubnet' | sed s/\"//g)
-SERF_JOIN_IP=${DOCKER_SUBNET_OF_FIRST_OTHER}.2
+PRIVATE_IP_OF_FIRST_OTHER=$(echo $METADATA_RESULT | jq "$OTHER_INSTANCES_SELECTOR" | jq '.[0].privateIp' | sed s/\"//g)
+SERF_JOIN_IP=${PRIVATE_IP_OF_FIRST_OTHER}
 
 # determines if this instance is the Ambari server or not and sets the tags accordingly
 AMBARI_SERVER=$(echo $METADATA_RESULT | jq "$INSTANCE_SELECTOR" | jq '.[].ambariServer' | sed s/\"//g)
