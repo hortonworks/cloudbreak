@@ -55,4 +55,14 @@ public class ClusterController {
         return new ResponseEntity<>(clusters, HttpStatus.OK);
     }
 
+    @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
+    public ResponseEntity<ClusterJson> deleteCluster(@PathVariable String id) {
+        ClusterRegistration registration = clusterRegistry.get(id);
+        if (registration == null) {
+            return new ResponseEntity<>(new ClusterJson("", "", ""), HttpStatus.NOT_FOUND);
+        }
+        ClusterRegistration removed = clusterRegistry.remove(id);
+        return new ResponseEntity<>(clusterConverter.convert(removed), HttpStatus.OK);
+    }
+
 }
