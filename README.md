@@ -47,6 +47,11 @@ http://docs.cloudbreak.apiary.io/
     - [Manage blueprints](#manage-blueprints)
     - [Create cluster](#create-cluster)
   - [Add new cloud providers](#add-new-cloud-providers)
+    - [Handling API requests](#handling-api-requests)
+    - [Event handling and notifications](#event-handling-and-notifications)
+    - [Metadata service](#metadata-service)
+    - [Account management](#account-management)
+    - [Cluster creation](#cluster-creation)
   - [Releases](#releases)
 
 <!--overview.md-->
@@ -485,7 +490,7 @@ Once you have launched the cluster creation you can track the progress either on
 
 <!--addnewcloud.md-->
 
-##Add new cloud providers
+## Add new cloud providers
 
 Cloudbreak is built from ground up on the idea of being cloud provider agnostic. All the external API's are cloud agnostic, and we have
 internally abstracted working with individual cloud providers API's. Nevertheless adding new cloud providers is extremely important for us, thus
@@ -513,11 +518,11 @@ It means that connecting a new provider involves implementing the necessary inte
 The flow is presented with the sequence diagrams below.
 The first diagram shows how the process is started when a `POST` request is sent to the API, the second one shows the actual provisioning flow's first part which contains the cloud platform specific services. The final diagram contains the last part of the provision flow that's common for every provider.
 
-![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/docs/docs/images/seq_diagram_stack_post.png?token=1568469__eyJzY29wZSI6IlJhd0Jsb2I6c2VxdWVuY2VpcS9jbG91ZGJyZWFrL2RvY3MvZG9jcy9pbWFnZXMvc2VxX2RpYWdyYW1fc3RhY2tfcG9zdC5wbmciLCJleHBpcmVzIjoxNDA1NjkzOTM3fQ%3D%3D--685e1231ec544c6708d7ef57c8385a809c16dc3e)
+![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/seq_diagram_stack_post.png?token=1568469__eyJzY29wZSI6IlJhd0Jsb2I6c2VxdWVuY2VpcS9jbG91ZGJyZWFrL21hc3Rlci9kb2NzL2ltYWdlcy9zZXFfZGlhZ3JhbV9zdGFja19wb3N0LnBuZyIsImV4cGlyZXMiOjE0MDU2OTU0MzJ9--29d50c7dd14b7a0d2b68d82dd2a92a661d3e421d)
 
 The process starts with the controller layer (`StackController` and `SimpleStackService`) that creates and persists the new stack domain object, then sends a `PROVISION_REQUEST_EVENT`. The whole provision flow runs async from this step, the controller returns the response with the newly created stack's id to the client.
 
-![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/docs/docs/images/seq_diagram_provision_flow_1.png?token=1568469__eyJzY29wZSI6IlJhd0Jsb2I6c2VxdWVuY2VpcS9jbG91ZGJyZWFrL2RvY3MvZG9jcy9pbWFnZXMvc2VxX2RpYWdyYW1fcHJvdmlzaW9uX2Zsb3dfMS5wbmciLCJleHBpcmVzIjoxNDA1NjkzOTY0fQ%3D%3D--e15254e1b1922a1f203bf41fd256a5be61ebd13d)
+![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/seq_diagram_provision_flow_1.png?token=1568469__eyJzY29wZSI6IlJhd0Jsb2I6c2VxdWVuY2VpcS9jbG91ZGJyZWFrL21hc3Rlci9kb2NzL2ltYWdlcy9zZXFfZGlhZ3JhbV9wcm92aXNpb25fZmxvd18xLnBuZyIsImV4cGlyZXMiOjE0MDU2OTU0Mzd9--733998eb6ce47cdfa0f788bd9fdbe4b95e870da3)
 
 The diagram's goal is to provide a high level design of the flow, it doesn't contain every little detail, there are some smaller steps and method calls left out, the method parameters are not shown and the class names are often abbreviated.
 
@@ -531,7 +536,7 @@ The diagram's goal is to provide a high level design of the flow, it doesn't con
 - `ProvisionRH` = `ProvisionRequestHandler`
 - `MetadataSetupCH` = `MetadataSetupCompleteHandler`
 
-![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/docs/docs/images/seq_diagram_provision_flow_2.png?token=1568469__eyJzY29wZSI6IlJhd0Jsb2I6c2VxdWVuY2VpcS9jbG91ZGJyZWFrL2RvY3MvZG9jcy9pbWFnZXMvc2VxX2RpYWdyYW1fcHJvdmlzaW9uX2Zsb3dfMi5wbmciLCJleHBpcmVzIjoxNDA1NjkzOTkwfQ%3D%3D--d64bc090a36c28d689b50b2a75ff7c4d6dea2df0)
+![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/seq_diagram_provision_flow_2.png?token=1568469__eyJzY29wZSI6IlJhd0Jsb2I6c2VxdWVuY2VpcS9jbG91ZGJyZWFrL21hc3Rlci9kb2NzL2ltYWdlcy9zZXFfZGlhZ3JhbV9wcm92aXNpb25fZmxvd18yLnBuZyIsImV4cGlyZXMiOjE0MDU2OTU0NDF9--37c78d072a5c16fb0dba4128351c63d17b33cb83)
 
 *Notes:*
 - Ambari server is not shown on the diagram, but health check is basically a call to the Ambari REST API's health endpoint
@@ -564,7 +569,7 @@ The implementation should iterate over these resources and should call the prope
 
 When a DELETE request arrives, the controller layer finds the requested stack in the database and passes it to the correct cloud platform implementation. There is no return type in this case. In case of a GET request, the implementation should return a `StackDescription` that contains the details of the cloud resources. Later in the controller the basic information from the Cloudbreak database is returned besides the detailed description coming from the `CloudPlatformConnector`.
 
-#### Event handling and notifications
+### Event handling and notifications
 Cloudbreak uses events and notifications extensively. Event publishing and subscribing uses the Reactor framework. This is an example to send a `METADATA_SETUP_COMPLETE` event after wiring the `Reactor` bean in the component:
 ```
 @Autowired
@@ -574,7 +579,7 @@ reactor.notify(ReactorConfig.METADATA_SETUP_COMPLETE_EVENT, Event.wrap(new Metad
 ```
 If you'd like to learn more about the Reactor framework, Spring has a [good guide](http://spring.io/guides/gs/messaging-reactor/) to start with. You should also check the `ReactorConfig` and `ReactorInitializer` classes in Cloudbreak.
 
-### Metadata service and user-data
+### Metadata service
 To be able to use the `sequenceiq/ambari` docker container, instances that are started in the same stack should know about each other. They have to know on which addresses can the other docker containers be reached to be able to join the Serf cluster.
 They also have to know if they have an Ambari server *role* or not. This kind of information is provided by the metadata service that is available for every stack on a different unique hash. The metadata address looks like this:
 ```
@@ -623,7 +628,7 @@ Cluster creation and installation is common for every cloud provider, it is base
 It is async like the stack creation: the response is sent back immedately, and the flow starts asynchronously.
 The sequence diagram below shows the flow.
 
-![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/docs/docs/images/seq_diagram_cluster_flow.png?token=1568469__eyJzY29wZSI6IlJhd0Jsb2I6c2VxdWVuY2VpcS9jbG91ZGJyZWFrL2RvY3MvZG9jcy9pbWFnZXMvc2VxX2RpYWdyYW1fY2x1c3Rlcl9mbG93LnBuZyIsImV4cGlyZXMiOjE0MDU2OTQ3ODV9--736809f2bdb7a272ae83fd5f9cb2dd15263677fd)
+![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/seq_diagram_cluster_flow.png?token=1568469__eyJzY29wZSI6IlJhd0Jsb2I6c2VxdWVuY2VpcS9jbG91ZGJyZWFrL21hc3Rlci9kb2NzL2ltYWdlcy9zZXFfZGlhZ3JhbV9jbHVzdGVyX2Zsb3cucG5nIiwiZXhwaXJlcyI6MTQwNTY5NTQzNn0%3D--7966403bc08a94e8fda5ce17aae800523856219a)
 
 <!--addnewcloud.md-->
 
