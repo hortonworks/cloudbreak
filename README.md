@@ -513,13 +513,11 @@ It means that connecting a new provider involves implementing the necessary inte
 The flow is presented with the sequence diagrams below.
 The first diagram shows how the process is started when a `POST` request is sent to the API, the second one shows the actual provisioning flow's first part which contains the cloud platform specific services. The final diagram contains the last part of the provision flow that's common for every provider.
 
-Sequence1
-![]()
+![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/docs/docs/images/seq_diagram_stack_post.png?token=1568469__eyJzY29wZSI6IlJhd0Jsb2I6c2VxdWVuY2VpcS9jbG91ZGJyZWFrL2RvY3MvZG9jcy9pbWFnZXMvc2VxX2RpYWdyYW1fc3RhY2tfcG9zdC5wbmciLCJleHBpcmVzIjoxNDA1NjkzOTM3fQ%3D%3D--685e1231ec544c6708d7ef57c8385a809c16dc3e)
 
 The process starts with the controller layer (`StackController` and `SimpleStackService`) that creates and persists the new stack domain object, then sends a `PROVISION_REQUEST_EVENT`. The whole provision flow runs async from this step, the controller returns the response with the newly created stack's id to the client.
 
-Sequence2
-![]()
+![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/docs/docs/images/seq_diagram_provision_flow_1.png?token=1568469__eyJzY29wZSI6IlJhd0Jsb2I6c2VxdWVuY2VpcS9jbG91ZGJyZWFrL2RvY3MvZG9jcy9pbWFnZXMvc2VxX2RpYWdyYW1fcHJvdmlzaW9uX2Zsb3dfMS5wbmciLCJleHBpcmVzIjoxNDA1NjkzOTY0fQ%3D%3D--e15254e1b1922a1f203bf41fd256a5be61ebd13d)
 
 The diagram's goal is to provide a high level design of the flow, it doesn't contain every little detail, there are some smaller steps and method calls left out, the method parameters are not shown and the class names are often abbreviated.
 
@@ -533,8 +531,7 @@ The diagram's goal is to provide a high level design of the flow, it doesn't con
 - `ProvisionRH` = `ProvisionRequestHandler`
 - `MetadataSetupCH` = `MetadataSetupCompleteHandler`
 
-Sequence3
-![]()
+![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/docs/docs/images/seq_diagram_provision_flow_2.png?token=1568469__eyJzY29wZSI6IlJhd0Jsb2I6c2VxdWVuY2VpcS9jbG91ZGJyZWFrL2RvY3MvZG9jcy9pbWFnZXMvc2VxX2RpYWdyYW1fcHJvdmlzaW9uX2Zsb3dfMi5wbmciLCJleHBpcmVzIjoxNDA1NjkzOTkwfQ%3D%3D--d64bc090a36c28d689b50b2a75ff7c4d6dea2df0)
 
 *Notes:*
 - Ambari server is not shown on the diagram, but health check is basically a call to the Ambari REST API's health endpoint
@@ -619,6 +616,14 @@ A sample AWS credentials request:
   }
 }
 ```
+
+### Cluster creation
+
+Cluster creation and installation is common for every cloud provider, it is based on Ambari and uses SequenceIQ's Ambari REST client.
+It is async like the stack creation: the response is sent back immedately, and the flow starts asynchronously.
+The sequence diagram below shows the flow.
+
+![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/docs/docs/images/seq_diagram_cluster_flow.png?token=1568469__eyJzY29wZSI6IlJhd0Jsb2I6c2VxdWVuY2VpcS9jbG91ZGJyZWFrL2RvY3MvZG9jcy9pbWFnZXMvc2VxX2RpYWdyYW1fY2x1c3Rlcl9mbG93LnBuZyIsImV4cGlyZXMiOjE0MDU2OTQ3ODV9--736809f2bdb7a272ae83fd5f9cb2dd15263677fd)
 
 <!--addnewcloud.md-->
 
