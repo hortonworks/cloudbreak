@@ -25,7 +25,7 @@
       "Description" : "Number of instances that should be started in the stack.",
       "Type" : "Number",
       "Default" : "3",
-      "MinValue" : "2",
+      "MinValue" : "1",
       "MaxValue" : "99"
     },
     
