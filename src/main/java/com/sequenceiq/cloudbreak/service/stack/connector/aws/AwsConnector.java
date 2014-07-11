@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.aws;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +16,6 @@ import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.Filter;
-import com.amazonaws.services.ec2.model.Instance;
-import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsStackDescription;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
@@ -105,25 +100,10 @@ public class AwsConnector implements CloudPlatformConnector {
     @Override
     public void deleteStack(User user, Stack stack, Credential credential) {
         LOGGER.info("Deleting stack: {}", stack.getId(), stack.getCfStackId());
-        AwsTemplate awsInfra = (AwsTemplate) stack.getTemplate();
+        AwsTemplate template = (AwsTemplate) stack.getTemplate();
         AwsCredential awsCredential = (AwsCredential) credential;
-        AmazonEC2Client ec2Client = awsStackUtil.createEC2Client(awsInfra.getRegion(), awsCredential);
-        DescribeInstancesRequest instancesRequest = new DescribeInstancesRequest()
-                .withFilters(new Filter().withName("tag:" + INSTANCE_TAG_NAME).withValues(stack.getName()));
-        DescribeInstancesResult instancesResult = ec2Client.describeInstances(instancesRequest);
-
-        if (!instancesResult.getReservations().isEmpty()) {
-            List<String> instanceIds = new ArrayList<>();
-            for (Instance instance : instancesResult.getReservations().get(0).getInstances()) {
-                instanceIds.add(instance.getInstanceId());
-            }
-            LOGGER.info("Terminating instances for stack: {} [instances: {}]", stack.getId(), instanceIds);
-            TerminateInstancesRequest terminateInstancesRequest = new TerminateInstancesRequest().withInstanceIds(instanceIds);
-            ec2Client.terminateInstances(terminateInstancesRequest);
-        }
-
         if (stack.getCfStackName() != null) {
-            AmazonCloudFormationClient client = awsStackUtil.createCloudFormationClient(awsInfra.getRegion(), awsCredential);
+            AmazonCloudFormationClient client = awsStackUtil.createCloudFormationClient(template.getRegion(), awsCredential);
             LOGGER.info("Deleting CloudFormation stack for stack: {} [cf stack id: {}]", stack.getId(), stack.getCfStackId());
             DeleteStackRequest deleteStackRequest = new DeleteStackRequest().withStackName(stack.getCfStackName());
             client.deleteStack(deleteStackRequest);
