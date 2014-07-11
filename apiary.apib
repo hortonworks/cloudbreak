@@ -32,11 +32,10 @@ Allows the option to choose the favorite cloud provider and different pricing mo
 # Group User authentication
 Authentication related resources of the **Cloudbreak API**.
 
-The API supports token based and OAuth2 authentication.
 All operations against a REST resource must be authenticated.
 
-## Authentication [/authenticate]
-### Authenticates a user [POST]
+## Login [/login]
+### Login a user [POST]
 After successful authentication the call will return with an authentication token, and the user role. The token invalidates with the HTTP session or with the expiration of OAuth2 token.
 
 + Request (application/json)
@@ -49,19 +48,11 @@ After successful authentication the call will return with an authentication toke
 + Response 200 (application/json)
 
         {
-            "token": "user:c45sdfdsfo234jgkhsdgf324",
-            "roles": {
-                "ROLE_COMPANY_ADMIN": true,
-                "ROLE_COMPANY_USER ": true
-            },
-            "name": "mick.fanning@surf.com"
+            1
         }
 
 # Group User management
 User management related resources of the **Cloudbreak API**.
-
-These calls require *COMPANY_ADMIN* roles. A company administrator is the user who registers the company.
-Currently there are two user roles supported: regular users as  *COMPANY_USER* and admin users as *COMPANY_ADMIN*.
 
 ## User management [/users]
 ### Creates a new user [POST]
@@ -89,25 +80,6 @@ Creates a new user with the specified username, password, company, role. The use
         {
             "id": "user-2"
         }
-
-### List all users [GET]
-Users in *COMPANY_ADMIN* role can retrieve all users belonging to the company.
-The information contains generic user info, cloud and Hadoop cluster configurations belonging to the particular user.
-
-+ Request
-
-    + Headers
-
-            x-auth-token: user:c45sdfdsfo234jgkhsdgf324
-
-
-+ Response 200 (application/json)
-
-        [
-            {
-               TBD
-            }
-        ]
 
 ## Reset password request management [/password/reset]
 ### Request a password reset [POST]
@@ -151,11 +123,66 @@ The information contains generic user info, cloud and Hadoop cluster configurati
 
 + Response 200 (application/json)
 
-        {
             {
-               TBD
+              "blueprints": [],
+              "firstName": "Frank",
+              "lastName": "Louise",
+              "email": "frank.louise@sequenceiq.com",
+              "company": "SequenceIQ",
+              "credentials": [
+                {
+                  "id": 50,
+                  "description": "my aws credential",
+                  "parameters": {
+                    "roleArn": "rolearn",
+                    "snsTopics": []
+                  },
+                  "cloudPlatform": "AWS",
+                  "name": "aws_credential"
+                },
+                {
+                  "id": 51,
+                  "description": "my azure credential",
+                  "parameters": {
+                    "subscriptionId": "0000-0000-00000-0000",
+                    "jksPassword": "test123"
+                  },
+                  "cloudPlatform": "AZURE",
+                  "name": "azurefrank"
+                }
+              ],
+              "azureTemplates": [
+                {
+                  "id": 51,
+                  "description": "azure template",
+                  "parameters": {
+                    "password": "",
+                    "location": "NORTH_EUROPE",
+                    "imageName": "ambari-docker-v1",
+                    "vmType": "SMALL",
+                    "ports": []
+                  },
+                  "name": "warmup",
+                  "cloudPlatform": "AZURE"
+                },
+              ],
+              "awsTemplates": [
+                {
+                  "id": 50,
+                  "description": "description sample",
+                  "parameters": {
+                    "amiId": "ami-25dc0852",
+                    "sshLocation": "0.0.0.0/0",
+                    "keyName": "sequence-eu",
+                    "region": "EU_WEST_1",
+                    "instanceType": "t2.small"
+                  },
+                  "name": "Aws development environment",
+                  "cloudPlatform": "AWS"
+                }
+              ],
+              "stacks": []
             }
-        }
 
 ##  Confirmation of the registration [/confirm/{confToken}]
 ### Confirm the registration [GET]
@@ -473,234 +500,6 @@ Deletes the specified template from the database, unless there is a cloud instan
         {
         }
 
-# Group Stacks
-Stacks related resources of the **Cloudbreak API**.
-Manages AWS or Azure clouds based on templates. Creates, launches, stops, deletes the specified number of instances in the selected template (infrastructure).
-
-
-## Create cloud [/stacks]
-### Create stack [POST]
-Creates an AWS or Azure cloud from a template.
-
-+ Request
-
-    + Headers
-
-            x-auth-token: user:c45sdfdsfo234jgkhsdgf324
-
-    + Body
-
-            {
-                "name": "my-cloud-1",
-                "description": "my testing cloud",
-                "clusterSize": 3,
-                "templateId": "1"
-            }
-
-+ Response 200 (application/json)
-
-        {
-            "id": "1"
-        }
-
-## Retrieve stacks for the user [/stacks]
-### List stacks [GET]
-Retrieves the cloud stacks belonging to the user
-
-+ Request
-
-    + Headers
-
-            x-auth-token: user:c45sdfdsfo234jgkhsdgf324
-
-    + Body
-
-            {
-            }
-
-+ Response 200 (application/json)
-
-        {
-          [
-            "metadata": [
-              {
-                "dockerSubnet": "172.17.10",
-                "ambariServer": true,
-                "instanceIndex": 0,
-                "instanceId": "i-fab627b8",
-                "publicIp": "54.77.43.59",
-                "privateIp": "10.0.0.136"
-              },
-              {
-                "dockerSubnet": "172.17.11",
-                "ambariServer": false,
-                "instanceIndex": 1,
-                "instanceId": "i-1bb92859",
-                "publicIp": "54.77.43.60",
-                "privateIp": "10.0.0.135"
-              },
-              {
-                "dockerSubnet": "172.17.12",
-                "ambariServer": false,
-                "instanceIndex": 2,
-                "instanceId": "i-1ab92858",
-                "publicIp": "54.77.43.61",
-                "privateIp": "10.0.0.137"
-              }
-            ],
-            "cluster": {
-              "description": "",
-              "blueprintId": 50,
-              "cluster": {},
-              "minutesUp": 8,
-              "hoursUp": 0,
-              "status": "CREATE_COMPLETED",
-              "id": 2
-            },
-            "hash": "208d3dd389fad2221311792106cde53d",
-            "ambariServerIp": "54.77.43.59",
-            "nodeCount": 3,
-            "name": "awstest",
-            "templateId": 50,
-            "credentialId": 50,
-            "id": 50,
-            "cloudPlatform": "AWS",
-            "description": {
-              --AWS DESCRIPTION--
-            },
-            "status": "CREATE_COMPLETED"
-          ]
-        }
-
-
-## Retrieve a  stack [/stacks/{id}]
-### Retrieve a particular stack [GET]
-Retrieves a  (AWS or Azure)  stack definition.
-
-+ Parameters
-    + id (required String `id`) ... The identifier of the `template`.
-
-+ Request
-
-    + Headers
-
-            x-auth-token: user:c45sdfdsfo234jgkhsdgf324
-
-+ Response 200 (application/json)
-
-        {
-          "metadata": [
-            {
-              "dockerSubnet": "172.17.10",
-              "ambariServer": true,
-              "instanceIndex": 0,
-              "instanceId": "i-fab627b8",
-              "publicIp": "54.77.43.59",
-              "privateIp": "10.0.0.136"
-            },
-            {
-              "dockerSubnet": "172.17.11",
-              "ambariServer": false,
-              "instanceIndex": 1,
-              "instanceId": "i-1bb92859",
-              "publicIp": "54.77.43.60",
-              "privateIp": "10.0.0.135"
-            },
-            {
-              "dockerSubnet": "172.17.12",
-              "ambariServer": false,
-              "instanceIndex": 2,
-              "instanceId": "i-1ab92858",
-              "publicIp": "54.77.43.61",
-              "privateIp": "10.0.0.137"
-            }
-          ],
-          "cluster": {
-            "description": "",
-            "blueprintId": 50,
-            "cluster": {},
-            "minutesUp": 8,
-            "hoursUp": 0,
-            "status": "CREATE_COMPLETED",
-            "id": 2
-          },
-          "hash": "208d3dd389fad2221311792106cde53d",
-          "ambariServerIp": "54.77.43.59",
-          "nodeCount": 3,
-          "name": "awstest",
-          "templateId": 50,
-          "credentialId": 50,
-          "id": 50,
-          "cloudPlatform": "AWS",
-          "description": {
-            --AWS DESCRIPTION--
-          },
-          "status": "CREATE_COMPLETED"
-        }
-
-
-
-## Delete cloud stacks [/stacks/{id}]
-### Deletes the specified cloud stack [DELETE]
-Deletes the specified stack from the (AWS or Azure) cloud
-
-WARNING: All data will be lost - unless there was no storage configured. It is the user's responsibilty to backup data or take snapshots uning the cloud interface.
-
-+ Parameters
-    + id (required String `aws-cloud-id`) ... The identifier of the `stack`.
-
-+ Request
-
-    + Headers
-
-            x-auth-token: user:c45sdfdsfo234jgkhsdgf324
-
-+ Response 200 (application/json)
-
-
-          {
-
-          }
-
-## Retrieve a  stack [/stacks/metadata/{hash}]
-### Retrieve a particular stack metadata [GET]
-Retrieves a  (AWS or Azure)  stack metadata.
-
-+ Parameters
-    + hash (required String `hash`) ... The identifier of the `metadata`.
-
-+ Response 200 (application/json)
-
-  {
-    [
-      {
-        "dockerSubnet": "172.17.12",
-        "ambariServer": false,
-        "instanceIndex": 2,
-        "instanceId": "i-1ab92858",
-        "publicIp": "54.77.43.61",
-        "privateIp": "10.0.0.137"
-      },
-      {
-        "dockerSubnet": "172.17.10",
-        "ambariServer": true,
-        "instanceIndex": 0,
-        "instanceId": "i-fab627b8",
-        "publicIp": "54.77.43.59",
-        "privateIp": "10.0.0.136"
-      },
-      {
-        "dockerSubnet": "172.17.11",
-        "ambariServer": false,
-        "instanceIndex": 1,
-        "instanceId": "i-1bb92859",
-        "publicIp": "54.77.43.60",
-        "privateIp": "10.0.0.135"
-      }
-    ]
-  }
-
-
 # Group Blueprints
 Hadoop blueprint  related resources of the **Cloudbreak API**.
 
@@ -792,7 +591,7 @@ The cardinality specifies the desired number of nodes for the hostgroup. When th
 
 ## Create Hadoop blueprints [/blueprints]
 ### Create a blueprint [POST]
-Creates a Hadoop blueprint using the provided `blueprintUrl`
+Creates a Hadoop blueprint using the provided `url`
 
 + Request
 
@@ -994,11 +793,241 @@ WARNING: Deletes the specified blueprint from the database.
         }
 
 
+# Group Stacks
+Stacks related resources of the **Cloudbreak API**.
+Manages AWS or Azure clouds based on templates. Creates, launches, stops, deletes the specified number of instances in the selected template (infrastructure).
+
+
+## Create cloud [/stacks]
+### Create stack [POST]
+Creates an AWS or Azure cloud from a template.
+
++ Request
+
+    + Headers
+
+            x-auth-token: user:c45sdfdsfo234jgkhsdgf324
+
+    + Body
+
+            {
+                "name": "my-cloud-1",
+                "description": "my testing cloud",
+                "clusterSize": 3,
+                "templateId": "1"
+            }
+
++ Response 200 (application/json)
+
+        {
+            "id": "1"
+        }
+
+## Retrieve stacks for the user [/stacks]
+### List stacks [GET]
+Retrieves the cloud stacks belonging to the user
+
++ Request
+
+    + Headers
+
+            x-auth-token: user:c45sdfdsfo234jgkhsdgf324
+
+    + Body
+
+            {
+            }
+
++ Response 200 (application/json)
+
+        {
+          [
+            "metadata": [
+              {
+                "dockerSubnet": "172.17.10",
+                "ambariServer": true,
+                "instanceIndex": 0,
+                "instanceId": "i-fab627b8",
+                "publicIp": "54.77.43.59",
+                "privateIp": "10.0.0.136"
+              },
+              {
+                "dockerSubnet": "172.17.11",
+                "ambariServer": false,
+                "instanceIndex": 1,
+                "instanceId": "i-1bb92859",
+                "publicIp": "54.77.43.60",
+                "privateIp": "10.0.0.135"
+              },
+              {
+                "dockerSubnet": "172.17.12",
+                "ambariServer": false,
+                "instanceIndex": 2,
+                "instanceId": "i-1ab92858",
+                "publicIp": "54.77.43.61",
+                "privateIp": "10.0.0.137"
+              }
+            ],
+            "cluster": {
+              "description": "",
+              "blueprintId": 50,
+              "cluster": {},
+              "minutesUp": 8,
+              "hoursUp": 0,
+              "status": "CREATE_COMPLETED",
+              "id": 2
+            },
+            "hash": "208d3dd389fad2221311792106cde53d",
+            "ambariServerIp": "54.77.43.59",
+            "nodeCount": 3,
+            "name": "awstest",
+            "templateId": 50,
+            "credentialId": 50,
+            "id": 50,
+            "cloudPlatform": "AWS",
+            "description": {
+              --AWS DESCRIPTION--
+            },
+            "status": "CREATE_COMPLETED"
+          ]
+        }
+
+
+## Retrieve a  stack [/stacks/{id}]
+### Retrieve a particular stack [GET]
+Retrieves a  (AWS or Azure)  stack definition.
+
++ Parameters
+    + id (required String `id`) ... The identifier of the `stack`.
+
++ Request
+
+    + Headers
+
+            x-auth-token: user:c45sdfdsfo234jgkhsdgf324
+
++ Response 200 (application/json)
+
+        {
+          "metadata": [
+            {
+              "dockerSubnet": "172.17.10",
+              "ambariServer": true,
+              "instanceIndex": 0,
+              "instanceId": "i-fab627b8",
+              "publicIp": "54.77.43.59",
+              "privateIp": "10.0.0.136"
+            },
+            {
+              "dockerSubnet": "172.17.11",
+              "ambariServer": false,
+              "instanceIndex": 1,
+              "instanceId": "i-1bb92859",
+              "publicIp": "54.77.43.60",
+              "privateIp": "10.0.0.135"
+            },
+            {
+              "dockerSubnet": "172.17.12",
+              "ambariServer": false,
+              "instanceIndex": 2,
+              "instanceId": "i-1ab92858",
+              "publicIp": "54.77.43.61",
+              "privateIp": "10.0.0.137"
+            }
+          ],
+          "cluster": {
+            "description": "",
+            "blueprintId": 50,
+            "cluster": {},
+            "minutesUp": 8,
+            "hoursUp": 0,
+            "status": "CREATE_COMPLETED",
+            "id": 2
+          },
+          "hash": "208d3dd389fad2221311792106cde53d",
+          "ambariServerIp": "54.77.43.59",
+          "nodeCount": 3,
+          "name": "awstest",
+          "templateId": 50,
+          "credentialId": 50,
+          "id": 50,
+          "cloudPlatform": "AWS",
+          "description": {
+            --AWS DESCRIPTION--
+          },
+          "status": "CREATE_COMPLETED"
+        }
+
+
+
+## Delete cloud stacks [/stacks/{id}]
+### Deletes the specified cloud stack [DELETE]
+Deletes the specified stack from the (AWS or Azure) cloud
+
+WARNING: All data will be lost - unless there was no storage configured. It is the user's responsibilty to backup data or take snapshots uning the cloud interface.
+
++ Parameters
+    + id (required String `aws-cloud-id`) ... The identifier of the `stack`.
+
++ Request
+
+    + Headers
+
+            x-auth-token: user:c45sdfdsfo234jgkhsdgf324
+
++ Response 200 (application/json)
+
+
+          {
+
+          }
+
+## Retrieve a  stack [/stacks/metadata/{hash}]
+### Retrieve a particular stack metadata [GET]
+Retrieves a  (AWS or Azure)  stack metadata.
+
++ Parameters
+    + hash (required String `hash`) ... The identifier of the `metadata`.
+
++ Response 200 (application/json)
+
+  {
+    [
+      {
+        "dockerSubnet": "172.17.12",
+        "ambariServer": false,
+        "instanceIndex": 2,
+        "instanceId": "i-1ab92858",
+        "publicIp": "54.77.43.61",
+        "privateIp": "10.0.0.137"
+      },
+      {
+        "dockerSubnet": "172.17.10",
+        "ambariServer": true,
+        "instanceIndex": 0,
+        "instanceId": "i-fab627b8",
+        "publicIp": "54.77.43.59",
+        "privateIp": "10.0.0.136"
+      },
+      {
+        "dockerSubnet": "172.17.11",
+        "ambariServer": false,
+        "instanceIndex": 1,
+        "instanceId": "i-1bb92859",
+        "publicIp": "54.77.43.60",
+        "privateIp": "10.0.0.135"
+      }
+    ]
+  }
+
+
+
+
 # Group Clusters
 Hadoop cluster related resources of the **Cloudbreak API**.
 
 
-## Adding Hadoop clusters [/stack/{stackId}/cluster]
+## Adding Hadoop clusters [/stacks/{stackId}/cluster]
 ### Create cluster [POST]
 Creates a Hadoop cluster based on a blueprint.
 
@@ -1025,7 +1054,7 @@ Creates a Hadoop cluster based on a blueprint.
         }
 
 
-## Retrieve Hadoop clusters [/stack/{stackId}/cluster]
+## Retrieve Hadoop clusters [/stacks/{stackId}/cluster]
 ### Retrieve a particular cluster [GET]
 Retrieves a particular cluster configuration for the user
 
