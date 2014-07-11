@@ -1,6 +1,6 @@
 package com.sequenceiq.periscope.rest.json;
 
-public class AmbariJson {
+public class AmbariJson implements Json {
 
     private String host;
     private String port;

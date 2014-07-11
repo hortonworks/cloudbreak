@@ -1,6 +1,6 @@
 package com.sequenceiq.periscope.rest.json;
 
-public class IdJson {
+public class IdJson implements Json {
 
     private String id;
 

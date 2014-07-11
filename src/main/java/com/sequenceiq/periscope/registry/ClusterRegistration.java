@@ -9,12 +9,14 @@ import com.sequenceiq.periscope.service.configuration.AmbariConfigurationService
 public class ClusterRegistration {
 
     private final String clusterId;
+    private final Ambari ambari;
     private final AmbariClient ambariClient;
     private final AmbariConfigurationService configurationService;
     private final YarnClient yarnClient;
 
     public ClusterRegistration(String clusterId, Ambari ambari) {
         this.clusterId = clusterId;
+        this.ambari = ambari;
         this.ambariClient = new AmbariClient(ambari.getHost(), ambari.getPort(), ambari.getUser(), ambari.getPass());
         this.configurationService = new AmbariConfigurationService(ambariClient);
         this.yarnClient = YarnClient.createYarnClient();
@@ -36,5 +38,21 @@ public class ClusterRegistration {
 
     public YarnClient getYarnClient() {
         return yarnClient;
+    }
+
+    public String getHost() {
+        return ambari.getHost();
+    }
+
+    public String getPort() {
+        return ambari.getPort();
+    }
+
+    public String getUser() {
+        return ambari.getUser();
+    }
+
+    public String getPass() {
+        return ambari.getPass();
     }
 }
