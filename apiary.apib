@@ -988,9 +988,12 @@ WARNING: Deletes the specified blueprint from the database.
 Hadoop cluster related resources of the **Cloudbreak API**.
 
 
-## Adding Hadoop clusters [/clusters]
+## Adding Hadoop clusters [/stack/{stackId}/cluster]
 ### Create cluster [POST]
 Creates a Hadoop cluster based on a blueprint.
+
++ Parameters
+    + id (required String `id`) ... The identifier of the `stack`
 
 + Request
 
@@ -1002,16 +1005,8 @@ Creates a Hadoop cluster based on a blueprint.
 
             {
                  "clusterName": "my-cluster",
-                 "blueprintName": "multi-node-hdfs-yarn",
-                 "hostGroups": [
-                     {
-                          "name": "master",
-                          "cardinality": 1
-                     },
-                     {
-                         "name": "slave",
-                         "cardinality": 3
-                    } ]
+                 "blueprintId": "1",
+                 "description": "My multinode cluster"
             }
 
 + Response 200 (application/json)
@@ -1020,9 +1015,12 @@ Creates a Hadoop cluster based on a blueprint.
         }
 
 
-## Retrieve Hadoop clusters [/clusters]
-### List clusters [GET]
-Retrieve all Hadoop clusters
+## Retrieve Hadoop clusters [/stack/{stackId}/cluster]
+### Retrieve a particular cluster [GET]
+Retrieves a particular cluster configuration for the user
+
++ Parameters
+    + id (required String `id`) ... The identifier of the `stack`
 
 + Request
 
@@ -1110,54 +1108,4 @@ Retrieve all Hadoop clusters
             },
             "href": "http://172.17.0.2:8080/api/v1/clusters/MySingleNodeCluster2"
           }
-        }
-
-
-## Retrieve a cluster  [/clusters/{id}]
-### Retrieve a particular cluster [GET]
-Retrieves a particular cluster configuration for the user
-
-+ Parameters
-    + id (required String `id`) ... The identifier of the `cluster`
-
-+ Request
-
-    + Headers
-
-            x-auth-token: user:c45sdfdsfo234jgkhsdgf324
-
-+ Response 200 (application/json)
-
-        {
-            "clusterName": "my-hadoop-cluster-1",
-            "stackId":"my-hadoop-stack-1"
-            "host_groups" : [
-                  {
-                    "name" : "master",
-                    "cardinality" : "1"
-                  },
-                  {
-                    "name" : "slaves",
-                    "cardinality" : "2"
-                  }
-                ]
-        }
-
-
-## Delete clusters [/clusters/{id}]
-### Deletes the specified cluster [DELETE]
-WARNING: Deletes the cluster - all data in HDFS will be lost. The cluster is destroyed.
-
-+ Parameters
-    + id (required String `id`) ... The identifier of the cluster.
-
-+ Request
-
-    + Headers
-
-            x-auth-token: user:c45sdfdsfo234jgkhsdgf324
-
-+ Response 200 (application/json)
-
-        {
         }
