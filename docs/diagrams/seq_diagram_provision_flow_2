@@ -1,0 +1,11 @@
+SetupCH->AmbariRoleAllocator: allocateRoles()
+AmbariRoleAllocator->AmbariRoleAllocationCH: notify(AMBARI_ROLE_ALLOCATION_COMPLETE)
+AmbariRoleAllocationCH->AmbariRoleAllocationCH: extendMetadata()
+AmbariRoleAllocationCH->AmbariRoleAllocationCH: saveMetadata()
+AmbariRoleAllocationCH->AmbariStartupListener: waitForAmbariServer()
+loop until Ambari available
+    AmbariStartupListener->AmbariStartupListener: Ambari server healthCheck
+end
+AmbariStartupListener->StackCreationSH: notify(STACK_CREATE_SUCCESS)
+StackCreationSH->StackCreationSH: save(Status. CREATE_COMPLETED)
+StackCreationSH->ClusterRequestH: notify(AMBARI_STARTED)

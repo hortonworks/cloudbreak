@@ -28,7 +28,7 @@ http://docs.cloudbreak.apiary.io/
       - [Development] (#development)
       - [Production] (#production)
   - [How it works] (#how-it-works)
-    - [Temlates] (#temlates)
+    - [Templates] (#templates)
     - [Stacks] (#stacks)
     - [Blueprints] (#blueprints)
     - [Clusters] (#clusters)
@@ -488,17 +488,142 @@ Once you have launched the cluster creation you can track the progress either on
 ##Add new cloud providers
 
 Cloudbreak is built from ground up on the idea of being cloud provider agnostic. All the external API's are cloud agnostic, and we have
-internally abstracted wokring with individual cloud providers API's. Nevertheless adding new cloud providers is extremely important for us, thus
+internally abstracted working with individual cloud providers API's. Nevertheless adding new cloud providers is extremely important for us, thus
 in order to speed up the process and linking the new provider API with Cloudbreak we came up with an SDK and list of responsibilities.
-Once these interfaces are implemented, and the different providers API calls are `translated` you are ready to go.
+Once these interfaces are implemented, and the different provider's API calls are `translated` you are ready to go.
 
 Though we are working on a few popular providers to add to Cloudbreak we'd like to hear your voice as well - your ideas, provider requests or `contribution` is highly appreciated.
 
-1. Metadata service
+### Handling API requests
 
-2. Notifications
+Connecting a new cloud provider means that the Cloudbreak rest API should handle GET, POST and DELETE requests to a stack resource of the new cloud provider correctly.
+- POST: Creates the cloud resources (VPC, instances, etc) and properly starts Sequenceiq's Ambari Docker container on the instances.
+- DELETE: Terminates all instances in the cloud and deletes every other resources
+- GET: Describes the cloud resources by communicating with the cloud provider.
 
-3. Account management
+When connecting a new cloud provider, the `CloudPlatform` enum that holds the providers should be extended first. It is used to find the implementations when a request arrives.
+The main idea is the same behind every method: deal with the database calls in the controller then call the correct implementation that communicates with the cloud platform. This enables the connectors to be detached from the repository calls, they should only deal with the communication with the providers.
+
+After an interface is implemented there is only one task to make it available: put the `@Service` annotation on the class. Spring will take care of the rest by discovering the bean when building the application context and putting it in the list that holds the different implementations (see `AppConfig`).
+
+#### POST
+Cloudbreak uses an event-driven flow to provision stacks in the cloud. It gives more freedom to the cloud provider implementations and allows developers to build async flows easily, yet unifies the process and takes off the responsiblity from the implementations to manage the lifecycle of a stack entity.
+It means that connecting a new provider involves implementing the necessary interfaces, and sending different 'completed' events after a specific step is done.
+
+The flow is presented with the sequence diagrams below.
+The first diagram shows how the process is started when a `POST` request is sent to the API, the second one shows the actual provisioning flow's first part which contains the cloud platform specific services. The final diagram contains the last part of the provision flow that's common for every provider.
+
+![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/docs/docs/images/seq_diagram_stack_post.png?token=1568469__eyJzY29wZSI6IlJhd0Jsb2I6c2VxdWVuY2VpcS9jbG91ZGJyZWFrL2RvY3MvZG9jcy9pbWFnZXMvc2VxX2RpYWdyYW1fc3RhY2tfcG9zdC5wbmciLCJleHBpcmVzIjoxNDA1NjkzOTM3fQ%3D%3D--685e1231ec544c6708d7ef57c8385a809c16dc3e)
+
+The process starts with the controller layer (`StackController` and `SimpleStackService`) that creates and persists the new stack domain object, then sends a `PROVISION_REQUEST_EVENT`. The whole provision flow runs async from this step, the controller returns the response with the newly created stack's id to the client.
+
+![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/docs/docs/images/seq_diagram_provision_flow_1.png?token=1568469__eyJzY29wZSI6IlJhd0Jsb2I6c2VxdWVuY2VpcS9jbG91ZGJyZWFrL2RvY3MvZG9jcy9pbWFnZXMvc2VxX2RpYWdyYW1fcHJvdmlzaW9uX2Zsb3dfMS5wbmciLCJleHBpcmVzIjoxNDA1NjkzOTY0fQ%3D%3D--e15254e1b1922a1f203bf41fd256a5be61ebd13d)
+
+The diagram's goal is to provide a high level design of the flow, it doesn't contain every little detail, there are some smaller steps and method calls left out, the method parameters are not shown and the class names are often abbreviated.
+
+*Notes:*
+- every notification event contains the stack id and the cloud platform
+- the stack object is retrieved from the database in every complete handler and passed to the invoked method
+- the ProvisionSetup event contains a `Map` that hold keys and values and passed to the Provision step
+- the MetadataSetup event contains a `Set` of `CoreMetadataInstance` that's processed by the complete handler
+- `ProvisionRH` = `ProvisionRequestHandler`
+- `ProvisionSetupCH` = `ProvisionSetupCompleteHandler`
+- `ProvisionRH` = `ProvisionRequestHandler`
+- `MetadataSetupCH` = `MetadataSetupCompleteHandler`
+
+![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/docs/docs/images/seq_diagram_provision_flow_2.png?token=1568469__eyJzY29wZSI6IlJhd0Jsb2I6c2VxdWVuY2VpcS9jbG91ZGJyZWFrL2RvY3MvZG9jcy9pbWFnZXMvc2VxX2RpYWdyYW1fcHJvdmlzaW9uX2Zsb3dfMi5wbmciLCJleHBpcmVzIjoxNDA1NjkzOTkwfQ%3D%3D--d64bc090a36c28d689b50b2a75ff7c4d6dea2df0)
+
+*Notes:*
+- Ambari server is not shown on the diagram, but health check is basically a call to the Ambari REST API's health endpoint
+- `MetadataSetupCH` = `MetadataSetupCompleteHandler`
+- `AmbariRoleAllocationCH` = `AmbariRoleAllocationCompleteHandler`
+- `StackCreationSH` = `StackCreationSuccessHandler`
+- `ClusterRequestH` = `ClusterRequestHandler`
+
+
+When adding a new provider, the following **3+1 steps** should be implemented to handle the provisioning successfully. The first three steps are similar: they involve the implementation of different interfaces and they should send `complete` events after their task is done. Sending only events when a task is done enables the implementations themselves to use async processes. For example AWS provisioning uses such an implementation (See `Provisioner` for the details).
+The last step is a bit different because it requires the implementation of the user-data bash script that runs on every cloud machine instance after they are started.
+- `ProvisionSetup`: This step should create every cloud provider resource that will be used during the provisioning. For example the EC2 implementation uses SNS topics to notify Cloudbreak when an EC2 resource creation is completed. These topics are created (or retrieved) in this step, and the identifiers are sent in the `PROVISION_SETUP_COMPLETE` event as a key-value pair. (see `AwsProvisionSetup`)
+
+- `Provisioner`: The actual cloud resource creation is done here. The `PROVISION_COMPLETE` must be sent after every resource creation is initialized. It must contain the type and id of the created resources. This process can be async itself, e.g.: AWS CloudFormation is able to notify clients through an SNS topic when specific resources are created - the `PROVISION_COMPLETE` event is only sent after this notification arrives. `AwsProvisioner` handles the resource requests and `SnsMessageHandler` handles the notifications coming from Amazon SNS.
+There are a few restriction for the resources to be created: the service must start as many instances as it is specified in the stack object and these instances must be started in a different subnet for every stack. They must also be able to reach the Internet, and a few ports should be open in the subnet.
+We recommend to create and use **pre-installed images** from a vanilla Ubuntu that have Docker and some other required tools installed and the sequenceiq/ambari image downloaded, so these things don't have to be done every time an instance is started. This prevents network issues and shortens the time of the provisioning. We have also created an [Ansible playbook]() that can be used to create the image.
+
+- `MetadataSetup`: The Cloudbreak instance metadata service is detailed [here](#metadata-service). For this to work, the cloud platform connectors must provide details to Cloudbreak about the instances that were started in a stack. The `CoreInstanceMetaData` (private IP in VPC, public IP and instance identifier) of every instance must be retrieved from the cloud platform and must be sent in a `METADATA_SETUP_COMPLETE` event. (see `AwsMetadataSetup`)
+
+- `user-data script`: Most cloud platforms provide user-data provisioning when starting an instance. It means that a specific script can be handed to the instance and it is run when the instance is initializing. User-data is usually handled by [CloudInit](https://help.ubuntu.com/community/CloudInit) on Ubuntu. This script is responsible for setting up the network configuration on an instance and start the Serf and Dnsmasq based Ambari Docker container with the proper variables.
+We have created Cloudbreak's metadata service to be able to use the same script everywhere, but the different cloud platforms can have different characteristics so we left the possibility to write a custom script too. The user data should be saved in `src/main/resources` with the name `[prefix]-init.sh` and it's prefix must be specified in the `CloudPlatform` enum.
+
+The rest of the flow in the sequence diagram is common for every cloud provider. Once the instances are started, the docker containers are running and the network configuration is done there is **no other cloud platform specific task** in Cloudbreak.
+Waiting for the Ambari server to start requires only the IP address of the server, the rest of the cluster installation is handled by Ambari through our [Ambari rest client](https://github.com/sequenceiq/ambari-rest-client) that is written in Groovy.
+
+#### GET and DELETE
+GET and DELETE is much more straightforward to implement than POST. There is an interface called `CloudPlatformConnector` in the `com.sequenceiq.cloudbreak.service.stack.connector` package that must be implemented.
+Deleting or describing a resource on a cloud provider is in most cases easy. It usually involves an API call through an SDK where the name or id of the resource must be specified. Cloudbreak stores the ids of the resources in its database to determine which resources belong to a given stack.
+The implementation should iterate over these resources and should call the proper API request that deletes it or returns its details.
+
+When a DELETE request arrives, the controller layer finds the requested stack in the database and passes it to the correct cloud platform implementation. There is no return type in this case. In case of a GET request, the implementation should return a `StackDescription` that contains the details of the cloud resources. Later in the controller the basic information from the Cloudbreak database is returned besides the detailed description coming from the `CloudPlatformConnector`.
+
+#### Event handling and notifications
+Cloudbreak uses events and notifications extensively. Event publishing and subscribing uses the Reactor framework. This is an example to send a `METADATA_SETUP_COMPLETE` event after wiring the `Reactor` bean in the component:
+```
+@Autowired
+private Reactor reactor;
+...
+reactor.notify(ReactorConfig.METADATA_SETUP_COMPLETE_EVENT, Event.wrap(new MetadataSetupComplete(CloudPlatform.AWS, stack.getId(), coreInstanceMetadata)));
+```
+If you'd like to learn more about the Reactor framework, Spring has a [good guide](http://spring.io/guides/gs/messaging-reactor/) to start with. You should also check the `ReactorConfig` and `ReactorInitializer` classes in Cloudbreak.
+
+### Metadata service and user-data
+To be able to use the `sequenceiq/ambari` docker container, instances that are started in the same stack should know about each other. They have to know on which addresses can the other docker containers be reached to be able to join the Serf cluster.
+They also have to know if they have an Ambari server *role* or not. This kind of information is provided by the metadata service that is available for every stack on a different unique hash. The metadata address looks like this:
+```
+http://<METADATA_ADDRESS>/stacks/metadata/<METADATA_HASH>
+```
+`METADATA_ADDRESS` and `METADATA_HASH` is available in every init-script as variables.
+
+Different cloud platform implementations should send only the `CoreInstanceMetadata` in the `MetadataSetup` step. It is later extended by `MetadataSetupContext` that selects the Ambari server and generates an index and a Docker subnet for every instance. It means that the instances can be completely equal when started, only their metadata differentiates them from each other.
+
+Our reference user-data implementation is `ec2-init.sh`. That script contains the network configurations, the Docker subnet setup and the launch of the Docker container. The script has only one EC2-specific part: it retrieves the current instance's id from the EC2 metadata and uses that to parse the metadata coming from Cloudbreak. This means that this script is highly reusable for other cloud platforms too, the only difference should be the retrieval of the instance id (and other cloud platform specific characteristics, like in case of Azure).
+
+To learn more about the `sequenceiq/ambari` container, how it works with Serf and Dnsmasq check the [repo](https://github.com/sequenceiq/docker-ambari) on Github and read the blog posts about the [single-node](http://blog.sequenceiq.com/blog/2014/06/17/ambari-cluster-on-docker/) and [multi-node](http://blog.sequenceiq.com/blog/2014/06/19/multinode-hadoop-cluster-on-docker/) Hadoop clusters on Docker.
+
+
+### Account management
+
+Every cloud platform requires some kind of credentials when requesting, deleting or describing resources. Cloudbreak supports the management of credentials through it's REST API. First a credential should be created and later when a stack is requested, the credential has to be attached. This credential will be used by Cloudbreak for authentication and authorization to the cloud provider. This is a sample `POST: /stacks` request body with a credential:
+```
+{
+  "nodeCount":12,
+  "templateId":"123",
+  "name":"sample-stack",
+  "credentialId":"123"
+}
+```
+
+Connecting a new cloud provider requires that the right credentials are passed when communicating with its API. In order to be able to create new type of credentials with Cloudbreak, a new domain object must be created that extends `Credential`, and `SimpleCredentialService` must be extended so it can handle the new `CloudPlatform`.
+Cloudbreak offers the clients to create clusters **on their own accounts**. It means that some kind of cross-account access must be implemented, which is provided nicely by Amazon through IAM roles but quite hard to solve in Azure for example, and couldn't be done without some kind of unique solutions.
+Different providers use very different kind of credentials, so the Cloudbreak API expects these credentials as an unstructured parameters set. The implementation has the responsibility to parse, validate, convert and use these credentials (see `AwsCredential`, `AwsCredentialConverter` and `CrossAccountCredentialsProvider` for the AWS part).
+
+A sample AWS credentials request:
+
+```
+{
+  "cloudPlatform":"AWS",
+  "name":"sample-aws-credential",
+  "parameters": {
+    "roleArn":"arn:aws:iam::123456789000:role/my-iam-role",
+  }
+}
+```
+
+### Cluster creation
+
+Cluster creation and installation is common for every cloud provider, it is based on Ambari and uses SequenceIQ's Ambari REST client.
+It is async like the stack creation: the response is sent back immedately, and the flow starts asynchronously.
+The sequence diagram below shows the flow.
+
+![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/docs/docs/images/seq_diagram_cluster_flow.png?token=1568469__eyJzY29wZSI6IlJhd0Jsb2I6c2VxdWVuY2VpcS9jbG91ZGJyZWFrL2RvY3MvZG9jcy9pbWFnZXMvc2VxX2RpYWdyYW1fY2x1c3Rlcl9mbG93LnBuZyIsImV4cGlyZXMiOjE0MDU2OTQ3ODV9--736809f2bdb7a272ae83fd5f9cb2dd15263677fd)
 
 <!--addnewcloud.md-->
 
