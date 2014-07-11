@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.blueprint;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.times;
 import static org.mockito.BDDMockito.verify;
+import static org.mockito.Matchers.anySetOf;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.anyString;
@@ -12,6 +13,7 @@ import static org.mockito.Mockito.doThrow;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.google.common.collect.Sets;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -81,46 +83,76 @@ public class BlueprintServiceTest {
 
     @Test
     public void testDeleteBlueprint() {
-        //GIVEN
+        // GIVEN
         given(blueprintRepository.findOne(anyLong())).willReturn(blueprint);
         doNothing().when(blueprintRepository).delete(blueprint);
         doNothing().when(websocketService).sendToTopicUser(anyString(), any(WebsocketEndPoint.class), any(StatusMessage.class));
-        //WHEN
+        // WHEN
         underTest.delete(1L);
-        //THEN
+        // THEN
         verify(websocketService, times(1)).sendToTopicUser(anyString(), any(WebsocketEndPoint.class), any(StatusMessage.class));
         verify(blueprintRepository, times(1)).delete(blueprint);
     }
 
     @Test(expected = NotFoundException.class)
     public void testDeleteBlueprintWhenBlueprintNotFound() {
-        //GIVEN
+        // GIVEN
         given(blueprintRepository.findOne(anyLong())).willReturn(null);
-        //WHEN
+        // WHEN
         underTest.delete(1L);
     }
 
     @Test(expected = DataIntegrityViolationException.class)
     public void testDeleteBlueprintWhenBlueprintDataIntegrityExceptionAndFindAllClusterByBlueprintReturnEmptyList() {
-        //GIVEN
+        // GIVEN
         given(blueprintRepository.findOne(anyLong())).willReturn(blueprint);
         doThrow(new DataIntegrityViolationException("test")).when(blueprintRepository).delete(blueprint);
         Set<Cluster> clusters = new HashSet<>();
         given(clusterRepository.findAllClusterByBlueprint(anyLong())).willReturn(clusters);
-        //WHEN
+        // WHEN
         underTest.delete(1L);
     }
 
     @Test(expected = BadRequestException.class)
     public void testDeleteBlueprintWhenBlueprintDataIntegrityExceptionAndFindAllClusterByBlueprintReturnNotEmptyList() {
-        //GIVEN
+        // GIVEN
         given(blueprintRepository.findOne(anyLong())).willReturn(blueprint);
         doThrow(new DataIntegrityViolationException("test")).when(blueprintRepository).delete(blueprint);
         Set<Cluster> clusters = new HashSet<>();
         clusters.add(new Cluster());
         given(clusterRepository.findAllClusterByBlueprint(anyLong())).willReturn(clusters);
-        //WHEN
+        // WHEN
         underTest.delete(1L);
+    }
+
+    @Test
+    public void testGetBlueprint() {
+        // GIVEN
+        given(blueprintRepository.findOne(anyLong())).willReturn(blueprint);
+        given(blueprintConverter.convert(blueprint)).willReturn(blueprintJson);
+        // WHEN
+        underTest.get(1L);
+        // THEN
+        verify(blueprintConverter, times(1)).convert(blueprint);
+    }
+
+    @Test(expected = NotFoundException.class)
+    public void testGetBlueprintWhenBlueprintNotFound() {
+        // GIVEN
+        given(blueprintRepository.findOne(anyLong())).willReturn(null);
+        // WHEN
+        underTest.get(1L);
+    }
+
+    @Test
+    public void testGetAll() {
+        // GIVEN
+        given(blueprintConverter.convertAllEntityToJson(Sets.newHashSet(blueprint)))
+                .willReturn(Sets.newHashSet(blueprintJson));
+        // WHEN
+        underTest.getAll(user);
+        // THEN
+        verify(blueprintConverter, times(1)).convertAllEntityToJson(anySetOf(Blueprint.class));
     }
 
     private Blueprint createBlueprint() {
