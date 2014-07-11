@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.domain.Status;
 public class StackJson implements JsonEntity {
 
     private Long id;
-    @Min(value = 1, message = "Count of nodes has to be min 2")
+    @Min(value = 1, message = "Count of nodes has to be min 1")
     @Digits(fraction = 0, integer = 10, message = "Node count has to be a number")
     private int nodeCount;
     @Size(max = 20, min = 2,  message = "Name has to be min 2 letter maximum 20 length")
