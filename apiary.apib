@@ -521,71 +521,56 @@ Retrieves the cloud stacks belonging to the user
 + Response 200 (application/json)
 
         {
-            "nodeCount": 2,
-            "templateId": "1",
+          [
+            "metadata": [
+              {
+                "dockerSubnet": "172.17.10",
+                "ambariServer": true,
+                "instanceIndex": 0,
+                "instanceId": "i-fab627b8",
+                "publicIp": "54.77.43.59",
+                "privateIp": "10.0.0.136"
+              },
+              {
+                "dockerSubnet": "172.17.11",
+                "ambariServer": false,
+                "instanceIndex": 1,
+                "instanceId": "i-1bb92859",
+                "publicIp": "54.77.43.60",
+                "privateIp": "10.0.0.135"
+              },
+              {
+                "dockerSubnet": "172.17.12",
+                "ambariServer": false,
+                "instanceIndex": 2,
+                "instanceId": "i-1ab92858",
+                "publicIp": "54.77.43.61",
+                "privateIp": "10.0.0.137"
+              }
+            ],
+            "cluster": {
+              "description": "",
+              "blueprintId": 50,
+              "cluster": {},
+              "minutesUp": 8,
+              "hoursUp": 0,
+              "status": "CREATE_COMPLETED",
+              "id": 2
+            },
+            "hash": "208d3dd389fad2221311792106cde53d",
+            "ambariServerIp": "54.77.43.59",
+            "nodeCount": 3,
+            "name": "awstest",
+            "templateId": 50,
+            "credentialId": 50,
+            "id": 50,
             "cloudPlatform": "AWS",
-            "name": "stack-123",
-            "status": "CREATED",
-            "creationTime": "2010-07-27T22:28:28Z",
-            "ambarServerIP": "ambari.server.ip",
-            "stackDescription": {
-                  "resources": {
-                      "stackResources": [
-                      {
-                          "description": null,
-                          "stackName": "coreos",
-                          "stackId": "arn:aws:cloudformation:eu-west-1:755047402263:stack/coreos/fa71a930-e16b-11e3-8185-50014118ec7c",
-                          "logicalResourceId": "CoreOSELB",
-                          "physicalResourceId": "coreos-CoreOSELB-EIJBBQ9335MT",
-                          "resourceType": "AWS::ElasticLoadBalancing::LoadBalancer",
-                          "timestamp": 1400733975000,
-                          "resourceStatus": "CREATE_COMPLETE",
-                          "resourceStatusReason": null
-                      },
-                      {
-                          "description": null,
-                          "stackName": "coreos",
-                          "stackId": "arn:aws:cloudformation:eu-west-1:755047402263:stack/coreos/fa71a930-e16b-11e3-8185-50014118ec7c",
-                          "logicalResourceId": "CoreOSUser",
-                          "physicalResourceId": "coreos-CoreOSUser-1W69DK6OLLTXZ",
-                          "resourceType": "AWS::IAM::User",
-                          "timestamp": 1400733980000,
-                          "resourceStatus": "CREATE_COMPLETE",
-                          "resourceStatusReason": null
-                        }
-                      ]},
-                          "stack": {
-                              "nextToken": null,
-                              "stacks": [
-                                  {
-                                      "tags": [
-                                      {
-                                          "value": "coreos",
-                                          "key": "Name"
-                                      }],
-                                      "capabilities": [
-                                          "CAPABILITY_IAM"
-                                          ],
-                                      "timeoutInMinutes": null,
-                                      "notificationARNs": [],
-                                      "disableRollback": false,
-                                      "stackId": "arn:aws:cloudformation:eu-west-1:755047402263:stack/coreos/fa71a930-e16b-11e3-8185-50014118ec7c",
-                                      "stackName": "coreos",
-                                      "description": "CoreOS stack",
-                                      "parameters": [
-                                          {
-                                              "parameterValue": "sequence-eu",
-                                              "parameterKey": "KeyPair"
-                                          },
-                                          {
-                                              "parameterValue": "0.0.0.0/0",
-                                              "parameterKey": "AllowSSHFrom"
-                                          }]
-                                  }
-                              ]
-                          }
-                    }
-            }
+            "description": {
+              --AWS DESCRIPTION--
+            },
+            "status": "CREATE_COMPLETED"
+          ]
+        }
 
 
 ## Retrieve a  stack [/stacks/{id}]
@@ -604,69 +589,53 @@ Retrieves a  (AWS or Azure)  stack definition.
 + Response 200 (application/json)
 
         {
-            "nodeCount": 2,
-            "templateId": "1",
-            "cloudPlatform": "AWS",
-            "name": "stack-123",
-            "status": "CREATED",
-            "creationTime": "2010-07-27T22:28:28Z",
-            "ambarServerIP": "ambari.server.ip",
-            "stackDescription": {
-                "resources": {
-                    "stackResources": [
-                    {
-                        "description": null,
-                        "stackName": "coreos",
-                        "stackId": "arn:aws:cloudformation:eu-west-1:755047402263:stack/coreos/fa71a930-e16b-11e3-8185-50014118ec7c",
-                        "logicalResourceId": "CoreOSELB",
-                        "physicalResourceId": "coreos-CoreOSELB-EIJBBQ9335MT",
-                        "resourceType": "AWS::ElasticLoadBalancing::LoadBalancer",
-                        "timestamp": 1400733975000,
-                        "resourceStatus": "CREATE_COMPLETE",
-                        "resourceStatusReason": null
-                    },
-                    {
-                        "description": null,
-                        "stackName": "coreos",
-                        "stackId": "arn:aws:cloudformation:eu-west-1:755047402263:stack/coreos/fa71a930-e16b-11e3-8185-50014118ec7c",
-                        "logicalResourceId": "CoreOSUser",
-                        "physicalResourceId": "coreos-CoreOSUser-1W69DK6OLLTXZ",
-                        "resourceType": "AWS::IAM::User",
-                        "timestamp": 1400733980000,
-                        "resourceStatus": "CREATE_COMPLETE",
-                        "resourceStatusReason": null
-                    }]
-                    },
-                    "stack": {
-                        "nextToken": null,
-                        "stacks": [
-                        {
-                            "tags": [
-                            {
-                                "value": "coreos",
-                                "key": "Name"
-                            }],
-                            "capabilities": [
-                                "CAPABILITY_IAM"
-                            ],
-                            "timeoutInMinutes": null,
-                            "notificationARNs": [],
-                            "disableRollback": false,
-                            "stackId": "arn:aws:cloudformation:eu-west-1:755047402263:stack/coreos/fa71a930-e16b-11e3-8185-50014118ec7c",
-                            "stackName": "coreos",
-                            "description": "CoreOS stack",
-                            "parameters": [
-                            {
-                                "parameterValue": "sequence-eu",
-                                "parameterKey": "KeyPair"
-                            },
-                            {
-                                "parameterValue": "0.0.0.0/0",
-                                "parameterKey": "AllowSSHFrom"
-                            }]
-                        }]
-                      }
-                    }
+          "metadata": [
+            {
+              "dockerSubnet": "172.17.10",
+              "ambariServer": true,
+              "instanceIndex": 0,
+              "instanceId": "i-fab627b8",
+              "publicIp": "54.77.43.59",
+              "privateIp": "10.0.0.136"
+            },
+            {
+              "dockerSubnet": "172.17.11",
+              "ambariServer": false,
+              "instanceIndex": 1,
+              "instanceId": "i-1bb92859",
+              "publicIp": "54.77.43.60",
+              "privateIp": "10.0.0.135"
+            },
+            {
+              "dockerSubnet": "172.17.12",
+              "ambariServer": false,
+              "instanceIndex": 2,
+              "instanceId": "i-1ab92858",
+              "publicIp": "54.77.43.61",
+              "privateIp": "10.0.0.137"
+            }
+          ],
+          "cluster": {
+            "description": "",
+            "blueprintId": 50,
+            "cluster": {},
+            "minutesUp": 8,
+            "hoursUp": 0,
+            "status": "CREATE_COMPLETED",
+            "id": 2
+          },
+          "hash": "208d3dd389fad2221311792106cde53d",
+          "ambariServerIp": "54.77.43.59",
+          "nodeCount": 3,
+          "name": "awstest",
+          "templateId": 50,
+          "credentialId": 50,
+          "id": 50,
+          "cloudPlatform": "AWS",
+          "description": {
+            --AWS DESCRIPTION--
+          },
+          "status": "CREATE_COMPLETED"
         }
 
 
@@ -688,8 +657,49 @@ WARNING: All data will be lost - unless there was no storage configured. It is t
 
 + Response 200 (application/json)
 
-        {
-        }
+
+          {
+
+          }
+
+## Retrieve a  stack [/stacks/metadata/{hash}]
+### Retrieve a particular stack metadata [GET]
+Retrieves a  (AWS or Azure)  stack metadata.
+
++ Parameters
+    + hash (required String `hash`) ... The identifier of the `metadata`.
+
++ Response 200 (application/json)
+
+  {
+    [
+      {
+        "dockerSubnet": "172.17.12",
+        "ambariServer": false,
+        "instanceIndex": 2,
+        "instanceId": "i-1ab92858",
+        "publicIp": "54.77.43.61",
+        "privateIp": "10.0.0.137"
+      },
+      {
+        "dockerSubnet": "172.17.10",
+        "ambariServer": true,
+        "instanceIndex": 0,
+        "instanceId": "i-fab627b8",
+        "publicIp": "54.77.43.59",
+        "privateIp": "10.0.0.136"
+      },
+      {
+        "dockerSubnet": "172.17.11",
+        "ambariServer": false,
+        "instanceIndex": 1,
+        "instanceId": "i-1bb92859",
+        "publicIp": "54.77.43.60",
+        "privateIp": "10.0.0.135"
+      }
+    ]
+  }
+
 
 # Group Blueprints
 Hadoop blueprint  related resources of the **Cloudbreak API**.
@@ -1036,76 +1046,228 @@ Retrieves a particular cluster configuration for the user
 + Response 200 (application/json)
 
         {
-          "cluster": {
-            "configurations": [
-              {
-                "Config": {
-                  "cluster_name": "MySingleNodeCluster2"
-                },
-                "type": "capacity-scheduler",
-                "tag": "1",
-                "href": "http://172.17.0.2:8080/api/v1/clusters/MySingleNodeCluster2/configurations?type=capacity-scheduler&tag=1"
-              },
-              {
-                "Config": {
-                  "cluster_name": "MySingleNodeCluster2"
-                },
-                "type": "core-site",
-                "tag": "1",
-                "href": "http://172.17.0.2:8080/api/v1/clusters/MySingleNodeCluster2/configurations?type=core-site&tag=1"
-              }
-            ],
-            "hosts": [
-              {
-                "Hosts": {
-                  "host_name": "server.ambari.com",
-                  "cluster_name": "MySingleNodeCluster2"
-                },
-                "href": "http://172.17.0.2:8080/api/v1/clusters/MySingleNodeCluster2/hosts/server.ambari.com"
-              }
-            ],
-            "workflows": [],
-            "config_groups": [],
-            "services": [
-              {
-                "ServiceInfo": {
-                  "service_name": "GANGLIA",
-                  "cluster_name": "MySingleNodeCluster2"
-                },
-                "href": "http://172.17.0.2:8080/api/v1/clusters/MySingleNodeCluster2/services/GANGLIA"
-              },
-              {
-                "ServiceInfo": {
-                  "service_name": "HDFS",
-                  "cluster_name": "MySingleNodeCluster2"
-                },
-                "href": "http://172.17.0.2:8080/api/v1/clusters/MySingleNodeCluster2/services/HDFS"
-              }
-            ],
-            "requests": [
-              {
-                "Requests": {
-                  "id": 1,
-                  "cluster_name": "MySingleNodeCluster2"
-                },
-                "href": "http://172.17.0.2:8080/api/v1/clusters/MySingleNodeCluster2/requests/1"
-              }
-            ],
-            "Clusters": {
-              "desired_configs": {
-                "zookeeper-log4j": {
+          {
+            "description": "",
+            "blueprintId": 50,
+            "cluster": {
+              "configurations": [
+                {
+                  "Config": {
+                    "cluster_name": "awstest"
+                  },
+                  "type": "capacity-scheduler",
                   "tag": "1",
-                  "user": "admin"
+                  "href": "http://54.77.43.59:8080/api/v1/clusters/awstest/configurations?type=capacity-scheduler&tag=1"
                 },
-                "yarn-site": {
+                {
+                  "Config": {
+                    "cluster_name": "awstest"
+                  },
+                  "type": "core-site",
                   "tag": "1",
-                  "user": "admin"
+                  "href": "http://54.77.43.59:8080/api/v1/clusters/awstest/configurations?type=core-site&tag=1"
+                },
+                {
+                  "Config": {
+                    "cluster_name": "awstest"
+                  },
+                  "type": "global",
+                  "tag": "1",
+                  "href": "http://54.77.43.59:8080/api/v1/clusters/awstest/configurations?type=global&tag=1"
+                },
+                {
+                  "Config": {
+                    "cluster_name": "awstest"
+                  },
+                  "type": "hadoop-policy",
+                  "tag": "1",
+                  "href": "http://54.77.43.59:8080/api/v1/clusters/awstest/configurations?type=hadoop-policy&tag=1"
+                },
+                {
+                  "Config": {
+                    "cluster_name": "awstest"
+                  },
+                  "type": "hdfs-log4j",
+                  "tag": "1",
+                  "href": "http://54.77.43.59:8080/api/v1/clusters/awstest/configurations?type=hdfs-log4j&tag=1"
+                },
+                {
+                  "Config": {
+                    "cluster_name": "awstest"
+                  },
+                  "type": "hdfs-site",
+                  "tag": "1",
+                  "href": "http://54.77.43.59:8080/api/v1/clusters/awstest/configurations?type=hdfs-site&tag=1"
+                },
+                {
+                  "Config": {
+                    "cluster_name": "awstest"
+                  },
+                  "type": "mapred-queue-acls",
+                  "tag": "1",
+                  "href": "http://54.77.43.59:8080/api/v1/clusters/awstest/configurations?type=mapred-queue-acls&tag=1"
+                },
+                {
+                  "Config": {
+                    "cluster_name": "awstest"
+                  },
+                  "type": "mapred-site",
+                  "tag": "1",
+                  "href": "http://54.77.43.59:8080/api/v1/clusters/awstest/configurations?type=mapred-site&tag=1"
+                },
+                {
+                  "Config": {
+                    "cluster_name": "awstest"
+                  },
+                  "type": "yarn-log4j",
+                  "tag": "1",
+                  "href": "http://54.77.43.59:8080/api/v1/clusters/awstest/configurations?type=yarn-log4j&tag=1"
+                },
+                {
+                  "Config": {
+                    "cluster_name": "awstest"
+                  },
+                  "type": "yarn-site",
+                  "tag": "1",
+                  "href": "http://54.77.43.59:8080/api/v1/clusters/awstest/configurations?type=yarn-site&tag=1"
+                },
+                {
+                  "Config": {
+                    "cluster_name": "awstest"
+                  },
+                  "type": "zookeeper-log4j",
+                  "tag": "1",
+                  "href": "http://54.77.43.59:8080/api/v1/clusters/awstest/configurations?type=zookeeper-log4j&tag=1"
                 }
+              ],
+              "hosts": [
+                {
+                  "Hosts": {
+                    "host_name": "amb0.mycorp.kom",
+                    "cluster_name": "awstest"
+                  },
+                  "href": "http://54.77.43.59:8080/api/v1/clusters/awstest/hosts/amb0.mycorp.kom"
+                },
+                {
+                  "Hosts": {
+                    "host_name": "amb1.mycorp.kom",
+                    "cluster_name": "awstest"
+                  },
+                  "href": "http://54.77.43.59:8080/api/v1/clusters/awstest/hosts/amb1.mycorp.kom"
+                },
+                {
+                  "Hosts": {
+                    "host_name": "amb2.mycorp.kom",
+                    "cluster_name": "awstest"
+                  },
+                  "href": "http://54.77.43.59:8080/api/v1/clusters/awstest/hosts/amb2.mycorp.kom"
+                }
+              ],
+              "workflows": [],
+              "config_groups": [],
+              "services": [
+                {
+                  "ServiceInfo": {
+                    "service_name": "HDFS",
+                    "cluster_name": "awstest"
+                  },
+                  "href": "http://54.77.43.59:8080/api/v1/clusters/awstest/services/HDFS"
+                },
+                {
+                  "ServiceInfo": {
+                    "service_name": "MAPREDUCE2",
+                    "cluster_name": "awstest"
+                  },
+                  "href": "http://54.77.43.59:8080/api/v1/clusters/awstest/services/MAPREDUCE2"
+                },
+                {
+                  "ServiceInfo": {
+                    "service_name": "NAGIOS",
+                    "cluster_name": "awstest"
+                  },
+                  "href": "http://54.77.43.59:8080/api/v1/clusters/awstest/services/NAGIOS"
+                },
+                {
+                  "ServiceInfo": {
+                    "service_name": "YARN",
+                    "cluster_name": "awstest"
+                  },
+                  "href": "http://54.77.43.59:8080/api/v1/clusters/awstest/services/YARN"
+                },
+                {
+                  "ServiceInfo": {
+                    "service_name": "ZOOKEEPER",
+                    "cluster_name": "awstest"
+                  },
+                  "href": "http://54.77.43.59:8080/api/v1/clusters/awstest/services/ZOOKEEPER"
+                }
+              ],
+              "requests": [
+                {
+                  "Requests": {
+                    "id": 1,
+                    "cluster_name": "awstest"
+                  },
+                  "href": "http://54.77.43.59:8080/api/v1/clusters/awstest/requests/1"
+                }
+              ],
+              "Clusters": {
+                "desired_configs": {
+                  "zookeeper-log4j": {
+                    "tag": "1",
+                    "user": "admin"
+                  },
+                  "yarn-site": {
+                    "tag": "1",
+                    "user": "admin"
+                  },
+                  "yarn-log4j": {
+                    "tag": "1",
+                    "user": "admin"
+                  },
+                  "capacity-scheduler": {
+                    "tag": "1",
+                    "user": "admin"
+                  },
+                  "core-site": {
+                    "tag": "1",
+                    "user": "admin"
+                  },
+                  "global": {
+                    "tag": "1",
+                    "user": "admin"
+                  },
+                  "hadoop-policy": {
+                    "tag": "1",
+                    "user": "admin"
+                  },
+                  "hdfs-log4j": {
+                    "tag": "1",
+                    "user": "admin"
+                  },
+                  "hdfs-site": {
+                    "tag": "1",
+                    "user": "admin"
+                  },
+                  "mapred-queue-acls": {
+                    "tag": "1",
+                    "user": "admin"
+                  },
+                  "mapred-site": {
+                    "tag": "1",
+                    "user": "admin"
+                  }
+                },
+                "version": "HDP-2.1",
+                "cluster_name": "awstest",
+                "cluster_id": 2
               },
-              "version": "HDP-2.1",
-              "cluster_name": "MySingleNodeCluster2",
-              "cluster_id": 3
+              "href": "http://54.77.43.59:8080/api/v1/clusters/awstest"
             },
-            "href": "http://172.17.0.2:8080/api/v1/clusters/MySingleNodeCluster2"
+            "minutesUp": 16,
+            "hoursUp": 0,
+            "status": "CREATE_COMPLETED",
+            "id": 2
           }
+
         }
