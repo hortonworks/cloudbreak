@@ -33,17 +33,17 @@ public class SchedulerUpdateRequest extends AbstractEventPublisher implements Ru
 
     @Override
     public void run() {
-        String rmAddress = clusterRegistration.getConfigValue(ConfigParam.YARN_RM_WEB_ADDRESS, "");
-        String url = "http://" + rmAddress + WS_URL;
-        SchedulerTypeInfo response = restOperations.getForObject(url, SchedulerTypeInfo.class);
         try {
+            String rmAddress = clusterRegistration.getConfigValue(ConfigParam.YARN_RM_WEB_ADDRESS, "");
+            String url = "http://" + rmAddress + WS_URL;
+            SchedulerTypeInfo response = restOperations.getForObject(url, SchedulerTypeInfo.class);
             // TODO https://issues.apache.org/jira/browse/YARN-2280
             Field field = response.getClass().getDeclaredField("schedulerInfo");
             field.setAccessible(true);
             SchedulerInfo schedulerInfo = (SchedulerInfo) field.get(response);
             publishEvent(new SchedulerUpdateEvent(schedulerInfo, clusterRegistration.getClusterId()));
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            LOGGER.error("Error unboxing the scheduler info from the WS response", e);
+        } catch (Exception e) {
+            LOGGER.error("Error updating the scheduler info from the WS {}", clusterRegistration.getClusterId(), e);
             publishEvent(new UpdateFailedEvent(clusterRegistration.getClusterId()));
         }
     }
