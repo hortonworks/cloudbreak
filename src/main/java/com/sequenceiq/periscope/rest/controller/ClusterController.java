@@ -1,5 +1,9 @@
 package com.sequenceiq.periscope.rest.controller;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,12 +39,20 @@ public class ClusterController {
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
-    public ResponseEntity<ClusterJson> getClusters(@PathVariable String id) {
+    public ResponseEntity<ClusterJson> getCluster(@PathVariable String id) {
         ClusterRegistration cluster = clusterRegistry.get(id);
         if (cluster == null) {
             return new ResponseEntity<>(new ClusterJson("", "", ""), HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(clusterConverter.convert(cluster), HttpStatus.OK);
+    }
+
+    @RequestMapping(method = RequestMethod.GET)
+    public ResponseEntity<List<ClusterJson>> getClusters() {
+        List<ClusterJson> clusters = new ArrayList<>();
+        Collection<ClusterRegistration> registrations = clusterRegistry.getAll();
+        clusters.addAll(clusterConverter.convertAllToJson(registrations));
+        return new ResponseEntity<>(clusters, HttpStatus.OK);
     }
 
 }
