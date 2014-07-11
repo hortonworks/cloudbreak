@@ -317,6 +317,7 @@ dependencies {
     compile("org.apache.hadoop:hadoop-common:${hadoopVersion}")
     compile("com.sequenceiq.ambari:ambari-client:1.6.0-SNAPSHOT")
     compile("javax.servlet:javax.servlet-api:3.0.1")
+    compile("com.sequenceiq.cloudbreak:cloudbreak-rest-client:0.1-SNAPSHOT")
     testCompile("junit:junit:4.11")
 }
 
