@@ -1,0 +1,12 @@
+Client->Controller: POST: /stacks
+Controller->StackService: create
+StackService->StackRepository: save
+StackRepository-->StackService: save
+StackService->ProvisionRequestHandler: notify(PROVISION_REQUEST, cloudPlatform, stackId)
+StackService-->Controller: create
+Controller-->Client: {id}
+
+note right of ProvisionRequestHandler
+    starting provision-flow
+end note
+

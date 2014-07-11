@@ -1,0 +1,8 @@
+ProvisionRH->ProvisionSetup: setupProvisioning()
+ProvisionSetup->ProvisionSetupCH: notify(PROVISION_SETUP_COMPLETE)
+ProvisionSetupCH->ProvisionSetupCH: save(Status. CREATE_IN_PROGRESS)
+ProvisionSetupCH->Provisioner: provision()
+Provisioner->ProvisionCH: notify(PROVISION_COMPLETE)
+ProvisionCH->MetadataSetup: setupMetadata()
+MetadataSetup->MetadataSetupCH: notify(METADATA_SETUP_COMPLETE)
+
