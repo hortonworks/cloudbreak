@@ -14,7 +14,7 @@ import com.sequenceiq.periscope.monitor.event.QueueInfoUpdateEvent;
 import com.sequenceiq.periscope.monitor.event.UpdateFailedEvent;
 import com.sequenceiq.periscope.registry.ClusterRegistration;
 
-@Component
+@Component("QueueInfoUpdateRequest")
 @Scope("prototype")
 public class QueueInfoUpdateRequest extends AbstractEventPublisher implements Runnable, EventPublisher {
 

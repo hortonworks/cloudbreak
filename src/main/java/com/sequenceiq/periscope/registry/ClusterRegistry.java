@@ -9,7 +9,7 @@ public interface ClusterRegistry {
     /**
      * Adds a new hadoop cluster to the registry.
      *
-     * @param id           id of the cluster
+     * @param id     id of the cluster
      * @param ambari ambari server parameters
      */
     ClusterRegistration add(String id, Ambari ambari);

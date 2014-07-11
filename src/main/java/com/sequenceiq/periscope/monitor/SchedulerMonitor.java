@@ -7,12 +7,12 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.periscope.monitor.request.ApplicationReportUpdateRequest;
+import com.sequenceiq.periscope.monitor.request.SchedulerUpdateRequest;
 import com.sequenceiq.periscope.registry.ClusterRegistration;
 import com.sequenceiq.periscope.registry.ClusterRegistry;
 
 @Component
-public class ApplicationMonitor implements Monitor {
+public class SchedulerMonitor implements Monitor {
 
     @Autowired
     private ClusterRegistry clusterRegistry;
@@ -22,11 +22,11 @@ public class ApplicationMonitor implements Monitor {
     private ApplicationContext applicationContext;
 
     @Override
-    @Scheduled(fixedRate = MonitorUpdateRate.APP_REPORT_UPDATE_RATE)
+    @Scheduled(fixedRate = MonitorUpdateRate.QUEUE_UPDATE_RATE)
     public void update() {
         for (ClusterRegistration clusterRegistration : clusterRegistry.getAll()) {
-            ApplicationReportUpdateRequest request = (ApplicationReportUpdateRequest)
-                    applicationContext.getBean(ApplicationReportUpdateRequest.class.getSimpleName(), clusterRegistration);
+            SchedulerUpdateRequest request = (SchedulerUpdateRequest)
+                    applicationContext.getBean(SchedulerUpdateRequest.class.getSimpleName(), clusterRegistration);
             executorService.execute(request);
         }
     }

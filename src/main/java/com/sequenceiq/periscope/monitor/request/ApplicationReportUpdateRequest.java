@@ -16,7 +16,7 @@ import com.sequenceiq.periscope.monitor.event.ApplicationReportUpdateEvent;
 import com.sequenceiq.periscope.monitor.event.UpdateFailedEvent;
 import com.sequenceiq.periscope.registry.ClusterRegistration;
 
-@Component
+@Component("ApplicationReportUpdateRequest")
 @Scope("prototype")
 public class ApplicationReportUpdateRequest extends AbstractEventPublisher implements Runnable, EventPublisher {
 

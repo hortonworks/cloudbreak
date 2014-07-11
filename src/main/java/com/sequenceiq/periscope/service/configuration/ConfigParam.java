@@ -1,17 +1,24 @@
 package com.sequenceiq.periscope.service.configuration;
 
-public final class ConfigParam {
+public enum ConfigParam {
 
-    public static final String MR_FRAMEWORK_NAME = "mapreduce.framework.name";
-    public static final String FS_DEFAULT_NAME = "fs.defaultFS";
-    public static final String YARN_RM_ADDRESS = "yarn.resourcemanager.address";
-    public static final String YARN_RESOURCEMANAGER_SCHEDULER_ADDRESS = "yarn.resourcemanager.scheduler.address";
-    public static final String YARN_SCHEDULER_ADDRESS = "yarn.resourcemanager.scheduler.address";
-    public static final String RM_CONN_MAX_WAIT_MS = "yarn.resourcemanager.connect.max-wait.ms";
-    public static final String RM_CONN_RETRY_INTERVAL_MS = "yarn.resourcemanager.connect.retry-interval.ms";
+    MR_FRAMEWORK_NAME("mapreduce.framework.name"),
+    FS_DEFAULT_NAME("fs.defaultFS"),
+    YARN_RM_ADDRESS("yarn.resourcemanager.address"),
+    YARN_RM_WEB_ADDRESS("yarn.resourcemanager.webapp.address"),
+    YARN_RM_SCHEDULER_ADDRESS("yarn.resourcemanager.scheduler.address"),
+    YARN_SCHEDULER_ADDRESS("yarn.resourcemanager.scheduler.address"),
+    RM_CONN_MAX_WAIT_MS("yarn.resourcemanager.connect.max-wait.ms"),
+    RM_CONN_RETRY_INTERVAL_MS("yarn.resourcemanager.connect.retry-interval.ms");
 
-    private ConfigParam() {
-        throw new IllegalStateException();
+    private final String key;
+
+    private ConfigParam(String key) {
+        this.key = key;
+    }
+
+    public String key() {
+        return key;
     }
 
 }

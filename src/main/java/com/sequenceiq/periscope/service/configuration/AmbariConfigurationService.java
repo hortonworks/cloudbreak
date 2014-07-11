@@ -1,6 +1,6 @@
 package com.sequenceiq.periscope.service.configuration;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -10,25 +10,22 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 
-public class AmbariConfigurationService implements ConfigurationService {
+public class AmbariConfigurationService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariConfigurationService.class);
+    private static final List<String> CONFIG_LIST = new ArrayList<>(ConfigParam.values().length);
     private static final String RETRY_COUNT = "1";
-    private static final List<String> CONFIG_LIST = Arrays.asList(
-            ConfigParam.MR_FRAMEWORK_NAME,
-            ConfigParam.YARN_RM_ADDRESS,
-            ConfigParam.YARN_RESOURCEMANAGER_SCHEDULER_ADDRESS,
-            ConfigParam.YARN_SCHEDULER_ADDRESS,
-            ConfigParam.FS_DEFAULT_NAME
-    );
-    private final AmbariClient ambariClient;
 
-    public AmbariConfigurationService(AmbariClient ambariClient) {
-        this.ambariClient = ambariClient;
+    static {
+        for (ConfigParam param : ConfigParam.values()) {
+            CONFIG_LIST.add(param.key());
+        }
     }
 
-    @Override
-    public Configuration getConfiguration() {
+    private AmbariConfigurationService() {
+    }
+
+    public static Configuration getConfiguration(AmbariClient ambariClient) {
         Configuration configuration = new Configuration(false);
         for (Map.Entry<String, Map<String, String>> serviceEntry : ambariClient.getServiceConfigMap().entrySet()) {
             LOGGER.debug("Processing service: {}", serviceEntry.getKey());
@@ -43,8 +40,8 @@ public class AmbariConfigurationService implements ConfigurationService {
         return configuration;
     }
 
-    private void decorateConfiguration(Configuration configuration) {
-        configuration.set(ConfigParam.RM_CONN_MAX_WAIT_MS, RETRY_COUNT);
-        configuration.set(ConfigParam.RM_CONN_RETRY_INTERVAL_MS, RETRY_COUNT);
+    private static void decorateConfiguration(Configuration configuration) {
+        configuration.set(ConfigParam.RM_CONN_MAX_WAIT_MS.key(), RETRY_COUNT);
+        configuration.set(ConfigParam.RM_CONN_RETRY_INTERVAL_MS.key(), RETRY_COUNT);
     }
 }

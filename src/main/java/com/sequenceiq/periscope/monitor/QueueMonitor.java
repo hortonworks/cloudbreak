@@ -26,7 +26,7 @@ public class QueueMonitor implements Monitor {
     public void update() {
         for (ClusterRegistration clusterRegistration : clusterRegistry.getAll()) {
             QueueInfoUpdateRequest request = (QueueInfoUpdateRequest)
-                    applicationContext.getBean("queueInfoUpdateRequest", clusterRegistration);
+                    applicationContext.getBean(QueueInfoUpdateRequest.class.getSimpleName(), clusterRegistration);
             executorService.execute(request);
         }
     }
