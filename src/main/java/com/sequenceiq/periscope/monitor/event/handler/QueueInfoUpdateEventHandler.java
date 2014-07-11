@@ -1,5 +1,6 @@
 package com.sequenceiq.periscope.monitor.event.handler;
 
+import org.apache.hadoop.yarn.api.records.QueueInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationListener;
@@ -14,6 +15,19 @@ public class QueueInfoUpdateEventHandler implements ApplicationListener<QueueInf
 
     @Override
     public void onApplicationEvent(QueueInfoUpdateEvent event) {
-        LOGGER.info("Queue metrics updated for cluster.. {}", event.getClusterId());
+        for (QueueInfo info : event.getQueueInfo()) {
+            printQueueMetrics(info);
+        }
+    }
+
+    private void printQueueMetrics(QueueInfo info) {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("\nQueue name: ").append(info.getQueueName());
+        sb.append("\ncapacity: ").append(info.getCapacity());
+        sb.append("\nmax capacity: ").append(info.getMaximumCapacity());
+        sb.append("\ncurrent consumption: ").append(info.getCurrentCapacity());
+
+        LOGGER.info(sb.toString());
     }
 }
