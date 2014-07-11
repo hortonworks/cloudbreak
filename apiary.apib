@@ -32,11 +32,10 @@ Allows the option to choose the favorite cloud provider and different pricing mo
 # Group User authentication
 Authentication related resources of the **Cloudbreak API**.
 
-The API supports token based and OAuth2 authentication.
 All operations against a REST resource must be authenticated.
 
-## Authentication [/authenticate]
-### Authenticates a user [POST]
+## Login [/login]
+### Login a user [POST]
 After successful authentication the call will return with an authentication token, and the user role. The token invalidates with the HTTP session or with the expiration of OAuth2 token.
 
 + Request (application/json)
@@ -49,19 +48,11 @@ After successful authentication the call will return with an authentication toke
 + Response 200 (application/json)
 
         {
-            "token": "user:c45sdfdsfo234jgkhsdgf324",
-            "roles": {
-                "ROLE_COMPANY_ADMIN": true,
-                "ROLE_COMPANY_USER ": true
-            },
-            "name": "mick.fanning@surf.com"
+            1
         }
 
 # Group User management
 User management related resources of the **Cloudbreak API**.
-
-These calls require *COMPANY_ADMIN* roles. A company administrator is the user who registers the company.
-Currently there are two user roles supported: regular users as  *COMPANY_USER* and admin users as *COMPANY_ADMIN*.
 
 ## User management [/users]
 ### Creates a new user [POST]
@@ -89,25 +80,6 @@ Creates a new user with the specified username, password, company, role. The use
         {
             "id": "user-2"
         }
-
-### List all users [GET]
-Users in *COMPANY_ADMIN* role can retrieve all users belonging to the company.
-The information contains generic user info, cloud and Hadoop cluster configurations belonging to the particular user.
-
-+ Request
-
-    + Headers
-
-            x-auth-token: user:c45sdfdsfo234jgkhsdgf324
-
-
-+ Response 200 (application/json)
-
-        [
-            {
-               TBD
-            }
-        ]
 
 ## Reset password request management [/password/reset]
 ### Request a password reset [POST]
@@ -151,11 +123,66 @@ The information contains generic user info, cloud and Hadoop cluster configurati
 
 + Response 200 (application/json)
 
-        {
             {
-               TBD
+              "blueprints": [],
+              "firstName": "Frank",
+              "lastName": "Louise",
+              "email": "frank.louise@sequenceiq.com",
+              "company": "SequenceIQ",
+              "credentials": [
+                {
+                  "id": 50,
+                  "description": "my aws credential",
+                  "parameters": {
+                    "roleArn": "rolearn",
+                    "snsTopics": []
+                  },
+                  "cloudPlatform": "AWS",
+                  "name": "aws_credential"
+                },
+                {
+                  "id": 51,
+                  "description": "my azure credential",
+                  "parameters": {
+                    "subscriptionId": "0000-0000-00000-0000",
+                    "jksPassword": "test123"
+                  },
+                  "cloudPlatform": "AZURE",
+                  "name": "azurefrank"
+                }
+              ],
+              "azureTemplates": [
+                {
+                  "id": 51,
+                  "description": "azure template",
+                  "parameters": {
+                    "password": "",
+                    "location": "NORTH_EUROPE",
+                    "imageName": "ambari-docker-v1",
+                    "vmType": "SMALL",
+                    "ports": []
+                  },
+                  "name": "warmup",
+                  "cloudPlatform": "AZURE"
+                },
+              ],
+              "awsTemplates": [
+                {
+                  "id": 50,
+                  "description": "description sample",
+                  "parameters": {
+                    "amiId": "ami-25dc0852",
+                    "sshLocation": "0.0.0.0/0",
+                    "keyName": "sequence-eu",
+                    "region": "EU_WEST_1",
+                    "instanceType": "t2.small"
+                  },
+                  "name": "Aws development environment",
+                  "cloudPlatform": "AWS"
+                }
+              ],
+              "stacks": []
             }
-        }
 
 ##  Confirmation of the registration [/confirm/{confToken}]
 ### Confirm the registration [GET]
@@ -191,9 +218,9 @@ Registers an AWS IAM role ARN or the user's account.
             {
                "name": "sqiq-0002",
                "cloudPlatform": "AWS",
+               "description": "My aws credential",
                "parameters": {
-                   "roleArn": "arn:aws:iam::755047402263:role/seq-self-cf",
-                   "instanceProfileRoleArn": "arn:aws:iam::755047402263:instance-profile/readonly-role"
+                   "roleArn": "arn:aws:iam::755047402263:role/seq-self-cf"
                 }
             }
 
@@ -217,7 +244,9 @@ Adds an Azure JKS the user's account.
     + Body
 
             {
+                "name": "sqiq-0001",
                 "cloudPlatform": "AZURE",
+                "description": "My azure credential",
                 "parameters": {
                     "subscriptionId": "1234-5678-1234-5678",
                     "jksPassword": "pw123"
@@ -227,6 +256,7 @@ Adds an Azure JKS the user's account.
 + Response 201 (application/json)
 
         {
+          "id":50
         }
 
 
@@ -245,7 +275,7 @@ Retrieves registered cloud credentials  for a user
         [
             {
                 "id": 50,
-                "description": "",
+                "description": "my sample description1",
                 "parameters": {
                     "roleArn": "arn:aws:iam::755047402263:role/seq-self-cf",
                     "instanceProfileRoleArn": "arn:aws:iam::755047402263:instance-profile/readonly-role"
@@ -255,10 +285,9 @@ Retrieves registered cloud credentials  for a user
             },
             {
                 "id": 51,
-                "description": "",
+                "description": "my sample description2",
                 "parameters": {
-                    "roleArn": "arn:aws:iam::755047402263:role/seq-self-cf",
-                    "instanceProfileRoleArn": "arn:aws:iam::755047402263:instance-profile/readonly-role"
+                    "roleArn": "arn:aws:iam::755047402263:role/seq-self-cf"
                 },
                 "cloudPlatform": "AWS",
                 "name": "lp-0002"
@@ -282,10 +311,9 @@ Retrieves the cloud credential (AWS or Azure) associated with the user account
 
         {
             "id": 50,
-            "description": "",
+            "description": "my sample description1",
             "parameters": {
-                "roleArn": "arn:aws:iam::755047402263:role/seq-self-cf",
-                "instanceProfileRoleArn": "arn:aws:iam::755047402263:instance-profile/readonly-role"
+                "roleArn": "arn:aws:iam::755047402263:role/seq-self-cf"
             },
             "cloudPlatform": "AWS",
             "name": "aws_credential"
@@ -330,6 +358,7 @@ Creates an AWS template (vpc, subnet, internetGateway, routeTable, securityGroup
             {
                 "cloudPlatform": "AWS",
                 "name": "my-template-1",
+                "description": "My aws template"
                 "parameters": {
                     "sshLocation": "0.0.0.0/0"
                     "region": "eu-west-1",
@@ -342,7 +371,7 @@ Creates an AWS template (vpc, subnet, internetGateway, routeTable, securityGroup
 + Response 200 (application/json)
 
         {
-            "infraId": "aws-infra-id"
+            "id": "1"
         }
 
 
@@ -360,24 +389,20 @@ Creates an Azure cloud template. (vpc, subnet, instances)
             {
                 "cloudPlatform": "AZURE",
                 "name": "my-azure-cluster",
+                "description": "my azure template"
                 "parameters": {
                     "location": "NORTH_EUROPE",
-                    "description": "my-azure-cluster description",
-                    "addressPrefix": "172.16.0.0/16",
-                    "subnetAddressPrefix": "172.16.0.0/24",
-                    "deploymentSlot": "production",
-                    "imageName": "c290a6b031d841e09f2da759bbabe71f__Oracle-Linux-6",
-                    "username": "ricsiuser",
+                    "imageName": "sequnceiq-ambari-docker-v1",
                     "password": "Password!@#$",
-                    "disableSshPasswordAuthentication": "true",
-                    "vmType": "Small"
+                    "vmType": "Small",
+                    "sshPublicKey": "-----BEGIN CERTIFICATE-----MIICsDCCAhmgAwIBAgIJAPtq+czPZYU/MA0GCSqGSIb3DQEBBQUAMEUxCzAJBgNVBAYTAkFVMRMwEQYDVQQIEwpTb21lLVN0YXRlMSEwHw-----END CERTIFICATE-----"
                 }
             }
 
 + Response 200 (application/json)
 
         {
-            "infraId": "azure-infra-id"
+            "id": "2"
         }
 
 ## Retrieve templates for a user [/templates]
@@ -401,6 +426,7 @@ Retrieves a list with the cloud templates belonging to the user
               {
                   "cloudPlatform": "AWS",
                   "name": "my-template-1",
+                  "description": "My azure template",
                   "parameters": {
                       "sshLocation": "0.0.0.0/0"
                       "region": "eu-west-1",
@@ -412,17 +438,13 @@ Retrieves a list with the cloud templates belonging to the user
               {
                   "cloudPlatform": "AZURE",
                   "name": "my-azure-cluster",
+                  "description": "my azure template"
                   "parameters": {
                       "location": "NORTH_EUROPE",
-                      "description": "my-azure-cluster description",
-                      "addressPrefix": "172.16.0.0/16",
-                      "subnetAddressPrefix": "172.16.0.0/24",
-                      "deploymentSlot": "production",
-                      "imageName": "c290a6b031d841e09f2da759bbabe71f__Oracle-Linux-6",
-                      "username": "ricsiuser",
+                      "imageName": "sequnceiq-ambari-docker-v1",
                       "password": "Password!@#$",
-                      "disableSshPasswordAuthentication": "true",
-                      "vmType": "Small"
+                      "vmType": "Small",
+                  }
               }
           ]
 
@@ -448,6 +470,7 @@ Retrieves the AWS or Azure template by submitting the template ID
             {
                 "cloudPlatform": "AWS",
                 "name": "my-template-1",
+                "description": "My azure template",
                 "parameters": {
                     "sshLocation": "0.0.0.0/0"
                     "region": "eu-west-1",
@@ -465,223 +488,6 @@ Deletes the specified template from the database, unless there is a cloud instan
 
 + Parameters
     + id (required String `id`) ... The identifier of the `template`.
-
-+ Request
-
-    + Headers
-
-            x-auth-token: user:c45sdfdsfo234jgkhsdgf324
-
-+ Response 200 (application/json)
-
-        {
-        }
-
-# Group Stacks
-Stacks related resources of the **Cloudbreak API**.
-Manages AWS or Azure clouds based on templates. Creates, launches, stops, deletes the specified number of instances in the selected template (infrastructure).
-
-
-## Create cloud [/stacks]
-### Create stack [POST]
-Creates an AWS or Azure cloud from a template.
-
-+ Request
-
-    + Headers
-
-            x-auth-token: user:c45sdfdsfo234jgkhsdgf324
-
-    + Body
-
-            {
-                "name": "my-cloud-1",
-                "clusterSize": 3,
-                "templateId": "1"
-            }
-
-+ Response 200 (application/json)
-
-        {
-            "infraId": "aws-infra-id"
-        }
-
-## Retrieve stacks for the user [/stacks]
-### List stacks [GET]
-Retrieves the cloud stacks belonging to the user
-
-+ Request
-
-    + Headers
-
-            x-auth-token: user:c45sdfdsfo234jgkhsdgf324
-
-    + Body
-
-            {
-            }
-
-+ Response 200 (application/json)
-
-        {
-            "nodeCount": 2,
-            "templateId": "1",
-            "cloudPlatform": "AWS",
-            "name": "stack-123",
-            "status": "CREATED",
-            "creationTime": "2010-07-27T22:28:28Z",
-            "ambarServerIP": "ambari.server.ip",
-            "stackDescription": {
-                  "resources": {
-                      "stackResources": [
-                      {
-                          "description": null,
-                          "stackName": "coreos",
-                          "stackId": "arn:aws:cloudformation:eu-west-1:755047402263:stack/coreos/fa71a930-e16b-11e3-8185-50014118ec7c",
-                          "logicalResourceId": "CoreOSELB",
-                          "physicalResourceId": "coreos-CoreOSELB-EIJBBQ9335MT",
-                          "resourceType": "AWS::ElasticLoadBalancing::LoadBalancer",
-                          "timestamp": 1400733975000,
-                          "resourceStatus": "CREATE_COMPLETE",
-                          "resourceStatusReason": null
-                      },
-                      {
-                          "description": null,
-                          "stackName": "coreos",
-                          "stackId": "arn:aws:cloudformation:eu-west-1:755047402263:stack/coreos/fa71a930-e16b-11e3-8185-50014118ec7c",
-                          "logicalResourceId": "CoreOSUser",
-                          "physicalResourceId": "coreos-CoreOSUser-1W69DK6OLLTXZ",
-                          "resourceType": "AWS::IAM::User",
-                          "timestamp": 1400733980000,
-                          "resourceStatus": "CREATE_COMPLETE",
-                          "resourceStatusReason": null
-                        }
-                      ]},
-                          "stack": {
-                              "nextToken": null,
-                              "stacks": [
-                                  {
-                                      "tags": [
-                                      {
-                                          "value": "coreos",
-                                          "key": "Name"
-                                      }],
-                                      "capabilities": [
-                                          "CAPABILITY_IAM"
-                                          ],
-                                      "timeoutInMinutes": null,
-                                      "notificationARNs": [],
-                                      "disableRollback": false,
-                                      "stackId": "arn:aws:cloudformation:eu-west-1:755047402263:stack/coreos/fa71a930-e16b-11e3-8185-50014118ec7c",
-                                      "stackName": "coreos",
-                                      "description": "CoreOS stack",
-                                      "parameters": [
-                                          {
-                                              "parameterValue": "sequence-eu",
-                                              "parameterKey": "KeyPair"
-                                          },
-                                          {
-                                              "parameterValue": "0.0.0.0/0",
-                                              "parameterKey": "AllowSSHFrom"
-                                          }]
-                                  }
-                              ]
-                          }
-                    }
-            }
-
-
-## Retrieve a  stack [/stacks/{id}]
-### Retrieve a particular stack [GET]
-Retrieves a  (AWS or Azure)  stack definition.
-
-+ Parameters
-    + id (required String `id`) ... The identifier of the `template`.
-
-+ Request
-
-    + Headers
-
-            x-auth-token: user:c45sdfdsfo234jgkhsdgf324
-
-+ Response 200 (application/json)
-
-        {
-            "nodeCount": 2,
-            "templateId": "1",
-            "cloudPlatform": "AWS",
-            "name": "stack-123",
-            "status": "CREATED",
-            "creationTime": "2010-07-27T22:28:28Z",
-            "ambarServerIP": "ambari.server.ip",
-            "stackDescription": {
-                "resources": {
-                    "stackResources": [
-                    {
-                        "description": null,
-                        "stackName": "coreos",
-                        "stackId": "arn:aws:cloudformation:eu-west-1:755047402263:stack/coreos/fa71a930-e16b-11e3-8185-50014118ec7c",
-                        "logicalResourceId": "CoreOSELB",
-                        "physicalResourceId": "coreos-CoreOSELB-EIJBBQ9335MT",
-                        "resourceType": "AWS::ElasticLoadBalancing::LoadBalancer",
-                        "timestamp": 1400733975000,
-                        "resourceStatus": "CREATE_COMPLETE",
-                        "resourceStatusReason": null
-                    },
-                    {
-                        "description": null,
-                        "stackName": "coreos",
-                        "stackId": "arn:aws:cloudformation:eu-west-1:755047402263:stack/coreos/fa71a930-e16b-11e3-8185-50014118ec7c",
-                        "logicalResourceId": "CoreOSUser",
-                        "physicalResourceId": "coreos-CoreOSUser-1W69DK6OLLTXZ",
-                        "resourceType": "AWS::IAM::User",
-                        "timestamp": 1400733980000,
-                        "resourceStatus": "CREATE_COMPLETE",
-                        "resourceStatusReason": null
-                    }]
-                    },
-                    "stack": {
-                        "nextToken": null,
-                        "stacks": [
-                        {
-                            "tags": [
-                            {
-                                "value": "coreos",
-                                "key": "Name"
-                            }],
-                            "capabilities": [
-                                "CAPABILITY_IAM"
-                            ],
-                            "timeoutInMinutes": null,
-                            "notificationARNs": [],
-                            "disableRollback": false,
-                            "stackId": "arn:aws:cloudformation:eu-west-1:755047402263:stack/coreos/fa71a930-e16b-11e3-8185-50014118ec7c",
-                            "stackName": "coreos",
-                            "description": "CoreOS stack",
-                            "parameters": [
-                            {
-                                "parameterValue": "sequence-eu",
-                                "parameterKey": "KeyPair"
-                            },
-                            {
-                                "parameterValue": "0.0.0.0/0",
-                                "parameterKey": "AllowSSHFrom"
-                            }]
-                        }]
-                      }
-                    }
-        }
-
-
-
-## Delete cloud stacks [/stacks/{id}]
-### Deletes the specified cloud stack [DELETE]
-Deletes the specified stack from the (AWS or Azure) cloud
-
-WARNING: All data will be lost - unless there was no storage configured. It is the user's responsibilty to backup data or take snapshots uning the cloud interface.
-
-+ Parameters
-    + id (required String `aws-cloud-id`) ... The identifier of the `stack`.
 
 + Request
 
@@ -716,7 +522,8 @@ The cardinality specifies the desired number of nodes for the hostgroup. When th
 
             {
                 "name": "multi-node-hdfs-yarn",
-                "blueprint": {
+                "description": "My multinode blueprint",
+                "ambariBlueprint": {
                   "Blueprints": {
                     "blueprint_name": "multi-node-hdfs-yarn",
                     "stack_name": "HDP",
@@ -784,7 +591,7 @@ The cardinality specifies the desired number of nodes for the hostgroup. When th
 
 ## Create Hadoop blueprints [/blueprints]
 ### Create a blueprint [POST]
-Creates a Hadoop blueprint using the provided `blueprintUrl`
+Creates a Hadoop blueprint using the provided `url`
 
 + Request
 
@@ -796,7 +603,8 @@ Creates a Hadoop blueprint using the provided `blueprintUrl`
 
             {
                 "name": "multi-node-hdfs-yarn",
-                "blueprintUrl": "http://url.com/blueprint.json"
+                "description": "My multinode blueprint",
+                "url": "http://url.com/blueprint.json"
             }
 
 + Response 200 (application/json)
@@ -823,9 +631,12 @@ Retrieve blueprints for the user
 + Response 200 (application/json)
 
         {
-            "stackName": "my-ambari-cluster-1",
-            "blueprintBody": {
-            "host_groups" : [
+            "id": "51"
+            "name": "my-ambari-cluster-1",
+            "description": "My multinode blueprint",
+            "blueprintName": "multi-node-hdfs-yarn",
+            "ambariBlueprint": {
+              "host_groups" : [
                   {
                     "name" : "master",
                     "components" : [
@@ -899,8 +710,11 @@ Retrieve blueprints for the user
 + Response 200 (application/json)
 
         {
-                "stackName": "my-ambari-cluster-1",
-                "blueprintBody": {
+                "id": "51"
+                "name": "my-ambari-cluster-1",
+                "description": "My multinode blueprint",
+                "blueprintName": "multi-node-hdfs-yarn",
+                "ambariBlueprint": {
                 "host_groups" : [
                       {
                         "name" : "master",
@@ -979,13 +793,246 @@ WARNING: Deletes the specified blueprint from the database.
         }
 
 
+# Group Stacks
+Stacks related resources of the **Cloudbreak API**.
+Manages AWS or Azure clouds based on templates. Creates, launches, stops, deletes the specified number of instances in the selected template (infrastructure).
+
+
+## Create cloud [/stacks]
+### Create stack [POST]
+Creates an AWS or Azure cloud from a template.
+
++ Request
+
+    + Headers
+
+            x-auth-token: user:c45sdfdsfo234jgkhsdgf324
+
+    + Body
+
+            {
+                "name": "my-cloud-1",
+                "description": "my testing cloud",
+                "clusterSize": 3,
+                "templateId": "1"
+            }
+
++ Response 200 (application/json)
+
+        {
+            "id": "1"
+        }
+
+## Retrieve stacks for the user [/stacks]
+### List stacks [GET]
+Retrieves the cloud stacks belonging to the user
+
++ Request
+
+    + Headers
+
+            x-auth-token: user:c45sdfdsfo234jgkhsdgf324
+
+    + Body
+
+            {
+            }
+
++ Response 200 (application/json)
+
+        {
+          [
+            "metadata": [
+              {
+                "dockerSubnet": "172.17.10",
+                "ambariServer": true,
+                "instanceIndex": 0,
+                "instanceId": "i-fab627b8",
+                "publicIp": "54.77.43.59",
+                "privateIp": "10.0.0.136"
+              },
+              {
+                "dockerSubnet": "172.17.11",
+                "ambariServer": false,
+                "instanceIndex": 1,
+                "instanceId": "i-1bb92859",
+                "publicIp": "54.77.43.60",
+                "privateIp": "10.0.0.135"
+              },
+              {
+                "dockerSubnet": "172.17.12",
+                "ambariServer": false,
+                "instanceIndex": 2,
+                "instanceId": "i-1ab92858",
+                "publicIp": "54.77.43.61",
+                "privateIp": "10.0.0.137"
+              }
+            ],
+            "cluster": {
+              "description": "",
+              "blueprintId": 50,
+              "cluster": {},
+              "minutesUp": 8,
+              "hoursUp": 0,
+              "status": "CREATE_COMPLETED",
+              "id": 2
+            },
+            "hash": "208d3dd389fad2221311792106cde53d",
+            "ambariServerIp": "54.77.43.59",
+            "nodeCount": 3,
+            "name": "awstest",
+            "templateId": 50,
+            "credentialId": 50,
+            "id": 50,
+            "cloudPlatform": "AWS",
+            "description": {
+              --AWS DESCRIPTION--
+            },
+            "status": "CREATE_COMPLETED"
+          ]
+        }
+
+
+## Retrieve a  stack [/stacks/{id}]
+### Retrieve a particular stack [GET]
+Retrieves a  (AWS or Azure)  stack definition.
+
++ Parameters
+    + id (required String `id`) ... The identifier of the `stack`.
+
++ Request
+
+    + Headers
+
+            x-auth-token: user:c45sdfdsfo234jgkhsdgf324
+
++ Response 200 (application/json)
+
+        {
+          "metadata": [
+            {
+              "dockerSubnet": "172.17.10",
+              "ambariServer": true,
+              "instanceIndex": 0,
+              "instanceId": "i-fab627b8",
+              "publicIp": "54.77.43.59",
+              "privateIp": "10.0.0.136"
+            },
+            {
+              "dockerSubnet": "172.17.11",
+              "ambariServer": false,
+              "instanceIndex": 1,
+              "instanceId": "i-1bb92859",
+              "publicIp": "54.77.43.60",
+              "privateIp": "10.0.0.135"
+            },
+            {
+              "dockerSubnet": "172.17.12",
+              "ambariServer": false,
+              "instanceIndex": 2,
+              "instanceId": "i-1ab92858",
+              "publicIp": "54.77.43.61",
+              "privateIp": "10.0.0.137"
+            }
+          ],
+          "cluster": {
+            "description": "",
+            "blueprintId": 50,
+            "cluster": {},
+            "minutesUp": 8,
+            "hoursUp": 0,
+            "status": "CREATE_COMPLETED",
+            "id": 2
+          },
+          "hash": "208d3dd389fad2221311792106cde53d",
+          "ambariServerIp": "54.77.43.59",
+          "nodeCount": 3,
+          "name": "awstest",
+          "templateId": 50,
+          "credentialId": 50,
+          "id": 50,
+          "cloudPlatform": "AWS",
+          "description": {
+            --AWS DESCRIPTION--
+          },
+          "status": "CREATE_COMPLETED"
+        }
+
+
+
+## Delete cloud stacks [/stacks/{id}]
+### Deletes the specified cloud stack [DELETE]
+Deletes the specified stack from the (AWS or Azure) cloud
+
+WARNING: All data will be lost - unless there was no storage configured. It is the user's responsibilty to backup data or take snapshots uning the cloud interface.
+
++ Parameters
+    + id (required String `aws-cloud-id`) ... The identifier of the `stack`.
+
++ Request
+
+    + Headers
+
+            x-auth-token: user:c45sdfdsfo234jgkhsdgf324
+
++ Response 200 (application/json)
+
+
+          {
+
+          }
+
+## Retrieve a  stack [/stacks/metadata/{hash}]
+### Retrieve a particular stack metadata [GET]
+Retrieves a  (AWS or Azure)  stack metadata.
+
++ Parameters
+    + hash (required String `hash`) ... The identifier of the `metadata`.
+
++ Response 200 (application/json)
+
+  {
+    [
+      {
+        "dockerSubnet": "172.17.12",
+        "ambariServer": false,
+        "instanceIndex": 2,
+        "instanceId": "i-1ab92858",
+        "publicIp": "54.77.43.61",
+        "privateIp": "10.0.0.137"
+      },
+      {
+        "dockerSubnet": "172.17.10",
+        "ambariServer": true,
+        "instanceIndex": 0,
+        "instanceId": "i-fab627b8",
+        "publicIp": "54.77.43.59",
+        "privateIp": "10.0.0.136"
+      },
+      {
+        "dockerSubnet": "172.17.11",
+        "ambariServer": false,
+        "instanceIndex": 1,
+        "instanceId": "i-1bb92859",
+        "publicIp": "54.77.43.60",
+        "privateIp": "10.0.0.135"
+      }
+    ]
+  }
+
+
+
+
 # Group Clusters
 Hadoop cluster related resources of the **Cloudbreak API**.
 
 
-## Adding Hadoop clusters [/clusters]
+## Adding Hadoop clusters [/stacks/{stackId}/cluster]
 ### Create cluster [POST]
 Creates a Hadoop cluster based on a blueprint.
+
++ Parameters
+    + id (required String `id`) ... The identifier of the `stack`
 
 + Request
 
@@ -997,16 +1044,8 @@ Creates a Hadoop cluster based on a blueprint.
 
             {
                  "clusterName": "my-cluster",
-                 "blueprintName": "multi-node-hdfs-yarn",
-                 "hostGroups": [
-                     {
-                          "name": "master",
-                          "cardinality": 1
-                     },
-                     {
-                         "name": "slave",
-                         "cardinality": 3
-                    } ]
+                 "blueprintId": "1",
+                 "description": "My multinode cluster"
             }
 
 + Response 200 (application/json)
@@ -1015,9 +1054,12 @@ Creates a Hadoop cluster based on a blueprint.
         }
 
 
-## Retrieve Hadoop clusters [/clusters]
-### List clusters [GET]
-Retrieve all Hadoop clusters
+## Retrieve Hadoop clusters [/stacks/{stackId}/cluster]
+### Retrieve a particular cluster [GET]
+Retrieves a particular cluster configuration for the user
+
++ Parameters
+    + id (required String `id`) ... The identifier of the `stack`
 
 + Request
 
@@ -1033,126 +1075,228 @@ Retrieve all Hadoop clusters
 + Response 200 (application/json)
 
         {
-          "cluster": {
-            "configurations": [
-              {
-                "Config": {
-                  "cluster_name": "MySingleNodeCluster2"
-                },
-                "type": "capacity-scheduler",
-                "tag": "1",
-                "href": "http://172.17.0.2:8080/api/v1/clusters/MySingleNodeCluster2/configurations?type=capacity-scheduler&tag=1"
-              },
-              {
-                "Config": {
-                  "cluster_name": "MySingleNodeCluster2"
-                },
-                "type": "core-site",
-                "tag": "1",
-                "href": "http://172.17.0.2:8080/api/v1/clusters/MySingleNodeCluster2/configurations?type=core-site&tag=1"
-              }
-            ],
-            "hosts": [
-              {
-                "Hosts": {
-                  "host_name": "server.ambari.com",
-                  "cluster_name": "MySingleNodeCluster2"
-                },
-                "href": "http://172.17.0.2:8080/api/v1/clusters/MySingleNodeCluster2/hosts/server.ambari.com"
-              }
-            ],
-            "workflows": [],
-            "config_groups": [],
-            "services": [
-              {
-                "ServiceInfo": {
-                  "service_name": "GANGLIA",
-                  "cluster_name": "MySingleNodeCluster2"
-                },
-                "href": "http://172.17.0.2:8080/api/v1/clusters/MySingleNodeCluster2/services/GANGLIA"
-              },
-              {
-                "ServiceInfo": {
-                  "service_name": "HDFS",
-                  "cluster_name": "MySingleNodeCluster2"
-                },
-                "href": "http://172.17.0.2:8080/api/v1/clusters/MySingleNodeCluster2/services/HDFS"
-              }
-            ],
-            "requests": [
-              {
-                "Requests": {
-                  "id": 1,
-                  "cluster_name": "MySingleNodeCluster2"
-                },
-                "href": "http://172.17.0.2:8080/api/v1/clusters/MySingleNodeCluster2/requests/1"
-              }
-            ],
-            "Clusters": {
-              "desired_configs": {
-                "zookeeper-log4j": {
-                  "tag": "1",
-                  "user": "admin"
-                },
-                "yarn-site": {
-                  "tag": "1",
-                  "user": "admin"
-                }
-              },
-              "version": "HDP-2.1",
-              "cluster_name": "MySingleNodeCluster2",
-              "cluster_id": 3
-            },
-            "href": "http://172.17.0.2:8080/api/v1/clusters/MySingleNodeCluster2"
-          }
-        }
-
-
-## Retrieve a cluster  [/clusters/{id}]
-### Retrieve a particular cluster [GET]
-Retrieves a particular cluster configuration for the user
-
-+ Parameters
-    + id (required String `id`) ... The identifier of the `cluster`
-
-+ Request
-
-    + Headers
-
-            x-auth-token: user:c45sdfdsfo234jgkhsdgf324
-
-+ Response 200 (application/json)
-
-        {
-            "clusterName": "my-hadoop-cluster-1",
-            "stackId":"my-hadoop-stack-1"
-            "host_groups" : [
-                  {
-                    "name" : "master",
-                    "cardinality" : "1"
+          {
+            "description": "",
+            "blueprintId": 50,
+            "cluster": {
+              "configurations": [
+                {
+                  "Config": {
+                    "cluster_name": "awstest"
                   },
-                  {
-                    "name" : "slaves",
-                    "cardinality" : "2"
+                  "type": "capacity-scheduler",
+                  "tag": "1",
+                  "href": "http://54.77.43.59:8080/api/v1/clusters/awstest/configurations?type=capacity-scheduler&tag=1"
+                },
+                {
+                  "Config": {
+                    "cluster_name": "awstest"
+                  },
+                  "type": "core-site",
+                  "tag": "1",
+                  "href": "http://54.77.43.59:8080/api/v1/clusters/awstest/configurations?type=core-site&tag=1"
+                },
+                {
+                  "Config": {
+                    "cluster_name": "awstest"
+                  },
+                  "type": "global",
+                  "tag": "1",
+                  "href": "http://54.77.43.59:8080/api/v1/clusters/awstest/configurations?type=global&tag=1"
+                },
+                {
+                  "Config": {
+                    "cluster_name": "awstest"
+                  },
+                  "type": "hadoop-policy",
+                  "tag": "1",
+                  "href": "http://54.77.43.59:8080/api/v1/clusters/awstest/configurations?type=hadoop-policy&tag=1"
+                },
+                {
+                  "Config": {
+                    "cluster_name": "awstest"
+                  },
+                  "type": "hdfs-log4j",
+                  "tag": "1",
+                  "href": "http://54.77.43.59:8080/api/v1/clusters/awstest/configurations?type=hdfs-log4j&tag=1"
+                },
+                {
+                  "Config": {
+                    "cluster_name": "awstest"
+                  },
+                  "type": "hdfs-site",
+                  "tag": "1",
+                  "href": "http://54.77.43.59:8080/api/v1/clusters/awstest/configurations?type=hdfs-site&tag=1"
+                },
+                {
+                  "Config": {
+                    "cluster_name": "awstest"
+                  },
+                  "type": "mapred-queue-acls",
+                  "tag": "1",
+                  "href": "http://54.77.43.59:8080/api/v1/clusters/awstest/configurations?type=mapred-queue-acls&tag=1"
+                },
+                {
+                  "Config": {
+                    "cluster_name": "awstest"
+                  },
+                  "type": "mapred-site",
+                  "tag": "1",
+                  "href": "http://54.77.43.59:8080/api/v1/clusters/awstest/configurations?type=mapred-site&tag=1"
+                },
+                {
+                  "Config": {
+                    "cluster_name": "awstest"
+                  },
+                  "type": "yarn-log4j",
+                  "tag": "1",
+                  "href": "http://54.77.43.59:8080/api/v1/clusters/awstest/configurations?type=yarn-log4j&tag=1"
+                },
+                {
+                  "Config": {
+                    "cluster_name": "awstest"
+                  },
+                  "type": "yarn-site",
+                  "tag": "1",
+                  "href": "http://54.77.43.59:8080/api/v1/clusters/awstest/configurations?type=yarn-site&tag=1"
+                },
+                {
+                  "Config": {
+                    "cluster_name": "awstest"
+                  },
+                  "type": "zookeeper-log4j",
+                  "tag": "1",
+                  "href": "http://54.77.43.59:8080/api/v1/clusters/awstest/configurations?type=zookeeper-log4j&tag=1"
+                }
+              ],
+              "hosts": [
+                {
+                  "Hosts": {
+                    "host_name": "amb0.mycorp.kom",
+                    "cluster_name": "awstest"
+                  },
+                  "href": "http://54.77.43.59:8080/api/v1/clusters/awstest/hosts/amb0.mycorp.kom"
+                },
+                {
+                  "Hosts": {
+                    "host_name": "amb1.mycorp.kom",
+                    "cluster_name": "awstest"
+                  },
+                  "href": "http://54.77.43.59:8080/api/v1/clusters/awstest/hosts/amb1.mycorp.kom"
+                },
+                {
+                  "Hosts": {
+                    "host_name": "amb2.mycorp.kom",
+                    "cluster_name": "awstest"
+                  },
+                  "href": "http://54.77.43.59:8080/api/v1/clusters/awstest/hosts/amb2.mycorp.kom"
+                }
+              ],
+              "workflows": [],
+              "config_groups": [],
+              "services": [
+                {
+                  "ServiceInfo": {
+                    "service_name": "HDFS",
+                    "cluster_name": "awstest"
+                  },
+                  "href": "http://54.77.43.59:8080/api/v1/clusters/awstest/services/HDFS"
+                },
+                {
+                  "ServiceInfo": {
+                    "service_name": "MAPREDUCE2",
+                    "cluster_name": "awstest"
+                  },
+                  "href": "http://54.77.43.59:8080/api/v1/clusters/awstest/services/MAPREDUCE2"
+                },
+                {
+                  "ServiceInfo": {
+                    "service_name": "NAGIOS",
+                    "cluster_name": "awstest"
+                  },
+                  "href": "http://54.77.43.59:8080/api/v1/clusters/awstest/services/NAGIOS"
+                },
+                {
+                  "ServiceInfo": {
+                    "service_name": "YARN",
+                    "cluster_name": "awstest"
+                  },
+                  "href": "http://54.77.43.59:8080/api/v1/clusters/awstest/services/YARN"
+                },
+                {
+                  "ServiceInfo": {
+                    "service_name": "ZOOKEEPER",
+                    "cluster_name": "awstest"
+                  },
+                  "href": "http://54.77.43.59:8080/api/v1/clusters/awstest/services/ZOOKEEPER"
+                }
+              ],
+              "requests": [
+                {
+                  "Requests": {
+                    "id": 1,
+                    "cluster_name": "awstest"
+                  },
+                  "href": "http://54.77.43.59:8080/api/v1/clusters/awstest/requests/1"
+                }
+              ],
+              "Clusters": {
+                "desired_configs": {
+                  "zookeeper-log4j": {
+                    "tag": "1",
+                    "user": "admin"
+                  },
+                  "yarn-site": {
+                    "tag": "1",
+                    "user": "admin"
+                  },
+                  "yarn-log4j": {
+                    "tag": "1",
+                    "user": "admin"
+                  },
+                  "capacity-scheduler": {
+                    "tag": "1",
+                    "user": "admin"
+                  },
+                  "core-site": {
+                    "tag": "1",
+                    "user": "admin"
+                  },
+                  "global": {
+                    "tag": "1",
+                    "user": "admin"
+                  },
+                  "hadoop-policy": {
+                    "tag": "1",
+                    "user": "admin"
+                  },
+                  "hdfs-log4j": {
+                    "tag": "1",
+                    "user": "admin"
+                  },
+                  "hdfs-site": {
+                    "tag": "1",
+                    "user": "admin"
+                  },
+                  "mapred-queue-acls": {
+                    "tag": "1",
+                    "user": "admin"
+                  },
+                  "mapred-site": {
+                    "tag": "1",
+                    "user": "admin"
                   }
-                ]
-        }
+                },
+                "version": "HDP-2.1",
+                "cluster_name": "awstest",
+                "cluster_id": 2
+              },
+              "href": "http://54.77.43.59:8080/api/v1/clusters/awstest"
+            },
+            "minutesUp": 16,
+            "hoursUp": 0,
+            "status": "CREATE_COMPLETED",
+            "id": 2
+          }
 
-
-## Delete clusters [/clusters/{id}]
-### Deletes the specified cluster [DELETE]
-WARNING: Deletes the cluster - all data in HDFS will be lost. The cluster is destroyed.
-
-+ Parameters
-    + id (required String `id`) ... The identifier of the cluster.
-
-+ Request
-
-    + Headers
-
-            x-auth-token: user:c45sdfdsfo234jgkhsdgf324
-
-+ Response 200 (application/json)
-
-        {
         }
