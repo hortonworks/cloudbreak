@@ -502,9 +502,12 @@ Though we are working on a few popular providers to add to Cloudbreak we'd like 
 ### Handling API requests
 
 Connecting a new cloud provider means that the Cloudbreak rest API should handle GET, POST and DELETE requests to a stack resource of the new cloud provider correctly.
-- POST: Creates the cloud resources (VPC, instances, etc) and properly starts Sequenceiq's Ambari Docker container on the instances.
-- DELETE: Terminates all instances in the cloud and deletes every other resources
-- GET: Describes the cloud resources by communicating with the cloud provider.
+
+- *POST*: Creates the cloud resources (VPC, instances, etc) and properly starts Sequenceiq's Ambari Docker container on the instances.
+
+- *DELETE*: Terminates all instances in the cloud and deletes every other resources
+
+- *GET*: Describes the cloud resources by communicating with the cloud provider.
 
 When connecting a new cloud provider, the `CloudPlatform` enum that holds the providers should be extended first. It is used to find the implementations when a request arrives.
 The main idea is the same behind every method: deal with the database calls in the controller then call the correct implementation that communicates with the cloud platform. This enables the connectors to be detached from the repository calls, they should only deal with the communication with the providers.
@@ -527,27 +530,41 @@ The process starts with the controller layer (`StackController` and `SimpleStack
 The diagram's goal is to provide a high level design of the flow, it doesn't contain every little detail, there are some smaller steps and method calls left out, the method parameters are not shown and the class names are often abbreviated.
 
 *Notes:*
+
 - every notification event contains the stack id and the cloud platform
+
 - the stack object is retrieved from the database in every complete handler and passed to the invoked method
+
 - the ProvisionSetup event contains a `Map` that hold keys and values and passed to the Provision step
+
 - the MetadataSetup event contains a `Set` of `CoreMetadataInstance` that's processed by the complete handler
+
 - `ProvisionRH` = `ProvisionRequestHandler`
+
 - `ProvisionSetupCH` = `ProvisionSetupCompleteHandler`
+
 - `ProvisionRH` = `ProvisionRequestHandler`
+
 - `MetadataSetupCH` = `MetadataSetupCompleteHandler`
 
 ![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/seq_diagram_provision_flow_2.png?token=1568469__eyJzY29wZSI6IlJhd0Jsb2I6c2VxdWVuY2VpcS9jbG91ZGJyZWFrL21hc3Rlci9kb2NzL2ltYWdlcy9zZXFfZGlhZ3JhbV9wcm92aXNpb25fZmxvd18yLnBuZyIsImV4cGlyZXMiOjE0MDU2OTU0NDF9--37c78d072a5c16fb0dba4128351c63d17b33cb83)
 
 *Notes:*
+
 - Ambari server is not shown on the diagram, but health check is basically a call to the Ambari REST API's health endpoint
+
 - `MetadataSetupCH` = `MetadataSetupCompleteHandler`
+
 - `AmbariRoleAllocationCH` = `AmbariRoleAllocationCompleteHandler`
+
 - `StackCreationSH` = `StackCreationSuccessHandler`
+
 - `ClusterRequestH` = `ClusterRequestHandler`
 
 
 When adding a new provider, the following **3+1 steps** should be implemented to handle the provisioning successfully. The first three steps are similar: they involve the implementation of different interfaces and they should send `complete` events after their task is done. Sending only events when a task is done enables the implementations themselves to use async processes. For example AWS provisioning uses such an implementation (See `Provisioner` for the details).
 The last step is a bit different because it requires the implementation of the user-data bash script that runs on every cloud machine instance after they are started.
+
 - `ProvisionSetup`: This step should create every cloud provider resource that will be used during the provisioning. For example the EC2 implementation uses SNS topics to notify Cloudbreak when an EC2 resource creation is completed. These topics are created (or retrieved) in this step, and the identifiers are sent in the `PROVISION_SETUP_COMPLETE` event as a key-value pair. (see `AwsProvisionSetup`)
 
 - `Provisioner`: The actual cloud resource creation is done here. The `PROVISION_COMPLETE` must be sent after every resource creation is initialized. It must contain the type and id of the created resources. This process can be async itself, e.g.: AWS CloudFormation is able to notify clients through an SNS topic when specific resources are created - the `PROVISION_COMPLETE` event is only sent after this notification arrives. `AwsProvisioner` handles the resource requests and `SnsMessageHandler` handles the notifications coming from Amazon SNS.
