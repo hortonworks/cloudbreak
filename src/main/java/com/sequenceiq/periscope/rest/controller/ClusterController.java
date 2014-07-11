@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.sequenceiq.ambari.client.AmbariConnectionException;
 import com.sequenceiq.periscope.registry.ClusterRegistration;
 import com.sequenceiq.periscope.registry.ClusterRegistry;
 import com.sequenceiq.periscope.rest.converter.AmbariConverter;
@@ -25,6 +28,8 @@ import com.sequenceiq.periscope.rest.json.IdJson;
 @RequestMapping("/clusters")
 public class ClusterController {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterController.class);
+
     @Autowired
     private ClusterRegistry clusterRegistry;
     @Autowired
@@ -34,7 +39,12 @@ public class ClusterController {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.POST)
     public ResponseEntity<IdJson> addCluster(@PathVariable String id, @RequestBody AmbariJson ambariServer) {
-        clusterRegistry.add(id, ambariConverter.convert(ambariServer));
+        try {
+            clusterRegistry.add(id, ambariConverter.convert(ambariServer));
+        } catch (AmbariConnectionException e) {
+            LOGGER.error("Error adding the ambari cluster {} to the registry", ambariServer.getHost(), e);
+            return new ResponseEntity<>(new IdJson(""), HttpStatus.BAD_REQUEST);
+        }
         return new ResponseEntity<>(new IdJson(id), HttpStatus.CREATED);
     }
 
