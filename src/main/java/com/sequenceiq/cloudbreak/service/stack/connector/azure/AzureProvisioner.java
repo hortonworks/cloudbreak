@@ -5,12 +5,10 @@ import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStack
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.NAME;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.NOT_FOUND;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.SERVICENAME;
-import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.getVmName;
 
 import groovyx.net.http.HttpResponseDecorator;
 import groovyx.net.http.HttpResponseException;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
@@ -79,6 +77,9 @@ public class AzureProvisioner implements Provisioner {
     @Autowired
     private RetryingStackUpdater retryingStackUpdater;
 
+    @Autowired
+    private AzureStackUtil azureStackUtil;
+
     @Override
     public void buildStack(Stack stack, String userData, Map<String, Object> setupProperties) {
         AzureTemplate azureTemplate = (AzureTemplate) stack.getTemplate();
@@ -87,10 +88,7 @@ public class AzureProvisioner implements Provisioner {
         String emailAsFolder = (String) setupProperties.get(EMAILASFOLDER);
 
         String filePath = AzureCertificateService.getUserJksFileName(credential, emailAsFolder);
-        File file = new File(filePath);
-        AzureClient azureClient = new AzureClient(
-                ((AzureCredential) credential).getSubscriptionId(), file.getAbsolutePath(), ((AzureCredential) credential).getJks()
-                );
+        AzureClient azureClient = azureStackUtil.createAzureClient(credential, filePath);
         retryingStackUpdater.updateStackStatus(stack.getId(), Status.CREATE_IN_PROGRESS);
         String name = stack.getName().replaceAll("\\s+", "");
         String commonName = ((AzureCredential) credential).getName().replaceAll("\\s+", "");
@@ -100,7 +98,7 @@ public class AzureProvisioner implements Provisioner {
 
         for (int i = 0; i < stack.getNodeCount(); i++) {
             try {
-                String vmName = getVmName(name, i);
+                String vmName = azureStackUtil.getVmName(name, i);
                 createCloudService(azureClient, azureTemplate, name, vmName, commonName);
                 createServiceCertificate(azureClient, azureTemplate, vmName, emailAsFolder);
                 createVirtualMachine(azureClient, azureTemplate, credential, name, vmName, commonName, userData);
@@ -155,7 +153,7 @@ public class AzureProvisioner implements Provisioner {
         props.put(DEPLOYMENTSLOT, PRODUCTION);
         props.put(LABEL, label);
         props.put(IMAGENAME,
-                azureTemplate.getImageName().equals(AzureStackUtil.IMAGE_NAME) ? AzureStackUtil.getOsImageName(credential) : azureTemplate.getImageName());
+                azureTemplate.getImageName().equals(AzureStackUtil.IMAGE_NAME) ? azureStackUtil.getOsImageName(credential) : azureTemplate.getImageName());
         props.put(IMAGESTOREURI,
                 String.format("http://%s.blob.core.windows.net/vhd-store/%s.vhd", commonName, vmName)
                 );
@@ -164,7 +162,7 @@ public class AzureProvisioner implements Provisioner {
         if (azureTemplate.getPassword() != null && !azureTemplate.getPassword().isEmpty()) {
             props.put(PASSWORD, azureTemplate.getPassword());
         } else {
-            X509Certificate sshCert = new X509Certificate(AzureCertificateService.getCerFile(azureTemplate.getOwner().emailAsFolder(), azureTemplate.getId()));
+            X509Certificate sshCert = azureStackUtil.createX509Certificate(azureTemplate, azureTemplate.getOwner().emailAsFolder());
             props.put(SSHPUBLICKEYFINGERPRINT, sshCert.getSha1Fingerprint().toUpperCase());
             props.put(SSHPUBLICKEYPATH, String.format("/home/%s/.ssh/authorized_keys", DEFAULT_USER_NAME));
         }
@@ -193,7 +191,7 @@ public class AzureProvisioner implements Provisioner {
             throws FileNotFoundException, CertificateException {
         Map<String, String> props = new HashMap<>();
         props.put(NAME, name);
-        X509Certificate sshCert = new X509Certificate(AzureCertificateService.getCerFile(emailAsFolder, azureTemplate.getId()));
+        X509Certificate sshCert = azureStackUtil.createX509Certificate(azureTemplate, emailAsFolder);
         props.put(DATA, new String(sshCert.getPem()));
         HttpResponseDecorator serviceCertificate = (HttpResponseDecorator) azureClient.createServiceCertificate(props);
         String requestId = (String) azureClient.getRequestId(serviceCertificate);

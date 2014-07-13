@@ -72,14 +72,14 @@ public class SnsTopicManagerTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        credential = AwsStackTestUtil.createAwsCredential();
+        credential = AwsConnectorTestUtil.createAwsCredential();
         createTopicResult = new CreateTopicResult();
-        createTopicResult.setTopicArn(AwsStackTestUtil.DEFAULT_TOPIC_ARN);
+        createTopicResult.setTopicArn(AwsConnectorTestUtil.DEFAULT_TOPIC_ARN);
         confirmSubscriptionResult = new ConfirmSubscriptionResult();
-        confirmSubscriptionResult.setSubscriptionArn(AwsStackTestUtil.DEFAULT_TOPIC_ARN);
-        snsTopic = AwsStackTestUtil.createSnsTopic(credential);
-        user = AwsStackTestUtil.createUser();
-        stack = AwsStackTestUtil.createStack(user, credential, AwsStackTestUtil.createAwsTemplate(user));
+        confirmSubscriptionResult.setSubscriptionArn(AwsConnectorTestUtil.DEFAULT_TOPIC_ARN);
+        snsTopic = AwsConnectorTestUtil.createSnsTopic(credential);
+        user = AwsConnectorTestUtil.createUser();
+        stack = AwsConnectorTestUtil.createStack(user, credential, AwsConnectorTestUtil.createAwsTemplate(user));
     }
 
     @Test
@@ -100,10 +100,10 @@ public class SnsTopicManagerTest {
         // GIVEN
         given(awsStackUtil.createSnsClient(Regions.DEFAULT_REGION, credential)).willReturn(snsClient);
         SnsRequest snsRequest = createSnsRequest();
-        given(snsTopicRepository.findByTopicArn(AwsStackTestUtil.DEFAULT_TOPIC_ARN)).willReturn(Arrays.asList(snsTopic, snsTopic));
+        given(snsTopicRepository.findByTopicArn(AwsConnectorTestUtil.DEFAULT_TOPIC_ARN)).willReturn(Arrays.asList(snsTopic, snsTopic));
         given(snsClient.confirmSubscription(anyString(), anyString())).willReturn(confirmSubscriptionResult);
         given(snsTopicRepository.save(any(SnsTopic.class))).willReturn(snsTopic);
-        given(stackRepository.findRequestedStacksWithCredential(AwsStackTestUtil.DEFAULT_ID)).willReturn(Arrays.asList(stack, stack));
+        given(stackRepository.findRequestedStacksWithCredential(AwsConnectorTestUtil.DEFAULT_ID)).willReturn(Arrays.asList(stack, stack));
         // WHEN
         underTest.confirmSubscription(snsRequest);
         // THEN
@@ -115,7 +115,7 @@ public class SnsTopicManagerTest {
         // GIVEN
         SnsRequest snsRequest = createSnsRequest();
         snsTopic.setConfirmed(true);
-        given(snsTopicRepository.findByTopicArn(AwsStackTestUtil.DEFAULT_TOPIC_ARN)).willReturn(Arrays.asList(snsTopic));
+        given(snsTopicRepository.findByTopicArn(AwsConnectorTestUtil.DEFAULT_TOPIC_ARN)).willReturn(Arrays.asList(snsTopic));
         // WHEN
         underTest.confirmSubscription(snsRequest);
         // THEN
@@ -126,7 +126,7 @@ public class SnsTopicManagerTest {
     public void testConfirmSubscriptionWhenTopicsAreNotFoundShouldNotConfirmTopic() {
         // GIVEN
         SnsRequest snsRequest = createSnsRequest();
-        given(snsTopicRepository.findByTopicArn(AwsStackTestUtil.DEFAULT_TOPIC_ARN)).willReturn(new ArrayList<SnsTopic>());
+        given(snsTopicRepository.findByTopicArn(AwsConnectorTestUtil.DEFAULT_TOPIC_ARN)).willReturn(new ArrayList<SnsTopic>());
         // WHEN
         underTest.confirmSubscription(snsRequest);
         // THEN
@@ -135,7 +135,7 @@ public class SnsTopicManagerTest {
 
     private SnsRequest createSnsRequest() {
         SnsRequest snsRequest = new SnsRequest();
-        snsRequest.setTopicArn(AwsStackTestUtil.DEFAULT_TOPIC_ARN);
+        snsRequest.setTopicArn(AwsConnectorTestUtil.DEFAULT_TOPIC_ARN);
         snsRequest.setToken(DUMMY_TOKEN);
         return snsRequest;
     }

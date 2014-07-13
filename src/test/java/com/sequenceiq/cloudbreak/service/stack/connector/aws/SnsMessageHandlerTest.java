@@ -68,10 +68,10 @@ public class SnsMessageHandlerTest {
         underTest = new SnsMessageHandler();
         MockitoAnnotations.initMocks(this);
         snsRequest = createSnsRequest();
-        User user = AwsStackTestUtil.createUser();
-        AwsCredential credential = AwsStackTestUtil.createAwsCredential();
-        AwsTemplate awsTemplate = AwsStackTestUtil.createAwsTemplate(user);
-        stack = AwsStackTestUtil.createStack(user, credential, awsTemplate);
+        User user = AwsConnectorTestUtil.createUser();
+        AwsCredential credential = AwsConnectorTestUtil.createAwsCredential();
+        AwsTemplate awsTemplate = AwsConnectorTestUtil.createAwsTemplate(user);
+        stack = AwsConnectorTestUtil.createStack(user, credential, awsTemplate);
     }
 
     @Test

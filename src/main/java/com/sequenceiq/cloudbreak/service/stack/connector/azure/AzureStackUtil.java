@@ -1,8 +1,17 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.azure;
 
+import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
+import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
+import org.springframework.stereotype.Component;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.security.cert.CertificateException;
+
+@Component
 public class AzureStackUtil {
 
     public static final int NOT_FOUND = 404;
@@ -13,15 +22,22 @@ public class AzureStackUtil {
     public static final String EMAILASFOLDER = "emailAsFolder";
     public static final String IMAGE_NAME = "ambari-docker-v1";
 
-    private AzureStackUtil() throws IllegalAccessException {
-        throw new IllegalAccessException("Instantiate this class is not possible.");
-    }
-
-    public static String getVmName(String azureTemplate, int i) {
+    public String getVmName(String azureTemplate, int i) {
         return String.format("%s-%s", azureTemplate, i);
     }
 
-    public static String getOsImageName(Credential credential) {
+    public String getOsImageName(Credential credential) {
         return String.format("%s-%s", ((AzureCredential) credential).getName().replaceAll("\\s+", ""), IMAGE_NAME);
+    }
+
+    public AzureClient createAzureClient(Credential credential, String filePath) {
+        File file = new File(filePath);
+        return new AzureClient(
+                ((AzureCredential) credential).getSubscriptionId(), file.getAbsolutePath(), ((AzureCredential) credential).getJks()
+        );
+    }
+
+    public X509Certificate createX509Certificate(AzureTemplate azureTemplate, String emailAsFolder) throws FileNotFoundException, CertificateException {
+        return new X509Certificate(AzureCertificateService.getCerFile(emailAsFolder, azureTemplate.getId()));
     }
 }

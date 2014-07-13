@@ -3,13 +3,13 @@ package com.sequenceiq.cloudbreak.service.stack.connector.azure;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.NAME;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.SERVICENAME;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,18 +39,15 @@ public class AzureMetadataSetup implements MetadataSetup {
     @Autowired
     private Reactor reactor;
 
+    @Autowired
+    private AzureStackUtil azureStackUtil;
+
     @Override
     public void setupMetadata(Stack stack) {
         AzureCredential azureCredential = (AzureCredential) stack.getCredential();
 
         String filePath = AzureCertificateService.getUserJksFileName(azureCredential,  stack.getUser().emailAsFolder());
-        File file = new File(filePath);
-
-        AzureClient azureClient = new AzureClient(
-                azureCredential.getSubscriptionId(),
-                file.getAbsolutePath(),
-                azureCredential.getJks()
-        );
+        AzureClient azureClient = azureStackUtil.createAzureClient(azureCredential, filePath);
         String name = stack.getName().replaceAll("\\s+", "");
         Set<CoreInstanceMetaData> instanceMetaDatas = collectMetaData(stack, azureClient, name);
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.METADATA_SETUP_COMPLETE_EVENT, stack.getId());
@@ -61,7 +58,7 @@ public class AzureMetadataSetup implements MetadataSetup {
     private Set<CoreInstanceMetaData> collectMetaData(Stack stack, AzureClient azureClient, String name) {
         Set<CoreInstanceMetaData> instanceMetaDatas = new HashSet<>();
         for (int i = 0; i < stack.getNodeCount(); i++) {
-            String vmName = AzureStackUtil.getVmName(name, i);
+            String vmName = azureStackUtil.getVmName(name, i);
             Map<String, Object> props = new HashMap<>();
             props.put(NAME, vmName);
             props.put(SERVICENAME, vmName);
@@ -78,13 +75,14 @@ public class AzureMetadataSetup implements MetadataSetup {
         return instanceMetaDatas;
     }
 
-
-    private String getVirtualIP(String response) throws IOException {
+    @VisibleForTesting
+    protected String getVirtualIP(String response) throws IOException {
         JsonNode actualObj = MAPPER.readValue(response, JsonNode.class);
         return actualObj.get("Deployment").get("VirtualIPs").get("VirtualIP").get("Address").asText();
     }
 
-    private String getPrivateIP(String response) throws IOException {
+    @VisibleForTesting
+    protected String getPrivateIP(String response) throws IOException {
         JsonNode actualObj = MAPPER.readValue(response, JsonNode.class);
         return actualObj.get("Deployment").get("RoleInstanceList").get("RoleInstance").get("IpAddress").asText();
     }
