@@ -1,20 +1,25 @@
 package com.sequenceiq.cloudbreak.service.stack.handler;
 
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
-import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
-import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupContext;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+import java.util.Set;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import reactor.event.Event;
 
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.any;
+import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
+import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupContext;
+
+import reactor.event.Event;
 
 public class ProvisionCompleteHandlerTest {
     @InjectMocks
@@ -24,6 +29,8 @@ public class ProvisionCompleteHandlerTest {
     private MetadataSetupContext metadataSetupContext;
 
     private Event<ProvisionComplete> event;
+
+    private Set<Resource> resourceSet;
 
     @Before
     public void setUp() {
@@ -44,6 +51,6 @@ public class ProvisionCompleteHandlerTest {
 
 
     private Event<ProvisionComplete> createEvent() {
-        return new Event<ProvisionComplete>(new ProvisionComplete(CloudPlatform.AWS, 1L));
+        return new Event<ProvisionComplete>(new ProvisionComplete(CloudPlatform.AWS, 1L, resourceSet));
     }
 }

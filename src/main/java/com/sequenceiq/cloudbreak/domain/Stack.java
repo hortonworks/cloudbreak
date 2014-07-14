@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -88,6 +90,9 @@ public class Stack implements ProvisionEntity {
     @ManyToOne
     @JoinColumn(name = "stack_user")
     private User user;
+
+    @OneToMany(mappedBy = "stack", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Resource> resources = new HashSet<>();
 
     @Version
     private Long version;
@@ -236,4 +241,21 @@ public class Stack implements ProvisionEntity {
         this.instanceMetaData = instanceMetaData;
     }
 
+    public Set<Resource> getResources() {
+        return resources;
+    }
+
+    public void setResources(Set<Resource> resources) {
+        this.resources = resources;
+    }
+
+    public List<Resource> getResourcesbyType(ResourceType resourceType){
+        List<Resource> resourceList = new ArrayList<>();
+        for (Resource resource : resources) {
+            if (resourceType.equals(resource.getResourceType())) {
+                resourceList.add(resource);
+            }
+        }
+        return resourceList;
+    }
 }

@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.DetailedAwsStackDescription;
+import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackDescription;
 import com.sequenceiq.cloudbreak.domain.User;
@@ -105,7 +106,8 @@ public class AwsConnector implements CloudPlatformConnector {
         if (stack.getCfStackName() != null) {
             AmazonCloudFormationClient client = awsStackUtil.createCloudFormationClient(template.getRegion(), awsCredential);
             LOGGER.info("Deleting CloudFormation stack for stack: {} [cf stack id: {}]", stack.getId(), stack.getCfStackId());
-            DeleteStackRequest deleteStackRequest = new DeleteStackRequest().withStackName(stack.getCfStackName());
+            DeleteStackRequest deleteStackRequest = new DeleteStackRequest()
+                    .withStackName(stack.getResourcesbyType(ResourceType.CLOUDFORMATION_TEMPLATE_NAME).get(0).getResourceName());
             client.deleteStack(deleteStackRequest);
         }
     }

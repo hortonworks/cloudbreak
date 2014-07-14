@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 
@@ -56,6 +57,21 @@ public class RetryingStackUpdater {
                 return doUpdateMetaData(stackId, instanceMetaData);
             } else {
                 throw new InternalServerException(String.format("Failed to update stack '%s' in 5 attempts. (while trying to update metadata)", stackId), e);
+            }
+        }
+    }
+
+    public Stack updateStackResources(Long stackId, Set<Resource> resources) {
+        int attempt = 1;
+        try {
+            return doUpdateResources(stackId, resources);
+        } catch (OptimisticLockException | OptimisticLockingFailureException e) {
+            LOGGER.info("Failed to update stack status. [id: '{}', attempt: '{}', Cause: {}]. Trying to save it again.",
+                    stackId, attempt++, e.getClass().getSimpleName());
+            if (attempt <= MAX_RETRIES) {
+                return doUpdateResources(stackId, resources);
+            } else {
+                throw new InternalServerException(String.format("Failed to update stack '%s' in 5 attempts. (while trying to update resources)", stackId), e);
             }
         }
     }
@@ -197,4 +213,16 @@ public class RetryingStackUpdater {
         LOGGER.info("Updated stack: [stack: '{}' metadataReady: 'true'].", stackId);
         return stack;
     }
+
+
+    private Stack doUpdateResources(Long stackId, Set<Resource> resources) {
+        Stack stack = stackRepository.findById(stackId);
+        stack.setResources(resources);
+        stack = stackRepository.save(stack);
+        LOGGER.info("Updated stack resources: [stack: '{}', status: '{}', statusReason: '{}'].", stackId);
+        return stack;
+    }
+
+
+
 }
