@@ -70,6 +70,4 @@ lc(){
 
 checkProps
 
-# args
-
-#java $(args) -jar build/libs/cloudbreak-0.1-DEV.jar
+java $(args) -jar build/libs/cloudbreak-0.1-DEV.jar
