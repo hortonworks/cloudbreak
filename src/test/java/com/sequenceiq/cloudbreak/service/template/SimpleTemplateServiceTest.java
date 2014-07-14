@@ -3,19 +3,26 @@ package com.sequenceiq.cloudbreak.service.template;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
+import com.sequenceiq.cloudbreak.controller.validation.AzureTemplateParam;
 import com.sequenceiq.cloudbreak.converter.AwsTemplateConverter;
+import com.sequenceiq.cloudbreak.converter.AzureTemplateConverter;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
+import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Map;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -23,6 +30,9 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.anySetOf;
 
 public class SimpleTemplateServiceTest {
 
@@ -36,6 +46,12 @@ public class SimpleTemplateServiceTest {
     private AwsTemplateConverter awsTemplateConverter;
 
     @Mock
+    private AzureTemplateConverter azureTemplateConverter;
+
+    @Mock
+    private AzureCertificateService azureCertificateService;
+
+    @Mock
     private StackRepository stackRepository;
 
     @Mock
@@ -45,6 +61,8 @@ public class SimpleTemplateServiceTest {
 
     private AwsTemplate awsTemplate;
 
+    private AzureTemplate azureTemplate;
+
     @Before
     public void setUp() {
         underTest = new SimpleTemplateService();
@@ -53,6 +71,9 @@ public class SimpleTemplateServiceTest {
         awsTemplate = new AwsTemplate();
         awsTemplate.setId(1L);
         awsTemplate.setUser(user);
+        azureTemplate = new AzureTemplate();
+        azureTemplate.setId(1L);
+        azureTemplate.setUser(user);
     }
 
     @Test
@@ -68,7 +89,38 @@ public class SimpleTemplateServiceTest {
     }
 
     @Test
-    public void testDeleteAwsTemplate() {
+    public void testCreateAzureTemplate() {
+        // GIVEN
+        Map<String, Object> params = new HashMap<>();
+        params.put("sshPublicKey", AzureTemplateParam.SSH_PUBLIC_KEY);
+        given(azureTemplateConverter.convert(templateJson)).willReturn(azureTemplate);
+        given(templateJson.getParameters()).willReturn(params);
+        given(templateJson.getCloudPlatform()).willReturn(CloudPlatform.AZURE);
+        given(templateRepository.save(azureTemplate)).willReturn(azureTemplate);
+        doNothing().when(azureCertificateService).generateSshCertificate(any(User.class), any(AzureTemplate.class), anyString());
+        // WHEN
+        underTest.create(user, templateJson);
+        // THEN
+        verify(azureCertificateService, times(1)).generateSshCertificate(any(User.class), any(AzureTemplate.class), anyString());
+    }
+
+    @Test
+    public void testCreateAzureTemplateWhenAzureParamsAreEmpty() {
+        // GIVEN
+        Map<String, Object> params = new HashMap<>();
+        given(azureTemplateConverter.convert(templateJson)).willReturn(azureTemplate);
+        given(templateJson.getParameters()).willReturn(params);
+        given(templateJson.getCloudPlatform()).willReturn(CloudPlatform.AZURE);
+        given(templateRepository.save(azureTemplate)).willReturn(azureTemplate);
+        doNothing().when(azureCertificateService).generateSshCertificate(any(User.class), any(AzureTemplate.class), anyString());
+        // WHEN
+        underTest.create(user, templateJson);
+        // THEN
+        verify(azureCertificateService, times(0)).generateSshCertificate(any(User.class), any(AzureTemplate.class), anyString());
+    }
+
+    @Test
+    public void testDeleteTemplate() {
         //GIVEN
         given(templateRepository.findOne(1L)).willReturn(awsTemplate);
         given(stackRepository.findAllStackForTemplate(1L)).willReturn(new ArrayList<Stack>());
@@ -80,7 +132,7 @@ public class SimpleTemplateServiceTest {
     }
 
     @Test(expected = NotFoundException.class)
-    public void testDeleteAwsTemplateWhenTemplateNotFound() {
+    public void testDeleteTemplateWhenTemplateNotFound() {
         //GIVEN
         given(templateRepository.findOne(1L)).willReturn(null);
         //WHEN
@@ -88,12 +140,46 @@ public class SimpleTemplateServiceTest {
     }
 
     @Test(expected = BadRequestException.class)
-    public void testDeleteAwsTemplateWhenStackListIsEmpty() {
+    public void testDeleteTemplateWhenStackListIsEmpty() {
         //GIVEN
         given(templateRepository.findOne(1L)).willReturn(awsTemplate);
         given(stackRepository.findAllStackForTemplate(1L)).willReturn(Arrays.asList(new Stack()));
         doNothing().when(templateRepository).delete(awsTemplate);
         //WHEN
         underTest.delete(1L);
+    }
+
+    @Test
+    public void testGetAll() {
+        // GIVEN
+        given(awsTemplateConverter.convertAllEntityToJson(anySetOf(AwsTemplate.class))).willReturn(new HashSet<TemplateJson>());
+        given(azureTemplateConverter.convertAllEntityToJson(anySetOf(AzureTemplate.class))).willReturn(new HashSet<TemplateJson>());
+        // WHEN
+        underTest.getAll(user);
+        // THEN
+        verify(awsTemplateConverter, times(1)).convertAllEntityToJson(anySetOf(AwsTemplate.class));
+        verify(azureTemplateConverter, times(1)).convertAllEntityToJson(anySetOf(AzureTemplate.class));
+    }
+
+    @Test
+    public void testGetAwsTemplate() {
+        // GIVEN
+        given(templateRepository.findOne(1L)).willReturn(awsTemplate);
+        given(awsTemplateConverter.convert(any(AwsTemplate.class))).willReturn(templateJson);
+        // WHEN
+        underTest.get(1L);
+        // THEN
+        verify(awsTemplateConverter, times(1)).convert(any(AwsTemplate.class));
+    }
+
+    @Test
+    public void testGetAzureTemplate() {
+        // GIVEN
+        given(templateRepository.findOne(1L)).willReturn(azureTemplate);
+        given(azureTemplateConverter.convert(any(AzureTemplate.class))).willReturn(templateJson);
+        // WHEN
+        underTest.get(1L);
+        // THEN
+        verify(azureTemplateConverter, times(1)).convert(any(AzureTemplate.class));
     }
 }
