@@ -1,8 +1,10 @@
 package com.sequenceiq.periscope.service.configuration;
 
+import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
@@ -25,9 +27,10 @@ public class AmbariConfigurationService {
     private AmbariConfigurationService() {
     }
 
-    public static Configuration getConfiguration(AmbariClient ambariClient) {
+    public static Configuration getConfiguration(AmbariClient ambariClient) throws ConnectException {
         Configuration configuration = new Configuration(false);
-        for (Map.Entry<String, Map<String, String>> serviceEntry : ambariClient.getServiceConfigMap().entrySet()) {
+        Set<Map.Entry<String, Map<String, String>>> serviceConfigs = ambariClient.getServiceConfigMap().entrySet();
+        for (Map.Entry<String, Map<String, String>> serviceEntry : serviceConfigs) {
             LOGGER.debug("Processing service: {}", serviceEntry.getKey());
             for (Map.Entry<String, String> configEntry : serviceEntry.getValue().entrySet()) {
                 if (CONFIG_LIST.contains(configEntry.getKey())) {
@@ -35,6 +38,9 @@ public class AmbariConfigurationService {
                     LOGGER.debug("Adding entry: {}", configEntry);
                 }
             }
+        }
+        if (serviceConfigs.isEmpty()) {
+            throw new ConnectException(ambariClient.getAmbari().getUri().toString());
         }
         decorateConfiguration(configuration);
         return configuration;

@@ -9,11 +9,6 @@ import com.sequenceiq.periscope.rest.json.ClusterJson;
 public class ClusterConverter extends AbstractConverter<ClusterJson, ClusterRegistration> {
 
     @Override
-    public ClusterRegistration convert(ClusterJson source) {
-        throw new UnsupportedOperationException("Cannot create cluster registration with cluster json");
-    }
-
-    @Override
     public ClusterJson convert(ClusterRegistration source) {
         return new ClusterJson(source.getClusterId(), source.getHost(), source.getPort());
     }

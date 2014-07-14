@@ -1,16 +1,26 @@
 package com.sequenceiq.periscope.rest.json;
 
-public class AppJson implements Json {
+public class AppMoveJson implements Json {
 
     private String appId;
     private String queue;
+    private String message;
 
-    public AppJson() {
+    public AppMoveJson() {
     }
 
-    public AppJson(String appId, String queue) {
+    public AppMoveJson(String appId, String queue, String message) {
         this.appId = appId;
         this.queue = queue;
+        this.message = message;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 
     public String getAppId() {

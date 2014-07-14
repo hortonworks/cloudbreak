@@ -12,7 +12,7 @@ public interface ClusterRegistry {
      * @param id     id of the cluster
      * @param ambari ambari server parameters
      */
-    ClusterRegistration add(String id, Ambari ambari);
+    ClusterRegistration add(String id, Ambari ambari) throws ConnectionException;
 
     /**
      * Removes a cluster from the registry.

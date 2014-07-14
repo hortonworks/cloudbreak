@@ -16,14 +16,18 @@ public class ClusterRegistration {
     private final Configuration configuration;
     private final YarnClient yarnClient;
 
-    public ClusterRegistration(String clusterId, Ambari ambari) {
+    public ClusterRegistration(String clusterId, Ambari ambari) throws ConnectionException {
         this.clusterId = clusterId;
         this.ambari = ambari;
-        this.ambariClient = new AmbariClient(ambari.getHost(), ambari.getPort(), ambari.getUser(), ambari.getPass());
-        this.configuration = AmbariConfigurationService.getConfiguration(ambariClient);
-        this.yarnClient = YarnClient.createYarnClient();
-        this.yarnClient.init(configuration);
-        this.yarnClient.start();
+        try {
+            this.ambariClient = new AmbariClient(ambari.getHost(), ambari.getPort(), ambari.getUser(), ambari.getPass());
+            this.configuration = AmbariConfigurationService.getConfiguration(ambariClient);
+            this.yarnClient = YarnClient.createYarnClient();
+            this.yarnClient.init(configuration);
+            this.yarnClient.start();
+        } catch (Exception e) {
+            throw new ConnectionException(ambari.getHost());
+        }
     }
 
     public String getClusterId() {

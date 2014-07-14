@@ -13,8 +13,4 @@ public class AmbariConverter extends AbstractConverter<AmbariJson, Ambari> {
         return new Ambari(source.getHost(), source.getPort(), source.getUser(), source.getPass());
     }
 
-    @Override
-    public AmbariJson convert(Ambari source) {
-        throw new UnsupportedOperationException("Cannot create ambari json from ambari entity.");
-    }
 }

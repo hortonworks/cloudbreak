@@ -3,3 +3,6 @@ curl -X POST -H "Content-Type: application/json" -d '{"host":"172.24.0.2", "port
 
 # move application
 curl -X PUT -H "Content-Type: application/json" -d '{"queue":"l1"}' localhost:8081/clusters/multi-node/apps/application_1/move |jq .
+
+# list all app
+curl -X GET -H "Content-Type: application/json" -d localhost:8081/clusters/multi-node/apps |jq .

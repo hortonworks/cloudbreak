@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.sequenceiq.ambari.client.AmbariConnectionException;
 import com.sequenceiq.periscope.registry.ClusterRegistration;
 import com.sequenceiq.periscope.registry.ClusterRegistry;
+import com.sequenceiq.periscope.registry.ConnectionException;
 import com.sequenceiq.periscope.rest.converter.AmbariConverter;
 import com.sequenceiq.periscope.rest.converter.ClusterConverter;
 import com.sequenceiq.periscope.rest.json.AmbariJson;
@@ -41,7 +41,7 @@ public class ClusterController {
     public ResponseEntity<IdJson> addCluster(@PathVariable String id, @RequestBody AmbariJson ambariServer) {
         try {
             clusterRegistry.add(id, ambariConverter.convert(ambariServer));
-        } catch (AmbariConnectionException e) {
+        } catch (ConnectionException e) {
             LOGGER.error("Error adding the ambari cluster {} to the registry", ambariServer.getHost(), e);
             return new ResponseEntity<>(new IdJson(""), HttpStatus.BAD_REQUEST);
         }

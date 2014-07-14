@@ -2,7 +2,6 @@ package com.sequenceiq.periscope.rest.controller;
 
 import java.util.NoSuchElementException;
 
-import org.apache.hadoop.yarn.exceptions.YarnException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -24,12 +23,6 @@ public class ExceptionController {
         return createExceptionMessage(e.getMessage());
     }
 
-    @ExceptionHandler(YarnException.class)
-    public ResponseEntity<ExceptionMessage> handleYarnException(YarnException e) {
-        LOGGER.error("Unexpected error during yarn communication", e);
-        return createExceptionMessage(e.getMessage());
-    }
-
     @ExceptionHandler({ ClusterNotFoundException.class, NoSuchElementException.class })
     public ResponseEntity<ExceptionMessage> handleNotFoundExceptions(Exception e) {
         LOGGER.error("Not found", e);
@@ -37,11 +30,11 @@ public class ExceptionController {
         return createExceptionMessage(message == null ? "Not found" : message, HttpStatus.NOT_FOUND);
     }
 
-    private ResponseEntity<ExceptionMessage> createExceptionMessage(String message) {
+    public static ResponseEntity<ExceptionMessage> createExceptionMessage(String message) {
         return createExceptionMessage(message, HttpStatus.BAD_REQUEST);
     }
 
-    private ResponseEntity<ExceptionMessage> createExceptionMessage(String message, HttpStatus statusCode) {
+    public static ResponseEntity<ExceptionMessage> createExceptionMessage(String message, HttpStatus statusCode) {
         return new ResponseEntity<>(new ExceptionMessage(message), statusCode);
     }
 }

@@ -9,6 +9,16 @@ import com.sequenceiq.periscope.rest.json.Json;
 public abstract class AbstractConverter<J extends Json, E> implements Converter<J, E> {
 
     @Override
+    public E convert(J source) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public J convert(E source) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public Collection<E> convertAllFromJson(Collection<J> jsonList) {
         List<E> entityList = new ArrayList<>(jsonList.size());
         for (J json : jsonList) {

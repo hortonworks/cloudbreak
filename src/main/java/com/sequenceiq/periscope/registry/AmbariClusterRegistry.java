@@ -17,7 +17,7 @@ public class AmbariClusterRegistry implements ClusterRegistry {
     private Map<String, ClusterRegistration> clusters = new ConcurrentHashMap<>();
 
     @Override
-    public ClusterRegistration add(String id, Ambari ambari) {
+    public ClusterRegistration add(String id, Ambari ambari) throws ConnectionException {
         ClusterRegistration clusterRegistration = new ClusterRegistration(id, ambari);
         clusters.put(id, clusterRegistration);
         LOGGER.info("Cluster: {} registered with id: {}", ambari.getHost(), id);
