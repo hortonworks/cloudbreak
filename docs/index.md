@@ -402,7 +402,9 @@ _Note1: Clodbreak does not store any login details into these instances - when y
 _Note2: Because Azure does not directly support third party public images we will have to copy the used image from VM Depot into your storage account. The steps below needs to be finished ONCE and only ONCE before any stack is created for every affinity group:_
 
 _1. Get the VM image - http://vmdepot.msopentech.com/Vhd/Show?vhdId=42480&version=43564_
+
 _2. Copy the VHD blob from above (community images) into your storage account_
+
 _3. Create a VM image from the copied VHD blob._
 
 _This process will take 20 minutes so be patient - but this step will have do be done once and only once._
