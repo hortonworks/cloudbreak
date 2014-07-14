@@ -57,10 +57,9 @@ public class AwsProvisioner implements Provisioner {
                         new Parameter().withParameterKey("AMI").withParameterValue(awsTemplate.getAmiId())
                 );
         CreateStackResult createStackResult = client.createStack(createStackRequest);
-        Stack updatedStack = stackUpdater.updateStackCfAttributes(stack.getId(), createStackResult.getStackId());
         Set<Resource> resources = new HashSet<>();
-        resources.add(new Resource(ResourceType.CLOUDFORMATION_TEMPLATE_NAME, stackName, updatedStack));
-        updatedStack = stackUpdater.updateStackResources(updatedStack.getId(), resources);
+        resources.add(new Resource(ResourceType.CLOUDFORMATION_TEMPLATE_NAME, stackName, stack));
+        Stack updatedStack = stackUpdater.updateStackResources(stack.getId(), resources);
         LOGGER.info("CloudFormation stack creation request sent with stack name: '{}' for stack: '{}'", stackName, updatedStack.getId());
     }
 

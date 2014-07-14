@@ -91,22 +91,6 @@ public class RetryingStackUpdater {
         }
     }
 
-    public Stack updateStackCfAttributes(Long stackId, String cfStackId) {
-        int attempt = 1;
-        try {
-            return doUpdateStackCfAttributes(stackId, cfStackId);
-        } catch (OptimisticLockException | OptimisticLockingFailureException e) {
-            LOGGER.info("Failed to update stack's CloudFormation attributes. [id: '{}', attempt: '{}', Cause: {}]. Trying to save it again.",
-                    stackId, attempt++, e.getClass().getSimpleName());
-            if (attempt <= MAX_RETRIES) {
-                return doUpdateStackCfAttributes(stackId, cfStackId);
-            } else {
-                throw new InternalServerException(String.format(
-                        "Failed to update stack '%s' in 5 attempts. (while trying to update CloudFormation attributes)", stackId), e);
-            }
-        }
-    }
-
     public Stack updateStackCluster(Long stackId, Cluster cluster) {
         int attempt = 1;
         try {
@@ -178,14 +162,6 @@ public class RetryingStackUpdater {
         stack.setAmbariIp(ambariIp);
         stack = stackRepository.save(stack);
         LOGGER.info("Updated stack: [stack: '{}' ambariIp: '{}'].", stackId, ambariIp);
-        return stack;
-    }
-
-    private Stack doUpdateStackCfAttributes(Long stackId, String cfStackId) {
-        Stack stack = stackRepository.findById(stackId);
-        stack.setCfStackId(cfStackId);
-        stack = stackRepository.save(stack);
-        LOGGER.info("Updated stack '{}' with CloudFormation properties: [id: '{}'].", stackId, cfStackId);
         return stack;
     }
 

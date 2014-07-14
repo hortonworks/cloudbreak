@@ -60,8 +60,6 @@ public class Stack implements ProvisionEntity {
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    private String cfStackId;
-
     private boolean cfStackCompleted;
 
     private String ambariIp;
@@ -165,14 +163,6 @@ public class Stack implements ProvisionEntity {
 
     public void setStatus(Status status) {
         this.status = status;
-    }
-
-    public String getCfStackId() {
-        return cfStackId;
-    }
-
-    public void setCfStackId(String cfStackId) {
-        this.cfStackId = cfStackId;
     }
 
     public boolean isCfStackCompleted() {

@@ -88,7 +88,6 @@ public class AwsProvisionerTest {
         given(awsStackUtil.createCloudFormationClient(Regions.DEFAULT_REGION, credential)).willReturn(client);
         given(client.createStack(any(CreateStackRequest.class))).willReturn(createStackResult);
         given(createStackResult.getStackId()).willReturn(STACK_ID);
-        given(stackUpdater.updateStackCfAttributes(stack.getId(), STACK_ID)).willReturn(stack);
         given(stackUpdater.updateStackResources(anyLong(), anySet())).willReturn(stack);
         given(underTest.createStackRequest()).willReturn(createStackRequest);
         given(cfTemplate.getBody()).willReturn("templatebody");
@@ -124,6 +123,6 @@ public class AwsProvisionerTest {
             }
         }));
         verify(client, times(1)).createStack(createStackRequest);
-        verify(stackUpdater, times(1)).updateStackCfAttributes(stack.getId(), createStackResult.getStackId());
+        verify(stackUpdater, times(1)).updateStackResources(anyLong(), anySet());
     }
 }

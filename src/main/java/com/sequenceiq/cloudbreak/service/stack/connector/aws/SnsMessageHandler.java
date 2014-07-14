@@ -88,7 +88,7 @@ public class SnsMessageHandler {
         } else if (!stack.isCfStackCompleted()) {
             awsNetworkConfigurator.disableSourceDestCheck(stack);
             stack = stackUpdater.updateCfStackCreateComplete(stack.getId());
-            LOGGER.info("CloudFormation stack creation completed. [Id: '{}', CFStackId '{}']", stack.getId(), stack.getCfStackId());
+            LOGGER.info("CloudFormation stack creation completed. [Id: '{}']", stack.getId());
             LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_COMPLETE_EVENT, stack.getId());
             Set<Resource> resourceSet = new HashSet<>();
             resourceSet.add(new Resource(ResourceType.CLOUDFORMATION_TEMPLATE_NAME, cfMessage.get("StackName"), stack));
@@ -102,7 +102,7 @@ public class SnsMessageHandler {
             LOGGER.info("Got message that CloudFormation stack creation failed, but no matching stack found in the db. [CFStackId: '{}']. Ignoring message.",
                     cfMessage.get("StackId"));
         } else if (!stack.isCfStackCompleted() && !Status.CREATE_FAILED.equals(stack.getStatus())) {
-            LOGGER.info("CloudFormation stack creation failed. [Id: '{}', CFStackId '{}']", stack.getId(), stack.getCfStackId());
+            LOGGER.info("CloudFormation stack creation failed. [Id: '{}']", stack.getId());
             StackCreationFailure stackCreationFailure = new StackCreationFailure(stack.getId(), "Error while creating CloudFormation stack: "
                     + cfMessage.get("ResourceStatusReason"));
             LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_CREATE_FAILED_EVENT, stack.getId());

@@ -113,12 +113,13 @@ public class AwsConnector implements CloudPlatformConnector {
 
     @Override
     public void deleteStack(User user, Stack stack, Credential credential) {
-        LOGGER.info("Deleting stack: {}", stack.getId(), stack.getCfStackId());
+        LOGGER.info("Deleting stack: {}", stack.getId());
         AwsTemplate template = (AwsTemplate) stack.getTemplate();
         AwsCredential awsCredential = (AwsCredential) credential;
         if (stack.getResourcesbyType(ResourceType.CLOUDFORMATION_TEMPLATE_NAME).get(0).getResourceName() != null) {
             AmazonCloudFormationClient client = awsStackUtil.createCloudFormationClient(template.getRegion(), awsCredential);
-            LOGGER.info("Deleting CloudFormation stack for stack: {} [cf stack id: {}]", stack.getId(), stack.getCfStackId());
+            LOGGER.info("Deleting CloudFormation stack for stack: {} [cf stack id: {}]", stack.getId(),
+                    stack.getResourcesbyType(ResourceType.CLOUDFORMATION_TEMPLATE_NAME).get(0).getResourceName());
             DeleteStackRequest deleteStackRequest = new DeleteStackRequest()
                     .withStackName(stack.getResourcesbyType(ResourceType.CLOUDFORMATION_TEMPLATE_NAME).get(0).getResourceName());
             client.deleteStack(deleteStackRequest);
