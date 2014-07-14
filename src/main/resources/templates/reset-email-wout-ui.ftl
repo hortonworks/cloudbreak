@@ -8,7 +8,9 @@
   </h1>
 
 </br>
-  To generate new password - POST ${confirm}?password=<base64encoded new password>
+  To generate new password - POST ${confirm} with password data.
+<p>
+  Command line example: curl -X POST -H "Content-Type: application/json" -d '{"password":"&#60;new base64 encoded password&#62;"}' ${confirm} | jq .
 <p>
   Thank you,
 
