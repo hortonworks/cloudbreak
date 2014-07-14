@@ -7,7 +7,7 @@ Cloudbreak
 
 *Cloudbreak is a cloud agnostic Hadoop as a Service API. Abstracts the provisioning and ease management and monitoring of on-demand clusters.*
 
-http://docs.cloudbreak.apiary.io/
+Cloudbreak [API documentation](http://docs.cloudbreak.apiary.io/).
 
 <!--main.md-->
 
