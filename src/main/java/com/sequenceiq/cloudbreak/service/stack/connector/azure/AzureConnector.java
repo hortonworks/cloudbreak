@@ -4,9 +4,7 @@ import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStack
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.NAME;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.NOT_FOUND;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.SERVICENAME;
-import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.getVmName;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,16 +38,16 @@ public class AzureConnector implements CloudPlatformConnector {
     @Autowired
     private JsonHelper jsonHelper;
 
+    @Autowired
+    private AzureStackUtil azureStackUtil;
+
     @Override
     public StackDescription describeStack(User user, Stack stack, Credential credential) {
         String filePath = AzureCertificateService.getUserJksFileName(credential, user.emailAsFolder());
-        File file = new File(filePath);
-        AzureClient azureClient = new AzureClient(
-                ((AzureCredential) credential).getSubscriptionId(), file.getAbsolutePath(), ((AzureCredential) credential).getJks()
-                );
+        AzureClient azureClient = azureStackUtil.createAzureClient(credential, filePath);
         AzureStackDescription azureStackDescription = new AzureStackDescription();
         for (int i = 0; i < stack.getNodeCount(); i++) {
-            String vmName = getVmName(stack.getName(), i);
+            String vmName = azureStackUtil.getVmName(stack.getName(), i);
             Map<String, String> props = new HashMap<>();
             props.put(SERVICENAME, vmName);
             props.put(NAME, vmName);
@@ -72,12 +70,7 @@ public class AzureConnector implements CloudPlatformConnector {
     @Override
     public StackDescription describeStackWithResources(User user, Stack stack, Credential credential) {
         String filePath = AzureCertificateService.getUserJksFileName(credential, user.emailAsFolder());
-        File file = new File(filePath);
-        AzureClient azureClient = new AzureClient(
-                ((AzureCredential) credential).getSubscriptionId(),
-                file.getAbsolutePath(),
-                ((AzureCredential) credential).getJks()
-                );
+        AzureClient azureClient = azureStackUtil.createAzureClient(credential, filePath);
 
         DetailedAzureStackDescription detailedAzureStackDescription = new DetailedAzureStackDescription();
         String templateName = stack.getName();
@@ -95,7 +88,7 @@ public class AzureConnector implements CloudPlatformConnector {
         }
 
         for (int i = 0; i < stack.getNodeCount(); i++) {
-            String vmName = getVmName(templateName, i);
+            String vmName = azureStackUtil.getVmName(templateName, i);
             Map<String, String> props = new HashMap<>();
             props.put(SERVICENAME, templateName);
             props.put(NAME, vmName);
@@ -120,12 +113,9 @@ public class AzureConnector implements CloudPlatformConnector {
     @Override
     public void deleteStack(User user, Stack stack, Credential credential) {
         String filePath = AzureCertificateService.getUserJksFileName(credential, user.emailAsFolder());
-        File file = new File(filePath);
-        AzureClient azureClient = new AzureClient(
-                ((AzureCredential) credential).getSubscriptionId(), file.getAbsolutePath(), ((AzureCredential) credential).getJks()
-                );
+        AzureClient azureClient = azureStackUtil.createAzureClient(credential, filePath);
         for (int i = 0; i < stack.getNodeCount(); i++) {
-            String vmName = getVmName(stack.getName(), i);
+            String vmName = azureStackUtil.getVmName(stack.getName(), i);
             Map<String, String> props;
             try {
                 props = new HashMap<>();

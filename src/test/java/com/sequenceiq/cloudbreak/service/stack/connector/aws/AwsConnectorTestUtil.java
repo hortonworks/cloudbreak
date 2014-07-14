@@ -11,27 +11,11 @@ import com.sequenceiq.cloudbreak.domain.SnsTopic;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.service.stack.connector.ConnectorTestUtil;
 
-public class AwsStackTestUtil {
-    public static final Integer NODE_COUNT = 3;
-    public static final long DEFAULT_ID = 1L;
-    public static final String DEFAULT_TOPIC_ARN = "TOPIC_ARN";
-    public static final String DUMMY_EMAIL = "gipszjakab@mymail.com";
-    public static final String AMBARI_IP = "172.17.0.2";
-    public static final String AWS_DESCRIPTION = "AWS Description";
-    public static final String STACK_NAME = "stack_name";
-    public static final String CF_STACK_NAME = "cfStackName";
-    public static final String DEFAULT_KEY_NAME = "defaultKeyName";
-    public static final String SSH_LOCATION = "ssh_location";
+public class AwsConnectorTestUtil extends ConnectorTestUtil {
 
-    private AwsStackTestUtil() {
-    }
-
-    public static User createUser() {
-        User user = new User();
-        user.setId(DEFAULT_ID);
-        user.setEmail(DUMMY_EMAIL);
-        return user;
+    private AwsConnectorTestUtil() {
     }
 
     public static Stack createStack(User user, Credential credential, AwsTemplate awsTemplate) {

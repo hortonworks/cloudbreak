@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import com.sequenceiq.cloudbreak.service.stack.connector.ConnectorTestUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -80,11 +81,11 @@ public class AwsConnectorTest {
     public void setUp() {
         underTest = new AwsConnector();
         MockitoAnnotations.initMocks(this);
-        user = AwsStackTestUtil.createUser();
-        awsTemplate = AwsStackTestUtil.createAwsTemplate(user);
-        credential = AwsStackTestUtil.createAwsCredential();
-        stack = AwsStackTestUtil.createStack(user, credential, awsTemplate);
-        instancesResult = AwsStackTestUtil.createDescribeInstanceResult();
+        user = AwsConnectorTestUtil.createUser();
+        awsTemplate = AwsConnectorTestUtil.createAwsTemplate(user);
+        credential = AwsConnectorTestUtil.createAwsCredential();
+        stack = AwsConnectorTestUtil.createStack(user, credential, awsTemplate);
+        instancesResult = AwsConnectorTestUtil.createDescribeInstanceResult();
     }
 
     @Test
@@ -228,7 +229,7 @@ public class AwsConnectorTest {
     }
 
     private AmazonServiceException createAmazonServiceException() {
-        AmazonServiceException e = new AmazonServiceException(String.format("Stack:%s does not exist", AwsStackTestUtil.CF_STACK_NAME));
+        AmazonServiceException e = new AmazonServiceException(String.format("Stack:%s does not exist", ConnectorTestUtil.CF_STACK_NAME));
         e.setServiceName("AmazonCloudFormation");
         e.setErrorCode(DUMMY_NUMBER_STR);
         e.setRequestId(DUMMY_NUMBER_STR);

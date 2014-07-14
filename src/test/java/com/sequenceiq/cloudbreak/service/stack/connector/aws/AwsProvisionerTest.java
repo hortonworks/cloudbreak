@@ -68,9 +68,9 @@ public class AwsProvisionerTest {
     public void setUp() {
         underTest = new AwsProvisioner();
         MockitoAnnotations.initMocks(this);
-        user = AwsStackTestUtil.createUser();
-        credential = AwsStackTestUtil.createAwsCredential();
-        stack = AwsStackTestUtil.createStack(user, credential, AwsStackTestUtil.createAwsTemplate(user));
+        user = AwsConnectorTestUtil.createUser();
+        credential = AwsConnectorTestUtil.createAwsCredential();
+        stack = AwsConnectorTestUtil.createStack(user, credential, AwsConnectorTestUtil.createAwsTemplate(user));
     }
 
     @Test
@@ -94,7 +94,7 @@ public class AwsProvisionerTest {
         assertTrue(FluentIterable.from(createStackRequest.getParameters()).anyMatch(new Predicate<Parameter>() {
             @Override
             public boolean apply(Parameter parameter) {
-                return "SSHLocation".equals(parameter.getParameterKey()) && AwsStackTestUtil.SSH_LOCATION.equals(parameter.getParameterValue());
+                return "SSHLocation".equals(parameter.getParameterKey()) && AwsConnectorTestUtil.SSH_LOCATION.equals(parameter.getParameterValue());
             }
         }));
         assertTrue(FluentIterable.from(createStackRequest.getParameters()).anyMatch(new Predicate<Parameter>() {
@@ -106,13 +106,13 @@ public class AwsProvisionerTest {
         assertTrue(FluentIterable.from(createStackRequest.getParameters()).anyMatch(new Predicate<Parameter>() {
             @Override
             public boolean apply(Parameter parameter) {
-                return "StackName".equals(parameter.getParameterKey()) && (AwsStackTestUtil.STACK_NAME + "-1").equals(parameter.getParameterValue());
+                return "StackName".equals(parameter.getParameterKey()) && (AwsConnectorTestUtil.STACK_NAME + "-1").equals(parameter.getParameterValue());
             }
         }));
         assertTrue(FluentIterable.from(createStackRequest.getParameters()).anyMatch(new Predicate<Parameter>() {
             @Override
             public boolean apply(Parameter parameter) {
-                return "InstanceCount".equals(parameter.getParameterKey()) && AwsStackTestUtil.NODE_COUNT.toString().equals(parameter.getParameterValue());
+                return "InstanceCount".equals(parameter.getParameterKey()) && AwsConnectorTestUtil.NODE_COUNT.toString().equals(parameter.getParameterValue());
             }
         }));
         verify(client, times(1)).createStack(createStackRequest);

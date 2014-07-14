@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStack
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.EMAILASFOLDER;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.NOT_FOUND;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -52,6 +51,9 @@ public class AzureProvisionSetup implements ProvisionSetup {
     @Autowired
     private Reactor reactor;
 
+    @Autowired
+    private AzureStackUtil azureStackUtil;
+
     @Override
     public void setupProvisioning(Stack stack) {
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT, stack.getId());
@@ -59,11 +61,8 @@ public class AzureProvisionSetup implements ProvisionSetup {
         String emailAsFolder = stack.getUser().emailAsFolder();
 
         String filePath = AzureCertificateService.getUserJksFileName(credential, emailAsFolder);
-        File file = new File(filePath);
-        AzureClient azureClient = new AzureClient(
-                ((AzureCredential) credential).getSubscriptionId(), file.getAbsolutePath(), ((AzureCredential) credential).getJks()
-        );
-        if (!azureClient.isImageAvailable(AzureStackUtil.getOsImageName(credential))) {
+        AzureClient azureClient = azureStackUtil.createAzureClient(credential, filePath);
+        if (!azureClient.isImageAvailable(azureStackUtil.getOsImageName(credential))) {
             String affinityGroupName = ((AzureCredential) credential).getName().replaceAll("\\s+", "");
             try {
                 azureClient.getAffinityGroup(affinityGroupName);
@@ -111,7 +110,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
                 AzureClientUtil.copyOsImage(storageAccountKey, baseImageUri, targetImageUri);
                 AzureClientUtil.imageCopyProgress(storageAccountKey, targetImageUri);
                 params = new HashMap<>();
-                params.put(AzureStackUtil.NAME, AzureStackUtil.getOsImageName(credential));
+                params.put(AzureStackUtil.NAME, azureStackUtil.getOsImageName(credential));
                 params.put(OS, "Linux");
                 params.put(MEDIALINK, targetImageUri);
                 azureClient.addOsImage(params);
