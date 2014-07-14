@@ -74,34 +74,33 @@ public class AzureConnector implements CloudPlatformConnector {
     public StackDescription describeStackWithResources(User user, Stack stack, Credential credential) {
         String filePath = AzureCertificateService.getUserJksFileName(credential, user.emailAsFolder());
         AzureClient azureClient = azureStackUtil.createAzureClient(credential, filePath);
-
         DetailedAzureStackDescription detailedAzureStackDescription = new DetailedAzureStackDescription();
-        String templateName = stack.getName();
         try {
-            Object affinityGroup = azureClient.getAffinityGroup(templateName);
+            Object affinityGroup = azureClient.getAffinityGroup(stack.getResourcesbyType(ResourceType.AFFINITY_GROUP).get(0).getResourceName());
             detailedAzureStackDescription.setAffinityGroup(jsonHelper.createJsonFromString(affinityGroup.toString()));
         } catch (Exception ex) {
             detailedAzureStackDescription.setAffinityGroup(jsonHelper.createJsonFromString(String.format("{\"AffinityGroup\": {%s}}", ERROR)));
         }
         try {
-            Object storageAccount = azureClient.getStorageAccount(templateName);
+            Object storageAccount = azureClient.getStorageAccount(stack.getResourcesbyType(ResourceType.STORAGE).get(0).getResourceName());
             detailedAzureStackDescription.setStorageAccount(jsonHelper.createJsonFromString(storageAccount.toString()));
         } catch (Exception ex) {
             detailedAzureStackDescription.setStorageAccount(jsonHelper.createJsonFromString(String.format("{\"StorageService\": {%s}}", ERROR)));
         }
 
-        for (int i = 0; i < stack.getNodeCount(); i++) {
-            String vmName = azureStackUtil.getVmName(templateName, i);
-            Map<String, String> props = new HashMap<>();
-            props.put(SERVICENAME, templateName);
-            props.put(NAME, vmName);
+        for (Resource resource : stack.getResourcesbyType(ResourceType.VIRTUAL_MACHINE)) {
             try {
-                Object cloudService = azureClient.getCloudService(vmName);
+                Object cloudService = azureClient.getCloudService(resource.getResourceName());
                 detailedAzureStackDescription.getCloudServices().add(jsonHelper.createJsonFromString(cloudService.toString()).toString());
             } catch (Exception ex) {
-                detailedAzureStackDescription.getCloudServices()
-                        .add(jsonHelper.createJsonFromString(String.format("{\"HostedService\": {%s}}", ERROR)).toString());
+                detailedAzureStackDescription.getCloudServices().add(
+                        jsonHelper.createJsonFromString(String.format("{\"HostedService\": {%s}}", ERROR)).toString());
             }
+        }
+        for (Resource resource : stack.getResourcesbyType(ResourceType.VIRTUAL_MACHINE)) {
+            Map<String, String> props = new HashMap<>();
+            props.put(SERVICENAME, resource.getResourceName());
+            props.put(NAME, resource.getResourceName());
             try {
                 Object virtualMachine = azureClient.getVirtualMachine(props);
                 detailedAzureStackDescription.getVirtualMachines().add(jsonHelper.createJsonFromString(virtualMachine.toString()).toString());
