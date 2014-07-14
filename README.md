@@ -206,7 +206,7 @@ DB_PORT_5432_TCP_PORT
 HBM2DDL_STRATEGY
 ```
 
-If you'd like to work with AWS you'll need to set two more system propwrties:
+If you'd like to work with AWS you'll need to set two more system properties:
 
 ```
 # AWS credentials
