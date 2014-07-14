@@ -8,6 +8,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 import org.junit.Before;
@@ -28,6 +29,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.CloudFormationTemplate;
+import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
@@ -70,7 +72,7 @@ public class AwsProvisionerTest {
         MockitoAnnotations.initMocks(this);
         user = AwsConnectorTestUtil.createUser();
         credential = AwsConnectorTestUtil.createAwsCredential();
-        stack = AwsConnectorTestUtil.createStack(user, credential, AwsConnectorTestUtil.createAwsTemplate(user));
+        stack = AwsConnectorTestUtil.createStack(user, credential, AwsConnectorTestUtil.createAwsTemplate(user),  new HashSet<Resource>());
     }
 
     @Test

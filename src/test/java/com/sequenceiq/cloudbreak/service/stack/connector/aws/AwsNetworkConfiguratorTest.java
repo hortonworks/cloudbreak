@@ -1,5 +1,22 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.aws;
 
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.times;
+import static org.mockito.BDDMockito.verify;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doNothing;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup;
@@ -13,28 +30,14 @@ import com.amazonaws.services.cloudformation.model.StackResourceDetail;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
-import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.InstanceNetworkInterface;
 import com.amazonaws.services.ec2.model.ModifyNetworkInterfaceAttributeRequest;
+import com.amazonaws.services.ec2.model.Reservation;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
+import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.User;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.times;
-import static org.mockito.BDDMockito.verify;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doNothing;
 
 
 public class AwsNetworkConfiguratorTest {
@@ -69,7 +72,7 @@ public class AwsNetworkConfiguratorTest {
         User user = AwsConnectorTestUtil.createUser();
         AwsCredential credential = AwsConnectorTestUtil.createAwsCredential();
         AwsTemplate template = AwsConnectorTestUtil.createAwsTemplate(user);
-        stack = AwsConnectorTestUtil.createStack(user, credential, template);
+        stack = AwsConnectorTestUtil.createStack(user, credential, template, new HashSet<Resource>());
         dsrResult = new DescribeStackResourceResult();
         dsrResult.setStackResourceDetail(new StackResourceDetail());
         dasgResult = createAutoScaldingGroups();

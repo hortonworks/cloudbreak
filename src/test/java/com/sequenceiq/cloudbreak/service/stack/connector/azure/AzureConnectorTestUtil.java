@@ -1,14 +1,17 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.azure;
 
-import com.sequenceiq.cloudbreak.domain.User;
-import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import java.util.Set;
+
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
-import com.sequenceiq.cloudbreak.domain.AzureTemplate;
-import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
-import com.sequenceiq.cloudbreak.domain.AzureVmType;
 import com.sequenceiq.cloudbreak.domain.AzureLocation;
+import com.sequenceiq.cloudbreak.domain.AzureTemplate;
+import com.sequenceiq.cloudbreak.domain.AzureVmType;
+import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.Status;
+import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.service.stack.connector.ConnectorTestUtil;
 
 public class AzureConnectorTestUtil extends ConnectorTestUtil {
@@ -20,7 +23,7 @@ public class AzureConnectorTestUtil extends ConnectorTestUtil {
     private AzureConnectorTestUtil() {
     }
 
-    public static Stack createStack(User user, Credential credential, AzureTemplate azureTemplate) {
+    public static Stack createStack(User user, Credential credential, AzureTemplate azureTemplate, Set<Resource> resources) {
         Stack stack = new Stack();
         stack.setId(DEFAULT_ID);
         stack.setName(STACK_NAME);
@@ -31,6 +34,7 @@ public class AzureConnectorTestUtil extends ConnectorTestUtil {
         stack.setNodeCount(NODE_COUNT);
         stack.setCfStackName(CF_STACK_NAME);
         stack.setStatus(Status.REQUESTED);
+        stack.setResources(resources);
         return stack;
     }
 

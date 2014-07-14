@@ -26,7 +26,7 @@ import javax.persistence.Version;
 
 @Entity
 @Table(name = "Stack", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "stack_user", "name" })
+        @UniqueConstraint(columnNames = {"stack_user", "name" })
 })
 @NamedQueries({
         @NamedQuery(
@@ -249,7 +249,7 @@ public class Stack implements ProvisionEntity {
         this.resources = resources;
     }
 
-    public List<Resource> getResourcesbyType(ResourceType resourceType){
+    public List<Resource> getResourcesbyType(ResourceType resourceType) {
         List<Resource> resourceList = new ArrayList<>();
         for (Resource resource : resources) {
             if (resourceType.equals(resource.getResourceType())) {

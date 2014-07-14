@@ -8,17 +8,16 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
-import com.sequenceiq.cloudbreak.service.stack.connector.ConnectorTestUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import reactor.core.Reactor;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.regions.Regions;
@@ -38,9 +37,14 @@ import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsStackDescription;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.DetailedAwsStackDescription;
+import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackDescription;
 import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.service.stack.connector.ConnectorTestUtil;
+
+import reactor.core.Reactor;
 
 public class AwsConnectorTest {
     private static final String DUMMY_NUMBER_STR = "1";
@@ -84,8 +88,14 @@ public class AwsConnectorTest {
         user = AwsConnectorTestUtil.createUser();
         awsTemplate = AwsConnectorTestUtil.createAwsTemplate(user);
         credential = AwsConnectorTestUtil.createAwsCredential();
-        stack = AwsConnectorTestUtil.createStack(user, credential, awsTemplate);
+        stack = AwsConnectorTestUtil.createStack(user, credential, awsTemplate, getDefaultResourceSet());
         instancesResult = AwsConnectorTestUtil.createDescribeInstanceResult();
+    }
+
+    public Set<Resource> getDefaultResourceSet() {
+        Set<Resource> resources = new HashSet<>();
+        resources.add(new Resource(ResourceType.CLOUDFORMATION_TEMPLATE_NAME, DUMMY_SERVICE, stack));
+        return resources;
     }
 
     @Test

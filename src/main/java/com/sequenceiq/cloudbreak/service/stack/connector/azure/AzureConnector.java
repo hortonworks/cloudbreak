@@ -48,7 +48,7 @@ public class AzureConnector implements CloudPlatformConnector {
         String filePath = AzureCertificateService.getUserJksFileName(credential, user.emailAsFolder());
         AzureClient azureClient = azureStackUtil.createAzureClient(credential, filePath);
         AzureStackDescription azureStackDescription = new AzureStackDescription();
-        for (Resource resource : stack.getResourcesbyType(ResourceType.VIRTUAL_MACHINE)) {
+        for (Resource resource : stack.getResourcesbyType(ResourceType.CLOUD_SERVICE)) {
             try {
                 Object cloudService = azureClient.getCloudService(resource.getResourceName());
                 azureStackDescription.getCloudServices().add(jsonHelper.createJsonFromString(cloudService.toString()).toString());
@@ -97,7 +97,7 @@ public class AzureConnector implements CloudPlatformConnector {
                         jsonHelper.createJsonFromString(String.format("{\"HostedService\": {%s}}", ERROR)).toString());
             }
         }
-        for (Resource resource : stack.getResourcesbyType(ResourceType.VIRTUAL_MACHINE)) {
+        for (Resource resource : stack.getResourcesbyType(ResourceType.CLOUD_SERVICE)) {
             Map<String, String> props = new HashMap<>();
             props.put(SERVICENAME, resource.getResourceName());
             props.put(NAME, resource.getResourceName());

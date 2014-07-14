@@ -1,27 +1,32 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.aws;
 
-import com.amazonaws.regions.Regions;
-import com.sequenceiq.cloudbreak.conf.ReactorConfig;
-import com.sequenceiq.cloudbreak.domain.AwsCredential;
-import com.sequenceiq.cloudbreak.domain.AwsTemplate;
-import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.User;
-import com.sequenceiq.cloudbreak.domain.SnsTopic;
-import com.sequenceiq.cloudbreak.repository.SnsTopicRepository;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import reactor.core.Reactor;
-import reactor.event.Event;
-
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.BDDMockito.given;
+
+import java.util.HashSet;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import com.amazonaws.regions.Regions;
+import com.sequenceiq.cloudbreak.conf.ReactorConfig;
+import com.sequenceiq.cloudbreak.domain.AwsCredential;
+import com.sequenceiq.cloudbreak.domain.AwsTemplate;
+import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.domain.SnsTopic;
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.repository.SnsTopicRepository;
+
+import reactor.core.Reactor;
+import reactor.event.Event;
 
 public class AwsProvisionSetupTest {
 
@@ -54,7 +59,7 @@ public class AwsProvisionSetupTest {
         awsCredential = AwsConnectorTestUtil.createAwsCredential();
         user = AwsConnectorTestUtil.createUser();
         awsTemplate = AwsConnectorTestUtil.createAwsTemplate(user);
-        stack = AwsConnectorTestUtil.createStack(user, awsCredential, awsTemplate);
+        stack = AwsConnectorTestUtil.createStack(user, awsCredential, awsTemplate, new HashSet<Resource>());
         snsTopic = AwsConnectorTestUtil.createSnsTopic(awsCredential);
     }
 

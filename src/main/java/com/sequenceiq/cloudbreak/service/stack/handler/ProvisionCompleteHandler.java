@@ -34,8 +34,8 @@ public class ProvisionCompleteHandler implements Consumer<Event<ProvisionComplet
         CloudPlatform cloudPlatform = stackCreateComplete.getCloudPlatform();
         Long stackId = stackCreateComplete.getStackId();
         LOGGER.info("Accepted {} event.", ReactorConfig.PROVISION_COMPLETE_EVENT, stackId);
-        Set<Resource> resourcesMap = event.getData().getResources();
-        retryingStackUpdater.updateStackResources(stackId, resourcesMap);
+        Set<Resource> resourcesSet = event.getData().getResources();
+        retryingStackUpdater.updateStackResources(stackId, resourcesSet);
         metadataSetupContext.setupMetadata(cloudPlatform, stackId);
     }
 
