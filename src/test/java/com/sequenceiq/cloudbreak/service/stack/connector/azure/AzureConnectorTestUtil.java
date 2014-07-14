@@ -32,7 +32,6 @@ public class AzureConnectorTestUtil extends ConnectorTestUtil {
         stack.setUser(user);
         stack.setTemplate(azureTemplate);
         stack.setNodeCount(NODE_COUNT);
-        stack.setCfStackName(CF_STACK_NAME);
         stack.setStatus(Status.REQUESTED);
         stack.setResources(resources);
         return stack;

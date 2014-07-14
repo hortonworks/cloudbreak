@@ -94,7 +94,7 @@ public class AwsConnectorTest {
 
     public Set<Resource> getDefaultResourceSet() {
         Set<Resource> resources = new HashSet<>();
-        resources.add(new Resource(ResourceType.CLOUDFORMATION_TEMPLATE_NAME, DUMMY_SERVICE, stack));
+        resources.add(new Resource(ResourceType.CLOUDFORMATION_TEMPLATE_NAME, ConnectorTestUtil.CF_STACK_NAME, stack));
         return resources;
     }
 
@@ -223,19 +223,6 @@ public class AwsConnectorTest {
         underTest.deleteStack(user, stack, credential);
         // THEN
         verify(amazonCloudFormationClient, times(1)).deleteStack(any(DeleteStackRequest.class));
-    }
-
-    @Test
-    public void testDeleteStackWithoutCfStackName() {
-        // GIVEN
-        instancesResult.setReservations(new ArrayList<Reservation>());
-        given(awsStackUtil.createEC2Client(Regions.DEFAULT_REGION, credential)).willReturn(ec2Client);
-        given(ec2Client.describeInstances(any(DescribeInstancesRequest.class))).willReturn(instancesResult);
-        stack.setCfStackName(null);
-        // WHEN
-        underTest.deleteStack(user, stack, credential);
-        // THEN
-        verify(amazonCloudFormationClient, times(0)).deleteStack(any(DeleteStackRequest.class));
     }
 
     private AmazonServiceException createAmazonServiceException() {

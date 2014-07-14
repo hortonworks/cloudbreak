@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -36,6 +37,7 @@ import com.amazonaws.services.ec2.model.Reservation;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.User;
 
@@ -72,7 +74,9 @@ public class AwsNetworkConfiguratorTest {
         User user = AwsConnectorTestUtil.createUser();
         AwsCredential credential = AwsConnectorTestUtil.createAwsCredential();
         AwsTemplate template = AwsConnectorTestUtil.createAwsTemplate(user);
-        stack = AwsConnectorTestUtil.createStack(user, credential, template, new HashSet<Resource>());
+        Set<Resource> resources = new HashSet<>();
+        resources.add(new Resource(ResourceType.CLOUDFORMATION_TEMPLATE_NAME, "", stack));
+        stack = AwsConnectorTestUtil.createStack(user, credential, template, resources);
         dsrResult = new DescribeStackResourceResult();
         dsrResult.setStackResourceDetail(new StackResourceDetail());
         dasgResult = createAutoScaldingGroups();

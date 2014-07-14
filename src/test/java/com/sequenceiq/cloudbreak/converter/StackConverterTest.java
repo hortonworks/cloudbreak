@@ -1,22 +1,17 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import com.amazonaws.services.cloudformation.model.DescribeStacksResult;
-import com.amazonaws.services.ec2.model.DescribeInstancesResult;
-import com.sequenceiq.cloudbreak.controller.json.ClusterResponse;
-import com.sequenceiq.cloudbreak.controller.json.InstanceMetaDataJson;
-import com.sequenceiq.cloudbreak.controller.json.StackJson;
-import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.StackDescription;
-import com.sequenceiq.cloudbreak.domain.AwsCredential;
-import com.sequenceiq.cloudbreak.domain.AwsTemplate;
-import com.sequenceiq.cloudbreak.domain.AwsStackDescription;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
-import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.domain.User;
-import com.sequenceiq.cloudbreak.repository.CredentialRepository;
-import com.sequenceiq.cloudbreak.repository.TemplateRepository;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anySetOf;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+import java.util.HashSet;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -24,17 +19,23 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.access.AccessDeniedException;
 
-import java.util.HashSet;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.anySetOf;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import com.amazonaws.services.cloudformation.model.DescribeStacksResult;
+import com.amazonaws.services.ec2.model.DescribeInstancesResult;
+import com.sequenceiq.cloudbreak.controller.json.ClusterResponse;
+import com.sequenceiq.cloudbreak.controller.json.InstanceMetaDataJson;
+import com.sequenceiq.cloudbreak.controller.json.StackJson;
+import com.sequenceiq.cloudbreak.domain.AwsCredential;
+import com.sequenceiq.cloudbreak.domain.AwsStackDescription;
+import com.sequenceiq.cloudbreak.domain.AwsTemplate;
+import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.StackDescription;
+import com.sequenceiq.cloudbreak.domain.Status;
+import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.repository.CredentialRepository;
+import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 
 public class StackConverterTest {
 
@@ -189,7 +190,6 @@ public class StackConverterTest {
         stack.setAmbariIp(AMBARI_IP);
         stack.setCfStackCompleted(CF_STACK_COMPLETED);
         stack.setCfStackId(DUMMY_STACK_ID);
-        stack.setCfStackName(DUMMY_STACK_NAME);
         stack.setCluster(new Cluster());
         stack.setCredential(awsCredential);
         stack.setTemplate(awsTemplate);

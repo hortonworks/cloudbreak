@@ -10,9 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import reactor.core.Reactor;
-import reactor.event.Event;
-
 import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsResult;
@@ -28,10 +25,14 @@ import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataSetupComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.domain.CoreInstanceMetaData;
+
+import reactor.core.Reactor;
+import reactor.event.Event;
 
 @Component
 public class AwsMetadataSetup implements MetadataSetup {
@@ -56,7 +57,7 @@ public class AwsMetadataSetup implements MetadataSetup {
         AmazonAutoScalingClient amazonAutoScalingClient = awsStackUtil.createAutoScalingClient(awsTemplate.getRegion(), awsCredential);
 
         DescribeStackResourceResult result = amazonCfClient.describeStackResource(new DescribeStackResourceRequest()
-                .withStackName(stack.getCfStackName())
+                .withStackName(stack.getResourcesbyType(ResourceType.CLOUDFORMATION_TEMPLATE_NAME).get(0).getResourceName())
                 .withLogicalResourceId("AmbariNodes"));
 
         DescribeAutoScalingGroupsResult describeAutoScalingGroupsResult = amazonAutoScalingClient
