@@ -120,23 +120,52 @@ Note: The system properties prefixed with MAIL_SENDER_ are the SNMP settings req
 
 ###Running Cloudbreak API on the host
 
-If you'd like to run Cloudbreak outside of a Docker container - directly on the host - we provide you an installation shell script.
+If you'd like to run Cloudbreak outside of a Docker container - directly on the host - we provide you shell script that starts the app for you.
 
 After building the application _(./gradlew clean build)_ please run the following script from the project root:
+
 ```
-./run_cloudbreak.sh <db-user> <db-pass> <db-host> <db-port> <host-address>
+./run_cloudbreak.sh <host-addr> \
+<db-user> \
+<db-pass> \
+<db-host> \
+<db-port> \
+<hbm2ddl-strategy> \
+<smtp-username> \
+<smpt-password \
+<smtp-host> \
+<smtp-port \
+<mail-sender-from>
+
 ```
-The arguments are as follows:
+Where:
 
-`db-user` - your database user
+`host-address`     - the ngrok generated address to receive SNS notifications
 
-`db-pass` - your password for the database
+`db-user`          - database user name
 
-`db-host` - the address of the machine hosting your database
+`db-pass`          - password for the database
 
-`db-port` - the port where you can connect to the database
+`db-host`          - the address of the machine hosting the database
 
-`host-address` - the ngrok generated address to receive SNS notifications
+`db-port`          - the port where you can connect to the database
+
+`hbm2ddl-strategy` - the desired value for the *hibernate.hbm2ddl.auto* configuration
+
+`smtp-username`    - SMTP username
+
+`smpt-password`    - SMTP password
+
+`smtp-host`        - SMTP host address
+
+`smtp-port`        - SMTP port
+
+`mail-sender-from` - the email address to use when sending registration confirmation or password renewal emails
+
+
+Please note, that configuration properties can be given both as arguments to the script and as system properties.
+
+*Warning*: When providing configuration as arguments to the script, the arguments should follow the order above!  
 
 
 ##Configuration
@@ -156,7 +185,34 @@ _Note: In the terminal window you'll find displayed a value - this is the last a
 
 ###Production
 
-TBD - add properties list !!!
+In production environments make sure the following system properties are set:
+
+```
+# The host running the cloudbreak app
+HOST_ADDR
+
+# SMTP related properties (required for account registration, password renewal)
+MAIL_SENDER_USERNAME
+MAIL_SENDER_PASSWORD
+MAIL_SENDER_HOST
+MAIL_SENDER_PORT
+MAIL_SENDER_FROM
+
+# Database related properties
+DB_ENV_USER
+DB_ENV_PASS
+DB_PORT_5432_TCP_ADDR
+DB_PORT_5432_TCP_PORT
+HBM2DDL_STRATEGY
+```
+
+If you'd like to work with AWS you'll need to set two more system propwrties:
+
+```
+# AWS credentials
+AWS_ACCESS_KEY_ID
+AWS_SECRET_KEY
+```
 
 <!--quickstart.md-->
 
