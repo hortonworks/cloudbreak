@@ -8,9 +8,7 @@
   </h1>
 
 </br>
-  To reset your password please click <a href="${confirm}">here</a>
-<p>
-  After the page navigation, 30 minutes remain to submit the new password.
+  To generate new password - POST ${confirm}?password=<base64encoded new password>
 <p>
   Thank you,
 
