@@ -68,7 +68,7 @@ public class SimpleUserService implements UserService {
             user.setBlueprints(defaultBlueprintLoaderService.loadBlueprints(user));
             User savedUser = userRepository.save(user);
             LOGGER.info("User {} successfully saved", user);
-            MimeMessagePreparator msgPreparator = prepareMessage(user, "templates/confirmation-email.ftl", "#?confirmSignUpToken=");
+            MimeMessagePreparator msgPreparator = prepareMessage(user, "templates/confirmation-email.ftl", getRegisterUserConfirmPath());
             sendConfirmationEmail(msgPreparator);
             return savedUser.getId();
         } else {
@@ -99,7 +99,7 @@ public class SimpleUserService implements UserService {
             String confToken = DigestUtils.md5DigestAsHex(UUID.randomUUID().toString().getBytes());
             user.setConfToken(confToken);
             userRepository.save(user);
-            MimeMessagePreparator msgPreparator = prepareMessage(user, "templates/reset-email.ftl", "#?resetToken=");
+            MimeMessagePreparator msgPreparator = prepareMessage(user, getResetTemplate(), getResetPasswordConfirmPath());
             sendConfirmationEmail(msgPreparator);
             return email;
         } else {
@@ -107,6 +107,7 @@ public class SimpleUserService implements UserService {
             throw new NotFoundException("There is no user for " + email);
         }
     }
+
 
     @Override
     public String resetPassword(String confToken, String password) {
@@ -121,6 +122,18 @@ public class SimpleUserService implements UserService {
             LOGGER.warn("There's no user for token: {}", confToken);
             throw new NotFoundException("There's no user for token: " + confToken);
         }
+    }
+
+    private String getResetTemplate() {
+        return uiAddress != null ? "templates/reset-email.ftl" : "templates/reset-email-wout-ui.ftl";
+    }
+
+    private String getRegisterUserConfirmPath() {
+        return uiAddress != null ? "#?confirmSignUpToken=" : "/users/confirm/";
+    }
+
+    private String getResetPasswordConfirmPath() {
+        return uiAddress != null ? "#?resetToken=" : "/password/reset/";
     }
 
     private String generateRegistrationId(User user) {
