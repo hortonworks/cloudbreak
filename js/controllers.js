@@ -149,8 +149,8 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     $http({
                       method: 'POST',
                       url: $rootScope.apiUrl + '/password/reset',
-                      params: { email: emailFieldLogin.value } ,
-                      headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+                      data: { email: emailFieldLogin.value } ,
+                      headers: {'Content-Type': 'application/json'}
                      }).success(function (responseData) {
                         if (responseData && responseData.length != 0) {
                             $jq('.outerCarousel').carousel(4);
@@ -170,8 +170,8 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                  $http({
                       method: 'POST',
                       url: $rootScope.apiUrl + '/password/reset/'+ $rootScope.resetToken,
-                      params: { password: Base64.encode(resetPasswField.value) },
-                      headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+                      data: { password: Base64.encode(resetPasswField.value) },
+                      headers: {'Content-Type': 'application/json'}
                  }).success(function(responseData){
                     if (responseData && responseData.length != 0 && responseData == $rootScope.resetToken){
                         $jq('.outerCarousel').carousel(1);
