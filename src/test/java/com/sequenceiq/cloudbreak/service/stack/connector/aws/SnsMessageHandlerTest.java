@@ -81,7 +81,7 @@ public class SnsMessageHandlerTest {
         // GIVEN
         given(snsMessageParser.parseCFMessage(snsRequest.getMessage())).willReturn(createCFMessage());
         given(stackRepository.findByCfStackId(anyString())).willReturn(stack);
-        given(stackUpdater.updateCfStackCreateComplete(anyLong())).willReturn(stack);
+        given(stackUpdater.updateStackCreateComplete(anyLong())).willReturn(stack);
         // WHEN
         underTest.handleMessage(snsRequest);
         // THEN

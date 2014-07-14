@@ -107,6 +107,7 @@ public class AzureProvisionerTest {
     public void testBuildStack() throws FileNotFoundException, CertificateException {
         // GIVEN
         given(retryingStackUpdater.updateStackStatus(anyLong(), any(Status.class))).willReturn(stack);
+        given(retryingStackUpdater.updateStackCreateComplete(anyLong())).willReturn(stack);
         given(azureStackUtil.createAzureClient(any(Credential.class), anyString())).willReturn(azureClient);
         given(azureClient.getAffinityGroup(anyString())).willReturn(new Object());
         given(azureClient.getStorageAccount(anyString())).willReturn(new Object());
@@ -133,6 +134,8 @@ public class AzureProvisionerTest {
         // GIVEN
         template.setPassword(null);
         given(retryingStackUpdater.updateStackStatus(anyLong(), any(Status.class))).willReturn(stack);
+        given(retryingStackUpdater.updateStackCreateComplete(anyLong())).willReturn(stack);
+        given(retryingStackUpdater.updateStackCreateComplete(anyLong())).willReturn(stack);
         given(azureStackUtil.createAzureClient(any(Credential.class), anyString())).willReturn(azureClient);
         given(azureClient.getAffinityGroup(anyString())).willReturn(httpResponseException);
         given(azureClient.getStorageAccount(anyString())).willReturn(httpResponseException);
@@ -162,6 +165,7 @@ public class AzureProvisionerTest {
     public void testBuildStackWhenThrowsInternalServerErrorOnCreateStorageAccount() throws FileNotFoundException, CertificateException {
         // GIVEN
         given(retryingStackUpdater.updateStackStatus(anyLong(), any(Status.class))).willReturn(stack);
+        given(retryingStackUpdater.updateStackCreateComplete(anyLong())).willReturn(stack);
         given(azureStackUtil.createAzureClient(any(Credential.class), anyString())).willReturn(azureClient);
         given(azureClient.getAffinityGroup(anyString())).willReturn(httpResponseException);
         given(azureClient.getStorageAccount(anyString())).willReturn(httpResponseException);
@@ -217,6 +221,7 @@ public class AzureProvisionerTest {
             throws FileNotFoundException, CertificateException, NoSuchAlgorithmException {
         // GIVEN
         given(retryingStackUpdater.updateStackStatus(anyLong(), any(Status.class))).willReturn(stack);
+        given(retryingStackUpdater.updateStackCreateComplete(anyLong())).willReturn(stack);
         given(azureStackUtil.createAzureClient(any(Credential.class), anyString())).willReturn(azureClient);
         given(azureClient.getAffinityGroup(anyString())).willReturn(httpResponseException);
         given(azureClient.getStorageAccount(anyString())).willReturn(httpResponseException);

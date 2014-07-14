@@ -106,15 +106,15 @@ public class RetryingStackUpdater {
         }
     }
 
-    public Stack updateCfStackCreateComplete(Long stackId) {
+    public Stack updateStackCreateComplete(Long stackId) {
         int attempt = 1;
         try {
-            return doUpdateCfStackCreateComplete(stackId);
+            return doUpdateStackCreateComplete(stackId);
         } catch (OptimisticLockException | OptimisticLockingFailureException e) {
             if (attempt <= MAX_RETRIES) {
                 LOGGER.info("Failed to update stack while trying to set 'CF stack completed'. [id: '{}', attempt: '{}', Cause: {}]. Trying to save it again.",
                         stackId, attempt++, e.getClass().getSimpleName());
-                return doUpdateCfStackCreateComplete(stackId);
+                return doUpdateStackCreateComplete(stackId);
             } else {
                 throw new InternalServerException(String.format("Failed to update stack '%s' in 5 attempts. (while trying to set 'CF stack completed')",
                         stackId), e);
@@ -130,7 +130,7 @@ public class RetryingStackUpdater {
             if (attempt <= MAX_RETRIES) {
                 LOGGER.info("Failed to update stack while trying to set 'metadataReady'. [id: '{}', attempt: '{}', Cause: {}]. Trying to save it again.",
                         stackId, attempt++, e.getClass().getSimpleName());
-                return doUpdateCfStackCreateComplete(stackId);
+                return doUpdateStackCreateComplete(stackId);
             } else {
                 throw new InternalServerException(String.format("Failed to update stack '%s' in 5 attempts. (while trying to set 'metadataReady')",
                         stackId), e);
@@ -173,9 +173,9 @@ public class RetryingStackUpdater {
         return stack;
     }
 
-    private Stack doUpdateCfStackCreateComplete(Long stackId) {
+    private Stack doUpdateStackCreateComplete(Long stackId) {
         Stack stack = stackRepository.findById(stackId);
-        stack.setCfStackCompleted(true);
+        stack.setStackCompleted(true);
         stack = stackRepository.save(stack);
         LOGGER.info("Updated stack: [stack: '{}' cfStackCompleted: 'true'].", stackId);
         return stack;

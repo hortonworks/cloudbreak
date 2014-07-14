@@ -133,8 +133,9 @@ public class AzureProvisioner implements Provisioner {
                 return;
             }
         }
-        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_COMPLETE_EVENT, stack.getId());
-        reactor.notify(ReactorConfig.PROVISION_COMPLETE_EVENT, Event.wrap(new ProvisionComplete(CloudPlatform.AZURE, stack.getId(), resourceSet)));
+        Stack updatedStack = retryingStackUpdater.updateStackCreateComplete(stack.getId());
+        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_COMPLETE_EVENT, updatedStack.getId());
+        reactor.notify(ReactorConfig.PROVISION_COMPLETE_EVENT, Event.wrap(new ProvisionComplete(CloudPlatform.AZURE, updatedStack.getId(), resourceSet)));
     }
 
     @Override

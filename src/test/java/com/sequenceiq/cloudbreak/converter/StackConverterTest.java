@@ -188,7 +188,7 @@ public class StackConverterTest {
     private Stack createStack() {
         Stack stack = new Stack();
         stack.setAmbariIp(AMBARI_IP);
-        stack.setCfStackCompleted(CF_STACK_COMPLETED);
+        stack.setStackCompleted(CF_STACK_COMPLETED);
         stack.setCluster(new Cluster());
         stack.setCredential(awsCredential);
         stack.setTemplate(awsTemplate);
