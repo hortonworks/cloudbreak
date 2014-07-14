@@ -87,14 +87,14 @@ You have the option to choose your favorite cloud provider and their different p
 
 ##Quickstart and installation
 
-##Running Cloudbreak API using Docker
+###Running Cloudbreak API using Docker
 
-###Database
+####Database
 The only dependency that Cloudbreak needs is a postgresql database. The easiest way to spin up a postgresql is of course Docker. Run it first with this line:
 ```
 docker run -d --name="postgresql" -p 5432:5432 -v /tmp/data:/data -e USER="seqadmin" -e DB="cloudbreak" -e PASS="seq123_" paintedfox/postgresql
 ```
-###Cloudbreak REST API
+####Cloudbreak REST API
 After postgresql is running, Cloudbreak can be started locally in a Docker container with the following command. By linking the database container, the necessary environment variables for the connection are set. The postgresql address can be set explicitly through the environment variable: DB_PORT_5432_TCP_ADDR.
 ```
 VERSION=0.1-20140623140412
@@ -118,7 +118,7 @@ dockerfile/java bash \
 
 Note: The system properties prefixed with MAIL_SENDER_ are the SNMP settings required to send emails.  
 
-##Running Cloudbreak API on the host
+###Running Cloudbreak API on the host
 
 If you'd like to run Cloudbreak outside of a Docker container - directly on the host - we provide you an installation shell script.
 
