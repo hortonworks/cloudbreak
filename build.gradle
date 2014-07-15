@@ -151,6 +151,7 @@ compileJava.dependsOn buildInfo
 
 class BuildInfoTask extends DefaultTask {
     File destination = new File("build.info")
+    File application = new File("src/main/resources")
     String basename
     String buildVersion
 
@@ -161,6 +162,12 @@ class BuildInfoTask extends DefaultTask {
             [
                     "ARTIFACT_BASENAME=" + basename,
                     "ARTIFACT_VERSION=" + buildVersion,
+            ].each { out.println it }
+        }
+        new File(application, "application.properties").withWriter { out ->
+            [
+                    "info.app.name=" + basename,
+                    "info.app.version=" + buildVersion,
             ].each { out.println it }
         }
     }
