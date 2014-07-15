@@ -57,7 +57,7 @@ public class AwsMetadataSetup implements MetadataSetup {
         AmazonAutoScalingClient amazonAutoScalingClient = awsStackUtil.createAutoScalingClient(awsTemplate.getRegion(), awsCredential);
 
         DescribeStackResourceResult result = amazonCfClient.describeStackResource(new DescribeStackResourceRequest()
-                .withStackName(stack.getResourcesbyType(ResourceType.CLOUDFORMATION_TEMPLATE_NAME).get(0).getResourceName())
+                .withStackName(stack.getResourcesbyType(ResourceType.CLOUDFORMATION_STACK).get(0).getResourceName())
                 .withLogicalResourceId("AmbariNodes"));
 
         DescribeAutoScalingGroupsResult describeAutoScalingGroupsResult = amazonAutoScalingClient

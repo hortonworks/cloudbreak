@@ -91,7 +91,7 @@ public class SnsMessageHandler {
             LOGGER.info("CloudFormation stack creation completed. [Id: '{}']", stack.getId());
             LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_COMPLETE_EVENT, stack.getId());
             Set<Resource> resourceSet = new HashSet<>();
-            resourceSet.add(new Resource(ResourceType.CLOUDFORMATION_TEMPLATE_NAME, cfMessage.get("StackName"), stack));
+            resourceSet.add(new Resource(ResourceType.CLOUDFORMATION_STACK, cfMessage.get("StackName"), stack));
             reactor.notify(ReactorConfig.PROVISION_COMPLETE_EVENT, Event.wrap(new ProvisionComplete(CloudPlatform.AWS, stack.getId(), resourceSet)));
         }
     }

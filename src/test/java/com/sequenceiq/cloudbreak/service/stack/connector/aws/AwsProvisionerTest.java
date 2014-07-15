@@ -77,7 +77,7 @@ public class AwsProvisionerTest {
         user = AwsConnectorTestUtil.createUser();
         credential = AwsConnectorTestUtil.createAwsCredential();
         Set<Resource> resources = new HashSet<>();
-        resources.add(new Resource(ResourceType.CLOUDFORMATION_TEMPLATE_NAME, "", stack));
+        resources.add(new Resource(ResourceType.CLOUDFORMATION_STACK, "", stack));
         stack = AwsConnectorTestUtil.createStack(user, credential, AwsConnectorTestUtil.createAwsTemplate(user), resources);
     }
 

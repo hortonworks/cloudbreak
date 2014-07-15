@@ -238,4 +238,13 @@ public class Stack implements ProvisionEntity {
         }
         return resourceList;
     }
+
+    public Resource getResourcebyType(ResourceType resourceType) {
+        for (Resource resource : resources) {
+            if (resourceType.equals(resource.getResourceType())) {
+                return resource;
+            }
+        }
+        return null;
+    }
 }

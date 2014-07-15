@@ -66,7 +66,7 @@ public class RetryingStackUpdater {
         try {
             return doUpdateResources(stackId, resources);
         } catch (OptimisticLockException | OptimisticLockingFailureException e) {
-            LOGGER.info("Failed to update stack status. [id: '{}', attempt: '{}', Cause: {}]. Trying to save it again.",
+            LOGGER.info("Failed to update stack resources. [id: '{}', attempt: '{}', Cause: {}]. Trying to save it again.",
                     stackId, attempt++, e.getClass().getSimpleName());
             if (attempt <= MAX_RETRIES) {
                 return doUpdateResources(stackId, resources);

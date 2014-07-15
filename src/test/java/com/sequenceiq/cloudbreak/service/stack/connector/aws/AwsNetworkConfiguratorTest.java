@@ -75,7 +75,7 @@ public class AwsNetworkConfiguratorTest {
         AwsCredential credential = AwsConnectorTestUtil.createAwsCredential();
         AwsTemplate template = AwsConnectorTestUtil.createAwsTemplate(user);
         Set<Resource> resources = new HashSet<>();
-        resources.add(new Resource(ResourceType.CLOUDFORMATION_TEMPLATE_NAME, "", stack));
+        resources.add(new Resource(ResourceType.CLOUDFORMATION_STACK, "", stack));
         stack = AwsConnectorTestUtil.createStack(user, credential, template, resources);
         dsrResult = new DescribeStackResourceResult();
         dsrResult.setStackResourceDetail(new StackResourceDetail());

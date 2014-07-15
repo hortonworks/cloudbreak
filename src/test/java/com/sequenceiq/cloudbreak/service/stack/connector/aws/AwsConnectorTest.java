@@ -94,7 +94,7 @@ public class AwsConnectorTest {
 
     public Set<Resource> getDefaultResourceSet() {
         Set<Resource> resources = new HashSet<>();
-        resources.add(new Resource(ResourceType.CLOUDFORMATION_TEMPLATE_NAME, ConnectorTestUtil.CF_STACK_NAME, stack));
+        resources.add(new Resource(ResourceType.CLOUDFORMATION_STACK, ConnectorTestUtil.CF_STACK_NAME, stack));
         return resources;
     }
 

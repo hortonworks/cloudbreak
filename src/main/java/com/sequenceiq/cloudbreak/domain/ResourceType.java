@@ -9,5 +9,5 @@ public enum ResourceType {
     AFFINITY_GROUP,
 
     // AWS
-    CLOUDFORMATION_TEMPLATE_NAME
+    CLOUDFORMATION_STACK
 }

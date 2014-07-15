@@ -58,7 +58,7 @@ public class AwsProvisioner implements Provisioner {
                 );
         CreateStackResult createStackResult = client.createStack(createStackRequest);
         Set<Resource> resources = new HashSet<>();
-        resources.add(new Resource(ResourceType.CLOUDFORMATION_TEMPLATE_NAME, stackName, stack));
+        resources.add(new Resource(ResourceType.CLOUDFORMATION_STACK, stackName, stack));
         Stack updatedStack = stackUpdater.updateStackResources(stack.getId(), resources);
         LOGGER.info("CloudFormation stack creation request sent with stack name: '{}' for stack: '{}'", stackName, updatedStack.getId());
     }
