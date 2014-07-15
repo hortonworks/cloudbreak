@@ -1,0 +1,11 @@
+{
+    "cloudPlatform": "AZURE",
+    "name": "my-azure-cluster","description": "my azure template",
+    "parameters": {
+        "location": "NORTH_EUROPE",
+        "imageName": "sequnceiq-ambari-docker-v1",
+        "password": "Password!@#$",
+        "vmType": "SMALL",
+        "sshPublicKey": "-----BEGIN CERTIFICATE-----MIICsDCCAhmgAwIBAgIJAPtq+czPZYU/MA0GCSqGSIb3DQEBBQUAMEUxCzAJBgNVBAYTAkFVMRMwEQYDVQQIEwpTb21lLVN0YXRlMSEwHw-----END CERTIFICATE-----"
+    }
+}
