@@ -319,6 +319,8 @@ dependencies {
     compile("javax.servlet:javax.servlet-api:3.0.1")
     compile("com.sequenceiq.cloudbreak:cloudbreak-rest-client:0.1-SNAPSHOT")
     testCompile("junit:junit:4.11")
+    testCompile("org.mockito:mockito-all:1.9.5")
+    testCompile("org.springframework:spring-test:4.0.2.RELEASE")
 }
 
 springBoot { mainClass = "com.sequenceiq.periscope.PeriscopeApplication" }
