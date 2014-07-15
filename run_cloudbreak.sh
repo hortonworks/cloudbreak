@@ -1,73 +1,21 @@
 #!/bin/bash
-
-USAGE="Usage: ./run_cloudbreak.sh \
-<host-addr> \
-<db-user> \
-<db-pass> \
-<db-host> \
-<db-port> \
-<hbm2ddl-strategy> \
-<smtp-username> \
-<smpt-password \
-<smtp-host> \
-<smtp-port \
-<mail-sender-from>"
-
 # the address where the app is hosted
-: ${HOST_ADDR:="$1"}
+: ${HOST_ADDR:?"Please set the HOST_ADDR environment variable!"}
 
 # database settings
-: ${DB_ENV_USER:="$2"}
-: ${DB_ENV_PASS:="$3"}
-: ${DB_PORT_5432_TCP_ADDR:="$4"}
-: ${DB_PORT_5432_TCP_PORT:="$5"}
-: ${HBM2DDL_STRATEGY:="create"}
+: ${DB_ENV_USER:?"Please set the DB_ENV_USER environment variable!"}
+: ${DB_ENV_PASS:?"Please set the DB_ENV_PASS environment variable!"}
+: ${DB_PORT_5432_TCP_ADDR:?"Please set the DB_PORT_5432_TCP_ADDR environment variable!"}
+: ${DB_PORT_5432_TCP_PORT:?"Please set the DB_PORT_5432_TCP_PORT environment variable!"}
+: ${HBM2DDL_STRATEGY:-"create"}
 
 # SMTP properties
-: ${MAIL_SENDER_USERNAME:="$6"}
-: ${MAIL_SENDER_PASSWORD:="$7"}
-: ${MAIL_SENDER_HOST:="$8"}
-: ${MAIL_SENDER_PORT:="$9"}
-: ${MAIL_SENDER_FROM:="$10"}
+: ${MAIL_SENDER_USERNAME:?"Please set the MAIL_SENDER_USERNAME environment variable!"}
+: ${MAIL_SENDER_PASSWORD:?"Please set the MAIL_SENDER_PASSWORD environment variable!"}
+: ${MAIL_SENDER_HOST:?"Please set the MAIL_SENDER_HOST environment variable!"}
+: ${MAIL_SENDER_PORT:?"Please set the MAIL_SENDER_PORT environment variable!"}
+: ${MAIL_SENDER_FROM:?"Please set the MAIL_SENDER_FROM environment variable!"}
+: ${AZURE_IMAGE_URI:="http://vmdepoteastus.blob.core.windows.net/linux-community-store/community-62091-a59dcdc1-d82d-4e76-9094-27b8c018a4a1-1.vhd"}
+: ${BLUEPRINT_DEFAULTS:='lambda-architecture,multi-node-hdfs-yarn,single-node-hdfs-yarn'}
 
-PROPERTIES=(\
-  "HOST_ADDR" \
-  "DB_ENV_USER" \
-  "DB_ENV_PASS" \
-  "DB_PORT_5432_TCP_ADDR" \
-  "DB_PORT_5432_TCP_PORT" \
-  "HBM2DDL_STRATEGY" \
-  "MAIL_SENDER_USERNAME" \
-  "MAIL_SENDER_PASSWORD" \
-  "MAIL_SENDER_HOST" \
-  "MAIL_SENDER_PORT" \
-  "MAIL_SENDER_FROM"\
-)
-
-checkProps(){
-for arg in "${PROPERTIES[@]}";
-  do
-    if [[ -z ${!arg} ]];
-      then
-        echo "Please set the property $arg . export $arg="
-        break
-      else
-        echo "$arg"="${!arg}"
-    fi
-  done;
-}
-
-args(){
-  for arg in "${PROPERTIES[@]}";
-    do
-      echo -n "-D$(lc $arg)=${!arg} ";
-    done;
-}
-
-lc(){
-    echo $1 | sed -e 's/\(.*\)/\L\1/' | sed 's/_/\./g'
-}
-
-checkProps
-
-java $(args) -jar build/libs/cloudbreak-0.1-DEV.jar
+java -jar build/libs/cloudbreak-0.1-DEV-defaults.jar

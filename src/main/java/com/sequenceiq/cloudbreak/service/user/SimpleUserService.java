@@ -53,7 +53,7 @@ public class SimpleUserService implements UserService {
     @Value("${mail.sender.from}")
     private String msgFrom;
 
-    @Value("${uluwatu.addr}")
+    @Value("${uluwatu.addr:localhost}")
     private String uiAddress;
 
     @Autowired
