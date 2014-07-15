@@ -12,28 +12,27 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.periscope.monitor.event.QueueInfoUpdateEvent;
 import com.sequenceiq.periscope.monitor.event.UpdateFailedEvent;
-import com.sequenceiq.periscope.registry.ClusterRegistration;
+import com.sequenceiq.periscope.registry.Cluster;
 
 @Component("QueueInfoUpdateRequest")
 @Scope("prototype")
 public class QueueInfoUpdateRequest extends AbstractEventPublisher implements Runnable, EventPublisher {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(QueueInfoUpdateRequest.class);
+    private final Cluster cluster;
 
-    private ClusterRegistration clusterRegistration;
-
-    public QueueInfoUpdateRequest(ClusterRegistration clusterRegistration) {
-        this.clusterRegistration = clusterRegistration;
+    public QueueInfoUpdateRequest(Cluster cluster) {
+        this.cluster = cluster;
     }
 
     @Override
     public void run() {
         try {
-            List<QueueInfo> queues = clusterRegistration.getYarnClient().getAllQueues();
-            publishEvent(new QueueInfoUpdateEvent(clusterRegistration.getClusterId(), queues));
+            List<QueueInfo> queues = cluster.getYarnClient().getAllQueues();
+            publishEvent(new QueueInfoUpdateEvent(cluster.getClusterId(), queues));
         } catch (IOException | YarnException e) {
-            LOGGER.error("Error occurred during queue metrics update from cluster {}", clusterRegistration.getClusterId(), e);
-            publishEvent(new UpdateFailedEvent(clusterRegistration.getClusterId()));
+            LOGGER.error("Error occurred during queue metrics update from cluster {}", cluster.getClusterId(), e);
+            publishEvent(new UpdateFailedEvent(cluster.getClusterId()));
         }
     }
 }

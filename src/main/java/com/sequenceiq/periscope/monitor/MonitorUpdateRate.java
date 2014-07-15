@@ -4,6 +4,7 @@ public final class MonitorUpdateRate {
 
     public static final int QUEUE_UPDATE_RATE = 30000;
     public static final int APP_REPORT_UPDATE_RATE = 20000;
+    public static final int CLUSTER_UPDATE_RATE = 30000;
 
     private MonitorUpdateRate() {
         throw new IllegalStateException();

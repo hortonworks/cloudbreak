@@ -13,7 +13,7 @@ import org.springframework.web.client.RestOperations;
 
 import com.sequenceiq.periscope.monitor.event.SchedulerUpdateEvent;
 import com.sequenceiq.periscope.monitor.event.UpdateFailedEvent;
-import com.sequenceiq.periscope.registry.ClusterRegistration;
+import com.sequenceiq.periscope.registry.Cluster;
 import com.sequenceiq.periscope.service.configuration.ConfigParam;
 
 @Component("SchedulerUpdateRequest")
@@ -25,26 +25,26 @@ public class SchedulerUpdateRequest extends AbstractEventPublisher implements Ru
 
     @Autowired
     private RestOperations restOperations;
-    private ClusterRegistration clusterRegistration;
+    private final Cluster cluster;
 
-    public SchedulerUpdateRequest(ClusterRegistration clusterRegistration) {
-        this.clusterRegistration = clusterRegistration;
+    public SchedulerUpdateRequest(Cluster cluster) {
+        this.cluster = cluster;
     }
 
     @Override
     public void run() {
         try {
-            String rmAddress = clusterRegistration.getConfigValue(ConfigParam.YARN_RM_WEB_ADDRESS, "");
+            String rmAddress = cluster.getConfigValue(ConfigParam.YARN_RM_WEB_ADDRESS, "");
             String url = "http://" + rmAddress + WS_URL;
             SchedulerTypeInfo response = restOperations.getForObject(url, SchedulerTypeInfo.class);
             // TODO https://issues.apache.org/jira/browse/YARN-2280
             Field field = response.getClass().getDeclaredField("schedulerInfo");
             field.setAccessible(true);
             SchedulerInfo schedulerInfo = (SchedulerInfo) field.get(response);
-            publishEvent(new SchedulerUpdateEvent(schedulerInfo, clusterRegistration.getClusterId()));
+            publishEvent(new SchedulerUpdateEvent(schedulerInfo, cluster.getClusterId()));
         } catch (Exception e) {
-            LOGGER.error("Error updating the scheduler info from the WS {}", clusterRegistration.getClusterId(), e);
-            publishEvent(new UpdateFailedEvent(clusterRegistration.getClusterId()));
+            LOGGER.error("Error updating the scheduler info from the WS {}", cluster.getClusterId(), e);
+            publishEvent(new UpdateFailedEvent(cluster.getClusterId()));
         }
     }
 }

@@ -11,7 +11,7 @@ import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.periscope.registry.ClusterRegistration;
+import com.sequenceiq.periscope.registry.Cluster;
 import com.sequenceiq.periscope.registry.ClusterRegistry;
 
 @Service
@@ -21,20 +21,20 @@ public class AppService {
     private ClusterRegistry clusterRegistry;
 
     public void moveToQueue(String clusterId, String appId, String queue) throws IOException, YarnException {
-        ClusterRegistration cluster = getClusterRegistration(clusterId);
+        Cluster cluster = getCluster(clusterId);
         YarnClient yarnClient = cluster.getYarnClient();
         ApplicationId applicationId = ConverterUtils.toApplicationId(appId);
         yarnClient.moveApplicationAcrossQueues(applicationId, queue);
     }
 
     public List<ApplicationReport> getApps(String clusterId) throws IOException, YarnException {
-        ClusterRegistration cluster = getClusterRegistration(clusterId);
+        Cluster cluster = getCluster(clusterId);
         YarnClient yarnClient = cluster.getYarnClient();
         return yarnClient.getApplications();
     }
 
-    private ClusterRegistration getClusterRegistration(String clusterId) {
-        ClusterRegistration cluster = clusterRegistry.get(clusterId);
+    private Cluster getCluster(String clusterId) {
+        Cluster cluster = clusterRegistry.get(clusterId);
         if (cluster == null) {
             throw new ClusterNotFoundException(clusterId);
         }

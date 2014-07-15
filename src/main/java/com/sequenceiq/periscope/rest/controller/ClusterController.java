@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.sequenceiq.periscope.registry.ClusterRegistration;
+import com.sequenceiq.periscope.registry.Cluster;
 import com.sequenceiq.periscope.registry.ClusterRegistry;
 import com.sequenceiq.periscope.registry.ConnectionException;
 import com.sequenceiq.periscope.rest.converter.AmbariConverter;
@@ -50,7 +50,7 @@ public class ClusterController {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public ResponseEntity<ClusterJson> getCluster(@PathVariable String id) {
-        ClusterRegistration cluster = clusterRegistry.get(id);
+        Cluster cluster = clusterRegistry.get(id);
         if (cluster == null) {
             return new ResponseEntity<>(new ClusterJson("", "", ""), HttpStatus.NOT_FOUND);
         }
@@ -59,20 +59,19 @@ public class ClusterController {
 
     @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<List<ClusterJson>> getClusters() {
-        List<ClusterJson> clusters = new ArrayList<>();
-        Collection<ClusterRegistration> registrations = clusterRegistry.getAll();
-        clusters.addAll(clusterConverter.convertAllToJson(registrations));
-        return new ResponseEntity<>(clusters, HttpStatus.OK);
+        List<ClusterJson> result = new ArrayList<>();
+        Collection<Cluster> clusters = clusterRegistry.getAll();
+        result.addAll(clusterConverter.convertAllToJson(clusters));
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
     public ResponseEntity<ClusterJson> deleteCluster(@PathVariable String id) {
-        ClusterRegistration registration = clusterRegistry.get(id);
-        if (registration == null) {
+        Cluster cluster = clusterRegistry.remove(id);
+        if (cluster == null) {
             return new ResponseEntity<>(new ClusterJson("", "", ""), HttpStatus.NOT_FOUND);
         }
-        ClusterRegistration removed = clusterRegistry.remove(id);
-        return new ResponseEntity<>(clusterConverter.convert(removed), HttpStatus.OK);
+        return new ResponseEntity<>(clusterConverter.convert(cluster), HttpStatus.OK);
     }
 
 }

@@ -8,7 +8,7 @@ import com.sequenceiq.periscope.model.Ambari;
 import com.sequenceiq.periscope.service.configuration.AmbariConfigurationService;
 import com.sequenceiq.periscope.service.configuration.ConfigParam;
 
-public class ClusterRegistration {
+public class Cluster {
 
     private final String clusterId;
     private final Ambari ambari;
@@ -16,7 +16,7 @@ public class ClusterRegistration {
     private final Configuration configuration;
     private final YarnClient yarnClient;
 
-    public ClusterRegistration(String clusterId, Ambari ambari) throws ConnectionException {
+    public Cluster(String clusterId, Ambari ambari) throws ConnectionException {
         this.clusterId = clusterId;
         this.ambari = ambari;
         try {

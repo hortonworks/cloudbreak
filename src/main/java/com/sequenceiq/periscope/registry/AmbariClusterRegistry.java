@@ -14,29 +14,30 @@ import com.sequenceiq.periscope.model.Ambari;
 public class AmbariClusterRegistry implements ClusterRegistry {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariClusterRegistry.class);
-    private Map<String, ClusterRegistration> clusters = new ConcurrentHashMap<>();
+    private Map<String, Cluster> clusters = new ConcurrentHashMap<>();
 
     @Override
-    public ClusterRegistration add(String id, Ambari ambari) throws ConnectionException {
-        ClusterRegistration clusterRegistration = new ClusterRegistration(id, ambari);
-        clusters.put(id, clusterRegistration);
+    public Cluster add(String id, Ambari ambari) throws ConnectionException {
+        // TODO should be per user registry
+        Cluster cluster = new Cluster(id, ambari);
+        clusters.put(id, cluster);
         LOGGER.info("Cluster: {} registered with id: {}", ambari.getHost(), id);
-        return clusterRegistration;
+        return cluster;
     }
 
     @Override
-    public ClusterRegistration remove(String id) {
+    public Cluster remove(String id) {
         LOGGER.info("Cluster: {} removed from registry", id);
         return clusters.remove(id);
     }
 
     @Override
-    public ClusterRegistration get(String id) {
+    public Cluster get(String id) {
         return clusters.get(id);
     }
 
     @Override
-    public Collection<ClusterRegistration> getAll() {
+    public Collection<Cluster> getAll() {
         return clusters.values();
     }
 }
