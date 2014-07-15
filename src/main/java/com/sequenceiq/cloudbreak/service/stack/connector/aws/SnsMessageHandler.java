@@ -80,7 +80,7 @@ public class SnsMessageHandler {
     }
 
     private synchronized void handleCfStackCreateComplete(Map<String, String> cfMessage) {
-        Stack stack = stackRepository.findByCfStackId(cfMessage.get("StackId"));
+        Stack stack = stackRepository.findByStackResourceName(cfMessage.get("StackName"));
         if (stack == null) {
             LOGGER.info(
                     "Got message that CloudFormation stack created, but no matching stack found in the database [CFStackId: '{}']. Ignoring message.",
@@ -97,7 +97,7 @@ public class SnsMessageHandler {
     }
 
     private synchronized void handleCfStackCreateFailed(Map<String, String> cfMessage) {
-        Stack stack = stackRepository.findByCfStackId(cfMessage.get("StackId"));
+        Stack stack = stackRepository.findByStackResourceName(cfMessage.get("StackName"));
         if (stack == null) {
             LOGGER.info("Got message that CloudFormation stack creation failed, but no matching stack found in the db. [CFStackId: '{}']. Ignoring message.",
                     cfMessage.get("StackId"));

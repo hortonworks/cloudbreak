@@ -80,7 +80,7 @@ public class SnsMessageHandlerTest {
     public void testHandleMessageCreationComplete() {
         // GIVEN
         given(snsMessageParser.parseCFMessage(snsRequest.getMessage())).willReturn(createCFMessage());
-        given(stackRepository.findByCfStackId(anyString())).willReturn(stack);
+        given(stackRepository.findByStackResourceName(anyString())).willReturn(stack);
         given(stackUpdater.updateStackCreateComplete(anyLong())).willReturn(stack);
         // WHEN
         underTest.handleMessage(snsRequest);
@@ -92,7 +92,7 @@ public class SnsMessageHandlerTest {
     public void testHandleMessageCreationCompleteNoStack() {
         // GIVEN
         given(snsMessageParser.parseCFMessage(snsRequest.getMessage())).willReturn(createCFMessage());
-        given(stackRepository.findByCfStackId(anyString())).willReturn(null);
+        given(stackRepository.findByStackResourceName(anyString())).willReturn(null);
         // WHEN
         underTest.handleMessage(snsRequest);
         // THEN
@@ -107,7 +107,7 @@ public class SnsMessageHandlerTest {
         cfMessage.put(RESOURCE_STATUS, "ROLLBACK_IN_PROGRESS");
         stack.setStatus(Status.CREATE_IN_PROGRESS);
         given(snsMessageParser.parseCFMessage(snsRequest.getMessage())).willReturn(cfMessage);
-        given(stackRepository.findByCfStackId(anyString())).willReturn(stack);
+        given(stackRepository.findByStackResourceName(anyString())).willReturn(stack);
         // WHEN
         underTest.handleMessage(snsRequest);
         // THEN
@@ -121,7 +121,7 @@ public class SnsMessageHandlerTest {
         cfMessage.put(RESOURCE_STATUS, "CREATE_FAILED");
         stack.setStatus(Status.CREATE_FAILED);
         given(snsMessageParser.parseCFMessage(snsRequest.getMessage())).willReturn(cfMessage);
-        given(stackRepository.findByCfStackId(anyString())).willReturn(stack);
+        given(stackRepository.findByStackResourceName(anyString())).willReturn(stack);
         // WHEN
         underTest.handleMessage(snsRequest);
         // THEN
@@ -134,7 +134,7 @@ public class SnsMessageHandlerTest {
         Map<String, String> cfMessage = createCFMessage();
         cfMessage.put(RESOURCE_STATUS, "CREATE_FAILED");
         given(snsMessageParser.parseCFMessage(snsRequest.getMessage())).willReturn(cfMessage);
-        given(stackRepository.findByCfStackId(anyString())).willReturn(null);
+        given(stackRepository.findByStackResourceName(anyString())).willReturn(null);
         // WHEN
         underTest.handleMessage(snsRequest);
         // THEN
