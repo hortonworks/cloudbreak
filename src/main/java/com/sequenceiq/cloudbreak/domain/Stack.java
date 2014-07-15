@@ -41,7 +41,16 @@ import javax.persistence.Version;
                 name = "Stack.findRequestedStacksWithCredential",
                 query = "SELECT c FROM Stack c "
                         + "WHERE c.credential.id= :credentialId "
-                        + "AND c.status= 'REQUESTED'")
+                        + "AND c.status= 'REQUESTED'"),
+        @NamedQuery(
+                name = "Stack.findOneWithLists",
+                query = "SELECT c FROM Stack c "
+                        + "LEFT JOIN FETCH c.resources "
+                        + "WHERE c.id= :id "),
+        @NamedQuery(
+                name = "Stack.findByStackResourceName",
+                query = "SELECT c FROM Stack c inner join c.resources res "
+                        + "WHERE res.resourceName = :stackName AND res.resourceType = 'CLOUDFORMATION_STACK'")
 })
 public class Stack implements ProvisionEntity {
 
