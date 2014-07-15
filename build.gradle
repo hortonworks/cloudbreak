@@ -144,7 +144,7 @@ task wrapper(type: Wrapper) { gradleVersion = "1.12" }
 task buildInfo(type: BuildInfoTask) {
     systemProperties = System.properties
     destination = file("$buildDir")
-    String destination1Path = "$buildDir"
+    applicationPropertiesPath = "$buildDir"
     basename = jar.baseName
     buildVersion = version
 }
@@ -153,8 +153,8 @@ compileJava.dependsOn buildInfo
 
 class BuildInfoTask extends DefaultTask {
     File destination = new File("build.info")
-    String destination1Path
-    File destination1 = new File(destination1Path + "/src/main/resources/")
+    String applicationPropertiesPath
+    File destination1 = new File(applicationPropertiesPath + "/src/main/resources/")
     String basename
     String buildVersion
 
