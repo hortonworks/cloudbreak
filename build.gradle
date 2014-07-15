@@ -171,7 +171,8 @@ class BuildInfoTask extends DefaultTask {
         new File(applicationDestination, "application.properties").withWriter { out ->
             [
                     "info.app.name=" + basename,
-                    "info.app.version=" + buildVersion
+                    "info.app.version=" + buildVersion,
+                    "management.contextPath=" + "\${MANAGEMENT_CONTEXT_PATH}"
             ].each { out.println it }
         }
     }
