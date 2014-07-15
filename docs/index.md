@@ -131,7 +131,7 @@ Please note, that configuration properties can be given both as arguments to the
 
 In order to be able to receive Amazon push notifications on localhost, you will need to install a secure introspectable tunnel to localhost.
 
-###Install and configure ngrok
+####Install and configure ngrok
 Cloudbreak uses SNS to receive notifications. On OSX you can do the following:
 
 ```
@@ -418,7 +418,7 @@ _This process will take 20 minutes so be patient - but this step will have do be
 When we have started to work on Cloudbreak our main goal was to create an easy to use, cloud and Hadoop distribution agnostis Hadoop as a Service API. Though we always like to automate everything and aproach things with a very DevOps mindset, as a side project we have created a UI for Cloudbreak as well.
 The goal of the UI is to ease to process and allow you to create a Hadoop cluster on your favorite cloud provider in `one-click`.
 
-The UI is built on the foundation of the Cloudbreak REST API.
+The UI is built on the foundation of the Cloudbreak REST API. You can access the UI [here](https://cloudbreak.sequenceiq.com/).
 
 ###Manage credentials
 Using manage credentials you can link your cloud account with the Cloudbreak account.
@@ -508,6 +508,18 @@ _Note: Cloudbreak can maintain multiple cloud credentials (even for the same pro
 `Blueprint:` your Hadoop cluster blueprint
 
 Once you have launched the cluster creation you can track the progress either on Cloudbreak UI or your cloud provider management UI.
+
+
+_Note: Because Azure does not directly support third party public images we will have to copy the used image from VM Depot into your storage account. The steps below needs to be finished once and only once before any stack is created for every affinity group:_
+
+_1. Get the VM image - http://vmdepot.msopentech.com/Vhd/Show?vhdId=42480&version=43564_
+
+_2. Copy the VHD blob from above (community images) into your storage account_
+
+_3. Create a VM image from the copied VHD blob._
+
+_This process will take 20 minutes so be patient - but this step will have do be done once and only once._
+
 
 <!--ui.md-->
 
@@ -674,7 +686,7 @@ The sequence diagram below shows the flow.
 
 <!--releases.md-->
 
-##Releases
+##Releases, future plans
 
 When we have started to work on Cloudbreak the idea was to `democratize` the usage of Hadoop in the cloud and VMs. For us this was a necesity as we often had to deal with different Hadoop versions, distributions and cloud providers.
 
@@ -684,7 +696,7 @@ All the Hadoop ecosystem related code, configuration and serivces are inside Doc
 
 We needed to find a unified way to provision, manage and configurure Hadoon clusters - welcome **Apache Ambari**.
 
-###Current release - 0.1
+###Public Beta - 0.1
 The first public beta version of Cloudbreak supports Hadoop on Amazon's EC2 and Microsoft's Azure cloud providers. The currently supported Hadoop is the Hortonworks Data Platform - the 100% open source Hadoop distribution.
 
 Versions:
@@ -714,17 +726,19 @@ dnsmasq - 2.7
 
 ###Future releases
 
-**Hadoop distributions**
+####Hadoop distributions
 
-There is a great effort by the community and SequenceIQ to bring [Apache Bigtop](http://bigtop.apache.org/) - the Apache Hadoop distribution - under the umbrella of Apache Ambari. Once this effort is finished, Cloudbreak will support Apache Bigtop as a Hadoop distribution as well.
+There is an effort by the community and SequenceIQ to bring [Apache Bigtop](http://bigtop.apache.org/) - the Apache Hadoop distribution - under the umbrella of Ambari. Once this effort is finished, Cloudbreak will support Apache Bigtop as a Hadoop distribution as well.
 
 In the meantime we have started an internal R&D project to bring Cloudera's CDH distribution under Apache Ambari - in case you would like to collaborate in this task with us or sounds interesting to you don't hesitate to let us know.
 
-**Cloud providers**
+Apache Ambari allows you to create your own [custom Hadoop stack](https://cwiki.apache.org/confluence/pages/viewpage.action?pageId=38571133) - and you can use Cloudbreak to provision a cluster based on that.
+
+####Cloud providers
 
 While we have just released the first public beta version of Cloudbreak, we have already started working on other cloud providers - namely Google Cloud Compute and Digital Ocean.
-We have received many requests from people to integrate Cloudbreak wih 3d party hypervisors and cloud providers - as IBM's Softlayer. In case you'd like to have your favorite cloud provider listed don't hesitate to contact us or use our SDK and process to add yours.
+We have received many requests from people to integrate Cloudbreak wih 3d party hypervisors and cloud providers - as IBM's Softlayer. In case you'd like to have your favorite cloud provider listed don't hesitate to contact us or use our SDK and process to add yours. You can fill the following [questionnaire](https://docs.google.com/forms/d/129RVh6VfjRsuuHOcS3VPbFYTdM2SEjANDsGCR5Pul0I/viewform) and request your favorite cloud provider.
 
-Enjoy Cloudbreak - the Hadoop as a Service API which brings you a Hadoop ecosystem in matters on minutes. You are literarily one click or two REST calls away from a fully functional, distributed Hadoop cluster.
+Enjoy Cloudbreak - the Hadoop as a Service API which brings you a Hadoop ecosystem in minutes. You are literarily one click or REST call away from a fully functional, distributed Hadoop cluster.
 
 <!--releases.md-->
