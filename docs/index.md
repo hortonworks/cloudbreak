@@ -223,7 +223,7 @@ Cloudbreak is built on the foundation of cloud providers APIs, Apache Ambari, Do
 
 The Apache Ambari project is aimed at making Hadoop management simpler by developing software for provisioning, managing, and monitoring Apache Hadoop clusters. Ambari provides an intuitive, easy-to-use Hadoop management web UI backed by its RESTful APIs.
 
-![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/ambari-overview.png?token=6003104__eyJzY29wZSI6IlJhd0Jsb2I6c2VxdWVuY2VpcS9jbG91ZGJyZWFrL21hc3Rlci9kb2NzL2ltYWdlcy9hbWJhcmktb3ZlcnZpZXcucG5nIiwiZXhwaXJlcyI6MTQwNTQyNTQ0NH0%3D--b5c7b0e5adc62ebd34c8a5b73806f6ac905faed2)
+![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/ambari-overview.png)
 
 Ambari enables System Administrators to:
 
@@ -242,7 +242,7 @@ Ambari enables System Administrators to:
 Ambari enables to integrate Hadoop provisioning, management, and monitoring capabilities into applications with the Ambari REST APIs.
 Ambari Blueprints are a declarative definition of a cluster. With a Blueprint, you can specify a Stack, the Component layout and the Configurations to materialise a Hadoop cluster instance (via a REST API) without having to use the Ambari Cluster Install Wizard.
 
-![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/ambari-create-cluster.png?token=6003104__eyJzY29wZSI6IlJhd0Jsb2I6c2VxdWVuY2VpcS9jbG91ZGJyZWFrL21hc3Rlci9kb2NzL2ltYWdlcy9hbWJhcmktY3JlYXRlLWNsdXN0ZXIucG5nIiwiZXhwaXJlcyI6MTQwNTQyNTUxOH0%3D--4207ee222d43a67deeb6e5174029cef45ea4f271)
+![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/ambari-create-cluster.png)
 
 ###Docker
 
@@ -255,7 +255,7 @@ The main features of Docker are:
 3. VM - without the overhead of a VM
   * Each virtualised application includes not only the application and the necessary binaries and libraries, but also an entire guest operating system
   * The Docker Engine container comprises just the application and its dependencies. It runs as an isolated process in userspace on the host operating system, sharing the kernel with other containers.
-    ![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/vm.png?token=6003104__eyJzY29wZSI6IlJhd0Jsb2I6c2VxdWVuY2VpcS9jbG91ZGJyZWFrL21hc3Rlci9kb2NzL2ltYWdlcy92bS5wbmciLCJleHBpcmVzIjoxNDA1NDI1NTc1fQ%3D%3D--b07a90b876bd4e26f361f37eed901f874f71bf87)
+    ![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/vm.png)
 
 4. Containers are isolated
 5. It can be automated and scripted
@@ -268,9 +268,10 @@ Serf uses an efficient gossip protocol to solve three major problems:
   * Membership: Serf maintains cluster membership lists and is able to execute custom handler scripts when that membership changes. For example, Serf can maintain the list of Hadoop servers of a cluster and notify the members when nodes comes online or goes offline.
 
   * Failure detection and recovery: Serf automatically detects failed nodes within seconds, notifies the rest of the cluster, and executes handler scripts allowing you to handle these events. Serf will attempt to recover failed nodes by reconnecting to them periodically.
-    ![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/serf-gossip.png?token=6003104__eyJzY29wZSI6IlJhd0Jsb2I6c2VxdWVuY2VpcS9jbG91ZGJyZWFrL21hc3Rlci9kb2NzL2ltYWdlcy9zZXJmLWdvc3NpcC5wbmciLCJleHBpcmVzIjoxNDA1NDI1NjA4fQ%3D%3D--358fedd73c8fbd20a105dcc74bdf66524d680134)
+    ![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/serf-gossip.png)
+
   * Custom event propagation: Serf can broadcast custom events and queries to the cluster. These can be used to trigger deploys, propagate configuration, etc. Events are simply fire-and-forget broadcast, and Serf makes a best effort to deliver messages in the face of offline nodes or network partitions. Queries provide a simple realtime request/response mechanism.
-    ![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/serf-event.png?token=6003104__eyJzY29wZSI6IlJhd0Jsb2I6c2VxdWVuY2VpcS9jbG91ZGJyZWFrL21hc3Rlci9kb2NzL2ltYWdlcy9zZXJmLWV2ZW50LnBuZyIsImV4cGlyZXMiOjE0MDU0MjU2Mjh9--69ea14f7dc1db34dd1dd6585df42ad8f2dd2a9d1)
+    ![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/serf-event.png)
 
 <!--technologies.md-->
 
@@ -375,7 +376,7 @@ Once you have logged in Cloudbreak you will have to link your AWS account with t
       **External ID:** provision-ambari (association link)
 
     * Custom policy
-      Use this policy [document](https://raw.githubusercontent.com/sequenceiq/cloudbreak/documentation/src/main/resources/iam-arn-custom.policy?token=6003104__eyJzY29wZSI6IlJhd0Jsb2I6c2VxdWVuY2VpcS9jbG91ZGJyZWFrL2RvY3VtZW50YXRpb24vc3JjL21haW4vcmVzb3VyY2VzL2lhbS1hcm4tY3VzdG9tLnBvbGljeSIsImV4cGlyZXMiOjE0MDUzMzc2MjV9--cde4acae8c67317e6245598526be8cf680a08914) to configure the permission to start EC2 instances on the end user's behalf, and use SNS to receive notifications.
+      Use this policy [document](https://raw.githubusercontent.com/sequenceiq/cloudbreak/documentation/src/main/resources/iam-arn-custom.policy) to configure the permission to start EC2 instances on the end user's behalf, and use SNS to receive notifications.
 
 
 Once this is configured, Cloudbreak is ready to launch Hadoop clusters on your behalf. The only thing Cloudbreak requires is the `Role ARN` (Role for Cross-Account access).
@@ -556,7 +557,7 @@ It means that connecting a new provider involves implementing the necessary inte
 The flow is presented with the sequence diagrams below.
 The first diagram shows how the process is started when a `POST` request is sent to the API, the second one shows the actual provisioning flow's first part which contains the cloud platform specific services. The final diagram contains the last part of the provision flow that's common for every provider.
 
-![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/seq_diagram_stack_post.png?token=1568469__eyJzY29wZSI6IlJhd0Jsb2I6c2VxdWVuY2VpcS9jbG91ZGJyZWFrL21hc3Rlci9kb2NzL2ltYWdlcy9zZXFfZGlhZ3JhbV9zdGFja19wb3N0LnBuZyIsImV4cGlyZXMiOjE0MDU2OTU0MzJ9--29d50c7dd14b7a0d2b68d82dd2a92a661d3e421d)
+![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/seq_diagram_stack_post.png)
 
 The process starts with the controller layer (`StackController` and `SimpleStackService`) that creates and persists the new stack domain object, then sends a `PROVISION_REQUEST_EVENT`. The whole provision flow runs async from this step, the controller returns the response with the newly created stack's id to the client.
 
@@ -582,7 +583,7 @@ The diagram's goal is to provide a high level design of the flow, it doesn't con
 
 - `MetadataSetupCH` = `MetadataSetupCompleteHandler`
 
-![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/seq_diagram_provision_flow_2.png?token=1568469__eyJzY29wZSI6IlJhd0Jsb2I6c2VxdWVuY2VpcS9jbG91ZGJyZWFrL21hc3Rlci9kb2NzL2ltYWdlcy9zZXFfZGlhZ3JhbV9wcm92aXNpb25fZmxvd18yLnBuZyIsImV4cGlyZXMiOjE0MDU2OTU0NDF9--37c78d072a5c16fb0dba4128351c63d17b33cb83)
+![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/seq_diagram_provision_flow_2.png)
 
 *Notes:*
 
@@ -680,7 +681,7 @@ Cluster creation and installation is common for every cloud provider, it is base
 It is async like the stack creation: the response is sent back immediately, and the flow starts asynchronously.
 The sequence diagram below shows the flow.
 
-![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/seq_diagram_cluster_flow.png?token=1568469__eyJzY29wZSI6IlJhd0Jsb2I6c2VxdWVuY2VpcS9jbG91ZGJyZWFrL21hc3Rlci9kb2NzL2ltYWdlcy9zZXFfZGlhZ3JhbV9jbHVzdGVyX2Zsb3cucG5nIiwiZXhwaXJlcyI6MTQwNTY5NTQzNn0%3D--7966403bc08a94e8fda5ce17aae800523856219a)
+![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/seq_diagram_cluster_flow.png)
 
 <!--addnewcloud.md-->
 
