@@ -15,7 +15,16 @@
 : ${MAIL_SENDER_HOST:?"Please set the MAIL_SENDER_HOST environment variable!"}
 : ${MAIL_SENDER_PORT:?"Please set the MAIL_SENDER_PORT environment variable!"}
 : ${MAIL_SENDER_FROM:?"Please set the MAIL_SENDER_FROM environment variable!"}
+
+# Azure
 : ${AZURE_IMAGE_URI:="http://vmdepoteastus.blob.core.windows.net/linux-community-store/community-62091-a59dcdc1-d82d-4e76-9094-27b8c018a4a1-1.vhd"}
+
+# Ambari
 : ${BLUEPRINT_DEFAULTS:='lambda-architecture,multi-node-hdfs-yarn,single-node-hdfs-yarn'}
+
+# AWS related (optional) settings - not setting them causes AWS related operations to fail
+: ${AWS_ACCESS_KEY_ID:?"Please set the AWS_ACCESS_KEY_ID environment variable!"}
+: ${AWS_SECRET_KEY:?"Please set the AWS_SECRET_KEY environment variable!"
+
 
 java -jar build/libs/cloudbreak-0.1-DEV-defaults.jar

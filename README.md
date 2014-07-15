@@ -110,6 +110,8 @@ docker run -d --name cloudbreak \
 -e "MAIL_SENDER_PORT=$MAIL_SENDER_PORT" \
 -e "MAIL_SENDER_FROM=$MAIL_SENDER_FROM" \
 -e "HOST_ADDR=$HOST_ADDR" \
+-e "AZURE_IMAGE_URI=$AZURE_IMAGE_URI" \
+-e "BLUEPRINT_DEFAULTS=$BLUEPRINT_DEFAULTS" \
 --link postgresql:db -p 8080:8080 \
 dockerfile/java bash \
 -c 'curl -o /tmp/cloudbreak-$VERSION.jar https://s3-eu-west-1.amazonaws.com/seq-repo/releases/com/sequenceiq/cloudbreak/$VERSION/cloudbreak-$VERSION.jar && java -jar /tmp/cloudbreak-$VERSION.jar'
@@ -172,6 +174,10 @@ brew update && brew install ngrok
 ngrok 8080
 ```
 _Note: In the terminal window you'll find displayed a value - this should be set as the HOST_ADDR environment variable
+
+### Production
+
+There are no special requirements for production environments.
 
 <!--quickstart.md-->
 
