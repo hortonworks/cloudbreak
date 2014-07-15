@@ -154,21 +154,21 @@ compileJava.dependsOn buildInfo
 class BuildInfoTask extends DefaultTask {
     File destination = new File("build.info")
     String applicationPropertiesPath
-    File destination1 = new File(applicationPropertiesPath + "/src/main/resources/")
+    File applicationDestination = new File(applicationPropertiesPath + "/src/main/resources/")
     String basename
     String buildVersion
 
     @TaskAction
     def writeBuildInfo() {
         destination.mkdirs()
-        destination1.mkdirs()
+        applicationDestination.mkdirs()
         new File(destination, "build.info").withWriter { out ->
             [
                     "ARTIFACT_BASENAME=" + basename,
                     "ARTIFACT_VERSION=" + buildVersion,
             ].each { out.println it }
         }
-        new File(destination1, "application.properties").withWriter { out ->
+        new File(applicationDestination, "application.properties").withWriter { out ->
             [
                     "info.app.name=" + basename,
                     "info.app.version=" + buildVersion,
