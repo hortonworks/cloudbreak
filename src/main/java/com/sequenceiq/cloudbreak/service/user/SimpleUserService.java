@@ -20,7 +20,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import org.springframework.util.DigestUtils;
-import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
@@ -112,9 +111,8 @@ public class SimpleUserService implements UserService {
     @Override
     public String resetPassword(String confToken, String password) {
         User user = userRepository.findUserByConfToken(confToken);
-        String decodedPassword = Base64Coder.decodeString(password);
         if (user != null) {
-            user.setPassword(passwordEncoder.encode(decodedPassword));
+            user.setPassword(passwordEncoder.encode(password));
             user.setConfToken(null);
             userRepository.save(user);
             return confToken;
