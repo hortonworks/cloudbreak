@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 
@@ -60,6 +61,21 @@ public class RetryingStackUpdater {
         }
     }
 
+    public Stack updateStackResources(Long stackId, Set<Resource> resources) {
+        int attempt = 1;
+        try {
+            return doUpdateResources(stackId, resources);
+        } catch (OptimisticLockException | OptimisticLockingFailureException e) {
+            LOGGER.info("Failed to update stack resources. [id: '{}', attempt: '{}', Cause: {}]. Trying to save it again.",
+                    stackId, attempt++, e.getClass().getSimpleName());
+            if (attempt <= MAX_RETRIES) {
+                return doUpdateResources(stackId, resources);
+            } else {
+                throw new InternalServerException(String.format("Failed to update stack '%s' in 5 attempts. (while trying to update resources)", stackId), e);
+            }
+        }
+    }
+
     public Stack updateAmbariIp(Long stackId, String ambariIp) {
         int attempt = 1;
         try {
@@ -71,22 +87,6 @@ public class RetryingStackUpdater {
                 return doUpdateAmbariIp(stackId, ambariIp);
             } else {
                 throw new InternalServerException(String.format("Failed to update stack '%s' in 5 attempts. (while trying to update ambariIp)", stackId), e);
-            }
-        }
-    }
-
-    public Stack updateStackCfAttributes(Long stackId, String cfStackName, String cfStackId) {
-        int attempt = 1;
-        try {
-            return doUpdateStackCfAttributes(stackId, cfStackName, cfStackId);
-        } catch (OptimisticLockException | OptimisticLockingFailureException e) {
-            LOGGER.info("Failed to update stack's CloudFormation attributes. [id: '{}', attempt: '{}', Cause: {}]. Trying to save it again.",
-                    stackId, attempt++, e.getClass().getSimpleName());
-            if (attempt <= MAX_RETRIES) {
-                return doUpdateStackCfAttributes(stackId, cfStackName, cfStackId);
-            } else {
-                throw new InternalServerException(String.format(
-                        "Failed to update stack '%s' in 5 attempts. (while trying to update CloudFormation attributes)", stackId), e);
             }
         }
     }
@@ -106,15 +106,15 @@ public class RetryingStackUpdater {
         }
     }
 
-    public Stack updateCfStackCreateComplete(Long stackId) {
+    public Stack updateStackCreateComplete(Long stackId) {
         int attempt = 1;
         try {
-            return doUpdateCfStackCreateComplete(stackId);
+            return doUpdateStackCreateComplete(stackId);
         } catch (OptimisticLockException | OptimisticLockingFailureException e) {
             if (attempt <= MAX_RETRIES) {
                 LOGGER.info("Failed to update stack while trying to set 'CF stack completed'. [id: '{}', attempt: '{}', Cause: {}]. Trying to save it again.",
                         stackId, attempt++, e.getClass().getSimpleName());
-                return doUpdateCfStackCreateComplete(stackId);
+                return doUpdateStackCreateComplete(stackId);
             } else {
                 throw new InternalServerException(String.format("Failed to update stack '%s' in 5 attempts. (while trying to set 'CF stack completed')",
                         stackId), e);
@@ -130,7 +130,7 @@ public class RetryingStackUpdater {
             if (attempt <= MAX_RETRIES) {
                 LOGGER.info("Failed to update stack while trying to set 'metadataReady'. [id: '{}', attempt: '{}', Cause: {}]. Trying to save it again.",
                         stackId, attempt++, e.getClass().getSimpleName());
-                return doUpdateCfStackCreateComplete(stackId);
+                return doUpdateStackCreateComplete(stackId);
             } else {
                 throw new InternalServerException(String.format("Failed to update stack '%s' in 5 attempts. (while trying to set 'metadataReady')",
                         stackId), e);
@@ -165,15 +165,6 @@ public class RetryingStackUpdater {
         return stack;
     }
 
-    private Stack doUpdateStackCfAttributes(Long stackId, String cfStackName, String cfStackId) {
-        Stack stack = stackRepository.findById(stackId);
-        stack.setCfStackId(cfStackId);
-        stack.setCfStackName(cfStackName);
-        stack = stackRepository.save(stack);
-        LOGGER.info("Updated stack '{}' with CloudFormation properties: [name: '{}', id: '{}'].", stackId, cfStackName, cfStackId);
-        return stack;
-    }
-
     private Stack doUpdateStackCluster(Long stackId, Cluster cluster) {
         Stack stack = stackRepository.findById(stackId);
         stack.setCluster(cluster);
@@ -182,9 +173,9 @@ public class RetryingStackUpdater {
         return stack;
     }
 
-    private Stack doUpdateCfStackCreateComplete(Long stackId) {
+    private Stack doUpdateStackCreateComplete(Long stackId) {
         Stack stack = stackRepository.findById(stackId);
-        stack.setCfStackCompleted(true);
+        stack.setStackCompleted(true);
         stack = stackRepository.save(stack);
         LOGGER.info("Updated stack: [stack: '{}' cfStackCompleted: 'true'].", stackId);
         return stack;
@@ -197,4 +188,16 @@ public class RetryingStackUpdater {
         LOGGER.info("Updated stack: [stack: '{}' metadataReady: 'true'].", stackId);
         return stack;
     }
+
+
+    private Stack doUpdateResources(Long stackId, Set<Resource> resources) {
+        Stack stack = stackRepository.findById(stackId);
+        stack.setResources(resources);
+        stack = stackRepository.save(stack);
+        LOGGER.info("Updated stack resources: [stack: '{}', status: '{}', statusReason: '{}'].", stackId);
+        return stack;
+    }
+
+
+
 }

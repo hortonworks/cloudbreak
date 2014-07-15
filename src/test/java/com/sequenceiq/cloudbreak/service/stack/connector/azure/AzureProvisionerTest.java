@@ -1,39 +1,44 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.azure;
 
-import com.sequenceiq.cloud.azure.client.AzureClient;
-import com.sequenceiq.cloudbreak.domain.AzureCredential;
-import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.User;
-import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.domain.AzureTemplate;
-import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
-import groovyx.net.http.HttpResponseDecorator;
-import groovyx.net.http.HttpResponseException;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import reactor.core.Reactor;
+import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.CREDENTIAL;
+import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.EMAILASFOLDER;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.times;
+import static org.mockito.BDDMockito.verify;
+import static org.mockito.Matchers.anyMap;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.anyString;
 
 import java.io.FileNotFoundException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.verify;
-import static org.mockito.BDDMockito.times;
-import static org.mockito.Matchers.anyMap;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
-import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.CREDENTIAL;
-import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.EMAILASFOLDER;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.anyInt;
+import com.sequenceiq.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.domain.AzureCredential;
+import com.sequenceiq.cloudbreak.domain.AzureTemplate;
+import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.domain.ResourceType;
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.Status;
+import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
+
+import groovyx.net.http.HttpResponseDecorator;
+import groovyx.net.http.HttpResponseException;
+import reactor.core.Reactor;
 
 public class AzureProvisionerTest {
 
@@ -87,14 +92,22 @@ public class AzureProvisionerTest {
         User user = AzureConnectorTestUtil.createUser();
         template = AzureConnectorTestUtil.createAzureTemplate(user);
         credential = AzureConnectorTestUtil.createAzureCredential();
-        stack = AzureConnectorTestUtil.createStack(user, credential, template);
+        stack = AzureConnectorTestUtil.createStack(user, credential, template, getDefaultResourceSet());
         setupProperties = createSetupProperties();
+    }
+
+    public Set<Resource> getDefaultResourceSet() {
+        Set<Resource> resources = new HashSet<>();
+        resources.add(new com.sequenceiq.cloudbreak.domain.Resource(ResourceType.CLOUD_SERVICE, DUMMY_VM_NAME, stack));
+        resources.add(new com.sequenceiq.cloudbreak.domain.Resource(ResourceType.VIRTUAL_MACHINE, DUMMY_VM_NAME, stack));
+        return resources;
     }
 
     @Test
     public void testBuildStack() throws FileNotFoundException, CertificateException {
         // GIVEN
         given(retryingStackUpdater.updateStackStatus(anyLong(), any(Status.class))).willReturn(stack);
+        given(retryingStackUpdater.updateStackCreateComplete(anyLong())).willReturn(stack);
         given(azureStackUtil.createAzureClient(any(Credential.class), anyString())).willReturn(azureClient);
         given(azureClient.getAffinityGroup(anyString())).willReturn(new Object());
         given(azureClient.getStorageAccount(anyString())).willReturn(new Object());
@@ -121,6 +134,8 @@ public class AzureProvisionerTest {
         // GIVEN
         template.setPassword(null);
         given(retryingStackUpdater.updateStackStatus(anyLong(), any(Status.class))).willReturn(stack);
+        given(retryingStackUpdater.updateStackCreateComplete(anyLong())).willReturn(stack);
+        given(retryingStackUpdater.updateStackCreateComplete(anyLong())).willReturn(stack);
         given(azureStackUtil.createAzureClient(any(Credential.class), anyString())).willReturn(azureClient);
         given(azureClient.getAffinityGroup(anyString())).willReturn(httpResponseException);
         given(azureClient.getStorageAccount(anyString())).willReturn(httpResponseException);
@@ -150,6 +165,7 @@ public class AzureProvisionerTest {
     public void testBuildStackWhenThrowsInternalServerErrorOnCreateStorageAccount() throws FileNotFoundException, CertificateException {
         // GIVEN
         given(retryingStackUpdater.updateStackStatus(anyLong(), any(Status.class))).willReturn(stack);
+        given(retryingStackUpdater.updateStackCreateComplete(anyLong())).willReturn(stack);
         given(azureStackUtil.createAzureClient(any(Credential.class), anyString())).willReturn(azureClient);
         given(azureClient.getAffinityGroup(anyString())).willReturn(httpResponseException);
         given(azureClient.getStorageAccount(anyString())).willReturn(httpResponseException);
@@ -205,6 +221,7 @@ public class AzureProvisionerTest {
             throws FileNotFoundException, CertificateException, NoSuchAlgorithmException {
         // GIVEN
         given(retryingStackUpdater.updateStackStatus(anyLong(), any(Status.class))).willReturn(stack);
+        given(retryingStackUpdater.updateStackCreateComplete(anyLong())).willReturn(stack);
         given(azureStackUtil.createAzureClient(any(Credential.class), anyString())).willReturn(azureClient);
         given(azureClient.getAffinityGroup(anyString())).willReturn(httpResponseException);
         given(azureClient.getStorageAccount(anyString())).willReturn(httpResponseException);

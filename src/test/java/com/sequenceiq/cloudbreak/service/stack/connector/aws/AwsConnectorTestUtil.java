@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.aws;
 
+import java.util.Set;
+
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.InstanceType;
@@ -7,6 +9,7 @@ import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.SnsTopic;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
@@ -18,7 +21,7 @@ public class AwsConnectorTestUtil extends ConnectorTestUtil {
     private AwsConnectorTestUtil() {
     }
 
-    public static Stack createStack(User user, Credential credential, AwsTemplate awsTemplate) {
+    public static Stack createStack(User user, Credential credential, AwsTemplate awsTemplate, Set<Resource> resources) {
         Stack stack = new Stack();
         stack.setId(DEFAULT_ID);
         stack.setName(STACK_NAME);
@@ -27,8 +30,8 @@ public class AwsConnectorTestUtil extends ConnectorTestUtil {
         stack.setUser(user);
         stack.setTemplate(awsTemplate);
         stack.setNodeCount(NODE_COUNT);
-        stack.setCfStackName(CF_STACK_NAME);
         stack.setStatus(Status.REQUESTED);
+        stack.setResources(resources);
         return stack;
     }
 

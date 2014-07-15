@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.aws;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +17,8 @@ import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudFormationTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.stack.connector.Provisioner;
@@ -53,7 +57,9 @@ public class AwsProvisioner implements Provisioner {
                         new Parameter().withParameterKey("AMI").withParameterValue(awsTemplate.getAmiId())
                 );
         CreateStackResult createStackResult = client.createStack(createStackRequest);
-        Stack updatedStack = stackUpdater.updateStackCfAttributes(stack.getId(), stackName, createStackResult.getStackId());
+        Set<Resource> resources = new HashSet<>();
+        resources.add(new Resource(ResourceType.CLOUDFORMATION_STACK, stackName, stack));
+        Stack updatedStack = stackUpdater.updateStackResources(stack.getId(), resources);
         LOGGER.info("CloudFormation stack creation request sent with stack name: '{}' for stack: '{}'", stackName, updatedStack.getId());
     }
 

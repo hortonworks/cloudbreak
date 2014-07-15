@@ -10,4 +10,5 @@
 *.iml
 .DS_Store
 *.jks
+atlassian*
 userdatas/

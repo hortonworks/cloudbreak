@@ -1,17 +1,18 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.aws;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import reactor.core.Reactor;
-import reactor.event.Event;
-
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.SnsRequest;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
@@ -19,6 +20,9 @@ import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.StackCreationFailure;
+
+import reactor.core.Reactor;
+import reactor.event.Event;
 
 @Service
 public class SnsMessageHandler {
@@ -81,12 +85,14 @@ public class SnsMessageHandler {
             LOGGER.info(
                     "Got message that CloudFormation stack created, but no matching stack found in the database [CFStackId: '{}']. Ignoring message.",
                     cfMessage.get("StackId"));
-        } else if (!stack.isCfStackCompleted()) {
+        } else if (!stack.isStackCompleted()) {
             awsNetworkConfigurator.disableSourceDestCheck(stack);
-            stack = stackUpdater.updateCfStackCreateComplete(stack.getId());
-            LOGGER.info("CloudFormation stack creation completed. [Id: '{}', CFStackId '{}']", stack.getId(), stack.getCfStackId());
+            stack = stackUpdater.updateStackCreateComplete(stack.getId());
+            LOGGER.info("CloudFormation stack creation completed. [Id: '{}']", stack.getId());
             LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_COMPLETE_EVENT, stack.getId());
-            reactor.notify(ReactorConfig.PROVISION_COMPLETE_EVENT, Event.wrap(new ProvisionComplete(CloudPlatform.AWS, stack.getId())));
+            Set<Resource> resourceSet = new HashSet<>();
+            resourceSet.add(new Resource(ResourceType.CLOUDFORMATION_STACK, cfMessage.get("StackName"), stack));
+            reactor.notify(ReactorConfig.PROVISION_COMPLETE_EVENT, Event.wrap(new ProvisionComplete(CloudPlatform.AWS, stack.getId(), resourceSet)));
         }
     }
 
@@ -95,8 +101,8 @@ public class SnsMessageHandler {
         if (stack == null) {
             LOGGER.info("Got message that CloudFormation stack creation failed, but no matching stack found in the db. [CFStackId: '{}']. Ignoring message.",
                     cfMessage.get("StackId"));
-        } else if (!stack.isCfStackCompleted() && !Status.CREATE_FAILED.equals(stack.getStatus())) {
-            LOGGER.info("CloudFormation stack creation failed. [Id: '{}', CFStackId '{}']", stack.getId(), stack.getCfStackId());
+        } else if (!stack.isStackCompleted() && !Status.CREATE_FAILED.equals(stack.getStatus())) {
+            LOGGER.info("CloudFormation stack creation failed. [Id: '{}']", stack.getId());
             StackCreationFailure stackCreationFailure = new StackCreationFailure(stack.getId(), "Error while creating CloudFormation stack: "
                     + cfMessage.get("ResourceStatusReason"));
             LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_CREATE_FAILED_EVENT, stack.getId());

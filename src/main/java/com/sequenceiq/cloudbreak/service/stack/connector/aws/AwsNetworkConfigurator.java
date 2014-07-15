@@ -23,6 +23,7 @@ import com.amazonaws.services.ec2.model.ModifyNetworkInterfaceAttributeRequest;
 import com.amazonaws.services.ec2.model.Reservation;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
+import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 
 @Component
@@ -43,7 +44,7 @@ public class AwsNetworkConfigurator {
         AmazonAutoScalingClient amazonAutoScalingClient = awsStackUtil.createAutoScalingClient(awsTemplate.getRegion(), awsCredential);
 
         DescribeStackResourceResult result = amazonCfClient.describeStackResource(new DescribeStackResourceRequest()
-                .withStackName(stack.getCfStackName())
+                .withStackName(stack.getResourcesbyType(ResourceType.CLOUDFORMATION_STACK).get(0).getResourceName())
                 .withLogicalResourceId("AmbariNodes"));
 
         DescribeAutoScalingGroupsResult describeAutoScalingGroupsResult = amazonAutoScalingClient

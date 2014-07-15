@@ -4,11 +4,15 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anySet;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -16,8 +20,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
-
-import reactor.core.Reactor;
 
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
@@ -28,9 +30,13 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.CloudFormationTemplate;
+import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
+
+import reactor.core.Reactor;
 
 public class AwsProvisionerTest {
 
@@ -70,7 +76,9 @@ public class AwsProvisionerTest {
         MockitoAnnotations.initMocks(this);
         user = AwsConnectorTestUtil.createUser();
         credential = AwsConnectorTestUtil.createAwsCredential();
-        stack = AwsConnectorTestUtil.createStack(user, credential, AwsConnectorTestUtil.createAwsTemplate(user));
+        Set<Resource> resources = new HashSet<>();
+        resources.add(new Resource(ResourceType.CLOUDFORMATION_STACK, "", stack));
+        stack = AwsConnectorTestUtil.createStack(user, credential, AwsConnectorTestUtil.createAwsTemplate(user), resources);
     }
 
     @Test
@@ -80,8 +88,7 @@ public class AwsProvisionerTest {
         given(awsStackUtil.createCloudFormationClient(Regions.DEFAULT_REGION, credential)).willReturn(client);
         given(client.createStack(any(CreateStackRequest.class))).willReturn(createStackResult);
         given(createStackResult.getStackId()).willReturn(STACK_ID);
-        given(stackUpdater.updateStackCfAttributes(stack.getId(),
-                String.format("%s-%s", stack.getName(), stack.getId()), STACK_ID)).willReturn(stack);
+        given(stackUpdater.updateStackResources(anyLong(), anySet())).willReturn(stack);
         given(underTest.createStackRequest()).willReturn(createStackRequest);
         given(cfTemplate.getBody()).willReturn("templatebody");
         Map<String, Object> setupProperties = new HashMap<>();
@@ -116,7 +123,6 @@ public class AwsProvisionerTest {
             }
         }));
         verify(client, times(1)).createStack(createStackRequest);
-        verify(stackUpdater, times(1)).updateStackCfAttributes(stack.getId(),
-                String.format("%s-%s", stack.getName(), stack.getId()), createStackResult.getStackId());
+        verify(stackUpdater, times(1)).updateStackResources(anyLong(), anySet());
     }
 }

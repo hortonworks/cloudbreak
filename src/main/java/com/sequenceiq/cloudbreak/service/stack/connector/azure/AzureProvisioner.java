@@ -6,25 +6,21 @@ import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStack
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.NOT_FOUND;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.SERVICENAME;
 
-import groovyx.net.http.HttpResponseDecorator;
-import groovyx.net.http.HttpResponseException;
-
 import java.io.FileNotFoundException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import reactor.core.Reactor;
-import reactor.event.Event;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
@@ -36,6 +32,8 @@ import com.sequenceiq.cloudbreak.domain.AzureVmType;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Port;
+import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
@@ -43,6 +41,11 @@ import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateServic
 import com.sequenceiq.cloudbreak.service.stack.connector.Provisioner;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.StackCreationFailure;
+
+import groovyx.net.http.HttpResponseDecorator;
+import groovyx.net.http.HttpResponseException;
+import reactor.core.Reactor;
+import reactor.event.Event;
 
 @Component
 public class AzureProvisioner implements Provisioner {
@@ -95,13 +98,19 @@ public class AzureProvisioner implements Provisioner {
         createAffinityGroup(azureClient, azureTemplate, commonName);
         createStorageAccount(azureClient, azureTemplate, commonName);
         createVirtualNetwork(azureClient, name, commonName);
+        Set<Resource> resourceSet = new HashSet<>();
+        resourceSet.add(new Resource(ResourceType.AFFINITY_GROUP, commonName, stack));
+        resourceSet.add(new Resource(ResourceType.STORAGE, commonName, stack));
+        resourceSet.add(new Resource(ResourceType.NETWORK, name, stack));
 
         for (int i = 0; i < stack.getNodeCount(); i++) {
             try {
                 String vmName = azureStackUtil.getVmName(name, i);
-                createCloudService(azureClient, azureTemplate, name, vmName, commonName);
+                createCloudService(azureClient, azureTemplate, vmName, commonName);
                 createServiceCertificate(azureClient, azureTemplate, vmName, emailAsFolder);
                 createVirtualMachine(azureClient, azureTemplate, credential, name, vmName, commonName, userData);
+                resourceSet.add(new Resource(ResourceType.VIRTUAL_MACHINE, vmName, stack));
+                resourceSet.add(new Resource(ResourceType.CLOUD_SERVICE, vmName, stack));
             } catch (FileNotFoundException e) {
                 LOGGER.info("Problem with the ssh file because not found: " + e.getMessage());
                 reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(new StackCreationFailure(stack.getId(),
@@ -124,8 +133,9 @@ public class AzureProvisioner implements Provisioner {
                 return;
             }
         }
-        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_COMPLETE_EVENT, stack.getId());
-        reactor.notify(ReactorConfig.PROVISION_COMPLETE_EVENT, Event.wrap(new ProvisionComplete(CloudPlatform.AZURE, stack.getId())));
+        Stack updatedStack = retryingStackUpdater.updateStackCreateComplete(stack.getId());
+        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_COMPLETE_EVENT, updatedStack.getId());
+        reactor.notify(ReactorConfig.PROVISION_COMPLETE_EVENT, Event.wrap(new ProvisionComplete(CloudPlatform.AZURE, updatedStack.getId(), resourceSet)));
     }
 
     @Override
@@ -177,7 +187,7 @@ public class AzureProvisioner implements Provisioner {
         azureClient.waitUntilComplete(requestId);
     }
 
-    private void createCloudService(AzureClient azureClient, AzureTemplate azureTemplate, String name, String vmName, String commonName) {
+    private void createCloudService(AzureClient azureClient, AzureTemplate azureTemplate, String vmName, String commonName) {
         Map<String, String> props = new HashMap<>();
         props.put(NAME, vmName);
         props.put(DESCRIPTION, azureTemplate.getDescription());

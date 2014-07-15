@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -24,7 +26,7 @@ import javax.persistence.Version;
 
 @Entity
 @Table(name = "Stack", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "stack_user", "name" })
+        @UniqueConstraint(columnNames = {"stack_user", "name" })
 })
 @NamedQueries({
         @NamedQuery(
@@ -58,11 +60,7 @@ public class Stack implements ProvisionEntity {
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    private String cfStackName;
-
-    private String cfStackId;
-
-    private boolean cfStackCompleted;
+    private boolean stackCompleted;
 
     private String ambariIp;
 
@@ -88,6 +86,9 @@ public class Stack implements ProvisionEntity {
     @ManyToOne
     @JoinColumn(name = "stack_user")
     private User user;
+
+    @OneToMany(mappedBy = "stack", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Resource> resources = new HashSet<>();
 
     @Version
     private Long version;
@@ -164,28 +165,12 @@ public class Stack implements ProvisionEntity {
         this.status = status;
     }
 
-    public String getCfStackId() {
-        return cfStackId;
+    public boolean isStackCompleted() {
+        return stackCompleted;
     }
 
-    public void setCfStackId(String cfStackId) {
-        this.cfStackId = cfStackId;
-    }
-
-    public String getCfStackName() {
-        return cfStackName;
-    }
-
-    public void setCfStackName(String cfStackName) {
-        this.cfStackName = cfStackName;
-    }
-
-    public boolean isCfStackCompleted() {
-        return cfStackCompleted;
-    }
-
-    public void setCfStackCompleted(boolean cfStackCompleted) {
-        this.cfStackCompleted = cfStackCompleted;
+    public void setStackCompleted(boolean stackCompleted) {
+        this.stackCompleted = stackCompleted;
     }
 
     public String getAmbariIp() {
@@ -236,4 +221,30 @@ public class Stack implements ProvisionEntity {
         this.instanceMetaData = instanceMetaData;
     }
 
+    public Set<Resource> getResources() {
+        return resources;
+    }
+
+    public void setResources(Set<Resource> resources) {
+        this.resources = resources;
+    }
+
+    public List<Resource> getResourcesbyType(ResourceType resourceType) {
+        List<Resource> resourceList = new ArrayList<>();
+        for (Resource resource : resources) {
+            if (resourceType.equals(resource.getResourceType())) {
+                resourceList.add(resource);
+            }
+        }
+        return resourceList;
+    }
+
+    public Resource getResourcebyType(ResourceType resourceType) {
+        for (Resource resource : resources) {
+            if (resourceType.equals(resource.getResourceType())) {
+                return resource;
+            }
+        }
+        return null;
+    }
 }

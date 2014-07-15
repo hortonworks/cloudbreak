@@ -5,21 +5,24 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import com.sequenceiq.cloudbreak.service.stack.connector.aws.AwsConnectorTestUtil;
+import java.util.HashSet;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import reactor.event.Event;
-
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.service.stack.connector.aws.AwsConnectorTestUtil;
+
+import reactor.event.Event;
 
 public class ClusterRequestHandlerTest {
     public static final String CLUSTER_REQUESTED = "CLUSTER_REQUESTED";
@@ -39,7 +42,7 @@ public class ClusterRequestHandlerTest {
         User user = AwsConnectorTestUtil.createUser();
         AwsCredential credential = AwsConnectorTestUtil.createAwsCredential();
         AwsTemplate awsTemplate = AwsConnectorTestUtil.createAwsTemplate(user);
-        stackEvent = new Event<>(AwsConnectorTestUtil.createStack(user, credential, awsTemplate));
+        stackEvent = new Event<>(AwsConnectorTestUtil.createStack(user, credential, awsTemplate, new HashSet<Resource>()));
         stackEvent.setKey(AMBARI_STARTED);
     }
 

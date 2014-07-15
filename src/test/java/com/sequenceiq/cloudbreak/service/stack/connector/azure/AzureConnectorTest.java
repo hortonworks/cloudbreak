@@ -1,32 +1,38 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.azure;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.sequenceiq.cloud.azure.client.AzureClient;
-import com.sequenceiq.cloudbreak.controller.InternalServerException;
-import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
-import com.sequenceiq.cloudbreak.domain.User;
-import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.AzureCredential;
-import com.sequenceiq.cloudbreak.domain.AzureTemplate;
-import com.sequenceiq.cloudbreak.domain.StackDescription;
-import groovyx.net.http.HttpResponseDecorator;
-import groovyx.net.http.HttpResponseException;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.BDDMockito.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.times;
+import static org.mockito.BDDMockito.verify;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyMap;
+import static org.mockito.Matchers.anyString;
+
+import java.util.HashSet;
+import java.util.Set;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.any;
-import static org.mockito.BDDMockito.verify;
-import static org.mockito.BDDMockito.times;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.anyMap;
-import static org.mockito.Matchers.anyInt;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.sequenceiq.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.controller.InternalServerException;
+import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
+import com.sequenceiq.cloudbreak.domain.AzureCredential;
+import com.sequenceiq.cloudbreak.domain.AzureTemplate;
+import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.domain.ResourceType;
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.StackDescription;
+import com.sequenceiq.cloudbreak.domain.User;
 
-import static org.junit.Assert.assertNotNull;
+import groovyx.net.http.HttpResponseDecorator;
+import groovyx.net.http.HttpResponseException;
 
 
 public class AzureConnectorTest {
@@ -71,7 +77,18 @@ public class AzureConnectorTest {
         user = AzureConnectorTestUtil.createUser();
         azureTemplate = AzureConnectorTestUtil.createAzureTemplate(user);
         credential = AzureConnectorTestUtil.createAzureCredential();
-        stack = AzureConnectorTestUtil.createStack(user, credential, azureTemplate);
+        stack = AzureConnectorTestUtil.createStack(user, credential, azureTemplate, getDefaultResourceSet());
+    }
+
+    public Set<Resource> getDefaultResourceSet() {
+        Set<Resource> resources = new HashSet<>();
+        resources.add(new Resource(ResourceType.CLOUD_SERVICE, DUMMY_VM_NAME, stack));
+        resources.add(new Resource(ResourceType.CLOUD_SERVICE, DUMMY_VM_NAME, stack));
+        resources.add(new Resource(ResourceType.CLOUD_SERVICE, DUMMY_VM_NAME, stack));
+        resources.add(new Resource(ResourceType.VIRTUAL_MACHINE, DUMMY_VM_NAME, stack));
+        resources.add(new Resource(ResourceType.VIRTUAL_MACHINE, DUMMY_VM_NAME, stack));
+        resources.add(new Resource(ResourceType.VIRTUAL_MACHINE, DUMMY_VM_NAME, stack));
+        return resources;
     }
 
     @Test

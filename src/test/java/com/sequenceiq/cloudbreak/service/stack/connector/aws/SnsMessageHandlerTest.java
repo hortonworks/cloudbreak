@@ -7,6 +7,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.util.HashSet;
 import java.util.Map;
 
 import org.junit.Before;
@@ -15,19 +16,20 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import reactor.core.Reactor;
-import reactor.event.Event;
-
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
+import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.SnsRequest;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+
+import reactor.core.Reactor;
+import reactor.event.Event;
 
 public class SnsMessageHandlerTest {
 
@@ -71,7 +73,7 @@ public class SnsMessageHandlerTest {
         User user = AwsConnectorTestUtil.createUser();
         AwsCredential credential = AwsConnectorTestUtil.createAwsCredential();
         AwsTemplate awsTemplate = AwsConnectorTestUtil.createAwsTemplate(user);
-        stack = AwsConnectorTestUtil.createStack(user, credential, awsTemplate);
+        stack = AwsConnectorTestUtil.createStack(user, credential, awsTemplate,  new HashSet<Resource>());
     }
 
     @Test
@@ -79,7 +81,7 @@ public class SnsMessageHandlerTest {
         // GIVEN
         given(snsMessageParser.parseCFMessage(snsRequest.getMessage())).willReturn(createCFMessage());
         given(stackRepository.findByCfStackId(anyString())).willReturn(stack);
-        given(stackUpdater.updateCfStackCreateComplete(anyLong())).willReturn(stack);
+        given(stackUpdater.updateStackCreateComplete(anyLong())).willReturn(stack);
         // WHEN
         underTest.handleMessage(snsRequest);
         // THEN
