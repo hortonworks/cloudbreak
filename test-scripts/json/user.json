@@ -2,5 +2,6 @@
   "email": "laszlo.puskas@sequenceiq.com",
   "lastName": "test",
   "firstName": "seq",
-  "password": "pwd"
+  "password": "pwd",
+  "company": "SequenceIQ"
 }
