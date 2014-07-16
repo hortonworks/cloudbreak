@@ -119,6 +119,8 @@ AWS_SECRET_KEY=
 CB_AZURE_IMAGE_URI=
 
 # Ambari default blueprint
+CB_MANAGEMENT_CONTEXT_PATH=
+
 # use this as default: BLUEPRINT_DEFAULTS='lambda-architecture,multi-node-hdfs-yarn,single-node-hdfs-yarn'
 CB_BLUEPRINT_DEFAULTS=
 
@@ -147,7 +149,7 @@ _Note: In the terminal window you'll find displayed a value - this should be set
 
 ###Production
 
-There are no special requirements for production environments. Make sure that the SNS or callback ports are available. We suggest to always use HTTPS. 
+There are no special requirements for production environments. Make sure that the SNS or callback ports are available. We suggest to always use HTTPS.
 
 
 <!--quickstart.md-->
