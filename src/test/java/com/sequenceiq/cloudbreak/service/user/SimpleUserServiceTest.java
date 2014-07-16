@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.user;
 
-import com.sequenceiq.cloudbreak.controller.NotFoundException;
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
 import org.junit.Before;
@@ -65,7 +65,7 @@ public class SimpleUserServiceTest {
 
     }
 
-    @Test(expected = NotFoundException.class)
+    @Test(expected = BadRequestException.class)
     public void testGenerateResetPasswordTokenWhenNoUserFoundForEmailShouldNotSendEmail() {
         // GIVEN
         given(userRepository.findByEmail(anyString())).willReturn(null);
@@ -86,7 +86,7 @@ public class SimpleUserServiceTest {
 
     }
 
-    @Test(expected = NotFoundException.class)
+    @Test(expected = BadRequestException.class)
     public void resetPasswordWhenUserNotFound() {
         // GIVEN
         given(userRepository.findUserByConfToken(DUMMY_TOKEN)).willReturn(null);
