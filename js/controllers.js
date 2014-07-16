@@ -610,7 +610,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                         keyName: aws_tkeyName.value,
                         region: aws_tregion.value,
                         instanceType: aws_tinstanceType.value,
-                        amiId: aws_tamiId.value
+                        amiId: getAmi(aws_tregion.value)
                     }
                 }
             }).success(function (data, status, headers, config) {
@@ -644,7 +644,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     parameters: {
                         location: azure_tlocation.value,
                         vmType: azure_tvmType.value,
-                        imageName: azure_timageName.value,
+                        imageName: "ambari-docker-v1",
                         password: azure_tpassword.value,
                         sshPublicKey: azure_sshPublicKey.value,
                         ports:[]
@@ -811,6 +811,26 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 $scope.statusMessage = body.name + ": Nodes terminated successfully.";
             } else {
                 $scope.statusMessage = body.name + ": Something went wrong.";
+            }
+        }
+
+        function getAmi(regionValue) {
+            if(regionValue === 'US_EAST_1') {
+                return "ami-d89955b0";
+            } else if (regionValue === 'US_WEST_1') {
+                return "ami-314a4974";
+            } else if (regionValue === 'US_WEST_2') {
+                return "ami-17b0c927";
+            } else if (regionValue === 'EU_WEST_1') {
+                return "ami-7778af00";
+            } else if (regionValue === 'AP_SOUTHEAST_1') {
+                return "ami-468bd214";
+            } else if (regionValue === 'AP_SOUTHEAST_2') {
+                return "ami-678bec5d";
+            } else if (regionValue === 'AP_NORTHEAST_1') {
+                return "ami-0bcd9d0a";
+            } else {
+                return "ami-1b0ca206";
             }
         }
 
