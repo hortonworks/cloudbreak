@@ -1,8 +1,6 @@
 package com.sequenceiq.periscope.model;
 
-import java.util.Comparator;
-
-public class Priority {
+public class Priority implements Comparable<Priority> {
 
     public static final Priority HIGHEST = Priority.of(0);
     public static final Priority NORMAL = Priority.of(100);
@@ -47,11 +45,8 @@ public class Priority {
         return new Priority(val);
     }
 
-    public static class PriorityComparator implements Comparator<Priority> {
-        @Override
-        public int compare(Priority o1, Priority o2) {
-            return Integer.compare(o1.value, o2.value);
-        }
+    @Override
+    public int compareTo(Priority o) {
+        return Integer.compare(value, o.value);
     }
-
 }

@@ -32,6 +32,12 @@ public class AppController {
     @Autowired
     private AppReportConverter appReportConverter;
 
+    @RequestMapping(value = "/random", method = RequestMethod.POST)
+    public ResponseEntity<String> randomize(@PathVariable String clusterId) {
+        appService.setPriorityToHighRandomly(clusterId);
+        return new ResponseEntity<>("OK", HttpStatus.OK);
+    }
+
     @RequestMapping(value = "/{appId}/move", method = RequestMethod.PUT)
     public ResponseEntity<AppMoveJson> move(@PathVariable String clusterId,
             @PathVariable String appId, @RequestBody AppMoveJson appMoveJson) {
@@ -53,7 +59,7 @@ public class AppController {
         List<AppReportJson> result = new ArrayList<>();
         HttpStatus status;
         try {
-            result.addAll(appReportConverter.convertAllToJson(appService.getApps(clusterId)));
+            result.addAll(appReportConverter.convertAllToJson(appService.getApplicationReports(clusterId)));
             status = HttpStatus.OK;
         } catch (Exception e) {
             LOGGER.error("Error reporting apps", e);
