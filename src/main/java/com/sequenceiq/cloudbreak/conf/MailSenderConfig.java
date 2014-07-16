@@ -14,19 +14,19 @@ import freemarker.template.TemplateException;
 
 @Configuration
 public class MailSenderConfig {
-    @Value("${cb.mail.sender.host}")
+    @Value("${cb.smtp.sender.host}")
     private String host;
 
-    @Value("${cb.mail.sender.port}")
+    @Value("${cb.smtp.sender.port}")
     private int port;
 
-    @Value("${cb.mail.sender.username}")
+    @Value("${cb.smtp.sender.username}")
     private String userName;
 
-    @Value("${cb.mail.sender.password}")
+    @Value("${cb.smtp.sender.password}")
     private String password;
 
-    @Value("${cb.mail.sender.from}")
+    @Value("${cb.smtp.sender.from}")
     private String msgFrom;
 
     @Bean

@@ -10,11 +10,11 @@
 : ${CB_HBM2DDL_STRATEGY:="create"}
 
 # SMTP properties
-: ${CB_MAIL_SENDER_USERNAME:?"Please set the CB_MAIL_SENDER_USERNAME environment variable!"}
-: ${CB_MAIL_SENDER_PASSWORD:?"Please set the CB_MAIL_SENDER_PASSWORD environment variable!"}
-: ${CB_MAIL_SENDER_HOST:?"Please set the CB_MAIL_SENDER_HOST environment variable!"}
-: ${CB_MAIL_SENDER_PORT:?"Please set the CB_MAIL_SENDER_PORT environment variable!"}
-: ${CB_MAIL_SENDER_FROM:?"Please set the CB_MAIL_SENDER_FROM environment variable!"}
+: ${CB_SMTP_SENDER_USERNAME:?"Please set the CB_SMTP_SENDER_USERNAME environment variable!"}
+: ${CB_SMTP_SENDER_PASSWORD:?"Please set the CB_SMTP_SENDER_PASSWORD environment variable!"}
+: ${CB_SMTP_SENDER_HOST:?"Please set the CB_SMTP_SENDER_HOST environment variable!"}
+: ${CB_SMTP_SENDER_PORT:?"Please set the CB_SMTP_SENDER_PORT environment variable!"}
+: ${CB_SMTP_SENDER_FROM:?"Please set the CB_SMTP_SENDER_FROM environment variable!"}
 
 # Azure
 : ${CB_AZURE_IMAGE_URI:="http://vmdepoteastus.blob.core.windows.net/linux-community-store/community-62091-a59dcdc1-d82d-4e76-9094-27b8c018a4a1-1.vhd"}

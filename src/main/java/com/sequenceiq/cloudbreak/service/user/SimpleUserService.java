@@ -50,7 +50,7 @@ public class SimpleUserService implements UserService {
     @Value("${cb.host.addr}")
     private String hostAddress;
 
-    @Value("${cb.mail.sender.from}")
+    @Value("${cb.smtp.sender.from}")
     private String msgFrom;
 
     @Value("${cb.uluwatu.addr:localhost}")
