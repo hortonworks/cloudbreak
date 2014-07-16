@@ -71,14 +71,14 @@ docker run -d --name cloudbreak \
 -e "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" \
 -e "AWS_SECRET_KEY=$AWS_SECRET_KEY" \
 -e "CB_HBM2DDL_STRATEGY=create" \
--e "CB_SMTP_SENDER_USERNAME=$MAIL_SENDER_USERNAME" \
--e "CB_SMTP_SENDER_PASSWORD=$MAIL_SENDER_PASSWORD" \
--e "CB_SMTP_SENDER_HOST=$MAIL_SENDER_HOST" \
--e "CB_SMTP_SENDER_PORT=$MAIL_SENDER_PORT" \
--e "CB_SMTP_SENDER_FROM=$MAIL_SENDER_FROM" \
--e "CB_HOST_ADDR=$HOST_ADDR" \
--e "CB_AZURE_IMAGE_URI=$AZURE_IMAGE_URI" \
--e "CB_BLUEPRINT_DEFAULTS=$BLUEPRINT_DEFAULTS" \
+-e "CB_SMTP_SENDER_USERNAME=$CB_SMTP_SENDER_USERNAME" \
+-e "CB_SMTP_SENDER_PASSWORD=$CB_SMTP_SENDER_PASSWORD" \
+-e "CB_SMTP_SENDER_HOST=$CB_SMTP_SENDER_HOST" \
+-e "CB_SMTP_SENDER_PORT=$CB_SMTP_SENDER_PORT" \
+-e "CB_SMTP_SENDER_FROM=$CB_SMTP_SENDER_FROM" \
+-e "CB_HOST_ADDR=$CB_HOST_ADDR" \
+-e "CB_AZURE_IMAGE_URI=$CB_AZURE_IMAGE_URI" \
+-e "CB_BLUEPRINT_DEFAULTS=$CB_BLUEPRINT_DEFAULTS" \
 -e "CB_SNS_SSL=false"
 --link postgresql:cb_db -p 8080:8080 \
 dockerfile/java bash \
@@ -116,11 +116,11 @@ AWS_SECRET_KEY=
 
 # Azure related settings
 # use this as default AZURE_IMAGE_URI="http://vmdepoteastus.blob.core.windows.net/linux-community-store/community-62091-a59dcdc1-d82d-4e76-9094-27b8c018a4a1-1.vhd
-AZURE_IMAGE_URI=
+CB_AZURE_IMAGE_URI=
 
 # Ambari default blueprint
 # use this as default: BLUEPRINT_DEFAULTS='lambda-architecture,multi-node-hdfs-yarn,single-node-hdfs-yarn'
-BLUEPRINT_DEFAULTS=
+CB_BLUEPRINT_DEFAULTS=
 
 ```
 
@@ -143,7 +143,7 @@ Cloudbreak uses SNS to receive notifications. On OSX you can do the following:
 brew update && brew install ngrok
 ngrok 8080
 ```
-_Note: In the terminal window you'll find displayed a value - this is the last argument `host-address` of the `run_cloudbreak.sh` script_
+_Note: In the terminal window you'll find displayed a value - this should be set as the `CB_HOST_ADDR` env variable_
 
 ###Production
 
