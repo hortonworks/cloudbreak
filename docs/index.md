@@ -47,7 +47,7 @@ You have the option to choose your favourite cloud provider and their different 
 We provide you three different ways to start using Cloudbreak. The simplest and easiest solution is hosted by SequenceIQ, however we have two DIY _(do it yourself)_ options as well.
 
 ###Using Cloudbreak - hosted by SequenceIQ
-The easiest way to start your own Hadoop cluster in your favorite cloud provider is to use our hosted solution. We host, maintain and support [Cloudbreak](https://cloudbreak.sequenceiq.com/) for you.
+The easiest way to start your own Hadoop cluster in your favourite cloud provider is to use our hosted solution. We host, maintain and support [Cloudbreak](https://cloudbreak.sequenceiq.com/) for you.
 
 Please note that Cloudbreak is launching Hadoop clusters on the user's behalf - on different cloud providers. We do not store your cloud provider account details (such as username, password, keys, private SSL certificates, etc), but work around the concept that Identity and Access Management is fully controlled by you - the end user.
 
@@ -94,7 +94,7 @@ The Cloudbreak application can be run outside a docker container - on an arbitra
 
 ```
 
-# The address of the host running the application. This should ebe reachable from the internet (it's also used to deal with SNS notifications)
+# The address of the host running the application. This should be reachable from the internet (it's also used to deal with SNS notifications)
 CB_HOST_ADDR=
 
 # database settings
@@ -310,9 +310,9 @@ It's allows you to use the following services: HDFS, YARN, MAPREDUCE2, GANGLIA, 
 
 5. Custom blueprints
 
-We allow you to build your own Blueprint - for further instractions please check the Apache Ambari [documentation](https://cwiki.apache.org/confluence/display/AMBARI/Blueprints).
+We allow you to build your own Blueprint - for further instructions please check the Apache Ambari [documentation](https://cwiki.apache.org/confluence/display/AMBARI/Blueprints).
 
-When you are creating clustom Blueprints you can use the components above to build Hadoop services and use them in your on-demand Hadoop cluster.
+When you are creating custom Blueprints you can use the components above to build Hadoop services and use them in your on-demand Hadoop cluster.
 
 We are trying to figure out the hosts to hostgroups assignments - and order to do so you will need to follow the conventions below:
 
