@@ -134,7 +134,7 @@ the application can be launched by running the script `./run_cloudbreak` This sc
 
 ###Development
 
-In order to be able to receive Amazon push notifications on localhost, you will need to install a secure introspectable tunnel to localhost.
+In order to be able to receive Amazon push notifications on `localhost`, you will need to install a secure introspectable tunnel to localhost.
 
 ####Install and configure ngrok
 Cloudbreak uses SNS to receive notifications. On OSX you can do the following:
@@ -147,7 +147,7 @@ _Note: In the terminal window you'll find displayed a value - this should be set
 
 ###Production
 
-There are no special requirements for production environments.
+There are no special requirements for production environments. Make sure that the SNS or callback ports are available. We suggest to always use HTTPS. 
 
 
 <!--quickstart.md-->
