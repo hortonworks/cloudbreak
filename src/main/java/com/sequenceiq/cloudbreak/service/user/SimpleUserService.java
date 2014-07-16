@@ -47,13 +47,13 @@ public class SimpleUserService implements UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @Value("${host.addr}")
+    @Value("${cb.host.addr}")
     private String hostAddress;
 
-    @Value("${mail.sender.from}")
+    @Value("${cb.mail.sender.from}")
     private String msgFrom;
 
-    @Value("${uluwatu.addr:localhost}")
+    @Value("${cb.uluwatu.addr:localhost}")
     private String uiAddress;
 
     @Autowired

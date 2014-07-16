@@ -52,21 +52,21 @@ The only dependency that Cloudbreak needs is a postgresql database. The easiest 
 docker run -d --name="postgresql" -p 5432:5432 -v /tmp/data:/data -e USER="seqadmin" -e DB="cloudbreak" -e PASS="seq123_" paintedfox/postgresql
 ```
 ####Cloudbreak REST API
-After postgresql is running, Cloudbreak can be started locally in a Docker container with the following command. By linking the database container, the necessary environment variables for the connection are set. The postgresql address can be set explicitly through the environment variable: DB_PORT_5432_TCP_ADDR.
+After postgresql is running, Cloudbreak can be started locally in a Docker container with the following command. By linking the database container, the necessary environment variables for the connection are set. The postgresql address can be set explicitly through the environment variable: CB_DB_PORT_5432_TCP_ADDR.
 ```
 VERSION=0.1-20140623140412
 
 docker run -d --name cloudbreak \
--e "VERSION=$VERSION" \
+-e "CB_VERSION=$VERSION" \
 -e "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" \
 -e "AWS_SECRET_KEY=$AWS_SECRET_KEY" \
--e "HBM2DDL_STRATEGY=create" \
--e "MAIL_SENDER_USERNAME=$MAIL_SENDER_USERNAME" \
--e "MAIL_SENDER_PASSWORD=$MAIL_SENDER_PASSWORD" \
--e "MAIL_SENDER_HOST=$MAIL_SENDER_HOST" \
--e "MAIL_SENDER_PORT=$MAIL_SENDER_PORT" \
--e "MAIL_SENDER_FROM=$MAIL_SENDER_FROM" \
--e "HOST_ADDR=$HOST_ADDR" \
+-e "CB_HBM2DDL_STRATEGY=create" \
+-e "CB_MAIL_SENDER_USERNAME=$MAIL_SENDER_USERNAME" \
+-e "CB_MAIL_SENDER_PASSWORD=$MAIL_SENDER_PASSWORD" \
+-e "CB_MAIL_SENDER_HOST=$MAIL_SENDER_HOST" \
+-e "CB_MAIL_SENDER_PORT=$MAIL_SENDER_PORT" \
+-e "CB_MAIL_SENDER_FROM=$MAIL_SENDER_FROM" \
+-e "CB_HOST_ADDR=$HOST_ADDR" \
 --link postgresql:db -p 8080:8080 \
 dockerfile/java bash \
 -c 'curl -o /tmp/cloudbreak-$VERSION.jar https://s3-eu-west-1.amazonaws.com/seq-repo/releases/com/sequenceiq/cloudbreak/$VERSION/cloudbreak-$VERSION.jar && java -jar /tmp/cloudbreak-$VERSION.jar'
@@ -146,21 +146,21 @@ In production environments make sure the following system properties are set:
 
 ```
 # The host running the cloudbreak app
-HOST_ADDR
+CB_HOST_ADDR
 
 # SMTP related properties (required for account registration, password renewal)
-MAIL_SENDER_USERNAME
-MAIL_SENDER_PASSWORD
-MAIL_SENDER_HOST
-MAIL_SENDER_PORT
-MAIL_SENDER_FROM
+CB_MAIL_SENDER_USERNAME
+CB_MAIL_SENDER_PASSWORD
+CB_MAIL_SENDER_HOST
+CB_MAIL_SENDER_PORT
+CB_MAIL_SENDER_FROM
 
 # Database related properties
-DB_ENV_USER
-DB_ENV_PASS
-DB_PORT_5432_TCP_ADDR
-DB_PORT_5432_TCP_PORT
-HBM2DDL_STRATEGY
+CB_DB_ENV_USER
+CB_DB_ENV_PASS
+CB_DB_PORT_5432_TCP_ADDR
+CB_DB_PORT_5432_TCP_PORT
+CB_HBM2DDL_STRATEGY
 ```
 
 If you'd like to work with AWS you'll need to set two more system properties:

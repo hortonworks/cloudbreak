@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 @Component
 public class UserDataBuilder {
 
-    @Value("${host.addr}")
+    @Value("${cb.host.addr}")
     private String hostAddress;
 
     private Map<CloudPlatform, String> userDataScripts = new HashMap<>();

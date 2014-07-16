@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.service.blueprint.DefaultBlueprintLoaderService
 public class UserInitializer implements InitializingBean {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserInitializer.class);
 
-    @Value("${hbm2ddl.strategy}")
+    @Value("${cb.hbm2ddl.strategy:update}")
     private String hbm2ddlStrategy;
 
     @Autowired
