@@ -57,7 +57,7 @@ After postgresql is running, Cloudbreak can be started locally in a Docker conta
 VERSION=0.1-20140623140412
 
 docker run -d --name cloudbreak \
--e "CB_VERSION=$VERSION" \
+-e "VERSION=$VERSION" \
 -e "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" \
 -e "AWS_SECRET_KEY=$AWS_SECRET_KEY" \
 -e "CB_HBM2DDL_STRATEGY=create" \
@@ -67,13 +67,15 @@ docker run -d --name cloudbreak \
 -e "CB_MAIL_SENDER_PORT=$MAIL_SENDER_PORT" \
 -e "CB_MAIL_SENDER_FROM=$MAIL_SENDER_FROM" \
 -e "CB_HOST_ADDR=$HOST_ADDR" \
+-e "CB_AZURE_IMAGE_URI=$AZURE_IMAGE_URI" \
+-e "CB_BLUEPRINT_DEFAULTS=$BLUEPRINT_DEFAULTS" \
 --link postgresql:db -p 8080:8080 \
 dockerfile/java bash \
 -c 'curl -o /tmp/cloudbreak-$VERSION.jar https://s3-eu-west-1.amazonaws.com/seq-repo/releases/com/sequenceiq/cloudbreak/$VERSION/cloudbreak-$VERSION.jar && java -jar /tmp/cloudbreak-$VERSION.jar'
 
 ```
 
-Note: The system properties prefixed with MAIL_SENDER_ are the SNMP settings required to send emails.  
+Note: The system properties prefixed with MAIL_SENDER_ are the SNMP settings required to send emails.
 
 ###Running Cloudbreak API on the host
 
@@ -122,7 +124,7 @@ Where:
 
 Please note, that configuration properties can be given both as arguments to the script and as system properties.
 
-*Warning*: When providing configuration as arguments to the script, the arguments should follow the order above!  
+*Warning*: When providing configuration as arguments to the script, the arguments should follow the order above!
 
 
 ##Configuration
@@ -142,7 +144,7 @@ _Note: In the terminal window you'll find displayed a value - this is the last a
 
 ###Production
 
-In production environments make sure the following system properties are set:
+There are no special requirements for production environments.
 
 ```
 # The host running the cloudbreak app
