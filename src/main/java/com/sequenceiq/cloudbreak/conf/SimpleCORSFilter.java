@@ -16,12 +16,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class SimpleCORSFilter implements Filter {
 
-    @Value("${cb.uluwatu.addr:localhost}")
-    private String uluwatuAddress;
+    @Value("${cb.ui.addr:localhost}")
+    private String uiAddress;
 
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
         HttpServletResponse response = (HttpServletResponse) res;
-        response.setHeader("Access-Control-Allow-Origin", uluwatuAddress);
+        response.setHeader("Access-Control-Allow-Origin", uiAddress);
         response.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, OPTIONS, DELETE");
         response.setHeader("Access-Control-Max-Age", "3600");
         response.setHeader("Access-Control-Allow-Credentials", "true");
