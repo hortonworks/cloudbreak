@@ -1560,6 +1560,7 @@
                                             <a href="#" type="submit" ng-click="signIn()" ng-disabled="loginForm.$invalid" id="login-btn" class="btn btn-info btn-block" role="button">
                                                 <i class="fa fa-sign-in fa-fw"></i> login</a>
                                             <a href="#" id="forgot-btn" ng-click="forgotPassword()" ng-disabled="loginForm.emailFieldLogin.$invalid" class="btn btn-info btn-block hidden" role="button"><i class='fa fa-paper-plane fa-fw'></i> get password reset email</a>
+                                            <a href="#" id="login-back-btn" class="btn btn-info btn-block backToSelector" role="button"> back</a>
                                         </form>
 
                                     </div><!-- .item -->
@@ -1631,6 +1632,7 @@
                                             </div><!-- .form-group -->
 
                                             <a href="#" id="signup-btn" ng-click="signUp()" ng-disabled="signUpForm.$invalid" class="btn btn-info btn-block" role="button"><i class="fa fa-user fa-fw"></i> sign up</a>
+                                            <a href="#" id="signup-back-btn" class="btn btn-info btn-block backToSelector" role="button"> back</a>
 
                                         </form>
 
@@ -1641,6 +1643,7 @@
                                     <div class="item" style="text-align: center;">
 
                                         <h5>We've sent a verification email to the <strong>{{ signUpEmailField }}</strong> address.</h5>
+                                        <a href="#" class="btn btn-info btn-block backToLogin" role="button"> back</a>
 
                                     </div><!-- .item -->
 
@@ -1651,6 +1654,7 @@
                                     <div class="item">
 
                                         <h5>We've sent a verification/password reset email to the <strong>{{ emailFieldLogin }}</strong> address.</h5>
+                                        <a href="#" class="btn btn-info btn-block backToLogin" role="button"> back</a>
 
                                     </div><!-- .item -->
 
@@ -1715,6 +1719,12 @@
   				});
  				$jq('#select-signup-btn').click(function () {
  					$('.outerCarousel').carousel(2);
+ 				});
+ 				$jq('.backToSelector').click(function () {
+ 					$('.outerCarousel').carousel(0);
+ 				});
+ 				$jq('.backToLogin').click(function () {
+ 					$('.outerCarousel').carousel(1);
  				});
             });
         </script>
