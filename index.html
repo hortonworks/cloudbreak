@@ -1495,7 +1495,7 @@
                 </div><!-- .row -->
             </div><!-- .container -->
         </header>
-        <section class="container">
+        <section ng-hide="signedIn" class="container">
             <div class="container carousel slide outerCarousel">
                 <div class="row">
                     <div class="col-sm-8 col-sm-offset-2">
@@ -1519,7 +1519,7 @@
 
                                     <div class="item">
 
-                                        <form role="form" autocomplete="on">
+                                        <form role="form" autocomplete="on" name="loginForm">
 
                                             <div class="form-group"><!-- OPTIONAL HTML:
 										        class: 'has-feedback' - got validation result AND
@@ -1530,7 +1530,7 @@
 
                                                 <div class="input-group">
                                                     <span class="input-group-addon"><i class="fa fa-envelope-o fa-fw"></i></span>
-                                                    <input class="form-control" type="email" ng-model="emailFieldLogin" id="emailFieldLogin" placeholder="email"
+                                                    <input class="form-control" type="email" ng-model="emailFieldLogin" id="emailFieldLogin" name="emailFieldLogin" placeholder="email"
                                                            required>
                                                     <!-- OPTIONAL HTML: (only for textfields)
                                                     <i class="fa fa-warning form-control-feedback"></i>
@@ -1557,61 +1557,80 @@
                                                 <p class="text-right"><a href="#" id="login-forgot-passw"><i class="fa fa-question-circle fa-fw"></i> forgot my password</a>
                                                 </p>
                                             </div>
-                                            <a href="#" type="submit" ng-click="signIn()" id="login-btn" class="btn btn-info btn-block" role="button"><i
-                                                    class="fa fa-sign-in fa-fw"></i> login</a>
-                                            <a href="#" id="forgot-btn" ng-click="forgotPassword()" class="btn btn-info btn-block hidden" role="button"><i class='fa fa-paper-plane fa-fw'></i> get password reset email</a>
+                                            <a href="#" type="submit" ng-click="signIn()" ng-disabled="loginForm.$invalid" id="login-btn" class="btn btn-info btn-block" role="button">
+                                                <i class="fa fa-sign-in fa-fw"></i> login</a>
+                                            <a href="#" id="forgot-btn" ng-click="forgotPassword()" ng-disabled="loginForm.emailFieldLogin.$invalid" class="btn btn-info btn-block hidden" role="button"><i class='fa fa-paper-plane fa-fw'></i> get password reset email</a>
                                         </form>
 
                                     </div><!-- .item -->
                                     <!-- ............... SIGN UP .............................................. -->
                                     <div class="item">
 
-                                        <form role="form" autocomplete="on">
+                                        <form role="form" autocomplete="on" name="signUpForm">
 
                                             <div class="form-group">
                                                 <label class="sr-only" for="signUpEmailField">email</label>
                                                 <div class="input-group">
                                                     <span class="input-group-addon"><i class="fa fa-envelope-o fa-fw"></i></span>
-                                                    <input class="form-control" type="email" ng-model="signUpEmailField" id="signUpEmailField" placeholder="email" required>
+                                                    <input class="form-control" type="email" ng-model="signUpEmailField" id="signUpEmailField" name="signUpEmailField" placeholder="email" required>
                                                 </div><!-- .input-group -->
+                                                <div class="help-block" ng-show="signUpForm.signUpEmailField.$dirty && signUpForm.signUpEmailField.$invalid || (signUpForm.signUpEmailField.$error.email)">
+                                                    <i class="fa fa-warning"></i>Email is invalid
+                                                </div>
                                             </div><!-- .form-group -->
                                             <div class="form-group">
                                                 <label class="sr-only" for="signUpPasswField">password</label>
                                                 <div class="input-group">
                                                     <span class="input-group-addon"><i class="fa fa-lock fa-fw"></i></span>
-                                                    <input class="form-control" type="password" ng-model="signUpPasswField" id="signUpPasswField" placeholder="password" required>
+                                                    <input class="form-control" type="password" ng-model="signUpPasswField" name="signUpPasswField" id="signUpPasswField" placeholder="password" ng-minlength="6" ng-maxlength="200" required>
                                                 </div><!-- .input-group -->
+                                                <div class="help-block" ng-show="signUpForm.signUpPasswField.$dirty && signUpForm.signUpPasswField.$invalid">
+                                                    <i class="fa fa-warning"></i>Password field is invalid (6 to 200 char)
+                                                </div>
                                             </div><!-- .form-group -->
                                             <div class="form-group">
                                                 <label class="sr-only" for="signUpPassw2Field">repeat password</label>
                                                 <div class="input-group">
                                                     <span class="input-group-addon"><i class="fa fa-lock fa-fw"></i></span>
-                                                    <input class="form-control" type="password" ng-model="signUpPassw2Field" id="signUpPassw2Field" placeholder="repeat password" required>
-                                                </div><!-- .input-group -->
+                                                    <input class="form-control" type="password" ng-model="signUpPassw2Field" name="signUpPassw2Field" id="signUpPassw2Field" placeholder="repeat password" match="signUpPasswField" required>
+                                                </div>
+                                                <div class="help-block" ng-show="signUpForm.signUpPasswField.$dirty && signUpForm.signUpPassw2Field.$invalid">
+                                                    <i class="fa fa-warning"></i>Passwords do not match!
+                                                </div>
+                                                <!-- .input-group -->
                                             </div><!-- .form-group -->
                                             <div class="form-group">
                                                 <label class="sr-only" for="signUpFirstNameField">name</label>
                                                 <div class="input-group">
                                                     <span class="input-group-addon"><i class="fa fa-male fa-fw"></i></span>
-                                                    <input class="form-control" type="text" ng-model="signUpFirstNameField" id="signUpFirstNameField" placeholder="first name" required>
+                                                    <input class="form-control" type="text" ng-model="signUpFirstNameField" name="signUpFirstNameField" id="signUpFirstNameField" placeholder="first name" required>
                                                 </div><!-- .input-group -->
+                                                <div class="help-block" ng-show="signUpForm.signUpFirstNameField.$dirty && signUpForm.signUpFirstNameField.$invalid">
+                                                    <i class="fa fa-warning"></i>Fist name field is empty
+                                                </div>
                                             </div><!-- .form-group -->
                                             <div class="form-group">
                                                 <label class="sr-only" for="signUpLastNameField">name</label>
                                                 <div class="input-group">
                                                     <span class="input-group-addon"><i class="fa fa-male fa-fw"></i></span>
-                                                    <input class="form-control" type="text" ng-model="signUpLastNameField" id="signUpLastNameField" placeholder="last name" required>
+                                                    <input class="form-control" type="text" ng-model="signUpLastNameField" name="signUpLastNameField" id="signUpLastNameField" placeholder="last name" required>
                                                 </div><!-- .input-group -->
+                                                <div class="help-block" ng-show="signUpForm.signUpLastNameField.$dirty && signUpForm.signUpLastNameField.$invalid">
+                                                    <i class="fa fa-warning"></i>Last name field is empty
+                                                </div>
                                             </div><!-- .form-group -->
                                             <div class="form-group">
                                                 <label class="sr-only" for="signUpCompanyField">company</label>
                                                 <div class="input-group">
                                                     <span class="input-group-addon"><i class="fa fa-institution fa-fw"></i></span>
-                                                    <input class="form-control" type="text" ng-model="signUpCompanyField" id="signUpCompanyField" placeholder="company" required>
+                                                    <input class="form-control" type="text" ng-model="signUpCompanyField" name="signUpCompanyField"  id="signUpCompanyField" placeholder="company" required>
                                                 </div><!-- .input-group -->
+                                                <div class="help-block" ng-show="signUpForm.signUpCompanyField.$dirty && signUpForm.signUpCompanyField.$invalid">
+                                                    <i class="fa fa-warning"></i>Company field is empty
+                                                </div>
                                             </div><!-- .form-group -->
 
-                                            <a href="#" id="signup-btn" ng-click="signUp()" class="btn btn-info btn-block" role="button"><i class="fa fa-user fa-fw"></i> sign up</a>
+                                            <a href="#" id="signup-btn" ng-click="signUp()" ng-disabled="signUpForm.$invalid" class="btn btn-info btn-block" role="button"><i class="fa fa-user fa-fw"></i> sign up</a>
 
                                         </form>
 
@@ -1639,24 +1658,24 @@
 
                                     <div class="item">
 
-                                        <form role="form" autocomplete="on">
+                                        <form role="form" autocomplete="on" name="resetPasswordForm">
 
                                             <div class="form-group">
                                                 <label class="sr-only" for="resetPasswField">new password</label>
                                                 <div class="input-group">
                                                     <span class="input-group-addon"><i class="fa fa-lock fa-fw"></i></span>
-                                                    <input class="form-control" type="password" id="resetPasswField" placeholder="new password" required>
+                                                    <input class="form-control" ng-model="resetPasswField" type="password" id="resetPasswField" name="resetPasswField" placeholder="new password" required ng-minlength="6" ng-maxlength="200">
                                                 </div><!-- .input-group -->
                                             </div><!-- .form-group -->
                                             <div class="form-group">
                                                 <label class="sr-only" for="resetPassw2Field">repeat password</label>
                                                 <div class="input-group">
                                                     <span class="input-group-addon"><i class="fa fa-lock fa-fw"></i></span>
-                                                    <input class="form-control" type="password" id="resetPassw2Field" placeholder="repeat password" required>
+                                                    <input class="form-control" ng-model="resetPassw2Field" type="password" id="resetPassw2Field" name="resetPassw2Field" placeholder="repeat password" match="resetPasswField" required>
                                                 </div><!-- .input-group -->
                                             </div><!-- .form-group -->
 
-                                            <a href="#" id="setpassw-btn" ng-click="resetPassword()" class="btn btn-info btn-block" role="button"><i class="fa fa-lock fa-fw"></i> set new password</a>
+                                            <a href="#" id="setpassw-btn" ng-click="resetPassword()" ng-disabled="resetPasswordForm.$invalid" class="btn btn-info btn-block" role="button"><i class="fa fa-lock fa-fw"></i> set new password</a>
 
                                         </form>
 

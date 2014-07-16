@@ -171,7 +171,6 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
         }
 
         $scope.resetPassword = function() {
-            if (resetPasswField.value == resetPassw2Field.value){
             $http.get('connection.properties').then(function (response) {
                  $rootScope.apiUrl = response.data.backend_url;
                  $http({
@@ -193,12 +192,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                         alert("Internal server error.");
                     }
                  });
-
             });
-            } else {
-                alert("Passwords do not match.")
-            }
-
         }
 
         $scope.getLedStyle = function(status) {
