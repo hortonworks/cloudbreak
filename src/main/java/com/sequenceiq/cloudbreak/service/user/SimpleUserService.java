@@ -53,8 +53,11 @@ public class SimpleUserService implements UserService {
     @Value("${cb.smtp.sender.from}")
     private String msgFrom;
 
-    @Value("${cb.uluwatu.addr:localhost}")
+    @Value("${cb.ui.addr:localhost}")
     private String uiAddress;
+
+    @Value("${cb.mail.ui.enabled:false}")
+    private boolean uiEnabled;
 
     @Autowired
     private DefaultBlueprintLoaderService defaultBlueprintLoaderService;
@@ -123,15 +126,15 @@ public class SimpleUserService implements UserService {
     }
 
     private String getResetTemplate() {
-        return uiAddress != null ? "templates/reset-email.ftl" : "templates/reset-email-wout-ui.ftl";
+        return uiEnabled ? "templates/reset-email.ftl" : "templates/reset-email-wout-ui.ftl";
     }
 
     private String getRegisterUserConfirmPath() {
-        return uiAddress != null ? "#?confirmSignUpToken=" : "/users/confirm/";
+        return uiEnabled ? "#?confirmSignUpToken=" : "/users/confirm/";
     }
 
     private String getResetPasswordConfirmPath() {
-        return uiAddress != null ? "#?resetToken=" : "/password/reset/";
+        return uiEnabled ? "#?resetToken=" : "/password/reset/";
     }
 
     private String generateRegistrationId(User user) {
@@ -168,7 +171,7 @@ public class SimpleUserService implements UserService {
     }
 
     private String getConfirmLinkPath() {
-        return uiAddress == null ? hostAddress : uiAddress;
+        return uiEnabled ? uiAddress : hostAddress;
     }
 
     @Async
