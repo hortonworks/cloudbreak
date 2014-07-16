@@ -117,7 +117,6 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 $http({
                     method: 'GET',
                     dataType: 'json',
-                    withCredentials: true,
                     url:  $rootScope.apiUrl + "/login",
                     headers: {
                         'Authorization': 'Basic ' + Base64.encode(emailFieldLogin.value + ":" + passwFieldLogin.value),
@@ -132,7 +131,11 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     $rootScope.password64 = localStorage.password64;
                     $scope.doQuerys();
                 }).error(function (data, status, headers, config) {
-                    alert("Your credentials are not valid! Try again");
+                    if (status == 401) {
+                        alert("Invalid username/password combination")
+                    } else {
+                        alert("Internal server error");
+                    }
                 });
         }
 
@@ -158,7 +161,11 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                             alert("Internal server error");
                         }
                      }).error(function (data, status, headers, config){
-                        alert("Internal server error");
+                        if (status == 404){
+                            alert("There is not susch username");
+                        } else {
+                            alert("Internal server error");
+                        }
                      });
                 });
         }
@@ -180,7 +187,11 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                         alert("Password change failed.")
                     }
                  }).error(function (data, status, headers, config){
-                    alert("Internal server error.");
+                    if (status == 404){
+                        alert("There's no user for token" + $rootScope.resetToken)
+                    } else {
+                        alert("Internal server error.");
+                    }
                  });
 
             });
