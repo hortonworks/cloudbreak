@@ -1576,7 +1576,7 @@
                                                     <input class="form-control" type="email" ng-model="signUpEmailField" id="signUpEmailField" name="signUpEmailField" placeholder="email" required>
                                                 </div><!-- .input-group -->
                                                 <div class="help-block" ng-show="signUpForm.signUpEmailField.$dirty && signUpForm.signUpEmailField.$invalid || (signUpForm.signUpEmailField.$error.email)">
-                                                    <i class="fa fa-warning"></i>Email is invalid
+                                                    <i class="fa fa-warning"></i>{{error_msg.email_invalid}}
                                                 </div>
                                             </div><!-- .form-group -->
                                             <div class="form-group">
@@ -1586,7 +1586,7 @@
                                                     <input class="form-control" type="password" ng-model="signUpPasswField" name="signUpPasswField" id="signUpPasswField" placeholder="password" ng-minlength="6" ng-maxlength="200" required>
                                                 </div><!-- .input-group -->
                                                 <div class="help-block" ng-show="signUpForm.signUpPasswField.$dirty && signUpForm.signUpPasswField.$invalid">
-                                                    <i class="fa fa-warning"></i>Password field is invalid (6 to 200 char)
+                                                    <i class="fa fa-warning"></i>{{error_msg.pwd_invalid}}
                                                 </div>
                                             </div><!-- .form-group -->
                                             <div class="form-group">
@@ -1596,7 +1596,7 @@
                                                     <input class="form-control" type="password" ng-model="signUpPassw2Field" name="signUpPassw2Field" id="signUpPassw2Field" placeholder="repeat password" match="signUpPasswField" required>
                                                 </div>
                                                 <div class="help-block" ng-show="signUpForm.signUpPasswField.$dirty && signUpForm.signUpPassw2Field.$invalid">
-                                                    <i class="fa fa-warning"></i>Passwords do not match!
+                                                    <i class="fa fa-warning"></i>{{error_msg.pwd_repeat}}
                                                 </div>
                                                 <!-- .input-group -->
                                             </div><!-- .form-group -->
@@ -1607,7 +1607,7 @@
                                                     <input class="form-control" type="text" ng-model="signUpFirstNameField" name="signUpFirstNameField" id="signUpFirstNameField" placeholder="first name" required>
                                                 </div><!-- .input-group -->
                                                 <div class="help-block" ng-show="signUpForm.signUpFirstNameField.$dirty && signUpForm.signUpFirstNameField.$invalid">
-                                                    <i class="fa fa-warning"></i>Fist name field is empty
+                                                    <i class="fa fa-warning"></i>{{error_msg.first_name_empty}}
                                                 </div>
                                             </div><!-- .form-group -->
                                             <div class="form-group">
@@ -1617,7 +1617,7 @@
                                                     <input class="form-control" type="text" ng-model="signUpLastNameField" name="signUpLastNameField" id="signUpLastNameField" placeholder="last name" required>
                                                 </div><!-- .input-group -->
                                                 <div class="help-block" ng-show="signUpForm.signUpLastNameField.$dirty && signUpForm.signUpLastNameField.$invalid">
-                                                    <i class="fa fa-warning"></i>Last name field is empty
+                                                    <i class="fa fa-warning"></i>{{error_msg.last_name_empty}}
                                                 </div>
                                             </div><!-- .form-group -->
                                             <div class="form-group">
@@ -1627,7 +1627,7 @@
                                                     <input class="form-control" type="text" ng-model="signUpCompanyField" name="signUpCompanyField"  id="signUpCompanyField" placeholder="company" required>
                                                 </div><!-- .input-group -->
                                                 <div class="help-block" ng-show="signUpForm.signUpCompanyField.$dirty && signUpForm.signUpCompanyField.$invalid">
-                                                    <i class="fa fa-warning"></i>Company field is empty
+                                                    <i class="fa fa-warning"></i>{{error_msg.company_empty}}
                                                 </div>
                                             </div><!-- .form-group -->
 
@@ -1670,6 +1670,9 @@
                                                     <span class="input-group-addon"><i class="fa fa-lock fa-fw"></i></span>
                                                     <input class="form-control" ng-model="resetPasswField" type="password" id="resetPasswField" name="resetPasswField" placeholder="new password" required ng-minlength="6" ng-maxlength="200">
                                                 </div><!-- .input-group -->
+                                                <div class="help-block" ng-show="resetPasswordForm.resetPasswField.$dirty && resetPasswordForm.resetPasswField.$invalid">
+                                                    <i class="fa fa-warning"></i>{{error_msg.pwd_invalid}}
+                                                </div>
                                             </div><!-- .form-group -->
                                             <div class="form-group">
                                                 <label class="sr-only" for="resetPassw2Field">repeat password</label>
@@ -1677,6 +1680,9 @@
                                                     <span class="input-group-addon"><i class="fa fa-lock fa-fw"></i></span>
                                                     <input class="form-control" ng-model="resetPassw2Field" type="password" id="resetPassw2Field" name="resetPassw2Field" placeholder="repeat password" match="resetPasswField" required>
                                                 </div><!-- .input-group -->
+                                                <div class="help-block" ng-show="resetPasswordForm.resetPassw2Field.$dirty && resetPasswordForm.resetPassw2Field.$invalid">
+                                                    <i class="fa fa-warning"></i>{{error_msg.pwd_repeat}}
+                                                </div>
                                             </div><!-- .form-group -->
 
                                             <a href="#" id="setpassw-btn" ng-click="resetPassword()" ng-disabled="resetPasswordForm.$invalid" class="btn btn-info btn-block" role="button"><i class="fa fa-lock fa-fw"></i> set new password</a>

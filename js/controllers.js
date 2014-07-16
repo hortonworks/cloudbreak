@@ -8,10 +8,20 @@ var layout = new log4javascript.PatternLayout("[%-5p] %m");
 popUpAppender.setLayout(layout);
 var cloudbreakControllers = angular.module('cloudbreakControllers', []);
 
-cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Templates', '$location', '$rootScope', '$q', '$window',
-    function ($scope, $http, Templates, $location, $rootScope, $q, $window) {
+cloudbreakControllers.value('errorMessages', {
+    email_invalid: "Email is invalid",
+    pwd_invalid: "Password field is invalid (6 to 200 char)",
+    pwd_repeat: "Passwords do not match!",
+    first_name_empty: "Fist name field is empty",
+    last_name_empty: "Last name field is empty",
+    company_empty: "Fist name field is empty",
+})
+
+cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Templates', '$location', '$rootScope', '$q', '$window', 'errorMessages',
+    function ($scope, $http, Templates, $location, $rootScope, $q, $window, errorMessages) {
         $scope.form = undefined;
         $http.defaults.useXDomain = true;
+        $scope.error_msg = errorMessages
         delete $http.defaults.headers.common['X-Requested-With'];
         $http.defaults.headers.common['Content-Type']= 'application/json';
 
