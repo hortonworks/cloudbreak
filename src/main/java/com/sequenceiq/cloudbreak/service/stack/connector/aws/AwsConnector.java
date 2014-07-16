@@ -46,28 +46,29 @@ public class AwsConnector implements CloudPlatformConnector {
         AwsCredential awsCredential = (AwsCredential) credential;
         DescribeStacksResult stackResult = null;
         DescribeInstancesResult instancesResult = null;
-        Resource resource = stack.getResourcebyType(ResourceType.CLOUDFORMATION_STACK);
-
-        try {
-            AmazonCloudFormationClient client = awsStackUtil.createCloudFormationClient(awsTemplate.getRegion(), awsCredential);
-            DescribeStacksRequest stackRequest = new DescribeStacksRequest().withStackName(
-                    resource.getResourceName());
-            stackResult = client.describeStacks(stackRequest);
-        } catch (AmazonServiceException e) {
-            if (CF_SERVICE_NAME.equals(e.getServiceName())
-                    && e.getErrorMessage().equals(String.format("Stack:%s does not exist",
-                    resource.getResourceName()))) {
-                LOGGER.error("Amazon CloudFormation stack {} does not exist. Returning null in describeStack.",
+        Resource resource = stack.getResourceByType(ResourceType.CLOUDFORMATION_STACK);
+        if (resource != null) {
+            try {
+                AmazonCloudFormationClient client = awsStackUtil.createCloudFormationClient(awsTemplate.getRegion(), awsCredential);
+                DescribeStacksRequest stackRequest = new DescribeStacksRequest().withStackName(
                         resource.getResourceName());
-                stackResult = new DescribeStacksResult();
-            } else {
-                throw e;
+                stackResult = client.describeStacks(stackRequest);
+            } catch (AmazonServiceException e) {
+                if (CF_SERVICE_NAME.equals(e.getServiceName())
+                        && e.getErrorMessage().equals(String.format("Stack:%s does not exist",
+                                resource.getResourceName()))) {
+                    LOGGER.error("Amazon CloudFormation stack {} does not exist. Returning null in describeStack.",
+                            resource.getResourceName());
+                    stackResult = new DescribeStacksResult();
+                } else {
+                    throw e;
+                }
             }
+            AmazonEC2Client ec2Client = awsStackUtil.createEC2Client(awsTemplate.getRegion(), awsCredential);
+            DescribeInstancesRequest instancesRequest = new DescribeInstancesRequest()
+                    .withFilters(new Filter().withName("tag:" + INSTANCE_TAG_NAME).withValues());
+            instancesResult = ec2Client.describeInstances(instancesRequest);
         }
-        AmazonEC2Client ec2Client = awsStackUtil.createEC2Client(awsTemplate.getRegion(), awsCredential);
-        DescribeInstancesRequest instancesRequest = new DescribeInstancesRequest()
-                .withFilters(new Filter().withName("tag:" + INSTANCE_TAG_NAME).withValues());
-        instancesResult = ec2Client.describeInstances(instancesRequest);
         return new AwsStackDescription(stackResult, instancesResult);
     }
 
@@ -77,38 +78,37 @@ public class AwsConnector implements CloudPlatformConnector {
         AwsCredential awsCredential = (AwsCredential) credential;
         DescribeStacksResult stackResult = null;
         DescribeStackResourcesResult resourcesResult = null;
-        Resource resource = stack.getResourcebyType(ResourceType.CLOUDFORMATION_STACK);
-
-        try {
-            AmazonCloudFormationClient client = awsStackUtil.createCloudFormationClient(awsInfra.getRegion(), awsCredential);
-            DescribeStacksRequest stackRequest = new DescribeStacksRequest().withStackName(
-                    resource.getResourceName()
-            );
-            stackResult = client.describeStacks(stackRequest);
-
-            DescribeStackResourcesRequest resourcesRequest = new DescribeStackResourcesRequest().withStackName(
-                    resource.getResourceName()
-            );
-            resourcesResult = client.describeStackResources(resourcesRequest);
-        } catch (AmazonServiceException e) {
-            if (CF_SERVICE_NAME.equals(e.getServiceName())
-                    && e.getErrorMessage().equals(String.format("Stack:%s does not exist",
-                    resource.getResourceName()))) {
-                LOGGER.error("Amazon CloudFormation stack {} doesn't exist. Returning null in describeStack.",
-                        resource.getResourceName());
-                stackResult = new DescribeStacksResult();
-            } else {
-                throw e;
-            }
-        }
-
-        AmazonEC2Client ec2Client = awsStackUtil.createEC2Client(awsInfra.getRegion(), awsCredential);
-        DescribeInstancesRequest instancesRequest = new DescribeInstancesRequest()
-                .withFilters(new Filter().withName("tag:" + INSTANCE_TAG_NAME).withValues(
+        DescribeInstancesResult instancesResult = null;
+        Resource resource = stack.getResourceByType(ResourceType.CLOUDFORMATION_STACK);
+        if (resource != null) {
+            try {
+                AmazonCloudFormationClient client = awsStackUtil.createCloudFormationClient(awsInfra.getRegion(), awsCredential);
+                DescribeStacksRequest stackRequest = new DescribeStacksRequest().withStackName(
                         resource.getResourceName()
-                ));
-        DescribeInstancesResult instancesResult = ec2Client.describeInstances(instancesRequest);
+                        );
+                stackResult = client.describeStacks(stackRequest);
 
+                DescribeStackResourcesRequest resourcesRequest = new DescribeStackResourcesRequest().withStackName(
+                        resource.getResourceName()
+                        );
+                resourcesResult = client.describeStackResources(resourcesRequest);
+            } catch (AmazonServiceException e) {
+                if (CF_SERVICE_NAME.equals(e.getServiceName())
+                        && e.getErrorMessage().equals(String.format("Stack:%s does not exist",
+                                resource.getResourceName()))) {
+                    LOGGER.error("Amazon CloudFormation stack {} doesn't exist. Returning null in describeStack.",
+                            resource.getResourceName());
+                    stackResult = new DescribeStacksResult();
+                } else {
+                    throw e;
+                }
+            }
+
+            AmazonEC2Client ec2Client = awsStackUtil.createEC2Client(awsInfra.getRegion(), awsCredential);
+            DescribeInstancesRequest instancesRequest = new DescribeInstancesRequest()
+                    .withFilters(new Filter().withName("tag:" + INSTANCE_TAG_NAME).withValues(resource.getResourceName()));
+            instancesResult = ec2Client.describeInstances(instancesRequest);
+        }
         return new DetailedAwsStackDescription(stackResult, resourcesResult, instancesResult);
     }
 
@@ -117,7 +117,7 @@ public class AwsConnector implements CloudPlatformConnector {
         LOGGER.info("Deleting stack: {}", stack.getId());
         AwsTemplate template = (AwsTemplate) stack.getTemplate();
         AwsCredential awsCredential = (AwsCredential) credential;
-        Resource resource = stack.getResourcebyType(ResourceType.CLOUDFORMATION_STACK);
+        Resource resource = stack.getResourceByType(ResourceType.CLOUDFORMATION_STACK);
         if (resource != null) {
             AmazonCloudFormationClient client = awsStackUtil.createCloudFormationClient(template.getRegion(), awsCredential);
             LOGGER.info("Deleting CloudFormation stack for stack: {} [cf stack id: {}]", stack.getId(),

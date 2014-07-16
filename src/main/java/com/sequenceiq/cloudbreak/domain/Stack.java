@@ -238,7 +238,7 @@ public class Stack implements ProvisionEntity {
         this.resources = resources;
     }
 
-    public List<Resource> getResourcesbyType(ResourceType resourceType) {
+    public List<Resource> getResourcesByType(ResourceType resourceType) {
         List<Resource> resourceList = new ArrayList<>();
         for (Resource resource : resources) {
             if (resourceType.equals(resource.getResourceType())) {
@@ -248,7 +248,7 @@ public class Stack implements ProvisionEntity {
         return resourceList;
     }
 
-    public Resource getResourcebyType(ResourceType resourceType) {
+    public Resource getResourceByType(ResourceType resourceType) {
         for (Resource resource : resources) {
             if (resourceType.equals(resource.getResourceType())) {
                 return resource;
