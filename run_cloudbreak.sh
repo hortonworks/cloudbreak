@@ -27,5 +27,7 @@
 : ${AWS_ACCESS_KEY_ID:?"Please set the AWS_ACCESS_KEY_ID environment variable!"}
 : ${AWS_SECRET_KEY:?"Please set the AWS_SECRET_KEY environment variable!"}
 
+# AWS SNS subscriptions should use HTTPS endpoints or not
+: ${CB_SNS_SSL:?"Please set the CB_SNS_SSL environment variable!"}
 
 java -jar build/libs/cloudbreak-0.1-DEV.jar
