@@ -47,9 +47,9 @@ You have the option to choose your favourite cloud provider and their different 
 We provide you three different ways to start using Cloudbreak. The simplest and easiest solution is hosted by SequenceIQ, however we have two DIY _(do it yourself)_ options as well.
 
 ###Using Cloudbreak - hosted by SequenceIQ
-The easiest way to start your own Hadoop cluster in your favorite cloud provider is to use our hosted solution. We host, maintain and support [Cloudbreak](https://cloudbreak.sequenceiq.com/) for you. 
+The easiest way to start your own Hadoop cluster in your favorite cloud provider is to use our hosted solution. We host, maintain and support [Cloudbreak](https://cloudbreak.sequenceiq.com/) for you.
 
-Please note that Cloudbreak is launching Hadoop clusters on the user's behalf - on different cloud providers. We do not store your cloud provider account details (such as username, password, keys, private SSL certificates, etc), but work around the concept that Identity and Access Management is fully controlled by you - the end user. 
+Please note that Cloudbreak is launching Hadoop clusters on the user's behalf - on different cloud providers. We do not store your cloud provider account details (such as username, password, keys, private SSL certificates, etc), but work around the concept that Identity and Access Management is fully controlled by you - the end user.
 
 Though Cloudbreak controls your Hadoop cluster lifecycle (start, stop, pause), we **do not** have access to the launched instances. The Hadoop clusters created by Cloudbreak are private to you.
 
@@ -71,14 +71,14 @@ docker run -d --name cloudbreak \
 -e "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" \
 -e "AWS_SECRET_KEY=$AWS_SECRET_KEY" \
 -e "CB_HBM2DDL_STRATEGY=create" \
--e "CB_SMTP_SENDER_USERNAME=$MAIL_SENDER_USERNAME" \
--e "CB_SMTP_SENDER_PASSWORD=$MAIL_SENDER_PASSWORD" \
--e "CB_SMTP_SENDER_HOST=$MAIL_SENDER_HOST" \
--e "CB_SMTP_SENDER_PORT=$MAIL_SENDER_PORT" \
--e "CB_SMTP_SENDER_FROM=$MAIL_SENDER_FROM" \
--e "CB_HOST_ADDR=$HOST_ADDR" \
--e "CB_AZURE_IMAGE_URI=$AZURE_IMAGE_URI" \
--e "CB_BLUEPRINT_DEFAULTS=$BLUEPRINT_DEFAULTS" \
+-e "CB_SMTP_SENDER_USERNAME=$CB_SMTP_SENDER_USERNAME" \
+-e "CB_SMTP_SENDER_PASSWORD=$CB_SMTP_SENDER_PASSWORD" \
+-e "CB_SMTP_SENDER_HOST=$CB_SMTP_SENDER_HOST" \
+-e "CB_SMTP_SENDER_PORT=$CB_SMTP_SENDER_PORT" \
+-e "CB_SMTP_SENDER_FROM=$CB_SMTP_SENDER_FROM" \
+-e "CB_HOST_ADDR=$CB_HOST_ADDR" \
+-e "CB_AZURE_IMAGE_URI=$CB_AZURE_IMAGE_URI" \
+-e "CB_BLUEPRINT_DEFAULTS=$CB_BLUEPRINT_DEFAULTS" \
 -e "CB_SNS_SSL=false"
 --link postgresql:cb_db -p 8080:8080 \
 dockerfile/java bash \
@@ -90,52 +90,44 @@ Note: The system properties prefixed with MAIL_SENDER_ are the SNMP settings req
 
 ###DIY - Running Cloudbreak API on the host
 
-If you'd like to run Cloudbreak outside of a Docker container - directly on the host - we provide you shell scripts that starts the application for you.
-
-After building the application _(./gradlew clean build)_ please run the following script from the project root:
+The Cloudbreak application can be run outside a docker container - on an arbitrary machine. The only thing required for this is to have the following list of environment variables set:
 
 ```
-./run_cloudbreak.sh <host-addr> \
-<db-user> \
-<db-pass> \
-<db-host> \
-<db-port> \
-<hbm2ddl-strategy> \
-<smtp-username> \
-<smpt-password \
-<smtp-host> \
-<smtp-port \
-<mail-sender-from>
+
+# The address of the host running the application. This should ebe reachable from the internet (it's also used to deal with SNS notifications)
+CB_HOST_ADDR=
+
+# database settings
+CB_DB_ENV_USER=
+CB_DB_ENV_PASS=
+CB_DB_PORT_5432_TCP_ADDR=
+CB_DB_PORT_5432_TCP_PORT=
+
+# SMTP settings for sending confirmation and password recovery emails to customers
+CB_SMTP_SENDER_USERNAME=
+CB_SMTP_SENDER_PASSWORD=
+CB_SMTP_SENDER_HOST=
+CB_SMTP_SENDER_PORT=
+CB_SMTP_SENDER_FROM=
+
+# AWS related (optional) settings - not setting them causes AWS related operations to fail
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_KEY=
+
+# Azure related settings
+# use this as default AZURE_IMAGE_URI="http://vmdepoteastus.blob.core.windows.net/linux-community-store/community-62091-a59dcdc1-d82d-4e76-9094-27b8c018a4a1-1.vhd
+CB_AZURE_IMAGE_URI=
+
+# Ambari default blueprint
+# use this as default: BLUEPRINT_DEFAULTS='lambda-architecture,multi-node-hdfs-yarn,single-node-hdfs-yarn'
+CB_BLUEPRINT_DEFAULTS=
 
 ```
-Where:
 
-`host-address`     - the ngrok generated address to receive SNS notifications
+After the project is built with the command: `./gradlew clean build`
 
-`db-user`          - database user name
+the application can be launched by running the script `./run_cloudbreak` This script provides some help by validating the environment (run it from the project root)
 
-`db-pass`          - password for the database
-
-`db-host`          - the address of the machine hosting the database
-
-`db-port`          - the port where you can connect to the database
-
-`hbm2ddl-strategy` - the desired value for the *hibernate.hbm2ddl.auto* configuration
-
-`smtp-username`    - SMTP username
-
-`smpt-password`    - SMTP password
-
-`smtp-host`        - SMTP host address
-
-`smtp-port`        - SMTP port
-
-`mail-sender-from` - the email address to use when sending registration confirmation or password renewal emails
-
-
-Please note, that configuration properties can be given both as arguments to the script and as system properties.
-
-*Warning*: When providing configuration as arguments to the script, the arguments should follow the order above!
 
 
 ##Configuration
@@ -151,38 +143,12 @@ Cloudbreak uses SNS to receive notifications. On OSX you can do the following:
 brew update && brew install ngrok
 ngrok 8080
 ```
-_Note: In the terminal window you'll find displayed a value - this is the last argument `host-address` of the `run_cloudbreak.sh` script_
+_Note: In the terminal window you'll find displayed a value - this should be set as the `CB_HOST_ADDR` env variable_
 
 ###Production
 
 There are no special requirements for production environments.
 
-```
-# The host running the cloudbreak app
-CB_HOST_ADDR
-
-# SMTP related properties (required for account registration, password renewal)
-CB_SMTP_SENDER_USERNAME
-CB_SMTP_SENDER_PASSWORD
-CB_SMTP_SENDER_HOST
-CB_SMTP_SENDER_PORT
-CB_SMTP_SENDER_FROM
-
-# Database related properties
-CB_DB_ENV_USER
-CB_DB_ENV_PASS
-CB_DB_PORT_5432_TCP_ADDR
-CB_DB_PORT_5432_TCP_PORT
-CB_HBM2DDL_STRATEGY
-```
-
-If you'd like to work with AWS you'll need to set two more system properties:
-
-```
-# AWS credentials
-AWS_ACCESS_KEY_ID
-AWS_SECRET_KEY
-```
 
 <!--quickstart.md-->
 
