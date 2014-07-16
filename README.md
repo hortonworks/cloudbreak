@@ -67,6 +67,8 @@ docker run -d --name cloudbreak \
 -e "CB_MAIL_SENDER_PORT=$MAIL_SENDER_PORT" \
 -e "CB_MAIL_SENDER_FROM=$MAIL_SENDER_FROM" \
 -e "CB_HOST_ADDR=$HOST_ADDR" \
+-e "CB_AZURE_IMAGE_URI=$AZURE_IMAGE_URI" \
+-e "CB_BLUEPRINT_DEFAULTS=$BLUEPRINT_DEFAULTS" \
 --link postgresql:db -p 8080:8080 \
 dockerfile/java bash \
 -c 'curl -o /tmp/cloudbreak-$VERSION.jar https://s3-eu-west-1.amazonaws.com/seq-repo/releases/com/sequenceiq/cloudbreak/$VERSION/cloudbreak-$VERSION.jar && java -jar /tmp/cloudbreak-$VERSION.jar'
@@ -142,7 +144,7 @@ _Note: In the terminal window you'll find displayed a value - this is the last a
 
 ###Production
 
-In production environments make sure the following system properties are set:
+There are no special requirements for production environments.
 
 ```
 # The host running the cloudbreak app
