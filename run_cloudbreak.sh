@@ -28,4 +28,4 @@
 : ${AWS_SECRET_KEY:?"Please set the AWS_SECRET_KEY environment variable!"}
 
 
-java -jar build/libs/cloudbreak-0.1-DEV-renamed-properties.jar
+java -jar build/libs/cloudbreak-0.1-DEV.jar
