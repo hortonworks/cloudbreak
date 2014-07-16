@@ -8,9 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import reactor.core.Reactor;
-import reactor.event.Event;
-
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.sns.AmazonSNSClient;
 import com.amazonaws.services.sns.model.ConfirmSubscriptionResult;
@@ -26,6 +23,9 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.credential.aws.CrossAccountCredentialsProvider;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
 
+import reactor.core.Reactor;
+import reactor.event.Event;
+
 @Service
 public class SnsTopicManager {
 
@@ -35,7 +35,7 @@ public class SnsTopicManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SnsTopicManager.class);
 
-    @Value("${host.addr}")
+    @Value("${cb.host.addr}")
     private String hostAddress;
 
     @Autowired

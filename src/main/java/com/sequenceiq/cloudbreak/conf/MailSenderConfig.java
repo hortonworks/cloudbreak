@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.conf;
 
-import freemarker.template.TemplateException;
+import java.io.IOException;
+import java.util.Properties;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -8,24 +10,23 @@ import org.springframework.mail.MailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
-import java.io.IOException;
-import java.util.Properties;
+import freemarker.template.TemplateException;
 
 @Configuration
 public class MailSenderConfig {
-    @Value("${mail.sender.host}")
+    @Value("${cb.smtp.sender.host}")
     private String host;
 
-    @Value("${mail.sender.port}")
+    @Value("${cb.smtp.sender.port}")
     private int port;
 
-    @Value("${mail.sender.username}")
+    @Value("${cb.smtp.sender.username}")
     private String userName;
 
-    @Value("${mail.sender.password}")
+    @Value("${cb.smtp.sender.password}")
     private String password;
 
-    @Value("${mail.sender.from}")
+    @Value("${cb.smtp.sender.from}")
     private String msgFrom;
 
     @Bean

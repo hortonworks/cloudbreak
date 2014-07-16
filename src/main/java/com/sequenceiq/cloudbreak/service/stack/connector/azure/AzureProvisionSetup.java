@@ -45,7 +45,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
     private static final String OS = "os";
     private static final String MEDIALINK = "mediaLink";
 
-    @Value("${azure.image.uri}")
+    @Value("${cb.azure.image.uri}")
     private String baseImageUri;
 
     @Autowired

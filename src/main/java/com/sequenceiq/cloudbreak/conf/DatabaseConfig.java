@@ -1,5 +1,11 @@
 package com.sequenceiq.cloudbreak.conf;
 
+import java.util.Properties;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.sql.DataSource;
+
 import org.postgresql.Driver;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -13,28 +19,23 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.sql.DataSource;
-import java.util.Properties;
-
 @Configuration
 @EnableTransactionManagement
 public class DatabaseConfig {
 
-    @Value("${db.env.user}")
+    @Value("${cb.db.env.user}")
     private String dbUser;
 
-    @Value("${db.env.pass}")
+    @Value("${cb.db.env.pass}")
     private String dbPassword;
 
-    @Value("${db.port.5432.tcp.addr}")
+    @Value("${cb.db.port.5432.tcp.addr}")
     private String dbHost;
 
-    @Value("${db.port.5432.tcp.port}")
+    @Value("${cb.db.port.5432.tcp.port}")
     private String dbPort;
 
-    @Value("${hbm2ddl.strategy}")
+    @Value("${cb.hbm2ddl.strategy:update}")
     private String hbm2ddlStrategy;
 
     @Bean
