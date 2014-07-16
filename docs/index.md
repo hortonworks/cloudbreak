@@ -44,9 +44,9 @@ You have the option to choose your favourite cloud provider and their different 
 
 ##QuickStart and installation
 
-We provide you three different ways to start using Cloudbreak. The simplest and easiest solution is hosted by SequenceIQ, however we have two DIY _(do it yourself)_ options as well.
+We provide you three different ways to start using Cloudbreak. The simplest and easiest solution is hosted by SequenceIQ, however we have two DIY _(do it/deploy it yourself)_ options as well.
 
-###Using Cloudbreak - hosted by SequenceIQ
+###Hosted by SequenceIQ - Cloudbreak UI and API  
 The easiest way to start your own Hadoop cluster in your favourite cloud provider is to use our hosted solution. We host, maintain and support [Cloudbreak](https://cloudbreak.sequenceiq.com/) for you.
 
 Please note that Cloudbreak is launching Hadoop clusters on the user's behalf - on different cloud providers. We do not store your cloud provider account details (such as username, password, keys, private SSL certificates, etc), but work around the concept that Identity and Access Management is fully controlled by you - the end user.
@@ -54,7 +54,7 @@ Please note that Cloudbreak is launching Hadoop clusters on the user's behalf - 
 Though Cloudbreak controls your Hadoop cluster lifecycle (start, stop, pause), we **do not** have access to the launched instances. The Hadoop clusters created by Cloudbreak are private to you.
 
 
-###DIY - Running Cloudbreak API using Docker
+###DIY - Deploying Cloudbreak API using Docker
 
 ####Database
 The only dependency that Cloudbreak needs is a postgresql database. The easiest way to spin up a postgresql is of course Docker. Run it first with this line:
@@ -88,7 +88,7 @@ dockerfile/java bash \
 
 Note: The system properties prefixed with MAIL_SENDER_ are the SNMP settings required to send emails.
 
-###DIY - Running Cloudbreak API on the host
+###DIY - Deploying Cloudbreak API on any host
 
 The Cloudbreak application can be run outside a docker container - on an arbitrary machine. The only thing required for this is to have the following list of environment variables set:
 
