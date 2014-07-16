@@ -79,7 +79,8 @@ docker run -d --name cloudbreak \
 -e "CB_HOST_ADDR=$CB_HOST_ADDR" \
 -e "CB_AZURE_IMAGE_URI=$CB_AZURE_IMAGE_URI" \
 -e "CB_BLUEPRINT_DEFAULTS=$CB_BLUEPRINT_DEFAULTS" \
--e "CB_SNS_SSL=false"
+-e "CB_SNS_SSL=false" \
+-e "CB_MANAGEMENT_CONTEXT_PATH=/" \
 --link postgresql:cb_db -p 8080:8080 \
 dockerfile/java bash \
 -c 'curl -o /tmp/cloudbreak-$VERSION.jar https://s3-eu-west-1.amazonaws.com/seq-repo/releases/com/sequenceiq/cloudbreak/$VERSION/cloudbreak-$VERSION.jar && java -jar /tmp/cloudbreak-$VERSION.jar'
@@ -119,6 +120,8 @@ AWS_SECRET_KEY=
 CB_AZURE_IMAGE_URI=
 
 # Ambari default blueprint
+CB_MANAGEMENT_CONTEXT_PATH=
+
 # use this as default: BLUEPRINT_DEFAULTS='lambda-architecture,multi-node-hdfs-yarn,single-node-hdfs-yarn'
 CB_BLUEPRINT_DEFAULTS=
 
@@ -147,7 +150,7 @@ _Note: In the terminal window you'll find displayed a value - this should be set
 
 ###Production
 
-There are no special requirements for production environments. Make sure that the SNS or callback ports are available. We suggest to always use HTTPS. 
+There are no special requirements for production environments. Make sure that the SNS or callback ports are available. We suggest to always use HTTPS.
 
 
 <!--quickstart.md-->
