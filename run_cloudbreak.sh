@@ -21,10 +21,11 @@
 
 # Ambari
 : ${BLUEPRINT_DEFAULTS:='lambda-architecture,multi-node-hdfs-yarn,single-node-hdfs-yarn'}
+: ${MANAGEMENT_CONTEXT_PATH:?"Please set the MANAGEMENT_CONTEXT_PATH environment variable!"}
 
 # AWS related (optional) settings - not setting them causes AWS related operations to fail
 : ${AWS_ACCESS_KEY_ID:?"Please set the AWS_ACCESS_KEY_ID environment variable!"}
-: ${AWS_SECRET_KEY:?"Please set the AWS_SECRET_KEY environment variable!"
+: ${AWS_SECRET_KEY:?"Please set the AWS_SECRET_KEY environment variable!"}
 
 
-java -jar build/libs/cloudbreak-0.1-DEV-defaults.jar
+java -jar build/libs/cloudbreak-0.1-DEV.jar
