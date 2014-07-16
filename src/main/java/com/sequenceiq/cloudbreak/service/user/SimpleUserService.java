@@ -23,7 +23,6 @@ import org.springframework.util.DigestUtils;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.UserStatus;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
@@ -86,7 +85,7 @@ public class SimpleUserService implements UserService {
             return user.getEmail();
         } else {
             LOGGER.warn("There's no user registration pending for confToken: {}", confToken);
-            throw new NotFoundException("There's no user registration pending for confToken: " + confToken);
+            throw new BadRequestException("There's no user registration pending for confToken: " + confToken);
         }
     }
 
@@ -103,7 +102,7 @@ public class SimpleUserService implements UserService {
             return email;
         } else {
             LOGGER.warn("There's no user for email: {} ", email);
-            throw new NotFoundException("There is no user for " + email);
+            throw new BadRequestException("There is no user for " + email);
         }
     }
 
@@ -118,7 +117,7 @@ public class SimpleUserService implements UserService {
             return confToken;
         } else {
             LOGGER.warn("There's no user for token: {}", confToken);
-            throw new NotFoundException("There's no user for token: " + confToken);
+            throw new BadRequestException("There's no user for token: " + confToken);
         }
     }
 
