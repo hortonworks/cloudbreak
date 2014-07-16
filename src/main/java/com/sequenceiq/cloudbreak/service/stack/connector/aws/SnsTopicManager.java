@@ -12,6 +12,7 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.sns.AmazonSNSClient;
 import com.amazonaws.services.sns.model.ConfirmSubscriptionResult;
 import com.amazonaws.services.sns.model.CreateTopicResult;
+import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
@@ -37,6 +38,9 @@ public class SnsTopicManager {
 
     @Value("${cb.host.addr}")
     private String hostAddress;
+
+    @Value("${cb.sns.ssl}")
+    private boolean useSslForSns;
 
     @Autowired
     private CrossAccountCredentialsProvider credentialsProvider;
@@ -109,10 +113,25 @@ public class SnsTopicManager {
     private void subscribeToTopic(AmazonSNSClient amazonSNSClient, String topicArn) {
         String subscriptionEndpoint = hostAddress + "/sns";
         if (subscriptionEndpoint.startsWith("https")) {
-            amazonSNSClient.subscribe(topicArn, "https", subscriptionEndpoint);
+            if (useSslForSns) {
+                amazonSNSClient.subscribe(topicArn, "https", subscriptionEndpoint);
+            } else {
+                subscriptionEndpoint = subscriptionEndpoint.replaceFirst("https", "http");
+                amazonSNSClient.subscribe(topicArn, "http", subscriptionEndpoint);
+            }
         } else {
             amazonSNSClient.subscribe(topicArn, "http", subscriptionEndpoint);
         }
         LOGGER.info("Amazon SNS subscription request sent. [topic ARN: '{}', endpoint: '{}']", topicArn, subscriptionEndpoint);
+    }
+
+    @VisibleForTesting
+    protected void setHostAddress(String hostAddress) {
+        this.hostAddress = hostAddress;
+    }
+
+    @VisibleForTesting
+    protected void setUseSslForSns(boolean useSslForSns) {
+        this.useSslForSns = useSslForSns;
     }
 }

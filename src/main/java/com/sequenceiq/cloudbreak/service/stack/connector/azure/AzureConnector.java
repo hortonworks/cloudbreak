@@ -48,7 +48,7 @@ public class AzureConnector implements CloudPlatformConnector {
         String filePath = AzureCertificateService.getUserJksFileName(credential, user.emailAsFolder());
         AzureClient azureClient = azureStackUtil.createAzureClient(credential, filePath);
         AzureStackDescription azureStackDescription = new AzureStackDescription();
-        for (Resource resource : stack.getResourcesbyType(ResourceType.CLOUD_SERVICE)) {
+        for (Resource resource : stack.getResourcesByType(ResourceType.CLOUD_SERVICE)) {
             try {
                 Object cloudService = azureClient.getCloudService(resource.getResourceName());
                 azureStackDescription.getCloudServices().add(jsonHelper.createJsonFromString(cloudService.toString()).toString());
@@ -56,7 +56,7 @@ public class AzureConnector implements CloudPlatformConnector {
                 azureStackDescription.getCloudServices().add(jsonHelper.createJsonFromString(String.format("{\"HostedService\": {%s}}", ERROR)).toString());
             }
         }
-        for (Resource resource : stack.getResourcesbyType(ResourceType.VIRTUAL_MACHINE)) {
+        for (Resource resource : stack.getResourcesByType(ResourceType.VIRTUAL_MACHINE)) {
             Map<String, String> props = new HashMap<>();
             props.put(SERVICENAME, resource.getResourceName());
             props.put(NAME, resource.getResourceName());
@@ -76,19 +76,19 @@ public class AzureConnector implements CloudPlatformConnector {
         AzureClient azureClient = azureStackUtil.createAzureClient(credential, filePath);
         DetailedAzureStackDescription detailedAzureStackDescription = new DetailedAzureStackDescription();
         try {
-            Object affinityGroup = azureClient.getAffinityGroup(stack.getResourcesbyType(ResourceType.AFFINITY_GROUP).get(0).getResourceName());
+            Object affinityGroup = azureClient.getAffinityGroup(stack.getResourcesByType(ResourceType.AFFINITY_GROUP).get(0).getResourceName());
             detailedAzureStackDescription.setAffinityGroup(jsonHelper.createJsonFromString(affinityGroup.toString()));
         } catch (Exception ex) {
             detailedAzureStackDescription.setAffinityGroup(jsonHelper.createJsonFromString(String.format("{\"AffinityGroup\": {%s}}", ERROR)));
         }
         try {
-            Object storageAccount = azureClient.getStorageAccount(stack.getResourcesbyType(ResourceType.STORAGE).get(0).getResourceName());
+            Object storageAccount = azureClient.getStorageAccount(stack.getResourcesByType(ResourceType.STORAGE).get(0).getResourceName());
             detailedAzureStackDescription.setStorageAccount(jsonHelper.createJsonFromString(storageAccount.toString()));
         } catch (Exception ex) {
             detailedAzureStackDescription.setStorageAccount(jsonHelper.createJsonFromString(String.format("{\"StorageService\": {%s}}", ERROR)));
         }
 
-        for (Resource resource : stack.getResourcesbyType(ResourceType.VIRTUAL_MACHINE)) {
+        for (Resource resource : stack.getResourcesByType(ResourceType.VIRTUAL_MACHINE)) {
             try {
                 Object cloudService = azureClient.getCloudService(resource.getResourceName());
                 detailedAzureStackDescription.getCloudServices().add(jsonHelper.createJsonFromString(cloudService.toString()).toString());
@@ -97,7 +97,7 @@ public class AzureConnector implements CloudPlatformConnector {
                         jsonHelper.createJsonFromString(String.format("{\"HostedService\": {%s}}", ERROR)).toString());
             }
         }
-        for (Resource resource : stack.getResourcesbyType(ResourceType.CLOUD_SERVICE)) {
+        for (Resource resource : stack.getResourcesByType(ResourceType.CLOUD_SERVICE)) {
             Map<String, String> props = new HashMap<>();
             props.put(SERVICENAME, resource.getResourceName());
             props.put(NAME, resource.getResourceName());
@@ -116,7 +116,7 @@ public class AzureConnector implements CloudPlatformConnector {
     public void deleteStack(User user, Stack stack, Credential credential) {
         String filePath = AzureCertificateService.getUserJksFileName(credential, user.emailAsFolder());
         AzureClient azureClient = azureStackUtil.createAzureClient(credential, filePath);
-        for (Resource resource : stack.getResourcesbyType(ResourceType.VIRTUAL_MACHINE)) {
+        for (Resource resource : stack.getResourcesByType(ResourceType.VIRTUAL_MACHINE)) {
             Map<String, String> props;
             try {
                 props = new HashMap<>();
@@ -132,7 +132,7 @@ public class AzureConnector implements CloudPlatformConnector {
                 throw new InternalServerException(ex.getMessage());
             }
         }
-        for (Resource resource : stack.getResourcesbyType(ResourceType.CLOUD_SERVICE)) {
+        for (Resource resource : stack.getResourcesByType(ResourceType.CLOUD_SERVICE)) {
             Map<String, String> props;
             try {
                 props = new HashMap<>();
@@ -147,7 +147,7 @@ public class AzureConnector implements CloudPlatformConnector {
                 throw new InternalServerException(ex.getMessage());
             }
         }
-        for (Resource resource : stack.getResourcesbyType(ResourceType.NETWORK)) {
+        for (Resource resource : stack.getResourcesByType(ResourceType.NETWORK)) {
             Map<String, String> props;
             try {
                 props = new HashMap<>();

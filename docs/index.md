@@ -69,7 +69,8 @@ docker run -d --name cloudbreak \
 -e "CB_HOST_ADDR=$HOST_ADDR" \
 -e "CB_AZURE_IMAGE_URI=$AZURE_IMAGE_URI" \
 -e "CB_BLUEPRINT_DEFAULTS=$BLUEPRINT_DEFAULTS" \
---link postgresql:db -p 8080:8080 \
+-e "CB_SNS_SSL=false"
+--link postgresql:cb_db -p 8080:8080 \
 dockerfile/java bash \
 -c 'curl -o /tmp/cloudbreak-$VERSION.jar https://s3-eu-west-1.amazonaws.com/seq-repo/releases/com/sequenceiq/cloudbreak/$VERSION/cloudbreak-$VERSION.jar && java -jar /tmp/cloudbreak-$VERSION.jar'
 

@@ -16,6 +16,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import reactor.core.Reactor;
+import reactor.event.Event;
+
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.sns.AmazonSNSClient;
 import com.amazonaws.services.sns.model.ConfirmSubscriptionResult;
@@ -31,9 +34,6 @@ import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.SnsTopicRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.credential.aws.CrossAccountCredentialsProvider;
-
-import reactor.core.Reactor;
-import reactor.event.Event;
 
 public class SnsTopicManagerTest {
 
@@ -85,8 +85,10 @@ public class SnsTopicManagerTest {
     }
 
     @Test
-    public void testCreateTopicAndSubscribe() {
+    public void testCreateTopicAndSubscribeShouldSubscribeToHttpWhenHostIsHttp() {
         // GIVEN
+        underTest.setHostAddress("http://sample.host.com");
+        underTest.setUseSslForSns(false);
         given(awsStackUtil.createSnsClient(Regions.DEFAULT_REGION, credential)).willReturn(snsClient);
         given(snsClient.createTopic(anyString())).willReturn(createTopicResult);
         given(snsTopicRepository.save(any(SnsTopic.class))).willReturn(snsTopic);
@@ -94,7 +96,37 @@ public class SnsTopicManagerTest {
         // WHEN
         underTest.createTopicAndSubscribe(credential, Regions.DEFAULT_REGION);
         // THEN
-        verify(snsClient, times(1)).subscribe(anyString(), anyString(), anyString());
+        verify(snsClient, times(1)).subscribe(AwsConnectorTestUtil.DEFAULT_TOPIC_ARN, "http", "http://sample.host.com/sns");
+    }
+
+    @Test
+    public void testCreateTopicAndSubscribeShouldSubscribeToHttpsWhenHostIsHttpsAndSslEnabled() {
+        // GIVEN
+        underTest.setHostAddress("https://sample.host.com");
+        underTest.setUseSslForSns(true);
+        given(awsStackUtil.createSnsClient(Regions.DEFAULT_REGION, credential)).willReturn(snsClient);
+        given(snsClient.createTopic(anyString())).willReturn(createTopicResult);
+        given(snsTopicRepository.save(any(SnsTopic.class))).willReturn(snsTopic);
+        given(snsClient.subscribe(anyString(), anyString(), anyString())).willReturn(new SubscribeResult());
+        // WHEN
+        underTest.createTopicAndSubscribe(credential, Regions.DEFAULT_REGION);
+        // THEN
+        verify(snsClient, times(1)).subscribe(AwsConnectorTestUtil.DEFAULT_TOPIC_ARN, "https", "https://sample.host.com/sns");
+    }
+
+    @Test
+    public void testCreateTopicAndSubscribeShouldSubscribeToHttpWhenHostIsHttpsAndSslDisabled() {
+        // GIVEN
+        underTest.setHostAddress("https://sample.host.com");
+        underTest.setUseSslForSns(false);
+        given(awsStackUtil.createSnsClient(Regions.DEFAULT_REGION, credential)).willReturn(snsClient);
+        given(snsClient.createTopic(anyString())).willReturn(createTopicResult);
+        given(snsTopicRepository.save(any(SnsTopic.class))).willReturn(snsTopic);
+        given(snsClient.subscribe(anyString(), anyString(), anyString())).willReturn(new SubscribeResult());
+        // WHEN
+        underTest.createTopicAndSubscribe(credential, Regions.DEFAULT_REGION);
+        // THEN
+        verify(snsClient, times(1)).subscribe(AwsConnectorTestUtil.DEFAULT_TOPIC_ARN, "http", "http://sample.host.com/sns");
     }
 
     @Test
