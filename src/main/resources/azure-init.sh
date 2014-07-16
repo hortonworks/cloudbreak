@@ -22,7 +22,7 @@ METADATA_STATUS=204
 MAX_RETRIES=60
 RETRIES=0
 while [ $METADATA_STATUS -eq 204 ] && [ $RETRIES -ne $MAX_RETRIES ]; do
-  METADATA_STATUS=$(curl -s -o /tmp/metadata_result -w "%{http_code}" -X GET -H Content-Type:application/json $METADATA_ADDRESS/stacks/metadata/$METADATA_HASH);
+  METADATA_STATUS=$(curl -sk -o /tmp/metadata_result -w "%{http_code}" -X GET -H Content-Type:application/json $METADATA_ADDRESS/stacks/metadata/$METADATA_HASH);
   echo "Metadata service returned status code: $METADATA_STATUS";
   [ $METADATA_STATUS -eq 204 ] && sleep 5 && ((RETRIES++));
 done
