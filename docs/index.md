@@ -298,7 +298,7 @@ Using manage credentials you can link your cloud account with the Cloudbreak acc
 
 `Description:` short description of your linked credential
 
-`Role ARN:` the role string - see Accounts
+`Role ARN:` the role string - you can find it at the summary tab of the IAM role 
 
 **Azure**
 
