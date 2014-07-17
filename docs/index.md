@@ -740,28 +740,28 @@ GitHub: <a href=https://github.com/sequenceiq/uluwatu>https://github.com/sequenc
 
 ###Cloudbreak API
 
-Available: https://cloudbreak-api.sequenceiq.com/
+Available: <a href=https://cloudbreak-api.sequenceiq.com>https://cloudbreak-api.sequenceiq.com</a>
 
-GitHub: https://github.com/sequenceiq/cloudbreak
+GitHub: <a href=https://github.com/sequenceiq/cloudbreak>https://github.com/sequenceiq/cloudbreak</a>
 
 ###Cloudbreak REST client
 
-GitHub: https://github.com/sequenceiq/cloudbreak-rest-client
+GitHub: <a href=https://github.com/sequenceiq/cloudbreak-rest-client>https://github.com/sequenceiq/cloudbreak-rest-client</a>
 
 ###Cloudbreak CLI
 
-GitHub: https://github.com/sequenceiq/cloudbreak-shell
+GitHub: <a href=https://github.com/sequenceiq/cloudbreak-shell>https://github.com/sequenceiq/cloudbreak-shell</a>
 
 ###Cloudbreak documentation
 
-Product documentation: http://sequenceiq.com/cloudbreak/
+Product documentation: <a href=http://sequenceiq.com/cloudbreak>http://sequenceiq.com/cloudbreak</a>
 
-GitHub: https://github.com/sequenceiq/cloudbreak/blob/master/docs/index.md
+GitHub: <a href=https://github.com/sequenceiq/cloudbreak/blob/master/docs/index.md>https://github.com/sequenceiq/cloudbreak/blob/master/docs/index.md</a>
 
 
-API documentation: http://docs.cloudbreak.apiary.io/
+API documentation: <a href=http://docs.cloudbreak.apiary.io>http://docs.cloudbreak.apiary.io</a>
 
-GitHub: https://github.com/sequenceiq/cloudbreak/blob/master/apiary.apib
+GitHub: <a href=https://github.com/sequenceiq/cloudbreak/blob/master/apiary.apib>https://github.com/sequenceiq/cloudbreak/blob/master/apiary.apib</a>
 
 ###Ways to contribute
 
