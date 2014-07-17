@@ -4,13 +4,13 @@
 </head>
 <body>
   <h1>
-    Dear ${user.firstName},
+    Hello ${user.firstName},
   </h1>
 
 </br>
-  To reset your password please click <a href="${confirm}">here</a>
+  To reset your password please click on the following link <a href="${confirm}">here</a>
 <p>
-  After the page navigation, 30 minutes remain to submit the new password.
+  You have 30 minutes remaining to submit your new password.
 <p>
   Thank you,
 
