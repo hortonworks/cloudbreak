@@ -609,13 +609,13 @@
         </div>
     </div>
 </div>
-<form class="form-horizontal" role="form" ng-show="azureTemplate">
+<form class="form-horizontal" role="form" name="azureTemplateForm" ng-show="azureTemplate">
 
     <div class="form-group">
         <label class="col-sm-3 control-label" for="azure_tclusterName">Name</label>
 
         <div class="col-sm-9">
-            <input type="text" class="form-control" id="azure_tclusterName" placeholder="min. 5 max. 20 char">
+            <input type="text" class="form-control" id="azure_tclusterName" ng-model="azure_tclusterName" ng-minlength="5" ng-maxlength="20" required placeholder="min. 5 max. 20 char">
         </div>
         <!-- .col-sm-9 -->
 
@@ -624,7 +624,7 @@
         <label class="col-sm-3 control-label" for="azure_tdescription">Description</label>
 
         <div class="col-sm-9">
-            <input type="text" class="form-control" id="azure_tdescription" placeholder="min. 5 max. 20 char">
+            <input type="text" class="form-control" id="azure_tdescription" ng-model="azure_tdescription" ng-minlength="5" ng-maxlength="20" required placeholder="min. 5 max. 20 char">
         </div>
         <!-- .col-sm-9 -->
 
@@ -697,19 +697,19 @@
 
     <div class="row btn-row">
         <div class="col-sm-9 col-sm-offset-3">
-            <a href="#" id="createAzureTemplate" class="btn btn-success btn-block" ng-click="createAzureTemplate()" role="button"><i
+            <a href="#" id="createAzureTemplate" ng-disabled="azureTemplateForm.$invalid" class="btn btn-success btn-block" ng-click="createAzureTemplate()" role="button"><i
                     class="fa fa-plus fa-fw"></i> create template</a>
         </div>
     </div>
 
 </form>
 
-<form class="form-horizontal" role="form" ng-show="awsTemplate">
+<form class="form-horizontal" role="form" ng-show="awsTemplate" name="awsTemplateForm">
     <div class="form-group">
         <label class="col-sm-3 control-label" for="aws_tclusterName">Name</label>
 
         <div class="col-sm-9">
-            <input type="text" class="form-control" id="aws_tclusterName">
+            <input type="text" class="form-control" ng-model="aws_tclusterName" ng-minlength="5" ng-maxlength="20" required id="aws_tclusterName">
         </div>
         <!-- .col-sm-9 -->
 
@@ -719,13 +719,13 @@
         <label class="col-sm-3 control-label" for="aws_tdescription">Description</label>
 
         <div class="col-sm-9">
-            <input type="text" class="form-control" id="aws_tdescription" placeholder="max. 20 char">
+            <input type="text" class="form-control" ng-model="aws_tdescription" ng-minlength="5" ng-maxlength="20" id="aws_tdescription" placeholder="max. 20 char">
         </div>
         <!-- .col-sm-9 -->
 
     </div>
     <div class="form-group">
-        <label class="col-sm-3 control-label" for="aws_tsshLocation">SSH location</label>
+        <label class="col-sm-3 control-label" for="aws_tsshLocation" required>SSH location</label>
 
         <div class="col-sm-9">
             <input type="text" class="form-control" id="aws_tsshLocation">
@@ -734,7 +734,7 @@
 
     </div>
     <div class="form-group">
-        <label class="col-sm-3 control-label" for="aws_tkeyName">SSH key name</label>
+        <label class="col-sm-3 control-label" for="aws_tkeyName" required>SSH key name</label>
 
         <div class="col-sm-9">
             <input type="text" class="form-control" id="aws_tkeyName">
@@ -781,7 +781,7 @@
 
     <div class="row btn-row">
         <div class="col-sm-9 col-sm-offset-3">
-            <a href="#" id="createAwsTemplate" class="btn btn-success btn-block" ng-click="createAwsTemplate()" role="button"><i class="fa fa-plus fa-fw"></i>
+            <a href="#" id="createAwsTemplate" ng-disabled="awsTemplateForm.$invalid" class="btn btn-success btn-block" ng-click="createAwsTemplate()" role="button"><i class="fa fa-plus fa-fw"></i>
                 create template</a>
         </div>
     </div>
@@ -1165,13 +1165,13 @@
                     </div>
                 </div>
 
-                <form class="form-horizontal" role="form" ng-show="azureCredential">
+                <form class="form-horizontal" role="form" name="azureCredentialForm"  ng-show="azureCredential">
 
                     <div class="form-group">
                         <label class="col-sm-3 control-label" for="cname">Name</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" id="cname" placeholder="min. 5 max. 20 char">
+                            <input type="text" class="form-control" id="cname" ng-model="cname" ng-minlength="5" ng-maxlength="20" required placeholder="min. 5 max. 20 char">
                         </div>
                         <!-- .col-sm-9 -->
 
@@ -1181,7 +1181,7 @@
                         <label class="col-sm-3 control-label" for="cdescription">Description</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" id="cdescription" placeholder="max. 20 char">
+                            <input type="text" class="form-control" ng-model="cdescription" id="cdescription" ng-maxlength="20"  placeholder="max. 20 char">
                         </div>
                         <!-- .col-sm-9 -->
 
@@ -1192,7 +1192,7 @@
                         <label class="col-sm-3 control-label" for="csubscriptionId">Subscription ID</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" id="csubscriptionId" placeholder="your subscription id">
+                            <input type="text" class="form-control" id="csubscriptionId" ng-model="csubscriptionId" required placeholder="your subscription id">
                         </div>
                         <!-- .col-sm-9 -->
 
@@ -1202,14 +1202,14 @@
                         <label class="col-sm-3 control-label" for="cjksPassword">File password</label>
 
                         <div class="col-sm-9">
-                            <input type="password" class="form-control" id="cjksPassword" placeholder="min. 5 max. 10 char">
+                            <input type="password" class="form-control" id="cjksPassword" ng-model="cjksPassword" ng-minlength="5" ng-maxlength="10" required placeholder="min. 5 max. 10 char">
                         </div>
                         <!-- .col-sm-9 -->
 
                     </div>
                     <div class="row btn-row">
                         <div class="col-sm-9 col-sm-offset-3">
-                            <a href="#" id="createAzureCredential" class="btn btn-success btn-block" ng-click="createAzureCredential()" role="button"><i
+                            <a href="#" id="createAzureCredential" ng-disabled="azureCredentialForm.$invalid" class="btn btn-success btn-block" ng-click="createAzureCredential()" role="button"><i
                                     class="fa fa-plus fa-fw"></i>
                                 create credential</a>
                         </div>
@@ -1217,13 +1217,13 @@
 
                 </form>
 
-                <form class="form-horizontal" role="form" ng-show="awsCredential">
+                <form class="form-horizontal" role="form" ng-show="awsCredential" name="awsCredentialForm">
 
                     <div class="form-group">
                         <label class="col-sm-3 control-label" for="awscname">Name</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" id="awscname" placeholder="min. 5 max. 20 char">
+                            <input type="text" class="form-control" id="awscname" ng-minlength="5" ng-maxlength="20" required placeholder="min. 5 max. 20 char">
                         </div>
                         <!-- .col-sm-9 -->
 
@@ -1233,7 +1233,7 @@
                         <label class="col-sm-3 control-label" for="awscdescription">Description</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" id="awscdescription" placeholder="max. 20 char">
+                            <input type="text" class="form-control" id="awscdescription" ng-maxlength="20" placeholder="max. 20 char">
                         </div>
                         <!-- .col-sm-9 -->
 
@@ -1244,7 +1244,7 @@
                         <label class="col-sm-3 control-label" for="croleArn">IAM Role ARN</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" id="croleArn">
+                            <input type="text" class="form-control" ng-minlength="5" ng-maxlength="20" required id="croleArn">
                         </div>
                         <!-- .col-sm-9 -->
 
@@ -1252,7 +1252,7 @@
 
                     <div class="row btn-row">
                         <div class="col-sm-9 col-sm-offset-3">
-                            <a href="#" id="createAwsCredential" ng-click="createAwsCredential()" class="btn btn-success btn-block" role="button"><i
+                            <a href="#" id="createAwsCredential" ng-disabled="awsCredentialForm.$invalid" ng-click="createAwsCredential()" class="btn btn-success btn-block" role="button"><i
                                     class="fa fa-plus fa-fw"></i>
                                 create credential</a>
                         </div>
