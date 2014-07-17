@@ -763,7 +763,7 @@ API documentation: http://docs.cloudbreak.apiary.io/
 
 GitHub: https://github.com/sequenceiq/cloudbreak/blob/master/apiary.apib
 
-##Ways to contribute
+###Ways to contribute
 
 * Use Cloudbreak
 * Submit a GitHub issue to the appropriate GitHub repository.
