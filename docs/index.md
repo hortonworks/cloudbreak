@@ -219,7 +219,7 @@ The default rule for multi node clusters is that there must be at least as many 
 
 ###Cloudbreak account
 
-First and foremost in order to start launching Hadoop clusters you will need to create a Cloudbreak account. C
+First and foremost in order to start launching Hadoop clusters you will need to create a Cloudbreak account.
 Cloudbreak supports registration, forgotten and reset password, and login features at API level.
 All passwords that are stored or sent are hashed - communication is always over a secure HTTPS channel. When you are deploying your own Cloudbreak instance we strongly suggest to configure an SSL certificate.
 Users create and launch Hadoop clusters on their own namespace and security context.
