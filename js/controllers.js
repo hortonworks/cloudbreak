@@ -25,10 +25,8 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                               headers: {'Content-Type': 'application/x-www-form-urlencoded'}
                               }).success(function(responseData){
                                  if (responseData && responseData.length != 0) {
-                                    localStorage.signedIn = true;
-                                    $rootScope.signedIn = true;
-                                    localStorage.activeUser = responseData;
-                                    $rootScope.activeUser = localStorage.activeUser;
+                                    $jq('#emailFieldLogin').val(responseData)
+                                    $jq('.carousel').carousel(1);
                                  } else {
                                     alert("Sign up confirmation is failed.")
                                  }
