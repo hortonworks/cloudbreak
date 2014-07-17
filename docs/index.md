@@ -735,8 +735,7 @@ They are probably not perfect, please let us know if anything feels wrong or inc
 
 ### Legal
 
-*Brought to you courtesy of our legal counsel. For more context,
-please see the Notice document.*
+*Brought to you courtesy of our legal counsel.*
 
 Use and transfer of Cloudbreak may be subject to certain restrictions by the
 United States and other governments.  
