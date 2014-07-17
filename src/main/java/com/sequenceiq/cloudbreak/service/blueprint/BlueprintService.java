@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.service.blueprint;
 
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +23,8 @@ import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
 @Service
 public class BlueprintService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintService.class);
 
     @Autowired
     private BlueprintRepository blueprintRepository;

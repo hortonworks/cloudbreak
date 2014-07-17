@@ -1,21 +1,22 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.json.BlueprintJson;
-import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.verify;
-import static org.mockito.BDDMockito.times;
-import static org.mockito.Matchers.anyString;
-import static org.junit.Assert.assertEquals;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.json.BlueprintJson;
+import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 
 public class BlueprintConverterTest {
 
@@ -23,7 +24,28 @@ public class BlueprintConverterTest {
     public static final String DUMMY_ID = "1";
     public static final String DUMMY_URL = "http://mycompany.com/#blueprint";
     public static final String DUMMY_DESCRIPTION = "dummyDescription";
-    public static final String DUMMY_BLUEPRINT_TEXT = "\"blueprint_name\" : \"multi-node-hdfs-yarn\",";
+
+    public static final String DUMMY_BLUEPRINT_TEXT =
+            "{\"Blueprints\":{\"blueprint_name\":\"asd\"},\"host_groups\":[{\"name\":\"asd\"},{\"name\":\"slave_a\"}]}";
+
+    public static final String DUMMY_BLUEPRINT_TEXT_WO_BLUEPRINTS =
+            "{\"host_groups\":[{\"name\":\"asd\"},{\"name\":\"slave_a\"}]}";
+
+    public static final String DUMMY_BLUEPRINT_TEXT_WO_HOST_GROUPS =
+            "{\"Blueprints\":{\"blueprint_name\":\"asd\"}}";
+
+    public static final String DUMMY_BLUEPRINT_TEXT_WO_BLUEPRINT_NAME =
+            "{\"Blueprints\":{\"stack_name\":\"asd\"},\"host_groups\":[{\"name\":\"asd\"},{\"name\":\"slave_a\"}]}";
+
+    public static final String DUMMY_BLUEPRINT_TEXT_HOSTGROUPS_NOT_ARRAY =
+            "{\"Blueprints\":{\"stack_name\":\"asd\"},\"host_groups\":{\"name\":\"asd\"}}";
+
+    public static final String DUMMY_BLUEPRINT_TEXT_HOSTGROUPS_DONT_HAVE_NAME =
+            "{\"Blueprints\":{\"blueprint_name\":\"asd\"},\"host_groups\":[{\"names\":\"asd\"},{\"name\":\"slave_a\"}]}";
+
+    public static final String DUMMY_BLUEPRINT_TEXT_HOSTGROUPS_DONT_HAVE_SLAVE =
+            "{\"Blueprints\":{\"blueprint_name\":\"asd\"},\"host_groups\":[{\"name\":\"group1\"},{\"name\":\"group2\"}]}";
+
     public static final String ERROR_MSG = "msg";
     @InjectMocks
     private BlueprintConverter underTest;
@@ -76,13 +98,79 @@ public class BlueprintConverterTest {
         Blueprint result = underTest.convert(blueprintJson);
         // THEN
         assertEquals(result.getBlueprintText(), blueprintJson.getAmbariBlueprint());
+        assertEquals(result.getHostGroupCount(), 2);
     }
 
     @Test(expected = BadRequestException.class)
-    public void testConvertBlueprintJsonToEntityWhenPatternNotMatch() {
+    public void testConvertBlueprintJsonToEntityShouldThrowBadRequestWhenBlueprintsIsNotInJson() {
         // GIVEN
+        given(jsonNode.toString()).willReturn(DUMMY_BLUEPRINT_TEXT_WO_BLUEPRINTS);
+        blueprintJson.setAmbariBlueprint(jsonNode);
+        blueprintJson.setUrl(null);
         // WHEN
-        underTest.convert(blueprintJson);
+        Blueprint result = underTest.convert(blueprintJson);
+        // THEN
+        assertEquals(result.getBlueprintText(), blueprintJson.getAmbariBlueprint());
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testConvertBlueprintJsonToEntityShouldThrowBadRequestWhenBlueprintNameIsNotInJson() {
+        // GIVEN
+        given(jsonNode.toString()).willReturn(DUMMY_BLUEPRINT_TEXT_WO_BLUEPRINT_NAME);
+        blueprintJson.setAmbariBlueprint(jsonNode);
+        blueprintJson.setUrl(null);
+        // WHEN
+        Blueprint result = underTest.convert(blueprintJson);
+        // THEN
+        assertEquals(result.getBlueprintText(), blueprintJson.getAmbariBlueprint());
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testConvertBlueprintJsonToEntityShouldThrowBadRequestWhenHostGroupsIsNotInJson() {
+        // GIVEN
+        given(jsonNode.toString()).willReturn(DUMMY_BLUEPRINT_TEXT_WO_HOST_GROUPS);
+        blueprintJson.setAmbariBlueprint(jsonNode);
+        blueprintJson.setUrl(null);
+        // WHEN
+        Blueprint result = underTest.convert(blueprintJson);
+        // THEN
+        assertEquals(result.getBlueprintText(), blueprintJson.getAmbariBlueprint());
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testConvertBlueprintJsonToEntityShouldThrowBadRequestWhenHostGroupsIsNotArray() {
+        // GIVEN
+        given(jsonNode.toString()).willReturn(DUMMY_BLUEPRINT_TEXT_HOSTGROUPS_NOT_ARRAY);
+        blueprintJson.setAmbariBlueprint(jsonNode);
+        blueprintJson.setUrl(null);
+        // WHEN
+        Blueprint result = underTest.convert(blueprintJson);
+        // THEN
+        assertEquals(result.getBlueprintText(), blueprintJson.getAmbariBlueprint());
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testConvertBlueprintJsonToEntityShouldThrowBadRequestWhenHostGroupDoNotHaveName() {
+        // GIVEN
+        given(jsonNode.toString()).willReturn(DUMMY_BLUEPRINT_TEXT_HOSTGROUPS_DONT_HAVE_NAME);
+        blueprintJson.setAmbariBlueprint(jsonNode);
+        blueprintJson.setUrl(null);
+        // WHEN
+        Blueprint result = underTest.convert(blueprintJson);
+        // THEN
+        assertEquals(result.getBlueprintText(), blueprintJson.getAmbariBlueprint());
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testConvertBlueprintJsonToEntityShouldThrowBadRequestWhenHostGroupDoNotHaveSlave() {
+        // GIVEN
+        given(jsonNode.toString()).willReturn(DUMMY_BLUEPRINT_TEXT_HOSTGROUPS_DONT_HAVE_SLAVE);
+        blueprintJson.setAmbariBlueprint(jsonNode);
+        blueprintJson.setUrl(null);
+        // WHEN
+        Blueprint result = underTest.convert(blueprintJson);
+        // THEN
+        assertEquals(result.getBlueprintText(), blueprintJson.getAmbariBlueprint());
     }
 
     private BlueprintJson createBlueprintJson() {
