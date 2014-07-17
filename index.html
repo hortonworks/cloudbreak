@@ -1573,9 +1573,9 @@
                                                 <label class="sr-only" for="signUpEmailField">email</label>
                                                 <div class="input-group">
                                                     <span class="input-group-addon"><i class="fa fa-envelope-o fa-fw"></i></span>
-                                                    <input class="form-control" type="email" ng-model="signUpEmailField" id="signUpEmailField" name="signUpEmailField" placeholder="email" required>
+                                                    <input class="form-control" type="email" ng-blur="showSignUpEmailError=true;" ng-model="signUpEmailField" id="signUpEmailField" name="signUpEmailField" placeholder="email" required>
                                                 </div><!-- .input-group -->
-                                                <div class="help-block" ng-show="signUpForm.signUpEmailField.$dirty && signUpForm.signUpEmailField.$invalid || (signUpForm.signUpEmailField.$error.email)">
+                                                <div class="help-block" ng-show="showSignUpEmailError && signUpForm.signUpEmailField.$invalid">
                                                     <i class="fa fa-warning"></i>{{error_msg.email_invalid}}
                                                 </div>
                                             </div><!-- .form-group -->
@@ -1583,9 +1583,9 @@
                                                 <label class="sr-only" for="signUpPasswField">password</label>
                                                 <div class="input-group">
                                                     <span class="input-group-addon"><i class="fa fa-lock fa-fw"></i></span>
-                                                    <input class="form-control" type="password" ng-model="signUpPasswField" name="signUpPasswField" id="signUpPasswField" placeholder="password" ng-minlength="6" ng-maxlength="200" required>
+                                                    <input class="form-control" type="password" ng-blur="showSingUpPasswordFieldError=true;" ng-model="signUpPasswField" name="signUpPasswField" id="signUpPasswField" placeholder="password" ng-minlength="6" ng-maxlength="200" required>
                                                 </div><!-- .input-group -->
-                                                <div class="help-block" ng-show="signUpForm.signUpPasswField.$dirty && signUpForm.signUpPasswField.$invalid">
+                                                <div class="help-block" ng-show="showSingUpPasswordFieldError && signUpForm.signUpPasswField.$invalid">
                                                     <i class="fa fa-warning"></i>{{error_msg.pwd_invalid}}
                                                 </div>
                                             </div><!-- .form-group -->
@@ -1595,7 +1595,7 @@
                                                     <span class="input-group-addon"><i class="fa fa-lock fa-fw"></i></span>
                                                     <input class="form-control" type="password" ng-model="signUpPassw2Field" name="signUpPassw2Field" id="signUpPassw2Field" placeholder="repeat password" match="signUpPasswField" required>
                                                 </div>
-                                                <div class="help-block" ng-show="signUpForm.signUpPasswField.$dirty && signUpForm.signUpPassw2Field.$invalid">
+                                                <div class="help-block" ng-show="signUpForm.signUpPassw2Field.$dirty && signUpForm.signUpPassw2Field.$invalid">
                                                     <i class="fa fa-warning"></i>{{error_msg.pwd_repeat}}
                                                 </div>
                                                 <!-- .input-group -->
@@ -1604,9 +1604,9 @@
                                                 <label class="sr-only" for="signUpFirstNameField">name</label>
                                                 <div class="input-group">
                                                     <span class="input-group-addon"><i class="fa fa-male fa-fw"></i></span>
-                                                    <input class="form-control" type="text" ng-model="signUpFirstNameField" name="signUpFirstNameField" id="signUpFirstNameField" placeholder="first name" required>
+                                                    <input class="form-control" type="text" ng-blur="showSingUpFirstNameError=true;" ng-model="signUpFirstNameField" name="signUpFirstNameField" id="signUpFirstNameField" placeholder="first name" required>
                                                 </div><!-- .input-group -->
-                                                <div class="help-block" ng-show="signUpForm.signUpFirstNameField.$dirty && signUpForm.signUpFirstNameField.$invalid">
+                                                <div class="help-block" ng-show="showSingUpFirstNameError && signUpForm.signUpFirstNameField.$invalid">
                                                     <i class="fa fa-warning"></i>{{error_msg.first_name_empty}}
                                                 </div>
                                             </div><!-- .form-group -->
@@ -1614,9 +1614,9 @@
                                                 <label class="sr-only" for="signUpLastNameField">name</label>
                                                 <div class="input-group">
                                                     <span class="input-group-addon"><i class="fa fa-male fa-fw"></i></span>
-                                                    <input class="form-control" type="text" ng-model="signUpLastNameField" name="signUpLastNameField" id="signUpLastNameField" placeholder="last name" required>
+                                                    <input class="form-control" type="text" ng-blur="showSingUpLastNameError=true;" ng-model="signUpLastNameField" name="signUpLastNameField" id="signUpLastNameField" placeholder="last name" required>
                                                 </div><!-- .input-group -->
-                                                <div class="help-block" ng-show="signUpForm.signUpLastNameField.$dirty && signUpForm.signUpLastNameField.$invalid">
+                                                <div class="help-block" ng-show="showSingUpLastNameError && signUpForm.signUpLastNameField.$invalid">
                                                     <i class="fa fa-warning"></i>{{error_msg.last_name_empty}}
                                                 </div>
                                             </div><!-- .form-group -->
@@ -1624,9 +1624,9 @@
                                                 <label class="sr-only" for="signUpCompanyField">company</label>
                                                 <div class="input-group">
                                                     <span class="input-group-addon"><i class="fa fa-institution fa-fw"></i></span>
-                                                    <input class="form-control" type="text" ng-model="signUpCompanyField" name="signUpCompanyField"  id="signUpCompanyField" placeholder="company" required>
+                                                    <input class="form-control" type="text" ng-blur="showSingUpCompanyError=true;" ng-model="signUpCompanyField" name="signUpCompanyField"  id="signUpCompanyField" placeholder="company" required>
                                                 </div><!-- .input-group -->
-                                                <div class="help-block" ng-show="signUpForm.signUpCompanyField.$dirty && signUpForm.signUpCompanyField.$invalid">
+                                                <div class="help-block" ng-show="showSingUpCompanyError && signUpForm.signUpCompanyField.$invalid">
                                                     <i class="fa fa-warning"></i>{{error_msg.company_empty}}
                                                 </div>
                                             </div><!-- .form-group -->
@@ -1668,9 +1668,9 @@
                                                 <label class="sr-only" for="resetPasswField">new password</label>
                                                 <div class="input-group">
                                                     <span class="input-group-addon"><i class="fa fa-lock fa-fw"></i></span>
-                                                    <input class="form-control" ng-model="resetPasswField" type="password" id="resetPasswField" name="resetPasswField" placeholder="new password" required ng-minlength="6" ng-maxlength="200">
+                                                    <input class="form-control" ng-model="resetPasswField" ng-blur="showResetPasswordError=true;" type="password" id="resetPasswField" name="resetPasswField" placeholder="new password" required ng-minlength="6" ng-maxlength="200">
                                                 </div><!-- .input-group -->
-                                                <div class="help-block" ng-show="resetPasswordForm.resetPasswField.$dirty && resetPasswordForm.resetPasswField.$invalid">
+                                                <div class="help-block" ng-show="showResetPasswordError && resetPasswordForm.resetPasswField.$invalid">
                                                     <i class="fa fa-warning"></i>{{error_msg.pwd_invalid}}
                                                 </div>
                                             </div><!-- .form-group -->

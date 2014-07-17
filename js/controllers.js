@@ -14,7 +14,7 @@ cloudbreakControllers.value('errorMessages', {
     pwd_repeat: "Passwords do not match!",
     first_name_empty: "Fist name field is empty",
     last_name_empty: "Last name field is empty",
-    company_empty: "Fist name field is empty",
+    company_empty: "Fist name field is empty"
 })
 
 cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Templates', '$location', '$rootScope', '$q', '$window', 'errorMessages',
@@ -96,7 +96,6 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
         }
 
         $scope.signUp = function() {
-            if (signUpPasswField.value == signUpPassw2Field.value) {
             $http({
                 method: 'POST',
                 dataType: 'json',
@@ -118,9 +117,6 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     alert("Internal server error.")
                 }
             });
-            } else {
-                alert("Passwords do not match.")
-            }
         }
 
         $scope.signIn = function() {
