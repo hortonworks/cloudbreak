@@ -13,6 +13,7 @@ public class BlueprintJson implements JsonEntity {
     private String url;
     private String ambariBlueprint;
     private String description;
+    private Integer hostGroupCount;
 
     @JsonRawValue
     public String getAmbariBlueprint() {
@@ -67,5 +68,13 @@ public class BlueprintJson implements JsonEntity {
     @JsonIgnore
     public void setId(String id) {
         this.id = id;
+    }
+
+    public Integer getHostGroupCount() {
+        return hostGroupCount;
+    }
+
+    public void setHostGroupCount(Integer hostGroupCount) {
+        this.hostGroupCount = hostGroupCount;
     }
 }

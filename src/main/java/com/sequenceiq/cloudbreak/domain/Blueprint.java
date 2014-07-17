@@ -32,6 +32,8 @@ public class Blueprint implements ProvisionEntity {
 
     private String description;
 
+    private int hostGroupCount;
+
     @ManyToOne
     @JoinColumn(name = "blueprint_user")
     private User user;
@@ -86,5 +88,13 @@ public class Blueprint implements ProvisionEntity {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public int getHostGroupCount() {
+        return hostGroupCount;
+    }
+
+    public void setHostGroupCount(int hostGroupCount) {
+        this.hostGroupCount = hostGroupCount;
     }
 }
