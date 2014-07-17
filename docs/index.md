@@ -298,7 +298,7 @@ Using manage credentials you can link your cloud account with the Cloudbreak acc
 
 `Description:` short description of your linked credential
 
-`Role ARN:` the role string - you can find it at the summary tab of the IAM role 
+`Role ARN:` the role string - you can find it at the summary tab of the IAM role
 
 **Azure**
 
@@ -793,13 +793,21 @@ We recommend discussing your plans on the [mailing list](https://groups.google.c
 
 Please write clean code. Universally formatted code promotes ease of writing, reading, and maintenance.
 * Do not use @author tags.
+
 * New classes must match our dependency mechanism.
+
 * Code must be formatted according to our [formatter](https://gist.github.com/martonsereg/9390889).
+
 * Code must be checked with our [checkstyle](https://github.com/sequenceiq/cloudbreak/tree/master/config/checkstyle).
+
 * Contributions must pass existing unit tests.
+
 * The code changes must be accompanied by unit tests. In cases where unit tests are not possible or don’t make sense an explanation should be provided.
+
 * New unit tests should be provided to demonstrate bugs and fixes (use Mockito whenever possible).
+
 * The tests should be named *Test.java.
+
 * Use slf4j instead of commons logging as the logging facade.
 
 
