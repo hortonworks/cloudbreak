@@ -734,9 +734,9 @@ Cloudbreak consist of the following main projects:
 
 ###Cloudbreak UI
 
-Available: https://cloudbreak.sequenceiq.com
+Available: <a href=https://cloudbreak.sequenceiq.com>https://cloudbreak.sequenceiq.com</a>
 
-GitHub: https://github.com/sequenceiq/uluwatu
+GitHub: <a href=https://github.com/sequenceiq/uluwatu>https://github.com/sequenceiq/uluwatu</a>
 
 ###Cloudbreak API
 
@@ -763,7 +763,7 @@ API documentation: http://docs.cloudbreak.apiary.io/
 
 GitHub: https://github.com/sequenceiq/cloudbreak/blob/master/apiary.apib
 
-##Ways to contribute
+###Ways to contribute
 
 * Use Cloudbreak
 * Submit a GitHub issue to the appropriate GitHub repository.
