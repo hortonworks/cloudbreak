@@ -219,7 +219,7 @@ The default rule for multi node clusters is that there must be at least as many 
 
 ###Cloudbreak account
 
-First and foremost in order to start launching Hadoop clusters you will need to create a Cloudbreak account. C
+First and foremost in order to start launching Hadoop clusters you will need to create a Cloudbreak account.
 Cloudbreak supports registration, forgotten and reset password, and login features at API level.
 All passwords that are stored or sent are hashed - communication is always over a secure HTTPS channel. When you are deploying your own Cloudbreak instance we strongly suggest to configure an SSL certificate.
 Users create and launch Hadoop clusters on their own namespace and security context.
@@ -298,7 +298,7 @@ Using manage credentials you can link your cloud account with the Cloudbreak acc
 
 `Description:` short description of your linked credential
 
-`Role ARN:` the role string - you can find it at the summary tab of the IAM role 
+`Role ARN:` the role string - you can find it at the summary tab of the IAM role
 
 **Azure**
 
@@ -730,7 +730,7 @@ Enjoy Cloudbreak - the Hadoop as a Service API which brings you a Hadoop ecosyst
 
 ##Contribution
 
-So you are about to contribute to the Cloudbreak projects? Awesome! There are many different ways in which you can contribute. We strongly value your feedback, questions, bug reports, and feature requests.
+So you are about to contribute to Cloudbreak? Awesome! There are many different ways in which you can contribute. We strongly value your feedback, questions, bug reports, and feature requests.
 Cloudbreak consist of the following main projects:
 
 ###Cloudbreak UI
@@ -793,13 +793,21 @@ We recommend discussing your plans on the [mailing list](https://groups.google.c
 
 Please write clean code. Universally formatted code promotes ease of writing, reading, and maintenance.
 * Do not use @author tags.
+
 * New classes must match our dependency mechanism.
-* Code must be formatted according to our [formatter](https://gist.github.com/martonsereg/9390889).
+
+* Code must be formatted according to our [formatter](https://github.com/sequenceiq/cloudbreak/blob/master/config/eclipse_formatter.xml).
+
 * Code must be checked with our [checkstyle](https://github.com/sequenceiq/cloudbreak/tree/master/config/checkstyle).
+
 * Contributions must pass existing unit tests.
+
 * The code changes must be accompanied by unit tests. In cases where unit tests are not possible or don’t make sense an explanation should be provided.
+
 * New unit tests should be provided to demonstrate bugs and fixes (use Mockito whenever possible).
+
 * The tests should be named *Test.java.
+
 * Use slf4j instead of commons logging as the logging facade.
 
 
