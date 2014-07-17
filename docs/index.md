@@ -730,7 +730,7 @@ Enjoy Cloudbreak - the Hadoop as a Service API which brings you a Hadoop ecosyst
 
 ##Contribution
 
-So you are about to contribute to the Cloudbreak projects? Awesome! There are many different ways in which you can contribute. We strongly value your feedback, questions, bug reports, and feature requests.
+So you are about to contribute to Cloudbreak? Awesome! There are many different ways in which you can contribute. We strongly value your feedback, questions, bug reports, and feature requests.
 Cloudbreak consist of the following main projects:
 
 ###Cloudbreak UI
