@@ -244,7 +244,7 @@ Once you have logged in Cloudbreak you will have to link your AWS account with t
 
     * Custom policy
 
-      Use this policy **[document](https://raw.githubusercontent.com/sequenceiq/cloudbreak/documentation/src/main/resources/iam-arn-custom.policy)** to configure the permission to start EC2 instances on the end user's behalf, and use SNS to receive notifications.
+      Use this policy **[document](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/aws/iam_role.policy)** to configure the permission to start EC2 instances on the end user's behalf, and use SNS to receive notifications.
 
 
 Once this is configured, Cloudbreak is ready to launch Hadoop clusters on your behalf. The only thing Cloudbreak requires is the `Role ARN` (Role for Cross-Account access).
