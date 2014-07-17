@@ -7,11 +7,13 @@ Cloudbreak consist of the following main projects:
 ###[Cloudbreak UI](https://cloudbreak.sequenceiq.com)
 
 Available: https://cloudbreak.sequenceiq.com
+
 GitHub: https://github.com/sequenceiq/uluwatu
 
 ###Cloudbreak API
 
 Available: https://cloudbreak-api.sequenceiq.com/
+
 GitHub: https://github.com/sequenceiq/cloudbreak
 
 ###Cloudbreak REST client
@@ -25,9 +27,13 @@ GitHub: https://github.com/sequenceiq/cloudbreak-shell
 ###Cloudbreak documentation
 
 Product documentation: http://sequenceiq.com/cloudbreak/
+
 GitHub: https://github.com/sequenceiq/cloudbreak/blob/master/docs/index.md
 
+
+
 API documentation: http://docs.cloudbreak.apiary.io/
+
 GitHub: https://github.com/sequenceiq/cloudbreak/blob/master/apiary.apib 
 
 ##Ways to contribute
