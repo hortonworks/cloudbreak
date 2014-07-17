@@ -120,7 +120,7 @@
                     <a href="#" id="toggle-cluster-block-btn" class="btn btn-fa-2x btn-info" role="button" title="toggle cluster panel"><i
                             class="fa fa-angle-up fa-2x fa-fw-forced"></i></a>
                 </span>
-            <input id="notification-n-filtering" role="alert" type="text" disabled class="form-control" placeholder="type cluster name"
+            <input id="notification-n-filtering" role="alert" type="text" disabled class="form-control" placeholder="your cluster name"
                    value="{{statusMessage}}">
             <!-- OPTIONAL HTML: value: 'time' 'cluster name' 'state' - after cluster state changed  -->
             <i class="fa fa-warning form-control-feedback hidden"></i>
@@ -494,11 +494,11 @@
                                 <label class="col-sm-3 control-label" for="cl_clusterName">Cluster name</label>
 
                                 <div class="col-sm-9">
-                                    <input type="text" name="cl_clusterName" class="form-control" id="cl_clusterName" placeholder="max. 20 char" ng-model="cl_clusterName"
+                                    <input type="text" name="cl_clusterName" class="form-control" id="cl_clusterName" placeholder="min. 5 max. 20 char" ng-model="cl_clusterName"
                                            ng-pattern="/^[a-zA-Z][-a-zA-Z0-9]*$/" ng-minlength="3" ng-maxlength="20" required>
 
                                     <div class="help-block"
-                                         ng-show="clusterCreationForm.cl_clusterName.$dirty && clusterCreationForm.cl_clusterName.$invalid"><i class="fa fa-warning"></i>Must contain only alphanumeric characters and hyphens and start with an alpha character (min 3, max 20 characters).
+                                         ng-show="clusterCreationForm.cl_clusterName.$dirty && clusterCreationForm.cl_clusterName.$invalid"><i class="fa fa-warning"></i>alphanumeric characters only (min 3, max 20 characters).
                                     </div>
                                 </div>
                                 <!-- .col-sm-9 -->
@@ -615,7 +615,7 @@
         <label class="col-sm-3 control-label" for="azure_tclusterName">Name</label>
 
         <div class="col-sm-9">
-            <input type="text" class="form-control" id="azure_tclusterName" placeholder="max. 20 char">
+            <input type="text" class="form-control" id="azure_tclusterName" placeholder="min. 5 max. 20 char">
         </div>
         <!-- .col-sm-9 -->
 
@@ -624,7 +624,7 @@
         <label class="col-sm-3 control-label" for="azure_tdescription">Description</label>
 
         <div class="col-sm-9">
-            <input type="text" class="form-control" id="azure_tdescription" placeholder="max. 20 char">
+            <input type="text" class="form-control" id="azure_tdescription" placeholder="min. 5 max. 20 char">
         </div>
         <!-- .col-sm-9 -->
 
@@ -993,7 +993,7 @@
                                                placeholder="set blueprint name">
 
                                         <div class="help-block" ng-show="blueprintForm.bluePrintName.$dirty && blueprintForm.bluePrintName.$invalid"><i class="fa fa-warning"></i>
-                                            Name can not be null
+                                            name can not be empty
                                         </div>
                                     </div>
 
@@ -1022,7 +1022,7 @@
                                                placeholder="set blueprint URL">
 
                                         <div class="help-block" ng-show="blueprintForm.blueprintUrl.$dirty && blueprintForm.blueprintUrl.$invalid">
-                                            <i class="fa fa-warning"></i>Url has to be a valid url
+                                            <i class="fa fa-warning"></i>url has to be valid
                                         </div>
                                     </div>
 
@@ -1038,7 +1038,7 @@
                                         <textarea class="form-control" id="bluePrintText" ng-model="bluePrintText" name="bluePrintText" placeholder="paste blueprint text here" validjson rows="10"></textarea>
 
                                       <div class="help-block" ng-show="blueprintForm.bluePrintText.$error.validjson">
-                                          <i class="fa fa-warning"></i> Blueprint text is not a JSON
+                                          <i class="fa fa-warning"></i> blueprint text is not in JSON format
                                       </div>
                                     </div>
                                     <!-- .col-sm-9 -->
@@ -1175,7 +1175,7 @@
                         <label class="col-sm-3 control-label" for="cname">Name</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" id="cname" placeholder="max. 20 char">
+                            <input type="text" class="form-control" id="cname" placeholder="min. 5 max. 20 char">
                         </div>
                         <!-- .col-sm-9 -->
 
@@ -1196,7 +1196,7 @@
                         <label class="col-sm-3 control-label" for="csubscriptionId">Subscription ID</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" id="csubscriptionId" placeholder="max. 20 char">
+                            <input type="text" class="form-control" id="csubscriptionId" placeholder="Your subscription id">
                         </div>
                         <!-- .col-sm-9 -->
 
@@ -1206,7 +1206,7 @@
                         <label class="col-sm-3 control-label" for="cjksPassword">File password</label>
 
                         <div class="col-sm-9">
-                            <input type="password" class="form-control" id="cjksPassword" placeholder="max. 20 char">
+                            <input type="password" class="form-control" id="cjksPassword" placeholder="min. 5 max. 10 char">
                         </div>
                         <!-- .col-sm-9 -->
 
@@ -1227,7 +1227,7 @@
                         <label class="col-sm-3 control-label" for="awscname">Name</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" id="awscname" placeholder="max. 20 char">
+                            <input type="text" class="form-control" id="awscname" placeholder="min. 5 max. 20 char">
                         </div>
                         <!-- .col-sm-9 -->
 
@@ -1610,7 +1610,7 @@
 
                                     <div class="item" style="text-align: center;">
 
-                                        <h5>We've sent a verification email to the <strong>{{ signUpEmailField }}</strong> address.</h5>
+                                        <h5>We have sent a verification email to the <strong>{{ signUpEmailField }}</strong> address.</h5>
                                         <a href="#" class="btn btn-info btn-block backToLogin" role="button"> back</a>
 
                                     </div><!-- .item -->
@@ -1621,7 +1621,7 @@
 
                                     <div class="item">
 
-                                        <h5>We've sent a verification/password reset email to the <strong>{{ emailFieldLogin }}</strong> address.</h5>
+                                        <h5>We have sent a verification/password reset email to the <strong>{{ emailFieldLogin }}</strong> address.</h5>
                                         <a href="#" class="btn btn-info btn-block backToLogin" role="button"> back</a>
 
                                     </div><!-- .item -->
