@@ -796,7 +796,7 @@ Please write clean code. Universally formatted code promotes ease of writing, re
 
 * New classes must match our dependency mechanism.
 
-* Code must be formatted according to our [formatter](https://gist.github.com/martonsereg/9390889).
+* Code must be formatted according to our [formatter](https://github.com/sequenceiq/cloudbreak/blob/master/config/eclipse_formatter.xml).
 
 * Code must be checked with our [checkstyle](https://github.com/sequenceiq/cloudbreak/tree/master/config/checkstyle).
 
