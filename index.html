@@ -299,34 +299,7 @@
                     </div>
                     <!-- .col-sm-9 -->
                 </div>
-                <!-- .form-group -->
-                <div class="form-group">
-                    <label class="col-sm-3 control-label" for="password">Password</label>
 
-                    <div class="col-sm-9">
-                        <p id="password" class="form-control-static">{{activeStack.template.parameters.password}}</p>
-                    </div>
-                    <!-- .col-sm-9 -->
-                </div>
-                <!-- .form-group -->
-                <div class="form-group">
-                    <label class="col-sm-3 control-label" for="subnetAddressPrefix">Subnet address prefix</label>
-
-                    <div class="col-sm-9">
-                        <p id="subnetAddressPrefix" class="form-control-static">{{activeStack.template.parameters.subnetAddressPrefix}}</p>
-                    </div>
-                    <!-- .col-sm-9 -->
-                </div>
-                <!-- .form-group -->
-                <div class="form-group">
-                    <label class="col-sm-3 control-label" for="addressPrefix">Address prefix</label>
-
-                    <div class="col-sm-9">
-                        <p id="addressPrefix" class="form-control-static">{{activeStack.template.parameters.addressPrefix}}</p>
-                    </div>
-                    <!-- .col-sm-9 -->
-                </div>
-                <!-- .form-group -->
                 <div class="form-group">
                     <label class="col-sm-3 control-label" for="vmType">VM type</label>
 
@@ -350,15 +323,6 @@
 
                     <div class="col-sm-9">
                         <p id="location" class="form-control-static">{{activeStack.template.parameters.location}}</p>
-                    </div>
-                    <!-- .col-sm-9 -->
-                </div>
-                <!-- .form-group -->
-                <div class="form-group">
-                    <label class="col-sm-3 control-label" for="description">Description</label>
-
-                    <div class="col-sm-9">
-                        <p id="description" class="form-control-static">{{activeStack.template.parameters.description | json}}</p>
                     </div>
                     <!-- .col-sm-9 -->
                 </div>
@@ -436,7 +400,7 @@
     <div id="panel-collapse02" class="panel-collapse collapse">
         <div class="panel-body">
                                     <pre id="blueprintPanelBody" class="form-control-static blueprint-source">
-{{activeStack.blueprint.name | json}}
+{{activeStack.blueprint.ambariBlueprint | json}}
                                     </pre>
         </div>
     </div>
