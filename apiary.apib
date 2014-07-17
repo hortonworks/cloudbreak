@@ -356,6 +356,21 @@ Templates describe cloud infrastructures and are used for creating cloud stacks 
 #### Our default Image name on Azure:
   + ambari-docker-v1
 
+#### Amazon instance types:
++ T2Micro
++ T2Small
++ T2Medium
++ M3Medium
++ M3Large
++ M3XLarge
+
+#### Azure vm types:
++ EXTRA_SMALL
++ SMALL
++ MEDIUM
++ LARGE
++ EXTRA_LARGE
+
 ## Create cloud template [/templates]
 ### Create AWS template [POST]
 Creates an AWS template (vpc, subnet, internetGateway, routeTable, securityGroups, ACLs, instances). The template internally is using an Amazon AWS Cloudformation template.
@@ -376,7 +391,7 @@ Creates an AWS template (vpc, subnet, internetGateway, routeTable, securityGroup
                     "sshLocation": "0.0.0.0/0"
                     "region": "eu-west-1",
                     "keyName": "sequence-eu",
-                    "instanceType": "m3.xlarge",
+                    "instanceType": "M3XLarge",
                     "amiId": "ami-12345678"
                 }
             }
