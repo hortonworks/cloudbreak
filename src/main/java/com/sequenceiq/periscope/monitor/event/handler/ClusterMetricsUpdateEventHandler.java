@@ -3,11 +3,14 @@ package com.sequenceiq.periscope.monitor.event.handler;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.ClusterMetricsInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.periscope.monitor.event.ClusterMetricsUpdateEvent;
+import com.sequenceiq.periscope.registry.Cluster;
+import com.sequenceiq.periscope.registry.ClusterRegistry;
 
 @Component
 public class ClusterMetricsUpdateEventHandler implements ApplicationListener<ClusterMetricsUpdateEvent> {
@@ -19,9 +22,14 @@ public class ClusterMetricsUpdateEventHandler implements ApplicationListener<Clu
     @Value("${node.count.min:3}")
     private int minNodeCount;
 
+    @Autowired
+    private ClusterRegistry clusterRegistry;
+
     @Override
     public void onApplicationEvent(ClusterMetricsUpdateEvent event) {
         ClusterMetricsInfo metrics = event.getClusterMetricsInfo();
+        Cluster cluster = clusterRegistry.get(event.getClusterId());
+        cluster.updateMetrics(metrics);
         if (shouldAddNewNodes(metrics)) {
             LOGGER.info("Should add new nodes with cloudbreak to {}", event.getClusterId());
         } else if (shouldRemoveNodes(metrics)) {

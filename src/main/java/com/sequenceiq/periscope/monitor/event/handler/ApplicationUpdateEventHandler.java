@@ -1,5 +1,6 @@
 package com.sequenceiq.periscope.monitor.event.handler;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -29,6 +30,7 @@ import com.sequenceiq.periscope.registry.ClusterRegistry;
 public class ApplicationUpdateEventHandler implements ApplicationListener<ApplicationUpdateEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationUpdateEventHandler.class);
+    private static final int HUNDRED = 100;
 
     @Autowired
     private ClusterRegistry clusterRegistry;
@@ -37,6 +39,7 @@ public class ApplicationUpdateEventHandler implements ApplicationListener<Applic
     public void onApplicationEvent(ApplicationUpdateEvent event) {
         List<ApplicationReport> appReports = event.getReports();
         SchedulerInfo schedulerInfo = event.getSchedulerInfo();
+        List<CapacitySchedulerQueueInfo> queueInfoList = getAllQueueInfo(schedulerInfo);
 
         Cluster cluster = clusterRegistry.get(event.getClusterId());
         Map<Priority, Map<ApplicationId, SchedulerApplication>> apps = cluster.getApplicationsPriorityOrder();
@@ -52,8 +55,25 @@ public class ApplicationUpdateEventHandler implements ApplicationListener<Applic
         }
         removeApplicationIfFinished(cluster, activeApps, apps);
 
-        printQueueReport(schedulerInfo);
+        printQueueReport(queueInfoList, cluster);
         printApplicationReport(appReports);
+    }
+
+    private List<CapacitySchedulerQueueInfo> getAllQueueInfo(SchedulerInfo schedulerInfo) {
+        List<CapacitySchedulerQueueInfo> queueInfoList = new ArrayList<>();
+        if (schedulerInfo instanceof CapacitySchedulerInfo) {
+            addQueueInfo(queueInfoList, ((CapacitySchedulerInfo) schedulerInfo).getQueues());
+        }
+        return queueInfoList;
+    }
+
+    private void addQueueInfo(List<CapacitySchedulerQueueInfo> queueInfoList, CapacitySchedulerQueueInfoList queues) {
+        if (queues != null && queues.getQueueInfoList() != null) {
+            for (CapacitySchedulerQueueInfo info : queues.getQueueInfoList()) {
+                queueInfoList.add(info);
+                addQueueInfo(queueInfoList, info.getQueues());
+            }
+        }
     }
 
     private boolean isApplicationHighPriority(Map<Priority, Map<ApplicationId, SchedulerApplication>> apps, ApplicationId id) {
@@ -78,9 +98,23 @@ public class ApplicationUpdateEventHandler implements ApplicationListener<Applic
         }
     }
 
-    private void printQueueReport(SchedulerInfo schedulerInfo) {
-        if (schedulerInfo instanceof CapacitySchedulerInfo) {
-            printCSSchedulerMetrics((CapacitySchedulerInfo) schedulerInfo);
+    private void printQueueReport(List<CapacitySchedulerQueueInfo> infoList, Cluster cluster) {
+        for (CapacitySchedulerQueueInfo info : infoList) {
+            StringBuilder sb = new StringBuilder();
+
+            sb.append("\nQueue name: ").append(info.getQueueName());
+            sb.append("\ncapacity: ").append(info.getCapacity());
+            sb.append("\nmax capacity: ").append(info.getMaxCapacity());
+            sb.append("\nabsolute capacity: ").append(info.getAbsoluteCapacity());
+            sb.append("\nabsolute max capacity: ").append(info.getAbsoluteMaxCapacity());
+            sb.append("\nabsolute max resource capacity (MB): ").append(cluster.getTotalMB() * (info.getAbsoluteMaxCapacity() / HUNDRED));
+            sb.append("\nused capacity: ").append(info.getUsedCapacity());
+            sb.append("\nabsolute used capacity: ").append(info.getAbsoluteUsedCapacity());
+            sb.append("\nnumber of apps: ").append(info.getNumApplications());
+            sb.append("\nused resources: ").append(info.getResourcesUsed());
+            sb.append("\nused capacity: ").append(info.getUsedCapacity());
+
+            LOGGER.info(sb.toString());
         }
     }
 
@@ -108,32 +142,6 @@ public class ApplicationUpdateEventHandler implements ApplicationListener<Applic
         sb.append("\nused resources").append(usage.getUsedResources());
 
         LOGGER.info(sb.toString());
-    }
-
-    private void printCSSchedulerMetrics(CapacitySchedulerInfo schedulerInfo) {
-        printCSSchedulerMetrics(schedulerInfo.getQueues());
-    }
-
-    private void printCSSchedulerMetrics(CapacitySchedulerQueueInfoList infoList) {
-        if (infoList != null && infoList.getQueueInfoList() != null) {
-            for (CapacitySchedulerQueueInfo info : infoList.getQueueInfoList()) {
-                StringBuilder sb = new StringBuilder();
-
-                sb.append("\nQueue name: ").append(info.getQueueName());
-                sb.append("\ncapacity: ").append(info.getCapacity());
-                sb.append("\nmax capacity: ").append(info.getMaxCapacity());
-                sb.append("\nabsolute capacity: ").append(info.getAbsoluteCapacity());
-                sb.append("\nabsolute max capacity: ").append(info.getAbsoluteMaxCapacity());
-                sb.append("\nused capacity: ").append(info.getUsedCapacity());
-                sb.append("\nabsolute used capacity: ").append(info.getAbsoluteUsedCapacity());
-                sb.append("\nnumber of apps: ").append(info.getNumApplications());
-                sb.append("\nused resources: ").append(info.getResourcesUsed());
-                sb.append("\nused capacity: ").append(info.getUsedCapacity());
-
-                LOGGER.info(sb.toString());
-                printCSSchedulerMetrics(info.getQueues());
-            }
-        }
     }
 
 }

@@ -42,7 +42,7 @@ public class AppService {
         int i = 0;
         for (ApplicationId applicationId : applications.keySet()) {
             if (i++ % 2 == 0) {
-                cluster.setPriority(applicationId, Priority.HIGHEST);
+                cluster.setApplicationPriority(applicationId, Priority.HIGHEST);
             }
         }
     }

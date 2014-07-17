@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.client.api.YarnClient;
+import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.ClusterMetricsInfo;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +28,7 @@ public class Cluster {
     private final Configuration configuration;
     private final YarnClient yarnClient;
     private final Map<Priority, Map<ApplicationId, SchedulerApplication>> applications;
+    private ClusterMetricsInfo metrics;
 
     public Cluster(String clusterId, Ambari ambari) throws ConnectionException {
         this.clusterId = clusterId;
@@ -59,16 +61,16 @@ public class Cluster {
         return ambari.getPort();
     }
 
-    public String getUser() {
-        return ambari.getUser();
-    }
-
-    public String getPass() {
-        return ambari.getPass();
-    }
-
     public String getConfigValue(ConfigParam param, String defaultValue) {
         return configuration.get(param.key(), defaultValue);
+    }
+
+    public long getTotalMB() {
+        return metrics == null ? 0 : metrics.getTotalMB();
+    }
+
+    public void updateMetrics(ClusterMetricsInfo metrics) {
+        this.metrics = metrics == null ? this.metrics : metrics;
     }
 
     public synchronized SchedulerApplication addApplication(String applicationId, Priority priority) {
@@ -104,7 +106,7 @@ public class Cluster {
         return null;
     }
 
-    public synchronized SchedulerApplication setPriority(ApplicationId applicationId, Priority newPriority) {
+    public synchronized SchedulerApplication setApplicationPriority(ApplicationId applicationId, Priority newPriority) {
         SchedulerApplication application = removeApplication(applicationId);
         if (application != null) {
             application.setPriority(newPriority);
