@@ -3,11 +3,6 @@
 : ${IMAGE:="sequenceiq/ambari"}
 : ${INSTANCE_ID:="0"}
 
-sudo apt-get install bridge-utils
-# installs jq to process jsons easily
-curl -o /usr/bin/jq http://stedolan.github.io/jq/download/linux64/jq
-chmod +x /usr/bin/jq
-
 # instance id from ec2 metadata
 INSTANCE_ID=$(sudo cat /var/lib/waagent/ovf-env.xml |grep -oPm1 "(?<=<HostName>)[^<]+")
 
