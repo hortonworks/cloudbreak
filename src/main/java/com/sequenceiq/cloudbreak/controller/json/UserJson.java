@@ -3,19 +3,28 @@ package com.sequenceiq.cloudbreak.controller.json;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.hibernate.validator.constraints.Email;
+import org.hibernate.validator.constraints.Length;
+import org.hibernate.validator.constraints.NotBlank;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class UserJson implements JsonEntity {
 
+    @NotBlank
     private String firstName;
 
+    @NotBlank
     private String lastName;
 
+    @Email
     private String email;
 
+    @Length(min = 6, max = 200)
     private String password;
 
+    @NotBlank
     private String company;
 
     private Set<CredentialJson> credentials;
