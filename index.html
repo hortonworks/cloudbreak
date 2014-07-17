@@ -546,7 +546,7 @@
 
                             <div class="row btn-row">
                                 <div class="col-sm-9 col-sm-offset-3">
-                                    <a href="#" id="createCluster" class="btn btn-success btn-block" role="button" ng-click="createStack()"><i
+                                    <a href="#" id="createCluster" class="btn btn-success btn-block" ng-disabled="clusterCreationForm.$invalid" role="button" ng-click="createStack()"><i
                                             class="fa fa-plus fa-fw"></i>create and start
                                         cluster</a>
                                 </div>
@@ -1223,7 +1223,7 @@
                         <label class="col-sm-3 control-label" for="awscname">Name</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" id="awscname" ng-minlength="5" ng-maxlength="20" required placeholder="min. 5 max. 20 char">
+                            <input type="text" class="form-control" ng-model="awscname" id="awscname" ng-minlength="5" ng-maxlength="20" required placeholder="min. 5 max. 20 char">
                         </div>
                         <!-- .col-sm-9 -->
 
@@ -1233,7 +1233,7 @@
                         <label class="col-sm-3 control-label" for="awscdescription">Description</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" id="awscdescription" ng-maxlength="20" placeholder="max. 20 char">
+                            <input type="text" class="form-control" ng-model="awscdescription" id="awscdescription" ng-maxlength="20" placeholder="max. 20 char">
                         </div>
                         <!-- .col-sm-9 -->
 
@@ -1244,7 +1244,7 @@
                         <label class="col-sm-3 control-label" for="croleArn">IAM Role ARN</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" ng-minlength="5" ng-maxlength="20" required id="croleArn">
+                            <input type="text" class="form-control" ng-model="croleArn" ng-minlength="5" ng-maxlength="20" required id="croleArn">
                         </div>
                         <!-- .col-sm-9 -->
 
