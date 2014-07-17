@@ -508,11 +508,11 @@
 
                                 <div class="col-sm-9">
                                     <input type="number" name="cl_clusterSize" class="form-control" ng-model="cl_clusterSize" id="cl_clusterSize" min="1"
-                                           max="999" required>
+                                           max="99" required>
 
                                     <div class="help-block"
                                          ng-show="clusterCreationForm.cl_clusterSize.$dirty && clusterCreationForm.cl_clusterSize.$invalid"><i class="fa fa-warning"></i>
-                                        Required and has to be a number which is bigger than 0
+                                        Required and has to be a number larger than zero.
                                     </div>
                                 </div>
                                 <!-- .col-sm-9 -->
@@ -1035,7 +1035,11 @@
                                     <label class="col-sm-3 control-label" for="bluePrintText">Manual copy</label>
 
                                     <div class="col-sm-9">
-                                        <textarea class="form-control" id="bluePrintText" placeholder="paste blueprint text here" rows="10"></textarea>
+                                        <textarea class="form-control" id="bluePrintText" ng-model="bluePrintText" name="bluePrintText" placeholder="paste blueprint text here" validjson rows="10"></textarea>
+
+                                      <div class="help-block" ng-show="blueprintForm.bluePrintText.$error.validjson">
+                                          <i class="fa fa-warning"></i> Blueprint text is not a JSON
+                                      </div>
                                     </div>
                                     <!-- .col-sm-9 -->
                                 </div>

@@ -4,6 +4,22 @@
 
 var cloudbreakApp = angular.module('cloudbreakApp', ['ngRoute', 'cloudbreakControllers', 'cloudbreakServices']);
 
+cloudbreakApp.directive('validjson', function($parse) {
+  return {
+    require: 'ngModel',
+    link: function(scope, elem, attrs, ctrl) {
+      ctrl.$parsers.unshift(function(viewValue) {
+        try {
+          JSON.parse(viewValue)
+          ctrl.$setValidity('validjson', true);
+        } catch (err){
+          ctrl.$setValidity('validjson', false);
+        }
+      });
+    }
+  };
+});
+
 cloudbreakApp.directive('match', function($parse) {
   return {
     require: 'ngModel',
