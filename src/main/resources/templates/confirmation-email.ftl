@@ -1,14 +1,14 @@
 <html>
 <head>
-  <title>Welcome!</title>
+  <title>Welcome to Cloudbreak!</title>
 </head>
 <body>
   <h1>
-    Welcome ${user.firstName},
+    Hello ${user.firstName}.
   </h1>
 
 </br>
-  To activate your account please click <a href="${confirm}">here</a>
+  Welcome to Cloudbreak, the Hadoop as a Service API. To activate your account please click on the following link: <a href="${confirm}">here</a>
 
 <p>
   Thank you,
