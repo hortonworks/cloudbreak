@@ -695,8 +695,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     name: awscname.value,
                     description: awscdescription.value,
                     parameters: {
-                        roleArn: croleArn.value,
-                        instanceProfileRoleArn: cinstanceProfileRoleArn.value
+                        roleArn: croleArn.value
                     }
                 }
             }).success(function (data, status, headers, config) {
@@ -704,7 +703,6 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 $scope.getCredentials();
                 awscname.value = "";
                 croleArn.value = "";
-                cinstanceProfileRoleArn.value = "";
                 awscdescription.value = "";
             }).error(function (data, status, headers, config) {
                 $scope.statusMessage = "AWS template creation failed: " + data.message;
