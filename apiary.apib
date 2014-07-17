@@ -82,7 +82,7 @@ Creates a new user with the specified username, password, company, role. The use
             "id": "user-2"
         }
 
-## Reset password request management [/password/reset]
+## Reset password [/password/reset]
 ### Request a password reset [POST]
 Send an email to the user with the password reset information
 + Request
@@ -94,9 +94,9 @@ Send an email to the user with the password reset information
 + Response 200 (application/json)
 
 
-## Reset Password management [/password/reset/{resetToken}]
+## Change password [/password/reset/{resetToken}]
 ### Change the actual password [POST]
-Change the actual password with a newer one
+Change the current password
 
 + Parameters
     + resetToken (required String `resetToken`) ... The token of the password reset request.
@@ -111,7 +111,7 @@ Change the actual password with a newer one
 
 
 ## User information [/me]
-Retrieve informations about the authenticated
+Retrieve information about the authenticated user
 
 ### Retrieve user configuration [GET]
 The information contains generic user info, cloud and Hadoop cluster configurations belonging to the particular user.
@@ -204,9 +204,9 @@ Cloud Authentication related resources of the **Cloudbreak API**.
 Adds an AWS IAM role ARN or Azure JKS to user's account.
 
 
-## Add a cloud credentials for a user [/credentials]
+## Add cloud credentials for a user [/credentials]
 ### Add credentials [POST]
-Registers an AWS IAM role ARN or the user's account.
+Adds an AWS IAM role ARN with the user's account.
 
 + Request
 
@@ -261,9 +261,9 @@ Adds an Azure JKS the user's account.
         }
 
 
-## Retrieves the cloud credentials of the user [/credentials]
+## Retrieve cloud credentials for the user [/credentials]
 ### Retrieve credentials [GET]
-Retrieves registered cloud credentials  for a user
+Retrieves registered cloud credentials for a user
 
 + Request
 
@@ -295,7 +295,7 @@ Retrieves registered cloud credentials  for a user
             }
         ]
 
-## Retrieves a specific cloud credential configuration for the user [/credentials/{id}]
+## Retrieve a specific cloud credential for the user [/credentials/{id}]
 ### Retrieve credential [GET]
 
 Retrieves the cloud credential (AWS or Azure) associated with the user account
