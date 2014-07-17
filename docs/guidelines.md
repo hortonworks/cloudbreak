@@ -37,20 +37,13 @@ GitHub: https://github.com/sequenceiq/cloudbreak/blob/master/apiary.apib
 
 ##Ways to contribute
 
-* Create a GitHub issue to the appropriate GitHub repository.
-* Create a new feature request (as a GitHub issue).
-* Submit a new feature, code fix, unit test by creating a pull request.
-
-###Cloudbreak Backend Development
-* Do not use @author tags.
-* New classes must match our dependency mechanism.
-* Code must be formatted according to our [formatter](https://gist.github.com/martonsereg/9390889).
-* Code must be checked with our [checkstyle](https://github.com/sequenceiq/cloudbreak/tree/master/config/checkstyle).
-* Contributions must pass existing unit tests.
-* The code changes must be accompanied by unit tests. In cases where unit tests are not possible or don’t make sense an explanation should be provided.
-* New unit tests should be provided to demonstrate bugs and fixes (use Mockito whenever possible).
-* The tests should be named *Test.java.
-* Use slf4j instead of commons logging as the logging facade.
+* Use Cloudbreak
+* Submit a GitHub issue to the appropriate GitHub repository.
+* Submit a new feature request (as a GitHub issue).
+* Submit a code fix for a bug.
+* Submit a unit test.
+* Code review pending pull requests and bug fixes.
+* Tell others about these projects.
 
 ###Contributing code
 
@@ -70,6 +63,15 @@ We recommend discussing your plans on the [mailing list](https://groups.google.c
 ####Conventions
 
 Please write clean code. Universally formatted code promotes ease of writing, reading, and maintenance.
+* Do not use @author tags.
+* New classes must match our dependency mechanism.
+* Code must be formatted according to our [formatter](https://gist.github.com/martonsereg/9390889).
+* Code must be checked with our [checkstyle](https://github.com/sequenceiq/cloudbreak/tree/master/config/checkstyle).
+* Contributions must pass existing unit tests.
+* The code changes must be accompanied by unit tests. In cases where unit tests are not possible or don’t make sense an explanation should be provided.
+* New unit tests should be provided to demonstrate bugs and fixes (use Mockito whenever possible).
+* The tests should be named *Test.java.
+* Use slf4j instead of commons logging as the logging facade.
 
 
 ###Thank you
