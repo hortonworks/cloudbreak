@@ -726,3 +726,22 @@ We have received many requests from people to integrate Cloudbreak with 3d party
 Enjoy Cloudbreak - the Hadoop as a Service API which brings you a Hadoop ecosystem in minutes. You are literaly one click or REST call away from a fully functional, distributed Hadoop cluster.
 
 <!--releases.md-->
+
+##Contributing to Cloudbreak
+
+Want to contribute on Cloudbreak? Here are the [instructions](guidelines.md) to get you started.
+
+They are probably not perfect, please let us know if anything feels wrong or incomplete.
+
+### Legal
+
+*Brought to you courtesy of our legal counsel. For more context,
+please see the Notice document.*
+
+Use and transfer of Cloudbreak may be subject to certain restrictions by the
+United States and other governments.  
+It is your responsibility to ensure that your use and/or transfer does not
+violate applicable laws.
+
+### Licensing
+Cloudbreak is licensed under the Apache License, Version 2.0. See [LICENSE](http://www.apache.org/licenses/LICENSE-2.0.html) for full license text.
