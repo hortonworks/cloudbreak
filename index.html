@@ -607,7 +607,7 @@
         <label class="col-sm-3 control-label" for="azure_tclusterName">Name</label>
 
         <div class="col-sm-9">
-            <input type="text" class="form-control" id="azure_tclusterName" name="azure_tclusterName" ng-model="azure_tclusterName" ng-minlength="5" ng-maxlength="20" required placeholder="min. 5 max. 20 char">
+            <input type="text" ng-pattern="/^[a-zA-Z][-a-zA-Z0-9]*$/" class="form-control" id="azure_tclusterName" name="azure_tclusterName" ng-model="azure_tclusterName" ng-minlength="5" ng-maxlength="20" required placeholder="min. 5 max. 20 char">
             <div class="help-block" ng-show="azureTemplateForm.azure_tclusterName.$dirty && azureTemplateForm.azure_tclusterName.$invalid">
                 <i class="fa fa-warning"></i> {{error_msg.template_name_invalid}}
             </div>
@@ -690,7 +690,7 @@
         <label class="col-sm-3 control-label" for="aws_tclusterName">Name</label>
 
         <div class="col-sm-9">
-            <input type="text" class="form-control" name="aws_tclusterName" ng-model="aws_tclusterName" ng-minlength="5" ng-maxlength="20" required id="aws_tclusterName" placeholder="min. 5 max. 20 char">
+            <input type="text" class="form-control" ng-pattern="/^[a-zA-Z][-a-zA-Z0-9]*$/" name="aws_tclusterName" ng-model="aws_tclusterName" ng-minlength="5" ng-maxlength="20" required id="aws_tclusterName" placeholder="min. 5 max. 20 char">
             <div class="help-block" ng-show="awsTemplateForm.aws_tclusterName.$dirty && awsTemplateForm.aws_tclusterName.$invalid">
                 <i class="fa fa-warning"></i> {{error_msg.template_name_invalid}}
             </div>
@@ -956,9 +956,9 @@
 
                                     <div class="col-sm-9">
                                         <input type="text" class="form-control" id="bluePrintName" ng-model="bluePrintName" name="bluePrintName"
-                                               placeholder="set blueprint name" required>
+                                               ng-pattern="/^[a-zA-Z][-a-zA-Z0-9]*$/" placeholder="set blueprint name" required>
                                         <div class="help-block" ng-show="blueprintForm.bluePrintName.$dirty && blueprintForm.bluePrintName.$invalid"><i class="fa fa-warning"></i>
-                                            {{error_msg.blueprint_name_empty}}
+                                            {{error_msg.blueprint_name_invalid}}
                                         </div>
                                     </div>
 
@@ -979,11 +979,11 @@
                                 </div>
                                 <!-- .form-group -->
 
-                                <div class="form-group" ng-class="{ 'has-error': blueprintForm.blueprintUrl.$dirty && blueprintForm.blueprintUrl.$invalid }">
+                                <div class="form-group" ng-hide="blueprintForm.bluePrintText.$dirty && !blueprintForm.bluePrintText.$error.required" ng-class="{ 'has-error': blueprintForm.blueprintUrl.$dirty && blueprintForm.blueprintUrl.$invalid }">
                                     <label class="col-sm-3 control-label" for="blueprintUrl">Source URL</label>
 
                                     <div class="col-sm-9">
-                                        <input type="url" class="form-control" ng-focus="blueprintForm.bluePrintText.$setPristine(true)" id="blueprintUrl" ng-model="blueprintUrl" name="blueprintUrl"
+                                        <input type="url" class="form-control" id="blueprintUrl" ng-model="blueprintUrl" name="blueprintUrl"
                                                placeholder="set blueprint URL" required>
 
                                         <div class="help-block" ng-show="blueprintForm.blueprintUrl.$dirty && blueprintForm.blueprintUrl.$invalid">
@@ -996,7 +996,7 @@
                                 </div>
                                 <!-- .form-group -->
 
-                                <div class="form-group" ng-class="{ 'has-error': blueprintForm.bluePrintText.$error.validjson && blueprintForm.bluePrintText.$dirty }">
+                                <div class="form-group" ng-hide="blueprintForm.blueprintUrl.$dirty && !blueprintForm.blueprintUrl.$error.required" ng-class="{ 'has-error': blueprintForm.bluePrintText.$error.validjson && blueprintForm.bluePrintText.$dirty }">
                                     <label class="col-sm-3 control-label" for="bluePrintText">Manual copy</label>
 
                                     <div class="col-sm-9">
@@ -1015,8 +1015,8 @@
                                     <div class="col-sm-9 col-sm-offset-3">
                                         <a href="#" id="createBlueprint" ng-click="createBlueprint()"
                                            ng-disabled="blueprintForm.bluePrintName.$invalid ||
-                                           (!blueprintForm.blueprintUrl.$url && !blueprintForm.blueprintUrl.$error.required) ||
-                                           blueprintForm.bluePrintText.$error.validjson && blueprintForm.blueprintUrl.$url" class="btn btn-success btn-block" role="button"><i
+                                           (blueprintForm.blueprintUrl.$error.url && !blueprintForm.blueprintUrl.$error.required) ||
+                                           blueprintForm.bluePrintText.$error.validjson && !blueprintForm.bluePrintText.$error.required" class="btn btn-success btn-block" role="button"><i
                                                 class="fa fa-plus fa-fw"></i> create
                                             blueprint</a>
                                     </div>
@@ -1143,7 +1143,7 @@
                         <label class="col-sm-3 control-label" for="cname">Name</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" name="cname" id="cname" ng-model="cname" ng-minlength="5" ng-maxlength="20" required placeholder="min. 5 max. 20 char">
+                            <input type="text" class="form-control" ng-pattern="/^[a-zA-Z][-a-zA-Z0-9]*$/" name="cname" id="cname" ng-model="cname" ng-minlength="5" ng-maxlength="20" required placeholder="min. 5 max. 20 char">
                             <div class="help-block" ng-show="azureCredentialForm.cname.$dirty && azureCredentialForm.cname.$invalid">
                                 <i class="fa fa-warning"></i> {{error_msg.credential_name_invalid}}
                             </div>
@@ -1221,7 +1221,7 @@
                         <label class="col-sm-3 control-label" for="awscname">Name</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" ng-model="awscname" id="awscname" name="awscname" ng-minlength="5" ng-maxlength="20" required placeholder="min. 5 max. 20 char">
+                            <input type="text" ng-pattern="/^[a-zA-Z][-a-zA-Z0-9]*$/" class="form-control" ng-model="awscname" id="awscname" name="awscname" ng-minlength="5" ng-maxlength="20" required placeholder="min. 5 max. 20 char">
                             <div class="help-block" ng-show="awsCredentialForm.awscname.$dirty && awsCredentialForm.awscname.$invalid">
                                 <i class="fa fa-warning"></i> {{error_msg.credential_name_invalid}}
                             </div>
