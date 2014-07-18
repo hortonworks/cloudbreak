@@ -40,7 +40,7 @@ public class AwsConnectorTestUtil extends ConnectorTestUtil {
         credential.setId(DEFAULT_ID);
         credential.setCloudPlatform(CloudPlatform.AWS);
         credential.setDescription(AWS_DESCRIPTION);
-        credential.setSshKeyName(DEFAULT_KEY_NAME);
+        //credential.setSshKeyName(DEFAULT_KEY_NAME);
         return credential;
     }
 

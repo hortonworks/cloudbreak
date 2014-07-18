@@ -85,4 +85,14 @@ public class CredentialController {
         FileCopyUtils.copy(Files.readAllBytes(cerFile.toPath()), response.getOutputStream());
         return null;
     }
+
+    @RequestMapping(method = RequestMethod.GET, value = "{credentialId}/sshkey")
+    @ResponseBody
+    public ModelAndView getSshFile(@CurrentUser User user, @PathVariable Long credentialId, HttpServletResponse response) throws Exception {
+        File cerFile = azureCertificateService.getSshPublicKeyFile(user, credentialId);
+        response.setContentType("application/octet-stream");
+        response.setHeader("Content-Disposition", "attachment;filename=public_key.pem");
+        FileCopyUtils.copy(Files.readAllBytes(cerFile.toPath()), response.getOutputStream());
+        return null;
+    }
 }

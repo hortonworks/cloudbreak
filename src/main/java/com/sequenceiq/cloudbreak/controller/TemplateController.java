@@ -1,23 +1,18 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import java.io.File;
-import java.nio.file.Files;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.ModelAndView;
 
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
 import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
@@ -61,16 +56,6 @@ public class TemplateController {
     public ResponseEntity<TemplateJson> deleteTemplate(@CurrentUser User user, @PathVariable Long templateId) {
         templateService.delete(templateId);
         return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    @RequestMapping(method = RequestMethod.GET, value = "{templateId}/sshkey")
-    @ResponseBody
-    public ModelAndView getSshFile(@CurrentUser User user, @PathVariable Long templateId, HttpServletResponse response) throws Exception {
-        File cerFile = templateService.getSshPublicKeyFile(user, templateId);
-        response.setContentType("application/octet-stream");
-        response.setHeader("Content-Disposition", "attachment;filename=public_key.pem");
-        FileCopyUtils.copy(Files.readAllBytes(cerFile.toPath()), response.getOutputStream());
-        return null;
     }
 
 }

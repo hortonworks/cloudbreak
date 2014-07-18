@@ -1,22 +1,23 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.junit.Before;
+import org.junit.Test;
+
 import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
 import com.sequenceiq.cloudbreak.controller.validation.AzureTemplateParam;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Port;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.LinkedHashMap;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.HashMap;
-
-import static org.junit.Assert.assertEquals;
 
 public class AzureTemplateConverterTest {
 
@@ -79,7 +80,6 @@ public class AzureTemplateConverterTest {
         props.put(AzureTemplateParam.LOCATION.getName(), DUMMY_LOCATION);
         props.put(AzureTemplateParam.IMAGENAME.getName(), DUMMY_IMAGE_NAME);
         props.put(AzureTemplateParam.VMTYPE.getName(), DUMMY_VM_TYPE);
-        props.put(AzureTemplateParam.PASSWORD.getName(), DUMMY_PASSWORD);
         templateJson.setParameters(props);
         // WHEN
         AzureTemplate result = underTest.convert(templateJson);
@@ -97,7 +97,6 @@ public class AzureTemplateConverterTest {
         azureTemplate.setImageName(DUMMY_IMAGE_NAME);
         azureTemplate.setLocation(DUMMY_PASSWORD);
         azureTemplate.setName(DUMMY_NAME);
-        azureTemplate.setPassword(DUMMY_PASSWORD);
         azureTemplate.setId(1L);
         Set<Port> ports = new HashSet<>();
         ports.add(new Port(DUMMY_NAME, PORT, LOCAL_PORT, DUMMY_PROTOCOL));
@@ -115,7 +114,6 @@ public class AzureTemplateConverterTest {
         props.put(AzureTemplateParam.LOCATION.getName(), DUMMY_LOCATION);
         props.put(AzureTemplateParam.IMAGENAME.getName(), DUMMY_IMAGE_NAME);
         props.put(AzureTemplateParam.VMTYPE.getName(), DUMMY_VM_TYPE);
-        props.put(AzureTemplateParam.PASSWORD.getName(), DUMMY_PASSWORD);
         props.put(AzureTemplateParam.PORTS.getName(), createPorts());
         templateJson.setParameters(props);
         return templateJson;

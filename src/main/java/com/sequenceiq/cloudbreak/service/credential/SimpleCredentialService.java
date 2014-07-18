@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.credential;
 
+import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UnknownFormatConversionException;
@@ -14,6 +15,7 @@ import com.sequenceiq.cloudbreak.converter.AwsCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.AzureCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
+import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.User;
@@ -108,10 +110,23 @@ public class SimpleCredentialService implements CredentialService {
         AzureCredential azureCredential = azureCredentialConverter.convert(credentialJson);
         azureCredential.setAzureCredentialOwner(user);
         azureCredentialRepository.save(azureCredential);
+        if (azureCredential.getPublicKey() != null) {
+            azureCertificateService.generateSshCertificate(user, azureCredential, azureCredential.getPublicKey());
+        }
         azureCertificateService.generateCertificate(azureCredential, user);
         websocketService.sendToTopicUser(user.getEmail(), WebsocketEndPoint.CREDENTIAL,
                 new StatusMessage(azureCredential.getId(), azureCredential.getName(), Status.CREATE_COMPLETED.name()));
         return new IdJson(azureCredential.getId());
+    }
+
+    @Override
+    public File getSshPublicKeyFile(User user, Long credentialId) {
+        Credential one = credentialRepository.findOne(credentialId);
+        if (CloudPlatform.AZURE.equals(one.cloudPlatform())) {
+            return azureCertificateService.getSshPublicKeyFile(user, credentialId);
+        } else {
+            throw new UnsupportedOperationException("Ssh key function supported only on Azure platform.");
+        }
     }
 
 }

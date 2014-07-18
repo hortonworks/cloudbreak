@@ -118,7 +118,7 @@ public class AzureProvisionerTest {
         given(azureClient.waitUntilComplete(DUMMY_REQUEST_ID)).willReturn(new Object());
         given(azureStackUtil.getVmName(anyString(), anyInt())).willReturn(DUMMY_VM_NAME);
         given(azureClient.createCloudService(anyMap())).willReturn(httpResponseDecorator);
-        given(azureStackUtil.createX509Certificate(any(AzureTemplate.class), anyString())).willReturn(x509Certificate);
+        given(azureStackUtil.createX509Certificate(any(AzureCredential.class), anyString())).willReturn(x509Certificate);
         given(x509Certificate.getPem()).willReturn(DUMMY_DATA.getBytes());
         given(azureClient.createServiceCertificate(anyMap())).willReturn(httpResponseDecorator);
         given(azureClient.createVirtualMachine(anyMap())).willReturn(httpResponseDecorator);
@@ -132,7 +132,6 @@ public class AzureProvisionerTest {
     public void testBuildStackWhenNoAffinityGroupAndStorageAccountNotFoundAndNoTemplatePassword()
             throws FileNotFoundException, CertificateException, NoSuchAlgorithmException {
         // GIVEN
-        template.setPassword(null);
         given(retryingStackUpdater.updateStackStatus(anyLong(), any(Status.class))).willReturn(stack);
         given(retryingStackUpdater.updateStackCreateComplete(anyLong())).willReturn(stack);
         given(retryingStackUpdater.updateStackCreateComplete(anyLong())).willReturn(stack);
@@ -150,7 +149,7 @@ public class AzureProvisionerTest {
         given(azureClient.waitUntilComplete(DUMMY_REQUEST_ID)).willReturn(new Object());
         given(azureStackUtil.getVmName(anyString(), anyInt())).willReturn(DUMMY_VM_NAME);
         given(azureClient.createCloudService(anyMap())).willReturn(httpResponseDecorator);
-        given(azureStackUtil.createX509Certificate(any(AzureTemplate.class), anyString())).willReturn(x509Certificate);
+        given(azureStackUtil.createX509Certificate(any(AzureCredential.class), anyString())).willReturn(x509Certificate);
         given(x509Certificate.getPem()).willReturn(DUMMY_DATA.getBytes());
         given(x509Certificate.getSha1Fingerprint()).willReturn(SHA_1_FINGERPRINT);
         given(azureClient.createServiceCertificate(anyMap())).willReturn(httpResponseDecorator);
@@ -180,7 +179,7 @@ public class AzureProvisionerTest {
         given(azureClient.waitUntilComplete(DUMMY_REQUEST_ID)).willReturn(new Object());
         given(azureStackUtil.getVmName(anyString(), anyInt())).willReturn(DUMMY_VM_NAME);
         given(azureClient.createCloudService(anyMap())).willReturn(httpResponseDecorator);
-        given(azureStackUtil.createX509Certificate(any(AzureTemplate.class), anyString())).willReturn(x509Certificate);
+        given(azureStackUtil.createX509Certificate(any(AzureCredential.class), anyString())).willReturn(x509Certificate);
         given(x509Certificate.getPem()).willReturn(DUMMY_DATA.getBytes());
         given(azureClient.createServiceCertificate(anyMap())).willReturn(httpResponseDecorator);
         given(azureClient.createVirtualMachine(anyMap())).willReturn(httpResponseDecorator);
@@ -208,7 +207,7 @@ public class AzureProvisionerTest {
         given(azureClient.waitUntilComplete(DUMMY_REQUEST_ID)).willReturn(new Object());
         given(azureStackUtil.getVmName(anyString(), anyInt())).willReturn(DUMMY_VM_NAME);
         given(azureClient.createCloudService(anyMap())).willReturn(httpResponseDecorator);
-        given(azureStackUtil.createX509Certificate(any(AzureTemplate.class), anyString()))
+        given(azureStackUtil.createX509Certificate(any(AzureCredential.class), anyString()))
                 .willThrow(new FileNotFoundException("file not found"));
         // WHEN
         underTest.buildStack(stack, USER_DATA, setupProperties);
@@ -236,13 +235,13 @@ public class AzureProvisionerTest {
         given(azureClient.waitUntilComplete(DUMMY_REQUEST_ID)).willReturn(new Object());
         given(azureStackUtil.getVmName(anyString(), anyInt())).willReturn(DUMMY_VM_NAME);
         given(azureClient.createCloudService(anyMap())).willReturn(httpResponseDecorator);
-        given(azureStackUtil.createX509Certificate(any(AzureTemplate.class), anyString())).willReturn(x509Certificate);
+        given(azureStackUtil.createX509Certificate(any(AzureCredential.class), anyString())).willReturn(x509Certificate);
         given(x509Certificate.getPem()).willReturn(DUMMY_DATA.getBytes());
         given(x509Certificate.getSha1Fingerprint()).willThrow(new NoSuchAlgorithmException("no such algorithm"));
         // WHEN
         underTest.buildStack(stack, USER_DATA, setupProperties);
         // THEN
-        verify(azureStackUtil, times(3)).createX509Certificate(any(AzureTemplate.class), anyString());
+        verify(azureStackUtil, times(3)).createX509Certificate(any(AzureCredential.class), anyString());
     }
 
     @Test
@@ -266,7 +265,7 @@ public class AzureProvisionerTest {
         // WHEN
         underTest.buildStack(stack, USER_DATA, setupProperties);
         // THEN
-        verify(azureStackUtil, times(0)).createX509Certificate(any(AzureTemplate.class), anyString());
+        verify(azureStackUtil, times(0)).createX509Certificate(any(AzureCredential.class), anyString());
     }
 
     private Map<String, Object> createSetupProperties() {

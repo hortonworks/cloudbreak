@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
-import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.AzureCredentialRepository;
@@ -83,11 +82,11 @@ public class AzureCertificateService {
         }
     }
 
-    public File getSshPublicKeyFile(User user, Long templateId) {
-        return new File(getPemFile(user.emailAsFolder(), templateId));
+    public File getSshPublicKeyFile(User user, Long azureCredentialId) {
+        return new File(getPemFile(user.emailAsFolder(), azureCredentialId));
     }
 
-    public void generateSshCertificate(User user, AzureTemplate azureTemplate, String sshKey) {
+    public void generateSshCertificate(User user, AzureCredential azureCredential, String sshKey) {
         try {
             File userFolder = new File(getSimpleUserFolder(user.emailAsFolder()));
             if (!userFolder.exists()) {
@@ -97,19 +96,19 @@ public class AzureCertificateService {
             if (!sshFolder.exists()) {
                 FileUtils.forceMkdir(new File(getSshFolder(user.emailAsFolder())));
             }
-            File templateFolder = new File(getSshFolderForTemplate(user.emailAsFolder(), azureTemplate.getId()));
+            File templateFolder = new File(getSshFolderForTemplate(user.emailAsFolder(), azureCredential.getId()));
             if (!templateFolder.exists()) {
-                FileUtils.forceMkdir(new File(getSshFolderForTemplate(user.emailAsFolder(), azureTemplate.getId())));
+                FileUtils.forceMkdir(new File(getSshFolderForTemplate(user.emailAsFolder(), azureCredential.getId())));
             }
             try {
-                File file = new File(getPemFile(user.emailAsFolder(), azureTemplate.getId()));
+                File file = new File(getPemFile(user.emailAsFolder(), azureCredential.getId()));
                 FileWriter fw = new FileWriter(file.getAbsoluteFile());
                 BufferedWriter bw = new BufferedWriter(fw);
                 bw.write(sshKey);
                 bw.close();
-                keyGeneratorService.generateSshKey(getSshFolderForTemplate(user.emailAsFolder(), azureTemplate.getId()) + "/" + user.emailAsFolder());
+                keyGeneratorService.generateSshKey(getSshFolderForTemplate(user.emailAsFolder(), azureCredential.getId()) + "/" + user.emailAsFolder());
             } catch (InterruptedException e) {
-                LOGGER.error("An error occured under the ssh generation for {} template. The error was: {} {}", azureTemplate.getId(), e.getMessage(), e);
+                LOGGER.error("An error occured under the ssh generation for {} template. The error was: {} {}", azureCredential.getId(), e.getMessage(), e);
                 throw new InternalServerException(e.getMessage());
             }
         } catch (IOException ex) {
@@ -130,16 +129,16 @@ public class AzureCertificateService {
         return String.format("%s/%s", DATADIR, user);
     }
 
-    public static String getSshFolderForTemplate(String user, Long templateId) {
-        return String.format("%s/%s", getSshFolder(user), templateId);
+    public static String getSshFolderForTemplate(String user, Long credentialId) {
+        return String.format("%s/%s", getSshFolder(user), credentialId);
     }
 
-    public static String getPemFile(String user, Long templateId) {
-        return String.format("%s/%s.pem", getSshFolderForTemplate(user, templateId), user);
+    public static String getPemFile(String user, Long credentialId) {
+        return String.format("%s/%s.pem", getSshFolderForTemplate(user, credentialId), user);
     }
 
-    public static String getCerFile(String user, Long templateId) {
-        return String.format("%s/%s.cer", getSshFolderForTemplate(user, templateId), user);
+    public static String getCerFile(String user, Long credentialId) {
+        return String.format("%s/%s.cer", getSshFolderForTemplate(user, credentialId), user);
     }
 
     public static String getCertificateFolder(Credential credential, String user) {

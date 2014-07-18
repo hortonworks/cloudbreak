@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.credential;
 
+import java.io.File;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.controller.json.CredentialJson;
@@ -15,5 +16,7 @@ public interface CredentialService {
     CredentialJson get(Long id);
 
     void delete(Long id);
+
+    File getSshPublicKeyFile(User user, Long credentialId);
 
 }
