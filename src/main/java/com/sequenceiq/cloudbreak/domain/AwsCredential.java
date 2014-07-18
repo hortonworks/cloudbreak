@@ -16,6 +16,8 @@ public class AwsCredential extends Credential implements ProvisionEntity {
 
     private String roleArn;
 
+    private String sshKeyName;
+
     @ManyToOne
     @JoinColumn(name = "awsCredential_awsCredentialOwner")
     private User awsCredentialOwner;
@@ -55,6 +57,14 @@ public class AwsCredential extends Credential implements ProvisionEntity {
 
     public void setRoleArn(String roleArn) {
         this.roleArn = roleArn;
+    }
+
+    public String getSshKeyName() {
+        return sshKeyName;
+    }
+
+    public void setSshKeyName(String sshKeyName) {
+        this.sshKeyName = sshKeyName;
     }
 
     public TemporaryAwsCredentials getTemporaryAwsCredentials() {
