@@ -13,9 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
-import reactor.core.Reactor;
-import reactor.event.Event;
-
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
@@ -33,6 +30,9 @@ import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataIncompleteException;
+
+import reactor.core.Reactor;
+import reactor.event.Event;
 
 @Service
 public class SimpleStackService implements StackService {
@@ -61,9 +61,7 @@ public class SimpleStackService implements StackService {
     public Set<StackJson> getAll(User user) {
         Set<StackJson> result = new HashSet<>();
         for (Stack stack : user.getStacks()) {
-            CloudPlatform cp = stack.getTemplate().cloudPlatform();
-            StackDescription description = provisionServices.get(cp).describeStack(user, stack, stack.getCredential());
-            result.add(stackConverter.convert(stack, description));
+            result.add(stackConverter.convert(stack));
         }
         return result;
     }

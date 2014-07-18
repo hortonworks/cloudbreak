@@ -34,7 +34,6 @@ import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.Reservation;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
-import com.sequenceiq.cloudbreak.domain.AwsStackDescription;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.DetailedAwsStackDescription;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -96,48 +95,6 @@ public class AwsConnectorTest {
         Set<Resource> resources = new HashSet<>();
         resources.add(new Resource(ResourceType.CLOUDFORMATION_STACK, ConnectorTestUtil.CF_STACK_NAME, stack));
         return resources;
-    }
-
-    @Test
-    public void testDescribeStack() {
-        // GIVEN
-        given(awsStackUtil.createCloudFormationClient(Regions.DEFAULT_REGION, credential)).willReturn(amazonCloudFormationClient);
-        given(amazonCloudFormationClient.describeStacks(any(DescribeStacksRequest.class))).willReturn(stackResult);
-        given(awsStackUtil.createEC2Client(Regions.DEFAULT_REGION, credential)).willReturn(ec2Client);
-        given(ec2Client.describeInstances(any(DescribeInstancesRequest.class))).willReturn(instancesResult);
-        // WHEN
-        StackDescription result = underTest.describeStack(user, stack, credential);
-        // THEN
-        verify(ec2Client, times(1)).describeInstances(any(DescribeInstancesRequest.class));
-        assertTrue(result.getClass().isAssignableFrom(AwsStackDescription.class));
-    }
-
-    @Test
-    public void testDescribeStackWhenDescribeStacksShouldThrowAmazonServiceException() {
-        // GIVEN
-        AmazonServiceException e = createAmazonServiceException();
-        given(awsStackUtil.createCloudFormationClient(Regions.DEFAULT_REGION, credential)).willReturn(amazonCloudFormationClient);
-        given(amazonCloudFormationClient.describeStacks(any(DescribeStacksRequest.class))).willThrow(e);
-        given(awsStackUtil.createEC2Client(Regions.DEFAULT_REGION, credential)).willReturn(ec2Client);
-        given(ec2Client.describeInstances(any(DescribeInstancesRequest.class))).willReturn(instancesResult);
-        // WHEN
-        StackDescription result = underTest.describeStack(user, stack, credential);
-        // THEN
-        verify(ec2Client, times(1)).describeInstances(any(DescribeInstancesRequest.class));
-        assertTrue(result.getClass().isAssignableFrom(AwsStackDescription.class));
-    }
-
-    @Test(expected = AmazonServiceException.class)
-    public void testDescribeStackWhenDescribeStacksShouldThrowAmazonServiceExceptionWithoutCloudFormService() {
-        // GIVEN
-        AmazonServiceException e = createAmazonServiceException();
-        e.setServiceName(DUMMY_SERVICE);
-        given(awsStackUtil.createCloudFormationClient(Regions.DEFAULT_REGION, credential)).willReturn(amazonCloudFormationClient);
-        given(amazonCloudFormationClient.describeStacks(any(DescribeStacksRequest.class))).willThrow(e);
-        given(awsStackUtil.createEC2Client(Regions.DEFAULT_REGION, credential)).willReturn(ec2Client);
-        given(ec2Client.describeInstances(any(DescribeInstancesRequest.class))).willReturn(instancesResult);
-        // WHEN
-        underTest.describeStack(user, stack, credential);
     }
 
     @Test

@@ -17,7 +17,6 @@ import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
-import com.sequenceiq.cloudbreak.domain.AzureStackDescription;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.DetailedAzureStackDescription;
@@ -42,33 +41,6 @@ public class AzureConnector implements CloudPlatformConnector {
 
     @Autowired
     private AzureStackUtil azureStackUtil;
-
-    @Override
-    public StackDescription describeStack(User user, Stack stack, Credential credential) {
-        String filePath = AzureCertificateService.getUserJksFileName(credential, user.emailAsFolder());
-        AzureClient azureClient = azureStackUtil.createAzureClient(credential, filePath);
-        AzureStackDescription azureStackDescription = new AzureStackDescription();
-        for (Resource resource : stack.getResourcesByType(ResourceType.CLOUD_SERVICE)) {
-            try {
-                Object cloudService = azureClient.getCloudService(resource.getResourceName());
-                azureStackDescription.getCloudServices().add(jsonHelper.createJsonFromString(cloudService.toString()).toString());
-            } catch (Exception ex) {
-                azureStackDescription.getCloudServices().add(jsonHelper.createJsonFromString(String.format("{\"HostedService\": {%s}}", ERROR)).toString());
-            }
-        }
-        for (Resource resource : stack.getResourcesByType(ResourceType.VIRTUAL_MACHINE)) {
-            Map<String, String> props = new HashMap<>();
-            props.put(SERVICENAME, resource.getResourceName());
-            props.put(NAME, resource.getResourceName());
-            try {
-                Object virtualMachine = azureClient.getVirtualMachine(props);
-                azureStackDescription.getVirtualMachines().add(jsonHelper.createJsonFromString(virtualMachine.toString()).toString());
-            } catch (Exception ex) {
-                azureStackDescription.getVirtualMachines().add(jsonHelper.createJsonFromString(String.format("{\"Deployment\": {%s}}", ERROR)).toString());
-            }
-        }
-        return azureStackDescription;
-    }
 
     @Override
     public StackDescription describeStackWithResources(User user, Stack stack, Credential credential) {
