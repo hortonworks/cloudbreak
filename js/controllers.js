@@ -871,7 +871,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
         }
 
         $http.get('messages.properties').then(function (messages) {
-            $scope.error_msg = messages.data
+            $rootScope.error_msg = messages.data
         })
     }
 ]);

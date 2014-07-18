@@ -482,20 +482,20 @@
                     <div class="panel-body">
                         <form class="form-horizontal" role="form" name="clusterCreationForm">
 
-                            <div class="form-group">
+                            <div class="form-group" ng-class="{ 'has-error': clusterCreationForm.cl_clusterName.$dirty && clusterCreationForm.cl_clusterName.$invalid }">
                                 <label class="col-sm-3 control-label" for="cl_clusterName">Cluster name</label>
 
                                 <div class="col-sm-9">
-                                    <input type="text" name="cl_clusterName" class="form-control" id="cl_clusterName" placeholder="min. 5 max. 20 char" ng-model="cl_clusterName"
+                                    <input type="text" name="cl_clusterName" class="form-control" id="cl_clusterName" name="cl_clusterName" placeholder="min. 5 max. 20 char" ng-model="cl_clusterName"
                                            ng-pattern="/^[a-zA-Z][-a-zA-Z0-9]*$/" ng-minlength="3" ng-maxlength="20" required>
 
                                     <div class="help-block"
-                                         ng-show="clusterCreationForm.cl_clusterName.$dirty && clusterCreationForm.cl_clusterName.$invalid"><i class="fa fa-warning"></i>alphanumeric characters only (min 3, max 20 characters).
+                                         ng-show="clusterCreationForm.cl_clusterName.$dirty && clusterCreationForm.cl_clusterName.$invalid"><i class="fa fa-warning"></i> {{error_msg.cluster_name_invalid}}
                                     </div>
                                 </div>
                                 <!-- .col-sm-9 -->
                             </div>
-                            <div class="form-group">
+                            <div class="form-group" ng-class="{ 'has-error': clusterCreationForm.cl_clusterSize.$dirty && clusterCreationForm.cl_clusterSize.$invalid }">
                                 <label class="col-sm-3 control-label" for="cl_clusterSize">Cluster size</label>
 
                                 <div class="col-sm-9">
@@ -504,7 +504,7 @@
 
                                     <div class="help-block"
                                          ng-show="clusterCreationForm.cl_clusterSize.$dirty && clusterCreationForm.cl_clusterSize.$invalid"><i class="fa fa-warning"></i>
-                                        Required and has to be a number larger than zero.
+                                        {{error_msg.cluster_size_invalid}}
                                     </div>
                                 </div>
                                 <!-- .col-sm-9 -->
@@ -603,20 +603,26 @@
 </div>
 <form class="form-horizontal" role="form" name="azureTemplateForm" ng-show="azureTemplate">
 
-    <div class="form-group">
+    <div class="form-group" ng-class="{ 'has-error': azureTemplateForm.azure_tclusterName.$dirty && azureTemplateForm.azure_tclusterName.$invalid }">
         <label class="col-sm-3 control-label" for="azure_tclusterName">Name</label>
 
         <div class="col-sm-9">
-            <input type="text" class="form-control" id="azure_tclusterName" ng-model="azure_tclusterName" ng-minlength="5" ng-maxlength="20" required placeholder="min. 5 max. 20 char">
+            <input type="text" class="form-control" id="azure_tclusterName" name="azure_tclusterName" ng-model="azure_tclusterName" ng-minlength="5" ng-maxlength="20" required placeholder="min. 5 max. 20 char">
+            <div class="help-block" ng-show="azureTemplateForm.azure_tclusterName.$dirty && azureTemplateForm.azure_tclusterName.$invalid">
+                <i class="fa fa-warning"></i> {{error_msg.template_name_invalid}}
+            </div>
         </div>
         <!-- .col-sm-9 -->
 
     </div>
-    <div class="form-group">
+    <div class="form-group" ng-class="{ 'has-error': azureTemplateForm.azure_tdescription.$dirty && azureTemplateForm.azure_tdescription.$invalid }">
         <label class="col-sm-3 control-label" for="azure_tdescription">Description</label>
 
         <div class="col-sm-9">
-            <input type="text" class="form-control" id="azure_tdescription" ng-model="azure_tdescription" ng-minlength="5" ng-maxlength="20" required placeholder="min. 5 max. 20 char">
+            <input type="text" class="form-control" id="azure_tdescription" name="azure_tdescription" ng-model="azure_tdescription" ng-minlength="5" ng-maxlength="20" required placeholder="min. 5 max. 20 char">
+            <div class="help-block" ng-show="azureTemplateForm.azure_tdescription.$dirty && azureTemplateForm.azure_tdescription.$invalid">
+                <i class="fa fa-warning"></i> {{error_msg.template_description_invalid}}
+            </div>
         </div>
         <!-- .col-sm-9 -->
 
@@ -680,21 +686,27 @@
 </form>
 
 <form class="form-horizontal" role="form" ng-show="awsTemplate" name="awsTemplateForm">
-    <div class="form-group">
+    <div class="form-group" ng-class="{ 'has-error': awsTemplateForm.aws_tclusterName.$dirty && awsTemplateForm.aws_tclusterName.$invalid }">
         <label class="col-sm-3 control-label" for="aws_tclusterName">Name</label>
 
         <div class="col-sm-9">
-            <input type="text" class="form-control" ng-model="aws_tclusterName" ng-minlength="5" ng-maxlength="20" required id="aws_tclusterName">
+            <input type="text" class="form-control" name="aws_tclusterName" ng-model="aws_tclusterName" ng-minlength="5" ng-maxlength="20" required id="aws_tclusterName" placeholder="min. 5 max. 20 char">
+            <div class="help-block" ng-show="awsTemplateForm.aws_tclusterName.$dirty && awsTemplateForm.aws_tclusterName.$invalid">
+                <i class="fa fa-warning"></i> {{error_msg.template_name_invalid}}
+            </div>
         </div>
         <!-- .col-sm-9 -->
 
     </div>
 
-    <div class="form-group">
+    <div class="form-group" ng-class="{ 'has-error': awsTemplateForm.aws_tdescription.$dirty && awsTemplateForm.aws_tdescription.$invalid }">
         <label class="col-sm-3 control-label" for="aws_tdescription">Description</label>
 
         <div class="col-sm-9">
-            <input type="text" class="form-control" ng-model="aws_tdescription" ng-minlength="5" ng-maxlength="20" id="aws_tdescription" placeholder="max. 20 char">
+            <input type="text" class="form-control" name="aws_tdescription" ng-model="aws_tdescription" ng-minlength="5" ng-maxlength="20" id="aws_tdescription" placeholder="max. 20 char">
+            <div class="help-block" ng-show="awsTemplateForm.aws_tdescription.$dirty && awsTemplateForm.aws_tdescription.$invalid">
+                <i class="fa fa-warning"></i> {{error_msg.template_description_invalid}}
+            </div>
         </div>
         <!-- .col-sm-9 -->
 
@@ -939,15 +951,14 @@
 
                             <form class="form-horizontal" role="form" name="blueprintForm">
 
-                                <div class="form-group">
+                                <div class="form-group" ng-class="{ 'has-error': blueprintForm.bluePrintName.$dirty && blueprintForm.bluePrintName.$invalid }">
                                     <label class="col-sm-3 control-label" for="bluePrintName">Name</label>
 
                                     <div class="col-sm-9">
                                         <input type="text" class="form-control" id="bluePrintName" ng-model="bluePrintName" name="bluePrintName"
-                                               placeholder="set blueprint name">
-
+                                               placeholder="set blueprint name" required>
                                         <div class="help-block" ng-show="blueprintForm.bluePrintName.$dirty && blueprintForm.bluePrintName.$invalid"><i class="fa fa-warning"></i>
-                                            name can not be empty
+                                            {{error_msg.blueprint_name_empty}}
                                         </div>
                                     </div>
 
@@ -968,15 +979,15 @@
                                 </div>
                                 <!-- .form-group -->
 
-                                <div class="form-group">
+                                <div class="form-group" ng-class="{ 'has-error': blueprintForm.blueprintUrl.$dirty && blueprintForm.blueprintUrl.$invalid }">
                                     <label class="col-sm-3 control-label" for="blueprintUrl">Source URL</label>
 
                                     <div class="col-sm-9">
-                                        <input type="url" class="form-control" id="blueprintUrl" ng-model="blueprintUrl" name="blueprintUrl"
-                                               placeholder="set blueprint URL">
+                                        <input type="url" class="form-control" ng-focus="blueprintForm.bluePrintText.$setPristine(true)" id="blueprintUrl" ng-model="blueprintUrl" name="blueprintUrl"
+                                               placeholder="set blueprint URL" required>
 
                                         <div class="help-block" ng-show="blueprintForm.blueprintUrl.$dirty && blueprintForm.blueprintUrl.$invalid">
-                                            <i class="fa fa-warning"></i>url has to be valid
+                                            <i class="fa fa-warning"></i> {{error_msg.blueprint_url_invalid}}
                                         </div>
                                     </div>
 
@@ -985,14 +996,14 @@
                                 </div>
                                 <!-- .form-group -->
 
-                                <div class="form-group">
+                                <div class="form-group" ng-class="{ 'has-error': blueprintForm.bluePrintText.$error.validjson && blueprintForm.bluePrintText.$dirty }">
                                     <label class="col-sm-3 control-label" for="bluePrintText">Manual copy</label>
 
                                     <div class="col-sm-9">
-                                        <textarea class="form-control" id="bluePrintText" ng-model="bluePrintText" name="bluePrintText" placeholder="paste blueprint text here" validjson rows="10"></textarea>
+                                        <textarea class="form-control" id="bluePrintText" ng-model="bluePrintText" name="bluePrintText" placeholder="paste blueprint text here" validjson rows="10" required></textarea>
 
                                       <div class="help-block" ng-show="blueprintForm.bluePrintText.$error.validjson">
-                                          <i class="fa fa-warning"></i> blueprint text is not in JSON format
+                                          <i class="fa fa-warning"></i> {{error_msg.blueprint_json_invalid}}
                                       </div>
                                     </div>
                                     <!-- .col-sm-9 -->
@@ -1002,7 +1013,10 @@
 
                                 <div class="row btn-row">
                                     <div class="col-sm-9 col-sm-offset-3">
-                                        <a href="#" id="createBlueprint" ng-click="createBlueprint()" class="btn btn-success btn-block" role="button"><i
+                                        <a href="#" id="createBlueprint" ng-click="createBlueprint()"
+                                           ng-disabled="blueprintForm.bluePrintName.$invalid ||
+                                           (!blueprintForm.blueprintUrl.$url && !blueprintForm.blueprintUrl.$error.required) ||
+                                           blueprintForm.bluePrintText.$error.validjson && blueprintForm.blueprintUrl.$url" class="btn btn-success btn-block" role="button"><i
                                                 class="fa fa-plus fa-fw"></i> create
                                             blueprint</a>
                                     </div>
@@ -1125,52 +1139,67 @@
 
                 <form class="form-horizontal" role="form" name="azureCredentialForm"  ng-show="azureCredential">
 
-                    <div class="form-group">
+                    <div class="form-group" ng-class="{ 'has-error': azureCredentialForm.cname.$dirty && azureCredentialForm.cname.$invalid }">
                         <label class="col-sm-3 control-label" for="cname">Name</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" id="cname" ng-model="cname" ng-minlength="5" ng-maxlength="20" required placeholder="min. 5 max. 20 char">
+                            <input type="text" class="form-control" name="cname" id="cname" ng-model="cname" ng-minlength="5" ng-maxlength="20" required placeholder="min. 5 max. 20 char">
+                            <div class="help-block" ng-show="azureCredentialForm.cname.$dirty && azureCredentialForm.cname.$invalid">
+                                <i class="fa fa-warning"></i> {{error_msg.credential_name_invalid}}
+                            </div>
                         </div>
                         <!-- .col-sm-9 -->
 
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-group" ng-class="{ 'has-error': azureCredentialForm.cdescription.$dirty && azureCredentialForm.cdescription.$invalid }">
                         <label class="col-sm-3 control-label" for="cdescription">Description</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" ng-model="cdescription" id="cdescription" ng-maxlength="20"  placeholder="max. 20 char">
+                            <input type="text" class="form-control" ng-model="cdescription" id="cdescription" name="cdescription" ng-maxlength="20"  placeholder="max. 20 char">
+                            <div class="help-block" ng-show="azureCredentialForm.cdescription.$dirty && azureCredentialForm.cdescription.$invalid">
+                                <i class="fa fa-warning"></i> {{error_msg.credential_description_invalid}}
+                            </div>
                         </div>
                         <!-- .col-sm-9 -->
 
                     </div>
 
                     <!-- .form-group -->
-                    <div class="form-group">
+                    <div class="form-group" ng-class="{ 'has-error': azureCredentialForm.csubscriptionId.$dirty && azureCredentialForm.csubscriptionId.$invalid }">
                         <label class="col-sm-3 control-label" for="csubscriptionId">Subscription ID</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" id="csubscriptionId" ng-model="csubscriptionId" required placeholder="your subscription id">
+                            <input type="text" class="form-control" id="csubscriptionId" name="csubscriptionId" ng-model="csubscriptionId" required placeholder="your subscription id">
+                            <div class="help-block" ng-show="azureCredentialForm.csubscriptionId.$dirty && azureCredentialForm.csubscriptionId.$invalid">
+                                <i class="fa fa-warning"></i> {{error_msg.credential_subscription_invalid}}
+                            </div>
                         </div>
                         <!-- .col-sm-9 -->
 
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-group" ng-class="{ 'has-error': azureCredentialForm.cjksPassword.$dirty && azureCredentialForm.cjksPassword.$invalid }">
                         <label class="col-sm-3 control-label" for="cjksPassword">File password</label>
 
                         <div class="col-sm-9">
-                            <input type="password" class="form-control" id="cjksPassword" ng-model="cjksPassword" ng-minlength="5" ng-maxlength="10" required placeholder="min. 5 max. 10 char">
+                            <input type="password" class="form-control" id="cjksPassword" name="cjksPassword" ng-model="cjksPassword" ng-minlength="5" ng-maxlength="10" required placeholder="min. 5 max. 10 char">
+                            <div class="help-block" ng-show="azureCredentialForm.cjksPassword.$dirty && azureCredentialForm.cjksPassword.$invalid">
+                                <i class="fa fa-warning"></i> {{error_msg.credential_file_pwd_invalid}}
+                            </div>
                         </div>
                         <!-- .col-sm-9 -->
 
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-group" ng-class="{ 'has-error': azureCredentialForm.azure_sshPublicKey.$dirty && azureCredentialForm.azure_sshPublicKey.$invalid }">
                         <label class="col-sm-3 control-label" for="azure_sshPublicKey">SSH public key:</label>
 
                         <div class="col-sm-9">
-                            <textarea rows="4" type="text" class="form-control" ng-model="azure_sshPublicKey" id="azure_sshPublicKey" required></textarea>
+                            <textarea rows="4" type="text" class="form-control" ng-model="azure_sshPublicKey" name="azure_sshPublicKey" id="azure_sshPublicKey" required></textarea>
+                            <div class="help-block" ng-show="azureCredentialForm.azure_sshPublicKey.$dirty && azureCredentialForm.azure_sshPublicKey.$invalid">
+                                <i class="fa fa-warning"></i> {{error_msg.credential_ssh_key_invalid}}
+                            </div>
                         </div>
                         <!-- .col-sm-9 -->
 
@@ -1188,42 +1217,54 @@
 
                 <form class="form-horizontal" role="form" ng-show="awsCredential" name="awsCredentialForm">
 
-                    <div class="form-group">
+                    <div class="form-group" ng-class="{ 'has-error': awsCredentialForm.awscname.$dirty && awsCredentialForm.awscname.$invalid }">
                         <label class="col-sm-3 control-label" for="awscname">Name</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" ng-model="awscname" id="awscname" ng-minlength="5" ng-maxlength="20" required placeholder="min. 5 max. 20 char">
+                            <input type="text" class="form-control" ng-model="awscname" id="awscname" name="awscname" ng-minlength="5" ng-maxlength="20" required placeholder="min. 5 max. 20 char">
+                            <div class="help-block" ng-show="awsCredentialForm.awscname.$dirty && awsCredentialForm.awscname.$invalid">
+                                <i class="fa fa-warning"></i> {{error_msg.credential_name_invalid}}
+                            </div>
                         </div>
                         <!-- .col-sm-9 -->
 
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-group" ng-class="{ 'has-error': awsCredentialForm.awscdescription.$dirty && awsCredentialForm.awscdescription.$invalid }">
                         <label class="col-sm-3 control-label" for="awscdescription">Description</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" ng-model="awscdescription" id="awscdescription" ng-maxlength="20" placeholder="max. 20 char">
+                            <input type="text" class="form-control" ng-model="awscdescription" id="awscdescription" name="awscdescription" ng-maxlength="20" placeholder="max. 20 char">
+                            <div class="help-block" ng-show="awsCredentialForm.awscdescription.$dirty && awsCredentialForm.awscdescription.$invalid">
+                                <i class="fa fa-warning"></i> {{error_msg.credential_description_invalid}}
+                            </div>
                         </div>
                         <!-- .col-sm-9 -->
 
                     </div>
 
                     <!-- .form-group -->
-                    <div class="form-group">
+                    <div class="form-group" ng-class="{ 'has-error': awsCredentialForm.croleArn.$dirty && awsCredentialForm.croleArn.$invalid }">
                         <label class="col-sm-3 control-label" for="croleArn">IAM Role ARN</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" ng-model="croleArn" ng-minlength="5" ng-maxlength="20" required id="croleArn">
+                            <input type="text" class="form-control" name="croleArn" ng-model="croleArn" ng-minlength="5" ng-maxlength="20" required id="croleArn">
+                            <div class="help-block" ng-show="awsCredentialForm.croleArn.$dirty && awsCredentialForm.croleArn.$invalid">
+                                <i class="fa fa-warning"></i> {{error_msg.credential_iam_role_invalid}}
+                            </div>
                         </div>
                         <!-- .col-sm-9 -->
 
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-group" ng-class="{ 'has-error': awsCredentialForm.aws_sshPublicKey.$dirty && awsCredentialForm.aws_sshPublicKey.$invalid }">
                         <label class="col-sm-3 control-label" for="aws_sshPublicKey">SSH public key:</label>
 
                         <div class="col-sm-9">
-                            <textarea rows="4" type="text" class="form-control" ng-model="aws_sshPublicKey" id="aws_sshPublicKey" required></textarea>
+                            <textarea rows="4" type="text" class="form-control" ng-model="aws_sshPublicKey" name="aws_sshPublicKey" id="aws_sshPublicKey" required></textarea>
+                            <div class="help-block" ng-show="awsCredentialForm.aws_sshPublicKey.$dirty && awsCredentialForm.aws_sshPublicKey.$invalid">
+                                <i class="fa fa-warning"></i> {{error_msg.credential_ssh_key_invalid}}
+                            </div>
                         </div>
                         <!-- .col-sm-9 -->
 
