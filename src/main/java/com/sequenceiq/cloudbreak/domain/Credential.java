@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -27,6 +28,7 @@ public abstract class Credential {
 
     private String description;
 
+    @Column(columnDefinition = "TEXT")
     private String publicKey;
 
     public Credential() {
