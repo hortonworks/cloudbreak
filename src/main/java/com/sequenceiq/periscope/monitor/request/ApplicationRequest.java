@@ -52,6 +52,7 @@ public class ApplicationRequest extends AbstractEventPublisher implements EventP
     }
 
     private List<ApplicationReport> getApplicationReport() throws YarnException, IOException {
+        // TODO should check for proper state to start with
         EnumSet<YarnApplicationState> states = EnumSet.of(YarnApplicationState.RUNNING);
         return cluster.getYarnClient().getApplications(states);
     }

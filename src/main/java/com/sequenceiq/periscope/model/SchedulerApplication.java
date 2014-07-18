@@ -7,6 +7,7 @@ public class SchedulerApplication {
 
     private final ApplicationId applicationId;
     private Priority priority;
+    private boolean moved;
 
     public SchedulerApplication(String applicationId) {
         this(applicationId, Priority.NORMAL);
@@ -31,5 +32,13 @@ public class SchedulerApplication {
 
     public void setPriority(Priority priority) {
         this.priority = priority;
+    }
+
+    public boolean isMoved() {
+        return moved;
+    }
+
+    public void setMoved(boolean moved) {
+        this.moved = moved;
     }
 }
