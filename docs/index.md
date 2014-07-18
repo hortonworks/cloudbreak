@@ -306,7 +306,7 @@ Using manage credentials you can link your cloud account with the Cloudbreak acc
 
 `Role ARN:` the role string - you can find it at the summary tab of the IAM role
 
-`SSH public key` if you specify an SSH public key you can use your private key later to log into you launched instances
+`SSH public key:` if you specify an SSH public key you can use your private key later to log into your launched instances
 
 **Azure**
 
@@ -318,7 +318,7 @@ Using manage credentials you can link your cloud account with the Cloudbreak acc
 
 `File password:` your generated JKS file password - see Accounts
 
-`SSH public key` if you specify an SSH public key you can use your private key later to log into you launched instances (The key generation process is described in the Configuring the Microsoft Azure account section)
+`SSH public key:` if you specify an SSH public key you can use your private key later to log into your launched instances (The key generation process is described in the Configuring the Microsoft Azure account section)
 
 
 ###Manage templates
