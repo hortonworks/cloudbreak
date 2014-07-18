@@ -12,7 +12,7 @@ public abstract class ConnectorTestUtil {
     public static final String AZURE_DESCRIPTION = "Azure Description";
     public static final String STACK_NAME = "stack_name";
     public static final String CF_STACK_NAME = "cfStackName";
-    public static final String DEFAULT_KEY_NAME = "defaultKeyName";
+    public static final String PUBLIC_KEY = "mypublickey";
     public static final String SSH_LOCATION = "ssh_location";
 
     public static User createUser() {

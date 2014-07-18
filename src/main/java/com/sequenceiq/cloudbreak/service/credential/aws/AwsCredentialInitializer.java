@@ -19,6 +19,8 @@ public class AwsCredentialInitializer {
 
     public static final String CLOUDBREAK_KEY_NAME = "cloudbreak-key";
 
+    private static final int SUFFIX_RND = 999999;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsCredentialInitializer.class);
 
     @Autowired
@@ -35,7 +37,7 @@ public class AwsCredentialInitializer {
     private AwsCredential importKeyPairs(AwsCredential awsCredential) {
         try {
             Random rnd = new Random();
-            String keyPairName = CLOUDBREAK_KEY_NAME + rnd.nextInt(999999);
+            String keyPairName = CLOUDBREAK_KEY_NAME + "-" + rnd.nextInt(SUFFIX_RND);
             for (Regions regions : Regions.values()) {
                 if (!Regions.CN_NORTH_1.equals(regions) && !Regions.GovCloud.equals(regions)) {
                     AmazonEC2Client client = awsStackUtil.createEC2Client(regions, awsCredential);
