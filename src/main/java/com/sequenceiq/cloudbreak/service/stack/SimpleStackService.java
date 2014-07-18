@@ -61,7 +61,6 @@ public class SimpleStackService implements StackService {
     public Set<StackJson> getAll(User user) {
         Set<StackJson> result = new HashSet<>();
         for (Stack stack : user.getStacks()) {
-            CloudPlatform cp = stack.getTemplate().cloudPlatform();
             result.add(stackConverter.convert(stack));
         }
         return result;

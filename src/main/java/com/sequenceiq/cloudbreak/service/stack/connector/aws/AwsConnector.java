@@ -76,6 +76,7 @@ public class AwsConnector implements CloudPlatformConnector {
                         .withFilters(new Filter().withName("tag:" + INSTANCE_TAG_NAME).withValues(resource.getResourceName()));
                 instancesResult = ec2Client.describeInstances(instancesRequest);
             } catch (Exception ex) {
+                LOGGER.error(ex.getMessage(), ex);
                 instancesResult = new DescribeInstancesResult();
             }
 
