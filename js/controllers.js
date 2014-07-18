@@ -828,21 +828,21 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
 
         function getAmi(regionValue) {
             if(regionValue === 'US_EAST_1') {
-                return "ami-d89955b0";
+                return "ami-6ab47b02";
             } else if (regionValue === 'US_WEST_1') {
-                return "ami-314a4974";
+                return "ami-1f02015a";
             } else if (regionValue === 'US_WEST_2') {
-                return "ami-17b0c927";
+                return "ami-09e79e39";
             } else if (regionValue === 'EU_WEST_1') {
-                return "ami-7778af00";
+                return "ami-83f82ef4";
             } else if (regionValue === 'AP_SOUTHEAST_1') {
-                return "ami-468bd214";
+                return "ami-ccdd849e";
             } else if (regionValue === 'AP_SOUTHEAST_2') {
-                return "ami-678bec5d";
+                return "ami-57ef886d";
             } else if (regionValue === 'AP_NORTHEAST_1') {
-                return "ami-0bcd9d0a";
+                return "ami-0bcd9d0a"; //TODO: new AMI
             } else {
-                return "ami-1b0ca206";
+                return "ami-1b0ca206"; //TODO: new AMI
             }
         }
 
