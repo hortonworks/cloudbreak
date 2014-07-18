@@ -97,11 +97,6 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     company: signUpCompanyField.value
                 }
             }).success(function(responseData){
-                email.value = "";
-                firstName.value = "";
-                lastName.value = "";
-                password.value = "";
-                company.value = "";
                 $jq('.outerCarousel').carousel(3);
             })
             .error(function (data, status, headers, config){
