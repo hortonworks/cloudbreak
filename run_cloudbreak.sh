@@ -17,7 +17,7 @@
 : ${CB_SMTP_SENDER_FROM:?"Please set the CB_SMTP_SENDER_FROM environment variable!"}
 
 # Azure
-: ${CB_AZURE_IMAGE_URI:="http://vmdepoteastus.blob.core.windows.net/linux-community-store/community-62091-a59dcdc1-d82d-4e76-9094-27b8c018a4a1-1.vhd"}
+: ${CB_AZURE_IMAGE_URI:="http://vmdepoteastus.blob.core.windows.net/linux-community-store/community-62091-a59dcdc1-d82d-4e76-9094-27b8c018a4a1-2.vhd"}
 
 # Ambari
 : ${CB_MANAGEMENT_CONTEXT_PATH:?"Please set the CB_MANAGEMENT_CONTEXT_PATH environment variable!"}
