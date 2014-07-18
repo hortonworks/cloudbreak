@@ -1,3 +1,7 @@
+*Uluwatu is situated at the southern end of Bali and is the island most famous and consistent wave. The spot offers several waves which are working with different swells and tides.*
+
+*Uluwatu is a web UI for Cloudbreak - a cloud agnostic Hadoop as a Service API.*
+
 ##[Cloudbreak UI](https://cloudbreak.sequenceiq.com/)
 
 When we have started to work on Cloudbreak, our main goal was to create an easy to use, cloud and Hadoop distribution agnostic Hadoop as a Service API. Though we always like to automate everything and approach things with a very DevOps mindset, as a side project we have created a UI for Cloudbreak as well.
