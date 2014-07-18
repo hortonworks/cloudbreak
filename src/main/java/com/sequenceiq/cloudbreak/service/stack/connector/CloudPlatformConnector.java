@@ -8,8 +8,6 @@ import com.sequenceiq.cloudbreak.domain.User;
 
 public interface CloudPlatformConnector {
 
-    StackDescription describeStack(User user, Stack stack, Credential credential);
-
     StackDescription describeStackWithResources(User user, Stack stack, Credential credential);
 
     void deleteStack(User user, Stack stack, Credential credential);

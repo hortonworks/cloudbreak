@@ -92,54 +92,6 @@ public class AzureConnectorTest {
     }
 
     @Test
-    public void testDescribeStack() {
-        // GIVEN
-        given(azureStackUtil.createAzureClient(any(Credential.class), anyString()))
-                .willReturn(azureClient);
-        given(azureStackUtil.getVmName(anyString(), anyInt())).willReturn(DUMMY_VM_NAME);
-        given(azureClient.getCloudService(DUMMY_VM_NAME)).willReturn(new Object());
-        given(azureClient.getVirtualMachine(anyMap())).willReturn(new Object());
-        given(jsonHelper.createJsonFromString(anyString())).willReturn(jsonNode);
-        // WHEN
-        StackDescription result = underTest.describeStack(user, stack, credential);
-        // THEN
-        verify(jsonHelper, times(6)).createJsonFromString(anyString());
-        assertNotNull(result);
-    }
-
-    @Test
-    public void testDescribeStackWhenThrowsCloudServiceRelatedException() {
-        // GIVEN
-        given(azureStackUtil.createAzureClient(any(Credential.class), anyString()))
-                .willReturn(azureClient);
-        given(azureStackUtil.getVmName(anyString(), anyInt())).willReturn(DUMMY_VM_NAME);
-        given(azureClient.getCloudService(DUMMY_VM_NAME)).willThrow(new IllegalStateException());
-        given(azureClient.getVirtualMachine(anyMap())).willReturn(new Object());
-        given(jsonHelper.createJsonFromString(anyString())).willReturn(jsonNode);
-        // WHEN
-        StackDescription result = underTest.describeStack(user, stack, credential);
-        // THEN
-        verify(jsonHelper, times(6)).createJsonFromString(anyString());
-        assertNotNull(result);
-    }
-
-    @Test
-    public void testDescribeStackWhenThrowsVirtualMachineRelatedException() {
-        // GIVEN
-        given(azureStackUtil.createAzureClient(any(Credential.class), anyString()))
-                .willReturn(azureClient);
-        given(azureStackUtil.getVmName(anyString(), anyInt())).willReturn(DUMMY_VM_NAME);
-        given(azureClient.getCloudService(DUMMY_VM_NAME)).willReturn(new Object());
-        given(azureClient.getVirtualMachine(anyMap())).willThrow(new IllegalStateException());
-        given(jsonHelper.createJsonFromString(anyString())).willReturn(jsonNode);
-        // WHEN
-        StackDescription result = underTest.describeStack(user, stack, credential);
-        // THEN
-        verify(jsonHelper, times(6)).createJsonFromString(anyString());
-        assertNotNull(result);
-    }
-
-    @Test
     public void testDescribeStackWithResources() {
         // GIVEN
         given(azureStackUtil.createAzureClient(any(Credential.class), anyString()))
