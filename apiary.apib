@@ -220,6 +220,7 @@ Adds an AWS IAM role ARN with the user's account.
                "name": "sqiq-0002",
                "cloudPlatform": "AWS",
                "description": "My aws credential",
+               "publicKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCasJyap4swb4Hk4xOlnF3OmKVwzmv2e053yrtvcUPaxCeboSltOBReuTQxX+kYCgKCdtEwpIvEDXk16T6nCI4tSptAalFgpUWn+JOysCuLuWnwrk6mSKOzEiPYCrB54444mDY6rbBDSRuE/VUYQ/yi0imocARlOiFdPRlZGTN0XGE1V8LSo+m0oIzTwBKn58I4v5iB4ZUL/6adGXo7dgdBh/Fmm4uYbgrCZnL1kldjfksjdfkskdjlfEaKpMxSG76XWhuzFpHjLkRndz88ha0rB6davag6nZGdno5IepLAWg9oB4jTApHwhN2j1rWLN2y1c+pTxsF6LxBiN5rsYKR495VFmuOepLYz5I8Dn sequence-eu",
                "parameters": {
                    "roleArn": "arn:aws:iam::755047402263:role/seq-self-cf"
                 }
@@ -248,6 +249,7 @@ Adds an Azure JKS the user's account.
                 "name": "sqiq-0001",
                 "cloudPlatform": "AZURE",
                 "description": "My azure credential",
+                "publicKey": "-----BEGIN CERTIFICATE-----MIICsDCCAhmgAwIBAgIJAPtq+czPZYU/MA0GCSqGSIb3DQEBBQUAMEUxCzAJBgNVBAYTAkFVMRMwEQYDVQQIEwpTb21lLVN0YXRlMSEwHw-----END CERTIFICATE-----",
                 "parameters": {
                     "subscriptionId": "1234-5678-1234-5678",
                     "jksPassword": "pw123"
@@ -362,7 +364,8 @@ Templates describe cloud infrastructures and are used for creating cloud stacks 
 + T2Medium
 + M3Medium
 + M3Large
-+ M3XLarge
++ M3Xlarge
++ M32xlarge
 
 #### Azure vm types:
 + EXTRA_SMALL
@@ -390,8 +393,7 @@ Creates an AWS template (vpc, subnet, internetGateway, routeTable, securityGroup
                 "parameters": {
                     "sshLocation": "0.0.0.0/0"
                     "region": "eu-west-1",
-                    "keyName": "sequence-eu",
-                    "instanceType": "M3XLarge",
+                    "instanceType": "M3Xlarge",
                     "amiId": "ami-12345678"
                 }
             }
@@ -423,7 +425,6 @@ Creates an Azure cloud template. (vpc, subnet, instances)
                     "imageName": "sequnceiq-ambari-docker-v1",
                     "password": "Password!@#$",
                     "vmType": "SMALL",
-                    "sshPublicKey": "-----BEGIN CERTIFICATE-----MIICsDCCAhmgAwIBAgIJAPtq+czPZYU/MA0GCSqGSIb3DQEBBQUAMEUxCzAJBgNVBAYTAkFVMRMwEQYDVQQIEwpTb21lLVN0YXRlMSEwHw-----END CERTIFICATE-----"
                 }
             }
 
