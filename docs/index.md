@@ -232,6 +232,9 @@ We work around the concept that Identity and Access Management is fully controll
 ###Configuring the AWS EC2 account
 
 Once you have logged in Cloudbreak you will have to link your AWS account with the Cloudbreak one. In order to do that you will need to configure an IAM Role.
+You can do this on the management console, or - if you have aws-cli configured - by running a small script we're providing in the `docs/aws` folder.
+
+####Create IAM role on the console
 
 1. Log in to the AWS management console with the user account you'd like to use with Cloudbreak
 2. Go to IAM and select Roles
@@ -246,6 +249,12 @@ Once you have logged in Cloudbreak you will have to link your AWS account with t
 
       Use this policy **[document](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/aws/iam_role.policy)** to configure the permission to start EC2 instances on the end user's behalf, and use SNS to receive notifications.
 
+####Create IAM role with the create script
+
+1. Download the contents of [this folder](https://github.com/sequenceiq/cloudbreak/tree/master/docs/aws) in a directory.
+2. Enter the directory
+3. Run `./create-iam-role`
+4. Copy the resulting role ARN
 
 Once this is configured, Cloudbreak is ready to launch Hadoop clusters on your behalf. The only thing Cloudbreak requires is the `Role ARN` (Role for Cross-Account access).
 
