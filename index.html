@@ -364,14 +364,6 @@
                     <!-- .col-sm-9 -->
                 </div>
                 <div class="form-group">
-                    <label class="col-sm-3 control-label" for="awskeyName">keyName</label>
-
-                    <div class="col-sm-9">
-                        <p id="awskeyName" class="form-control-static">{{activeStack.template.parameters.keyName}}</p>
-                    </div>
-                    <!-- .col-sm-9 -->
-                </div>
-                <div class="form-group">
                     <label class="col-sm-3 control-label" for="awsregion">Region</label>
 
                     <div class="col-sm-9">
@@ -675,25 +667,8 @@
         &lt;!&ndash; .col-sm-9 &ndash;&gt;
 
     </div>-->
-    <div class="form-group" ng-hide="azure_sshPublicKey.length">
-        <label class="col-sm-3 control-label" for="azure_tpassword">Password</label>
 
-        <div class="col-sm-9">
-            <input type="text" class="form-control" ng-model="azure_tpassword" id="azure_tpassword">
-        </div>
-        <!-- .col-sm-9 -->
 
-    </div>
-
-    <div class="form-group" ng-hide="azure_tpassword.length">
-        <label class="col-sm-3 control-label" for="azure_sshPublicKey">SSH public key:</label>
-
-        <div class="col-sm-9">
-            <textarea rows="4" type="text" class="form-control" ng-model="azure_sshPublicKey" id="azure_sshPublicKey"></textarea>
-        </div>
-        <!-- .col-sm-9 -->
-
-    </div>
 
     <div class="row btn-row">
         <div class="col-sm-9 col-sm-offset-3">
@@ -729,15 +704,6 @@
 
         <div class="col-sm-9">
             <input type="text" class="form-control" id="aws_tsshLocation">
-        </div>
-        <!-- .col-sm-9 -->
-
-    </div>
-    <div class="form-group">
-        <label class="col-sm-3 control-label" for="aws_tkeyName" required>SSH key name</label>
-
-        <div class="col-sm-9">
-            <input type="text" class="form-control" id="aws_tkeyName">
         </div>
         <!-- .col-sm-9 -->
 
@@ -909,14 +875,6 @@
 
                         <div class="col-sm-9">
                             <p id="awssshLocation" class="form-control-static">{{template.parameters.sshLocation}}</p>
-                        </div>
-                        <!-- .col-sm-9 -->
-                    </div>
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label" for="awskeyName">SSH key name</label>
-
-                        <div class="col-sm-9">
-                            <p id="awskeyName" class="form-control-static">{{template.parameters.keyName}}</p>
                         </div>
                         <!-- .col-sm-9 -->
                     </div>
@@ -1207,6 +1165,17 @@
                         <!-- .col-sm-9 -->
 
                     </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="azure_sshPublicKey">SSH public key:</label>
+
+                        <div class="col-sm-9">
+                            <textarea rows="4" type="text" class="form-control" ng-model="azure_sshPublicKey" id="azure_sshPublicKey" required></textarea>
+                        </div>
+                        <!-- .col-sm-9 -->
+
+                    </div>
+
                     <div class="row btn-row">
                         <div class="col-sm-9 col-sm-offset-3">
                             <a href="#" id="createAzureCredential" ng-disabled="azureCredentialForm.$invalid" class="btn btn-success btn-block" ng-click="createAzureCredential()" role="button"><i
@@ -1245,6 +1214,16 @@
 
                         <div class="col-sm-9">
                             <input type="text" class="form-control" ng-model="croleArn" ng-minlength="5" ng-maxlength="20" required id="croleArn">
+                        </div>
+                        <!-- .col-sm-9 -->
+
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="aws_sshPublicKey">SSH public key:</label>
+
+                        <div class="col-sm-9">
+                            <textarea rows="4" type="text" class="form-control" ng-model="aws_sshPublicKey" id="aws_sshPublicKey" required></textarea>
                         </div>
                         <!-- .col-sm-9 -->
 

@@ -661,8 +661,6 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                         location: azure_tlocation.value,
                         vmType: azure_tvmType.value,
                         imageName: "ambari-docker-v1",
-                        password: azure_tpassword.value,
-                        sshPublicKey: azure_sshPublicKey.value,
                         ports:[]
                     }
                 }
@@ -693,6 +691,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     cloudPlatform: "AWS",
                     name: awscname.value,
                     description: awscdescription.value,
+                    publicKey: aws_sshPublicKey.value,
                     parameters: {
                         roleArn: croleArn.value
                     }
@@ -722,6 +721,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     cloudPlatform: "AZURE",
                     name: cname.value,
                     description: cdescription.value,
+                    publicKey: azure_sshPublicKey.value,
                     parameters: {
                         subscriptionId: csubscriptionId.value,
                         jksPassword: cjksPassword.value
