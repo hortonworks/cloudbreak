@@ -1248,7 +1248,7 @@
                         <label class="col-sm-3 control-label" for="croleArn">IAM Role ARN</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" name="croleArn" ng-model="croleArn" ng-minlength="5" ng-maxlength="20" required id="croleArn">
+                            <input type="text" class="form-control" name="croleArn" ng-model="croleArn" ng-minlength="5" required id="croleArn">
                             <div class="help-block" ng-show="awsCredentialForm.croleArn.$dirty && awsCredentialForm.croleArn.$invalid">
                                 <i class="fa fa-warning"></i> {{error_msg.credential_iam_role_invalid}}
                             </div>
