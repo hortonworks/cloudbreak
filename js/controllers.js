@@ -27,7 +27,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                               headers: {'Content-Type': 'application/x-www-form-urlencoded'}
                               }).success(function(responseData){
                                  if (responseData && responseData.length != 0) {
-                                    $jq('.carousel').carousel(1);
+                                    $jq('.outerCarousel').carousel(1);
                                  } else {
                                     alert("Sign up confirmation is failed.")
                                  }
