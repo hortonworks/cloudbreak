@@ -18,7 +18,6 @@ public class AwsTemplate extends Template implements ProvisionEntity {
     private String description;
     @Enumerated(EnumType.STRING)
     private Regions region;
-    private String keyName;
     private String amiId;
     @Enumerated(EnumType.STRING)
     private InstanceType instanceType;
@@ -53,14 +52,6 @@ public class AwsTemplate extends Template implements ProvisionEntity {
 
     public void setRegion(Regions region) {
         this.region = region;
-    }
-
-    public String getKeyName() {
-        return keyName;
-    }
-
-    public void setKeyName(String keyName) {
-        this.keyName = keyName;
     }
 
     public String getAmiId() {

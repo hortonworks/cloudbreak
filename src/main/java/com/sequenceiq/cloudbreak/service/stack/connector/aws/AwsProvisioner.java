@@ -53,7 +53,7 @@ public class AwsProvisioner implements Provisioner {
                         new Parameter().withParameterKey("StackName").withParameterValue(stackName),
                         new Parameter().withParameterKey("InstanceCount").withParameterValue(stack.getNodeCount().toString()),
                         new Parameter().withParameterKey("InstanceType").withParameterValue(awsTemplate.getInstanceType().toString()),
-                        new Parameter().withParameterKey("KeyName").withParameterValue(awsTemplate.getKeyName()),
+                        new Parameter().withParameterKey("KeyName").withParameterValue(awsCredential.getSshKeyName()),
                         new Parameter().withParameterKey("AMI").withParameterValue(awsTemplate.getAmiId())
                 );
         CreateStackResult createStackResult = client.createStack(createStackRequest);

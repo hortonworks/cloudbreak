@@ -48,12 +48,12 @@ public class UserInitializer implements InitializingBean {
             AwsCredential awsCredential = new AwsCredential();
             awsCredential.setRoleArn("arn:aws:iam::755047402263:role/seq-self-cf");
             awsCredential.setAwsCredentialOwner(user2);
+            awsCredential.setSshKeyName("sequence-eu");
             awsCredential.setName("aws_credential");
 
             user2.getAwsCredentials().add(awsCredential);
 
             AwsTemplate awsTemplate = new AwsTemplate();
-            awsTemplate.setKeyName("sequence-eu");
             awsTemplate.setName("Aws development environment");
             awsTemplate.setDescription("description sample");
             awsTemplate.setRegion(Regions.EU_WEST_1);

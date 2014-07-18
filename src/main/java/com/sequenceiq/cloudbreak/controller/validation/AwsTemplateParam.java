@@ -6,7 +6,6 @@ import com.google.common.base.Optional;
 
 public enum AwsTemplateParam implements TemplateParam {
 
-    KEY_NAME("keyName", true, String.class, Optional.<String>absent()),
     REGION("region", true, Regions.class, Optional.<String>absent()),
     AMI_ID("amiId", true, String.class, Optional.<String>absent()),
     INSTANCE_TYPE("instanceType", true, InstanceType.class, Optional.<String>absent()),
