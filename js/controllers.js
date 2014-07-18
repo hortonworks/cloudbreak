@@ -670,8 +670,6 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 azure_tclusterName.value = "";
                 azure_tdescription.value = "";
                 azure_tclusterName.value = "";
-                azure_tpassword.value = "";
-                azure_sshPublicKey.text("");
             }).error(function (data, status, headers, config) {
                 $scope.statusMessage = "Azure template creation failed: " + data.message;
             });
