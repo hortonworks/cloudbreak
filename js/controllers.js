@@ -623,7 +623,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     name: aws_tclusterName.value,
                     description: aws_tdescription.value,
                     parameters: {
-                        keyName: aws_tkeyName.value,
+                        sshLocation: aws_tsshLocation.value,
                         region: aws_tregion.value,
                         instanceType: aws_tinstanceType.value,
                         amiId: getAmi(aws_tregion.value)
@@ -633,10 +633,9 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 $scope.statusMessage = "AWS template '" + data.id + "' was created successfully";
                 $scope.getTemplates();
                 aws_tclusterName.value = "";
-                aws_tkeyName.value = "";
                 aws_tamiId.value = "";
                 aws_tdescription.value = "";
-                aws_tsshLocation.value= "";
+                aws_tsshLocation.value = "";
             }).error(function (data, status, headers, config) {
                 $scope.statusMessage = "Creation of AWS template failed: " + data.message;
             });
