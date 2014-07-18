@@ -27,6 +27,8 @@ public abstract class Credential {
 
     private String description;
 
+    private String publicKey;
+
     public Credential() {
 
     }
@@ -37,6 +39,14 @@ public abstract class Credential {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getPublicKey() {
+        return publicKey;
+    }
+
+    public void setPublicKey(String publicKey) {
+        this.publicKey = publicKey;
     }
 
     public Long getId() {

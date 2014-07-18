@@ -48,7 +48,12 @@ public class UserInitializer implements InitializingBean {
             AwsCredential awsCredential = new AwsCredential();
             awsCredential.setRoleArn("arn:aws:iam::755047402263:role/seq-self-cf");
             awsCredential.setAwsCredentialOwner(user2);
-            awsCredential.setSshKeyName("sequence-eu");
+            awsCredential.setPublicKey("ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCasJyap4swb4Hk4xOlnF"
+                    + "3OmKVwzmv2e053yrtvcUPaxCeboSltOBReuTQxX+kYCgKCdtEwpIvEDXk16T6nCI4tSptAalFgp"
+                    + "UWn+JOysCuLuWnwrk6mSKOzEiPYCrB54444mDY6rbBDSRuE/VUYQ/yi0imocARlOiFdPRlZGTN0"
+                    + "XGE1V8LSo+m0oIzTwBKn58I4v5iB4ZUL/6adGXo7dgdBh/Fmm4uYbgrCZnL1EaKpMxSG76XWhuz"
+                    + "FpHjLkRndz88ha0rB6davag6nZGdno5IepLAWg9oB4jTApHwhN2j1rWLN2y1c+pTxsF6LxBiN5r"
+                    + "sYKR495VFmuOepLYz5I8Dn sequence-eu");
             awsCredential.setName("aws_credential");
 
             user2.getAwsCredentials().add(awsCredential);
