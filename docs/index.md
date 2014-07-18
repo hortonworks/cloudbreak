@@ -264,6 +264,12 @@ In order to create a Cloudbreak account associated with your Azure account you w
 4. You should download the generated `certification`
 5. On Azure go to Settings and `Management Certificates` and upload the `cert` file
 
+Use `openssl` to generate an X509 certificate with a 2048-bit RSA keypair. Please answer the few questions that the openssl prompts for (or you may leave them blank). The content in these fields is not used by the platform:
+
+```openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout myPrivateKey.key -out myCert.pem```
+
+The content of the myCert.pem file is the publicKey in the credential requests.
+
 You are done - from now on Cloudbreak can launch Azure instances on your behalf.
 
 _Note1: Cloudbreak does not store any login details into these instances - when you are creating Templates you can specify a `password` or `SSH Public key` which you can use to login into the launched instances._
@@ -300,6 +306,8 @@ Using manage credentials you can link your cloud account with the Cloudbreak acc
 
 `Role ARN:` the role string - you can find it at the summary tab of the IAM role
 
+`SSH public key` if you specify an SSH public key you can use your private key later to log into you launched instances
+
 **Azure**
 
 `Name:` name of your credential
@@ -309,6 +317,9 @@ Using manage credentials you can link your cloud account with the Cloudbreak acc
 `Subscription Id:` your Azure subscription id - see Accounts
 
 `File password:` your generated JKS file password - see Accounts
+
+`SSH public key` if you specify an SSH public key you can use your private key later to log into you launched instances (The key generation process is described in the Configuring the Microsoft Azure account section)
+
 
 ###Manage templates
 
@@ -323,8 +334,6 @@ Using manage templates you can create infrastructure templates.
 `AMI:` the AMI which contains the Docker containers
 
 `SSH location:` allowed inbound SSH access. Use 0.0.0.0/0 as default
-
-`SSH key name:` your SSH key name used on AWS
 
 `Region:` AWS region where you'd like to launch your cluster
 
@@ -343,8 +352,6 @@ Using manage templates you can create infrastructure templates.
 `Instance type:` the Azure instance type to be used - we suggest to use at least small or medium instances
 
 `Password:` if you specify a password you can use it later to log into you launched instances
-
-`SSH public key` if you specify an SSH public key you can use your private key later to log into you launched instances
 
 ###Manage blueprints
 Blueprints are your declarative definition of a Hadoop cluster.

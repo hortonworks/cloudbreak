@@ -237,6 +237,12 @@ Adds an AWS IAM role ARN with the user's account.
 ### Add credential [POST]
 Adds an Azure JKS the user's account.
 
+Use `openssl` to generate an X509 certificate with a 2048-bit RSA keypair. Please answer the few questions that the openssl prompts for (or you may leave them blank). The content in these fields is not used by the platform:
+
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout myPrivateKey.key -out myCert.pem
+
+The content of the myCert.pem file is the publicKey in the request
+
 + Request
 
     + Headers
