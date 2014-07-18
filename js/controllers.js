@@ -633,7 +633,6 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 $scope.statusMessage = "AWS template '" + data.id + "' was created successfully";
                 $scope.getTemplates();
                 aws_tclusterName.value = "";
-                aws_tamiId.value = "";
                 aws_tdescription.value = "";
                 aws_tsshLocation.value = "";
             }).error(function (data, status, headers, config) {
