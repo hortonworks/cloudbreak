@@ -107,7 +107,7 @@ public class AzureProvisioner implements Provisioner {
             try {
                 String vmName = azureStackUtil.getVmName(name, i);
                 createCloudService(azureClient, azureTemplate, vmName, commonName);
-                createServiceCertificate(azureClient, azureTemplate, vmName, emailAsFolder);
+                createServiceCertificate(azureClient, azureTemplate, credential, vmName, emailAsFolder);
                 createVirtualMachine(azureClient, azureTemplate, credential, name, vmName, commonName, userData);
                 resourceSet.add(new Resource(ResourceType.VIRTUAL_MACHINE, vmName, stack));
                 resourceSet.add(new Resource(ResourceType.CLOUD_SERVICE, vmName, stack));
@@ -166,16 +166,13 @@ public class AzureProvisioner implements Provisioner {
                 azureTemplate.getImageName().equals(AzureStackUtil.IMAGE_NAME) ? azureStackUtil.getOsImageName(credential) : azureTemplate.getImageName());
         props.put(IMAGESTOREURI,
                 String.format("http://%s.blob.core.windows.net/vhd-store/%s.vhd", commonName, vmName)
-                );
+        );
         props.put(HOSTNAME, vmName);
         props.put(USERNAME, DEFAULT_USER_NAME);
-        if (azureTemplate.getPassword() != null && !azureTemplate.getPassword().isEmpty()) {
-            props.put(PASSWORD, azureTemplate.getPassword());
-        } else {
-            X509Certificate sshCert = azureStackUtil.createX509Certificate(azureTemplate, azureTemplate.getOwner().emailAsFolder());
-            props.put(SSHPUBLICKEYFINGERPRINT, sshCert.getSha1Fingerprint().toUpperCase());
-            props.put(SSHPUBLICKEYPATH, String.format("/home/%s/.ssh/authorized_keys", DEFAULT_USER_NAME));
-        }
+        X509Certificate sshCert = azureStackUtil.createX509Certificate((AzureCredential) credential, azureTemplate.getOwner().emailAsFolder());
+        props.put(SSHPUBLICKEYFINGERPRINT, sshCert.getSha1Fingerprint().toUpperCase());
+        props.put(SSHPUBLICKEYPATH, String.format("/home/%s/.ssh/authorized_keys", DEFAULT_USER_NAME));
+
         props.put(SERVICENAME, vmName);
         props.put(SUBNETNAME, name);
         props.put(CUSTOMDATA, new String(Base64.encodeBase64(userData.getBytes())));
@@ -197,11 +194,11 @@ public class AzureProvisioner implements Provisioner {
         azureClient.waitUntilComplete(requestId);
     }
 
-    private void createServiceCertificate(AzureClient azureClient, AzureTemplate azureTemplate, String name, String emailAsFolder)
+    private void createServiceCertificate(AzureClient azureClient, AzureTemplate azureTemplate, Credential credential, String name, String emailAsFolder)
             throws FileNotFoundException, CertificateException {
         Map<String, String> props = new HashMap<>();
         props.put(NAME, name);
-        X509Certificate sshCert = azureStackUtil.createX509Certificate(azureTemplate, emailAsFolder);
+        X509Certificate sshCert = azureStackUtil.createX509Certificate((AzureCredential) credential, emailAsFolder);
         props.put(DATA, new String(sshCert.getPem()));
         HttpResponseDecorator serviceCertificate = (HttpResponseDecorator) azureClient.createServiceCertificate(props);
         String requestId = (String) azureClient.getRequestId(serviceCertificate);

@@ -54,7 +54,6 @@ public class AzureConnectorTestUtil extends ConnectorTestUtil {
         azureTemplate.setVmType(AzureVmType.MEDIUM.toString());
         azureTemplate.setDescription(AZURE_DESCRIPTION);
         azureTemplate.setImageName(IMAGE_NAME);
-        azureTemplate.setPassword(DUMMY_PASSWORD);
         return azureTemplate;
     }
 }

@@ -21,6 +21,8 @@ public class CredentialJson implements JsonEntity {
     private CloudPlatform cloudPlatform;
     private Map<String, Object> parameters = new HashMap<>();
     private String description;
+    @NotNull
+    private String publicKey;
 
     public CredentialJson() {
 
@@ -58,6 +60,14 @@ public class CredentialJson implements JsonEntity {
 
     public void setCloudPlatform(CloudPlatform cloudPlatform) {
         this.cloudPlatform = cloudPlatform;
+    }
+
+    public String getPublicKey() {
+        return publicKey;
+    }
+
+    public void setPublicKey(String publicKey) {
+        this.publicKey = publicKey;
     }
 
     public Map<String, Object> getParameters() {

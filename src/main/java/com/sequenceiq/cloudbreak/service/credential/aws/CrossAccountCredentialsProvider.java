@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.repository.TemporaryAwsCredentialsRepository;
 public class CrossAccountCredentialsProvider {
 
     public static final int DEFAULT_SESSION_CREDENTIALS_DURATION = 3600;
+    public static final String DEFAULT_EXTERNAL_ID = "provision-ambari";
     private static final int MILLISECONDS = 1000;
     private static final int FIVE_MINUTES = 300000;
 

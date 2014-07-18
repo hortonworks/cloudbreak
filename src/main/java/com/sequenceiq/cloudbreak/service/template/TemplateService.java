@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.template;
 
-import java.io.File;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
@@ -17,5 +16,4 @@ public interface TemplateService {
 
     void delete(Long id);
 
-    File getSshPublicKeyFile(User user, Long templateId);
 }

@@ -1,5 +1,20 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anySetOf;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
 import com.sequenceiq.cloudbreak.controller.json.CredentialJson;
 import com.sequenceiq.cloudbreak.controller.json.SnsTopicJson;
 import com.sequenceiq.cloudbreak.controller.validation.AWSCredentialParam;
@@ -7,19 +22,7 @@ import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.SnsTopic;
 import com.sequenceiq.cloudbreak.domain.TemporaryAwsCredentials;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.anySetOf;
+import com.sequenceiq.cloudbreak.service.credential.aws.AwsCredentialInitializer;
 
 public class AwsCredentialConverterTest {
 
@@ -32,7 +35,12 @@ public class AwsCredentialConverterTest {
     @Mock
     private SnsTopicConverter snsTopicConverter;
 
+    @Mock
+    private AwsCredentialInitializer awsCredentialInitializer;
+
     private AwsCredential awsCredential;
+
+    private AwsCredential awsCredentialWithKeyName;
 
     private CredentialJson credentialJson;
 
@@ -41,6 +49,8 @@ public class AwsCredentialConverterTest {
         underTest = new AwsCredentialConverter();
         MockitoAnnotations.initMocks(this);
         awsCredential = createAwsCredential();
+        awsCredentialWithKeyName = createAwsCredential();
+        awsCredentialWithKeyName.setKeyPairName("mykeypair");
         credentialJson = createCredentialJson();
     }
 
@@ -72,13 +82,14 @@ public class AwsCredentialConverterTest {
     @Test
     public void testConvertAwsCredentialJsonToEntity() {
         // GIVEN
+        given(awsCredentialInitializer.init(any(AwsCredential.class))).willReturn(awsCredentialWithKeyName);
         // WHEN
         AwsCredential result = underTest.convert(credentialJson);
         // THEN
         assertEquals(result.getRoleArn(),
                 credentialJson.getParameters().get(AWSCredentialParam.ROLE_ARN.getName()));
         assertEquals(result.getCredentialName(), credentialJson.getName());
-
+        assertEquals(result.getKeyPairName(), "mykeypair");
 
     }
 

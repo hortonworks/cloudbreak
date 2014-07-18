@@ -12,8 +12,6 @@ public enum AzureTemplateParam implements TemplateParam {
     IMAGENAME("imageName", true, String.class, Optional.<String>absent()),
     VMTYPE("vmType", true, AzureVmType.class, Optional.<String>absent()),
 
-    SSH_PUBLIC_KEY("sshPublicKey", false, String.class, Optional.<String>absent()),
-    PASSWORD("password", false, String.class, Optional.<String>absent()),
     PORTS("ports", false, ArrayList.class, Optional.<String>absent());
 
     private final String paramName;

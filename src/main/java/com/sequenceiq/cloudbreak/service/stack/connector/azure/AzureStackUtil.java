@@ -1,15 +1,15 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.azure;
 
-import com.sequenceiq.cloud.azure.client.AzureClient;
-import com.sequenceiq.cloudbreak.domain.AzureCredential;
-import com.sequenceiq.cloudbreak.domain.AzureTemplate;
-import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
-import org.springframework.stereotype.Component;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.security.cert.CertificateException;
+
+import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.domain.AzureCredential;
+import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
 
 @Component
 public class AzureStackUtil {
@@ -37,7 +37,7 @@ public class AzureStackUtil {
         );
     }
 
-    public X509Certificate createX509Certificate(AzureTemplate azureTemplate, String emailAsFolder) throws FileNotFoundException, CertificateException {
-        return new X509Certificate(AzureCertificateService.getCerFile(emailAsFolder, azureTemplate.getId()));
+    public X509Certificate createX509Certificate(AzureCredential azureCredential, String emailAsFolder) throws FileNotFoundException, CertificateException {
+        return new X509Certificate(AzureCertificateService.getCerFile(emailAsFolder, azureCredential.getId()));
     }
 }

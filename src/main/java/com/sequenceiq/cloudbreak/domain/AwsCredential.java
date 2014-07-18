@@ -23,6 +23,8 @@ public class AwsCredential extends Credential implements ProvisionEntity {
     @Column(nullable = false)
     private String name;
 
+    private String keyPairName;
+
     @OneToOne
     private TemporaryAwsCredentials temporaryAwsCredentials;
 
@@ -39,6 +41,14 @@ public class AwsCredential extends Credential implements ProvisionEntity {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getKeyPairName() {
+        return keyPairName;
+    }
+
+    public void setKeyPairName(String keyPairName) {
+        this.keyPairName = keyPairName;
     }
 
     public User getAwsCredentialOwner() {

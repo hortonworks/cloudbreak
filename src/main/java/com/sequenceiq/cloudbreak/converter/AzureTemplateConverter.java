@@ -29,7 +29,6 @@ public class AzureTemplateConverter extends AbstractConverter<TemplateJson, Azur
         putProperty(props, AzureTemplateParam.LOCATION.getName(), entity.getLocation());
         putProperty(props, AzureTemplateParam.IMAGENAME.getName(), entity.getImageName());
         putProperty(props, AzureTemplateParam.VMTYPE.getName(), entity.getVmType());
-        putProperty(props, AzureTemplateParam.PASSWORD.getName(), entity.getPassword());
         props.put(AzureTemplateParam.PORTS.getName(), entity.getPorts());
         azureTemplateJson.setCloudPlatform(CloudPlatform.AZURE);
         azureTemplateJson.setParameters(props);
@@ -45,7 +44,6 @@ public class AzureTemplateConverter extends AbstractConverter<TemplateJson, Azur
         azureTemplate.setImageName(String.valueOf(json.getParameters().get(AzureTemplateParam.IMAGENAME.getName())));
         azureTemplate.setLocation(String.valueOf(json.getParameters().get(AzureTemplateParam.LOCATION.getName())));
         azureTemplate.setName(String.valueOf(json.getName()));
-        azureTemplate.setPassword(String.valueOf(json.getParameters().get(AzureTemplateParam.PASSWORD.getName())));
         azureTemplate.setVmType(String.valueOf(json.getParameters().get(AzureTemplateParam.VMTYPE.getName())));
         Set<Port> ports = new HashSet<>();
         Object portObject = json.getParameters().get(AzureTemplateParam.PORTS.getName());

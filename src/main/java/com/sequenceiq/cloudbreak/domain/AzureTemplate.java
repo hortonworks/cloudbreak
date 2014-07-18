@@ -19,7 +19,6 @@ public class AzureTemplate extends Template implements ProvisionEntity {
     private String description;
     private String vmType;
     private String imageName;
-    private String password;
     @OneToMany(mappedBy = "azureTemplate", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Port> ports = new HashSet<>();
 
@@ -68,14 +67,6 @@ public class AzureTemplate extends Template implements ProvisionEntity {
 
     public void setVmType(String vmType) {
         this.vmType = vmType;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public Set<Port> getPorts() {

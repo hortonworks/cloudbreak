@@ -1,18 +1,19 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import static org.junit.Assert.assertEquals;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.junit.Before;
+import org.junit.Test;
+
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.ec2.model.InstanceType;
 import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
 import com.sequenceiq.cloudbreak.controller.validation.AwsTemplateParam;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
 
 public class AwsTemplateConverterTest {
 
@@ -51,8 +52,6 @@ public class AwsTemplateConverterTest {
         // GIVEN
         // WHEN
         AwsTemplate result = underTest.convert(templateJson);
-        assertEquals(result.getKeyName(),
-                templateJson.getParameters().get(AwsTemplateParam.KEY_NAME.getName()));
         assertEquals(result.cloudPlatform(), templateJson.getCloudPlatform());
     }
 
@@ -62,7 +61,6 @@ public class AwsTemplateConverterTest {
         templateJson.setDescription(DUMMY_DESCRIPTION);
         templateJson.setName(DUMMY_NAME);
         Map<String, Object> props = new HashMap<>();
-        props.put(AwsTemplateParam.KEY_NAME.getName(), DUMMY_KEY_NAME);
         props.put(AwsTemplateParam.REGION.getName(), Regions.DEFAULT_REGION.toString());
         props.put(AwsTemplateParam.AMI_ID.getName(), DUMMY_AMI_ID);
         props.put(AwsTemplateParam.INSTANCE_TYPE.getName(), InstanceType.C1Medium.name());
@@ -77,7 +75,6 @@ public class AwsTemplateConverterTest {
         awsTemplate.setDescription(DUMMY_DESCRIPTION);
         awsTemplate.setInstanceType(InstanceType.C1Medium);
         awsTemplate.setRegion(Regions.DEFAULT_REGION);
-        awsTemplate.setKeyName(DUMMY_KEY_NAME);
         awsTemplate.setSshLocation(DUMMY_SSH_LOCATION);
         awsTemplate.setAmiId(DUMMY_AMI_ID);
         awsTemplate.setName(DUMMY_NAME);

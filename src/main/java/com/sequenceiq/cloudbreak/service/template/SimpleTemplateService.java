@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.template;
 
-import java.io.File;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -13,12 +12,10 @@ import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
 import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
-import com.sequenceiq.cloudbreak.controller.validation.AzureTemplateParam;
 import com.sequenceiq.cloudbreak.converter.AwsTemplateConverter;
 import com.sequenceiq.cloudbreak.converter.AzureTemplateConverter;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.User;
@@ -111,21 +108,7 @@ public class SimpleTemplateService implements TemplateService {
         Template azureTemplate = azureTemplateConverter.convert(templateRequest);
         azureTemplate.setUser(user);
         templateRepository.save(azureTemplate);
-        Object shhPublicKey = templateRequest.getParameters().get(AzureTemplateParam.SSH_PUBLIC_KEY.getName());
-        if (shhPublicKey != null) {
-            azureCertificateService.generateSshCertificate(user, (AzureTemplate) azureTemplate, String.valueOf(shhPublicKey));
-        }
         return new IdJson(azureTemplate.getId());
-    }
-
-    @Override
-    public File getSshPublicKeyFile(User user, Long templateId) {
-        Template one = templateRepository.findOne(templateId);
-        if (CloudPlatform.AZURE.equals(one.cloudPlatform())) {
-            return azureCertificateService.getSshPublicKeyFile(user, templateId);
-        } else {
-            throw new UnsupportedOperationException("Ssh key function supported only on Azure platform.");
-        }
     }
 
     private List<Stack> getAllStackForTemplate(Long id) {

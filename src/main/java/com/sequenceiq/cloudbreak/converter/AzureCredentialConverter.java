@@ -36,6 +36,7 @@ public class AzureCredentialConverter extends AbstractConverter<CredentialJson, 
         azureCredential.setDescription(json.getDescription());
         azureCredential.setSubscriptionId(String.valueOf(json.getParameters().get(RequiredAzureCredentialParam.SUBSCRIPTION_ID.getName())));
         azureCredential.setCloudPlatform(CloudPlatform.AZURE);
+        azureCredential.setPublicKey(json.getPublicKey());
         return azureCredential;
     }
 }

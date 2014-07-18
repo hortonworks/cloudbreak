@@ -40,6 +40,7 @@ public class AwsConnectorTestUtil extends ConnectorTestUtil {
         credential.setId(DEFAULT_ID);
         credential.setCloudPlatform(CloudPlatform.AWS);
         credential.setDescription(AWS_DESCRIPTION);
+        credential.setPublicKey(PUBLIC_KEY);
         return credential;
     }
 
@@ -49,7 +50,6 @@ public class AwsConnectorTestUtil extends ConnectorTestUtil {
         awsTemplate.setUser(user);
         awsTemplate.setRegion(Regions.DEFAULT_REGION);
         awsTemplate.setInstanceType(InstanceType.C1Medium);
-        awsTemplate.setKeyName(DEFAULT_KEY_NAME);
         awsTemplate.setSshLocation(SSH_LOCATION);
         return awsTemplate;
     }
