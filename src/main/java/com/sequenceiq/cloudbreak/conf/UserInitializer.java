@@ -55,6 +55,7 @@ public class UserInitializer implements InitializingBean {
                     + "FpHjLkRndz88ha0rB6davag6nZGdno5IepLAWg9oB4jTApHwhN2j1rWLN2y1c+pTxsF6LxBiN5r"
                     + "sYKR495VFmuOepLYz5I8Dn sequence-eu");
             awsCredential.setName("aws_credential");
+            awsCredential.setKeyPairName("cloudbreak-key");
 
             user2.getAwsCredentials().add(awsCredential);
 

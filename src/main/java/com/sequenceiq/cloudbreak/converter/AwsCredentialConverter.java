@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.controller.json.CredentialJson;
 import com.sequenceiq.cloudbreak.controller.validation.AWSCredentialParam;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
-import com.sequenceiq.cloudbreak.service.credential.aws.AwsCredentialValidator;
+import com.sequenceiq.cloudbreak.service.credential.aws.AwsCredentialInitializer;
 
 @Component
 public class AwsCredentialConverter extends AbstractConverter<CredentialJson, AwsCredential> {
@@ -19,7 +19,7 @@ public class AwsCredentialConverter extends AbstractConverter<CredentialJson, Aw
     private SnsTopicConverter snsTopicConverter;
 
     @Autowired
-    private AwsCredentialValidator awsCredentialValidator;
+    private AwsCredentialInitializer awsCredentialInitializer;
 
     @Override
     public CredentialJson convert(AwsCredential entity) {
@@ -43,7 +43,7 @@ public class AwsCredentialConverter extends AbstractConverter<CredentialJson, Aw
         awsCredential.setCloudPlatform(CloudPlatform.AWS);
         awsCredential.setDescription(json.getDescription());
         awsCredential.setPublicKey(json.getPublicKey());
-        awsCredentialValidator.validate(awsCredential);
+        awsCredential = awsCredentialInitializer.init(awsCredential);
         return awsCredential;
     }
 }
