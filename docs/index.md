@@ -360,8 +360,6 @@ Using manage templates you can create infrastructure templates.
 
 `Instance type:` the Azure instance type to be used - we suggest to use at least small or medium instances
 
-`Password:` if you specify a password you can use it later to log into you launched instances
-
 ###Manage blueprints
 Blueprints are your declarative definition of a Hadoop cluster.
 
