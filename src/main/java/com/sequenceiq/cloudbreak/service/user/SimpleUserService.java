@@ -70,7 +70,8 @@ public class SimpleUserService implements UserService {
             user.setBlueprints(defaultBlueprintLoaderService.loadBlueprints(user));
             User savedUser = userRepository.save(user);
             LOGGER.info("User {} successfully saved", user);
-            MimeMessagePreparator msgPreparator = prepareMessage(user, "templates/confirmation-email.ftl", getRegisterUserConfirmPath());
+            MimeMessagePreparator msgPreparator = prepareMessage(user, "templates/confirmation-email.ftl",
+                    getRegisterUserConfirmPath(), "Cloudbreak - confirm registration");
             sendConfirmationEmail(msgPreparator);
             return savedUser.getId();
         } else {
@@ -101,7 +102,8 @@ public class SimpleUserService implements UserService {
             String confToken = DigestUtils.md5DigestAsHex(UUID.randomUUID().toString().getBytes());
             user.setConfToken(confToken);
             userRepository.save(user);
-            MimeMessagePreparator msgPreparator = prepareMessage(user, getResetTemplate(), getResetPasswordConfirmPath());
+            MimeMessagePreparator msgPreparator = prepareMessage(user, getResetTemplate(),
+                    getResetPasswordConfirmPath(), "Cloudbreak - reset password");
             sendConfirmationEmail(msgPreparator);
             return email;
         } else {
@@ -158,7 +160,7 @@ public class SimpleUserService implements UserService {
     }
 
     @VisibleForTesting
-    protected MimeMessagePreparator prepareMessage(final User user, final String template, final String confirmPath) {
+    protected MimeMessagePreparator prepareMessage(final User user, final String template, final String confirmPath, final String subject) {
         return new MimeMessagePreparator() {
             public void prepare(MimeMessage mimeMessage) throws Exception {
                 MimeMessageHelper message = new MimeMessageHelper(mimeMessage);
