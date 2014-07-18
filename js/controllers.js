@@ -97,6 +97,11 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     company: signUpCompanyField.value
                 }
             }).success(function(responseData){
+                email.value = "";
+                firstName.value = "";
+                lastName.value = "";
+                password.value = "";
+                company.value = "";
                 $jq('.outerCarousel').carousel(3);
             })
             .error(function (data, status, headers, config){
@@ -698,6 +703,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 awscname.value = "";
                 croleArn.value = "";
                 awscdescription.value = "";
+                aws_sshPublicKey.value = "";
             }).error(function (data, status, headers, config) {
                 $scope.statusMessage = "AWS template creation failed: " + data.message;
                 $scope.isFailedCreation = true;
@@ -730,6 +736,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 cdescription.value = "";
                 csubscriptionId.value = "";
                 cjksPassword.value = "";
+                azure_sshPublicKey.value = "";
             }).error(function (data, status, headers, config) {
                 $scope.statusMessage = "Azure credential creation failed: " + data.message;
             });
