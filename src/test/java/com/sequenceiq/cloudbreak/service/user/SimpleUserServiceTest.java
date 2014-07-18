@@ -56,7 +56,7 @@ public class SimpleUserServiceTest {
         // GIVEN
         given(userRepository.findByEmail(anyString())).willReturn(user);
         given(userRepository.save(user)).willReturn(user);
-        doReturn(mimeMessagePreparator).when(underTest).prepareMessage(any(User.class), anyString(), anyString());
+        doReturn(mimeMessagePreparator).when(underTest).prepareMessage(any(User.class), anyString(), anyString(), anyString());
         doNothing().when(underTest).sendConfirmationEmail(mimeMessagePreparator);
         // WHEN
         underTest.generatePasswordResetToken(DUMMY_EMAIL);

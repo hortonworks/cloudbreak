@@ -4,14 +4,19 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRawValue;
 import com.fasterxml.jackson.databind.JsonNode;
+import org.hibernate.validator.constraints.NotBlank;
+
+import javax.validation.constraints.Size;
 
 public class BlueprintJson implements JsonEntity {
 
     private String id;
+    @NotBlank
     private String name;
     private String blueprintName;
     private String url;
     private String ambariBlueprint;
+    @Size(max = 20)
     private String description;
     private Integer hostGroupCount;
 
