@@ -30,27 +30,35 @@ import javax.persistence.Version;
 })
 @NamedQueries({
         @NamedQuery(
+                name = "Stack.findOne",
+                query = "SELECT c FROM Stack c "
+                        + "WHERE c.id= :id AND c.deleted = false"),
+        @NamedQuery(
+                name = "Stack.findById",
+                query = "SELECT c FROM Stack c "
+                        + "WHERE c.id= :id AND c.deleted = false"),
+        @NamedQuery(
                 name = "Stack.findAllStackForTemplate",
                 query = "SELECT c FROM Stack c "
-                        + "WHERE c.template.id= :id"),
+                        + "WHERE c.template.id= :id AND c.deleted = false"),
         @NamedQuery(
                 name = "Stack.findStackForCluster",
                 query = "SELECT c FROM Stack c "
-                        + "WHERE c.cluster.id= :id"),
+                        + "WHERE c.cluster.id= :id AND c.deleted = false"),
         @NamedQuery(
                 name = "Stack.findRequestedStacksWithCredential",
                 query = "SELECT c FROM Stack c "
                         + "WHERE c.credential.id= :credentialId "
-                        + "AND c.status= 'REQUESTED'"),
+                        + "AND c.status= 'REQUESTED' AND c.deleted = false"),
         @NamedQuery(
                 name = "Stack.findOneWithLists",
                 query = "SELECT c FROM Stack c "
                         + "LEFT JOIN FETCH c.resources "
-                        + "WHERE c.id= :id "),
+                        + "WHERE c.id= :id AND c.deleted = false"),
         @NamedQuery(
                 name = "Stack.findByStackResourceName",
                 query = "SELECT c FROM Stack c inner join c.resources res "
-                        + "WHERE res.resourceName = :stackName AND res.resourceType = 'CLOUDFORMATION_STACK'")
+                        + "WHERE res.resourceName = :stackName AND res.resourceType = 'CLOUDFORMATION_STACK' AND c.deleted = false")
 })
 public class Stack implements ProvisionEntity {
 
@@ -101,6 +109,8 @@ public class Stack implements ProvisionEntity {
 
     @Version
     private Long version;
+
+    private Boolean deleted = Boolean.FALSE;
 
     public String getDescription() {
         return description;
@@ -236,6 +246,14 @@ public class Stack implements ProvisionEntity {
 
     public void setResources(Set<Resource> resources) {
         this.resources = resources;
+    }
+
+    public Boolean getDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
     }
 
     public List<Resource> getResourcesByType(ResourceType resourceType) {

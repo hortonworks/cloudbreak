@@ -1,11 +1,12 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import com.sequenceiq.cloudbreak.controller.json.UserJson;
-import com.sequenceiq.cloudbreak.domain.User;
-import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.controller.json.UserJson;
+import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 
 @Component
 public class UserConverter extends AbstractConverter<UserJson, User> {
@@ -38,7 +39,7 @@ public class UserConverter extends AbstractConverter<UserJson, User> {
         userJson.setCredentials(credentialService.getAll(entity));
         userJson.setAwsTemplates(awsTemplateConverter.convertAllEntityToJson(entity.getAwsTemplates()));
         userJson.setAzureTemplates(azureTemplateConverter.convertAllEntityToJson(entity.getAzureTemplates()));
-        userJson.setStacks(stackConverter.convertAllEntityToJson(entity.getStacks()));
+        userJson.setStacks(stackConverter.convertAllEntityToJsonWithClause(entity.getStacks()));
         userJson.setBlueprints(blueprintConverter.convertAllToIdList(entity.getBlueprints()));
         return userJson;
     }
