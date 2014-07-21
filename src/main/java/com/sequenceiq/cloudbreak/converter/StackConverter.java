@@ -96,7 +96,7 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
     public Set<StackJson> convertAllEntityToJsonWithClause(Collection<Stack> entityList) {
         Set<StackJson> stackJsons = new HashSet<>();
         for (Stack stack : entityList) {
-            if (Boolean.FALSE.equals(stack.getDeleted())) {
+            if (Boolean.FALSE.equals(stack.getTerminated())) {
                 stackJsons.add(convert(stack));
             }
         }
