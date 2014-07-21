@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
@@ -89,4 +93,13 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
 
     }
 
+    public Set<StackJson> convertAllEntityToJsonWithClause(Collection<Stack> entityList) {
+        Set<StackJson> stackJsons = new HashSet<>();
+        for (Stack stack : entityList) {
+            if (Boolean.FALSE.equals(stack.getTerminated())) {
+                stackJsons.add(convert(stack));
+            }
+        }
+        return stackJsons;
+    }
 }

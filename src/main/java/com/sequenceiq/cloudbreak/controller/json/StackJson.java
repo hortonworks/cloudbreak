@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.validation.constraints.Digits;
+import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
@@ -18,6 +19,7 @@ public class StackJson implements JsonEntity {
 
     private Long id;
     @Min(value = 1, message = "Count of nodes has to be min 1")
+    @Max(value = 99, message = "Count of nodes has to be max 99")
     @Digits(fraction = 0, integer = 10, message = "Node count has to be a number")
     private int nodeCount;
     @Size(max = 20, min = 2,  message = "Name has to be min 2 letter maximum 20 length")
