@@ -9,5 +9,5 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 public interface BlueprintRepository extends CrudRepository<Blueprint, Long> {
 
     @PostAuthorize("returnObject?.user?.id == principal?.id")
-    Blueprint findOne(@Param("id")Long id);
+    Blueprint findOne(@Param("id") Long id);
 }

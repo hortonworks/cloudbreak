@@ -11,13 +11,13 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 public interface StackRepository extends CrudRepository<Stack, Long> {
 
     @PostAuthorize("returnObject?.user?.id == principal?.id")
-    Stack findOne(@Param("id")Long id);
+    Stack findOne(@Param("id") Long id);
 
-    Stack findById(@Param("id")Long id);
+    Stack findById(@Param("id") Long id);
 
     Stack findOneWithLists(@Param("id") Long id);
 
-    Stack findByStackResourceName(@Param("stackName")String stackName);
+    Stack findByStackResourceName(@Param("stackName") String stackName);
 
     List<Stack> findAllStackForTemplate(@Param("id") Long id);
 

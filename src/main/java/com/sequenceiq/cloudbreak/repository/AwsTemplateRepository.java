@@ -12,5 +12,5 @@ public interface AwsTemplateRepository extends CrudRepository<AwsTemplate, Long>
     User findByName(String name);
 
     @PostAuthorize("returnObject?.user?.id == principal?.id")
-    AwsTemplate findOne(@Param("id")Long id);
+    AwsTemplate findOne(@Param("id") Long id);
 }

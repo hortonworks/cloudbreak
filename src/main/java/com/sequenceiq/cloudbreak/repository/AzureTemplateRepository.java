@@ -12,5 +12,5 @@ public interface AzureTemplateRepository extends CrudRepository<AzureTemplate, L
     User findByName(String name);
 
     @PostAuthorize("returnObject?.user?.id == principal?.id")
-    AzureTemplate findOne(@Param("id")Long id);
+    AzureTemplate findOne(@Param("id") Long id);
 }

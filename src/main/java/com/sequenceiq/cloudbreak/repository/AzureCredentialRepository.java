@@ -9,5 +9,5 @@ import com.sequenceiq.cloudbreak.domain.AzureCredential;
 public interface AzureCredentialRepository extends CrudRepository<AzureCredential, Long> {
 
     @PostAuthorize("returnObject?.owner?.id == principal?.id")
-    AzureCredential findOne(@Param("id")Long id);
+    AzureCredential findOne(@Param("id") Long id);
 }
