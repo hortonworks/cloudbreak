@@ -33,7 +33,7 @@ import com.sequenceiq.periscope.registry.ClusterRegistry;
 public class ApplicationUpdateEventHandler implements ApplicationListener<ApplicationUpdateEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationUpdateEventHandler.class);
-    private static final int HUNDRED = 100;
+    private static final int MAX_CAPACITY = 100;
 
     @Autowired
     private ClusterRegistry clusterRegistry;
@@ -148,14 +148,13 @@ public class ApplicationUpdateEventHandler implements ApplicationListener<Applic
             sb.append("\nabsolute used capacity: ").append(info.getAbsoluteUsedCapacity());
             sb.append("\nnumber of apps: ").append(info.getNumApplications());
             sb.append("\nused resources: ").append(info.getResourcesUsed());
-            sb.append("\nused capacity: ").append(info.getUsedCapacity());
 
             LOGGER.info(sb.toString());
         }
     }
 
     private float getMaxResourceCapacity(Cluster cluster, CapacitySchedulerQueueInfo info) {
-        return cluster.getTotalMB() * (info.getAbsoluteMaxCapacity() / HUNDRED);
+        return cluster.getTotalMB() * (info.getAbsoluteMaxCapacity() / MAX_CAPACITY);
     }
 
     private float getAvailableResourceCapacity(Cluster cluster, CapacitySchedulerQueueInfo info) {

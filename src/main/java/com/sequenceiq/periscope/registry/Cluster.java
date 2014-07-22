@@ -13,7 +13,6 @@ import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.periscope.model.Ambari;
 import com.sequenceiq.periscope.model.Priority;
 import com.sequenceiq.periscope.model.SchedulerApplication;
@@ -35,8 +34,7 @@ public class Cluster {
         this.ambari = ambari;
         try {
             this.applications = new ConcurrentHashMap<>();
-            this.configuration = AmbariConfigurationService.getConfiguration(
-                    new AmbariClient(ambari.getHost(), ambari.getPort(), ambari.getUser(), ambari.getPass()));
+            this.configuration = AmbariConfigurationService.getConfiguration(ambari);
             this.yarnClient = YarnClient.createYarnClient();
             this.yarnClient.init(configuration);
             this.yarnClient.start();

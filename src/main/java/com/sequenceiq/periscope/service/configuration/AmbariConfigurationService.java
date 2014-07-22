@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.periscope.model.Ambari;
 
 public class AmbariConfigurationService {
 
@@ -27,14 +28,18 @@ public class AmbariConfigurationService {
     private AmbariConfigurationService() {
     }
 
-    public static Configuration getConfiguration(AmbariClient ambariClient) throws ConnectException {
+    public static Configuration getConfiguration(Ambari ambari) throws ConnectException {
+        return getConfiguration(ambari, new AmbariClient(ambari.getHost(), ambari.getPort(), ambari.getUser(), ambari.getPass()));
+    }
+
+    public static Configuration getConfiguration(Ambari ambari, AmbariClient ambariClient) throws ConnectException {
         Configuration configuration = new Configuration(false);
         Set<Map.Entry<String, Map<String, String>>> serviceConfigs = ambariClient.getServiceConfigMap().entrySet();
         for (Map.Entry<String, Map<String, String>> serviceEntry : serviceConfigs) {
             LOGGER.debug("Processing service: {}", serviceEntry.getKey());
             for (Map.Entry<String, String> configEntry : serviceEntry.getValue().entrySet()) {
                 if (CONFIG_LIST.contains(configEntry.getKey())) {
-                    configuration.set(configEntry.getKey(), configEntry.getValue());
+                    configuration.set(configEntry.getKey(), replaceHostName(configEntry.getValue(), ambari.getHost()));
                     LOGGER.debug("Adding entry: {}", configEntry);
                 }
             }
@@ -44,6 +49,14 @@ public class AmbariConfigurationService {
         }
         decorateConfiguration(configuration);
         return configuration;
+    }
+
+    private static String replaceHostName(String value, String ip) {
+        String result = value;
+        if (value.contains(".kom")) {
+            result = ip + value.substring(value.indexOf(":"));
+        }
+        return result;
     }
 
     private static void decorateConfiguration(Configuration configuration) {
