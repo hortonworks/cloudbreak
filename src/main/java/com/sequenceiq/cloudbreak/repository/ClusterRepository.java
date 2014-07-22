@@ -11,9 +11,9 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 public interface ClusterRepository extends CrudRepository<Cluster, Long> {
 
     @PostAuthorize("returnObject?.user?.id == principal?.id")
-    Cluster findOne(Long id);
+    Cluster findOne(@Param("id")Long id);
 
-    Cluster findById(Long id);
+    Cluster findById(@Param("id")Long id);
 
     Set<Cluster> findAllClusterByBlueprint(@Param("id") Long id);
 
