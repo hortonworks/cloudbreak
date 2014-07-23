@@ -37,22 +37,36 @@ public class UserRegistrationController {
     @ResponseBody
     public ResponseEntity<IdJson> registerUser(@RequestBody @Valid UserJson userJson) {
 
-        // the default company name for a user is it's email
-        String companyName = userJson.getEmail();
+        LOGGER.info("Registering userType: {}", userJson.getUserType());
+        String companyName = null;
 
-        if (userJson.isCompanyAdmin()) {
-            companyName = userJson.getCompany();
-            // TODO define the behavior in this case
-            if (companyService.companyExists(companyName)) {
-                LOGGER.debug("Company <{}> already registered", companyName);
-                throw new BadRequestException("Company already registered");
-            }
+        switch (userJson.getUserType()) {
+            case DEFAULT:
+                // will have company user rights
+                companyName = userJson.getEmail();
+                checkCompany(companyName);
+                break;
+            case COMPANY_USER:
+                // invited by the admin! (companyName wired!)
+                companyName = userJson.getCompany();
+                break;
+            case COMPANY_ADMIN:
+                companyName = userJson.getCompany();
+                checkCompany(companyName);
+                break;
+            default:
+                throw new BadRequestException("Unsupported user type.");
         }
-
         companyService.ensureCompany(companyName);
-
         Long id = userService.registerUser(userConverter.convert(userJson));
         return new ResponseEntity<>(new IdJson(id), HttpStatus.CREATED);
+    }
+
+    private void checkCompany(String companyName) {
+        if (companyService.companyExists(companyName)) {
+            LOGGER.debug("Company <{}> already registered", companyName);
+            throw new BadRequestException("Company already registered");
+        }
     }
 
     @RequestMapping(value = "/confirm/{confToken}", method = RequestMethod.GET)

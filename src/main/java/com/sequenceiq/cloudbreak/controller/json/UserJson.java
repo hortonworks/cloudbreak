@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.controller.json;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sequenceiq.cloudbreak.domain.UserType;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotBlank;
@@ -25,7 +26,7 @@ public class UserJson implements JsonEntity {
 
     private String company;
 
-    private boolean companyAdmin;
+    private UserType userType = UserType.DEFAULT;
 
     private Set<CredentialJson> credentials;
 
@@ -123,11 +124,11 @@ public class UserJson implements JsonEntity {
         return password;
     }
 
-    public boolean isCompanyAdmin() {
-        return companyAdmin;
+    public UserType getUserType() {
+        return userType;
     }
 
-    public void setCompanyAdmin(boolean companyAdmin) {
-        this.companyAdmin = companyAdmin;
+    public void setUserType(UserType userType) {
+        this.userType = userType;
     }
 }

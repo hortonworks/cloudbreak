@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.UserJson;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.UserRole;
@@ -62,8 +63,17 @@ public class UserConverter extends AbstractConverter<UserJson, User> {
         user.setStacks(stackConverter.convertAllJsonToEntity(json.getStacks()));
         user.setPassword(passwordEncoder.encode(json.getPassword()));
         user.setCompany(companyRepository.findByName(json.getCompany()));
-        if (json.isCompanyAdmin()) {
-            user.getUserRole().add(UserRole.COMPANY_ADMIN);
+
+        switch (json.getUserType()) {
+            case DEFAULT:
+                break;
+            case COMPANY_USER:
+                break;
+            case COMPANY_ADMIN:
+                user.getUserRole().add(UserRole.COMPANY_ADMIN);
+                break;
+            default:
+                throw new BadRequestException("Unsupported user type.");
         }
         user.getUserRole().add(UserRole.COMPANY_USER);
         return user;
