@@ -1,19 +1,20 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import com.sequenceiq.cloudbreak.controller.json.UserJson;
 import com.sequenceiq.cloudbreak.controller.json.BlueprintJson;
-import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
-import com.sequenceiq.cloudbreak.controller.json.StackJson;
 import com.sequenceiq.cloudbreak.controller.json.CredentialJson;
+import com.sequenceiq.cloudbreak.controller.json.StackJson;
+import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
+import com.sequenceiq.cloudbreak.controller.json.UserJson;
+import com.sequenceiq.cloudbreak.domain.AwsCredential;
+import com.sequenceiq.cloudbreak.domain.AwsTemplate;
+import com.sequenceiq.cloudbreak.domain.AzureCredential;
+import com.sequenceiq.cloudbreak.domain.AzureTemplate;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.Company;
+import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.UserStatus;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.AwsCredential;
-import com.sequenceiq.cloudbreak.domain.AzureCredential;
-import com.sequenceiq.cloudbreak.domain.AwsTemplate;
-import com.sequenceiq.cloudbreak.domain.AzureTemplate;
-import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import org.junit.Before;
 import org.junit.Test;
@@ -133,7 +134,7 @@ public class UserConverterTest {
         user.setAzureTemplates(new HashSet<AzureTemplate>());
         user.setBlueprints(new HashSet<Blueprint>());
         user.setClusters(new HashSet<Cluster>());
-        user.setCompany(DUMMY_COMPANY);
+        user.setCompany(null);
         user.setConfToken(null);
         user.setEmail(DUMMY_EMAIL);
         user.setFirstName(DUMMY_FIRST_NAME);
@@ -152,7 +153,7 @@ public class UserConverterTest {
         userJson.setAwsTemplates(new HashSet<TemplateJson>());
         userJson.setAzureTemplates(new HashSet<TemplateJson>());
         userJson.setBlueprints(new HashSet<BlueprintJson>());
-        userJson.setCompany(DUMMY_COMPANY);
+        userJson.setCompany(null);
         userJson.setCredentials(new HashSet<CredentialJson>());
         userJson.setEmail(DUMMY_EMAIL);
         userJson.setFirstName(DUMMY_FIRST_NAME);
@@ -160,5 +161,11 @@ public class UserConverterTest {
         userJson.setPassword(DUMMY_PASSWORD);
         userJson.setStacks(new HashSet<StackJson>());
         return userJson;
+    }
+
+    private Company createCompany() {
+        Company company = new Company();
+        company.setName("SequenceIQ");
+        return company;
     }
 }

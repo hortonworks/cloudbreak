@@ -1,22 +1,29 @@
 package com.sequenceiq.cloudbreak.domain;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import org.hibernate.validator.constraints.Email;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-import org.hibernate.validator.constraints.Email;
-import org.hibernate.validator.constraints.NotEmpty;
 
 @Entity
 @NamedQueries({
@@ -50,9 +57,6 @@ public class User implements ProvisionEntity {
     @Column(unique = true, nullable = false)
     private String email;
 
-    @NotEmpty
-    private String company;
-
     @OneToMany(mappedBy = "awsCredentialOwner", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<AwsCredential> awsCredentials = new HashSet<>();
 
@@ -85,6 +89,14 @@ public class User implements ProvisionEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Cluster> clusters = new HashSet<>();
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Enumerated(EnumType.STRING)
+    private List<UserRole> userRole = new ArrayList<>();
+
+    @ManyToOne
+    private Company company;
+
+
     public User() {
     }
 
@@ -94,7 +106,6 @@ public class User implements ProvisionEntity {
         this.lastName = user.lastName;
         this.email = user.email;
         this.password = user.password;
-        this.company = user.company;
         this.confToken = user.confToken;
         this.awsTemplates = user.awsTemplates;
         this.azureTemplates = user.azureTemplates;
@@ -106,6 +117,8 @@ public class User implements ProvisionEntity {
         this.status = user.getStatus();
         this.lastLogin = user.lastLogin;
         this.registrationDate = user.registrationDate;
+        this.company = user.company;
+        this.userRole = user.userRole;
     }
 
     public String getPassword() {
@@ -225,14 +238,6 @@ public class User implements ProvisionEntity {
         this.status = status;
     }
 
-    public void setCompany(String company) {
-        this.company = company;
-    }
-
-    public String getCompany() {
-        return company;
-    }
-
     public Date getLastLogin() {
         return lastLogin;
     }
@@ -247,5 +252,21 @@ public class User implements ProvisionEntity {
 
     public void setRegistrationDate(Date registrationDate) {
         this.registrationDate = registrationDate;
+    }
+
+    public List<UserRole> getUserRole() {
+        return userRole;
+    }
+
+    public void setUserRole(List<UserRole> userRole) {
+        this.userRole = userRole;
+    }
+
+    public Company getCompany() {
+        return company;
+    }
+
+    public void setCompany(Company company) {
+        this.company = company;
     }
 }
