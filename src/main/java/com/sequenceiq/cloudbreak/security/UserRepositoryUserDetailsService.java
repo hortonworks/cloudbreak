@@ -1,11 +1,12 @@
 package com.sequenceiq.cloudbreak.security;
 
 import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.domain.UserRole;
 import com.sequenceiq.cloudbreak.domain.UserStatus;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 @Component
 public class UserRepositoryUserDetailsService implements UserDetailsService {
@@ -32,14 +35,18 @@ public class UserRepositoryUserDetailsService implements UserDetailsService {
     }
 
     private static final class UserRepositoryUserDetails extends User implements UserDetails {
+        private Set<GrantedAuthority> authorities = new HashSet<>();
 
         private UserRepositoryUserDetails(User user) {
             super(user);
+            for (UserRole role : getUserRole()) {
+                authorities.add(new SimpleGrantedAuthority(role.roleAsSecurityRole()));
+            }
         }
 
         @Override
         public Collection<? extends GrantedAuthority> getAuthorities() {
-            return AuthorityUtils.createAuthorityList("ROLE_USER");
+            return authorities;
         }
 
         @Override

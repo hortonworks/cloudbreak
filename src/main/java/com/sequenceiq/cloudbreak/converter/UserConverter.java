@@ -1,12 +1,13 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import com.sequenceiq.cloudbreak.controller.json.UserJson;
+import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.domain.UserRole;
+import com.sequenceiq.cloudbreak.repository.CompanyRepository;
+import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-
-import com.sequenceiq.cloudbreak.controller.json.UserJson;
-import com.sequenceiq.cloudbreak.domain.User;
-import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 
 @Component
 public class UserConverter extends AbstractConverter<UserJson, User> {
@@ -29,6 +30,12 @@ public class UserConverter extends AbstractConverter<UserJson, User> {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private CompanyConverter companyConverter;
+
+    @Autowired
+    private CompanyRepository companyRepository;
+
     @Override
     public UserJson convert(User entity) {
         UserJson userJson = new UserJson();
@@ -40,6 +47,7 @@ public class UserConverter extends AbstractConverter<UserJson, User> {
         userJson.setAzureTemplates(azureTemplateConverter.convertAllEntityToJson(entity.getAzureTemplates()));
         userJson.setStacks(stackConverter.convertAllEntityToJsonWithClause(entity.getStacks()));
         userJson.setBlueprints(blueprintConverter.convertAllToIdList(entity.getBlueprints()));
+        userJson.setCompany(entity.getCompany().getName());
         return userJson;
     }
 
@@ -53,6 +61,11 @@ public class UserConverter extends AbstractConverter<UserJson, User> {
         user.setAzureTemplates(azureTemplateConverter.convertAllJsonToEntity(json.getAzureTemplates()));
         user.setStacks(stackConverter.convertAllJsonToEntity(json.getStacks()));
         user.setPassword(passwordEncoder.encode(json.getPassword()));
+        user.setCompany(companyRepository.findByName(json.getCompany()));
+        if (json.isCompanyAdmin()) {
+            user.getUserRole().add(UserRole.COMPANY_ADMIN);
+        }
+        user.getUserRole().add(UserRole.COMPANY_USER);
         return user;
     }
 }

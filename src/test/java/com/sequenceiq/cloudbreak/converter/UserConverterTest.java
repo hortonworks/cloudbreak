@@ -153,7 +153,6 @@ public class UserConverterTest {
         userJson.setAwsTemplates(new HashSet<TemplateJson>());
         userJson.setAzureTemplates(new HashSet<TemplateJson>());
         userJson.setBlueprints(new HashSet<BlueprintJson>());
-        userJson.setCompany(null);
         userJson.setCredentials(new HashSet<CredentialJson>());
         userJson.setEmail(DUMMY_EMAIL);
         userJson.setFirstName(DUMMY_FIRST_NAME);
