@@ -3,6 +3,6 @@
   "lastName": "test",
   "firstName": "seq",
   "password": "test123",
-  "company": "TESTING",
-  "userType": "COMPANY_ADMIN"
+  "company": "SequenceIQ",
+  "userType": "DEFAULT"
 }

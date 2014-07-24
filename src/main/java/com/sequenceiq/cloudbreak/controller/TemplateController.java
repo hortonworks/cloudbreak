@@ -1,9 +1,12 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import java.util.Set;
-
-import javax.validation.Valid;
-
+import com.sequenceiq.cloudbreak.controller.json.IdJson;
+import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
+import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.domain.UserRole;
+import com.sequenceiq.cloudbreak.repository.UserRepository;
+import com.sequenceiq.cloudbreak.security.CurrentUser;
+import com.sequenceiq.cloudbreak.service.template.TemplateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,12 +17,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.sequenceiq.cloudbreak.controller.json.IdJson;
-import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
-import com.sequenceiq.cloudbreak.domain.User;
-import com.sequenceiq.cloudbreak.repository.UserRepository;
-import com.sequenceiq.cloudbreak.security.CurrentUser;
-import com.sequenceiq.cloudbreak.service.template.TemplateService;
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+import java.util.HashSet;
+import java.util.Set;
 
 @Controller
 @RequestMapping("templates")
@@ -40,8 +41,15 @@ public class TemplateController {
 
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<Set<TemplateJson>> getAllTemplates(@CurrentUser User user) {
-        return new ResponseEntity<>(templateService.getAll(userRepository.findOneWithLists(user.getId())), HttpStatus.OK);
+    public ResponseEntity<Set<TemplateJson>> getAllTemplates(@CurrentUser User user, HttpServletRequest request) {
+        User currentUser = userRepository.findOneWithLists(user.getId());
+        Set<TemplateJson> templates = new HashSet<>();
+        if (request.isUserInRole(UserRole.COMPANY_ADMIN.role())) {
+            templates = templateService.getAllForAdmin(currentUser);
+        } else {
+            templates = templateService.getAll(currentUser);
+        }
+        return new ResponseEntity<>(templates, HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "{templateId}")
