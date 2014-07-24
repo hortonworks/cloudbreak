@@ -711,7 +711,7 @@
         <!-- .col-sm-9 -->
 
     </div>
-    <div class="form-group">
+    <div class="form-group" ng-class="{ 'has-error': awsTemplateForm.aws_tsshLocation.$dirty && awsTemplateForm.aws_tsshLocation.$invalid }">
         <label class="col-sm-3 control-label" for="aws_tsshLocation">SSH location</label>
 
         <div class="col-sm-9">
