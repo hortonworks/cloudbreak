@@ -77,6 +77,50 @@ EOF
 
 $CMD
 
-# Update POSTROUTING rule created by Docker to support interhost package routing
-#iptables -t nat -D POSTROUTING 1
-#iptables -t nat -A POSTROUTING -s ${DOCKER_SUBNET}.0/24 ! -d 172.17.0.0/16 -j MASQUERADE
+cat <<EOF > /etc/init.d/ambari
+  #!/bin/bash
+
+  NODE_PREFIX=$NODE_PREFIX
+  MYDOMAIN=$MYDOMAIN
+  IMAGE=$IMAGE
+  INSTANCE_ID=$INSTANCE_ID
+  METADATA_ADDRESS=$METADATA_ADDRESS
+  METADATA_HASH=$METADATA_HASH
+
+  # instance id from ec2 metadata
+  INSTANCE_ID=$(sudo cat /var/lib/waagent/ovf-env.xml |grep -oPm1 "(?<=<HostName>)[^<]+")
+
+  # jq expression that selects the json entry of the current instance from the array returned by the metadata service
+  INSTANCE_SELECTOR='. | map(select(.instanceId == "'$INSTANCE_ID'"))'
+
+  # metadata service returns '204: no-content' if metadata is not ready yet and '200: ok' if it's completed
+  # every other http status codes mean that something unexpected happened
+  METADATA_STATUS=204
+  MAX_RETRIES=60
+  RETRIES=0
+  while [ $METADATA_STATUS -eq 204 ] && [ $RETRIES -ne $MAX_RETRIES ]; do
+    METADATA_STATUS=$(curl -sk -o /tmp/metadata_result -w "%{http_code}" -X GET -H Content-Type:application/json $METADATA_ADDRESS/stacks/metadata/$METADATA_HASH);
+    echo "Metadata service returned status code: $METADATA_STATUS";
+    [ $METADATA_STATUS -eq 204 ] && sleep 5 && ((RETRIES++));
+  done
+
+  [ $METADATA_STATUS -ne 200 ] && exit 1;
+
+  METADATA_RESULT=$(cat /tmp/metadata_result)
+
+  # select the docker subnet of the current instance
+  DOCKER_SUBNET=$(echo $METADATA_RESULT | jq "$INSTANCE_SELECTOR" | jq '.[].dockerSubnet' | sed s/\"//g)
+
+  # creates bridge for docker
+  ifconfig bridge0 down && brctl delbr bridge0
+  brctl addbr bridge0  && ifconfig bridge0 ${DOCKER_SUBNET}.1  netmask 255.255.255.0
+
+  service docker restart
+  sleep 5
+
+  INSTANCE_IDX=$(echo $METADATA_RESULT | jq "$INSTANCE_SELECTOR" | jq '.[].instanceIndex' | sed s/\"//g)
+  docker start ${NODE_PREFIX}${INSTANCE_IDX}
+EOF
+
+chmod +x /etc/init.d/ambari
+update-rc.d ambari defaults
