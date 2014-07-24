@@ -59,9 +59,10 @@ public class BlueprintService {
     public Set<BlueprintJson> getAllForAdmin(User user) {
         Set<BlueprintJson> blueprints = new HashSet<>();
         Company company = user.getCompany();
+        User decoratedUser = null;
         for (User cUser : company.getUsers()) {
-            cUser = userRepository.findOneWithLists(cUser.getId());
-            blueprints.addAll(blueprintConverter.convertAllEntityToJson(user.getBlueprints()));
+            decoratedUser = userRepository.findOneWithLists(cUser.getId());
+            blueprints.addAll(blueprintConverter.convertAllEntityToJson(decoratedUser.getBlueprints()));
         }
         return blueprints;
     }

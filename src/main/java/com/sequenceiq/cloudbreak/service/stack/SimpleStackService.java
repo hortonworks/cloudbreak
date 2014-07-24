@@ -75,8 +75,9 @@ public class SimpleStackService implements StackService {
     public Set<StackJson> getAllForAdmin(User user) {
         Set<StackJson> result = new HashSet<>();
         Company company = user.getCompany();
+        User decoratedUser = null;
         for (User cUser : company.getUsers()) {
-            cUser = userRepository.findOneWithLists(cUser.getId());
+            decoratedUser = userRepository.findOneWithLists(decoratedUser.getId());
             result.addAll(getAll(cUser));
         }
         return result;

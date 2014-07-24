@@ -71,8 +71,7 @@ public class StackController {
 
     @RequestMapping(method = RequestMethod.PUT, value = "{stackId}")
     @ResponseBody
-    public ResponseEntity<Boolean> startOrStopAllOnStack(@CurrentUser User user, @PathVariable Long stackId,
-                                                         @RequestBody StatusRequestJson statusRequestJson) {
+    public ResponseEntity<Boolean> startOrStopAllOnStack(@CurrentUser User user, @PathVariable Long stackId, @RequestBody StatusRequestJson statusRequestJson) {
         switch (statusRequestJson.getStatusRequest()) {
             case STOP:
                 return new ResponseEntity<>(stackService.stopAll(user, stackId), HttpStatus.OK);
