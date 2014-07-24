@@ -47,7 +47,7 @@ public class StackController {
     public ResponseEntity<Set<StackJson>> getAllStack(@CurrentUser User user, HttpServletRequest request) {
         User currentUser = userRepository.findOneWithLists(user.getId());
         Set<StackJson> stacks = new HashSet<>();
-        if (request.isUserInRole(UserRole.COMPANY_ADMIN.roleAsSecurityRole())) {
+        if (request.isUserInRole(UserRole.COMPANY_ADMIN.role())) {
             stacks = stackService.getAllForAdmin(currentUser);
         } else {
             stacks = stackService.getAll(currentUser);

@@ -50,7 +50,7 @@ public class BlueprintController {
         Set<BlueprintJson> blueprints = new HashSet<>();
         User loadedUser = userRepository.findOneWithLists(user.getId());
 
-        if (request.isUserInRole(UserRole.COMPANY_ADMIN.roleAsSecurityRole())) {
+        if (request.isUserInRole(UserRole.COMPANY_ADMIN.role())) {
             LOGGER.info("Retrieving blueprints for company administrator: {}", user.getId());
             blueprints = blueprintService.getAllForAdmin(loadedUser);
         } else {

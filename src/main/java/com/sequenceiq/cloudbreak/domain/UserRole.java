@@ -15,7 +15,7 @@ public enum UserRole {
         return this.value;
     }
 
-    public String roleAsSecurityRole() {
+    public String role() {
         return String.format("ROLE_%s", this.value);
     }
 
