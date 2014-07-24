@@ -13,6 +13,8 @@ public interface StackService {
 
     Set<StackJson> getAll(User user);
 
+    Set<StackJson> getAllForAdmin(User user);
+
     IdJson create(User user, StackJson stackRequest);
 
     void delete(User user, Long id);

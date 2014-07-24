@@ -1,9 +1,16 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import java.util.Set;
-
-import javax.validation.Valid;
-
+import com.sequenceiq.cloudbreak.controller.json.IdJson;
+import com.sequenceiq.cloudbreak.controller.json.InstanceMetaDataJson;
+import com.sequenceiq.cloudbreak.controller.json.StackJson;
+import com.sequenceiq.cloudbreak.controller.json.StatusRequestJson;
+import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
+import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.domain.UserRole;
+import com.sequenceiq.cloudbreak.repository.UserRepository;
+import com.sequenceiq.cloudbreak.security.CurrentUser;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.flow.MetadataIncompleteException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,16 +21,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.sequenceiq.cloudbreak.controller.json.IdJson;
-import com.sequenceiq.cloudbreak.controller.json.InstanceMetaDataJson;
-import com.sequenceiq.cloudbreak.controller.json.StackJson;
-import com.sequenceiq.cloudbreak.controller.json.StatusRequestJson;
-import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
-import com.sequenceiq.cloudbreak.domain.User;
-import com.sequenceiq.cloudbreak.repository.UserRepository;
-import com.sequenceiq.cloudbreak.security.CurrentUser;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.stack.flow.MetadataIncompleteException;
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+import java.util.HashSet;
+import java.util.Set;
 
 @Controller
 @RequestMapping("stacks")
@@ -43,9 +44,15 @@ public class StackController {
 
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<Set<StackJson>> getAllStack(@CurrentUser User user) {
+    public ResponseEntity<Set<StackJson>> getAllStack(@CurrentUser User user, HttpServletRequest request) {
         User currentUser = userRepository.findOneWithLists(user.getId());
-        return new ResponseEntity<>(stackService.getAll(currentUser), HttpStatus.OK);
+        Set<StackJson> stacks = new HashSet<>();
+        if (request.isUserInRole(UserRole.COMPANY_ADMIN.roleAsSecurityRole())) {
+            stacks = stackService.getAllForAdmin(currentUser);
+        } else {
+            stacks = stackService.getAll(currentUser);
+        }
+        return new ResponseEntity<>(stacks, HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "{stackId}")
@@ -65,14 +72,14 @@ public class StackController {
     @RequestMapping(method = RequestMethod.PUT, value = "{stackId}")
     @ResponseBody
     public ResponseEntity<Boolean> startOrStopAllOnStack(@CurrentUser User user, @PathVariable Long stackId,
-            @RequestBody StatusRequestJson statusRequestJson) {
+                                                         @RequestBody StatusRequestJson statusRequestJson) {
         switch (statusRequestJson.getStatusRequest()) {
-        case STOP:
-            return new ResponseEntity<>(stackService.stopAll(user, stackId), HttpStatus.OK);
-        case START:
-            return new ResponseEntity<>(stackService.startAll(user, stackId), HttpStatus.OK);
-        default:
-            throw new BadRequestException("The requested status not valid.");
+            case STOP:
+                return new ResponseEntity<>(stackService.stopAll(user, stackId), HttpStatus.OK);
+            case START:
+                return new ResponseEntity<>(stackService.startAll(user, stackId), HttpStatus.OK);
+            default:
+                throw new BadRequestException("The requested status not valid.");
         }
     }
 

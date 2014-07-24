@@ -1,25 +1,27 @@
 package com.sequenceiq.cloudbreak.service.blueprint;
 
-import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.json.BlueprintJson;
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
 import com.sequenceiq.cloudbreak.converter.BlueprintConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.Company;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
+import com.sequenceiq.cloudbreak.repository.UserRepository;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Service
 public class BlueprintService {
@@ -38,6 +40,9 @@ public class BlueprintService {
     @Autowired
     private WebsocketService websocketService;
 
+    @Autowired
+    private UserRepository userRepository;
+
     public IdJson addBlueprint(User user, BlueprintJson blueprintJson) {
         Blueprint blueprint = blueprintConverter.convert(blueprintJson);
         blueprint.setUser(user);
@@ -50,6 +55,17 @@ public class BlueprintService {
     public Set<BlueprintJson> getAll(User user) {
         return blueprintConverter.convertAllEntityToJson(user.getBlueprints());
     }
+
+    public Set<BlueprintJson> getAllForAdmin(User user) {
+        Set<BlueprintJson> blueprints = new HashSet<>();
+        Company company = user.getCompany();
+        for (User cUser : company.getUsers()) {
+            cUser = userRepository.findOneWithLists(cUser.getId());
+            blueprints.addAll(blueprintConverter.convertAllEntityToJson(user.getBlueprints()));
+        }
+        return blueprints;
+    }
+
 
     public BlueprintJson get(Long id) {
         Blueprint blueprint = blueprintRepository.findOne(id);
