@@ -619,7 +619,7 @@
         <label class="col-sm-3 control-label" for="azure_tdescription">Description</label>
 
         <div class="col-sm-9">
-            <input type="text" class="form-control" id="azure_tdescription" name="azure_tdescription" ng-model="azure_tdescription" ng-minlength="5" ng-maxlength="20" required placeholder="min. 5 max. 20 char">
+            <input type="text" class="form-control" id="azure_tdescription" name="azure_tdescription" ng-model="azure_tdescription" ng-maxlength="20" placeholder="max. 20 char">
             <div class="help-block" ng-show="azureTemplateForm.azure_tdescription.$dirty && azureTemplateForm.azure_tdescription.$invalid">
                 <i class="fa fa-warning"></i> {{error_msg.template_description_invalid}}
             </div>
@@ -703,7 +703,7 @@
         <label class="col-sm-3 control-label" for="aws_tdescription">Description</label>
 
         <div class="col-sm-9">
-            <input type="text" class="form-control" name="aws_tdescription" ng-model="aws_tdescription" ng-minlength="5" ng-maxlength="20" id="aws_tdescription" placeholder="max. 20 char">
+            <input type="text" class="form-control" name="aws_tdescription" ng-model="aws_tdescription" ng-maxlength="20" id="aws_tdescription" placeholder="max. 20 char">
             <div class="help-block" ng-show="awsTemplateForm.aws_tdescription.$dirty && awsTemplateForm.aws_tdescription.$invalid">
                 <i class="fa fa-warning"></i> {{error_msg.template_description_invalid}}
             </div>
@@ -712,10 +712,13 @@
 
     </div>
     <div class="form-group">
-        <label class="col-sm-3 control-label" for="aws_tsshLocation" required>SSH location</label>
+        <label class="col-sm-3 control-label" for="aws_tsshLocation">SSH location</label>
 
         <div class="col-sm-9">
-            <input type="text" class="form-control" id="aws_tsshLocation">
+            <input type="text" class="form-control" id="aws_tsshLocation" name="aws_tsshLocation" placeholder="0.0.0.0/0" required ng-pattern="\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\/\d+\b">
+            <div class="help-block" ng-show="awsTemplateForm.aws_tsshLocation.$dirty && awsTemplateForm.aws_tsshLocation.$invalid">
+                <i class="fa fa-warning"></i> {{error_msg.template_ssh_location_invalid}}
+            </div>
         </div>
         <!-- .col-sm-9 -->
 
@@ -1118,7 +1121,7 @@
 <div id="panel-credentials-collapse" class="panel-collapse panel-btn-in-header-collapse collapse">
 <div class="panel-body">
 
-    <p class="btn-row-over-panel"><a href="#panel-create-template-collapse" class="btn btn-success" role="button" data-toggle="collapse"
+    <p class="btn-row-over-panel"><a href="#panel-create-credential-collapse" class="btn btn-success" role="button" data-toggle="collapse"
                                      data-target="#panel-create-credential-collapse"><i
             class="fa fa-plus fa-fw"></i><span> create credential</span></a></p>
 
