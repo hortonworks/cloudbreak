@@ -1,0 +1,71 @@
+package com.sequenceiq.cloudbreak.domain;
+
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.MappedSuperclass;
+import java.util.Date;
+
+@MappedSuperclass
+public abstract class AbstractHistory implements ProvisionEntity {
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    private HistoryEvent eventType;
+
+    private Date eventTimestamp;
+
+    private String description;
+
+    private Long userId;
+
+    private String name;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Date getEventTimestamp() {
+        return eventTimestamp;
+    }
+
+    public void setEventTimestamp(Date eventTimestamp) {
+        this.eventTimestamp = eventTimestamp;
+    }
+
+    public HistoryEvent getEventType() {
+        return eventType;
+    }
+
+    public void setEventType(HistoryEvent eventType) {
+        this.eventType = eventType;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+}
