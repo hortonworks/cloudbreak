@@ -1,9 +1,10 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
-import groovyx.net.http.HttpResponseException;
+import static java.util.Collections.singletonMap;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -12,9 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import reactor.core.Reactor;
-import reactor.event.Event;
-
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.ambari.client.InvalidHostGroupHostAssociation;
@@ -22,9 +20,14 @@ import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
+
+import groovyx.net.http.HttpResponseException;
+import reactor.core.Reactor;
+import reactor.event.Event;
 
 @Service
 public class AmbariClusterInstaller {
@@ -39,7 +42,7 @@ public class AmbariClusterInstaller {
     private static final BigDecimal COMPLETED = new BigDecimal(100.0);
     private static final BigDecimal FAILED = new BigDecimal(-1.0);
 
-    private static final String UNHANDLED_EXCEPTION_MSG = "Unhandled exception occured while installing Ambari cluster.";
+    private static final String UNHANDLED_EXCEPTION_MSG = "Unhandled exception occurred while installing Ambari cluster.";
 
     @Autowired
     private ClusterRepository clusterRepository;
@@ -54,10 +57,10 @@ public class AmbariClusterInstaller {
             cluster.setCreationStarted(new Date().getTime());
             cluster = clusterRepository.save(cluster);
             Blueprint blueprint = cluster.getBlueprint();
-            addBlueprint(stack.getAmbariIp(), blueprint);
+            addBlueprint(stack, blueprint);
             AmbariClient ambariClient = createAmbariClient(stack.getAmbariIp());
             Map<String, List<String>> hostGroupMappings = recommend(stack, ambariClient, blueprint.getBlueprintName());
-            LOGGER.info("recommeneded host-hostGroup mappings for stack {}: {}", stack.getId(), hostGroupMappings);
+            LOGGER.info("recommended host-hostGroup mappings for stack {}: {}", stack.getId(), hostGroupMappings);
             ambariClient.createCluster(cluster.getName(), blueprint.getBlueprintName(), hostGroupMappings);
             BigDecimal installProgress = new BigDecimal(0);
             while (installProgress.compareTo(COMPLETED) != 0 && installProgress.compareTo(FAILED) != 0) {
@@ -100,10 +103,15 @@ public class AmbariClusterInstaller {
         return ambariClient.recommendAssignments(blueprintName);
     }
 
-    private void addBlueprint(String ambariIp, Blueprint blueprint) {
+    private void addBlueprint(Stack stack, Blueprint blueprint) {
+        String ambariIp = stack.getAmbariIp();
         AmbariClient ambariClient = createAmbariClient(ambariIp);
         try {
-            ambariClient.addBlueprint(blueprint.getBlueprintText());
+            Map<String, Map<String, String>> extendConfig = new HashMap<>();
+            if (CloudPlatform.AZURE.equals(stack.getTemplate().cloudPlatform())) {
+                extendConfig = getAzureHadoopConfig();
+            }
+            ambariClient.addBlueprint(blueprint.getBlueprintText(), extendConfig);
             LOGGER.info("Blueprint added [Ambari server: {}, blueprint: '{}']", ambariIp, blueprint.getId());
         } catch (HttpResponseException e) {
             if ("Conflict".equals(e.getMessage())) {
@@ -114,6 +122,14 @@ public class AmbariClusterInstaller {
                 throw new InternalServerException("Something went wrong", e);
             }
         }
+    }
+
+    private Map<String, Map<String, String>> getAzureHadoopConfig() {
+        Map<String, String> yarnConfig = new HashMap<>();
+        for (HadoopConfiguration.HadoopProperty property : HadoopConfiguration.YARN_SITE.getProperties()) {
+            yarnConfig.put(property.getKey(), property.getValue());
+        }
+        return singletonMap(HadoopConfiguration.YARN_SITE.getKey(), yarnConfig);
     }
 
     private void clusterCreateSuccess(Cluster cluster, long creationFinished) {
