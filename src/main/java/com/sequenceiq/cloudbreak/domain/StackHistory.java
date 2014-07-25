@@ -14,7 +14,7 @@ public class StackHistory extends AbstractHistory {
     private String status;
     private String statusReason;
     private boolean terminated;
-    private int version;
+    private Long version;
     private Long clusterId;
     private Long credentialId;
     private Long templateId;
@@ -83,11 +83,11 @@ public class StackHistory extends AbstractHistory {
         this.terminated = terminated;
     }
 
-    public int getVersion() {
+    public Long getVersion() {
         return version;
     }
 
-    public void setVersion(int version) {
+    public void setVersion(Long version) {
         this.version = version;
     }
 

@@ -6,13 +6,16 @@ import com.sequenceiq.cloudbreak.converter.AwsCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.AzureCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
-import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.HistoryEvent;
+import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
+import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.AwsCredentialRepository;
 import com.sequenceiq.cloudbreak.repository.AzureCredentialRepository;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
+import com.sequenceiq.cloudbreak.service.history.HistoryService;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 import org.junit.Before;
@@ -25,11 +28,11 @@ import java.util.HashSet;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.anySetOf;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 public class SimpleCredentialServiceTest {
 
@@ -60,6 +63,9 @@ public class SimpleCredentialServiceTest {
     @Mock
     private WebsocketService websocketService;
 
+    @Mock
+    private HistoryService historyService;
+
     private User user;
 
     private AwsCredential awsCredential;
@@ -85,6 +91,7 @@ public class SimpleCredentialServiceTest {
         given(awsCredentialConverter.convert(credentialJson)).willReturn(awsCredential);
         given(awsCredentialRepository.save(awsCredential)).willReturn(awsCredential);
         doNothing().when(websocketService).sendToTopicUser(anyString(), any(WebsocketEndPoint.class), any(StatusMessage.class));
+        doNothing().when(historyService).notify(any(ProvisionEntity.class), any(HistoryEvent.class));
         //WHEN
         underTest.save(user, credentialJson);
         //THEN
@@ -100,6 +107,7 @@ public class SimpleCredentialServiceTest {
         given(azureCredentialRepository.save(azureCredential)).willReturn(azureCredential);
         doNothing().when(azureCertificateService).generateCertificate(azureCredential, user);
         doNothing().when(websocketService).sendToTopicUser(anyString(), any(WebsocketEndPoint.class), any(StatusMessage.class));
+        doNothing().when(historyService).notify(any(ProvisionEntity.class), any(HistoryEvent.class));
         // WHEN
         underTest.save(user, credentialJson);
         // THEN
@@ -113,6 +121,7 @@ public class SimpleCredentialServiceTest {
         given(credentialRepository.findOne(1L)).willReturn(awsCredential);
         doNothing().when(credentialRepository).delete(awsCredential);
         doNothing().when(websocketService).sendToTopicUser(anyString(), any(WebsocketEndPoint.class), any(StatusMessage.class));
+        doNothing().when(historyService).notify(any(ProvisionEntity.class), any(HistoryEvent.class));
         //WHEN
         underTest.delete(1L);
         //THEN

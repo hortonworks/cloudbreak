@@ -2,31 +2,31 @@ package com.sequenceiq.cloudbreak.domain;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import java.util.Date;
 
 @Entity
 @Table(name = "clusterhistory")
 public class ClusterHistory extends AbstractHistory {
 
-    private Date creationStarted;
-    private Date creationFinished;
+    private Long creationStarted;
+    private Long creationFinished;
     private String status;
     private String statusReason;
-    private String blueprintId;
+    private Long blueprintId;
 
-    public Date getCreationStarted() {
+
+    public Long getCreationStarted() {
         return creationStarted;
     }
 
-    public void setCreationStarted(Date creationStarted) {
+    public void setCreationStarted(Long creationStarted) {
         this.creationStarted = creationStarted;
     }
 
-    public Date getCreationFinished() {
+    public Long getCreationFinished() {
         return creationFinished;
     }
 
-    public void setCreationFinished(Date creationFinished) {
+    public void setCreationFinished(Long creationFinished) {
         this.creationFinished = creationFinished;
     }
 
@@ -46,11 +46,11 @@ public class ClusterHistory extends AbstractHistory {
         this.statusReason = statusReason;
     }
 
-    public String getBlueprintId() {
+    public Long getBlueprintId() {
         return blueprintId;
     }
 
-    public void setBlueprintId(String blueprintId) {
+    public void setBlueprintId(Long blueprintId) {
         this.blueprintId = blueprintId;
     }
 }

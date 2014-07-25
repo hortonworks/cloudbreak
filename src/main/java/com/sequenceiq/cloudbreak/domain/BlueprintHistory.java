@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
@@ -10,6 +11,8 @@ public class BlueprintHistory extends AbstractHistory {
 
     private Long blueprintId;
     private String blueprintName;
+
+    @Column(length = 1000000, columnDefinition = "TEXT")
     private String blueprintText;
     private String blueprintDescription;
     private int hostGroupCount;

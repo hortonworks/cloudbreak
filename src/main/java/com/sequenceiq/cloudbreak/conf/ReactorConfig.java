@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.conf;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
 import reactor.core.Environment;
 import reactor.core.Reactor;
 import reactor.core.spec.Reactors;
@@ -24,6 +23,8 @@ public class ReactorConfig {
     public static final String AMBARI_STARTED_EVENT = "AMBARI_STARTED";
     public static final String CLUSTER_CREATE_SUCCESS_EVENT = "CLUSTER_CREATE_SUCCESS";
     public static final String CLUSTER_CREATE_FAILED_EVENT = "CLUSTER_CREATE_FAILED";
+
+    public static final String HISTORY_EVENT = "HISTORY_EVENT";
 
     @Bean
     public Environment env() {

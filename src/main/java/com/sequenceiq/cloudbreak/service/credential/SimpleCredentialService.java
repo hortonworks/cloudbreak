@@ -1,13 +1,5 @@
 package com.sequenceiq.cloudbreak.service.credential;
 
-import java.io.File;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UnknownFormatConversionException;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.json.CredentialJson;
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
@@ -17,6 +9,8 @@ import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.HistoryEvent;
+import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
@@ -24,8 +18,16 @@ import com.sequenceiq.cloudbreak.repository.AwsCredentialRepository;
 import com.sequenceiq.cloudbreak.repository.AzureCredentialRepository;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
+import com.sequenceiq.cloudbreak.service.history.HistoryService;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.io.File;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UnknownFormatConversionException;
 
 @Service
 public class SimpleCredentialService implements CredentialService {
@@ -51,6 +53,9 @@ public class SimpleCredentialService implements CredentialService {
     @Autowired
     private WebsocketService websocketService;
 
+    @Autowired
+    private HistoryService historyService;
+
     public Set<CredentialJson> getAll(User user) {
         Set<CredentialJson> result = new HashSet<>();
         result.addAll(awsCredentialConverter.convertAllEntityToJson(user.getAwsCredentials()));
@@ -64,26 +69,26 @@ public class SimpleCredentialService implements CredentialService {
             throw new NotFoundException(String.format("Template '%s' not found.", id));
         } else {
             switch (credential.cloudPlatform()) {
-            case AWS:
-                return awsCredentialConverter.convert((AwsCredential) credential);
-            case AZURE:
-                return azureCredentialConverter.convert((AzureCredential) credential);
-            default:
-                throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", credential.cloudPlatform()));
+                case AWS:
+                    return awsCredentialConverter.convert((AwsCredential) credential);
+                case AZURE:
+                    return azureCredentialConverter.convert((AzureCredential) credential);
+                default:
+                    throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", credential.cloudPlatform()));
             }
         }
     }
 
     public IdJson save(User user, CredentialJson credentialJson) {
         switch (credentialJson.getCloudPlatform()) {
-        case AWS:
-            return saveAwsCredential(user, credentialJson);
-        case AZURE:
-            return saveAzureCredential(user, credentialJson);
-        default:
-            websocketService.sendToTopicUser(user.getEmail(), WebsocketEndPoint.CREDENTIAL,
-                    new StatusMessage(-1L, credentialJson.getName(), Status.CREATE_FAILED.name()));
-            throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", credentialJson.getCloudPlatform()));
+            case AWS:
+                return saveAwsCredential(user, credentialJson);
+            case AZURE:
+                return saveAzureCredential(user, credentialJson);
+            default:
+                websocketService.sendToTopicUser(user.getEmail(), WebsocketEndPoint.CREDENTIAL,
+                        new StatusMessage(-1L, credentialJson.getName(), Status.CREATE_FAILED.name()));
+                throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", credentialJson.getCloudPlatform()));
         }
     }
 
@@ -93,6 +98,7 @@ public class SimpleCredentialService implements CredentialService {
             throw new NotFoundException(String.format("Credential '%s' not found.", id));
         }
         credentialRepository.delete(credential);
+        historyService.notify((ProvisionEntity) credential, HistoryEvent.DELETED);
         websocketService.sendToTopicUser(credential.getOwner().getEmail(), WebsocketEndPoint.CREDENTIAL,
                 new StatusMessage(credential.getId(), credential.getCredentialName(), Status.DELETE_COMPLETED.name()));
     }
@@ -100,22 +106,24 @@ public class SimpleCredentialService implements CredentialService {
     private IdJson saveAwsCredential(User user, CredentialJson credentialJson) {
         AwsCredential awsCredential = awsCredentialConverter.convert(credentialJson);
         awsCredential.setAwsCredentialOwner(user);
-        awsCredentialRepository.save(awsCredential);
+        awsCredential = awsCredentialRepository.save(awsCredential);
         websocketService.sendToTopicUser(user.getEmail(), WebsocketEndPoint.CREDENTIAL,
                 new StatusMessage(awsCredential.getId(), awsCredential.getName(), Status.CREATE_COMPLETED.name()));
+        historyService.notify(awsCredential, HistoryEvent.CREATED);
         return new IdJson(awsCredential.getId());
     }
 
     private IdJson saveAzureCredential(User user, CredentialJson credentialJson) {
         AzureCredential azureCredential = azureCredentialConverter.convert(credentialJson);
         azureCredential.setAzureCredentialOwner(user);
-        azureCredentialRepository.save(azureCredential);
+        azureCredential = azureCredentialRepository.save(azureCredential);
         if (azureCredential.getPublicKey() != null) {
             azureCertificateService.generateSshCertificate(user, azureCredential, azureCredential.getPublicKey());
         }
         azureCertificateService.generateCertificate(azureCredential, user);
         websocketService.sendToTopicUser(user.getEmail(), WebsocketEndPoint.CREDENTIAL,
                 new StatusMessage(azureCredential.getId(), azureCredential.getName(), Status.CREATE_COMPLETED.name()));
+        historyService.notify(azureCredential, HistoryEvent.CREATED);
         return new IdJson(azureCredential.getId());
     }
 

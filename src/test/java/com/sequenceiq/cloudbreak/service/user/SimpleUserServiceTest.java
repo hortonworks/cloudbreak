@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.user;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
+import com.sequenceiq.cloudbreak.service.history.HistoryService;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -41,6 +42,9 @@ public class SimpleUserServiceTest {
 
     @Mock
     private MimeMessagePreparator mimeMessagePreparator;
+
+    @Mock
+    private HistoryService historyService;
 
     private User user;
 

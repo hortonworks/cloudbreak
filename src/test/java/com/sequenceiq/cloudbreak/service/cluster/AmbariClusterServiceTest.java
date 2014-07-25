@@ -9,11 +9,14 @@ import com.sequenceiq.cloudbreak.controller.json.ClusterRequest;
 import com.sequenceiq.cloudbreak.controller.json.ClusterResponse;
 import com.sequenceiq.cloudbreak.converter.ClusterConverter;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.HistoryEvent;
+import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.history.HistoryService;
 import groovyx.net.http.HttpResponseException;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,6 +31,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -62,6 +66,9 @@ public class AmbariClusterServiceTest {
     @Mock
     private HttpResponseException mockedException;
 
+    @Mock
+    private HistoryService historyService;
+
     private Stack stack;
 
     private ClusterRequest clusterRequest;
@@ -87,6 +94,7 @@ public class AmbariClusterServiceTest {
         given(stackRepository.findOne(anyLong())).willReturn(stack);
         given(clusterConverter.convert(clusterRequest)).willReturn(cluster);
         given(stackUpdater.updateStackCluster(anyLong(), any(Cluster.class))).willReturn(stack);
+        doNothing().when(historyService).notify(any(ProvisionEntity.class), any(HistoryEvent.class));
         //WHEN
         underTest.createCluster(new User(), 1L, clusterRequest);
         //THEN

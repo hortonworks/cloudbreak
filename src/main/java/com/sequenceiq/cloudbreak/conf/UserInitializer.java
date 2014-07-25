@@ -4,6 +4,7 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.ec2.model.InstanceType;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Company;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.UserStatus;
@@ -17,6 +18,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import reactor.core.Reactor;
+
+import java.util.Set;
 
 @Component
 public class UserInitializer implements InitializingBean {
@@ -37,6 +41,10 @@ public class UserInitializer implements InitializingBean {
 
     @Autowired
     private DefaultBlueprintLoaderService defaultBlueprintLoaderService;
+
+    @Autowired
+    private Reactor reactor;
+
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -80,9 +88,11 @@ public class UserInitializer implements InitializingBean {
 
             user2.getAwsTemplates().add(awsTemplate);
 
-            user2.setBlueprints(defaultBlueprintLoaderService.loadBlueprints(user2));
+            Set<Blueprint> blueprints = defaultBlueprintLoaderService.loadBlueprints(user2);
+            user2.setBlueprints(blueprints);
 
             userRepository.save(user2);
+
         }
     }
 }

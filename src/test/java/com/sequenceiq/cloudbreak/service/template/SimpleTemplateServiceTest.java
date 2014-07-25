@@ -1,24 +1,5 @@
 package com.sequenceiq.cloudbreak.service.template;
 
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anySetOf;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
@@ -27,11 +8,32 @@ import com.sequenceiq.cloudbreak.converter.AzureTemplateConverter;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.HistoryEvent;
+import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
+import com.sequenceiq.cloudbreak.service.history.HistoryService;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anySetOf;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 public class SimpleTemplateServiceTest {
 
@@ -55,6 +57,9 @@ public class SimpleTemplateServiceTest {
 
     @Mock
     private TemplateJson templateJson;
+
+    @Mock
+    private HistoryService historyService;
 
     private User user;
 
@@ -81,6 +86,7 @@ public class SimpleTemplateServiceTest {
         given(awsTemplateConverter.convert(templateJson)).willReturn(awsTemplate);
         given(templateJson.getCloudPlatform()).willReturn(CloudPlatform.AWS);
         given(templateRepository.save(awsTemplate)).willReturn(awsTemplate);
+        //doNothing().when(historyService).notify(any(ProvisionEntity.class), any(HistoryEvent.class));
         //WHEN
         underTest.create(user, templateJson);
         //THEN
@@ -95,6 +101,7 @@ public class SimpleTemplateServiceTest {
         given(templateJson.getParameters()).willReturn(params);
         given(templateJson.getCloudPlatform()).willReturn(CloudPlatform.AZURE);
         given(templateRepository.save(azureTemplate)).willReturn(azureTemplate);
+        doNothing().when(historyService).notify(any(ProvisionEntity.class), any(HistoryEvent.class));
         // WHEN
         underTest.create(user, templateJson);
         // THEN
@@ -106,6 +113,7 @@ public class SimpleTemplateServiceTest {
         given(templateRepository.findOne(1L)).willReturn(awsTemplate);
         given(stackRepository.findAllStackForTemplate(1L)).willReturn(new ArrayList<Stack>());
         doNothing().when(templateRepository).delete(awsTemplate);
+        doNothing().when(historyService).notify(any(ProvisionEntity.class), any(HistoryEvent.class));
         //WHEN
         underTest.delete(1L);
         //THEN

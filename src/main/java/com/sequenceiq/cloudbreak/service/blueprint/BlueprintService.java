@@ -7,12 +7,14 @@ import com.sequenceiq.cloudbreak.controller.json.IdJson;
 import com.sequenceiq.cloudbreak.converter.BlueprintConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Company;
+import com.sequenceiq.cloudbreak.domain.HistoryEvent;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
+import com.sequenceiq.cloudbreak.service.history.HistoryService;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 import org.slf4j.Logger;
@@ -43,12 +45,16 @@ public class BlueprintService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private HistoryService historyService;
+
     public IdJson addBlueprint(User user, BlueprintJson blueprintJson) {
         Blueprint blueprint = blueprintConverter.convert(blueprintJson);
         blueprint.setUser(user);
-        blueprintRepository.save(blueprint);
+        blueprint = blueprintRepository.save(blueprint);
         websocketService.sendToTopicUser(user.getEmail(), WebsocketEndPoint.BLUEPRINT,
                 new StatusMessage(blueprint.getId(), blueprint.getName(), Status.CREATE_COMPLETED.name()));
+        historyService.notify(blueprint, HistoryEvent.CREATED);
         return new IdJson(blueprint.getId());
     }
 
@@ -86,6 +92,8 @@ public class BlueprintService {
             blueprintRepository.delete(blueprint);
             websocketService.sendToTopicUser(blueprint.getUser().getEmail(), WebsocketEndPoint.BLUEPRINT,
                     new StatusMessage(blueprint.getId(), blueprint.getName(), Status.DELETE_COMPLETED.name()));
+            historyService.notify(blueprint, HistoryEvent.DELETED);
+
         } else {
             throw new BadRequestException(String.format(
                     "There are stacks associated with blueprint '%s'. Please remove these before the deleting the blueprint.", id));
