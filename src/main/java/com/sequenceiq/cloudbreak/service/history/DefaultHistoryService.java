@@ -91,8 +91,8 @@ public class DefaultHistoryService implements HistoryService<ProvisionEntity> {
         credentialHistory.setDescription(entity.getDescription());
         credentialHistory.setCloudPlatform(entity.getCloudPlatform().name());
         credentialHistory.setPublickey(entity.getPublicKey());
-
         credentialHistory.setId(entity.getId());
+
         credentialHistory.setUserId(entity.getOwner().getId());
         credentialHistory.setEventTimestamp(Calendar.getInstance().getTime());
         credentialHistory.setEventType(historyEvent);
@@ -117,11 +117,9 @@ public class DefaultHistoryService implements HistoryService<ProvisionEntity> {
 
     private StackHistory createStackHistory(Stack entity, HistoryEvent historyEvent) {
         StackHistory stackHistory = new StackHistory();
-        stackHistory.setUserId(entity.getUser().getId());
+
         stackHistory.setName(entity.getName());
         stackHistory.setId(entity.getId());
-        stackHistory.setEventTimestamp(Calendar.getInstance().getTime());
-        stackHistory.setEventType(historyEvent);
         stackHistory.setAmbariIp(entity.getAmbariIp());
         stackHistory.setClusterId(entity.getCluster().getId());
         stackHistory.setCredentialId(entity.getCredential().getId());
@@ -135,6 +133,12 @@ public class DefaultHistoryService implements HistoryService<ProvisionEntity> {
         stackHistory.setTerminated(entity.getTerminated());
         stackHistory.setVersion(entity.getVersion());
         stackHistory.setDescription(entity.getDescription());
+
+        stackHistory.setUserId(entity.getUser().getId());
+        stackHistory.setEventTimestamp(Calendar.getInstance().getTime());
+        stackHistory.setEventType(historyEvent);
+
+
         return stackHistory;
     }
 
@@ -164,6 +168,9 @@ public class DefaultHistoryService implements HistoryService<ProvisionEntity> {
             default:
                 throw new IllegalStateException("Unsupported cloud platform: " + entity.cloudPlatform());
         }
+        templateHistory.setEventTimestamp(Calendar.getInstance().getTime());
+        templateHistory.setEventType(historyEvent);
+
         return templateHistory;
     }
 
@@ -175,9 +182,11 @@ public class DefaultHistoryService implements HistoryService<ProvisionEntity> {
         blueprintHistory.setBlueprintName(entity.getBlueprintName());
         blueprintHistory.setBlueprintText(entity.getBlueprintText());
         blueprintHistory.setHostGroupCount(entity.getHostGroupCount());
+
         blueprintHistory.setUserId(entity.getUser().getId());
         blueprintHistory.setEventType(historyEvent);
         blueprintHistory.setEventTimestamp(Calendar.getInstance().getTime());
+
         return blueprintHistory;
     }
 
@@ -186,11 +195,16 @@ public class DefaultHistoryService implements HistoryService<ProvisionEntity> {
         clusterHistory.setName(entity.getName());
         clusterHistory.setBlueprintId(entity.getBlueprint().getId());
         clusterHistory.setDescription(entity.getDescription());
-        clusterHistory.setUserId(entity.getUser().getId());
+
         clusterHistory.setCreationFinished(entity.getCreationFinished());
         clusterHistory.setCreationStarted(entity.getCreationStarted());
         clusterHistory.setStatus(entity.getStatus().name());
         clusterHistory.setStatusReason(entity.getStatusReason());
+
+        clusterHistory.setUserId(entity.getUser().getId());
+        clusterHistory.setEventType(historyEvent);
+        clusterHistory.setEventTimestamp(Calendar.getInstance().getTime());
+
         return clusterHistory;
     }
 
