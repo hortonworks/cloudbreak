@@ -212,4 +212,25 @@ public class DefaultHistoryService implements HistoryService<ProvisionEntity> {
         LOGGER.debug("Entity {} supported. EntityClass: {}", ret ? "is" : "is not", entity.getClass());
         return ret;
     }
+
+    @Override
+    public HistoryEvent getEventType(ProvisionEntity entity) {
+        HistoryEvent historyEvent = HistoryEvent.IGNORE;
+        if (isEntitySupported(entity)) {
+            Long id = null;
+            if (entity instanceof Cluster) {
+                id = ((Cluster) entity).getId();
+            } else if (entity instanceof Blueprint) {
+                id = ((Blueprint) entity).getId();
+            } else if (entity instanceof Stack) {
+                id = ((Stack) entity).getId();
+            } else if (entity instanceof Template) {
+                id = ((Blueprint) entity).getId();
+            } else if (entity instanceof Credential) {
+                id = ((Credential) entity).getId();
+            }
+            historyEvent = id == null ? HistoryEvent.UPDATED : HistoryEvent.CREATED;
+        }
+        return historyEvent;
+    }
 }

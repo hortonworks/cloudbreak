@@ -11,4 +11,6 @@ public interface HistoryService<T extends ProvisionEntity> {
 
     boolean isEntitySupported(T entity);
 
+    HistoryEvent getEventType(T entity);
+
 }
