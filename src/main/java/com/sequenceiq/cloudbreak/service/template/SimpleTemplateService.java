@@ -9,8 +9,6 @@ import com.sequenceiq.cloudbreak.converter.AzureTemplateConverter;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.Company;
-import com.sequenceiq.cloudbreak.domain.HistoryEvent;
-import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.User;
@@ -18,7 +16,6 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
 import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
-import com.sequenceiq.cloudbreak.service.history.HistoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -51,9 +48,6 @@ public class SimpleTemplateService implements TemplateService {
 
     @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private HistoryService historyService;
 
     @Override
     public Set<TemplateJson> getAll(User user) {
@@ -113,7 +107,6 @@ public class SimpleTemplateService implements TemplateService {
         List<Stack> allStackForTemplate = getAllStackForTemplate(id);
         if (allStackForTemplate.isEmpty()) {
             templateRepository.delete(template);
-            historyService.notify((ProvisionEntity) template, HistoryEvent.DELETED);
         } else {
             throw new BadRequestException(String.format(
                     "There are stacks associated with template '%s'. Please remove these before the deleting the template.", id));
@@ -124,7 +117,6 @@ public class SimpleTemplateService implements TemplateService {
         AwsTemplate awsTemplate = awsTemplateConverter.convert(templateRequest);
         awsTemplate.setUser(user);
         awsTemplate = templateRepository.save(awsTemplate);
-        historyService.notify((AwsTemplate) awsTemplate, HistoryEvent.CREATED);
         return new IdJson(awsTemplate.getId());
     }
 
@@ -132,7 +124,6 @@ public class SimpleTemplateService implements TemplateService {
         Template azureTemplate = azureTemplateConverter.convert(templateRequest);
         azureTemplate.setUser(user);
         azureTemplate = templateRepository.save(azureTemplate);
-        historyService.notify((AzureTemplate) azureTemplate, HistoryEvent.CREATED);
         return new IdJson(azureTemplate.getId());
     }
 

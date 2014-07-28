@@ -1,11 +1,9 @@
 package com.sequenceiq.cloudbreak.security;
 
-import com.sequenceiq.cloudbreak.domain.HistoryEvent;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.UserRole;
 import com.sequenceiq.cloudbreak.domain.UserStatus;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
-import com.sequenceiq.cloudbreak.service.history.HistoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -25,8 +23,6 @@ public class UserRepositoryUserDetailsService implements UserDetailsService {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private HistoryService historyService;
 
     @Override
     public UserDetails loadUserByUsername(String email) {
@@ -36,7 +32,6 @@ public class UserRepositoryUserDetailsService implements UserDetailsService {
         }
         user.setLastLogin(new Date());
         User updatedUser = userRepository.save(user);
-        historyService.notify(updatedUser, HistoryEvent.UPDATED);
         return new UserRepositoryUserDetails(user);
     }
 

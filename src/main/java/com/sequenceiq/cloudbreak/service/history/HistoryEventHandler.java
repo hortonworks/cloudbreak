@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.cluster;
+package com.sequenceiq.cloudbreak.service.history;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.domain.HistoryEvent;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
-import com.sequenceiq.cloudbreak.service.history.HistoryService;
 
 import reactor.event.Event;
 import reactor.function.Consumer;

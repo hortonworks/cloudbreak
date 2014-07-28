@@ -3,12 +3,10 @@ package com.sequenceiq.cloudbreak.service.user;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.domain.HistoryEvent;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.UserStatus;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
 import com.sequenceiq.cloudbreak.service.blueprint.DefaultBlueprintLoaderService;
-import com.sequenceiq.cloudbreak.service.history.HistoryService;
 import freemarker.template.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,9 +59,6 @@ public class SimpleUserService implements UserService {
     @Autowired
     private DefaultBlueprintLoaderService defaultBlueprintLoaderService;
 
-    @Autowired
-    private HistoryService historyService;
-
     @Override
     public Long registerUser(User user) {
         if (userRepository.findByEmail(user.getEmail()) == null) {
@@ -71,7 +66,6 @@ public class SimpleUserService implements UserService {
             user.setConfToken(confToken);
             user.setBlueprints(defaultBlueprintLoaderService.loadBlueprints(user));
             User savedUser = userRepository.save(user);
-            historyService.notify(savedUser, HistoryEvent.CREATED);
 
             LOGGER.info("User {} successfully saved", user);
             MimeMessagePreparator msgPreparator = prepareMessage(user, "templates/confirmation-email.ftl",
@@ -91,7 +85,6 @@ public class SimpleUserService implements UserService {
             user.setStatus(UserStatus.ACTIVE);
             user.setRegistrationDate(new Date());
             User updatedUser = userRepository.save(user);
-            historyService.notify(updatedUser, HistoryEvent.UPDATED);
             return user.getEmail();
         } else {
             LOGGER.warn("There's no user registration pending for confToken: {}", confToken);
@@ -107,7 +100,6 @@ public class SimpleUserService implements UserService {
             String confToken = DigestUtils.md5DigestAsHex(UUID.randomUUID().toString().getBytes());
             user.setConfToken(confToken);
             User updatedUser = userRepository.save(user);
-            historyService.notify(updatedUser, HistoryEvent.UPDATED);
             MimeMessagePreparator msgPreparator = prepareMessage(user, getResetTemplate(),
                     getResetPasswordConfirmPath(), "Cloudbreak - reset password");
             sendConfirmationEmail(msgPreparator);
@@ -126,7 +118,6 @@ public class SimpleUserService implements UserService {
             user.setPassword(passwordEncoder.encode(password));
             user.setConfToken(null);
             User updatedUser = userRepository.save(user);
-            historyService.notify(updatedUser, HistoryEvent.UPDATED);
             return confToken;
         } else {
             LOGGER.warn("There's no user for token: {}", confToken);

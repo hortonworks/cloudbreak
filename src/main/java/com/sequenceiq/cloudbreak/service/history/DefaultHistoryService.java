@@ -30,11 +30,22 @@ import org.springframework.stereotype.Service;
 import reactor.core.Reactor;
 import reactor.event.Event;
 
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.List;
 
 @Service
 public class DefaultHistoryService implements HistoryService<ProvisionEntity> {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultHistoryService.class);
+
+    private static final List<Class<? extends ProvisionEntity>> SUPPORTED_ENTITIES = Arrays.asList(
+            Cluster.class,
+            Stack.class,
+            Blueprint.class,
+            AzureTemplate.class,
+            AwsTemplate.class,
+            AzureCredential.class,
+            AwsCredential.class);
 
     @Autowired
     private Reactor reactor;
@@ -165,6 +176,8 @@ public class DefaultHistoryService implements HistoryService<ProvisionEntity> {
         blueprintHistory.setBlueprintText(entity.getBlueprintText());
         blueprintHistory.setHostGroupCount(entity.getHostGroupCount());
         blueprintHistory.setUserId(entity.getUser().getId());
+        blueprintHistory.setEventType(historyEvent);
+        blueprintHistory.setEventTimestamp(Calendar.getInstance().getTime());
         return blueprintHistory;
     }
 
@@ -185,6 +198,18 @@ public class DefaultHistoryService implements HistoryService<ProvisionEntity> {
     public void notify(ProvisionEntity entity, HistoryEvent historyEvent) {
         Event reactorEvent = Event.wrap(entity);
         reactorEvent.getHeaders().set("history.event", historyEvent.name());
-        reactor.notify(ReactorConfig.HISTORY_EVENT, reactorEvent);
+        if (isEntitySupported(entity)) {
+            LOGGER.debug("Notifying history service. Event: {}, Entity type: {}", historyEvent, entity.getClass());
+            reactor.notify(ReactorConfig.HISTORY_EVENT, reactorEvent);
+        } else {
+            LOGGER.debug("Ignoring history event. Event: {}, Entity type: {}", historyEvent, entity.getClass());
+        }
+    }
+
+    @Override
+    public boolean isEntitySupported(ProvisionEntity entity) {
+        boolean ret = SUPPORTED_ENTITIES.contains(entity.getClass());
+        LOGGER.debug("Entity {} supported. EntityClass: {}", ret ? "is" : "is not", entity.getClass());
+        return ret;
     }
 }

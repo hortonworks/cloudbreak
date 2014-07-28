@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.service.user;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
-import com.sequenceiq.cloudbreak.service.history.HistoryService;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -15,12 +14,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 public class SimpleUserServiceTest {
 
@@ -42,9 +41,6 @@ public class SimpleUserServiceTest {
 
     @Mock
     private MimeMessagePreparator mimeMessagePreparator;
-
-    @Mock
-    private HistoryService historyService;
 
     private User user;
 

@@ -9,8 +9,6 @@ import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.HistoryEvent;
-import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
@@ -18,7 +16,6 @@ import com.sequenceiq.cloudbreak.repository.AwsCredentialRepository;
 import com.sequenceiq.cloudbreak.repository.AzureCredentialRepository;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
-import com.sequenceiq.cloudbreak.service.history.HistoryService;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,8 +50,6 @@ public class SimpleCredentialService implements CredentialService {
     @Autowired
     private WebsocketService websocketService;
 
-    @Autowired
-    private HistoryService historyService;
 
     public Set<CredentialJson> getAll(User user) {
         Set<CredentialJson> result = new HashSet<>();
@@ -98,7 +93,6 @@ public class SimpleCredentialService implements CredentialService {
             throw new NotFoundException(String.format("Credential '%s' not found.", id));
         }
         credentialRepository.delete(credential);
-        historyService.notify((ProvisionEntity) credential, HistoryEvent.DELETED);
         websocketService.sendToTopicUser(credential.getOwner().getEmail(), WebsocketEndPoint.CREDENTIAL,
                 new StatusMessage(credential.getId(), credential.getCredentialName(), Status.DELETE_COMPLETED.name()));
     }
@@ -109,7 +103,6 @@ public class SimpleCredentialService implements CredentialService {
         awsCredential = awsCredentialRepository.save(awsCredential);
         websocketService.sendToTopicUser(user.getEmail(), WebsocketEndPoint.CREDENTIAL,
                 new StatusMessage(awsCredential.getId(), awsCredential.getName(), Status.CREATE_COMPLETED.name()));
-        historyService.notify(awsCredential, HistoryEvent.CREATED);
         return new IdJson(awsCredential.getId());
     }
 
@@ -123,7 +116,6 @@ public class SimpleCredentialService implements CredentialService {
         azureCertificateService.generateCertificate(azureCredential, user);
         websocketService.sendToTopicUser(user.getEmail(), WebsocketEndPoint.CREDENTIAL,
                 new StatusMessage(azureCredential.getId(), azureCredential.getName(), Status.CREATE_COMPLETED.name()));
-        historyService.notify(azureCredential, HistoryEvent.CREATED);
         return new IdJson(azureCredential.getId());
     }
 

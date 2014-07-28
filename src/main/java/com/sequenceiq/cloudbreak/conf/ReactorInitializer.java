@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterCreationFailureHandler;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterCreationSuccessHandler;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterRequestHandler;
-import com.sequenceiq.cloudbreak.service.cluster.HistoryEventHandler;
+import com.sequenceiq.cloudbreak.service.history.HistoryEventHandler;
 import com.sequenceiq.cloudbreak.service.stack.handler.AmbariRoleAllocationCompleteHandler;
 import com.sequenceiq.cloudbreak.service.stack.handler.MetadataSetupCompleteHandler;
 import com.sequenceiq.cloudbreak.service.stack.handler.ProvisionCompleteHandler;

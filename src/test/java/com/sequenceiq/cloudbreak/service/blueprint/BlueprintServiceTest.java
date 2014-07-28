@@ -29,13 +29,10 @@ import com.sequenceiq.cloudbreak.controller.json.IdJson;
 import com.sequenceiq.cloudbreak.converter.BlueprintConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.HistoryEvent;
-import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
-import com.sequenceiq.cloudbreak.service.history.HistoryService;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
@@ -58,9 +55,6 @@ public class BlueprintServiceTest {
     @Mock
     private BlueprintJson blueprintJson;
 
-    @Mock
-    private HistoryService historyService;
-
     private User user;
 
     private Blueprint blueprint;
@@ -80,7 +74,6 @@ public class BlueprintServiceTest {
         given(blueprintConverter.convert(blueprintJson)).willReturn(blueprint);
         given(blueprintRepository.save(blueprint)).willReturn(blueprint);
         doNothing().when(websocketService).sendToTopicUser(anyString(), any(WebsocketEndPoint.class), any(StatusMessage.class));
-        doNothing().when(historyService).notify(any(ProvisionEntity.class), any(HistoryEvent.class));
         //WHEN
         IdJson result = underTest.addBlueprint(user, blueprintJson);
         //THEN
