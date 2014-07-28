@@ -77,8 +77,8 @@ public class SimpleStackService implements StackService {
         Company company = user.getCompany();
         User decoratedUser = null;
         for (User cUser : company.getUsers()) {
-            decoratedUser = userRepository.findOneWithLists(decoratedUser.getId());
-            result.addAll(getAll(cUser));
+            decoratedUser = userRepository.findOneWithLists(cUser.getId());
+            result.addAll(getAll(decoratedUser));
         }
         return result;
     }
