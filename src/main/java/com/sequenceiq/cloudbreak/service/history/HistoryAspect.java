@@ -32,7 +32,7 @@ public class HistoryAspect {
     }
 
     @Around("repositorySave() && !historyRepository()")
-    void aroundSave(ProceedingJoinPoint pjp) throws Exception {
+    void aroundSave(ProceedingJoinPoint pjp) {
         LOGGER.info("Advice around save:  {}", pjp.getSignature());
         // save always has a single argument
         ProvisionEntity toBeSaved = (ProvisionEntity) pjp.getArgs()[0];
@@ -40,19 +40,19 @@ public class HistoryAspect {
         try {
             pjp.proceed();
         } catch (Throwable throwable) {
-            throw new Exception(throwable);
+            throw new RuntimeException("Failed to save ...", throwable);
         }
         historyService.notify(toBeSaved, event);
     }
 
     @Around("repositoryDelete() && !historyRepository()")
-    void aroundDelete(ProceedingJoinPoint pjp) throws Exception {
+    void aroundDelete(ProceedingJoinPoint pjp) {
         LOGGER.info("Advice around delete:  {}", pjp.getSignature());
         ProvisionEntity toBeDeleted = (ProvisionEntity) pjp.getArgs()[0];
         try {
             pjp.proceed();
         } catch (Throwable throwable) {
-            throw new Exception(throwable);
+            throw new RuntimeException("Failed to delete ...", throwable);
         }
         historyService.notify(toBeDeleted, HistoryEvent.DELETED);
     }

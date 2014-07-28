@@ -1,9 +1,7 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import java.nio.file.AccessDeniedException;
-
-import javax.persistence.EntityNotFoundException;
-
+import com.sequenceiq.cloudbreak.controller.json.ExceptionResult;
+import com.sequenceiq.cloudbreak.controller.json.ValidationResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -15,33 +13,33 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import com.sequenceiq.cloudbreak.controller.json.ExceptionResult;
-import com.sequenceiq.cloudbreak.controller.json.ValidationResult;
+import javax.persistence.EntityNotFoundException;
+import java.nio.file.AccessDeniedException;
 
 @ControllerAdvice
 public class ExceptionControllerAdvice {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExceptionControllerAdvice.class);
 
-    @ExceptionHandler({ HttpMessageNotReadableException.class, BadRequestException.class })
+    @ExceptionHandler({HttpMessageNotReadableException.class, BadRequestException.class})
     public ResponseEntity<ExceptionResult> badRequest(Exception e) {
         LOGGER.error(e.getMessage(), e);
         return new ResponseEntity<>(new ExceptionResult(e.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler({ AccessDeniedException.class, org.springframework.security.access.AccessDeniedException.class })
+    @ExceptionHandler({AccessDeniedException.class, org.springframework.security.access.AccessDeniedException.class})
     public ResponseEntity<ExceptionResult> accessDenied(Exception e) {
         LOGGER.error(e.getMessage(), e);
         return new ResponseEntity<>(new ExceptionResult(e.getMessage()), HttpStatus.FORBIDDEN);
     }
 
-    @ExceptionHandler({ NotFoundException.class, EntityNotFoundException.class })
+    @ExceptionHandler({NotFoundException.class, EntityNotFoundException.class})
     public ResponseEntity<ExceptionResult> notFound(Exception e) {
         LOGGER.error(e.getMessage(), e);
         return new ResponseEntity<>(new ExceptionResult(e.getMessage()), HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler({ MethodArgumentNotValidException.class })
+    @ExceptionHandler({MethodArgumentNotValidException.class})
     public ResponseEntity<ValidationResult> validationFailed(MethodArgumentNotValidException e) {
         LOGGER.error(e.getMessage(), e);
         ValidationResult result = new ValidationResult();
@@ -51,14 +49,14 @@ public class ExceptionControllerAdvice {
         return new ResponseEntity<>(result, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler({ Exception.class })
+    @ExceptionHandler({Exception.class})
     public ResponseEntity<ExceptionResult> serverError(Exception e) {
         LOGGER.error(e.getMessage(), e);
         return new ResponseEntity<>(new ExceptionResult("Internal server error"), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @ExceptionHandler({ DataIntegrityViolationException.class })
-    public ResponseEntity<ExceptionResult> constaintViolation(Exception e) {
+    @ExceptionHandler({DataIntegrityViolationException.class, RuntimeException.class})
+    public ResponseEntity<ExceptionResult> constraintViolation(Exception e) {
         LOGGER.error(e.getMessage(), e);
         return new ResponseEntity<>(new ExceptionResult("This name is taken, please choose a different one"), HttpStatus.BAD_REQUEST);
     }
