@@ -229,7 +229,7 @@ public class DefaultHistoryService implements HistoryService<ProvisionEntity> {
             } else if (entity instanceof Credential) {
                 id = ((Credential) entity).getId();
             }
-            historyEvent = id == null ? HistoryEvent.UPDATED : HistoryEvent.CREATED;
+            historyEvent = (id != null) ? HistoryEvent.UPDATED : HistoryEvent.CREATED;
         }
         return historyEvent;
     }
