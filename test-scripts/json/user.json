@@ -4,5 +4,5 @@
   "firstName": "seq",
   "password": "test123",
   "company": "test",
-  "userType": "DEFAULT"
+  "userType": "COMPANY_ADMIN"
 }

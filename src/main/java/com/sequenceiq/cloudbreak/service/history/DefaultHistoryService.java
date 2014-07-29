@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.history;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
+import com.sequenceiq.cloudbreak.domain.AbstractHistory;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
@@ -26,12 +28,12 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackHistory;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.TemplateHistory;
-import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.BlueprintHistoryRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterHistoryRepository;
 import com.sequenceiq.cloudbreak.repository.CredentialHistoryRepository;
 import com.sequenceiq.cloudbreak.repository.StackHistoryRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateHistoryRepository;
+import com.sequenceiq.cloudbreak.service.history.converter.HistoryConverter;
 
 import reactor.core.Reactor;
 import reactor.event.Event;
@@ -39,7 +41,6 @@ import reactor.event.Event;
 @Service
 public class DefaultHistoryService implements HistoryService<ProvisionEntity> {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultHistoryService.class);
-
     private static final List<Class<? extends ProvisionEntity>> SUPPORTED_ENTITIES = Arrays.asList(
             Cluster.class,
             Stack.class,
@@ -48,6 +49,9 @@ public class DefaultHistoryService implements HistoryService<ProvisionEntity> {
             AwsTemplate.class,
             AzureCredential.class,
             AwsCredential.class);
+
+    @Autowired
+    private List<HistoryConverter> converters = new ArrayList<>();
 
     @Autowired
     private Reactor reactor;
@@ -69,145 +73,22 @@ public class DefaultHistoryService implements HistoryService<ProvisionEntity> {
 
     @Override
     public void recordHistory(ProvisionEntity entity, HistoryEvent historyEvent) {
+        LOGGER.debug("Recording history for entity: {}, event: {}", entity, historyEvent.name());
+        ProvisionEntity history = convert(entity);
+        ((AbstractHistory) history).setEventType(historyEvent);
+        ((AbstractHistory) history).setEventTimestamp(Calendar.getInstance().getTime());
 
         if (entity instanceof Cluster) {
-            clusterHistoryRepository.save(createClusterHistory((Cluster) entity, historyEvent));
+            clusterHistoryRepository.save((ClusterHistory) history);
         } else if (entity instanceof Blueprint) {
-            blueprintHistoryRepository.save(createBlueprintHistory((Blueprint) entity, historyEvent));
+            blueprintHistoryRepository.save((BlueprintHistory) history);
         } else if (entity instanceof Template) {
-            templateHistoryRepository.save(createTemplateHistory((Template) entity, historyEvent));
+            templateHistoryRepository.save((TemplateHistory) history);
         } else if (entity instanceof Stack) {
-            stackHistoryRepository.save(createStackHistory((Stack) entity, historyEvent));
+            stackHistoryRepository.save((StackHistory) history);
         } else if (entity instanceof Credential) {
-            credentialHistoryRepository.save(createCredentialHistory((Credential) entity, historyEvent));
-        } else if (entity instanceof User) {
-            LOGGER.debug("User has been touched. Event: {}", historyEvent);
+            credentialHistoryRepository.save((CredentialHistory) history);
         }
-
-    }
-
-    private CredentialHistory createCredentialHistory(Credential entity, HistoryEvent historyEvent) {
-        CredentialHistory credentialHistory = new CredentialHistory();
-
-        credentialHistory.setName(entity.getCredentialName());
-        credentialHistory.setDescription(entity.getDescription());
-        credentialHistory.setCloudPlatform(entity.getCloudPlatform().name());
-        credentialHistory.setPublickey(entity.getPublicKey());
-        credentialHistory.setId(entity.getId());
-
-        credentialHistory.setUserId(entity.getOwner().getId());
-        credentialHistory.setEventTimestamp(Calendar.getInstance().getTime());
-        credentialHistory.setEventType(historyEvent);
-
-        switch (entity.getCloudPlatform()) {
-            case AWS:
-                AzureCredential azureCredential = (AzureCredential) entity;
-                credentialHistory.setJks(azureCredential.getJks());
-                credentialHistory.setSubscriptionid(azureCredential.getSubscriptionId());
-                break;
-            case AZURE:
-                AwsCredential awsCredential = (AwsCredential) entity;
-                credentialHistory.setKeyPairName(awsCredential.getKeyPairName());
-                credentialHistory.setTemporaryAccessKeyId(awsCredential.getTemporaryAwsCredentials().getAccessKeyId());
-                credentialHistory.setRoleArn(awsCredential.getRoleArn());
-                break;
-            default:
-                throw new IllegalStateException("Unsupported cloud platform: " + entity.getCloudPlatform());
-        }
-        return credentialHistory;
-    }
-
-    private StackHistory createStackHistory(Stack entity, HistoryEvent historyEvent) {
-        StackHistory stackHistory = new StackHistory();
-
-        stackHistory.setName(entity.getName());
-        stackHistory.setId(entity.getId());
-        stackHistory.setAmbariIp(entity.getAmbariIp());
-        stackHistory.setClusterId(entity.getCluster().getId());
-        stackHistory.setCredentialId(entity.getCredential().getId());
-        stackHistory.setHash(entity.getHash());
-        stackHistory.setMetadataReady(entity.isMetadataReady());
-        stackHistory.setNodeCount(entity.getNodeCount());
-        stackHistory.setStackCompleted(entity.isStackCompleted());
-        stackHistory.setStatus(entity.getStatus().name());
-        stackHistory.setStatusReason(entity.getStatusReason());
-        stackHistory.setTemplateId(entity.getTemplate().getId());
-        stackHistory.setTerminated(entity.getTerminated());
-        stackHistory.setVersion(entity.getVersion());
-        stackHistory.setDescription(entity.getDescription());
-
-        stackHistory.setUserId(entity.getUser().getId());
-        stackHistory.setEventTimestamp(Calendar.getInstance().getTime());
-        stackHistory.setEventType(historyEvent);
-
-
-        return stackHistory;
-    }
-
-    private TemplateHistory createTemplateHistory(Template entity, HistoryEvent historyEvent) {
-        TemplateHistory templateHistory = new TemplateHistory();
-
-        switch (entity.cloudPlatform()) {
-            case AZURE:
-                AzureTemplate azureTemplate = (AzureTemplate) entity;
-                templateHistory.setDescription(azureTemplate.getDescription());
-                templateHistory.setName(azureTemplate.getName());
-                templateHistory.setImageName(azureTemplate.getImageName());
-                templateHistory.setVmType(azureTemplate.getVmType());
-                templateHistory.setLocation(azureTemplate.getLocation());
-                templateHistory.setUserId(azureTemplate.getAzureTemplateOwner().getId());
-                break;
-            case AWS:
-                AwsTemplate awsTemplate = (AwsTemplate) entity;
-                templateHistory.setName(awsTemplate.getName());
-                templateHistory.setDescription(awsTemplate.getDescription());
-                templateHistory.setRegion(awsTemplate.getRegion().name());
-                templateHistory.setAmiid(awsTemplate.getAmiId());
-                templateHistory.setInstancetype(awsTemplate.getInstanceType().name());
-                templateHistory.setSshLocation(awsTemplate.getSshLocation());
-                templateHistory.setUserId(awsTemplate.getOwner().getId());
-                break;
-            default:
-                throw new IllegalStateException("Unsupported cloud platform: " + entity.cloudPlatform());
-        }
-        templateHistory.setEventTimestamp(Calendar.getInstance().getTime());
-        templateHistory.setEventType(historyEvent);
-
-        return templateHistory;
-    }
-
-    private BlueprintHistory createBlueprintHistory(Blueprint entity, HistoryEvent historyEvent) {
-        BlueprintHistory blueprintHistory = new BlueprintHistory();
-        blueprintHistory.setName(entity.getName());
-        blueprintHistory.setBlueprintDescription(entity.getDescription());
-        blueprintHistory.setBlueprintId(entity.getId());
-        blueprintHistory.setBlueprintName(entity.getBlueprintName());
-        blueprintHistory.setBlueprintText(entity.getBlueprintText());
-        blueprintHistory.setHostGroupCount(entity.getHostGroupCount());
-
-        blueprintHistory.setUserId(entity.getUser().getId());
-        blueprintHistory.setEventType(historyEvent);
-        blueprintHistory.setEventTimestamp(Calendar.getInstance().getTime());
-
-        return blueprintHistory;
-    }
-
-    private ClusterHistory createClusterHistory(Cluster entity, HistoryEvent historyEvent) {
-        ClusterHistory clusterHistory = new ClusterHistory();
-        clusterHistory.setName(entity.getName());
-        clusterHistory.setBlueprintId(entity.getBlueprint().getId());
-        clusterHistory.setDescription(entity.getDescription());
-
-        clusterHistory.setCreationFinished(entity.getCreationFinished());
-        clusterHistory.setCreationStarted(entity.getCreationStarted());
-        clusterHistory.setStatus(entity.getStatus().name());
-        clusterHistory.setStatusReason(entity.getStatusReason());
-
-        clusterHistory.setUserId(entity.getUser().getId());
-        clusterHistory.setEventType(historyEvent);
-        clusterHistory.setEventTimestamp(Calendar.getInstance().getTime());
-
-        return clusterHistory;
     }
 
     @Override
@@ -249,4 +130,21 @@ public class DefaultHistoryService implements HistoryService<ProvisionEntity> {
         }
         return historyEvent;
     }
+
+
+    private ProvisionEntity convert(ProvisionEntity entity) {
+        ProvisionEntity history = null;
+        for (HistoryConverter converter : converters) {
+            if (converter.supportsEntity(entity)) {
+                history = converter.convert(entity);
+                LOGGER.debug("Converter {} : entity type: {}", converter.getClass(), entity.getClass());
+                break;
+            }
+        }
+        if (null == history) {
+            throw new UnsupportedOperationException("Entity conversin not supported");
+        }
+        return history;
+    }
+
 }

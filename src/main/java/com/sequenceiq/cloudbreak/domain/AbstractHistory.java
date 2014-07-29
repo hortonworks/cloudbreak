@@ -22,6 +22,8 @@ public abstract class AbstractHistory implements ProvisionEntity {
 
     private String name;
 
+    private Long entityId;
+
     public Long getId() {
         return id;
     }
@@ -68,5 +70,13 @@ public abstract class AbstractHistory implements ProvisionEntity {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Long getEntityId() {
+        return entityId;
+    }
+
+    public void setEntityId(Long entityId) {
+        this.entityId = entityId;
     }
 }
