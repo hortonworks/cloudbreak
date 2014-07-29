@@ -1,11 +1,12 @@
 package com.sequenceiq.cloudbreak.service.company;
 
-import com.sequenceiq.cloudbreak.domain.Company;
-import com.sequenceiq.cloudbreak.repository.CompanyRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.sequenceiq.cloudbreak.domain.Company;
+import com.sequenceiq.cloudbreak.repository.CompanyRepository;
 
 @Service
 public class DefaultCompanyService implements CompanyService {
@@ -20,7 +21,7 @@ public class DefaultCompanyService implements CompanyService {
 
         Company company = companyRepository.findByName(companyName);
         if (null == company) {
-            LOGGER.debug("Company with name <{}> not found. Creating it ....");
+            LOGGER.debug("Company with name <{}> not found. Creating it ....", companyName);
             company = new Company();
             company.setName(companyName);
             company = companyRepository.save(company);

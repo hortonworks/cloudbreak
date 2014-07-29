@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.domain;
 
 public enum UserRole {
     DEPLOYER("DEPLOYER"),
-    COMPANY_USER("COMPANY_USER "),
+    COMPANY_USER("COMPANY_USER"),
     COMPANY_ADMIN("COMPANY_ADMIN");
 
     private final String value;
