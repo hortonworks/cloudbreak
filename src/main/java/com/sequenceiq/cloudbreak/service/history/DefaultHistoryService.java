@@ -42,13 +42,7 @@ import reactor.event.Event;
 public class DefaultHistoryService implements HistoryService<ProvisionEntity> {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultHistoryService.class);
     private static final List<Class<? extends ProvisionEntity>> SUPPORTED_ENTITIES = Arrays.asList(
-            Cluster.class,
-            Stack.class,
-            Blueprint.class,
-            AzureTemplate.class,
-            AwsTemplate.class,
-            AzureCredential.class,
-            AwsCredential.class);
+            Cluster.class, Stack.class, Blueprint.class, AzureTemplate.class, AwsTemplate.class, AzureCredential.class, AwsCredential.class);
 
     @Autowired
     private List<HistoryConverter> converters = new ArrayList<>();
@@ -72,11 +66,24 @@ public class DefaultHistoryService implements HistoryService<ProvisionEntity> {
     private TemplateHistoryRepository templateHistoryRepository;
 
     @Override
+    public void notify(ProvisionEntity entity, HistoryEvent historyEvent) {
+        Event reactorEvent = Event.wrap(entity);
+        reactorEvent.getHeaders().set("history.event", historyEvent.name());
+        if (isEntitySupported(entity)) {
+            LOGGER.debug("Notifying history service. Event: {}, Entity type: {}", historyEvent, entity.getClass());
+            reactor.notify(ReactorConfig.HISTORY_EVENT, reactorEvent);
+        } else {
+            LOGGER.debug("Ignoring history event. Event: {}, Entity type: {}", historyEvent, entity.getClass());
+        }
+    }
+
+    @Override
     public void recordHistory(ProvisionEntity entity, HistoryEvent historyEvent) {
         LOGGER.debug("Recording history for entity: {}, event: {}", entity, historyEvent.name());
+        
         ProvisionEntity history = convert(entity);
         ((AbstractHistory) history).setEventType(historyEvent);
-        ((AbstractHistory) history).setEventTimestamp(Calendar.getInstance().getTime());
+        ((AbstractHistory) history).setEventTimestamp(Calendar.getInstance().getTime().getTime());
 
         if (entity instanceof Cluster) {
             clusterHistoryRepository.save((ClusterHistory) history);
@@ -88,18 +95,6 @@ public class DefaultHistoryService implements HistoryService<ProvisionEntity> {
             stackHistoryRepository.save((StackHistory) history);
         } else if (entity instanceof Credential) {
             credentialHistoryRepository.save((CredentialHistory) history);
-        }
-    }
-
-    @Override
-    public void notify(ProvisionEntity entity, HistoryEvent historyEvent) {
-        Event reactorEvent = Event.wrap(entity);
-        reactorEvent.getHeaders().set("history.event", historyEvent.name());
-        if (isEntitySupported(entity)) {
-            LOGGER.debug("Notifying history service. Event: {}, Entity type: {}", historyEvent, entity.getClass());
-            reactor.notify(ReactorConfig.HISTORY_EVENT, reactorEvent);
-        } else {
-            LOGGER.debug("Ignoring history event. Event: {}, Entity type: {}", historyEvent, entity.getClass());
         }
     }
 
@@ -131,7 +126,6 @@ public class DefaultHistoryService implements HistoryService<ProvisionEntity> {
         return historyEvent;
     }
 
-
     private ProvisionEntity convert(ProvisionEntity entity) {
         ProvisionEntity history = null;
         for (HistoryConverter converter : converters) {
@@ -142,9 +136,8 @@ public class DefaultHistoryService implements HistoryService<ProvisionEntity> {
             }
         }
         if (null == history) {
-            throw new UnsupportedOperationException("Entity conversin not supported");
+            throw new UnsupportedOperationException("Entity conversion not supported");
         }
         return history;
     }
-
 }

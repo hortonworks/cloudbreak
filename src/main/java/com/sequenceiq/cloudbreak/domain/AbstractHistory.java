@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.domain;
 
-import java.util.Date;
-
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
@@ -12,17 +10,17 @@ public abstract class AbstractHistory implements ProvisionEntity {
     @GeneratedValue
     private Long id;
 
-    private HistoryEvent eventType;
-
-    private Date eventTimestamp;
-
-    private String description;
+    private Long entityId;
 
     private Long userId;
 
+    private HistoryEvent eventType;
+
+    private Long eventTimestamp;
+
     private String name;
 
-    private Long entityId;
+    private String description;
 
     public Long getId() {
         return id;
@@ -32,28 +30,12 @@ public abstract class AbstractHistory implements ProvisionEntity {
         this.id = id;
     }
 
-    public Date getEventTimestamp() {
-        return eventTimestamp;
+    public Long getEntityId() {
+        return entityId;
     }
 
-    public void setEventTimestamp(Date eventTimestamp) {
-        this.eventTimestamp = eventTimestamp;
-    }
-
-    public HistoryEvent getEventType() {
-        return eventType;
-    }
-
-    public void setEventType(HistoryEvent eventType) {
-        this.eventType = eventType;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
+    public void setEntityId(Long entityId) {
+        this.entityId = entityId;
     }
 
     public Long getUserId() {
@@ -64,6 +46,22 @@ public abstract class AbstractHistory implements ProvisionEntity {
         this.userId = userId;
     }
 
+    public HistoryEvent getEventType() {
+        return eventType;
+    }
+
+    public void setEventType(HistoryEvent eventType) {
+        this.eventType = eventType;
+    }
+
+    public Long getEventTimestamp() {
+        return eventTimestamp;
+    }
+
+    public void setEventTimestamp(Long eventTimestamp) {
+        this.eventTimestamp = eventTimestamp;
+    }
+
     public String getName() {
         return name;
     }
@@ -72,11 +70,11 @@ public abstract class AbstractHistory implements ProvisionEntity {
         this.name = name;
     }
 
-    public Long getEntityId() {
-        return entityId;
+    public String getDescription() {
+        return description;
     }
 
-    public void setEntityId(Long entityId) {
-        this.entityId = entityId;
+    public void setDescription(String description) {
+        this.description = description;
     }
 }
