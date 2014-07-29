@@ -1,12 +1,11 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import com.sequenceiq.cloudbreak.controller.json.BlueprintJson;
-import com.sequenceiq.cloudbreak.controller.json.IdJson;
-import com.sequenceiq.cloudbreak.domain.User;
-import com.sequenceiq.cloudbreak.domain.UserRole;
-import com.sequenceiq.cloudbreak.repository.UserRepository;
-import com.sequenceiq.cloudbreak.security.CurrentUser;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,10 +18,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import java.util.HashSet;
-import java.util.Set;
+import com.sequenceiq.cloudbreak.controller.json.BlueprintJson;
+import com.sequenceiq.cloudbreak.controller.json.IdJson;
+import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.domain.UserRole;
+import com.sequenceiq.cloudbreak.repository.UserRepository;
+import com.sequenceiq.cloudbreak.security.CurrentUser;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 
 @Controller
 @RequestMapping("blueprints")

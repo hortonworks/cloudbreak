@@ -1,5 +1,13 @@
 package com.sequenceiq.cloudbreak.service.template;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UnknownFormatConversionException;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
@@ -16,13 +24,6 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
 import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UnknownFormatConversionException;
 
 @Service
 public class SimpleTemplateService implements TemplateService {

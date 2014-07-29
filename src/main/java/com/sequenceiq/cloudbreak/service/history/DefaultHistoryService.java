@@ -1,5 +1,14 @@
 package com.sequenceiq.cloudbreak.service.history;
 
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
@@ -23,16 +32,9 @@ import com.sequenceiq.cloudbreak.repository.ClusterHistoryRepository;
 import com.sequenceiq.cloudbreak.repository.CredentialHistoryRepository;
 import com.sequenceiq.cloudbreak.repository.StackHistoryRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateHistoryRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+
 import reactor.core.Reactor;
 import reactor.event.Event;
-
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.List;
 
 @Service
 public class DefaultHistoryService implements HistoryService<ProvisionEntity> {

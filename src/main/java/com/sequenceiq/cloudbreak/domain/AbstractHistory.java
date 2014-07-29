@@ -1,9 +1,10 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import java.util.Date;
+
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
-import java.util.Date;
 
 @MappedSuperclass
 public abstract class AbstractHistory implements ProvisionEntity {

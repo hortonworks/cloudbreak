@@ -16,6 +16,7 @@ public class DetailedAzureStackDescription extends StackDescription {
     public DetailedAzureStackDescription() {
 
     }
+
     @JsonRawValue
     public String getAffinityGroup() {
         return affinityGroup;

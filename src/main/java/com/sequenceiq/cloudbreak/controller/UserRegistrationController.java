@@ -1,10 +1,7 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import com.sequenceiq.cloudbreak.controller.json.IdJson;
-import com.sequenceiq.cloudbreak.controller.json.UserJson;
-import com.sequenceiq.cloudbreak.converter.UserConverter;
-import com.sequenceiq.cloudbreak.service.company.CompanyService;
-import com.sequenceiq.cloudbreak.service.user.UserService;
+import javax.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +14,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.validation.Valid;
+import com.sequenceiq.cloudbreak.controller.json.IdJson;
+import com.sequenceiq.cloudbreak.controller.json.UserJson;
+import com.sequenceiq.cloudbreak.converter.UserConverter;
+import com.sequenceiq.cloudbreak.service.company.CompanyService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Controller
 @RequestMapping("/users")
@@ -73,7 +74,7 @@ public class UserRegistrationController {
     public ResponseEntity<String> confirmRegistration(@PathVariable String confToken) {
         LOGGER.debug("Confirming registration (token: {})... ", confToken);
         String activeUser = userService.confirmRegistration(confToken);
-        LOGGER.debug("Registration confirmed (token: {}) for {}", new Object[]{confToken, activeUser});
+        LOGGER.debug("Registration confirmed (token: {}) for {}", new Object[]{ confToken, activeUser });
         return new ResponseEntity<>(activeUser, HttpStatus.OK);
     }
 }

@@ -44,14 +44,14 @@ public class ClusterController {
     public ResponseEntity<String> startOrStopAllServiceOnCluster(@CurrentUser User user, @PathVariable Long stackId,
             @RequestBody StatusRequestJson statusRequestJson) {
         switch (statusRequestJson.getStatusRequest()) {
-        case STOP:
-            ambariClusterService.stopAllService(user, stackId);
-            return new ResponseEntity<>(HttpStatus.OK);
-        case START:
-            ambariClusterService.startAllService(user, stackId);
-            return new ResponseEntity<>(HttpStatus.OK);
-        default:
-            throw new BadRequestException("The requested status not valid.");
+            case STOP:
+                ambariClusterService.stopAllService(user, stackId);
+                return new ResponseEntity<>(HttpStatus.OK);
+            case START:
+                ambariClusterService.startAllService(user, stackId);
+                return new ResponseEntity<>(HttpStatus.OK);
+            default:
+                throw new BadRequestException("The requested status not valid.");
         }
     }
 

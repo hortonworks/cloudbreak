@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service.history;
 
-import com.sequenceiq.cloudbreak.domain.HistoryEvent;
-import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -10,6 +8,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.sequenceiq.cloudbreak.domain.HistoryEvent;
+import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 
 @Service
 @Aspect

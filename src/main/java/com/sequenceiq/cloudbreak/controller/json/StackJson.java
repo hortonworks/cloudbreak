@@ -22,7 +22,7 @@ public class StackJson implements JsonEntity {
     @Max(value = 99, message = "Count of nodes has to be max 99")
     @Digits(fraction = 0, integer = 10, message = "Node count has to be a number")
     private int nodeCount;
-    @Size(max = 20, min = 2,  message = "Name has to be min 2 letter maximum 20 length")
+    @Size(max = 20, min = 2, message = "Name has to be min 2 letter maximum 20 length")
     @Pattern(regexp = "([a-zA-Z][-a-zA-Z0-9]*)",
             message = "Must contain only alphanumeric characters (case sensitive) and hyphens and start with an alpha character.")
     private String name;
@@ -78,17 +78,17 @@ public class StackJson implements JsonEntity {
         return cloudPlatform;
     }
 
+    @JsonIgnore
+    public void setCloudPlatform(CloudPlatform cloudPlatform) {
+        this.cloudPlatform = cloudPlatform;
+    }
+
     public Long getCredentialId() {
         return credentialId;
     }
 
     public void setCredentialId(Long credentialId) {
         this.credentialId = credentialId;
-    }
-
-    @JsonIgnore
-    public void setCloudPlatform(CloudPlatform cloudPlatform) {
-        this.cloudPlatform = cloudPlatform;
     }
 
     @JsonProperty("description")

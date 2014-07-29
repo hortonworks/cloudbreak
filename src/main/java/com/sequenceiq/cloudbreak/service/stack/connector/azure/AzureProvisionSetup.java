@@ -76,6 +76,40 @@ public class AzureProvisionSetup implements ProvisionSetup {
             createAffinityGroup(stack, azureClient, affinityGroupName);
             String storageName = String.format("%s%s", VM_COMMON_NAME, stack.getId());
             createStorage(stack, azureClient, affinityGroupName);
+
+            try {
+                azureClient.getAffinityGroup(affinityGroupName);
+            } catch (Exception ex) {
+                if (ex instanceof HttpResponseException && ((HttpResponseException) ex).getStatusCode() == NOT_FOUND) {
+                    Map<String, String> params = new HashMap<>();
+                    params.put(AzureStackUtil.NAME, affinityGroupName);
+                    params.put(DESCRIPTION, VM_COMMON_NAME);
+                    params.put(LOCATION, "East US");
+                    azureClient.createAffinityGroup(params);
+                } else {
+                    LOGGER.info("There was a problem with the creation of the affinity group.");
+                    reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(new StackCreationFailure(stack.getId(),
+                            "The copy of the os image was not success")));
+                }
+            }
+
+            try {
+                azureClient.getStorageAccount(affinityGroupName);
+            } catch (Exception ex) {
+                if (ex instanceof HttpResponseException && ((HttpResponseException) ex).getStatusCode() == NOT_FOUND) {
+                    Map<String, String> params = new HashMap<>();
+                    params.put(AzureStackUtil.NAME, affinityGroupName);
+                    params.put(DESCRIPTION, VM_COMMON_NAME);
+                    params.put(AFFINITYGROUP, affinityGroupName);
+                    HttpResponseDecorator response = (HttpResponseDecorator) azureClient.createStorageAccount(params);
+                    azureClient.waitUntilComplete((String) azureClient.getRequestId(response));
+                } else {
+                    LOGGER.info("There was a problem with the creation of the storage.");
+                    reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(new StackCreationFailure(stack.getId(),
+                            "The copy of the os image was not success")));
+                }
+            }
+           
             try {
                 String targetBlobContainerUri = "http://" + affinityGroupName + ".blob.core.windows.net/vm-images";
                 String targetImageUri = targetBlobContainerUri + '/' + storageName + ".vhd";

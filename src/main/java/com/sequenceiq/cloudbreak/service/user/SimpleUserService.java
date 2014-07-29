@@ -1,13 +1,12 @@
 package com.sequenceiq.cloudbreak.service.user;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.domain.User;
-import com.sequenceiq.cloudbreak.domain.UserStatus;
-import com.sequenceiq.cloudbreak.repository.UserRepository;
-import com.sequenceiq.cloudbreak.service.blueprint.DefaultBlueprintLoaderService;
-import freemarker.template.Configuration;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.mail.internet.MimeMessage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,11 +21,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import org.springframework.util.DigestUtils;
 
-import javax.mail.internet.MimeMessage;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import com.google.common.annotations.VisibleForTesting;
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.NotFoundException;
+import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.domain.UserStatus;
+import com.sequenceiq.cloudbreak.repository.UserRepository;
+import com.sequenceiq.cloudbreak.service.blueprint.DefaultBlueprintLoaderService;
+
+import freemarker.template.Configuration;
 
 @Service
 public class SimpleUserService implements UserService {

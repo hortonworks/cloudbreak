@@ -1,8 +1,9 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.controller.json.CompanyJson;
 import com.sequenceiq.cloudbreak.domain.Company;
-import org.springframework.stereotype.Component;
 
 @Component
 public class CompanyConverter extends AbstractConverter<CompanyJson, Company> {

@@ -1,14 +1,15 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sequenceiq.cloudbreak.domain.UserType;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotBlank;
 
-import java.util.HashSet;
-import java.util.Set;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sequenceiq.cloudbreak.domain.UserType;
 
 public class UserJson implements JsonEntity {
 
@@ -66,12 +67,12 @@ public class UserJson implements JsonEntity {
         this.email = email;
     }
 
-    public void setCompany(String company) {
-        this.company = company;
-    }
-
     public String getCompany() {
         return company;
+    }
+
+    public void setCompany(String company) {
+        this.company = company;
     }
 
     public Set<TemplateJson> getAwsTemplates() {
@@ -114,14 +115,14 @@ public class UserJson implements JsonEntity {
         this.credentials = credentials;
     }
 
-    @JsonProperty("password")
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
     @JsonIgnore
     public String getPassword() {
         return password;
+    }
+
+    @JsonProperty("password")
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public UserType getUserType() {

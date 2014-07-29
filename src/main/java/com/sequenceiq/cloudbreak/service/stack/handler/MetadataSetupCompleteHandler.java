@@ -7,13 +7,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import reactor.event.Event;
-import reactor.function.Consumer;
-
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataSetupComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.domain.CoreInstanceMetaData;
 import com.sequenceiq.cloudbreak.service.stack.flow.AmbariRoleAllocator;
+
+import reactor.event.Event;
+import reactor.function.Consumer;
 
 @Component
 public class MetadataSetupCompleteHandler implements Consumer<Event<MetadataSetupComplete>> {

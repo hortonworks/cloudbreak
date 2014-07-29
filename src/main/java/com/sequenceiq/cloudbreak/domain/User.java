@@ -1,7 +1,10 @@
 package com.sequenceiq.cloudbreak.domain;
 
-import org.hibernate.validator.constraints.Email;
-import org.hibernate.validator.constraints.NotEmpty;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -18,11 +21,9 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+
+import org.hibernate.validator.constraints.Email;
+import org.hibernate.validator.constraints.NotEmpty;
 
 
 @Entity
@@ -222,12 +223,12 @@ public class User implements ProvisionEntity {
         return email.replaceAll("@", "_").replace(".", "_");
     }
 
-    public void setConfToken(String confToken) {
-        this.confToken = confToken;
-    }
-
     public String getConfToken() {
         return this.confToken;
+    }
+
+    public void setConfToken(String confToken) {
+        this.confToken = confToken;
     }
 
     public UserStatus getStatus() {

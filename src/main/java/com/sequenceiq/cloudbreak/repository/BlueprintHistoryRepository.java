@@ -1,7 +1,8 @@
 package com.sequenceiq.cloudbreak.repository;
 
-import com.sequenceiq.cloudbreak.domain.BlueprintHistory;
 import org.springframework.data.repository.CrudRepository;
+
+import com.sequenceiq.cloudbreak.domain.BlueprintHistory;
 
 public interface BlueprintHistoryRepository extends CrudRepository<BlueprintHistory, Long> {
 

@@ -1,5 +1,13 @@
 package com.sequenceiq.cloudbreak.service.credential;
 
+import java.io.File;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UnknownFormatConversionException;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.json.CredentialJson;
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
@@ -18,13 +26,6 @@ import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.io.File;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UnknownFormatConversionException;
 
 @Service
 public class SimpleCredentialService implements CredentialService {

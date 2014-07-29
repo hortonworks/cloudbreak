@@ -39,6 +39,42 @@ public class AzureCertificateService {
     @Autowired
     private AzureCredentialRepository azureCredentialRepository;
 
+    public static String getSshFolder(String user) {
+        return String.format("%s/%s/%s", DATADIR, user, SSH_DATADIR);
+    }
+
+    public static String getCertificateFolder(String user) {
+        return String.format("%s/%s/%s", DATADIR, user, CERTIFICATE_DATADIR);
+    }
+
+    public static String getSimpleUserFolder(String user) {
+        return String.format("%s/%s", DATADIR, user);
+    }
+
+    public static String getSshFolderForTemplate(String user, Long credentialId) {
+        return String.format("%s/%s", getSshFolder(user), credentialId);
+    }
+
+    public static String getPemFile(String user, Long credentialId) {
+        return String.format("%s/%s.pem", getSshFolderForTemplate(user, credentialId), user);
+    }
+
+    public static String getCerFile(String user, Long credentialId) {
+        return String.format("%s/%s.cer", getSshFolderForTemplate(user, credentialId), user);
+    }
+
+    public static String getCertificateFolder(Credential credential, String user) {
+        return String.format("%s/%s/", getCertificateFolder(user), credential.getId());
+    }
+
+    public static String getUserJksFileName(Credential credential, String user) {
+        return String.format("%s/%s/%s.jks", getCertificateFolder(user), credential.getId(), user);
+    }
+
+    public static String getUserCerFileName(Credential credential, String user) {
+        return String.format("%s/%s/%s.cer", getCertificateFolder(user), credential.getId(), user);
+    }
+
     public File getCertificateFile(Long credentialId, User user) {
         AzureCredential credential = azureCredentialRepository.findOne(credentialId);
         if (credential == null) {
@@ -115,41 +151,5 @@ public class AzureCertificateService {
             LOGGER.error("An error occured under the ssh folder generation: {} {}", ex.getMessage(), ex);
             throw new InternalServerException("There was a problem with the ssh key generation", ex);
         }
-    }
-
-    public static String getSshFolder(String user) {
-        return String.format("%s/%s/%s", DATADIR, user, SSH_DATADIR);
-    }
-
-    public static String getCertificateFolder(String user) {
-        return String.format("%s/%s/%s", DATADIR, user, CERTIFICATE_DATADIR);
-    }
-
-    public static String getSimpleUserFolder(String user) {
-        return String.format("%s/%s", DATADIR, user);
-    }
-
-    public static String getSshFolderForTemplate(String user, Long credentialId) {
-        return String.format("%s/%s", getSshFolder(user), credentialId);
-    }
-
-    public static String getPemFile(String user, Long credentialId) {
-        return String.format("%s/%s.pem", getSshFolderForTemplate(user, credentialId), user);
-    }
-
-    public static String getCerFile(String user, Long credentialId) {
-        return String.format("%s/%s.cer", getSshFolderForTemplate(user, credentialId), user);
-    }
-
-    public static String getCertificateFolder(Credential credential, String user) {
-        return String.format("%s/%s/", getCertificateFolder(user), credential.getId());
-    }
-
-    public static String getUserJksFileName(Credential credential, String user) {
-        return String.format("%s/%s/%s.jks", getCertificateFolder(user), credential.getId(), user);
-    }
-
-    public static String getUserCerFileName(Credential credential, String user) {
-        return String.format("%s/%s/%s.cer", getCertificateFolder(user), credential.getId(), user);
     }
 }

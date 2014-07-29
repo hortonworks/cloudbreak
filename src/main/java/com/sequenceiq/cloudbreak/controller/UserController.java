@@ -1,10 +1,5 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import com.sequenceiq.cloudbreak.controller.json.UserJson;
-import com.sequenceiq.cloudbreak.converter.UserConverter;
-import com.sequenceiq.cloudbreak.domain.User;
-import com.sequenceiq.cloudbreak.repository.UserRepository;
-import com.sequenceiq.cloudbreak.security.CurrentUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +7,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.sequenceiq.cloudbreak.controller.json.UserJson;
+import com.sequenceiq.cloudbreak.converter.UserConverter;
+import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.repository.UserRepository;
+import com.sequenceiq.cloudbreak.security.CurrentUser;
 
 @Controller
 public class UserController {

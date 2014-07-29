@@ -1,5 +1,15 @@
 package com.sequenceiq.cloudbreak.conf;
 
+import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
+
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.ec2.model.InstanceType;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
@@ -11,16 +21,8 @@ import com.sequenceiq.cloudbreak.domain.UserStatus;
 import com.sequenceiq.cloudbreak.repository.CompanyRepository;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
 import com.sequenceiq.cloudbreak.service.blueprint.DefaultBlueprintLoaderService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
-import reactor.core.Reactor;
 
-import java.util.Set;
+import reactor.core.Reactor;
 
 @Component
 public class UserInitializer implements InitializingBean {

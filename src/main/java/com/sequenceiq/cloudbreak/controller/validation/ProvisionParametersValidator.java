@@ -40,14 +40,14 @@ public class ProvisionParametersValidator implements ConstraintValidator<ValidPr
     public boolean isValid(TemplateJson request, ConstraintValidatorContext context) {
         boolean valid = true;
         switch (request.getCloudPlatform()) {
-        case AWS:
-            valid = validateAWSParams(request, context);
-            break;
-        case AZURE:
-            valid = validateAzureParams(request, context);
-            break;
-        default:
-            break;
+            case AWS:
+                valid = validateAWSParams(request, context);
+                break;
+            case AZURE:
+                valid = validateAzureParams(request, context);
+                break;
+            default:
+                break;
         }
         return valid;
     }

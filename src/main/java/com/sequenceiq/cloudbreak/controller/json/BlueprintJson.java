@@ -1,12 +1,13 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
+import javax.validation.constraints.Size;
+
+import org.hibernate.validator.constraints.NotBlank;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRawValue;
 import com.fasterxml.jackson.databind.JsonNode;
-import org.hibernate.validator.constraints.NotBlank;
-
-import javax.validation.constraints.Size;
 
 public class BlueprintJson implements JsonEntity {
 
