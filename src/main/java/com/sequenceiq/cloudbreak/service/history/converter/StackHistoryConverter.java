@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service.history.converter;
 
-import java.util.Calendar;
-
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackHistory;
@@ -26,7 +24,6 @@ public class StackHistoryConverter extends AbstractHistoryConverter<Stack, Stack
         stackHistory.setVersion(entity.getVersion());
         stackHistory.setDescription(entity.getDescription());
         stackHistory.setUserId(entity.getUser().getId());
-        stackHistory.setEventTimestamp(Calendar.getInstance().getTime());
         return stackHistory;
     }
 

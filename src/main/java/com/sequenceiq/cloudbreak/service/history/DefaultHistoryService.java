@@ -80,7 +80,7 @@ public class DefaultHistoryService implements HistoryService<ProvisionEntity> {
     @Override
     public void recordHistory(ProvisionEntity entity, HistoryEvent historyEvent) {
         LOGGER.debug("Recording history for entity: {}, event: {}", entity, historyEvent.name());
-        
+
         ProvisionEntity history = convert(entity);
         ((AbstractHistory) history).setEventType(historyEvent);
         ((AbstractHistory) history).setEventTimestamp(Calendar.getInstance().getTime().getTime());
