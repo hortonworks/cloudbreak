@@ -1146,7 +1146,7 @@
                         <label class="col-sm-3 control-label" for="cname">Name</label>
 
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" ng-pattern="/^[a-zA-Z][-a-zA-Z0-9]*$/" name="cname" id="cname" ng-model="cname" ng-minlength="5" ng-maxlength="20" required placeholder="min. 5 max. 20 char">
+                            <input type="text" class="form-control" ng-pattern="/^[a-zA-Z][a-zA-Z0-9]*$/" name="cname" id="cname" ng-model="cname" ng-minlength="5" ng-maxlength="20" required placeholder="min. 5 max. 20 char">
                             <div class="help-block" ng-show="azureCredentialForm.cname.$dirty && azureCredentialForm.cname.$invalid">
                                 <i class="fa fa-warning"></i> {{error_msg.credential_name_invalid}}
                             </div>
