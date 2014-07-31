@@ -715,7 +715,7 @@
         <label class="col-sm-3 control-label" for="aws_tsshLocation">SSH location</label>
 
         <div class="col-sm-9">
-            <input type="text" class="form-control" id="aws_tsshLocation" name="aws_tsshLocation" ng-model="aws_tsshLocation" placeholder="0.0.0.0/0" required ng-pattern="\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\/\d+\b">
+            <input type="text" class="form-control" id="aws_tsshLocation" name="aws_tsshLocation" ng-model="aws_tsshLocation" placeholder="0.0.0.0/0" required ng-pattern="/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\/(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/i">
             <div class="help-block" ng-show="awsTemplateForm.aws_tsshLocation.$dirty && awsTemplateForm.aws_tsshLocation.$invalid">
                 <i class="fa fa-warning"></i> {{error_msg.template_ssh_location_invalid}}
             </div>
