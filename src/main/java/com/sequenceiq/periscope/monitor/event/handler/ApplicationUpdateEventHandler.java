@@ -130,7 +130,7 @@ public class ApplicationUpdateEventHandler implements ApplicationListener<Applic
     private void addApplicationIfAbsent(Cluster cluster, ApplicationReport appReport) {
         ApplicationId appId = appReport.getApplicationId();
         if (cluster.getApplication(appId) == null) {
-            cluster.addApplication(appId, Priority.NORMAL);
+            cluster.addApplication(appReport);
         }
     }
 

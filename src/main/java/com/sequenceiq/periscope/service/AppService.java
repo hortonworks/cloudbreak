@@ -47,11 +47,6 @@ public class AppService {
         }
     }
 
-    public SchedulerApplication addApplication(String clusterId, Priority priority, String appId) {
-        Cluster cluster = getCluster(clusterId);
-        return cluster.addApplication(appId, priority);
-    }
-
     private Cluster getCluster(String clusterId) {
         Cluster cluster = clusterRegistry.get(clusterId);
         if (cluster == null) {

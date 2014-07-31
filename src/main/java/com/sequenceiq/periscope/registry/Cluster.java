@@ -7,9 +7,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.client.api.YarnClient;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.ClusterMetricsInfo;
-import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,17 +71,22 @@ public class Cluster {
         this.metrics = metrics == null ? this.metrics : metrics;
     }
 
-    public synchronized SchedulerApplication addApplication(String applicationId, Priority priority) {
-        return addApplication(ConverterUtils.toApplicationId(applicationId), priority);
+    public synchronized SchedulerApplication addApplication(ApplicationReport appReport) {
+        return addApplication(appReport, Priority.NORMAL);
     }
 
-    public synchronized SchedulerApplication addApplication(ApplicationId applicationId, Priority priority) {
+    public synchronized SchedulerApplication addApplication(ApplicationReport appReport, Priority priority) {
+        SchedulerApplication application = new SchedulerApplication(appReport, priority);
+        return addApplication(application, priority);
+    }
+
+    public synchronized SchedulerApplication addApplication(SchedulerApplication application, Priority priority) {
         Map<ApplicationId, SchedulerApplication> applicationMap = applications.get(priority);
         if (applicationMap == null) {
             applicationMap = new TreeMap<>();
             applications.put(priority, applicationMap);
         }
-        SchedulerApplication application = new SchedulerApplication(applicationId, priority);
+        ApplicationId applicationId = application.getApplicationId();
         applicationMap.put(applicationId, application);
         LOGGER.info("Application ({}) added to cluster {}", applicationId.toString(), clusterId);
         return application;
@@ -108,7 +113,7 @@ public class Cluster {
         SchedulerApplication application = removeApplication(applicationId);
         if (application != null) {
             application.setPriority(newPriority);
-            addApplication(applicationId, newPriority);
+            addApplication(application, newPriority);
         }
         return application;
     }

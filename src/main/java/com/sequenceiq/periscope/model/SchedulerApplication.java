@@ -1,24 +1,18 @@
 package com.sequenceiq.periscope.model;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.apache.hadoop.yarn.util.ConverterUtils;
+import org.apache.hadoop.yarn.api.records.ApplicationReport;
 
 public class SchedulerApplication {
 
     private final ApplicationId applicationId;
+    private final long startTime;
     private Priority priority;
     private boolean moved;
 
-    public SchedulerApplication(String applicationId) {
-        this(applicationId, Priority.NORMAL);
-    }
-
-    public SchedulerApplication(String applicationId, Priority priority) {
-        this(ConverterUtils.toApplicationId(applicationId), priority);
-    }
-
-    public SchedulerApplication(ApplicationId applicationId, Priority priority) {
-        this.applicationId = applicationId;
+    public SchedulerApplication(ApplicationReport appReport, Priority priority) {
+        this.applicationId = appReport.getApplicationId();
+        this.startTime = appReport.getStartTime();
         this.priority = priority;
     }
 
@@ -40,5 +34,9 @@ public class SchedulerApplication {
 
     public void setMoved(boolean moved) {
         this.moved = moved;
+    }
+
+    public long getStartTime() {
+        return startTime;
     }
 }
