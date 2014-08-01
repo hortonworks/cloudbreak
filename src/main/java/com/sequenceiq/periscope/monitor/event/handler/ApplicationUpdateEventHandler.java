@@ -3,7 +3,6 @@ package com.sequenceiq.periscope.monitor.event.handler;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -46,17 +45,16 @@ public class ApplicationUpdateEventHandler implements ApplicationListener<Applic
         List<CapacitySchedulerQueueInfo> allQueueInfo = getAllQueueInfo(schedulerInfo);
         Cluster cluster = clusterRegistry.get(event.getClusterId());
 
-        Map<Priority, Map<ApplicationId, SchedulerApplication>> apps = new HashMap<>();
+        Map<Priority, Map<ApplicationId, SchedulerApplication>> apps = cluster.getApplicationsPriorityOrder();
         Set<ApplicationId> activeApps = new HashSet<>();
         for (ApplicationReport report : appReports) {
             ApplicationId id = report.getApplicationId();
             activeApps.add(id);
-            addApplicationIfAbsent(cluster, report);
+            SchedulerApplication application = addApplicationIfAbsent(cluster, report);
             apps = cluster.getApplicationsPriorityOrder();
             if (isApplicationHighPriority(apps, id)) {
                 LOGGER.info("Try to move high priority app {}", id);
                 CapacitySchedulerQueueInfo queue = getQueueWithMostAvailableCapacity(cluster, allQueueInfo);
-                SchedulerApplication application = cluster.getApplication(id);
                 if (!application.isMoved()) {
                     float availableMemory = getAvailableResourceCapacity(cluster, queue);
                     int usedMemory = report.getApplicationResourceUsageReport().getUsedResources().getMemory();
@@ -127,11 +125,13 @@ public class ApplicationUpdateEventHandler implements ApplicationListener<Applic
         }
     }
 
-    private void addApplicationIfAbsent(Cluster cluster, ApplicationReport appReport) {
+    private SchedulerApplication addApplicationIfAbsent(Cluster cluster, ApplicationReport appReport) {
         ApplicationId appId = appReport.getApplicationId();
-        if (cluster.getApplication(appId) == null) {
-            cluster.addApplication(appReport);
+        SchedulerApplication application = cluster.getApplication(appId);
+        if (application == null) {
+            application = cluster.addApplication(appReport);
         }
+        return application;
     }
 
     private void printQueueReport(List<CapacitySchedulerQueueInfo> infoList, Cluster cluster) {
