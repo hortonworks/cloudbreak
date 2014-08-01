@@ -317,6 +317,25 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             });
         }
 
+        $scope.getStack = function(id) {
+            $http({
+                method: 'GET',
+                dataType: 'json',
+                withCredentials: true,
+                url:  $rootScope.apiUrl + "/stacks/" + id,
+                headers: {
+                    'Authorization': 'Basic ' + $rootScope.basic_auth,
+                    'Content-Type': 'application/json'
+                }
+            }).success(function (data, status, headers, config) {
+                return data;
+            }).error(function (data, status, headers, config) {
+                log.info("getStack was unsucces: " + data.message);
+                return null;
+            });
+        }
+
+
         $scope.deleteStack = function(id) {
             $http({
                 method: 'DELETE',
@@ -486,6 +505,9 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     });
                     $scope.getBluePrint($scope.stacks[i].cluster.blueprintId).then(function(data){
                         $scope.activeStack.blueprint = data;
+                    });
+                    $scope.getStack($scope.stacks[i].id).then(function(data){
+                        $scope.activeStack.data = data;
                     });
                     $scope.activeStack.data = $scope.stacks[i];
                     break;
