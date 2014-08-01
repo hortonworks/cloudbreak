@@ -513,8 +513,8 @@
                                 <label class="col-sm-3 control-label" for="selectTemplate">Template</label>
 
                                 <div class="col-sm-9">
-                                    <select class="form-control" id="selectTemplate" ng-model="selectTemplate" ng-options="t.name for t in templates | orderBy:'name'" required >
-                                        <option data-value="{{template.id}}" value="{{template.id}}" id="{{template.id}}" ng-if="template.cloudPlatform == activeCredential.cloudPlatform">{{template.name}}
+                                    <select class="form-control" id="selectTemplate" ng-model="selectTemplate" required >
+                                        <option data-value="{{template.id}}" value="{{template.id}}" id="{{template.id}}" ng-if="template.cloudPlatform == activeCredential.cloudPlatform"  ng-repeat="template in templates | orderBy:'name'" >{{template.name}}
                                         </option>
                                     </select>
                                 </div>
