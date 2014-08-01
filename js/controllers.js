@@ -350,6 +350,12 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 }
             }).success(function (data, status, headers, config) {
                 $scope.getStacks();
+                for (var i = 0; i < $scope.stacks.length; i++) {
+                    if ($scope.stacks[i].id == id) {
+                        $scope.stacks.splice(i, 1);
+                        break;
+                    }
+                }
                 $scope.statusMessage = "Cluster " + id + " terminated successfully";
             }).error(function (data, status, headers, config) {
                 $scope.getStacks();
