@@ -318,6 +318,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
         }
 
         $scope.getStack = function(id) {
+            var deferred = $q.defer();
             $http({
                 method: 'GET',
                 dataType: 'json',
@@ -328,11 +329,12 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     'Content-Type': 'application/json'
                 }
             }).success(function (data, status, headers, config) {
-                return data;
+                deferred.resolve(data);
             }).error(function (data, status, headers, config) {
                 log.info("getStack was unsucces: " + data.message);
-                return null;
+                return deferred.reject();
             });
+            return deferred.promise;
         }
 
 
@@ -507,9 +509,8 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                         $scope.activeStack.blueprint = data;
                     });
                     $scope.getStack($scope.stacks[i].id).then(function(data){
-                        $scope.activeStack.data = data;
+                        $scope.activeStack.data = data.description;
                     });
-                    $scope.activeStack.data = $scope.stacks[i];
                     break;
                 }
             }
