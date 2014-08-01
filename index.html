@@ -976,7 +976,10 @@
 
                                     <div class="col-sm-9">
                                         <input type="text" class="form-control" id="bluePrintDescription" ng-model="bluePrintDescription" name="bluePrintDescription"
-                                               placeholder="description">
+                                               placeholder="description" ng-maxlength="20">
+                                        <div class="help-block" ng-show="blueprintForm.bluePrintDescription.$dirty && blueprintForm.bluePrintDescription.$invalid"><i class="fa fa-warning"></i>
+                                            {{error_msg.blueprint_description_invalid}}
+                                        </div>
                                     </div>
                                     <!-- .col-sm-9 -->
                                 </div>
