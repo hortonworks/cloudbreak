@@ -732,6 +732,8 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 csubscriptionId.value = "";
                 cjksPassword.value = "";
                 azure_sshPublicKey.value = "";
+                console.log("download" + data.id);
+                $scope.getAzureCertification(data.id);
             }).error(function (data, status, headers, config) {
                 $scope.statusMessage = "Azure credential creation failed: " + data.message;
             });
@@ -788,6 +790,10 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 stompClient.subscribe('/user/topic/blueprint', function(timeInfo){
                     $scope.getBluePrints();
                 });
+                stompClient.subscribe('/user/topic/copyimage', function(info){
+                    $scope.statusMessage = JSON.parse(info.body).detailedMessage;
+                });
+
             });
         }
 
