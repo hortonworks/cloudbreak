@@ -509,7 +509,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                         $scope.activeStack.blueprint = data;
                     });
                     $scope.getStack($scope.stacks[i].id).then(function(data){
-                        $scope.activeStack.data = data.description;
+                        $scope.activeStack.data = data;
                     });
                     break;
                 }
