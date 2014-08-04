@@ -27,7 +27,7 @@ public class AzureStackUtil {
     }
 
     public String getOsImageName(Credential credential) {
-        return String.format("%s-%s", ((AzureCredential) credential).getName().replaceAll("\\s+", ""), IMAGE_NAME);
+        return String.format("%s-%s", ((AzureCredential) credential).getCommonName(), IMAGE_NAME);
     }
 
     public AzureClient createAzureClient(Credential credential, String filePath) {

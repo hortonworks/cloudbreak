@@ -6,6 +6,7 @@ public enum WebsocketEndPoint {
     UPTIME("/uptime"),
     BLUEPRINT("/blueprint"),
     CREDENTIAL("/credential"),
+    COPY_IMAGE("/copyimage"),
     CLUSTER("/cluster");
 
     private final String value;

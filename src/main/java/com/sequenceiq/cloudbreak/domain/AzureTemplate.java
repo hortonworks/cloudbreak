@@ -6,6 +6,8 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -13,7 +15,8 @@ import javax.persistence.OneToMany;
 @Entity
 public class AzureTemplate extends Template implements ProvisionEntity {
 
-    private String location;
+    @Enumerated(EnumType.STRING)
+    private AzureLocation location;
     @Column(nullable = false)
     private String name;
     private String description;
@@ -29,11 +32,11 @@ public class AzureTemplate extends Template implements ProvisionEntity {
     public AzureTemplate() {
     }
 
-    public String getLocation() {
+    public AzureLocation getLocation() {
         return location;
     }
 
-    public void setLocation(String location) {
+    public void setLocation(AzureLocation location) {
         this.location = location;
     }
 

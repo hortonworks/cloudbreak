@@ -10,6 +10,7 @@ import java.io.FileNotFoundException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -26,7 +27,6 @@ import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
-import com.sequenceiq.cloudbreak.domain.AzureLocation;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.AzureVmType;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
@@ -93,8 +93,8 @@ public class AzureProvisioner implements Provisioner {
         String filePath = AzureCertificateService.getUserJksFileName(credential, emailAsFolder);
         AzureClient azureClient = azureStackUtil.createAzureClient(credential, filePath);
         retryingStackUpdater.updateStackStatus(stack.getId(), Status.CREATE_IN_PROGRESS);
-        String name = stack.getName().replaceAll("\\s+", "");
-        String commonName = ((AzureCredential) credential).getName().replaceAll("\\s+", "");
+        String name = stack.getName().replaceAll("\\s+", "") + String.valueOf(new Date().getTime());
+        String commonName = ((AzureCredential) credential).getCommonName();
         createAffinityGroup(azureClient, azureTemplate, commonName);
         createStorageAccount(azureClient, azureTemplate, commonName);
         createVirtualNetwork(azureClient, name, commonName);
@@ -105,35 +105,38 @@ public class AzureProvisioner implements Provisioner {
 
         for (int i = 0; i < stack.getNodeCount(); i++) {
             try {
-                String vmName = azureStackUtil.getVmName(name, i);
+                String vmName = azureStackUtil.getVmName(name, i) + String.valueOf(new Date().getTime());
                 createCloudService(azureClient, azureTemplate, vmName, commonName);
                 createServiceCertificate(azureClient, azureTemplate, credential, vmName, emailAsFolder);
                 createVirtualMachine(azureClient, azureTemplate, credential, name, vmName, commonName, userData);
                 resourceSet.add(new Resource(ResourceType.VIRTUAL_MACHINE, vmName, stack));
                 resourceSet.add(new Resource(ResourceType.CLOUD_SERVICE, vmName, stack));
+                resourceSet.add(new Resource(ResourceType.BLOB, vmName, stack));
             } catch (FileNotFoundException e) {
-                LOGGER.info("Problem with the ssh file because not found: " + e.getMessage());
+                LOGGER.error(String.format("Ssh certificate file not found for %s stack", stack.getId()), e);
                 reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(new StackCreationFailure(stack.getId(),
                         "Error while creating Azure stack: ssh file not found")));
                 return;
             } catch (CertificateException e) {
-                LOGGER.info("Problem with the certificate file: " + e.getMessage());
+                LOGGER.error(String.format("Ssh certificate file was not in the correct format", stack.getId()), e);
                 reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(new StackCreationFailure(stack.getId(),
                         "Error while creating Azure stack: certificate not correct")));
                 return;
             } catch (NoSuchAlgorithmException e) {
-                LOGGER.info("Problem with the fingerprint: " + e.getMessage());
+                LOGGER.error(String.format("No such algorithm exception under azure vm creation %s stack", stack.getId()), e);
                 reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(new StackCreationFailure(stack.getId(),
                         "Error while creating Azure stack: no such algorithm exception")));
                 return;
-            } catch (Exception ex) {
-                LOGGER.info("Problem with the stack creation: " + ex.getMessage());
+            } catch (Exception e) {
+                LOGGER.error(String.format("%s exception occured in %s stack", e.getMessage(), stack.getId()), e);
                 reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(new StackCreationFailure(stack.getId(),
-                        "Error while creating Azure stack: " + ex.getMessage())));
+                        "Error while creating Azure stack: " + e.getMessage())));
                 return;
             }
         }
+
         Stack updatedStack = retryingStackUpdater.updateStackCreateComplete(stack.getId());
+        updatedStack = retryingStackUpdater.updateStackResources(stack.getId(), resourceSet);
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_COMPLETE_EVENT, updatedStack.getId());
         reactor.notify(ReactorConfig.PROVISION_COMPLETE_EVENT, Event.wrap(new ProvisionComplete(CloudPlatform.AZURE, updatedStack.getId(), resourceSet)));
     }
@@ -164,9 +167,7 @@ public class AzureProvisioner implements Provisioner {
         props.put(LABEL, label);
         props.put(IMAGENAME,
                 azureTemplate.getImageName().equals(AzureStackUtil.IMAGE_NAME) ? azureStackUtil.getOsImageName(credential) : azureTemplate.getImageName());
-        props.put(IMAGESTOREURI,
-                String.format("http://%s.blob.core.windows.net/vhd-store/%s.vhd", commonName, vmName)
-        );
+        props.put(IMAGESTOREURI, buildimageStoreUri(commonName, vmName));
         props.put(HOSTNAME, vmName);
         props.put(USERNAME, DEFAULT_USER_NAME);
         X509Certificate sshCert = azureStackUtil.createX509Certificate((AzureCredential) credential, azureTemplate.getOwner().emailAsFolder());
@@ -182,6 +183,10 @@ public class AzureProvisioner implements Provisioner {
         HttpResponseDecorator virtualMachineResponse = (HttpResponseDecorator) azureClient.createVirtualMachine(props);
         String requestId = (String) azureClient.getRequestId(virtualMachineResponse);
         azureClient.waitUntilComplete(requestId);
+    }
+
+    private String buildimageStoreUri(String commonName, String vmName) {
+        return String.format("http://%s.blob.core.windows.net/vhd-store/%s.vhd", commonName, vmName);
     }
 
     private void createCloudService(AzureClient azureClient, AzureTemplate azureTemplate, String vmName, String commonName) {
@@ -244,7 +249,7 @@ public class AzureProvisioner implements Provisioner {
             if (((HttpResponseException) ex).getStatusCode() == NOT_FOUND) {
                 Map<String, String> props = new HashMap<>();
                 props.put(NAME, name);
-                props.put(LOCATION, AzureLocation.valueOf(azureTemplate.getLocation()).location());
+                props.put(LOCATION, azureTemplate.getLocation().location());
                 props.put(DESCRIPTION, azureTemplate.getDescription());
                 HttpResponseDecorator affinityResponse = (HttpResponseDecorator) azureClient.createAffinityGroup(props);
                 String requestId = (String) azureClient.getRequestId(affinityResponse);

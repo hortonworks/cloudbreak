@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,6 +36,7 @@ public class AzureCredentialConverter extends AbstractConverter<CredentialJson, 
         azureCredential.setName(json.getName());
         azureCredential.setDescription(json.getDescription());
         azureCredential.setSubscriptionId(String.valueOf(json.getParameters().get(RequiredAzureCredentialParam.SUBSCRIPTION_ID.getName())));
+        azureCredential.setPostFix(String.valueOf(new Date().getTime()));
         azureCredential.setCloudPlatform(CloudPlatform.AZURE);
         azureCredential.setPublicKey(json.getPublicKey());
         return azureCredential;

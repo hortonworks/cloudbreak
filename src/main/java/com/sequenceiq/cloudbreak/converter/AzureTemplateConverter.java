@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
 import com.sequenceiq.cloudbreak.controller.validation.AzureTemplateParam;
+import com.sequenceiq.cloudbreak.domain.AzureLocation;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Port;
@@ -42,7 +43,7 @@ public class AzureTemplateConverter extends AbstractConverter<TemplateJson, Azur
         azureTemplate.setName(json.getName());
         azureTemplate.setDescription(json.getDescription());
         azureTemplate.setImageName(String.valueOf(json.getParameters().get(AzureTemplateParam.IMAGENAME.getName())));
-        azureTemplate.setLocation(String.valueOf(json.getParameters().get(AzureTemplateParam.LOCATION.getName())));
+        azureTemplate.setLocation(AzureLocation.valueOf(json.getParameters().get(AzureTemplateParam.LOCATION.getName()).toString()));
         azureTemplate.setName(String.valueOf(json.getName()));
         azureTemplate.setVmType(String.valueOf(json.getParameters().get(AzureTemplateParam.VMTYPE.getName())));
         Set<Port> ports = new HashSet<>();

@@ -4,6 +4,7 @@ public enum ResourceType {
     // AZURE
     VIRTUAL_MACHINE,
     CLOUD_SERVICE,
+    BLOB,
     STORAGE,
     NETWORK,
     AFFINITY_GROUP,

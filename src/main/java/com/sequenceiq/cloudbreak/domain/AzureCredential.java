@@ -8,9 +8,12 @@ import javax.persistence.ManyToOne;
 @Entity
 public class AzureCredential extends Credential implements ProvisionEntity {
 
+    private static final int END_INDEX = 24;
     private String subscriptionId;
 
     private String jks;
+
+    private String postFix;
 
     @ManyToOne
     @JoinColumn(name = "azureCredential_azureCredentialOwner")
@@ -47,6 +50,14 @@ public class AzureCredential extends Credential implements ProvisionEntity {
         this.jks = jks;
     }
 
+    public String getPostFix() {
+        return postFix;
+    }
+
+    public void setPostFix(String postFix) {
+        this.postFix = postFix;
+    }
+
     public User getAzureCredentialOwner() {
         return azureCredentialOwner;
     }
@@ -68,5 +79,13 @@ public class AzureCredential extends Credential implements ProvisionEntity {
     @Override
     public String getCredentialName() {
         return name;
+    }
+
+    public String getCommonName() {
+        String result = name.replaceAll("\\s+", "") + postFix;
+        if (result.length() > END_INDEX) {
+            return result.substring(result.length() - END_INDEX, result.length());
+        }
+        return result;
     }
 }

@@ -9,7 +9,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.common.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,10 +16,13 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
@@ -57,19 +59,18 @@ public class AzureMetadataSetup implements MetadataSetup {
 
     private Set<CoreInstanceMetaData> collectMetaData(Stack stack, AzureClient azureClient, String name) {
         Set<CoreInstanceMetaData> instanceMetaDatas = new HashSet<>();
-        for (int i = 0; i < stack.getNodeCount(); i++) {
-            String vmName = azureStackUtil.getVmName(name, i);
+        for (Resource resource : stack.getResourcesByType(ResourceType.VIRTUAL_MACHINE)) {
             Map<String, Object> props = new HashMap<>();
-            props.put(NAME, vmName);
-            props.put(SERVICENAME, vmName);
+            props.put(NAME, resource.getResourceName());
+            props.put(SERVICENAME, resource.getResourceName());
             Object virtualMachine = azureClient.getVirtualMachine(props);
             try {
-                CoreInstanceMetaData instanceMetaData = new CoreInstanceMetaData(vmName,
+                CoreInstanceMetaData instanceMetaData = new CoreInstanceMetaData(resource.getResourceName(),
                         getPrivateIP((String) virtualMachine),
                         getVirtualIP((String) virtualMachine));
                 instanceMetaDatas.add(instanceMetaData);
             } catch (IOException e) {
-                LOGGER.info("The instance {} was not reacheable: ", vmName, e.getMessage());
+                LOGGER.error(String.format("The instance %s was not reacheable: %s", resource.getResourceName(), e.getMessage()), e);
             }
         }
         return instanceMetaDatas;
