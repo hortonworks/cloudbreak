@@ -1,4 +1,4 @@
-package com.sequenceiq.periscope.policies.cloudbreak;
+package com.sequenceiq.periscope.utils;
 
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.ClusterMetricsInfo;
 

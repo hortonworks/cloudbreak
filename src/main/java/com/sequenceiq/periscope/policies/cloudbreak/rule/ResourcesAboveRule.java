@@ -1,6 +1,6 @@
 package com.sequenceiq.periscope.policies.cloudbreak.rule;
 
-import static com.sequenceiq.periscope.policies.cloudbreak.ClusterUtils.computeFreeResourceRate;
+import static com.sequenceiq.periscope.utils.ClusterUtils.computeFreeResourceRate;
 import static java.lang.Math.max;
 
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.ClusterMetricsInfo;
