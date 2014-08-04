@@ -15,7 +15,6 @@ import com.amazonaws.services.cloudformation.model.CreateStackResult;
 import com.amazonaws.services.cloudformation.model.Parameter;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
-import com.sequenceiq.cloudbreak.domain.CloudFormationTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
@@ -26,13 +25,19 @@ import com.sequenceiq.cloudbreak.service.stack.connector.Provisioner;
 @Component
 public class AwsProvisioner implements Provisioner {
 
+    private static final int DEFAULT_VOLUME_COUNT = 2;
+
+    private static final String DEFAULT_VOLUME_TYPE = "gp2";
+
+    private static final String DEFAULT_VOLUME_SIZE = "60";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsProvisioner.class);
 
     @Autowired
     private AwsStackUtil awsStackUtil;
 
     @Autowired
-    private CloudFormationTemplate cfTemplate;
+    private CloudFormationTemplateBuilder cfTemplateBuilder;
 
     @Autowired
     private RetryingStackUpdater stackUpdater;
@@ -45,7 +50,7 @@ public class AwsProvisioner implements Provisioner {
         String stackName = String.format("%s-%s", stack.getName(), stack.getId());
         CreateStackRequest createStackRequest = createStackRequest()
                 .withStackName(stackName)
-                .withTemplateBody(cfTemplate.getBody())
+                .withTemplateBody(cfTemplateBuilder.build("templates/aws-cf-stack.ftl", DEFAULT_VOLUME_COUNT))
                 .withNotificationARNs((String) setupProperties.get(SnsTopicManager.NOTIFICATION_TOPIC_ARN_KEY))
                 .withParameters(
                         new Parameter().withParameterKey("SSHLocation").withParameterValue(awsTemplate.getSshLocation()),
@@ -54,7 +59,9 @@ public class AwsProvisioner implements Provisioner {
                         new Parameter().withParameterKey("InstanceCount").withParameterValue(stack.getNodeCount().toString()),
                         new Parameter().withParameterKey("InstanceType").withParameterValue(awsTemplate.getInstanceType().toString()),
                         new Parameter().withParameterKey("KeyName").withParameterValue(awsCredential.getKeyPairName()),
-                        new Parameter().withParameterKey("AMI").withParameterValue(awsTemplate.getAmiId())
+                        new Parameter().withParameterKey("AMI").withParameterValue(awsTemplate.getAmiId()),
+                        new Parameter().withParameterKey("VolumeSize").withParameterValue(DEFAULT_VOLUME_SIZE),
+                        new Parameter().withParameterKey("VolumeType").withParameterValue(DEFAULT_VOLUME_TYPE)
                 );
         CreateStackResult createStackResult = client.createStack(createStackRequest);
         Set<Resource> resources = new HashSet<>();

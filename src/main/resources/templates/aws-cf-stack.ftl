@@ -60,6 +60,22 @@
       "MaxLength": "12",
       "AllowedPattern" : "ami-[a-z0-9]{8}",
       "ConstraintDescription" : "must follow pattern: ami-xxxxxxxx"
+    },
+    
+    "VolumeSize" : {
+      "Description" : "Size of the attached volumes in GB",
+      "Type" : "Number",
+      "Default" : "40",
+      "MinValue": "10",
+      "MaxValue": "1000"
+    },
+    
+    "VolumeType" : {
+      "Description" : "Type of the attached volumes (SSD or magnetic)",
+      "Type" : "String",
+      "Default" : "gp2",
+      "AllowedValues" : [ "gp2","standard"],
+      "ConstraintDescription" : "must be 'gp2' or 'standard'."
     }
 
   },
@@ -163,6 +179,42 @@
     "AmbariNodeLaunchConfig"  : {
       "Type" : "AWS::AutoScaling::LaunchConfiguration",
       "Properties" : {
+      	"BlockDeviceMappings" : [
+      	  {
+            "DeviceName" : "/dev/sda1",
+            "Ebs" : {
+              "VolumeSize" : "50",
+              "VolumeType" : "gp2"
+            }
+          }, {
+            "DeviceName" : "/dev/sdb",
+            "NoDevice" : true,
+            "Ebs": {}
+      	  }, {
+            "DeviceName" : "/dev/sdc",
+            "NoDevice" : true,
+            "Ebs": {}
+          }, {
+            "DeviceName" : "/dev/sdd",
+            "NoDevice" : true,
+            "Ebs": {}
+          }, {
+            "DeviceName" : "/dev/sde",
+            "NoDevice" : true,
+            "Ebs": {}
+          }
+		  <#assign seq = ["f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]>
+			<#list seq as x>
+			<#if x_index = volumeCount><#break></#if>
+  		  ,{
+          	"DeviceName" : "/dev/sd${x}",
+          	"Ebs" : {
+           	  "VolumeSize" : { "Ref" : "VolumeSize" },
+           	  "VolumeType" : { "Ref" : "VolumeType" }
+            }
+      	  }	
+			</#list>
+      	],
         "ImageId"        : { "Ref" : "AMI" },
         "SecurityGroups" : [ { "Ref" : "ClusterNodeSecurityGroup" } ],
         "InstanceType"   : { "Ref" : "InstanceType" },
