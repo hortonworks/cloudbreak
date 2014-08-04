@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.conf;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,7 +10,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import com.sequenceiq.cloudbreak.domain.CloudFormationTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
@@ -21,8 +19,6 @@ import com.sequenceiq.cloudbreak.service.stack.connector.aws.TemplateReader;
 
 @Configuration
 public class AppConfig {
-
-    private static final String DEFAULT_TEMPLATE_NAME = "vpc-and-subnet.template";
 
     @Autowired
     private TemplateReader templateReader;
@@ -42,11 +38,6 @@ public class AppConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    public CloudFormationTemplate defaultTemplate() throws IOException {
-        return templateReader.readTemplateFromFile(DEFAULT_TEMPLATE_NAME);
     }
 
     @Bean
