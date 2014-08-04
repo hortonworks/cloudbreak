@@ -25,6 +25,12 @@ import com.sequenceiq.cloudbreak.service.stack.connector.Provisioner;
 @Component
 public class AwsProvisioner implements Provisioner {
 
+    private static final int DEFAULT_VOLUME_COUNT = 2;
+
+    private static final String DEFAULT_VOLUME_TYPE = "gp2";
+
+    private static final String DEFAULT_VOLUME_SIZE = "60";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsProvisioner.class);
 
     @Autowired
