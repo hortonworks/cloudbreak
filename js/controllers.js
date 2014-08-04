@@ -157,7 +157,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                         }
                      }).error(function (data, status, headers, config){
                         if (status == 404){
-                            alert("There is not susch username");
+                            alert("There's no such username");
                         } else {
                             alert("Internal server error");
                         }
