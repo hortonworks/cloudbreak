@@ -599,173 +599,16 @@
         </div>
     </div>
 </div>
-<form class="form-horizontal" role="form" name="azureTemplateForm" ng-show="azureTemplate">
 
-    <div class="form-group" ng-class="{ 'has-error': azureTemplateForm.azure_tclusterName.$dirty && azureTemplateForm.azure_tclusterName.$invalid }">
-        <label class="col-sm-3 control-label" for="azure_tclusterName">Name</label>
+    <form class="form-horizontal" role="form" name="azureTemplateForm" ng-show="azureTemplate">
+        <div ng-include src="'tags/template/azureform.tag'"></div>
+    </form>
 
-        <div class="col-sm-9">
-            <input type="text" ng-pattern="/^[a-zA-Z][-a-zA-Z0-9]*$/" class="form-control" id="azure_tclusterName" name="azure_tclusterName" ng-model="azure_tclusterName" ng-minlength="5" ng-maxlength="20" required placeholder="min. 5 max. 20 char">
-            <div class="help-block" ng-show="azureTemplateForm.azure_tclusterName.$dirty && azureTemplateForm.azure_tclusterName.$invalid">
-                <i class="fa fa-warning"></i> {{error_msg.template_name_invalid}}
-            </div>
-        </div>
-        <!-- .col-sm-9 -->
-
-    </div>
-    <div class="form-group" ng-class="{ 'has-error': azureTemplateForm.azure_tdescription.$dirty && azureTemplateForm.azure_tdescription.$invalid }">
-        <label class="col-sm-3 control-label" for="azure_tdescription">Description</label>
-
-        <div class="col-sm-9">
-            <input type="text" class="form-control" id="azure_tdescription" name="azure_tdescription" ng-model="azure_tdescription" ng-maxlength="20" placeholder="max. 20 char">
-            <div class="help-block" ng-show="azureTemplateForm.azure_tdescription.$dirty && azureTemplateForm.azure_tdescription.$invalid">
-                <i class="fa fa-warning"></i> {{error_msg.template_description_invalid}}
-            </div>
-        </div>
-        <!-- .col-sm-9 -->
-
-    </div>
-
-    <div class="form-group">
-            <label class="col-sm-3 control-label" for="azure_tlocation">Location</label>
-
-            <div class="col-sm-9">
-                <select class="form-control" id="azure_tlocation">
-                    <option value="NORTH_EUROPE">North Europe</option>
-                    <option value="EAST_ASIA">East Asia</option>
-                    <option value="EAST_US">East US</option>
-                    <option value="WEST_US">West US</option>
-                    <option value="BRAZIL_SOUTH">Brazil South</option>
-                </select>
-            </div>
-            <!-- .col-sm-9 -->
-
-    </div>
-    <div class="form-group">
-        <label class="col-sm-3 control-label" for="azure_tvmType">Instance type</label>
-        <div class="col-sm-9">
-            <select class="form-control" id="azure_tvmType">
-                <option value="SMALL">Small</option>
-                <option value="MEDIUM">Medium</option>
-                <option value="LARGE">Large</option>
-                <option value="EXTRA_LARGE">Extra Large</option>
-            </select>
-        </div>
-        <!-- .col-sm-9 -->
-    </div>
-    <!--<div class="form-group">
-        <label class="col-sm-3 control-label" for="azure_taddressPrefix">Address prefix</label>
-
-        <div class="col-sm-9">
-            <input type="text" class="form-control" id="azure_taddressPrefix">
-        </div>
-        &lt;!&ndash; .col-sm-9 &ndash;&gt;
-
-    </div>
-    <div class="form-group">
-        <label class="col-sm-3 control-label" for="azure_tsubnetAddressPrefix">Subnet address prefix</label>
-
-        <div class="col-sm-9">
-            <input type="text" class="form-control" id="azure_tsubnetAddressPrefix">
-        </div>
-        &lt;!&ndash; .col-sm-9 &ndash;&gt;
-
-    </div>-->
+    <form class="form-horizontal" role="form" ng-show="awsTemplate" name="awsTemplateForm">
+        <div ng-include src="'tags/template/awsform.tag'"></div>
+    </form>
 
 
-
-    <div class="row btn-row">
-        <div class="col-sm-9 col-sm-offset-3">
-            <a href="#" id="createAzureTemplate" ng-disabled="azureTemplateForm.$invalid" class="btn btn-success btn-block" ng-click="createAzureTemplate()" role="button"><i
-                    class="fa fa-plus fa-fw"></i> create template</a>
-        </div>
-    </div>
-
-</form>
-
-<form class="form-horizontal" role="form" ng-show="awsTemplate" name="awsTemplateForm">
-    <div class="form-group" ng-class="{ 'has-error': awsTemplateForm.aws_tclusterName.$dirty && awsTemplateForm.aws_tclusterName.$invalid }">
-        <label class="col-sm-3 control-label" for="aws_tclusterName">Name</label>
-
-        <div class="col-sm-9">
-            <input type="text" class="form-control" ng-pattern="/^[a-zA-Z][-a-zA-Z0-9]*$/" name="aws_tclusterName" ng-model="aws_tclusterName" ng-minlength="5" ng-maxlength="20" required id="aws_tclusterName" placeholder="min. 5 max. 20 char">
-            <div class="help-block" ng-show="awsTemplateForm.aws_tclusterName.$dirty && awsTemplateForm.aws_tclusterName.$invalid">
-                <i class="fa fa-warning"></i> {{error_msg.template_name_invalid}}
-            </div>
-        </div>
-        <!-- .col-sm-9 -->
-
-    </div>
-
-    <div class="form-group" ng-class="{ 'has-error': awsTemplateForm.aws_tdescription.$dirty && awsTemplateForm.aws_tdescription.$invalid }">
-        <label class="col-sm-3 control-label" for="aws_tdescription">Description</label>
-
-        <div class="col-sm-9">
-            <input type="text" class="form-control" name="aws_tdescription" ng-model="aws_tdescription" ng-maxlength="20" id="aws_tdescription" placeholder="max. 20 char">
-            <div class="help-block" ng-show="awsTemplateForm.aws_tdescription.$dirty && awsTemplateForm.aws_tdescription.$invalid">
-                <i class="fa fa-warning"></i> {{error_msg.template_description_invalid}}
-            </div>
-        </div>
-        <!-- .col-sm-9 -->
-
-    </div>
-    <div class="form-group" ng-class="{ 'has-error': awsTemplateForm.aws_tsshLocation.$dirty && awsTemplateForm.aws_tsshLocation.$invalid }">
-        <label class="col-sm-3 control-label" for="aws_tsshLocation">SSH location</label>
-
-        <div class="col-sm-9">
-            <input type="text" class="form-control" id="aws_tsshLocation" name="aws_tsshLocation" ng-model="aws_tsshLocation" placeholder="0.0.0.0/0" required ng-pattern="/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\/(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/i">
-            <div class="help-block" ng-show="awsTemplateForm.aws_tsshLocation.$dirty && awsTemplateForm.aws_tsshLocation.$invalid">
-                <i class="fa fa-warning"></i> {{error_msg.template_ssh_location_invalid}}
-            </div>
-        </div>
-        <!-- .col-sm-9 -->
-
-    </div>
-    <div class="form-group">
-        <label class="col-sm-3 control-label" for="aws_tregion">Region</label>
-
-        <div class="col-sm-9">
-            <select class="form-control" id="aws_tregion">
-                <option value="US_EAST_1">us-east-1</option>
-                <option value="US_WEST_1">us-west-1</option>
-                <option value="US_WEST_2">us-west-2</option>
-                <option value="EU_WEST_1">eu-west-1</option>
-                <option value="AP_SOUTHEAST_1">ap-southeast-1</option>
-                <option value="AP_SOUTHEAST_2">ap-southeast-2</option>
-                <option value="AP_NORTHEAST_1">ap-northeast-1</option>
-                <option value="SA_EAST_1">sa-east-1</option>
-            </select>
-        </div>
-        <!-- .col-sm-9 -->
-
-    </div>
-    <div class="form-group">
-        <label class="col-sm-3 control-label" for="aws_tinstanceType">Instance type</label>
-
-        <div class="col-sm-9">
-            <select class="form-control" id="aws_tinstanceType">
-                <option value="T2Micro">t2.micro</option>
-                <option value="T2Small">t2.small</option>
-                <option value="T2Medium">t2.medium</option>
-                <option value="M3Medium">m3.medium</option>
-                <option value="M3Large">m3.large</option>
-                <option value="M3Xlarge">m3.xlarge</option>
-                <option value="M32xlarge">m3.2xlarge</option>
-            </select>
-        </div>
-        <!-- .col-sm-9 -->
-
-    </div>
-
-
-    <div class="row btn-row">
-        <div class="col-sm-9 col-sm-offset-3">
-            <a href="#" id="createAwsTemplate" ng-disabled="awsTemplateForm.$invalid" class="btn btn-success btn-block" ng-click="createAwsTemplate()" role="button"><i class="fa fa-plus fa-fw"></i>
-                create template</a>
-        </div>
-    </div>
-
-</form>
 </div>
 </div>
 </div>
@@ -790,124 +633,11 @@
                     class="fa fa-times fa-fw"></i><span> delete</span></a></p>
 
             <div class="panel-body" ng-if="template.cloudPlatform == 'AZURE' ">
-
-                <form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
-
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label" for="clusterName">Name</label>
-
-                        <div class="col-sm-9">
-                            <p id="clusterName" class="form-control-static">{{template.name}}</p>
-                        </div>
-                        <!-- .col-sm-9 -->
-                    </div>
-                    <!-- .form-group -->
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label" for="clusterDesc">Description</label>
-
-                        <div class="col-sm-9">
-                            <p id="clusterDesc" class="form-control-static">{{template.description}}</p>
-                        </div>
-                        <!-- .col-sm-9 -->
-                    </div>
-                    <div class="form-group" ng-show="template.parameters.password.length">
-                        <label class="col-sm-3 control-label" for="password">Password</label>
-
-                        <div class="col-sm-9">
-                            <p id="password" class="form-control-static">{{template.parameters.password}}</p>
-                        </div>
-                        <!-- .col-sm-9 -->
-                    </div>
-                    <!-- .form-group -->
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label" for="username">Username</label>
-
-                        <div class="col-sm-9">
-                            <p id="username" class="form-control-static">ubuntu</p>
-                        </div>
-                        <!-- .col-sm-9 -->
-                    </div>
-                    <!-- .form-group -->
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label" for="vmType">VM type</label>
-
-                        <div class="col-sm-9">
-                            <p id="vmType" class="form-control-static">{{template.parameters.vmType}}</p>
-                        </div>
-                        <!-- .col-sm-9 -->
-                    </div>
-                    <!-- .form-group -->
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label" for="imageName">Image name</label>
-
-                        <div class="col-sm-9">
-                            <p id="imageName" class="form-control-static">{{template.parameters.imageName}}</p>
-                        </div>
-                        <!-- .col-sm-9 -->
-                    </div>
-                    <!-- .form-group -->
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label" for="location">Location</label>
-
-                        <div class="col-sm-9">
-                            <p id="location" class="form-control-static">{{template.parameters.location}}</p>
-                        </div>
-                        <!-- .col-sm-9 -->
-                    </div>
-                </form>
+                <div ng-include src="'tags/template/azurelist.tag'"></div>
             </div>
 
             <div class="panel-body" ng-if="template.cloudPlatform == 'AWS' ">
-                <form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label" for="awsclusterName">Name</label>
-
-                        <div class="col-sm-9">
-                            <p id="awsclusterName" class="form-control-static">{{template.name}}</p>
-                        </div>
-                        <!-- .col-sm-9 -->
-                    </div>
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label" for="awsclusterDesc">Description</label>
-
-                        <div class="col-sm-9">
-                            <p id="awsclusterDesc" class="form-control-static">{{template.description}}</p>
-                        </div>
-                        <!-- .col-sm-9 -->
-                    </div>
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label" for="awsamiId">AMI</label>
-
-                        <div class="col-sm-9">
-                            <p id="awsamiId" class="form-control-static">{{template.parameters.amiId}}</p>
-                        </div>
-                        <!-- .col-sm-9 -->
-                    </div>
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label" for="awssshLocation">SSH location</label>
-
-                        <div class="col-sm-9">
-                            <p id="awssshLocation" class="form-control-static">{{template.parameters.sshLocation}}</p>
-                        </div>
-                        <!-- .col-sm-9 -->
-                    </div>
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label" for="awsregion">Region</label>
-
-                        <div class="col-sm-9">
-                            <p id="awsregion" class="form-control-static">{{template.parameters.region}}</p>
-                        </div>
-                        <!-- .col-sm-9 -->
-                    </div>
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label" for="awsinstanceType">Instance type</label>
-
-                        <div class="col-sm-9">
-                            <p id="awsinstanceType" class="form-control-static">{{template.parameters.instanceType}}</p>
-                        </div>
-                        <!-- .col-sm-9 -->
-                    </div>
-                </form>
+                <div ng-include src="'tags/template/awslist.tag'"></div>
             </div>
         </div>
     </div>
@@ -949,84 +679,8 @@
                 <div class="panel panel-default">
                     <div id="panel-create-blueprint-collapse" class="panel-collapse panel-under-btn-collapse collapse">
                         <div class="panel-body">
+                            <div ng-include src="'tags/blueprint/bpform.tag'"></div>
 
-                            <form class="form-horizontal" role="form" name="blueprintForm">
-
-                                <div class="form-group" ng-class="{ 'has-error': blueprintForm.bluePrintName.$dirty && blueprintForm.bluePrintName.$invalid }">
-                                    <label class="col-sm-3 control-label" for="bluePrintName">Name</label>
-
-                                    <div class="col-sm-9">
-                                        <input type="text" class="form-control" id="bluePrintName" ng-model="bluePrintName" name="bluePrintName"
-                                               ng-pattern="/^[a-zA-Z][-a-zA-Z0-9]*$/" placeholder="set blueprint name" required>
-                                        <div class="help-block" ng-show="blueprintForm.bluePrintName.$dirty && blueprintForm.bluePrintName.$invalid"><i class="fa fa-warning"></i>
-                                            {{error_msg.blueprint_name_invalid}}
-                                        </div>
-                                    </div>
-
-
-                                    <!-- .col-sm-9 -->
-                                </div>
-                                <!-- .form-group -->
-
-
-                                <div class="form-group">
-                                    <label class="col-sm-3 control-label" for="bluePrintDescription">Description</label>
-
-                                    <div class="col-sm-9">
-                                        <input type="text" class="form-control" id="bluePrintDescription" ng-model="bluePrintDescription" name="bluePrintDescription"
-                                               placeholder="description" ng-maxlength="20">
-                                        <div class="help-block" ng-show="blueprintForm.bluePrintDescription.$dirty && blueprintForm.bluePrintDescription.$invalid"><i class="fa fa-warning"></i>
-                                            {{error_msg.blueprint_description_invalid}}
-                                        </div>
-                                    </div>
-                                    <!-- .col-sm-9 -->
-                                </div>
-                                <!-- .form-group -->
-
-                                <div class="form-group" ng-hide="blueprintForm.bluePrintText.$dirty && !blueprintForm.bluePrintText.$error.required" ng-class="{ 'has-error': blueprintForm.blueprintUrl.$dirty && blueprintForm.blueprintUrl.$invalid }">
-                                    <label class="col-sm-3 control-label" for="blueprintUrl">Source URL</label>
-
-                                    <div class="col-sm-9">
-                                        <input type="url" class="form-control" id="blueprintUrl" ng-model="blueprintUrl" name="blueprintUrl"
-                                               placeholder="set blueprint URL" required>
-
-                                        <div class="help-block" ng-show="blueprintForm.blueprintUrl.$dirty && blueprintForm.blueprintUrl.$invalid">
-                                            <i class="fa fa-warning"></i> {{error_msg.blueprint_url_invalid}}
-                                        </div>
-                                    </div>
-
-
-                                    <!-- .col-sm-9 -->
-                                </div>
-                                <!-- .form-group -->
-
-                                <div class="form-group" ng-hide="blueprintForm.blueprintUrl.$dirty && !blueprintForm.blueprintUrl.$error.required" ng-class="{ 'has-error': blueprintForm.bluePrintText.$error.validjson && blueprintForm.bluePrintText.$dirty }">
-                                    <label class="col-sm-3 control-label" for="bluePrintText">Manual copy</label>
-
-                                    <div class="col-sm-9">
-                                        <textarea class="form-control" id="bluePrintText" ng-model="bluePrintText" name="bluePrintText" placeholder="paste blueprint text here" validjson rows="10" required></textarea>
-
-                                      <div class="help-block" ng-show="blueprintForm.bluePrintText.$error.validjson">
-                                          <i class="fa fa-warning"></i> {{error_msg.blueprint_json_invalid}}
-                                      </div>
-                                    </div>
-                                    <!-- .col-sm-9 -->
-                                </div>
-                                <!-- .form-group -->
-
-
-                                <div class="row btn-row">
-                                    <div class="col-sm-9 col-sm-offset-3">
-                                        <a href="#" id="createBlueprint" ng-click="createBlueprint()"
-                                           ng-disabled="blueprintForm.bluePrintName.$invalid ||
-                                           (blueprintForm.blueprintUrl.$error.url && !blueprintForm.blueprintUrl.$error.required) ||
-                                           blueprintForm.bluePrintText.$error.validjson && !blueprintForm.bluePrintText.$error.required" class="btn btn-success btn-block" role="button"><i
-                                                class="fa fa-plus fa-fw"></i> create
-                                            blueprint</a>
-                                    </div>
-                                </div>
-
-                            </form>
                         </div>
                     </div>
                 </div>
@@ -1050,40 +704,7 @@
                             </p>
 
                             <div class="panel-body">
-
-                                <form class="form-horizontal" role="document">
-
-                                    <div class="form-group">
-                                        <label class="col-sm-3 control-label" for="name">Blueprint name</label>
-
-                                        <div class="col-sm-9">
-                                            <p id="name" class="form-control-static">{{blueprint.blueprintName}}</p>
-                                        </div>
-                                        <!-- .col-sm-9 -->
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label class="col-sm-3 control-label" for="name">Description</label>
-
-                                        <div class="col-sm-9">
-                                            <p id="name" class="form-control-static">{{blueprint.description}}</p>
-                                        </div>
-                                        <!-- .col-sm-9 -->
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label class="col-sm-3 control-label" for="source">Source</label>
-
-                                        <div class="col-sm-9">
-                                                                    <pre id="source" class="form-control-static blueprint-source">
-    {{blueprint.ambariBlueprint | json}}
-                                                                    </pre>
-                                        </div>
-                                        <!-- .col-sm-9 -->
-                                    </div>
-                                    <!-- .form-group -->
-
-                                </form>
+                                <div ng-include src="'tags/blueprint/bplist.tag'"></div>
                             </div>
                         </div>
                     </div>
@@ -1141,148 +762,12 @@
                     </div>
                 </div>
 
-                <form class="form-horizontal" role="form" name="azureCredentialForm"  ng-show="azureCredential">
 
-                    <div class="form-group" ng-class="{ 'has-error': azureCredentialForm.cname.$dirty && azureCredentialForm.cname.$invalid }">
-                        <label class="col-sm-3 control-label" for="cname">Name</label>
+                    <div ng-include src="'tags/credential/azureform.tag'"></div>
 
-                        <div class="col-sm-9">
-                            <input type="text" class="form-control" ng-pattern="/^[a-z][a-z0-9]*$/" name="cname" id="cname" ng-model="cname" ng-minlength="5" ng-maxlength="20" required placeholder="min. 5 max. 20 char">
-                            <div class="help-block" ng-show="azureCredentialForm.cname.$dirty && azureCredentialForm.cname.$invalid">
-                                <i class="fa fa-warning"></i> {{error_msg.credential_name_invalid}}
-                            </div>
-                        </div>
-                        <!-- .col-sm-9 -->
+                    <div ng-include src="'tags/credential/awsform.tag'"></div>
 
-                    </div>
 
-                    <div class="form-group" ng-class="{ 'has-error': azureCredentialForm.cdescription.$dirty && azureCredentialForm.cdescription.$invalid }">
-                        <label class="col-sm-3 control-label" for="cdescription">Description</label>
-
-                        <div class="col-sm-9">
-                            <input type="text" class="form-control" ng-model="cdescription" id="cdescription" name="cdescription" ng-maxlength="20"  placeholder="max. 20 char">
-                            <div class="help-block" ng-show="azureCredentialForm.cdescription.$dirty && azureCredentialForm.cdescription.$invalid">
-                                <i class="fa fa-warning"></i> {{error_msg.credential_description_invalid}}
-                            </div>
-                        </div>
-                        <!-- .col-sm-9 -->
-
-                    </div>
-
-                    <!-- .form-group -->
-                    <div class="form-group" ng-class="{ 'has-error': azureCredentialForm.csubscriptionId.$dirty && azureCredentialForm.csubscriptionId.$invalid }">
-                        <label class="col-sm-3 control-label" for="csubscriptionId">Subscription ID</label>
-
-                        <div class="col-sm-9">
-                            <input type="text" class="form-control" id="csubscriptionId" name="csubscriptionId" ng-model="csubscriptionId" required placeholder="your subscription id">
-                            <div class="help-block" ng-show="azureCredentialForm.csubscriptionId.$dirty && azureCredentialForm.csubscriptionId.$invalid">
-                                <i class="fa fa-warning"></i> {{error_msg.credential_subscription_invalid}}
-                            </div>
-                        </div>
-                        <!-- .col-sm-9 -->
-
-                    </div>
-
-                    <div class="form-group" ng-class="{ 'has-error': azureCredentialForm.cjksPassword.$dirty && azureCredentialForm.cjksPassword.$invalid }">
-                        <label class="col-sm-3 control-label" for="cjksPassword">File password</label>
-
-                        <div class="col-sm-9">
-                            <input type="password" class="form-control" id="cjksPassword" name="cjksPassword" ng-model="cjksPassword" ng-minlength="6" ng-maxlength="10" required placeholder="min. 6 max. 10 char">
-                            <div class="help-block" ng-show="azureCredentialForm.cjksPassword.$dirty && azureCredentialForm.cjksPassword.$invalid">
-                                <i class="fa fa-warning"></i> {{error_msg.credential_file_pwd_invalid}}
-                            </div>
-                        </div>
-                        <!-- .col-sm-9 -->
-
-                    </div>
-
-                    <div class="form-group" ng-class="{ 'has-error': azureCredentialForm.azure_sshPublicKey.$dirty && azureCredentialForm.azure_sshPublicKey.$invalid }">
-                        <label class="col-sm-3 control-label" for="azure_sshPublicKey">SSH public key:</label>
-
-                        <div class="col-sm-9">
-                            <textarea rows="4" type="text" class="form-control" ng-model="azure_sshPublicKey" name="azure_sshPublicKey" id="azure_sshPublicKey" required></textarea>
-                            <div class="help-block" ng-show="azureCredentialForm.azure_sshPublicKey.$dirty && azureCredentialForm.azure_sshPublicKey.$invalid">
-                                <i class="fa fa-warning"></i> {{error_msg.credential_ssh_key_invalid}}
-                            </div>
-                        </div>
-                        <!-- .col-sm-9 -->
-
-                    </div>
-
-                    <div class="row btn-row">
-                        <div class="col-sm-9 col-sm-offset-3">
-                            <a href="#" id="createAzureCredential" ng-disabled="azureCredentialForm.$invalid" class="btn btn-success btn-block" ng-click="createAzureCredential()" role="button"><i
-                                    class="fa fa-plus fa-fw"></i>
-                                create credential</a>
-                        </div>
-                    </div>
-
-                </form>
-
-                <form class="form-horizontal" role="form" ng-show="awsCredential" name="awsCredentialForm">
-
-                    <div class="form-group" ng-class="{ 'has-error': awsCredentialForm.awscname.$dirty && awsCredentialForm.awscname.$invalid }">
-                        <label class="col-sm-3 control-label" for="awscname">Name</label>
-
-                        <div class="col-sm-9">
-                            <input type="text" ng-pattern="/^[a-zA-Z][-a-zA-Z0-9]*$/" class="form-control" ng-model="awscname" id="awscname" name="awscname" ng-minlength="5" ng-maxlength="20" required placeholder="min. 5 max. 20 char">
-                            <div class="help-block" ng-show="awsCredentialForm.awscname.$dirty && awsCredentialForm.awscname.$invalid">
-                                <i class="fa fa-warning"></i> {{error_msg.credential_name_invalid}}
-                            </div>
-                        </div>
-                        <!-- .col-sm-9 -->
-
-                    </div>
-
-                    <div class="form-group" ng-class="{ 'has-error': awsCredentialForm.awscdescription.$dirty && awsCredentialForm.awscdescription.$invalid }">
-                        <label class="col-sm-3 control-label" for="awscdescription">Description</label>
-
-                        <div class="col-sm-9">
-                            <input type="text" class="form-control" ng-model="awscdescription" id="awscdescription" name="awscdescription" ng-maxlength="20" placeholder="max. 20 char">
-                            <div class="help-block" ng-show="awsCredentialForm.awscdescription.$dirty && awsCredentialForm.awscdescription.$invalid">
-                                <i class="fa fa-warning"></i> {{error_msg.credential_description_invalid}}
-                            </div>
-                        </div>
-                        <!-- .col-sm-9 -->
-
-                    </div>
-
-                    <!-- .form-group -->
-                    <div class="form-group" ng-class="{ 'has-error': awsCredentialForm.croleArn.$dirty && awsCredentialForm.croleArn.$invalid }">
-                        <label class="col-sm-3 control-label" for="croleArn">IAM Role ARN</label>
-
-                        <div class="col-sm-9">
-                            <input type="text" class="form-control" name="croleArn" ng-model="croleArn" ng-minlength="5" required id="croleArn">
-                            <div class="help-block" ng-show="awsCredentialForm.croleArn.$dirty && awsCredentialForm.croleArn.$invalid">
-                                <i class="fa fa-warning"></i> {{error_msg.credential_iam_role_invalid}}
-                            </div>
-                        </div>
-                        <!-- .col-sm-9 -->
-
-                    </div>
-
-                    <div class="form-group" ng-class="{ 'has-error': awsCredentialForm.aws_sshPublicKey.$dirty && awsCredentialForm.aws_sshPublicKey.$invalid }">
-                        <label class="col-sm-3 control-label" for="aws_sshPublicKey">SSH public key:</label>
-
-                        <div class="col-sm-9">
-                            <textarea rows="4" type="text" class="form-control" ng-model="aws_sshPublicKey" name="aws_sshPublicKey" id="aws_sshPublicKey" required></textarea>
-                            <div class="help-block" ng-show="awsCredentialForm.aws_sshPublicKey.$dirty && awsCredentialForm.aws_sshPublicKey.$invalid">
-                                <i class="fa fa-warning"></i> {{error_msg.credential_ssh_key_invalid}}
-                            </div>
-                        </div>
-                        <!-- .col-sm-9 -->
-
-                    </div>
-
-                    <div class="row btn-row">
-                        <div class="col-sm-9 col-sm-offset-3">
-                            <a href="#" id="createAwsCredential" ng-disabled="awsCredentialForm.$invalid" ng-click="createAwsCredential()" class="btn btn-success btn-block" role="button"><i
-                                    class="fa fa-plus fa-fw"></i>
-                                create credential</a>
-                        </div>
-                    </div>
-
-                </form>
             </div>
         </div>
     </div>
@@ -1304,94 +789,13 @@
                 <p class="btn-row-over-panel"><a href="#" class="btn btn-danger" role="button" ng-click="deleteCredential(credential.id)"><i
                         class="fa fa-times fa-fw"></i><span> delete</span></a></p>
 
+
                 <div class="panel-body" ng-if="credential.cloudPlatform == 'AZURE' ">
-
-
-                    <form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
-
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label" for="name">Name</label>
-
-                            <div class="col-sm-9">
-                                <p id="name" class="form-control-static">{{credential.name}}</p>
-                            </div>
-                            <!-- .col-sm-9 -->
-                        </div>
-
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label" for="azuredescriptionfield">Description</label>
-
-                            <div class="col-sm-9">
-                                <p id="azuredescriptionfield" class="form-control-static">{{credential.description}}</p>
-                            </div>
-                            <!-- .col-sm-9 -->
-                        </div>
-                        <!-- .form-group -->
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label" for="subscriptionId">Subscription ID</label>
-
-                            <div class="col-sm-9">
-                                <p id="subscriptionId" class="form-control-static">{{credential.parameters.subscriptionId}}</p>
-                            </div>
-                            <!-- .col-sm-9 -->
-                        </div>
-                        <!-- .form-group -->
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label" for="jksPassword">Password</label>
-
-                            <div class="col-sm-9">
-                                <p id="jksPassword" class="form-control-static">{{credential.parameters.jksPassword}}</p>
-                            </div>
-                            <!-- .col-sm-9 -->
-                        </div>
-                        <!-- .form-group -->
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label" for="jksFile">Certification file</label>
-
-                            <div class="col-sm-9">
-                                <a href="#" id="jksFile" ng-click="getAzureCertification(credential.id)" download="file.cer" class="btn btn-success btn-block" role="button"><i
-                                        class="fa fa-file fa-fw"></i>
-                                    Download certificate file</a>
-                            </div>
-                            <!-- .col-sm-9 -->
-                        </div>
-
-                    </form>
+                    <div ng-include src="'tags/credential/azurelist.tag'"></div>
                 </div>
 
                 <div class="panel-body" ng-if="credential.cloudPlatform == 'AWS' ">
-
-
-                    <form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
-
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label" for="name">Name</label>
-
-                            <div class="col-sm-9">
-                                <p id="name" class="form-control-static">{{credential.name}}</p>
-                            </div>
-                            <!-- .col-sm-9 -->
-                        </div>
-                        <!-- .form-group -->
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label" for="awsdescriptionfield">Description</label>
-
-                            <div class="col-sm-9">
-                                <p id="awsdescriptionfield" class="form-control-static">{{credential.description}}</p>
-                            </div>
-                            <!-- .col-sm-9 -->
-                        </div>
-                        <!-- .form-group -->
-                        <div class="form-group">
-                            <label class="col-sm-3 control-label" for="roleArn">IAM Role ARN</label>
-
-                            <div class="col-sm-9">
-                                <p id="roleArn" class="form-control-static">{{credential.parameters.roleArn}}</p>
-                            </div>
-                            <!-- .col-sm-9 -->
-                        </div>
-
-                    </form>
+                    <div ng-include src="'tags/credential/awslist.tag'"></div>
                 </div>
             </div>
         </div>
