@@ -51,6 +51,7 @@ public class ApplicationUpdateEventHandler implements ApplicationListener<Applic
             ApplicationId id = report.getApplicationId();
             activeApps.add(id);
             SchedulerApplication application = addApplicationIfAbsent(cluster, report);
+            application.update(report);
             apps = cluster.getApplicationsPriorityOrder();
             if (isApplicationHighPriority(apps, id)) {
                 LOGGER.info("Try to move high priority app {}", id);
@@ -110,7 +111,7 @@ public class ApplicationUpdateEventHandler implements ApplicationListener<Applic
     }
 
     private boolean isApplicationHighPriority(Map<Priority, Map<ApplicationId, SchedulerApplication>> apps, ApplicationId id) {
-        Map<ApplicationId, SchedulerApplication> high = apps.get(Priority.HIGHEST);
+        Map<ApplicationId, SchedulerApplication> high = apps.get(Priority.HIGH);
         return high == null ? false : high.containsKey(id);
     }
 

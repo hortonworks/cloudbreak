@@ -9,6 +9,7 @@ public class SchedulerApplication {
     private final long startTime;
     private Priority priority;
     private boolean moved;
+    private double progress;
 
     public SchedulerApplication(ApplicationReport appReport, Priority priority) {
         this.applicationId = appReport.getApplicationId();
@@ -39,4 +40,13 @@ public class SchedulerApplication {
     public long getStartTime() {
         return startTime;
     }
+
+    public double getProgress() {
+        return progress;
+    }
+
+    public void update(ApplicationReport report) {
+        this.progress = report.getProgress();
+    }
+
 }
