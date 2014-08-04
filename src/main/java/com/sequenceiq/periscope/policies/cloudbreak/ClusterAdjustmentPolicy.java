@@ -1,6 +1,7 @@
 package com.sequenceiq.periscope.policies.cloudbreak;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +11,8 @@ import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.ClusterMetricsIn
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.periscope.policies.cloudbreak.rule.ClusterAdjustmentRule;
+import com.sequenceiq.periscope.policies.cloudbreak.rule.PendingAppsRule;
+import com.sequenceiq.periscope.policies.cloudbreak.rule.PendingContainersRule;
 import com.sequenceiq.periscope.policies.cloudbreak.rule.ResourcesAboveRule;
 import com.sequenceiq.periscope.policies.cloudbreak.rule.ResourcesBelowRule;
 
@@ -24,12 +27,15 @@ public class ClusterAdjustmentPolicy {
         Map<String, Class<? extends ClusterAdjustmentRule>> rules = new TreeMap<>();
         rules.put(ResourcesBelowRule.NAME, ResourcesBelowRule.class);
         rules.put(ResourcesAboveRule.NAME, ResourcesAboveRule.class);
+        rules.put(PendingAppsRule.NAME, PendingAppsRule.class);
+        rules.put(PendingContainersRule.NAME, PendingContainersRule.class);
         DEFAULT_RULES = Collections.unmodifiableMap(rules);
     }
 
     public ClusterAdjustmentPolicy() {
-        scaleUpRules.add(new ResourcesBelowRule(4));
-        scaleDownRules.add(new ResourcesAboveRule(3));
+        scaleUpRules.addAll(
+                Arrays.asList(new ResourcesBelowRule(0, 4), new PendingAppsRule(1, 5)));
+        scaleDownRules.add(new ResourcesAboveRule(0, 3));
     }
 
     public int scale(ClusterMetricsInfo clusterInfo) {

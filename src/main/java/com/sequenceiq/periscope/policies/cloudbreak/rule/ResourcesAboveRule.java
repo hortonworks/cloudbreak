@@ -10,8 +10,8 @@ public class ResourcesAboveRule extends AbstractAdjustmentRule implements Cluste
     public static final String NAME = "resourcesAbove";
     private static final double DEFAULT_FREE_RESOURCE_RATE_THRESHOLD = 0.4;
 
-    public ResourcesAboveRule(int limit) {
-        super(NAME, limit);
+    public ResourcesAboveRule(int order, int limit) {
+        super(NAME, order, limit);
     }
 
     @Override
