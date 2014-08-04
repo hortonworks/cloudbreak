@@ -14,13 +14,13 @@ import com.sequenceiq.cloudbreak.controller.json.BlueprintJson;
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
 import com.sequenceiq.cloudbreak.converter.BlueprintConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.Company;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
+import com.sequenceiq.cloudbreak.service.company.CompanyService;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
@@ -44,6 +44,9 @@ public class BlueprintService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private CompanyService companyService;
+
     public IdJson addBlueprint(User user, BlueprintJson blueprintJson) {
         Blueprint blueprint = blueprintConverter.convert(blueprintJson);
         blueprint.setUser(user);
@@ -59,11 +62,9 @@ public class BlueprintService {
 
     public Set<BlueprintJson> getAllForAdmin(User user) {
         Set<BlueprintJson> blueprints = new HashSet<>();
-        Company company = user.getCompany();
-        User decoratedUser = null;
-        for (User cUser : company.getUsers()) {
-            decoratedUser = userRepository.findOneWithLists(cUser.getId());
-            blueprints.addAll(blueprintConverter.convertAllEntityToJson(decoratedUser.getBlueprints()));
+        Set<User> decoratedUsers = companyService.decoratedUsers(user.getCompany().getId());
+        for (User cUser : decoratedUsers) {
+            blueprints.addAll(blueprintConverter.convertAllEntityToJson(cUser.getBlueprints()));
         }
         return blueprints;
     }

@@ -1,11 +1,14 @@
 package com.sequenceiq.cloudbreak.service.company;
 
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.domain.Company;
+import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.CompanyRepository;
 
 @Service
@@ -34,5 +37,11 @@ public class DefaultCompanyService implements CompanyService {
         return null != companyRepository.findByName(companyName);
     }
 
-
+    @Override
+    public Set<User> decoratedUsers(Long companyId) {
+        LOGGER.debug("Retrieving decorated users for company with id: [{}] ...", companyId);
+        Set<User> users = companyRepository.decoratedUsers(companyId);
+        LOGGER.debug("Found #{} users.", users.size());
+        return users;
+    }
 }

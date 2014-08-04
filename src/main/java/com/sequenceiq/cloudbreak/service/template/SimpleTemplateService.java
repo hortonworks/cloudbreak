@@ -16,13 +16,13 @@ import com.sequenceiq.cloudbreak.converter.AwsTemplateConverter;
 import com.sequenceiq.cloudbreak.converter.AzureTemplateConverter;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
-import com.sequenceiq.cloudbreak.domain.Company;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
+import com.sequenceiq.cloudbreak.service.company.CompanyService;
 import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
 
 @Service
@@ -50,6 +50,9 @@ public class SimpleTemplateService implements TemplateService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private CompanyService companyService;
+
     @Override
     public Set<TemplateJson> getAll(User user) {
         Set<TemplateJson> result = new HashSet<>();
@@ -60,14 +63,12 @@ public class SimpleTemplateService implements TemplateService {
 
     @Override
     public Set<TemplateJson> getAllForAdmin(User user) {
-        Set<TemplateJson> blueprints = new HashSet<>();
-        Company company = user.getCompany();
-        User decoratedUser = null;
-        for (User cUser : company.getUsers()) {
-            decoratedUser = userRepository.findOneWithLists(cUser.getId());
-            blueprints.addAll(getAll(decoratedUser));
+        Set<TemplateJson> templates = new HashSet<>();
+        Set<User> decoratedUsers = companyService.decoratedUsers(user.getCompany().getId());
+        for (User cUser : decoratedUsers) {
+            templates.addAll(getAll(cUser));
         }
-        return blueprints;
+        return templates;
     }
 
     @Override

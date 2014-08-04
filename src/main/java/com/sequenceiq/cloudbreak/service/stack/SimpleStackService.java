@@ -21,7 +21,6 @@ import com.sequenceiq.cloudbreak.controller.json.StackJson;
 import com.sequenceiq.cloudbreak.converter.MetaDataConverter;
 import com.sequenceiq.cloudbreak.converter.StackConverter;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
-import com.sequenceiq.cloudbreak.domain.Company;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackDescription;
 import com.sequenceiq.cloudbreak.domain.Template;
@@ -29,6 +28,7 @@ import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
+import com.sequenceiq.cloudbreak.service.company.CompanyService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
@@ -57,6 +57,9 @@ public class SimpleStackService implements StackService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private CompanyService companyService;
+
     @Resource
     private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
 
@@ -77,11 +80,9 @@ public class SimpleStackService implements StackService {
     @Override
     public Set<StackJson> getAllForAdmin(User user) {
         Set<StackJson> result = new HashSet<>();
-        Company company = user.getCompany();
-        User decoratedUser = null;
-        for (User cUser : company.getUsers()) {
-            decoratedUser = userRepository.findOneWithLists(cUser.getId());
-            result.addAll(getAll(decoratedUser));
+        Set<User> decoratedUsers = companyService.decoratedUsers(user.getCompany().getId());
+        for (User cUser : decoratedUsers) {
+            result.addAll(getAll(cUser));
         }
         return result;
     }

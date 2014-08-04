@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.domain;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -10,6 +10,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -19,9 +20,24 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 @Entity
-@NamedQuery(
-        name = "Company.findByName",
-        query = "SELECT c FROM Company c WHERE c.name = :name")
+
+@NamedQueries({
+        @NamedQuery(
+                name = "Company.findByName",
+                query = "SELECT c FROM Company c WHERE c.name = :name"),
+        @NamedQuery(
+                name = "Company.decoratedUsers",
+                query = "SELECT cu FROM User cu "
+                        + "LEFT JOIN FETCH cu.azureTemplates "
+                        + "LEFT JOIN FETCH cu.awsTemplates "
+                        + "LEFT JOIN FETCH cu.stacks "
+                        + "LEFT JOIN FETCH cu.blueprints "
+                        + "LEFT JOIN FETCH cu.awsCredentials "
+                        + "LEFT JOIN FETCH cu.azureCredentials "
+                        + "LEFT JOIN FETCH cu.clusters "
+                        + "WHERE cu.company.id= :companyId")
+})
+
 @Table(name = "company")
 public class Company implements ProvisionEntity {
 
@@ -33,7 +49,7 @@ public class Company implements ProvisionEntity {
     private String name;
 
     @OneToMany(mappedBy = "company", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<User> users = new ArrayList<>();
+    private Set<User> users = new HashSet<>();
 
     public Company() {
 
@@ -55,11 +71,11 @@ public class Company implements ProvisionEntity {
         this.name = name;
     }
 
-    public List<User> getUsers() {
+    public Set<User> getUsers() {
         return users;
     }
 
-    public void setUsers(List<User> users) {
+    public void setUsers(Set<User> users) {
         this.users = users;
     }
 
