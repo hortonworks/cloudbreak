@@ -88,7 +88,7 @@ public class AzureMetadataSetupTest {
         // WHEN
         underTest.setupMetadata(stack);
         // THEN
-        verify(underTest, times(3)).getVirtualIP(anyString());
+        verify(underTest, times(1)).getVirtualIP(anyString());
     }
 
     @Test
