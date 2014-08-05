@@ -283,7 +283,7 @@ You are done - from now on Cloudbreak can launch Azure instances on your behalf.
 
 _Note1: Cloudbreak does not store any login details into these instances - when you are creating Templates you can specify a `password` or `SSH Public key` which you can use to login into the launched instances._
 
-_Note2: Because Azure does not directly support third party public images we will have to copy the used image from VM Depot into your storage account. The steps below need to be finished ONCE and only ONCE before any stack is created for every affinity group:_
+_Note2: Because Azure does not directly support third party public images we will have to copy the used image from VM Depot into your storage account. The steps below need to be finished ONCE and only ONCE before any stack is created for every affinity group - **this is an automated step** - we have just highlighted in order to point out the first time slowness:_
 
 _1. Get the VM image - http://vmdepot.msopentech.com/Vhd/Show?vhdId=42480&version=43564_
 
