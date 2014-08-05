@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.controller.validation;
 
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.ec2.model.InstanceType;
+import com.amazonaws.services.ec2.model.VolumeType;
 import com.google.common.base.Optional;
 
 public enum AwsTemplateParam implements TemplateParam {
@@ -12,7 +13,10 @@ public enum AwsTemplateParam implements TemplateParam {
     SSH_LOCATION("sshLocation", false, String.class, Optional.of("^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\."
             + "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\."
             + "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\."
-            + "([01]?\\d\\d?|2[0-4]\\d|25[0-5])/([01]?\\d\\d?|2[0-4]\\d|25[0-5])$"));
+            + "([01]?\\d\\d?|2[0-4]\\d|25[0-5])/([01]?\\d\\d?|2[0-4]\\d|25[0-5])$")),
+    VOLUME_COUNT("volumeCount", true, Integer.class, Optional.<String>absent()),
+    VOLUME_SIZE("volumeSize", true, Integer.class, Optional.<String>absent()),
+    VOLUME_TYPE("volumeType", true, VolumeType.class, Optional.<String>absent());
 
     private final String paramName;
     private final Class clazz;

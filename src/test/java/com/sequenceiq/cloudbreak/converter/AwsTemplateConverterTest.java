@@ -65,6 +65,9 @@ public class AwsTemplateConverterTest {
         props.put(AwsTemplateParam.AMI_ID.getName(), DUMMY_AMI_ID);
         props.put(AwsTemplateParam.INSTANCE_TYPE.getName(), InstanceType.C1Medium.name());
         props.put(AwsTemplateParam.SSH_LOCATION.getName(), DUMMY_SSH_LOCATION);
+        props.put(AwsTemplateParam.VOLUME_COUNT.getName(), 2);
+        props.put(AwsTemplateParam.VOLUME_SIZE.getName(), 60);
+        props.put(AwsTemplateParam.VOLUME_TYPE.getName(), "Gp2");
         templateJson.setParameters(props);
         return templateJson;
     }

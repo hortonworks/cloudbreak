@@ -5,6 +5,7 @@ import java.util.Set;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.InstanceType;
+import com.amazonaws.services.ec2.model.VolumeType;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
@@ -51,6 +52,9 @@ public class AwsConnectorTestUtil extends ConnectorTestUtil {
         awsTemplate.setRegion(Regions.DEFAULT_REGION);
         awsTemplate.setInstanceType(InstanceType.C1Medium);
         awsTemplate.setSshLocation(SSH_LOCATION);
+        awsTemplate.setVolumeCount(2);
+        awsTemplate.setVolumeSize(60);
+        awsTemplate.setVolumeType(VolumeType.Gp2);
         return awsTemplate;
     }
 

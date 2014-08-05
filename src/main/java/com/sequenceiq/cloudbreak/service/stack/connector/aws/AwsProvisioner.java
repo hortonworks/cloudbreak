@@ -25,12 +25,6 @@ import com.sequenceiq.cloudbreak.service.stack.connector.Provisioner;
 @Component
 public class AwsProvisioner implements Provisioner {
 
-    private static final int DEFAULT_VOLUME_COUNT = 2;
-
-    private static final String DEFAULT_VOLUME_TYPE = "gp2";
-
-    private static final String DEFAULT_VOLUME_SIZE = "60";
-
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsProvisioner.class);
 
     @Autowired
@@ -50,7 +44,7 @@ public class AwsProvisioner implements Provisioner {
         String stackName = String.format("%s-%s", stack.getName(), stack.getId());
         CreateStackRequest createStackRequest = createStackRequest()
                 .withStackName(stackName)
-                .withTemplateBody(cfTemplateBuilder.build("templates/aws-cf-stack.ftl", DEFAULT_VOLUME_COUNT))
+                .withTemplateBody(cfTemplateBuilder.build("templates/aws-cf-stack.ftl", awsTemplate.getVolumeCount()))
                 .withNotificationARNs((String) setupProperties.get(SnsTopicManager.NOTIFICATION_TOPIC_ARN_KEY))
                 .withParameters(
                         new Parameter().withParameterKey("SSHLocation").withParameterValue(awsTemplate.getSshLocation()),
@@ -60,8 +54,8 @@ public class AwsProvisioner implements Provisioner {
                         new Parameter().withParameterKey("InstanceType").withParameterValue(awsTemplate.getInstanceType().toString()),
                         new Parameter().withParameterKey("KeyName").withParameterValue(awsCredential.getKeyPairName()),
                         new Parameter().withParameterKey("AMI").withParameterValue(awsTemplate.getAmiId()),
-                        new Parameter().withParameterKey("VolumeSize").withParameterValue(DEFAULT_VOLUME_SIZE),
-                        new Parameter().withParameterKey("VolumeType").withParameterValue(DEFAULT_VOLUME_TYPE)
+                        new Parameter().withParameterKey("VolumeSize").withParameterValue(awsTemplate.getVolumeSize().toString()),
+                        new Parameter().withParameterKey("VolumeType").withParameterValue(awsTemplate.getVolumeType().toString())
                 );
         CreateStackResult createStackResult = client.createStack(createStackRequest);
         Set<Resource> resources = new HashSet<>();
