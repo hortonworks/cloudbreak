@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.ec2.model.InstanceType;
+import com.amazonaws.services.ec2.model.VolumeType;
 import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
 import com.sequenceiq.cloudbreak.controller.validation.AwsTemplateParam;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
@@ -27,6 +28,9 @@ public class AwsTemplateConverter extends AbstractConverter<TemplateJson, AwsTem
         props.put(AwsTemplateParam.AMI_ID.getName(), entity.getAmiId());
         props.put(AwsTemplateParam.INSTANCE_TYPE.getName(), entity.getInstanceType().name());
         props.put(AwsTemplateParam.SSH_LOCATION.getName(), entity.getSshLocation());
+        props.put(AwsTemplateParam.VOLUME_COUNT.getName(), entity.getVolumeCount());
+        props.put(AwsTemplateParam.VOLUME_SIZE.getName(), entity.getVolumeSize());
+        props.put(AwsTemplateParam.VOLUME_TYPE.getName(), entity.getVolumeType());
         templateJson.setParameters(props);
         templateJson.setCloudPlatform(CloudPlatform.AWS);
         templateJson.setDescription(entity.getDescription() == null ? "" : entity.getDescription());
@@ -44,6 +48,9 @@ public class AwsTemplateConverter extends AbstractConverter<TemplateJson, AwsTem
                 ? String.valueOf(json.getParameters().get(AwsTemplateParam.SSH_LOCATION.getName())) : DEFAULT_SSH_LOCATION;
         awsTemplate.setSshLocation(sshLocation);
         awsTemplate.setDescription(json.getDescription());
+        awsTemplate.setVolumeCount((Integer) json.getParameters().get(AwsTemplateParam.VOLUME_COUNT.getName()));
+        awsTemplate.setVolumeSize((Integer) json.getParameters().get(AwsTemplateParam.VOLUME_SIZE.getName()));
+        awsTemplate.setVolumeType(VolumeType.valueOf(String.valueOf(json.getParameters().get(AwsTemplateParam.VOLUME_TYPE.getName()))));
         return awsTemplate;
     }
 }
