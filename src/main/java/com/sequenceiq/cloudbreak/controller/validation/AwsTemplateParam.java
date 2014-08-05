@@ -9,10 +9,10 @@ public enum AwsTemplateParam implements TemplateParam {
     REGION("region", true, Regions.class, Optional.<String>absent()),
     AMI_ID("amiId", true, String.class, Optional.<String>absent()),
     INSTANCE_TYPE("instanceType", true, InstanceType.class, Optional.<String>absent()),
-    SSH_LOCATION("sshLocation", false, String.class, Optional.of("^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
-            "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
-            "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
-            "([01]?\\d\\d?|2[0-4]\\d|25[0-5])/([01]?\\d\\d?|2[0-4]\\d|25[0-5])$"));
+    SSH_LOCATION("sshLocation", false, String.class, Optional.of("^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\."
+            + "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\."
+            + "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\."
+            + "([01]?\\d\\d?|2[0-4]\\d|25[0-5])/([01]?\\d\\d?|2[0-4]\\d|25[0-5])$"));
 
     private final String paramName;
     private final Class clazz;
