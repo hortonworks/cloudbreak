@@ -12,8 +12,10 @@ var cloudbreakControllers = angular.module('cloudbreakControllers', []);
 
 cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Templates', '$location', '$rootScope', '$q', '$window',
     function ($scope, $http, Templates, $location, $rootScope, $q, $window) {
+
         $scope.form = undefined;
         $http.defaults.useXDomain = true;
+        $scope.errormessage = "";
         delete $http.defaults.headers.common['X-Requested-With'];
         $http.defaults.headers.common['Content-Type']= 'application/json';
 
@@ -29,10 +31,12 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                                  if (responseData && responseData.length != 0) {
                                     $jq('.outerCarousel').carousel(1);
                                  } else {
-                                    alert("Sign up confirmation is failed.")
+                                     $scope.errormessage = "Sign up confirmation is failed.";
+                                     $jq("#errorDialog").modal('show');
                                  }
                               }).error(function (data, status, headers, config) {
-                                  alert("Sign up confirmation is failed.")
+                                    $scope.errormessage = "Sign up confirmation is failed.";
+                                    $jq("#errorDialog").modal('show');
                               });
                         });
         }
@@ -101,14 +105,17 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             })
             .error(function (data, status, headers, config){
                 if (status == 400) {
-                    alert("User already exists.")
+                    $scope.errormessage = "User already exists.";
+                    $jq("#errorDialog").modal('show');
                 } else {
-                    alert("Internal server error.")
+                    $scope.errormessage = "Internal server error.";
+                    $jq("#errorDialog").modal('show');
                 }
             });
         }
 
         $scope.signIn = function() {
+
                 $http({
                     method: 'GET',
                     dataType: 'json',
@@ -127,9 +134,11 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     $scope.doQuerys();
                 }).error(function (data, status, headers, config) {
                     if (status == 401) {
-                        alert("Invalid username/password combination")
+                        $scope.errormessage = "Invalid username/password combination";
+                        $jq("#errorDialog").modal('show');
                     } else {
-                        alert("Internal server error");
+                        $scope.errormessage = "Internal server error";
+                        $jq("#errorDialog").modal('show');
                     }
                 });
         }
@@ -153,13 +162,16 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                         if (responseData && responseData.length != 0) {
                             $jq('.outerCarousel').carousel(4);
                         } else {
-                            alert("Internal server error");
+                            $scope.errormessage = "Internal server error";
+                            $jq("#errorDialog").modal('show');
                         }
                      }).error(function (data, status, headers, config){
                         if (status == 404){
-                            alert("There's no such username");
+                            $scope.errormessage = "There's no such username";
+                            $jq("#errorDialog").modal('show');
                         } else {
-                            alert("Internal server error");
+                            $scope.errormessage = "Internal server error";
+                            $jq("#errorDialog").modal('show');
                         }
                      });
                 });
@@ -178,13 +190,16 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                         $jq('.outerCarousel').carousel(1);
                         $rootScope.resetToken = null;
                     } else {
-                        alert("Password change failed.")
+                        $scope.errormessage = "Password change failed.";
+                        $jq("#errorDialog").modal('show');
                     }
                  }).error(function (data, status, headers, config){
                     if (status == 404){
-                        alert("There's no user for token" + $rootScope.resetToken)
+                        $scope.errormessage = "There's no user for token" + $rootScope.resetToken;
+                        $jq("#errorDialog").modal('show');
                     } else {
-                        alert("Internal server error.");
+                        $scope.errormessage = "Internal server error.";
+                        $jq("#errorDialog").modal('show');
                     }
                  });
             });

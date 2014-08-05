@@ -699,10 +699,12 @@
 
 
 <div ng-hide="signedIn">
+
     <div id="page-home">
         <div class="fill-bg">
             <img src="img/bg-login-page.jpg" alt="">
         </div>
+
         <header ng-hide="signedIn">
             <div class="container-fluid">
                 <div class="row">
@@ -715,6 +717,7 @@
             <!-- .container -->
         </header>
         <section ng-hide="signedIn" class="container">
+
             <div class="container carousel slide outerCarousel">
                 <div class="row">
                     <div class="col-sm-8 col-sm-offset-2">
@@ -742,7 +745,6 @@
                                     <!-- ............... LOGIN ................................................ -->
 
                                     <div class="item">
-
                                         <form role="form" autocomplete="on" name="loginForm">
 
                                             <div class="form-group" ng-class="{ 'has-error': showLoginEmailError && loginForm.emailFieldLogin.$invalid }">
@@ -936,6 +938,20 @@
             </div>
             <!-- .container -->
         </section>
+
+        <div class="modal fade" role="dialog" id="errorDialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        <h4 class="" style="color: black;">{{errormessage}}</h4>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div><!-- /.modal-content -->
+            </div><!-- /.modal-dialog -->
+        </div><!-- /.modal -->
         <script type="text/javascript">
             var $jq = jQuery.noConflict();
             $jq(document).ready(function ($) {
