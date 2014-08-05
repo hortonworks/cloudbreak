@@ -1,10 +1,19 @@
 package com.sequenceiq.periscope.policies.cloudbreak.rule;
 
+import java.util.Map;
+
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.ClusterMetricsInfo;
 
 import com.sequenceiq.periscope.policies.NamedRule;
 
-public interface ClusterAdjustmentRule extends NamedRule, Comparable<ClusterAdjustmentRule> {
+public interface ClusterAdjustmentRule extends NamedRule {
+
+    /**
+     * Invoked when creating the rule.
+     *
+     * @param config config parameters
+     */
+    void init(Map<String, Object> config);
 
     /**
      * Scale up or down to the required number of nodes.
@@ -13,13 +22,6 @@ public interface ClusterAdjustmentRule extends NamedRule, Comparable<ClusterAdju
      * @return
      */
     int scale(ClusterMetricsInfo clusterInfo);
-
-    /**
-     * Rules can be ordered. The first rule will apply.
-     *
-     * @return order of the rule. 0 is the first rule.
-     */
-    int getOrder();
 
     /**
      * Return the maximum/minimum number of nodes. Depends whether its scaling up or down.

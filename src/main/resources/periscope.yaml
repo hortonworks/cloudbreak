@@ -1,0 +1,16 @@
+cloudbreak:
+  scaleUp:
+    resourcesBelow:
+      limit: 4
+      freeResourceRate: 0.2
+    pendingApps:
+      limit: 4
+      pendingApps: 5
+    pendingContainers:
+      limit: 4
+      pendingContainers: 10
+
+  scaleDown:
+    resourcesAbove:
+      limit: 3
+      freeResourceRate: 0.4

@@ -3,15 +3,20 @@ package com.sequenceiq.periscope.policies.cloudbreak.rule;
 import static java.lang.Math.ceil;
 import static java.lang.Math.max;
 
+import java.util.Map;
+
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.ClusterMetricsInfo;
 
 public class PendingContainersRule extends AbstractAdjustmentRule implements ClusterAdjustmentRule {
 
     public static final String NAME = "pendingContainers";
-    private static final double DEFAULT_PENDING_CONTAINERS_THRESHOLD = 20;
+    private int pendingContainersLimit;
 
-    public PendingContainersRule(int order, int limit) {
-        super(NAME, order, limit);
+    @Override
+    public void init(Map<String, Object> config) {
+        setName(NAME);
+        setLimit((int) config.get("limit"));
+        this.pendingContainersLimit = (int) config.get("pendingContainers");
     }
 
     @Override
@@ -25,7 +30,7 @@ public class PendingContainersRule extends AbstractAdjustmentRule implements Clu
     }
 
     private boolean isPendingContainersExceed(int pendingContainers) {
-        return pendingContainers > DEFAULT_PENDING_CONTAINERS_THRESHOLD;
+        return pendingContainers > pendingContainersLimit;
     }
 
     private int calcAvgContainerPerNode(ClusterMetricsInfo clusterInfo) {

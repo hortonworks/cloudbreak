@@ -2,15 +2,8 @@ package com.sequenceiq.periscope.policies.cloudbreak.rule;
 
 public abstract class AbstractAdjustmentRule implements ClusterAdjustmentRule {
 
-    private final String name;
-    private final int limit;
-    private final int order;
-
-    protected AbstractAdjustmentRule(String name, int order, int limit) {
-        this.name = name;
-        this.order = order;
-        this.limit = limit;
-    }
+    private String name;
+    private int limit;
 
     @Override
     public String getName() {
@@ -22,13 +15,11 @@ public abstract class AbstractAdjustmentRule implements ClusterAdjustmentRule {
         return limit;
     }
 
-    @Override
-    public int getOrder() {
-        return order;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    @Override
-    public int compareTo(ClusterAdjustmentRule o) {
-        return Integer.compare(order, o.getOrder());
+    public void setLimit(int limit) {
+        this.limit = limit;
     }
 }

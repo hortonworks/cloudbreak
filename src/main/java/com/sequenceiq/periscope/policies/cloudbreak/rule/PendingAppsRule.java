@@ -2,15 +2,20 @@ package com.sequenceiq.periscope.policies.cloudbreak.rule;
 
 import static java.lang.Math.max;
 
+import java.util.Map;
+
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.ClusterMetricsInfo;
 
 public class PendingAppsRule extends AbstractAdjustmentRule implements ClusterAdjustmentRule {
 
     public static final String NAME = "pendingApps";
-    private static final double DEFAULT_PENDING_APPS_THRESHOLD = 5;
+    private int pendingAppsLimit;
 
-    public PendingAppsRule(int order, int limit) {
-        super(NAME, order, limit);
+    @Override
+    public void init(Map<String, Object> config) {
+        setName(NAME);
+        setLimit((int) config.get("limit"));
+        this.pendingAppsLimit = (int) config.get("pendingApps");
     }
 
     @Override
@@ -22,7 +27,7 @@ public class PendingAppsRule extends AbstractAdjustmentRule implements ClusterAd
     }
 
     private boolean isPendingAppsExceed(ClusterMetricsInfo metrics) {
-        return metrics.getAppsPending() > DEFAULT_PENDING_APPS_THRESHOLD;
+        return metrics.getAppsPending() > pendingAppsLimit;
     }
 
 }
