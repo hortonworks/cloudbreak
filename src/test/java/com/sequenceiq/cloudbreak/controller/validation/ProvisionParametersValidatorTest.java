@@ -82,6 +82,21 @@ public class ProvisionParametersValidatorTest {
     }
 
     @Test
+    public void validAwsTemplateWithSpecificSshJsonWillReturnTrue() {
+        TemplateJson templateJson = new TemplateJson();
+        templateJson.setCloudPlatform(CloudPlatform.AWS);
+        templateJson.setDescription("description");
+        templateJson.setName("name");
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put(AwsTemplateParam.AMI_ID.getName(), "ami");
+        parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), InstanceType.C1Medium.name());
+        parameters.put(AwsTemplateParam.REGION.getName(), Regions.AP_NORTHEAST_1);
+        parameters.put(AwsTemplateParam.SSH_LOCATION.getName(), "192.12.12.12/12");
+        templateJson.setParameters(parameters);
+        assertEquals(underTest.isValid(templateJson, constraintValidatorContext), true);
+    }
+
+    @Test
     public void validAwsTemplateWithInvalidSshLocationJsonWillReturnTrue() {
         TemplateJson templateJson = new TemplateJson();
         templateJson.setCloudPlatform(CloudPlatform.AWS);
@@ -92,6 +107,21 @@ public class ProvisionParametersValidatorTest {
         parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), InstanceType.C1Medium.name());
         parameters.put(AwsTemplateParam.REGION.getName(), Regions.AP_NORTHEAST_1);
         parameters.put(AwsTemplateParam.SSH_LOCATION.getName(), "0.0.0.0");
+        templateJson.setParameters(parameters);
+        assertEquals(underTest.isValid(templateJson, constraintValidatorContext), false);
+    }
+
+    @Test
+    public void validAwsTemplateWithInvalidSshLocationWithSpecificNumberJsonWillReturnTrue() {
+        TemplateJson templateJson = new TemplateJson();
+        templateJson.setCloudPlatform(CloudPlatform.AWS);
+        templateJson.setDescription("description");
+        templateJson.setName("name");
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put(AwsTemplateParam.AMI_ID.getName(), "ami");
+        parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), InstanceType.C1Medium.name());
+        parameters.put(AwsTemplateParam.REGION.getName(), Regions.AP_NORTHEAST_1);
+        parameters.put(AwsTemplateParam.SSH_LOCATION.getName(), "192.0.0.0/256");
         templateJson.setParameters(parameters);
         assertEquals(underTest.isValid(templateJson, constraintValidatorContext), false);
     }
