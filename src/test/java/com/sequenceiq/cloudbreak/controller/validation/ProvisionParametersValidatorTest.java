@@ -67,7 +67,7 @@ public class ProvisionParametersValidatorTest {
     }
 
     @Test
-    public void validAwsTemplateJsonWillReturnTrue(){
+    public void validAwsTemplateJsonWillReturnTrue() {
         TemplateJson templateJson = new TemplateJson();
         templateJson.setCloudPlatform(CloudPlatform.AWS);
         templateJson.setDescription("description");
@@ -82,7 +82,7 @@ public class ProvisionParametersValidatorTest {
     }
 
     @Test
-    public void validAwsTemplateWithInvalidSshLocationJsonWillReturnTrue(){
+    public void validAwsTemplateWithInvalidSshLocationJsonWillReturnTrue() {
         TemplateJson templateJson = new TemplateJson();
         templateJson.setCloudPlatform(CloudPlatform.AWS);
         templateJson.setDescription("description");
@@ -115,7 +115,7 @@ public class ProvisionParametersValidatorTest {
 
         @Override
         public Class<? extends Annotation> annotationType() {
-            return this.getClass();
+            return getClass();
         }
     }
 
