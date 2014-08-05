@@ -12,10 +12,10 @@ public class PendingAppsRule extends AbstractAdjustmentRule implements ClusterAd
     private int pendingAppsLimit;
 
     @Override
-    public void init(Map<String, Object> config) {
+    public void init(Map<String, String> config) {
         setName(NAME);
-        setLimit((int) config.get("limit"));
-        this.pendingAppsLimit = (int) config.get("pendingApps");
+        setLimit(Integer.valueOf(config.get("limit")));
+        this.pendingAppsLimit = Integer.valueOf(config.get("pendingApps"));
     }
 
     @Override

@@ -13,10 +13,10 @@ public class ResourcesBelowRule extends AbstractAdjustmentRule implements Cluste
     private double freeResourceRate;
 
     @Override
-    public void init(Map<String, Object> config) {
+    public void init(Map<String, String> config) {
         setName(NAME);
-        setLimit((int) config.get("limit"));
-        this.freeResourceRate = (double) config.get("freeResourceRate");
+        setLimit(Integer.valueOf(config.get("limit")));
+        this.freeResourceRate = Double.valueOf(config.get("freeResourceRate"));
     }
 
     @Override

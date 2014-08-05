@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.periscope.model.Ambari;
 import com.sequenceiq.periscope.model.Priority;
 import com.sequenceiq.periscope.model.SchedulerApplication;
+import com.sequenceiq.periscope.policies.cloudbreak.ClusterAdjustmentPolicy;
 import com.sequenceiq.periscope.service.configuration.AmbariConfigurationService;
 import com.sequenceiq.periscope.service.configuration.ConfigParam;
 
@@ -28,6 +29,7 @@ public class Cluster {
     private final YarnClient yarnClient;
     private final Map<Priority, Map<ApplicationId, SchedulerApplication>> applications;
     private ClusterMetricsInfo metrics;
+    private ClusterAdjustmentPolicy clusterAdjustmentPolicy;
 
     public Cluster(String clusterId, Ambari ambari) throws ConnectionException {
         this.clusterId = clusterId;
@@ -65,6 +67,18 @@ public class Cluster {
 
     public long getTotalMB() {
         return metrics == null ? 0 : metrics.getTotalMB();
+    }
+
+    public ClusterAdjustmentPolicy getClusterAdjustmentPolicy() {
+        return clusterAdjustmentPolicy;
+    }
+
+    public void setClusterAdjustmentPolicy(ClusterAdjustmentPolicy clusterAdjustmentPolicy) {
+        this.clusterAdjustmentPolicy = clusterAdjustmentPolicy;
+    }
+
+    public int scale() {
+        return metrics == null || clusterAdjustmentPolicy == null ? 0 : clusterAdjustmentPolicy.scale(metrics);
     }
 
     public void updateMetrics(ClusterMetricsInfo metrics) {

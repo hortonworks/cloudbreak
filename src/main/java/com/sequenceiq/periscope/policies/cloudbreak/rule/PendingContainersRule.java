@@ -13,10 +13,10 @@ public class PendingContainersRule extends AbstractAdjustmentRule implements Clu
     private int pendingContainersLimit;
 
     @Override
-    public void init(Map<String, Object> config) {
+    public void init(Map<String, String> config) {
         setName(NAME);
-        setLimit((int) config.get("limit"));
-        this.pendingContainersLimit = (int) config.get("pendingContainers");
+        setLimit(Integer.valueOf(config.get("limit")));
+        this.pendingContainersLimit = Integer.valueOf(config.get("pendingContainers"));
     }
 
     @Override

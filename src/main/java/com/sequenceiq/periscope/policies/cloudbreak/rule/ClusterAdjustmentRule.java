@@ -13,7 +13,7 @@ public interface ClusterAdjustmentRule extends NamedRule {
      *
      * @param config config parameters
      */
-    void init(Map<String, Object> config);
+    void init(Map<String, String> config);
 
     /**
      * Scale up or down to the required number of nodes.

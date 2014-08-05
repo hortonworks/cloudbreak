@@ -8,7 +8,6 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.periscope.monitor.event.ClusterMetricsUpdateEvent;
-import com.sequenceiq.periscope.policies.cloudbreak.ClusterAdjustmentPolicy;
 import com.sequenceiq.periscope.registry.Cluster;
 import com.sequenceiq.periscope.registry.ClusterRegistry;
 
@@ -20,15 +19,12 @@ public class ClusterMetricsUpdateEventHandler implements ApplicationListener<Clu
     @Autowired
     private ClusterRegistry clusterRegistry;
 
-    @Autowired
-    private ClusterAdjustmentPolicy clusterAdjustmentPolicy;
-
     @Override
     public void onApplicationEvent(ClusterMetricsUpdateEvent event) {
         ClusterMetricsInfo metrics = event.getClusterMetricsInfo();
         Cluster cluster = clusterRegistry.get(event.getClusterId());
         cluster.updateMetrics(metrics);
-        int newNodeCount = clusterAdjustmentPolicy.scale(metrics);
+        int newNodeCount = cluster.scale();
         if (newNodeCount > 0) {
             int activeNodes = metrics.getActiveNodes();
             if (newNodeCount > activeNodes) {
