@@ -125,4 +125,11 @@ public class SnsRequest {
         this.token = token;
     }
 
+    @Override
+    public String toString() {
+        return "SnsRequest [type=" + type + ", messageId=" + messageId + ", topicArn=" + topicArn + ", subject=" + subject + ", timestamp=" + timestamp
+                + ", signatureVersion=" + signatureVersion + ", signature=" + signature + ", signingCertURL=" + signingCertURL + ", subscribeURL="
+                + subscribeURL + ", unsubscribeURL=" + unsubscribeURL + ", message=" + message + ", token=" + token + "]";
+    }
+
 }

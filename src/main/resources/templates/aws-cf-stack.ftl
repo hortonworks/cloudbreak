@@ -256,7 +256,20 @@
 		  { "IpProtocol" : "udp", "FromPort" : "0", "ToPort" : "65535", "CidrIp" : "172.17.0.0/16"} ,
           { "IpProtocol" : "tcp", "FromPort" : "22", "ToPort" : "22", "CidrIp" : { "Ref" : "SSHLocation" } } ]
       }
-    }
+    },
+    
+    "InstancesStartedHandler" : {
+      "Type" : "AWS::CloudFormation::WaitConditionHandle"
+	},
+	
+	"InstancesStartedWaitCondition" : {
+      "Type" : "AWS::CloudFormation::WaitCondition",
+      "Properties" : {
+      	"Count"   : { "Ref" : "InstanceCount" },
+        "Handle" : { "Ref" : "InstancesStartedHandler" },
+        "Timeout" : "1800"
+      }
+	}
     
   },
   

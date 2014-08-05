@@ -48,6 +48,7 @@ public class SnsMessageHandler {
 
     public void handleMessage(SnsRequest snsRequest) {
         if (isCloudFormationMessage(snsRequest)) {
+            LOGGER.info(snsRequest.toString());
             Map<String, String> cfMessage = snsMessageParser.parseCFMessage(snsRequest.getMessage());
             if (isStackCreateCompleteMessage(cfMessage)) {
                 handleCfStackCreateComplete(cfMessage);
@@ -56,6 +57,8 @@ public class SnsMessageHandler {
             }
         } else if (isSubscriptionConfirmationMessage(snsRequest)) {
             snsTopicManager.confirmSubscription(snsRequest);
+        } else {
+            LOGGER.info(snsRequest.toString());
         }
     }
 
