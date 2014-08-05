@@ -44,7 +44,7 @@ public class AwsTemplateConverterTest {
         TemplateJson result = underTest.convert(awsTemplate);
         assertEquals(result.getCloudPlatform(), awsTemplate.cloudPlatform());
         assertEquals(result.getDescription(), awsTemplate.getDescription());
-        assertEquals(result.getParameters().get(AwsTemplateParam.INSTANCE_TYPE.getName()), awsTemplate.getInstanceType().toString());
+        assertEquals(result.getParameters().get(AwsTemplateParam.INSTANCE_TYPE.getName()), awsTemplate.getInstanceType().name());
     }
 
     @Test

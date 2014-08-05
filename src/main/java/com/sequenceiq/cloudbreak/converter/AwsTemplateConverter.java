@@ -25,7 +25,7 @@ public class AwsTemplateConverter extends AbstractConverter<TemplateJson, AwsTem
         Map<String, Object> props = new HashMap<>();
         props.put(AwsTemplateParam.REGION.getName(), entity.getRegion().toString());
         props.put(AwsTemplateParam.AMI_ID.getName(), entity.getAmiId());
-        props.put(AwsTemplateParam.INSTANCE_TYPE.getName(), entity.getInstanceType().toString());
+        props.put(AwsTemplateParam.INSTANCE_TYPE.getName(), entity.getInstanceType().name());
         props.put(AwsTemplateParam.SSH_LOCATION.getName(), entity.getSshLocation());
         templateJson.setParameters(props);
         templateJson.setCloudPlatform(CloudPlatform.AWS);
