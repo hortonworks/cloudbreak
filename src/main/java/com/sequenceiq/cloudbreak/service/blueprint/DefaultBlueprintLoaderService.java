@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.converter.BlueprintConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.domain.UserRole;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @Component
@@ -42,6 +43,8 @@ public class DefaultBlueprintLoaderService {
                 blueprintJson.setAmbariBlueprint(
                         jsonHelper.createJsonFromString(FileReaderUtils.readFileFromClasspath(String.format("blueprints/%s.bp", blueprintName)))
                 );
+
+                blueprintJson.getRoles().add(UserRole.COMPANY_ADMIN);
 
                 Blueprint bp = blueprintConverter.convert(blueprintJson);
                 bp.setUser(user);

@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.controller.json.CompanyJson;
 import com.sequenceiq.cloudbreak.converter.CompanyConverter;
 import com.sequenceiq.cloudbreak.domain.Company;
 import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.domain.UserRole;
 import com.sequenceiq.cloudbreak.service.company.CompanyService;
 
 @Controller
@@ -30,8 +31,13 @@ public class CompanyController {
     private CompanyConverter companyConverter;
 
     @RequestMapping(method = RequestMethod.GET)
-    public ResponseEntity<CompanyJson> companies() {
-        Set<User> users = companyService.decoratedUsers(1L);
+    public ResponseEntity<CompanyJson> test() {
+        Set<User> users = companyService.companyUsers(1L);
+
+        User admin = companyService.companyAdmin(users.iterator().next().getCompany().getId());
+        LOGGER.info("ADMIN: {} ", admin);
+        User data = companyService.companyUserData(1L, UserRole.COMPANY_ADMIN);
+
         Company company = users.iterator().next().getCompany();
         return new ResponseEntity<CompanyJson>(companyConverter.convert(company), HttpStatus.OK);
     }

@@ -26,7 +26,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
                 name = "Company.findByName",
                 query = "SELECT c FROM Company c WHERE c.name = :name"),
         @NamedQuery(
-                name = "Company.decoratedUsers",
+                name = "Company.companyUsers",
                 query = "SELECT cu FROM User cu "
                         + "LEFT JOIN FETCH cu.azureTemplates "
                         + "LEFT JOIN FETCH cu.awsTemplates "
@@ -35,7 +35,13 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
                         + "LEFT JOIN FETCH cu.awsCredentials "
                         + "LEFT JOIN FETCH cu.azureCredentials "
                         + "LEFT JOIN FETCH cu.clusters "
-                        + "WHERE cu.company.id= :companyId")
+                        + "WHERE cu.company.id= :companyId"),
+        @NamedQuery(
+                name = "Company.findCompanyAdmin",
+                query = "SELECT u FROM User u "
+                        + "WHERE 'COMPANY_ADMIN' in elements(u.userRole) "
+                        + "AND u.company.id= :companyId")
+
 })
 
 @Table(name = "company")

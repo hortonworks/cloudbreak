@@ -1,6 +1,13 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -20,8 +27,11 @@ public abstract class Template {
     @SequenceGenerator(name = "template_generator", sequenceName = "sequence_table")
     private Long id;
 
-    public Template() {
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Enumerated(EnumType.STRING)
+    private List<UserRole> userRoles = new ArrayList<>();
 
+    public Template() {
     }
 
     public Long getId() {
@@ -38,4 +48,11 @@ public abstract class Template {
 
     public abstract User getOwner();
 
+    public List<UserRole> getUserRoles() {
+        return userRoles;
+    }
+
+    public void setUserRoles(List<UserRole> userRoles) {
+        this.userRoles = userRoles;
+    }
 }

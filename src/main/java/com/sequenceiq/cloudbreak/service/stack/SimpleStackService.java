@@ -80,7 +80,7 @@ public class SimpleStackService implements StackService {
     @Override
     public Set<StackJson> getAllForAdmin(User user) {
         Set<StackJson> result = new HashSet<>();
-        Set<User> decoratedUsers = companyService.decoratedUsers(user.getCompany().getId());
+        Set<User> decoratedUsers = companyService.companyUsers(user.getCompany().getId());
         for (User cUser : decoratedUsers) {
             result.addAll(getAll(cUser));
         }

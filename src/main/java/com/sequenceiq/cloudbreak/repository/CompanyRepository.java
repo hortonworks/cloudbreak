@@ -12,5 +12,9 @@ public interface CompanyRepository extends CrudRepository<Company, Long> {
 
     Company findByName(@Param("name") String name);
 
-    Set<User> decoratedUsers(@Param("companyId") Long companyId);
+    Set<User> companyUsers(@Param("companyId") Long companyId);
+
+    User findCompanyAdmin(@Param("companyId") Long companyId);
+
+    //User resourcesForRole(@Param("adminId") Long adminId, @Param("role") UserRole role);
 }

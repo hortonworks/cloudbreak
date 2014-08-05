@@ -64,7 +64,7 @@ public class SimpleTemplateService implements TemplateService {
     @Override
     public Set<TemplateJson> getAllForAdmin(User user) {
         Set<TemplateJson> templates = new HashSet<>();
-        Set<User> decoratedUsers = companyService.decoratedUsers(user.getCompany().getId());
+        Set<User> decoratedUsers = companyService.companyUsers(user.getCompany().getId());
         for (User cUser : decoratedUsers) {
             templates.addAll(getAll(cUser));
         }

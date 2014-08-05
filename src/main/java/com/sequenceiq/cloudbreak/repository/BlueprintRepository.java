@@ -10,4 +10,7 @@ public interface BlueprintRepository extends CrudRepository<Blueprint, Long> {
 
     @PostAuthorize("returnObject?.user?.id == principal?.id")
     Blueprint findOne(@Param("id") Long id);
+
+    //List<Blueprint> companyBlueprintsForUser(User user);
+
 }

@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Company;
 import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.domain.UserRole;
 import com.sequenceiq.cloudbreak.domain.UserStatus;
 import com.sequenceiq.cloudbreak.repository.CompanyRepository;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
@@ -64,6 +65,7 @@ public class UserInitializer implements InitializingBean {
             user2.setPassword(passwordEncoder.encode("test123"));
             user2.setStatus(UserStatus.ACTIVE);
             user2.setCompany(company);
+            user2.getUserRole().add(UserRole.COMPANY_ADMIN);
 
             AwsCredential awsCredential = new AwsCredential();
             awsCredential.setRoleArn("arn:aws:iam::755047402263:role/seq-self-cf");
