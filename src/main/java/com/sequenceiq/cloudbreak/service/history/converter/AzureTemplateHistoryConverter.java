@@ -18,7 +18,7 @@ public class AzureTemplateHistoryConverter extends AbstractHistoryConverter<Azur
         history.setUserId(entity.getOwner().getId());
         //entity.getAzureTemplateOwner();
         history.setImageName(entity.getImageName());
-        history.setLocation(entity.getLocation());
+        history.setLocation(entity.getLocation().location());
         //history.entity.getPorts();
         history.setVmType(entity.getVmType());
         return history;
