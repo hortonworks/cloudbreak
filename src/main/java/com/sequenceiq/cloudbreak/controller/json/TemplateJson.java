@@ -20,7 +20,7 @@ public class TemplateJson implements JsonEntity {
     @Size(max = 20, min = 5)
     private String name;
     private Map<String, Object> parameters = new HashMap<>();
-    @Size(max = 20)
+    @Size(max = 50)
     private String description;
 
     @JsonProperty("id")

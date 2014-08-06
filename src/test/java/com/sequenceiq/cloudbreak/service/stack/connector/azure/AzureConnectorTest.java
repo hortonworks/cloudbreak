@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.domain.User;
 
 import groovyx.net.http.HttpResponseDecorator;
 import groovyx.net.http.HttpResponseException;
+import reactor.core.Reactor;
 
 
 public class AzureConnectorTest {
@@ -61,6 +62,9 @@ public class AzureConnectorTest {
 
     @Mock
     private HttpResponseException mockedException;
+
+    @Mock
+    private Reactor reactor;
 
     private Stack stack;
 

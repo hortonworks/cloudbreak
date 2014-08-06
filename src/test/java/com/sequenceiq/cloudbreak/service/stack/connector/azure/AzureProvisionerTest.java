@@ -11,9 +11,6 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import groovyx.net.http.HttpResponseDecorator;
-import groovyx.net.http.HttpResponseException;
-
 import java.io.FileNotFoundException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
@@ -28,8 +25,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import reactor.core.Reactor;
-
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
@@ -40,6 +35,10 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
+
+import groovyx.net.http.HttpResponseDecorator;
+import groovyx.net.http.HttpResponseException;
+import reactor.core.Reactor;
 
 public class AzureProvisionerTest {
 
@@ -53,9 +52,6 @@ public class AzureProvisionerTest {
 
     @InjectMocks
     private AzureProvisioner underTest;
-
-    @Mock
-    private Reactor reactor;
 
     @Mock
     private RetryingStackUpdater retryingStackUpdater;
@@ -77,6 +73,9 @@ public class AzureProvisionerTest {
 
     @Mock
     private X509Certificate x509Certificate;
+
+    @Mock
+    private Reactor reactor;
 
     private Stack stack;
 
@@ -108,6 +107,7 @@ public class AzureProvisionerTest {
     public void testBuildStack() throws Exception {
         // GIVEN
         given(retryingStackUpdater.updateStackStatus(anyLong(), any(Status.class))).willReturn(stack);
+        given(retryingStackUpdater.updateStackResources(anyLong(), any(Set.class))).willReturn(stack);
         given(retryingStackUpdater.updateStackCreateComplete(anyLong())).willReturn(stack);
         given(azureStackUtil.createAzureClient(any(Credential.class), anyString())).willReturn(azureClient);
         given(azureClient.getAffinityGroup(anyString())).willReturn(new Object());
@@ -135,6 +135,7 @@ public class AzureProvisionerTest {
             throws FileNotFoundException, CertificateException, NoSuchAlgorithmException {
         // GIVEN
         given(retryingStackUpdater.updateStackStatus(anyLong(), any(Status.class))).willReturn(stack);
+        given(retryingStackUpdater.updateStackResources(anyLong(), any(Set.class))).willReturn(stack);
         given(retryingStackUpdater.updateStackCreateComplete(anyLong())).willReturn(stack);
         given(retryingStackUpdater.updateStackCreateComplete(anyLong())).willReturn(stack);
         given(azureStackUtil.createAzureClient(any(Credential.class), anyString())).willReturn(azureClient);
@@ -166,6 +167,7 @@ public class AzureProvisionerTest {
     public void testBuildStackWhenThrowsInternalServerErrorOnCreateStorageAccount() throws Exception {
         // GIVEN
         given(retryingStackUpdater.updateStackStatus(anyLong(), any(Status.class))).willReturn(stack);
+        given(retryingStackUpdater.updateStackResources(anyLong(), any(Set.class))).willReturn(stack);
         given(retryingStackUpdater.updateStackCreateComplete(anyLong())).willReturn(stack);
         given(azureStackUtil.createAzureClient(any(Credential.class), anyString())).willReturn(azureClient);
         given(azureClient.getAffinityGroup(anyString())).willReturn(httpResponseException);

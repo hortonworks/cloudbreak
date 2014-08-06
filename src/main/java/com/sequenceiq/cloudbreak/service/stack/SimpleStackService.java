@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
+import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataIncompleteException;
 
 import reactor.core.Reactor;
@@ -52,7 +53,7 @@ public class SimpleStackService implements StackService {
     private TemplateRepository templateRepository;
 
     @Resource
-    private Map<CloudPlatform, CloudPlatformConnector> provisionServices;
+    private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
 
     @Autowired
     private Reactor reactor;
@@ -75,7 +76,7 @@ public class SimpleStackService implements StackService {
             throw new NotFoundException(String.format("Stack '%s' not found", id));
         }
         CloudPlatform cp = stack.getTemplate().cloudPlatform();
-        StackDescription description = provisionServices.get(cp).describeStackWithResources(user, stack, stack.getCredential());
+        StackDescription description = cloudPlatformConnectors.get(cp).describeStackWithResources(user, stack, stack.getCredential());
         return stackConverter.convert(stack, description);
     }
 
@@ -98,14 +99,13 @@ public class SimpleStackService implements StackService {
 
     @Override
     public void delete(User user, Long id) {
+        LOGGER.info("Stack delete requested. [StackId: {}]", id);
         Stack stack = stackRepository.findOne(id);
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", id));
         }
-        CloudPlatform cp = stack.getTemplate().cloudPlatform();
-        provisionServices.get(cp).deleteStack(user, stack, stack.getCredential());
-        stack.setTerminated(Boolean.TRUE);
-        stackRepository.save(stack);
+        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.DELETE_REQUEST_EVENT, stack.getId());
+        reactor.notify(ReactorConfig.DELETE_REQUEST_EVENT, Event.wrap(new StackDeleteRequest(stack.getTemplate().cloudPlatform(), stack.getId())));
     }
 
     @Override

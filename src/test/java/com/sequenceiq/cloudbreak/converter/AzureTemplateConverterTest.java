@@ -15,6 +15,7 @@ import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
 import com.sequenceiq.cloudbreak.controller.validation.AzureTemplateParam;
+import com.sequenceiq.cloudbreak.domain.AzureLocation;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Port;
@@ -24,7 +25,7 @@ public class AzureTemplateConverterTest {
     private static final String DUMMY_VM_TYPE = "dummyVmType";
     private static final String DUMMY_DESCRIPTION = "dummyDescription";
     private static final String DUMMY_IMAGE_NAME = "dummyImageName";
-    private static final String DUMMY_LOCATION = "dummyLocation";
+    private static final AzureLocation DUMMY_LOCATION = AzureLocation.BRAZIL_SOUTH;
     private static final String DUMMY_NAME = "dummyName";
     private static final String DUMMY_PASSWORD = "dummyPassword";
     private static final String PORT = "8081";
@@ -52,7 +53,7 @@ public class AzureTemplateConverterTest {
         // THEN
         assertEquals(result.getCloudPlatform(), azureTemplate.cloudPlatform());
         assertEquals(result.getParameters().get(AzureTemplateParam.LOCATION.getName()),
-                azureTemplate.getLocation());
+                azureTemplate.getLocation().name());
         assertEquals(((HashSet<Port>) result.getParameters().get(AzureTemplateParam.PORTS.getName()))
                         .iterator().next().getPort(),
                 azureTemplate.getPorts().iterator().next().getPort());
@@ -66,7 +67,7 @@ public class AzureTemplateConverterTest {
         AzureTemplate result = underTest.convert(templateJson);
         assertEquals(result.cloudPlatform(), templateJson.getCloudPlatform());
         assertEquals(result.getDescription(), templateJson.getDescription());
-        assertEquals(result.getLocation(),
+        assertEquals(result.getLocation().name(),
                 templateJson.getParameters().get(AzureTemplateParam.LOCATION.getName()));
         assertEquals(result.getPorts().iterator().next().getLocalPort(),
                 ((ArrayList<LinkedHashMap<String, String>>) templateJson.getParameters().get(AzureTemplateParam.PORTS.getName()))
@@ -95,7 +96,7 @@ public class AzureTemplateConverterTest {
         azureTemplate.setVmType(DUMMY_VM_TYPE);
         azureTemplate.setDescription(DUMMY_DESCRIPTION);
         azureTemplate.setImageName(DUMMY_IMAGE_NAME);
-        azureTemplate.setLocation(DUMMY_PASSWORD);
+        azureTemplate.setLocation(DUMMY_LOCATION);
         azureTemplate.setName(DUMMY_NAME);
         azureTemplate.setId(1L);
         Set<Port> ports = new HashSet<>();
@@ -111,7 +112,7 @@ public class AzureTemplateConverterTest {
         templateJson.setDescription(DUMMY_DESCRIPTION);
         templateJson.setName(DUMMY_NAME);
         Map<String, Object> props = new HashMap<>();
-        props.put(AzureTemplateParam.LOCATION.getName(), DUMMY_LOCATION);
+        props.put(AzureTemplateParam.LOCATION.getName(), DUMMY_LOCATION.name());
         props.put(AzureTemplateParam.IMAGENAME.getName(), DUMMY_IMAGE_NAME);
         props.put(AzureTemplateParam.VMTYPE.getName(), DUMMY_VM_TYPE);
         props.put(AzureTemplateParam.PORTS.getName(), createPorts());

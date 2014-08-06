@@ -50,7 +50,7 @@ public class AzureConnectorTestUtil extends ConnectorTestUtil {
         AzureTemplate azureTemplate = new AzureTemplate();
         azureTemplate.setId(DEFAULT_ID);
         azureTemplate.setUser(user);
-        azureTemplate.setLocation(AzureLocation.NORTH_EUROPE.location());
+        azureTemplate.setLocation(AzureLocation.NORTH_EUROPE);
         azureTemplate.setVmType(AzureVmType.MEDIUM.toString());
         azureTemplate.setDescription(AZURE_DESCRIPTION);
         azureTemplate.setImageName(IMAGE_NAME);

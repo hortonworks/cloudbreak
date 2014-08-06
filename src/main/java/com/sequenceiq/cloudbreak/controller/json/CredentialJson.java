@@ -20,7 +20,7 @@ public class CredentialJson implements JsonEntity {
     private String name;
     private CloudPlatform cloudPlatform;
     private Map<String, Object> parameters = new HashMap<>();
-    @Size(max = 20)
+    @Size(max = 50)
     private String description;
     @NotNull
     private String publicKey;

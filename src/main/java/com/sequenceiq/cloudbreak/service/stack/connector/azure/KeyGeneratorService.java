@@ -19,7 +19,7 @@ public class KeyGeneratorService {
                 "-keysize", "2048",
                 "-keypass", azureCredential.getJks(),
                 "-storepass", azureCredential.getJks(),
-                "-dname", "cn=" + user.getLastName() + ", ou=engineering, o=company, c=US"
+                "-dname", "cn=" + user.getLastName() + azureCredential.getPostFix() + ", ou=engineering, o=company, c=US"
         });
     }
 

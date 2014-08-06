@@ -16,6 +16,7 @@ import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.Filter;
+import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
@@ -27,6 +28,10 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackDescription;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
+import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteComplete;
+
+import reactor.core.Reactor;
+import reactor.event.Event;
 
 @Service
 public class AwsConnector implements CloudPlatformConnector {
@@ -38,6 +43,9 @@ public class AwsConnector implements CloudPlatformConnector {
 
     @Autowired
     private AwsStackUtil awsStackUtil;
+
+    @Autowired
+    private Reactor reactor;
 
     @Override
     public StackDescription describeStackWithResources(User user, Stack stack, Credential credential) {
@@ -98,6 +106,7 @@ public class AwsConnector implements CloudPlatformConnector {
                     .withStackName(resource.getResourceName());
             client.deleteStack(deleteStackRequest);
         }
+        reactor.notify(ReactorConfig.DELETE_COMPLETE_EVENT, Event.wrap(new StackDeleteComplete(stack.getId())));
     }
 
     @Override
