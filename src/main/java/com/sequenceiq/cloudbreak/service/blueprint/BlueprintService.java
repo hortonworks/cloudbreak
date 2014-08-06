@@ -12,4 +12,6 @@ public interface BlueprintService {
     BlueprintJson get(Long blueprintId);
 
     void delete(Long blueprintId);
+
+    Blueprint addBlueprint(User user, BlueprintJson blueprintJson);
 }

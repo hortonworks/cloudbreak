@@ -24,7 +24,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.json.BlueprintJson;
-import com.sequenceiq.cloudbreak.controller.json.IdJson;
 import com.sequenceiq.cloudbreak.converter.BlueprintConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -88,7 +87,7 @@ public class BlueprintServiceTest {
         given(blueprintRepository.save(blueprint)).willReturn(blueprint);
         doNothing().when(websocketService).sendToTopicUser(anyString(), any(WebsocketEndPoint.class), any(StatusMessage.class));
         //WHEN
-        IdJson result = underTest.addBlueprint(user, blueprintJson);
+        Blueprint result = underTest.addBlueprint(user, blueprintJson);
         //THEN
         verify(websocketService, times(1)).sendToTopicUser(anyString(), any(WebsocketEndPoint.class), any(StatusMessage.class));
         Assert.assertEquals(result.getId(), (Long) 1L);

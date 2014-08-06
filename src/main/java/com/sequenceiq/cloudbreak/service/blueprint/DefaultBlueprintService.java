@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.json.BlueprintJson;
-import com.sequenceiq.cloudbreak.controller.json.IdJson;
 import com.sequenceiq.cloudbreak.converter.BlueprintConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Status;
@@ -48,7 +47,8 @@ public class DefaultBlueprintService implements BlueprintService {
     @Autowired
     private CompanyService companyService;
 
-    public IdJson addBlueprint(User user, BlueprintJson blueprintJson) {
+    @Override
+    public Blueprint addBlueprint(User user, BlueprintJson blueprintJson) {
         Blueprint blueprint = blueprintConverter.convert(blueprintJson);
         blueprint.setUser(user);
         if (blueprint.getUserRoles().isEmpty()) {
@@ -57,7 +57,7 @@ public class DefaultBlueprintService implements BlueprintService {
         blueprint = blueprintRepository.save(blueprint);
         websocketService.sendToTopicUser(user.getEmail(), WebsocketEndPoint.BLUEPRINT,
                 new StatusMessage(blueprint.getId(), blueprint.getName(), Status.CREATE_COMPLETED.name()));
-        return new IdJson(blueprint.getId());
+        return blueprint;
     }
 
     @Override
@@ -99,15 +99,6 @@ public class DefaultBlueprintService implements BlueprintService {
             companyUserBlueprints.addAll(cUser.getBlueprints());
         }
         return companyUserBlueprints;
-    }
-
-    public Set<BlueprintJson> getAllForAdmin(User user) {
-        Set<BlueprintJson> blueprints = new HashSet<>();
-        Set<User> decoratedUsers = companyService.companyUsers(user.getCompany().getId());
-        for (User cUser : decoratedUsers) {
-            blueprints.addAll(blueprintConverter.convertAllEntityToJson(cUser.getBlueprints()));
-        }
-        return blueprints;
     }
 
     @Override

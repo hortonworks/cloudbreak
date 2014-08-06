@@ -45,8 +45,8 @@ public class BlueprintController {
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<IdJson> addBlueprint(@CurrentUser User user, @RequestBody @Valid BlueprintJson blueprintRequest) {
-        IdJson idJson = blueprintService.addBlueprint(user, blueprintRequest);
-        return new ResponseEntity<>(idJson, HttpStatus.CREATED);
+        Blueprint blueprint = blueprintService.addBlueprint(user, blueprintRequest);
+        return new ResponseEntity<>(new IdJson(blueprint.getId()), HttpStatus.CREATED);
     }
 
     @RequestMapping(method = RequestMethod.GET)
