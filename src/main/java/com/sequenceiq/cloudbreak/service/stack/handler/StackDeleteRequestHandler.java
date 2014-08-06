@@ -27,7 +27,7 @@ public class StackDeleteRequestHandler implements Consumer<Event<StackDeleteRequ
     private static final Logger LOGGER = LoggerFactory.getLogger(StackDeleteRequestHandler.class);
 
     @Resource
-    private Map<CloudPlatform, CloudPlatformConnector> provisionServices;
+    private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
 
     @Autowired
     private StackRepository stackRepository;
@@ -41,6 +41,11 @@ public class StackDeleteRequestHandler implements Consumer<Event<StackDeleteRequ
         LOGGER.info("Accepted {} event.", ReactorConfig.DELETE_REQUEST_EVENT, data.getStackId());
         retryingStackUpdater.updateStackStatus(data.getStackId(), Status.DELETE_IN_PROGRESS);
         Stack oneWithLists = stackRepository.findOneWithLists(data.getStackId());
-        provisionServices.get(data.getCloudPlatform()).deleteStack(oneWithLists.getUser(), oneWithLists, oneWithLists.getCredential());
+        try {
+            cloudPlatformConnectors.get(data.getCloudPlatform()).deleteStack(oneWithLists.getUser(), oneWithLists, oneWithLists.getCredential());
+        } catch (Exception ex) {
+            retryingStackUpdater.updateStackStatus(data.getStackId(), Status.DELETE_FAILED);
+        }
+
     }
 }

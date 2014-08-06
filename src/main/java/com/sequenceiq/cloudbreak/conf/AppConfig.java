@@ -28,7 +28,7 @@ public class AppConfig {
     private TemplateReader templateReader;
 
     @Autowired
-    private List<CloudPlatformConnector> provisionServices;
+    private List<CloudPlatformConnector> cloudPlatformConnectorList;
 
     @Autowired
     private List<ProvisionSetup> provisionSetups;
@@ -50,9 +50,9 @@ public class AppConfig {
     }
 
     @Bean
-    public Map<CloudPlatform, CloudPlatformConnector> provisionServices() {
+    public Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors() {
         Map<CloudPlatform, CloudPlatformConnector> map = new HashMap<>();
-        for (CloudPlatformConnector provisionService : provisionServices) {
+        for (CloudPlatformConnector provisionService : cloudPlatformConnectorList) {
             map.put(provisionService.getCloudPlatform(), provisionService);
         }
         return map;

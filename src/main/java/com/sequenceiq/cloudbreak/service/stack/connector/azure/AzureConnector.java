@@ -128,19 +128,6 @@ public class AzureConnector implements CloudPlatformConnector {
                 throw new InternalServerException(ex.getMessage());
             }
         }
-        for (Resource resource : stack.getResourcesByType(ResourceType.STORAGE)) {
-            try {
-                props = new HashMap<>();
-                props.put(NAME, resource.getResourceName());
-                HttpResponseDecorator deleteDisk = (HttpResponseDecorator) azureClient.deleteStorageAccount(props);
-                String requestId = (String) azureClient.getRequestId(deleteDisk);
-                azureClient.waitUntilComplete(requestId);
-            } catch (HttpResponseException ex) {
-                LOGGER.error(String.format("Storage account delete failed on %s user on %s stack: %s", user.getId(), stack.getId(), ex.getResponse().getData()));
-            } catch (Exception ex) {
-                throw new InternalServerException(ex.getMessage());
-            }
-        }
     }
 
     private void deleteNetwork(User user, Stack stack, AzureClient azureClient) {

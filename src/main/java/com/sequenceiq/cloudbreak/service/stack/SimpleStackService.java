@@ -53,7 +53,7 @@ public class SimpleStackService implements StackService {
     private TemplateRepository templateRepository;
 
     @Resource
-    private Map<CloudPlatform, CloudPlatformConnector> provisionServices;
+    private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
 
     @Autowired
     private Reactor reactor;
@@ -76,7 +76,7 @@ public class SimpleStackService implements StackService {
             throw new NotFoundException(String.format("Stack '%s' not found", id));
         }
         CloudPlatform cp = stack.getTemplate().cloudPlatform();
-        StackDescription description = provisionServices.get(cp).describeStackWithResources(user, stack, stack.getCredential());
+        StackDescription description = cloudPlatformConnectors.get(cp).describeStackWithResources(user, stack, stack.getCredential());
         return stackConverter.convert(stack, description);
     }
 
