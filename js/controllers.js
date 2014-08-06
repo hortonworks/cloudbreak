@@ -20,7 +20,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
         delete $http.defaults.headers.common['X-Requested-With'];
         $http.defaults.headers.common['Content-Type']= 'application/json';
         $http.get('messages.properties').then(function (messages) {
-            $rootScope.error_msg = messages.data
+            $rootScope.error_msg = messages.data;
         })
 
         var confirmSignUpToken = ($location.search()['confirmSignUpToken']);
