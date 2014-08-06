@@ -1,7 +1,11 @@
 package com.sequenceiq.cloudbreak.service;
 
+import com.sequenceiq.cloudbreak.domain.AwsCredential;
+import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Company;
+import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.UserRole;
@@ -42,6 +46,25 @@ public final class ServiceTestUtils {
         stack.getUserRoles().addAll(user.getUserRoles());
         stack.setTerminated(Boolean.FALSE);
         return stack;
+    }
+
+    public static Credential createCredential(User user, CloudPlatform platform, UserRole role) {
+        Credential cred = null;
+        switch (platform) {
+            case AZURE:
+                cred = new AzureCredential();
+                ((AzureCredential) cred).setAzureCredentialOwner(user);
+                break;
+            case AWS:
+                cred = new AwsCredential();
+                ((AwsCredential) cred).setAwsCredentialOwner(user);
+                break;
+            default:
+                break;
+        }
+        cred.setCloudPlatform(platform);
+        cred.getUserRoles().add(role);
+        return cred;
     }
 
 }

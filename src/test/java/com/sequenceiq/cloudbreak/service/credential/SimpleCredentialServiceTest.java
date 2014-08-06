@@ -1,5 +1,23 @@
 package com.sequenceiq.cloudbreak.service.credential;
 
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.json.CredentialJson;
 import com.sequenceiq.cloudbreak.converter.AwsCredentialConverter;
@@ -7,29 +25,19 @@ import com.sequenceiq.cloudbreak.converter.AzureCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.Company;
+import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.domain.UserRole;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.AwsCredentialRepository;
 import com.sequenceiq.cloudbreak.repository.AzureCredentialRepository;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
+import com.sequenceiq.cloudbreak.service.ServiceTestUtils;
+import com.sequenceiq.cloudbreak.service.company.CompanyService;
 import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
-import java.util.HashSet;
-
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anySetOf;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 public class SimpleCredentialServiceTest {
 
@@ -60,6 +68,9 @@ public class SimpleCredentialServiceTest {
     @Mock
     private WebsocketService websocketService;
 
+    @Mock
+    private CompanyService companyService;
+
     private User user;
 
     private AwsCredential awsCredential;
@@ -72,10 +83,8 @@ public class SimpleCredentialServiceTest {
         MockitoAnnotations.initMocks(this);
         user = new User();
         user.setEmail("dummy@mymail.com");
-        awsCredential = new AwsCredential();
-        awsCredential.setAwsCredentialOwner(user);
-        azureCredential = new AzureCredential();
-        azureCredential.setAzureCredentialOwner(user);
+        awsCredential = (AwsCredential) ServiceTestUtils.createCredential(user, CloudPlatform.AWS, UserRole.COMPANY_USER);
+        azureCredential = (AzureCredential) ServiceTestUtils.createCredential(user, CloudPlatform.AZURE, UserRole.COMPANY_USER);
     }
 
     @Test
@@ -86,7 +95,7 @@ public class SimpleCredentialServiceTest {
         given(awsCredentialRepository.save(awsCredential)).willReturn(awsCredential);
         doNothing().when(websocketService).sendToTopicUser(anyString(), any(WebsocketEndPoint.class), any(StatusMessage.class));
         //WHEN
-        underTest.save(user, credentialJson);
+        underTest.save(user, awsCredential);
         //THEN
         verify(websocketService, times(1)).sendToTopicUser(anyString(), any(WebsocketEndPoint.class), any(StatusMessage.class));
         verify(azureCertificateService, times(0)).generateCertificate(any(AzureCredential.class), any(User.class));
@@ -101,7 +110,7 @@ public class SimpleCredentialServiceTest {
         doNothing().when(azureCertificateService).generateCertificate(azureCredential, user);
         doNothing().when(websocketService).sendToTopicUser(anyString(), any(WebsocketEndPoint.class), any(StatusMessage.class));
         // WHEN
-        underTest.save(user, credentialJson);
+        underTest.save(user, azureCredential);
         // THEN
         verify(websocketService, times(1)).sendToTopicUser(anyString(), any(WebsocketEndPoint.class), any(StatusMessage.class));
         verify(azureCertificateService, times(1)).generateCertificate(any(AzureCredential.class), any(User.class));
@@ -127,38 +136,50 @@ public class SimpleCredentialServiceTest {
         underTest.delete(1L);
     }
 
-    @Test
-    public void testGetAll() {
-        // GIVEN
-        given(awsCredentialConverter.convertAllEntityToJson(anySetOf(AwsCredential.class))).willReturn(new HashSet<CredentialJson>());
-        given(azureCredentialConverter.convertAllEntityToJson(anySetOf(AzureCredential.class))).willReturn(new HashSet<CredentialJson>());
-        // WHEN
-        underTest.getAll(user);
-        // THEN
-        verify(awsCredentialConverter, times(1)).convertAllEntityToJson(anySetOf(AwsCredential.class));
-        verify(azureCredentialConverter, times(1)).convertAllEntityToJson(anySetOf(AzureCredential.class));
-    }
 
     @Test
-    public void testGetAwsCredential() {
+    public void testGetAllForCompanyAdminWithCompanyUserWithCredentials() {
         // GIVEN
-        given(credentialRepository.findOne(1L)).willReturn(awsCredential);
-        given(awsCredentialConverter.convert(any(AwsCredential.class))).willReturn(credentialJson);
+        Company company = ServiceTestUtils.createCompany("Blueprint Ltd.", 1L);
+        User admin = ServiceTestUtils.createUser(UserRole.COMPANY_ADMIN, company, 1L);
+        User cUser = ServiceTestUtils.createUser(UserRole.COMPANY_USER, company, 3L);
+        // admin has credentials
+        admin.getAwsCredentials().add((AwsCredential) ServiceTestUtils.createCredential(admin, CloudPlatform.AWS, UserRole.COMPANY_ADMIN));
+        admin.getAzureCredentials().add((AzureCredential) ServiceTestUtils.createCredential(admin, CloudPlatform.AZURE, UserRole.COMPANY_ADMIN));
+        // cUser also has credentials
+        cUser.getAwsCredentials().add((AwsCredential) ServiceTestUtils.createCredential(admin, CloudPlatform.AWS, UserRole.COMPANY_USER));
+        given(companyService.companyUsers(company.getId())).willReturn(new HashSet<User>(Arrays.asList(cUser)));
+
         // WHEN
-        underTest.get(1L);
+        Set<Credential> credentials = underTest.getAll(admin);
+
         // THEN
-        verify(awsCredentialConverter, times(1)).convert(any(AwsCredential.class));
+        Assert.assertNotNull(credentials);
+        Assert.assertTrue("The number of the returned blueprints is right", credentials.size() == 3);
     }
 
+
     @Test
-    public void testGetAzureCredential() {
+    public void testGetAllForCompanyUserWithVisibleCompanyCredentials() {
+
         // GIVEN
-        given(credentialRepository.findOne(1L)).willReturn(azureCredential);
-        given(azureCredentialConverter.convert(any(AzureCredential.class))).willReturn(credentialJson);
+        Company company = ServiceTestUtils.createCompany("Blueprint Ltd.", 1L);
+        User admin = ServiceTestUtils.createUser(UserRole.COMPANY_ADMIN, company, 1L);
+        User cUser = ServiceTestUtils.createUser(UserRole.COMPANY_USER, company, 3L);
+        // admin has credentials
+        admin.getAwsCredentials().add((AwsCredential) ServiceTestUtils.createCredential(admin, CloudPlatform.AWS, UserRole.COMPANY_ADMIN));
+        admin.getAzureCredentials().add((AzureCredential) ServiceTestUtils.createCredential(admin, CloudPlatform.AZURE, UserRole.COMPANY_USER));
+        // cUser also has credentials
+        cUser.getAwsCredentials().add((AwsCredential) ServiceTestUtils.createCredential(admin, CloudPlatform.AWS, UserRole.COMPANY_USER));
+        given(companyService.companyUserData(company.getId(), UserRole.COMPANY_USER)).willReturn(admin);
+
         // WHEN
-        underTest.get(1L);
+        Set<Credential> credentials = underTest.getAll(cUser);
+
         // THEN
-        verify(azureCredentialConverter, times(1)).convert(any(AzureCredential.class));
+        Assert.assertNotNull(credentials);
+        Assert.assertTrue("The number of the returned blueprints is right", credentials.size() == 3);
+
     }
 
 }

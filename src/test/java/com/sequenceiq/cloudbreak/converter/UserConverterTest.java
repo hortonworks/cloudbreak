@@ -1,5 +1,24 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anySetOf;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+import java.util.Date;
+import java.util.HashSet;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 import com.sequenceiq.cloudbreak.controller.json.BlueprintJson;
 import com.sequenceiq.cloudbreak.controller.json.CompanyJson;
 import com.sequenceiq.cloudbreak.controller.json.CredentialJson;
@@ -17,25 +36,6 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.UserStatus;
 import com.sequenceiq.cloudbreak.repository.CompanyRepository;
-import com.sequenceiq.cloudbreak.service.credential.CredentialService;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.security.crypto.password.PasswordEncoder;
-
-import java.util.Date;
-import java.util.HashSet;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anySetOf;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 public class UserConverterTest {
 
@@ -61,9 +61,6 @@ public class UserConverterTest {
     private BlueprintConverter blueprintConverter;
 
     @Mock
-    private CredentialService credentialService;
-
-    @Mock
     private PasswordEncoder passwordEncoder;
 
     @Mock
@@ -71,6 +68,12 @@ public class UserConverterTest {
 
     @Mock
     private CompanyRepository companyRepository;
+
+    @Mock
+    private AwsCredentialConverter awsCredentialConverter;
+
+    @Mock
+    private AzureCredentialConverter azureCredentialConverter;
 
     private User user;
 
@@ -87,7 +90,6 @@ public class UserConverterTest {
     @Test
     public void testConvertUserEntityToJson() {
         // GIVEN
-        given(credentialService.getAll(user)).willReturn(new HashSet<CredentialJson>());
         given(awsTemplateConverter.convertAllEntityToJson(anySetOf(AwsTemplate.class)))
                 .willReturn(new HashSet<TemplateJson>());
         given(azureTemplateConverter.convertAllEntityToJson(anySetOf(AzureTemplate.class)))

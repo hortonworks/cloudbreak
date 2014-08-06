@@ -2,7 +2,9 @@ package com.sequenceiq.cloudbreak.controller;
 
 import java.io.File;
 import java.nio.file.Files;
+import java.util.HashSet;
 import java.util.Set;
+import java.util.UnknownFormatConversionException;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -21,6 +23,11 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.sequenceiq.cloudbreak.controller.json.CredentialJson;
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
+import com.sequenceiq.cloudbreak.converter.AwsCredentialConverter;
+import com.sequenceiq.cloudbreak.converter.AzureCredentialConverter;
+import com.sequenceiq.cloudbreak.domain.AwsCredential;
+import com.sequenceiq.cloudbreak.domain.AzureCredential;
+import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
 import com.sequenceiq.cloudbreak.security.CurrentUser;
@@ -40,25 +47,37 @@ public class CredentialController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private AwsCredentialConverter awsCredentialConverter;
+
+    @Autowired
+    private AzureCredentialConverter azureCredentialConverter;
+
+
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<IdJson> saveCredential(@CurrentUser User user, @Valid @RequestBody CredentialJson credentialRequest) throws Exception {
-        IdJson save = credentialService.save(user, credentialRequest);
-        return new ResponseEntity<>(save, HttpStatus.CREATED);
+        Credential credential = convert(credentialRequest);
+        credential = credentialService.save(user, credential);
+        return new ResponseEntity<>(new IdJson(credential.getId()), HttpStatus.CREATED);
     }
 
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<Set<CredentialJson>> listCredentials(@CurrentUser User user) {
-        return new ResponseEntity<>(credentialService.getAll(userRepository.findOneWithLists(user.getId())), HttpStatus.OK);
+    public ResponseEntity<Set<CredentialJson>> getAllCredentials(@CurrentUser User user) {
+        User loadedUser = userRepository.findOneWithLists(user.getId());
+        Set<Credential> credentials = credentialService.getAll(loadedUser);
+        Set<CredentialJson> credentialJsons = convertCredentials(credentials);
+        return new ResponseEntity<>(credentialJsons, HttpStatus.OK);
     }
+
 
     @RequestMapping(method = RequestMethod.GET, value = "/{credentialId}")
     @ResponseBody
     public ResponseEntity<CredentialJson> getCredential(@CurrentUser User user, @PathVariable Long credentialId) {
         try {
-            CredentialJson credentialJson = credentialService.get(credentialId);
-            return new ResponseEntity<>(credentialJson, HttpStatus.OK);
+            Credential credential = credentialService.get(credentialId);
+            return new ResponseEntity<>(convert(credential), HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             throw new BadRequestException("Unknown cloud platform: " + credentialId, e);
         }
@@ -94,5 +113,43 @@ public class CredentialController {
         response.setHeader("Content-Disposition", "attachment;filename=public_key.pem");
         FileCopyUtils.copy(Files.readAllBytes(cerFile.toPath()), response.getOutputStream());
         return null;
+    }
+
+    private Credential convert(CredentialJson json) {
+        Credential ret = null;
+        switch (json.getCloudPlatform()) {
+            case AWS:
+                ret = awsCredentialConverter.convert(json);
+                break;
+            case AZURE:
+                ret = azureCredentialConverter.convert(json);
+                break;
+            default:
+                throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", json.getCloudPlatform()));
+        }
+        return ret;
+    }
+
+    private CredentialJson convert(Credential credential) {
+        CredentialJson ret = null;
+        switch (credential.getCloudPlatform()) {
+            case AWS:
+                ret = awsCredentialConverter.convert((AwsCredential) credential);
+                break;
+            case AZURE:
+                ret = azureCredentialConverter.convert((AzureCredential) credential);
+                break;
+            default:
+                throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", credential.getCloudPlatform()));
+        }
+        return ret;
+    }
+
+    private Set<CredentialJson> convertCredentials(Set<Credential> credentials) {
+        Set<CredentialJson> jsons = new HashSet<>();
+        for (Credential current : credentials) {
+            jsons.add(convert(current));
+        }
+        return jsons;
     }
 }

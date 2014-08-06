@@ -1,15 +1,18 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.json.CredentialJson;
 import com.sequenceiq.cloudbreak.controller.json.UserJson;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.UserRole;
 import com.sequenceiq.cloudbreak.repository.CompanyRepository;
-import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 
 @Component
 public class UserConverter extends AbstractConverter<UserJson, User> {
@@ -27,9 +30,6 @@ public class UserConverter extends AbstractConverter<UserJson, User> {
     private BlueprintConverter blueprintConverter;
 
     @Autowired
-    private CredentialService credentialService;
-
-    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
@@ -38,19 +38,32 @@ public class UserConverter extends AbstractConverter<UserJson, User> {
     @Autowired
     private CompanyRepository companyRepository;
 
+    @Autowired
+    private AwsCredentialConverter awsCredentialConverter;
+
+    @Autowired
+    private AzureCredentialConverter azureCredentialConverter;
+
     @Override
     public UserJson convert(User entity) {
         UserJson userJson = new UserJson();
         userJson.setEmail(entity.getEmail());
         userJson.setFirstName(entity.getFirstName());
         userJson.setLastName(entity.getLastName());
-        userJson.setCredentials(credentialService.getAll(entity));
+        userJson.setCredentials(convertCredentials(entity));
         userJson.setAwsTemplates(awsTemplateConverter.convertAllEntityToJson(entity.getAwsTemplates()));
         userJson.setAzureTemplates(azureTemplateConverter.convertAllEntityToJson(entity.getAzureTemplates()));
         userJson.setStacks(stackConverter.convertAllEntityToJsonWithClause(entity.getStacks()));
         userJson.setBlueprints(blueprintConverter.convertAllToIdList(entity.getBlueprints()));
         userJson.setCompany(entity.getCompany().getName());
         return userJson;
+    }
+
+    private Set<CredentialJson> convertCredentials(User entity) {
+        Set<CredentialJson> jsons = new HashSet<>();
+        jsons.addAll(awsCredentialConverter.convertAllEntityToJson(entity.getAwsCredentials()));
+        jsons.addAll(azureCredentialConverter.convertAllEntityToJson(entity.getAzureCredentials()));
+        return jsons;
     }
 
     @Override

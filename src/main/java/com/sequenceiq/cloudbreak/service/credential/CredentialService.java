@@ -3,17 +3,16 @@ package com.sequenceiq.cloudbreak.service.credential;
 import java.io.File;
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.controller.json.CredentialJson;
-import com.sequenceiq.cloudbreak.controller.json.IdJson;
+import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.User;
 
 public interface CredentialService {
 
-    IdJson save(User user, CredentialJson credentialRequest);
+    Credential save(User user, Credential credential);
 
-    Set<CredentialJson> getAll(User user);
+    Set<Credential> getAll(User user);
 
-    CredentialJson get(Long id);
+    Credential get(Long id);
 
     void delete(Long id);
 
