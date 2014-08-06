@@ -586,6 +586,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     log.info("Stack creation was succes: " + data.message);
                     $scope.statusMessage = "Cluster created succesfully.";
                     cl_clusterName.value = "";
+                    $scope.getStacks() // refresh stack data after cluster creation
 
                     // don't ask just read on
                     $jq('.carousel').carousel(0);
