@@ -25,6 +25,17 @@ done
 
 METADATA_RESULT=$(cat /tmp/metadata_result)
 
+# format and mount disks
+VOLUME_COUNT=$(echo $METADATA_RESULT | jq "$INSTANCE_SELECTOR" | jq '.[].volumeCount' | sed s/\"//g)
+START_LABEL=65
+for (( i=1; i<=VOLUME_COUNT; i++ )); do
+  LABEL=$(printf "\x$((START_LABEL+i))")
+  mkfs -t ext4 /dev/xvd${LABEL}
+  mkdir /mnt/fs${i}
+  mount /dev/xvd${LABEL} /mnt/fs${i}
+  DOCKER_VOLUME_PARAMS="${DOCKER_VOLUME_PARAMS} -v /mnt/fs${i}:/mnt/fs${i}"
+done
+
 # select the docker subnet of the current instance
 DOCKER_SUBNET=$(echo $METADATA_RESULT | jq "$INSTANCE_SELECTOR" | jq '.[].dockerSubnet' | sed s/\"//g)
 
@@ -65,7 +76,7 @@ AMBARI_SERVER=$(echo $METADATA_RESULT | jq "$INSTANCE_SELECTOR" | jq '.[].ambari
 
 INSTANCE_IDX=$(echo $METADATA_RESULT | jq "$INSTANCE_SELECTOR" | jq '.[].instanceIndex' | sed s/\"//g)
 
-CMD="docker run -d -p 8080:8080 -p 8088:8088 -p 8050:8050 -p 8020:8020 -p 10020:10020 -p 19888:19888 -e SERF_JOIN_IP=$SERF_JOIN_IP --dns 127.0.0.1 --name ${NODE_PREFIX}${INSTANCE_IDX} -h ${NODE_PREFIX}${INSTANCE_IDX}.${MYDOMAIN} --entrypoint /usr/local/serf/bin/start-serf-agent.sh  $IMAGE $AMBARI_ROLE"
+CMD="docker run -d $DOCKER_VOLUME_PARAMS -p 8080:8080 -p 8088:8088 -p 8050:8050 -p 8020:8020 -p 10020:10020 -p 19888:19888 -e SERF_JOIN_IP=$SERF_JOIN_IP --dns 127.0.0.1 --name ${NODE_PREFIX}${INSTANCE_IDX} -h ${NODE_PREFIX}${INSTANCE_IDX}.${MYDOMAIN} --entrypoint /usr/local/serf/bin/start-serf-agent.sh  $IMAGE $AMBARI_ROLE"
 
 cat << EOF
 =========================================
