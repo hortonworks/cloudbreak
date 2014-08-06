@@ -87,7 +87,7 @@ public class BlueprintServiceTest {
         given(blueprintRepository.save(blueprint)).willReturn(blueprint);
         doNothing().when(websocketService).sendToTopicUser(anyString(), any(WebsocketEndPoint.class), any(StatusMessage.class));
         //WHEN
-        Blueprint result = underTest.addBlueprint(user, blueprintJson);
+        Blueprint result = underTest.addBlueprint(user, blueprint);
         //THEN
         verify(websocketService, times(1)).sendToTopicUser(anyString(), any(WebsocketEndPoint.class), any(StatusMessage.class));
         Assert.assertEquals(result.getId(), (Long) 1L);
@@ -135,17 +135,6 @@ public class BlueprintServiceTest {
         given(clusterRepository.findAllClusterByBlueprint(anyLong())).willReturn(clusters);
         // WHEN
         underTest.delete(1L);
-    }
-
-    @Test
-    public void testGetBlueprint() {
-        // GIVEN
-        given(blueprintRepository.findOne(anyLong())).willReturn(blueprint);
-        given(blueprintConverter.convert(blueprint)).willReturn(blueprintJson);
-        // WHEN
-        underTest.get(1L);
-        // THEN
-        verify(blueprintConverter, times(1)).convert(blueprint);
     }
 
     @Test(expected = NotFoundException.class)

@@ -10,8 +10,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.controller.json.BlueprintJson;
-import com.sequenceiq.cloudbreak.converter.BlueprintConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.User;
@@ -36,9 +34,6 @@ public class DefaultBlueprintService implements BlueprintService {
     private ClusterRepository clusterRepository;
 
     @Autowired
-    private BlueprintConverter blueprintConverter;
-
-    @Autowired
     private WebsocketService websocketService;
 
     @Autowired
@@ -48,8 +43,7 @@ public class DefaultBlueprintService implements BlueprintService {
     private CompanyService companyService;
 
     @Override
-    public Blueprint addBlueprint(User user, BlueprintJson blueprintJson) {
-        Blueprint blueprint = blueprintConverter.convert(blueprintJson);
+    public Blueprint addBlueprint(User user, Blueprint blueprint) {
         blueprint.setUser(user);
         if (blueprint.getUserRoles().isEmpty()) {
             blueprint.getUserRoles().addAll(user.getUserRoles());
@@ -102,12 +96,12 @@ public class DefaultBlueprintService implements BlueprintService {
     }
 
     @Override
-    public BlueprintJson get(Long id) {
+    public Blueprint get(Long id) {
         Blueprint blueprint = blueprintRepository.findOne(id);
         if (blueprint == null) {
             throw new NotFoundException(String.format("Blueprint '%s' not found.", id));
         }
-        return blueprintConverter.convert(blueprint);
+        return blueprint;
     }
 
     @Override

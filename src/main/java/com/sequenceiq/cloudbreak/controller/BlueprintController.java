@@ -45,7 +45,7 @@ public class BlueprintController {
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<IdJson> addBlueprint(@CurrentUser User user, @RequestBody @Valid BlueprintJson blueprintRequest) {
-        Blueprint blueprint = blueprintService.addBlueprint(user, blueprintRequest);
+        Blueprint blueprint = blueprintService.addBlueprint(user, blueprintConverter.convert(blueprintRequest));
         return new ResponseEntity<>(new IdJson(blueprint.getId()), HttpStatus.CREATED);
     }
 
@@ -64,7 +64,8 @@ public class BlueprintController {
     @RequestMapping(method = RequestMethod.GET, value = "{id}")
     @ResponseBody
     public ResponseEntity<BlueprintJson> retrieveBlueprint(@CurrentUser User user, @PathVariable Long id) {
-        return new ResponseEntity<>(blueprintService.get(id), HttpStatus.OK);
+        Blueprint blueprint = blueprintService.get(id);
+        return new ResponseEntity<>(blueprintConverter.convert(blueprint), HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.DELETE, value = "{id}")
