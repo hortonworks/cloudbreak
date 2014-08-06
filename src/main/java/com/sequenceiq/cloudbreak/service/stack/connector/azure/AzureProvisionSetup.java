@@ -50,7 +50,6 @@ public class AzureProvisionSetup implements ProvisionSetup {
     private static final int MILLIS = 5000;
     private static final String PENDING = "pending";
     private static final String SUCCESS = "success";
-    private static final String THE_SPECIFIED_CONTAINER_ALREADY_EXISTS = "The specified container already exists.";
     private static final int ONE_HUNDRED = 100;
 
     @Value("${cb.azure.image.uri}")

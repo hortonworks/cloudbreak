@@ -62,7 +62,6 @@ public class AzureProvisioner implements Provisioner {
     private static final String IMAGESTOREURI = "imageStoreUri";
     private static final String HOSTNAME = "hostname";
     private static final String USERNAME = "username";
-    private static final String PASSWORD = "password";
     private static final String SUBNETNAME = "subnetName";
     private static final String CUSTOMDATA = "customData";
     private static final String VIRTUALNETWORKNAME = "virtualNetworkName";
