@@ -730,7 +730,10 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                         sshLocation: aws_tsshLocation.value,
                         region: aws_tregion.value,
                         instanceType: aws_tinstanceType.value,
-                        amiId: getAmi(aws_tregion.value)
+                        amiId: getAmi(aws_tregion.value),
+                        volumeCount: parseInt(aws_tvolumecount.value),
+                        volumeSize: parseInt(aws_tvolumesize.value),
+                        volumeType: aws_tvolumetype.value
                     }
                 }
             }).success(function (data, status, headers, config) {

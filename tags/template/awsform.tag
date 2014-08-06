@@ -72,6 +72,48 @@
 
     </div>
 
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="aws_tvolumecount">Attached volumes per instance</label>
+
+        <div class="col-sm-9">
+            <input type="number" name="aws_tvolumecount" class="form-control" ng-model="aws_tvolumecount" id="aws_tvolumecount" min="0"
+                   max="10" required>
+
+            <div class="help-block"
+                 ng-show="awsTemplateForm.aws_tvolumecount.$dirty && awsTemplateForm.aws_tvolumecount.$invalid"><i class="fa fa-warning"></i>
+                {{error_msg.volume_count_invalid}}
+            </div>
+        <!-- .col-sm-9 -->
+      </div>
+    </div>
+
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="aws_tvolumesize">Size of volumes (GB)</label>
+
+        <div class="col-sm-9">
+            <input type="number" name="aws_tvolumesize" class="form-control" ng-model="aws_tvolumesize" id="aws_tvolumesize" min="10"
+                   max="1000" required>
+
+            <div class="help-block"
+                 ng-show="awsTemplateForm.aws_tvolumesize.$dirty && awsTemplateForm.aws_tvolumesize.$invalid"><i class="fa fa-warning"></i>
+                {{error_msg.volume_size_invalid}}
+            </div>
+        <!-- .col-sm-9 -->
+      </div>
+    </div>
+
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="aws_tvolumetype">Instance type</label>
+
+        <div class="col-sm-9">
+            <select class="form-control" id="aws_tvolumetype">
+                <option value="Gp2">SSD</option>
+                <option value="Standard">standard</option>
+            </select>
+        </div>
+        <!-- .col-sm-9 -->
+      </div>
+    </div>
 
     <div class="row btn-row">
         <div class="col-sm-9 col-sm-offset-3">
