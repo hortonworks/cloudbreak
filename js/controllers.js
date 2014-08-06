@@ -824,6 +824,10 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     $scope.getStacks();
                     logStackInfo(JSON.parse(stackInfo.body));
                 });
+                stompClient.subscribe('/user/topic/teminate', function(stackInfo){
+                    $scope.getStacks();
+                    logStackInfo(JSON.parse(stackInfo.body));
+                });
                 stompClient.subscribe('/user/topic/cluster',  function(clusterInfo){
                     $scope.getStacks();
                     logClusterInfo(JSON.parse(clusterInfo.body));
