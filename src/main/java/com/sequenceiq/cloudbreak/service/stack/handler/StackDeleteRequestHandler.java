@@ -44,7 +44,7 @@ public class StackDeleteRequestHandler implements Consumer<Event<StackDeleteRequ
         try {
             cloudPlatformConnectors.get(data.getCloudPlatform()).deleteStack(oneWithLists.getUser(), oneWithLists, oneWithLists.getCredential());
         } catch (Exception ex) {
-            LOGGER.error("Stack delete failed on {} stack: " , oneWithLists.getId(), ex);
+            LOGGER.error(String.format("Stack delete failed on {} stack: " , oneWithLists.getId()), ex);
             retryingStackUpdater.updateStackStatus(data.getStackId(), Status.DELETE_FAILED);
         }
 
