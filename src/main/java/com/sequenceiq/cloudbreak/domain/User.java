@@ -92,7 +92,7 @@ public class User implements ProvisionEntity {
 
     @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
-    private List<UserRole> userRole = new ArrayList<>();
+    private List<UserRole> userRoles = new ArrayList<>();
 
     @ManyToOne
     private Company company;
@@ -119,7 +119,7 @@ public class User implements ProvisionEntity {
         this.lastLogin = user.lastLogin;
         this.registrationDate = user.registrationDate;
         this.company = user.company;
-        this.userRole = user.userRole;
+        this.userRoles = user.userRoles;
     }
 
     public String getPassword() {
@@ -255,12 +255,12 @@ public class User implements ProvisionEntity {
         this.registrationDate = registrationDate;
     }
 
-    public List<UserRole> getUserRole() {
-        return userRole;
+    public List<UserRole> getUserRoles() {
+        return userRoles;
     }
 
-    public void setUserRole(List<UserRole> userRole) {
-        this.userRole = userRole;
+    public void setUserRoles(List<UserRole> userRoles) {
+        this.userRoles = userRoles;
     }
 
     public Company getCompany() {

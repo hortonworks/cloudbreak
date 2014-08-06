@@ -109,7 +109,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
                             "The copy of the os image was not success")));
                 }
             }
-           
+
             try {
                 String targetBlobContainerUri = "http://" + affinityGroupName + ".blob.core.windows.net/vm-images";
                 String targetImageUri = targetBlobContainerUri + '/' + storageName + ".vhd";

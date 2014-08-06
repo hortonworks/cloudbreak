@@ -16,5 +16,4 @@ public interface CompanyRepository extends CrudRepository<Company, Long> {
 
     User findCompanyAdmin(@Param("companyId") Long companyId);
 
-    //User resourcesForRole(@Param("adminId") Long adminId, @Param("role") UserRole role);
 }

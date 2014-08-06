@@ -41,7 +41,7 @@ public class UserRepositoryUserDetailsService implements UserDetailsService {
 
         private UserRepositoryUserDetails(User user) {
             super(user);
-            for (UserRole role : getUserRole()) {
+            for (UserRole role : getUserRoles()) {
                 authorities.add(new SimpleGrantedAuthority(role.role()));
             }
         }

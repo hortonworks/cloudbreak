@@ -20,11 +20,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sequenceiq.cloudbreak.controller.json.BlueprintJson;
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
+import com.sequenceiq.cloudbreak.converter.BlueprintConverter;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.User;
-import com.sequenceiq.cloudbreak.domain.UserRole;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
 import com.sequenceiq.cloudbreak.security.CurrentUser;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.blueprint.DefaultBlueprintService;
 
 @Controller
 @RequestMapping("blueprints")
@@ -33,10 +34,13 @@ public class BlueprintController {
     private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintController.class);
 
     @Autowired
-    private BlueprintService blueprintService;
+    private DefaultBlueprintService blueprintService;
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private BlueprintConverter blueprintConverter;
 
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
@@ -49,17 +53,12 @@ public class BlueprintController {
     @ResponseBody
     public ResponseEntity<Set<BlueprintJson>> retrieveBlueprints(@CurrentUser User user, HttpServletRequest request) {
 
-        Set<BlueprintJson> blueprints = new HashSet<>();
+        Set<Blueprint> blueprints = new HashSet<>();
         User loadedUser = userRepository.findOneWithLists(user.getId());
 
-        if (request.isUserInRole(UserRole.COMPANY_ADMIN.role())) {
-            LOGGER.info("Retrieving blueprints for company administrator: {}", user.getId());
-            blueprints = blueprintService.getAllForAdmin(loadedUser);
-        } else {
-            LOGGER.info("Retrieving blueprints for user: {}", user.getId());
-            blueprints = blueprintService.getAll(loadedUser);
-        }
-        return new ResponseEntity<>(blueprints, HttpStatus.OK);
+        blueprints = blueprintService.getAll(loadedUser);
+
+        return new ResponseEntity<>(blueprintConverter.convertAllEntityToJson(blueprints), HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "{id}")

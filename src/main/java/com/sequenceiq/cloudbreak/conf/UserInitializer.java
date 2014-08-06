@@ -65,7 +65,7 @@ public class UserInitializer implements InitializingBean {
             user2.setPassword(passwordEncoder.encode("test123"));
             user2.setStatus(UserStatus.ACTIVE);
             user2.setCompany(company);
-            user2.getUserRole().add(UserRole.COMPANY_ADMIN);
+            user2.getUserRoles().add(UserRole.COMPANY_ADMIN);
 
             AwsCredential awsCredential = new AwsCredential();
             awsCredential.setRoleArn("arn:aws:iam::755047402263:role/seq-self-cf");

@@ -71,12 +71,12 @@ public class UserConverter extends AbstractConverter<UserJson, User> {
             case COMPANY_USER:
                 break;
             case COMPANY_ADMIN:
-                user.getUserRole().add(UserRole.COMPANY_ADMIN);
+                user.getUserRoles().add(UserRole.COMPANY_ADMIN);
                 break;
             default:
                 throw new BadRequestException("Unsupported user type.");
         }
-        user.getUserRole().add(UserRole.COMPANY_USER);
+        user.getUserRoles().add(UserRole.COMPANY_USER);
         return user;
     }
 }
