@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
-import static java.util.Collections.singletonMap;
+import groovyx.net.http.HttpResponseException;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -8,10 +8,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import reactor.core.Reactor;
+import reactor.event.Event;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.ambari.client.AmbariClient;
@@ -24,10 +29,7 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
-
-import groovyx.net.http.HttpResponseException;
-import reactor.core.Reactor;
-import reactor.event.Event;
+import com.sequenceiq.cloudbreak.service.stack.connector.HadoopConfigurationProvider;
 
 @Service
 public class AmbariClusterInstaller {
@@ -49,6 +51,9 @@ public class AmbariClusterInstaller {
 
     @Autowired
     private Reactor reactor;
+
+    @Resource
+    private Map<CloudPlatform, HadoopConfigurationProvider> hadoopConfigurationProviders;
 
     public void installAmbariCluster(Stack stack) {
         Cluster cluster = stack.getCluster();
@@ -107,11 +112,7 @@ public class AmbariClusterInstaller {
         String ambariIp = stack.getAmbariIp();
         AmbariClient ambariClient = createAmbariClient(ambariIp);
         try {
-            Map<String, Map<String, String>> extendConfig = new HashMap<>();
-            if (CloudPlatform.AZURE.equals(stack.getTemplate().cloudPlatform())) {
-                extendConfig = getAzureHadoopConfig();
-            }
-            ambariClient.addBlueprint(blueprint.getBlueprintText(), extendConfig);
+            ambariClient.addBlueprint(blueprint.getBlueprintText(), getExtendConfig(stack));
             LOGGER.info("Blueprint added [Ambari server: {}, blueprint: '{}']", ambariIp, blueprint.getId());
         } catch (HttpResponseException e) {
             if ("Conflict".equals(e.getMessage())) {
@@ -124,12 +125,12 @@ public class AmbariClusterInstaller {
         }
     }
 
-    private Map<String, Map<String, String>> getAzureHadoopConfig() {
-        Map<String, String> yarnConfig = new HashMap<>();
-        for (HadoopConfiguration.HadoopProperty property : HadoopConfiguration.YARN_SITE.getProperties()) {
-            yarnConfig.put(property.getKey(), property.getValue());
-        }
-        return singletonMap(HadoopConfiguration.YARN_SITE.getKey(), yarnConfig);
+    private Map<String, Map<String, String>> getExtendConfig(Stack stack) {
+        Map<String, Map<String, String>> extendConfig = new HashMap<>();
+        HadoopConfigurationProvider hadoopConfigurationProvider = hadoopConfigurationProviders.get(stack.getTemplate().cloudPlatform());
+        extendConfig.put(HadoopConfiguration.YARN_SITE.getKey(), hadoopConfigurationProvider.getYarnSiteConfigs(stack));
+        extendConfig.put(HadoopConfiguration.HDFS_SITE.getKey(), hadoopConfigurationProvider.getHdfsSiteConfigs(stack));
+        return extendConfig;
     }
 
     private void clusterCreateSuccess(Cluster cluster, long creationFinished) {

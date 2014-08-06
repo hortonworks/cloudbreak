@@ -207,7 +207,7 @@
 			<#list seq as x>
 			<#if x_index = volumeCount><#break></#if>
   		  ,{
-          	"DeviceName" : "/dev/sd${x}",
+          	"DeviceName" : "/dev/xvd${x}",
           	"Ebs" : {
            	  "VolumeSize" : { "Ref" : "VolumeSize" },
            	  "VolumeType" : { "Ref" : "VolumeType" }

@@ -58,6 +58,19 @@ public class AwsConnectorTestUtil extends ConnectorTestUtil {
         return awsTemplate;
     }
 
+    public static AwsTemplate createAwsTemplateWithZeroVolumes(User user) {
+        AwsTemplate awsTemplate = new AwsTemplate();
+        awsTemplate.setId(DEFAULT_ID);
+        awsTemplate.setUser(user);
+        awsTemplate.setRegion(Regions.DEFAULT_REGION);
+        awsTemplate.setInstanceType(InstanceType.C1Medium);
+        awsTemplate.setSshLocation(SSH_LOCATION);
+        awsTemplate.setVolumeCount(0);
+        awsTemplate.setVolumeSize(60);
+        awsTemplate.setVolumeType(VolumeType.Gp2);
+        return awsTemplate;
+    }
+
     public static SnsTopic createSnsTopic(Credential credential) {
         SnsTopic snsTopic = new SnsTopic();
         snsTopic.setId(DEFAULT_ID);
