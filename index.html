@@ -116,7 +116,7 @@
 <div class="row" id="clusters-bar" data-spy="affix" data-offset-top="52"><!-- data-offset-top = @navbar-height -->
 
     <!-- collapse/open button and notification -->
-    <div class="col-sm-7 col-xs-8 combo-box">
+    <div class="col-sm-7 col-xs-8 combo-box {{statusclass}}">
         <!-- OPTIONAL HTML:
                             class: 'has-feedback' 'has-error' - cluster stopping or stopped because of error not by stop button (v.02?)
                             -->
@@ -128,7 +128,7 @@
             <input id="notification-n-filtering" role="alert" type="text" disabled class="form-control" placeholder=""
                    value="{{statusMessage}}">
             <!-- OPTIONAL HTML: value: 'time' 'cluster name' 'state' - after cluster state changed  -->
-            <i class="fa fa-warning form-control-feedback hidden"></i>
+            <i class="fa fa-warning form-control-feedback"></i>
         </div>
         <!-- .input-group -->
     </div>
