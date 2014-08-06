@@ -13,6 +13,7 @@ public class InstanceMetaData implements ProvisionEntity {
     private Long id;
     private String privateIp;
     private String publicIp;
+    private Integer volumeCount;
     private String instanceId;
     private int instanceIndex;
     private Boolean ambariServer;
@@ -38,6 +39,14 @@ public class InstanceMetaData implements ProvisionEntity {
 
     public void setPublicIp(String publicIp) {
         this.publicIp = publicIp;
+    }
+
+    public Integer getVolumeCount() {
+        return volumeCount;
+    }
+
+    public void setVolumeCount(Integer volumeCount) {
+        this.volumeCount = volumeCount;
     }
 
     public Long getId() {
