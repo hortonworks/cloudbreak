@@ -86,7 +86,6 @@ public class AzureProvisioner implements Provisioner {
     @Override
     public void buildStack(Stack stack, String userData, Map<String, Object> setupProperties) {
         AzureTemplate azureTemplate = (AzureTemplate) stack.getTemplate();
-        retryingStackUpdater.updateStackStatus(stack.getId(), Status.REQUESTED);
         Credential credential = (Credential) setupProperties.get(CREDENTIAL);
         String emailAsFolder = (String) setupProperties.get(EMAILASFOLDER);
 
@@ -134,11 +133,8 @@ public class AzureProvisioner implements Provisioner {
                 return;
             }
         }
-
-        Stack updatedStack = retryingStackUpdater.updateStackCreateComplete(stack.getId());
-        updatedStack = retryingStackUpdater.updateStackResources(stack.getId(), resourceSet);
-        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_COMPLETE_EVENT, updatedStack.getId());
-        reactor.notify(ReactorConfig.PROVISION_COMPLETE_EVENT, Event.wrap(new ProvisionComplete(CloudPlatform.AZURE, updatedStack.getId(), resourceSet)));
+        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_COMPLETE_EVENT, stack.getId());
+        reactor.notify(ReactorConfig.PROVISION_COMPLETE_EVENT, Event.wrap(new ProvisionComplete(CloudPlatform.AZURE, stack.getId(), resourceSet)));
     }
 
     @Override

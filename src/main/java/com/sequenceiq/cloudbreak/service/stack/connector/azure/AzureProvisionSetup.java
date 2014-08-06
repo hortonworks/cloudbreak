@@ -67,7 +67,6 @@ public class AzureProvisionSetup implements ProvisionSetup {
 
     @Override
     public void setupProvisioning(Stack stack) {
-        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT, stack.getId());
         Credential credential = stack.getCredential();
         String emailAsFolder = stack.getUser().emailAsFolder();
 
@@ -121,6 +120,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
             }
         }
 
+        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT, stack.getId());
         reactor.notify(ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT,
                 Event.wrap(new ProvisionSetupComplete(getCloudPlatform(), stack.getId())
                                 .withSetupProperty(CREDENTIAL, stack.getCredential())
