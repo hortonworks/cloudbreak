@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
 import com.sequenceiq.cloudbreak.security.CurrentUser;
-import com.sequenceiq.cloudbreak.service.blueprint.DefaultBlueprintService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 
 @Controller
 @RequestMapping("blueprints")
@@ -34,7 +34,7 @@ public class BlueprintController {
     private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintController.class);
 
     @Autowired
-    private DefaultBlueprintService blueprintService;
+    private BlueprintService blueprintService;
 
     @Autowired
     private UserRepository userRepository;
