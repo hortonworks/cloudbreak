@@ -5,6 +5,7 @@ public class InstanceMetaDataJson implements JsonEntity {
     private String privateIp;
     private String publicIp;
     private String instanceId;
+    private Integer volumeCount;
     private int instanceIndex;
     private Boolean ambariServer;
     private String dockerSubnet;
@@ -35,6 +36,14 @@ public class InstanceMetaDataJson implements JsonEntity {
 
     public void setInstanceId(String instanceId) {
         this.instanceId = instanceId;
+    }
+
+    public Integer getVolumeCount() {
+        return volumeCount;
+    }
+
+    public void setVolumeCount(Integer volumeCount) {
+        this.volumeCount = volumeCount;
     }
 
     public int getInstanceIndex() {
