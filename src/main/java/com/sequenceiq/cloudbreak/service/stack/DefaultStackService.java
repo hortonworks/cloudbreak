@@ -15,16 +15,14 @@ import org.springframework.util.DigestUtils;
 
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.controller.json.IdJson;
-import com.sequenceiq.cloudbreak.controller.json.InstanceMetaDataJson;
-import com.sequenceiq.cloudbreak.controller.json.StackJson;
-import com.sequenceiq.cloudbreak.converter.MetaDataConverter;
 import com.sequenceiq.cloudbreak.converter.StackConverter;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackDescription;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.domain.UserRole;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
@@ -38,15 +36,12 @@ import reactor.core.Reactor;
 import reactor.event.Event;
 
 @Service
-public class SimpleStackService implements StackService {
+public class DefaultStackService implements StackService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleStackService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultStackService.class);
 
     @Autowired
     private StackConverter stackConverter;
-
-    @Autowired
-    private MetaDataConverter metaDataConverter;
 
     @Autowired
     private StackRepository stackRepository;
@@ -67,52 +62,70 @@ public class SimpleStackService implements StackService {
     private Reactor reactor;
 
     @Override
-    public Set<StackJson> getAll(User user) {
-        Set<StackJson> result = new HashSet<>();
-        for (Stack stack : user.getStacks()) {
+    public Set<Stack> getAll(User user) {
+        Set<Stack> legacyStacks = new HashSet<>();
+        Set<Stack> terminatedStacks = new HashSet<>();
+        Set<Stack> userStacks = user.getStacks();
+        LOGGER.debug("User stacks: #{}", userStacks.size());
+
+        if (user.getUserRoles().contains(UserRole.COMPANY_ADMIN)) {
+            LOGGER.debug("Getting company user stacks for company admin; id: [{}]", user.getId());
+            legacyStacks = getCompanyUserStacks(user);
+        } else {
+            LOGGER.debug("Getting company wide stacks for company user; id: [{}]", user.getId());
+            legacyStacks = getCompanyStacks(user);
+        }
+        LOGGER.debug("Found #{} legacy stacks for user [{}]", legacyStacks.size(), user.getId());
+        userStacks.addAll(legacyStacks);
+        legacyStacks.clear();
+        for (Stack stack : userStacks) {
             if (Boolean.FALSE.equals(stack.getTerminated())) {
-                result.add(stackConverter.convert(stack));
+                terminatedStacks.add(stack);
             }
         }
-        return result;
+        return terminatedStacks;
     }
 
-    @Override
-    public Set<StackJson> getAllForAdmin(User user) {
-        Set<StackJson> result = new HashSet<>();
-        Set<User> decoratedUsers = companyService.companyUsers(user.getCompany().getId());
-        for (User cUser : decoratedUsers) {
-            result.addAll(getAll(cUser));
+    private Set<Stack> getCompanyStacks(User user) {
+        Set<Stack> companyStacks = new HashSet<>();
+        User adminWithFilteredData = companyService.companyUserData(user.getCompany().getId(), user.getUserRoles().iterator().next());
+        if (adminWithFilteredData != null) {
+            companyStacks = adminWithFilteredData.getStacks();
+        } else {
+            LOGGER.debug("There's no company admin for user: [{}]", user.getId());
         }
-        return result;
+        return companyStacks;
+    }
+
+    private Set<Stack> getCompanyUserStacks(User user) {
+        Set<Stack> companyUserStacks = new HashSet<>();
+        Set<User> companyUsers = companyService.companyUsers(user.getCompany().getId());
+        companyUsers.remove(user);
+        for (User cUser : companyUsers) {
+            LOGGER.debug("Adding blueprints of company user: [{}]", cUser.getId());
+            companyUserStacks.addAll(cUser.getStacks());
+        }
+        return companyUserStacks;
     }
 
     @Override
-    public StackJson get(User user, Long id) {
+    public Stack get(User user, Long id) {
         Stack stack = stackRepository.findOne(id);
         if (stack == null || Boolean.TRUE.equals(stack.getTerminated())) {
             throw new NotFoundException(String.format("Stack '%s' not found", id));
         }
-        CloudPlatform cp = stack.getTemplate().cloudPlatform();
-        StackDescription description = cloudPlatformConnectors.get(cp).describeStackWithResources(user, stack, stack.getCredential());
-        return stackConverter.convert(stack, description);
+        return stack;
     }
 
     @Override
-    public IdJson create(User user, StackJson stackRequest) {
-        LOGGER.info("Stack creation requested. [CredentialId: {}, Name: {}, Node count: {}, TemplateId: {}]",
-                stackRequest.getCredentialId(),
-                stackRequest.getName(),
-                stackRequest.getNodeCount(),
-                stackRequest.getTemplateId());
-        Stack stack = stackConverter.convert(stackRequest);
-        Template template = templateRepository.findOne(stackRequest.getTemplateId());
+    public Stack create(User user, Stack stack) {
+        Template template = templateRepository.findOne(stack.getTemplate().getId());
         stack.setUser(user);
         stack.setHash(generateHash(stack));
         stack = stackRepository.save(stack);
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_REQUEST_EVENT, stack.getId());
         reactor.notify(ReactorConfig.PROVISION_REQUEST_EVENT, Event.wrap(new ProvisionRequest(template.cloudPlatform(), stack.getId())));
-        return new IdJson(stack.getId());
+        return stack;
     }
 
     @Override
@@ -137,13 +150,22 @@ public class SimpleStackService implements StackService {
     }
 
     @Override
-    public Set<InstanceMetaDataJson> getMetaData(User one, String hash) {
+    public StackDescription getStackDescription(User user, Stack stack) {
+        CloudPlatform cp = stack.getTemplate().cloudPlatform();
+        LOGGER.debug("Getting stack description for cloud platform: {} ...", cp);
+        StackDescription description = cloudPlatformConnectors.get(cp).describeStackWithResources(user, stack, stack.getCredential());
+        LOGGER.debug("Found stack description {}", description.getClass());
+        return description;
+    }
+
+    @Override
+    public Set<InstanceMetaData> getMetaData(User one, String hash) {
         Stack stack = stackRepository.findStackByHash(hash);
         if (stack != null) {
             if (!stack.isMetadataReady()) {
                 throw new MetadataIncompleteException("Instance metadata is incomplete.");
             } else if (!stack.getInstanceMetaData().isEmpty()) {
-                return metaDataConverter.convertAllEntityToJson(stack.getInstanceMetaData());
+                return stack.getInstanceMetaData();
             }
         }
         throw new NotFoundException("Metadata not found on stack.");
@@ -153,5 +175,4 @@ public class SimpleStackService implements StackService {
         int hashCode = HashCodeBuilder.reflectionHashCode(stack);
         return DigestUtils.md5DigestAsHex(String.valueOf(hashCode).getBytes());
     }
-
 }

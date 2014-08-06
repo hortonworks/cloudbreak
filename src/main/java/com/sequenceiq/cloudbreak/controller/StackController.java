@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
@@ -21,8 +20,12 @@ import com.sequenceiq.cloudbreak.controller.json.InstanceMetaDataJson;
 import com.sequenceiq.cloudbreak.controller.json.StackJson;
 import com.sequenceiq.cloudbreak.controller.json.StatusRequestJson;
 import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
+import com.sequenceiq.cloudbreak.converter.MetaDataConverter;
+import com.sequenceiq.cloudbreak.converter.StackConverter;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.StackDescription;
 import com.sequenceiq.cloudbreak.domain.User;
-import com.sequenceiq.cloudbreak.domain.UserRole;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
 import com.sequenceiq.cloudbreak.security.CurrentUser;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -38,29 +41,39 @@ public class StackController {
     @Autowired
     private StackService stackService;
 
+    @Autowired
+    private StackConverter stackConverter;
+
+    @Autowired
+    private MetaDataConverter metaDataConverter;
+
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<IdJson> createStack(@CurrentUser User user, @RequestBody @Valid StackJson stackRequest) {
-        return new ResponseEntity<>(stackService.create(userRepository.findOneWithLists(user.getId()), stackRequest), HttpStatus.CREATED);
+        User loadedUser = userRepository.findOneWithLists(user.getId());
+        Stack stack = stackConverter.convert(stackRequest);
+        if (stack.getUserRoles().isEmpty()) {
+            stack.getUserRoles().addAll(loadedUser.getUserRoles());
+        }
+        stack = stackService.create(loadedUser, stack);
+        return new ResponseEntity<>(new IdJson(stack.getId()), HttpStatus.CREATED);
     }
 
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<Set<StackJson>> getAllStack(@CurrentUser User user, HttpServletRequest request) {
+    public ResponseEntity<Set<StackJson>> getAllStacks(@CurrentUser User user, HttpServletRequest request) {
         User currentUser = userRepository.findOneWithLists(user.getId());
-        Set<StackJson> stacks = new HashSet<>();
-        if (request.isUserInRole(UserRole.COMPANY_ADMIN.role())) {
-            stacks = stackService.getAllForAdmin(currentUser);
-        } else {
-            stacks = stackService.getAll(currentUser);
-        }
-        return new ResponseEntity<>(stacks, HttpStatus.OK);
+        Set<Stack> stacks = stackService.getAll(currentUser);
+        Set<StackJson> stackJsons = stackConverter.convertAllEntityToJson(stacks);
+        return new ResponseEntity<>(stackJsons, HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "{stackId}")
     @ResponseBody
     public ResponseEntity<StackJson> getStack(@CurrentUser User user, @PathVariable Long stackId) {
-        StackJson stackJson = stackService.get(userRepository.findOne(user.getId()), stackId);
+        Stack stack = stackService.get(user, stackId);
+        StackDescription stackDescription = stackService.getStackDescription(user, stack);
+        StackJson stackJson = stackConverter.convert(stack, stackDescription);
         return new ResponseEntity<>(stackJson, HttpStatus.OK);
     }
 
@@ -88,8 +101,8 @@ public class StackController {
     @ResponseBody
     public ResponseEntity<Set<InstanceMetaDataJson>> getStackMetadata(@CurrentUser User user, @PathVariable String hash) {
         try {
-            Set<InstanceMetaDataJson> metaData = stackService.getMetaData(user, hash);
-            return new ResponseEntity<>(metaData, HttpStatus.OK);
+            Set<InstanceMetaData> metaData = stackService.getMetaData(user, hash);
+            return new ResponseEntity<>(metaDataConverter.convertAllEntityToJson(metaData), HttpStatus.OK);
         } catch (MetadataIncompleteException e) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }

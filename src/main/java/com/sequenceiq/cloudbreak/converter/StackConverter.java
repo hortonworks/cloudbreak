@@ -89,8 +89,8 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
             throw new AccessDeniedException(String.format("Access to template '%s' is denied or template doesn't exist.", json.getTemplateId()), e);
         }
         stack.setStatus(Status.REQUESTED);
+        stack.getUserRoles().addAll(json.getRoles());
         return stack;
-
     }
 
     public Set<StackJson> convertAllEntityToJsonWithClause(Collection<Stack> entityList) {
