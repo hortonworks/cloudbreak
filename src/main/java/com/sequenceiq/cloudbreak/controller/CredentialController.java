@@ -58,6 +58,9 @@ public class CredentialController {
     @ResponseBody
     public ResponseEntity<IdJson> saveCredential(@CurrentUser User user, @Valid @RequestBody CredentialJson credentialRequest) throws Exception {
         Credential credential = convert(credentialRequest);
+        if (credential.getUserRoles().isEmpty()) {
+            credential.getUserRoles().addAll(user.getUserRoles());
+        }
         credential = credentialService.save(user, credential);
         return new ResponseEntity<>(new IdJson(credential.getId()), HttpStatus.CREATED);
     }
@@ -70,7 +73,6 @@ public class CredentialController {
         Set<CredentialJson> credentialJsons = convertCredentials(credentials);
         return new ResponseEntity<>(credentialJsons, HttpStatus.OK);
     }
-
 
     @RequestMapping(method = RequestMethod.GET, value = "/{credentialId}")
     @ResponseBody
@@ -127,6 +129,7 @@ public class CredentialController {
             default:
                 throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", json.getCloudPlatform()));
         }
+        ret.getUserRoles().addAll(json.getUserRoles());
         return ret;
     }
 
