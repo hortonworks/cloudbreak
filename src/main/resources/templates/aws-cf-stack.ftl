@@ -21,6 +21,13 @@
       "MaxLength": "50"
     },
     
+    "StackOwner" : {
+      "Description" : "The instances will have this parameter as an Owner tag.",
+      "Type" : "String",
+      "MinLength": "1",
+      "MaxLength": "50"
+    },
+    
     "InstanceCount" : {
       "Description" : "Number of instances that should be started in the stack.",
       "Type" : "Number",
@@ -172,7 +179,8 @@
         "MinSize" : { "Ref" : "InstanceCount" },
         "MaxSize" : { "Ref" : "InstanceCount" },
         "DesiredCapacity" : { "Ref" : "InstanceCount" },
-        "Tags" : [ { "Key" : "Name", "Value" : { "Ref" : "StackName" }, "PropagateAtLaunch" : "true" } ]
+        "Tags" : [ { "Key" : "Name", "Value" : { "Ref" : "StackName" }, "PropagateAtLaunch" : "true" },
+        		   { "Key" : "owner", "Value" : { "Ref" : "StackOwner" }, "PropagateAtLaunch" : "true" } ]
       }
     },
 
