@@ -1,36 +1,29 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
-import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.conf.ReactorConfig;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.InternalServerException;
-import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.controller.json.ClusterRequest;
-import com.sequenceiq.cloudbreak.controller.json.ClusterResponse;
-import com.sequenceiq.cloudbreak.converter.ClusterConverter;
-import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.User;
-import com.sequenceiq.cloudbreak.repository.ClusterRepository;
-import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
-import groovyx.net.http.HttpResponseException;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doReturn;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
-import reactor.core.Reactor;
-import reactor.event.Event;
 
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.cloudbreak.controller.InternalServerException;
+import com.sequenceiq.cloudbreak.controller.json.ClusterRequest;
+import com.sequenceiq.cloudbreak.controller.json.ClusterResponse;
+import com.sequenceiq.cloudbreak.converter.ClusterConverter;
+import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.repository.ClusterRepository;
+import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
+
+import groovyx.net.http.HttpResponseException;
+import reactor.core.Reactor;
 
 public class AmbariClusterServiceTest {
 
@@ -80,71 +73,23 @@ public class AmbariClusterServiceTest {
         clusterResponse = new ClusterResponse();
     }
 
-    @Test
-    public void testCreateCluster() {
-        //GIVEN
-        stack.setCluster(null);
-        given(stackRepository.findOne(anyLong())).willReturn(stack);
-        given(clusterConverter.convert(clusterRequest)).willReturn(cluster);
-        given(stackUpdater.updateStackCluster(anyLong(), any(Cluster.class))).willReturn(stack);
-        //WHEN
-        underTest.createCluster(new User(), 1L, clusterRequest);
-        //THEN
-        verify(reactor, times(1)).notify(any(ReactorConfig.class), any(Event.class));
-        verify(stackUpdater, times(1)).updateStackCluster(anyLong(), any(Cluster.class));
-    }
-
-    @Test(expected = BadRequestException.class)
-    public void testCreateClusterWhenClusterAlreadyExists() {
-        //GIVEN
-        given(stackRepository.findOne(anyLong())).willReturn(stack);
-        //WHEN
-        underTest.createCluster(new User(), 1L, clusterRequest);
-    }
-
-    @Test
-    public void testRetrieveCluster() throws HttpResponseException {
-        //GIVEN
-        given(stackRepository.findOne(anyLong())).willReturn(stack);
-        doReturn(ambariClient).when(underTest).createAmbariClient(anyString());
-        given(ambariClient.getClusterAsJson()).willReturn(DUMMY_CLUSTER_JSON);
-        given(clusterConverter.convert(cluster, DUMMY_CLUSTER_JSON)).willReturn(clusterResponse);
-        //WHEN
-        underTest.retrieveCluster(new User(), 1L);
-        //THEN
-        verify(clusterConverter, times(1)).convert(cluster, DUMMY_CLUSTER_JSON);
-    }
-
     @Test(expected = InternalServerException.class)
-    public void testRetrieveClusterWhenClusterJsonIsNull() throws HttpResponseException {
+    public void testRetrieveClusterJsonWhenClusterJsonIsNull() throws HttpResponseException {
         //GIVEN
-        given(stackRepository.findOne(anyLong())).willReturn(stack);
         doReturn(ambariClient).when(underTest).createAmbariClient(anyString());
         given(ambariClient.getClusterAsJson()).willReturn(null);
         //WHEN
-        underTest.retrieveCluster(new User(), 1L);
-    }
-
-    @Test(expected = NotFoundException.class)
-    public void testRetrieveClusterThrowsHttpResponseNotFoundException() throws HttpResponseException {
-        //GIVEN
-        given(stackRepository.findOne(anyLong())).willReturn(stack);
-        doReturn(ambariClient).when(underTest).createAmbariClient(anyString());
-        given(ambariClient.getClusterAsJson()).willThrow(mockedException);
-        given(mockedException.getMessage()).willReturn(NOT_FOUND);
-        //WHEN
-        underTest.retrieveCluster(new User(), 1L);
+        underTest.getClusterJson("123.12.3.4", 1L);
     }
 
     @Test(expected = InternalServerException.class)
-    public void testRetrieveClusterThrowsHttpResponseException() throws HttpResponseException {
+    public void testRetrieveClusterJsonThrowsHttpResponseException() throws HttpResponseException {
         //GIVEN
-        given(stackRepository.findOne(anyLong())).willReturn(stack);
         doReturn(ambariClient).when(underTest).createAmbariClient(anyString());
         given(ambariClient.getClusterAsJson()).willThrow(mockedException);
         given(mockedException.getMessage()).willReturn(null);
         //WHEN
-        underTest.retrieveCluster(new User(), 1L);
+        underTest.getClusterJson("127.0.0.1", 1L);
     }
 
     private Stack createStack(Cluster cluster) {

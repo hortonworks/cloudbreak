@@ -13,7 +13,6 @@ import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Company;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.User;
@@ -82,21 +81,10 @@ public class DefaultCompanyService implements CompanyService {
         getAzureTemplatesForRole(decoratedAdmin, role);
         getSatcksForRole(decoratedAdmin, role);
         getBlueprintsForRole(decoratedAdmin, role);
-        getClustersForRole(decoratedAdmin, role);
 
         return decoratedAdmin;
     }
 
-    private void getClustersForRole(User decoratedAdmin, UserRole role) {
-        Set<Cluster> clustersInRole = new HashSet<>();
-        for (Cluster cluster : decoratedAdmin.getClusters()) {
-            if (cluster.getUserRoles().contains(role)) {
-                clustersInRole.add(cluster);
-            }
-        }
-        decoratedAdmin.getClusters().clear();
-        decoratedAdmin.getClusters().addAll(clustersInRole);
-    }
 
     private void getBlueprintsForRole(User decoratedAdmin, UserRole role) {
         Set<Blueprint> blueprintsInRole = new HashSet<>();

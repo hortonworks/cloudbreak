@@ -1,14 +1,7 @@
 package com.sequenceiq.cloudbreak.domain;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.persistence.Column;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -50,10 +43,6 @@ public class Cluster implements ProvisionEntity {
     private Long creationFinished;
 
     private String statusReason;
-
-    @ElementCollection(fetch = FetchType.EAGER)
-    @Enumerated(EnumType.STRING)
-    private List<UserRole> userRoles = new ArrayList<>();
 
     public String getDescription() {
         return description;
@@ -127,11 +116,4 @@ public class Cluster implements ProvisionEntity {
         this.statusReason = statusReason;
     }
 
-    public List<UserRole> getUserRoles() {
-        return userRoles;
-    }
-
-    public void setUserRoles(List<UserRole> userRoles) {
-        this.userRoles = userRoles;
-    }
 }
