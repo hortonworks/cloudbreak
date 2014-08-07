@@ -78,12 +78,13 @@ public class StackController {
 
     @RequestMapping(method = RequestMethod.GET, value = "/metadata/{hash}")
     @ResponseBody
-    public ResponseEntity<Set<InstanceMetaDataJson>> getStackMetadata(@CurrentUser User user, @PathVariable String hash) {
+    public ResponseEntity<Set<InstanceMetaDataJson>> getStackMetadata(@PathVariable String hash) {
         try {
-            Set<InstanceMetaDataJson> metaData = stackService.getMetaData(user, hash);
+            Set<InstanceMetaDataJson> metaData = stackService.getMetaData(hash);
             return new ResponseEntity<>(metaData, HttpStatus.OK);
         } catch (MetadataIncompleteException e) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
     }
+
 }

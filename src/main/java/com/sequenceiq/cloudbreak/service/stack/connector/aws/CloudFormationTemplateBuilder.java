@@ -20,9 +20,10 @@ public class CloudFormationTemplateBuilder {
     @Autowired
     private Configuration freemarkerConfiguration;
 
-    public String build(String templatePath, int volumeCount) {
+    public String build(String templatePath, int volumeCount, boolean spotPriced) {
         Map<String, Object> model = new HashMap<>();
         model.put("volumeCount", volumeCount);
+        model.put("useSpot", spotPriced);
         try {
             return FreeMarkerTemplateUtils.processTemplateIntoString(freemarkerConfiguration.getTemplate(templatePath, "UTF-8"), model);
         } catch (IOException | TemplateException e) {

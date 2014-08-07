@@ -21,5 +21,5 @@ public interface StackService {
 
     Boolean stopAll(User user, Long stackId);
 
-    Set<InstanceMetaDataJson> getMetaData(User one, String hash);
+    Set<InstanceMetaDataJson> getMetaData(String hash);
 }
