@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -10,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.controller.validation.ValidProvisionRequest;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.UserRole;
 
 @ValidProvisionRequest
 public class TemplateJson implements JsonEntity {
@@ -22,6 +25,8 @@ public class TemplateJson implements JsonEntity {
     private Map<String, Object> parameters = new HashMap<>();
     @Size(max = 50)
     private String description;
+
+    private Set<UserRole> userRoles = new HashSet();
 
     @JsonProperty("id")
     public Long getId() {
@@ -65,4 +70,11 @@ public class TemplateJson implements JsonEntity {
         this.parameters = parameters;
     }
 
+    public Set<UserRole> getUserRoles() {
+        return userRoles;
+    }
+
+    public void setUserRoles(Set<UserRole> userRoles) {
+        this.userRoles = userRoles;
+    }
 }

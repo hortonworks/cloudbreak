@@ -80,6 +80,9 @@ public class SimpleTemplateService implements TemplateService {
     public Template create(User user, Template template) {
         LOGGER.debug("Creating template for user: [{}]", user.getId());
         template.setUser(user);
+        if (template.getUserRoles().isEmpty()) {
+            template.getUserRoles().addAll(user.getUserRoles());
+        }
         template = templateRepository.save(template);
         return template;
     }

@@ -93,6 +93,7 @@ public class TemplateController {
             default:
                 throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", templateRequest.getCloudPlatform()));
         }
+        template.getUserRoles().addAll(templateRequest.getUserRoles());
         return template;
     }
 
