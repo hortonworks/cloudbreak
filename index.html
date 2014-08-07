@@ -744,136 +744,11 @@
                                     <!-- .item -->
                                     <!-- ............... LOGIN ................................................ -->
 
-                                    <div class="item">
-                                        <form role="form" autocomplete="on" name="loginForm">
+                                    <div class="item" ng-include src="'tags/login/login.tag'"></div>
 
-                                            <div class="form-group" ng-class="{ 'has-error': showLoginEmailError && loginForm.emailFieldLogin.$invalid }">
-                                                <!-- OPTIONAL HTML:
-										        class: 'has-feedback' - got validation result AND
-										        class: 'has-error' – error OR
-										        class: 'has-success' - ok
-										        -->
-                                                <label class="sr-only" for="emailFieldLogin">email</label>
-
-                                                <div class="input-group">
-                                                    <span class="input-group-addon"><i class="fa fa-envelope-o fa-fw"></i></span>
-                                                    <input class="form-control" type="email" ng-model="emailFieldLogin" ng-blur="showLoginEmailError=true;" id="emailFieldLogin" name="emailFieldLogin" placeholder="email"
-                                                           required>
-                                                    <i class="fa fa-warning form-control-feedback" ng-show="showLoginEmailError && loginForm.emailFieldLogin.$invalid"></i>
-                                                </div><!-- .input-group -->
-                                                <span class="help-block" ng-show="showLoginEmailError && loginForm.emailFieldLogin.$invalid">
-                                                    {{error_msg.email_invalid}}
-                                                </span>
-
-                                            </div><!-- .form-group -->
-                                            <div class="form-group" ng-class="{ 'has-error': showLoginPasswordError && loginForm.passwFieldLogin.$invalid }">
-                                                <label class="sr-only" for="passwFieldLogin">jelszó</label>
-
-                                                <div class="input-group" ng-class="{ 'has-error': showLoginPasswordError && loginForm.passwFieldLogin.$invalid }">
-                                                    <span class="input-group-addon"><i class="fa fa-lock fa-fw"></i></span>
-                                                    <input class="form-control" type="password" ng-model="passwFieldLogin" ng-blur="showLoginPasswordError=true;" name="passwFieldLogin" id="passwFieldLogin" placeholder="password" ng-minlength="6" ng-maxlength="200"
-                                                           required>
-                                                    <i class="fa fa-warning form-control-feedback" ng-show="showLoginPasswordError && loginForm.passwFieldLogin.$invalid"></i>
-                                                </div>
-                                                <span class="help-block" ng-show="showLoginPasswordError && loginForm.passwFieldLogin.$invalid">
-                                                    {{error_msg.pwd_invalid}}
-                                                </span>
-                                                <!-- .input-group -->
-                                                <p class="text-right"><a href="#" id="login-forgot-passw"><i class="fa fa-question-circle fa-fw"></i> forgot my password</a>
-                                                </p>
-                                            </div>
-                                            <a href="#" type="submit" ng-click="signIn()" ng-disabled="loginForm.$invalid" id="login-btn" class="btn btn-info btn-block" role="button">
-                                                <i class="fa fa-sign-in fa-fw"></i> login</a>
-                                            <a href="#" id="forgot-btn" ng-click="forgotPassword()" ng-disabled="loginForm.emailFieldLogin.$invalid" class="btn btn-info btn-block hidden" role="button"><i class='fa fa-paper-plane fa-fw'></i> reset email</a>
-                                            <a href="#" id="login-back-btn" class="btn btn-info btn-block backToSelector" role="button"> back</a>
-                                        </form>
-
-                                    </div><!-- .item -->
                                     <!-- ............... SIGN UP .............................................. -->
-                                    <div class="item">
 
-                                        <form role="form" autocomplete="on" name="signUpForm">
-
-                                            <div class="form-group" ng-class="{ 'has-error': showSignUpEmailError && signUpForm.signUpEmailField.$invalid }">
-                                                <label class="sr-only" for="signUpEmailField">email</label>
-                                                <div class="input-group">
-                                                    <span class="input-group-addon"><i class="fa fa-envelope-o fa-fw"></i></span>
-                                                    <input class="form-control" type="email" ng-blur="showSignUpEmailError=true;" ng-model="signUpEmailField" id="signUpEmailField" name="signUpEmailField" placeholder="email" required>
-                                                    <i ng-show="showSignUpEmailError && signUpForm.signUpEmailField.$invalid" class="fa fa-warning form-control-feedback"></i>
-                                                </div><!-- .input-group -->
-                                                <span class="help-block" ng-show="showSignUpEmailError && signUpForm.signUpEmailField.$invalid">
-                                                    {{error_msg.email_invalid}}
-                                                </span>
-                                            </div><!-- .form-group -->
-                                            <div class="form-group" ng-class="{ 'has-error': showSingUpPasswordFieldError && signUpForm.signUpPasswField.$invalid }">
-                                                <label class="sr-only" for="signUpPasswField">password</label>
-                                                <div class="input-group">
-                                                    <span class="input-group-addon"><i class="fa fa-lock fa-fw"></i></span>
-                                                    <input class="form-control" type="password" ng-blur="showSingUpPasswordFieldError=true;" ng-model="signUpPasswField" name="signUpPasswField" id="signUpPasswField" placeholder="password" ng-minlength="6" ng-maxlength="200" required>
-                                                    <i class="fa fa-warning form-control-feedback" ng-show="showSingUpPasswordFieldError && signUpForm.signUpPasswField.$invalid"></i>
-                                                </div><!-- .input-group -->
-                                                <span class="help-block" ng-show="showSingUpPasswordFieldError && signUpForm.signUpPasswField.$invalid">
-                                                    {{error_msg.pwd_invalid}}
-                                                </span>
-                                            </div><!-- .form-group -->
-                                            <div class="form-group" ng-class="{ 'has-error': signUpForm.signUpPassw2Field.$dirty && signUpForm.signUpPassw2Field.$invalid }">
-                                                <label class="sr-only" for="signUpPassw2Field">repeat password</label>
-                                                <div class="input-group">
-                                                    <span class="input-group-addon"><i class="fa fa-lock fa-fw"></i></span>
-                                                    <input class="form-control" type="password" ng-model="signUpPassw2Field" name="signUpPassw2Field" id="signUpPassw2Field" placeholder="repeat password" match="signUpPasswField" required>
-                                                    <i class="fa fa-warning form-control-feedback" ng-show="signUpForm.signUpPassw2Field.$dirty && signUpForm.signUpPassw2Field.$invalid"></i>
-                                                </div>
-                                                <span class="help-block" ng-show="signUpForm.signUpPassw2Field.$dirty && signUpForm.signUpPassw2Field.$invalid">
-                                                    {{error_msg.pwd_repeat}}
-                                                </span>
-                                                <!-- .input-group -->
-                                            </div><!-- .form-group -->
-                                            <div class="form-group" ng-class="{ 'has-error': showSingUpFirstNameError && signUpForm.signUpFirstNameField.$invalid }">
-                                                <label class="sr-only" for="signUpFirstNameField">name</label>
-                                                <div class="input-group">
-                                                    <span class="input-group-addon"><i class="fa fa-male fa-fw"></i></span>
-                                                    <input class="form-control" type="text" ng-blur="showSingUpFirstNameError=true;" ng-model="signUpFirstNameField" name="signUpFirstNameField" id="signUpFirstNameField" placeholder="first name" required>
-                                                    <i class="fa fa-warning form-control-feedback" ng-show="showSingUpFirstNameError && signUpForm.signUpFirstNameField.$invalid"></i>
-                                                </div><!-- .input-group -->
-                                                <span class="help-block" ng-show="showSingUpFirstNameError && signUpForm.signUpFirstNameField.$invalid">
-                                                    {{error_msg.first_name_empty}}
-                                                </span>
-                                            </div><!-- .form-group -->
-                                            <div class="form-group" ng-class="{ 'has-error': showSingUpLastNameError && signUpForm.signUpLastNameField.$invalid }">
-                                                <label class="sr-only" for="signUpLastNameField">name</label>
-                                                <div class="input-group">
-                                                    <span class="input-group-addon"><i class="fa fa-male fa-fw"></i></span>
-                                                    <input class="form-control" type="text" ng-blur="showSingUpLastNameError=true;" ng-model="signUpLastNameField" name="signUpLastNameField" id="signUpLastNameField" placeholder="last name" required>
-                                                    <i class="fa fa-warning form-control-feedback" ng-show="showSingUpLastNameError && signUpForm.signUpLastNameField.$invalid"></i>
-                                                </div><!-- .input-group -->
-                                                <span class="help-block" ng-show="showSingUpLastNameError && signUpForm.signUpLastNameField.$invalid">
-                                                    {{error_msg.last_name_empty}}
-                                                </span>
-                                            </div><!-- .form-group -->
-                                            <div class="form-group" ng-class="{ 'has-error': showSingUpCompanyError && signUpForm.signUpCompanyField.$invalid && companyAdminCheck}">
-                                                <label class="sr-only" for="signUpCompanyField">company</label>
-                                                <div class="input-group">
-                                                    <span class="input-group-addon"><i class="fa fa-institution fa-fw"></i></span>
-                                                    <input class="form-control" type="text" ng-blur="showSingUpCompanyError=true;" ng-model="signUpCompanyField" name="signUpCompanyField"  id="signUpCompanyField" placeholder="company" required>
-                                                    <i class="fa fa-warning form-control-feedback" ng-show="showSingUpCompanyError && signUpForm.signUpCompanyField.$invalid && companyAdminCheck"></i>
-                                                </div><!-- .input-group -->
-                                                <span class="help-block" ng-show="showSingUpCompanyError && signUpForm.signUpCompanyField.$invalid && companyAdminCheck">
-                                                    {{error_msg.company_empty}}
-                                                </span>
-                                                <div class="checkbox checkbox-attached">
-                                                    <label>
-                                                        <input type="checkbox" ng-model="companyAdminCheck" name="companyAdminCheck" id="companyAdminCheck"> I am a company admin
-                                                    </label>
-                                                </div>
-                                            </div><!-- .form-group -->
-
-                                            <a href="#" id="signup-btn" ng-click="signUp()" ng-disabled="signUpForm.signUpEmailField.$invalid || signUpForm.signUpPasswField.$invalid || signUpForm.signUpPasswField.$invalid
-                                            || signUpForm.signUpFirstNameField.$invalid || signUpForm.signUpLastNameField.$invalid || (signUpForm.signUpCompanyField.$invalid && companyAdminCheck)" class="btn btn-info btn-block" role="button"><i class="fa fa-user fa-fw"></i> sign up</a>
-                                            <a href="#" id="signup-back-btn" class="btn btn-info btn-block backToSelector" role="button"> back</a>
-
-                                        </form>
-
-                                    </div><!-- .item -->
+                                    <div class="item" ng-include src="'tags/login/signup.tag'"></div>
 
                                     <!-- SIGN UP MESSAGE .................................. -->
 
@@ -896,41 +771,7 @@
                                     </div><!-- .item -->
 
                                     <!-- RESET PASSWORD .................................... -->
-
-                                    <div class="item">
-
-                                        <form role="form" autocomplete="on" name="resetPasswordForm">
-
-                                            <div class="form-group" ng-class="{ 'has-error': showResetPasswordError && resetPasswordForm.resetPasswField.$invalid }">
-                                                <label class="sr-only" for="resetPasswField">new password</label>
-                                                <div class="input-group">
-                                                    <span class="input-group-addon"><i class="fa fa-lock fa-fw"></i></span>
-                                                    <input class="form-control" ng-model="resetPasswField" ng-blur="showResetPasswordError=true;" type="password" id="resetPasswField" name="resetPasswField" placeholder="new password" required ng-minlength="6" ng-maxlength="200">
-                                                    <i class="fa fa-warning form-control-feedback" ng-show="showResetPasswordError && resetPasswordForm.resetPasswField.$invalid"></i>
-                                                </div><!-- .input-group -->
-                                                <span class="help-block" ng-show="showResetPasswordError && resetPasswordForm.resetPasswField.$invalid">
-                                                    {{error_msg.pwd_invalid}}
-                                                </span>
-                                            </div><!-- .form-group -->
-                                            <div class="form-group" ng-class="{ 'has-error': resetPasswordForm.resetPassw2Field.$dirty && resetPasswordForm.resetPassw2Field.$invalid }">
-                                                <label class="sr-only" for="resetPassw2Field">repeat password</label>
-                                                <div class="input-group">
-                                                    <span class="input-group-addon"><i class="fa fa-lock fa-fw"></i></span>
-                                                    <input class="form-control" ng-model="resetPassw2Field" type="password" id="resetPassw2Field" name="resetPassw2Field" placeholder="repeat password" match="resetPasswField" required>
-                                                    <i class="fa fa-warning form-control-feedback" ng-show="resetPasswordForm.resetPassw2Field.$dirty && resetPasswordForm.resetPassw2Field.$invalid"></i>
-                                                </div><!-- .input-group -->
-                                                <span class="help-block" ng-show="resetPasswordForm.resetPassw2Field.$dirty && resetPasswordForm.resetPassw2Field.$invalid">
-                                                    {{error_msg.pwd_repeat}}
-                                                </span>
-                                            </div><!-- .form-group -->
-
-                                            <a href="#" id="setpassw-btn" ng-click="resetPassword()" ng-disabled="resetPasswordForm.$invalid" class="btn btn-info btn-block" role="button"><i class="fa fa-lock fa-fw"></i> set new password</a>
-
-                                        </form>
-
-
-                                    </div><!-- .item -->
-
+                                    <div class="item" ng-include src="'tags/login/resetpassword.tag'"></div>
                                 </div> <!-- .carousel-inner -->
                             </div>
                             <!-- .panel-body -->
@@ -963,19 +804,19 @@
             $jq(document).ready(function ($) {
                 // Bootstrap carousel as selector / login / sign up slider
                 // init
-                $jq('.outerCarousel').carousel('pause');
-                $jq('#select-login-btn').click(function () {
-                    $('.outerCarousel').carousel(1);
-                });
-                $jq('#select-signup-btn').click(function () {
-                    $('.outerCarousel').carousel(2);
-                });
-                $jq('.backToSelector').click(function () {
-                    $('.outerCarousel').carousel(0);
-                });
-                $jq('.backToLogin').click(function () {
-                    $('.outerCarousel').carousel(1);
-                });
+              $jq('.outerCarousel').carousel('pause');
+            });
+            $jq(document).on("click", ".backToSelector", function() {
+              $jq('.outerCarousel').carousel(0)
+            });
+            $jq(document).on("click", ".backToLogin", function() {
+              $jq('.outerCarousel').carousel(1)
+            });
+            $jq(document).on("click","#select-login-btn", function () {
+              $jq('.outerCarousel').carousel(1);
+            });
+            $jq(document).on("click","#select-signup-btn", function () {
+              $jq('.outerCarousel').carousel(2);
             });
             $jq(document).on("click", "#login-forgot-passw", function() {
               if($jq(this).text() == " forgot my password"){
