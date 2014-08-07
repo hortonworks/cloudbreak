@@ -4,6 +4,9 @@ import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStack
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.EMAILASFOLDER;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.NOT_FOUND;
 
+import groovyx.net.http.HttpResponseDecorator;
+import groovyx.net.http.HttpResponseException;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,6 +15,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import reactor.core.Reactor;
+import reactor.event.Event;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,11 +36,6 @@ import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.StackCreationFailure;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
-
-import groovyx.net.http.HttpResponseDecorator;
-import groovyx.net.http.HttpResponseException;
-import reactor.core.Reactor;
-import reactor.event.Event;
 
 @Component
 public class AzureProvisionSetup implements ProvisionSetup {
@@ -66,17 +67,17 @@ public class AzureProvisionSetup implements ProvisionSetup {
 
     @Override
     public void setupProvisioning(Stack stack) {
-        Credential credential = stack.getCredential();
-        String emailAsFolder = stack.getUser().emailAsFolder();
+        try {
+            Credential credential = stack.getCredential();
+            String emailAsFolder = stack.getUser().emailAsFolder();
 
-        String filePath = AzureCertificateService.getUserJksFileName(credential, emailAsFolder);
-        AzureClient azureClient = azureStackUtil.createAzureClient(credential, filePath);
-        if (!azureClient.isImageAvailable(azureStackUtil.getOsImageName(credential))) {
-            String affinityGroupName = ((AzureCredential) credential).getCommonName();
-            createAffinityGroup(stack, azureClient, affinityGroupName);
-            String storageName = String.format("%s%s", VM_COMMON_NAME, stack.getId());
-            createStorage(stack, azureClient, affinityGroupName);
-            try {
+            String filePath = AzureCertificateService.getUserJksFileName(credential, emailAsFolder);
+            AzureClient azureClient = azureStackUtil.createAzureClient(credential, filePath);
+            if (!azureClient.isImageAvailable(azureStackUtil.getOsImageName(credential))) {
+                String affinityGroupName = ((AzureCredential) credential).getCommonName();
+                createAffinityGroup(stack, azureClient, affinityGroupName);
+                String storageName = String.format("%s%s", VM_COMMON_NAME, stack.getId());
+                createStorage(stack, azureClient, affinityGroupName);
                 String targetBlobContainerUri = "http://" + affinityGroupName + ".blob.core.windows.net/vm-images";
                 String targetImageUri = targetBlobContainerUri + '/' + storageName + ".vhd";
                 Map<String, String> params = new HashMap<>();
@@ -113,19 +114,20 @@ public class AzureProvisionSetup implements ProvisionSetup {
                 params.put(OS, "Linux");
                 params.put(MEDIALINK, targetImageUri);
                 azureClient.addOsImage(params);
-            } catch (Exception e) {
-                reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(new StackCreationFailure(stack.getId(),
-                        "There was a problem with the Json node parsing when tried to create the specific image.")));
-            }
-        }
 
-        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT, stack.getId());
-        reactor.notify(ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT,
-                Event.wrap(new ProvisionSetupComplete(getCloudPlatform(), stack.getId())
-                                .withSetupProperty(CREDENTIAL, stack.getCredential())
-                                .withSetupProperty(EMAILASFOLDER, stack.getUser().emailAsFolder())
-                )
-        );
+            }
+
+            LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT, stack.getId());
+            reactor.notify(ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT,
+                    Event.wrap(new ProvisionSetupComplete(getCloudPlatform(), stack.getId())
+                            .withSetupProperty(CREDENTIAL, stack.getCredential())
+                            .withSetupProperty(EMAILASFOLDER, stack.getUser().emailAsFolder())
+                            )
+                    );
+        } catch (Exception e) {
+            reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(new StackCreationFailure(stack.getId(),
+                    "There was a problem with the Json node parsing when tried to create the specific image.")));
+        }
     }
 
     private void createStorage(Stack stack, AzureClient azureClient, String affinityGroupName) {

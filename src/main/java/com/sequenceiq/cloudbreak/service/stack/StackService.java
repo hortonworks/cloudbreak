@@ -21,7 +21,8 @@ public interface StackService {
 
     Boolean stopAll(User user, Long stackId);
 
-    Set<InstanceMetaData> getMetaData(User one, String hash);
+    Set<InstanceMetaData> getMetaData(String hash);
 
     StackDescription getStackDescription(User user, Stack stack);
+
 }

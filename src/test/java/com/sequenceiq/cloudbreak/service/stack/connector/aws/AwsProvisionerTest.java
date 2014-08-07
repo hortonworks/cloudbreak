@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anySet;
@@ -91,7 +92,7 @@ public class AwsProvisionerTest {
         given(createStackResult.getStackId()).willReturn(STACK_ID);
         given(stackUpdater.updateStackResources(anyLong(), anySet())).willReturn(stack);
         given(underTest.createStackRequest()).willReturn(createStackRequest);
-        given(cfTemplateBuilder.build(anyString(), anyInt())).willReturn("templatebody");
+        given(cfTemplateBuilder.build(anyString(), anyInt(), anyBoolean())).willReturn("templatebody");
         Map<String, Object> setupProperties = new HashMap<>();
         setupProperties.put(SnsTopicManager.NOTIFICATION_TOPIC_ARN_KEY, "topicArn");
         // WHEN

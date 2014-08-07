@@ -33,16 +33,32 @@ public class CloudFormationTemplateBuilderTest {
     @Test
     public void testBuildTemplateShouldCreateTwoDeviceNameEntriesWhenTwoVolumesAreSpecified() {
         // WHEN
-        String result = underTest.build("templates/aws-cf-stack.ftl", 2);
+        String result = underTest.build("templates/aws-cf-stack.ftl", 2, false);
         // THEN
         assertTrue(result.contains("\"DeviceName\" : \"/dev/xvdf\""));
         assertTrue(result.contains("\"DeviceName\" : \"/dev/xvdg\""));
         assertFalse(result.contains("\"DeviceName\" : \"/dev/xvdh\""));
     }
 
+    @Test
+    public void testBuildTemplateShouldHaveSpotPriceSpecifiedWhenItIsSet() {
+        // WHEN
+        String result = underTest.build("templates/aws-cf-stack.ftl", 2, true);
+        // THEN
+        assertTrue(result.contains("\"SpotPrice\""));
+    }
+
+    @Test
+    public void testBuildTemplateShouldNotHaveSpotPriceSpecifiedWhenItIsSetToFalse() {
+        // WHEN
+        String result = underTest.build("templates/aws-cf-stack.ftl", 2, false);
+        // THEN
+        assertFalse(result.contains("\"SpotPrice\""));
+    }
+
     @Test(expected = InternalServerException.class)
     public void testBuildTemplateShouldThrowInternalServerExceptionWhenTemplateDoesNotExist() {
         // WHEN
-        underTest.build("templates/non-existent.ftl", 2);
+        underTest.build("templates/non-existent.ftl", 2, false);
     }
 }

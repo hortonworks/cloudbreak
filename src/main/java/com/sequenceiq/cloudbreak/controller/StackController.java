@@ -88,23 +88,24 @@ public class StackController {
     @ResponseBody
     public ResponseEntity<Boolean> startOrStopAllOnStack(@CurrentUser User user, @PathVariable Long stackId, @RequestBody StatusRequestJson statusRequestJson) {
         switch (statusRequestJson.getStatusRequest()) {
-            case STOP:
-                return new ResponseEntity<>(stackService.stopAll(user, stackId), HttpStatus.OK);
-            case START:
-                return new ResponseEntity<>(stackService.startAll(user, stackId), HttpStatus.OK);
-            default:
-                throw new BadRequestException("The requested status not valid.");
+        case STOP:
+            return new ResponseEntity<>(stackService.stopAll(user, stackId), HttpStatus.OK);
+        case START:
+            return new ResponseEntity<>(stackService.startAll(user, stackId), HttpStatus.OK);
+        default:
+            throw new BadRequestException("The requested status not valid.");
         }
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/metadata/{hash}")
     @ResponseBody
-    public ResponseEntity<Set<InstanceMetaDataJson>> getStackMetadata(@CurrentUser User user, @PathVariable String hash) {
+    public ResponseEntity<Set<InstanceMetaDataJson>> getStackMetadata(@PathVariable String hash) {
         try {
-            Set<InstanceMetaData> metaData = stackService.getMetaData(user, hash);
+            Set<InstanceMetaData> metaData = stackService.getMetaData(hash);
             return new ResponseEntity<>(metaDataConverter.convertAllEntityToJson(metaData), HttpStatus.OK);
         } catch (MetadataIncompleteException e) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
     }
+
 }
