@@ -967,14 +967,6 @@
                 $jq('#select-login-btn').click(function () {
                     $('.outerCarousel').carousel(1);
                 });
-                // forgotten login password
-                $jq('#login-forgot-passw').click(function (e) {
-                    $(this).css("visibility", "hidden");
-                    $('#passwFieldLogin').prop("disabled", "true");
-                    $('#login-btn').addClass('hidden');
-                    $('#forgot-btn').removeClass('hidden');
-                    e.preventDefault();
-                });
                 $jq('#select-signup-btn').click(function () {
                     $('.outerCarousel').carousel(2);
                 });
@@ -984,6 +976,19 @@
                 $jq('.backToLogin').click(function () {
                     $('.outerCarousel').carousel(1);
                 });
+            });
+            $jq(document).on("click", "#login-forgot-passw", function() {
+              if($jq(this).text() == " forgot my password"){
+                $jq(this).text(" back to login")
+                $jq('#passwFieldLogin').prop("disabled", true);
+                $jq('#login-btn').addClass('hidden');
+                $jq('#forgot-btn').removeClass('hidden');
+              } else {
+                $jq(this).html("<i class='fa fa-question-circle fa-fw'></i> forgot my password")
+                $jq('#passwFieldLogin').prop("disabled", false);
+                $jq('#login-btn').removeClass('hidden');
+                $jq('#forgot-btn').addClass('hidden');
+              }
             });
         </script>
     </div>
