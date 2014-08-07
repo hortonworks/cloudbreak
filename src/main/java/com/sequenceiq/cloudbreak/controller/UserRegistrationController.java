@@ -66,7 +66,7 @@ public class UserRegistrationController {
     private void checkCompany(String companyName) {
         if (companyService.companyExists(companyName)) {
             LOGGER.debug("Company <{}> already registered", companyName);
-            throw new BadRequestException("Company already registered");
+            throw new BadRequestException(String.format("Company %s already registered", companyName));
         }
     }
 
