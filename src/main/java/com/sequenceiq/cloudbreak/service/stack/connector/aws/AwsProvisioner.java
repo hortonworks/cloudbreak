@@ -50,6 +50,7 @@ public class AwsProvisioner implements Provisioner {
                         new Parameter().withParameterKey("SSHLocation").withParameterValue(awsTemplate.getSshLocation()),
                         new Parameter().withParameterKey("CBUserData").withParameterValue(userData),
                         new Parameter().withParameterKey("StackName").withParameterValue(stackName),
+                        new Parameter().withParameterKey("StackOwner").withParameterValue(awsCredential.getRoleArn()),
                         new Parameter().withParameterKey("InstanceCount").withParameterValue(stack.getNodeCount().toString()),
                         new Parameter().withParameterKey("InstanceType").withParameterValue(awsTemplate.getInstanceType().toString()),
                         new Parameter().withParameterKey("KeyName").withParameterValue(awsCredential.getKeyPairName()),
