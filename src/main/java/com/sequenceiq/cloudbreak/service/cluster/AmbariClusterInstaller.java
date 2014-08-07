@@ -39,7 +39,7 @@ public class AmbariClusterInstaller {
     private static final int POLLING_INTERVAL = 3000;
     private static final int MS_PER_SEC = 1000;
     private static final int SEC_PER_MIN = 60;
-    private static final int MAX_RECOMMEND_POLLING_ATTEMPTS = SEC_PER_MIN / (POLLING_INTERVAL / MS_PER_SEC) * 15;
+    private static final int MAX_RECOMMEND_POLLING_ATTEMPTS = SEC_PER_MIN / (POLLING_INTERVAL / MS_PER_SEC) * 20;
 
     private static final BigDecimal COMPLETED = new BigDecimal(100.0);
     private static final BigDecimal FAILED = new BigDecimal(-1.0);
