@@ -3,30 +3,28 @@ package com.sequenceiq.cloudbreak.service.template;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UnknownFormatConversionException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.controller.json.IdJson;
-import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
-import com.sequenceiq.cloudbreak.converter.AwsTemplateConverter;
-import com.sequenceiq.cloudbreak.converter.AzureTemplateConverter;
-import com.sequenceiq.cloudbreak.domain.AwsTemplate;
-import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.domain.UserRole;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
 import com.sequenceiq.cloudbreak.service.company.CompanyService;
+import com.sequenceiq.cloudbreak.service.credential.SimpleCredentialService;
 import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
 
 @Service
 public class SimpleTemplateService implements TemplateService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleCredentialService.class);
 
     private static final String CLOUD_PLATFORM_NOT_SUPPORTED_MSG = "The cloudPlatform '%s' is not supported.";
 
@@ -34,12 +32,6 @@ public class SimpleTemplateService implements TemplateService {
 
     @Autowired
     private TemplateRepository templateRepository;
-
-    @Autowired
-    private AwsTemplateConverter awsTemplateConverter;
-
-    @Autowired
-    private AzureTemplateConverter azureTemplateConverter;
 
     @Autowired
     private StackRepository stackRepository;
@@ -54,83 +46,81 @@ public class SimpleTemplateService implements TemplateService {
     private CompanyService companyService;
 
     @Override
-    public Set<TemplateJson> getAll(User user) {
-        Set<TemplateJson> result = new HashSet<>();
-        result.addAll(awsTemplateConverter.convertAllEntityToJson(user.getAwsTemplates()));
-        result.addAll(azureTemplateConverter.convertAllEntityToJson(user.getAzureTemplates()));
-        return result;
-    }
+    public Set<Template> getAll(User user) {
+        Set<Template> userTemplates = new HashSet<>();
+        Set<Template> legacyTemplates = new HashSet<>();
 
-    @Override
-    public Set<TemplateJson> getAllForAdmin(User user) {
-        Set<TemplateJson> templates = new HashSet<>();
-        Set<User> decoratedUsers = companyService.companyUsers(user.getCompany().getId());
-        for (User cUser : decoratedUsers) {
-            templates.addAll(getAll(cUser));
+        userTemplates.addAll(user.getAwsTemplates());
+        userTemplates.addAll(user.getAzureTemplates());
+        LOGGER.debug("User credentials: #{}", userTemplates.size());
+
+        if (user.getUserRoles().contains(UserRole.COMPANY_ADMIN)) {
+            LOGGER.debug("Getting company user templates for company admin; id: [{}]", user.getId());
+            legacyTemplates = getCompanyUserTemplates(user);
+        } else {
+            LOGGER.debug("Getting company templates for company user; id: [{}]", user.getId());
+            legacyTemplates = getCompanyTemplates(user);
         }
-        return templates;
+        LOGGER.debug("Found #{} legacy templates for user [{}]", legacyTemplates.size(), user.getId());
+        userTemplates.addAll(legacyTemplates);
+        return userTemplates;
     }
 
     @Override
-    public TemplateJson get(Long id) {
+    public Template get(Long id) {
         Template template = templateRepository.findOne(id);
         if (template == null) {
             throw new NotFoundException(String.format(TEMPLATE_NOT_FOUND_MSG, id));
         } else {
-            switch (template.cloudPlatform()) {
-                case AWS:
-                    return awsTemplateConverter.convert((AwsTemplate) template);
-                case AZURE:
-                    return azureTemplateConverter.convert((AzureTemplate) template);
-                default:
-                    throw new UnknownFormatConversionException(String.format(CLOUD_PLATFORM_NOT_SUPPORTED_MSG, template.cloudPlatform()));
-            }
+            return template;
         }
     }
 
     @Override
-    public IdJson create(User user, TemplateJson templateRequest) {
-        switch (templateRequest.getCloudPlatform()) {
-            case AWS:
-                return createAwsTemplate(user, templateRequest);
-            case AZURE:
-                return createAzureTemplate(user, templateRequest);
-            default:
-                throw new UnknownFormatConversionException(String.format(CLOUD_PLATFORM_NOT_SUPPORTED_MSG, templateRequest.getCloudPlatform()));
-        }
+    public Template create(User user, Template template) {
+        LOGGER.debug("Creating template for user: [{}]", user.getId());
+        template.setUser(user);
+        template = templateRepository.save(template);
+        return template;
     }
 
     @Override
-    public void delete(Long id) {
-        Template template = templateRepository.findOne(id);
+    public void delete(Long templateId) {
+        LOGGER.debug("Deleting template : [{}]", templateId);
+        Template template = templateRepository.findOne(templateId);
         if (template == null) {
-            throw new NotFoundException(String.format(TEMPLATE_NOT_FOUND_MSG, id));
+            throw new NotFoundException(String.format(TEMPLATE_NOT_FOUND_MSG, templateId));
         }
-        List<Stack> allStackForTemplate = getAllStackForTemplate(id);
+        List<Stack> allStackForTemplate = stackRepository.findAllStackForTemplate(templateId);
         if (allStackForTemplate.isEmpty()) {
             templateRepository.delete(template);
         } else {
             throw new BadRequestException(String.format(
-                    "There are stacks associated with template '%s'. Please remove these before the deleting the template.", id));
+                    "There are stacks associated with template '%s'. Please remove these before the deleting the template.", templateId));
         }
     }
 
-    private IdJson createAwsTemplate(User user, TemplateJson templateRequest) {
-        AwsTemplate awsTemplate = awsTemplateConverter.convert(templateRequest);
-        awsTemplate.setUser(user);
-        awsTemplate = templateRepository.save(awsTemplate);
-        return new IdJson(awsTemplate.getId());
+    private Set<Template> getCompanyTemplates(User user) {
+        Set<Template> companyTemplates = new HashSet<>();
+        User adminWithFilteredData = companyService.companyUserData(user.getCompany().getId(), user.getUserRoles().iterator().next());
+        if (adminWithFilteredData != null) {
+            companyTemplates.addAll(adminWithFilteredData.getAwsTemplates());
+            companyTemplates.addAll(adminWithFilteredData.getAzureTemplates());
+        } else {
+            LOGGER.debug("There's no company admin for user: [{}]", user.getId());
+        }
+        return companyTemplates;
     }
 
-    private IdJson createAzureTemplate(User user, TemplateJson templateRequest) {
-        Template azureTemplate = azureTemplateConverter.convert(templateRequest);
-        azureTemplate.setUser(user);
-        azureTemplate = templateRepository.save(azureTemplate);
-        return new IdJson(azureTemplate.getId());
+    private Set<Template> getCompanyUserTemplates(User user) {
+        Set<Template> companyUserTemplates = new HashSet<>();
+        Set<User> companyUsers = companyService.companyUsers(user.getCompany().getId());
+        companyUsers.remove(user);
+        for (User cUser : companyUsers) {
+            LOGGER.debug("Adding templates of company user: [{}]", cUser.getId());
+            companyUserTemplates.addAll(cUser.getAwsTemplates());
+            companyUserTemplates.addAll(cUser.getAzureTemplates());
+        }
+        return companyUserTemplates;
     }
-
-    private List<Stack> getAllStackForTemplate(Long id) {
-        return stackRepository.findAllStackForTemplate(id);
-    }
-
 }

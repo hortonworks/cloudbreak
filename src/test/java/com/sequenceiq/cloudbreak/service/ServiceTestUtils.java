@@ -1,12 +1,15 @@
 package com.sequenceiq.cloudbreak.service;
 
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
+import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
+import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Company;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.UserRole;
 
@@ -67,4 +70,21 @@ public final class ServiceTestUtils {
         return cred;
     }
 
+    public static Template createTemplate(User user, CloudPlatform platform, UserRole role) {
+        Template template = null;
+        switch (platform) {
+            case AZURE:
+                template = new AzureTemplate();
+                ((AzureTemplate) template).setAzureTemplateOwner(user);
+                break;
+            case AWS:
+                template = new AwsTemplate();
+                ((AwsTemplate) template).setAwsTemplateOwner(user);
+                break;
+            default:
+                break;
+        }
+        template.getUserRoles().add(role);
+        return template;
+    }
 }
