@@ -54,6 +54,8 @@ public class AzureConnectorTestUtil extends ConnectorTestUtil {
         azureTemplate.setVmType(AzureVmType.MEDIUM.toString());
         azureTemplate.setDescription(AZURE_DESCRIPTION);
         azureTemplate.setImageName(IMAGE_NAME);
+        azureTemplate.setVolumeCount(0);
+        azureTemplate.setVolumeSize(0);
         return azureTemplate;
     }
 }
