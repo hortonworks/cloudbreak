@@ -29,7 +29,7 @@ public class AwsProvisioner implements Provisioner {
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsProvisioner.class);
 
     @Value("${cb.aws.spot}")
-    private Boolean useSpot;
+    private boolean useSpot;
 
     @Autowired
     private AwsStackUtil awsStackUtil;

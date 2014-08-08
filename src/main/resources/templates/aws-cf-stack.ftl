@@ -181,9 +181,6 @@
         "DesiredCapacity" : { "Ref" : "InstanceCount" },
         "Tags" : [ { "Key" : "Name", "Value" : { "Ref" : "StackName" }, "PropagateAtLaunch" : "true" },
         		   { "Key" : "owner", "Value" : { "Ref" : "StackOwner" }, "PropagateAtLaunch" : "true" } ]
-		<#if useSpot>
-        "SpotPrice"     : "0.4",
-        </#if>
       }
     },
 
@@ -231,6 +228,9 @@
         "InstanceType"   : { "Ref" : "InstanceType" },
         "KeyName"        : { "Ref" : "KeyName" },
         "AssociatePublicIpAddress" : "true",
+        <#if useSpot>
+        "SpotPrice"     : "0.4",
+        </#if>
         "UserData"       : { "Fn::Base64" : { "Ref" : "CBUserData"}}
       }
     },

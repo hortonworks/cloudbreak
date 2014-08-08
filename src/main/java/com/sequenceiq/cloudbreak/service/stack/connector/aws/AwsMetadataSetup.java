@@ -8,6 +8,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import reactor.core.Reactor;
@@ -39,6 +40,11 @@ public class AwsMetadataSetup implements MetadataSetup {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsMetadataSetup.class);
 
+    private static final int POLLING_INTERVAL = 5000;
+
+    @Value("${cb.aws.spot}")
+    private boolean useSpot;
+
     @Autowired
     private AwsStackUtil awsStackUtil;
 
@@ -63,7 +69,21 @@ public class AwsMetadataSetup implements MetadataSetup {
         DescribeAutoScalingGroupsResult describeAutoScalingGroupsResult = amazonAutoScalingClient
                 .describeAutoScalingGroups(new DescribeAutoScalingGroupsRequest().withAutoScalingGroupNames(result.getStackResourceDetail()
                         .getPhysicalResourceId()));
-        describeAutoScalingGroupsResult.getAutoScalingGroups().get(0).getInstances();
+        // If spot priced instances are used, CloudFormation signals completion
+        // when the spot requests are made but the instances are not running
+        // yet, so we will have to wait until the spot requests are fulfilled
+        // (there are as many instances in the ASG as needed)
+        if (useSpot) {
+            while (describeAutoScalingGroupsResult.getAutoScalingGroups().get(0).getInstances() == null
+                    || describeAutoScalingGroupsResult.getAutoScalingGroups().get(0).getInstances().size() < stack.getNodeCount()) {
+                LOGGER.info("Spot requests for stack '{}' are not fulfilled yet. Trying to reach instances in the next polling interval.", stack.getId());
+                awsStackUtil.sleep(POLLING_INTERVAL);
+                describeAutoScalingGroupsResult = amazonAutoScalingClient
+                        .describeAutoScalingGroups(new DescribeAutoScalingGroupsRequest().withAutoScalingGroupNames(result.getStackResourceDetail()
+                                .getPhysicalResourceId()));
+            }
+        }
+
         List<String> instanceIds = new ArrayList<>();
         for (Instance instance : describeAutoScalingGroupsResult.getAutoScalingGroups().get(0).getInstances()) {
             instanceIds.add(instance.getInstanceId());
