@@ -7,7 +7,6 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
@@ -28,9 +27,6 @@ public class AwsProvisioner implements Provisioner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsProvisioner.class);
 
-    @Value("${cb.aws.spot}")
-    private boolean useSpot;
-
     @Autowired
     private AwsStackUtil awsStackUtil;
 
@@ -48,7 +44,7 @@ public class AwsProvisioner implements Provisioner {
         String stackName = String.format("%s-%s", stack.getName(), stack.getId());
         CreateStackRequest createStackRequest = createStackRequest()
                 .withStackName(stackName)
-                .withTemplateBody(cfTemplateBuilder.build("templates/aws-cf-stack.ftl", awsTemplate.getVolumeCount(), useSpot))
+                .withTemplateBody(cfTemplateBuilder.build("templates/aws-cf-stack.ftl", awsTemplate.getVolumeCount(), awsTemplate.isSpotPriced()))
                 .withNotificationARNs((String) setupProperties.get(SnsTopicManager.NOTIFICATION_TOPIC_ARN_KEY))
                 .withParameters(
                         new Parameter().withParameterKey("SSHLocation").withParameterValue(awsTemplate.getSshLocation()),
