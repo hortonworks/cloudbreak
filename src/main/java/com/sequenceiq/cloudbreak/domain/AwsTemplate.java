@@ -23,8 +23,6 @@ public class AwsTemplate extends Template implements ProvisionEntity {
     @Enumerated(EnumType.STRING)
     private InstanceType instanceType;
     private String sshLocation;
-    private Integer volumeCount;
-    private Integer volumeSize;
     private VolumeType volumeType;
     private Boolean spotPriced;
 
@@ -104,22 +102,6 @@ public class AwsTemplate extends Template implements ProvisionEntity {
     @Override
     public User getOwner() {
         return awsTemplateOwner;
-    }
-
-    public Integer getVolumeCount() {
-        return volumeCount;
-    }
-
-    public void setVolumeCount(Integer volumeCount) {
-        this.volumeCount = volumeCount;
-    }
-
-    public Integer getVolumeSize() {
-        return volumeSize;
-    }
-
-    public void setVolumeSize(Integer volumeSize) {
-        this.volumeSize = volumeSize;
     }
 
     public VolumeType getVolumeType() {

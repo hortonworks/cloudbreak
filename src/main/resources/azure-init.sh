@@ -27,15 +27,16 @@ done
 METADATA_RESULT=$(cat /tmp/metadata_result)
 
 # format and mount disks
-#VOLUME_COUNT=$(echo $METADATA_RESULT | jq "$INSTANCE_SELECTOR" | jq '.[].volumeCount' | sed s/\"//g)
-#START_LABEL=65
-#for (( i=1; i<=VOLUME_COUNT; i++ )); do
-#  LABEL=$(printf "\x$((START_LABEL+i))")
-#  mkfs -t ext4 /dev/xvd${LABEL}
-#  mkdir /mnt/fs${i}
-#  mount /dev/xvd${LABEL} /mnt/fs${i}
-#  DOCKER_VOLUME_PARAMS="${DOCKER_VOLUME_PARAMS} -v /mnt/fs${i}:/mnt/fs${i}"
-#done
+VOLUME_COUNT=$(echo $METADATA_RESULT | jq "$INSTANCE_SELECTOR" | jq '.[].volumeCount' | sed s/\"//g)
+START_LABEL=62
+for (( i=1; i<=VOLUME_COUNT; i++ )); do
+  LABEL=$(printf "\x$((START_LABEL+i))")
+  mkfs -F -t ext4 /dev/sd${LABEL}
+  mkdir /mnt/fs${i}
+  mount /dev/sd${LABEL} /mnt/fs${i}
+  DOCKER_VOLUME_PARAMS="${DOCKER_VOLUME_PARAMS} -v /mnt/fs${i}:/mnt/fs${i}"
+done
+
 
 service docker restart
 sleep 5

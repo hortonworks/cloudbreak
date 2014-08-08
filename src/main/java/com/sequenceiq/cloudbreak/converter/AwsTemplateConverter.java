@@ -23,13 +23,13 @@ public class AwsTemplateConverter extends AbstractConverter<TemplateJson, AwsTem
         TemplateJson templateJson = new TemplateJson();
         templateJson.setId(entity.getId());
         templateJson.setName(entity.getName());
+        templateJson.setVolumeCount(entity.getVolumeCount());
+        templateJson.setVolumeSize(entity.getVolumeSize());
         Map<String, Object> props = new HashMap<>();
         props.put(AwsTemplateParam.REGION.getName(), entity.getRegion().toString());
         props.put(AwsTemplateParam.AMI_ID.getName(), entity.getAmiId());
         props.put(AwsTemplateParam.INSTANCE_TYPE.getName(), entity.getInstanceType().name());
         props.put(AwsTemplateParam.SSH_LOCATION.getName(), entity.getSshLocation());
-        props.put(AwsTemplateParam.VOLUME_COUNT.getName(), entity.getVolumeCount());
-        props.put(AwsTemplateParam.VOLUME_SIZE.getName(), entity.getVolumeSize());
         props.put(AwsTemplateParam.VOLUME_TYPE.getName(), entity.getVolumeType());
         props.put(AwsTemplateParam.SPOT_PRICED.getName(), entity.isSpotPriced());
         templateJson.setParameters(props);
@@ -49,8 +49,8 @@ public class AwsTemplateConverter extends AbstractConverter<TemplateJson, AwsTem
                 ? String.valueOf(json.getParameters().get(AwsTemplateParam.SSH_LOCATION.getName())) : DEFAULT_SSH_LOCATION;
         awsTemplate.setSshLocation(sshLocation);
         awsTemplate.setDescription(json.getDescription());
-        awsTemplate.setVolumeCount((Integer) json.getParameters().get(AwsTemplateParam.VOLUME_COUNT.getName()));
-        awsTemplate.setVolumeSize((Integer) json.getParameters().get(AwsTemplateParam.VOLUME_SIZE.getName()));
+        awsTemplate.setVolumeCount((json.getVolumeCount() == null) ? 0 : json.getVolumeCount());
+        awsTemplate.setVolumeSize((json.getVolumeSize() == null) ? 0 : json.getVolumeSize());
         awsTemplate.setVolumeType(VolumeType.valueOf(String.valueOf(json.getParameters().get(AwsTemplateParam.VOLUME_TYPE.getName()))));
         Boolean spotPriced = json.getParameters().containsKey(AwsTemplateParam.SPOT_PRICED.getName())
                 ? (Boolean) json.getParameters().get(AwsTemplateParam.SPOT_PRICED.getName()) : false;

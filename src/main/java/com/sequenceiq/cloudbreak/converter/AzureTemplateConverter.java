@@ -34,6 +34,8 @@ public class AzureTemplateConverter extends AbstractConverter<TemplateJson, Azur
         azureTemplateJson.setCloudPlatform(CloudPlatform.AZURE);
         azureTemplateJson.setParameters(props);
         azureTemplateJson.setDescription(entity.getDescription() == null ? "" : entity.getDescription());
+        azureTemplateJson.setVolumeCount(entity.getVolumeCount());
+        azureTemplateJson.setVolumeSize(entity.getVolumeSize());
         return azureTemplateJson;
     }
 
@@ -61,6 +63,8 @@ public class AzureTemplateConverter extends AbstractConverter<TemplateJson, Azur
         }
         azureTemplate.setDescription(json.getDescription());
         azureTemplate.setPorts(ports);
+        azureTemplate.setVolumeCount((json.getVolumeCount() == null) ? 0 : json.getVolumeCount());
+        azureTemplate.setVolumeSize((json.getVolumeSize() == null) ? 0 : json.getVolumeSize());
         return azureTemplate;
     }
 
