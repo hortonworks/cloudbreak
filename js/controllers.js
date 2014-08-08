@@ -761,6 +761,8 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     cloudPlatform: "AZURE",
                     name: azure_tclusterName.value,
                     description: azure_tdescription.value,
+                    volumeCount: azure_tvolumesize.value,
+                    volumeSize: azure_tvolumescount.value,
                     parameters: {
                         location: azure_tlocation.value,
                         vmType: azure_tvmType.value,
@@ -775,6 +777,8 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 azure_tclusterName.value = "";
                 azure_tdescription.value = "";
                 azure_tclusterName.value = "";
+                azure_tvolumesize.value = "";
+                azure_tvolumescount.value = "";
             }).error(function (data, status, headers, config) {
                 $scope.modifyStatusMessage($rootScope.error_msg.azure_template_failed + data.message);
                 $scope.modifyStatusClass("has-error");
