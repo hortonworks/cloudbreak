@@ -36,8 +36,8 @@ public class UserDataBuilder {
         parameters.put("METADATA_ADDRESS", hostAddress);
         parameters.put("METADATA_HASH", metadataHash);
         String ec2userDataScript = userDataScripts.get(cloudPlatform);
-        // StringBuilder stringBuilder = new StringBuilder("#!/bin/bash\n");
-        StringBuilder stringBuilder = new StringBuilder("");
+        StringBuilder stringBuilder = new StringBuilder("#!/bin/bash\n");
+        //StringBuilder stringBuilder = new StringBuilder("");
         stringBuilder.append("set -x\n").append("\n");
         for (Entry<String, String> parameter : parameters.entrySet()) {
             stringBuilder.append(parameter.getKey()).append("=").append(parameter.getValue()).append("\n");

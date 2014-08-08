@@ -14,9 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import reactor.core.Reactor;
-import reactor.event.Event;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
@@ -31,6 +28,9 @@ import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateServic
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataSetupComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.domain.CoreInstanceMetaData;
+
+import reactor.core.Reactor;
+import reactor.event.Event;
 
 @Component
 public class AzureMetadataSetup implements MetadataSetup {
@@ -65,9 +65,12 @@ public class AzureMetadataSetup implements MetadataSetup {
             props.put(SERVICENAME, resource.getResourceName());
             Object virtualMachine = azureClient.getVirtualMachine(props);
             try {
-                CoreInstanceMetaData instanceMetaData = new CoreInstanceMetaData(resource.getResourceName(),
+                CoreInstanceMetaData instanceMetaData = new CoreInstanceMetaData(
+                        resource.getResourceName(),
                         getPrivateIP((String) virtualMachine),
-                        getVirtualIP((String) virtualMachine), 0);
+                        getVirtualIP((String) virtualMachine),
+                        stack.getTemplate().getVolumeCount()
+                );
                 instanceMetaDatas.add(instanceMetaData);
             } catch (IOException e) {
                 LOGGER.error(String.format("The instance %s was not reacheable: %s", resource.getResourceName(), e.getMessage()), e);

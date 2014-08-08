@@ -6,9 +6,6 @@ import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStack
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.NOT_FOUND;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.SERVICENAME;
 
-import groovyx.net.http.HttpResponseDecorator;
-import groovyx.net.http.HttpResponseException;
-
 import java.io.FileNotFoundException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
@@ -25,9 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import reactor.core.Reactor;
-import reactor.event.Event;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
@@ -47,6 +41,11 @@ import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateServic
 import com.sequenceiq.cloudbreak.service.stack.connector.Provisioner;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.StackCreationFailure;
+
+import groovyx.net.http.HttpResponseDecorator;
+import groovyx.net.http.HttpResponseException;
+import reactor.core.Reactor;
+import reactor.event.Event;
 
 @Component
 public class AzureProvisioner implements Provisioner {
@@ -72,6 +71,7 @@ public class AzureProvisioner implements Provisioner {
     private static final String SSHPUBLICKEYFINGERPRINT = "sshPublicKeyFingerprint";
     private static final String SSHPUBLICKEYPATH = "sshPublicKeyPath";
     private static final String PORTS = "ports";
+    private static final String DISKS = "disks";
     private static final String DATA = "data";
     private static final String DEFAULT_USER_NAME = "ubuntu";
     private static final String PRODUCTION = "production";
@@ -172,6 +172,14 @@ public class AzureProvisioner implements Provisioner {
         X509Certificate sshCert = azureStackUtil.createX509Certificate((AzureCredential) credential, azureTemplate.getOwner().emailAsFolder());
         props.put(SSHPUBLICKEYFINGERPRINT, sshCert.getSha1Fingerprint().toUpperCase());
         props.put(SSHPUBLICKEYPATH, String.format("/home/%s/.ssh/authorized_keys", DEFAULT_USER_NAME));
+        props.put(AFFINITYGROUP, commonName);
+        if (azureTemplate.getVolumeCount() > 0) {
+            List<Integer> disks = new ArrayList<>();
+            for (int i = 0; i < azureTemplate.getVolumeCount(); i++) {
+                disks.add(azureTemplate.getVolumeSize());
+            }
+            props.put(DISKS, disks);
+        }
 
         props.put(SERVICENAME, vmName);
         props.put(SUBNETNAME, name);
@@ -180,6 +188,7 @@ public class AzureProvisioner implements Provisioner {
         props.put(VIRTUALNETWORKNAME, name);
         props.put(PORTS, ports);
         props.put(VMTYPE, AzureVmType.valueOf(azureTemplate.getVmType()).vmType().replaceAll(" ", ""));
+
         HttpResponseDecorator virtualMachineResponse = (HttpResponseDecorator) azureClient.createVirtualMachine(props);
         String requestId = (String) azureClient.getRequestId(virtualMachineResponse);
         azureClient.waitUntilComplete(requestId);

@@ -20,6 +20,9 @@ public abstract class Template {
     @SequenceGenerator(name = "template_generator", sequenceName = "sequence_table")
     private Long id;
 
+    private Integer volumeCount;
+    private Integer volumeSize;
+
     public Template() {
 
     }
@@ -37,5 +40,21 @@ public abstract class Template {
     public abstract CloudPlatform cloudPlatform();
 
     public abstract User getOwner();
+
+    public Integer getVolumeCount() {
+        return volumeCount;
+    }
+
+    public void setVolumeCount(Integer volumeCount) {
+        this.volumeCount = volumeCount;
+    }
+
+    public Integer getVolumeSize() {
+        return volumeSize;
+    }
+
+    public void setVolumeSize(Integer volumeSize) {
+        this.volumeSize = volumeSize;
+    }
 
 }

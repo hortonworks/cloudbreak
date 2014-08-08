@@ -77,8 +77,8 @@ public class ProvisionParametersValidatorTest {
         parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), InstanceType.C1Medium.name());
         parameters.put(AwsTemplateParam.REGION.getName(), Regions.AP_NORTHEAST_1);
         parameters.put(AwsTemplateParam.SSH_LOCATION.getName(), "0.0.0.0/0");
-        parameters.put(AwsTemplateParam.VOLUME_COUNT.getName(), 3);
-        parameters.put(AwsTemplateParam.VOLUME_SIZE.getName(), 30);
+        templateJson.setVolumeCount(3);
+        templateJson.setVolumeSize(30);
         parameters.put(AwsTemplateParam.VOLUME_TYPE.getName(), "Gp2");
         templateJson.setParameters(parameters);
         assertEquals(underTest.isValid(templateJson, constraintValidatorContext), true);
@@ -95,8 +95,8 @@ public class ProvisionParametersValidatorTest {
         parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), InstanceType.C1Medium.name());
         parameters.put(AwsTemplateParam.REGION.getName(), Regions.AP_NORTHEAST_1);
         parameters.put(AwsTemplateParam.SSH_LOCATION.getName(), "192.12.12.12/12");
-        parameters.put(AwsTemplateParam.VOLUME_COUNT.getName(), 3);
-        parameters.put(AwsTemplateParam.VOLUME_SIZE.getName(), 30);
+        templateJson.setVolumeCount(3);
+        templateJson.setVolumeSize(30);
         parameters.put(AwsTemplateParam.VOLUME_TYPE.getName(), "Gp2");
         templateJson.setParameters(parameters);
         assertEquals(underTest.isValid(templateJson, constraintValidatorContext), true);
@@ -113,8 +113,8 @@ public class ProvisionParametersValidatorTest {
         parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), InstanceType.C1Medium.name());
         parameters.put(AwsTemplateParam.REGION.getName(), Regions.AP_NORTHEAST_1);
         parameters.put(AwsTemplateParam.SSH_LOCATION.getName(), "0.0.0.0");
-        parameters.put(AwsTemplateParam.VOLUME_COUNT.getName(), 3);
-        parameters.put(AwsTemplateParam.VOLUME_SIZE.getName(), 30);
+        templateJson.setVolumeCount(3);
+        templateJson.setVolumeSize(30);
         parameters.put(AwsTemplateParam.VOLUME_TYPE.getName(), "Gp2");
         templateJson.setParameters(parameters);
         assertEquals(underTest.isValid(templateJson, constraintValidatorContext), false);
@@ -131,8 +131,8 @@ public class ProvisionParametersValidatorTest {
         parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), InstanceType.C1Medium.name());
         parameters.put(AwsTemplateParam.REGION.getName(), Regions.AP_NORTHEAST_1);
         parameters.put(AwsTemplateParam.SSH_LOCATION.getName(), "192.0.0.0/256");
-        parameters.put(AwsTemplateParam.VOLUME_COUNT.getName(), 3);
-        parameters.put(AwsTemplateParam.VOLUME_SIZE.getName(), 30);
+        templateJson.setVolumeCount(3);
+        templateJson.setVolumeSize(30);
         parameters.put(AwsTemplateParam.VOLUME_TYPE.getName(), "Gp2");
         templateJson.setParameters(parameters);
         assertEquals(underTest.isValid(templateJson, constraintValidatorContext), false);
@@ -149,8 +149,8 @@ public class ProvisionParametersValidatorTest {
         parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), InstanceType.C1Medium.name());
         parameters.put(AwsTemplateParam.REGION.getName(), Regions.AP_NORTHEAST_1);
         parameters.put(AwsTemplateParam.SSH_LOCATION.getName(), "0.0.0.0/0");
-        parameters.put(AwsTemplateParam.VOLUME_COUNT.getName(), 3);
-        parameters.put(AwsTemplateParam.VOLUME_SIZE.getName(), 30);
+        templateJson.setVolumeCount(3);
+        templateJson.setVolumeSize(30);
         parameters.put(AwsTemplateParam.VOLUME_TYPE.getName(), "invalid");
         templateJson.setParameters(parameters);
         assertEquals(underTest.isValid(templateJson, constraintValidatorContext), false);
