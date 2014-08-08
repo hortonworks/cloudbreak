@@ -31,6 +31,7 @@ public class AwsTemplateConverter extends AbstractConverter<TemplateJson, AwsTem
         props.put(AwsTemplateParam.VOLUME_COUNT.getName(), entity.getVolumeCount());
         props.put(AwsTemplateParam.VOLUME_SIZE.getName(), entity.getVolumeSize());
         props.put(AwsTemplateParam.VOLUME_TYPE.getName(), entity.getVolumeType());
+        props.put(AwsTemplateParam.SPOT_PRICED.getName(), entity.isSpotPriced());
         templateJson.setParameters(props);
         templateJson.setCloudPlatform(CloudPlatform.AWS);
         templateJson.setDescription(entity.getDescription() == null ? "" : entity.getDescription());
@@ -51,6 +52,9 @@ public class AwsTemplateConverter extends AbstractConverter<TemplateJson, AwsTem
         awsTemplate.setVolumeCount((Integer) json.getParameters().get(AwsTemplateParam.VOLUME_COUNT.getName()));
         awsTemplate.setVolumeSize((Integer) json.getParameters().get(AwsTemplateParam.VOLUME_SIZE.getName()));
         awsTemplate.setVolumeType(VolumeType.valueOf(String.valueOf(json.getParameters().get(AwsTemplateParam.VOLUME_TYPE.getName()))));
+        Boolean spotPriced = json.getParameters().containsKey(AwsTemplateParam.SPOT_PRICED.getName())
+                ? (Boolean) json.getParameters().get(AwsTemplateParam.SPOT_PRICED.getName()) : false;
+        awsTemplate.setSpotPriced(spotPriced);
         return awsTemplate;
     }
 }

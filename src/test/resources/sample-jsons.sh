@@ -17,7 +17,7 @@ curl -u cbuser@sequenceiq.com:test123 -X POST -H "Content-Type:application/json"
 
 # create AWS stack & cluster - happy flow
 curl -u cbuser@sequenceiq.com:test123 -sX POST -H "Content-Type:application/json" -d '{"cloudPlatform":"AWS","name":"mykred","parameters":{"roleArn":"arn:aws:iam::755047402263:role/seq-self-cf","ssKeyName":"sequence-eu"}}' http://localhost:8080/credentials | jq .
-curl -u cbuser@sequenceiq.com:test123 -sX POST -H "Content-Type:application/json" -d '{"cloudPlatform":"AWS","name":"awsinstancstemplate2","parameters":{"region":"EU_WEST_1", "amiId":"ami-7778af00","sshLocation":"0.0.0.0/0","instanceType":"T2Small"}}' http://localhost:8080/templates | jq .  
+curl -u cbuser@sequenceiq.com:test123 -sX POST -H "Content-Type:application/json" -d '{"cloudPlatform":"AWS","name":"awsinstancstemplate2","parameters":{"region":"EU_WEST_1", "amiId":"ami-7778af00","sshLocation":"0.0.0.0/0","instanceType":"T2Small", "volumeCount":2, "volumeSize":40, "volumeType":"Gp2", "spotPriced": true}}' http://localhost:8080/templates | jq .  
 curl -u cbuser@sequenceiq.com:test123 -sX POST -H "Content-Type:application/json" -d '{"nodeCount":3, "templateId":"52", "name":"sundaywork2", "credentialId":"52"}' http://localhost:8080/stacks | jq .
 curl -u cbuser@sequenceiq.com:test123 -sX POST -H "Content-Type:application/json" -d '{"url":"https://raw.githubusercontent.com/sequenceiq/ambari-rest-client/master/src/main/resources/blueprints/multi-node-hdfs-yarn"}' http://localhost:8080/blueprints | jq .
 curl -u cbuser@sequenceiq.com:test123 -sX POST -H "Content-Type:application/json" -d '{"clusterName":"full-cloudbreak-api","blueprintId":52}' http://localhost:8080/stacks/51/cluster | jq .

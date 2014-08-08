@@ -26,6 +26,7 @@ public class AwsTemplate extends Template implements ProvisionEntity {
     private Integer volumeCount;
     private Integer volumeSize;
     private VolumeType volumeType;
+    private Boolean spotPriced;
 
     @ManyToOne
     @JoinColumn(name = "awsTemplate_awsTemplateOwner")
@@ -128,4 +129,13 @@ public class AwsTemplate extends Template implements ProvisionEntity {
     public void setVolumeType(VolumeType volumeType) {
         this.volumeType = volumeType;
     }
+
+    public Boolean isSpotPriced() {
+        return spotPriced;
+    }
+
+    public void setSpotPriced(Boolean spotPriced) {
+        this.spotPriced = spotPriced;
+    }
+
 }

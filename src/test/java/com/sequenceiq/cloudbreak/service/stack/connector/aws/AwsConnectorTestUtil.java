@@ -55,6 +55,7 @@ public class AwsConnectorTestUtil extends ConnectorTestUtil {
         awsTemplate.setVolumeCount(2);
         awsTemplate.setVolumeSize(60);
         awsTemplate.setVolumeType(VolumeType.Gp2);
+        awsTemplate.setSpotPriced(false);
         return awsTemplate;
     }
 
