@@ -45,6 +45,26 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                         });
         }
 
+
+
+        $scope.modifyStatusMessage = function(message, name) {
+            var now = new Date();
+            var date = now.toTimeString().split(" ")[0];
+            if (name) {
+                $scope.statusMessage = date + " " + name +  " " + message;
+            }
+        }
+
+        $scope.modifyStatusMessage = function(message) {
+            var now = new Date();
+            var date = now.toTimeString().split(" ")[0];
+            $scope.statusMessage = date + " " + message;
+        }
+
+        $scope.modifyStatusClass = function(status) {
+            $scope.statusclass = status;
+        }
+
         var resetToken = ($location.search()['resetToken']);
         if (resetToken != null) {
            $rootScope.resetToken = resetToken;
@@ -282,8 +302,8 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             }).success(function (data, status, headers, config) {
                 $scope.credentials = data;
             }).error(function (data, status, headers, config) {
-                $scope.statusMessage = data;
-                $scope.statusclass = "has-error";
+                $scope.modifyStatusMessage(data);
+                $scope.modifyStatusClass("has-error");
             });
         }
 
@@ -299,11 +319,11 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 }
             }).success(function (data, status, headers, config) {
                 $scope.getCredentials();
-                $scope.statusMessage = $rootScope.error_msg.credential_delete_success1 + id + $rootScope.error_msg.credential_delete_success2;
-                $scope.statusclass = "has-success";
+                $scope.modifyStatusMessage($rootScope.error_msg.credential_delete_success1 + id + $rootScope.error_msg.credential_delete_success2);
+                $scope.modifyStatusClass("has-success");
             }).error(function (data, status, headers, config) {
-                $scope.statusMessage = data;
-                $scope.statusclass = "has-error";
+                $scope.modifyStatusMessage(data);
+                $scope.modifyStatusClass("has-error");
                 $scope.getCredentials();
             });
         }
@@ -322,8 +342,8 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             }).success(function (data, status, headers, config) {
                 deferred.resolve(data);
             }).error(function (data, status, headers, config) {
-                $scope.statusMessage = data;
-                $scope.statusclass = "has-error";
+                $scope.modifyStatusMessage(data);
+                $scope.modifyStatusClass("has-error");
                 return deferred.reject();
             });
             return deferred.promise;
@@ -385,8 +405,8 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                         break;
                     }
                 }
-                $scope.statusMessage = $rootScope.error_msg.cluster_delete_success1 + id + $rootScope.error_msg.cluster_delete_success2;
-                $scope.statusclass = "has-success";
+                $scope.modifyStatusMessage($rootScope.error_msg.cluster_delete_success1 + id + $rootScope.error_msg.cluster_delete_success2);
+                $scope.modifyStatusClass("has-success");
             }).error(function (data, status, headers, config) {
                 $scope.getStacks();
             });
@@ -440,8 +460,8 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 }
             }).success(function (data, status, headers, config) {
                 $scope.getTemplates();
-                $scope.statusMessage = $rootScope.error_msg.template_delete_success1 + id + $rootScope.error_msg.template_delete_success2;
-                $scope.statusclass = "has-success";
+                $scope.modifyStatusMessage($rootScope.error_msg.template_delete_success1 + id + $rootScope.error_msg.template_delete_success2);
+                $scope.modifyStatusClass("has-success");
             }).error(function (data, status, headers, config) {
                 $scope.getTemplates();
             });
@@ -495,8 +515,8 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 }
             }).success(function (data, status, headers, config) {
                 $scope.getBluePrints();
-                $scope.statusMessage = $rootScope.error_msg.blueprint_delete_success1 + id + $rootScope.error_msg.blueprint_delete_success2;
-                $scope.statusclass = "has-success";
+                $scope.modifyStatusMessage($rootScope.error_msg.blueprint_delete_success1 + id + $rootScope.error_msg.blueprint_delete_success2);
+                $scope.modifyStatusClass("has-success");
             }).error(function (data, status, headers, config) {
                 $scope.getBluePrints();
             });
@@ -575,8 +595,8 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 deferred.resolve(data.id);
                 cl_clusterSize.value = "";
             }).error(function (data, status, headers, config) {
-                $scope.statusMessage = $rootScope.error_msg.full_stack_failed;
-                $scope.statusclass = "has-error";
+                $scope.modifyStatusMessage($rootScope.error_msg.full_stack_failed);
+                $scope.modifyStatusClass("has-error");
                 console.log("Creation of full stack was unsucces: " + data.message);
                 return deferred.reject();
             });
@@ -591,13 +611,13 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
               var blueprintId = selectBlueprint.value
               if($scope.blueprints[i].id === blueprintId) {
                 if ($scope.blueprints[i].hostGroupCount > cl_clusterSize.value){
-                  $scope.statusMessage = $rootScope.error_msg.hostgroup_invalid_node_count;
-                  $scope.statusclass = "has-error";
+                  $scope.modifyStatusMessage($rootScope.error_msg.hostgroup_invalid_node_count);
+                  $scope.modifyStatusClass("has-error");
                   return;
                 }
                 if ($scope.blueprints[i].hostGroupCount === 1 && cl_clusterSize.value != 1){
-                  $scope.statusMessage = $rootScope.error_msg.hostgroup_single_invalid;
-                  $scope.statusclass = "has-error";
+                  $scope.modifyStatusMessage($rootScope.error_msg.hostgroup_single_invalid);
+                  $scope.modifyStatusClass("has-error");
                   return;
                 }
               }
@@ -617,8 +637,8 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                         blueprintId: selectBlueprint.value
                     }
                 }).success(function (data, status, headers, config) {
-                    $scope.statusMessage = $rootScope.error_msg.cluster_success1 + cl_clusterName.value + $rootScope.error_msg.cluster_success2;
-                    $scope.statusclass = "has-success";
+                    $scope.modifyStatusMessage($rootScope.error_msg.cluster_success1 + cl_clusterName.value + $rootScope.error_msg.cluster_success2);
+                    $scope.modifyStatusClass("has-success");
                     console.log("Stack creation was succes: " + data.message);
                     cl_clusterName.value = "";
                     $scope.getStacks() // refresh stack data after cluster creation
@@ -631,8 +651,8 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     $jq('#create-cluster-btn').removeClass('disabled');
                     $jq("#notification-n-filtering").prop("disabled", false);
                 }).error(function (data, status, headers, config) {
-                    $scope.statusMessage = $rootScope.error_msg.cluster_failed;
-                    $scope.statusclass = "has-error";
+                    $scope.modifyStatusMessage($rootScope.error_msg.cluster_failed);
+                    $scope.modifyStatusClass("has-error");
                     console.log("Stack creation failed: " + data.message);
                 });
             }, function(reason) {
@@ -659,21 +679,21 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                       description: bluePrintDescription.value
                   }
               }).success(function (data, status, headers, config) {
-                  $scope.statusMessage = $rootScope.error_msg.blueprint_success1 + data.id + $rootScope.error_msg.blueprint_success2;
-                  $scope.statusclass = "has-success";
+                  $scope.modifyStatusMessage($rootScope.error_msg.blueprint_success1 + data.id + $rootScope.error_msg.blueprint_success2);
+                  $scope.modifyStatusClass("has-success");
                   blueprintUrl.value = "";
                   bluePrintText.value = "";
                   bluePrintName.value = "";
                   bluePrintDescription.value = "";
                   $scope.getBluePrints()
               }).error(function (data, status, headers, config) {
-                  $scope.statusMessage = $rootScope.error_msg.blueprint_failed + data.message;
-                  $scope.statusclass = "has-error";
+                  $scope.modifyStatusMessage($rootScope.error_msg.blueprint_failed + data.message);
+                  $scope.modifyStatusClass("has-error");
                   $scope.isFailedCreation = true;
               });
             } catch(err){
-              $scope.statusMessage = $rootScope.error_msg.blueprint_not_json;
-              $scope.statusclass = "has-error";
+              $scope.modifyStatusMessage($rootScope.error_msg.blueprint_not_json);
+              $scope.modifyStatusClass("has-error");
             }
         }
 
@@ -699,15 +719,15 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     }
                 }
             }).success(function (data, status, headers, config) {
-                $scope.statusMessage = $rootScope.error_msg.aws_template_success1 + data.id + $rootScope.error_msg.aws_template_success2;
-                $scope.statusclass = "has-success";
+                $scope.modifyStatusMessage($rootScope.error_msg.aws_template_success1 + data.id + $rootScope.error_msg.aws_template_success2);
+                $scope.modifyStatusClass("has-success");
                 $scope.getTemplates();
                 aws_tclusterName.value = "";
                 aws_tdescription.value = "";
                 aws_tsshLocation.value = "";
             }).error(function (data, status, headers, config) {
-                $scope.statusMessage = $rootScope.error_msg.aws_template_failed + data.message;
-                $scope.statusclass = "has-error";
+                $scope.modifyStatusMessage($rootScope.error_msg.aws_template_failed + data.message);
+                $scope.modifyStatusClass("has-error");
             });
         }
 
@@ -734,15 +754,15 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     }
                 }
             }).success(function (data, status, headers, config) {
-                $scope.statusMessage = $rootScope.error_msg.azure_template_success1 + data.id + $rootScope.error_msg.azure_template_success2;
-                $scope.statusclass = "has-success";
+                $scope.modifyStatusMessage($rootScope.error_msg.azure_template_success1 + data.id + $rootScope.error_msg.azure_template_success2);
+                $scope.modifyStatusClass("has-success");
                 $scope.getTemplates();
                 azure_tclusterName.value = "";
                 azure_tdescription.value = "";
                 azure_tclusterName.value = "";
             }).error(function (data, status, headers, config) {
-                $scope.statusMessage = $rootScope.error_msg.azure_template_failed + data.message;
-                $scope.statusclass = "has-error";
+                $scope.modifyStatusMessage($rootScope.error_msg.azure_template_failed + data.message);
+                $scope.modifyStatusClass("has-error");
             });
         }
 
@@ -766,16 +786,16 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     }
                 }
             }).success(function (data, status, headers, config) {
-                $scope.statusMessage = $rootScope.error_msg.aws_credential_success1 + data.id + $rootScope.error_msg.aws_credential_success2;
-                $scope.statusclass = "has-success";
+                $scope.modifyStatusMessage($rootScope.error_msg.aws_credential_success1 + data.id + $rootScope.error_msg.aws_credential_success2);
+                $scope.modifyStatusClass("has-success");
                 $scope.getCredentials();
                 awscname.value = "";
                 croleArn.value = "";
                 awscdescription.value = "";
                 aws_sshPublicKey.value = "";
             }).error(function (data, status, headers, config) {
-                $scope.statusMessage = $rootScope.error_msg.aws_credential_failed + data.message;
-                $scope.statusclass = "has-error";
+                $scope.modifyStatusMessage($rootScope.error_msg.aws_credential_failed + data.message);
+                $scope.modifyStatusClass("has-error");
                 $scope.isFailedCreation = true;
             });
         }
@@ -801,8 +821,8 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 }
             }).success(function (data, status, headers, config) {
                 $scope.getCredentials();
-                $scope.statusMessage = $rootScope.error_msg.azure_credential_success1 + data.id + $rootScope.error_msg.azure_credential_success2;
-                $scope.statusclass = "has-success";
+                $scope.modifyStatusMessage($rootScope.error_msg.azure_credential_success1 + data.id + $rootScope.error_msg.azure_credential_success2);
+                $scope.modifyStatusClass("has-success");
                 cname.value = "";
                 cdescription.value = "";
                 csubscriptionId.value = "";
@@ -811,8 +831,8 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 console.log("download" + data.id);
                 $scope.getAzureCertification(data.id);
             }).error(function (data, status, headers, config) {
-                $scope.statusMessage = $rootScope.error_msg.azure_credential_failed + data.message;
-                $scope.statusclass = "has-error";
+                $scope.modifyStatusMessage($rootScope.error_msg.azure_credential_failed + data.message);
+                $scope.modifyStatusClass("has-error");
             });
         }
 
@@ -872,8 +892,8 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     $scope.getBluePrints();
                 });
                 stompClient.subscribe('/user/topic/copyimage', function(info){
-                    $scope.statusMessage = JSON.parse(info.body).detailedMessage;
-                    $scope.statusclass = "has-success";
+                    $scope.modifyStatusMessage(JSON.parse(info.body).detailedMessage);
+                    $scope.modifyStatusClass("has-success");
                 });
 
             });
@@ -900,25 +920,26 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
 
         function logStackInfo(body) {
             if(body.status === 'CREATE_COMPLETED') {
-                $scope.statusMessage = body.name + $rootScope.error_msg.stack_create_completed;
-                $scope.statusclass = "has-success";
+                $scope.modifyStatusMessage($rootScope.error_msg.stack_create_completed, body.name);
+                $scope.modifyStatusClass("has-success");
             } else if(body.status === 'CREATE_IN_PROGRESS')  {
-                $scope.statusMessage = body.name + $rootScope.error_msg.stack_create_failed;
-                $scope.statusclass = "has-success";
+                $scope.modifyStatusMessage($rootScope.error_msg.stack_create_in_progress, body.name);
+                $scope.modifyStatusClass("has-success");
             }  else if(body.status === 'CREATE_FAILED')  {
-                $scope.statusMessage = body.name + $rootScope.error_msg.stack_create_failed;
-                $scope.statusclass = "has-error";
+                $scope.modifyStatusMessage($rootScope.error_msg.stack_create_failed, body.name);
+                $scope.modifyStatusClass("has-error");
             }  else if(body.status === 'DELETE_IN_PROGRESS')  {
-                $scope.statusMessage = body.name + $rootScope.error_msg.stack_delete_in_progress;
-                $scope.statusclass = "has-success";
+                $scope.modifyStatusMessage($rootScope.error_msg.stack_delete_in_progress, body.name);
+                $scope.modifyStatusClass("has-success");
             }  else if(body.status === 'DELETE_COMPLETED')  {
-                $scope.statusMessage = body.name + $rootScope.error_msg.stack_delete_completed;
-                $scope.statusclass = "has-success";
+                $scope.modifyStatusMessage($rootScope.error_msg.stack_delete_completed, body.name);
+                $scope.modifyStatusClass("has-success");
             } else {
-                $scope.statusMessage = body.name + $rootScope.error_msg.stack_else;
-                $scope.statusclass = "has-error";
+                $scope.modifyStatusMessage($rootScope.error_msg.stack_else, body.name);
+                $scope.modifyStatusClass("has-error");
             }
         }
+
 
         function getAmi(regionValue) {
             if(regionValue === 'US_EAST_1') {
@@ -942,17 +963,17 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
 
         function logClusterInfo(body) {
             if(body.status === 'CREATE_COMPLETED') {
-                $scope.statusMessage = body.name + $rootScope.error_msg.cluster_create_completed;
-                $scope.statusclass = "has-success";
+                $scope.modifyStatusMessage($rootScope.error_msg.cluster_create_completed, body.name);
+                $scope.modifyStatusClass("has-success");
             } else if(body.status === 'CREATE_IN_PROGRESS')  {
-                $scope.statusMessage = body.name + $rootScope.error_msg.cluster_create_inprogress;
-                $scope.statusclass = "has-success";
+                $scope.modifyStatusMessage($rootScope.error_msg.cluster_create_inprogress, body.name);
+                $scope.modifyStatusClass("has-success");
             }  else if(body.status === 'CREATE_FAILED') {
-                $scope.statusMessage = body.name + $rootScope.error_msg.cluster_create_failed;
-                $scope.statusclass = "has-error";
+                $scope.modifyStatusMessage($rootScope.error_msg.cluster_create_failed, body.name);
+                $scope.modifyStatusClass("has-error");
             } else {
-                $scope.statusMessage = body.name + $rootScope.error_msg.cluster_else;
-                $scope.statusclass = "has-error";
+                $scope.modifyStatusMessage($rootScope.error_msg.cluster_else, body.name);
+                $scope.modifyStatusClass("has-error");
             }
         }
 
