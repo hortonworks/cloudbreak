@@ -170,6 +170,8 @@ At high level the supported list of components can be grouped into main categori
 | ZOOKEEPER	  | ZOOKEEPER_CLIENT, ZOOKEEPER_SERVER                                      |
 
 
+_Note: You can run Apache Spark on a cluster provisioned with Cloudbreak by using the `multi-node-hdfs-yarn` blueprint, and use Spark in [yarn-mode](https://spark.apache.org/docs/latest/running-on-yarn.html)._
+
 We provide a list of default Hadoop cluster Blueprints for your convenience, however you can always build and use your own Blueprint.
 
 1. Simple single node - Apache Ambari blueprint
