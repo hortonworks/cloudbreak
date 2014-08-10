@@ -114,6 +114,10 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
         }
 
         $scope.signUp = function() {
+            var signUpUserType = "DEFAULT"
+            if (companyAdminCheck.value) {
+               signUpUserType = "COMPANY_ADMIN"
+            }
             $http({
                 method: 'POST',
                 dataType: 'json',
@@ -123,7 +127,8 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     firstName: signUpFirstNameField.value,
                     lastName: signUpLastNameField.value,
                     password: signUpPasswField.value,
-                    company: signUpCompanyField.value
+                    company: signUpCompanyField.value,
+                    userType: signUpUserType
                 }
             }).success(function(responseData){
                 $jq('.outerCarousel').carousel(3);
