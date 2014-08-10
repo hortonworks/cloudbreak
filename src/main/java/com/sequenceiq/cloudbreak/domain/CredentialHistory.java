@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
@@ -8,6 +9,7 @@ import javax.persistence.Table;
 public class CredentialHistory extends AbstractHistory {
     private String dtype;
     private String cloudPlatform;
+    @Column(length = 1000000, columnDefinition = "TEXT")
     private String publickey;
     private String keyPairName;
     private String roleArn;

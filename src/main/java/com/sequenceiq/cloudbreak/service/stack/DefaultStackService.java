@@ -77,13 +77,7 @@ public class DefaultStackService implements StackService {
         }
         LOGGER.debug("Found #{} legacy stacks for user [{}]", legacyStacks.size(), user.getId());
         userStacks.addAll(legacyStacks);
-        legacyStacks.clear();
-        for (Stack stack : userStacks) {
-            if (Boolean.FALSE.equals(stack.getTerminated())) {
-                terminatedStacks.add(stack);
-            }
-        }
-        return terminatedStacks;
+        return userStacks;
     }
 
     private Set<Stack> getCompanyStacks(User user) {
@@ -111,7 +105,7 @@ public class DefaultStackService implements StackService {
     @Override
     public Stack get(User user, Long id) {
         Stack stack = stackRepository.findOne(id);
-        if (stack == null || Boolean.TRUE.equals(stack.getTerminated())) {
+        if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", id));
         }
         return stack;

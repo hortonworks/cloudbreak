@@ -39,7 +39,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
         @NamedQuery(
                 name = "Company.findCompanyAdmin",
                 query = "SELECT u FROM User u "
-                        + "WHERE 'COMPANY_ADMIN' in elements(u.userRole) "
+                        + "WHERE 'COMPANY_ADMIN' in elements(u.userRoles) "
                         + "AND u.company.id= :companyId")
 
 })

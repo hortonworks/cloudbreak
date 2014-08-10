@@ -1,9 +1,12 @@
 package com.sequenceiq.cloudbreak.service.history.converter;
 
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackHistory;
 
+@Component
 public class StackHistoryConverter extends AbstractHistoryConverter<Stack, StackHistory> {
     @Override
     public StackHistory convert(Stack entity) {
@@ -20,7 +23,6 @@ public class StackHistoryConverter extends AbstractHistoryConverter<Stack, Stack
         stackHistory.setStatus(entity.getStatus().name());
         stackHistory.setStatusReason(entity.getStatusReason());
         stackHistory.setTemplateId(entity.getTemplate().getId());
-        stackHistory.setTerminated(entity.getTerminated());
         stackHistory.setVersion(entity.getVersion());
         stackHistory.setDescription(entity.getDescription());
         stackHistory.setUserId(entity.getUser().getId());

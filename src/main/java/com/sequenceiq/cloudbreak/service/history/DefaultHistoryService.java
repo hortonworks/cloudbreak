@@ -117,7 +117,7 @@ public class DefaultHistoryService implements HistoryService<ProvisionEntity> {
             } else if (entity instanceof Stack) {
                 id = ((Stack) entity).getId();
             } else if (entity instanceof Template) {
-                id = ((Blueprint) entity).getId();
+                id = ((Template) entity).getId();
             } else if (entity instanceof Credential) {
                 id = ((Credential) entity).getId();
             }

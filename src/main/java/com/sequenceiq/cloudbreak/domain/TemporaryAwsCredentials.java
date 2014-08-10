@@ -5,7 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 
 @Entity
-public class TemporaryAwsCredentials {
+public class TemporaryAwsCredentials implements ProvisionEntity {
 
     @Id
     private String accessKeyId;

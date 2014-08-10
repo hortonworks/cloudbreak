@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
@@ -14,6 +16,7 @@ public abstract class AbstractHistory implements ProvisionEntity {
 
     private Long userId;
 
+    @Enumerated(EnumType.STRING)
     private HistoryEvent eventType;
 
     private Long eventTimestamp;

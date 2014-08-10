@@ -47,6 +47,5 @@ public class StackDeleteRequestHandler implements Consumer<Event<StackDeleteRequ
             LOGGER.error(String.format("Stack delete failed on {} stack: " , oneWithLists.getId()), ex);
             retryingStackUpdater.updateStackStatus(data.getStackId(), Status.DELETE_FAILED);
         }
-
     }
 }

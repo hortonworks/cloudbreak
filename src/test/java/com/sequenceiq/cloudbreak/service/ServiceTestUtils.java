@@ -47,7 +47,6 @@ public final class ServiceTestUtils {
         Stack stack = new Stack();
         stack.setUser(user);
         stack.getUserRoles().addAll(user.getUserRoles());
-        stack.setTerminated(Boolean.FALSE);
         return stack;
     }
 

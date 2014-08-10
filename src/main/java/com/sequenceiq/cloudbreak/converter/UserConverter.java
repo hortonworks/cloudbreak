@@ -33,9 +33,6 @@ public class UserConverter extends AbstractConverter<UserJson, User> {
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private CompanyConverter companyConverter;
-
-    @Autowired
     private CompanyRepository companyRepository;
 
     @Autowired

@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -49,6 +50,12 @@ public class ExceptionControllerAdvice {
             result.addValidationError(err.getField(), err.getDefaultMessage());
         }
         return new ResponseEntity<>(result, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler({ HttpRequestMethodNotSupportedException.class })
+    public ResponseEntity<ExceptionResult> httpRequestMethodNotSupportedExceptionError(Exception e) {
+        LOGGER.error(e.getMessage(), e);
+        return new ResponseEntity<>(new ExceptionResult("The requested http method not supported on the resource"), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler({ Exception.class })
