@@ -7,9 +7,11 @@ import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -26,39 +28,39 @@ import javax.persistence.Version;
 
 @Entity
 @Table(name = "Stack", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"stack_user", "name" })
+        @UniqueConstraint(columnNames = { "stack_user", "name" })
 })
 @NamedQueries({
         @NamedQuery(
                 name = "Stack.findOne",
                 query = "SELECT c FROM Stack c "
-                        + "WHERE c.id= :id AND c.terminated = false"),
+                        + "WHERE c.id= :id"),
         @NamedQuery(
                 name = "Stack.findById",
                 query = "SELECT c FROM Stack c "
-                        + "WHERE c.id= :id AND c.terminated = false"),
+                        + "WHERE c.id= :id"),
         @NamedQuery(
                 name = "Stack.findAllStackForTemplate",
                 query = "SELECT c FROM Stack c "
-                        + "WHERE c.template.id= :id AND c.terminated = false"),
+                        + "WHERE c.template.id= :id"),
         @NamedQuery(
                 name = "Stack.findStackForCluster",
                 query = "SELECT c FROM Stack c "
-                        + "WHERE c.cluster.id= :id AND c.terminated = false"),
+                        + "WHERE c.cluster.id= :id"),
         @NamedQuery(
                 name = "Stack.findRequestedStacksWithCredential",
                 query = "SELECT c FROM Stack c "
                         + "WHERE c.credential.id= :credentialId "
-                        + "AND c.status= 'REQUESTED' AND c.terminated = false"),
+                        + "AND c.status= 'REQUESTED'"),
         @NamedQuery(
                 name = "Stack.findOneWithLists",
                 query = "SELECT c FROM Stack c "
                         + "LEFT JOIN FETCH c.resources "
-                        + "WHERE c.id= :id AND c.terminated = false"),
+                        + "WHERE c.id= :id"),
         @NamedQuery(
                 name = "Stack.findByStackResourceName",
                 query = "SELECT c FROM Stack c inner join c.resources res "
-                        + "WHERE res.resourceName = :stackName AND res.resourceType = 'CLOUDFORMATION_STACK' AND c.terminated = false")
+                        + "WHERE res.resourceName = :stackName AND res.resourceType = 'CLOUDFORMATION_STACK'")
 })
 public class Stack implements ProvisionEntity {
 
@@ -107,10 +109,12 @@ public class Stack implements ProvisionEntity {
     @OneToMany(mappedBy = "stack", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Resource> resources = new HashSet<>();
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Enumerated(EnumType.STRING)
+    private List<UserRole> userRoles = new ArrayList<>();
+
     @Version
     private Long version;
-
-    private Boolean terminated = Boolean.FALSE;
 
     public String getDescription() {
         return description;
@@ -248,14 +252,6 @@ public class Stack implements ProvisionEntity {
         this.resources = resources;
     }
 
-    public Boolean getTerminated() {
-        return terminated;
-    }
-
-    public void setTerminated(Boolean terminated) {
-        this.terminated = terminated;
-    }
-
     public List<Resource> getResourcesByType(ResourceType resourceType) {
         List<Resource> resourceList = new ArrayList<>();
         for (Resource resource : resources) {
@@ -273,5 +269,13 @@ public class Stack implements ProvisionEntity {
             }
         }
         return null;
+    }
+
+    public List<UserRole> getUserRoles() {
+        return userRoles;
+    }
+
+    public void setUserRoles(List<UserRole> userRoles) {
+        this.userRoles = userRoles;
     }
 }

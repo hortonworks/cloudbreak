@@ -9,6 +9,7 @@ import org.hibernate.validator.constraints.NotBlank;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sequenceiq.cloudbreak.domain.UserType;
 
 public class UserJson implements JsonEntity {
 
@@ -24,8 +25,9 @@ public class UserJson implements JsonEntity {
     @Length(min = 6, max = 200)
     private String password;
 
-    @NotBlank
     private String company;
+
+    private UserType userType = UserType.DEFAULT;
 
     private Set<CredentialJson> credentials;
 
@@ -65,12 +67,12 @@ public class UserJson implements JsonEntity {
         this.email = email;
     }
 
-    public void setCompany(String company) {
-        this.company = company;
-    }
-
     public String getCompany() {
         return company;
+    }
+
+    public void setCompany(String company) {
+        this.company = company;
     }
 
     public Set<TemplateJson> getAwsTemplates() {
@@ -113,13 +115,21 @@ public class UserJson implements JsonEntity {
         this.credentials = credentials;
     }
 
+    @JsonIgnore
+    public String getPassword() {
+        return password;
+    }
+
     @JsonProperty("password")
     public void setPassword(String password) {
         this.password = password;
     }
 
-    @JsonIgnore
-    public String getPassword() {
-        return password;
+    public UserType getUserType() {
+        return userType;
+    }
+
+    public void setUserType(UserType userType) {
+        this.userType = userType;
     }
 }

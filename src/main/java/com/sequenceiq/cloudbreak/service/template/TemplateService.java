@@ -2,17 +2,16 @@ package com.sequenceiq.cloudbreak.service.template;
 
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.controller.json.IdJson;
-import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
+import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.User;
 
 public interface TemplateService {
 
-    Set<TemplateJson> getAll(User user);
+    Set<Template> getAll(User user);
 
-    TemplateJson get(Long id);
+    Template get(Long id);
 
-    IdJson create(User user, TemplateJson templateRequest);
+    Template create(User user, Template templateRequest);
 
     void delete(Long id);
 

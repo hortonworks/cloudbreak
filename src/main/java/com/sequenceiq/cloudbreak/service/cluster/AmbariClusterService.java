@@ -1,25 +1,17 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
-import com.google.common.annotations.VisibleForTesting;
-import groovyx.net.http.HttpResponseException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import reactor.core.Reactor;
-import reactor.event.Event;
-
+import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.controller.json.ClusterRequest;
-import com.sequenceiq.cloudbreak.controller.json.ClusterResponse;
-import com.sequenceiq.cloudbreak.converter.ClusterConverter;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.User;
@@ -27,8 +19,12 @@ import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 
+import groovyx.net.http.HttpResponseException;
+import reactor.core.Reactor;
+import reactor.event.Event;
+
 @Service
-public class AmbariClusterService {
+public class AmbariClusterService implements ClusterService {
 
     public static final String PORT = "8080";
 
@@ -37,8 +33,6 @@ public class AmbariClusterService {
     @Autowired
     private StackRepository stackRepository;
 
-    @Autowired
-    private ClusterConverter clusterConverter;
 
     @Autowired
     private ClusterRepository clusterRepository;
@@ -49,14 +43,14 @@ public class AmbariClusterService {
     @Autowired
     private Reactor reactor;
 
-    public void createCluster(User user, Long stackId, ClusterRequest clusterRequest) {
+    @Override
+    public void createCluster(User user, Long stackId, Cluster cluster) {
         Stack stack = stackRepository.findOne(stackId);
-        LOGGER.info("Cluster requested for stack '{}' [BlueprintId: {}]", stackId, clusterRequest.getBlueprintId());
+        LOGGER.info("Cluster requested for stack '{}' [BlueprintId: {}]", stackId, cluster.getBlueprint().getId());
         if (stack.getCluster() != null) {
             throw new BadRequestException(String.format("A cluster is already created on this stack! [stack: '%s', cluster: '%s']", stackId, stack.getCluster()
                     .getName()));
         }
-        Cluster cluster = clusterConverter.convert(clusterRequest);
         cluster.setUser(user);
         cluster = clusterRepository.save(cluster);
         stack = stackUpdater.updateStackCluster(stack.getId(), cluster);
@@ -64,16 +58,22 @@ public class AmbariClusterService {
         reactor.notify(ReactorConfig.CLUSTER_REQUESTED_EVENT, Event.wrap(stack));
     }
 
-    public ClusterResponse retrieveCluster(User user, Long stackId) {
+    @Override
+    public Cluster retrieveCluster(User user, Long stackId) {
         Stack stack = stackRepository.findOne(stackId);
-        AmbariClient ambariClient = createAmbariClient(stack.getAmbariIp());
+        return stack.getCluster();
+    }
+
+    @Override
+    public String getClusterJson(String ambariIp, Long stackId) {
+        AmbariClient ambariClient = createAmbariClient(ambariIp);
         try {
             String clusterJson = ambariClient.getClusterAsJson();
             if (clusterJson == null) {
                 throw new InternalServerException(String.format("Cluster response coming from Ambari server was null. [Stack: '%s', Ambari Server IP: '%s']",
-                        stackId, stack.getAmbariIp()));
+                        stackId, ambariIp));
             }
-            return clusterConverter.convert(stack.getCluster(), clusterJson);
+            return clusterJson;
         } catch (HttpResponseException e) {
             if ("Not Found".equals(e.getMessage())) {
                 throw new NotFoundException("Ambari blueprint not found.", e);
@@ -83,6 +83,7 @@ public class AmbariClusterService {
         }
     }
 
+    @Override
     @Async
     public void startAllService(User user, Long stackId) {
         Stack stack = stackRepository.findOne(stackId);
@@ -90,6 +91,7 @@ public class AmbariClusterService {
         ambariClient.startAllServices();
     }
 
+    @Override
     @Async
     public void stopAllService(User user, Long stackId) {
         Stack stack = stackRepository.findOne(stackId);
@@ -101,5 +103,4 @@ public class AmbariClusterService {
     protected AmbariClient createAmbariClient(String ambariIp) {
         return new AmbariClient(ambariIp, PORT);
     }
-
 }

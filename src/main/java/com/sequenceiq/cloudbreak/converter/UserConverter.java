@@ -1,12 +1,18 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.json.CredentialJson;
 import com.sequenceiq.cloudbreak.controller.json.UserJson;
 import com.sequenceiq.cloudbreak.domain.User;
-import com.sequenceiq.cloudbreak.service.credential.CredentialService;
+import com.sequenceiq.cloudbreak.domain.UserRole;
+import com.sequenceiq.cloudbreak.repository.CompanyRepository;
 
 @Component
 public class UserConverter extends AbstractConverter<UserJson, User> {
@@ -24,10 +30,16 @@ public class UserConverter extends AbstractConverter<UserJson, User> {
     private BlueprintConverter blueprintConverter;
 
     @Autowired
-    private CredentialService credentialService;
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    private CompanyRepository companyRepository;
+
+    @Autowired
+    private AwsCredentialConverter awsCredentialConverter;
+
+    @Autowired
+    private AzureCredentialConverter azureCredentialConverter;
 
     @Override
     public UserJson convert(User entity) {
@@ -35,13 +47,20 @@ public class UserConverter extends AbstractConverter<UserJson, User> {
         userJson.setEmail(entity.getEmail());
         userJson.setFirstName(entity.getFirstName());
         userJson.setLastName(entity.getLastName());
-        userJson.setCompany(entity.getCompany());
-        userJson.setCredentials(credentialService.getAll(entity));
+        userJson.setCredentials(convertCredentials(entity));
         userJson.setAwsTemplates(awsTemplateConverter.convertAllEntityToJson(entity.getAwsTemplates()));
         userJson.setAzureTemplates(azureTemplateConverter.convertAllEntityToJson(entity.getAzureTemplates()));
         userJson.setStacks(stackConverter.convertAllEntityToJsonWithClause(entity.getStacks()));
         userJson.setBlueprints(blueprintConverter.convertAllToIdList(entity.getBlueprints()));
+        userJson.setCompany(entity.getCompany().getName());
         return userJson;
+    }
+
+    private Set<CredentialJson> convertCredentials(User entity) {
+        Set<CredentialJson> jsons = new HashSet<>();
+        jsons.addAll(awsCredentialConverter.convertAllEntityToJson(entity.getAwsCredentials()));
+        jsons.addAll(azureCredentialConverter.convertAllEntityToJson(entity.getAzureCredentials()));
+        return jsons;
     }
 
     @Override
@@ -50,11 +69,24 @@ public class UserConverter extends AbstractConverter<UserJson, User> {
         user.setEmail(json.getEmail());
         user.setFirstName(json.getFirstName());
         user.setLastName(json.getLastName());
-        user.setCompany(json.getCompany());
         user.setAwsTemplates(awsTemplateConverter.convertAllJsonToEntity(json.getAwsTemplates()));
         user.setAzureTemplates(azureTemplateConverter.convertAllJsonToEntity(json.getAzureTemplates()));
         user.setStacks(stackConverter.convertAllJsonToEntity(json.getStacks()));
         user.setPassword(passwordEncoder.encode(json.getPassword()));
+        user.setCompany(companyRepository.findByName(json.getCompany()));
+
+        switch (json.getUserType()) {
+            case DEFAULT:
+                break;
+            case COMPANY_USER:
+                break;
+            case COMPANY_ADMIN:
+                user.getUserRoles().add(UserRole.COMPANY_ADMIN);
+                break;
+            default:
+                throw new BadRequestException("Unsupported user type.");
+        }
+        user.getUserRoles().add(UserRole.COMPANY_USER);
         return user;
     }
 }

@@ -5,12 +5,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import reactor.event.Event;
-import reactor.function.Consumer;
-
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.service.stack.event.AmbariRoleAllocationComplete;
 import com.sequenceiq.cloudbreak.service.stack.flow.AmbariStartupListener;
+
+import reactor.event.Event;
+import reactor.function.Consumer;
 
 @Component
 public class AmbariRoleAllocationCompleteHandler implements Consumer<Event<AmbariRoleAllocationComplete>> {

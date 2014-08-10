@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.controller;
 
 import java.util.Set;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,11 @@ import com.sequenceiq.cloudbreak.controller.json.InstanceMetaDataJson;
 import com.sequenceiq.cloudbreak.controller.json.StackJson;
 import com.sequenceiq.cloudbreak.controller.json.StatusRequestJson;
 import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
+import com.sequenceiq.cloudbreak.converter.MetaDataConverter;
+import com.sequenceiq.cloudbreak.converter.StackConverter;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.StackDescription;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
 import com.sequenceiq.cloudbreak.security.CurrentUser;
@@ -35,23 +41,39 @@ public class StackController {
     @Autowired
     private StackService stackService;
 
+    @Autowired
+    private StackConverter stackConverter;
+
+    @Autowired
+    private MetaDataConverter metaDataConverter;
+
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<IdJson> createStack(@CurrentUser User user, @RequestBody @Valid StackJson stackRequest) {
-        return new ResponseEntity<>(stackService.create(userRepository.findOneWithLists(user.getId()), stackRequest), HttpStatus.CREATED);
+        User loadedUser = userRepository.findOneWithLists(user.getId());
+        Stack stack = stackConverter.convert(stackRequest);
+        if (stack.getUserRoles().isEmpty()) {
+            stack.getUserRoles().addAll(loadedUser.getUserRoles());
+        }
+        stack = stackService.create(loadedUser, stack);
+        return new ResponseEntity<>(new IdJson(stack.getId()), HttpStatus.CREATED);
     }
 
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<Set<StackJson>> getAllStack(@CurrentUser User user) {
+    public ResponseEntity<Set<StackJson>> getAllStacks(@CurrentUser User user, HttpServletRequest request) {
         User currentUser = userRepository.findOneWithLists(user.getId());
-        return new ResponseEntity<>(stackService.getAll(currentUser), HttpStatus.OK);
+        Set<Stack> stacks = stackService.getAll(currentUser);
+        Set<StackJson> stackJsons = stackConverter.convertAllEntityToJson(stacks);
+        return new ResponseEntity<>(stackJsons, HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "{stackId}")
     @ResponseBody
     public ResponseEntity<StackJson> getStack(@CurrentUser User user, @PathVariable Long stackId) {
-        StackJson stackJson = stackService.get(userRepository.findOne(user.getId()), stackId);
+        Stack stack = stackService.get(user, stackId);
+        StackDescription stackDescription = stackService.getStackDescription(user, stack);
+        StackJson stackJson = stackConverter.convert(stack, stackDescription);
         return new ResponseEntity<>(stackJson, HttpStatus.OK);
     }
 
@@ -64,15 +86,14 @@ public class StackController {
 
     @RequestMapping(method = RequestMethod.PUT, value = "{stackId}")
     @ResponseBody
-    public ResponseEntity<Boolean> startOrStopAllOnStack(@CurrentUser User user, @PathVariable Long stackId,
-            @RequestBody StatusRequestJson statusRequestJson) {
+    public ResponseEntity<Boolean> startOrStopAllOnStack(@CurrentUser User user, @PathVariable Long stackId, @RequestBody StatusRequestJson statusRequestJson) {
         switch (statusRequestJson.getStatusRequest()) {
-        case STOP:
-            return new ResponseEntity<>(stackService.stopAll(user, stackId), HttpStatus.OK);
-        case START:
-            return new ResponseEntity<>(stackService.startAll(user, stackId), HttpStatus.OK);
-        default:
-            throw new BadRequestException("The requested status not valid.");
+            case STOP:
+                return new ResponseEntity<>(stackService.stopAll(user, stackId), HttpStatus.OK);
+            case START:
+                return new ResponseEntity<>(stackService.startAll(user, stackId), HttpStatus.OK);
+            default:
+                throw new BadRequestException("The requested status not valid.");
         }
     }
 
@@ -80,8 +101,8 @@ public class StackController {
     @ResponseBody
     public ResponseEntity<Set<InstanceMetaDataJson>> getStackMetadata(@CurrentUser User user, @PathVariable String hash) {
         try {
-            Set<InstanceMetaDataJson> metaData = stackService.getMetaData(user, hash);
-            return new ResponseEntity<>(metaData, HttpStatus.OK);
+            Set<InstanceMetaData> metaData = stackService.getMetaData(user, hash);
+            return new ResponseEntity<>(metaDataConverter.convertAllEntityToJson(metaData), HttpStatus.OK);
         } catch (MetadataIncompleteException e) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }

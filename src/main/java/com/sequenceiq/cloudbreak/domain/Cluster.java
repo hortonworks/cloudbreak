@@ -18,7 +18,7 @@ import javax.persistence.UniqueConstraint;
         name = "Cluster.findAllClusterByBlueprint",
         query = "SELECT c FROM Cluster c "
                 + "WHERE c.blueprint.id= :id")
-public class Cluster {
+public class Cluster implements ProvisionEntity {
 
     @Id
     @GeneratedValue

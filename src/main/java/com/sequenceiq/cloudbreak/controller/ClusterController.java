@@ -15,28 +15,43 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.sequenceiq.cloudbreak.controller.json.ClusterRequest;
 import com.sequenceiq.cloudbreak.controller.json.ClusterResponse;
 import com.sequenceiq.cloudbreak.controller.json.StatusRequestJson;
+import com.sequenceiq.cloudbreak.converter.ClusterConverter;
+import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.security.CurrentUser;
-import com.sequenceiq.cloudbreak.service.cluster.AmbariClusterService;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Controller
 @RequestMapping("/stacks/{stackId}/cluster")
 public class ClusterController {
 
     @Autowired
-    private AmbariClusterService ambariClusterService;
+    private ClusterConverter clusterConverter;
+
+    @Autowired
+    private ClusterService clusterService;
+
+    @Autowired
+    private StackService stackService;
 
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<String> createCluster(@CurrentUser User user, @PathVariable Long stackId, @RequestBody @Valid ClusterRequest clusterRequest) {
-        ambariClusterService.createCluster(user, stackId, clusterRequest);
+        Cluster cluster = clusterConverter.convert(clusterRequest);
+        clusterService.createCluster(user, stackId, cluster);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<ClusterResponse> retrieveClusters(@CurrentUser User user, @PathVariable Long stackId) {
-        return new ResponseEntity<>(ambariClusterService.retrieveCluster(user, stackId), HttpStatus.OK);
+        Stack stack = stackService.get(user, stackId);
+        Cluster cluster = clusterService.retrieveCluster(user, stackId);
+        String clusterJson = clusterService.getClusterJson(stack.getAmbariIp(), stackId);
+        ClusterResponse response = clusterConverter.convert(cluster, clusterJson);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.PUT)
@@ -44,15 +59,14 @@ public class ClusterController {
     public ResponseEntity<String> startOrStopAllServiceOnCluster(@CurrentUser User user, @PathVariable Long stackId,
             @RequestBody StatusRequestJson statusRequestJson) {
         switch (statusRequestJson.getStatusRequest()) {
-        case STOP:
-            ambariClusterService.stopAllService(user, stackId);
-            return new ResponseEntity<>(HttpStatus.OK);
-        case START:
-            ambariClusterService.startAllService(user, stackId);
-            return new ResponseEntity<>(HttpStatus.OK);
-        default:
-            throw new BadRequestException("The requested status not valid.");
+            case STOP:
+                clusterService.stopAllService(user, stackId);
+                return new ResponseEntity<>(HttpStatus.OK);
+            case START:
+                clusterService.startAllService(user, stackId);
+                return new ResponseEntity<>(HttpStatus.OK);
+            default:
+                throw new BadRequestException("The requested status not valid.");
         }
     }
-
 }

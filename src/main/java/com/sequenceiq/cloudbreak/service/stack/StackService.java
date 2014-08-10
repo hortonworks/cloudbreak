@@ -2,18 +2,18 @@ package com.sequenceiq.cloudbreak.service.stack;
 
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.controller.json.IdJson;
-import com.sequenceiq.cloudbreak.controller.json.InstanceMetaDataJson;
-import com.sequenceiq.cloudbreak.controller.json.StackJson;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.StackDescription;
 import com.sequenceiq.cloudbreak.domain.User;
 
 public interface StackService {
 
-    StackJson get(User user, Long id);
+    Stack create(User user, Stack stack);
 
-    Set<StackJson> getAll(User user);
+    Stack get(User user, Long id);
 
-    IdJson create(User user, StackJson stackRequest);
+    Set<Stack> getAll(User user);
 
     void delete(User user, Long id);
 
@@ -21,5 +21,7 @@ public interface StackService {
 
     Boolean stopAll(User user, Long stackId);
 
-    Set<InstanceMetaDataJson> getMetaData(User one, String hash);
+    Set<InstanceMetaData> getMetaData(User one, String hash);
+
+    StackDescription getStackDescription(User user, Stack stack);
 }

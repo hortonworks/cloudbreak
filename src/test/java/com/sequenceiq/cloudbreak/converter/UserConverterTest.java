@@ -1,20 +1,17 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import com.sequenceiq.cloudbreak.controller.json.UserJson;
-import com.sequenceiq.cloudbreak.controller.json.BlueprintJson;
-import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
-import com.sequenceiq.cloudbreak.controller.json.StackJson;
-import com.sequenceiq.cloudbreak.controller.json.CredentialJson;
-import com.sequenceiq.cloudbreak.domain.User;
-import com.sequenceiq.cloudbreak.domain.UserStatus;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.AwsCredential;
-import com.sequenceiq.cloudbreak.domain.AzureCredential;
-import com.sequenceiq.cloudbreak.domain.AwsTemplate;
-import com.sequenceiq.cloudbreak.domain.AzureTemplate;
-import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.service.credential.CredentialService;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anySetOf;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+import java.util.Date;
+import java.util.HashSet;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -22,16 +19,23 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.Date;
-import java.util.HashSet;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.anySetOf;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import com.sequenceiq.cloudbreak.controller.json.BlueprintJson;
+import com.sequenceiq.cloudbreak.controller.json.CompanyJson;
+import com.sequenceiq.cloudbreak.controller.json.CredentialJson;
+import com.sequenceiq.cloudbreak.controller.json.StackJson;
+import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
+import com.sequenceiq.cloudbreak.controller.json.UserJson;
+import com.sequenceiq.cloudbreak.domain.AwsCredential;
+import com.sequenceiq.cloudbreak.domain.AwsTemplate;
+import com.sequenceiq.cloudbreak.domain.AzureCredential;
+import com.sequenceiq.cloudbreak.domain.AzureTemplate;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.Company;
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.domain.UserStatus;
+import com.sequenceiq.cloudbreak.repository.CompanyRepository;
 
 public class UserConverterTest {
 
@@ -57,10 +61,19 @@ public class UserConverterTest {
     private BlueprintConverter blueprintConverter;
 
     @Mock
-    private CredentialService credentialService;
+    private PasswordEncoder passwordEncoder;
 
     @Mock
-    private PasswordEncoder passwordEncoder;
+    private CompanyConverter companyConverter;
+
+    @Mock
+    private CompanyRepository companyRepository;
+
+    @Mock
+    private AwsCredentialConverter awsCredentialConverter;
+
+    @Mock
+    private AzureCredentialConverter azureCredentialConverter;
 
     private User user;
 
@@ -77,7 +90,6 @@ public class UserConverterTest {
     @Test
     public void testConvertUserEntityToJson() {
         // GIVEN
-        given(credentialService.getAll(user)).willReturn(new HashSet<CredentialJson>());
         given(awsTemplateConverter.convertAllEntityToJson(anySetOf(AwsTemplate.class)))
                 .willReturn(new HashSet<TemplateJson>());
         given(azureTemplateConverter.convertAllEntityToJson(anySetOf(AzureTemplate.class)))
@@ -89,7 +101,7 @@ public class UserConverterTest {
         // WHEN
         UserJson result = underTest.convert(user);
         // THEN
-        assertEquals(result.getCompany(), user.getCompany());
+        assertEquals(result.getCompany(), user.getCompany().getName());
         assertEquals(result.getFirstName(), user.getFirstName());
         assertEquals(result.getStacks().size(), user.getStacks().size());
         assertNotNull(result.getAwsTemplates());
@@ -109,10 +121,16 @@ public class UserConverterTest {
         given(stackConverter.convertAllJsonToEntity(anySetOf(StackJson.class)))
                 .willReturn(new HashSet<Stack>());
         given(passwordEncoder.encode(anyString())).willReturn(DUMMY_PASSWORD);
+
+        given(companyConverter.convert(any(CompanyJson.class))).willReturn(createCompany());
+
+        given(companyRepository.findByName(anyString())).willReturn(createCompany());
+
+
         // WHEN
         User result = underTest.convert(userJson);
         // THEN
-        assertEquals(result.getCompany(), userJson.getCompany());
+        assertEquals(result.getCompany().getName(), userJson.getCompany());
         assertEquals(result.getFirstName(), userJson.getFirstName());
         assertEquals(result.getStacks().size(), userJson.getStacks().size());
         assertNotNull(result.getAwsCredentials());
@@ -133,7 +151,7 @@ public class UserConverterTest {
         user.setAzureTemplates(new HashSet<AzureTemplate>());
         user.setBlueprints(new HashSet<Blueprint>());
         user.setClusters(new HashSet<Cluster>());
-        user.setCompany(DUMMY_COMPANY);
+        user.setCompany(createCompany());
         user.setConfToken(null);
         user.setEmail(DUMMY_EMAIL);
         user.setFirstName(DUMMY_FIRST_NAME);
@@ -152,13 +170,19 @@ public class UserConverterTest {
         userJson.setAwsTemplates(new HashSet<TemplateJson>());
         userJson.setAzureTemplates(new HashSet<TemplateJson>());
         userJson.setBlueprints(new HashSet<BlueprintJson>());
-        userJson.setCompany(DUMMY_COMPANY);
         userJson.setCredentials(new HashSet<CredentialJson>());
         userJson.setEmail(DUMMY_EMAIL);
         userJson.setFirstName(DUMMY_FIRST_NAME);
         userJson.setLastName(DUMMY_LAST_NAME);
         userJson.setPassword(DUMMY_PASSWORD);
         userJson.setStacks(new HashSet<StackJson>());
+        userJson.setCompany("SequenceIQ");
         return userJson;
+    }
+
+    private Company createCompany() {
+        Company company = new Company();
+        company.setName("SequenceIQ");
+        return company;
     }
 }

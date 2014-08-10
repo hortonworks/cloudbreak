@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.StackDescription;
 import com.sequenceiq.cloudbreak.domain.Status;
+import com.sequenceiq.cloudbreak.domain.UserRole;
 
 public class StackJson implements JsonEntity {
 
@@ -22,7 +23,7 @@ public class StackJson implements JsonEntity {
     @Max(value = 99, message = "Count of nodes has to be max 99")
     @Digits(fraction = 0, integer = 10, message = "Node count has to be a number")
     private int nodeCount;
-    @Size(max = 20, min = 2,  message = "Name has to be min 2 letter maximum 20 length")
+    @Size(max = 20, min = 2, message = "Name has to be min 2 letter maximum 20 length")
     @Pattern(regexp = "([a-zA-Z][-a-zA-Z0-9]*)",
             message = "Must contain only alphanumeric characters (case sensitive) and hyphens and start with an alpha character.")
     private String name;
@@ -35,6 +36,7 @@ public class StackJson implements JsonEntity {
     private String hash;
     private ClusterResponse cluster;
     private Set<InstanceMetaDataJson> metadata = new HashSet<>();
+    private Set<UserRole> roles = new HashSet<>();
 
     public StackJson() {
     }
@@ -78,17 +80,17 @@ public class StackJson implements JsonEntity {
         return cloudPlatform;
     }
 
+    @JsonIgnore
+    public void setCloudPlatform(CloudPlatform cloudPlatform) {
+        this.cloudPlatform = cloudPlatform;
+    }
+
     public Long getCredentialId() {
         return credentialId;
     }
 
     public void setCredentialId(Long credentialId) {
         this.credentialId = credentialId;
-    }
-
-    @JsonIgnore
-    public void setCloudPlatform(CloudPlatform cloudPlatform) {
-        this.cloudPlatform = cloudPlatform;
     }
 
     @JsonProperty("description")
@@ -149,5 +151,13 @@ public class StackJson implements JsonEntity {
     @JsonIgnore
     public void setCluster(ClusterResponse cluster) {
         this.cluster = cluster;
+    }
+
+    public Set<UserRole> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<UserRole> roles) {
+        this.roles = roles;
     }
 }

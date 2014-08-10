@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.conf;
 
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -8,13 +10,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.ec2.model.InstanceType;
-import com.sequenceiq.cloudbreak.domain.AwsCredential;
-import com.sequenceiq.cloudbreak.domain.AwsTemplate;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.Company;
 import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.domain.UserRole;
 import com.sequenceiq.cloudbreak.domain.UserStatus;
-import com.sequenceiq.cloudbreak.repository.UserRepository;
+import com.sequenceiq.cloudbreak.repository.CompanyRepository;
 import com.sequenceiq.cloudbreak.service.blueprint.DefaultBlueprintLoaderService;
 
 @Component
@@ -24,8 +25,23 @@ public class UserInitializer implements InitializingBean {
     @Value("${cb.hbm2ddl.strategy:update}")
     private String hbm2ddlStrategy;
 
+    @Value("${cb.default.user.email:cbuser@sequenceiq.com}")
+    private String defaultUserEmail;
+
+    @Value("${cb.default.user.firstname:Firstname}")
+    private String defaultUserFirstName;
+
+    @Value("${cb.default.user.lastname:Lastname}")
+    private String defaultUserLastName;
+
+    @Value("${cb.default.user.password:test123}")
+    private String defaultUserPassword;
+
+    @Value("${cb.default.company.name:SequenceIQ}")
+    private String defaultCompanyName;
+
     @Autowired
-    private UserRepository userRepository;
+    private CompanyRepository companyRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -36,43 +52,23 @@ public class UserInitializer implements InitializingBean {
     @Override
     public void afterPropertiesSet() throws Exception {
         if ("create".equals(hbm2ddlStrategy) || "create-drop".equals(hbm2ddlStrategy)) {
+            Company company = new Company();
+            company.setName(defaultCompanyName);
 
-            User user2 = new User();
-            user2.setEmail("cbuser@sequenceiq.com");
-            user2.setFirstName("seq");
-            user2.setLastName("test");
-            user2.setPassword(passwordEncoder.encode("test123"));
-            user2.setStatus(UserStatus.ACTIVE);
-            user2.setCompany("SequenceIQ");
+            User user = new User();
+            user.setEmail(defaultUserEmail);
+            user.setFirstName(defaultUserFirstName);
+            user.setLastName(defaultUserLastName);
+            user.setPassword(passwordEncoder.encode(defaultUserPassword));
+            user.setStatus(UserStatus.ACTIVE);
+            user.setCompany(company);
+            user.getUserRoles().add(UserRole.COMPANY_ADMIN);
 
-            AwsCredential awsCredential = new AwsCredential();
-            awsCredential.setRoleArn("arn:aws:iam::755047402263:role/seq-self-cf");
-            awsCredential.setAwsCredentialOwner(user2);
-            awsCredential.setPublicKey("ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCasJyap4swb4Hk4xOlnF"
-                    + "3OmKVwzmv2e053yrtvcUPaxCeboSltOBReuTQxX+kYCgKCdtEwpIvEDXk16T6nCI4tSptAalFgp"
-                    + "UWn+JOysCuLuWnwrk6mSKOzEiPYCrB54444mDY6rbBDSRuE/VUYQ/yi0imocARlOiFdPRlZGTN0"
-                    + "XGE1V8LSo+m0oIzTwBKn58I4v5iB4ZUL/6adGXo7dgdBh/Fmm4uYbgrCZnL1EaKpMxSG76XWhuz"
-                    + "FpHjLkRndz88ha0rB6davag6nZGdno5IepLAWg9oB4jTApHwhN2j1rWLN2y1c+pTxsF6LxBiN5r"
-                    + "sYKR495VFmuOepLYz5I8Dn sequence-eu");
-            awsCredential.setName("aws_credential");
-            awsCredential.setKeyPairName("cloudbreak-key");
+            Set<Blueprint> blueprints = defaultBlueprintLoaderService.loadBlueprints(user);
+            user.setBlueprints(blueprints);
+            company.getUsers().add(user);
 
-            user2.getAwsCredentials().add(awsCredential);
-
-            AwsTemplate awsTemplate = new AwsTemplate();
-            awsTemplate.setName("Aws development environment");
-            awsTemplate.setDescription("description sample");
-            awsTemplate.setRegion(Regions.EU_WEST_1);
-            awsTemplate.setAmiId("ami-7778af00");
-            awsTemplate.setInstanceType(InstanceType.T2Small);
-            awsTemplate.setSshLocation("0.0.0.0/0");
-            awsTemplate.setUser(user2);
-
-            user2.getAwsTemplates().add(awsTemplate);
-
-            user2.setBlueprints(defaultBlueprintLoaderService.loadBlueprints(user2));
-
-            userRepository.save(user2);
+            companyRepository.save(company);
         }
     }
 }

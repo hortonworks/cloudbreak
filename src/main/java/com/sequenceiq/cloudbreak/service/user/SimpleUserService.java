@@ -69,6 +69,7 @@ public class SimpleUserService implements UserService {
             user.setConfToken(confToken);
             user.setBlueprints(defaultBlueprintLoaderService.loadBlueprints(user));
             User savedUser = userRepository.save(user);
+
             LOGGER.info("User {} successfully saved", user);
             MimeMessagePreparator msgPreparator = prepareMessage(user, "templates/confirmation-email.ftl",
                     getRegisterUserConfirmPath(), "Cloudbreak - confirm registration");
@@ -86,7 +87,7 @@ public class SimpleUserService implements UserService {
             user.setConfToken(null);
             user.setStatus(UserStatus.ACTIVE);
             user.setRegistrationDate(new Date());
-            userRepository.save(user);
+            User updatedUser = userRepository.save(user);
             return user.getEmail();
         } else {
             LOGGER.warn("There's no user registration pending for confToken: {}", confToken);
@@ -101,7 +102,7 @@ public class SimpleUserService implements UserService {
             user.setPassword(UUID.randomUUID().toString());
             String confToken = DigestUtils.md5DigestAsHex(UUID.randomUUID().toString().getBytes());
             user.setConfToken(confToken);
-            userRepository.save(user);
+            User updatedUser = userRepository.save(user);
             MimeMessagePreparator msgPreparator = prepareMessage(user, getResetTemplate(),
                     getResetPasswordConfirmPath(), "Cloudbreak - reset password");
             sendConfirmationEmail(msgPreparator);
@@ -119,7 +120,7 @@ public class SimpleUserService implements UserService {
         if (user != null) {
             user.setPassword(passwordEncoder.encode(password));
             user.setConfToken(null);
-            userRepository.save(user);
+            User updatedUser = userRepository.save(user);
             return confToken;
         } else {
             LOGGER.warn("There's no user for token: {}", confToken);

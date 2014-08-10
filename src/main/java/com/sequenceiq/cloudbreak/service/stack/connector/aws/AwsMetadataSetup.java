@@ -77,7 +77,7 @@ public class AwsMetadataSetup implements MetadataSetup {
                         instance.getInstanceId(),
                         instance.getPrivateIpAddress(),
                         instance.getPublicIpAddress()
-                        ));
+                ));
             }
         }
 

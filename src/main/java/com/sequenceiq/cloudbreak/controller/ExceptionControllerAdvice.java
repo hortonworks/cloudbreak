@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -51,14 +52,20 @@ public class ExceptionControllerAdvice {
         return new ResponseEntity<>(result, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler({ HttpRequestMethodNotSupportedException.class })
+    public ResponseEntity<ExceptionResult> httpRequestMethodNotSupportedExceptionError(Exception e) {
+        LOGGER.error(e.getMessage(), e);
+        return new ResponseEntity<>(new ExceptionResult("The requested http method not supported on the resource"), HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler({ Exception.class })
     public ResponseEntity<ExceptionResult> serverError(Exception e) {
         LOGGER.error(e.getMessage(), e);
         return new ResponseEntity<>(new ExceptionResult("Internal server error"), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @ExceptionHandler({ DataIntegrityViolationException.class })
-    public ResponseEntity<ExceptionResult> constaintViolation(Exception e) {
+    @ExceptionHandler({ DataIntegrityViolationException.class, RuntimeException.class })
+    public ResponseEntity<ExceptionResult> constraintViolation(Exception e) {
         LOGGER.error(e.getMessage(), e);
         return new ResponseEntity<>(new ExceptionResult("This name is taken, please choose a different one"), HttpStatus.BAD_REQUEST);
     }

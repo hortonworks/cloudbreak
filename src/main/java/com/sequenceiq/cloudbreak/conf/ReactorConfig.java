@@ -25,6 +25,8 @@ public class ReactorConfig {
     public static final String CLUSTER_CREATE_SUCCESS_EVENT = "CLUSTER_CREATE_SUCCESS";
     public static final String CLUSTER_CREATE_FAILED_EVENT = "CLUSTER_CREATE_FAILED";
 
+    public static final String HISTORY_EVENT = "HISTORY_EVENT";
+
     @Bean
     public Environment env() {
         return new Environment();

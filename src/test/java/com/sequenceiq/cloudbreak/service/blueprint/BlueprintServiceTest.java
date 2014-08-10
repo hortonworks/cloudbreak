@@ -3,17 +3,16 @@ package com.sequenceiq.cloudbreak.service.blueprint;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.times;
 import static org.mockito.BDDMockito.verify;
-import static org.mockito.Matchers.anySetOf;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.google.common.collect.Sets;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,20 +24,24 @@ import org.springframework.dao.DataIntegrityViolationException;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.json.BlueprintJson;
-import com.sequenceiq.cloudbreak.controller.json.IdJson;
 import com.sequenceiq.cloudbreak.converter.BlueprintConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.Company;
 import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.domain.UserRole;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
+import com.sequenceiq.cloudbreak.service.ServiceTestUtils;
+import com.sequenceiq.cloudbreak.service.company.CompanyService;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
+
 public class BlueprintServiceTest {
     @InjectMocks
-    private BlueprintService underTest;
+    private DefaultBlueprintService underTest;
 
     @Mock
     private BlueprintRepository blueprintRepository;
@@ -55,17 +58,27 @@ public class BlueprintServiceTest {
     @Mock
     private BlueprintJson blueprintJson;
 
+    @Mock
+    private CompanyService companyService;
+
+
     private User user;
+
+    private Company company;
 
     private Blueprint blueprint;
 
     @Before
     public void setUp() {
-        underTest = new BlueprintService();
+        underTest = new DefaultBlueprintService();
+        company = new Company();
+        company.setId(1L);
+
         MockitoAnnotations.initMocks(this);
         user = new User();
         user.setEmail("dummy@mymail.com");
-        blueprint = createBlueprint();
+        user.setCompany(company);
+        blueprint = ServiceTestUtils.createBlueprint(user);
     }
 
     @Test
@@ -75,7 +88,7 @@ public class BlueprintServiceTest {
         given(blueprintRepository.save(blueprint)).willReturn(blueprint);
         doNothing().when(websocketService).sendToTopicUser(anyString(), any(WebsocketEndPoint.class), any(StatusMessage.class));
         //WHEN
-        IdJson result = underTest.addBlueprint(user, blueprintJson);
+        Blueprint result = underTest.addBlueprint(user, blueprint);
         //THEN
         verify(websocketService, times(1)).sendToTopicUser(anyString(), any(WebsocketEndPoint.class), any(StatusMessage.class));
         Assert.assertEquals(result.getId(), (Long) 1L);
@@ -125,17 +138,6 @@ public class BlueprintServiceTest {
         underTest.delete(1L);
     }
 
-    @Test
-    public void testGetBlueprint() {
-        // GIVEN
-        given(blueprintRepository.findOne(anyLong())).willReturn(blueprint);
-        given(blueprintConverter.convert(blueprint)).willReturn(blueprintJson);
-        // WHEN
-        underTest.get(1L);
-        // THEN
-        verify(blueprintConverter, times(1)).convert(blueprint);
-    }
-
     @Test(expected = NotFoundException.class)
     public void testGetBlueprintWhenBlueprintNotFound() {
         // GIVEN
@@ -145,22 +147,61 @@ public class BlueprintServiceTest {
     }
 
     @Test
-    public void testGetAll() {
+    public void testGetAllForCompanyAdminWithoutCompanyUser() {
         // GIVEN
-        given(blueprintConverter.convertAllEntityToJson(Sets.newHashSet(blueprint)))
-                .willReturn(Sets.newHashSet(blueprintJson));
+        Company company = ServiceTestUtils.createCompany("Blueprint Ltd.", 1L);
+        User admin = ServiceTestUtils.createUser(UserRole.COMPANY_ADMIN, company, 1L);
+        // admin has a blueprint
+        admin.getBlueprints().add(ServiceTestUtils.createBlueprint(admin));
+
         // WHEN
-        underTest.getAll(user);
+        Set<Blueprint> blueprints = underTest.getAll(admin);
+
         // THEN
-        verify(blueprintConverter, times(1)).convertAllEntityToJson(anySetOf(Blueprint.class));
+        Assert.assertNotNull(blueprints);
+        Assert.assertTrue(blueprints.size() == 1);
     }
 
-    private Blueprint createBlueprint() {
-        Blueprint blueprint = new Blueprint();
-        blueprint.setId(1L);
-        blueprint.setUser(user);
-        blueprint.setBlueprintName("dummyName");
-        blueprint.setBlueprintText("dummyText");
-        return blueprint;
+    @Test
+    public void testGetAllForCompanyAdminWithCompanyUserWithBlueprint() {
+        // GIVEN
+        Company company = ServiceTestUtils.createCompany("Blueprint Ltd.", 1L);
+        User admin = ServiceTestUtils.createUser(UserRole.COMPANY_ADMIN, company, 1L);
+        User cUser = ServiceTestUtils.createUser(UserRole.COMPANY_USER, company, 3L);
+        // admin has a blueprint
+        admin.getBlueprints().add(ServiceTestUtils.createBlueprint(admin));
+        // cUser has also one blueprint
+        cUser.getBlueprints().add(ServiceTestUtils.createBlueprint(cUser));
+        given(companyService.companyUsers(company.getId())).willReturn(new HashSet<User>(Arrays.asList(cUser)));
+
+        // WHEN
+        Set<Blueprint> blueprints = underTest.getAll(admin);
+
+        // THEN
+        Assert.assertNotNull(blueprints);
+        Assert.assertTrue("The number of the returned blueprints is right", blueprints.size() == 2);
     }
+
+
+    @Test
+    public void testGetAllForCompanyUserWithVisibleCompanyBlueprints() {
+        // GIVEN
+        Company company = ServiceTestUtils.createCompany("Blueprint Ltd.", 1L);
+        User admin = ServiceTestUtils.createUser(UserRole.COMPANY_ADMIN, company, 1L);
+        User cUser = ServiceTestUtils.createUser(UserRole.COMPANY_USER, company, 3L);
+        // admin has a blueprint, with COMPANY_ADMIN role! (not visible for company users
+        admin.getBlueprints().add(ServiceTestUtils.createBlueprint(admin));
+        // cUser has also one blueprint
+        cUser.getBlueprints().add(ServiceTestUtils.createBlueprint(cUser));
+        given(companyService.companyUserData(company.getId(), UserRole.COMPANY_USER)).willReturn(admin);
+
+        // WHEN
+        Set<Blueprint> blueprints = underTest.getAll(cUser);
+
+        //THEN
+        Assert.assertNotNull(blueprints);
+        Assert.assertTrue("The number of the returned blueprints is right", blueprints.size() == 2);
+    }
+
+
 }

@@ -1,8 +1,6 @@
 package com.sequenceiq.cloudbreak.service.template;
 
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anySetOf;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -12,7 +10,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -27,10 +27,15 @@ import com.sequenceiq.cloudbreak.converter.AzureTemplateConverter;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.Company;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.domain.UserRole;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
+import com.sequenceiq.cloudbreak.service.ServiceTestUtils;
+import com.sequenceiq.cloudbreak.service.company.CompanyService;
 import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
 
 public class SimpleTemplateServiceTest {
@@ -56,6 +61,9 @@ public class SimpleTemplateServiceTest {
     @Mock
     private TemplateJson templateJson;
 
+    @Mock
+    private CompanyService companyService;
+
     private User user;
 
     private AwsTemplate awsTemplate;
@@ -78,11 +86,11 @@ public class SimpleTemplateServiceTest {
     @Test
     public void testCreateAwsTemplate() {
         //GIVEN
-        given(awsTemplateConverter.convert(templateJson)).willReturn(awsTemplate);
         given(templateJson.getCloudPlatform()).willReturn(CloudPlatform.AWS);
         given(templateRepository.save(awsTemplate)).willReturn(awsTemplate);
+        //doNothing().when(historyService).notify(any(ProvisionEntity.class), any(HistoryEvent.class));
         //WHEN
-        underTest.create(user, templateJson);
+        underTest.create(user, awsTemplate);
         //THEN
         verify(templateRepository, times(1)).save(awsTemplate);
     }
@@ -96,7 +104,7 @@ public class SimpleTemplateServiceTest {
         given(templateJson.getCloudPlatform()).willReturn(CloudPlatform.AZURE);
         given(templateRepository.save(azureTemplate)).willReturn(azureTemplate);
         // WHEN
-        underTest.create(user, templateJson);
+        underTest.create(user, azureTemplate);
         // THEN
     }
 
@@ -131,36 +139,48 @@ public class SimpleTemplateServiceTest {
     }
 
     @Test
-    public void testGetAll() {
+    public void testGetAllForCompanyAdminWithCompanyUserWithTemplates() {
         // GIVEN
-        given(awsTemplateConverter.convertAllEntityToJson(anySetOf(AwsTemplate.class))).willReturn(new HashSet<TemplateJson>());
-        given(azureTemplateConverter.convertAllEntityToJson(anySetOf(AzureTemplate.class))).willReturn(new HashSet<TemplateJson>());
+        Company company = ServiceTestUtils.createCompany("Blueprint Ltd.", 1L);
+        User admin = ServiceTestUtils.createUser(UserRole.COMPANY_ADMIN, company, 1L);
+        User cUser = ServiceTestUtils.createUser(UserRole.COMPANY_USER, company, 3L);
+        // admin has credentials
+        admin.getAwsTemplates().add((AwsTemplate) ServiceTestUtils.createTemplate(admin, CloudPlatform.AWS, UserRole.COMPANY_ADMIN));
+        admin.getAzureTemplates().add((AzureTemplate) ServiceTestUtils.createTemplate(admin, CloudPlatform.AZURE, UserRole.COMPANY_ADMIN));
+        // cUser also has credentials
+        cUser.getAwsTemplates().add((AwsTemplate) ServiceTestUtils.createTemplate(admin, CloudPlatform.AWS, UserRole.COMPANY_USER));
+        given(companyService.companyUsers(company.getId())).willReturn(new HashSet<User>(Arrays.asList(cUser)));
+
         // WHEN
-        underTest.getAll(user);
+        Set<Template> templates = underTest.getAll(admin);
+
         // THEN
-        verify(awsTemplateConverter, times(1)).convertAllEntityToJson(anySetOf(AwsTemplate.class));
-        verify(azureTemplateConverter, times(1)).convertAllEntityToJson(anySetOf(AzureTemplate.class));
+        Assert.assertNotNull(templates);
+        Assert.assertTrue("The number of the returned blueprints is right", templates.size() == 3);
     }
 
-    @Test
-    public void testGetAwsTemplate() {
-        // GIVEN
-        given(templateRepository.findOne(1L)).willReturn(awsTemplate);
-        given(awsTemplateConverter.convert(any(AwsTemplate.class))).willReturn(templateJson);
-        // WHEN
-        underTest.get(1L);
-        // THEN
-        verify(awsTemplateConverter, times(1)).convert(any(AwsTemplate.class));
-    }
 
     @Test
-    public void testGetAzureTemplate() {
+    public void testGetAllForCompanyUserWithVisibleCompanyTemplates() {
+
         // GIVEN
-        given(templateRepository.findOne(1L)).willReturn(azureTemplate);
-        given(azureTemplateConverter.convert(any(AzureTemplate.class))).willReturn(templateJson);
+        Company company = ServiceTestUtils.createCompany("Blueprint Ltd.", 1L);
+        User admin = ServiceTestUtils.createUser(UserRole.COMPANY_ADMIN, company, 1L);
+        User cUser = ServiceTestUtils.createUser(UserRole.COMPANY_USER, company, 3L);
+        // admin has credentials
+        admin.getAwsTemplates().add((AwsTemplate) ServiceTestUtils.createTemplate(admin, CloudPlatform.AWS, UserRole.COMPANY_ADMIN));
+        admin.getAzureTemplates().add((AzureTemplate) ServiceTestUtils.createTemplate(admin, CloudPlatform.AZURE, UserRole.COMPANY_USER));
+        // cUser also has credentials
+        cUser.getAwsTemplates().add((AwsTemplate) ServiceTestUtils.createTemplate(admin, CloudPlatform.AWS, UserRole.COMPANY_USER));
+        given(companyService.companyUserData(company.getId(), UserRole.COMPANY_USER)).willReturn(admin);
+
         // WHEN
-        underTest.get(1L);
+        Set<Template> templates = underTest.getAll(cUser);
+
         // THEN
-        verify(azureTemplateConverter, times(1)).convert(any(AzureTemplate.class));
+        Assert.assertNotNull(templates);
+        Assert.assertTrue("The number of the returned blueprints is right", templates.size() == 3);
+
     }
+
 }

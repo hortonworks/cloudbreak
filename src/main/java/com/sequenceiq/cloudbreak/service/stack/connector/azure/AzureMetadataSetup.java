@@ -48,7 +48,7 @@ public class AzureMetadataSetup implements MetadataSetup {
     public void setupMetadata(Stack stack) {
         AzureCredential azureCredential = (AzureCredential) stack.getCredential();
 
-        String filePath = AzureCertificateService.getUserJksFileName(azureCredential,  stack.getUser().emailAsFolder());
+        String filePath = AzureCertificateService.getUserJksFileName(azureCredential, stack.getUser().emailAsFolder());
         AzureClient azureClient = azureStackUtil.createAzureClient(azureCredential, filePath);
         String name = stack.getName().replaceAll("\\s+", "");
         Set<CoreInstanceMetaData> instanceMetaDatas = collectMetaData(stack, azureClient, name);
