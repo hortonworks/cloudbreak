@@ -1,11 +1,15 @@
-# add cluster
+# cluster
 curl -X POST -H "Content-Type: application/json" -d '{"host":"172.24.0.2", "port":"8080", "user":"admin", "pass":"admin"}' localhost:8081/clusters/multi-node | jq .
+curl -X GET localhost:8081/clusters/multi-node | jq .
+curl -X GET localhost:8081/clusters | jq .
+curl -X DELETE localhost:8081/clusters/multi-node | jq .
 
 # set random priority
 curl -X POST -H "Content-Type: application/json" localhost:8081/clusters/multi-node/apps/random |jq .
 
 # list all app
-curl -X GET -H "Content-Type: application/json" localhost:8081/clusters/multi-node/apps | jq .
+curl -X GET localhost:8081/clusters/multi-node/apps | jq .
 
 # add cloudbreak policy to cluster
-curl -X POST -H "Content-Type: application/json" -d '{"scaleUpRules":{"resourcesBelow":{"limit":"4","freeResourceRate":"0.2"},"pendingApps":{"limit":"4","pendingApps":"5"},"pendingContainers":{"limit":"4","pendingContainers":"10"}},"scaleDownRules":{"resourcesAbove":{"limit":"3","freeResourceRate":"0.4"}}} 'localhost:8081/clusters/multi-node/policy/cloudbreak |jq .
+curl -X POST -H "Content-Type: application/json" -d '{"scaleUpRules":{"resourcesBelow":{"limit":"4","freeResourceRate":"0.2"},"pendingApps":{"limit":"4","pendingApps":"5"},"pendingContainers":{"limit":"4","pendingContainers":"10"}},"scaleDownRules":{"resourcesAbove":{"limit":"3","freeResourceRate":"0.4"}}}' localhost:8081/clusters/multi-node/policy/cloudbreak | jq .
+curl -X GET localhost:8081/clusters/multi-node/policy/cloudbreak | jq .

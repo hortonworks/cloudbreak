@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.periscope.monitor.event.ClusterMetricsUpdateEvent;
 import com.sequenceiq.periscope.registry.Cluster;
-import com.sequenceiq.periscope.registry.ClusterRegistry;
+import com.sequenceiq.periscope.service.ClusterService;
 
 @Component
 public class ClusterMetricsUpdateEventHandler implements ApplicationListener<ClusterMetricsUpdateEvent> {
@@ -17,12 +17,15 @@ public class ClusterMetricsUpdateEventHandler implements ApplicationListener<Clu
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterMetricsUpdateEventHandler.class);
 
     @Autowired
-    private ClusterRegistry clusterRegistry;
+    private ClusterService clusterService;
 
     @Override
     public void onApplicationEvent(ClusterMetricsUpdateEvent event) {
         ClusterMetricsInfo metrics = event.getClusterMetricsInfo();
-        Cluster cluster = clusterRegistry.get(event.getClusterId());
+        Cluster cluster = clusterService.get(event.getClusterId());
+        if (cluster == null) {
+            return;
+        }
         cluster.updateMetrics(metrics);
         int newNodeCount = cluster.scale();
         if (newNodeCount > 0) {

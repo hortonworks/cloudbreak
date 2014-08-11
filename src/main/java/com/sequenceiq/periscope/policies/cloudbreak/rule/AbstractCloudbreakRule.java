@@ -1,6 +1,6 @@
 package com.sequenceiq.periscope.policies.cloudbreak.rule;
 
-public abstract class AbstractAdjustmentRule implements ClusterAdjustmentRule {
+public abstract class AbstractCloudbreakRule implements CloudbreakRule {
 
     private String name;
     private int limit;

@@ -6,7 +6,7 @@ import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.ClusterMetricsIn
 
 import com.sequenceiq.periscope.policies.NamedRule;
 
-public interface ClusterAdjustmentRule extends NamedRule {
+public interface CloudbreakRule extends NamedRule {
 
     /**
      * Invoked when creating the rule.
@@ -18,8 +18,7 @@ public interface ClusterAdjustmentRule extends NamedRule {
     /**
      * Scale up or down to the required number of nodes.
      *
-     * @param clusterInfo
-     * @return
+     * @param clusterInfo cluster metrics obtained from the cluster
      */
     int scale(ClusterMetricsInfo clusterInfo);
 

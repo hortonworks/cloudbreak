@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.ClusterMetricsInfo;
 
-public class ResourcesBelowRule extends AbstractAdjustmentRule implements ClusterAdjustmentRule {
+public class ResourcesBelowRule extends AbstractCloudbreakRule implements CloudbreakRule {
 
     public static final String NAME = "resourcesBelow";
     private double freeResourceRate;

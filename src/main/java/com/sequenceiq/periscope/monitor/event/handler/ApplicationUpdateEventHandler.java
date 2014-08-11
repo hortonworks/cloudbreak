@@ -26,7 +26,7 @@ import com.sequenceiq.periscope.model.Priority;
 import com.sequenceiq.periscope.model.SchedulerApplication;
 import com.sequenceiq.periscope.monitor.event.ApplicationUpdateEvent;
 import com.sequenceiq.periscope.registry.Cluster;
-import com.sequenceiq.periscope.registry.ClusterRegistry;
+import com.sequenceiq.periscope.service.ClusterService;
 
 @Component
 public class ApplicationUpdateEventHandler implements ApplicationListener<ApplicationUpdateEvent> {
@@ -35,7 +35,7 @@ public class ApplicationUpdateEventHandler implements ApplicationListener<Applic
     private static final int MAX_CAPACITY = 100;
 
     @Autowired
-    private ClusterRegistry clusterRegistry;
+    private ClusterService clusterService;
 
     @Override
     public void onApplicationEvent(ApplicationUpdateEvent event) {
@@ -43,7 +43,10 @@ public class ApplicationUpdateEventHandler implements ApplicationListener<Applic
         SchedulerInfo schedulerInfo = event.getSchedulerInfo();
 
         List<CapacitySchedulerQueueInfo> allQueueInfo = getAllQueueInfo(schedulerInfo);
-        Cluster cluster = clusterRegistry.get(event.getClusterId());
+        Cluster cluster = clusterService.get(event.getClusterId());
+        if (cluster == null) {
+            return;
+        }
 
         Map<Priority, Map<ApplicationId, SchedulerApplication>> apps = cluster.getApplicationsPriorityOrder();
         Set<ApplicationId> activeApps = new HashSet<>();

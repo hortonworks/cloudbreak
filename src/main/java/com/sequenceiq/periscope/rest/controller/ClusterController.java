@@ -16,13 +16,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sequenceiq.periscope.registry.Cluster;
-import com.sequenceiq.periscope.registry.ClusterRegistry;
 import com.sequenceiq.periscope.registry.ConnectionException;
 import com.sequenceiq.periscope.rest.converter.AmbariConverter;
 import com.sequenceiq.periscope.rest.converter.ClusterConverter;
 import com.sequenceiq.periscope.rest.json.AmbariJson;
 import com.sequenceiq.periscope.rest.json.ClusterJson;
 import com.sequenceiq.periscope.rest.json.IdJson;
+import com.sequenceiq.periscope.service.ClusterService;
 
 @RestController
 @RequestMapping("/clusters")
@@ -31,7 +31,7 @@ public class ClusterController {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterController.class);
 
     @Autowired
-    private ClusterRegistry clusterRegistry;
+    private ClusterService clusterService;
     @Autowired
     private AmbariConverter ambariConverter;
     @Autowired
@@ -40,19 +40,19 @@ public class ClusterController {
     @RequestMapping(value = "/{id}", method = RequestMethod.POST)
     public ResponseEntity<IdJson> addCluster(@PathVariable String id, @RequestBody AmbariJson ambariServer) {
         try {
-            clusterRegistry.add(id, ambariConverter.convert(ambariServer));
+            clusterService.add(id, ambariConverter.convert(ambariServer));
         } catch (ConnectionException e) {
             LOGGER.error("Error adding the ambari cluster {} to the registry", ambariServer.getHost(), e);
-            return new ResponseEntity<>(new IdJson(""), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(IdJson.emptyJson(), HttpStatus.BAD_REQUEST);
         }
         return new ResponseEntity<>(new IdJson(id), HttpStatus.CREATED);
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public ResponseEntity<ClusterJson> getCluster(@PathVariable String id) {
-        Cluster cluster = clusterRegistry.get(id);
+        Cluster cluster = clusterService.get(id);
         if (cluster == null) {
-            return new ResponseEntity<>(new ClusterJson("", "", ""), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(ClusterJson.emptyJson(), HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(clusterConverter.convert(cluster), HttpStatus.OK);
     }
@@ -60,16 +60,16 @@ public class ClusterController {
     @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<List<ClusterJson>> getClusters() {
         List<ClusterJson> result = new ArrayList<>();
-        Collection<Cluster> clusters = clusterRegistry.getAll();
+        Collection<Cluster> clusters = clusterService.getAll();
         result.addAll(clusterConverter.convertAllToJson(clusters));
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
     public ResponseEntity<ClusterJson> deleteCluster(@PathVariable String id) {
-        Cluster cluster = clusterRegistry.remove(id);
+        Cluster cluster = clusterService.remove(id);
         if (cluster == null) {
-            return new ResponseEntity<>(new ClusterJson("", "", ""), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(ClusterJson.emptyJson(), HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(clusterConverter.convert(cluster), HttpStatus.OK);
     }

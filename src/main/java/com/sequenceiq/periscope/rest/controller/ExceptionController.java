@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.sequenceiq.periscope.rest.ExceptionMessage;
-import com.sequenceiq.periscope.service.ClusterNotFoundException;
 
 @ControllerAdvice
 public class ExceptionController {
@@ -23,7 +22,7 @@ public class ExceptionController {
         return createExceptionMessage(e.getMessage());
     }
 
-    @ExceptionHandler({ ClusterNotFoundException.class, NoSuchElementException.class })
+    @ExceptionHandler(NoSuchElementException.class)
     public ResponseEntity<ExceptionMessage> handleNotFoundExceptions(Exception e) {
         LOGGER.error("Not found", e);
         String message = e.getMessage();

@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.ClusterMetricsInfo;
 
-public class PendingAppsRule extends AbstractAdjustmentRule implements ClusterAdjustmentRule {
+public class PendingAppsRule extends AbstractCloudbreakRule implements CloudbreakRule {
 
     public static final String NAME = "pendingApps";
     private int pendingAppsLimit;

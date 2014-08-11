@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.periscope.model.Ambari;
 import com.sequenceiq.periscope.model.Priority;
 import com.sequenceiq.periscope.model.SchedulerApplication;
-import com.sequenceiq.periscope.policies.cloudbreak.ClusterAdjustmentPolicy;
+import com.sequenceiq.periscope.policies.cloudbreak.CloudbreakPolicy;
 import com.sequenceiq.periscope.service.configuration.AmbariConfigurationService;
 import com.sequenceiq.periscope.service.configuration.ConfigParam;
 
@@ -29,7 +29,7 @@ public class Cluster {
     private final YarnClient yarnClient;
     private final Map<Priority, Map<ApplicationId, SchedulerApplication>> applications;
     private ClusterMetricsInfo metrics;
-    private ClusterAdjustmentPolicy clusterAdjustmentPolicy;
+    private CloudbreakPolicy cloudbreakPolicy;
 
     public Cluster(String clusterId, Ambari ambari) throws ConnectionException {
         this.clusterId = clusterId;
@@ -69,16 +69,16 @@ public class Cluster {
         return metrics == null ? 0 : metrics.getTotalMB();
     }
 
-    public ClusterAdjustmentPolicy getClusterAdjustmentPolicy() {
-        return clusterAdjustmentPolicy;
+    public CloudbreakPolicy getCloudbreakPolicy() {
+        return cloudbreakPolicy;
     }
 
-    public void setClusterAdjustmentPolicy(ClusterAdjustmentPolicy clusterAdjustmentPolicy) {
-        this.clusterAdjustmentPolicy = clusterAdjustmentPolicy;
+    public void setCloudbreakPolicy(CloudbreakPolicy cloudbreakPolicy) {
+        this.cloudbreakPolicy = cloudbreakPolicy;
     }
 
     public int scale() {
-        return metrics == null || clusterAdjustmentPolicy == null ? 0 : clusterAdjustmentPolicy.scale(metrics);
+        return metrics == null || cloudbreakPolicy == null ? 0 : cloudbreakPolicy.scale(metrics);
     }
 
     public void updateMetrics(ClusterMetricsInfo metrics) {

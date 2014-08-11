@@ -18,4 +18,8 @@ public class IdJson implements Json {
     public void setId(String id) {
         this.id = id;
     }
+
+    public static IdJson emptyJson() {
+        return new IdJson("");
+    }
 }

@@ -2,7 +2,7 @@ package com.sequenceiq.periscope.rest.converter;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.periscope.model.CloudbreakPolicy;
+import com.sequenceiq.periscope.policies.cloudbreak.CloudbreakPolicy;
 import com.sequenceiq.periscope.rest.json.CloudbreakPolicyJson;
 
 @Component
@@ -10,7 +10,11 @@ public class CloudbreakPolicyConverter extends AbstractConverter<CloudbreakPolic
 
     @Override
     public CloudbreakPolicy convert(CloudbreakPolicyJson source) {
-        return new CloudbreakPolicy(source);
+        return new CloudbreakPolicy(source.getScaleUpRules(), source.getScaleDownRules());
     }
 
+    @Override
+    public CloudbreakPolicyJson convert(CloudbreakPolicy source) {
+        return new CloudbreakPolicyJson(source.getScaleUpConfig(), source.getScaleDownConfig());
+    }
 }

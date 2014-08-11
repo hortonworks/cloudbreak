@@ -38,4 +38,8 @@ public class ClusterJson implements Json {
     public void setPort(String port) {
         this.port = port;
     }
+
+    public static ClusterJson emptyJson() {
+        return new ClusterJson("", "", "");
+    }
 }
