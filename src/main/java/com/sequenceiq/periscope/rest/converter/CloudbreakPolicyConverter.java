@@ -10,11 +10,11 @@ public class CloudbreakPolicyConverter extends AbstractConverter<CloudbreakPolic
 
     @Override
     public CloudbreakPolicy convert(CloudbreakPolicyJson source) {
-        return new CloudbreakPolicy(source.getScaleUpRules(), source.getScaleDownRules());
+        return new CloudbreakPolicy(source.getScaleUpRules(), source.getScaleDownRules(), source.getJarUrl());
     }
 
     @Override
     public CloudbreakPolicyJson convert(CloudbreakPolicy source) {
-        return new CloudbreakPolicyJson(source.getScaleUpConfig(), source.getScaleDownConfig());
+        return new CloudbreakPolicyJson(source.getScaleUpConfig(), source.getScaleDownConfig(), source.getJarUrl());
     }
 }

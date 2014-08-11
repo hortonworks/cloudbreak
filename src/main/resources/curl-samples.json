@@ -12,4 +12,5 @@ curl -X GET localhost:8081/clusters/multi-node/apps | jq .
 
 # add cloudbreak policy to cluster
 curl -X POST -H "Content-Type: application/json" -d '{"scaleUpRules":{"resourcesBelow":{"limit":"4","freeResourceRate":"0.2"},"pendingApps":{"limit":"4","pendingApps":"5"},"pendingContainers":{"limit":"4","pendingContainers":"10"}},"scaleDownRules":{"resourcesAbove":{"limit":"3","freeResourceRate":"0.4"}}}' localhost:8081/clusters/multi-node/policy/cloudbreak | jq .
+curl -X POST -H "Content-Type: application/json" -d '{"jarUrl":"https://dl.dropboxusercontent.com/u/13919958/lostnodes.jar", "scaleUpRules":{"com.sequenceiq.periscope.policies.cloudbreak.rule.LostNodesRule":{"limit":"4", "lostNodes":"2"},"pendingApps":{"limit":"4","pendingApps":"5"},"pendingContainers":{"limit":"4","pendingContainers":"10"}},"scaleDownRules":{"resourcesAbove":{"limit":"3","freeResourceRate":"0.4"}}}' localhost:8081/clusters/multi-node/policy/cloudbreak | jq .
 curl -X GET localhost:8081/clusters/multi-node/policy/cloudbreak | jq .

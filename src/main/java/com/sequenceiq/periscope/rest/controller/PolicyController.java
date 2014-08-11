@@ -11,9 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.sequenceiq.periscope.policies.cloudbreak.CloudbreakPolicy;
 import com.sequenceiq.periscope.rest.converter.CloudbreakPolicyConverter;
-import com.sequenceiq.periscope.rest.converter.DynamicCbPolicyConverter;
 import com.sequenceiq.periscope.rest.json.CloudbreakPolicyJson;
-import com.sequenceiq.periscope.rest.json.DynamicCbPolicyJson;
 import com.sequenceiq.periscope.service.PolicyService;
 
 @RestController
@@ -24,17 +22,26 @@ public class PolicyController {
     private PolicyService policyService;
     @Autowired
     private CloudbreakPolicyConverter cloudbreakPolicyConverter;
-    @Autowired
-    private DynamicCbPolicyConverter dynamicCbPolicyConverter;
 
     @RequestMapping(value = "/cloudbreak", method = RequestMethod.POST)
     public ResponseEntity<CloudbreakPolicyJson> createRules(@PathVariable String clusterId, @RequestBody CloudbreakPolicyJson policyJson) {
-        return setRules(clusterId, policyJson, cloudbreakPolicyConverter.convert(policyJson));
-    }
-
-    @RequestMapping(value = "/cloudbreak/dynamic", method = RequestMethod.POST)
-    public ResponseEntity<CloudbreakPolicyJson> createRules(@PathVariable String clusterId, @RequestBody DynamicCbPolicyJson policyJson) {
-        return setRules(clusterId, policyJson, dynamicCbPolicyConverter.convert(policyJson));
+        CloudbreakPolicy policy = cloudbreakPolicyConverter.convert(policyJson);
+        boolean added = policyService.setCloudbreakPolicy(clusterId, policy);
+        HttpStatus status;
+        if (added) {
+            status = HttpStatus.OK;
+            CloudbreakPolicyJson response = cloudbreakPolicyConverter.convert(getCloudbreakPolicy(clusterId));
+            if (areRulesOmitted(policyJson, response)) {
+                response.setMessage("Policy added, but some rules are omitted");
+                policyJson = response;
+            } else {
+                policyJson.setMessage("Policy successfully added");
+            }
+        } else {
+            status = HttpStatus.NOT_FOUND;
+            policyJson.setMessage("Cluster not found");
+        }
+        return new ResponseEntity<>(policyJson, status);
     }
 
     @RequestMapping(value = "/cloudbreak", method = RequestMethod.GET)
@@ -50,26 +57,6 @@ public class PolicyController {
             json = cloudbreakPolicyConverter.convert(policy);
         }
         return new ResponseEntity<>(json, status);
-    }
-
-    private ResponseEntity<CloudbreakPolicyJson> setRules(String clusterId, CloudbreakPolicyJson json, CloudbreakPolicy policy) {
-        CloudbreakPolicyJson resultJson = json;
-        boolean added = policyService.setCloudbreakPolicy(clusterId, policy);
-        HttpStatus status;
-        if (added) {
-            status = HttpStatus.OK;
-            CloudbreakPolicyJson response = cloudbreakPolicyConverter.convert(getCloudbreakPolicy(clusterId));
-            if (areRulesOmitted(resultJson, response)) {
-                response.setMessage("Policy added, but some rules are omitted");
-                resultJson = response;
-            } else {
-                resultJson.setMessage("Policy successfully added");
-            }
-        } else {
-            status = HttpStatus.NOT_FOUND;
-            resultJson.setMessage("Cluster not found");
-        }
-        return new ResponseEntity<>(resultJson, status);
     }
 
     private boolean areRulesOmitted(CloudbreakPolicyJson json1, CloudbreakPolicyJson json2) {
