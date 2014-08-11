@@ -28,11 +28,11 @@ public class UpdateFailedEventHandler implements ApplicationListener<UpdateFaile
         Integer failed = updateFailures.get(id);
         if (failed == null) {
             updateFailures.put(id, 1);
-        } else if (RETRY_THRESHOLD - 1 == failed.intValue()) {
+        } else if (RETRY_THRESHOLD - 1 == failed) {
             clusterRegistry.remove(id);
             updateFailures.remove(id);
         } else {
-            updateFailures.put(id, failed.intValue() + 1);
+            updateFailures.put(id, failed + 1);
         }
     }
 }

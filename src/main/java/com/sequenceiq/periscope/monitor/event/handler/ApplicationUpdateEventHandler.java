@@ -115,7 +115,7 @@ public class ApplicationUpdateEventHandler implements ApplicationListener<Applic
 
     private boolean isApplicationHighPriority(Map<Priority, Map<ApplicationId, SchedulerApplication>> apps, ApplicationId id) {
         Map<ApplicationId, SchedulerApplication> high = apps.get(Priority.HIGH);
-        return high == null ? false : high.containsKey(id);
+        return high != null && high.containsKey(id);
     }
 
     private void removeApplicationIfFinished(Cluster cluster, Set<ApplicationId> activeApps,

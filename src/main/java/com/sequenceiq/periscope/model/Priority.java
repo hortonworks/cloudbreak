@@ -40,9 +40,7 @@ public class Priority implements Comparable<Priority> {
     }
 
     public static Priority of(int value) {
-        int val = value < 0 ? 0 : value;
-        val = val > Integer.MAX_VALUE ? Integer.MAX_VALUE : val;
-        return new Priority(val);
+        return new Priority(value < 0 ? 0 : value);
     }
 
     @Override
