@@ -26,26 +26,24 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
         var confirmSignUpToken = ($location.search()['confirmSignUpToken']);
         if (confirmSignUpToken != null) {
             $http.get('connection.properties').then(function (response) {
-                            $rootScope.apiUrl = response.data.backend_url;
-                            $http({
-                              url: $rootScope.apiUrl + '/users/confirm/' + confirmSignUpToken,
-                              method: "GET",
-                              headers: {'Content-Type': 'application/x-www-form-urlencoded'}
-                              }).success(function(responseData){
-                                 if (responseData && responseData.length != 0) {
-                                    $jq('.outerCarousel').carousel(1);
-                                 } else {
-                                     $scope.errormessage = $rootScope.error_msg.signup_confirmation_failed;
-                                     $jq("#errorDialog").modal('show');
-                                 }
-                              }).error(function (data, status, headers, config) {
-                                    $scope.errormessage = $rootScope.error_msg.signup_confirmation_failed;
-                                    $jq("#errorDialog").modal('show');
-                              });
-                        });
+                $rootScope.apiUrl = response.data.backend_url;
+                $http({
+                    url: $rootScope.apiUrl + '/users/confirm/' + confirmSignUpToken,
+                    method: "GET",
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+                }).success(function(responseData){
+                    if (responseData && responseData.length != 0) {
+                        $jq('.outerCarousel').carousel(1);
+                        } else {
+                        $scope.errormessage = $rootScope.error_msg.signup_confirmation_failed;
+                        $jq("#errorDialog").modal('show');
+                    }
+                }).error(function (data, status, headers, config) {
+                    $scope.errormessage = $rootScope.error_msg.signup_confirmation_failed;
+                    $jq("#errorDialog").modal('show');
+                });
+            });
         }
-
-
 
         $scope.modifyStatusMessage = function(message, name) {
             var now = new Date();
@@ -87,7 +85,6 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             $scope.statusMessage = "";
             $scope.statusclass = "";
         }
-
         if($rootScope.activeCredential === null || $rootScope.activeCredential === undefined ) {
             $rootScope.activeCredential = {
                 name: "select a credential",
@@ -178,6 +175,29 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             localStorage.signedIn = false;
             localStorage.removeItem('password64');
             localStorage.removeItem('activeUser');
+            $scope.errormessage = "";
+            $scope.statusclass = "";
+            $scope.credentials = [];
+            $scope.templates = [];
+            $scope.blueprints = [];
+            $scope.stacks = [];
+            $scope.statusMessage = "";
+            $scope.statusclass = "";
+            $rootScope.activeCredential = {
+                name: "select a credential",
+                id: -1
+            };
+            $rootScope.activeStack = {
+                credential: null,
+                data: null,
+                template: null,
+                blueprint: null
+            };
+            $scope.azureTemplate = false;
+            $scope.awsTemplate = true;
+            $scope.azureCredential = false;
+            $scope.awsCredential = true;
+
         }
 
         $scope.forgotPassword = function() {
@@ -386,7 +406,6 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             return deferred.promise;
         }
 
-
         $scope.deleteStack = function(id) {
             $http({
                 method: 'DELETE',
@@ -522,7 +541,6 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             });
         }
 
-
         $scope.createAwsTemplateRequest = function() {
             $scope.azureTemplate = false;
             $scope.awsTemplate = true;
@@ -542,7 +560,6 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             $scope.azureCredential = true;
             $scope.awsCredential = false;
         }
-
 
         $scope.changeActiveCredential = function(id) {
             for (var i = 0; i < $scope.credentials.length; i++) {
@@ -602,8 +619,6 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             });
             return deferred.promise;
         }
-
-
 
         $scope.createStack = function() {
             $scope.statusMessage = "";
@@ -940,7 +955,6 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             }
         }
 
-
         function getAmi(regionValue) {
             if(regionValue === 'US_EAST_1') {
                 return "ami-6ab47b02";
@@ -990,7 +1004,6 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
         } else {
             console.log("No localstorage support!");
         }
-
 
     }
 ]);
