@@ -37,6 +37,7 @@ for (( i=1; i<=VOLUME_COUNT; i++ )); do
   DOCKER_VOLUME_PARAMS="${DOCKER_VOLUME_PARAMS} -v /mnt/fs${i}:/mnt/fs${i}"
 done
 
+echo $METADATA_RESULT | jq ".[]|.privateIp,.longName" -r | xargs -n 2 | while read privateIp longName; do echo $privateIp $(echo $longName | cut -d \. -f 1) $longName ; done >> /etc/hosts
 
 service docker restart
 sleep 5
@@ -48,9 +49,7 @@ AMBARI_SERVER=$(echo $METADATA_RESULT | jq "$INSTANCE_SELECTOR" | jq '.[].ambari
 INSTANCE_IDX=$(echo $METADATA_RESULT | jq "$INSTANCE_SELECTOR" | jq '.[].instanceIndex' | sed s/\"//g)
 
 AMBARI_SERVER_IP=$(echo $METADATA_RESULT | jq "$AMBARI_SERVER_SELECTOR" | jq '.[].privateIp' | sed s/\"//g)
-#CMD="docker run -d $DOCKER_VOLUME_PARAMS -e SERF_JOIN_IP=$AMBARI_SERVER_IP --net=host --name ${NODE_PREFIX}${INSTANCE_IDX} --entrypoint /usr/local/serf/bin/start-serf-agent.sh  $IMAGE $AMBARI_ROLE"
-CMD="docker run -d -e SERF_JOIN_IP=$AMBARI_SERVER_IP --net=host --name ${NODE_PREFIX}${INSTANCE_IDX} --entrypoint /usr/local/serf/bin/start-serf-agent.sh  $IMAGE $AMBARI_ROLE"
-
+CMD="docker run -d $DOCKER_VOLUME_PARAMS -e SERF_JOIN_IP=$AMBARI_SERVER_IP --net=host --name ${NODE_PREFIX}${INSTANCE_IDX} --entrypoint /usr/local/serf/bin/start-serf-agent.sh  $IMAGE $AMBARI_ROLE"
 
 cat << EOF
 =========================================
