@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.periscope.policies.cloudbreak.rule.CloudbreakRule;
+import com.sequenceiq.periscope.policies.cloudbreak.rule.ForceNodeCountRule;
 import com.sequenceiq.periscope.policies.cloudbreak.rule.scaledown.ResourcesAboveRule;
 import com.sequenceiq.periscope.policies.cloudbreak.rule.scaleup.PendingAppsRule;
 import com.sequenceiq.periscope.policies.cloudbreak.rule.scaleup.PendingContainersRule;
@@ -37,6 +38,7 @@ public class CloudbreakPolicy {
         rules.put(ResourcesAboveRule.NAME, ResourcesAboveRule.class);
         rules.put(PendingAppsRule.NAME, PendingAppsRule.class);
         rules.put(PendingContainersRule.NAME, PendingContainersRule.class);
+        rules.put(ForceNodeCountRule.NAME, ForceNodeCountRule.class);
         DEFAULT_RULES = Collections.unmodifiableMap(rules);
     }
 
