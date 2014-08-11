@@ -8,9 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import reactor.core.Reactor;
-import reactor.event.Event;
-
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -19,6 +16,9 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.event.AmbariRoleAllocationComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.StackCreationFailure;
 import com.sequenceiq.cloudbreak.service.stack.event.domain.CoreInstanceMetaData;
+
+import reactor.core.Reactor;
+import reactor.event.Event;
 
 @Service
 public class AmbariRoleAllocator {
@@ -53,6 +53,7 @@ public class AmbariRoleAllocator {
                     instanceMetaDataEntry.setPublicIp(coreInstanceMetaDataEntry.getPublicIp());
                     instanceMetaDataEntry.setInstanceId(coreInstanceMetaDataEntry.getInstanceId());
                     instanceMetaDataEntry.setVolumeCount(coreInstanceMetaDataEntry.getVolumeCount());
+                    instanceMetaDataEntry.setLongName(coreInstanceMetaDataEntry.getLongName());
                     instanceMetaDataEntry.setInstanceIndex(instanceIndex);
                     instanceMetaDataEntry.setDockerSubnet(DOCKER_SUBNET_PREFIX + instanceIndex);
                     if (instanceIndex == 0) {

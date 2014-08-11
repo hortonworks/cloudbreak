@@ -16,14 +16,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import reactor.core.Reactor;
-import reactor.event.Event;
-
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.event.domain.CoreInstanceMetaData;
+
+import reactor.core.Reactor;
+import reactor.event.Event;
 
 public class AmbariRoleAllocatorTest {
     @InjectMocks
@@ -100,8 +100,8 @@ public class AmbariRoleAllocatorTest {
 
     private Set<CoreInstanceMetaData> createCoreInstanceMetaData() {
         Set<CoreInstanceMetaData> metaData = new HashSet<>();
-        CoreInstanceMetaData data1 = new CoreInstanceMetaData("instanceId1", "dummyPrivateIp1", "dummyPublicIp1", 3);
-        CoreInstanceMetaData data2 = new CoreInstanceMetaData("instanceId2", "dummyPrivateIp2", "dummyPublicIp2", 3);
+        CoreInstanceMetaData data1 = new CoreInstanceMetaData("instanceId1", "dummyPrivateIp1", "dummyPublicIp1", 3, "john1.john.j5.internal.cloudapp.net");
+        CoreInstanceMetaData data2 = new CoreInstanceMetaData("instanceId2", "dummyPrivateIp2", "dummyPublicIp2", 3, "john2.john.j5.internal.cloudapp.net");
         metaData.add(data1);
         metaData.add(data2);
         return metaData;

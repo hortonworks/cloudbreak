@@ -9,6 +9,7 @@ public class InstanceMetaDataJson implements JsonEntity {
     private int instanceIndex;
     private Boolean ambariServer;
     private String dockerSubnet;
+    private String longName;
 
     public InstanceMetaDataJson() {
 
@@ -68,5 +69,13 @@ public class InstanceMetaDataJson implements JsonEntity {
 
     public void setDockerSubnet(String dockerSubnet) {
         this.dockerSubnet = dockerSubnet;
+    }
+
+    public String getLongName() {
+        return longName;
+    }
+
+    public void setLongName(String longName) {
+        this.longName = longName;
     }
 }
