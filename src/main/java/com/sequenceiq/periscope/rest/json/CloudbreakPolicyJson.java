@@ -1,5 +1,7 @@
 package com.sequenceiq.periscope.rest.json;
 
+import static com.sequenceiq.periscope.utils.CloneUtils.copy;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,7 +34,7 @@ public class CloudbreakPolicyJson implements Json {
     }
 
     public Map<String, Map<String, String>> getScaleUpRules() {
-        return scaleUpRules;
+        return copy(scaleUpRules);
     }
 
     public void setScaleUpRules(Map<String, Map<String, String>> scaleUpRules) {
@@ -40,7 +42,7 @@ public class CloudbreakPolicyJson implements Json {
     }
 
     public Map<String, Map<String, String>> getScaleDownRules() {
-        return scaleDownRules;
+        return copy(scaleDownRules);
     }
 
     public void setScaleDownRules(Map<String, Map<String, String>> scaleDownRules) {

@@ -1,6 +1,11 @@
 package com.sequenceiq.periscope.policies.cloudbreak;
 
+import static com.sequenceiq.periscope.utils.CloneUtils.copy;
+
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -35,33 +40,75 @@ public class CloudbreakPolicy {
     }
 
     public CloudbreakPolicy(Map<String, Map<String, String>> upConfig, Map<String, Map<String, String>> downConfig) {
-        this.scaleUpConfig = upConfig;
-        this.scaleDownConfig = downConfig;
-        initRules(upConfig, scaleUpRules);
-        initRules(downConfig, scaleDownRules);
+        this(upConfig, downConfig, null);
     }
 
-    private void initRules(Map<String, Map<String, String>> config, List<CloudbreakRule> ruleSet) {
-        if (config != null) {
-            for (String rule : config.keySet()) {
-                try {
-                    Class<? extends CloudbreakRule> ruleClass = DEFAULT_RULES.get(rule);
-                    if (ruleClass == null) {
-                        ruleClass = (Class<? extends CloudbreakRule>) Class.forName(rule);
-                    }
-                    CloudbreakRule cbRule = ruleClass.newInstance();
-                    cbRule.init(config.get(rule));
-                    ruleSet.add(cbRule);
-                } catch (Exception e) {
-                    LOGGER.error("Cannot create rule: " + rule, e);
-                }
-            }
-        }
+    public CloudbreakPolicy(Map<String, Map<String, String>> upConfig, Map<String, Map<String, String>> downConfig, URL url) {
+        this.scaleUpConfig = upConfig;
+        this.scaleDownConfig = downConfig;
+        URLClassLoader classLoader = createClassLoader(url);
+        initRules(scaleUpConfig, scaleUpRules, classLoader);
+        initRules(scaleDownConfig, scaleDownRules, classLoader);
+    }
+
+    public Map<String, Map<String, String>> getScaleUpConfig() {
+        return copy(scaleUpConfig);
+    }
+
+    public Map<String, Map<String, String>> getScaleDownConfig() {
+        return copy(scaleDownConfig);
     }
 
     public int scale(ClusterMetricsInfo clusterInfo) {
         int scaleTo = scale(clusterInfo, scaleUpRules);
         return scaleTo == 0 ? scale(clusterInfo, scaleDownRules) : scaleTo;
+    }
+
+    private URLClassLoader createClassLoader(URL url) {
+        URLClassLoader classLoader = null;
+        if (url != null) {
+            classLoader = new URLClassLoader(new URL[]{url});
+        }
+        return classLoader;
+    }
+
+    private void initRules(Map<String, Map<String, String>> config, List<CloudbreakRule> ruleSet, URLClassLoader classLoader) {
+        Iterator<String> iterator = config.keySet().iterator();
+        while (iterator.hasNext()) {
+            String rule = iterator.next();
+            try {
+                Class<? extends CloudbreakRule> ruleClass = loadClass(rule, classLoader);
+                if (ruleClass != null) {
+                    CloudbreakRule cbRule = ruleClass.newInstance();
+                    cbRule.init(config.get(rule));
+                    ruleSet.add(cbRule);
+                } else {
+                    LOGGER.info("Cannot load rule class {}", rule);
+                    iterator.remove();
+                }
+            } catch (Exception e) {
+                LOGGER.error("Cannot create rule: " + rule, e);
+            }
+        }
+    }
+
+    private Class<? extends CloudbreakRule> loadClass(String rule, URLClassLoader classLoader) {
+        Class<? extends CloudbreakRule> clazz = DEFAULT_RULES.get(rule);
+        if (clazz == null) {
+            try {
+                clazz = (Class<? extends CloudbreakRule>) Class.forName(rule);
+            } catch (ClassNotFoundException e) {
+                LOGGER.info("Cannot load class from classpath: " + rule, e);
+            }
+        }
+        if (clazz == null && classLoader != null) {
+            try {
+                clazz = (Class<? extends CloudbreakRule>) classLoader.loadClass(rule);
+            } catch (ClassNotFoundException e) {
+                LOGGER.info("Cannot load class from URL: " + rule, e);
+            }
+        }
+        return clazz;
     }
 
     private int scale(ClusterMetricsInfo clusterInfo, List<CloudbreakRule> rules) {
@@ -75,11 +122,4 @@ public class CloudbreakPolicy {
         return scaleTo;
     }
 
-    public Map<String, Map<String, String>> getScaleUpConfig() {
-        return scaleUpConfig;
-    }
-
-    public Map<String, Map<String, String>> getScaleDownConfig() {
-        return scaleDownConfig;
-    }
 }
