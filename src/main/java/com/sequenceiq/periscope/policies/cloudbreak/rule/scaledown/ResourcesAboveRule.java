@@ -1,4 +1,4 @@
-package com.sequenceiq.periscope.policies.cloudbreak.rule;
+package com.sequenceiq.periscope.policies.cloudbreak.rule.scaledown;
 
 import static com.sequenceiq.periscope.utils.ClusterUtils.computeFreeResourceRate;
 import static java.lang.Math.max;
@@ -6,6 +6,9 @@ import static java.lang.Math.max;
 import java.util.Map;
 
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.ClusterMetricsInfo;
+
+import com.sequenceiq.periscope.policies.cloudbreak.rule.AbstractCloudbreakRule;
+import com.sequenceiq.periscope.policies.cloudbreak.rule.CloudbreakRule;
 
 public class ResourcesAboveRule extends AbstractCloudbreakRule implements CloudbreakRule {
 

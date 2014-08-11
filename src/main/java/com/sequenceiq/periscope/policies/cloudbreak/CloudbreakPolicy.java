@@ -16,10 +16,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.periscope.policies.cloudbreak.rule.CloudbreakRule;
-import com.sequenceiq.periscope.policies.cloudbreak.rule.PendingAppsRule;
-import com.sequenceiq.periscope.policies.cloudbreak.rule.PendingContainersRule;
-import com.sequenceiq.periscope.policies.cloudbreak.rule.ResourcesAboveRule;
-import com.sequenceiq.periscope.policies.cloudbreak.rule.ResourcesBelowRule;
+import com.sequenceiq.periscope.policies.cloudbreak.rule.scaledown.ResourcesAboveRule;
+import com.sequenceiq.periscope.policies.cloudbreak.rule.scaleup.PendingAppsRule;
+import com.sequenceiq.periscope.policies.cloudbreak.rule.scaleup.PendingContainersRule;
+import com.sequenceiq.periscope.policies.cloudbreak.rule.scaleup.ResourcesBelowRule;
 
 public class CloudbreakPolicy {
 

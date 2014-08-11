@@ -1,10 +1,13 @@
-package com.sequenceiq.periscope.policies.cloudbreak.rule;
+package com.sequenceiq.periscope.policies.cloudbreak.rule.scaleup;
 
 import static java.lang.Math.max;
 
 import java.util.Map;
 
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.ClusterMetricsInfo;
+
+import com.sequenceiq.periscope.policies.cloudbreak.rule.AbstractCloudbreakRule;
+import com.sequenceiq.periscope.policies.cloudbreak.rule.CloudbreakRule;
 
 public class PendingAppsRule extends AbstractCloudbreakRule implements CloudbreakRule {
 
