@@ -77,7 +77,7 @@
 
         <div class="col-sm-9">
             <input type="number" name="aws_tvolumecount" class="form-control" ng-model="aws_tvolumecount" id="aws_tvolumecount" min="0"
-                   max="10" required>
+                   required>
 
             <div class="help-block"
                  ng-show="awsTemplateForm.aws_tvolumecount.$dirty && awsTemplateForm.aws_tvolumecount.$invalid"><i class="fa fa-warning"></i>
@@ -92,7 +92,7 @@
 
         <div class="col-sm-9">
             <input type="number" name="aws_tvolumesize" class="form-control" ng-model="aws_tvolumesize" id="aws_tvolumesize" min="10"
-                   max="1000" required>
+                   max="1024" required>
 
             <div class="help-block"
                  ng-show="awsTemplateForm.aws_tvolumesize.$dirty && awsTemplateForm.aws_tvolumesize.$invalid"><i class="fa fa-warning"></i>
