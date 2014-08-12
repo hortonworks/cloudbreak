@@ -764,8 +764,8 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     cloudPlatform: "AZURE",
                     name: azure_tclusterName.value,
                     description: azure_tdescription.value,
-                    volumeCount: azure_tvolumesize.value,
-                    volumeSize: azure_tvolumescount.value,
+                    volumeSize: azure_tvolumesize.value,
+                    volumeCount: azure_tvolumescount.value,
                     parameters: {
                         location: azure_tlocation.value,
                         vmType: azure_tvmType.value,
@@ -964,21 +964,21 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
 
         function getAmi(regionValue) {
             if(regionValue === 'US_EAST_1') {
-                return "ami-6ab47b02";
+                return "ami-0609d86e";
             } else if (regionValue === 'US_WEST_1') {
-                return "ami-1f02015a";
+                return "ami-73000d36";
             } else if (regionValue === 'US_WEST_2') {
-                return "ami-09e79e39";
+                return "ami-07bdc737";
             } else if (regionValue === 'EU_WEST_1') {
-                return "ami-83f82ef4";
+                return "ami-e09e4397";
             } else if (regionValue === 'AP_SOUTHEAST_1') {
-                return "ami-ccdd849e";
+                return "ami-363f6464";
             } else if (regionValue === 'AP_SOUTHEAST_2') {
-                return "ami-57ef886d";
+                return "ami-3d9ef807";
             } else if (regionValue === 'AP_NORTHEAST_1') {
-                return "ami-0bcd9d0a"; //TODO: new AMI
+                return "ami-8dbde48c";
             } else {
-                return "ami-1b0ca206"; //TODO: new AMI
+                return "ami-17f45c0a";
             }
         }
 
