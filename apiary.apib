@@ -1368,4 +1368,283 @@ Given the option of provisioning or decommissioning cluster nodes on the fly, Pe
   5. *Enforce* guaranteed cluster capacity requests ( x % of the resources)
   6. *Private* cluster requests - supports provisioning of short lived private clusters with the possibility to merge
   7. Support for distributed (but not YARN ready) applications using Apache Slider
+<<<<<<< HEAD
 >>>>>>> 3b7285c... PERI-2 Transferring blueprint from apiary.io
+=======
+  
+#Group Clusters 
+Clusters related resources of the **Periscope API**.
+
+##Clusters [/clusters]
+###Add a cluster [POST]
+Add a cluster to be monitored by Periscope. 
+
++ Request (application/json)
+
+        {
+            "host": "172.24.0.2",
+            "port": "8080",
+            "user": "admin",
+            "pass": "admin"
+        }
+
++ Response 200 (application/json)
+
+        {
+            "appMovement": "allowed",
+            "state": "RUNNING",
+            "port": "8080",
+            "host": "172.24.0.2",
+            "id": "multi-node"
+        }
+    
+
+##  Clusters [/clusters/{id}]
+###Retrieved the monitored cluster information [GET]
+
++ Parameters
+    + id (required String `id`) ... The id of the cluster to be monitored.
+
++ Request
+        {
+
+        }
+
++ Response 200 (application/json)
+
+        {
+            "appMovement": "allowed",
+            "state": "RUNNING",
+            "port": "8080",
+            "host": "172.24.0.2",
+            "id": "multi-node"
+        }
+
+##  Clusters [/clusters]
+###Retrieved all the monitored cluster information [GET]
+
++ Request
+       
++ Response 200 (application/json)
+
+        [
+          {
+            "appMovement": "allowed",
+            "state": "RUNNING",
+            "port": "8080",
+            "host": "172.24.0.2",
+            "id": "multi-node"
+          }
+        ]
+
+##Policy [/policy/{clusterId}/{policyName}]
+###Create a scaling policy for a cluster [POST]
+TBD - add the 3 different scenarios - success, partial and failure
+
++ Parameters
+    + clusterId (required String `clusterIUD`) ... The id of the cluster to attach the policy.
+    + policyName (required String `policyName`) ... The name of the attached policy name to the cluster.
+
++ Request (application/json)
+
+        {
+
+            "jarUrl": "https://dl.dropboxusercontent.com/u/13919958/lostnodes.jar",
+            "scaleUpRules": 
+            {
+                "com.sequenceiq.periscope.policies.cloudbreak.rule.LostNodesRule": 
+                {
+                    "limit": "4",
+                    "lostNodes": "2"
+                },
+                "pendingApps": 
+                {
+                    "limit": "4",
+                    "pendingApps": "5"
+                },
+                "pendingContainers": 
+                {
+                    "limit": "4",
+                    "pendingContainers": "10"
+                }
+            },
+            "scaleDownRules": 
+            {
+                "resourcesAbove": 
+                {
+                    "limit": "3",
+                    "freeResourceRate": "0.4"
+                }
+            }
+        }
+
++ Response 200 (application/json)
+
+        {
+            "scaleDownRules": 
+            {
+                "resourcesAbove": 
+                {
+                    "freeResourceRate": "0.4",
+                    "limit": "3"
+                }
+            },
+            "scaleUpRules": 
+            {
+                "pendingApps": 
+                {
+                    "pendingApps": "5",
+                    "limit": "4"
+                },
+                "pendingContainers": 
+                {
+                    "pendingContainers": "10",
+                    "limit": "4"
+                },
+                "com.sequenceiq.periscope.policies.cloudbreak.rule.LostNodesRule": 
+                {
+                    "lostNodes": "2",
+                    "limit": "4"
+                }
+            },
+            "jarUrl": "https://dl.dropboxusercontent.com/u/13919958/lostnodes.jar",
+            "message": "Policy successfully added"
+        }
+
+
+##Policy [/policy/{clusterId}/{policyName}]
+###Create a scaling policy for a cluster [GET]
+
+
++ Parameters
+    + clusterId (required String `clusterIUD`) ... The id of the cluster to attach the policy.
+    + policyName (required String `policyName`) ... The name of the attached policy name to the cluster.
+
++ Request (application/json)
+    
++ Response 200 (application/json)
+
+        {
+            "scaleDownRules": 
+            {
+                "resourcesAbove": 
+                {
+                    "freeResourceRate": "0.4",
+                "limit": "3"
+                }
+            },
+            "scaleUpRules": 
+            {
+                "pendingApps": 
+                {
+                    "pendingApps": "5",
+                    "limit": "4"
+                },
+                "pendingContainers": 
+                {
+                    "pendingContainers": "10",
+                    "limit": "4"
+                },
+                "com.sequenceiq.periscope.policies.cloudbreak.rule.LostNodesRule": 
+                {
+                    "lostNodes": "2",
+                    "limit": "4"
+                }
+            },
+            "jarUrl": "https://dl.dropboxusercontent.com/u/13919958/lostnodes.jar",
+            "message": ""
+        }
+
+##Policy [/movement/{clusterId}}]
+###Create a scaling policy for a cluster [POST]
+
++ Parameters
+    + clusterId (required String `clusterIUD`) ... The id of the cluster to attach the policy.
+    
++ Request (application/json)
+
+        {
+          "allowed": "false"
+        }
+        
++  Response 200 (application/json)
+
+        {
+            "appMovement": "prohibited",
+            "state": "SUSPENDED",
+            "port": "8080",
+            "host": "172.24.0.2",
+            "id": "multi-node"
+        }
+
+##Movements [/movement/{clusterId}}]
+###Configure application movements withih a cluster [POST]
+
++ Parameters
+    + clusterId (required String `clusterIUD`) ... The id of the cluster to attach the policy.
+    
++ Request (application/json)
+
+        {
+          "allowed": "false"
+        }
+        
++  Response 200 (application/json)
+
+        {
+            "appMovement": "prohibited",
+            "state": "SUSPENDED",
+            "port": "8080",
+            "host": "172.24.0.2",
+            "id": "multi-node"
+        }
+
+##State [/state/{clusterId}]
+###Set the state of a cluster [POST]
+
++ Parameters
+    + clusterId (required String `clusterIUD`) ... The id of the cluster to attach the policy.
+    
++ Request (application/json)
+
+        {
+          "allowed": "false"
+        }
+        
++  Response 200 (application/json)
+
+        {
+            "appMovement": "prohibited",
+            "state": "SUSPENDED",
+            "port": "8080",
+            "host": "172.24.0.2",
+            "id": "multi-node"
+        }
+
+##Applications [/applications/{clusterId}]
+###List the running applications in a cluster [GET]
+
++ Parameters
+    + clusterId (required String `clusterIUD`) ... The id of the cluster to attach the policy.
+    
++ Request (application/json)
+    
++ Response 200 (application/json)
+
+        [
+            {
+                "usedVCores": 1,
+                "usedMemory": 512,
+                "reservedContainers": 0,
+                "usedContainers": 1,
+                "appId": "application_1407836063840_0001",
+                "user": "hdfs",
+                "queue": "default",
+                "state": "ACCEPTED",
+                "url": "http://amb0.mycorp.kom:8088/proxy/application_1407836063840_0001/",
+                "start": 1407847270776,
+                "finish": 0,
+                "progress": 0
+              }
+        ]
+>>>>>>> e490783... PERI-2 apiary v1 added
