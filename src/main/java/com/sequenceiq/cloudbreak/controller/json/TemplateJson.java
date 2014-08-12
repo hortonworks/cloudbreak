@@ -28,8 +28,8 @@ public class TemplateJson implements JsonEntity {
     @Size(max = 50)
     private String description;
     private Integer volumeCount;
-    @Min(value = 0, message = "Size of volumes has to be min 0")
-    @Max(value = 1024, message = "Size of volumes has to be max 1024")
+    @Min(value = 0, message = "Volume size must be greater than or equal to 0")
+    @Max(value = 1024, message = "Volume size must be lesser than or equal to 1024")
     private Integer volumeSize;
 
     private Set<UserRole> userRoles = new HashSet();
