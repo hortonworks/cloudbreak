@@ -310,7 +310,7 @@ Cloudbreak defines three distinct roles:
 This is the `master` role - currently it's not used.
 
 ###Company admin
-We have introduced the notion of companies - and with comes an administrator role. Upon registration a user can specify whether it's a regular user or a company user. If someone choses to be a company user than we will register that company in the system. A company is a unique entity and can't be registered twice. If the company is already registered and you think that is a mistake please let us know. 
+We have introduced the notion of companies - and with comes an administrator role. Upon registration a user can specify whether it's a regular user or a company user. If someone choses to be a company user then we will register that company in the system. A company is a unique entity and can't be registered twice. If the company is already registered and you think that is a mistake please let us know. 
 The extra rights associated with the company admin role are:
 
 * Invite colleagues under the company account
