@@ -47,4 +47,28 @@
         </div>
         <!-- .col-sm-9 -->
     </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="awsvolumecount">Attached volumes per instance</label>
+
+        <div class="col-sm-9">
+            <p id="awsvolumecount" class="form-control-static">{{template.parameters.volumeCount}}</p>
+        </div>
+        <!-- .col-sm-9 -->
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="awsvolumesize">Volume size (GB)</label>
+
+        <div class="col-sm-9">
+            <p id="awsvolumesize" class="form-control-static">{{template.parameters.volumeSize}}</p>
+        </div>
+        <!-- .col-sm-9 -->
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="awsvolumetype">Volume type</label>
+
+        <div class="col-sm-9">
+            <p id="awsvolumetype" class="form-control-static">{{template.parameters.volumeType}}</p>
+        </div>
+        <!-- .col-sm-9 -->
+    </div>
 </form>

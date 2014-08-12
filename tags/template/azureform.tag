@@ -50,6 +50,34 @@
     </div>
     <!-- .col-sm-9 -->
 </div>
+
+<div class="form-group" ng-class="{ 'has-error': azureTemplateForm.azure_tvolumescount.$dirty && azureTemplateForm.azure_tvolumescount.$invalid }">
+    <label class="col-sm-3 control-label" for="azure_tvolumescount">Volumes count</label>
+
+    <div class="col-sm-9">
+        <input type="text" ng-pattern="/^\d+$/" class="form-control" id="azure_tvolumescount" name="azure_tvolumescount" ng-model="azure_tvolumescount"  placeholder="0" min="0">
+        <div class="help-block" ng-show="azureTemplateForm.azure_tvolumescount.$dirty && azureTemplateForm.azure_tvolumescount.$invalid">
+            <i class="fa fa-warning"></i> {{error_msg.template_volume_count_invalid}}
+        </div>
+    </div>
+    <!-- .col-sm-9 -->
+
+</div>
+
+<div class="form-group" ng-class="{ 'has-error': azureTemplateForm.azure_tvolumesize.$dirty && azureTemplateForm.azure_tvolumesize.$invalid }">
+    <label class="col-sm-3 control-label" for="azure_tvolumesize">Volumes size in Gb</label>
+
+    <div class="col-sm-9">
+        <input type="number" class="form-control" id="azure_tvolumesize" name="azure_tvolumesize" ng-model="azure_tvolumesize"  placeholder="0 Gb" min="10" max="1024" required>
+        <div class="help-block" ng-show="azureTemplateForm.azure_tvolumesize.$dirty && azureTemplateForm.azure_tvolumesize.$invalid">
+            <i class="fa fa-warning"></i> {{error_msg.volume_size_invalid}}
+        </div>
+    </div>
+    <!-- .col-sm-9 -->
+
+</div>
+
+
 <!--<div class="form-group">
 <label class="col-sm-3 control-label" for="azure_taddressPrefix">Address prefix</label>
 

@@ -726,11 +726,15 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     cloudPlatform: "AWS",
                     name: aws_tclusterName.value,
                     description: aws_tdescription.value,
+                    volumeCount: parseInt(aws_tvolumecount.value),
+                    volumeSize: parseInt(aws_tvolumesize.value),
                     parameters: {
                         sshLocation: aws_tsshLocation.value,
                         region: aws_tregion.value,
                         instanceType: aws_tinstanceType.value,
-                        amiId: getAmi(aws_tregion.value)
+                        amiId: getAmi(aws_tregion.value),
+                        volumeType: aws_tvolumetype.value,
+                        spotPrice: parseFloat(aws_tspotprice.value)
                     }
                 }
             }).success(function (data, status, headers, config) {
@@ -761,6 +765,8 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     cloudPlatform: "AZURE",
                     name: azure_tclusterName.value,
                     description: azure_tdescription.value,
+                    volumeSize: azure_tvolumesize.value,
+                    volumeCount: azure_tvolumescount.value,
                     parameters: {
                         location: azure_tlocation.value,
                         vmType: azure_tvmType.value,
@@ -775,6 +781,8 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 azure_tclusterName.value = "";
                 azure_tdescription.value = "";
                 azure_tclusterName.value = "";
+                azure_tvolumesize.value = "";
+                azure_tvolumescount.value = "";
             }).error(function (data, status, headers, config) {
                 $scope.modifyStatusMessage($rootScope.error_msg.azure_template_failed + data.message);
                 $scope.modifyStatusClass("has-error");
@@ -957,21 +965,21 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
 
         function getAmi(regionValue) {
             if(regionValue === 'US_EAST_1') {
-                return "ami-6ab47b02";
+                return "ami-0609d86e";
             } else if (regionValue === 'US_WEST_1') {
-                return "ami-1f02015a";
+                return "ami-73000d36";
             } else if (regionValue === 'US_WEST_2') {
-                return "ami-09e79e39";
+                return "ami-07bdc737";
             } else if (regionValue === 'EU_WEST_1') {
-                return "ami-83f82ef4";
+                return "ami-e09e4397";
             } else if (regionValue === 'AP_SOUTHEAST_1') {
-                return "ami-ccdd849e";
+                return "ami-363f6464";
             } else if (regionValue === 'AP_SOUTHEAST_2') {
-                return "ami-57ef886d";
+                return "ami-3d9ef807";
             } else if (regionValue === 'AP_NORTHEAST_1') {
-                return "ami-0bcd9d0a"; //TODO: new AMI
+                return "ami-8dbde48c";
             } else {
-                return "ami-1b0ca206"; //TODO: new AMI
+                return "ami-17f45c0a";
             }
         }
 
@@ -994,6 +1002,16 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
         if (typeof (Storage) !== "undefined") {
             $http.get('connection.properties').then(function (response) {
                 $rootScope.apiUrl = response.data.backend_url;
+                $http({
+                    method: 'GET',
+                    dataType: 'json',
+                    url:  $rootScope.apiUrl + "/notification/info",
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }).error(function (data, status, headers, config) {
+                    $scope.signOut();
+                });
             });
             if (localStorage.signedIn === 'true' && localStorage.activeUser && localStorage.password64) {
                 $rootScope.signedIn = true;
