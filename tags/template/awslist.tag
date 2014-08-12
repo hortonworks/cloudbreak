@@ -51,7 +51,7 @@
         <label class="col-sm-3 control-label" for="awsvolumecount">Attached volumes per instance</label>
 
         <div class="col-sm-9">
-            <p id="awsvolumecount" class="form-control-static">{{template.parameters.volumeCount}}</p>
+            <p id="awsvolumecount" class="form-control-static">{{template.volumeCount}}</p>
         </div>
         <!-- .col-sm-9 -->
     </div>
@@ -59,7 +59,7 @@
         <label class="col-sm-3 control-label" for="awsvolumesize">Volume size (GB)</label>
 
         <div class="col-sm-9">
-            <p id="awsvolumesize" class="form-control-static">{{template.parameters.volumeSize}}</p>
+            <p id="awsvolumesize" class="form-control-static">{{template.volumeSize}}</p>
         </div>
         <!-- .col-sm-9 -->
     </div>
@@ -68,6 +68,14 @@
 
         <div class="col-sm-9">
             <p id="awsvolumetype" class="form-control-static">{{template.parameters.volumeType}}</p>
+        </div>
+        <!-- .col-sm-9 -->
+    </div>
+    <div class="form-group" ng-show="{{template.parameters.spotPrice}}">
+        <label class="col-sm-3 control-label" for="awsspotprice">Spot Price</label>
+
+        <div class="col-sm-9">
+            <p id="awsspotprice" class="form-control-static">{{template.parameters.spotPrice}}</p>
         </div>
         <!-- .col-sm-9 -->
     </div>
