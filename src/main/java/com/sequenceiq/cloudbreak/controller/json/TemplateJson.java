@@ -27,6 +27,7 @@ public class TemplateJson implements JsonEntity {
     @Size(max = 50)
     private String description;
     private Integer volumeCount;
+    @Size(max = 1024)
     private Integer volumeSize;
     private VolumeType volumeType;
 
