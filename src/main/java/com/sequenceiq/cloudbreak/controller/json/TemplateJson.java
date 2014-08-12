@@ -8,7 +8,6 @@ import java.util.Set;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import com.amazonaws.services.ec2.model.VolumeType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.controller.validation.ValidProvisionRequest;
@@ -29,7 +28,6 @@ public class TemplateJson implements JsonEntity {
     private Integer volumeCount;
     @Size(max = 1024)
     private Integer volumeSize;
-    private VolumeType volumeType;
 
     private Set<UserRole> userRoles = new HashSet();
 
@@ -99,11 +97,4 @@ public class TemplateJson implements JsonEntity {
         this.volumeCount = volumeCount;
     }
 
-    public VolumeType getVolumeType() {
-        return volumeType;
-    }
-
-    public void setVolumeType(VolumeType volumeType) {
-        this.volumeType = volumeType;
-    }
 }
