@@ -37,6 +37,12 @@ for (( i=1; i<=VOLUME_COUNT; i++ )); do
   DOCKER_VOLUME_PARAMS="${DOCKER_VOLUME_PARAMS} -v /mnt/fs${i}:/mnt/fs${i}"
 done
 
+FQDN=$(echo $METADATA_RESULT | jq "$INSTANCE_SELECTOR" | jq '.[].longName' | sed s/\"//g)
+DOMAIN=$(echo $FQDN | cut -d'.' -f 2-6)
+
+echo "nameserver 127.0.0.1" > /run/resolvconf/resolv.conf
+echo "search $DOMAIN" >> /run/resolvconf/resolv.conf
+echo "nameserver 168.63.129.16" >> /run/resolvconf/resolv.conf
 
 service docker restart
 sleep 5
@@ -48,9 +54,7 @@ AMBARI_SERVER=$(echo $METADATA_RESULT | jq "$INSTANCE_SELECTOR" | jq '.[].ambari
 INSTANCE_IDX=$(echo $METADATA_RESULT | jq "$INSTANCE_SELECTOR" | jq '.[].instanceIndex' | sed s/\"//g)
 
 AMBARI_SERVER_IP=$(echo $METADATA_RESULT | jq "$AMBARI_SERVER_SELECTOR" | jq '.[].privateIp' | sed s/\"//g)
-#CMD="docker run -d $DOCKER_VOLUME_PARAMS -e SERF_JOIN_IP=$AMBARI_SERVER_IP --net=host --name ${NODE_PREFIX}${INSTANCE_IDX} --entrypoint /usr/local/serf/bin/start-serf-agent.sh  $IMAGE $AMBARI_ROLE"
-CMD="docker run -d -e SERF_JOIN_IP=$AMBARI_SERVER_IP --net=host --name ${NODE_PREFIX}${INSTANCE_IDX} --entrypoint /usr/local/serf/bin/start-serf-agent.sh  $IMAGE $AMBARI_ROLE"
-
+CMD="docker run -d $DOCKER_VOLUME_PARAMS -e SERF_JOIN_IP=$AMBARI_SERVER_IP --net=host --name ${NODE_PREFIX}${INSTANCE_IDX} --entrypoint /usr/local/serf/bin/start-serf-agent.sh  $IMAGE $AMBARI_ROLE"
 
 cat << EOF
 =========================================
