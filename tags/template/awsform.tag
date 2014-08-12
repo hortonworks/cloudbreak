@@ -115,6 +115,21 @@
       </div>
     </div>
 
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="aws_tspotprice">Spot price</label>
+
+        <div class="col-sm-9">
+            <input type="number" name="aws_tspotprice" class="form-control" id="aws_tspotprice" ng-model="aws_tspotprice" min="0.1" max="100.0">
+        </div>
+
+        <div class="help-block"
+             ng-show="awsTemplateForm.aws_tspotprice.$dirty && awsTemplateForm.aws_tspotprice.$invalid"><i class="fa fa-warning"></i>
+            {{error_msg.spot_price_invalid}}
+        </div>
+        <!-- .col-sm-9 -->
+      </div>
+    </div>
+
     <div class="row btn-row">
         <div class="col-sm-9 col-sm-offset-3">
             <a href="#" id="createAwsTemplate" ng-disabled="awsTemplateForm.$invalid" class="btn btn-success btn-block" ng-click="createAwsTemplate()" role="button"><i class="fa fa-plus fa-fw"></i>

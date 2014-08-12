@@ -733,7 +733,8 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                         region: aws_tregion.value,
                         instanceType: aws_tinstanceType.value,
                         amiId: getAmi(aws_tregion.value),
-                        volumeType: aws_tvolumetype.value
+                        volumeType: aws_tvolumetype.value,
+                        spotPrice: parseFloat(aws_tspotprice.value)
                     }
                 }
             }).success(function (data, status, headers, config) {
