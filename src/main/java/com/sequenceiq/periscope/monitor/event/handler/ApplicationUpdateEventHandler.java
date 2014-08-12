@@ -44,7 +44,7 @@ public class ApplicationUpdateEventHandler implements ApplicationListener<Applic
 
         List<CapacitySchedulerQueueInfo> allQueueInfo = getAllQueueInfo(schedulerInfo);
         Cluster cluster = clusterService.get(event.getClusterId());
-        if (cluster == null || !cluster.isAppMovementAllowed()) {
+        if (cluster == null) {
             return;
         }
 
@@ -55,25 +55,27 @@ public class ApplicationUpdateEventHandler implements ApplicationListener<Applic
             activeApps.add(id);
             SchedulerApplication application = addApplicationIfAbsent(cluster, report);
             application.update(report);
-            apps = cluster.getApplicationsPriorityOrder();
-            if (isApplicationHighPriority(apps, id)) {
-                LOGGER.info("Try to move high priority app {}", id);
-                CapacitySchedulerQueueInfo queue = getQueueWithMostAvailableCapacity(cluster, allQueueInfo);
-                if (!application.isMoved()) {
-                    float availableMemory = getAvailableResourceCapacity(cluster, queue);
-                    int usedMemory = report.getApplicationResourceUsageReport().getUsedResources().getMemory();
-                    if (availableMemory - usedMemory > 0) {
-                        try {
-                            cluster.getYarnClient().moveApplicationAcrossQueues(id, queue.getQueueName());
-                            application.setMoved(true);
-                            LOGGER.info("Application {} moved to queue {}", id.toString(), queue.getQueueName());
-                            break;
-                        } catch (IOException | YarnException e) {
-                            LOGGER.error("Error moving {} to {}", id.toString(), queue.getQueueName(), e);
+            if (cluster.isAppMovementAllowed()) {
+                apps = cluster.getApplicationsPriorityOrder();
+                if (isApplicationHighPriority(apps, id)) {
+                    LOGGER.info("Try to move high priority app {}", id);
+                    CapacitySchedulerQueueInfo queue = getQueueWithMostAvailableCapacity(cluster, allQueueInfo);
+                    if (!application.isMoved()) {
+                        float availableMemory = getAvailableResourceCapacity(cluster, queue);
+                        int usedMemory = report.getApplicationResourceUsageReport().getUsedResources().getMemory();
+                        if (availableMemory - usedMemory > 0) {
+                            try {
+                                cluster.getYarnClient().moveApplicationAcrossQueues(id, queue.getQueueName());
+                                application.setMoved(true);
+                                LOGGER.info("Application {} moved to queue {}", id.toString(), queue.getQueueName());
+                                break;
+                            } catch (IOException | YarnException e) {
+                                LOGGER.error("Error moving {} to {}", id.toString(), queue.getQueueName(), e);
+                            }
                         }
                     }
+                    LOGGER.info("Queue with most available resource : {}", queue.getQueueName());
                 }
-                LOGGER.info("Queue with most available resource : {}", queue.getQueueName());
             }
         }
         removeApplicationIfFinished(cluster, activeApps, apps);
@@ -179,6 +181,7 @@ public class ApplicationUpdateEventHandler implements ApplicationListener<Applic
 
         sb.append("\nApplication: ").append(report.getApplicationId());
         sb.append("\ntype: ").append(report.getApplicationType());
+        sb.append("\nstate: ").append(report.getYarnApplicationState());
         sb.append("\nqueue: ").append(report.getQueue());
         sb.append("\nstart time: ").append(new Date(report.getStartTime()));
         sb.append("\nprogress: ").append(report.getProgress());

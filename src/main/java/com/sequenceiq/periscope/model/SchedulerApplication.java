@@ -2,6 +2,7 @@ package com.sequenceiq.periscope.model;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
+import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 
 public class SchedulerApplication {
 
@@ -10,6 +11,7 @@ public class SchedulerApplication {
     private Priority priority;
     private boolean moved;
     private double progress;
+    private YarnApplicationState state;
 
     public SchedulerApplication(ApplicationReport appReport, Priority priority) {
         this.applicationId = appReport.getApplicationId();
@@ -45,8 +47,17 @@ public class SchedulerApplication {
         return progress;
     }
 
+    public YarnApplicationState getState() {
+        return state;
+    }
+
+    public void setState(YarnApplicationState state) {
+        this.state = state;
+    }
+
     public void update(ApplicationReport report) {
         this.progress = report.getProgress();
+        this.state = report.getYarnApplicationState();
     }
 
 }
