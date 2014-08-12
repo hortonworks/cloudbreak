@@ -1,13 +1,13 @@
-package com.sequenceiq.periscope.rest;
+package com.sequenceiq.periscope.rest.json;
 
-public class ExceptionMessage {
+public class ExceptionMessageJson {
 
     private String message;
 
-    public ExceptionMessage() {
+    public ExceptionMessageJson() {
     }
 
-    public ExceptionMessage(String message) {
+    public ExceptionMessageJson(String message) {
         this.message = message;
     }
 

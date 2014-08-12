@@ -9,7 +9,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import com.sequenceiq.periscope.rest.ExceptionMessage;
+import com.sequenceiq.periscope.rest.ClusterNotFoundException;
+import com.sequenceiq.periscope.rest.json.ClusterJson;
+import com.sequenceiq.periscope.rest.json.ExceptionMessageJson;
 
 @ControllerAdvice
 public class ExceptionController {
@@ -17,23 +19,30 @@ public class ExceptionController {
     private static final Logger LOGGER = LoggerFactory.getLogger(ExceptionController.class);
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ExceptionMessage> handleIllegalArgException(IllegalArgumentException e) {
+    public ResponseEntity<ExceptionMessageJson> handleIllegalArgException(IllegalArgumentException e) {
         LOGGER.error("Unexpected illegal argument exception", e);
         return createExceptionMessage(e.getMessage());
     }
 
     @ExceptionHandler(NoSuchElementException.class)
-    public ResponseEntity<ExceptionMessage> handleNotFoundExceptions(Exception e) {
+    public ResponseEntity<ExceptionMessageJson> handleNotFoundExceptions(Exception e) {
         LOGGER.error("Not found", e);
         String message = e.getMessage();
         return createExceptionMessage(message == null ? "Not found" : message, HttpStatus.NOT_FOUND);
     }
 
-    public static ResponseEntity<ExceptionMessage> createExceptionMessage(String message) {
+    @ExceptionHandler(ClusterNotFoundException.class)
+    public ResponseEntity<ClusterJson> handleClusterNotFoundException(ClusterNotFoundException e) {
+        ClusterJson json = ClusterJson.emptyJson();
+        json.setId(e.getId());
+        return new ResponseEntity<>(json, HttpStatus.NOT_FOUND);
+    }
+
+    public static ResponseEntity<ExceptionMessageJson> createExceptionMessage(String message) {
         return createExceptionMessage(message, HttpStatus.BAD_REQUEST);
     }
 
-    public static ResponseEntity<ExceptionMessage> createExceptionMessage(String message, HttpStatus statusCode) {
-        return new ResponseEntity<>(new ExceptionMessage(message), statusCode);
+    public static ResponseEntity<ExceptionMessageJson> createExceptionMessage(String message, HttpStatus statusCode) {
+        return new ResponseEntity<>(new ExceptionMessageJson(message), statusCode);
     }
 }

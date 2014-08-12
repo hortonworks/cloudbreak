@@ -19,9 +19,11 @@ public abstract class AbstractMonitor implements Monitor {
 
     public void update(Class clazz) {
         for (Cluster cluster : clusterRegistry.getAll()) {
-            Runnable request = (Runnable)
-                    applicationContext.getBean(clazz.getSimpleName(), cluster);
-            executorService.execute(request);
+            if (cluster.isRunning()) {
+                Runnable request = (Runnable)
+                        applicationContext.getBean(clazz.getSimpleName(), cluster);
+                executorService.execute(request);
+            }
         }
     }
 }

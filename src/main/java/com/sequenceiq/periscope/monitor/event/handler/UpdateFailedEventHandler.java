@@ -10,7 +10,8 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.periscope.monitor.event.UpdateFailedEvent;
-import com.sequenceiq.periscope.registry.ClusterRegistry;
+import com.sequenceiq.periscope.registry.ClusterState;
+import com.sequenceiq.periscope.service.ClusterService;
 
 @Component
 public class UpdateFailedEventHandler implements ApplicationListener<UpdateFailedEvent> {
@@ -19,7 +20,7 @@ public class UpdateFailedEventHandler implements ApplicationListener<UpdateFaile
     private static final int RETRY_THRESHOLD = 5;
 
     @Autowired
-    private ClusterRegistry clusterRegistry;
+    private ClusterService clusterService;
     private Map<String, Integer> updateFailures = new ConcurrentHashMap<>();
 
     @Override
@@ -29,7 +30,7 @@ public class UpdateFailedEventHandler implements ApplicationListener<UpdateFaile
         if (failed == null) {
             updateFailures.put(id, 1);
         } else if (RETRY_THRESHOLD - 1 == failed) {
-            clusterRegistry.remove(id);
+            clusterService.setState(id, ClusterState.SUSPENDED);
             updateFailures.remove(id);
         } else {
             updateFailures.put(id, failed + 1);

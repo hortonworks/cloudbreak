@@ -10,7 +10,7 @@ public class ClusterConverter extends AbstractConverter<ClusterJson, Cluster> {
 
     @Override
     public ClusterJson convert(Cluster source) {
-        return new ClusterJson(source.getClusterId(), source.getHost(), source.getPort());
+        return new ClusterJson(source.getClusterId(), source.getHost(), source.getPort(), source.getState().name());
     }
 
 }

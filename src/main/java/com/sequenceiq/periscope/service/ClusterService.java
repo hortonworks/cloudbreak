@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.periscope.model.Ambari;
 import com.sequenceiq.periscope.registry.Cluster;
 import com.sequenceiq.periscope.registry.ClusterRegistry;
+import com.sequenceiq.periscope.registry.ClusterState;
 import com.sequenceiq.periscope.registry.ConnectionException;
 
 @Service
@@ -30,6 +31,14 @@ public class ClusterService {
 
     public Cluster remove(String clusterId) {
         return clusterRegistry.remove(clusterId);
+    }
+
+    public Cluster setState(String clusterId, ClusterState state) {
+        Cluster cluster = clusterRegistry.get(clusterId);
+        if (cluster != null) {
+            cluster.setState(state);
+        }
+        return cluster;
     }
 
 }

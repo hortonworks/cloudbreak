@@ -23,14 +23,15 @@ import com.sequenceiq.periscope.service.configuration.ConfigParam;
 public class Cluster {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Cluster.class);
+    private final Map<Priority, Map<ApplicationId, SchedulerApplication>> applications;
     private final String clusterId;
     private final Ambari ambari;
     private final Configuration configuration;
     private final YarnClient yarnClient;
-    private final Map<Priority, Map<ApplicationId, SchedulerApplication>> applications;
+    private boolean appMovementAllowed = true;
     private ClusterMetricsInfo metrics;
     private CloudbreakPolicy cloudbreakPolicy;
-    private boolean appMovementAllowed = true;
+    private ClusterState state = ClusterState.RUNNING;
 
     public Cluster(String clusterId, Ambari ambari) throws ConnectionException {
         this.clusterId = clusterId;
@@ -64,6 +65,18 @@ public class Cluster {
 
     public boolean isAppMovementAllowed() {
         return appMovementAllowed;
+    }
+
+    public ClusterState getState() {
+        return state;
+    }
+
+    public void setState(ClusterState state) {
+        this.state = state;
+    }
+
+    public boolean isRunning() {
+        return state == ClusterState.RUNNING;
     }
 
     public void allowAppMovement(boolean appMovementAllowed) {

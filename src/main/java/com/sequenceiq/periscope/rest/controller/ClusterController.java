@@ -17,11 +17,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.sequenceiq.periscope.registry.Cluster;
 import com.sequenceiq.periscope.registry.ConnectionException;
+import com.sequenceiq.periscope.rest.ClusterNotFoundException;
 import com.sequenceiq.periscope.rest.converter.AmbariConverter;
 import com.sequenceiq.periscope.rest.converter.ClusterConverter;
 import com.sequenceiq.periscope.rest.json.AmbariJson;
 import com.sequenceiq.periscope.rest.json.ClusterJson;
 import com.sequenceiq.periscope.rest.json.IdJson;
+import com.sequenceiq.periscope.rest.json.StateJson;
 import com.sequenceiq.periscope.service.ClusterService;
 
 @RestController
@@ -52,7 +54,7 @@ public class ClusterController {
     public ResponseEntity<ClusterJson> getCluster(@PathVariable String id) {
         Cluster cluster = clusterService.get(id);
         if (cluster == null) {
-            return new ResponseEntity<>(ClusterJson.emptyJson(), HttpStatus.NOT_FOUND);
+            throw new ClusterNotFoundException(id);
         }
         return new ResponseEntity<>(clusterConverter.convert(cluster), HttpStatus.OK);
     }
@@ -69,7 +71,16 @@ public class ClusterController {
     public ResponseEntity<ClusterJson> deleteCluster(@PathVariable String id) {
         Cluster cluster = clusterService.remove(id);
         if (cluster == null) {
-            return new ResponseEntity<>(ClusterJson.emptyJson(), HttpStatus.NOT_FOUND);
+            throw new ClusterNotFoundException(id);
+        }
+        return new ResponseEntity<>(clusterConverter.convert(cluster), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/{id}/state", method = RequestMethod.POST)
+    public ResponseEntity<ClusterJson> setState(@PathVariable String id, @RequestBody StateJson stateJson) {
+        Cluster cluster = clusterService.setState(id, stateJson.getState());
+        if (cluster == null) {
+            throw new ClusterNotFoundException(id);
         }
         return new ResponseEntity<>(clusterConverter.convert(cluster), HttpStatus.OK);
     }

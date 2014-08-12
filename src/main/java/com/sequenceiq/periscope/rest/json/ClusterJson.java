@@ -5,14 +5,16 @@ public class ClusterJson implements Json {
     private String id;
     private String host;
     private String port;
+    private String state;
 
     public ClusterJson() {
     }
 
-    public ClusterJson(String id, String host, String port) {
+    public ClusterJson(String id, String host, String port, String state) {
         this.id = id;
         this.host = host;
         this.port = port;
+        this.state = state;
     }
 
     public String getId() {
@@ -39,7 +41,15 @@ public class ClusterJson implements Json {
         this.port = port;
     }
 
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
     public static ClusterJson emptyJson() {
-        return new ClusterJson("", "", "");
+        return new ClusterJson("", "", "", "");
     }
 }
