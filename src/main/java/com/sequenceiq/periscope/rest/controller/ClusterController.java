@@ -22,7 +22,6 @@ import com.sequenceiq.periscope.rest.converter.AmbariConverter;
 import com.sequenceiq.periscope.rest.converter.ClusterConverter;
 import com.sequenceiq.periscope.rest.json.AmbariJson;
 import com.sequenceiq.periscope.rest.json.ClusterJson;
-import com.sequenceiq.periscope.rest.json.IdJson;
 import com.sequenceiq.periscope.rest.json.StateJson;
 import com.sequenceiq.periscope.service.ClusterService;
 
@@ -40,14 +39,15 @@ public class ClusterController {
     private ClusterConverter clusterConverter;
 
     @RequestMapping(value = "/{id}", method = RequestMethod.POST)
-    public ResponseEntity<IdJson> addCluster(@PathVariable String id, @RequestBody AmbariJson ambariServer) {
+    public ResponseEntity<ClusterJson> addCluster(@PathVariable String id, @RequestBody AmbariJson ambariServer) {
+        Cluster cluster;
         try {
-            clusterService.add(id, ambariConverter.convert(ambariServer));
+            cluster = clusterService.add(id, ambariConverter.convert(ambariServer));
         } catch (ConnectionException e) {
             LOGGER.error("Error adding the ambari cluster {} to the registry", ambariServer.getHost(), e);
-            return new ResponseEntity<>(IdJson.emptyJson(), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(ClusterJson.emptyJson(), HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>(new IdJson(id), HttpStatus.CREATED);
+        return new ResponseEntity<>(clusterConverter.convert(cluster), HttpStatus.CREATED);
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
