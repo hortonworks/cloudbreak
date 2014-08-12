@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -26,7 +28,8 @@ public class TemplateJson implements JsonEntity {
     @Size(max = 50)
     private String description;
     private Integer volumeCount;
-    @Size(max = 1024)
+    @Min(value = 0, message = "Volume size must be greater than or equal to 0")
+    @Max(value = 1024, message = "Volume size must be lesser than or equal to 1024")
     private Integer volumeSize;
 
     private Set<UserRole> userRoles = new HashSet();
