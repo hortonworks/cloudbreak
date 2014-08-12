@@ -297,6 +297,35 @@ _This process will take 20 minutes so be patient - but this step will have do be
 
 <!--accounts.md-->
 
+##Roles
+
+Cloudbreak defines three distinct roles:
+
+1. CLOUDBREAK_DEPLOYER
+2. COMPANY_ADMIN
+3. COMPANY_USER
+4. REGULAR_USER
+
+###Cloudbreak deployer
+This is the `master` role - currently it's not used.
+
+###Company admin
+We have introduced the notion of companies - and with comes an administrator role. Upon registration a user can specify whether it's a regular user or a company user. If someone choses to be a company user then we will register that company in the system. A company is a unique entity and can't be registered twice. If the company is already registered and you think that is a mistake please let us know. 
+The extra rights associated with the company admin role are:
+
+* Invite colleagues under the company account
+* Share company wide resources (credential, blueprints, templates)
+* See resources created by colleagues
+* See clusters started by colleagues
+* Management and reporting tool available 
+
+###Company user
+A company user is a user who has been invited to join Cloudbreak by his company administrator. Can see (if made available by the company admin) shared resources. Company users activity will show up under the management and reporting tool for company wide statistics. Apart from common company wide resources, the company users will manage their own private resources. 
+
+###Regular user
+Users who directly register and are not company administrator will be regular Cloudbreak users. They manage their own private resources.
+
+
 <!--ui.md-->
 
 ##Cloudbreak UI
@@ -305,6 +334,9 @@ When we have started to work on Cloudbreak, our main goal was to create an easy 
 The goal of the UI is to ease to process and allow you to create a Hadoop cluster on your favourite cloud provider in `one-click`.
 
 The UI is built on the foundation of the Cloudbreak REST API. You can access the UI [here](https://cloudbreak.sequenceiq.com/).
+
+###User registration
+While we consider the registration process quite simple, we'd like to explain the notion of **companies**. When a user registers as a `company admin` it means that he will be the administrator of that company - further colleagues will have the opportunity to join the **company** upon being invited by the admin user. 
 
 ###Manage credentials
 Using manage credentials you can link your cloud account with the Cloudbreak account.
