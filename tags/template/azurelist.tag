@@ -62,7 +62,7 @@
         <!-- .col-sm-9 -->
     </div>
     <div class="form-group">
-        <label class="col-sm-3 control-label" for="location">Volume count</label>
+        <label class="col-sm-3 control-label" for="location">Attached volumes per instance</label>
 
         <div class="col-sm-9">
             <p id="volcount" class="form-control-static">{{template.volumeCount}}</p>
@@ -70,7 +70,7 @@
         <!-- .col-sm-9 -->
     </div>
     <div class="form-group">
-        <label class="col-sm-3 control-label" for="location">Volume size</label>
+        <label class="col-sm-3 control-label" for="location">Volume size (GB)</label>
 
         <div class="col-sm-9">
             <p id="volsize" class="form-control-static">{{template.volumeSize}}</p>

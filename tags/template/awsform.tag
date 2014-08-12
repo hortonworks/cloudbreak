@@ -103,7 +103,7 @@
     </div>
 
     <div class="form-group">
-        <label class="col-sm-3 control-label" for="aws_tvolumetype">Instance type</label>
+        <label class="col-sm-3 control-label" for="aws_tvolumetype">Volume type</label>
 
         <div class="col-sm-9">
             <select class="form-control" id="aws_tvolumetype">
