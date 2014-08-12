@@ -20,3 +20,6 @@ curl -w '%{http_code}' -H "Content-Type: application/json" -X POST -d '{"allowed
 
 # set cluster state
 curl -X POST -H "Content-Type: application/json" -d '{"state":"SUSPENDED"}' localhost:8081/clusters/multi-node/state | jq .
+
+# refresh ambari configuration
+curl -X POST localhost:8081/clusters/multi-node/config/ambari/refresh | jq .

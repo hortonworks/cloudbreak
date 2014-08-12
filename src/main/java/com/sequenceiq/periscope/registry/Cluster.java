@@ -26,9 +26,9 @@ public class Cluster {
     private final Map<Priority, Map<ApplicationId, SchedulerApplication>> applications;
     private final String clusterId;
     private final Ambari ambari;
-    private final Configuration configuration;
-    private final YarnClient yarnClient;
     private boolean appMovementAllowed = true;
+    private Configuration configuration;
+    private YarnClient yarnClient;
     private ClusterMetricsInfo metrics;
     private CloudbreakPolicy cloudbreakPolicy;
     private ClusterState state = ClusterState.RUNNING;
@@ -36,15 +36,8 @@ public class Cluster {
     public Cluster(String clusterId, Ambari ambari) throws ConnectionException {
         this.clusterId = clusterId;
         this.ambari = ambari;
-        try {
-            this.applications = new ConcurrentHashMap<>();
-            this.configuration = AmbariConfigurationService.getConfiguration(ambari);
-            this.yarnClient = YarnClient.createYarnClient();
-            this.yarnClient.init(configuration);
-            this.yarnClient.start();
-        } catch (Exception e) {
-            throw new ConnectionException(ambari.getHost());
-        }
+        this.applications = new ConcurrentHashMap<>();
+        initConfiguration();
     }
 
     public String getClusterId() {
@@ -105,6 +98,10 @@ public class Cluster {
 
     public void updateMetrics(ClusterMetricsInfo metrics) {
         this.metrics = metrics == null ? this.metrics : metrics;
+    }
+
+    public void refreshConfiguration() throws ConnectionException {
+        initConfiguration();
     }
 
     public synchronized SchedulerApplication addApplication(ApplicationReport appReport) {
@@ -181,6 +178,20 @@ public class Cluster {
             }
         }
         return null;
+    }
+
+    private void initConfiguration() throws ConnectionException {
+        try {
+            configuration = AmbariConfigurationService.getConfiguration(ambari);
+            if (yarnClient != null) {
+                yarnClient.stop();
+            }
+            yarnClient = YarnClient.createYarnClient();
+            yarnClient.init(configuration);
+            yarnClient.start();
+        } catch (Exception e) {
+            throw new ConnectionException(ambari.getHost());
+        }
     }
 
 }

@@ -34,9 +34,17 @@ public class ClusterService {
     }
 
     public Cluster setState(String clusterId, ClusterState state) {
-        Cluster cluster = clusterRegistry.get(clusterId);
+        Cluster cluster = get(clusterId);
         if (cluster != null) {
             cluster.setState(state);
+        }
+        return cluster;
+    }
+
+    public Cluster refreshConfiguration(String clusterId) throws ConnectionException {
+        Cluster cluster = get(clusterId);
+        if (cluster != null) {
+            cluster.refreshConfiguration();
         }
         return cluster;
     }

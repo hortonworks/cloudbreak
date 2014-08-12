@@ -33,9 +33,7 @@ public class ExceptionController {
 
     @ExceptionHandler(ClusterNotFoundException.class)
     public ResponseEntity<ClusterJson> handleClusterNotFoundException(ClusterNotFoundException e) {
-        ClusterJson json = ClusterJson.emptyJson();
-        json.setId(e.getId());
-        return new ResponseEntity<>(json, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(ClusterJson.emptyJson().withId(e.getId()), HttpStatus.NOT_FOUND);
     }
 
     public static ResponseEntity<ExceptionMessageJson> createExceptionMessage(String message) {

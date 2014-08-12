@@ -62,4 +62,9 @@ public class ClusterJson implements Json {
     public static ClusterJson emptyJson() {
         return new ClusterJson("", "", "", "", "");
     }
+
+    public ClusterJson withId(String id) {
+        this.id = id;
+        return this;
+    }
 }

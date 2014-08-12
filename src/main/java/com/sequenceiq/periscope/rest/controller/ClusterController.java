@@ -40,14 +40,15 @@ public class ClusterController {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.POST)
     public ResponseEntity<ClusterJson> addCluster(@PathVariable String id, @RequestBody AmbariJson ambariServer) {
-        Cluster cluster;
+        ResponseEntity response;
         try {
-            cluster = clusterService.add(id, ambariConverter.convert(ambariServer));
+            Cluster cluster = clusterService.add(id, ambariConverter.convert(ambariServer));
+            response = new ResponseEntity<>(clusterConverter.convert(cluster), HttpStatus.CREATED);
         } catch (ConnectionException e) {
-            LOGGER.error("Error adding the ambari cluster {} to the registry", ambariServer.getHost(), e);
-            return new ResponseEntity<>(ClusterJson.emptyJson(), HttpStatus.BAD_REQUEST);
+            LOGGER.error("Error adding the ambari cluster " + ambariServer.getHost() + " to the registry", e);
+            response = new ResponseEntity<>(ClusterJson.emptyJson().withId(id), HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>(clusterConverter.convert(cluster), HttpStatus.CREATED);
+        return response;
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
@@ -83,6 +84,22 @@ public class ClusterController {
             throw new ClusterNotFoundException(id);
         }
         return new ResponseEntity<>(clusterConverter.convert(cluster), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/{id}/config/ambari/refresh", method = RequestMethod.POST)
+    public ResponseEntity<ClusterJson> refreshConfiguration(@PathVariable String id) {
+        ResponseEntity response;
+        try {
+            Cluster cluster = clusterService.refreshConfiguration(id);
+            if (cluster == null) {
+                throw new ClusterNotFoundException(id);
+            }
+            response = new ResponseEntity<>(clusterConverter.convert(cluster), HttpStatus.OK);
+        } catch (ConnectionException e) {
+            LOGGER.error("Error refreshing the configuration on cluster " + id, e);
+            response = new ResponseEntity<>(ClusterJson.emptyJson().withId(id), HttpStatus.REQUEST_TIMEOUT);
+        }
+        return response;
     }
 
 }
