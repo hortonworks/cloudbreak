@@ -44,7 +44,7 @@ public class ApplicationUpdateEventHandler implements ApplicationListener<Applic
 
         List<CapacitySchedulerQueueInfo> allQueueInfo = getAllQueueInfo(schedulerInfo);
         Cluster cluster = clusterService.get(event.getClusterId());
-        if (cluster == null) {
+        if (cluster == null || !cluster.isAppMovementAllowed()) {
             return;
         }
 

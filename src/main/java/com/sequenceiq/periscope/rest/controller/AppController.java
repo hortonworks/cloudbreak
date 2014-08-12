@@ -9,11 +9,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sequenceiq.periscope.rest.converter.AppReportConverter;
+import com.sequenceiq.periscope.rest.json.AppMovementJson;
 import com.sequenceiq.periscope.rest.json.AppReportJson;
 import com.sequenceiq.periscope.service.AppService;
 
@@ -46,6 +48,12 @@ public class AppController {
             status = HttpStatus.INTERNAL_SERVER_ERROR;
         }
         return new ResponseEntity<>(result, status);
+    }
+
+    @RequestMapping(value = "/movement", method = RequestMethod.POST)
+    public ResponseEntity<AppMovementJson> enableMovement(@PathVariable String clusterId, @RequestBody AppMovementJson appMovementJson) {
+        boolean success = appService.allowAppMovement(clusterId, appMovementJson.isAllowed());
+        return new ResponseEntity<>(appMovementJson, success ? HttpStatus.OK : HttpStatus.NOT_FOUND);
     }
 
 }

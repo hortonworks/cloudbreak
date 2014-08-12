@@ -30,6 +30,7 @@ public class Cluster {
     private final Map<Priority, Map<ApplicationId, SchedulerApplication>> applications;
     private ClusterMetricsInfo metrics;
     private CloudbreakPolicy cloudbreakPolicy;
+    private boolean appMovementAllowed = true;
 
     public Cluster(String clusterId, Ambari ambari) throws ConnectionException {
         this.clusterId = clusterId;
@@ -59,6 +60,14 @@ public class Cluster {
 
     public String getPort() {
         return ambari.getPort();
+    }
+
+    public boolean isAppMovementAllowed() {
+        return appMovementAllowed;
+    }
+
+    public void allowAppMovement(boolean appMovementAllowed) {
+        this.appMovementAllowed = appMovementAllowed;
     }
 
     public String getConfigValue(ConfigParam param, String defaultValue) {

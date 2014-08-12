@@ -45,4 +45,14 @@ public class AppService {
         }
     }
 
+    public boolean allowAppMovement(String clusterId, boolean allow) {
+        boolean result = false;
+        Cluster cluster = clusterService.get(clusterId);
+        if (cluster != null) {
+            cluster.allowAppMovement(allow);
+            result = true;
+        }
+        return result;
+    }
+
 }
