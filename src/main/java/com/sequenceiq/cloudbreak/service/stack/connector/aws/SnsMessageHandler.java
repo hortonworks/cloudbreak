@@ -9,6 +9,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import reactor.core.Reactor;
+import reactor.event.Event;
+
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -20,9 +23,6 @@ import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.StackCreationFailure;
-
-import reactor.core.Reactor;
-import reactor.event.Event;
 
 @Service
 public class SnsMessageHandler {
@@ -45,9 +45,6 @@ public class SnsMessageHandler {
 
     @Autowired
     private Reactor reactor;
-
-    @Autowired
-    private AwsNetworkConfigurator awsNetworkConfigurator;
 
     public void handleMessage(SnsRequest snsRequest) {
         if (isCloudFormationMessage(snsRequest)) {
@@ -86,7 +83,6 @@ public class SnsMessageHandler {
                     "Got message that CloudFormation stack created, but no matching stack found in the database [CFStackId: '{}']. Ignoring message.",
                     cfMessage.get("StackId"));
         } else if (!stack.isStackCompleted()) {
-            awsNetworkConfigurator.disableSourceDestCheck(stack);
             stack = stackUpdater.updateStackCreateComplete(stack.getId());
             LOGGER.info("CloudFormation stack creation completed. [Id: '{}']", stack.getId());
             LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_COMPLETE_EVENT, stack.getId());

@@ -52,6 +52,8 @@ public class AmbariRoleAllocator {
                     instanceMetaDataEntry.setPrivateIp(coreInstanceMetaDataEntry.getPrivateIp());
                     instanceMetaDataEntry.setPublicIp(coreInstanceMetaDataEntry.getPublicIp());
                     instanceMetaDataEntry.setInstanceId(coreInstanceMetaDataEntry.getInstanceId());
+                    instanceMetaDataEntry.setVolumeCount(coreInstanceMetaDataEntry.getVolumeCount());
+                    instanceMetaDataEntry.setLongName(coreInstanceMetaDataEntry.getLongName());
                     instanceMetaDataEntry.setInstanceIndex(instanceIndex);
                     instanceMetaDataEntry.setDockerSubnet(DOCKER_SUBNET_PREFIX + instanceIndex);
                     if (instanceIndex == 0) {

@@ -16,6 +16,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import reactor.core.Reactor;
+import reactor.event.Event;
+
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
@@ -27,9 +30,6 @@ import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-
-import reactor.core.Reactor;
-import reactor.event.Event;
 
 public class SnsMessageHandlerTest {
 
@@ -53,9 +53,6 @@ public class SnsMessageHandlerTest {
     private RetryingStackUpdater stackUpdater;
 
     @Mock
-    private AwsNetworkConfigurator awsNetworkConfigurator;
-
-    @Mock
     private Reactor reactor;
 
     @Mock
@@ -73,7 +70,7 @@ public class SnsMessageHandlerTest {
         User user = AwsConnectorTestUtil.createUser();
         AwsCredential credential = AwsConnectorTestUtil.createAwsCredential();
         AwsTemplate awsTemplate = AwsConnectorTestUtil.createAwsTemplate(user);
-        stack = AwsConnectorTestUtil.createStack(user, credential, awsTemplate,  new HashSet<Resource>());
+        stack = AwsConnectorTestUtil.createStack(user, credential, awsTemplate, new HashSet<Resource>());
     }
 
     @Test

@@ -5,9 +5,11 @@ public class InstanceMetaDataJson implements JsonEntity {
     private String privateIp;
     private String publicIp;
     private String instanceId;
+    private Integer volumeCount;
     private int instanceIndex;
     private Boolean ambariServer;
     private String dockerSubnet;
+    private String longName;
 
     public InstanceMetaDataJson() {
 
@@ -37,6 +39,14 @@ public class InstanceMetaDataJson implements JsonEntity {
         this.instanceId = instanceId;
     }
 
+    public Integer getVolumeCount() {
+        return volumeCount;
+    }
+
+    public void setVolumeCount(Integer volumeCount) {
+        this.volumeCount = volumeCount;
+    }
+
     public int getInstanceIndex() {
         return instanceIndex;
     }
@@ -59,5 +69,13 @@ public class InstanceMetaDataJson implements JsonEntity {
 
     public void setDockerSubnet(String dockerSubnet) {
         this.dockerSubnet = dockerSubnet;
+    }
+
+    public String getLongName() {
+        return longName;
+    }
+
+    public void setLongName(String longName) {
+        this.longName = longName;
     }
 }

@@ -65,9 +65,13 @@ public class AzureMetadataSetup implements MetadataSetup {
             props.put(SERVICENAME, resource.getResourceName());
             Object virtualMachine = azureClient.getVirtualMachine(props);
             try {
-                CoreInstanceMetaData instanceMetaData = new CoreInstanceMetaData(resource.getResourceName(),
+                CoreInstanceMetaData instanceMetaData = new CoreInstanceMetaData(
+                        resource.getResourceName(),
                         getPrivateIP((String) virtualMachine),
-                        getVirtualIP((String) virtualMachine));
+                        getVirtualIP((String) virtualMachine),
+                        stack.getTemplate().getVolumeCount(),
+                        getLongName((String) virtualMachine)
+                );
                 instanceMetaDatas.add(instanceMetaData);
             } catch (IOException e) {
                 LOGGER.error(String.format("The instance %s was not reacheable: %s", resource.getResourceName(), e.getMessage()), e);
@@ -80,6 +84,14 @@ public class AzureMetadataSetup implements MetadataSetup {
     protected String getVirtualIP(String response) throws IOException {
         JsonNode actualObj = MAPPER.readValue(response, JsonNode.class);
         return actualObj.get("Deployment").get("VirtualIPs").get("VirtualIP").get("Address").asText();
+    }
+
+    @VisibleForTesting
+    protected String getLongName(String response) throws IOException {
+        JsonNode actualObj = MAPPER.readValue(response, JsonNode.class);
+        String dns = actualObj.get("Deployment").get("InternalDnsSuffix").asText();
+        String deploymentName = actualObj.get("Deployment").get("Name").asText();
+        return String.format("%s.%s", deploymentName, dns);
     }
 
     @VisibleForTesting

@@ -13,6 +13,7 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
 import com.sequenceiq.cloudbreak.controller.validation.AzureTemplateParam;
 import com.sequenceiq.cloudbreak.domain.AzureLocation;
@@ -22,7 +23,7 @@ import com.sequenceiq.cloudbreak.domain.Port;
 
 public class AzureTemplateConverterTest {
 
-    private static final String DUMMY_VM_TYPE = "dummyVmType";
+    private static final String DUMMY_VM_TYPE = "SMALL";
     private static final String DUMMY_DESCRIPTION = "dummyDescription";
     private static final String DUMMY_IMAGE_NAME = "dummyImageName";
     private static final AzureLocation DUMMY_LOCATION = AzureLocation.BRAZIL_SOUTH;
@@ -89,6 +90,45 @@ public class AzureTemplateConverterTest {
         assertEquals(result.getImageName(),
                 templateJson.getParameters().get(AzureTemplateParam.IMAGENAME.getName()));
         assertEquals(result.getPorts().size(), 0);
+    }
+
+    @Test
+    public void testConvertAzureJsonWithSpecifiedVolumeTypeWhenTheVolumeSizeCorrectNoExceptionOccurs() {
+        Map<String, Object> props = new HashMap<>();
+        props.put(AzureTemplateParam.LOCATION.getName(), DUMMY_LOCATION);
+        props.put(AzureTemplateParam.IMAGENAME.getName(), DUMMY_IMAGE_NAME);
+        props.put(AzureTemplateParam.VMTYPE.getName(), DUMMY_VM_TYPE);
+        templateJson.setVolumeCount(1);
+        templateJson.setVolumeSize(100);
+        templateJson.setParameters(props);
+
+        AzureTemplate result = underTest.convert(templateJson);
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testConvertAzureJsonWithSpecifiedVolumeTypeWhenTheVolumeCountInCorrectThenBadRequestException() {
+        Map<String, Object> props = new HashMap<>();
+        props.put(AzureTemplateParam.LOCATION.getName(), DUMMY_LOCATION);
+        props.put(AzureTemplateParam.IMAGENAME.getName(), DUMMY_IMAGE_NAME);
+        props.put(AzureTemplateParam.VMTYPE.getName(), DUMMY_VM_TYPE);
+        templateJson.setVolumeCount(10);
+        templateJson.setVolumeSize(10000);
+        templateJson.setParameters(props);
+
+        AzureTemplate result = underTest.convert(templateJson);
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testConvertAzureJsonWithSpecifiedVolumeTypeWhenTheVolumeSizeIsBiggerWithOneCountThenBadRequestException() {
+        Map<String, Object> props = new HashMap<>();
+        props.put(AzureTemplateParam.LOCATION.getName(), DUMMY_LOCATION);
+        props.put(AzureTemplateParam.IMAGENAME.getName(), DUMMY_IMAGE_NAME);
+        props.put(AzureTemplateParam.VMTYPE.getName(), DUMMY_VM_TYPE);
+        templateJson.setVolumeCount(3);
+        templateJson.setVolumeSize(2049);
+        templateJson.setParameters(props);
+
+        AzureTemplate result = underTest.convert(templateJson);
     }
 
     private AzureTemplate createAzureTemplate() {

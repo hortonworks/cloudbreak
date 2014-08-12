@@ -1,6 +1,6 @@
 : ${NODE_PREFIX=amb}
 : ${MYDOMAIN:=mycorp.kom}
-: ${IMAGE:="sequenceiq/ambari"}
+: ${IMAGE:="sequenceiq/ambari:pam-fix"}
 : ${INSTANCE_ID:="0"}
 
 # instance id from ec2 metadata
@@ -8,8 +8,8 @@ INSTANCE_ID=$(sudo cat /var/lib/waagent/ovf-env.xml |grep -oPm1 "(?<=<HostName>)
 
 # jq expression that selects the json entry of the current instance from the array returned by the metadata service
 INSTANCE_SELECTOR='. | map(select(.instanceId == "'$INSTANCE_ID'"))'
-# jq expression that selects all the other json entries
-OTHER_INSTANCES_SELECTOR='. | map(select(.instanceId != "'$INSTANCE_ID'"))'
+# jq expression to select ambariServer from metadata
+AMBARI_SERVER_SELECTOR='. | map(select(.ambariServer))'
 
 # metadata service returns '204: no-content' if metadata is not ready yet and '200: ok' if it's completed
 # every other http status codes mean that something unexpected happened
@@ -26,48 +26,35 @@ done
 
 METADATA_RESULT=$(cat /tmp/metadata_result)
 
-# select the docker subnet of the current instance
-DOCKER_SUBNET=$(echo $METADATA_RESULT | jq "$INSTANCE_SELECTOR" | jq '.[].dockerSubnet' | sed s/\"//g)
+# format and mount disks
+VOLUME_COUNT=$(echo $METADATA_RESULT | jq "$INSTANCE_SELECTOR" | jq '.[].volumeCount' | sed s/\"//g)
+START_LABEL=62
+for (( i=1; i<=VOLUME_COUNT; i++ )); do
+  LABEL=$(printf "\x$((START_LABEL+i))")
+  mkfs -F -t ext4 /dev/sd${LABEL}
+  mkdir /mnt/fs${i}
+  mount /dev/sd${LABEL} /mnt/fs${i}
+  DOCKER_VOLUME_PARAMS="${DOCKER_VOLUME_PARAMS} -v /mnt/fs${i}:/mnt/fs${i}"
+done
 
-# creates bridge for docker
-ifconfig bridge0 down && brctl delbr bridge0
-brctl addbr bridge0  && ifconfig bridge0 ${DOCKER_SUBNET}.1  netmask 255.255.255.0
+FQDN=$(echo $METADATA_RESULT | jq "$INSTANCE_SELECTOR" | jq '.[].longName' | sed s/\"//g)
+DOMAIN=$(echo $FQDN | cut -d'.' -f 2-6)
 
-# route to others
-# read from stdin <launch-idx> <priv-ip>
-#create_routes() {
-#  while read SUBNET IP; do
-#    route add -net ${SUBNET}.0  netmask 255.255.255.0  gw $IP
-#  done
-#}
-
-#route delete -net 172.17.0.0/16
-
-# selects every other instance's docker subnet and private ip and calls create_routes on them
-#echo $METADATA_RESULT | jq "$OTHER_INSTANCES_SELECTOR" | jq '.[] | (.dockerSubnet + " " + .privateIp)' | sed s/\"//g | create_routes
-
-netstat -nr
-
-# set bridge0 in docker opts
-sh -c "cat > /etc/default/docker" <<"EOF"
-DOCKER_OPTS="-b bridge0 -H unix:// -H tcp://0.0.0.0:2375"
-EOF
+echo "nameserver 127.0.0.1" > /run/resolvconf/resolv.conf
+echo "search $DOMAIN" >> /run/resolvconf/resolv.conf
+echo "nameserver 168.63.129.16" >> /run/resolvconf/resolv.conf
 
 service docker restart
 sleep 5
-
-# find the docker subnet of the first instance from "other instances" - this is used to determine which IP Serf will use to join the cluster
-PRIVATE_IP_OF_FIRST_OTHER=$(echo $METADATA_RESULT | jq "$OTHER_INSTANCES_SELECTOR" | jq '.[0].privateIp' | sed s/\"//g)
-SERF_JOIN_IP=${PRIVATE_IP_OF_FIRST_OTHER}
 
 # determines if this instance is the Ambari server or not and sets the tags accordingly
 AMBARI_SERVER=$(echo $METADATA_RESULT | jq "$INSTANCE_SELECTOR" | jq '.[].ambariServer' | sed s/\"//g)
 [ "$AMBARI_SERVER" == true ] && AMBARI_ROLE="--tag ambari-server=true" || AMBARI_ROLE=""
 
 INSTANCE_IDX=$(echo $METADATA_RESULT | jq "$INSTANCE_SELECTOR" | jq '.[].instanceIndex' | sed s/\"//g)
-MY_IP=$(echo $METADATA_RESULT | jq "$INSTANCE_SELECTOR" | jq '.[].privateIp' | sed s/\"//g)
 
-CMD="docker run -d -p 2181:2181 -p 45454:45454 -p 40000:40000 -p 40001:40001 -p 40002:40002 -p 40003:40003 -p 40004:40004 -p 40005:40005 -p 40006:40006 -p 40007:40007 -p 40008:40008 -p 40009:40009 -p 40010:40010 -p 40011:40011 -p 40012:40012 -p 40013:40013 -p 40014:40014 -p 40015:40015 -p 40016:40016 -p 40017:40017 -p 40018:40018 -p 40019:40019 -p 40020:40020 -p 40021:40021 -p 40022:40022 -p 40023:40023 -p 40024:40024 -p 40025:40025 -p 40026:40026 -p 40027:40027 -p 40028:40028 -p 40029:40029 -p 40030:40030 -p 40031:40031 -p 40032:40032 -p 40033:40033 -p 40034:40034 -p 40035:40035 -p 40036:40036 -p 40037:40037 -p 40038:40038 -p 40039:40039 -p 40040:40040 -p 40041:40041 -p 40042:40042 -p 40043:40043 -p 40044:40044 -p 40045:40045 -p 40046:40046 -p 40047:40047 -p 40048:40048 -p 40049:40049 -p 40050:40050 -p 37098:37098 -p 8025:8025 -p 8670:8670 -p 2888:2888 -p 3306:3306 -p 3888:3888 -p 7373:7373 -p 7946:7946/tcp -p 7946:7946/udp -p 8020:8020 -p 8021:8021 -p 8030:8030 -p 8031:8031 -p 8032:8032 -p 8033:8033 -p 8040:8040 -p 8042:8042 -p 8050:8050 -p 8080:8080 -p 8088:8088 -p 8440:8440 -p 8441:8441 -p 8660:8660 -p 8661:8661 -p 8662:8662 -p 8663:8663 -p 9000:9000 -p 9083:9083 -p 10000:10000 -p 10020:10020 -p 19888:19888 -p 49707:49707 -p 50010:50010 -p 50020:50020 -p 50030:50030 -p 50060:50060 -p 50070:50070 -p 50075:50075 -p 50090:50090 -p 50111:50111 -p 50470:50470 -p 50475:50475 -p 51111:51111 -p 60000:60000 -p 60010:60010 -p 60020:60020 -p 60030:60030 -e SERF_JOIN_IP=$SERF_JOIN_IP -e SERF_ADVERTISE_IP=$MY_IP --dns 127.0.0.1 --name ${NODE_PREFIX}${INSTANCE_IDX} -h ${NODE_PREFIX}${INSTANCE_IDX}.${MYDOMAIN} --entrypoint /usr/local/serf/bin/start-serf-agent.sh  $IMAGE $AMBARI_ROLE"
+AMBARI_SERVER_IP=$(echo $METADATA_RESULT | jq "$AMBARI_SERVER_SELECTOR" | jq '.[].privateIp' | sed s/\"//g)
+CMD="docker run -d $DOCKER_VOLUME_PARAMS -e SERF_JOIN_IP=$AMBARI_SERVER_IP --net=host --name ${NODE_PREFIX}${INSTANCE_IDX} --entrypoint /usr/local/serf/bin/start-serf-agent.sh  $IMAGE $AMBARI_ROLE"
 
 cat << EOF
 =========================================
@@ -76,7 +63,3 @@ CMD=$CMD
 EOF
 
 $CMD
-
-# Update POSTROUTING rule created by Docker to support interhost package routing
-#iptables -t nat -D POSTROUTING 1
-#iptables -t nat -A POSTROUTING -s ${DOCKER_SUBNET}.0/24 ! -d 172.17.0.0/16 -j MASQUERADE

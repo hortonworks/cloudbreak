@@ -9,10 +9,12 @@ import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
 import com.sequenceiq.cloudbreak.controller.validation.AzureTemplateParam;
 import com.sequenceiq.cloudbreak.domain.AzureLocation;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
+import com.sequenceiq.cloudbreak.domain.AzureVmType;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Port;
 
@@ -34,6 +36,8 @@ public class AzureTemplateConverter extends AbstractConverter<TemplateJson, Azur
         azureTemplateJson.setCloudPlatform(CloudPlatform.AZURE);
         azureTemplateJson.setParameters(props);
         azureTemplateJson.setDescription(entity.getDescription() == null ? "" : entity.getDescription());
+        azureTemplateJson.setVolumeCount(entity.getVolumeCount());
+        azureTemplateJson.setVolumeSize(entity.getVolumeSize());
         return azureTemplateJson;
     }
 
@@ -61,6 +65,16 @@ public class AzureTemplateConverter extends AbstractConverter<TemplateJson, Azur
         }
         azureTemplate.setDescription(json.getDescription());
         azureTemplate.setPorts(ports);
+        azureTemplate.setVolumeCount((json.getVolumeCount() == null) ? 0 : json.getVolumeCount());
+        azureTemplate.setVolumeSize((json.getVolumeSize() == null) ? 0 : json.getVolumeSize());
+        AzureVmType azureVmType = AzureVmType.valueOf(json.getParameters().get(AzureTemplateParam.VMTYPE.getName()).toString());
+        if (azureVmType.maxDiskSize() < azureTemplate.getVolumeCount()) {
+            throw new BadRequestException(
+                    String.format("Azure not support this volumesize on the %s. The max suppported size is: %s",
+                    azureVmType.vmType(),
+                    azureVmType.maxDiskSize())
+            );
+        }
         return azureTemplate;
     }
 

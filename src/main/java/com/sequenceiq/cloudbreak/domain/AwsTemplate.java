@@ -9,6 +9,7 @@ import javax.persistence.ManyToOne;
 
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.ec2.model.InstanceType;
+import com.amazonaws.services.ec2.model.VolumeType;
 
 @Entity
 public class AwsTemplate extends Template implements ProvisionEntity {
@@ -22,6 +23,8 @@ public class AwsTemplate extends Template implements ProvisionEntity {
     @Enumerated(EnumType.STRING)
     private InstanceType instanceType;
     private String sshLocation;
+    private VolumeType volumeType;
+    private Boolean spotPriced;
 
     @ManyToOne
     @JoinColumn(name = "awsTemplate_awsTemplateOwner")
@@ -100,4 +103,21 @@ public class AwsTemplate extends Template implements ProvisionEntity {
     public User getOwner() {
         return awsTemplateOwner;
     }
+
+    public VolumeType getVolumeType() {
+        return volumeType;
+    }
+
+    public void setVolumeType(VolumeType volumeType) {
+        this.volumeType = volumeType;
+    }
+
+    public Boolean isSpotPriced() {
+        return spotPriced;
+    }
+
+    public void setSpotPriced(Boolean spotPriced) {
+        this.spotPriced = spotPriced;
+    }
+
 }

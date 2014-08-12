@@ -25,6 +25,9 @@ public class TemplateJson implements JsonEntity {
     private Map<String, Object> parameters = new HashMap<>();
     @Size(max = 50)
     private String description;
+    private Integer volumeCount;
+    @Size(max = 1024)
+    private Integer volumeSize;
 
     private Set<UserRole> userRoles = new HashSet();
 
@@ -77,4 +80,21 @@ public class TemplateJson implements JsonEntity {
     public void setUserRoles(Set<UserRole> userRoles) {
         this.userRoles = userRoles;
     }
+
+    public Integer getVolumeSize() {
+        return volumeSize;
+    }
+
+    public void setVolumeSize(Integer volumeSize) {
+        this.volumeSize = volumeSize;
+    }
+
+    public Integer getVolumeCount() {
+        return volumeCount;
+    }
+
+    public void setVolumeCount(Integer volumeCount) {
+        this.volumeCount = volumeCount;
+    }
+
 }

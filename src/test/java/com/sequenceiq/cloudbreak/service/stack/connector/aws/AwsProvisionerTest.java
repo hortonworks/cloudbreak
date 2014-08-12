@@ -4,8 +4,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anySet;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -21,6 +24,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
+import reactor.core.Reactor;
+
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.CreateStackRequest;
@@ -29,14 +34,11 @@ import com.amazonaws.services.cloudformation.model.Parameter;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
-import com.sequenceiq.cloudbreak.domain.CloudFormationTemplate;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
-
-import reactor.core.Reactor;
 
 public class AwsProvisionerTest {
 
@@ -50,7 +52,7 @@ public class AwsProvisionerTest {
     private AwsStackUtil awsStackUtil;
 
     @Mock
-    private CloudFormationTemplate cfTemplate;
+    private CloudFormationTemplateBuilder cfTemplateBuilder;
 
     @Mock
     private RetryingStackUpdater stackUpdater;
@@ -90,7 +92,7 @@ public class AwsProvisionerTest {
         given(createStackResult.getStackId()).willReturn(STACK_ID);
         given(stackUpdater.updateStackResources(anyLong(), anySet())).willReturn(stack);
         given(underTest.createStackRequest()).willReturn(createStackRequest);
-        given(cfTemplate.getBody()).willReturn("templatebody");
+        given(cfTemplateBuilder.build(anyString(), anyInt(), anyBoolean())).willReturn("templatebody");
         Map<String, Object> setupProperties = new HashMap<>();
         setupProperties.put(SnsTopicManager.NOTIFICATION_TOPIC_ARN_KEY, "topicArn");
         // WHEN

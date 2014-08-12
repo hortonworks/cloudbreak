@@ -31,6 +31,9 @@ public abstract class Template {
     @Enumerated(EnumType.STRING)
     private List<UserRole> userRoles = new ArrayList<>();
 
+    private Integer volumeCount;
+    private Integer volumeSize;
+
     public Template() {
     }
 
@@ -55,4 +58,21 @@ public abstract class Template {
     public void setUserRoles(List<UserRole> userRoles) {
         this.userRoles = userRoles;
     }
+
+    public Integer getVolumeCount() {
+        return volumeCount;
+    }
+
+    public void setVolumeCount(Integer volumeCount) {
+        this.volumeCount = volumeCount;
+    }
+
+    public Integer getVolumeSize() {
+        return volumeSize;
+    }
+
+    public void setVolumeSize(Integer volumeSize) {
+        this.volumeSize = volumeSize;
+    }
+
 }

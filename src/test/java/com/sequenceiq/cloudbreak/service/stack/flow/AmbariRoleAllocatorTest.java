@@ -1,29 +1,31 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
-import com.sequenceiq.cloudbreak.conf.ReactorConfig;
-import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.stack.event.domain.CoreInstanceMetaData;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anySet;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+import java.util.HashSet;
+import java.util.Set;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import com.sequenceiq.cloudbreak.conf.ReactorConfig;
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.stack.event.domain.CoreInstanceMetaData;
+
 import reactor.core.Reactor;
 import reactor.event.Event;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.verify;
-import static org.mockito.BDDMockito.times;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anySet;
-
-public class AmbariRolAllocatorTest {
+public class AmbariRoleAllocatorTest {
     @InjectMocks
     private AmbariRoleAllocator underTest;
 
@@ -44,7 +46,7 @@ public class AmbariRolAllocatorTest {
     public void setUp() {
         underTest = new AmbariRoleAllocator();
         MockitoAnnotations.initMocks(this);
-        coreInstanceMetaData = createCodeInstanceMetaData();
+        coreInstanceMetaData = createCoreInstanceMetaData();
         stack = createStack();
     }
 
@@ -96,10 +98,10 @@ public class AmbariRolAllocatorTest {
         verify(stackUpdater, times(0)).updateMetadataReady(anyLong());
     }
 
-    private Set<CoreInstanceMetaData> createCodeInstanceMetaData() {
+    private Set<CoreInstanceMetaData> createCoreInstanceMetaData() {
         Set<CoreInstanceMetaData> metaData = new HashSet<>();
-        CoreInstanceMetaData data1 = new CoreInstanceMetaData("instanceId1", "dummyPrivateIp1", "dummyPublicIp1");
-        CoreInstanceMetaData data2 = new CoreInstanceMetaData("instanceId2", "dummyPrivateIp2", "dummyPublicIp2");
+        CoreInstanceMetaData data1 = new CoreInstanceMetaData("instanceId1", "dummyPrivateIp1", "dummyPublicIp1", 3, "john1.john.j5.internal.cloudapp.net");
+        CoreInstanceMetaData data2 = new CoreInstanceMetaData("instanceId2", "dummyPrivateIp2", "dummyPublicIp2", 3, "john2.john.j5.internal.cloudapp.net");
         metaData.add(data1);
         metaData.add(data2);
         return metaData;

@@ -6,6 +6,9 @@ import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStack
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.NOT_FOUND;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.SERVICENAME;
 
+import groovyx.net.http.HttpResponseDecorator;
+import groovyx.net.http.HttpResponseException;
+
 import java.io.FileNotFoundException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
@@ -22,6 +25,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import reactor.core.Reactor;
+import reactor.event.Event;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
@@ -42,15 +48,11 @@ import com.sequenceiq.cloudbreak.service.stack.connector.Provisioner;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.StackCreationFailure;
 
-import groovyx.net.http.HttpResponseDecorator;
-import groovyx.net.http.HttpResponseException;
-import reactor.core.Reactor;
-import reactor.event.Event;
-
 @Component
 public class AzureProvisioner implements Provisioner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureProvisioner.class);
+    private static final int VALID_IP_RANGE_START = 4;
     private static final String LOCATION = "location";
     private static final String DESCRIPTION = "description";
     private static final String AFFINITYGROUP = "affinityGroup";
@@ -63,12 +65,14 @@ public class AzureProvisioner implements Provisioner {
     private static final String HOSTNAME = "hostname";
     private static final String USERNAME = "username";
     private static final String SUBNETNAME = "subnetName";
+    private static final String VIRTUAL_NETWORK_IP_ADDRESS = "virtualNetworkIPAddress";
     private static final String CUSTOMDATA = "customData";
     private static final String VIRTUALNETWORKNAME = "virtualNetworkName";
     private static final String VMTYPE = "vmType";
     private static final String SSHPUBLICKEYFINGERPRINT = "sshPublicKeyFingerprint";
     private static final String SSHPUBLICKEYPATH = "sshPublicKeyPath";
     private static final String PORTS = "ports";
+    private static final String DISKS = "disks";
     private static final String DATA = "data";
     private static final String DEFAULT_USER_NAME = "ubuntu";
     private static final String PRODUCTION = "production";
@@ -106,7 +110,8 @@ public class AzureProvisioner implements Provisioner {
                 String vmName = azureStackUtil.getVmName(name, i) + String.valueOf(new Date().getTime());
                 createCloudService(azureClient, azureTemplate, vmName, commonName);
                 createServiceCertificate(azureClient, azureTemplate, credential, vmName, emailAsFolder);
-                createVirtualMachine(azureClient, azureTemplate, credential, name, vmName, commonName, userData);
+                String internalIp = "172.16.0." + (i + VALID_IP_RANGE_START);
+                createVirtualMachine(azureClient, azureTemplate, credential, name, vmName, commonName, userData, internalIp);
                 resourceSet.add(new Resource(ResourceType.VIRTUAL_MACHINE, vmName, stack));
                 resourceSet.add(new Resource(ResourceType.CLOUD_SERVICE, vmName, stack));
                 resourceSet.add(new Resource(ResourceType.BLOB, vmName, stack));
@@ -142,7 +147,7 @@ public class AzureProvisioner implements Provisioner {
     }
 
     private void createVirtualMachine(AzureClient azureClient, AzureTemplate azureTemplate, Credential credential,
-            String name, String vmName, String commonName, String userData)
+            String name, String vmName, String commonName, String userData, String internalIp)
             throws FileNotFoundException, CertificateException, NoSuchAlgorithmException {
         byte[] encoded = Base64.encodeBase64(vmName.getBytes());
         String label = new String(encoded);
@@ -168,13 +173,23 @@ public class AzureProvisioner implements Provisioner {
         X509Certificate sshCert = azureStackUtil.createX509Certificate((AzureCredential) credential, azureTemplate.getOwner().emailAsFolder());
         props.put(SSHPUBLICKEYFINGERPRINT, sshCert.getSha1Fingerprint().toUpperCase());
         props.put(SSHPUBLICKEYPATH, String.format("/home/%s/.ssh/authorized_keys", DEFAULT_USER_NAME));
+        props.put(AFFINITYGROUP, commonName);
+        if (azureTemplate.getVolumeCount() > 0) {
+            List<Integer> disks = new ArrayList<>();
+            for (int i = 0; i < azureTemplate.getVolumeCount(); i++) {
+                disks.add(azureTemplate.getVolumeSize());
+            }
+            props.put(DISKS, disks);
+        }
 
         props.put(SERVICENAME, vmName);
         props.put(SUBNETNAME, name);
+        props.put(VIRTUAL_NETWORK_IP_ADDRESS, internalIp);
         props.put(CUSTOMDATA, new String(Base64.encodeBase64(userData.getBytes())));
         props.put(VIRTUALNETWORKNAME, name);
         props.put(PORTS, ports);
         props.put(VMTYPE, AzureVmType.valueOf(azureTemplate.getVmType()).vmType().replaceAll(" ", ""));
+
         HttpResponseDecorator virtualMachineResponse = (HttpResponseDecorator) azureClient.createVirtualMachine(props);
         String requestId = (String) azureClient.getRequestId(virtualMachineResponse);
         azureClient.waitUntilComplete(requestId);
