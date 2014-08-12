@@ -24,7 +24,7 @@ public class AwsTemplate extends Template implements ProvisionEntity {
     private InstanceType instanceType;
     private String sshLocation;
     private VolumeType volumeType;
-    private Boolean spotPriced;
+    private Double spotPrice;
 
     @ManyToOne
     @JoinColumn(name = "awsTemplate_awsTemplateOwner")
@@ -112,12 +112,12 @@ public class AwsTemplate extends Template implements ProvisionEntity {
         this.volumeType = volumeType;
     }
 
-    public Boolean isSpotPriced() {
-        return spotPriced;
+    public Double getSpotPrice() {
+        return spotPrice;
     }
 
-    public void setSpotPriced(Boolean spotPriced) {
-        this.spotPriced = spotPriced;
+    public void setSpotPrice(Double spotPrice) {
+        this.spotPrice = spotPrice;
     }
 
 }
