@@ -14,9 +14,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.sequenceiq.periscope.registry.Cluster;
+import com.sequenceiq.periscope.rest.ClusterNotFoundException;
 import com.sequenceiq.periscope.rest.converter.AppReportConverter;
+import com.sequenceiq.periscope.rest.converter.ClusterConverter;
 import com.sequenceiq.periscope.rest.json.AppMovementJson;
 import com.sequenceiq.periscope.rest.json.AppReportJson;
+import com.sequenceiq.periscope.rest.json.ClusterJson;
 import com.sequenceiq.periscope.service.AppService;
 
 @RestController
@@ -29,6 +33,8 @@ public class AppController {
     private AppService appService;
     @Autowired
     private AppReportConverter appReportConverter;
+    @Autowired
+    private ClusterConverter clusterConverter;
 
     @RequestMapping(value = "/random", method = RequestMethod.POST)
     public ResponseEntity<String> randomize(@PathVariable String clusterId) {
@@ -51,9 +57,12 @@ public class AppController {
     }
 
     @RequestMapping(value = "/movement", method = RequestMethod.POST)
-    public ResponseEntity<AppMovementJson> enableMovement(@PathVariable String clusterId, @RequestBody AppMovementJson appMovementJson) {
-        boolean success = appService.allowAppMovement(clusterId, appMovementJson.isAllowed());
-        return new ResponseEntity<>(appMovementJson, success ? HttpStatus.OK : HttpStatus.NOT_FOUND);
+    public ResponseEntity<ClusterJson> enableMovement(@PathVariable String clusterId, @RequestBody AppMovementJson appMovementJson) {
+        Cluster cluster = appService.allowAppMovement(clusterId, appMovementJson.isAllowed());
+        if (cluster == null) {
+            throw new ClusterNotFoundException(clusterId);
+        }
+        return new ResponseEntity<>(clusterConverter.convert(cluster), HttpStatus.OK);
     }
 
 }

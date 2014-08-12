@@ -16,4 +16,4 @@ curl -X POST -H "Content-Type: application/json" -d '{"jarUrl":"https://dl.dropb
 curl -X GET localhost:8081/clusters/multi-node/policy/cloudbreak | jq .
 
 # app movement
-curl -w '%{http_code}' -X POST -d '{"allowed":"false"}' localhost:8081/clusters/multi-node/apps/movement
+curl -w '%{http_code}' -H "Content-Type: application/json" -X POST -d '{"allowed":"false"}' localhost:8081/clusters/multi-node/apps/movement | jq .
