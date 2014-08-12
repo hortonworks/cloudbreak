@@ -116,16 +116,19 @@
     </div>
 
     <div class="form-group">
-        <label class="col-sm-3 control-label" for="aws_tspotprice">Spot price</label>
+        <label class="col-sm-3 control-label" for="aws_tspotprice">Spot price (USD)</label>
 
         <div class="col-sm-9">
             <input type="number" name="aws_tspotprice" class="form-control" id="aws_tspotprice" ng-model="aws_tspotprice" min="0.1" max="100.0">
+          <div class="help-block" ng-show="awsTemplateForm.aws_tspotprice.$dirty"><i class="fa fa-warning"></i>
+              Note: If you enter a spot price it cannot be guaranteed when your instances will be able to start.
+          </div>
+          <div class="help-block"
+               ng-show="awsTemplateForm.aws_tspotprice.$dirty && awsTemplateForm.aws_tspotprice.$invalid"><i class="fa fa-warning"></i>
+              {{error_msg.spot_price_invalid}}
+          </div>
         </div>
 
-        <div class="help-block"
-             ng-show="awsTemplateForm.aws_tspotprice.$dirty && awsTemplateForm.aws_tspotprice.$invalid"><i class="fa fa-warning"></i>
-            {{error_msg.spot_price_invalid}}
-        </div>
         <!-- .col-sm-9 -->
       </div>
     </div>
