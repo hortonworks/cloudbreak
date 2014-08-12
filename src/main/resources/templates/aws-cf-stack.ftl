@@ -69,6 +69,16 @@
       "ConstraintDescription" : "must follow pattern: ami-xxxxxxxx"
     },
     
+    <#if useSpot>
+	"SpotPrice" : {
+      "Description" : "The maximum price for the instances per hour if they were started as spot priced.",
+      "Type" : "Number",
+      "Default" : "0.5",
+      "MinValue": "0.01",
+      "MaxValue": "100"
+    },
+    </#if>
+    
     "VolumeSize" : {
       "Description" : "Size of the attached volumes in GB",
       "Type" : "Number",
@@ -229,7 +239,7 @@
         "KeyName"        : { "Ref" : "KeyName" },
         "AssociatePublicIpAddress" : "true",
         <#if useSpot>
-        "SpotPrice"     : "0.4",
+        "SpotPrice"      : { "Ref" : "SpotPrice" },
         </#if>
         "UserData"       : { "Fn::Base64" : { "Ref" : "CBUserData"}}
       }

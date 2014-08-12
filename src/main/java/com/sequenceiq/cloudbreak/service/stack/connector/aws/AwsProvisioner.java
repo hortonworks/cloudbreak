@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.aws;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -25,12 +28,6 @@ import com.sequenceiq.cloudbreak.service.stack.connector.Provisioner;
 @Component
 public class AwsProvisioner implements Provisioner {
 
-    private static final int DEFAULT_VOLUME_COUNT = 2;
-
-    private static final String DEFAULT_VOLUME_TYPE = "gp2";
-
-    private static final String DEFAULT_VOLUME_SIZE = "60";
-
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsProvisioner.class);
 
     @Autowired
@@ -48,22 +45,26 @@ public class AwsProvisioner implements Provisioner {
         AwsCredential awsCredential = (AwsCredential) stack.getCredential();
         AmazonCloudFormationClient client = awsStackUtil.createCloudFormationClient(awsTemplate.getRegion(), awsCredential);
         String stackName = String.format("%s-%s", stack.getName(), stack.getId());
+        boolean spotPriced = awsTemplate.getSpotPrice() == null ? false : true;
+        List<Parameter> parameters = new ArrayList<>(Arrays.asList(
+                new Parameter().withParameterKey("SSHLocation").withParameterValue(awsTemplate.getSshLocation()),
+                new Parameter().withParameterKey("CBUserData").withParameterValue(userData),
+                new Parameter().withParameterKey("StackName").withParameterValue(stackName),
+                new Parameter().withParameterKey("StackOwner").withParameterValue(awsCredential.getRoleArn()),
+                new Parameter().withParameterKey("InstanceCount").withParameterValue(stack.getNodeCount().toString()),
+                new Parameter().withParameterKey("InstanceType").withParameterValue(awsTemplate.getInstanceType().toString()),
+                new Parameter().withParameterKey("KeyName").withParameterValue(awsCredential.getKeyPairName()),
+                new Parameter().withParameterKey("AMI").withParameterValue(awsTemplate.getAmiId()),
+                new Parameter().withParameterKey("VolumeSize").withParameterValue(awsTemplate.getVolumeSize().toString()),
+                new Parameter().withParameterKey("VolumeType").withParameterValue(awsTemplate.getVolumeType().toString())));
+        if (spotPriced) {
+            parameters.add(new Parameter().withParameterKey("SpotPrice").withParameterValue(awsTemplate.getSpotPrice().toString()));
+        }
         CreateStackRequest createStackRequest = createStackRequest()
                 .withStackName(stackName)
-                .withTemplateBody(cfTemplateBuilder.build("templates/aws-cf-stack.ftl", awsTemplate.getVolumeCount(), awsTemplate.isSpotPriced()))
+                .withTemplateBody(cfTemplateBuilder.build("templates/aws-cf-stack.ftl", awsTemplate.getVolumeCount(), spotPriced))
                 .withNotificationARNs((String) setupProperties.get(SnsTopicManager.NOTIFICATION_TOPIC_ARN_KEY))
-                .withParameters(
-                        new Parameter().withParameterKey("SSHLocation").withParameterValue(awsTemplate.getSshLocation()),
-                        new Parameter().withParameterKey("CBUserData").withParameterValue(userData),
-                        new Parameter().withParameterKey("StackName").withParameterValue(stackName),
-                        new Parameter().withParameterKey("StackOwner").withParameterValue(awsCredential.getRoleArn()),
-                        new Parameter().withParameterKey("InstanceCount").withParameterValue(stack.getNodeCount().toString()),
-                        new Parameter().withParameterKey("InstanceType").withParameterValue(awsTemplate.getInstanceType().toString()),
-                        new Parameter().withParameterKey("KeyName").withParameterValue(awsCredential.getKeyPairName()),
-                        new Parameter().withParameterKey("AMI").withParameterValue(awsTemplate.getAmiId()),
-                        new Parameter().withParameterKey("VolumeSize").withParameterValue(awsTemplate.getVolumeSize().toString()),
-                        new Parameter().withParameterKey("VolumeType").withParameterValue(awsTemplate.getVolumeType().toString())
-                );
+                .withParameters(parameters);
         CreateStackResult createStackResult = client.createStack(createStackRequest);
         Set<Resource> resources = new HashSet<>();
         resources.add(new Resource(ResourceType.CLOUDFORMATION_STACK, stackName, stack));

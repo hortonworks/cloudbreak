@@ -31,7 +31,9 @@ public class AwsTemplateConverter extends AbstractConverter<TemplateJson, AwsTem
         props.put(AwsTemplateParam.INSTANCE_TYPE.getName(), entity.getInstanceType().name());
         props.put(AwsTemplateParam.SSH_LOCATION.getName(), entity.getSshLocation());
         props.put(AwsTemplateParam.VOLUME_TYPE.getName(), entity.getVolumeType());
-        props.put(AwsTemplateParam.SPOT_PRICED.getName(), entity.isSpotPriced());
+        if (entity.getSpotPrice() != null) {
+            props.put(AwsTemplateParam.SPOT_PRICE.getName(), entity.getSpotPrice());
+        }
         templateJson.setParameters(props);
         templateJson.setCloudPlatform(CloudPlatform.AWS);
         templateJson.setDescription(entity.getDescription() == null ? "" : entity.getDescription());
@@ -52,9 +54,9 @@ public class AwsTemplateConverter extends AbstractConverter<TemplateJson, AwsTem
         awsTemplate.setVolumeCount((json.getVolumeCount() == null) ? 0 : json.getVolumeCount());
         awsTemplate.setVolumeSize((json.getVolumeSize() == null) ? 0 : json.getVolumeSize());
         awsTemplate.setVolumeType(VolumeType.valueOf(String.valueOf(json.getParameters().get(AwsTemplateParam.VOLUME_TYPE.getName()))));
-        Boolean spotPriced = json.getParameters().containsKey(AwsTemplateParam.SPOT_PRICED.getName())
-                ? (Boolean) json.getParameters().get(AwsTemplateParam.SPOT_PRICED.getName()) : false;
-        awsTemplate.setSpotPriced(spotPriced);
+        Double spotPrice = json.getParameters().containsKey(AwsTemplateParam.SPOT_PRICE.getName())
+                ? (Double) json.getParameters().get(AwsTemplateParam.SPOT_PRICE.getName()) : null;
+        awsTemplate.setSpotPrice(spotPrice);
         return awsTemplate;
     }
 }

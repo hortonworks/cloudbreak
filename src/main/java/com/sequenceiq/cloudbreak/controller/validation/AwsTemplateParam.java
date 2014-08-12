@@ -15,7 +15,7 @@ public enum AwsTemplateParam implements TemplateParam {
             + "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\."
             + "([01]?\\d\\d?|2[0-4]\\d|25[0-5])/([01]?\\d\\d?|2[0-4]\\d|25[0-5])$")),
     VOLUME_TYPE("volumeType", true, VolumeType.class, Optional.<String>absent()),
-    SPOT_PRICED("spotPriced", false, Boolean.class, Optional.<String>absent());
+    SPOT_PRICE("spotPrice", false, Double.class, Optional.<String>absent());
 
     private final String paramName;
     private final Class clazz;

@@ -10,6 +10,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import reactor.core.Reactor;
+import reactor.event.Event;
+
 import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsResult;
@@ -30,9 +33,6 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataSetupComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.domain.CoreInstanceMetaData;
-
-import reactor.core.Reactor;
-import reactor.event.Event;
 
 @Component
 public class AwsMetadataSetup implements MetadataSetup {
@@ -69,7 +69,7 @@ public class AwsMetadataSetup implements MetadataSetup {
         // when the spot requests are made but the instances are not running
         // yet, so we will have to wait until the spot requests are fulfilled
         // (there are as many instances in the ASG as needed)
-        if (awsTemplate.isSpotPriced()) {
+        if (awsTemplate.getSpotPrice() != null) {
             while (describeAutoScalingGroupsResult.getAutoScalingGroups().get(0).getInstances() == null
                     || describeAutoScalingGroupsResult.getAutoScalingGroups().get(0).getInstances().size() < stack.getNodeCount()) {
                 LOGGER.info("Spot requests for stack '{}' are not fulfilled yet. Trying to reach instances in the next polling interval.", stack.getId());
@@ -95,7 +95,7 @@ public class AwsMetadataSetup implements MetadataSetup {
                         instance.getPublicIpAddress(),
                         instance.getBlockDeviceMappings().size() - 1,
                         instance.getPublicDnsName()
-                ));
+                        ));
             }
         }
 
