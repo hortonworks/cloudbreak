@@ -1,6 +1,6 @@
 package com.sequenceiq.periscope.policies.cloudbreak.rule.scaledown;
 
-import static com.sequenceiq.periscope.utils.ClusterUtils.computeFreeResourceRate;
+import static com.sequenceiq.periscope.utils.ClusterUtils.computeFreeClusterResourceRate;
 import static java.lang.Math.max;
 
 import java.util.Map;
@@ -31,7 +31,7 @@ public class ResourcesAboveRule extends AbstractCloudbreakRule implements Cloudb
     }
 
     private boolean isAboveThreshold(ClusterMetricsInfo metrics) {
-        return computeFreeResourceRate(metrics) > freeResourceRate;
+        return computeFreeClusterResourceRate(metrics) > freeResourceRate;
     }
 
 }

@@ -1,8 +1,9 @@
 package com.sequenceiq.periscope.monitor.event.handler;
 
+import static com.sequenceiq.periscope.utils.ClusterUtils.computeFreeQueueResourceCapacity;
+import static com.sequenceiq.periscope.utils.ClusterUtils.getAllQueueInfo;
+
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -10,11 +11,8 @@ import java.util.Set;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
-import org.apache.hadoop.yarn.api.records.ApplicationResourceUsageReport;
 import org.apache.hadoop.yarn.exceptions.YarnException;
-import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.CapacitySchedulerInfo;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.CapacitySchedulerQueueInfo;
-import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.CapacitySchedulerQueueInfoList;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.SchedulerInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +30,6 @@ import com.sequenceiq.periscope.service.ClusterService;
 public class ApplicationMovementHandler implements ApplicationListener<ApplicationUpdateEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationMovementHandler.class);
-    private static final int MAX_CAPACITY = 100;
 
     @Autowired
     private ClusterService clusterService;
@@ -44,9 +41,6 @@ public class ApplicationMovementHandler implements ApplicationListener<Applicati
 
         List<CapacitySchedulerQueueInfo> allQueueInfo = getAllQueueInfo(schedulerInfo);
         Cluster cluster = clusterService.get(event.getClusterId());
-        if (cluster == null) {
-            return;
-        }
 
         Map<Priority, Map<ApplicationId, SchedulerApplication>> apps = cluster.getApplicationsPriorityOrder();
         Set<ApplicationId> activeApps = new HashSet<>();
@@ -61,7 +55,7 @@ public class ApplicationMovementHandler implements ApplicationListener<Applicati
                     LOGGER.info("Try to move high priority app {}", id);
                     CapacitySchedulerQueueInfo queue = getQueueWithMostAvailableCapacity(cluster, allQueueInfo);
                     if (!application.isMoved()) {
-                        float availableMemory = getAvailableResourceCapacity(cluster, queue);
+                        float availableMemory = computeFreeQueueResourceCapacity(cluster, queue);
                         int usedMemory = report.getApplicationResourceUsageReport().getUsedResources().getMemory();
                         if (availableMemory - usedMemory > 0) {
                             try {
@@ -79,9 +73,6 @@ public class ApplicationMovementHandler implements ApplicationListener<Applicati
             }
         }
         removeApplicationIfFinished(cluster, activeApps, apps);
-
-        printQueueReport(allQueueInfo, cluster);
-        printApplicationReport(appReports);
     }
 
     private CapacitySchedulerQueueInfo getQueueWithMostAvailableCapacity(Cluster cluster, List<CapacitySchedulerQueueInfo> allQueueInfo) {
@@ -90,29 +81,12 @@ public class ApplicationMovementHandler implements ApplicationListener<Applicati
         if (numQueues > 1) {
             for (int i = 1; i < numQueues; i++) {
                 CapacitySchedulerQueueInfo queue = allQueueInfo.get(i);
-                if (getAvailableResourceCapacity(cluster, queue) > getAvailableResourceCapacity(cluster, result)) {
+                if (computeFreeQueueResourceCapacity(cluster, queue) > computeFreeQueueResourceCapacity(cluster, result)) {
                     result = queue;
                 }
             }
         }
         return result;
-    }
-
-    private List<CapacitySchedulerQueueInfo> getAllQueueInfo(SchedulerInfo schedulerInfo) {
-        List<CapacitySchedulerQueueInfo> queueInfoList = new ArrayList<>();
-        if (schedulerInfo instanceof CapacitySchedulerInfo) {
-            addQueueInfo(queueInfoList, ((CapacitySchedulerInfo) schedulerInfo).getQueues());
-        }
-        return queueInfoList;
-    }
-
-    private void addQueueInfo(List<CapacitySchedulerQueueInfo> queueInfoList, CapacitySchedulerQueueInfoList queues) {
-        if (queues != null && queues.getQueueInfoList() != null) {
-            for (CapacitySchedulerQueueInfo info : queues.getQueueInfoList()) {
-                queueInfoList.add(info);
-                addQueueInfo(queueInfoList, info.getQueues());
-            }
-        }
     }
 
     private boolean isApplicationHighPriority(Map<Priority, Map<ApplicationId, SchedulerApplication>> apps, ApplicationId id) {
@@ -138,63 +112,6 @@ public class ApplicationMovementHandler implements ApplicationListener<Applicati
             application = cluster.addApplication(appReport);
         }
         return application;
-    }
-
-    private void printQueueReport(List<CapacitySchedulerQueueInfo> infoList, Cluster cluster) {
-        for (CapacitySchedulerQueueInfo info : infoList) {
-            StringBuilder sb = new StringBuilder();
-
-            sb.append("\nQueue name: ").append(info.getQueueName());
-            sb.append("\ncapacity: ").append(info.getCapacity());
-            sb.append("\nmax capacity: ").append(info.getMaxCapacity());
-            sb.append("\nabsolute capacity: ").append(info.getAbsoluteCapacity());
-            sb.append("\nabsolute max capacity: ").append(info.getAbsoluteMaxCapacity());
-            sb.append("\nabsolute max resource capacity (MB): ").append(getMaxResourceCapacity(cluster, info));
-            sb.append("\nused capacity: ").append(info.getUsedCapacity());
-            sb.append("\nabsolute used capacity: ").append(info.getAbsoluteUsedCapacity());
-            sb.append("\nnumber of apps: ").append(info.getNumApplications());
-            sb.append("\nused resources: ").append(info.getResourcesUsed());
-
-            LOGGER.info(sb.toString());
-        }
-    }
-
-    private float getMaxResourceCapacity(Cluster cluster, CapacitySchedulerQueueInfo info) {
-        return cluster.getTotalMB() * (info.getAbsoluteMaxCapacity() / MAX_CAPACITY);
-    }
-
-    private float getAvailableResourceCapacity(Cluster cluster, CapacitySchedulerQueueInfo info) {
-        if (info.getQueues() == null) {
-            return getMaxResourceCapacity(cluster, info) - info.getResourcesUsed().getMemory();
-        }
-        return 0;
-    }
-
-    private void printApplicationReport(List<ApplicationReport> reports) {
-        for (ApplicationReport report : reports) {
-            printApplicationReport(report);
-        }
-    }
-
-    private void printApplicationReport(ApplicationReport report) {
-        StringBuilder sb = new StringBuilder();
-
-        sb.append("\nApplication: ").append(report.getApplicationId());
-        sb.append("\ntype: ").append(report.getApplicationType());
-        sb.append("\nstate: ").append(report.getYarnApplicationState());
-        sb.append("\nqueue: ").append(report.getQueue());
-        sb.append("\nstart time: ").append(new Date(report.getStartTime()));
-        sb.append("\nprogress: ").append(report.getProgress());
-        sb.append("\nuser: ").append(report.getUser());
-
-        ApplicationResourceUsageReport usage = report.getApplicationResourceUsageReport();
-        sb.append("\nreserved containers: ").append(usage.getNumReservedContainers());
-        sb.append("\nreserved resources: ").append(usage.getReservedResources());
-        sb.append("\nneeded resource: ").append(usage.getNeededResources());
-        sb.append("\nused containers: ").append(usage.getNumUsedContainers());
-        sb.append("\nused resources").append(usage.getUsedResources());
-
-        LOGGER.info(sb.toString());
     }
 
 }
