@@ -121,6 +121,63 @@ public class ProvisionParametersValidatorTest {
     }
 
     @Test
+    public void validAwsTemplateWithSpotPriceWithIntegerJsonWillReturnTrue() {
+        TemplateJson templateJson = new TemplateJson();
+        templateJson.setCloudPlatform(CloudPlatform.AWS);
+        templateJson.setDescription("description");
+        templateJson.setName("name");
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put(AwsTemplateParam.AMI_ID.getName(), "ami");
+        parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), InstanceType.C1Medium.name());
+        parameters.put(AwsTemplateParam.REGION.getName(), Regions.AP_NORTHEAST_1);
+        parameters.put(AwsTemplateParam.SSH_LOCATION.getName(), "0.0.0.0/0");
+        templateJson.setVolumeCount(3);
+        templateJson.setVolumeSize(30);
+        parameters.put(AwsTemplateParam.VOLUME_TYPE.getName(), "Gp2");
+        parameters.put(AwsTemplateParam.SPOT_PRICE.getName(), Integer.valueOf(1));
+        templateJson.setParameters(parameters);
+        assertEquals(underTest.isValid(templateJson, constraintValidatorContext), true);
+    }
+
+    @Test
+    public void validAwsTemplateWithSpotPriceWithStringJsonWillReturnFalse() {
+        TemplateJson templateJson = new TemplateJson();
+        templateJson.setCloudPlatform(CloudPlatform.AWS);
+        templateJson.setDescription("description");
+        templateJson.setName("name");
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put(AwsTemplateParam.AMI_ID.getName(), "ami");
+        parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), InstanceType.C1Medium.name());
+        parameters.put(AwsTemplateParam.REGION.getName(), Regions.AP_NORTHEAST_1);
+        parameters.put(AwsTemplateParam.SSH_LOCATION.getName(), "0.0.0.0/0");
+        templateJson.setVolumeCount(3);
+        templateJson.setVolumeSize(30);
+        parameters.put(AwsTemplateParam.VOLUME_TYPE.getName(), "Gp2");
+        parameters.put(AwsTemplateParam.SPOT_PRICE.getName(), "apple");
+        templateJson.setParameters(parameters);
+        assertEquals(underTest.isValid(templateJson, constraintValidatorContext), false);
+    }
+
+    @Test
+    public void validAwsTemplateWithSpotPriceWithDoubleJsonWillReturnTrue() {
+        TemplateJson templateJson = new TemplateJson();
+        templateJson.setCloudPlatform(CloudPlatform.AWS);
+        templateJson.setDescription("description");
+        templateJson.setName("name");
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put(AwsTemplateParam.AMI_ID.getName(), "ami");
+        parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), InstanceType.C1Medium.name());
+        parameters.put(AwsTemplateParam.REGION.getName(), Regions.AP_NORTHEAST_1);
+        parameters.put(AwsTemplateParam.SSH_LOCATION.getName(), "0.0.0.0/0");
+        templateJson.setVolumeCount(3);
+        templateJson.setVolumeSize(30);
+        parameters.put(AwsTemplateParam.VOLUME_TYPE.getName(), "Gp2");
+        parameters.put(AwsTemplateParam.SPOT_PRICE.getName(), Double.valueOf(1.2));
+        templateJson.setParameters(parameters);
+        assertEquals(underTest.isValid(templateJson, constraintValidatorContext), true);
+    }
+
+    @Test
     public void validAwsTemplateWithInvalidSshLocationWithSpecificNumberJsonWillReturnTrue() {
         TemplateJson templateJson = new TemplateJson();
         templateJson.setCloudPlatform(CloudPlatform.AWS);
