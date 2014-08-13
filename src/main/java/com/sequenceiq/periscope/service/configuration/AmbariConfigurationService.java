@@ -29,10 +29,10 @@ public class AmbariConfigurationService {
     }
 
     public static Configuration getConfiguration(Ambari ambari) throws ConnectException {
-        return getConfiguration(ambari, new AmbariClient(ambari.getHost(), ambari.getPort(), ambari.getUser(), ambari.getPass()));
+        return getConfiguration(new AmbariClient(ambari.getHost(), ambari.getPort(), ambari.getUser(), ambari.getPass()));
     }
 
-    public static Configuration getConfiguration(Ambari ambari, AmbariClient ambariClient) throws ConnectException {
+    public static Configuration getConfiguration(AmbariClient ambariClient) throws ConnectException {
         Configuration configuration = new Configuration(false);
         Set<Map.Entry<String, Map<String, String>>> serviceConfigs = ambariClient.getServiceConfigMap().entrySet();
         for (Map.Entry<String, Map<String, String>> serviceEntry : serviceConfigs) {
