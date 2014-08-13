@@ -88,7 +88,7 @@
     </div>
 
     <div class="form-group">
-        <label class="col-sm-3 control-label" for="aws_tvolumesize">Size of volumes (GB)</label>
+        <label class="col-sm-3 control-label" for="aws_tvolumesize">Volume size (GB)</label>
 
         <div class="col-sm-9">
             <input type="number" name="aws_tvolumesize" class="form-control" ng-model="aws_tvolumesize" id="aws_tvolumesize" min="10"
