@@ -73,20 +73,24 @@ public class UserConverter extends AbstractConverter<UserJson, User> {
         user.setAzureTemplates(azureTemplateConverter.convertAllJsonToEntity(json.getAzureTemplates()));
         user.setStacks(stackConverter.convertAllJsonToEntity(json.getStacks()));
         user.setPassword(passwordEncoder.encode(json.getPassword()));
-        user.setCompany(companyRepository.findByName(json.getCompany()));
+        user.setCompanyName(json.getCompany());
 
         switch (json.getUserType()) {
             case DEFAULT:
+                // if no specific usertype posted, this is the default!
+                user.getUserRoles().add(UserRole.REGULAR_USER);
                 break;
             case COMPANY_USER:
+                user.getUserRoles().add(UserRole.COMPANY_USER);
+                user.setCompany(companyRepository.findByName(json.getCompany()));
                 break;
             case COMPANY_ADMIN:
                 user.getUserRoles().add(UserRole.COMPANY_ADMIN);
+                user.setCompany(companyRepository.findByName(json.getCompany()));
                 break;
             default:
                 throw new BadRequestException("Unsupported user type.");
         }
-        user.getUserRoles().add(UserRole.COMPANY_USER);
         return user;
     }
 }

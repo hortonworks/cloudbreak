@@ -62,7 +62,7 @@ public class SimpleCredentialService implements CredentialService {
         if (user.getUserRoles().contains(UserRole.COMPANY_ADMIN)) {
             LOGGER.debug("Getting company user credentials for company admin; id: [{}]", user.getId());
             legacyCredentials = getCompanyUserCredentials(user);
-        } else {
+        } else if (user.getUserRoles().contains(UserRole.COMPANY_USER)) {
             LOGGER.debug("Getting company wide credentials for company user; id: [{}]", user.getId());
             legacyCredentials = getCompanyCredentials(user);
         }

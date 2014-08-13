@@ -57,7 +57,7 @@ public class SimpleTemplateService implements TemplateService {
         if (user.getUserRoles().contains(UserRole.COMPANY_ADMIN)) {
             LOGGER.debug("Getting company user templates for company admin; id: [{}]", user.getId());
             legacyTemplates = getCompanyUserTemplates(user);
-        } else {
+        } else if (user.getUserRoles().contains(UserRole.COMPANY_USER)) {
             LOGGER.debug("Getting company templates for company user; id: [{}]", user.getId());
             legacyTemplates = getCompanyTemplates(user);
         }

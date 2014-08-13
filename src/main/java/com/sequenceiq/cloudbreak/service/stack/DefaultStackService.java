@@ -13,9 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
-import reactor.core.Reactor;
-import reactor.event.Event;
-
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.converter.StackConverter;
@@ -34,6 +31,9 @@ import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataIncompleteException;
+
+import reactor.core.Reactor;
+import reactor.event.Event;
 
 @Service
 public class DefaultStackService implements StackService {
@@ -71,7 +71,7 @@ public class DefaultStackService implements StackService {
         if (user.getUserRoles().contains(UserRole.COMPANY_ADMIN)) {
             LOGGER.debug("Getting company user stacks for company admin; id: [{}]", user.getId());
             legacyStacks = getCompanyUserStacks(user);
-        } else {
+        } else if (user.getUserRoles().contains(UserRole.COMPANY_USER)) {
             LOGGER.debug("Getting company wide stacks for company user; id: [{}]", user.getId());
             legacyStacks = getCompanyStacks(user);
         }

@@ -43,22 +43,20 @@ public class UserRegistrationController {
 
         switch (userJson.getUserType()) {
             case DEFAULT:
-                // will have company user rights
-                companyName = userJson.getEmail();
-                checkCompany(companyName);
+                companyName = userJson.getCompany();
                 break;
             case COMPANY_USER:
-                // invited by the admin! (companyName wired!)
                 companyName = userJson.getCompany();
                 break;
             case COMPANY_ADMIN:
                 companyName = userJson.getCompany();
                 checkCompany(companyName);
+                companyService.ensureCompany(companyName);
                 break;
             default:
                 throw new BadRequestException("Unsupported user type.");
         }
-        companyService.ensureCompany(companyName);
+
         Long id = userService.registerUser(userConverter.convert(userJson));
         return new ResponseEntity<>(new IdJson(id), HttpStatus.CREATED);
     }

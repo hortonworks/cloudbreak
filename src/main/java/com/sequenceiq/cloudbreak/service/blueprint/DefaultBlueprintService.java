@@ -59,7 +59,7 @@ public class DefaultBlueprintService implements BlueprintService {
         if (user.getUserRoles().contains(UserRole.COMPANY_ADMIN)) {
             LOGGER.debug("Getting company user blueprints for company admin; id: [{}]", user.getId());
             legacyBlueprints = getCompanyUserBlueprints(user);
-        } else {
+        } else if (user.getUserRoles().contains(UserRole.COMPANY_USER)) {
             LOGGER.debug("Getting company wide blueprints for company user; id: [{}]", user.getId());
             legacyBlueprints = getCompanyBlueprints(user);
         }
