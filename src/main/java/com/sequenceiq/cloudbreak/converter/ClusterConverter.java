@@ -35,6 +35,7 @@ public class ClusterConverter {
         cluster.setName(clusterRequest.getClusterName());
         cluster.setStatus(Status.REQUESTED);
         cluster.setDescription(clusterRequest.getDescription());
+        cluster.setEmailNeeded(clusterRequest.getEmailNeeded());
         return cluster;
     }
 

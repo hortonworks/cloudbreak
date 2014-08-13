@@ -55,9 +55,6 @@ public class AzureTemplateConverterTest {
         assertEquals(result.getCloudPlatform(), azureTemplate.cloudPlatform());
         assertEquals(result.getParameters().get(AzureTemplateParam.LOCATION.getName()),
                 azureTemplate.getLocation().name());
-        assertEquals(((HashSet<Port>) result.getParameters().get(AzureTemplateParam.PORTS.getName()))
-                        .iterator().next().getPort(),
-                azureTemplate.getPorts().iterator().next().getPort());
 
     }
 
@@ -70,9 +67,6 @@ public class AzureTemplateConverterTest {
         assertEquals(result.getDescription(), templateJson.getDescription());
         assertEquals(result.getLocation().name(),
                 templateJson.getParameters().get(AzureTemplateParam.LOCATION.getName()));
-        assertEquals(result.getPorts().iterator().next().getLocalPort(),
-                ((ArrayList<LinkedHashMap<String, String>>) templateJson.getParameters().get(AzureTemplateParam.PORTS.getName()))
-                        .get(0).get("localPort"));
     }
 
     @Test
@@ -89,7 +83,6 @@ public class AzureTemplateConverterTest {
         assertEquals(result.getDescription(), templateJson.getDescription());
         assertEquals(result.getImageName(),
                 templateJson.getParameters().get(AzureTemplateParam.IMAGENAME.getName()));
-        assertEquals(result.getPorts().size(), 0);
     }
 
     @Test
@@ -141,7 +134,6 @@ public class AzureTemplateConverterTest {
         azureTemplate.setId(1L);
         Set<Port> ports = new HashSet<>();
         ports.add(new Port(DUMMY_NAME, PORT, LOCAL_PORT, DUMMY_PROTOCOL));
-        azureTemplate.setPorts(ports);
         return azureTemplate;
     }
 
@@ -155,7 +147,6 @@ public class AzureTemplateConverterTest {
         props.put(AzureTemplateParam.LOCATION.getName(), DUMMY_LOCATION.name());
         props.put(AzureTemplateParam.IMAGENAME.getName(), DUMMY_IMAGE_NAME);
         props.put(AzureTemplateParam.VMTYPE.getName(), DUMMY_VM_TYPE);
-        props.put(AzureTemplateParam.PORTS.getName(), createPorts());
         templateJson.setParameters(props);
         return templateJson;
     }

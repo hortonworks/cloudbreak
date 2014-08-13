@@ -1,16 +1,11 @@
 package com.sequenceiq.cloudbreak.domain;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 
 @Entity
 public class AzureTemplate extends Template implements ProvisionEntity {
@@ -22,8 +17,6 @@ public class AzureTemplate extends Template implements ProvisionEntity {
     private String description;
     private String vmType;
     private String imageName;
-    @OneToMany(mappedBy = "azureTemplate", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Port> ports = new HashSet<>();
 
     @ManyToOne
     @JoinColumn(name = "azureTemplate_azureTemplateOwner")
@@ -70,14 +63,6 @@ public class AzureTemplate extends Template implements ProvisionEntity {
 
     public void setVmType(String vmType) {
         this.vmType = vmType;
-    }
-
-    public Set<Port> getPorts() {
-        return ports;
-    }
-
-    public void setPorts(Set<Port> ports) {
-        this.ports = ports;
     }
 
     public User getAzureTemplateOwner() {

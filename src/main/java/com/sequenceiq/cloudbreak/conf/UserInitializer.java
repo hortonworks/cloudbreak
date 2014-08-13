@@ -62,7 +62,7 @@ public class UserInitializer implements InitializingBean {
             user.setPassword(passwordEncoder.encode(defaultUserPassword));
             user.setStatus(UserStatus.ACTIVE);
             user.setCompany(company);
-            user.getUserRoles().add(UserRole.COMPANY_ADMIN);
+            user.getUserRoles().add(UserRole.DEPLOYER);
 
             Set<Blueprint> blueprints = defaultBlueprintLoaderService.loadBlueprints(user);
             user.setBlueprints(blueprints);
