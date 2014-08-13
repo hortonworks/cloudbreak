@@ -130,7 +130,7 @@ public class UserConverterTest {
         // WHEN
         User result = underTest.convert(userJson);
         // THEN
-        assertEquals(result.getCompany().getName(), userJson.getCompany());
+        assertEquals(result.getCompanyName(), userJson.getCompany());
         assertEquals(result.getFirstName(), userJson.getFirstName());
         assertEquals(result.getStacks().size(), userJson.getStacks().size());
         assertNotNull(result.getAwsCredentials());

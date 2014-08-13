@@ -97,6 +97,9 @@ public class User implements ProvisionEntity {
     @ManyToOne
     private Company company;
 
+    @Column(name = "company")
+    private String companyName;
+
 
     public User() {
     }
@@ -269,5 +272,13 @@ public class User implements ProvisionEntity {
 
     public void setCompany(Company company) {
         this.company = company;
+    }
+
+    public String getCompanyName() {
+        return companyName;
+    }
+
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName;
     }
 }
