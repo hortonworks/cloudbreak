@@ -77,8 +77,11 @@ public class UserConverter extends AbstractConverter<UserJson, User> {
 
         switch (json.getUserType()) {
             case DEFAULT:
+                // if no specific usertype posted, this is the default!
+                user.getUserRoles().add(UserRole.REGULAR_USER);
                 break;
             case COMPANY_USER:
+                user.getUserRoles().add(UserRole.COMPANY_USER);
                 break;
             case COMPANY_ADMIN:
                 user.getUserRoles().add(UserRole.COMPANY_ADMIN);
@@ -86,7 +89,6 @@ public class UserConverter extends AbstractConverter<UserJson, User> {
             default:
                 throw new BadRequestException("Unsupported user type.");
         }
-        user.getUserRoles().add(UserRole.COMPANY_USER);
         return user;
     }
 }
