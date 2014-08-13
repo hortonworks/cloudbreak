@@ -382,6 +382,16 @@ Using manage templates you can create infrastructure templates.
 
 `Instance type:` the Amazon instance type to be used - we suggest to use at least small or medium instances
 
+`Attached volumes per instance:` the number of disks to be attached
+
+`Volume size (GB):` the size of the attached disks (in GB)
+
+`Volume type:` option to choose SSD or regular HDD
+
+`Spot price:` option to set a spot price 
+
+
+
 **Azure**
 
 `Name:` name of your template
@@ -393,6 +403,10 @@ Using manage templates you can create infrastructure templates.
 `Image name:` The Azure base image used
 
 `Instance type:` the Azure instance type to be used - we suggest to use at least small or medium instances
+
+`Attached volumes per instance:` the number of disks to be attached
+
+`Volume size (GB):` the size of the attached disks (in GB)
 
 ###Manage blueprints
 Blueprints are your declarative definition of a Hadoop cluster.
