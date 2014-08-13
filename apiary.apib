@@ -1449,6 +1449,50 @@ Add a cluster to be monitored by Periscope.
             "id": "multi-node"
         }
 
+## Clusters [/clusters/{clusterId}/state]
+###Set the state of a cluster [POST]
+
++ Parameters
+    + clusterId (required String `clusterIUD`) ... The id of the cluster.
+
++ Request (application/json)
+
+        {
+          "state": "SUSPENDED"
+        }
+
++  Response 200 (application/json)
+
+        {
+            "appMovement": "prohibited",
+            "state": "SUSPENDED",
+            "port": "8080",
+            "host": "172.24.0.2",
+            "id": "multi-node"
+        }
+
+## Clusters [/clusters/{clusterId}/movement]
+###Configure application movements within a cluster [POST]
+
++ Parameters
+    + clusterId (required String `clusterIUD`) ... The id of the cluster.
+
++ Request (application/json)
+
+        {
+          "allowed": "false"
+        }
+
++  Response 200 (application/json)
+
+        {
+            "appMovement": "prohibited",
+            "state": "SUSPENDED",
+            "port": "8080",
+            "host": "172.24.0.2",
+            "id": "multi-node"
+        }
+
 ##  Clusters [/clusters]
 ###Retrieved all the monitored cluster information [GET]
 
@@ -1585,50 +1629,6 @@ TBD - add the 3 different scenarios - success, partial and failure
             },
             "jarUrl": "https://dl.dropboxusercontent.com/u/13919958/lostnodes.jar",
             "message": ""
-        }
-
-##Movements [/movement/{clusterId}}]
-###Configure application movements withih a cluster [POST]
-
-+ Parameters
-    + clusterId (required String `clusterIUD`) ... The id of the cluster.
-
-+ Request (application/json)
-
-        {
-          "allowed": "false"
-        }
-
-+  Response 200 (application/json)
-
-        {
-            "appMovement": "prohibited",
-            "state": "SUSPENDED",
-            "port": "8080",
-            "host": "172.24.0.2",
-            "id": "multi-node"
-        }
-
-##State [/state/{clusterId}]
-###Set the state of a cluster [POST]
-
-+ Parameters
-    + clusterId (required String `clusterIUD`) ... The id of the cluster.
-
-+ Request (application/json)
-
-        {
-          "state": "SUSPENDED"
-        }
-
-+  Response 200 (application/json)
-
-        {
-            "appMovement": "prohibited",
-            "state": "SUSPENDED",
-            "port": "8080",
-            "host": "172.24.0.2",
-            "id": "multi-node"
         }
 
 ##Applications [/applications/{clusterId}]
