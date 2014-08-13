@@ -58,13 +58,13 @@ public class ExceptionControllerAdvice {
         return new ResponseEntity<>(new ExceptionResult("The requested http method not supported on the resource"), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler({ Exception.class })
+    @ExceptionHandler({ Exception.class, RuntimeException.class })
     public ResponseEntity<ExceptionResult> serverError(Exception e) {
         LOGGER.error(e.getMessage(), e);
         return new ResponseEntity<>(new ExceptionResult("Internal server error"), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @ExceptionHandler({ DataIntegrityViolationException.class, RuntimeException.class })
+    @ExceptionHandler({ DataIntegrityViolationException.class })
     public ResponseEntity<ExceptionResult> constraintViolation(Exception e) {
         LOGGER.error(e.getMessage(), e);
         return new ResponseEntity<>(new ExceptionResult("This name is taken, please choose a different one"), HttpStatus.BAD_REQUEST);

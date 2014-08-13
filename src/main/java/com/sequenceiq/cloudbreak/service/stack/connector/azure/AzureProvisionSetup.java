@@ -4,9 +4,7 @@ import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStack
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.EMAILASFOLDER;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.NOT_FOUND;
 
-import groovyx.net.http.HttpResponseDecorator;
-import groovyx.net.http.HttpResponseException;
-
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,14 +14,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import reactor.core.Reactor;
-import reactor.event.Event;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloud.azure.client.AzureClientUtil;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
+import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
@@ -33,9 +29,13 @@ import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
-import com.sequenceiq.cloudbreak.service.stack.event.StackCreationFailure;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
+
+import groovyx.net.http.HttpResponseDecorator;
+import groovyx.net.http.HttpResponseException;
+import reactor.core.Reactor;
+import reactor.event.Event;
 
 @Component
 public class AzureProvisionSetup implements ProvisionSetup {
@@ -67,67 +67,71 @@ public class AzureProvisionSetup implements ProvisionSetup {
 
     @Override
     public void setupProvisioning(Stack stack) {
-        try {
-            Credential credential = stack.getCredential();
-            String emailAsFolder = stack.getUser().emailAsFolder();
+        Credential credential = stack.getCredential();
+        String emailAsFolder = stack.getUser().emailAsFolder();
 
-            String filePath = AzureCertificateService.getUserJksFileName(credential, emailAsFolder);
-            AzureClient azureClient = azureStackUtil.createAzureClient(credential, filePath);
-            if (!azureClient.isImageAvailable(azureStackUtil.getOsImageName(credential))) {
-                String affinityGroupName = ((AzureCredential) credential).getCommonName();
-                createAffinityGroup(stack, azureClient, affinityGroupName);
-                String storageName = String.format("%s%s", VM_COMMON_NAME, stack.getId());
-                createStorage(stack, azureClient, affinityGroupName);
-                String targetBlobContainerUri = "http://" + affinityGroupName + ".blob.core.windows.net/vm-images";
-                String targetImageUri = targetBlobContainerUri + '/' + storageName + ".vhd";
-                Map<String, String> params = new HashMap<>();
-                params.put(AzureStackUtil.NAME, affinityGroupName);
-                String keyJson = (String) azureClient.getStorageAccountKeys(params);
+        String filePath = AzureCertificateService.getUserJksFileName(credential, emailAsFolder);
+        AzureClient azureClient = azureStackUtil.createAzureClient(credential, filePath);
+        if (!azureClient.isImageAvailable(azureStackUtil.getOsImageName(credential))) {
+            String affinityGroupName = ((AzureCredential) credential).getCommonName();
+            createAffinityGroup(stack, azureClient, affinityGroupName);
+            String storageName = String.format("%s%s", VM_COMMON_NAME, stack.getId());
+            createStorage(stack, azureClient, affinityGroupName);
+            String targetBlobContainerUri = "http://" + affinityGroupName + ".blob.core.windows.net/vm-images";
+            String targetImageUri = targetBlobContainerUri + '/' + storageName + ".vhd";
+            Map<String, String> params = new HashMap<>();
+            params.put(AzureStackUtil.NAME, affinityGroupName);
+            String keyJson = (String) azureClient.getStorageAccountKeys(params);
 
-                JsonNode actualObj = MAPPER.readValue(keyJson, JsonNode.class);
-                String storageAccountKey = actualObj.get("StorageService").get("StorageServiceKeys").get("Primary").asText();
-
-                AzureClientUtil.createBlobContainer(storageAccountKey, targetBlobContainerUri);
-                AzureClientUtil.copyOsImage(storageAccountKey, baseImageUri, targetImageUri);
-
-                String copyStatus = PENDING;
-                while (PENDING.equals(copyStatus)) {
-                    Map<String, String> copyStatusFromServer = (Map<String, String>) AzureClientUtil.getCopyOsImageProgress(storageAccountKey, targetImageUri);
-                    copyStatus = copyStatusFromServer.get("status");
-                    Long copied = Long.valueOf(copyStatusFromServer.get("copiedBytes"));
-                    Long total = Long.valueOf(copyStatusFromServer.get("totalBytes"));
-                    double copyPercentage = (long) ((float) copied / total * ONE_HUNDRED);
-                    LOGGER.info(String.format("copy progress=%s / %s percentage: %s%%.",
-                            copyStatusFromServer.get("copiedBytes"),
-                            copyStatusFromServer.get("totalBytes"),
-                            copyPercentage));
-
-                    websocketService.sendToTopicUser(stack.getUser().getEmail(), WebsocketEndPoint.COPY_IMAGE,
-                            new StatusMessage(stack.getId(), stack.getName(), PENDING, String.format("The copy status is: %s%%.", copyPercentage)));
-                    Thread.sleep(MILLIS);
-                }
-                if (!SUCCESS.equals(copyStatus)) {
-                    throw new Exception("Copy OS image failed with status: " + copyStatus);
-                }
-                params = new HashMap<>();
-                params.put(AzureStackUtil.NAME, azureStackUtil.getOsImageName(credential));
-                params.put(OS, "Linux");
-                params.put(MEDIALINK, targetImageUri);
-                azureClient.addOsImage(params);
-
+            JsonNode actualObj = null;
+            try {
+                actualObj = MAPPER.readValue(keyJson, JsonNode.class);
+            } catch (IOException e) {
+                LOGGER.info("Can not read Json node: ", e);
+                throw new InternalServerException("Can not read Json node: ", e);
             }
+            String storageAccountKey = actualObj.get("StorageService").get("StorageServiceKeys").get("Primary").asText();
 
-            LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT, stack.getId());
-            reactor.notify(ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT,
-                    Event.wrap(new ProvisionSetupComplete(getCloudPlatform(), stack.getId())
-                            .withSetupProperty(CREDENTIAL, stack.getCredential())
-                            .withSetupProperty(EMAILASFOLDER, stack.getUser().emailAsFolder())
-                            )
-                    );
-        } catch (Exception e) {
-            reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(new StackCreationFailure(stack.getId(),
-                    "There was a problem with the Json node parsing when tried to create the specific image.")));
+            AzureClientUtil.createBlobContainer(storageAccountKey, targetBlobContainerUri);
+            AzureClientUtil.copyOsImage(storageAccountKey, baseImageUri, targetImageUri);
+
+            String copyStatus = PENDING;
+            while (PENDING.equals(copyStatus)) {
+                Map<String, String> copyStatusFromServer = (Map<String, String>) AzureClientUtil.getCopyOsImageProgress(storageAccountKey, targetImageUri);
+                copyStatus = copyStatusFromServer.get("status");
+                Long copied = Long.valueOf(copyStatusFromServer.get("copiedBytes"));
+                Long total = Long.valueOf(copyStatusFromServer.get("totalBytes"));
+                double copyPercentage = (long) ((float) copied / total * ONE_HUNDRED);
+                LOGGER.info(String.format("copy progress=%s / %s percentage: %s%%.",
+                        copyStatusFromServer.get("copiedBytes"),
+                        copyStatusFromServer.get("totalBytes"),
+                        copyPercentage));
+
+                websocketService.sendToTopicUser(stack.getUser().getEmail(), WebsocketEndPoint.COPY_IMAGE,
+                        new StatusMessage(stack.getId(), stack.getName(), PENDING, String.format("The copy status is: %s%%.", copyPercentage)));
+                try {
+                    Thread.sleep(MILLIS);
+                } catch (InterruptedException e) {
+                    LOGGER.info("Interrupted exception occured during sleep.", e);
+                    Thread.currentThread().interrupt();
+                }
+            }
+            if (!SUCCESS.equals(copyStatus)) {
+                throw new InternalServerException("Copy OS image failed with status: " + copyStatus);
+            }
+            params = new HashMap<>();
+            params.put(AzureStackUtil.NAME, azureStackUtil.getOsImageName(credential));
+            params.put(OS, "Linux");
+            params.put(MEDIALINK, targetImageUri);
+            azureClient.addOsImage(params);
         }
+        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT, stack.getId());
+        reactor.notify(ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT,
+                Event.wrap(new ProvisionSetupComplete(getCloudPlatform(), stack.getId())
+                                .withSetupProperty(CREDENTIAL, stack.getCredential())
+                                .withSetupProperty(EMAILASFOLDER, stack.getUser().emailAsFolder())
+                )
+        );
     }
 
     private void createStorage(Stack stack, AzureClient azureClient, String affinityGroupName) {
@@ -142,9 +146,8 @@ public class AzureProvisionSetup implements ProvisionSetup {
                 HttpResponseDecorator response = (HttpResponseDecorator) azureClient.createStorageAccount(params);
                 azureClient.waitUntilComplete((String) azureClient.getRequestId(response));
             } else {
-                LOGGER.info("There was a problem with the creation of the storage.");
-                reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(new StackCreationFailure(stack.getId(),
-                        "The copy of the os image was not success")));
+                LOGGER.error(String.format("Error occurs on %s stack under the storage creation", stack.getId()), ex);
+                throw new InternalServerException(ex.getMessage());
             }
         }
     }
@@ -160,9 +163,8 @@ public class AzureProvisionSetup implements ProvisionSetup {
                 params.put(LOCATION, ((AzureTemplate) stack.getTemplate()).getLocation().location());
                 azureClient.createAffinityGroup(params);
             } else {
-                LOGGER.info("There was a problem with the creation of the affinity group.");
-                reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(new StackCreationFailure(stack.getId(),
-                        "The copy of the os image was not success")));
+                LOGGER.error(String.format("Error occurs on %s stack under the affinity group creation", stack.getId()), ex);
+                throw new InternalServerException(ex.getMessage());
             }
         }
     }

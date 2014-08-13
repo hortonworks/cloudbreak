@@ -6,11 +6,9 @@ import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStack
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.NOT_FOUND;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.SERVICENAME;
 
-import groovyx.net.http.HttpResponseDecorator;
-import groovyx.net.http.HttpResponseException;
-
 import java.io.FileNotFoundException;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -26,12 +24,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import reactor.core.Reactor;
-import reactor.event.Event;
-
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
+import com.sequenceiq.cloudbreak.controller.StackCreationFailureException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.AzureVmType;
@@ -46,7 +42,11 @@ import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
 import com.sequenceiq.cloudbreak.service.stack.connector.Provisioner;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
-import com.sequenceiq.cloudbreak.service.stack.event.StackCreationFailure;
+
+import groovyx.net.http.HttpResponseDecorator;
+import groovyx.net.http.HttpResponseException;
+import reactor.core.Reactor;
+import reactor.event.Event;
 
 @Component
 public class AzureProvisioner implements Provisioner {
@@ -97,45 +97,22 @@ public class AzureProvisioner implements Provisioner {
         retryingStackUpdater.updateStackStatus(stack.getId(), Status.CREATE_IN_PROGRESS);
         String name = stack.getName().replaceAll("\\s+", "") + String.valueOf(new Date().getTime());
         String commonName = ((AzureCredential) credential).getCommonName();
-        createAffinityGroup(azureClient, azureTemplate, commonName);
-        createStorageAccount(azureClient, azureTemplate, commonName);
+        createAffinityGroup(stack, azureClient, azureTemplate, commonName);
+        createStorageAccount(stack, azureClient, azureTemplate, commonName);
         createVirtualNetwork(azureClient, name, commonName);
         Set<Resource> resourceSet = new HashSet<>();
         resourceSet.add(new Resource(ResourceType.AFFINITY_GROUP, commonName, stack));
         resourceSet.add(new Resource(ResourceType.STORAGE, commonName, stack));
         resourceSet.add(new Resource(ResourceType.NETWORK, name, stack));
-
         for (int i = 0; i < stack.getNodeCount(); i++) {
-            try {
-                String vmName = azureStackUtil.getVmName(name, i) + String.valueOf(new Date().getTime());
-                createCloudService(azureClient, azureTemplate, vmName, commonName);
-                createServiceCertificate(azureClient, azureTemplate, credential, vmName, emailAsFolder);
-                String internalIp = "172.16.0." + (i + VALID_IP_RANGE_START);
-                createVirtualMachine(azureClient, azureTemplate, credential, name, vmName, commonName, userData, internalIp);
-                resourceSet.add(new Resource(ResourceType.VIRTUAL_MACHINE, vmName, stack));
-                resourceSet.add(new Resource(ResourceType.CLOUD_SERVICE, vmName, stack));
-                resourceSet.add(new Resource(ResourceType.BLOB, vmName, stack));
-            } catch (FileNotFoundException e) {
-                LOGGER.error(String.format("Ssh certificate file not found for %s stack", stack.getId()), e);
-                reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(new StackCreationFailure(stack.getId(),
-                        "Error while creating Azure stack: ssh file not found")));
-                return;
-            } catch (CertificateException e) {
-                LOGGER.error(String.format("Ssh certificate file was not in the correct format", stack.getId()), e);
-                reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(new StackCreationFailure(stack.getId(),
-                        "Error while creating Azure stack: certificate not correct")));
-                return;
-            } catch (NoSuchAlgorithmException e) {
-                LOGGER.error(String.format("No such algorithm exception under azure vm creation %s stack", stack.getId()), e);
-                reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(new StackCreationFailure(stack.getId(),
-                        "Error while creating Azure stack: no such algorithm exception")));
-                return;
-            } catch (Exception e) {
-                LOGGER.error(String.format("%s exception occured in %s stack", e.getMessage(), stack.getId()), e);
-                reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(new StackCreationFailure(stack.getId(),
-                        "Error while creating Azure stack: " + e.getMessage())));
-                return;
-            }
+            String vmName = azureStackUtil.getVmName(name, i) + String.valueOf(new Date().getTime());
+            createCloudService(azureClient, azureTemplate, vmName, commonName);
+            createServiceCertificate(azureClient, azureTemplate, credential, vmName, emailAsFolder);
+            String internalIp = "172.16.0." + (i + VALID_IP_RANGE_START);
+            createVirtualMachine(azureClient, azureTemplate, credential, name, vmName, commonName, userData, internalIp);
+            resourceSet.add(new Resource(ResourceType.VIRTUAL_MACHINE, vmName, stack));
+            resourceSet.add(new Resource(ResourceType.CLOUD_SERVICE, vmName, stack));
+            resourceSet.add(new Resource(ResourceType.BLOB, vmName, stack));
         }
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_COMPLETE_EVENT, stack.getId());
         reactor.notify(ReactorConfig.PROVISION_COMPLETE_EVENT, Event.wrap(new ProvisionComplete(CloudPlatform.AZURE, stack.getId(), resourceSet)));
@@ -147,8 +124,7 @@ public class AzureProvisioner implements Provisioner {
     }
 
     private void createVirtualMachine(AzureClient azureClient, AzureTemplate azureTemplate, Credential credential,
-            String name, String vmName, String commonName, String userData, String internalIp)
-            throws FileNotFoundException, CertificateException, NoSuchAlgorithmException {
+            String name, String vmName, String commonName, String userData, String internalIp) {
         byte[] encoded = Base64.encodeBase64(vmName.getBytes());
         String label = new String(encoded);
         Map<String, Object> props = new HashMap<>();
@@ -170,8 +146,21 @@ public class AzureProvisioner implements Provisioner {
         props.put(IMAGESTOREURI, buildimageStoreUri(commonName, vmName));
         props.put(HOSTNAME, vmName);
         props.put(USERNAME, DEFAULT_USER_NAME);
-        X509Certificate sshCert = azureStackUtil.createX509Certificate((AzureCredential) credential, azureTemplate.getOwner().emailAsFolder());
-        props.put(SSHPUBLICKEYFINGERPRINT, sshCert.getSha1Fingerprint().toUpperCase());
+        X509Certificate sshCert = null;
+        try {
+            sshCert = azureStackUtil.createX509Certificate((AzureCredential) credential, azureTemplate.getOwner().emailAsFolder());
+        } catch (FileNotFoundException e) {
+            throw new StackCreationFailureException(e);
+        } catch (CertificateException e) {
+            throw new StackCreationFailureException(e);
+        }
+        try {
+            props.put(SSHPUBLICKEYFINGERPRINT, sshCert.getSha1Fingerprint().toUpperCase());
+        } catch (CertificateEncodingException e) {
+            throw new StackCreationFailureException(e);
+        } catch (NoSuchAlgorithmException e) {
+            throw new StackCreationFailureException(e);
+        }
         props.put(SSHPUBLICKEYPATH, String.format("/home/%s/.ssh/authorized_keys", DEFAULT_USER_NAME));
         props.put(AFFINITYGROUP, commonName);
         if (azureTemplate.getVolumeCount() > 0) {
@@ -209,12 +198,22 @@ public class AzureProvisioner implements Provisioner {
         azureClient.waitUntilComplete(requestId);
     }
 
-    private void createServiceCertificate(AzureClient azureClient, AzureTemplate azureTemplate, Credential credential, String name, String emailAsFolder)
-            throws FileNotFoundException, CertificateException {
+    private void createServiceCertificate(AzureClient azureClient, AzureTemplate azureTemplate, Credential credential, String name, String emailAsFolder) {
         Map<String, String> props = new HashMap<>();
         props.put(NAME, name);
-        X509Certificate sshCert = azureStackUtil.createX509Certificate((AzureCredential) credential, emailAsFolder);
-        props.put(DATA, new String(sshCert.getPem()));
+        X509Certificate sshCert = null;
+        try {
+            sshCert = azureStackUtil.createX509Certificate((AzureCredential) credential, emailAsFolder);
+        } catch (FileNotFoundException e) {
+            throw new StackCreationFailureException(e);
+        } catch (CertificateException e) {
+            throw new StackCreationFailureException(e);
+        }
+        try {
+            props.put(DATA, new String(sshCert.getPem()));
+        } catch (CertificateEncodingException e) {
+            throw new StackCreationFailureException(e);
+        }
         HttpResponseDecorator serviceCertificate = (HttpResponseDecorator) azureClient.createServiceCertificate(props);
         String requestId = (String) azureClient.getRequestId(serviceCertificate);
         azureClient.waitUntilComplete(requestId);
@@ -234,7 +233,7 @@ public class AzureProvisioner implements Provisioner {
         }
     }
 
-    private void createStorageAccount(AzureClient azureClient, AzureTemplate azureTemplate, String commonName) {
+    private void createStorageAccount(Stack stack, AzureClient azureClient, AzureTemplate azureTemplate, String commonName) {
         try {
             azureClient.getStorageAccount(commonName);
         } catch (Exception ex) {
@@ -246,13 +245,17 @@ public class AzureProvisioner implements Provisioner {
                 HttpResponseDecorator storageResponse = (HttpResponseDecorator) azureClient.createStorageAccount(props);
                 String requestId = (String) azureClient.getRequestId(storageResponse);
                 azureClient.waitUntilComplete(requestId);
+            } else if (ex instanceof HttpResponseException) {
+                LOGGER.error(String.format("Error occurs on %s stack under the storage creation", stack.getId()), ex);
+                throw new InternalServerException(((HttpResponseException) ex).getResponse().toString());
             } else {
-                throw new InternalServerException(ex.getMessage());
+                LOGGER.error(String.format("Error occurs on %s stack under the storage creation", stack.getId()), ex);
+                throw new StackCreationFailureException(ex);
             }
         }
     }
 
-    private void createAffinityGroup(AzureClient azureClient, AzureTemplate azureTemplate, String name) {
+    private void createAffinityGroup(Stack stack, AzureClient azureClient, AzureTemplate azureTemplate, String name) {
         try {
             azureClient.getAffinityGroup(name);
         } catch (Exception ex) {
@@ -264,8 +267,12 @@ public class AzureProvisioner implements Provisioner {
                 HttpResponseDecorator affinityResponse = (HttpResponseDecorator) azureClient.createAffinityGroup(props);
                 String requestId = (String) azureClient.getRequestId(affinityResponse);
                 azureClient.waitUntilComplete(requestId);
+            } else if (ex instanceof HttpResponseException) {
+                LOGGER.error(String.format("Error occurs on %s stack under the affinity group creation", stack.getId()), ex);
+                throw new InternalServerException(((HttpResponseException) ex).getResponse().toString());
             } else {
-                throw new InternalServerException(ex.getMessage());
+                LOGGER.error(String.format("Error occurs on %s stack under the affinity group creation", stack.getId()), ex);
+                throw new StackCreationFailureException(ex);
             }
         }
     }

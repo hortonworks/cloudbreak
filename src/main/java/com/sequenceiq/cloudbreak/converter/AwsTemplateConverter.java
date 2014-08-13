@@ -55,7 +55,7 @@ public class AwsTemplateConverter extends AbstractConverter<TemplateJson, AwsTem
         awsTemplate.setVolumeSize((json.getVolumeSize() == null) ? 0 : json.getVolumeSize());
         awsTemplate.setVolumeType(VolumeType.valueOf(String.valueOf(json.getParameters().get(AwsTemplateParam.VOLUME_TYPE.getName()))));
         Double spotPrice = json.getParameters().containsKey(AwsTemplateParam.SPOT_PRICE.getName())
-                ? (Double) json.getParameters().get(AwsTemplateParam.SPOT_PRICE.getName()) : null;
+                ? Double.valueOf(json.getParameters().get(AwsTemplateParam.SPOT_PRICE.getName()).toString()) : null;
         awsTemplate.setSpotPrice(spotPrice);
         return awsTemplate;
     }

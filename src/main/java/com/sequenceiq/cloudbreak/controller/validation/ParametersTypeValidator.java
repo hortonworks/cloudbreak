@@ -28,9 +28,16 @@ public class ParametersTypeValidator extends AbstractParameterValidator {
                                 fieldList(entry.getClazz().getFields())));
                         valid = false;
                     }
-                } else if (!parameters.get(entry.getName()).getClass().isAssignableFrom(entry.getClazz())) {
-                    addParameterConstraintViolation(context, entry.getName(), String.format("%s is not valid type.", entry.getName()));
-                    valid = false;
+                } else {
+                    try {
+                        entry.getClazz().getConstructor(parameters.get(entry.getName()).getClass()).newInstance(parameters.get(entry.getName()));
+                    } catch (Exception e) {
+                        try {
+                            entry.getClazz().getConstructor(String.class).newInstance(parameters.get(entry.getName()).toString());
+                        } catch (Exception ex) {
+                            valid = false;
+                        }
+                    }
                 }
             }
         }
