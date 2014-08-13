@@ -1,25 +1,25 @@
 # cluster
-curl -X POST -H "Content-Type: application/json" -d '{"host":"172.24.0.2", "port":"8080", "user":"admin", "pass":"admin"}' localhost:8081/clusters/multi-node | jq .
-curl -X GET localhost:8081/clusters/multi-node | jq .
-curl -X GET localhost:8081/clusters | jq .
-curl -X DELETE localhost:8081/clusters/multi-node | jq .
+curl -X POST -H "Content-Type: application/json" -d '{"host":"172.24.0.2", "port":"8080", "user":"admin", "pass":"admin"}' localhost:8080/clusters/multi-node | jq .
+curl -X GET localhost:8080/clusters/multi-node | jq .
+curl -X GET localhost:8080/clusters | jq .
+curl -X DELETE localhost:8080/clusters/multi-node | jq .
 
 # set cluster state
-curl -X POST -H "Content-Type: application/json" -d '{"state":"SUSPENDED"}' localhost:8081/clusters/multi-node/state | jq .
+curl -X POST -H "Content-Type: application/json" -d '{"state":"SUSPENDED"}' localhost:8080/clusters/multi-node/state | jq .
 
 # app movement
-curl -w '%{http_code}' -H "Content-Type: application/json" -X POST -d '{"allowed":"false"}' localhost:8081/clusters/multi-node/movement | jq .
+curl -w '%{http_code}' -H "Content-Type: application/json" -X POST -d '{"allowed":"false"}' localhost:8080/clusters/multi-node/movement | jq .
 
 # set random priority
-curl -X POST -H "Content-Type: application/json" localhost:8081/clusters/multi-node/apps/random |jq .
+curl -X POST -H "Content-Type: application/json" localhost:8080/clusters/multi-node/apps/random |jq .
 
 # list all app
-curl -X GET localhost:8081/applications/multi-node | jq .
+curl -X GET localhost:8080/applications/multi-node | jq .
 
 # cloudbreak policy
-curl -X POST -H "Content-Type: application/json" -d '{"scaleUpRules":{"resourcesBelow":{"limit":"4","freeResourceRate":"0.2"},"pendingApps":{"limit":"4","pendingApps":"5"},"pendingContainers":{"limit":"4","pendingContainers":"10"}},"scaleDownRules":{"resourcesAbove":{"limit":"3","freeResourceRate":"0.4"}}}' localhost:8081/policy/multi-node | jq .
-curl -X POST -H "Content-Type: application/json" -d '{"jarUrl":"https://dl.dropboxusercontent.com/u/13919958/lostnodes.jar", "scaleUpRules":{"com.sequenceiq.periscope.policies.cloudbreak.rule.LostNodesRule":{"limit":"4", "lostNodes":"2"},"pendingApps":{"limit":"4","pendingApps":"5"},"pendingContainers":{"limit":"4","pendingContainers":"10"}},"scaleDownRules":{"resourcesAbove":{"limit":"3","freeResourceRate":"0.4"}}}' localhost:8081/policy/multi-node | jq .
-curl -X GET localhost:8081/policy/multi-node | jq .
+curl -X POST -H "Content-Type: application/json" -d '{"scaleUpRules":{"resourcesBelow":{"limit":"4","freeResourceRate":"0.2"},"pendingApps":{"limit":"4","pendingApps":"5"},"pendingContainers":{"limit":"4","pendingContainers":"10"}},"scaleDownRules":{"resourcesAbove":{"limit":"3","freeResourceRate":"0.4"}}}' localhost:8080/policy/multi-node | jq .
+curl -X POST -H "Content-Type: application/json" -d '{"jarUrl":"https://dl.dropboxusercontent.com/u/13919958/lostnodes.jar", "scaleUpRules":{"com.sequenceiq.periscope.policies.cloudbreak.rule.LostNodesRule":{"limit":"4", "lostNodes":"2"},"pendingApps":{"limit":"4","pendingApps":"5"},"pendingContainers":{"limit":"4","pendingContainers":"10"}},"scaleDownRules":{"resourcesAbove":{"limit":"3","freeResourceRate":"0.4"}}}' localhost:8080/policy/multi-node | jq .
+curl -X GET localhost:8080/policy/multi-node | jq .
 
 # refresh ambari configuration
-curl -X POST localhost:8081/configuration/multi-node | jq .
+curl -X POST localhost:8080/configuration/multi-node | jq .
