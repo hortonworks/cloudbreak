@@ -1513,13 +1513,12 @@ Add a cluster to be monitored by Periscope.
           }
         ]
 
-##Policy [/policy/{clusterId}/{policyName}]
+##Policy [/policy/{clusterId}]
 ###Create a scaling policy for a cluster [POST]
 TBD - add the 3 different scenarios - success, partial and failure
 
 + Parameters
     + clusterId (required String `clusterIUD`) ... The id of the cluster to attach the policy.
-    + policyName (required String `policyName`) ... The name of the attached policy name to the cluster.
 
 + Request (application/json)
 
@@ -1588,13 +1587,12 @@ TBD - add the 3 different scenarios - success, partial and failure
         }
 
 
-##Policy [/policy/{clusterId}/{policyName}]
+##Policy [/policy/{clusterId}]
 ###Create a scaling policy for a cluster [GET]
 
 
 + Parameters
     + clusterId (required String `clusterIUD`) ... The id of the cluster to attach the policy.
-    + policyName (required String `policyName`) ... The name of the attached policy name to the cluster.
 
 + Request (application/json)
 
