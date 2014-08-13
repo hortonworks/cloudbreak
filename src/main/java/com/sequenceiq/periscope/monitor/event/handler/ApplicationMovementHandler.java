@@ -49,7 +49,7 @@ public class ApplicationMovementHandler implements ApplicationListener<Applicati
             activeApps.add(id);
             SchedulerApplication application = addApplicationIfAbsent(cluster, report);
             application.update(report);
-            if (cluster.isAppMovementAllowed()) {
+            if (cluster.isAppMovementAllowed() && allQueueInfo.size() > 1) {
                 apps = cluster.getApplicationsPriorityOrder();
                 if (isApplicationHighPriority(apps, id)) {
                     LOGGER.info("Try to move high priority app {}", id);
@@ -78,12 +78,10 @@ public class ApplicationMovementHandler implements ApplicationListener<Applicati
     private CapacitySchedulerQueueInfo getQueueWithMostAvailableCapacity(Cluster cluster, List<CapacitySchedulerQueueInfo> allQueueInfo) {
         CapacitySchedulerQueueInfo result = allQueueInfo.get(0);
         int numQueues = allQueueInfo.size();
-        if (numQueues > 1) {
-            for (int i = 1; i < numQueues; i++) {
-                CapacitySchedulerQueueInfo queue = allQueueInfo.get(i);
-                if (computeFreeQueueResourceCapacity(cluster, queue) > computeFreeQueueResourceCapacity(cluster, result)) {
-                    result = queue;
-                }
+        for (int i = 1; i < numQueues; i++) {
+            CapacitySchedulerQueueInfo queue = allQueueInfo.get(i);
+            if (computeFreeQueueResourceCapacity(cluster, queue) > computeFreeQueueResourceCapacity(cluster, result)) {
+                result = queue;
             }
         }
         return result;
