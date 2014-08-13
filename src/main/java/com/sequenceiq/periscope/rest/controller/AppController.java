@@ -18,6 +18,7 @@ import com.sequenceiq.periscope.rest.json.AppReportJson;
 import com.sequenceiq.periscope.service.AppService;
 
 @RestController
+@RequestMapping("/applications/{clusterId}")
 public class AppController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AppController.class);
@@ -33,7 +34,7 @@ public class AppController {
         return new ResponseEntity<>("OK", HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/applications/{clusterId}", method = RequestMethod.GET)
+    @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<List<AppReportJson>> getApp(@PathVariable String clusterId) {
         List<AppReportJson> result = new ArrayList<>();
         HttpStatus status;

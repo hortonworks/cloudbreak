@@ -11,7 +11,7 @@ curl -X POST -H "Content-Type: application/json" -d '{"state":"SUSPENDED"}' loca
 curl -w '%{http_code}' -H "Content-Type: application/json" -X POST -d '{"allowed":"false"}' localhost:8080/clusters/multi-node/movement | jq .
 
 # set random priority
-curl -X POST -H "Content-Type: application/json" localhost:8080/clusters/multi-node/apps/random |jq .
+curl -X POST -H "Content-Type: application/json" localhost:8080/applications/multi-node/random |jq .
 
 # list all app
 curl -X GET localhost:8080/applications/multi-node | jq .
