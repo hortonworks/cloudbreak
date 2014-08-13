@@ -26,6 +26,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.controller.StackCreationFailureException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.Credential;
@@ -194,7 +195,7 @@ public class AzureProvisionerTest {
         verify(azureClient, times(3)).createVirtualMachine(anyMap());
     }
 
-    @Test
+    @Test(expected = StackCreationFailureException.class)
     public void testBuildStackWhenCertificateFileNotFound() throws FileNotFoundException, CertificateException {
         // GIVEN
         given(retryingStackUpdater.updateStackStatus(anyLong(), any(Status.class))).willReturn(stack);
@@ -220,7 +221,7 @@ public class AzureProvisionerTest {
         verify(azureClient, times(0)).createVirtualMachine(anyMap());
     }
 
-    @Test
+    @Test(expected = IllegalStateException.class)
     public void testBuildStackWhenExceptionThrowsDuringCloudServiceCreation() throws FileNotFoundException, CertificateException, NoSuchAlgorithmException {
         // GIVEN
         given(retryingStackUpdater.updateStackStatus(anyLong(), any(Status.class))).willReturn(stack);
