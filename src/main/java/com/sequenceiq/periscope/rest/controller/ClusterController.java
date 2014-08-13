@@ -21,7 +21,10 @@ import com.sequenceiq.periscope.rest.ClusterNotFoundException;
 import com.sequenceiq.periscope.rest.converter.AmbariConverter;
 import com.sequenceiq.periscope.rest.converter.ClusterConverter;
 import com.sequenceiq.periscope.rest.json.AmbariJson;
+import com.sequenceiq.periscope.rest.json.AppMovementJson;
 import com.sequenceiq.periscope.rest.json.ClusterJson;
+import com.sequenceiq.periscope.rest.json.StateJson;
+import com.sequenceiq.periscope.service.AppService;
 import com.sequenceiq.periscope.service.ClusterService;
 
 @RestController
@@ -36,6 +39,8 @@ public class ClusterController {
     private AmbariConverter ambariConverter;
     @Autowired
     private ClusterConverter clusterConverter;
+    @Autowired
+    private AppService appService;
 
     @RequestMapping(value = "/{id}", method = RequestMethod.POST)
     public ResponseEntity<ClusterJson> addCluster(@PathVariable String id, @RequestBody AmbariJson ambariServer) {
@@ -70,6 +75,24 @@ public class ClusterController {
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
     public ResponseEntity<ClusterJson> deleteCluster(@PathVariable String id) {
         Cluster cluster = clusterService.remove(id);
+        if (cluster == null) {
+            throw new ClusterNotFoundException(id);
+        }
+        return new ResponseEntity<>(clusterConverter.convert(cluster), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/{id}/state", method = RequestMethod.POST)
+    public ResponseEntity<ClusterJson> setState(@PathVariable String id, @RequestBody StateJson stateJson) {
+        Cluster cluster = clusterService.setState(id, stateJson.getState());
+        if (cluster == null) {
+            throw new ClusterNotFoundException(id);
+        }
+        return new ResponseEntity<>(clusterConverter.convert(cluster), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/{id}/movement", method = RequestMethod.POST)
+    public ResponseEntity<ClusterJson> enableMovement(@PathVariable String id, @RequestBody AppMovementJson appMovementJson) {
+        Cluster cluster = appService.allowAppMovement(id, appMovementJson.isAllowed());
         if (cluster == null) {
             throw new ClusterNotFoundException(id);
         }
