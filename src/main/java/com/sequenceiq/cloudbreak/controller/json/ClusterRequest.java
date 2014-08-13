@@ -5,6 +5,7 @@ public class ClusterRequest {
     private String clusterName;
     private Long blueprintId;
     private String description;
+    private Boolean emailNeeded = Boolean.FALSE;
 
     public String getDescription() {
         return description;
@@ -30,4 +31,11 @@ public class ClusterRequest {
         this.blueprintId = blueprintId;
     }
 
+    public Boolean getEmailNeeded() {
+        return emailNeeded;
+    }
+
+    public void setEmailNeeded(Boolean emailNeeded) {
+        this.emailNeeded = emailNeeded;
+    }
 }

@@ -44,6 +44,8 @@ public class Cluster implements ProvisionEntity {
 
     private String statusReason;
 
+    private Boolean emailNeeded;
+
     public String getDescription() {
         return description;
     }
@@ -116,4 +118,11 @@ public class Cluster implements ProvisionEntity {
         this.statusReason = statusReason;
     }
 
+    public Boolean getEmailNeeded() {
+        return emailNeeded;
+    }
+
+    public void setEmailNeeded(Boolean emailNeeded) {
+        this.emailNeeded = emailNeeded;
+    }
 }

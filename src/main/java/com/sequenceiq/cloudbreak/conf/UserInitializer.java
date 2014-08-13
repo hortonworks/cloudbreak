@@ -25,19 +25,19 @@ public class UserInitializer implements InitializingBean {
     @Value("${cb.hbm2ddl.strategy:update}")
     private String hbm2ddlStrategy;
 
-    @Value("${cb.default.user.email:cbuser@sequenceiq.com}")
+    @Value("${cb.default.user.email}")
     private String defaultUserEmail;
 
-    @Value("${cb.default.user.firstname:Firstname}")
+    @Value("${cb.default.user.firstname}")
     private String defaultUserFirstName;
 
-    @Value("${cb.default.user.lastname:Lastname}")
+    @Value("${cb.default.user.lastname}")
     private String defaultUserLastName;
 
-    @Value("${cb.default.user.password:test123}")
+    @Value("${cb.default.user.password}")
     private String defaultUserPassword;
 
-    @Value("${cb.default.company.name:SequenceIQ}")
+    @Value("${cb.default.company.name}")
     private String defaultCompanyName;
 
     @Autowired
@@ -62,7 +62,7 @@ public class UserInitializer implements InitializingBean {
             user.setPassword(passwordEncoder.encode(defaultUserPassword));
             user.setStatus(UserStatus.ACTIVE);
             user.setCompany(company);
-            user.getUserRoles().add(UserRole.COMPANY_ADMIN);
+            user.getUserRoles().add(UserRole.DEPLOYER);
 
             Set<Blueprint> blueprints = defaultBlueprintLoaderService.loadBlueprints(user);
             user.setBlueprints(blueprints);
