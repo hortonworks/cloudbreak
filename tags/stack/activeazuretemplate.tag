@@ -44,7 +44,7 @@
         <!-- .col-sm-9 -->
     </div>
     <div class="form-group">
-        <label class="col-sm-3 control-label" for="location">Volume count</label>
+        <label class="col-sm-3 control-label" for="volcount">Volume count</label>
 
         <div class="col-sm-9">
             <p id="volcount" class="form-control-static">{{activeStack.template.volumeCount}}</p>
@@ -52,11 +52,13 @@
         <!-- .col-sm-9 -->
     </div>
     <div class="form-group">
-        <label class="col-sm-3 control-label" for="location">Volume size</label>
+        <label class="col-sm-3 control-label" for="volsize">Volume size</label>
 
         <div class="col-sm-9">
             <p id="volsize" class="form-control-static">{{activeStack.template.volumeSize}}</p>
         </div>
         <!-- .col-sm-9 -->
     </div>
+
+
 </form>
