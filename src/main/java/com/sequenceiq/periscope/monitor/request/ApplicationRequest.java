@@ -44,10 +44,10 @@ public class ApplicationRequest extends AbstractEventPublisher implements EventP
             List<ApplicationReport> applicationReport = getApplicationReport();
             SchedulerInfo schedulerInfo = getSchedulerInfo();
             QueueAppUpdate appUpdate = new QueueAppUpdate(applicationReport, schedulerInfo);
-            publishEvent(new ApplicationUpdateEvent(cluster.getClusterId(), appUpdate));
+            publishEvent(new ApplicationUpdateEvent(cluster.getId(), appUpdate));
         } catch (Exception e) {
-            LOGGER.error("Error occurred during application update from cluster {}", cluster.getClusterId(), e);
-            publishEvent(new UpdateFailedEvent(cluster.getClusterId()));
+            LOGGER.error("Error occurred during application update from cluster {}", cluster.getId(), e);
+            publishEvent(new UpdateFailedEvent(cluster.getId()));
         }
     }
 

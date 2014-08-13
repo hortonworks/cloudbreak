@@ -34,10 +34,10 @@ public class ClusterMetricsUpdateRequest extends AbstractEventPublisher implemen
             String rmAddress = cluster.getConfigValue(ConfigParam.YARN_RM_WEB_ADDRESS, "");
             String url = "http://" + rmAddress + WS_URL;
             ClusterMetricsInfo response = restOperations.getForObject(url, ClusterMetricsInfo.class);
-            publishEvent(new ClusterMetricsUpdateEvent(response, cluster.getClusterId()));
+            publishEvent(new ClusterMetricsUpdateEvent(response, cluster.getId()));
         } catch (Exception e) {
-            LOGGER.error("Error updating the cluster metrics from the WS {}", cluster.getClusterId(), e);
-            publishEvent(new UpdateFailedEvent(cluster.getClusterId()));
+            LOGGER.error("Error updating the cluster metrics from the WS {}", cluster.getId(), e);
+            publishEvent(new UpdateFailedEvent(cluster.getId()));
         }
     }
 }

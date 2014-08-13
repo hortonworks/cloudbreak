@@ -24,7 +24,7 @@ public class Cluster {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Cluster.class);
     private final Map<Priority, Map<ApplicationId, SchedulerApplication>> applications;
-    private final String clusterId;
+    private final String id;
     private final Ambari ambari;
     private boolean appMovementAllowed = true;
     private Configuration configuration;
@@ -33,15 +33,15 @@ public class Cluster {
     private CloudbreakPolicy cloudbreakPolicy;
     private ClusterState state = ClusterState.RUNNING;
 
-    public Cluster(String clusterId, Ambari ambari) throws ConnectionException {
-        this.clusterId = clusterId;
+    public Cluster(String id, Ambari ambari) throws ConnectionException {
+        this.id = id;
         this.ambari = ambari;
         this.applications = new ConcurrentHashMap<>();
         initConfiguration();
     }
 
-    public String getClusterId() {
-        return clusterId;
+    public String getId() {
+        return id;
     }
 
     public YarnClient getYarnClient() {
@@ -78,6 +78,10 @@ public class Cluster {
 
     public String getConfigValue(ConfigParam param, String defaultValue) {
         return configuration.get(param.key(), defaultValue);
+    }
+
+    public int getTotalNodes() {
+        return metrics == null ? 0 : metrics.getTotalNodes();
     }
 
     public long getTotalMB() {
@@ -121,7 +125,7 @@ public class Cluster {
         }
         ApplicationId applicationId = application.getApplicationId();
         applicationMap.put(applicationId, application);
-        LOGGER.info("Application ({}) added to cluster {}", applicationId.toString(), clusterId);
+        LOGGER.info("Application ({}) added to cluster {}", applicationId.toString(), this.id);
         return application;
     }
 
@@ -134,7 +138,7 @@ public class Cluster {
                 if (id.equals(applicationId)) {
                     SchedulerApplication application = apps.get(id);
                     iterator.remove();
-                    LOGGER.info("Application ({}) removed from cluster {}", applicationId, clusterId);
+                    LOGGER.info("Application ({}) removed from cluster {}", applicationId, this.id);
                     return application;
                 }
             }
