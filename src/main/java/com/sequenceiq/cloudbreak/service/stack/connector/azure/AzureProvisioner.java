@@ -6,9 +6,6 @@ import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStack
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.NOT_FOUND;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.SERVICENAME;
 
-import groovyx.net.http.HttpResponseDecorator;
-import groovyx.net.http.HttpResponseException;
-
 import java.io.FileNotFoundException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
@@ -25,9 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import reactor.core.Reactor;
-import reactor.event.Event;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
@@ -47,6 +41,11 @@ import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateServic
 import com.sequenceiq.cloudbreak.service.stack.connector.Provisioner;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.StackCreationFailure;
+
+import groovyx.net.http.HttpResponseDecorator;
+import groovyx.net.http.HttpResponseException;
+import reactor.core.Reactor;
+import reactor.event.Event;
 
 @Component
 public class AzureProvisioner implements Provisioner {
@@ -97,8 +96,8 @@ public class AzureProvisioner implements Provisioner {
         retryingStackUpdater.updateStackStatus(stack.getId(), Status.CREATE_IN_PROGRESS);
         String name = stack.getName().replaceAll("\\s+", "") + String.valueOf(new Date().getTime());
         String commonName = ((AzureCredential) credential).getCommonName();
-        createAffinityGroup(azureClient, azureTemplate, commonName);
-        createStorageAccount(azureClient, azureTemplate, commonName);
+        createAffinityGroup(stack, azureClient, azureTemplate, commonName);
+        createStorageAccount(stack, azureClient, azureTemplate, commonName);
         createVirtualNetwork(azureClient, name, commonName);
         Set<Resource> resourceSet = new HashSet<>();
         resourceSet.add(new Resource(ResourceType.AFFINITY_GROUP, commonName, stack));
@@ -234,7 +233,7 @@ public class AzureProvisioner implements Provisioner {
         }
     }
 
-    private void createStorageAccount(AzureClient azureClient, AzureTemplate azureTemplate, String commonName) {
+    private void createStorageAccount(Stack stack, AzureClient azureClient, AzureTemplate azureTemplate, String commonName) {
         try {
             azureClient.getStorageAccount(commonName);
         } catch (Exception ex) {
@@ -246,13 +245,17 @@ public class AzureProvisioner implements Provisioner {
                 HttpResponseDecorator storageResponse = (HttpResponseDecorator) azureClient.createStorageAccount(props);
                 String requestId = (String) azureClient.getRequestId(storageResponse);
                 azureClient.waitUntilComplete(requestId);
+            } else if (ex instanceof HttpResponseException) {
+                LOGGER.error(String.format("Error occurs on %s stack under the storage creation", stack.getId()), ex);
+                throw new InternalServerException(((HttpResponseException) ex).getResponse().toString());
             } else {
+                LOGGER.error(String.format("Error occurs on %s stack under the storage creation", stack.getId()), ex);
                 throw new InternalServerException(ex.getMessage());
             }
         }
     }
 
-    private void createAffinityGroup(AzureClient azureClient, AzureTemplate azureTemplate, String name) {
+    private void createAffinityGroup(Stack stack, AzureClient azureClient, AzureTemplate azureTemplate, String name) {
         try {
             azureClient.getAffinityGroup(name);
         } catch (Exception ex) {
@@ -264,7 +267,11 @@ public class AzureProvisioner implements Provisioner {
                 HttpResponseDecorator affinityResponse = (HttpResponseDecorator) azureClient.createAffinityGroup(props);
                 String requestId = (String) azureClient.getRequestId(affinityResponse);
                 azureClient.waitUntilComplete(requestId);
+            } else if (ex instanceof HttpResponseException) {
+                LOGGER.error(String.format("Error occurs on %s stack under the affinity group creation", stack.getId()), ex);
+                throw new InternalServerException(((HttpResponseException) ex).getResponse().toString());
             } else {
+                LOGGER.error(String.format("Error occurs on %s stack under the affinity group creation", stack.getId()), ex);
                 throw new InternalServerException(ex.getMessage());
             }
         }
