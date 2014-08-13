@@ -55,7 +55,7 @@
     <label class="col-sm-3 control-label" for="azure_tvolumescount">Attached volumes per instance</label>
 
     <div class="col-sm-9">
-        <input type="text" ng-pattern="/^\d+$/" class="form-control" id="azure_tvolumescount" name="azure_tvolumescount" ng-model="azure_tvolumescount"  placeholder="0" min="0">
+        <input type="number" class="form-control" id="azure_tvolumescount" name="azure_tvolumescount" ng-model="azure_tvolumescount"  placeholder="0" min="1">
         <div class="help-block" ng-show="azureTemplateForm.azure_tvolumescount.$dirty && azureTemplateForm.azure_tvolumescount.$invalid">
             <i class="fa fa-warning"></i> {{error_msg.template_volume_count_invalid}}
         </div>

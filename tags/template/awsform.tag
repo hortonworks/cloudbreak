@@ -76,7 +76,7 @@
         <label class="col-sm-3 control-label" for="aws_tvolumecount">Attached volumes per instance</label>
 
         <div class="col-sm-9">
-            <input type="number" name="aws_tvolumecount" class="form-control" ng-model="aws_tvolumecount" id="aws_tvolumecount" min="0"
+            <input type="number" name="aws_tvolumecount" class="form-control" ng-model="aws_tvolumecount" id="aws_tvolumecount" min="1"
                    required>
 
             <div class="help-block"
@@ -121,7 +121,7 @@
         <div class="col-sm-9">
             <input type="number" name="aws_tspotprice" class="form-control" id="aws_tspotprice" ng-model="aws_tspotprice" min="0.1" max="100.0">
           <div class="help-block" ng-show="awsTemplateForm.aws_tspotprice.$dirty"><i class="fa fa-warning"></i>
-              Note: If you enter a spot price it cannot be guaranteed when your instances will be able to start.
+              If you enter a spot price it cannot be guaranteed when your instances will be able to start.
           </div>
           <div class="help-block"
                ng-show="awsTemplateForm.aws_tspotprice.$dirty && awsTemplateForm.aws_tspotprice.$invalid"><i class="fa fa-warning"></i>
