@@ -10,7 +10,7 @@ import com.sequenceiq.periscope.service.CloudbreakService;
 import com.sequenceiq.periscope.service.ClusterService;
 
 @Component
-public class ClusterMetricsUpdateEventHandler implements ApplicationListener<ClusterMetricsUpdateEvent> {
+public class ClusterScalingHandler implements ApplicationListener<ClusterMetricsUpdateEvent> {
 
     @Autowired
     private ClusterService clusterService;

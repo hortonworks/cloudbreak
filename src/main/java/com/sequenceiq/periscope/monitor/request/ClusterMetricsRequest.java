@@ -13,18 +13,18 @@ import com.sequenceiq.periscope.monitor.event.UpdateFailedEvent;
 import com.sequenceiq.periscope.registry.Cluster;
 import com.sequenceiq.periscope.service.configuration.ConfigParam;
 
-@Component("ClusterMetricsUpdateRequest")
+@Component("ClusterMetricsRequest")
 @Scope("prototype")
-public class ClusterMetricsUpdateRequest extends AbstractEventPublisher implements Runnable, EventPublisher {
+public class ClusterMetricsRequest extends AbstractEventPublisher implements Runnable, EventPublisher {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterMetricsUpdateRequest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterMetricsRequest.class);
     private static final String WS_URL = "/ws/v1/cluster/metrics";
 
     @Autowired
     private RestOperations restOperations;
     private final Cluster cluster;
 
-    public ClusterMetricsUpdateRequest(Cluster cluster) {
+    public ClusterMetricsRequest(Cluster cluster) {
         this.cluster = cluster;
     }
 

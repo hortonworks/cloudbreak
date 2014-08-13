@@ -3,8 +3,6 @@ package com.sequenceiq.periscope.monitor.event.handler;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
@@ -14,9 +12,8 @@ import com.sequenceiq.periscope.registry.ClusterState;
 import com.sequenceiq.periscope.service.ClusterService;
 
 @Component
-public class UpdateFailedEventHandler implements ApplicationListener<UpdateFailedEvent> {
+public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEvent> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(UpdateFailedEventHandler.class);
     private static final int RETRY_THRESHOLD = 5;
 
     @Autowired

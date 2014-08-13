@@ -29,9 +29,9 @@ import com.sequenceiq.periscope.registry.Cluster;
 import com.sequenceiq.periscope.service.ClusterService;
 
 @Component
-public class ApplicationUpdateEventHandler implements ApplicationListener<ApplicationUpdateEvent> {
+public class ApplicationMovementHandler implements ApplicationListener<ApplicationUpdateEvent> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationUpdateEventHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationMovementHandler.class);
     private static final int MAX_CAPACITY = 100;
 
     @Autowired
