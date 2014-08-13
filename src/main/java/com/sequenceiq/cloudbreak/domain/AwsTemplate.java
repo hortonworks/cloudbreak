@@ -23,6 +23,7 @@ public class AwsTemplate extends Template implements ProvisionEntity {
     @Enumerated(EnumType.STRING)
     private InstanceType instanceType;
     private String sshLocation;
+    @Enumerated(EnumType.STRING)
     private VolumeType volumeType;
     private Double spotPrice;
 
