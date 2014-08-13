@@ -15,7 +15,7 @@ import com.sequenceiq.periscope.rest.json.CloudbreakPolicyJson;
 import com.sequenceiq.periscope.service.PolicyService;
 
 @RestController
-@RequestMapping("/clusters/{clusterId}/policy")
+@RequestMapping("/policy/{clusterId}")
 public class PolicyController {
 
     @Autowired
@@ -23,7 +23,7 @@ public class PolicyController {
     @Autowired
     private CloudbreakPolicyConverter cloudbreakPolicyConverter;
 
-    @RequestMapping(value = "/cloudbreak", method = RequestMethod.POST)
+    @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<CloudbreakPolicyJson> createRules(@PathVariable String clusterId, @RequestBody CloudbreakPolicyJson policyJson) {
         CloudbreakPolicy policy = cloudbreakPolicyConverter.convert(policyJson);
         boolean added = policyService.setCloudbreakPolicy(clusterId, policy);
@@ -44,7 +44,7 @@ public class PolicyController {
         return new ResponseEntity<>(policyJson, status);
     }
 
-    @RequestMapping(value = "/cloudbreak", method = RequestMethod.GET)
+    @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<CloudbreakPolicyJson> getPolicy(@PathVariable String clusterId) {
         CloudbreakPolicy policy = getCloudbreakPolicy(clusterId);
         CloudbreakPolicyJson json = CloudbreakPolicyJson.emptyJson();

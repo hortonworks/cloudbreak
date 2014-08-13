@@ -24,7 +24,6 @@ import com.sequenceiq.periscope.rest.json.ClusterJson;
 import com.sequenceiq.periscope.service.AppService;
 
 @RestController
-@RequestMapping("/clusters/{clusterId}/apps")
 public class AppController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AppController.class);
@@ -42,7 +41,7 @@ public class AppController {
         return new ResponseEntity<>("OK", HttpStatus.OK);
     }
 
-    @RequestMapping(method = RequestMethod.GET)
+    @RequestMapping(value = "/applications/{clusterId}", method = RequestMethod.GET)
     public ResponseEntity<List<AppReportJson>> getApp(@PathVariable String clusterId) {
         List<AppReportJson> result = new ArrayList<>();
         HttpStatus status;
@@ -56,7 +55,7 @@ public class AppController {
         return new ResponseEntity<>(result, status);
     }
 
-    @RequestMapping(value = "/movement", method = RequestMethod.POST)
+    @RequestMapping(value = "/movement/{clusterId}", method = RequestMethod.POST)
     public ResponseEntity<ClusterJson> enableMovement(@PathVariable String clusterId, @RequestBody AppMovementJson appMovementJson) {
         Cluster cluster = appService.allowAppMovement(clusterId, appMovementJson.isAllowed());
         if (cluster == null) {

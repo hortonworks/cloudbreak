@@ -22,7 +22,6 @@ import com.sequenceiq.periscope.rest.converter.AmbariConverter;
 import com.sequenceiq.periscope.rest.converter.ClusterConverter;
 import com.sequenceiq.periscope.rest.json.AmbariJson;
 import com.sequenceiq.periscope.rest.json.ClusterJson;
-import com.sequenceiq.periscope.rest.json.StateJson;
 import com.sequenceiq.periscope.service.ClusterService;
 
 @RestController
@@ -75,31 +74,6 @@ public class ClusterController {
             throw new ClusterNotFoundException(id);
         }
         return new ResponseEntity<>(clusterConverter.convert(cluster), HttpStatus.OK);
-    }
-
-    @RequestMapping(value = "/{id}/state", method = RequestMethod.POST)
-    public ResponseEntity<ClusterJson> setState(@PathVariable String id, @RequestBody StateJson stateJson) {
-        Cluster cluster = clusterService.setState(id, stateJson.getState());
-        if (cluster == null) {
-            throw new ClusterNotFoundException(id);
-        }
-        return new ResponseEntity<>(clusterConverter.convert(cluster), HttpStatus.OK);
-    }
-
-    @RequestMapping(value = "/{id}/config/ambari/refresh", method = RequestMethod.POST)
-    public ResponseEntity<ClusterJson> refreshConfiguration(@PathVariable String id) {
-        ResponseEntity response;
-        try {
-            Cluster cluster = clusterService.refreshConfiguration(id);
-            if (cluster == null) {
-                throw new ClusterNotFoundException(id);
-            }
-            response = new ResponseEntity<>(clusterConverter.convert(cluster), HttpStatus.OK);
-        } catch (ConnectionException e) {
-            LOGGER.error("Error refreshing the configuration on cluster " + id, e);
-            response = new ResponseEntity<>(ClusterJson.emptyJson().withId(id), HttpStatus.REQUEST_TIMEOUT);
-        }
-        return response;
     }
 
 }
