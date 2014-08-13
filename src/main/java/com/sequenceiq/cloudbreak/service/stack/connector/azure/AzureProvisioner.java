@@ -100,12 +100,11 @@ public class AzureProvisioner implements Provisioner {
         createStorageAccount(stack, azureClient, azureTemplate, commonName);
         createVirtualNetwork(azureClient, name, commonName);
         Set<Resource> resourceSet = new HashSet<>();
-        resourceSet.add(new Resource(ResourceType.AFFINITY_GROUP, commonName, stack));
-        resourceSet.add(new Resource(ResourceType.STORAGE, commonName, stack));
-        resourceSet.add(new Resource(ResourceType.NETWORK, name, stack));
-
-        for (int i = 0; i < stack.getNodeCount(); i++) {
-            try {
+        try {
+            resourceSet.add(new Resource(ResourceType.AFFINITY_GROUP, commonName, stack));
+            resourceSet.add(new Resource(ResourceType.STORAGE, commonName, stack));
+            resourceSet.add(new Resource(ResourceType.NETWORK, name, stack));
+            for (int i = 0; i < stack.getNodeCount(); i++) {
                 String vmName = azureStackUtil.getVmName(name, i) + String.valueOf(new Date().getTime());
                 createCloudService(azureClient, azureTemplate, vmName, commonName);
                 createServiceCertificate(azureClient, azureTemplate, credential, vmName, emailAsFolder);
@@ -114,27 +113,27 @@ public class AzureProvisioner implements Provisioner {
                 resourceSet.add(new Resource(ResourceType.VIRTUAL_MACHINE, vmName, stack));
                 resourceSet.add(new Resource(ResourceType.CLOUD_SERVICE, vmName, stack));
                 resourceSet.add(new Resource(ResourceType.BLOB, vmName, stack));
-            } catch (FileNotFoundException e) {
-                LOGGER.error(String.format("Ssh certificate file not found for %s stack", stack.getId()), e);
-                reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(new StackCreationFailure(stack.getId(),
-                        "Error while creating Azure stack: ssh file not found")));
-                return;
-            } catch (CertificateException e) {
-                LOGGER.error(String.format("Ssh certificate file was not in the correct format", stack.getId()), e);
-                reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(new StackCreationFailure(stack.getId(),
-                        "Error while creating Azure stack: certificate not correct")));
-                return;
-            } catch (NoSuchAlgorithmException e) {
-                LOGGER.error(String.format("No such algorithm exception under azure vm creation %s stack", stack.getId()), e);
-                reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(new StackCreationFailure(stack.getId(),
-                        "Error while creating Azure stack: no such algorithm exception")));
-                return;
-            } catch (Exception e) {
-                LOGGER.error(String.format("%s exception occured in %s stack", e.getMessage(), stack.getId()), e);
-                reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(new StackCreationFailure(stack.getId(),
-                        "Error while creating Azure stack: " + e.getMessage())));
-                return;
             }
+        } catch (FileNotFoundException e) {
+            LOGGER.error(String.format("Ssh certificate file not found for %s stack", stack.getId()), e);
+            reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(new StackCreationFailure(stack.getId(),
+                    "Error while creating Azure stack: ssh file not found")));
+            return;
+        } catch (CertificateException e) {
+            LOGGER.error(String.format("Ssh certificate file was not in the correct format", stack.getId()), e);
+            reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(new StackCreationFailure(stack.getId(),
+                    "Error while creating Azure stack: certificate not correct")));
+            return;
+        } catch (NoSuchAlgorithmException e) {
+            LOGGER.error(String.format("No such algorithm exception under azure vm creation %s stack", stack.getId()), e);
+            reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(new StackCreationFailure(stack.getId(),
+                    "Error while creating Azure stack: no such algorithm exception")));
+            return;
+        } catch (Exception e) {
+            LOGGER.error(String.format("%s exception occured in %s stack", e.getMessage(), stack.getId()), e);
+            reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(new StackCreationFailure(stack.getId(),
+                    "Error while creating Azure stack: " + e.getMessage())));
+            return;
         }
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_COMPLETE_EVENT, stack.getId());
         reactor.notify(ReactorConfig.PROVISION_COMPLETE_EVENT, Event.wrap(new ProvisionComplete(CloudPlatform.AZURE, stack.getId(), resourceSet)));
