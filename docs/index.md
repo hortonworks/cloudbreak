@@ -631,7 +631,13 @@ Though Cloudbreak controls your Hadoop cluster lifecycle (start, stop, pause), w
 
 ###DIY - Deploying Cloudbreak API using Docker
 
-To deploy a running Coudbreak instance the only thinh you will need to do is run the following script:
+To deploy a running Coudbreak instance the only thing you will need to do is to get the code first.
+
+```
+git clone git@github.com:sequenceiq/docker-cloudbreak.git
+cd docker-cloudbreak
+```
+Edit the ENV variables and you are reay to provison Cloudbreak.
 
 ```
 ./start_cloudbreak.sh
