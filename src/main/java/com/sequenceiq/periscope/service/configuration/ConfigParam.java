@@ -3,7 +3,6 @@ package com.sequenceiq.periscope.service.configuration;
 public enum ConfigParam {
 
     MR_FRAMEWORK_NAME("mapreduce.framework.name"),
-    FS_DEFAULT_NAME("fs.defaultFS"),
     YARN_RM_ADDRESS("yarn.resourcemanager.address"),
     YARN_RM_WEB_ADDRESS("yarn.resourcemanager.webapp.address"),
     YARN_RM_SCHEDULER_ADDRESS("yarn.resourcemanager.scheduler.address"),

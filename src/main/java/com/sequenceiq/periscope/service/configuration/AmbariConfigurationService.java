@@ -39,7 +39,7 @@ public class AmbariConfigurationService {
             LOGGER.debug("Processing service: {}", serviceEntry.getKey());
             for (Map.Entry<String, String> configEntry : serviceEntry.getValue().entrySet()) {
                 if (CONFIG_LIST.contains(configEntry.getKey())) {
-                    configuration.set(configEntry.getKey(), replaceHostName(configEntry.getValue(), ambari.getHost()));
+                    configuration.set(configEntry.getKey(), replaceHostName(ambariClient, configEntry));
                     LOGGER.debug("Adding entry: {}", configEntry);
                 }
             }
@@ -51,10 +51,12 @@ public class AmbariConfigurationService {
         return configuration;
     }
 
-    private static String replaceHostName(String value, String ip) {
-        String result = value;
-        if (value.contains(".kom")) {
-            result = ip + value.substring(value.indexOf(":"));
+    private static String replaceHostName(AmbariClient ambariClient, Map.Entry<String, String> entry) {
+        String result = entry.getValue();
+        if (entry.getKey().startsWith("yarn.resourcemanager")) {
+            int portStartIndex = result.indexOf(":");
+            String publicHost = ambariClient.resolveInternalHostName(result.substring(0, portStartIndex));
+            result = publicHost + result.substring(portStartIndex);
         }
         return result;
     }
