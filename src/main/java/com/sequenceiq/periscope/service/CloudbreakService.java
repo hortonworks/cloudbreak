@@ -2,7 +2,6 @@ package com.sequenceiq.periscope.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.periscope.registry.Cluster;
@@ -11,9 +10,6 @@ import com.sequenceiq.periscope.registry.Cluster;
 public class CloudbreakService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakService.class);
-
-    @Autowired
-    private ClusterService clusterService;
 
     public void scale(Cluster cluster) {
         int newNodeCount = cluster.scale();
