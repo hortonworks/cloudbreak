@@ -770,8 +770,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     parameters: {
                         location: azure_tlocation.value,
                         vmType: azure_tvmType.value,
-                        imageName: "ambari-docker-v1",
-                        ports:[]
+                        imageName: "ambari-docker-v1"
                     }
                 }
             }).success(function (data, status, headers, config) {
