@@ -301,30 +301,26 @@ _This process will take 20 minutes so be patient - but this step will have do be
 
 Cloudbreak defines three distinct roles:
 
-1. CLOUDBREAK_DEPLOYER
-2. COMPANY_ADMIN
-3. COMPANY_USER
-4. REGULAR_USER
+1. DEPLOYER
+2. ACCOUNT_ADMIN
+3. ACCOUNT_USER
 
 ###Cloudbreak deployer
-This is the `master` role - currently it's not used.
+This is the `master` role - the user which is created during the deployment process will have this role.
 
-###Company admin
-We have introduced the notion of companies - and with comes an administrator role. Upon registration a user can specify whether it's a regular user or a company user. If someone choses to be a company user then we will register that company in the system. A company is a unique entity and can't be registered twice. If the company is already registered and you think that is a mistake please let us know. 
-The extra rights associated with the company admin role are:
+###Account admin
+We have introduced the notion of accounts - and with that comes an administrator role. Upon registration a user will become an account administrator. 
 
-* Invite colleagues under the company account
-* Share company wide resources (credential, blueprints, templates)
-* See resources created by colleagues
-* See clusters started by colleagues
+The extra rights associated with the account admin role are:
+
+* Invite users to join the account
+* Share account wide resources (credential, blueprints, templates)
+* See resources created by account users
+* Monitor clusters started by account users
 * Management and reporting tool available 
 
-###Company user
-A company user is a user who has been invited to join Cloudbreak by his company administrator. Can see (if made available by the company admin) shared resources. Company users activity will show up under the management and reporting tool for company wide statistics. Apart from common company wide resources, the company users will manage their own private resources. 
-
-###Regular user
-Users who directly register and are not company administrator will be regular Cloudbreak users. They manage their own private resources.
-
+###Account user
+An account user is a user who has been invited to join Cloudbreak by an account administrator. Account users activity will show up in the management and reporting tool for account wide statistics - accessible by the account administrator. Apart from common account wide resources, the account users can manage their own private resources. 
 
 <!--ui.md-->
 
@@ -388,7 +384,7 @@ Using manage templates you can create infrastructure templates.
 
 `Volume type:` option to choose SSD or regular HDD
 
-`Spot price:` option to set a spot price 
+`Spot price:` option to set a spot price - not mandatory, if specified we will request spot price instances (which might take a while or never be fulfilled by Amazon)
 
 
 
@@ -634,10 +630,11 @@ Though Cloudbreak controls your Hadoop cluster lifecycle (start, stop, pause), w
 To deploy a running Coudbreak instance the only thing you will need to do is to get the code first.
 
 ```
-git clone git@github.com:sequenceiq/docker-cloudbreak.git
+git clone https://github.com/sequenceiq/cloudbreak.git
 cd docker-cloudbreak
 ```
-Edit the ENV variables and you are reay to provison Cloudbreak.
+
+Lauch the script below and follow the instructions.
 
 ```
 ./start_cloudbreak.sh
