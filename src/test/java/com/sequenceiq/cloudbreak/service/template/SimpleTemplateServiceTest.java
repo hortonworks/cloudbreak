@@ -24,10 +24,10 @@ import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
 import com.sequenceiq.cloudbreak.converter.AwsTemplateConverter;
 import com.sequenceiq.cloudbreak.converter.AzureTemplateConverter;
+import com.sequenceiq.cloudbreak.domain.Account;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
-import com.sequenceiq.cloudbreak.domain.Company;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.User;
@@ -35,7 +35,7 @@ import com.sequenceiq.cloudbreak.domain.UserRole;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 import com.sequenceiq.cloudbreak.service.ServiceTestUtils;
-import com.sequenceiq.cloudbreak.service.company.CompanyService;
+import com.sequenceiq.cloudbreak.service.account.AccountService;
 import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
 
 public class SimpleTemplateServiceTest {
@@ -62,7 +62,7 @@ public class SimpleTemplateServiceTest {
     private TemplateJson templateJson;
 
     @Mock
-    private CompanyService companyService;
+    private AccountService accountService;
 
     private User user;
 
@@ -85,13 +85,14 @@ public class SimpleTemplateServiceTest {
 
     @Test
     public void testCreateAwsTemplate() {
-        //GIVEN
+        // GIVEN
         given(templateJson.getCloudPlatform()).willReturn(CloudPlatform.AWS);
         given(templateRepository.save(awsTemplate)).willReturn(awsTemplate);
-        //doNothing().when(historyService).notify(any(ProvisionEntity.class), any(HistoryEvent.class));
-        //WHEN
+        // doNothing().when(historyService).notify(any(ProvisionEntity.class),
+        // any(HistoryEvent.class));
+        // WHEN
         underTest.create(user, awsTemplate);
-        //THEN
+        // THEN
         verify(templateRepository, times(1)).save(awsTemplate);
     }
 
@@ -110,46 +111,46 @@ public class SimpleTemplateServiceTest {
 
     @Test
     public void testDeleteTemplate() {
-        //GIVEN
+        // GIVEN
         given(templateRepository.findOne(1L)).willReturn(awsTemplate);
         given(stackRepository.findAllStackForTemplate(1L)).willReturn(new ArrayList<Stack>());
         doNothing().when(templateRepository).delete(awsTemplate);
-        //WHEN
+        // WHEN
         underTest.delete(1L);
-        //THEN
+        // THEN
         verify(templateRepository, times(1)).delete(awsTemplate);
     }
 
     @Test(expected = NotFoundException.class)
     public void testDeleteTemplateWhenTemplateNotFound() {
-        //GIVEN
+        // GIVEN
         given(templateRepository.findOne(1L)).willReturn(null);
-        //WHEN
+        // WHEN
         underTest.delete(1L);
     }
 
     @Test(expected = BadRequestException.class)
     public void testDeleteTemplateWhenStackListIsEmpty() {
-        //GIVEN
+        // GIVEN
         given(templateRepository.findOne(1L)).willReturn(awsTemplate);
         given(stackRepository.findAllStackForTemplate(1L)).willReturn(Arrays.asList(new Stack()));
         doNothing().when(templateRepository).delete(awsTemplate);
-        //WHEN
+        // WHEN
         underTest.delete(1L);
     }
 
     @Test
-    public void testGetAllForCompanyAdminWithCompanyUserWithTemplates() {
+    public void testGetAllForAccountAdminWithAccountUserWithTemplates() {
         // GIVEN
-        Company company = ServiceTestUtils.createCompany("Blueprint Ltd.", 1L);
-        User admin = ServiceTestUtils.createUser(UserRole.COMPANY_ADMIN, company, 1L);
-        User cUser = ServiceTestUtils.createUser(UserRole.COMPANY_USER, company, 3L);
+        Account account = ServiceTestUtils.createAccount("Blueprint Ltd.", 1L);
+        User admin = ServiceTestUtils.createUser(UserRole.ACCOUNT_ADMIN, account, 1L);
+        User cUser = ServiceTestUtils.createUser(UserRole.ACCOUNT_USER, account, 3L);
         // admin has credentials
-        admin.getAwsTemplates().add((AwsTemplate) ServiceTestUtils.createTemplate(admin, CloudPlatform.AWS, UserRole.COMPANY_ADMIN));
-        admin.getAzureTemplates().add((AzureTemplate) ServiceTestUtils.createTemplate(admin, CloudPlatform.AZURE, UserRole.COMPANY_ADMIN));
+        admin.getAwsTemplates().add((AwsTemplate) ServiceTestUtils.createTemplate(admin, CloudPlatform.AWS, UserRole.ACCOUNT_ADMIN));
+        admin.getAzureTemplates().add((AzureTemplate) ServiceTestUtils.createTemplate(admin, CloudPlatform.AZURE, UserRole.ACCOUNT_ADMIN));
         // cUser also has credentials
-        cUser.getAwsTemplates().add((AwsTemplate) ServiceTestUtils.createTemplate(admin, CloudPlatform.AWS, UserRole.COMPANY_USER));
-        given(companyService.companyUsers(company.getId())).willReturn(new HashSet<User>(Arrays.asList(cUser)));
+        cUser.getAwsTemplates().add((AwsTemplate) ServiceTestUtils.createTemplate(admin, CloudPlatform.AWS, UserRole.ACCOUNT_USER));
+        given(accountService.accountUsers(account.getId())).willReturn(new HashSet<User>(Arrays.asList(cUser)));
 
         // WHEN
         Set<Template> templates = underTest.getAll(admin);
@@ -159,20 +160,19 @@ public class SimpleTemplateServiceTest {
         Assert.assertTrue("The number of the returned blueprints is right", templates.size() == 3);
     }
 
-
     @Test
-    public void testGetAllForCompanyUserWithVisibleCompanyTemplates() {
+    public void testGetAllForAccountUserWithVisibleAccountTemplates() {
 
         // GIVEN
-        Company company = ServiceTestUtils.createCompany("Blueprint Ltd.", 1L);
-        User admin = ServiceTestUtils.createUser(UserRole.COMPANY_ADMIN, company, 1L);
-        User cUser = ServiceTestUtils.createUser(UserRole.COMPANY_USER, company, 3L);
+        Account account = ServiceTestUtils.createAccount("Blueprint Ltd.", 1L);
+        User admin = ServiceTestUtils.createUser(UserRole.ACCOUNT_ADMIN, account, 1L);
+        User cUser = ServiceTestUtils.createUser(UserRole.ACCOUNT_USER, account, 3L);
         // admin has credentials
-        admin.getAwsTemplates().add((AwsTemplate) ServiceTestUtils.createTemplate(admin, CloudPlatform.AWS, UserRole.COMPANY_ADMIN));
-        admin.getAzureTemplates().add((AzureTemplate) ServiceTestUtils.createTemplate(admin, CloudPlatform.AZURE, UserRole.COMPANY_USER));
+        admin.getAwsTemplates().add((AwsTemplate) ServiceTestUtils.createTemplate(admin, CloudPlatform.AWS, UserRole.ACCOUNT_ADMIN));
+        admin.getAzureTemplates().add((AzureTemplate) ServiceTestUtils.createTemplate(admin, CloudPlatform.AZURE, UserRole.ACCOUNT_USER));
         // cUser also has credentials
-        cUser.getAwsTemplates().add((AwsTemplate) ServiceTestUtils.createTemplate(admin, CloudPlatform.AWS, UserRole.COMPANY_USER));
-        given(companyService.companyUserData(company.getId(), UserRole.COMPANY_USER)).willReturn(admin);
+        cUser.getAwsTemplates().add((AwsTemplate) ServiceTestUtils.createTemplate(admin, CloudPlatform.AWS, UserRole.ACCOUNT_USER));
+        given(accountService.accountUserData(account.getId(), UserRole.ACCOUNT_USER)).willReturn(admin);
 
         // WHEN
         Set<Template> templates = underTest.getAll(cUser);

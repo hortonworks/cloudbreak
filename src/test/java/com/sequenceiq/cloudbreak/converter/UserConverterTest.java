@@ -19,19 +19,19 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import com.sequenceiq.cloudbreak.controller.json.AccountJson;
 import com.sequenceiq.cloudbreak.controller.json.BlueprintJson;
-import com.sequenceiq.cloudbreak.controller.json.CompanyJson;
 import com.sequenceiq.cloudbreak.controller.json.CredentialJson;
 import com.sequenceiq.cloudbreak.controller.json.StackJson;
 import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
 import com.sequenceiq.cloudbreak.controller.json.UserJson;
+import com.sequenceiq.cloudbreak.domain.Account;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.Company;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.UserStatus;
@@ -64,10 +64,10 @@ public class UserConverterTest {
     private PasswordEncoder passwordEncoder;
 
     @Mock
-    private CompanyConverter companyConverter;
+    private AccountConverter accountConverter;
 
     @Mock
-    private AccountRepository companyRepository;
+    private AccountRepository accountRepository;
 
     @Mock
     private AwsCredentialConverter awsCredentialConverter;
@@ -101,7 +101,7 @@ public class UserConverterTest {
         // WHEN
         UserJson result = underTest.convert(user);
         // THEN
-        assertEquals(result.getCompany(), user.getCompany().getName());
+        assertEquals(result.getCompany(), user.getAccount().getName());
         assertEquals(result.getFirstName(), user.getFirstName());
         assertEquals(result.getStacks().size(), user.getStacks().size());
         assertNotNull(result.getAwsTemplates());
@@ -122,15 +122,11 @@ public class UserConverterTest {
                 .willReturn(new HashSet<Stack>());
         given(passwordEncoder.encode(anyString())).willReturn(DUMMY_PASSWORD);
 
-        given(companyConverter.convert(any(CompanyJson.class))).willReturn(createCompany());
-
-        given(companyRepository.findByName(anyString())).willReturn(createCompany());
-
+        given(accountConverter.convert(any(AccountJson.class))).willReturn(createAccount());
 
         // WHEN
         User result = underTest.convert(userJson);
         // THEN
-        assertEquals(result.getCompanyName(), userJson.getCompany());
         assertEquals(result.getFirstName(), userJson.getFirstName());
         assertEquals(result.getStacks().size(), userJson.getStacks().size());
         assertNotNull(result.getAwsCredentials());
@@ -151,7 +147,7 @@ public class UserConverterTest {
         user.setAzureTemplates(new HashSet<AzureTemplate>());
         user.setBlueprints(new HashSet<Blueprint>());
         user.setClusters(new HashSet<Cluster>());
-        user.setCompany(createCompany());
+        user.setAccount(createAccount());
         user.setConfToken(null);
         user.setEmail(DUMMY_EMAIL);
         user.setFirstName(DUMMY_FIRST_NAME);
@@ -180,9 +176,9 @@ public class UserConverterTest {
         return userJson;
     }
 
-    private Company createCompany() {
-        Company company = new Company();
-        company.setName("SequenceIQ");
-        return company;
+    private Account createAccount() {
+        Account account = new Account();
+        account.setName("SequenceIQ");
+        return account;
     }
 }

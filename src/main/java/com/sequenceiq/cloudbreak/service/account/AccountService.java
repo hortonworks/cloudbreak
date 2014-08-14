@@ -13,13 +13,11 @@ public interface AccountService {
     Set<User> accountUsers(Long accountId);
 
     /**
-     * Retrieves company wide user data for the given role. These data are made
-     * available in the given role by the company administrator.
+     * Retrieves account wide user data for the given role. These data are made
+     * available in the given role by the account administrator.
      *
-     * @param accountId
-     *            the identifier of the account
-     * @param role
-     *            the role the returned resources should be in
+     * @param accountId the identifier of the account
+     * @param role the role the returned resources should be in
      * @return a User instance with the account wide resources in the given user
      *         role
      */
