@@ -41,14 +41,14 @@
 
         <div class="col-sm-9">
             <select class="form-control" id="aws_tregion">
-                <option value="US_EAST_1">us-east-1</option>
-                <option value="US_WEST_1">us-west-1</option>
-                <option value="US_WEST_2">us-west-2</option>
-                <option value="EU_WEST_1">eu-west-1</option>
-                <option value="AP_SOUTHEAST_1">ap-southeast-1</option>
-                <option value="AP_SOUTHEAST_2">ap-southeast-2</option>
-                <option value="AP_NORTHEAST_1">ap-northeast-1</option>
-                <option value="SA_EAST_1">sa-east-1</option>
+                <option value="US_EAST_1">US_EAST_1</option>
+                <option value="US_WEST_1">US_WEST_1</option>
+                <option value="US_WEST_2">US_WEST_2</option>
+                <option value="EU_WEST_1">EU_WEST_1</option>
+                <option value="AP_SOUTHEAST_1">AP_SOUTHEAST_1</option>
+                <option value="AP_SOUTHEAST_2">AP_SOUTHEAST_2</option>
+                <option value="AP_NORTHEAST_1">AP_NORTHEAST_1</option>
+                <option value="SA_EAST_1">SA_EAST_1</option>
             </select>
         </div>
         <!-- .col-sm-9 -->
@@ -59,13 +59,13 @@
 
         <div class="col-sm-9">
             <select class="form-control" id="aws_tinstanceType">
-                <option value="T2Micro">t2.micro</option>
-                <option value="T2Small">t2.small</option>
-                <option value="T2Medium">t2.medium</option>
-                <option value="M3Medium">m3.medium</option>
-                <option value="M3Large">m3.large</option>
-                <option value="M3Xlarge">m3.xlarge</option>
-                <option value="M32xlarge">m3.2xlarge</option>
+                <option value="T2Micro">T2Micro</option>
+                <option value="T2Small">T2Small</option>
+                <option value="T2Medium">T2Medium</option>
+                <option value="M3Medium">M3Medium</option>
+                <option value="M3Large">M3Large</option>
+                <option value="M3Xlarge">M3Xlarge</option>
+                <option value="M32xlarge">M32xlarge</option>
             </select>
         </div>
         <!-- .col-sm-9 -->
@@ -107,8 +107,8 @@
 
         <div class="col-sm-9">
             <select class="form-control" id="aws_tvolumetype">
-                <option value="Gp2">SSD</option>
-                <option value="Standard">standard</option>
+                <option value="Gp2">Gp2</option>
+                <option value="Standard">Standard</option>
             </select>
         </div>
         <!-- .col-sm-9 -->
