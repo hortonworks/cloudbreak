@@ -28,9 +28,9 @@ import com.sequenceiq.periscope.service.ClusterNotFoundException;
 import com.sequenceiq.periscope.service.ClusterService;
 
 @Component
-public class ApplicationMovementHandler implements ApplicationListener<ApplicationUpdateEvent> {
+public class DummyApplicationMovementHandler implements ApplicationListener<ApplicationUpdateEvent> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationMovementHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DummyApplicationMovementHandler.class);
 
     @Autowired
     private ClusterService clusterService;
