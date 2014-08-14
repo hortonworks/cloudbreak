@@ -9,7 +9,6 @@ import org.hibernate.validator.constraints.NotBlank;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sequenceiq.cloudbreak.domain.UserType;
 
 public class UserJson implements JsonEntity {
 
@@ -26,8 +25,6 @@ public class UserJson implements JsonEntity {
     private String password;
 
     private String company;
-
-    private UserType userType = UserType.DEFAULT;
 
     private Set<CredentialJson> credentials;
 
@@ -125,11 +122,4 @@ public class UserJson implements JsonEntity {
         this.password = password;
     }
 
-    public UserType getUserType() {
-        return userType;
-    }
-
-    public void setUserType(UserType userType) {
-        this.userType = userType;
-    }
 }

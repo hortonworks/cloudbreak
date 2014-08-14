@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.AwsCredentialRepository;
 import com.sequenceiq.cloudbreak.repository.AzureCredentialRepository;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
-import com.sequenceiq.cloudbreak.service.company.CompanyService;
+import com.sequenceiq.cloudbreak.service.account.AccountService;
 import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
@@ -34,7 +34,6 @@ public class SimpleCredentialService implements CredentialService {
 
     @Autowired
     private CredentialRepository credentialRepository;
-
 
     @Autowired
     private AzureCredentialRepository azureCredentialRepository;
@@ -49,8 +48,7 @@ public class SimpleCredentialService implements CredentialService {
     private WebsocketService websocketService;
 
     @Autowired
-    private CompanyService companyService;
-
+    private AccountService accountService;
 
     public Set<Credential> getAll(User user) {
         Set<Credential> userCredentials = new HashSet<>();
@@ -59,10 +57,10 @@ public class SimpleCredentialService implements CredentialService {
         userCredentials.addAll(user.getAzureCredentials());
         LOGGER.debug("User credentials: #{}", userCredentials.size());
 
-        if (user.getUserRoles().contains(UserRole.COMPANY_ADMIN)) {
+        if (user.getUserRoles().contains(UserRole.ACCOUNT_ADMIN)) {
             LOGGER.debug("Getting company user credentials for company admin; id: [{}]", user.getId());
             legacyCredentials = getCompanyUserCredentials(user);
-        } else if (user.getUserRoles().contains(UserRole.COMPANY_USER)) {
+        } else if (user.getUserRoles().contains(UserRole.ACCOUNT_USER)) {
             LOGGER.debug("Getting company wide credentials for company user; id: [{}]", user.getId());
             legacyCredentials = getCompanyCredentials(user);
         }
@@ -74,7 +72,7 @@ public class SimpleCredentialService implements CredentialService {
 
     private Set<Credential> getCompanyCredentials(User user) {
         Set<Credential> companyCredentials = new HashSet<>();
-        User adminWithFilteredData = companyService.companyUserData(user.getCompany().getId(), user.getUserRoles().iterator().next());
+        User adminWithFilteredData = accountService.accountUserData(user.getAccount().getId(), user.getUserRoles().iterator().next());
         if (adminWithFilteredData != null) {
             companyCredentials.addAll(adminWithFilteredData.getAwsCredentials());
             companyCredentials.addAll(adminWithFilteredData.getAzureCredentials());
@@ -86,7 +84,7 @@ public class SimpleCredentialService implements CredentialService {
 
     private Set<Credential> getCompanyUserCredentials(User user) {
         Set<Credential> companyUserCredentials = new HashSet<>();
-        Set<User> companyUsers = companyService.companyUsers(user.getCompany().getId());
+        Set<User> companyUsers = accountService.accountUsers(user.getAccount().getId());
         companyUsers.remove(user);
         for (User cUser : companyUsers) {
             LOGGER.debug("Adding credentials of company user: [{}]", cUser.getId());
@@ -108,14 +106,14 @@ public class SimpleCredentialService implements CredentialService {
 
     public Credential save(User user, Credential credential) {
         switch (credential.getCloudPlatform()) {
-            case AWS:
-                return saveAwsCredential(user, credential);
-            case AZURE:
-                return saveAzureCredential(user, credential);
-            default:
-                websocketService.sendToTopicUser(user.getEmail(), WebsocketEndPoint.CREDENTIAL,
-                        new StatusMessage(-1L, credential.getCredentialName(), Status.CREATE_FAILED.name()));
-                throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", credential.getCloudPlatform()));
+        case AWS:
+            return saveAwsCredential(user, credential);
+        case AZURE:
+            return saveAzureCredential(user, credential);
+        default:
+            websocketService.sendToTopicUser(user.getEmail(), WebsocketEndPoint.CREDENTIAL,
+                    new StatusMessage(-1L, credential.getCredentialName(), Status.CREATE_FAILED.name()));
+            throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", credential.getCloudPlatform()));
         }
     }
 

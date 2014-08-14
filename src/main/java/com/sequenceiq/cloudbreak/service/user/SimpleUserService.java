@@ -24,6 +24,7 @@ import org.springframework.util.DigestUtils;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
+import com.sequenceiq.cloudbreak.domain.Account;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.UserStatus;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
@@ -63,20 +64,21 @@ public class SimpleUserService implements UserService {
     private DefaultBlueprintLoaderService defaultBlueprintLoaderService;
 
     @Override
-    public Long registerUser(User user) {
+    public Long registerUserInAccount(User user, Account account) {
         if (userRepository.findByEmail(user.getEmail()) == null) {
-            String confToken = generateRegistrationId(user);
+            String confToken = generateConfToken(user);
             user.setConfToken(confToken);
             user.setBlueprints(defaultBlueprintLoaderService.loadBlueprints(user));
+            user.setAccount(account);
             User savedUser = userRepository.save(user);
 
-            LOGGER.info("User {} successfully saved", user);
+            LOGGER.info("User '{}' for account '{}' successfully registered", savedUser.getId(), account.getId());
             MimeMessagePreparator msgPreparator = prepareMessage(user, "templates/confirmation-email.ftl",
                     getRegisterUserConfirmPath(), "Cloudbreak - confirm registration");
             sendConfirmationEmail(msgPreparator);
             return savedUser.getId();
         } else {
-            throw new BadRequestException("User already exists.");
+            throw new BadRequestException(String.format("User with email '%s' already exists.", user.getEmail()));
         }
     }
 
@@ -113,7 +115,6 @@ public class SimpleUserService implements UserService {
         }
     }
 
-
     @Override
     public String resetPassword(String confToken, String password) {
         User user = userRepository.findUserByConfToken(confToken);
@@ -140,7 +141,7 @@ public class SimpleUserService implements UserService {
         return uiEnabled ? "#?resetToken=" : "/password/reset/";
     }
 
-    private String generateRegistrationId(User user) {
+    private String generateConfToken(User user) {
         LOGGER.debug("Generating registration id ...");
         String textToDigest = user.getEmail() + user.getPassword();
         return DigestUtils.md5DigestAsHex(textToDigest.getBytes());

@@ -3,20 +3,20 @@ package com.sequenceiq.cloudbreak.converter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.controller.json.CompanyJson;
-import com.sequenceiq.cloudbreak.domain.Company;
+import com.sequenceiq.cloudbreak.controller.json.AccountJson;
+import com.sequenceiq.cloudbreak.domain.Account;
 import com.sequenceiq.cloudbreak.domain.User;
 
 @Component
-public class CompanyConverter extends AbstractConverter<CompanyJson, Company> {
+public class AccountConverter extends AbstractConverter<AccountJson, Account> {
 
     @Autowired
     private UserConverter userConverter;
 
     @Override
-    public CompanyJson convert(Company entity) {
-        CompanyJson json = new CompanyJson();
-        json.setCompanyName(entity.getName());
+    public AccountJson convert(Account entity) {
+        AccountJson json = new AccountJson();
+        json.setAccountName(entity.getName());
         for (User user : entity.getUsers()) {
             json.getUsers().add(userConverter.convert(user));
         }
@@ -24,9 +24,9 @@ public class CompanyConverter extends AbstractConverter<CompanyJson, Company> {
     }
 
     @Override
-    public Company convert(CompanyJson json) {
-        Company entity = new Company();
-        entity.setName(json.getCompanyName());
+    public Account convert(AccountJson json) {
+        Account entity = new Account();
+        entity.setName(json.getAccountName());
         return entity;
     }
 }

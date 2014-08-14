@@ -35,6 +35,7 @@ public class DefaultBlueprintLoaderService {
     public Set<Blueprint> loadBlueprints(User user) {
         Set<Blueprint> blueprints = new HashSet<>();
         for (String blueprintName : blueprintArray) {
+            LOGGER.info("Adding default blueprint '{}' for user '{}'", blueprintName, user.getEmail());
             try {
                 BlueprintJson blueprintJson = new BlueprintJson();
                 blueprintJson.setBlueprintName(blueprintName);
@@ -42,9 +43,9 @@ public class DefaultBlueprintLoaderService {
                 blueprintJson.setDescription(blueprintName);
                 blueprintJson.setAmbariBlueprint(
                         jsonHelper.createJsonFromString(FileReaderUtils.readFileFromClasspath(String.format("blueprints/%s.bp", blueprintName)))
-                );
+                        );
 
-                blueprintJson.getRoles().add(UserRole.COMPANY_ADMIN);
+                blueprintJson.getRoles().add(UserRole.ACCOUNT_ADMIN);
 
                 Blueprint bp = blueprintConverter.convert(blueprintJson);
                 bp.setUser(user);

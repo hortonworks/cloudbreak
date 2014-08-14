@@ -35,7 +35,7 @@ import com.sequenceiq.cloudbreak.domain.Company;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.UserStatus;
-import com.sequenceiq.cloudbreak.repository.CompanyRepository;
+import com.sequenceiq.cloudbreak.repository.AccountRepository;
 
 public class UserConverterTest {
 
@@ -67,7 +67,7 @@ public class UserConverterTest {
     private CompanyConverter companyConverter;
 
     @Mock
-    private CompanyRepository companyRepository;
+    private AccountRepository companyRepository;
 
     @Mock
     private AwsCredentialConverter awsCredentialConverter;

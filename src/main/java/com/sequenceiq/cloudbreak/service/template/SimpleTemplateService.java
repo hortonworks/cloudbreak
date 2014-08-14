@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.domain.UserRole;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
-import com.sequenceiq.cloudbreak.service.company.CompanyService;
+import com.sequenceiq.cloudbreak.service.account.AccountService;
 import com.sequenceiq.cloudbreak.service.credential.SimpleCredentialService;
 import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
 
@@ -43,7 +43,7 @@ public class SimpleTemplateService implements TemplateService {
     private UserRepository userRepository;
 
     @Autowired
-    private CompanyService companyService;
+    private AccountService accountService;
 
     @Override
     public Set<Template> getAll(User user) {
@@ -54,10 +54,10 @@ public class SimpleTemplateService implements TemplateService {
         userTemplates.addAll(user.getAzureTemplates());
         LOGGER.debug("User credentials: #{}", userTemplates.size());
 
-        if (user.getUserRoles().contains(UserRole.COMPANY_ADMIN)) {
+        if (user.getUserRoles().contains(UserRole.ACCOUNT_ADMIN)) {
             LOGGER.debug("Getting company user templates for company admin; id: [{}]", user.getId());
             legacyTemplates = getCompanyUserTemplates(user);
-        } else if (user.getUserRoles().contains(UserRole.COMPANY_USER)) {
+        } else if (user.getUserRoles().contains(UserRole.ACCOUNT_USER)) {
             LOGGER.debug("Getting company templates for company user; id: [{}]", user.getId());
             legacyTemplates = getCompanyTemplates(user);
         }
@@ -105,7 +105,7 @@ public class SimpleTemplateService implements TemplateService {
 
     private Set<Template> getCompanyTemplates(User user) {
         Set<Template> companyTemplates = new HashSet<>();
-        User adminWithFilteredData = companyService.companyUserData(user.getCompany().getId(), user.getUserRoles().iterator().next());
+        User adminWithFilteredData = accountService.accountUserData(user.getAccount().getId(), user.getUserRoles().iterator().next());
         if (adminWithFilteredData != null) {
             companyTemplates.addAll(adminWithFilteredData.getAwsTemplates());
             companyTemplates.addAll(adminWithFilteredData.getAzureTemplates());
@@ -117,7 +117,7 @@ public class SimpleTemplateService implements TemplateService {
 
     private Set<Template> getCompanyUserTemplates(User user) {
         Set<Template> companyUserTemplates = new HashSet<>();
-        Set<User> companyUsers = companyService.companyUsers(user.getCompany().getId());
+        Set<User> companyUsers = accountService.accountUsers(user.getAccount().getId());
         companyUsers.remove(user);
         for (User cUser : companyUsers) {
             LOGGER.debug("Adding templates of company user: [{}]", cUser.getId());
