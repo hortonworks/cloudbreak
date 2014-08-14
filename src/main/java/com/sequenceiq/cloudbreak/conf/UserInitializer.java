@@ -10,12 +10,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.domain.Account;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.Company;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.UserRole;
 import com.sequenceiq.cloudbreak.domain.UserStatus;
-import com.sequenceiq.cloudbreak.repository.CompanyRepository;
+import com.sequenceiq.cloudbreak.repository.AccountRepository;
 import com.sequenceiq.cloudbreak.service.blueprint.DefaultBlueprintLoaderService;
 
 @Component
@@ -38,10 +38,10 @@ public class UserInitializer implements InitializingBean {
     private String defaultUserPassword;
 
     @Value("${cb.default.company.name}")
-    private String defaultCompanyName;
+    private String defaultAccountName;
 
     @Autowired
-    private CompanyRepository companyRepository;
+    private AccountRepository accountRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -52,23 +52,25 @@ public class UserInitializer implements InitializingBean {
     @Override
     public void afterPropertiesSet() throws Exception {
         if ("create".equals(hbm2ddlStrategy) || "create-drop".equals(hbm2ddlStrategy)) {
-            Company company = new Company();
-            company.setName(defaultCompanyName);
+            LOGGER.info("Creating default account with name: {}", defaultAccountName);
+            Account account = new Account();
+            account.setName(defaultAccountName);
 
+            LOGGER.info("Creating default user: [email: '{}', firstName: '{}', lastName:'{}']", defaultUserEmail, defaultUserFirstName, defaultUserLastName);
             User user = new User();
             user.setEmail(defaultUserEmail);
             user.setFirstName(defaultUserFirstName);
             user.setLastName(defaultUserLastName);
             user.setPassword(passwordEncoder.encode(defaultUserPassword));
             user.setStatus(UserStatus.ACTIVE);
-            user.setCompany(company);
+            user.setAccount(account);
             user.getUserRoles().add(UserRole.DEPLOYER);
 
             Set<Blueprint> blueprints = defaultBlueprintLoaderService.loadBlueprints(user);
             user.setBlueprints(blueprints);
-            company.getUsers().add(user);
+            account.getUsers().add(user);
 
-            companyRepository.save(company);
+            accountRepository.save(account);
         }
     }
 }

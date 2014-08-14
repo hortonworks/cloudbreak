@@ -25,7 +25,6 @@ import javax.persistence.Table;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 
-
 @Entity
 @NamedQueries({
         @NamedQuery(
@@ -95,11 +94,7 @@ public class User implements ProvisionEntity {
     private List<UserRole> userRoles = new ArrayList<>();
 
     @ManyToOne
-    private Company company;
-
-    @Column(name = "company")
-    private String companyName;
-
+    private Account account;
 
     public User() {
     }
@@ -121,7 +116,7 @@ public class User implements ProvisionEntity {
         this.status = user.getStatus();
         this.lastLogin = user.lastLogin;
         this.registrationDate = user.registrationDate;
-        this.company = user.company;
+        this.account = user.account;
         this.userRoles = user.userRoles;
     }
 
@@ -266,19 +261,11 @@ public class User implements ProvisionEntity {
         this.userRoles = userRoles;
     }
 
-    public Company getCompany() {
-        return company;
+    public Account getAccount() {
+        return account;
     }
 
-    public void setCompany(Company company) {
-        this.company = company;
-    }
-
-    public String getCompanyName() {
-        return companyName;
-    }
-
-    public void setCompanyName(String companyName) {
-        this.companyName = companyName;
+    public void setAccount(Account account) {
+        this.account = account;
     }
 }

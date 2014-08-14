@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.domain.UserRole;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
-import com.sequenceiq.cloudbreak.service.company.CompanyService;
+import com.sequenceiq.cloudbreak.service.account.AccountService;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
@@ -36,7 +36,7 @@ public class DefaultBlueprintService implements BlueprintService {
     private WebsocketService websocketService;
 
     @Autowired
-    private CompanyService companyService;
+    private AccountService accountService;
 
     @Override
     public Blueprint addBlueprint(User user, Blueprint blueprint) {
@@ -56,10 +56,10 @@ public class DefaultBlueprintService implements BlueprintService {
         Set<Blueprint> legacyBlueprints = new HashSet<>();
         LOGGER.debug("User blueprints: #{}", userBluePrints.size());
 
-        if (user.getUserRoles().contains(UserRole.COMPANY_ADMIN)) {
+        if (user.getUserRoles().contains(UserRole.ACCOUNT_ADMIN)) {
             LOGGER.debug("Getting company user blueprints for company admin; id: [{}]", user.getId());
             legacyBlueprints = getCompanyUserBlueprints(user);
-        } else if (user.getUserRoles().contains(UserRole.COMPANY_USER)) {
+        } else if (user.getUserRoles().contains(UserRole.ACCOUNT_USER)) {
             LOGGER.debug("Getting company wide blueprints for company user; id: [{}]", user.getId());
             legacyBlueprints = getCompanyBlueprints(user);
         }
@@ -71,7 +71,7 @@ public class DefaultBlueprintService implements BlueprintService {
 
     private Set<Blueprint> getCompanyBlueprints(User user) {
         Set<Blueprint> companyBlueprints = new HashSet<>();
-        User adminWithFilteredData = companyService.companyUserData(user.getCompany().getId(), user.getUserRoles().iterator().next());
+        User adminWithFilteredData = accountService.accountUserData(user.getAccount().getId(), user.getUserRoles().iterator().next());
         if (adminWithFilteredData != null) {
             companyBlueprints = adminWithFilteredData.getBlueprints();
         } else {
@@ -82,7 +82,7 @@ public class DefaultBlueprintService implements BlueprintService {
 
     private Set<Blueprint> getCompanyUserBlueprints(User user) {
         Set<Blueprint> companyUserBlueprints = new HashSet<>();
-        Set<User> companyUsers = companyService.companyUsers(user.getCompany().getId());
+        Set<User> companyUsers = accountService.accountUsers(user.getAccount().getId());
         companyUsers.remove(user);
         for (User cUser : companyUsers) {
             LOGGER.debug("Adding blueprints of company user: [{}]", cUser.getId());

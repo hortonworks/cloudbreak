@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.company;
+package com.sequenceiq.cloudbreak.service.account;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -8,71 +8,50 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.domain.Account;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.Company;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.UserRole;
-import com.sequenceiq.cloudbreak.repository.CompanyRepository;
+import com.sequenceiq.cloudbreak.repository.AccountRepository;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
 
 @Service
-public class DefaultCompanyService implements CompanyService {
+public class DefaultAccountService implements AccountService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCompanyService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultAccountService.class);
 
     @Autowired
-    private CompanyRepository companyRepository;
+    private AccountRepository accountRepository;
 
     @Autowired
     private UserRepository userRepository;
 
     @Override
-    public Company ensureCompany(String companyName) {
-        LOGGER.debug("Checking the company: {}", companyName);
-        Company company = companyRepository.findByName(companyName);
-        if (null == company) {
-            LOGGER.debug("Company with name <{}> not found. Creating it ....", companyName);
-            company = new Company();
-            company.setName(companyName);
-            company = companyRepository.save(company);
-            LOGGER.debug("Company registered,");
-        }
-        return company;
+    public Account registerAccount(String accountName) {
+        Account account = new Account();
+        account.setName(accountName);
+        account = accountRepository.save(account);
+        LOGGER.info("New account with id '{}' registered,", account.getId());
+        return account;
     }
 
     @Override
-    public boolean companyExists(String companyName) {
-        return null != companyRepository.findByName(companyName);
-    }
-
-    @Override
-    public Set<User> companyUsers(Long companyId) {
-        LOGGER.debug("Retrieving decorated users for company with id: [{}] ...", companyId);
-        Set<User> users = companyRepository.companyUsers(companyId);
+    public Set<User> accountUsers(Long accountId) {
+        LOGGER.debug("Retrieving decorated users for account with id: '{}'", accountId);
+        Set<User> users = accountRepository.accountUsers(accountId);
         LOGGER.debug("Found #{} users.", users.size());
         return users;
     }
 
     @Override
-    public User companyAdmin(Long companyId) {
-        LOGGER.debug("Retrieving company admin for company id: [{}] ...", companyId);
-        User admin = companyRepository.findCompanyAdmin(companyId);
-        if (admin == null) {
-            throw new IllegalStateException("The company has no admin!");
-        }
-        LOGGER.debug("Found company admin; user id: [{}] .", admin.getId());
-        return admin;
-    }
-
-    @Override
-    public User companyUserData(Long companyId, UserRole role) {
-        LOGGER.debug("Retrieving company user data for the company [{}] in userRole [{}] ...", companyId, role);
-        User admin = companyRepository.findCompanyAdmin(companyId);
+    public User accountUserData(Long accountId, UserRole role) {
+        LOGGER.debug("Retrieving company user data for the company '{}' in userRole '{}' ...", accountId, role);
+        User admin = accountRepository.findAccountAdmin(accountId);
         User decoratedAdmin = userRepository.findOneWithLists(admin.getId());
 
         getAwsCredentialsForRole(decoratedAdmin, role);
@@ -84,7 +63,6 @@ public class DefaultCompanyService implements CompanyService {
 
         return decoratedAdmin;
     }
-
 
     private void getBlueprintsForRole(User decoratedAdmin, UserRole role) {
         Set<Blueprint> blueprintsInRole = new HashSet<>();

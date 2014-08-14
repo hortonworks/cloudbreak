@@ -20,13 +20,12 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 @Entity
-
 @NamedQueries({
         @NamedQuery(
-                name = "Company.findByName",
-                query = "SELECT c FROM Company c WHERE c.name = :name"),
+                name = "Account.findByName",
+                query = "SELECT c FROM Account c WHERE c.name = :name"),
         @NamedQuery(
-                name = "Company.companyUsers",
+                name = "Account.accountUsers",
                 query = "SELECT cu FROM User cu "
                         + "LEFT JOIN FETCH cu.azureTemplates "
                         + "LEFT JOIN FETCH cu.awsTemplates "
@@ -35,29 +34,28 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
                         + "LEFT JOIN FETCH cu.awsCredentials "
                         + "LEFT JOIN FETCH cu.azureCredentials "
                         + "LEFT JOIN FETCH cu.clusters "
-                        + "WHERE cu.company.id= :companyId"),
+                        + "WHERE cu.account.id= :accountId"),
         @NamedQuery(
-                name = "Company.findCompanyAdmin",
+                name = "Account.findAccountAdmin",
                 query = "SELECT u FROM User u "
-                        + "WHERE 'COMPANY_ADMIN' in elements(u.userRoles) "
-                        + "AND u.company.id= :companyId")
+                        + "WHERE 'ACCOUNT_ADMIN' in elements(u.userRoles) "
+                        + "AND u.account.id= :accountId")
 
 })
-
-@Table(name = "company")
-public class Company implements ProvisionEntity {
+@Table(name = "cbaccount")
+public class Account implements ProvisionEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String name;
 
-    @OneToMany(mappedBy = "company", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "account", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<User> users = new HashSet<>();
 
-    public Company() {
+    public Account() {
 
     }
 

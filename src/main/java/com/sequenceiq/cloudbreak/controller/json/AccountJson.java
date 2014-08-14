@@ -3,16 +3,16 @@ package com.sequenceiq.cloudbreak.controller.json;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CompanyJson implements JsonEntity {
-    private String companyName;
+public class AccountJson implements JsonEntity {
+    private String accountName;
     private List<UserJson> users = new ArrayList<>();
 
-    public String getCompanyName() {
-        return companyName;
+    public String getAccountName() {
+        return accountName;
     }
 
-    public void setCompanyName(String companyName) {
-        this.companyName = companyName;
+    public void setAccountName(String accountName) {
+        this.accountName = accountName;
     }
 
     public List<UserJson> getUsers() {
@@ -22,4 +22,5 @@ public class CompanyJson implements JsonEntity {
     public void setUsers(List<UserJson> users) {
         this.users = users;
     }
+
 }

@@ -13,6 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
+import reactor.core.Reactor;
+import reactor.event.Event;
+
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.converter.StackConverter;
@@ -26,14 +29,11 @@ import com.sequenceiq.cloudbreak.domain.UserRole;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
-import com.sequenceiq.cloudbreak.service.company.CompanyService;
+import com.sequenceiq.cloudbreak.service.account.AccountService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataIncompleteException;
-
-import reactor.core.Reactor;
-import reactor.event.Event;
 
 @Service
 public class DefaultStackService implements StackService {
@@ -53,7 +53,7 @@ public class DefaultStackService implements StackService {
     private UserRepository userRepository;
 
     @Autowired
-    private CompanyService companyService;
+    private AccountService accountService;
 
     @Resource
     private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
@@ -68,10 +68,10 @@ public class DefaultStackService implements StackService {
         Set<Stack> userStacks = user.getStacks();
         LOGGER.debug("User stacks: #{}", userStacks.size());
 
-        if (user.getUserRoles().contains(UserRole.COMPANY_ADMIN)) {
+        if (user.getUserRoles().contains(UserRole.ACCOUNT_ADMIN)) {
             LOGGER.debug("Getting company user stacks for company admin; id: [{}]", user.getId());
             legacyStacks = getCompanyUserStacks(user);
-        } else if (user.getUserRoles().contains(UserRole.COMPANY_USER)) {
+        } else if (user.getUserRoles().contains(UserRole.ACCOUNT_USER)) {
             LOGGER.debug("Getting company wide stacks for company user; id: [{}]", user.getId());
             legacyStacks = getCompanyStacks(user);
         }
@@ -82,7 +82,7 @@ public class DefaultStackService implements StackService {
 
     private Set<Stack> getCompanyStacks(User user) {
         Set<Stack> companyStacks = new HashSet<>();
-        User adminWithFilteredData = companyService.companyUserData(user.getCompany().getId(), user.getUserRoles().iterator().next());
+        User adminWithFilteredData = accountService.accountUserData(user.getAccount().getId(), user.getUserRoles().iterator().next());
         if (adminWithFilteredData != null) {
             companyStacks = adminWithFilteredData.getStacks();
         } else {
@@ -93,7 +93,7 @@ public class DefaultStackService implements StackService {
 
     private Set<Stack> getCompanyUserStacks(User user) {
         Set<Stack> companyUserStacks = new HashSet<>();
-        Set<User> companyUsers = companyService.companyUsers(user.getCompany().getId());
+        Set<User> companyUsers = accountService.accountUsers(user.getAccount().getId());
         companyUsers.remove(user);
         for (User cUser : companyUsers) {
             LOGGER.debug("Adding blueprints of company user: [{}]", cUser.getId());

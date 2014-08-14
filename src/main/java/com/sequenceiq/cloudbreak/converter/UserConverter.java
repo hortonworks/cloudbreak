@@ -7,12 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.CredentialJson;
 import com.sequenceiq.cloudbreak.controller.json.UserJson;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.UserRole;
-import com.sequenceiq.cloudbreak.repository.CompanyRepository;
+import com.sequenceiq.cloudbreak.repository.AccountRepository;
 
 @Component
 public class UserConverter extends AbstractConverter<UserJson, User> {
@@ -33,7 +32,7 @@ public class UserConverter extends AbstractConverter<UserJson, User> {
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private CompanyRepository companyRepository;
+    private AccountRepository companyRepository;
 
     @Autowired
     private AwsCredentialConverter awsCredentialConverter;
@@ -52,7 +51,7 @@ public class UserConverter extends AbstractConverter<UserJson, User> {
         userJson.setAzureTemplates(azureTemplateConverter.convertAllEntityToJson(entity.getAzureTemplates()));
         userJson.setStacks(stackConverter.convertAllEntityToJsonWithClause(entity.getStacks()));
         userJson.setBlueprints(blueprintConverter.convertAllToIdList(entity.getBlueprints()));
-        userJson.setCompany(entity.getCompany().getName());
+        userJson.setCompany(entity.getAccount().getName());
         return userJson;
     }
 
@@ -73,24 +72,10 @@ public class UserConverter extends AbstractConverter<UserJson, User> {
         user.setAzureTemplates(azureTemplateConverter.convertAllJsonToEntity(json.getAzureTemplates()));
         user.setStacks(stackConverter.convertAllJsonToEntity(json.getStacks()));
         user.setPassword(passwordEncoder.encode(json.getPassword()));
-        user.setCompanyName(json.getCompany());
-
-        switch (json.getUserType()) {
-            case DEFAULT:
-                // if no specific usertype posted, this is the default!
-                user.getUserRoles().add(UserRole.REGULAR_USER);
-                break;
-            case COMPANY_USER:
-                user.getUserRoles().add(UserRole.COMPANY_USER);
-                user.setCompany(companyRepository.findByName(json.getCompany()));
-                break;
-            case COMPANY_ADMIN:
-                user.getUserRoles().add(UserRole.COMPANY_ADMIN);
-                user.setCompany(companyRepository.findByName(json.getCompany()));
-                break;
-            default:
-                throw new BadRequestException("Unsupported user type.");
-        }
+        // Every user will have an account now, where they will be an admin.
+        // Inviting other users to an existing account will be implemented
+        // later.
+        user.getUserRoles().add(UserRole.ACCOUNT_ADMIN);
         return user;
     }
 }

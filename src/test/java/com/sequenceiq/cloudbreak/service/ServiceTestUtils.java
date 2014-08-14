@@ -1,12 +1,12 @@
 package com.sequenceiq.cloudbreak.service;
 
+import com.sequenceiq.cloudbreak.domain.Account;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
-import com.sequenceiq.cloudbreak.domain.Company;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Template;
@@ -18,19 +18,19 @@ public final class ServiceTestUtils {
     private ServiceTestUtils() {
     }
 
-    public static User createUser(UserRole role, Company company, Long userId) {
+    public static User createUser(UserRole role, Account account, Long userId) {
         User usr = new User();
         usr.setId(userId);
-        usr.setCompany(company);
+        usr.setAccount(account);
         usr.getUserRoles().add(role);
         return usr;
     }
 
-    public static Company createCompany(String name, Long companyId) {
-        Company company = new Company();
-        company.setName(name);
-        company.setId(companyId);
-        return company;
+    public static Account createAccount(String name, Long companyId) {
+        Account account = new Account();
+        account.setName(name);
+        account.setId(companyId);
+        return account;
     }
 
     public static Blueprint createBlueprint(User bpUser) {
@@ -53,16 +53,16 @@ public final class ServiceTestUtils {
     public static Credential createCredential(User user, CloudPlatform platform, UserRole role) {
         Credential cred = null;
         switch (platform) {
-            case AZURE:
-                cred = new AzureCredential();
-                ((AzureCredential) cred).setAzureCredentialOwner(user);
-                break;
-            case AWS:
-                cred = new AwsCredential();
-                ((AwsCredential) cred).setAwsCredentialOwner(user);
-                break;
-            default:
-                break;
+        case AZURE:
+            cred = new AzureCredential();
+            ((AzureCredential) cred).setAzureCredentialOwner(user);
+            break;
+        case AWS:
+            cred = new AwsCredential();
+            ((AwsCredential) cred).setAwsCredentialOwner(user);
+            break;
+        default:
+            break;
         }
         cred.setCloudPlatform(platform);
         cred.getUserRoles().add(role);
@@ -72,16 +72,16 @@ public final class ServiceTestUtils {
     public static Template createTemplate(User user, CloudPlatform platform, UserRole role) {
         Template template = null;
         switch (platform) {
-            case AZURE:
-                template = new AzureTemplate();
-                ((AzureTemplate) template).setAzureTemplateOwner(user);
-                break;
-            case AWS:
-                template = new AwsTemplate();
-                ((AwsTemplate) template).setAwsTemplateOwner(user);
-                break;
-            default:
-                break;
+        case AZURE:
+            template = new AzureTemplate();
+            ((AzureTemplate) template).setAzureTemplateOwner(user);
+            break;
+        case AWS:
+            template = new AwsTemplate();
+            ((AwsTemplate) template).setAwsTemplateOwner(user);
+            break;
+        default:
+            break;
         }
         template.getUserRoles().add(role);
         return template;
