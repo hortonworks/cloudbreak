@@ -388,7 +388,7 @@ Using manage templates you can create infrastructure templates.
 
 `Volume type:` option to choose SSD or regular HDD
 
-`Spot price:` option to set a spot price 
+`Spot price:` option to set a spot price - not mandatory, if specified we will request spot price instances (which might take a while or never be fulfilled by Amazon)
 
 
 
@@ -634,10 +634,11 @@ Though Cloudbreak controls your Hadoop cluster lifecycle (start, stop, pause), w
 To deploy a running Coudbreak instance the only thing you will need to do is to get the code first.
 
 ```
-git clone git@github.com:sequenceiq/docker-cloudbreak.git
+git clone https://github.com/sequenceiq/cloudbreak.git
 cd docker-cloudbreak
 ```
-Edit the ENV variables and you are reay to provison Cloudbreak.
+
+Lauch the script below and follow the instructions.
 
 ```
 ./start_cloudbreak.sh
