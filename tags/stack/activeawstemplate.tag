@@ -35,7 +35,7 @@
         <label class="col-sm-3 control-label" for="awsregion">Region</label>
 
         <div class="col-sm-9">
-            <p id="awsregion" class="form-control-static">{{activeStack.template.parameters.region}}</p>
+            <p id="awsregion" class="form-control-static">{{getRegionName(activeStack.template.parameters.region)}}</p>
         </div>
         <!-- .col-sm-9 -->
     </div>

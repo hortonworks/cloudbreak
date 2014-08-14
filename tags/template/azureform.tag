@@ -28,11 +28,11 @@
 
     <div class="col-sm-9">
         <select class="form-control" id="azure_tlocation">
-            <option value="NORTH_EUROPE">NORTH_EUROPE</option>
-            <option value="EAST_ASIA">EAST_ASIA</option>
-            <option value="EAST_US">EAST_US</option>
-            <option value="WEST_US">WEST_US</option>
-            <option value="BRAZIL_SOUTH">BRAZIL_SOUTH</option>
+            <option value="NORTH_EUROPE">North Europe</option>
+            <option value="EAST_ASIA">East Asia</option>
+            <option value="EAST_US">East US</option>
+            <option value="WEST_US">West US</option>
+            <option value="BRAZIL_SOUTH">Brazil South</option>
         </select>
     </div>
     <!-- .col-sm-9 -->
@@ -42,10 +42,10 @@
     <label class="col-sm-3 control-label" for="azure_tvmType">Instance type</label>
     <div class="col-sm-9">
         <select class="form-control" id="azure_tvmType">
-            <option value="SMALL">SMALL</option>
-            <option value="MEDIUM">MEDIUM</option>
-            <option value="LARGE">LARGE</option>
-            <option value="EXTRA_LARGE">EXTRA_LARGE</option>
+            <option value="SMALL">Small</option>
+            <option value="MEDIUM">Medium</option>
+            <option value="LARGE">Large</option>
+            <option value="EXTRA_LARGE">Extra Large</option>
         </select>
     </div>
     <!-- .col-sm-9 -->

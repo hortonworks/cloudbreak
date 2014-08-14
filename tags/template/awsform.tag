@@ -41,14 +41,14 @@
 
         <div class="col-sm-9">
             <select class="form-control" id="aws_tregion">
-                <option value="US_EAST_1">US_EAST_1</option>
-                <option value="US_WEST_1">US_WEST_1</option>
-                <option value="US_WEST_2">US_WEST_2</option>
-                <option value="EU_WEST_1">EU_WEST_1</option>
-                <option value="AP_SOUTHEAST_1">AP_SOUTHEAST_1</option>
-                <option value="AP_SOUTHEAST_2">AP_SOUTHEAST_2</option>
-                <option value="AP_NORTHEAST_1">AP_NORTHEAST_1</option>
-                <option value="SA_EAST_1">SA_EAST_1</option>
+                <option value="US_EAST_1">US East(N. Virginia)</option>
+                <option value="US_WEST_1">US West (Oregon)</option>
+                <option value="US_WEST_2">US West (N. California)</option>
+                <option value="EU_WEST_1">EU (Ireland)</option>
+                <option value="AP_SOUTHEAST_1">Asia Pacific (Singapore)</option>
+                <option value="AP_SOUTHEAST_2">Asia Pacific (Sydney)</option>
+                <option value="AP_NORTHEAST_1">Asia Pacific (Tokyo)</option>
+                <option value="SA_EAST_1">South America (São Paulo)</option>
             </select>
         </div>
         <!-- .col-sm-9 -->

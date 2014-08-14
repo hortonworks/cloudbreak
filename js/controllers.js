@@ -713,7 +713,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
         }
 
         $scope.createAwsTemplate = function() {
-            console.log("aws cluster creation started...");
+            console.log("aws template creation started...");
             $http({
                 method: 'POST',
                 dataType: 'json',
@@ -981,6 +981,55 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 return "ami-17f45c0a";
             }
         }
+
+        $scope.getRegionName = function(regionValue) {
+            if(regionValue === 'US_EAST_1') {
+                return "US East(N. Virginia)";
+            } else if (regionValue === 'US_WEST_1') {
+                return "US West (Oregon)";
+            } else if (regionValue === 'US_WEST_2') {
+                return "US West (N. California)";
+            } else if (regionValue === 'EU_WEST_1') {
+                return "EU (Ireland)";
+            } else if (regionValue === 'AP_SOUTHEAST_1') {
+                return "Asia Pacific (Singapore)";
+            } else if (regionValue === 'AP_SOUTHEAST_2') {
+                return "Asia Pacific (Sydney)";
+            } else if (regionValue === 'AP_NORTHEAST_1') {
+                return "Asia Pacific (Tokyo)";
+            } else {
+                return "South America (São Paulo)";
+            }
+        }
+
+        $scope.getAzureRegionName = function(regionValue) {
+            if(regionValue === 'NORTH_EUROPE') {
+                return "North Europe";
+            } else if (regionValue === 'EAST_ASIA') {
+                return "East Asia";
+            } else if (regionValue === 'EAST_US') {
+                return "East US";
+            } else if (regionValue === 'WEST_US') {
+                return "West US";
+            } else if (regionValue === 'BRAZIL_SOUTH') {
+                return "Brazil South";
+            } else {
+                return "";
+            }
+        }
+
+        $scope.getAzureVmTypeName = function(vmValue) {
+            if(vmValue === 'SMALL') {
+                return "Small";
+            } else if (vmValue === 'MEDIUM') {
+                return "Medium";
+            } else if (vmValue === 'LARGE') {
+                return "Large";
+            } else {
+                return "Extra Large";
+            }
+        }
+
 
         function logClusterInfo(body) {
             if(body.status === 'CREATE_COMPLETED') {

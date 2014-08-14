@@ -21,7 +21,7 @@
         <label class="col-sm-3 control-label" for="vmType">VM type</label>
 
         <div class="col-sm-9">
-            <p id="vmType" class="form-control-static">{{activeStack.template.parameters.vmType}}</p>
+            <p id="vmType" class="form-control-static">{{getAzureVmTypeName(activeStack.template.parameters.vmType)}}</p>
         </div>
         <!-- .col-sm-9 -->
     </div>
@@ -39,7 +39,7 @@
         <label class="col-sm-3 control-label" for="location">Location</label>
 
         <div class="col-sm-9">
-            <p id="location" class="form-control-static">{{activeStack.template.parameters.location}}</p>
+            <p id="location" class="form-control-static">{{getAzureRegionName(activeStack.template.parameters.location)}}</p>
         </div>
         <!-- .col-sm-9 -->
     </div>
