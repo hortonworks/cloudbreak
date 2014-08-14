@@ -56,25 +56,20 @@
                                                     {{error_msg.last_name_empty}}
                                                 </span>
     </div><!-- .form-group -->
-    <div class="form-group" ng-class="{ 'has-error has-feedback': showSingUpCompanyError && signUpForm.signUpCompanyField.$invalid && companyAdminCheck}">
+    <div class="form-group" ng-class="{ 'has-error has-feedback': showSingUpCompanyError && signUpForm.signUpCompanyField.$invalid}">
         <label class="sr-only" for="signUpCompanyField">company</label>
            <div class="input-group">
              <span class="input-group-addon"><i class="fa fa-institution fa-fw"></i></span>
              <input class="form-control" type="text" ng-blur="showSingUpCompanyError=true;" ng-model="signUpCompanyField" name="signUpCompanyField"  id="signUpCompanyField" placeholder="company" required>
-             <i class="fa fa-warning form-control-feedback" ng-show="showSingUpCompanyError && signUpForm.signUpCompanyField.$invalid && companyAdminCheck"></i>
+             <i class="fa fa-warning form-control-feedback" ng-show="showSingUpCompanyError && signUpForm.signUpCompanyField.$invalid"></i>
            </div><!-- .input-group -->
-           <span class="help-block" ng-show="showSingUpCompanyError && signUpForm.signUpCompanyField.$invalid && companyAdminCheck">
+           <span class="help-block" ng-show="showSingUpCompanyError && signUpForm.signUpCompanyField.$invalid">
              {{error_msg.company_empty}}
            </span>
-           <div class="checkbox checkbox-attached">
-             <label>
-              <input type="checkbox" ng-model="companyAdminCheck" name="companyAdminCheck" id="companyAdminCheck"> I am a company admin
-             </label>
-           </div>
         </div><!-- .form-group -->
 
     <a href="#" id="signup-btn" ng-click="signUp()" ng-disabled="signUpForm.signUpEmailField.$invalid || signUpForm.signUpPasswField.$invalid || signUpForm.signUpPasswField.$invalid
-        || signUpForm.signUpFirstNameField.$invalid || signUpForm.signUpLastNameField.$invalid || (signUpForm.signUpCompanyField.$invalid && companyAdminCheck)" class="btn btn-info btn-block" role="button"><i class="fa fa-user fa-fw"></i> sign up</a>
+        || signUpForm.signUpFirstNameField.$invalid || signUpForm.signUpLastNameField.$invalid || (signUpForm.signUpCompanyField.$invalid)" class="btn btn-info btn-block" role="button"><i class="fa fa-user fa-fw"></i> sign up</a>
     <a href="#" id="signup-back-btn" class="btn btn-info btn-block backToSelector" role="button"> back</a>
 
 </form>
