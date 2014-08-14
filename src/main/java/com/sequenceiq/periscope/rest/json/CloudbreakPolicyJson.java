@@ -69,4 +69,9 @@ public class CloudbreakPolicyJson implements Json {
         return new CloudbreakPolicyJson(emptyMap, emptyMap);
     }
 
+    public CloudbreakPolicyJson withMessage(String message) {
+        this.message = message;
+        return this;
+    }
+
 }

@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.periscope.model.Ambari;
 
 public class AmbariConfigurationService {
 
@@ -26,10 +25,6 @@ public class AmbariConfigurationService {
     }
 
     private AmbariConfigurationService() {
-    }
-
-    public static Configuration getConfiguration(Ambari ambari) throws ConnectException {
-        return getConfiguration(new AmbariClient(ambari.getHost(), ambari.getPort(), ambari.getUser(), ambari.getPass()));
     }
 
     public static Configuration getConfiguration(AmbariClient ambariClient) throws ConnectException {

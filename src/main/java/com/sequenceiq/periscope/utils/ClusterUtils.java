@@ -13,7 +13,7 @@ import com.sequenceiq.periscope.registry.Cluster;
 
 public final class ClusterUtils {
 
-    private static final int MAX_CAPACITY = 100;
+    public static final int MAX_CAPACITY = 100;
 
     private ClusterUtils() {
         throw new IllegalStateException();

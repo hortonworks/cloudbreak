@@ -9,9 +9,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import com.sequenceiq.periscope.rest.ClusterNotFoundException;
 import com.sequenceiq.periscope.rest.json.ClusterJson;
 import com.sequenceiq.periscope.rest.json.ExceptionMessageJson;
+import com.sequenceiq.periscope.service.ClusterNotFoundException;
 
 @ControllerAdvice
 public class ExceptionController {

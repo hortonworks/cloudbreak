@@ -1,6 +1,12 @@
 package com.sequenceiq.periscope.registry;
 
+import static org.springframework.util.StringUtils.arrayToCommaDelimitedString;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,16 +19,24 @@ import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.ClusterMetricsIn
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.periscope.model.Ambari;
 import com.sequenceiq.periscope.model.Priority;
+import com.sequenceiq.periscope.model.Queue;
+import com.sequenceiq.periscope.model.QueueSetup;
 import com.sequenceiq.periscope.model.SchedulerApplication;
 import com.sequenceiq.periscope.policies.cloudbreak.CloudbreakPolicy;
 import com.sequenceiq.periscope.service.configuration.AmbariConfigurationService;
 import com.sequenceiq.periscope.service.configuration.ConfigParam;
+import com.sequenceiq.periscope.utils.ClusterUtils;
 
 public class Cluster {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Cluster.class);
+    private static final String CAPACITY_SCHEDULER = "capacity-scheduler";
+    private static final String ROOT_PREFIX = "yarn.scheduler.capacity.root.";
+    private static final String QUEUE_NAMES = ROOT_PREFIX + "queues";
+    private static final String DEFAULT_QUEUE_NAME = "default";
     private final Map<Priority, Map<ApplicationId, SchedulerApplication>> applications;
     private final String id;
     private final Ambari ambari;
@@ -108,6 +122,16 @@ public class Cluster {
         initConfiguration();
     }
 
+    public Map<String, String> setQueueSetup(QueueSetup queueSetup) throws QueueSetupException {
+        AmbariClient ambariClient = newAmbariClient();
+        Map<String, String> csConfig = ambariClient.getServiceConfigMap().get(CAPACITY_SCHEDULER);
+        validateCSConfig(csConfig, queueSetup);
+        Map<String, String> newConfig = generateNewQueueConfig(csConfig, queueSetup);
+        ambariClient.modifyConfiguration(CAPACITY_SCHEDULER, newConfig);
+        // TODO refresh queues
+        return newConfig;
+    }
+
     public synchronized SchedulerApplication addApplication(ApplicationReport appReport) {
         return addApplication(appReport, Priority.NORMAL);
     }
@@ -186,7 +210,7 @@ public class Cluster {
 
     private void initConfiguration() throws ConnectionException {
         try {
-            configuration = AmbariConfigurationService.getConfiguration(ambari);
+            configuration = AmbariConfigurationService.getConfiguration(newAmbariClient());
             if (yarnClient != null) {
                 yarnClient.stop();
             }
@@ -196,6 +220,78 @@ public class Cluster {
         } catch (Exception e) {
             throw new ConnectionException(ambari.getHost());
         }
+    }
+
+    private AmbariClient newAmbariClient() {
+        return new AmbariClient(ambari.getHost(), ambari.getPort(), ambari.getUser(), ambari.getPass());
+    }
+
+    private void validateCSConfig(Map<String, String> csConfig, QueueSetup queueSetup) throws QueueSetupException {
+        if (csConfig == null) {
+            throwQueueSetupException("Capacity-scheduler config not found", csConfig);
+        }
+        int capacity = 0;
+        List<String> queueNames = new ArrayList<>(queueSetup.getSetup().size());
+        for (Queue queue : queueSetup.getSetup()) {
+            String name = queue.getName();
+            if (queueNames.contains(name)) {
+                throwQueueSetupException("Queue name: " + name + " specified twice", csConfig);
+            }
+            capacity += queue.getCapacity();
+            queueNames.add(name);
+        }
+        if (capacity != ClusterUtils.MAX_CAPACITY) {
+            throwQueueSetupException("Global queue capacities must be 100", csConfig);
+        }
+        if (!queueNames.contains(DEFAULT_QUEUE_NAME)) {
+            throwQueueSetupException("Default queue must exist", csConfig);
+        }
+    }
+
+    private Map<String, String> generateNewQueueConfig(Map<String, String> csConfig, QueueSetup queueSetup) {
+        Map<String, String> config = new HashMap<>();
+        List<String> newQueueNames = new LinkedList<>();
+        for (Queue queue : queueSetup.getSetup()) {
+            String name = queue.getName();
+            int capacity = queue.getCapacity();
+            config.put(ROOT_PREFIX + name + ".acl_administer_jobs", "*");
+            config.put(ROOT_PREFIX + name + ".acl_submit_applications", "*");
+            config.put(ROOT_PREFIX + name + ".capacity", "" + capacity);
+            config.put(ROOT_PREFIX + name + ".maximum-capacity", "" + capacity);
+            config.put(ROOT_PREFIX + name + ".state", "RUNNING");
+            config.put(ROOT_PREFIX + name + ".user-limit-factor", "1");
+            newQueueNames.add(name);
+        }
+        copyNonQueueRelatedProperties(csConfig, config);
+        config.put(QUEUE_NAMES, arrayToCommaDelimitedString(newQueueNames.toArray()));
+        return config;
+    }
+
+    private void copyNonQueueRelatedProperties(Map<String, String> from, Map<String, String> to) {
+        String[] queueNames = getQueueNames(from);
+        for (String key : from.keySet()) {
+            if (!isQueueProperty(key, queueNames)) {
+                to.put(key, from.get(key));
+            }
+        }
+    }
+
+    private String[] getQueueNames(Map<String, String> csConfig) {
+        return csConfig.get(QUEUE_NAMES).split(",");
+    }
+
+    private boolean isQueueProperty(String key, String[] queueNames) {
+        boolean result = false;
+        for (String name : queueNames) {
+            if (key.startsWith(ROOT_PREFIX + name)) {
+                result = true;
+            }
+        }
+        return result;
+    }
+
+    private void throwQueueSetupException(String message, Map<String, String> csConfig) throws QueueSetupException {
+        throw new QueueSetupException(message, csConfig);
     }
 
 }

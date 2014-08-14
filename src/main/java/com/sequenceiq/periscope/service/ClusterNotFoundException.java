@@ -1,6 +1,6 @@
-package com.sequenceiq.periscope.rest;
+package com.sequenceiq.periscope.service;
 
-public class ClusterNotFoundException extends RuntimeException {
+public class ClusterNotFoundException extends Exception {
 
     private final String id;
 

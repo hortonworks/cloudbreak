@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.periscope.monitor.event.ApplicationUpdateEvent;
 import com.sequenceiq.periscope.registry.Cluster;
+import com.sequenceiq.periscope.service.ClusterNotFoundException;
 import com.sequenceiq.periscope.service.ClusterService;
 
 @Component
@@ -29,9 +30,13 @@ public class AppQueueLoggerHandler implements ApplicationListener<ApplicationUpd
 
     @Override
     public void onApplicationEvent(ApplicationUpdateEvent event) {
-        Cluster cluster = clusterService.get(event.getClusterId());
-        printQueueReport(getAllQueueInfo(event.getSchedulerInfo()), cluster);
-        printApplicationReport(event.getReports(), cluster);
+        try {
+            Cluster cluster = clusterService.get(event.getClusterId());
+            printQueueReport(getAllQueueInfo(event.getSchedulerInfo()), cluster);
+            printApplicationReport(event.getReports(), cluster);
+        } catch (ClusterNotFoundException e) {
+            LOGGER.error("Cluster not found and cannot be logged, id: " + event.getClusterId(), e);
+        }
     }
 
     private void printQueueReport(List<CapacitySchedulerQueueInfo> infoList, Cluster cluster) {

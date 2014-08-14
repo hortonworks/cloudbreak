@@ -1,7 +1,6 @@
 package com.sequenceiq.periscope.service;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -22,34 +21,26 @@ public class AppService {
     @Autowired
     private ClusterService clusterService;
 
-    public List<ApplicationReport> getApplicationReports(String clusterId) throws IOException, YarnException {
-        List<ApplicationReport> result = Collections.emptyList();
+    public List<ApplicationReport> getApplicationReports(String clusterId) throws IOException, YarnException, ClusterNotFoundException {
         Cluster cluster = clusterService.get(clusterId);
-        if (cluster != null) {
-            YarnClient yarnClient = cluster.getYarnClient();
-            result = yarnClient.getApplications();
-        }
-        return result;
+        YarnClient yarnClient = cluster.getYarnClient();
+        return yarnClient.getApplications();
     }
 
-    public void setPriorityToHighRandomly(String clusterId) {
+    public void setPriorityToHighRandomly(String clusterId) throws ClusterNotFoundException {
         Cluster cluster = clusterService.get(clusterId);
-        if (cluster != null) {
-            Map<ApplicationId, SchedulerApplication> applications = cluster.getApplications(Priority.NORMAL);
-            int i = 0;
-            for (ApplicationId applicationId : applications.keySet()) {
-                if (i++ % 2 == 0) {
-                    cluster.setApplicationPriority(applicationId, Priority.HIGH);
-                }
+        Map<ApplicationId, SchedulerApplication> applications = cluster.getApplications(Priority.NORMAL);
+        int i = 0;
+        for (ApplicationId applicationId : applications.keySet()) {
+            if (i++ % 2 == 0) {
+                cluster.setApplicationPriority(applicationId, Priority.HIGH);
             }
         }
     }
 
-    public Cluster allowAppMovement(String clusterId, boolean allow) {
+    public Cluster allowAppMovement(String clusterId, boolean allow) throws ClusterNotFoundException {
         Cluster cluster = clusterService.get(clusterId);
-        if (cluster != null) {
-            cluster.allowAppMovement(allow);
-        }
+        cluster.allowAppMovement(allow);
         return cluster;
     }
 

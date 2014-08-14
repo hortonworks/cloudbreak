@@ -24,6 +24,7 @@ import com.sequenceiq.periscope.model.Priority;
 import com.sequenceiq.periscope.model.SchedulerApplication;
 import com.sequenceiq.periscope.monitor.event.ApplicationUpdateEvent;
 import com.sequenceiq.periscope.registry.Cluster;
+import com.sequenceiq.periscope.service.ClusterNotFoundException;
 import com.sequenceiq.periscope.service.ClusterService;
 
 @Component
@@ -40,7 +41,13 @@ public class ApplicationMovementHandler implements ApplicationListener<Applicati
         SchedulerInfo schedulerInfo = event.getSchedulerInfo();
 
         List<CapacitySchedulerQueueInfo> allQueueInfo = getAllQueueInfo(schedulerInfo);
-        Cluster cluster = clusterService.get(event.getClusterId());
+        Cluster cluster;
+        try {
+            cluster = clusterService.get(event.getClusterId());
+        } catch (ClusterNotFoundException e) {
+            LOGGER.error("Cluster not found and cannot move applications, id: " + event.getClusterId(), e);
+            return;
+        }
 
         Map<Priority, Map<ApplicationId, SchedulerApplication>> apps = cluster.getApplicationsPriorityOrder();
         Set<ApplicationId> activeApps = new HashSet<>();

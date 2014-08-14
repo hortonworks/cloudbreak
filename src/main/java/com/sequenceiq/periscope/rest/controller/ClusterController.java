@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.sequenceiq.periscope.registry.Cluster;
 import com.sequenceiq.periscope.registry.ConnectionException;
-import com.sequenceiq.periscope.rest.ClusterNotFoundException;
 import com.sequenceiq.periscope.rest.converter.AmbariConverter;
 import com.sequenceiq.periscope.rest.converter.ClusterConverter;
 import com.sequenceiq.periscope.rest.json.AmbariJson;
@@ -25,6 +24,7 @@ import com.sequenceiq.periscope.rest.json.AppMovementJson;
 import com.sequenceiq.periscope.rest.json.ClusterJson;
 import com.sequenceiq.periscope.rest.json.StateJson;
 import com.sequenceiq.periscope.service.AppService;
+import com.sequenceiq.periscope.service.ClusterNotFoundException;
 import com.sequenceiq.periscope.service.ClusterService;
 
 @RestController
@@ -56,11 +56,8 @@ public class ClusterController {
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
-    public ResponseEntity<ClusterJson> getCluster(@PathVariable String id) {
+    public ResponseEntity<ClusterJson> getCluster(@PathVariable String id) throws ClusterNotFoundException {
         Cluster cluster = clusterService.get(id);
-        if (cluster == null) {
-            throw new ClusterNotFoundException(id);
-        }
         return new ResponseEntity<>(clusterConverter.convert(cluster), HttpStatus.OK);
     }
 
@@ -73,29 +70,22 @@ public class ClusterController {
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
-    public ResponseEntity<ClusterJson> deleteCluster(@PathVariable String id) {
+    public ResponseEntity<ClusterJson> deleteCluster(@PathVariable String id) throws ClusterNotFoundException {
         Cluster cluster = clusterService.remove(id);
-        if (cluster == null) {
-            throw new ClusterNotFoundException(id);
-        }
         return new ResponseEntity<>(clusterConverter.convert(cluster), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/{id}/state", method = RequestMethod.POST)
-    public ResponseEntity<ClusterJson> setState(@PathVariable String id, @RequestBody StateJson stateJson) {
+    public ResponseEntity<ClusterJson> setState(@PathVariable String id, @RequestBody StateJson stateJson)
+            throws ClusterNotFoundException {
         Cluster cluster = clusterService.setState(id, stateJson.getState());
-        if (cluster == null) {
-            throw new ClusterNotFoundException(id);
-        }
         return new ResponseEntity<>(clusterConverter.convert(cluster), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/{id}/movement", method = RequestMethod.POST)
-    public ResponseEntity<ClusterJson> enableMovement(@PathVariable String id, @RequestBody AppMovementJson appMovementJson) {
+    public ResponseEntity<ClusterJson> enableMovement(@PathVariable String id, @RequestBody AppMovementJson appMovementJson)
+            throws ClusterNotFoundException {
         Cluster cluster = appService.allowAppMovement(id, appMovementJson.isAllowed());
-        if (cluster == null) {
-            throw new ClusterNotFoundException(id);
-        }
         return new ResponseEntity<>(clusterConverter.convert(cluster), HttpStatus.OK);
     }
 
