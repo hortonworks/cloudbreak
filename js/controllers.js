@@ -1002,6 +1002,14 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             }
         }
 
+        $scope.getVolumeName = function(volumeValue) {
+            if(volumeValue === 'Gp2') {
+                return "SSD";
+            } else {
+                return "Magnetic";
+            }
+        }
+
         $scope.getAzureRegionName = function(regionValue) {
             if(regionValue === 'NORTH_EUROPE') {
                 return "North Europe";

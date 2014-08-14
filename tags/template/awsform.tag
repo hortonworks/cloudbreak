@@ -107,8 +107,8 @@
 
         <div class="col-sm-9">
             <select class="form-control" id="aws_tvolumetype">
-                <option value="Gp2">Gp2</option>
-                <option value="Standard">Standard</option>
+                <option value="Gp2">SSD</option>
+                <option value="Standard">Magnetic</option>
             </select>
         </div>
         <!-- .col-sm-9 -->

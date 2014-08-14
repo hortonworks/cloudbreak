@@ -68,7 +68,7 @@
         <label class="col-sm-3 control-label" for="awslvolumetype">Volume type</label>
 
         <div class="col-sm-9">
-            <p id="awslvolumetype" class="form-control-static">{{activeStack.template.parameters.volumeType}}</p>
+            <p id="awslvolumetype" class="form-control-static">{{getVolumeName(activeStack.template.parameters.volumeType)}}</p>
         </div>
         <!-- .col-sm-9 -->
     </div>
