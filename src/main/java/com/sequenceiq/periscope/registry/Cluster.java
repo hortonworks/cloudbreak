@@ -1,5 +1,6 @@
 package com.sequenceiq.periscope.registry;
 
+import static java.util.Arrays.asList;
 import static org.springframework.util.StringUtils.arrayToCommaDelimitedString;
 
 import java.util.ArrayList;
@@ -41,6 +42,7 @@ public class Cluster {
     private final String id;
     private final Ambari ambari;
     private boolean appMovementAllowed = true;
+    private boolean restarting;
     private Configuration configuration;
     private YarnClient yarnClient;
     private ClusterMetricsInfo metrics;
@@ -102,6 +104,10 @@ public class Cluster {
         return metrics == null ? 0 : metrics.getTotalMB();
     }
 
+    public boolean isRestarting() {
+        return restarting;
+    }
+
     public CloudbreakPolicy getCloudbreakPolicy() {
         return cloudbreakPolicy;
     }
@@ -115,6 +121,7 @@ public class Cluster {
     }
 
     public void updateMetrics(ClusterMetricsInfo metrics) {
+        this.restarting = false;
         this.metrics = metrics == null ? this.metrics : metrics;
     }
 
@@ -128,7 +135,9 @@ public class Cluster {
         validateCSConfig(csConfig, queueSetup);
         Map<String, String> newConfig = generateNewQueueConfig(csConfig, queueSetup);
         ambariClient.modifyConfiguration(CAPACITY_SCHEDULER, newConfig);
-        // TODO refresh queues
+        // TODO https://issues.apache.org/jira/browse/AMBARI-5937
+        ambariClient.restartServiceComponents("YARN", asList("NODEMANAGER", "RESOURCEMANAGER", "YARN_CLIENT"));
+        restarting = true;
         return newConfig;
     }
 

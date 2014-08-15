@@ -10,6 +10,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.periscope.monitor.event.UpdateFailedEvent;
+import com.sequenceiq.periscope.registry.Cluster;
 import com.sequenceiq.periscope.registry.ClusterState;
 import com.sequenceiq.periscope.service.ClusterNotFoundException;
 import com.sequenceiq.periscope.service.ClusterService;
@@ -27,18 +28,21 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
     @Override
     public void onApplicationEvent(UpdateFailedEvent event) {
         String id = event.getClusterId();
-        Integer failed = updateFailures.get(id);
-        if (failed == null) {
-            updateFailures.put(id, 1);
-        } else if (RETRY_THRESHOLD - 1 == failed) {
-            try {
-                clusterService.setState(id, ClusterState.SUSPENDED);
-            } catch (ClusterNotFoundException e) {
-                LOGGER.warn("Trying to suspend an already deleted cluster, id: " + id, e);
+        try {
+            Cluster cluster = clusterService.get(id);
+            if (!cluster.isRestarting()) {
+                Integer failed = updateFailures.get(id);
+                if (failed == null) {
+                    updateFailures.put(id, 1);
+                } else if (RETRY_THRESHOLD - 1 == failed) {
+                    cluster.setState(ClusterState.SUSPENDED);
+                    updateFailures.remove(id);
+                } else {
+                    updateFailures.put(id, failed + 1);
+                }
             }
-            updateFailures.remove(id);
-        } else {
-            updateFailures.put(id, failed + 1);
+        } catch (ClusterNotFoundException e) {
+            LOGGER.warn("Trying to suspend an already deleted cluster, id: " + id, e);
         }
     }
 }
