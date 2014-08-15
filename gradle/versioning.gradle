@@ -23,7 +23,26 @@ if ("HEAD".equals(branch)) {
     }
 }
 
-version = new ProjectVersion(0, 1, jobName != null ? buildId : "DEV", branch)
+String versionNum
+if(jobName != null) {
+    def f = new File('metadata.xml')
+    if (!f.exists()) {
+        new URL(System.getenv("METADATA_URL")).withInputStream { i ->
+            f.withOutputStream {
+                it << i
+            }
+        }
+    }
+    def mergeRequests = (new XmlParser()).parse('metadata.xml')
+    versionNum = "1"
+    String tmpVersion = mergeRequests.versioning.versions.version.last().text().tokenize('.').last().tokenize('-').last()
+    if (tmpVersion.length() < 5) {
+        versionNum = tmpVersion.toInteger() + 1
+    }
+    f.delete()
+}
+
+version = new ProjectVersion(0, 1, jobName != null ? versionNum : "DEV", branch)
 
 class ProjectVersion {
     Integer major
@@ -42,10 +61,10 @@ class ProjectVersion {
     String toString() {
         String fullVersion = "$major.$minor"
         if(build) {
-            fullVersion += "-$build"
+            fullVersion += ".$build"
         }
         if (branch != null && !branch.contains("master")) {
-            fullVersion += "-$branch"
+            fullVersion += ".$branch"
         }
         fullVersion
     }
