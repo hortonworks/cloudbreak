@@ -27,7 +27,8 @@ String versionNum
 if(jobName != null) {
     def f = new File('metadata.xml')
     if (!f.exists()) {
-        new URL(System.getenv("METADATA_URL")).withInputStream { i ->
+        def metadata = System.getenv("METADATA_URL")
+        new URL(metadata).withInputStream { i ->
             f.withOutputStream {
                 it << i
             }
