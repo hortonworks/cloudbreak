@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.service.cluster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailSender;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
@@ -13,6 +15,7 @@ import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
+import freemarker.template.Configuration;
 import reactor.event.Event;
 import reactor.function.Consumer;
 
@@ -27,6 +30,18 @@ public class ClusterCreationSuccessHandler implements Consumer<Event<ClusterCrea
     @Autowired
     private ClusterRepository clusterRepository;
 
+    @Value("${cb.smtp.sender.from}")
+    private String msgFrom;
+
+    @Autowired
+    private MailSender mailSender;
+
+    @Autowired
+    private Configuration freemarkerConfiguration;
+
+    @Autowired
+    private AmbariClusterInstallerMailSenderService ambariClusterInstallerMailSenderService;
+
     @Override
     public void accept(Event<ClusterCreationSuccess> event) {
         ClusterCreationSuccess clusterCreationSuccess = event.getData();
@@ -35,8 +50,12 @@ public class ClusterCreationSuccessHandler implements Consumer<Event<ClusterCrea
         Cluster cluster = clusterRepository.findById(clusterId);
         cluster.setStatus(Status.CREATE_COMPLETED);
         cluster.setCreationFinished(clusterCreationSuccess.getCreationFinished());
-        clusterRepository.save(cluster);
+        Cluster save = clusterRepository.save(cluster);
+        if (cluster.getEmailNeeded()) {
+            ambariClusterInstallerMailSenderService.sendSuccessEmail(cluster.getUser(), event.getData().getAmbariIp());
+        }
         websocketService.sendToTopicUser(cluster.getUser().getEmail(), WebsocketEndPoint.CLUSTER,
                 new StatusMessage(clusterId, cluster.getName(), Status.CREATE_COMPLETED.name()));
     }
+
 }
