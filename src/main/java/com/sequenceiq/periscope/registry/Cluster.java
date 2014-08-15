@@ -237,23 +237,23 @@ public class Cluster {
 
     private void validateCSConfig(Map<String, String> csConfig, QueueSetup queueSetup) throws QueueSetupException {
         if (csConfig == null) {
-            throwQueueSetupException("Capacity-scheduler config not found", csConfig);
+            throwQueueSetupException("Capacity-scheduler config not found");
         }
         int capacity = 0;
         List<String> queueNames = new ArrayList<>(queueSetup.getSetup().size());
         for (Queue queue : queueSetup.getSetup()) {
             String name = queue.getName();
             if (queueNames.contains(name)) {
-                throwQueueSetupException("Queue name: " + name + " specified twice", csConfig);
+                throwQueueSetupException("Queue name: " + name + " specified twice");
             }
             capacity += queue.getCapacity();
             queueNames.add(name);
         }
         if (capacity != ClusterUtils.MAX_CAPACITY) {
-            throwQueueSetupException("Global queue capacities must be 100", csConfig);
+            throwQueueSetupException("Global queue capacities must be 100");
         }
         if (!queueNames.contains(DEFAULT_QUEUE_NAME)) {
-            throwQueueSetupException("Default queue must exist", csConfig);
+            throwQueueSetupException("Default queue must exist");
         }
     }
 
@@ -299,8 +299,8 @@ public class Cluster {
         return result;
     }
 
-    private void throwQueueSetupException(String message, Map<String, String> csConfig) throws QueueSetupException {
-        throw new QueueSetupException(message, csConfig);
+    private void throwQueueSetupException(String message) throws QueueSetupException {
+        throw new QueueSetupException(message);
     }
 
 }

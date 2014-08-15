@@ -25,4 +25,4 @@ curl -X GET localhost:8081/policy/multi-node | jq .
 curl -X POST localhost:8081/configuration/multi-node | jq .
 
 # set queue newSetup
-curl -X POST -H "Content-Type: application/json" -d '{"newSetup":[{"name":"default", "capacity":60}, {"name":"high", "capacity":40}]}' localhost:8081/configuration/multi-node/queue | jq .
+curl -X POST -H "Content-Type: application/json" -d '{"setup":[{"name":"default", "capacity":60}, {"name":"high", "capacity":40}]}' localhost:8081/configuration/multi-node/queue | jq .

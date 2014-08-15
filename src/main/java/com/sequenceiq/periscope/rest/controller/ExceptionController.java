@@ -9,8 +9,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import com.sequenceiq.periscope.rest.json.ClusterJson;
+import com.sequenceiq.periscope.registry.ConnectionException;
+import com.sequenceiq.periscope.registry.QueueSetupException;
 import com.sequenceiq.periscope.rest.json.ExceptionMessageJson;
+import com.sequenceiq.periscope.rest.json.IdExceptionMessageJson;
 import com.sequenceiq.periscope.service.ClusterNotFoundException;
 
 @ControllerAdvice
@@ -32,8 +34,18 @@ public class ExceptionController {
     }
 
     @ExceptionHandler(ClusterNotFoundException.class)
-    public ResponseEntity<ClusterJson> handleClusterNotFoundException(ClusterNotFoundException e) {
-        return new ResponseEntity<>(ClusterJson.emptyJson().withId(e.getId()), HttpStatus.NOT_FOUND);
+    public ResponseEntity<IdExceptionMessageJson> handleClusterNotFoundException(ClusterNotFoundException e) {
+        return createIdExceptionMessage(e.getId(), "Cluster not found", HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(ConnectionException.class)
+    public ResponseEntity<ExceptionMessageJson> handleConnectionException(ConnectionException e) {
+        return createExceptionMessage(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(QueueSetupException.class)
+    public ResponseEntity<ExceptionMessageJson> handleQueueSetupException(QueueSetupException e) {
+        return createExceptionMessage(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     public static ResponseEntity<ExceptionMessageJson> createExceptionMessage(String message) {
@@ -42,5 +54,9 @@ public class ExceptionController {
 
     public static ResponseEntity<ExceptionMessageJson> createExceptionMessage(String message, HttpStatus statusCode) {
         return new ResponseEntity<>(new ExceptionMessageJson(message), statusCode);
+    }
+
+    public static ResponseEntity<IdExceptionMessageJson> createIdExceptionMessage(String id, String message, HttpStatus statusCode) {
+        return new ResponseEntity<>(new IdExceptionMessageJson(id, message), statusCode);
     }
 }

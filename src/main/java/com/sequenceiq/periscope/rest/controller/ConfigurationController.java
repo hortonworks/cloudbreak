@@ -37,31 +37,17 @@ public class ConfigurationController {
     private QueueSetupConverter queueSetupConverter;
 
     @RequestMapping(value = "/{id}", method = RequestMethod.POST)
-    public ResponseEntity<ClusterJson> refreshConfiguration(@PathVariable String id) {
-        ResponseEntity response;
-        try {
-            Cluster cluster = clusterService.refreshConfiguration(id);
-            response = new ResponseEntity<>(clusterConverter.convert(cluster), HttpStatus.OK);
-        } catch (ConnectionException | ClusterNotFoundException e) {
-            LOGGER.error("Error refreshing the configuration on cluster " + id, e);
-            response = new ResponseEntity<>(ClusterJson.emptyJson().withId(id), HttpStatus.REQUEST_TIMEOUT);
-        }
-        return response;
+    public ResponseEntity<ClusterJson> refreshConfiguration(@PathVariable String id)
+            throws ConnectionException, ClusterNotFoundException {
+        Cluster cluster = clusterService.refreshConfiguration(id);
+        return new ResponseEntity<>(clusterConverter.convert(cluster), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/{id}/queue", method = RequestMethod.POST)
-    public ResponseEntity<QueueSetupJson> setQueueConfig(@PathVariable String id, @RequestBody QueueSetupJson queueSetup) {
-        ResponseEntity<QueueSetupJson> result;
-        try {
-            Map<String, String> newSetup = clusterService.setQueueSetup(id, queueSetupConverter.convert(queueSetup));
-            QueueSetupJson responseJson = new QueueSetupJson("Queue setup successfully applied", queueSetup.getNewSetup(), newSetup);
-            result = new ResponseEntity<>(responseJson, HttpStatus.OK);
-        } catch (QueueSetupException e) {
-            result = new ResponseEntity<>(
-                    new QueueSetupJson(e.getMessage(), queueSetup.getNewSetup(), e.getProperties()), HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (ClusterNotFoundException e) {
-            result = new ResponseEntity<>(QueueSetupJson.emptyJson().withMessage("Cluster not found"), HttpStatus.NOT_FOUND);
-        }
-        return result;
+    public ResponseEntity<QueueSetupJson> setQueueConfig(@PathVariable String id, @RequestBody QueueSetupJson queueSetup)
+            throws ClusterNotFoundException, QueueSetupException {
+        Map<String, String> newSetup = clusterService.setQueueSetup(id, queueSetupConverter.convert(queueSetup));
+        QueueSetupJson responseJson = new QueueSetupJson("Queue setup successfully applied", queueSetup.getSetup(), newSetup);
+        return new ResponseEntity<>(responseJson, HttpStatus.OK);
     }
 }

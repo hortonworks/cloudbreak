@@ -16,6 +16,6 @@ public class QueueSetupConverter extends AbstractConverter<QueueSetupJson, Queue
 
     @Override
     public QueueSetup convert(QueueSetupJson source) {
-        return new QueueSetup(new ArrayList(queueConverter.convertAllFromJson(source.getNewSetup())));
+        return new QueueSetup(new ArrayList(queueConverter.convertAllFromJson(source.getSetup())));
     }
 }

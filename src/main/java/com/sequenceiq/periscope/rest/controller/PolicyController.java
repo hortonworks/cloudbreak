@@ -25,42 +25,23 @@ public class PolicyController {
     private CloudbreakPolicyConverter cloudbreakPolicyConverter;
 
     @RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity<CloudbreakPolicyJson> createRules(@PathVariable String clusterId, @RequestBody CloudbreakPolicyJson policyJson) {
-        ResponseEntity<CloudbreakPolicyJson> result;
+    public ResponseEntity<CloudbreakPolicyJson> createRules(@PathVariable String clusterId, @RequestBody CloudbreakPolicyJson policyJson)
+            throws ClusterNotFoundException {
         CloudbreakPolicy policy = cloudbreakPolicyConverter.convert(policyJson);
-        try {
-            policyService.setCloudbreakPolicy(clusterId, policy);
-            CloudbreakPolicyJson response = cloudbreakPolicyConverter.convert(getCloudbreakPolicy(clusterId));
-            if (areRulesOmitted(policyJson, response)) {
-                response.setMessage("Policy added, but some rules are omitted");
-                policyJson = response;
-            } else {
-                policyJson.setMessage("Policy successfully added");
-            }
-            result = new ResponseEntity<>(policyJson, HttpStatus.OK);
-        } catch (ClusterNotFoundException e) {
-            policyJson.setMessage("Cluster not found");
-            result = new ResponseEntity<>(policyJson, HttpStatus.NOT_FOUND);
-        }
-        return result;
+        policyService.setCloudbreakPolicy(clusterId, policy);
+        return new ResponseEntity<>(policyJson, HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public ResponseEntity<CloudbreakPolicyJson> getPolicy(@PathVariable String clusterId) {
+    public ResponseEntity<CloudbreakPolicyJson> getPolicy(@PathVariable String clusterId) throws ClusterNotFoundException {
+        CloudbreakPolicy policy = getCloudbreakPolicy(clusterId);
         ResponseEntity<CloudbreakPolicyJson> result;
-        try {
-            CloudbreakPolicy policy = getCloudbreakPolicy(clusterId);
+        if (policy != null) {
             result = new ResponseEntity<>(cloudbreakPolicyConverter.convert(policy), HttpStatus.OK);
-        } catch (ClusterNotFoundException e) {
-            CloudbreakPolicyJson json = CloudbreakPolicyJson.emptyJson().withMessage("Cluster not found");
-            result = new ResponseEntity<>(json, HttpStatus.NOT_FOUND);
+        } else {
+            result = new ResponseEntity<>(CloudbreakPolicyJson.emptyJson(), HttpStatus.NOT_FOUND);
         }
         return result;
-    }
-
-    private boolean areRulesOmitted(CloudbreakPolicyJson json1, CloudbreakPolicyJson json2) {
-        return json1.getScaleDownRules().size() != json2.getScaleDownRules().size()
-                || json1.getScaleUpRules().size() != json2.getScaleUpRules().size();
     }
 
     private CloudbreakPolicy getCloudbreakPolicy(String clusterId) throws ClusterNotFoundException {

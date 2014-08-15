@@ -43,16 +43,10 @@ public class ClusterController {
     private AppService appService;
 
     @RequestMapping(value = "/{id}", method = RequestMethod.POST)
-    public ResponseEntity<ClusterJson> addCluster(@PathVariable String id, @RequestBody AmbariJson ambariServer) {
-        ResponseEntity response;
-        try {
-            Cluster cluster = clusterService.add(id, ambariConverter.convert(ambariServer));
-            response = new ResponseEntity<>(clusterConverter.convert(cluster), HttpStatus.CREATED);
-        } catch (ConnectionException e) {
-            LOGGER.error("Error adding the ambari cluster " + ambariServer.getHost() + " to the registry", e);
-            response = new ResponseEntity<>(ClusterJson.emptyJson().withId(id), HttpStatus.BAD_REQUEST);
-        }
-        return response;
+    public ResponseEntity<ClusterJson> addCluster(@PathVariable String id, @RequestBody AmbariJson ambariServer)
+            throws ConnectionException {
+        Cluster cluster = clusterService.add(id, ambariConverter.convert(ambariServer));
+        return new ResponseEntity<>(clusterConverter.convert(cluster), HttpStatus.CREATED);
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
