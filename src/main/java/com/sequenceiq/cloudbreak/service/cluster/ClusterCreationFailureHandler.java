@@ -27,6 +27,9 @@ public class ClusterCreationFailureHandler implements Consumer<Event<ClusterCrea
     @Autowired
     private ClusterRepository clusterRepository;
 
+    @Autowired
+    private AmbariClusterInstallerMailSenderService ambariClusterInstallerMailSenderService;
+
     @Override
     public void accept(Event<ClusterCreationFailure> event) {
         ClusterCreationFailure clusterCreationFailure = event.getData();
@@ -37,6 +40,9 @@ public class ClusterCreationFailureHandler implements Consumer<Event<ClusterCrea
         cluster.setStatus(Status.CREATE_FAILED);
         cluster.setStatusReason(detailedMessage);
         clusterRepository.save(cluster);
+        if (cluster.getEmailNeeded()) {
+            ambariClusterInstallerMailSenderService.sendFailEmail(cluster.getUser());
+        }
         websocketService.sendToTopicUser(cluster.getUser().getEmail(), WebsocketEndPoint.CLUSTER,
                 new StatusMessage(clusterId, cluster.getName(), Status.CREATE_FAILED.name(), detailedMessage));
     }

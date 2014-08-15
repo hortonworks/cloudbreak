@@ -1,24 +1,26 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
-import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.User;
-import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
-import com.sequenceiq.cloudbreak.repository.ClusterRepository;
-import com.sequenceiq.cloudbreak.websocket.WebsocketService;
-import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import reactor.event.Event;
-
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
+import com.sequenceiq.cloudbreak.repository.ClusterRepository;
+import com.sequenceiq.cloudbreak.websocket.WebsocketService;
+import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
+
+import reactor.event.Event;
 
 public class ClusterCreationFailureHandlerTest {
 
@@ -44,6 +46,7 @@ public class ClusterCreationFailureHandlerTest {
         clusterCreationFailure = new ClusterCreationFailure(1L, "dummyMessage");
         event = new Event<>(clusterCreationFailure);
         cluster = new Cluster();
+        cluster.setEmailNeeded(false);
         User user = new User();
         user.setEmail("dummy@myemail.com");
         cluster.setUser(user);

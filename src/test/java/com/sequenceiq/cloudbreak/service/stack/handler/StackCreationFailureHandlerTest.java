@@ -1,5 +1,20 @@
 package com.sequenceiq.cloudbreak.service.stack.handler;
 
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.User;
@@ -7,20 +22,8 @@ import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.stack.event.StackCreationFailure;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import reactor.event.Event;
 
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.any;
-import static org.mockito.BDDMockito.given;
+import reactor.event.Event;
 
 public class StackCreationFailureHandlerTest {
 
@@ -66,6 +69,9 @@ public class StackCreationFailureHandlerTest {
     private Stack createStack() {
         Stack stack = new Stack();
         stack.setId(1L);
+        Cluster cluster = new Cluster();
+        cluster.setEmailNeeded(false);
+        stack.setCluster(cluster);
         stack.setName(STACK_NAME);
         User user = new User();
         user.setEmail(DUMMY_EMAIL);

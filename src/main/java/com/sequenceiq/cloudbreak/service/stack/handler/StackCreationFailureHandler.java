@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
+import com.sequenceiq.cloudbreak.service.cluster.AmbariClusterInstallerMailSenderService;
 import com.sequenceiq.cloudbreak.service.stack.event.StackCreationFailure;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
@@ -28,6 +29,9 @@ public class StackCreationFailureHandler implements Consumer<Event<StackCreation
     @Autowired
     private WebsocketService websocketService;
 
+    @Autowired
+    private AmbariClusterInstallerMailSenderService ambariClusterInstallerMailSenderService;
+
     @Override
     public void accept(Event<StackCreationFailure> event) {
         StackCreationFailure stackCreationFailure = event.getData();
@@ -35,6 +39,9 @@ public class StackCreationFailureHandler implements Consumer<Event<StackCreation
         LOGGER.info("Accepted {} event.", ReactorConfig.STACK_CREATE_FAILED_EVENT, stackId);
         String detailedMessage = stackCreationFailure.getDetailedMessage();
         Stack stack = stackUpdater.updateStackStatus(stackId, Status.CREATE_FAILED, detailedMessage);
+        if (stack.getCluster().getEmailNeeded()) {
+            ambariClusterInstallerMailSenderService.sendFailEmail(stack.getUser());
+        }
         websocketService.sendToTopicUser(stack.getUser().getEmail(), WebsocketEndPoint.STACK,
                 new StatusMessage(stackId, stack.getName(), Status.CREATE_FAILED.name(), detailedMessage));
     }

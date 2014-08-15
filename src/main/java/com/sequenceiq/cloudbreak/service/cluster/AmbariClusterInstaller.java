@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
-import groovyx.net.http.HttpResponseException;
-
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
@@ -15,9 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import reactor.core.Reactor;
-import reactor.event.Event;
-
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.ambari.client.InvalidHostGroupHostAssociation;
@@ -30,6 +25,10 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.service.stack.connector.HadoopConfigurationProvider;
+
+import groovyx.net.http.HttpResponseException;
+import reactor.core.Reactor;
+import reactor.event.Event;
 
 @Service
 public class AmbariClusterInstaller {
@@ -74,7 +73,7 @@ public class AmbariClusterInstaller {
                 LOGGER.info("Ambari Cluster installing. [Stack: '{}', Cluster: '{}', Progress: {}]", stack.getId(), cluster.getName(), installProgress);
             }
             if (installProgress.compareTo(COMPLETED) == 0) {
-                clusterCreateSuccess(cluster, new Date().getTime());
+                clusterCreateSuccess(cluster, new Date().getTime(), stack.getAmbariIp());
             } else if (installProgress.compareTo(FAILED) == 0) {
                 throw new ClusterInstallFailedException("Ambari failed to install services.");
             }
@@ -133,9 +132,9 @@ public class AmbariClusterInstaller {
         return extendConfig;
     }
 
-    private void clusterCreateSuccess(Cluster cluster, long creationFinished) {
+    private void clusterCreateSuccess(Cluster cluster, long creationFinished, String ambariIp) {
         LOGGER.info("Publishing {} event [ClusterId: '{}']", ReactorConfig.CLUSTER_CREATE_SUCCESS_EVENT, cluster.getId());
-        reactor.notify(ReactorConfig.CLUSTER_CREATE_SUCCESS_EVENT, Event.wrap(new ClusterCreationSuccess(cluster.getId(), creationFinished)));
+        reactor.notify(ReactorConfig.CLUSTER_CREATE_SUCCESS_EVENT, Event.wrap(new ClusterCreationSuccess(cluster.getId(), creationFinished, ambariIp)));
     }
 
     private void clusterCreateFailed(Cluster cluster, String message) {

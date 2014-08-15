@@ -4,10 +4,12 @@ public class ClusterCreationSuccess {
 
     private Long clusterId;
     private long creationFinished;
+    private String ambariIp;
 
-    public ClusterCreationSuccess(Long clusterId, long creationFinished) {
+    public ClusterCreationSuccess(Long clusterId, long creationFinished, String ambariIp) {
         this.clusterId = clusterId;
         this.creationFinished = creationFinished;
+        this.ambariIp = ambariIp;
     }
 
     public Long getClusterId() {
@@ -24,5 +26,13 @@ public class ClusterCreationSuccess {
 
     public void setCreationFinished(long creationFinished) {
         this.creationFinished = creationFinished;
+    }
+
+    public String getAmbariIp() {
+        return ambariIp;
+    }
+
+    public void setAmbariIp(String ambariIp) {
+        this.ambariIp = ambariIp;
     }
 }
