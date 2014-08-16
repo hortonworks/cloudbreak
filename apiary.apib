@@ -1526,14 +1526,8 @@ TBD - add the 3 different scenarios - success, partial and failure
 + Request (application/json)
 
         {
-            "jarUrl": "https://dl.dropboxusercontent.com/u/13919958/lostnodes.jar",
             "scaleUpRules":
             {
-                "com.sequenceiq.periscope.policies.cloudbreak.rule.LostNodesRule":
-                {
-                    "limit": "4",
-                    "lostNodes": "2"
-                },
                 "pendingApps":
                 {
                     "limit": "4",
@@ -1577,14 +1571,8 @@ TBD - add the 3 different scenarios - success, partial and failure
                 {
                     "pendingContainers": "10",
                     "limit": "4"
-                },
-                "com.sequenceiq.periscope.policies.cloudbreak.rule.LostNodesRule":
-                {
-                    "lostNodes": "2",
-                    "limit": "4"
                 }
-            },
-            "jarUrl": "https://dl.dropboxusercontent.com/u/13919958/lostnodes.jar"
+            }
         }
 
 
@@ -1628,8 +1616,7 @@ TBD - add the 3 different scenarios - success, partial and failure
                     "lostNodes": "2",
                     "limit": "4"
                 }
-            },
-            "jarUrl": "https://dl.dropboxusercontent.com/u/13919958/lostnodes.jar"
+            }
         }
 
 #Group Applications

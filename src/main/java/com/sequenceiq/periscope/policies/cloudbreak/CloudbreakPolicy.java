@@ -30,7 +30,6 @@ public class CloudbreakPolicy {
     private final List<CloudbreakRule> scaleDownRules = new LinkedList<>();
     private final Map<String, Map<String, String>> scaleUpConfig;
     private final Map<String, Map<String, String>> scaleDownConfig;
-    private final URL jarUrl;
 
     static {
         Map<String, Class<? extends CloudbreakRule>> rules = new TreeMap<>();
@@ -42,10 +41,13 @@ public class CloudbreakPolicy {
         DEFAULT_RULES = Collections.unmodifiableMap(rules);
     }
 
+    public CloudbreakPolicy(Map<String, Map<String, String>> upConfig, Map<String, Map<String, String>> downConfig) {
+        this(upConfig, downConfig, null);
+    }
+
     public CloudbreakPolicy(Map<String, Map<String, String>> upConfig, Map<String, Map<String, String>> downConfig, URL url) {
         this.scaleUpConfig = upConfig;
         this.scaleDownConfig = downConfig;
-        this.jarUrl = url;
         URLClassLoader classLoader = createClassLoader(url);
         initRules(scaleUpConfig, scaleUpRules, classLoader);
         initRules(scaleDownConfig, scaleDownRules, classLoader);
@@ -57,10 +59,6 @@ public class CloudbreakPolicy {
 
     public Map<String, Map<String, String>> getScaleDownConfig() {
         return copy(scaleDownConfig);
-    }
-
-    public URL getJarUrl() {
-        return jarUrl;
     }
 
     public int scale(ClusterMetricsInfo clusterInfo) {
