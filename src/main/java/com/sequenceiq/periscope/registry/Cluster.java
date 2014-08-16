@@ -26,7 +26,7 @@ import com.sequenceiq.periscope.model.Priority;
 import com.sequenceiq.periscope.model.Queue;
 import com.sequenceiq.periscope.model.QueueSetup;
 import com.sequenceiq.periscope.model.SchedulerApplication;
-import com.sequenceiq.periscope.policies.cloudbreak.CloudbreakPolicy;
+import com.sequenceiq.periscope.policies.scaling.ScalingPolicy;
 import com.sequenceiq.periscope.service.configuration.AmbariConfigurationService;
 import com.sequenceiq.periscope.service.configuration.ConfigParam;
 import com.sequenceiq.periscope.utils.ClusterUtils;
@@ -46,7 +46,7 @@ public class Cluster {
     private Configuration configuration;
     private YarnClient yarnClient;
     private ClusterMetricsInfo metrics;
-    private CloudbreakPolicy cloudbreakPolicy;
+    private ScalingPolicy scalingPolicy;
     private ClusterState state = ClusterState.RUNNING;
 
     public Cluster(String id, Ambari ambari) throws ConnectionException {
@@ -108,16 +108,16 @@ public class Cluster {
         return restarting;
     }
 
-    public CloudbreakPolicy getCloudbreakPolicy() {
-        return cloudbreakPolicy;
+    public ScalingPolicy getScalingPolicy() {
+        return scalingPolicy;
     }
 
-    public void setCloudbreakPolicy(CloudbreakPolicy cloudbreakPolicy) {
-        this.cloudbreakPolicy = cloudbreakPolicy;
+    public void setScalingPolicy(ScalingPolicy scalingPolicy) {
+        this.scalingPolicy = scalingPolicy;
     }
 
     public int scale() {
-        return metrics == null || cloudbreakPolicy == null ? 0 : cloudbreakPolicy.scale(metrics);
+        return metrics == null || scalingPolicy == null ? 0 : scalingPolicy.scale(metrics);
     }
 
     public void updateMetrics(ClusterMetricsInfo metrics) {

@@ -1,10 +1,10 @@
-package com.sequenceiq.periscope.policies.cloudbreak.rule;
+package com.sequenceiq.periscope.policies.scaling.rule;
 
 import java.util.Map;
 
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.ClusterMetricsInfo;
 
-public class ForceNodeCountRule extends AbstractCloudbreakRule implements CloudbreakRule {
+public class ForceNodeCountRule extends AbstractScalingRule implements ScalingRule {
 
     public static final String NAME = "forceNodeCount";
     private int nodeCount;

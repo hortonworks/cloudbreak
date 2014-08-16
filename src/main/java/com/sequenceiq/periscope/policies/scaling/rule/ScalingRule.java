@@ -1,4 +1,4 @@
-package com.sequenceiq.periscope.policies.cloudbreak.rule;
+package com.sequenceiq.periscope.policies.scaling.rule;
 
 import java.util.Map;
 
@@ -6,7 +6,7 @@ import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.ClusterMetricsIn
 
 import com.sequenceiq.periscope.policies.NamedRule;
 
-public interface CloudbreakRule extends NamedRule {
+public interface ScalingRule extends NamedRule {
 
     /**
      * Invoked when creating the rule.

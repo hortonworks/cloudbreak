@@ -1,4 +1,4 @@
-package com.sequenceiq.periscope.policies.cloudbreak;
+package com.sequenceiq.periscope.policies.scaling;
 
 import static com.sequenceiq.periscope.utils.CloneUtils.copy;
 
@@ -15,24 +15,24 @@ import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.ClusterMetricsIn
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.periscope.policies.cloudbreak.rule.CloudbreakRule;
-import com.sequenceiq.periscope.policies.cloudbreak.rule.ForceNodeCountRule;
-import com.sequenceiq.periscope.policies.cloudbreak.rule.scaledown.ResourcesAboveRule;
-import com.sequenceiq.periscope.policies.cloudbreak.rule.scaleup.PendingAppsRule;
-import com.sequenceiq.periscope.policies.cloudbreak.rule.scaleup.PendingContainersRule;
-import com.sequenceiq.periscope.policies.cloudbreak.rule.scaleup.ResourcesBelowRule;
+import com.sequenceiq.periscope.policies.scaling.rule.ForceNodeCountRule;
+import com.sequenceiq.periscope.policies.scaling.rule.ScalingRule;
+import com.sequenceiq.periscope.policies.scaling.rule.scaledown.ResourcesAboveRule;
+import com.sequenceiq.periscope.policies.scaling.rule.scaleup.PendingAppsRule;
+import com.sequenceiq.periscope.policies.scaling.rule.scaleup.PendingContainersRule;
+import com.sequenceiq.periscope.policies.scaling.rule.scaleup.ResourcesBelowRule;
 
-public class CloudbreakPolicy {
+public class ScalingPolicy {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakPolicy.class);
-    private static final Map<String, Class<? extends CloudbreakRule>> DEFAULT_RULES;
-    private final List<CloudbreakRule> scaleUpRules = new LinkedList<>();
-    private final List<CloudbreakRule> scaleDownRules = new LinkedList<>();
+    private static final Logger LOGGER = LoggerFactory.getLogger(ScalingPolicy.class);
+    private static final Map<String, Class<? extends ScalingRule>> DEFAULT_RULES;
+    private final List<ScalingRule> scaleUpRules = new LinkedList<>();
+    private final List<ScalingRule> scaleDownRules = new LinkedList<>();
     private final Map<String, Map<String, String>> scaleUpConfig;
     private final Map<String, Map<String, String>> scaleDownConfig;
 
     static {
-        Map<String, Class<? extends CloudbreakRule>> rules = new TreeMap<>();
+        Map<String, Class<? extends ScalingRule>> rules = new TreeMap<>();
         rules.put(ResourcesBelowRule.NAME, ResourcesBelowRule.class);
         rules.put(ResourcesAboveRule.NAME, ResourcesAboveRule.class);
         rules.put(PendingAppsRule.NAME, PendingAppsRule.class);
@@ -41,11 +41,11 @@ public class CloudbreakPolicy {
         DEFAULT_RULES = Collections.unmodifiableMap(rules);
     }
 
-    public CloudbreakPolicy(Map<String, Map<String, String>> upConfig, Map<String, Map<String, String>> downConfig) {
+    public ScalingPolicy(Map<String, Map<String, String>> upConfig, Map<String, Map<String, String>> downConfig) {
         this(upConfig, downConfig, null);
     }
 
-    public CloudbreakPolicy(Map<String, Map<String, String>> upConfig, Map<String, Map<String, String>> downConfig, URL url) {
+    public ScalingPolicy(Map<String, Map<String, String>> upConfig, Map<String, Map<String, String>> downConfig, URL url) {
         this.scaleUpConfig = upConfig;
         this.scaleDownConfig = downConfig;
         URLClassLoader classLoader = createClassLoader(url);
@@ -74,14 +74,14 @@ public class CloudbreakPolicy {
         return classLoader;
     }
 
-    private void initRules(Map<String, Map<String, String>> config, List<CloudbreakRule> ruleSet, URLClassLoader classLoader) {
+    private void initRules(Map<String, Map<String, String>> config, List<ScalingRule> ruleSet, URLClassLoader classLoader) {
         Iterator<String> iterator = config.keySet().iterator();
         while (iterator.hasNext()) {
             String rule = iterator.next();
             try {
-                Class<? extends CloudbreakRule> ruleClass = loadClass(rule, classLoader);
+                Class<? extends ScalingRule> ruleClass = loadClass(rule, classLoader);
                 if (ruleClass != null) {
-                    CloudbreakRule cbRule = ruleClass.newInstance();
+                    ScalingRule cbRule = ruleClass.newInstance();
                     cbRule.init(config.get(rule));
                     ruleSet.add(cbRule);
                 } else {
@@ -94,18 +94,18 @@ public class CloudbreakPolicy {
         }
     }
 
-    private Class<? extends CloudbreakRule> loadClass(String rule, URLClassLoader classLoader) {
-        Class<? extends CloudbreakRule> clazz = DEFAULT_RULES.get(rule);
+    private Class<? extends ScalingRule> loadClass(String rule, URLClassLoader classLoader) {
+        Class<? extends ScalingRule> clazz = DEFAULT_RULES.get(rule);
         if (clazz == null) {
             try {
-                clazz = (Class<? extends CloudbreakRule>) Class.forName(rule);
+                clazz = (Class<? extends ScalingRule>) Class.forName(rule);
             } catch (ClassNotFoundException e) {
                 LOGGER.info("Cannot load class from classpath: " + rule, e);
             }
         }
         if (clazz == null && classLoader != null) {
             try {
-                clazz = (Class<? extends CloudbreakRule>) classLoader.loadClass(rule);
+                clazz = (Class<? extends ScalingRule>) classLoader.loadClass(rule);
             } catch (ClassNotFoundException e) {
                 LOGGER.info("Cannot load class from URL: " + rule, e);
             }
@@ -113,9 +113,9 @@ public class CloudbreakPolicy {
         return clazz;
     }
 
-    private int scale(ClusterMetricsInfo clusterInfo, List<CloudbreakRule> rules) {
+    private int scale(ClusterMetricsInfo clusterInfo, List<ScalingRule> rules) {
         int scaleTo = 0;
-        for (CloudbreakRule rule : rules) {
+        for (ScalingRule rule : rules) {
             scaleTo = rule.scale(clusterInfo);
             if (scaleTo != 0) {
                 break;

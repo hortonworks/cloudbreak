@@ -1,4 +1,4 @@
-package com.sequenceiq.periscope.policies.cloudbreak.rule.scaleup;
+package com.sequenceiq.periscope.policies.scaling.rule.scaleup;
 
 import static java.lang.Math.ceil;
 import static java.lang.Math.max;
@@ -7,10 +7,10 @@ import java.util.Map;
 
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.ClusterMetricsInfo;
 
-import com.sequenceiq.periscope.policies.cloudbreak.rule.AbstractCloudbreakRule;
-import com.sequenceiq.periscope.policies.cloudbreak.rule.CloudbreakRule;
+import com.sequenceiq.periscope.policies.scaling.rule.AbstractScalingRule;
+import com.sequenceiq.periscope.policies.scaling.rule.ScalingRule;
 
-public class PendingContainersRule extends AbstractCloudbreakRule implements CloudbreakRule {
+public class PendingContainersRule extends AbstractScalingRule implements ScalingRule {
 
     public static final String NAME = "pendingContainers";
     private int pendingContainersLimit;

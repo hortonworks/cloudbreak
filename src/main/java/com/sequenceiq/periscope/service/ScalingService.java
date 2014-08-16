@@ -7,9 +7,9 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.periscope.registry.Cluster;
 
 @Service
-public class CloudbreakService {
+public class ScalingService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ScalingService.class);
 
     public void scale(Cluster cluster) {
         int newNodeCount = cluster.scale();

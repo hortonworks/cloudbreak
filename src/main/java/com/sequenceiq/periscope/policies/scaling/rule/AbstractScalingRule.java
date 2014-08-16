@@ -1,6 +1,6 @@
-package com.sequenceiq.periscope.policies.cloudbreak.rule;
+package com.sequenceiq.periscope.policies.scaling.rule;
 
-public abstract class AbstractCloudbreakRule implements CloudbreakRule {
+public abstract class AbstractScalingRule implements ScalingRule {
 
     private String name;
     private int limit;
