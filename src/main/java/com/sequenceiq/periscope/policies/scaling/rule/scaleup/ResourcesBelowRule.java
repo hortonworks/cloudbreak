@@ -8,6 +8,7 @@ import java.util.Map;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.ClusterMetricsInfo;
 
 import com.sequenceiq.periscope.policies.scaling.rule.AbstractScalingRule;
+import com.sequenceiq.periscope.policies.scaling.rule.RuleProperties;
 import com.sequenceiq.periscope.policies.scaling.rule.ScalingRule;
 
 public class ResourcesBelowRule extends AbstractScalingRule implements ScalingRule {
@@ -18,14 +19,15 @@ public class ResourcesBelowRule extends AbstractScalingRule implements ScalingRu
     @Override
     public void init(Map<String, String> config) {
         setName(NAME);
-        setLimit(Integer.valueOf(config.get("limit")));
+        setLimit(config.get(RuleProperties.LIMIT));
+        setScalingAdjustment(config.get(RuleProperties.SCALING_ADJUSTMENT));
         this.freeResourceRate = Double.valueOf(config.get("freeResourceRate"));
     }
 
     @Override
     public int scale(ClusterMetricsInfo clusterInfo) {
         if (isBelowThreshold(clusterInfo)) {
-            return min(getLimit(), clusterInfo.getActiveNodes() + 1);
+            return min(getLimit(), clusterInfo.getActiveNodes() + getScalingAdjustment());
         }
         return 0;
     }

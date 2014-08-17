@@ -26,4 +26,9 @@ public interface ScalingRule extends NamedRule {
      * Return the maximum/minimum number of nodes. Depends whether its scaling up or down.
      */
     int getLimit();
+
+    /**
+     * Returns the number of instances to scale with.
+     */
+    int getScalingAdjustment();
 }

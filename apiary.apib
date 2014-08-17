@@ -1531,7 +1531,8 @@ TBD - add the 3 different scenarios - success, partial and failure
                 "pendingApps":
                 {
                     "limit": "4",
-                    "pendingApps": "5"
+                    "pendingApps": "5",
+                    "scaling-adjustment": "1"
                 },
                 "pendingContainers":
                 {
@@ -1544,7 +1545,8 @@ TBD - add the 3 different scenarios - success, partial and failure
                 "resourcesAbove":
                 {
                     "limit": "3",
-                    "freeResourceRate": "0.4"
+                    "freeResourceRate": "0.4",
+                    "scaling-adjustment": "1"
                 }
             }
         }
@@ -1557,7 +1559,8 @@ TBD - add the 3 different scenarios - success, partial and failure
                 "resourcesAbove":
                 {
                     "freeResourceRate": "0.4",
-                    "limit": "3"
+                    "limit": "3",
+                    "scaling-adjustment": "1"
                 }
             },
             "scaleUpRules":
@@ -1565,7 +1568,8 @@ TBD - add the 3 different scenarios - success, partial and failure
                 "pendingApps":
                 {
                     "pendingApps": "5",
-                    "limit": "4"
+                    "limit": "4",
+                    "scaling-adjustment": "1"
                 },
                 "pendingContainers":
                 {
@@ -1596,7 +1600,8 @@ TBD - add the 3 different scenarios - success, partial and failure
                 "resourcesAbove":
                 {
                     "freeResourceRate": "0.4",
-                "limit": "3"
+                    "limit": "3",
+                    "scaling-adjustment": "1"
                 }
             },
             "scaleUpRules":
@@ -1604,16 +1609,12 @@ TBD - add the 3 different scenarios - success, partial and failure
                 "pendingApps":
                 {
                     "pendingApps": "5",
-                    "limit": "4"
+                    "limit": "4",
+                    "scaling-adjustment": "1"
                 },
                 "pendingContainers":
                 {
                     "pendingContainers": "10",
-                    "limit": "4"
-                },
-                "com.sequenceiq.periscope.policies.cloudbreak.rule.LostNodesRule":
-                {
-                    "lostNodes": "2",
                     "limit": "4"
                 }
             }
