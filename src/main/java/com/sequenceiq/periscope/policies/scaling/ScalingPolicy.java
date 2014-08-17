@@ -18,9 +18,11 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.periscope.policies.scaling.rule.ForceNodeCountRule;
 import com.sequenceiq.periscope.policies.scaling.rule.ScalingRule;
 import com.sequenceiq.periscope.policies.scaling.rule.scaledown.ResourcesAboveRule;
+import com.sequenceiq.periscope.policies.scaling.rule.scaleup.LostNodesRule;
 import com.sequenceiq.periscope.policies.scaling.rule.scaleup.PendingAppsRule;
 import com.sequenceiq.periscope.policies.scaling.rule.scaleup.PendingContainersRule;
 import com.sequenceiq.periscope.policies.scaling.rule.scaleup.ResourcesBelowRule;
+import com.sequenceiq.periscope.policies.scaling.rule.scaleup.UnhealthyNodesRule;
 
 public class ScalingPolicy {
 
@@ -38,6 +40,8 @@ public class ScalingPolicy {
         rules.put(PendingAppsRule.NAME, PendingAppsRule.class);
         rules.put(PendingContainersRule.NAME, PendingContainersRule.class);
         rules.put(ForceNodeCountRule.NAME, ForceNodeCountRule.class);
+        rules.put(LostNodesRule.NAME, LostNodesRule.class);
+        rules.put(UnhealthyNodesRule.NAME, UnhealthyNodesRule.class);
         DEFAULT_RULES = Collections.unmodifiableMap(rules);
     }
 
