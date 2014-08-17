@@ -25,7 +25,7 @@ if ("HEAD".equals(branch)) {
 
 String versionNum
 if(jobName != null) {
-    def f = new File('metadata.xml')
+    def f = new File("$rootDir/metadata.xml")
     if (!f.exists()) {
         def metadata = System.getenv("METADATA_URL")
         new URL(metadata).withInputStream { i ->
@@ -34,7 +34,7 @@ if(jobName != null) {
             }
         }
     }
-    def mergeRequests = (new XmlParser()).parse('metadata.xml')
+    def mergeRequests = (new XmlParser()).parse("$rootDir/metadata.xml")
     versionNum = "1"
     String tmpVersion = mergeRequests.versioning.versions.version.last().text().tokenize('.').last().tokenize('-').last()
     if (tmpVersion.length() < 5) {
