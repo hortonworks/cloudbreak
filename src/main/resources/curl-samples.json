@@ -16,12 +16,16 @@ curl -X POST -H "Content-Type: application/json" localhost:8081/applications/mul
 # list all app
 curl -X GET localhost:8081/applications/multi-node | jq .
 
-# cloudbreak policy
-curl -X POST -H "Content-Type: application/json" -d '{"cooldown":10,"min-size":2,"max-size":10,"scaleUpRules":{"resourcesBelow":{"freeResourceRate":"0.2","scaling-adjustment":"1"},"pendingApps":{"pendingApps":"5","scaling-adjustment":"1"},"pendingContainers":{"pendingContainers":"10"}},"scaleDownRules":{"resourcesAbove":{"freeResourceRate":"0.4","scaling-adjustment":"1"}}}' localhost:8081/policy/multi-node | jq .
-curl -X GET localhost:8081/policy/multi-node | jq .
-
 # refresh ambari configuration
 curl -X POST localhost:8081/configuration/multi-node | jq .
 
 # set queue newSetup
 curl -X POST -H "Content-Type: application/json" -d '{"setup":[{"name":"default", "capacity":60}, {"name":"high", "capacity":40}]}' localhost:8081/configuration/multi-node/queue | jq .
+
+# set metric alarms
+curl -X POST -H "Content-Type: application/json" -d '{"alarms":[{"id":"alarm1","alarmName":"pendingContainers","description":"Pending containers above","metric":"PENDING_CONTAINERS","threshold":10,"comparisonOperator":"GREATER_THAN","period":10},{"id":"alarm2","alarmName":"globalResources","description":"Low global resource","metric":"GLOBAL_RESOURCES","threshold":0.2,"comparisonOperator":"LESS_THAN","period":10}]}' localhost:8081/clusters/multi-node/alarms | jq .
+curl -X GET localhost:8081/clusters/multi-node/alarms | jq .
+
+# set scaling policy
+curl -X POST -H "Content-Type: application/json" -d '{"minSize":3,"maxSize":10,"cooldown":5,"scalingPolicies":[{"id":"policy1","name":"upscaling","adjustmentType":"NODE_COUNT","scalingAdjustment":2,"alarmId":"alarm2"}]}' localhost:8081/clusters/multi-node/policies | jq .
+curl -X GET localhost:8081/clusters/multi-node/policies | jq .

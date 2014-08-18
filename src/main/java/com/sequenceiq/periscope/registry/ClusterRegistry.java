@@ -1,6 +1,6 @@
 package com.sequenceiq.periscope.registry;
 
-import java.util.Collection;
+import java.util.List;
 
 import com.sequenceiq.periscope.model.Ambari;
 
@@ -34,5 +34,5 @@ public interface ClusterRegistry {
      *
      * @return collection of clusters
      */
-    Collection<Cluster> getAll();
+    List<Cluster> getAll();
 }

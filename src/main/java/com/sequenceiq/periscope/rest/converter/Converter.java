@@ -1,6 +1,6 @@
 package com.sequenceiq.periscope.rest.converter;
 
-import java.util.Collection;
+import java.util.List;
 
 import com.sequenceiq.periscope.rest.json.Json;
 
@@ -29,7 +29,7 @@ public interface Converter<J extends Json, E> {
      * @param jsonList collection of json classes
      * @return collection of converted classes
      */
-    Collection<E> convertAllFromJson(Collection<J> jsonList);
+    List<E> convertAllFromJson(List<J> jsonList);
 
     /**
      * Bulk conversion to json.
@@ -37,6 +37,6 @@ public interface Converter<J extends Json, E> {
      * @param entityList collection of entity classes
      * @return collection of converted classes
      */
-    Collection<J> convertAllToJson(Collection<E> entityList);
+    List<J> convertAllToJson(List<E> entityList);
 
 }

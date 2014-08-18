@@ -9,43 +9,34 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.sequenceiq.periscope.policies.scaling.ScalingPolicy;
-import com.sequenceiq.periscope.rest.converter.ScalingPolicyConverter;
-import com.sequenceiq.periscope.rest.json.ScalingPolicyJson;
+import com.sequenceiq.periscope.model.AutoScalingGroup;
+import com.sequenceiq.periscope.rest.converter.AutoScalingGroupConverter;
+import com.sequenceiq.periscope.rest.json.AutoScalingGroupJson;
 import com.sequenceiq.periscope.service.ClusterNotFoundException;
-import com.sequenceiq.periscope.service.PolicyService;
+import com.sequenceiq.periscope.service.ScalingService;
 
 @RestController
-@RequestMapping("/policy/{clusterId}")
+@RequestMapping("/clusters/{clusterId}/policies")
 public class PolicyController {
 
     @Autowired
-    private PolicyService policyService;
+    private ScalingService scalingService;
     @Autowired
-    private ScalingPolicyConverter scalingPolicyConverter;
+    private AutoScalingGroupConverter scalingGroupConverter;
 
     @RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity<ScalingPolicyJson> createRules(@PathVariable String clusterId, @RequestBody ScalingPolicyJson policyJson)
+    public ResponseEntity<AutoScalingGroupJson> setScaling(@PathVariable String clusterId, @RequestBody AutoScalingGroupJson autoScaling)
             throws ClusterNotFoundException {
-        ScalingPolicy policy = scalingPolicyConverter.convert(policyJson);
-        policyService.setScalingPolicy(clusterId, policy);
-        return new ResponseEntity<>(policyJson, HttpStatus.OK);
+        AutoScalingGroup scalingGroup = scalingGroupConverter.convert(autoScaling, clusterId);
+        scalingService.setAutoScalingGroup(clusterId, scalingGroup);
+        return new ResponseEntity<>(autoScaling, HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public ResponseEntity<ScalingPolicyJson> getPolicy(@PathVariable String clusterId) throws ClusterNotFoundException {
-        ScalingPolicy policy = getCloudbreakPolicy(clusterId);
-        ResponseEntity<ScalingPolicyJson> result;
-        if (policy != null) {
-            result = new ResponseEntity<>(scalingPolicyConverter.convert(policy), HttpStatus.OK);
-        } else {
-            result = new ResponseEntity<>(ScalingPolicyJson.emptyJson(), HttpStatus.NOT_FOUND);
-        }
-        return result;
-    }
-
-    private ScalingPolicy getCloudbreakPolicy(String clusterId) throws ClusterNotFoundException {
-        return policyService.getScalingPolicy(clusterId);
+    public ResponseEntity<AutoScalingGroupJson> getScaling(@PathVariable String clusterId) throws ClusterNotFoundException {
+        AutoScalingGroup autoScalingGroup = scalingService.getAutoScalingGroup(clusterId);
+        AutoScalingGroupJson json = scalingGroupConverter.convert(autoScalingGroup);
+        return new ResponseEntity<>(json, HttpStatus.OK);
     }
 
 }

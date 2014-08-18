@@ -1,14 +1,12 @@
-package com.sequenceiq.periscope.rest.json;
+package com.sequenceiq.periscope.model;
 
-import com.sequenceiq.periscope.model.AdjustmentType;
-
-public class ScalingPolicyJson implements Json {
+public class ScalingPolicy {
 
     private String id;
     private String name;
     private AdjustmentType adjustmentType;
     private int scalingAdjustment;
-    private String alarmId;
+    private Alarm alarm;
 
     public String getId() {
         return id;
@@ -18,12 +16,12 @@ public class ScalingPolicyJson implements Json {
         this.id = id;
     }
 
-    public String getAlarmId() {
-        return alarmId;
+    public Alarm getAlarm() {
+        return alarm;
     }
 
-    public void setAlarmId(String alarmId) {
-        this.alarmId = alarmId;
+    public void setAlarm(Alarm alarm) {
+        this.alarm = alarm;
     }
 
     public String getName() {

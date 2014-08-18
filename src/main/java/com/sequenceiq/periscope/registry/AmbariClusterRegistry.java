@@ -1,6 +1,7 @@
 package com.sequenceiq.periscope.registry;
 
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -37,7 +38,7 @@ public class AmbariClusterRegistry implements ClusterRegistry {
     }
 
     @Override
-    public Collection<Cluster> getAll() {
-        return clusters.values();
+    public List<Cluster> getAll() {
+        return new ArrayList<>(clusters.values());
     }
 }

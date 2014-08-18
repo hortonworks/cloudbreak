@@ -21,12 +21,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.periscope.model.Alarm;
 import com.sequenceiq.periscope.model.Ambari;
+import com.sequenceiq.periscope.model.AutoScalingGroup;
 import com.sequenceiq.periscope.model.Priority;
 import com.sequenceiq.periscope.model.Queue;
 import com.sequenceiq.periscope.model.QueueSetup;
 import com.sequenceiq.periscope.model.SchedulerApplication;
-import com.sequenceiq.periscope.policies.scaling.ScalingPolicy;
 import com.sequenceiq.periscope.service.configuration.AmbariConfigurationService;
 import com.sequenceiq.periscope.service.configuration.ConfigParam;
 import com.sequenceiq.periscope.utils.ClusterUtils;
@@ -46,8 +47,9 @@ public class Cluster {
     private Configuration configuration;
     private YarnClient yarnClient;
     private ClusterMetricsInfo metrics;
-    private ScalingPolicy scalingPolicy;
     private ClusterState state = ClusterState.RUNNING;
+    private List<Alarm> alarms = new ArrayList<>();
+    private AutoScalingGroup autoScalingGroup;
 
     public Cluster(String id, Ambari ambari) throws ConnectionException {
         this.id = id;
@@ -108,16 +110,12 @@ public class Cluster {
         return restarting;
     }
 
-    public ScalingPolicy getScalingPolicy() {
-        return scalingPolicy;
+    public List<Alarm> getAlarms() {
+        return alarms;
     }
 
-    public void setScalingPolicy(ScalingPolicy scalingPolicy) {
-        this.scalingPolicy = scalingPolicy;
-    }
-
-    public int scale() {
-        return metrics == null || scalingPolicy == null ? 0 : scalingPolicy.scale(metrics);
+    public void setAlarms(List<Alarm> alarms) {
+        this.alarms = alarms;
     }
 
     public void updateMetrics(ClusterMetricsInfo metrics) {
@@ -127,6 +125,14 @@ public class Cluster {
 
     public void refreshConfiguration() throws ConnectionException {
         initConfiguration();
+    }
+
+    public AutoScalingGroup getAutoScalingGroup() {
+        return autoScalingGroup;
+    }
+
+    public void setAutoScalingGroup(AutoScalingGroup autoScalingGroup) {
+        this.autoScalingGroup = autoScalingGroup;
     }
 
     public Map<String, String> setQueueSetup(QueueSetup queueSetup) throws QueueSetupException {

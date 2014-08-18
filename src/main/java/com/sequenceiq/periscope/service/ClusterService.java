@@ -1,6 +1,6 @@
 package com.sequenceiq.periscope.service;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +32,7 @@ public class ClusterService {
         return clusterRegistry.add(clusterId, ambari);
     }
 
-    public Collection<Cluster> getAll() {
+    public List<Cluster> getAll() {
         return clusterRegistry.getAll();
     }
 

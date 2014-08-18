@@ -1,7 +1,6 @@
 package com.sequenceiq.periscope.rest.controller;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -58,7 +57,7 @@ public class ClusterController {
     @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<List<ClusterJson>> getClusters() {
         List<ClusterJson> result = new ArrayList<>();
-        Collection<Cluster> clusters = clusterService.getAll();
+        List<Cluster> clusters = clusterService.getAll();
         result.addAll(clusterConverter.convertAllToJson(clusters));
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
