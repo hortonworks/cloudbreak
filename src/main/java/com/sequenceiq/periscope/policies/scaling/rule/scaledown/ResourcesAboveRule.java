@@ -27,7 +27,7 @@ public class ResourcesAboveRule extends AbstractScalingRule implements ScalingRu
     @Override
     public int scale(ClusterMetricsInfo clusterInfo) {
         if (isAboveThreshold(clusterInfo)) {
-            return max(getLimit(), clusterInfo.getActiveNodes() - getScalingAdjustment());
+            return max(getLimit(), getCurrentNodeCount(clusterInfo) - getScalingAdjustment());
         }
         return 0;
     }

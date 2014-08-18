@@ -1,7 +1,7 @@
 package com.sequenceiq.periscope.policies.scaling.rule.scaleup;
 
 import static java.lang.Math.ceil;
-import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 import java.util.Map;
 
@@ -30,7 +30,8 @@ public class PendingContainersRule extends AbstractScalingRule implements Scalin
         if (isPendingContainersExceed(pendingContainers)) {
             int containerPerNode = calcAvgContainerPerNode(clusterInfo);
             int adjustment = getScalingAdjustment();
-            return max(getLimit(), adjustment == 0 ? (int) ceil((double) pendingContainers / containerPerNode) : adjustment);
+            return min(getLimit(), getCurrentNodeCount(clusterInfo)
+                    + (adjustment == 0 ? (int) ceil((double) pendingContainers / containerPerNode) : adjustment));
         }
         return 0;
     }
@@ -41,7 +42,7 @@ public class PendingContainersRule extends AbstractScalingRule implements Scalin
 
     private int calcAvgContainerPerNode(ClusterMetricsInfo clusterInfo) {
         int allocated = clusterInfo.getContainersAllocated();
-        int activeNodes = clusterInfo.getActiveNodes();
+        int activeNodes = getCurrentNodeCount(clusterInfo);
         return (int) ceil((double) allocated / activeNodes);
     }
 

@@ -1,6 +1,6 @@
 package com.sequenceiq.periscope.policies.scaling.rule.scaleup;
 
-import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 import java.util.Map;
 
@@ -27,8 +27,8 @@ public class UnhealthyNodesRule extends AbstractScalingRule implements ScalingRu
     public int scale(ClusterMetricsInfo clusterInfo) {
         if (isUnhealthyNodesLimitExceed(clusterInfo)) {
             int scalingAdjustment = getScalingAdjustment();
-            return max(getLimit(), clusterInfo.getActiveNodes()
-                    + scalingAdjustment == 0 ? clusterInfo.getUnhealthyNodes() : scalingAdjustment);
+            return min(getLimit(), getCurrentNodeCount(clusterInfo)
+                    + (scalingAdjustment == 0 ? clusterInfo.getUnhealthyNodes() : scalingAdjustment));
         }
         return 0;
     }

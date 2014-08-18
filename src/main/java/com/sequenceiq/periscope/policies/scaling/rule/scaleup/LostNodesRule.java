@@ -1,6 +1,6 @@
 package com.sequenceiq.periscope.policies.scaling.rule.scaleup;
 
-import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 import java.util.Map;
 
@@ -27,8 +27,8 @@ public class LostNodesRule extends AbstractScalingRule implements ScalingRule {
     public int scale(ClusterMetricsInfo clusterInfo) {
         if (isLostNodesLimitExceed(clusterInfo)) {
             int scalingAdjustment = getScalingAdjustment();
-            return max(getLimit(), clusterInfo.getActiveNodes()
-                    + scalingAdjustment == 0 ? clusterInfo.getLostNodes() : scalingAdjustment);
+            return min(getLimit(), getCurrentNodeCount(clusterInfo)
+                    + (scalingAdjustment == 0 ? clusterInfo.getLostNodes() : scalingAdjustment));
         }
         return 0;
     }

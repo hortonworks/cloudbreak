@@ -1,5 +1,7 @@
 package com.sequenceiq.periscope.policies.scaling.rule;
 
+import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.ClusterMetricsInfo;
+
 public abstract class AbstractScalingRule implements ScalingRule {
 
     private String name;
@@ -31,6 +33,10 @@ public abstract class AbstractScalingRule implements ScalingRule {
 
     public void setScalingAdjustment(String scalingAdjustment) {
         this.scalingAdjustment = toInt(scalingAdjustment);
+    }
+
+    protected int getCurrentNodeCount(ClusterMetricsInfo metricsInfo) {
+        return metricsInfo.getTotalNodes();
     }
 
     private int toInt(String value) {

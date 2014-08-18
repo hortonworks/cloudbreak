@@ -1,6 +1,6 @@
 package com.sequenceiq.periscope.policies.scaling.rule.scaleup;
 
-import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 import java.util.Map;
 
@@ -26,7 +26,7 @@ public class PendingAppsRule extends AbstractScalingRule implements ScalingRule 
     @Override
     public int scale(ClusterMetricsInfo clusterInfo) {
         if (isPendingAppsExceed(clusterInfo)) {
-            return max(getLimit(), clusterInfo.getActiveNodes() + getScalingAdjustment());
+            return min(getLimit(), getCurrentNodeCount(clusterInfo) + getScalingAdjustment());
         }
         return 0;
     }
