@@ -8,6 +8,8 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.periscope.model.Alarm;
+import com.sequenceiq.periscope.model.ComparisonOperator;
+import com.sequenceiq.periscope.model.ScalingPolicy;
 import com.sequenceiq.periscope.monitor.event.ClusterMetricsUpdateEvent;
 import com.sequenceiq.periscope.registry.Cluster;
 import com.sequenceiq.periscope.service.ClusterNotFoundException;
@@ -28,18 +30,23 @@ public class ClusterMetricsWatcher implements ApplicationListener<ClusterMetrics
 
     @Override
     public void onApplicationEvent(ClusterMetricsUpdateEvent event) {
+        String clusterId = event.getClusterId();
         try {
-            Cluster cluster = clusterService.get(event.getClusterId());
+            Cluster cluster = clusterService.get(clusterId);
             ClusterMetricsInfo metrics = event.getClusterMetricsInfo();
             cluster.updateMetrics(metrics);
             for (Alarm alarm : cluster.getAlarms()) {
+                LOGGER.info("Checking alarm: {} on cluster: {}", alarm.getAlarmName(), clusterId);
                 double value = getMetricValue(metrics, alarm);
-                if (alarmHit(value, alarm)) {
-                    scalingService.scale(cluster, alarm.getScalingPolicy());
+                if (alarmHit(value, alarm, clusterId)) {
+                    ScalingPolicy scalingPolicy = alarm.getScalingPolicy();
+                    if (scalingPolicy != null) {
+                        scalingService.scale(cluster, scalingPolicy);
+                    }
                 }
             }
         } catch (ClusterNotFoundException e) {
-            LOGGER.error("Cluster not found, id: " + event.getClusterId(), e);
+            LOGGER.error("Cluster not found, id: " + clusterId, e);
         }
     }
 
@@ -60,76 +67,70 @@ public class ClusterMetricsWatcher implements ApplicationListener<ClusterMetrics
         }
     }
 
-    private boolean alarmHit(double value, Alarm alarm) {
+    private boolean alarmHit(double value, Alarm alarm, String clusterId) {
         switch (alarm.getComparisonOperator()) {
             case EQUALS:
-                return isEqualsHits(value, alarm);
+                return isEqualsHits(value, alarm, clusterId);
             case GREATER_OR_EQUAL_THAN:
-                return isGreaterOrEqualHits(value, alarm);
+                return isGreaterOrEqualHits(value, alarm, clusterId);
             case GREATER_THAN:
-                return isGreaterHits(value, alarm);
+                return isGreaterHits(value, alarm, clusterId);
             case LESS_OR_EQUAL_THAN:
-                return isLessOrEqualHits(value, alarm);
+                return isLessOrEqualHits(value, alarm, clusterId);
             case LESS_THAN:
-                return isLessHits(value, alarm);
+                return isLessHits(value, alarm, clusterId);
             default:
                 return false;
         }
     }
 
-    private boolean isEqualsHits(double value, Alarm alarm) {
+    private boolean isEqualsHits(double value, Alarm alarm, String clusterId) {
+        return isComparisonHit(value == alarm.getThreshold(), alarm, ComparisonOperator.EQUALS, clusterId);
+    }
+
+    private boolean isGreaterOrEqualHits(double value, Alarm alarm, String clusterId) {
+        return isComparisonHit(value >= alarm.getThreshold(), alarm, ComparisonOperator.GREATER_OR_EQUAL_THAN, clusterId);
+    }
+
+    private boolean isGreaterHits(double value, Alarm alarm, String clusterId) {
+        return isComparisonHit(value > alarm.getThreshold(), alarm, ComparisonOperator.GREATER_THAN, clusterId);
+    }
+
+    private boolean isLessOrEqualHits(double value, Alarm alarm, String clusterId) {
+        return isComparisonHit(value <= alarm.getThreshold(), alarm, ComparisonOperator.LESS_OR_EQUAL_THAN, clusterId);
+    }
+
+    private boolean isLessHits(double value, Alarm alarm, String clusterId) {
+        return isComparisonHit(value < alarm.getThreshold(), alarm, ComparisonOperator.LESS_THAN, clusterId);
+    }
+
+    private boolean isComparisonHit(boolean valueHit, Alarm alarm, ComparisonOperator operator, String clusterId) {
         boolean result = false;
-        if (value == alarm.getThreshold()) {
-            result = setAndCheckTime(alarm);
+        String alarmName = alarm.getAlarmName();
+        if (valueHit) {
+            LOGGER.info("{} comparison hit for alarm: {}, on cluster: {}", operator, alarmName, clusterId);
+            result = setAndCheckTime(alarm, clusterId);
         } else {
+            LOGGER.info("{} comparison failed for alarm: {}, on cluster: {}", operator, alarmName, clusterId);
             resetTime(alarm);
         }
         return result;
     }
 
-    private boolean isGreaterOrEqualHits(double value, Alarm alarm) {
+    private boolean setAndCheckTime(Alarm alarm, String clusterId) {
         boolean result = false;
-        if (value >= alarm.getThreshold()) {
-            result = setAndCheckTime(alarm);
-        } else {
-            resetTime(alarm);
-        }
-        return result;
-    }
-
-    private boolean isGreaterHits(double value, Alarm alarm) {
-        boolean result = false;
-        if (value > alarm.getThreshold()) {
-            result = setAndCheckTime(alarm);
-        }
-        return result;
-    }
-
-    private boolean isLessOrEqualHits(double value, Alarm alarm) {
-        boolean result = false;
-        if (value <= alarm.getThreshold()) {
-            result = setAndCheckTime(alarm);
-        }
-        return result;
-    }
-
-    private boolean isLessHits(double value, Alarm alarm) {
-        boolean result = false;
-        if (value < alarm.getThreshold()) {
-            result = setAndCheckTime(alarm);
-        }
-        return result;
-    }
-
-    private boolean setAndCheckTime(Alarm alarm) {
-        boolean result = false;
+        String alarmName = alarm.getAlarmName();
         long hitsSince = alarm.getAlarmHitsSince();
         if (hitsSince == 0) {
+            LOGGER.info("No previous hit for alarm: {} on cluster: {}", alarmName, clusterId);
             setCurrentTime(alarm);
         } else {
-            result = System.currentTimeMillis() - hitsSince > alarm.getPeriod() * SEC_IN_MS;
+            long elapsedTime = System.currentTimeMillis() - hitsSince;
+            result = elapsedTime > (alarm.getPeriod() * SEC_IN_MS);
+            LOGGER.info("Alarm: {} stands since {}ms on cluster {}", alarmName, elapsedTime, clusterId);
             if (result) {
                 resetTime(alarm);
+                LOGGER.info("Alarm: {} HIT on cluster: {}", alarmName, clusterId);
             }
         }
         return result;

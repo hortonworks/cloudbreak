@@ -29,7 +29,7 @@ public class ScalingService {
         } else if (desiredNodeCount < totalNodes) {
             scaleDownTo(cluster, desiredNodeCount);
         } else {
-            LOGGER.info("No scaling activity on {}", cluster.getId());
+            LOGGER.info("No scaling activity required on {}", cluster.getId());
         }
     }
 
