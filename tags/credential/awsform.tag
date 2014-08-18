@@ -1,5 +1,5 @@
-
-<form class="form-horizontal" role="form" ng-show="awsCredential" name="awsCredentialForm">
+<div class="alert alert-info" role="alert" ng-show="awsCredentialInCreate"><b>Please wait!</b> creation in progress...</div>
+<form class="form-horizontal" role="form" ng-show="awsCredential" name="awsCredentialForm" ng-hide="awsCredentialInCreate">
     <div class="form-group" ng-class="{ 'has-error': awsCredentialForm.awscname.$dirty && awsCredentialForm.awscname.$invalid }">
         <label class="col-sm-3 control-label" for="awscname">Name</label>
 

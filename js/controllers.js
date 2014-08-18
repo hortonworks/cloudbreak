@@ -17,6 +17,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
         $http.defaults.useXDomain = true;
         $scope.errormessage = "";
         $scope.statusclass = "";
+        $scope.awsCredentialInCreate = false;
         delete $http.defaults.headers.common['X-Requested-With'];
         $http.defaults.headers.common['Content-Type']= 'application/json';
         $http.get('messages.properties').then(function (messages) {
@@ -786,6 +787,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
 
         $scope.createAwsCredential = function() {
             log.info("create aws credential");
+            $scope.awsCredentialInCreate = true;
             $http({
                 method: 'POST',
                 dataType: 'json',
@@ -804,6 +806,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     }
                 }
             }).success(function (data, status, headers, config) {
+                $scope.awsCredentialInCreate = false;
                 $scope.modifyStatusMessage($rootScope.error_msg.aws_credential_success1 + data.id + $rootScope.error_msg.aws_credential_success2);
                 $scope.modifyStatusClass("has-success");
                 $scope.getCredentials();
@@ -812,6 +815,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 awscdescription.value = "";
                 aws_sshPublicKey.value = "";
             }).error(function (data, status, headers, config) {
+                $scope.awsCredentialInCreate = false;
                 $scope.modifyStatusMessage($rootScope.error_msg.aws_credential_failed + data.message);
                 $scope.modifyStatusClass("has-error");
                 $scope.isFailedCreation = true;
