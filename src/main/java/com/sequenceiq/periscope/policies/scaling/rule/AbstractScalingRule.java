@@ -39,6 +39,10 @@ public abstract class AbstractScalingRule implements ScalingRule {
         return metricsInfo.getTotalNodes();
     }
 
+    protected int scaleTo(int currentNodeCount, int desiredNodeCount) {
+        return desiredNodeCount == currentNodeCount ? 0 : desiredNodeCount;
+    }
+
     private int toInt(String value) {
         return value == null ? 0 : Integer.valueOf(value);
     }

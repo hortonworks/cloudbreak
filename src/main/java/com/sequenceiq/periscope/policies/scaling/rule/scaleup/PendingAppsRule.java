@@ -26,7 +26,9 @@ public class PendingAppsRule extends AbstractScalingRule implements ScalingRule 
     @Override
     public int scale(ClusterMetricsInfo clusterInfo) {
         if (isPendingAppsExceed(clusterInfo)) {
-            return min(getLimit(), getCurrentNodeCount(clusterInfo) + getScalingAdjustment());
+            int currentNodeCount = getCurrentNodeCount(clusterInfo);
+            int desiredNodeCount = min(getLimit(), currentNodeCount + getScalingAdjustment());
+            return scaleTo(currentNodeCount, desiredNodeCount);
         }
         return 0;
     }

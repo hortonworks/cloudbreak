@@ -30,8 +30,10 @@ public class PendingContainersRule extends AbstractScalingRule implements Scalin
         if (isPendingContainersExceed(pendingContainers)) {
             int containerPerNode = calcAvgContainerPerNode(clusterInfo);
             int adjustment = getScalingAdjustment();
-            return min(getLimit(), getCurrentNodeCount(clusterInfo)
+            int currentNodeCount = getCurrentNodeCount(clusterInfo);
+            int desiredNodeCount = min(getLimit(), currentNodeCount
                     + (adjustment == 0 ? (int) ceil((double) pendingContainers / containerPerNode) : adjustment));
+            return scaleTo(currentNodeCount, desiredNodeCount);
         }
         return 0;
     }

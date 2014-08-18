@@ -1526,6 +1526,7 @@ TBD - add the 3 different scenarios - success, partial and failure
 + Request (application/json)
 
         {
+            "cooldown": 100,
             "scaleUpRules":
             {
                 "pendingApps":
@@ -1554,6 +1555,7 @@ TBD - add the 3 different scenarios - success, partial and failure
 + Response 200 (application/json)
 
         {
+            "cooldown": 100,
             "scaleDownRules":
             {
                 "resourcesAbove":
@@ -1595,6 +1597,7 @@ TBD - add the 3 different scenarios - success, partial and failure
 + Response 200 (application/json)
 
         {
+            "cooldown": 100,
             "scaleDownRules":
             {
                 "resourcesAbove":

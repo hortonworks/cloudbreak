@@ -28,10 +28,13 @@ public class ScalingPolicy {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ScalingPolicy.class);
     private static final Map<String, Class<? extends ScalingRule>> DEFAULT_RULES;
+    private static final int SEC_IN_MS = 1000;
     private final List<ScalingRule> scaleUpRules = new LinkedList<>();
     private final List<ScalingRule> scaleDownRules = new LinkedList<>();
     private final Map<String, Map<String, String>> scaleUpConfig;
     private final Map<String, Map<String, String>> scaleDownConfig;
+    private final int coolDown;
+    private long lastScalingActivityStart;
 
     static {
         Map<String, Class<? extends ScalingRule>> rules = new TreeMap<>();
@@ -45,11 +48,14 @@ public class ScalingPolicy {
         DEFAULT_RULES = Collections.unmodifiableMap(rules);
     }
 
-    public ScalingPolicy(Map<String, Map<String, String>> upConfig, Map<String, Map<String, String>> downConfig) {
-        this(upConfig, downConfig, null);
+    public ScalingPolicy(int coolDown,
+            Map<String, Map<String, String>> upConfig, Map<String, Map<String, String>> downConfig) {
+        this(coolDown, upConfig, downConfig, null);
     }
 
-    public ScalingPolicy(Map<String, Map<String, String>> upConfig, Map<String, Map<String, String>> downConfig, URL url) {
+    public ScalingPolicy(int coolDown,
+            Map<String, Map<String, String>> upConfig, Map<String, Map<String, String>> downConfig, URL url) {
+        this.coolDown = coolDown;
         this.scaleUpConfig = upConfig;
         this.scaleDownConfig = downConfig;
         URLClassLoader classLoader = createClassLoader(url);
@@ -65,9 +71,20 @@ public class ScalingPolicy {
         return copy(scaleDownConfig);
     }
 
+    public int getCoolDown() {
+        return coolDown;
+    }
+
     public int scale(ClusterMetricsInfo clusterInfo) {
-        int scaleTo = scale(clusterInfo, scaleUpRules);
-        return scaleTo == 0 ? scale(clusterInfo, scaleDownRules) : scaleTo;
+        int scaleTo = 0;
+        if (canScale()) {
+            scaleTo = scale(clusterInfo, scaleUpRules);
+            scaleTo = scaleTo == 0 ? scale(clusterInfo, scaleDownRules) : scaleTo;
+            if (scaleTo != 0) {
+                lastScalingActivityStart = System.currentTimeMillis();
+            }
+        }
+        return scaleTo;
     }
 
     private URLClassLoader createClassLoader(URL url) {
@@ -126,6 +143,15 @@ public class ScalingPolicy {
             }
         }
         return scaleTo;
+    }
+
+    private boolean canScale() {
+        boolean result = false;
+        if (lastScalingActivityStart == 0
+                || (System.currentTimeMillis() - lastScalingActivityStart) > (coolDown * SEC_IN_MS)) {
+            result = true;
+        }
+        return result;
     }
 
 }

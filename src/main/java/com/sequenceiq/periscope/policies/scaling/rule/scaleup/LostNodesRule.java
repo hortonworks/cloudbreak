@@ -27,8 +27,10 @@ public class LostNodesRule extends AbstractScalingRule implements ScalingRule {
     public int scale(ClusterMetricsInfo clusterInfo) {
         if (isLostNodesLimitExceed(clusterInfo)) {
             int scalingAdjustment = getScalingAdjustment();
-            return min(getLimit(), getCurrentNodeCount(clusterInfo)
+            int currentNodeCount = getCurrentNodeCount(clusterInfo);
+            int desiredNodeCount = min(getLimit(), currentNodeCount
                     + (scalingAdjustment == 0 ? clusterInfo.getLostNodes() : scalingAdjustment));
+            return scaleTo(currentNodeCount, desiredNodeCount);
         }
         return 0;
     }

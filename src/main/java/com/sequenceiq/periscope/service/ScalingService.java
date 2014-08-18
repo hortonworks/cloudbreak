@@ -12,16 +12,16 @@ public class ScalingService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ScalingService.class);
 
     public void scale(Cluster cluster) {
-        int newNodeCount = cluster.scale();
-        if (newNodeCount > 0) {
+        int desiredNodeCount = cluster.scale();
+        if (desiredNodeCount > 0) {
             int totalNodes = cluster.getTotalNodes();
-            if (newNodeCount > totalNodes) {
-                scaleUpTo(cluster, newNodeCount);
-            } else if (newNodeCount < totalNodes) {
-                scaleDownTo(cluster, newNodeCount);
-            } else {
-                LOGGER.info("Cluster size is optimal on cluster {}", cluster.getId());
+            if (desiredNodeCount > totalNodes) {
+                scaleUpTo(cluster, desiredNodeCount);
+            } else if (desiredNodeCount < totalNodes) {
+                scaleDownTo(cluster, desiredNodeCount);
             }
+        } else {
+            LOGGER.info("No scaling activity on {}", cluster.getId());
         }
     }
 

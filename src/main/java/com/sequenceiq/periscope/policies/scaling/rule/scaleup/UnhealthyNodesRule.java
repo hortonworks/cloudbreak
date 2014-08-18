@@ -27,8 +27,10 @@ public class UnhealthyNodesRule extends AbstractScalingRule implements ScalingRu
     public int scale(ClusterMetricsInfo clusterInfo) {
         if (isUnhealthyNodesLimitExceed(clusterInfo)) {
             int scalingAdjustment = getScalingAdjustment();
-            return min(getLimit(), getCurrentNodeCount(clusterInfo)
+            int currentNodeCount = getCurrentNodeCount(clusterInfo);
+            int desiredNodeCount = min(getLimit(), currentNodeCount
                     + (scalingAdjustment == 0 ? clusterInfo.getUnhealthyNodes() : scalingAdjustment));
+            return scaleTo(currentNodeCount, desiredNodeCount);
         }
         return 0;
     }

@@ -16,7 +16,7 @@ public interface ScalingRule extends NamedRule {
     void init(Map<String, String> config);
 
     /**
-     * Scale up or down to the required number of nodes.
+     * Scale up or down to the desired number of nodes.
      *
      * @param clusterInfo cluster metrics obtained from the cluster
      */
