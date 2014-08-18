@@ -39,8 +39,6 @@ public class AlarmController {
     public ResponseEntity<AlarmsJson> getAlarms(@PathVariable String clusterId) throws ClusterNotFoundException {
         List<Alarm> alarms = scalingService.getAlarms(clusterId);
         List<AlarmJson> metrics = alarmConverter.convertAllToJson(alarms);
-        AlarmsJson alarmsJson = new AlarmsJson();
-        alarmsJson.setAlarms(metrics);
-        return new ResponseEntity<>(alarmsJson, HttpStatus.OK);
+        return new ResponseEntity<>(new AlarmsJson(metrics), HttpStatus.OK);
     }
 }

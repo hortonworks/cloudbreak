@@ -1,4 +1,4 @@
-package com.sequenceiq.periscope.monitor.model;
+package com.sequenceiq.periscope.model;
 
 import java.util.List;
 

@@ -8,7 +8,6 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.periscope.model.Alarm;
-import com.sequenceiq.periscope.model.ScalingPolicy;
 import com.sequenceiq.periscope.monitor.event.ClusterMetricsUpdateEvent;
 import com.sequenceiq.periscope.registry.Cluster;
 import com.sequenceiq.periscope.service.ClusterNotFoundException;
@@ -36,8 +35,7 @@ public class ClusterMetricsWatcher implements ApplicationListener<ClusterMetrics
             for (Alarm alarm : cluster.getAlarms()) {
                 double value = getMetricValue(metrics, alarm);
                 if (alarmHit(value, alarm)) {
-                    ScalingPolicy scalingPolicy = alarm.getScalingPolicy();
-                    scalingService.scale(cluster, scalingPolicy);
+                    scalingService.scale(cluster, alarm.getScalingPolicy());
                 }
             }
         } catch (ClusterNotFoundException e) {

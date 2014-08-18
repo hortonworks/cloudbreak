@@ -1,6 +1,7 @@
 package com.sequenceiq.periscope.model;
 
 public enum Metric {
+
     PENDING_CONTAINERS("containersPending"),
     PENDING_APPLICATIONS("appsPending"),
     LOST_NODES("lostNodes"),

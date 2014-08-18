@@ -23,15 +23,11 @@ public class ScalingService {
 
     public void scale(Cluster cluster, ScalingPolicy policy) {
         int desiredNodeCount = getDesiredNodeCount(cluster, policy);
-        if (desiredNodeCount > 0) {
-            int totalNodes = cluster.getTotalNodes();
-            if (desiredNodeCount > totalNodes) {
-                scaleUpTo(cluster, desiredNodeCount);
-            } else if (desiredNodeCount < totalNodes) {
-                scaleDownTo(cluster, desiredNodeCount);
-            } else {
-                LOGGER.info("Cluster size is optimal on {}", cluster.getId());
-            }
+        int totalNodes = cluster.getTotalNodes();
+        if (desiredNodeCount > totalNodes) {
+            scaleUpTo(cluster, desiredNodeCount);
+        } else if (desiredNodeCount < totalNodes) {
+            scaleDownTo(cluster, desiredNodeCount);
         } else {
             LOGGER.info("No scaling activity on {}", cluster.getId());
         }
@@ -52,10 +48,6 @@ public class ScalingService {
 
     public List<Alarm> getAlarms(String clusterId) throws ClusterNotFoundException {
         return clusterService.get(clusterId).getAlarms();
-    }
-
-    public ScalingPolicy getScalingPolicy(String clusterId, String policyId) throws ClusterNotFoundException {
-        return getScalingPolicy(clusterService.get(clusterId), policyId);
     }
 
     public ScalingPolicy getScalingPolicy(Cluster cluster, String policyId) {
@@ -88,8 +80,7 @@ public class ScalingService {
     }
 
     public void setAutoScalingGroup(String clusterId, AutoScalingGroup autoScalingGroup) throws ClusterNotFoundException {
-        Cluster cluster = clusterService.get(clusterId);
-        cluster.setAutoScalingGroup(autoScalingGroup);
+        clusterService.get(clusterId).setAutoScalingGroup(autoScalingGroup);
     }
 
     private int getDesiredNodeCount(Cluster cluster, ScalingPolicy policy) {

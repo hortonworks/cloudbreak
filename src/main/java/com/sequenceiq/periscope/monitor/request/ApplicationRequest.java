@@ -17,9 +17,9 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestOperations;
 
+import com.sequenceiq.periscope.model.QueueAppUpdate;
 import com.sequenceiq.periscope.monitor.event.ApplicationUpdateEvent;
 import com.sequenceiq.periscope.monitor.event.UpdateFailedEvent;
-import com.sequenceiq.periscope.monitor.model.QueueAppUpdate;
 import com.sequenceiq.periscope.registry.Cluster;
 import com.sequenceiq.periscope.service.configuration.ConfigParam;
 

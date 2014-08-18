@@ -1,8 +1,6 @@
 package com.sequenceiq.periscope.model;
 
-import com.sequenceiq.periscope.rest.json.Json;
-
-public class Alarm implements Json {
+public class Alarm {
 
     private String id;
     private String alarmName;

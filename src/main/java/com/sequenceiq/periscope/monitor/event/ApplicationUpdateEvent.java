@@ -6,7 +6,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.SchedulerInfo;
 import org.springframework.context.ApplicationEvent;
 
-import com.sequenceiq.periscope.monitor.model.QueueAppUpdate;
+import com.sequenceiq.periscope.model.QueueAppUpdate;
 
 public class ApplicationUpdateEvent extends ApplicationEvent implements UpdateEvent {
 
