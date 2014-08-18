@@ -128,6 +128,9 @@ public class ClusterMetricsWatcher implements ApplicationListener<ClusterMetrics
             setCurrentTime(alarm);
         } else {
             result = System.currentTimeMillis() - hitsSince > alarm.getPeriod() * SEC_IN_MS;
+            if (result) {
+                resetTime(alarm);
+            }
         }
         return result;
     }

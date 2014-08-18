@@ -23,7 +23,7 @@ curl -X POST localhost:8081/configuration/multi-node | jq .
 curl -X POST -H "Content-Type: application/json" -d '{"setup":[{"name":"default", "capacity":60}, {"name":"high", "capacity":40}]}' localhost:8081/configuration/multi-node/queue | jq .
 
 # set metric alarms
-curl -X POST -H "Content-Type: application/json" -d '{"alarms":[{"id":"alarm1","alarmName":"pendingContainers","description":"Pending containers above","metric":"PENDING_CONTAINERS","threshold":10,"comparisonOperator":"GREATER_THAN","period":10},{"id":"alarm2","alarmName":"globalResources","description":"Low global resource","metric":"GLOBAL_RESOURCES","threshold":0.2,"comparisonOperator":"LESS_THAN","period":10}]}' localhost:8081/clusters/multi-node/alarms | jq .
+curl -X POST -H "Content-Type: application/json" -d '{"alarms":[{"id":"alarm1","alarmName":"pendingContainers","description":"Pending containers above","metric":"PENDING_CONTAINERS","threshold":10,"comparisonOperator":"GREATER_THAN","period":10},{"id":"alarm2","alarmName":"globalResources","description":"Low global resource","metric":"GLOBAL_RESOURCES","threshold":1.0,"comparisonOperator":"EQUALS","period":10}]}' localhost:8081/clusters/multi-node/alarms | jq .
 curl -X GET localhost:8081/clusters/multi-node/alarms | jq .
 
 # set scaling policy
