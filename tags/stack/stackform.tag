@@ -52,6 +52,15 @@
     </div>
     <!-- .form-group -->
 
+    <div class="form-group" >
+        <label class="col-sm-3 control-label" for="emailneeded">Email notification when cluster is provisioned</label>
+
+        <div class="col-sm-9">
+            <input type="checkbox" class="form-control" id="emailneeded" ng-model="emailneeded" name="emailneeded">
+
+        </div>
+        <!-- .col-sm-9 -->
+    </div>
     <div class="row btn-row">
         <div class="col-sm-9 col-sm-offset-3">
             <a href="#" id="createCluster" class="btn btn-success btn-block" ng-disabled="clusterCreationForm.$invalid" role="button" ng-click="createStack()"><i

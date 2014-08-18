@@ -644,7 +644,8 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     },
                     data: {
                         clusterName: cl_clusterName.value,
-                        blueprintId: selectBlueprint.value
+                        blueprintId: selectBlueprint.value,
+                        emailNeeded: emailneeded.checked
                     }
                 }).success(function (data, status, headers, config) {
                     $scope.modifyStatusMessage($rootScope.error_msg.cluster_success1 + cl_clusterName.value + $rootScope.error_msg.cluster_success2);
