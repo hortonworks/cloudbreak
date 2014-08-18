@@ -13,4 +13,8 @@ public interface UserService {
 
     Long registerUserInAccount(User user, Account account);
 
+    String inviteUser(User admin, String email);
+
+    User registerUserUponInvite(String hash);
+
 }

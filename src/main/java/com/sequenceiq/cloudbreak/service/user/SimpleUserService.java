@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Account;
 import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.domain.UserRole;
 import com.sequenceiq.cloudbreak.domain.UserStatus;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
 import com.sequenceiq.cloudbreak.service.blueprint.DefaultBlueprintLoaderService;
@@ -129,13 +130,57 @@ public class SimpleUserService implements UserService {
         }
     }
 
+    @Override
+    public String inviteUser(User adminUser, String email) {
+        String inviteHash = generateInviteToken(adminUser.getAccount().getName(), email);
+        // create a new user with the account, email and hash
+        User invitedUser = new User();
+        invitedUser.setAccount(adminUser.getAccount());
+        invitedUser.setEmail(email);
+        invitedUser.setConfToken(inviteHash);
+        invitedUser.setStatus(UserStatus.INVITED);
+        invitedUser.getUserRoles().add(UserRole.ACCOUNT_USER);
+
+        invitedUser = userRepository.save(invitedUser);
+
+        MimeMessagePreparator mimeMessagePreparator = prepareMessage(adminUser, getInviteTemplate(), getInviteRegistrationPath(),
+                "Cloudbreak - invitation");
+        sendConfirmationEmail(mimeMessagePreparator);
+
+        return inviteHash;
+    }
+
+    @Override
+    public User registerUserUponInvite(String inviteToken) {
+        LOGGER.debug("Registering upon invitation. Token: {}", inviteToken);
+        User registeringUser = userRepository.findUserByConfToken(inviteToken);
+        if (!UserStatus.INVITED.equals(registeringUser.getStatus())) {
+            throw new IllegalStateException("The user has already been registered!");
+        }
+        registeringUser.setStatus(UserStatus.ACTIVE);
+        registeringUser.setConfToken(null);
+        registeringUser.setRegistrationDate(new Date());
+        registeringUser = userRepository.save(registeringUser);
+        return registeringUser;
+    }
+
     private String getResetTemplate() {
         return uiEnabled ? "templates/reset-email.ftl" : "templates/reset-email-wout-ui.ftl";
     }
 
+    private String getInviteTemplate() {
+        return uiEnabled ? "templates/invite-email.ftl" : "templates/invite-email-wout-ui.ftl";
+    }
+
+
     private String getRegisterUserConfirmPath() {
         return uiEnabled ? "#?confirmSignUpToken=" : "/users/confirm/";
     }
+
+    private String getInviteRegistrationPath() {
+        return uiEnabled ? "#?inviteToken=" : "/users/invite/";
+    }
+
 
     private String getResetPasswordConfirmPath() {
         return uiEnabled ? "#?resetToken=" : "/password/reset/";
@@ -161,6 +206,12 @@ public class SimpleUserService implements UserService {
         return text;
     }
 
+    private String generateInviteToken(String accountName, String email) {
+        LOGGER.debug("Generating registration id ...");
+        String textToDigest = accountName + email;
+        return DigestUtils.md5DigestAsHex(textToDigest.getBytes());
+    }
+
     @VisibleForTesting
     protected MimeMessagePreparator prepareMessage(final User user, final String template, final String confirmPath, final String subject) {
         return new MimeMessagePreparator() {
@@ -168,11 +219,12 @@ public class SimpleUserService implements UserService {
                 MimeMessageHelper message = new MimeMessageHelper(mimeMessage);
                 message.setFrom(msgFrom);
                 message.setTo(user.getEmail());
-                message.setSubject("Cloudbreak - confirm registration");
+                message.setSubject(subject);
                 message.setText(getEmailBody(user, template, confirmPath), true);
             }
         };
     }
+
 
     private String getConfirmLinkPath() {
         return uiEnabled ? uiAddress : hostAddress;

@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.controller.json.IdJson;
 import com.sequenceiq.cloudbreak.controller.json.UserJson;
 import com.sequenceiq.cloudbreak.converter.UserConverter;
 import com.sequenceiq.cloudbreak.domain.Account;
+import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.service.account.AccountService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
@@ -49,7 +50,15 @@ public class UserRegistrationController {
     public ResponseEntity<String> confirmRegistration(@PathVariable String confToken) {
         LOGGER.debug("Confirming registration (token: {})... ", confToken);
         String activeUser = userService.confirmRegistration(confToken);
-        LOGGER.debug("Registration confirmed (token: {}) for {}", new Object[] { confToken, activeUser });
+        LOGGER.debug("Registration confirmed (token: {}) for {}", new Object[]{ confToken, activeUser });
         return new ResponseEntity<>(activeUser, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/invite/{inviteToken}", method = RequestMethod.GET)
+    public ResponseEntity<Long> registerFromInvite(@PathVariable String inviteToken) {
+        LOGGER.debug("Registering after invite (token: {})... ", inviteToken);
+        User activeUser = userService.registerUserUponInvite(inviteToken);
+        LOGGER.debug("Registration confirmed (token: {}) for {}", new Object[]{ inviteToken, activeUser });
+        return new ResponseEntity<>(activeUser.getId(), HttpStatus.OK);
     }
 }
