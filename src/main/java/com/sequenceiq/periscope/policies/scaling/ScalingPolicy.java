@@ -34,6 +34,8 @@ public class ScalingPolicy {
     private final Map<String, Map<String, String>> scaleUpConfig;
     private final Map<String, Map<String, String>> scaleDownConfig;
     private final int coolDown;
+    private final int minSize;
+    private final int maxSize;
     private long lastScalingActivityStart;
 
     static {
@@ -48,14 +50,16 @@ public class ScalingPolicy {
         DEFAULT_RULES = Collections.unmodifiableMap(rules);
     }
 
-    public ScalingPolicy(int coolDown,
+    public ScalingPolicy(int coolDown, int minSize, int maxSize,
             Map<String, Map<String, String>> upConfig, Map<String, Map<String, String>> downConfig) {
-        this(coolDown, upConfig, downConfig, null);
+        this(coolDown, minSize, maxSize, upConfig, downConfig, null);
     }
 
-    public ScalingPolicy(int coolDown,
+    public ScalingPolicy(int coolDown, int minSize, int maxSize,
             Map<String, Map<String, String>> upConfig, Map<String, Map<String, String>> downConfig, URL url) {
         this.coolDown = coolDown;
+        this.minSize = minSize;
+        this.maxSize = maxSize;
         this.scaleUpConfig = upConfig;
         this.scaleDownConfig = downConfig;
         URLClassLoader classLoader = createClassLoader(url);
@@ -75,12 +79,25 @@ public class ScalingPolicy {
         return coolDown;
     }
 
+    public int getMinSize() {
+        return minSize;
+    }
+
+    public int getMaxSize() {
+        return maxSize;
+    }
+
     public int scale(ClusterMetricsInfo clusterInfo) {
         int scaleTo = 0;
         if (canScale()) {
             scaleTo = scale(clusterInfo, scaleUpRules);
             scaleTo = scaleTo == 0 ? scale(clusterInfo, scaleDownRules) : scaleTo;
             if (scaleTo != 0) {
+                if (scaleTo > maxSize) {
+                    scaleTo = maxSize;
+                } else if (scaleTo < minSize) {
+                    scaleTo = minSize;
+                }
                 lastScalingActivityStart = System.currentTimeMillis();
             }
         }

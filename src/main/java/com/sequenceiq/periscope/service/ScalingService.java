@@ -19,6 +19,8 @@ public class ScalingService {
                 scaleUpTo(cluster, desiredNodeCount);
             } else if (desiredNodeCount < totalNodes) {
                 scaleDownTo(cluster, desiredNodeCount);
+            } else {
+                LOGGER.info("Cluster size is optimal on {}", cluster.getId());
             }
         } else {
             LOGGER.info("No scaling activity on {}", cluster.getId());

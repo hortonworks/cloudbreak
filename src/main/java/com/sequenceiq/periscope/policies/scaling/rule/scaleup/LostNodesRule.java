@@ -1,7 +1,5 @@
 package com.sequenceiq.periscope.policies.scaling.rule.scaleup;
 
-import static java.lang.Math.min;
-
 import java.util.Map;
 
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.ClusterMetricsInfo;
@@ -18,7 +16,6 @@ public class LostNodesRule extends AbstractScalingRule implements ScalingRule {
     @Override
     public void init(Map<String, String> config) {
         setName(NAME);
-        setLimit(config.get(RuleProperties.LIMIT));
         setScalingAdjustment(config.get(RuleProperties.SCALING_ADJUSTMENT));
         this.lostNodesLimit = Integer.valueOf(config.get("lostNodes"));
     }
@@ -28,8 +25,8 @@ public class LostNodesRule extends AbstractScalingRule implements ScalingRule {
         if (isLostNodesLimitExceed(clusterInfo)) {
             int scalingAdjustment = getScalingAdjustment();
             int currentNodeCount = getCurrentNodeCount(clusterInfo);
-            int desiredNodeCount = min(getLimit(), currentNodeCount
-                    + (scalingAdjustment == 0 ? clusterInfo.getLostNodes() : scalingAdjustment));
+            int desiredNodeCount = currentNodeCount +
+                    (scalingAdjustment == 0 ? clusterInfo.getLostNodes() : scalingAdjustment);
             return scaleTo(currentNodeCount, desiredNodeCount);
         }
         return 0;

@@ -5,17 +5,11 @@ import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.ClusterMetricsIn
 public abstract class AbstractScalingRule implements ScalingRule {
 
     private String name;
-    private int limit;
     private int scalingAdjustment;
 
     @Override
     public String getName() {
         return name;
-    }
-
-    @Override
-    public int getLimit() {
-        return limit;
     }
 
     @Override
@@ -25,10 +19,6 @@ public abstract class AbstractScalingRule implements ScalingRule {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public void setLimit(String limit) {
-        this.limit = toInt(limit);
     }
 
     public void setScalingAdjustment(String scalingAdjustment) {

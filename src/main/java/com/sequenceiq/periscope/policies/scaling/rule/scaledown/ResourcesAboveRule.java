@@ -1,7 +1,6 @@
 package com.sequenceiq.periscope.policies.scaling.rule.scaledown;
 
 import static com.sequenceiq.periscope.utils.ClusterUtils.computeFreeClusterResourceRate;
-import static java.lang.Math.max;
 
 import java.util.Map;
 
@@ -19,7 +18,6 @@ public class ResourcesAboveRule extends AbstractScalingRule implements ScalingRu
     @Override
     public void init(Map<String, String> config) {
         setName(NAME);
-        setLimit(config.get(RuleProperties.LIMIT));
         setScalingAdjustment(config.get(RuleProperties.SCALING_ADJUSTMENT));
         this.freeResourceRate = Double.valueOf(config.get("freeResourceRate"));
     }
@@ -28,7 +26,7 @@ public class ResourcesAboveRule extends AbstractScalingRule implements ScalingRu
     public int scale(ClusterMetricsInfo clusterInfo) {
         if (isAboveThreshold(clusterInfo)) {
             int currentNodeCount = getCurrentNodeCount(clusterInfo);
-            int desiredNodeCount = max(getLimit(), currentNodeCount - getScalingAdjustment());
+            int desiredNodeCount = currentNodeCount - getScalingAdjustment();
             return scaleTo(currentNodeCount, desiredNodeCount);
         }
         return 0;

@@ -11,15 +11,21 @@ public class ScalingPolicyJson implements Json {
 
     @JsonProperty("cooldown")
     private int coolDown;
+    @JsonProperty("min-size")
+    private int minSize;
+    @JsonProperty("max-size")
+    private int maxSize;
     private Map<String, Map<String, String>> scaleUpRules;
     private Map<String, Map<String, String>> scaleDownRules;
 
     public ScalingPolicyJson() {
     }
 
-    public ScalingPolicyJson(int coolDown,
+    public ScalingPolicyJson(int coolDown, int minSize, int maxSize,
             Map<String, Map<String, String>> scaleUpRules, Map<String, Map<String, String>> scaleDownRules) {
         this.coolDown = coolDown;
+        this.minSize = minSize;
+        this.maxSize = maxSize;
         this.scaleUpRules = scaleUpRules;
         this.scaleDownRules = scaleDownRules;
     }
@@ -48,9 +54,25 @@ public class ScalingPolicyJson implements Json {
         this.coolDown = coolDown;
     }
 
+    public int getMinSize() {
+        return minSize;
+    }
+
+    public void setMinSize(int minSize) {
+        this.minSize = minSize;
+    }
+
+    public int getMaxSize() {
+        return maxSize;
+    }
+
+    public void setMaxSize(int maxSize) {
+        this.maxSize = maxSize;
+    }
+
     public static ScalingPolicyJson emptyJson() {
         Map<String, Map<String, String>> emptyMap = new HashMap<>();
-        return new ScalingPolicyJson(0, emptyMap, emptyMap);
+        return new ScalingPolicyJson(0, 0, 0, emptyMap, emptyMap);
     }
 
 }

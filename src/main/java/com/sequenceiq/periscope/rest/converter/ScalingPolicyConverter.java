@@ -10,11 +10,13 @@ public class ScalingPolicyConverter extends AbstractConverter<ScalingPolicyJson,
 
     @Override
     public ScalingPolicy convert(ScalingPolicyJson source) {
-        return new ScalingPolicy(source.getCoolDown(), source.getScaleUpRules(), source.getScaleDownRules());
+        return new ScalingPolicy(source.getCoolDown(), source.getMinSize(),
+                source.getMaxSize(), source.getScaleUpRules(), source.getScaleDownRules());
     }
 
     @Override
     public ScalingPolicyJson convert(ScalingPolicy source) {
-        return new ScalingPolicyJson(source.getCoolDown(), source.getScaleUpConfig(), source.getScaleDownConfig());
+        return new ScalingPolicyJson(source.getCoolDown(), source.getMinSize(),
+                source.getMaxSize(), source.getScaleUpConfig(), source.getScaleDownConfig());
     }
 }
