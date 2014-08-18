@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.user;
 
 import com.sequenceiq.cloudbreak.domain.Account;
 import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.domain.UserStatus;
 
 public interface UserService {
 
@@ -16,5 +17,7 @@ public interface UserService {
     String inviteUser(User admin, String email);
 
     User registerUserUponInvite(String hash);
+
+    User setUserStatus(Long userId, UserStatus userStatus);
 
 }

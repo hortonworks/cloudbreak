@@ -164,6 +164,15 @@ public class SimpleUserService implements UserService {
         return registeringUser;
     }
 
+    @Override
+    public User setUserStatus(Long userId, UserStatus userStatus) {
+        User user = userRepository.findOne(userId);
+        LOGGER.debug("Modifying user: {};  setting status from: [{}] to: [{}]", user.getStatus(), userStatus);
+        user.setStatus(userStatus);
+        user = userRepository.save(user);
+        return user;
+    }
+
     private String getResetTemplate() {
         return uiEnabled ? "templates/reset-email.ftl" : "templates/reset-email-wout-ui.ftl";
     }
