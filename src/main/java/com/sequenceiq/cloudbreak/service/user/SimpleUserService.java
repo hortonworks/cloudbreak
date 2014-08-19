@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.user;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -130,7 +131,7 @@ public class SimpleUserService implements UserService {
     }
 
     @Override
-    public String inviteUser(User adminUser, String email) {
+    public String inviteUser(User adminUser, String email, UserRole role) {
         String inviteHash = generateInviteToken(adminUser.getAccount().getName(), email);
         // create a new user with the account, email and hash
         User invitedUser = new User();
@@ -138,7 +139,7 @@ public class SimpleUserService implements UserService {
         invitedUser.setEmail(email);
         invitedUser.setConfToken(inviteHash);
         invitedUser.setStatus(UserStatus.INVITED);
-        invitedUser.getUserRoles().add(UserRole.ACCOUNT_USER);
+        invitedUser.getUserRoles().add(role);
         invitedUser.setFirstName(UUID.randomUUID().toString());
         invitedUser.setLastName(UUID.randomUUID().toString());
         invitedUser.setPassword(UUID.randomUUID().toString());
@@ -202,10 +203,24 @@ public class SimpleUserService implements UserService {
     @Override
     public User setUserStatus(Long userId, UserStatus userStatus) {
         User user = userRepository.findOne(userId);
+        if (user == null) {
+            throw new IllegalStateException(String.format("User with id [%s] not found", userId));
+        }
         LOGGER.debug("Modifying user: {};  setting status from: [{}] to: [{}]", user.getStatus(), userStatus);
         user.setStatus(userStatus);
         user = userRepository.save(user);
         return user;
+    }
+
+    @Override
+    public User setUserRoles(Long userId, Set<UserRole> roles) {
+        User user = userRepository.findOne(userId);
+        LOGGER.debug("Modifying user: {};  setting roles from: [{}] to: [{}]", user.getUserRoles(), roles);
+        user.getUserRoles().clear();
+        user.getUserRoles().addAll(roles);
+        user = userRepository.save(user);
+        return user;
+
     }
 
     private String getResetTemplate() {

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.controller.json.UserJson;
 import com.sequenceiq.cloudbreak.converter.UserConverter;
 import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.domain.UserRole;
 import com.sequenceiq.cloudbreak.domain.UserStatus;
 import com.sequenceiq.cloudbreak.service.account.AccountService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
@@ -33,7 +34,15 @@ public class DefaultAdminUserFacade implements AdminUserFacade {
     @Override
     public String inviteUser(User admin, String email) {
         LOGGER.debug("Inviting {} ...", email);
-        String hash = userService.inviteUser(admin, email);
+        String hash = userService.inviteUser(admin, email, UserRole.ACCOUNT_USER);
+        LOGGER.debug("Invitation hash {}.", hash);
+        return hash;
+    }
+
+    @Override
+    public String inviteAdmin(User admin, String email) {
+        LOGGER.debug("Inviting {} ...", email);
+        String hash = userService.inviteUser(admin, email, UserRole.ACCOUNT_ADMIN);
         LOGGER.debug("Invitation hash {}.", hash);
         return hash;
     }
@@ -58,5 +67,14 @@ public class DefaultAdminUserFacade implements AdminUserFacade {
     public List<UserJson> accountUsers(User admin) {
         Set<User> accountUserSet = accountService.accountUsers(admin.getAccount().getId());
         return new ArrayList<UserJson>(userConverter.convertAllEntityToJson(accountUserSet));
+    }
+
+    @Override
+    public UserJson putUserInRoles(Long userId, Set<UserRole> roles) {
+        LOGGER.debug("Dectivating user with id [{}] ...");
+        User user = userService.setUserRoles(userId, roles);
+        LOGGER.debug("User with id [{}] deactivated");
+        return userConverter.convert(user);
+
     }
 }

@@ -14,8 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.sequenceiq.cloudbreak.controller.json.UserActivationRequest;
+import com.sequenceiq.cloudbreak.controller.json.InviteRequest;
 import com.sequenceiq.cloudbreak.controller.json.UserJson;
+import com.sequenceiq.cloudbreak.controller.json.UserUpdateRequest;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.facade.AdminUserFacade;
 import com.sequenceiq.cloudbreak.security.CurrentUser;
@@ -31,25 +32,38 @@ public class AdminUserController {
 
     @RequestMapping(method = RequestMethod.POST, value = "/users/invite")
     @ResponseBody
-    public ResponseEntity<String> inviteUser(@CurrentUser User user, @RequestBody String email) {
-        String hash = adminUserFacade.inviteUser(user, email);
+    public ResponseEntity<String> inviteUser(@CurrentUser User user, @RequestBody InviteRequest inviteRequest) {
+        String hash = null;
+        if (inviteRequest.isAdmin()) {
+            hash = adminUserFacade.inviteAdmin(user, inviteRequest.getEmail());
+        } else {
+            hash = adminUserFacade.inviteUser(user, inviteRequest.getEmail());
+        }
         return new ResponseEntity<>(hash, HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/users/{userId}")
     @ResponseBody
-    public ResponseEntity<UserJson> manageUserStatus(@CurrentUser User user, @RequestBody UserActivationRequest activationRequest,
+    public ResponseEntity<UserJson> updateUser(@CurrentUser User admin, @RequestBody UserUpdateRequest userUpdateRequest,
             @PathVariable("userId") Long userId) {
         UserJson modifiedUser = null;
-        switch (activationRequest.getUserStatus()) {
-            case ACTIVE:
-                modifiedUser = adminUserFacade.activateUser(userId);
-                break;
-            case DISABLED:
-                modifiedUser = adminUserFacade.deactivateUser(userId);
-                break;
-            default:
-                throw new UnsupportedOperationException(String.format("Unsupported status change to %s", activationRequest.getUserStatus().name()));
+        if (userUpdateRequest.isStatusUpdate()) {
+            LOGGER.debug("Status update request received for user id: {}, status: {}", userId, userUpdateRequest.getUserStatus());
+            switch (userUpdateRequest.getUserStatus()) {
+                case ACTIVE:
+                    modifiedUser = adminUserFacade.activateUser(userId);
+                    break;
+                case DISABLED:
+                    modifiedUser = adminUserFacade.deactivateUser(userId);
+                    break;
+                default:
+                    throw new BadRequestException(String.format("Unsupported status change to %s", userUpdateRequest.getUserStatus().name()));
+            }
+        } else if (userUpdateRequest.isRoleUpdate()) {
+            LOGGER.debug("Role update request received for user id: {}, roles: {}", userId, userUpdateRequest.getUserRoles());
+            modifiedUser = adminUserFacade.putUserInRoles(userId, userUpdateRequest.getUserRoles());
+        } else {
+            throw new BadRequestException("Invalid UserUpdate request!");
         }
         return new ResponseEntity<>(modifiedUser, HttpStatus.OK);
     }
@@ -60,5 +74,6 @@ public class AdminUserController {
         List<UserJson> accountUsers = adminUserFacade.accountUsers(admin);
         return new ResponseEntity<>(accountUsers, HttpStatus.OK);
     }
+
 }
 
