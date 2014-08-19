@@ -5,23 +5,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import javax.mail.internet.MimeMessage;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.MailSender;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.mail.javamail.MimeMessagePreparator;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import org.springframework.util.DigestUtils;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Account;
@@ -30,8 +22,7 @@ import com.sequenceiq.cloudbreak.domain.UserRole;
 import com.sequenceiq.cloudbreak.domain.UserStatus;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
 import com.sequenceiq.cloudbreak.service.blueprint.DefaultBlueprintLoaderService;
-
-import freemarker.template.Configuration;
+import com.sequenceiq.cloudbreak.service.email.EmailService;
 
 @Service
 public class SimpleUserService implements UserService {
@@ -39,12 +30,6 @@ public class SimpleUserService implements UserService {
 
     @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private MailSender mailSender;
-
-    @Autowired
-    private Configuration freemarkerConfiguration;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -62,6 +47,9 @@ public class SimpleUserService implements UserService {
     private boolean uiEnabled;
 
     @Autowired
+    private EmailService emailService;
+
+    @Autowired
     private DefaultBlueprintLoaderService defaultBlueprintLoaderService;
 
     @Override
@@ -74,9 +62,14 @@ public class SimpleUserService implements UserService {
             User savedUser = userRepository.save(user);
 
             LOGGER.info("User '{}' for account '{}' successfully registered", savedUser.getId(), account.getId());
-            MimeMessagePreparator msgPreparator = prepareMessage(user, "templates/confirmation-email.ftl",
-                    getRegisterUserConfirmPath(), "Cloudbreak - confirm registration");
-            sendConfirmationEmail(msgPreparator);
+            Map<String, Object> model = new HashMap<>();
+            model.put("user", user);
+            model.put("confirm", getConfirmLinkPath() + getRegisterUserConfirmPath() + user.getConfToken());
+
+            String messageText = emailService.messageText(model, "templates/confirmation-email.ftl");
+            MimeMessagePreparator msgPreparator = emailService.messagePreparator(user.getEmail(), msgFrom, "Cloudbreak - confirm registration", messageText);
+            emailService.sendEmail(msgPreparator);
+
             return savedUser.getId();
         } else {
             throw new BadRequestException(String.format("User with email '%s' already exists.", user.getEmail()));
@@ -106,9 +99,14 @@ public class SimpleUserService implements UserService {
             String confToken = DigestUtils.md5DigestAsHex(UUID.randomUUID().toString().getBytes());
             user.setConfToken(confToken);
             User updatedUser = userRepository.save(user);
-            MimeMessagePreparator msgPreparator = prepareMessage(user, getResetTemplate(),
-                    getResetPasswordConfirmPath(), "Cloudbreak - reset password");
-            sendConfirmationEmail(msgPreparator);
+
+            Map<String, Object> model = new HashMap<>();
+            model.put("user", user);
+            model.put("confirm", getConfirmLinkPath() + getResetPasswordConfirmPath() + user.getConfToken());
+
+            String emailText = emailService.messageText(model, getResetTemplate());
+            MimeMessagePreparator messagePreparator = emailService.messagePreparator(user.getEmail(), msgFrom, "Cloudbreak - reset password", emailText);
+            emailService.sendEmail(messagePreparator);
             return email;
         } else {
             LOGGER.warn("There's no user for email: {} ", email);
@@ -140,12 +138,19 @@ public class SimpleUserService implements UserService {
         invitedUser.setConfToken(inviteHash);
         invitedUser.setStatus(UserStatus.INVITED);
         invitedUser.getUserRoles().add(UserRole.ACCOUNT_USER);
+        invitedUser.setFirstName(UUID.randomUUID().toString());
+        invitedUser.setLastName(UUID.randomUUID().toString());
+        invitedUser.setPassword(UUID.randomUUID().toString());
 
         invitedUser = userRepository.save(invitedUser);
 
-        MimeMessagePreparator mimeMessagePreparator = prepareMessage(adminUser, getInviteTemplate(), getInviteRegistrationPath(),
-                "Cloudbreak - invitation");
-        sendConfirmationEmail(mimeMessagePreparator);
+        Map<String, Object> model = new HashMap<>();
+
+        model.put("invite", getInviteRegistrationPath() + invitedUser.getConfToken());
+        String emailText = emailService.messageText(model, getResetTemplate());
+
+        MimeMessagePreparator messagePreparator = emailService.messagePreparator(invitedUser.getEmail(), msgFrom, "Cloudbreak - invitation", emailText);
+        emailService.sendEmail(messagePreparator);
 
         return inviteHash;
     }
@@ -187,7 +192,7 @@ public class SimpleUserService implements UserService {
     }
 
     private String getInviteRegistrationPath() {
-        return uiEnabled ? "#?inviteToken=" : "/users/invite/";
+        return uiEnabled ? "#?inviteToken=" : "/admin/users/invite/";
     }
 
 
@@ -201,49 +206,14 @@ public class SimpleUserService implements UserService {
         return DigestUtils.md5DigestAsHex(textToDigest.getBytes());
     }
 
-    private String getEmailBody(User user, String template, String confirmPath) {
-        String text = null;
-        try {
-            Map<String, Object> model = new HashMap<>();
-            model.put("user", user);
-            model.put("confirm", getConfirmLinkPath() + confirmPath + user.getConfToken());
-            text = FreeMarkerTemplateUtils.processTemplateIntoString(freemarkerConfiguration.getTemplate(template, "UTF-8"), model);
-        } catch (Exception e) {
-            LOGGER.error("Confirmation email assembling failed. Exception: {}", e);
-            throw new BadRequestException("Failed to assemble confirmation email message", e);
-        }
-        return text;
-    }
-
     private String generateInviteToken(String accountName, String email) {
         LOGGER.debug("Generating registration id ...");
         String textToDigest = accountName + email;
         return DigestUtils.md5DigestAsHex(textToDigest.getBytes());
     }
 
-    @VisibleForTesting
-    protected MimeMessagePreparator prepareMessage(final User user, final String template, final String confirmPath, final String subject) {
-        return new MimeMessagePreparator() {
-            public void prepare(MimeMessage mimeMessage) throws Exception {
-                MimeMessageHelper message = new MimeMessageHelper(mimeMessage);
-                message.setFrom(msgFrom);
-                message.setTo(user.getEmail());
-                message.setSubject(subject);
-                message.setText(getEmailBody(user, template, confirmPath), true);
-            }
-        };
-    }
-
-
     private String getConfirmLinkPath() {
         return uiEnabled ? uiAddress : hostAddress;
-    }
-
-    @Async
-    public void sendConfirmationEmail(final MimeMessagePreparator preparator) {
-        LOGGER.info("Sending confirmation email ...");
-        ((JavaMailSender) mailSender).send(preparator);
-        LOGGER.info("Confirmation email sent");
     }
 
 }
