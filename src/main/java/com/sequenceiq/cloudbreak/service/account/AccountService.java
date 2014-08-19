@@ -17,10 +17,13 @@ public interface AccountService {
      * available in the given role by the account administrator.
      *
      * @param accountId the identifier of the account
-     * @param role the role the returned resources should be in
+     * @param role      the role the returned resources should be in
      * @return a User instance with the account wide resources in the given user
-     *         role
+     * role
      */
     User accountUserData(Long accountId, UserRole role);
+
+    Account findAccount(String accountName);
+
 
 }

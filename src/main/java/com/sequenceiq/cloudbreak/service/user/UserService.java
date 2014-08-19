@@ -20,4 +20,6 @@ public interface UserService {
 
     User setUserStatus(Long userId, UserStatus userStatus);
 
+    Long registerInvitedUser(User user, Account account);
+
 }

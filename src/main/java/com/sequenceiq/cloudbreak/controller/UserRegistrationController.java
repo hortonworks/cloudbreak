@@ -46,6 +46,17 @@ public class UserRegistrationController {
         return new ResponseEntity<>(new IdJson(id), HttpStatus.CREATED);
     }
 
+    @RequestMapping(method = RequestMethod.POST, value = "/invites")
+    @ResponseBody
+    public ResponseEntity<IdJson> registerAccountUser(@RequestBody @Valid UserJson userJson) {
+        LOGGER.info("Register user request arrived: [email: '{}']", userJson.getEmail());
+        String accountName = userJson.getCompany();
+        Account account = accountService.findAccount(accountName);
+        Long id = userService.registerInvitedUser(userConverter.convert(userJson), account);
+        return new ResponseEntity<>(new IdJson(id), HttpStatus.CREATED);
+    }
+
+
     @RequestMapping(value = "/confirm/{confToken}", method = RequestMethod.GET)
     public ResponseEntity<String> confirmRegistration(@PathVariable String confToken) {
         LOGGER.debug("Confirming registration (token: {})... ", confToken);

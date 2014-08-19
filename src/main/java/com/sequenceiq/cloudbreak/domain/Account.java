@@ -23,7 +23,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 @NamedQueries({
         @NamedQuery(
                 name = "Account.findByName",
-                query = "SELECT c FROM Account c WHERE c.name = :name"),
+                query = "SELECT c FROM Account c WHERE c.name = :accountName"),
         @NamedQuery(
                 name = "Account.accountUsers",
                 query = "SELECT cu FROM User cu "

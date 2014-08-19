@@ -14,4 +14,6 @@ public interface AccountRepository extends CrudRepository<Account, Long> {
 
     User findAccountAdmin(@Param("accountId") Long accountId);
 
+    Account findByName(@Param("accountName") String accountName);
+
 }

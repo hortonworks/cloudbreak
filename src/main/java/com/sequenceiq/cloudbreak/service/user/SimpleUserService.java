@@ -172,6 +172,27 @@ public class SimpleUserService implements UserService {
     }
 
     @Override
+    public Long registerInvitedUser(User registeringUser, Account account) {
+        User invitedUser = userRepository.findByEmail(registeringUser.getEmail());
+
+        if (invitedUser == null || !invitedUser.getStatus().equals(UserStatus.INVITED)) {
+            throw new BadRequestException(String.format("User with email '%s' is not invited!", registeringUser.getEmail()));
+        }
+
+        //invitedUser.setBlueprints(defaultBlueprintLoaderService.loadBlueprints(registeringUser));
+        invitedUser.setStatus(UserStatus.ACTIVE);
+        invitedUser.setConfToken(null);
+        invitedUser.setRegistrationDate(new Date());
+
+        invitedUser.setFirstName(registeringUser.getFirstName());
+        invitedUser.setLastName(registeringUser.getLastName());
+        invitedUser.setPassword(registeringUser.getPassword());
+        User savedUser = userRepository.save(invitedUser);
+
+        return savedUser.getId();
+    }
+
+    @Override
     public User setUserStatus(Long userId, UserStatus userStatus) {
         User user = userRepository.findOne(userId);
         LOGGER.debug("Modifying user: {};  setting status from: [{}] to: [{}]", user.getStatus(), userStatus);
@@ -188,7 +209,6 @@ public class SimpleUserService implements UserService {
         return uiEnabled ? "templates/invite-email.ftl" : "templates/invite-email-wout-ui.ftl";
     }
 
-
     private String getRegisterUserConfirmPath() {
         return uiEnabled ? "#?confirmSignUpToken=" : "/users/confirm/";
     }
@@ -196,7 +216,6 @@ public class SimpleUserService implements UserService {
     private String getInviteRegistrationPath() {
         return uiEnabled ? "#?inviteToken=" : "/admin/users/invite/";
     }
-
 
     private String getResetPasswordConfirmPath() {
         return uiEnabled ? "#?resetToken=" : "/password/reset/";
