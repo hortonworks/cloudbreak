@@ -1398,7 +1398,7 @@ A Hadoop cluster is a set of components and services launched in order to store,
 Periscope can work with any Hadoop 2/ YARN cluster provisioned with Apache Ambari, and supports any YARN application.
 
 ##Clusters [/clusters/{id}]
-###Add a cluster to be monitored[POST]
+###Add a cluster [POST]
 Add a Hadoop cluster to be monitored by Periscope. Note that Periscope does not require any pre-installation of components on cluster nodes. 
 To link a Hadoop cluster with Periscope the only required this is the Apache Ambari REST API endpoint.
 
@@ -1426,7 +1426,7 @@ To link a Hadoop cluster with Periscope the only required this is the Apache Amb
 
 
 ##  Clusters [/clusters/{id}]
-###Retrieve information about a cluster monitored[GET]
+###Retrieve cluster information [GET]
 
 + Parameters
     + id (required String `id`) ... The id of the cluster.
@@ -1448,7 +1448,7 @@ To link a Hadoop cluster with Periscope the only required this is the Apache Amb
         }
 
 ##  Clusters [/clusters/{id}]
-###Remove a cluster from being monitored[DELETE]
+###Remove a cluster [DELETE]
 
 + Parameters
     + id (required String `id`) ... The id of the cluster.
@@ -1469,7 +1469,7 @@ To link a Hadoop cluster with Periscope the only required this is the Apache Amb
         }
 
 ## Clusters [/clusters/{clusterId}/state]
-###Set the state of a cluster [POST]
+###Set state [POST]
 
 + Parameters
     + clusterId (required String `clusterID`) ... The id of the cluster.
@@ -1491,7 +1491,7 @@ To link a Hadoop cluster with Periscope the only required this is the Apache Amb
         }
 
 ## Clusters [/clusters/{clusterId}/movement]
-###Configure application movements within a cluster [POST]
+###Configure application movements [POST]
 Configure whether moveing the submitted applications between different queues to set a priority among them is allowed or not. 
 Based on our contribution to the CapacityScheduler [YARN-2248](https://issues.apache.org/jira/browse/YARN-2248) we made available to move running applications between queues.
 
@@ -1515,7 +1515,7 @@ Based on our contribution to the CapacityScheduler [YARN-2248](https://issues.ap
         }
 
 ##  Clusters [/clusters]
-###Retrieved information about all the monitored clusters[GET]
+###Retrieved cluster(s) information[GET]
 
 + Request
 
@@ -1539,7 +1539,7 @@ Based on our contribution to the CapacityScheduler [YARN-2248](https://issues.ap
 An alarm watches a metric over a specified time period, and used by one or more action or scaling policy based on the value of the metric relative to a given threshold over a number of time periods.
 
 ##Alarm [/clusters/{clusterId}/alarms]
-###Create an alarm for a cluster [POST]
+###Create an alarm [POST]
 
 + Parameters
     + clusterId (required String `clusterID`) ... The id of the cluster.
@@ -1596,7 +1596,7 @@ An alarm watches a metric over a specified time period, and used by one or more 
 
 
 ##Alarm [/clusters/{clusterId}/alarms]
-###Get the alarms for a cluster [GET]
+###Retrieve configured alarms [GET]
 
 + Parameters
     + clusterId (required String `clusterID`) ... The id of the cluster.
@@ -1635,7 +1635,7 @@ An alarm watches a metric over a specified time period, and used by one or more 
         }
 
 ##Alarm [/clusters/{clusterId}/alarms/{alarmId}]
-###Delete an alarm from a cluster [DELETE]
+###Delete an alarm [DELETE]
 
 + Parameters
     + clusterId (required String `clusterID`) ... The id of the cluster.
@@ -1791,7 +1791,7 @@ Periscope will do the heavy lifting and based on the alarms and the scaling poli
 A Hadoop YARN application is a workload submitted to a cluster. An application requests for resources from YARN Resource Manager. The resources are allocated as YARN containers.
 
 ##Applications [/clusters/{clusterId}/applications]
-###List the running applications and resources [GET]
+###List running applications and their resources [GET]
 
 + Parameters
     + clusterId (required String `clusterID`) ... The id of the cluster.
@@ -1829,7 +1829,7 @@ The CapacityScheduler is designed to run Hadoop applications as a shared, multi-
 Periscope facilites the reconfiguration of the CapacityScheduler, used by the application movement/re-prioritization of running applications.
 
 ##Configuration [/clusters/{clusterId}/configurations]
-###Reload the Hadoop YARN configuration [POST]
+###Reload Hadoop YARN configuration [POST]
 
 + Parameters
     + clusterId (required String `clusterID`) ... The id of the cluster.
