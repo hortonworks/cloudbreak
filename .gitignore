@@ -12,3 +12,4 @@
 *.jks
 atlassian*
 userdatas/
+out/

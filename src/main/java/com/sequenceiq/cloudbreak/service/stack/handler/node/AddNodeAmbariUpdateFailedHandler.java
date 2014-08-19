@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
-import com.sequenceiq.cloudbreak.service.stack.event.AddNodeSuccess;
+import com.sequenceiq.cloudbreak.service.stack.event.AddNodeFailed;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
@@ -18,7 +18,7 @@ import reactor.event.Event;
 import reactor.function.Consumer;
 
 @Service
-public class AddNodeAmbariUpdateFailedHandler implements Consumer<Event<AddNodeSuccess>> {
+public class AddNodeAmbariUpdateFailedHandler implements Consumer<Event<AddNodeFailed>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AddNodeAmbariUpdateFailedHandler.class);
 
@@ -29,8 +29,8 @@ public class AddNodeAmbariUpdateFailedHandler implements Consumer<Event<AddNodeS
     private ClusterRepository clusterRepository;
 
     @Override
-    public void accept(Event<AddNodeSuccess> event) {
-        AddNodeSuccess data = event.getData();
+    public void accept(Event<AddNodeFailed> event) {
+        AddNodeFailed data = event.getData();
         Cluster cluster = clusterRepository.findById(data.getClusterId());
         LOGGER.info("Accepted {} event.", ReactorConfig.ADD_NODE_AMBARI_UPDATE_NODE_FAILED_EVENT);
         websocketService.sendToTopicUser(cluster.getUser().getEmail(), WebsocketEndPoint.CLUSTER,

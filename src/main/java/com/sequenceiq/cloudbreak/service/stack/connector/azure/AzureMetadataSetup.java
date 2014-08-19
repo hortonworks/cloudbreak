@@ -4,8 +4,10 @@ import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStack
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.SERVICENAME;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -48,7 +50,6 @@ public class AzureMetadataSetup implements MetadataSetup {
     @Override
     public void setupMetadata(Stack stack) {
         AzureCredential azureCredential = (AzureCredential) stack.getCredential();
-
         String filePath = AzureCertificateService.getUserJksFileName(azureCredential, stack.getUser().emailAsFolder());
         AzureClient azureClient = azureStackUtil.createAzureClient(azureCredential, filePath);
         String name = stack.getName().replaceAll("\\s+", "");
@@ -63,27 +64,28 @@ public class AzureMetadataSetup implements MetadataSetup {
         AzureCredential azureCredential = (AzureCredential) stack.getCredential();
         String filePath = AzureCertificateService.getUserJksFileName(azureCredential, stack.getUser().emailAsFolder());
         AzureClient azureClient = azureStackUtil.createAzureClient(azureCredential, filePath);
-        Set<CoreInstanceMetaData> instanceMetaDatas = new HashSet<>();
-        for (Resource resource : resourceList) {
+        List<Resource> resources = new ArrayList<>();
+        for(Resource resource : resourceList) {
             if (ResourceType.VIRTUAL_MACHINE.equals(resource.getResourceType())) {
-                CoreInstanceMetaData metadata = getMetadata(stack, azureClient, resource);
-                if (metadata == null) {
-                    break;
-                }
-                instanceMetaDatas.add(metadata);
+                resources.add(resource);
             }
         }
+        Set<CoreInstanceMetaData> instanceMetaDatas = collectMetaData(stack, azureClient, resources);
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_NODE_UPDATE_METADATA_EVENT_COMPLETE, stack.getId());
         reactor.notify(ReactorConfig.ADD_NODE_UPDATE_METADATA_EVENT_COMPLETE,
                 Event.wrap(new AddNodeMetadataSetupComplete(CloudPlatform.AZURE, stack.getId(), instanceMetaDatas, resourceList, hostgroup)));
     }
 
-    private Set<CoreInstanceMetaData> collectMetaData(Stack stack, AzureClient azureClient) {
+    private Set<CoreInstanceMetaData> collectMetaData(Stack stack, AzureClient azureClient, List<Resource> resources) {
         Set<CoreInstanceMetaData> instanceMetaDatas = new HashSet<>();
-        for (Resource resource : stack.getResourcesByType(ResourceType.VIRTUAL_MACHINE)) {
+        for (Resource resource : resources) {
             instanceMetaDatas.add(getMetadata(stack, azureClient, resource));
         }
         return instanceMetaDatas;
+    }
+
+    private Set<CoreInstanceMetaData> collectMetaData(Stack stack, AzureClient azureClient) {
+        return collectMetaData(stack, azureClient, stack.getResourcesByType(ResourceType.VIRTUAL_MACHINE));
     }
 
     private CoreInstanceMetaData getMetadata(Stack stack, AzureClient azureClient, Resource resource) {
