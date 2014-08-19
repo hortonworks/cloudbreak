@@ -12,7 +12,7 @@ public interface UserService {
 
     String resetPassword(String confToken, String password);
 
-    Long registerUserInAccount(User user, Account account);
+    User registerUserInAccount(User user, Account account);
 
     String inviteUser(User admin, String email);
 
@@ -20,6 +20,8 @@ public interface UserService {
 
     User setUserStatus(Long userId, UserStatus userStatus);
 
-    Long registerInvitedUser(User user, Account account);
+    User registerInvitedUser(User user);
+
+    User findByEmail(String email);
 
 }

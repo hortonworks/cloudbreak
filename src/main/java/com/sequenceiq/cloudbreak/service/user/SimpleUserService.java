@@ -53,12 +53,13 @@ public class SimpleUserService implements UserService {
     private DefaultBlueprintLoaderService defaultBlueprintLoaderService;
 
     @Override
-    public Long registerUserInAccount(User user, Account account) {
+    public User registerUserInAccount(User user, Account account) {
         if (userRepository.findByEmail(user.getEmail()) == null) {
             String confToken = generateConfToken(user);
             user.setConfToken(confToken);
             user.setBlueprints(defaultBlueprintLoaderService.loadBlueprints(user));
             user.setAccount(account);
+            user.getUserRoles().add(UserRole.ACCOUNT_ADMIN);
             User savedUser = userRepository.save(user);
 
             LOGGER.info("User '{}' for account '{}' successfully registered", savedUser.getId(), account.getId());
@@ -70,7 +71,7 @@ public class SimpleUserService implements UserService {
             MimeMessagePreparator msgPreparator = emailService.messagePreparator(user.getEmail(), msgFrom, "Cloudbreak - confirm registration", messageText);
             emailService.sendEmail(msgPreparator);
 
-            return savedUser.getId();
+            return savedUser;
         } else {
             throw new BadRequestException(String.format("User with email '%s' already exists.", user.getEmail()));
         }
@@ -172,7 +173,7 @@ public class SimpleUserService implements UserService {
     }
 
     @Override
-    public Long registerInvitedUser(User registeringUser, Account account) {
+    public User registerInvitedUser(User registeringUser) {
         User invitedUser = userRepository.findByEmail(registeringUser.getEmail());
 
         if (invitedUser == null || !invitedUser.getStatus().equals(UserStatus.INVITED)) {
@@ -187,9 +188,15 @@ public class SimpleUserService implements UserService {
         invitedUser.setFirstName(registeringUser.getFirstName());
         invitedUser.setLastName(registeringUser.getLastName());
         invitedUser.setPassword(registeringUser.getPassword());
-        User savedUser = userRepository.save(invitedUser);
+        invitedUser.getUserRoles().add(UserRole.ACCOUNT_USER);
+        invitedUser = userRepository.save(invitedUser);
 
-        return savedUser.getId();
+        return invitedUser;
+    }
+
+    @Override
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email);
     }
 
     @Override

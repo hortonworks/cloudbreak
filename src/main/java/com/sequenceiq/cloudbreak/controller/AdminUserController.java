@@ -38,7 +38,8 @@ public class AdminUserController {
 
     @RequestMapping(method = RequestMethod.PUT, value = "/users/{userId}")
     @ResponseBody
-    public ResponseEntity<UserJson> manageUserStatus(@CurrentUser User user, @RequestBody UserActivationRequest activationRequest, @PathVariable("userId") Long userId) {
+    public ResponseEntity<UserJson> manageUserStatus(@CurrentUser User user, @RequestBody UserActivationRequest activationRequest,
+            @PathVariable("userId") Long userId) {
         UserJson modifiedUser = null;
         switch (activationRequest.getUserStatus()) {
             case ACTIVE:

@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.controller.json.CredentialJson;
 import com.sequenceiq.cloudbreak.controller.json.UserJson;
 import com.sequenceiq.cloudbreak.domain.User;
-import com.sequenceiq.cloudbreak.domain.UserRole;
 import com.sequenceiq.cloudbreak.repository.AccountRepository;
 
 @Component
@@ -52,6 +51,7 @@ public class UserConverter extends AbstractConverter<UserJson, User> {
         userJson.setStacks(stackConverter.convertAllEntityToJsonWithClause(entity.getStacks()));
         userJson.setBlueprints(blueprintConverter.convertAllToIdList(entity.getBlueprints()));
         userJson.setCompany(entity.getAccount().getName());
+        userJson.setUserId(entity.getId());
         return userJson;
     }
 
@@ -72,10 +72,6 @@ public class UserConverter extends AbstractConverter<UserJson, User> {
         user.setAzureTemplates(azureTemplateConverter.convertAllJsonToEntity(json.getAzureTemplates()));
         user.setStacks(stackConverter.convertAllJsonToEntity(json.getStacks()));
         user.setPassword(passwordEncoder.encode(json.getPassword()));
-        // Every user will have an account now, where they will be an admin.
-        // Inviting other users to an existing account will be implemented
-        // later.
-        user.getUserRoles().add(UserRole.ACCOUNT_ADMIN);
         return user;
     }
 }

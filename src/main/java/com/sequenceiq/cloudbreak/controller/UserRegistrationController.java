@@ -17,9 +17,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
 import com.sequenceiq.cloudbreak.controller.json.UserJson;
 import com.sequenceiq.cloudbreak.converter.UserConverter;
-import com.sequenceiq.cloudbreak.domain.Account;
 import com.sequenceiq.cloudbreak.domain.User;
-import com.sequenceiq.cloudbreak.service.account.AccountService;
+import com.sequenceiq.cloudbreak.facade.UserRegistrationFacade;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Controller
@@ -31,31 +30,18 @@ public class UserRegistrationController {
     private UserService userService;
 
     @Autowired
-    private AccountService accountService;
+    private UserConverter userConverter;
 
     @Autowired
-    private UserConverter userConverter;
+    private UserRegistrationFacade userRegistrationFacade;
 
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<IdJson> registerAccountAdmin(@RequestBody @Valid UserJson userJson) {
+    public ResponseEntity<IdJson> register(@RequestBody @Valid UserJson userJson) {
         LOGGER.info("Register user request arrived: [email: '{}']", userJson.getEmail());
-        String accountName = userJson.getCompany();
-        Account account = accountService.registerAccount(accountName);
-        Long id = userService.registerUserInAccount(userConverter.convert(userJson), account);
-        return new ResponseEntity<>(new IdJson(id), HttpStatus.CREATED);
+        UserJson newUser = userRegistrationFacade.registerUser(userJson);
+        return new ResponseEntity<>(new IdJson(newUser.getUserId()), HttpStatus.CREATED);
     }
-
-    @RequestMapping(method = RequestMethod.POST, value = "/invites")
-    @ResponseBody
-    public ResponseEntity<IdJson> registerAccountUser(@RequestBody @Valid UserJson userJson) {
-        LOGGER.info("Register user request arrived: [email: '{}']", userJson.getEmail());
-        String accountName = userJson.getCompany();
-        Account account = accountService.findAccount(accountName);
-        Long id = userService.registerInvitedUser(userConverter.convert(userJson), account);
-        return new ResponseEntity<>(new IdJson(id), HttpStatus.CREATED);
-    }
-
 
     @RequestMapping(value = "/confirm/{confToken}", method = RequestMethod.GET)
     public ResponseEntity<String> confirmRegistration(@PathVariable String confToken) {

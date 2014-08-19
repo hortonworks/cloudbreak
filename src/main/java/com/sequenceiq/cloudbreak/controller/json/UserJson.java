@@ -36,6 +36,8 @@ public class UserJson implements JsonEntity {
 
     private Set<BlueprintJson> blueprints = new HashSet<>();
 
+    private Long userId;
+
     public UserJson() {
 
     }
@@ -122,4 +124,12 @@ public class UserJson implements JsonEntity {
         this.password = password;
     }
 
+    public Long getUserId() {
+        return userId;
+    }
+
+    @JsonIgnore
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
 }
