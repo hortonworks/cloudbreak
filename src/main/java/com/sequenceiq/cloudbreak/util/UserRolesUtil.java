@@ -24,9 +24,11 @@ public class UserRolesUtil {
             case ACCOUNT_ADMIN:
                 roleGroup = new HashSet<>(Arrays.asList(UserRole.ACCOUNT_ADMIN, UserRole.ACCOUNT_USER));
                 break;
-            case ACCOUNT_USER: {
+            case ACCOUNT_USER:
                 roleGroup = new HashSet<>(Arrays.asList(UserRole.ACCOUNT_USER));
-            }
+                break;
+            default:
+                throw new IllegalStateException(String.format("Unsupported role: %s", userRole));
         }
         return roleGroup;
     }
