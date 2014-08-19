@@ -1,35 +1,15 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
-import com.sequenceiq.cloudbreak.domain.UserRole;
-import com.sequenceiq.cloudbreak.domain.UserStatus;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "type")
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = StatusUpdateRequest.class, name = "statusUpdate"),
+        @JsonSubTypes.Type(value = RoleUpdateRequest.class, name = "roleUpdate") })
 public class UserUpdateRequest implements JsonEntity {
 
-    private UserStatus userStatus;
-
-    private UserRole userRole;
-
-    public boolean isStatusUpdate() {
-        return userStatus != null;
-    }
-
-    public boolean isRoleUpdate() {
-        return userRole != null;
-    }
-
-    public UserStatus getUserStatus() {
-        return userStatus;
-    }
-
-    public void setUserStatus(UserStatus userStatus) {
-        this.userStatus = userStatus;
-    }
-
-    public UserRole getUserRole() {
-        return userRole;
-    }
-
-    public void setUserRole(UserRole userRole) {
-        this.userRole = userRole;
-    }
 }
