@@ -46,26 +46,8 @@ public class AdminUserController {
     @ResponseBody
     public ResponseEntity<UserJson> updateUser(@CurrentUser User admin, @RequestBody UserUpdateRequest userUpdateRequest,
             @PathVariable("userId") Long userId) {
-        UserJson modifiedUser = null;
-        if (userUpdateRequest.isStatusUpdate()) {
-            LOGGER.debug("Status update request received for user id: {}, status: {}", userId, userUpdateRequest.getUserStatus());
-            switch (userUpdateRequest.getUserStatus()) {
-                case ACTIVE:
-                    modifiedUser = adminUserFacade.activateUser(userId);
-                    break;
-                case DISABLED:
-                    modifiedUser = adminUserFacade.deactivateUser(userId);
-                    break;
-                default:
-                    throw new BadRequestException(String.format("Unsupported status change to %s", userUpdateRequest.getUserStatus().name()));
-            }
-        } else if (userUpdateRequest.isRoleUpdate()) {
-            LOGGER.debug("Role update request received for user id: {}, roles: {}", userId, userUpdateRequest.getUserRoles());
-            modifiedUser = adminUserFacade.putUserInRoles(userId, userUpdateRequest.getUserRoles());
-        } else {
-            throw new BadRequestException("Invalid UserUpdate request!");
-        }
-        return new ResponseEntity<>(modifiedUser, HttpStatus.OK);
+        UserJson usr = adminUserFacade.updateUser(admin, userId, userUpdateRequest);
+        return new ResponseEntity<>(usr, HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/users")

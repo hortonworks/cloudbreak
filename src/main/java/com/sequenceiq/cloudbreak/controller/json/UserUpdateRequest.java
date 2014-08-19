@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import com.sequenceiq.cloudbreak.domain.UserRole;
 import com.sequenceiq.cloudbreak.domain.UserStatus;
 
@@ -10,14 +7,14 @@ public class UserUpdateRequest implements JsonEntity {
 
     private UserStatus userStatus;
 
-    private Set<UserRole> userRoles = new HashSet<>();
+    private UserRole userRole;
 
     public boolean isStatusUpdate() {
         return userStatus != null;
     }
 
     public boolean isRoleUpdate() {
-        return !userRoles.isEmpty();
+        return userRole != null;
     }
 
     public UserStatus getUserStatus() {
@@ -28,11 +25,11 @@ public class UserUpdateRequest implements JsonEntity {
         this.userStatus = userStatus;
     }
 
-    public Set<UserRole> getUserRoles() {
-        return userRoles;
+    public UserRole getUserRole() {
+        return userRole;
     }
 
-    public void setUserRoles(Set<UserRole> userRoles) {
-        this.userRoles = userRoles;
+    public void setUserRole(UserRole userRole) {
+        this.userRole = userRole;
     }
 }

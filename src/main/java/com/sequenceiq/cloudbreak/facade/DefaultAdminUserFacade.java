@@ -10,12 +10,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.controller.json.UserJson;
+import com.sequenceiq.cloudbreak.controller.json.UserUpdateRequest;
 import com.sequenceiq.cloudbreak.converter.UserConverter;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.UserRole;
 import com.sequenceiq.cloudbreak.domain.UserStatus;
 import com.sequenceiq.cloudbreak.service.account.AccountService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.util.UserRolesUtil;
 
 @Service
 public class DefaultAdminUserFacade implements AdminUserFacade {
@@ -76,5 +78,33 @@ public class DefaultAdminUserFacade implements AdminUserFacade {
         LOGGER.debug("User with id [{}] deactivated");
         return userConverter.convert(user);
 
+    }
+
+    @Override
+    public UserJson updateUser(User admin, Long userId, UserUpdateRequest updateRequest) {
+        UserJson modifiedUser = null;
+        if (updateRequest.isStatusUpdate()) {
+            LOGGER.debug("Status update request received for user id: {}, status: {}", userId, updateRequest.getUserStatus());
+            switch (updateRequest.getUserStatus()) {
+                case ACTIVE:
+                    modifiedUser = activateUser(userId);
+                    break;
+                case DISABLED:
+                    modifiedUser = deactivateUser(userId);
+                    break;
+                default:
+                    throw new IllegalStateException(String.format("Unsupported status change to %s", updateRequest.getUserStatus().name()));
+            }
+        } else if (updateRequest.isRoleUpdate()) {
+            LOGGER.debug("Role update request received for user id: {}, roles: {}", userId, updateRequest.getUserRole());
+            if (UserRolesUtil.isUserInRole(admin, updateRequest.getUserRole())) {
+                modifiedUser = putUserInRoles(userId, UserRolesUtil.getGroupForRole(updateRequest.getUserRole()));
+            } else {
+                throw new UnsupportedOperationException(String.format("Can't set the role to %s", updateRequest.getUserRole()));
+            }
+        } else {
+            throw new IllegalStateException("Invalid UserUpdate request!");
+        }
+        return modifiedUser;
     }
 }
