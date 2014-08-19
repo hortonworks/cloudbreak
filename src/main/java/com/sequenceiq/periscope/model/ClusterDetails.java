@@ -62,8 +62,8 @@ public class ClusterDetails {
         return alarms;
     }
 
-    public void setAlarms(List<Alarm> alarms) {
-        this.alarms = alarms;
+    public void addAlarms(List<Alarm> alarms) {
+        this.alarms.addAll(alarms);
     }
 
     public int getMinSize() {

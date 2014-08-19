@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.periscope.model.Alarm;
+import com.sequenceiq.periscope.model.Cluster;
 import com.sequenceiq.periscope.model.ClusterDetails;
 import com.sequenceiq.periscope.repository.AlarmRepository;
 import com.sequenceiq.periscope.repository.ClusterDetailsRepository;
@@ -20,12 +21,13 @@ public class AlarmService {
     @Autowired
     private ClusterService clusterService;
 
-    public List<Alarm> setAlarms(String clusterId, List<Alarm> alarms) throws ClusterNotFoundException {
-        ClusterDetails clusterDetails = clusterService.get(clusterId).getClusterDetails();
-        clusterDetails.setAlarms(alarms);
+    public List<Alarm> addAlarms(String clusterId, List<Alarm> alarms) throws ClusterNotFoundException {
+        Cluster cluster = clusterService.get(clusterId);
+        ClusterDetails clusterDetails = cluster.getClusterDetails();
+        clusterDetails.addAlarms(alarms);
         alarmRepository.save(alarms);
         clusterDetailsRepository.save(clusterDetails);
-        return alarms;
+        return clusterDetails.getAlarms();
     }
 
     public List<Alarm> getAlarms(String clusterId) throws ClusterNotFoundException {
