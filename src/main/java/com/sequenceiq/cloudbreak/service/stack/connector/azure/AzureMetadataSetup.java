@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
+import com.sequenceiq.cloudbreak.service.stack.event.AddNodeMetadataSetupComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataSetupComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.domain.CoreInstanceMetaData;
 
@@ -51,33 +52,58 @@ public class AzureMetadataSetup implements MetadataSetup {
         String filePath = AzureCertificateService.getUserJksFileName(azureCredential, stack.getUser().emailAsFolder());
         AzureClient azureClient = azureStackUtil.createAzureClient(azureCredential, filePath);
         String name = stack.getName().replaceAll("\\s+", "");
-        Set<CoreInstanceMetaData> instanceMetaDatas = collectMetaData(stack, azureClient, name);
+        Set<CoreInstanceMetaData> instanceMetaDatas = collectMetaData(stack, azureClient);
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.METADATA_SETUP_COMPLETE_EVENT, stack.getId());
         reactor.notify(ReactorConfig.METADATA_SETUP_COMPLETE_EVENT,
                 Event.wrap(new MetadataSetupComplete(CloudPlatform.AZURE, stack.getId(), instanceMetaDatas)));
     }
 
-    private Set<CoreInstanceMetaData> collectMetaData(Stack stack, AzureClient azureClient, String name) {
+    @Override
+    public void addNodeMetadatas(Stack stack, Set<Resource> resourceList, String hostgroup) {
+        AzureCredential azureCredential = (AzureCredential) stack.getCredential();
+        String filePath = AzureCertificateService.getUserJksFileName(azureCredential, stack.getUser().emailAsFolder());
+        AzureClient azureClient = azureStackUtil.createAzureClient(azureCredential, filePath);
         Set<CoreInstanceMetaData> instanceMetaDatas = new HashSet<>();
-        for (Resource resource : stack.getResourcesByType(ResourceType.VIRTUAL_MACHINE)) {
-            Map<String, Object> props = new HashMap<>();
-            props.put(NAME, resource.getResourceName());
-            props.put(SERVICENAME, resource.getResourceName());
-            Object virtualMachine = azureClient.getVirtualMachine(props);
-            try {
-                CoreInstanceMetaData instanceMetaData = new CoreInstanceMetaData(
-                        resource.getResourceName(),
-                        getPrivateIP((String) virtualMachine),
-                        getVirtualIP((String) virtualMachine),
-                        stack.getTemplate().getVolumeCount(),
-                        getLongName((String) virtualMachine)
-                );
-                instanceMetaDatas.add(instanceMetaData);
-            } catch (IOException e) {
-                LOGGER.error(String.format("The instance %s was not reacheable: %s", resource.getResourceName(), e.getMessage()), e);
+        for (Resource resource : resourceList) {
+            if(ResourceType.VIRTUAL_MACHINE.equals(resource.getResourceType())) {
+                CoreInstanceMetaData metadata = getMetadata(stack, azureClient, resource);
+                if (metadata == null) {
+                    break;
+                }
+                instanceMetaDatas.add(metadata);
             }
         }
+        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_NODE_UPDATE_METADATA_EVENT_COMPLETE, stack.getId());
+        reactor.notify(ReactorConfig.ADD_NODE_UPDATE_METADATA_EVENT_COMPLETE,
+                Event.wrap(new AddNodeMetadataSetupComplete(CloudPlatform.AZURE, stack.getId(), instanceMetaDatas, resourceList, hostgroup)));
+    }
+
+    private Set<CoreInstanceMetaData> collectMetaData(Stack stack, AzureClient azureClient) {
+        Set<CoreInstanceMetaData> instanceMetaDatas = new HashSet<>();
+        for (Resource resource : stack.getResourcesByType(ResourceType.VIRTUAL_MACHINE)) {
+            instanceMetaDatas.add(getMetadata(stack, azureClient, resource));
+        }
         return instanceMetaDatas;
+    }
+
+    private CoreInstanceMetaData getMetadata(Stack stack, AzureClient azureClient, Resource resource) {
+        Map<String, Object> props = new HashMap<>();
+        props.put(NAME, resource.getResourceName());
+        props.put(SERVICENAME, resource.getResourceName());
+        Object virtualMachine = azureClient.getVirtualMachine(props);
+        try {
+            CoreInstanceMetaData instanceMetaData = new CoreInstanceMetaData(
+                    resource.getResourceName(),
+                    getPrivateIP((String) virtualMachine),
+                    getVirtualIP((String) virtualMachine),
+                    stack.getTemplate().getVolumeCount(),
+                    getLongName((String) virtualMachine)
+            );
+            return instanceMetaData;
+        } catch (IOException e) {
+            LOGGER.error(String.format("The instance %s was not reacheable: %s", resource.getResourceName(), e.getMessage()), e);
+        }
+        return null;
     }
 
     @VisibleForTesting

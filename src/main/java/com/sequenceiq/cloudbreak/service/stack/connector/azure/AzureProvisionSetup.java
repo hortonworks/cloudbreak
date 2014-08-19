@@ -173,4 +173,17 @@ public class AzureProvisionSetup implements ProvisionSetup {
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.AZURE;
     }
+
+    @Override
+    public Map<String, Object> getSetupProperties(Stack stack) {
+        Map<String, Object> properties = new HashMap<>();
+        properties.put(CREDENTIAL, stack.getCredential());
+        properties.put(EMAILASFOLDER, stack.getUser().emailAsFolder());
+        return properties;
+    }
+
+    @Override
+    public Map<String, String> getUserDataProperties(Stack stack) {
+        return new HashMap<>();
+    }
 }

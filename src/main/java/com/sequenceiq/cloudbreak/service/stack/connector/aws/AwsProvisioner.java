@@ -72,6 +72,11 @@ public class AwsProvisioner implements Provisioner {
         LOGGER.info("CloudFormation stack creation request sent with stack name: '{}' for stack: '{}'", stackName, updatedStack.getId());
     }
 
+    @Override
+    public void addNode(Stack stack, String userData, String hostgroup) {
+
+    }
+
     protected CreateStackRequest createStackRequest() {
         return new CreateStackRequest();
     }

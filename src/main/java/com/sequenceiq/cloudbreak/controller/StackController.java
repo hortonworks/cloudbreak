@@ -31,6 +31,8 @@ import com.sequenceiq.cloudbreak.security.CurrentUser;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataIncompleteException;
 
+import groovyx.net.http.HttpResponseException;
+
 @Controller
 @RequestMapping("stacks")
 public class StackController {
@@ -87,6 +89,9 @@ public class StackController {
     @RequestMapping(method = RequestMethod.PUT, value = "{stackId}")
     @ResponseBody
     public ResponseEntity<Boolean> startOrStopAllOnStack(@CurrentUser User user, @PathVariable Long stackId, @RequestBody StatusRequestJson statusRequestJson) {
+        Stack stack = stackService.get(user, stackId);
+        stack.setNodeCount(stack.getNodeCount() + 1);
+        stackService.addNode(user, stack);
         switch (statusRequestJson.getStatusRequest()) {
         case STOP:
             return new ResponseEntity<>(stackService.stopAll(user, stackId), HttpStatus.OK);
@@ -95,6 +100,24 @@ public class StackController {
         default:
             throw new BadRequestException("The requested status not valid.");
         }
+    }
+
+    @RequestMapping(method = RequestMethod.PUT, value = "/r/{stackId}/{hostgroup}")
+    @ResponseBody
+    public void increaseNodeCount(@CurrentUser User user, @PathVariable Long stackId, @PathVariable String hostgroup) throws HttpResponseException {
+        Stack stack = stackService.get(user, stackId);
+        try {
+            if(stackService.assignableHostgroup(stack, hostgroup)) {
+                stack.setNodeCount(stack.getNodeCount() + 1);
+                stackService.addNode(user, stack, hostgroup);
+            } else {
+                throw new BadRequestException(String.format("Invalid hostgroup: blueprint %s does not contain %s hostgroup.",
+                        stack.getCluster().getBlueprint().getId(), hostgroup));
+            }
+        } catch (Exception e) {
+            throw new BadRequestException(String.format("Stack %s put occurs a problem '%s': %s",stackId, e.getMessage(), e));
+        }
+
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/metadata/{hash}")

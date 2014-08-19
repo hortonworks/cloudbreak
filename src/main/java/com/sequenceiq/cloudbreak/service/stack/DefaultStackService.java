@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
+import java.io.IOException;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -13,9 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
-import reactor.core.Reactor;
-import reactor.event.Event;
-
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.converter.StackConverter;
@@ -31,9 +32,13 @@ import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
 import com.sequenceiq.cloudbreak.service.account.AccountService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
+import com.sequenceiq.cloudbreak.service.stack.event.AddNodeRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataIncompleteException;
+
+import reactor.core.Reactor;
+import reactor.event.Event;
 
 @Service
 public class DefaultStackService implements StackService {
@@ -144,12 +149,33 @@ public class DefaultStackService implements StackService {
     }
 
     @Override
+    public void addNode(User user, Stack stack, String hostgroup) {
+        stack = stackRepository.save(stack);
+        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_NODE_REQUEST_EVENT, stack.getId());
+        reactor.notify(ReactorConfig.ADD_NODE_REQUEST_EVENT, Event.wrap(new AddNodeRequest(stack.getTemplate().cloudPlatform(), stack.getId(), hostgroup)));
+    }
+
+    @Override
     public StackDescription getStackDescription(User user, Stack stack) {
         CloudPlatform cp = stack.getTemplate().cloudPlatform();
         LOGGER.debug("Getting stack description for cloud platform: {} ...", cp);
         StackDescription description = cloudPlatformConnectors.get(cp).describeStackWithResources(user, stack, stack.getCredential());
         LOGGER.debug("Found stack description {}", description.getClass());
         return description;
+    }
+
+    @Override
+    public Boolean assignableHostgroup(Stack stack, String hostgroup) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode root = mapper.readTree(stack.getCluster().getBlueprint().getBlueprintText());
+        Iterator<JsonNode> hostGroupsIterator = root.path("host_groups").elements();
+        while (hostGroupsIterator.hasNext()) {
+            JsonNode hostGroup = hostGroupsIterator.next();
+            if (hostGroup.path("name").asText().equals(hostgroup)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

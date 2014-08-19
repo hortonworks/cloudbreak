@@ -1,8 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import java.util.Map;
-
-import javax.annotation.Resource;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
@@ -27,7 +27,7 @@ public class MetadataSetupContext {
     @Autowired
     private StackRepository stackRepository;
 
-    @Resource
+    @javax.annotation.Resource
     private Map<CloudPlatform, MetadataSetup> metadataSetups;
 
     @Autowired
@@ -39,6 +39,21 @@ public class MetadataSetupContext {
             MetadataSetup metadataSetup = metadataSetups.get(cloudPlatform);
             metadataSetup.setupMetadata(stack);
         } catch (Exception e) {
+            LOGGER.error("Unhandled exception occured while creating stack.", e);
+            LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_CREATE_FAILED_EVENT, stackId);
+            StackCreationFailure stackCreationFailure = new StackCreationFailure(stackId, "Internal server error occured while creating stack.");
+            reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(stackCreationFailure));
+        }
+
+    }
+
+    public void setupHostMetadata(CloudPlatform cloudPlatform, Long stackId, Set<Resource> resourceSet, String hostgroup) {
+        try {
+            Stack stack = stackRepository.findOneWithLists(stackId);
+            MetadataSetup metadataSetup = metadataSetups.get(cloudPlatform);
+            metadataSetup.addNodeMetadatas(stack, resourceSet, hostgroup);
+        } catch (Exception e) {
+            //TODO what happening if the node update not success
             LOGGER.error("Unhandled exception occured while creating stack.", e);
             LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_CREATE_FAILED_EVENT, stackId);
             StackCreationFailure stackCreationFailure = new StackCreationFailure(stackId, "Internal server error occured while creating stack.");

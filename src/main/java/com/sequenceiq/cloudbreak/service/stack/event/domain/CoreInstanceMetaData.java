@@ -8,6 +8,9 @@ public class CoreInstanceMetaData {
     private Integer volumeCount;
     private String longName;
 
+    public CoreInstanceMetaData() {
+    }
+
     public CoreInstanceMetaData(String instanceId, String privateIp, String publicIp, Integer volumeCount, String longName) {
         this.instanceId = instanceId;
         this.privateIp = privateIp;

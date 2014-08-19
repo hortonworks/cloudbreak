@@ -10,6 +10,11 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterCreationFailureHandler;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterCreationSuccessHandler;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterRequestHandler;
 import com.sequenceiq.cloudbreak.service.history.HistoryEventHandler;
+import com.sequenceiq.cloudbreak.service.stack.handler.node.AddNodeCompleteHandler;
+import com.sequenceiq.cloudbreak.service.stack.handler.node.AddNodeMetadataSetupCompleteHandler;
+import com.sequenceiq.cloudbreak.service.stack.handler.node.AddNodeRequestHandler;
+import com.sequenceiq.cloudbreak.service.stack.handler.node.AddNodeAmbariUpdateFailedHandler;
+import com.sequenceiq.cloudbreak.service.stack.handler.node.AddNodeAmbariUpdateRequestHandler;
 import com.sequenceiq.cloudbreak.service.stack.handler.AmbariRoleAllocationCompleteHandler;
 import com.sequenceiq.cloudbreak.service.stack.handler.MetadataSetupCompleteHandler;
 import com.sequenceiq.cloudbreak.service.stack.handler.ProvisionCompleteHandler;
@@ -62,6 +67,21 @@ public class ReactorInitializer implements InitializingBean {
     private StackDeleteRequestHandler stackDeleteRequestHandler;
 
     @Autowired
+    private AddNodeRequestHandler addNodeRequestHandler;
+
+    @Autowired
+    private AddNodeCompleteHandler addNodeCompleteHandler;
+
+    @Autowired
+    private AddNodeAmbariUpdateRequestHandler addNodeAmbariUpdateRequestHandler;
+
+    @Autowired
+    private AddNodeMetadataSetupCompleteHandler addNodeMetadataSetupCompleteHandler;
+
+    @Autowired
+    private AddNodeAmbariUpdateFailedHandler ambariAddNodeSuccessHandler;
+
+    @Autowired
     private HistoryEventHandler historyEventHandler;
 
     @Autowired
@@ -83,6 +103,13 @@ public class ReactorInitializer implements InitializingBean {
         reactor.on($(ReactorConfig.AMBARI_STARTED_EVENT), clusterRequestHandler);
         reactor.on($(ReactorConfig.CLUSTER_CREATE_SUCCESS_EVENT), clusterCreationSuccessHandler);
         reactor.on($(ReactorConfig.CLUSTER_CREATE_FAILED_EVENT), clusterCreationFailureHandler);
+
+        reactor.on($(ReactorConfig.ADD_NODE_REQUEST_EVENT), addNodeRequestHandler);
+        reactor.on($(ReactorConfig.ADD_NODE_COMPLETE_EVENT), addNodeCompleteHandler);
+        reactor.on($(ReactorConfig.ADD_NODE_AMBARI_UPDATE_NODE_EVENT), addNodeAmbariUpdateRequestHandler);
+        reactor.on($(ReactorConfig.ADD_NODE_UPDATE_METADATA_EVENT_COMPLETE), addNodeMetadataSetupCompleteHandler);
+        reactor.on($(ReactorConfig.ADD_NODE_AMBARI_UPDATE_NODE_SUCCESS_EVENT), ambariAddNodeSuccessHandler);
+        reactor.on($(ReactorConfig.ADD_NODE_AMBARI_UPDATE_NODE_FAILED_EVENT), ambariAddNodeSuccessHandler);
 
         reactor.on($(ReactorConfig.HISTORY_EVENT), historyEventHandler);
     }

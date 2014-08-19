@@ -10,9 +10,11 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.stack.event.AmbariAddNode;
 import com.sequenceiq.cloudbreak.service.stack.event.AmbariRoleAllocationComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.StackCreationFailure;
 import com.sequenceiq.cloudbreak.service.stack.event.domain.CoreInstanceMetaData;
@@ -44,36 +46,12 @@ public class AmbariRoleAllocator {
                     throw new WrongMetadataException(String.format(
                             "Size of the collected metadata set does not equal the node count of the stack. [stack: '%s']", stack.getId()));
                 }
-                Set<InstanceMetaData> instanceMetaData = new HashSet<>();
-                int instanceIndex = 0;
-                String ambariIp = null;
-                for (CoreInstanceMetaData coreInstanceMetaDataEntry : coreInstanceMetaData) {
-                    InstanceMetaData instanceMetaDataEntry = new InstanceMetaData();
-                    instanceMetaDataEntry.setPrivateIp(coreInstanceMetaDataEntry.getPrivateIp());
-                    instanceMetaDataEntry.setPublicIp(coreInstanceMetaDataEntry.getPublicIp());
-                    instanceMetaDataEntry.setInstanceId(coreInstanceMetaDataEntry.getInstanceId());
-                    instanceMetaDataEntry.setVolumeCount(coreInstanceMetaDataEntry.getVolumeCount());
-                    instanceMetaDataEntry.setLongName(coreInstanceMetaDataEntry.getLongName());
-                    instanceMetaDataEntry.setInstanceIndex(instanceIndex);
-                    instanceMetaDataEntry.setDockerSubnet(DOCKER_SUBNET_PREFIX + instanceIndex);
-                    if (instanceIndex == 0) {
-                        instanceMetaDataEntry.setAmbariServer(Boolean.TRUE);
-                        ambariIp = instanceMetaDataEntry.getPublicIp();
-                        if (ambariIp == null) {
-                            throw new WrongMetadataException(String.format("Public IP of Ambari server cannot be null [stack: '%s', instanceId: '%s' ]",
-                                    stackId, coreInstanceMetaDataEntry.getInstanceId()));
-                        }
-                    } else {
-                        instanceMetaDataEntry.setAmbariServer(Boolean.FALSE);
-                    }
-                    instanceIndex++;
-                    instanceMetaDataEntry.setStack(stack);
-                    instanceMetaData.add(instanceMetaDataEntry);
-                }
-                stackUpdater.updateStackMetaData(stackId, instanceMetaData);
+                Set<InstanceMetaData> instanceMetaDatas = prepareInstanceMetaData(stack, coreInstanceMetaData);
+                stackUpdater.updateStackMetaData(stackId, instanceMetaDatas);
                 stackUpdater.updateMetadataReady(stackId);
                 LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.AMBARI_ROLE_ALLOCATION_COMPLETE_EVENT, stackId);
-                reactor.notify(ReactorConfig.AMBARI_ROLE_ALLOCATION_COMPLETE_EVENT, Event.wrap(new AmbariRoleAllocationComplete(stackId, ambariIp)));
+                reactor.notify(ReactorConfig.AMBARI_ROLE_ALLOCATION_COMPLETE_EVENT, Event.wrap(new AmbariRoleAllocationComplete(stackId,
+                        getAmbariIp(instanceMetaDatas))));
             } else {
                 LOGGER.info("Metadata of stack '{}' is already created, ignoring '{}' event.", stackId, ReactorConfig.METADATA_SETUP_COMPLETE_EVENT);
             }
@@ -84,6 +62,69 @@ public class AmbariRoleAllocator {
             LOGGER.error("Unhandled exception occured while creating stack.", e);
             notifyStackCreateFailed(stackId, "Unhandled exception occured while creating stack.");
         }
+    }
+
+    public void updateInstanceMetadata(Long stackId, Set<CoreInstanceMetaData> coreInstanceMetaData, Set<Resource> resources, String hostgroup) {
+        try {
+            Stack stack = stackRepository.findOneWithLists(stackId);
+            Set<InstanceMetaData> originalMetadata = stack.getInstanceMetaData();
+            Set<InstanceMetaData> instanceMetaDatas = prepareInstanceMetaData(stack, coreInstanceMetaData, stack.getNodeCount() - coreInstanceMetaData.size());
+            originalMetadata.addAll(instanceMetaDatas);
+            stackUpdater.updateStackMetaData(stackId, originalMetadata);
+            stackUpdater.updateMetadataReady(stackId);
+            LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_NODE_AMBARI_UPDATE_NODE_EVENT, stackId);
+            reactor.notify(ReactorConfig.ADD_NODE_AMBARI_UPDATE_NODE_EVENT, Event.wrap(
+                    new AmbariAddNode(stackId, getAmbariIp(instanceMetaDatas), instanceMetaDatas, resources, hostgroup)));
+        } catch (WrongMetadataException e) {
+            LOGGER.error(e.getMessage(), e);
+            notifyStackCreateFailed(stackId, e.getMessage());
+        } catch (Exception e) {
+            LOGGER.error("Unhandled exception occured while creating stack.", e);
+            notifyStackCreateFailed(stackId, "Unhandled exception occured while creating stack.");
+        }
+    }
+
+    private String getAmbariIp(Set<InstanceMetaData> instanceMetaDatas) {
+        for (InstanceMetaData instanceMetaData : instanceMetaDatas) {
+            if (Boolean.TRUE.equals(instanceMetaData.getAmbariServer())) {
+                return instanceMetaData.getPublicIp();
+            }
+        }
+        return null;
+    }
+
+    private Set<InstanceMetaData> prepareInstanceMetaData(Stack stack, Set<CoreInstanceMetaData> coreInstanceMetaData) {
+        return prepareInstanceMetaData(stack, coreInstanceMetaData, 0);
+    }
+
+    private Set<InstanceMetaData> prepareInstanceMetaData(Stack stack, Set<CoreInstanceMetaData> coreInstanceMetaData, int startIndex) {
+        Set<InstanceMetaData> instanceMetaData = new HashSet<>();
+        int instanceIndex = startIndex;
+        String ambariIp = null;
+        for (CoreInstanceMetaData coreInstanceMetaDataEntry : coreInstanceMetaData) {
+            InstanceMetaData instanceMetaDataEntry = new InstanceMetaData();
+            instanceMetaDataEntry.setPrivateIp(coreInstanceMetaDataEntry.getPrivateIp());
+            instanceMetaDataEntry.setPublicIp(coreInstanceMetaDataEntry.getPublicIp());
+            instanceMetaDataEntry.setInstanceId(coreInstanceMetaDataEntry.getInstanceId());
+            instanceMetaDataEntry.setVolumeCount(coreInstanceMetaDataEntry.getVolumeCount());
+            instanceMetaDataEntry.setLongName(coreInstanceMetaDataEntry.getLongName());
+            instanceMetaDataEntry.setInstanceIndex(instanceIndex);
+            instanceMetaDataEntry.setDockerSubnet(DOCKER_SUBNET_PREFIX + instanceIndex);
+            if (instanceIndex == 0) {
+                instanceMetaDataEntry.setAmbariServer(Boolean.TRUE);
+                ambariIp = instanceMetaDataEntry.getPublicIp();
+                if (ambariIp == null) {
+                    throw new WrongMetadataException(String.format("Public IP of Ambari server cannot be null [stack: '%s', instanceId: '%s' ]",
+                            stack.getId(), coreInstanceMetaDataEntry.getInstanceId()));
+                }
+            } else {
+                instanceMetaDataEntry.setAmbariServer(Boolean.FALSE);
+            }
+            instanceIndex++;
+            instanceMetaDataEntry.setStack(stack);
+            instanceMetaData.add(instanceMetaDataEntry);
+        }
+        return instanceMetaData;
     }
 
     private void notifyStackCreateFailed(Long stackId, String cause) {

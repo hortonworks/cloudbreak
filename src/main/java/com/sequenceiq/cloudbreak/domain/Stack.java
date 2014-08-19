@@ -56,6 +56,7 @@ import javax.persistence.Version;
                 name = "Stack.findOneWithLists",
                 query = "SELECT c FROM Stack c "
                         + "LEFT JOIN FETCH c.resources "
+                        + "LEFT JOIN FETCH c.instanceMetaData "
                         + "WHERE c.id= :id"),
         @NamedQuery(
                 name = "Stack.findByStackResourceName",
