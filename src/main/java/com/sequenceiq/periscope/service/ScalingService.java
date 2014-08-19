@@ -51,6 +51,20 @@ public class ScalingService {
         return getScalingPolicies(clusterDetails);
     }
 
+    public ScalingPolicies deletePolicy(String clusterId, long policyId) throws ClusterNotFoundException {
+        ClusterDetails clusterDetails = clusterDetailsRepository.findOne(clusterId);
+        for (Alarm alarm : clusterDetails.getAlarms()) {
+            ScalingPolicy scalingPolicy = alarm.getScalingPolicy();
+            if (scalingPolicy != null && scalingPolicy.getId() == policyId) {
+                alarm.setScalingPolicy(null);
+                break;
+            }
+        }
+        clusterService.get(clusterId).setClusterDetails(clusterDetails);
+        clusterDetailsRepository.save(clusterDetails);
+        return getScalingPolicies(clusterId);
+    }
+
     public ScalingPolicies getScalingPolicies(String clusterId) throws ClusterNotFoundException {
         return getScalingPolicies(clusterService.get(clusterId).getClusterDetails());
     }

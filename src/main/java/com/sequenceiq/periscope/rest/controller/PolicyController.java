@@ -27,15 +27,23 @@ public class PolicyController {
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<ScalingPoliciesJson> setScaling(@PathVariable String clusterId,
             @RequestBody ScalingPoliciesJson scalingPolicies) throws ClusterNotFoundException {
-        ScalingPolicies policies = scalingService.setScalingPolicies(clusterId, policiesConverter.convert(scalingPolicies));
-        return new ResponseEntity<>(policiesConverter.convert(policies), HttpStatus.OK);
+        return createScalingPoliciesJsonResponse(scalingService.setScalingPolicies(clusterId,
+                policiesConverter.convert(scalingPolicies)));
     }
 
     @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<ScalingPoliciesJson> getScaling(@PathVariable String clusterId) throws ClusterNotFoundException {
-        ScalingPolicies scalingPolicies = scalingService.getScalingPolicies(clusterId);
-        ScalingPoliciesJson json = policiesConverter.convert(scalingPolicies);
-        return new ResponseEntity<>(json, HttpStatus.OK);
+        return createScalingPoliciesJsonResponse(scalingService.getScalingPolicies(clusterId));
+    }
+
+    @RequestMapping(value = "/{policyId}", method = RequestMethod.DELETE)
+    public ResponseEntity<ScalingPoliciesJson> deletePolicy(@PathVariable String clusterId, @PathVariable long policyId)
+            throws ClusterNotFoundException {
+        return createScalingPoliciesJsonResponse(scalingService.deletePolicy(clusterId, policyId));
+    }
+
+    private ResponseEntity<ScalingPoliciesJson> createScalingPoliciesJsonResponse(ScalingPolicies scalingPolicies) {
+        return new ResponseEntity<>(policiesConverter.convert(scalingPolicies), HttpStatus.OK);
     }
 
 }

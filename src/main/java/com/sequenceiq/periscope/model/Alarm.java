@@ -27,7 +27,7 @@ public class Alarm {
     private int period;
     @Transient
     private long alarmHitsSince;
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private ScalingPolicy scalingPolicy;
 
     public String getAlarmName() {
