@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.periscope.model.Ambari;
+import com.sequenceiq.periscope.model.Cluster;
+import com.sequenceiq.periscope.model.ClusterDetails;
 
 @Component
 public class AmbariClusterRegistry implements ClusterRegistry {
@@ -20,7 +22,7 @@ public class AmbariClusterRegistry implements ClusterRegistry {
     @Override
     public Cluster add(String id, Ambari ambari) throws ConnectionException {
         // TODO should be per user registry
-        Cluster cluster = new Cluster(id, ambari);
+        Cluster cluster = new Cluster(new ClusterDetails(id, ambari));
         clusters.put(id, cluster);
         LOGGER.info("Cluster: {} registered with id: {}", ambari.getHost(), id);
         return cluster;

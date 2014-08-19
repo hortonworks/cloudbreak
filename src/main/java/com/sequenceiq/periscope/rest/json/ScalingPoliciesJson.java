@@ -1,13 +1,16 @@
-package com.sequenceiq.periscope.model;
+package com.sequenceiq.periscope.rest.json;
 
 import java.util.List;
 
-public class AutoScalingGroup {
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public class ScalingPoliciesJson implements Json {
 
     private int minSize;
     private int maxSize;
+    @JsonProperty("cooldown")
     private int coolDown;
-    private List<ScalingPolicy> scalingPolicies;
+    private List<ScalingPolicyJson> scalingPolicies;
 
     public int getMinSize() {
         return minSize;
@@ -33,11 +36,11 @@ public class AutoScalingGroup {
         this.coolDown = coolDown;
     }
 
-    public List<ScalingPolicy> getScalingPolicies() {
+    public List<ScalingPolicyJson> getScalingPolicies() {
         return scalingPolicies;
     }
 
-    public void setScalingPolicies(List<ScalingPolicy> scalingPolicies) {
+    public void setScalingPolicies(List<ScalingPolicyJson> scalingPolicies) {
         this.scalingPolicies = scalingPolicies;
     }
 }

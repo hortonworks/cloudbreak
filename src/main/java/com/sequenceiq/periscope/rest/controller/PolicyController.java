@@ -9,9 +9,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.sequenceiq.periscope.model.AutoScalingGroup;
-import com.sequenceiq.periscope.rest.converter.AutoScalingGroupConverter;
-import com.sequenceiq.periscope.rest.json.AutoScalingGroupJson;
+import com.sequenceiq.periscope.model.ScalingPolicies;
+import com.sequenceiq.periscope.rest.converter.ScalingPoliciesConverter;
+import com.sequenceiq.periscope.rest.json.ScalingPoliciesJson;
 import com.sequenceiq.periscope.service.ClusterNotFoundException;
 import com.sequenceiq.periscope.service.ScalingService;
 
@@ -22,20 +22,19 @@ public class PolicyController {
     @Autowired
     private ScalingService scalingService;
     @Autowired
-    private AutoScalingGroupConverter scalingGroupConverter;
+    private ScalingPoliciesConverter policiesConverter;
 
     @RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity<AutoScalingGroupJson> setScaling(@PathVariable String clusterId, @RequestBody AutoScalingGroupJson autoScaling)
-            throws ClusterNotFoundException {
-        AutoScalingGroup scalingGroup = scalingGroupConverter.convert(autoScaling, clusterId);
-        scalingService.setAutoScalingGroup(clusterId, scalingGroup);
-        return new ResponseEntity<>(autoScaling, HttpStatus.OK);
+    public ResponseEntity<ScalingPoliciesJson> setScaling(@PathVariable String clusterId,
+            @RequestBody ScalingPoliciesJson scalingPolicies) throws ClusterNotFoundException {
+        ScalingPolicies policies = scalingService.setScalingPolicies(clusterId, policiesConverter.convert(scalingPolicies));
+        return new ResponseEntity<>(policiesConverter.convert(policies), HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public ResponseEntity<AutoScalingGroupJson> getScaling(@PathVariable String clusterId) throws ClusterNotFoundException {
-        AutoScalingGroup autoScalingGroup = scalingService.getAutoScalingGroup(clusterId);
-        AutoScalingGroupJson json = scalingGroupConverter.convert(autoScalingGroup);
+    public ResponseEntity<ScalingPoliciesJson> getScaling(@PathVariable String clusterId) throws ClusterNotFoundException {
+        ScalingPolicies scalingPolicies = scalingService.getScalingPolicies(clusterId);
+        ScalingPoliciesJson json = policiesConverter.convert(scalingPolicies);
         return new ResponseEntity<>(json, HttpStatus.OK);
     }
 

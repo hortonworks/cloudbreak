@@ -14,13 +14,14 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.periscope.model.Ambari;
+import com.sequenceiq.periscope.model.Cluster;
 import com.sequenceiq.periscope.model.Queue;
 import com.sequenceiq.periscope.model.QueueSetup;
-import com.sequenceiq.periscope.registry.Cluster;
 import com.sequenceiq.periscope.registry.ClusterRegistry;
 import com.sequenceiq.periscope.registry.ClusterState;
 import com.sequenceiq.periscope.registry.ConnectionException;
 import com.sequenceiq.periscope.registry.QueueSetupException;
+import com.sequenceiq.periscope.repository.ClusterDetailsRepository;
 import com.sequenceiq.periscope.utils.ClusterUtils;
 
 @Service
@@ -33,6 +34,8 @@ public class ClusterService {
 
     @Autowired
     private ClusterRegistry clusterRegistry;
+    @Autowired
+    private ClusterDetailsRepository clusterDetailsRepository;
 
     public Cluster get(String clusterId) throws ClusterNotFoundException {
         Cluster cluster = clusterRegistry.get(clusterId);
@@ -43,7 +46,9 @@ public class ClusterService {
     }
 
     public Cluster add(String clusterId, Ambari ambari) throws ConnectionException {
-        return clusterRegistry.add(clusterId, ambari);
+        Cluster cluster = clusterRegistry.add(clusterId, ambari);
+        clusterDetailsRepository.save(cluster.getClusterDetails());
+        return cluster;
     }
 
     public List<Cluster> getAll() {

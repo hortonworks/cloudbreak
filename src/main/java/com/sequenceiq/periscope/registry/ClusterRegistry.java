@@ -3,6 +3,7 @@ package com.sequenceiq.periscope.registry;
 import java.util.List;
 
 import com.sequenceiq.periscope.model.Ambari;
+import com.sequenceiq.periscope.model.Cluster;
 
 public interface ClusterRegistry {
 

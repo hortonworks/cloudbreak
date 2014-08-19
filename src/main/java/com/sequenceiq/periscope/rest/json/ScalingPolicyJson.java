@@ -4,25 +4,25 @@ import com.sequenceiq.periscope.model.AdjustmentType;
 
 public class ScalingPolicyJson implements Json {
 
-    private String id;
+    private Long id;
     private String name;
     private AdjustmentType adjustmentType;
     private int scalingAdjustment;
-    private String alarmId;
+    private Long alarmId;
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
-    public String getAlarmId() {
+    public Long getAlarmId() {
         return alarmId;
     }
 
-    public void setAlarmId(String alarmId) {
+    public void setAlarmId(Long alarmId) {
         this.alarmId = alarmId;
     }
 

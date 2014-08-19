@@ -20,10 +20,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.periscope.model.Cluster;
 import com.sequenceiq.periscope.model.Priority;
 import com.sequenceiq.periscope.model.SchedulerApplication;
 import com.sequenceiq.periscope.monitor.event.ApplicationUpdateEvent;
-import com.sequenceiq.periscope.registry.Cluster;
 import com.sequenceiq.periscope.service.ClusterNotFoundException;
 import com.sequenceiq.periscope.service.ClusterService;
 

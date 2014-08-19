@@ -1,6 +1,5 @@
-package com.sequenceiq.periscope.registry;
+package com.sequenceiq.periscope.model;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -16,38 +15,30 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.periscope.model.Alarm;
-import com.sequenceiq.periscope.model.Ambari;
-import com.sequenceiq.periscope.model.AutoScalingGroup;
-import com.sequenceiq.periscope.model.Priority;
-import com.sequenceiq.periscope.model.SchedulerApplication;
+import com.sequenceiq.periscope.registry.ClusterState;
+import com.sequenceiq.periscope.registry.ConnectionException;
 import com.sequenceiq.periscope.service.configuration.AmbariConfigurationService;
 import com.sequenceiq.periscope.service.configuration.ConfigParam;
 
 public class Cluster {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Cluster.class);
-    private final Map<Priority, Map<ApplicationId, SchedulerApplication>> applications;
-    private final String id;
-    private final Ambari ambari;
-    private boolean appMovementAllowed = true;
+    private Map<Priority, Map<ApplicationId, SchedulerApplication>> applications;
     private boolean restarting;
+    private long lastScalingActivity;
     private Configuration configuration;
     private YarnClient yarnClient;
     private ClusterMetricsInfo metrics;
-    private ClusterState state = ClusterState.RUNNING;
-    private List<Alarm> alarms = new ArrayList<>();
-    private AutoScalingGroup autoScalingGroup;
+    private ClusterDetails clusterDetails;
 
-    public Cluster(String id, Ambari ambari) throws ConnectionException {
-        this.id = id;
-        this.ambari = ambari;
+    public Cluster(ClusterDetails clusterDetails) throws ConnectionException {
+        this.clusterDetails = clusterDetails;
         this.applications = new ConcurrentHashMap<>();
         initConfiguration();
     }
 
     public String getId() {
-        return id;
+        return clusterDetails.getId();
     }
 
     public YarnClient getYarnClient() {
@@ -55,31 +46,39 @@ public class Cluster {
     }
 
     public String getHost() {
-        return ambari.getHost();
+        return clusterDetails.getAmbari().getHost();
     }
 
     public String getPort() {
-        return ambari.getPort();
+        return clusterDetails.getAmbari().getPort();
+    }
+
+    public String getUser() {
+        return clusterDetails.getAmbari().getUser();
+    }
+
+    public String getPass() {
+        return clusterDetails.getAmbari().getPass();
     }
 
     public boolean isAppMovementAllowed() {
-        return appMovementAllowed;
+        return clusterDetails.isAppMovementAllowed();
     }
 
     public ClusterState getState() {
-        return state;
+        return clusterDetails.getState();
     }
 
     public void setState(ClusterState state) {
-        this.state = state;
+        clusterDetails.setState(state);
     }
 
     public boolean isRunning() {
-        return state == ClusterState.RUNNING;
+        return clusterDetails.getState() == ClusterState.RUNNING;
     }
 
     public void allowAppMovement(boolean appMovementAllowed) {
-        this.appMovementAllowed = appMovementAllowed;
+        clusterDetails.setAppMovementAllowed(appMovementAllowed);
     }
 
     public String getConfigValue(ConfigParam param, String defaultValue) {
@@ -103,11 +102,23 @@ public class Cluster {
     }
 
     public List<Alarm> getAlarms() {
-        return alarms;
+        return clusterDetails.getAlarms();
     }
 
-    public void setAlarms(List<Alarm> alarms) {
-        this.alarms = alarms;
+    public ClusterDetails getClusterDetails() {
+        return clusterDetails;
+    }
+
+    public void setClusterDetails(ClusterDetails clusterDetails) {
+        this.clusterDetails = clusterDetails;
+    }
+
+    public long getLastScalingActivity() {
+        return lastScalingActivity;
+    }
+
+    public void setLastScalingActivity(long lastScalingActivity) {
+        this.lastScalingActivity = lastScalingActivity;
     }
 
     public void updateMetrics(ClusterMetricsInfo metrics) {
@@ -117,14 +128,6 @@ public class Cluster {
 
     public void refreshConfiguration() throws ConnectionException {
         initConfiguration();
-    }
-
-    public AutoScalingGroup getAutoScalingGroup() {
-        return autoScalingGroup;
-    }
-
-    public void setAutoScalingGroup(AutoScalingGroup autoScalingGroup) {
-        this.autoScalingGroup = autoScalingGroup;
     }
 
     public synchronized SchedulerApplication addApplication(ApplicationReport appReport) {
@@ -144,7 +147,7 @@ public class Cluster {
         }
         ApplicationId applicationId = application.getApplicationId();
         applicationMap.put(applicationId, application);
-        LOGGER.info("Application ({}) added to cluster {}", applicationId.toString(), this.id);
+        LOGGER.info("Application ({}) added to cluster {}", applicationId.toString(), getId());
         return application;
     }
 
@@ -157,7 +160,7 @@ public class Cluster {
                 if (id.equals(applicationId)) {
                     SchedulerApplication application = apps.get(id);
                     iterator.remove();
-                    LOGGER.info("Application ({}) removed from cluster {}", applicationId, this.id);
+                    LOGGER.info("Application ({}) removed from cluster {}", applicationId, getId());
                     return application;
                 }
             }
@@ -204,7 +207,7 @@ public class Cluster {
     }
 
     public AmbariClient newAmbariClient() {
-        return new AmbariClient(ambari.getHost(), ambari.getPort(), ambari.getUser(), ambari.getPass());
+        return new AmbariClient(getHost(), getPort(), getUser(), getPass());
     }
 
     private void initConfiguration() throws ConnectionException {
@@ -217,7 +220,7 @@ public class Cluster {
             yarnClient.init(configuration);
             yarnClient.start();
         } catch (Exception e) {
-            throw new ConnectionException(ambari.getHost());
+            throw new ConnectionException(getHost());
         }
     }
 

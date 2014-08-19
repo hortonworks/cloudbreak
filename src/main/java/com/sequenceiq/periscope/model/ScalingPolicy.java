@@ -1,18 +1,31 @@
 package com.sequenceiq.periscope.model;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
+
+@Entity
 public class ScalingPolicy {
 
-    private String id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "template_generator")
+    @SequenceGenerator(name = "template_generator", sequenceName = "sequence_table")
+    private long id;
     private String name;
     private AdjustmentType adjustmentType;
     private int scalingAdjustment;
+    @OneToOne(cascade = CascadeType.PERSIST)
     private Alarm alarm;
 
-    public String getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(long id) {
         this.id = id;
     }
 

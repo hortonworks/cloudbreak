@@ -5,14 +5,14 @@ import com.sequenceiq.periscope.model.Metric;
 
 public class AlarmJson implements Json {
 
-    private String id;
+    private Long id;
     private String alarmName;
     private String description;
     private Metric metric;
     private double threshold;
     private ComparisonOperator comparisonOperator;
     private int period;
-    private String scalingPolicyId;
+    private Long scalingPolicyId;
 
     public String getAlarmName() {
         return alarmName;
@@ -62,19 +62,19 @@ public class AlarmJson implements Json {
         this.period = period;
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
-    public String getScalingPolicyId() {
+    public Long getScalingPolicyId() {
         return scalingPolicyId;
     }
 
-    public void setScalingPolicyId(String scalingPolicyId) {
+    public void setScalingPolicyId(Long scalingPolicyId) {
         this.scalingPolicyId = scalingPolicyId;
     }
 }

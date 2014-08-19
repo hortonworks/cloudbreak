@@ -2,7 +2,7 @@ package com.sequenceiq.periscope.rest.converter;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.periscope.registry.Cluster;
+import com.sequenceiq.periscope.model.Cluster;
 import com.sequenceiq.periscope.rest.json.ClusterJson;
 
 @Component

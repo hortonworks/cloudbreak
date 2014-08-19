@@ -9,7 +9,7 @@ import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.CapacitySchedule
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.ClusterMetricsInfo;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.SchedulerInfo;
 
-import com.sequenceiq.periscope.registry.Cluster;
+import com.sequenceiq.periscope.model.Cluster;
 
 public final class ClusterUtils {
 
