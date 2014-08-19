@@ -19,7 +19,7 @@ import freemarker.template.Configuration;
 
 @Service
 public class DefaultEmailService implements EmailService {
-    Logger LOGGER = LoggerFactory.getLogger(DefaultEmailService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultEmailService.class);
 
     @Autowired
     private MailSender mailSender;
