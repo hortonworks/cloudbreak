@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.domain.UserStatus;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
 import com.sequenceiq.cloudbreak.service.blueprint.DefaultBlueprintLoaderService;
 import com.sequenceiq.cloudbreak.service.email.EmailService;
+import com.sequenceiq.cloudbreak.util.UserRolesUtil;
 
 @Service
 public class SimpleUserService implements UserService {
@@ -60,7 +61,7 @@ public class SimpleUserService implements UserService {
             user.setConfToken(confToken);
             user.setBlueprints(defaultBlueprintLoaderService.loadBlueprints(user));
             user.setAccount(account);
-            user.getUserRoles().add(UserRole.ACCOUNT_ADMIN);
+            user.getUserRoles().addAll(UserRolesUtil.getGroupForRole(UserRole.ACCOUNT_ADMIN));
             User savedUser = userRepository.save(user);
 
             LOGGER.info("User '{}' for account '{}' successfully registered", savedUser.getId(), account.getId());
@@ -139,11 +140,14 @@ public class SimpleUserService implements UserService {
         invitedUser.setEmail(email);
         invitedUser.setConfToken(inviteHash);
         invitedUser.setStatus(UserStatus.INVITED);
-        invitedUser.getUserRoles().add(role);
         invitedUser.setFirstName(UUID.randomUUID().toString());
         invitedUser.setLastName(UUID.randomUUID().toString());
         invitedUser.setPassword(UUID.randomUUID().toString());
-
+        if (UserRolesUtil.isUserInRole(adminUser, role)) {
+            invitedUser.getUserRoles().addAll(UserRolesUtil.getGroupForRole(role));
+        } else {
+            throw new UnsupportedOperationException(String.format("Invite role is too high %s", role));
+        }
         invitedUser = userRepository.save(invitedUser);
 
         Map<String, Object> model = new HashMap<>();
@@ -162,8 +166,9 @@ public class SimpleUserService implements UserService {
     public User invitedUser(String inviteToken) {
         LOGGER.debug("Registering upon invitation. Token: {}", inviteToken);
         User invitedUser = userRepository.findUserByConfToken(inviteToken);
-        if (!UserStatus.INVITED.equals(invitedUser.getStatus())) {
-            throw new IllegalStateException("The user has already been registered!");
+
+        if (invitedUser == null || !UserStatus.INVITED.equals(invitedUser.getStatus())) {
+            throw new IllegalStateException(String.format("The user hasn't been invited or has already been registered!"));
         }
         invitedUser.setRegistrationDate(new Date());
         invitedUser.setFirstName("");
@@ -189,7 +194,6 @@ public class SimpleUserService implements UserService {
         invitedUser.setFirstName(registeringUser.getFirstName());
         invitedUser.setLastName(registeringUser.getLastName());
         invitedUser.setPassword(registeringUser.getPassword());
-        invitedUser.getUserRoles().add(UserRole.ACCOUNT_USER);
         invitedUser = userRepository.save(invitedUser);
 
         return invitedUser;
