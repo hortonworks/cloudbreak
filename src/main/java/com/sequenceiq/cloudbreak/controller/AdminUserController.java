@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.sequenceiq.cloudbreak.controller.json.UserActivationRequest;
 import com.sequenceiq.cloudbreak.controller.json.UserJson;
 import com.sequenceiq.cloudbreak.domain.User;
-import com.sequenceiq.cloudbreak.domain.UserStatus;
 import com.sequenceiq.cloudbreak.facade.AdminUserFacade;
 import com.sequenceiq.cloudbreak.security.CurrentUser;
 
@@ -38,10 +38,9 @@ public class AdminUserController {
 
     @RequestMapping(method = RequestMethod.PUT, value = "/users/{userId}")
     @ResponseBody
-    public ResponseEntity<UserJson> manageUserStatus(@CurrentUser User user, @RequestBody String status, @PathVariable("userId") Long userId) {
-        UserStatus userStatus = UserStatus.valueOf(status);
+    public ResponseEntity<UserJson> manageUserStatus(@CurrentUser User user, @RequestBody UserActivationRequest activationRequest, @PathVariable("userId") Long userId) {
         UserJson modifiedUser = null;
-        switch (userStatus) {
+        switch (activationRequest.getUserStatus()) {
             case ACTIVE:
                 modifiedUser = adminUserFacade.activateUser(userId);
                 break;
@@ -49,7 +48,7 @@ public class AdminUserController {
                 modifiedUser = adminUserFacade.deactivateUser(userId);
                 break;
             default:
-                throw new UnsupportedOperationException(String.format("Unsupported status change to %s", userStatus.name()));
+                throw new UnsupportedOperationException(String.format("Unsupported status change to %s", activationRequest.getUserStatus().name()));
         }
         return new ResponseEntity<>(modifiedUser, HttpStatus.OK);
     }
