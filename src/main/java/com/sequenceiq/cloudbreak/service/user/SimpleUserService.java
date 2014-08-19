@@ -254,8 +254,8 @@ public class SimpleUserService implements UserService {
     }
 
     private String generateInviteToken(String accountName, String email) {
-        LOGGER.debug("Generating registration id ...");
-        String textToDigest = accountName + email;
+        LOGGER.debug("Generating invite token ...");
+        String textToDigest = accountName + email + new Date().getTime();
         return DigestUtils.md5DigestAsHex(textToDigest.getBytes());
     }
 

@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sequenceiq.cloudbreak.controller.json.InviteRequest;
+import com.sequenceiq.cloudbreak.controller.json.UpdateRequest;
 import com.sequenceiq.cloudbreak.controller.json.UserJson;
-import com.sequenceiq.cloudbreak.controller.json.UserUpdateRequest;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.facade.AdminUserFacade;
 import com.sequenceiq.cloudbreak.security.CurrentUser;
@@ -33,20 +33,17 @@ public class AdminUserController {
     @RequestMapping(method = RequestMethod.POST, value = "/users/invite")
     @ResponseBody
     public ResponseEntity<String> inviteUser(@CurrentUser User user, @RequestBody InviteRequest inviteRequest) {
-        String hash = null;
-        if (inviteRequest.isAdmin()) {
-            hash = adminUserFacade.inviteAdmin(user, inviteRequest.getEmail());
-        } else {
-            hash = adminUserFacade.inviteUser(user, inviteRequest.getEmail());
-        }
-        return new ResponseEntity<>(hash, HttpStatus.OK);
+        LOGGER.debug("Invite request received {}", inviteRequest);
+        String inviteToken = adminUserFacade.inviteUser(user, inviteRequest);
+        return new ResponseEntity<>(inviteToken, HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/users/{userId}")
     @ResponseBody
-    public ResponseEntity<UserJson> updateUser(@CurrentUser User admin, @RequestBody UserUpdateRequest userUpdateRequest,
+    public ResponseEntity<UserJson> updateUser(@CurrentUser User admin, @RequestBody UpdateRequest updateRequest,
             @PathVariable("userId") Long userId) {
-        UserJson usr = adminUserFacade.updateUser(admin, userId, userUpdateRequest);
+        LOGGER.debug("Update request received {}", updateRequest);
+        UserJson usr = adminUserFacade.updateUser(admin, userId, updateRequest);
         return new ResponseEntity<>(usr, HttpStatus.OK);
     }
 

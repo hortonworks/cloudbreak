@@ -10,6 +10,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 @JsonSubTypes({
         @JsonSubTypes.Type(value = StatusUpdateRequest.class, name = "statusUpdate"),
         @JsonSubTypes.Type(value = RoleUpdateRequest.class, name = "roleUpdate") })
-public class UserUpdateRequest implements JsonEntity {
+public interface UpdateRequest extends JsonEntity {
 
 }

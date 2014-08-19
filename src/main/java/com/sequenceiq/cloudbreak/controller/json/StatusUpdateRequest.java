@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.controller.json;
 
 import com.sequenceiq.cloudbreak.domain.UserStatus;
 
-public class StatusUpdateRequest extends UserUpdateRequest {
+public class StatusUpdateRequest implements UpdateRequest {
     private UserStatus userStatus;
 
     public UserStatus getUserStatus() {

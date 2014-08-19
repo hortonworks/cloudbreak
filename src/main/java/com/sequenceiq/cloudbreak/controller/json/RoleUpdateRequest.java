@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.controller.json;
 
 import com.sequenceiq.cloudbreak.domain.UserRole;
 
-public class RoleUpdateRequest extends UserUpdateRequest {
+public class RoleUpdateRequest implements UpdateRequest {
     private UserRole userRole;
 
     public UserRole getUserRole() {
