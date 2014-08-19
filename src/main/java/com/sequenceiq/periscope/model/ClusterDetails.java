@@ -18,7 +18,7 @@ public class ClusterDetails {
     private String id;
     @OneToOne(cascade = CascadeType.ALL)
     private Ambari ambari;
-    private boolean appMovementAllowed = true;
+    private boolean appMovementAllowed;
     private ClusterState state = ClusterState.RUNNING;
     @OneToMany(cascade = CascadeType.ALL)
     private List<Alarm> alarms = new ArrayList<>();

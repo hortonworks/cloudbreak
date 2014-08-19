@@ -14,13 +14,13 @@ curl -w '%{http_code}' -H "Content-Type: application/json" -X POST -d '{"allowed
 curl -X POST -H "Content-Type: application/json" localhost:8081/applications/multi-node/random |jq .
 
 # list all app
-curl -X GET localhost:8081/applications/multi-node | jq .
+curl -X GET localhost:8081/clusters/multi-node/applications | jq .
 
 # refresh ambari configuration
-curl -X POST localhost:8081/configuration/multi-node | jq .
+curl -X POST localhost:8081/clusters/multi-node/configurations | jq .
 
 # set queue newSetup
-curl -X POST -H "Content-Type: application/json" -d '{"setup":[{"name":"default", "capacity":55}, {"name":"high", "capacity":45}]}' localhost:8081/configuration/multi-node/queue | jq .
+curl -X POST -H "Content-Type: application/json" -d '{"setup":[{"name":"default", "capacity":55}, {"name":"high", "capacity":45}]}' localhost:8081/clusters/multi-node/configurations/queue | jq .
 
 # set metric alarms
 curl -X POST -H "Content-Type: application/json" -d '{"alarms":[{"alarmName":"pendingContainerHigh","description":"Number of pending containers is high","metric":"PENDING_CONTAINERS","threshold":10,"comparisonOperator":"GREATER_THAN","period":10},{"alarmName":"freeGlobalResourcesRateLow","description":"Low free global resource rate","metric":"GLOBAL_RESOURCES","threshold":1,"comparisonOperator":"EQUALS","period":10}]}' localhost:8081/clusters/multi-node/alarms | jq .

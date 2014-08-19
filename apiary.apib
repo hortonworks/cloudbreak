@@ -1453,7 +1453,7 @@ Add a cluster to be monitored by Periscope.
 ###Set the state of a cluster [POST]
 
 + Parameters
-    + clusterId (required String `clusterIUD`) ... The id of the cluster.
+    + clusterId (required String `clusterID`) ... The id of the cluster.
 
 + Request (application/json)
 
@@ -1475,7 +1475,7 @@ Add a cluster to be monitored by Periscope.
 ###Configure application movements within a cluster [POST]
 
 + Parameters
-    + clusterId (required String `clusterIUD`) ... The id of the cluster.
+    + clusterId (required String `clusterID`) ... The id of the cluster.
 
 + Request (application/json)
 
@@ -1513,85 +1513,71 @@ Add a cluster to be monitored by Periscope.
           }
         ]
 
-#Group Policy
-SLA policy related resources of the **Periscope API**.
+#Group Alarms
+Metric alarms.
 
-##Policy [/policy/{clusterId}]
-###Create a scaling policy for a cluster [POST]
-TBD - add the 3 different scenarios - success, partial and failure
+##Alarm [/clusters/{clusterId}/alarms]
+###Create an alarm for a cluster [POST]
 
 + Parameters
-    + clusterId (required String `clusterIUD`) ... The id of the cluster to attach the policy.
+    + clusterId (required String `clusterID`) ... The id of the cluster.
 
 + Request (application/json)
 
         {
-            "cooldown": 100,
-            "min-size": 3,
-            "max-size": 10,
-            "scaleUpRules":
+          "alarms": [
             {
-                "pendingApps":
-                {
-                    "limit": "4",
-                    "pendingApps": "5",
-                    "scaling-adjustment": "1"
-                },
-                "pendingContainers":
-                {
-                    "limit": "4",
-                    "pendingContainers": "10"
-                }
+              "alarmName": "pendingContainerHigh",
+              "description": "Number of pending containers is high",
+              "metric": "PENDING_CONTAINERS",
+              "threshold": 10,
+              "comparisonOperator": "GREATER_THAN",
+              "period": 10
             },
-            "scaleDownRules":
             {
-                "resourcesAbove":
-                {
-                    "limit": "3",
-                    "freeResourceRate": "0.4",
-                    "scaling-adjustment": "1"
-                }
+              "alarmName": "freeGlobalResourcesRateLow",
+              "description": "Low free global resource rate",
+              "metric": "GLOBAL_RESOURCES",
+              "threshold": 1,
+              "comparisonOperator": "EQUALS",
+              "period": 10
             }
+          ]
         }
 
 + Response 200 (application/json)
 
-        {
-            "cooldown": 100,
-            "min-size": 3,
-            "max-size": 10,
-            "scaleDownRules":
-            {
-                "resourcesAbove":
-                {
-                    "freeResourceRate": "0.4",
-                    "limit": "3",
-                    "scaling-adjustment": "1"
-                }
-            },
-            "scaleUpRules":
-            {
-                "pendingApps":
-                {
-                    "pendingApps": "5",
-                    "limit": "4",
-                    "scaling-adjustment": "1"
-                },
-                "pendingContainers":
-                {
-                    "pendingContainers": "10",
-                    "limit": "4"
-                }
-            }
-        }
+       {
+         "alarms": [
+           {
+             "scalingPolicyId": null,
+             "period": 10,
+             "comparisonOperator": "GREATER_THAN",
+             "threshold": 10,
+             "metric": "PENDING_CONTAINERS",
+             "description": "Number of pending containers is high",
+             "alarmName": "pendingContainerHigh",
+             "id": 50
+           },
+           {
+             "scalingPolicyId": null,
+             "period": 10,
+             "comparisonOperator": "EQUALS",
+             "threshold": 1,
+             "metric": "GLOBAL_RESOURCES",
+             "description": "Low free global resource rate",
+             "alarmName": "freeGlobalResourcesRateLow",
+             "id": 51
+           }
+         ]
+       }
 
 
-##Policy [/policy/{clusterId}]
-###Get a scaling policy for a cluster [GET]
-
+##Alarm [/clusters/{clusterId}/alarms]
+###Get the alarms for a cluster [GET]
 
 + Parameters
-    + clusterId (required String `clusterIUD`) ... The id of the cluster to attach the policy.
+    + clusterId (required String `clusterID`) ... The id of the cluster to attach the policy.
 
 + Request (application/json)
         {
@@ -1601,42 +1587,188 @@ TBD - add the 3 different scenarios - success, partial and failure
 + Response 200 (application/json)
 
         {
-            "cooldown": 100,
-            "min-size": 3,
-            "max-size": 10,
-            "scaleDownRules":
+          "alarms": [
             {
-                "resourcesAbove":
-                {
-                    "freeResourceRate": "0.4",
-                    "limit": "3",
-                    "scaling-adjustment": "1"
-                }
+              "scalingPolicyId": null,
+              "period": 10,
+              "comparisonOperator": "GREATER_THAN",
+              "threshold": 10,
+              "metric": "PENDING_CONTAINERS",
+              "description": "Number of pending containers is high",
+              "alarmName": "pendingContainerHigh",
+              "id": 50
             },
-            "scaleUpRules":
             {
-                "pendingApps":
-                {
-                    "pendingApps": "5",
-                    "limit": "4",
-                    "scaling-adjustment": "1"
-                },
-                "pendingContainers":
-                {
-                    "pendingContainers": "10",
-                    "limit": "4"
-                }
+              "scalingPolicyId": null,
+              "period": 10,
+              "comparisonOperator": "EQUALS",
+              "threshold": 1,
+              "metric": "GLOBAL_RESOURCES",
+              "description": "Low free global resource rate",
+              "alarmName": "freeGlobalResourcesRateLow",
+              "id": 51
             }
+          ]
+        }
+
+##Alarm [/clusters/{clusterId}/alarms/{alarmId}]
+###Delete an alarm from cluster [DELETE]
+
++ Parameters
+    + clusterId (required String `clusterID`) ... The id of the cluster.
+    + alarmId (required String `alarmId`) ... The id of the alarm.
+
++ Request (application/json)
+        {
+
+        }
+
++ Response 200 (application/json)
+
+        {
+          "alarms": [
+            {
+              "scalingPolicyId": null,
+              "period": 10,
+              "comparisonOperator": "EQUALS",
+              "threshold": 1,
+              "metric": "GLOBAL_RESOURCES",
+              "description": "Low free global resource rate",
+              "alarmName": "freeGlobalResourcesRateLow",
+              "id": 51
+            }
+          ]
+        }
+
+#Group Scaling Policy
+Scaling policies related to alarms.
+
+##Policy [/clusters/{clusterId}/policies]
+###Create a scaling policy. [POST]
+
++ Parameters
+    + clusterId (required String `clusterID`) ... The id of the cluster.
+
++ Request (application/json)
+
+        {
+          "minSize": 2,
+          "maxSize": 10,
+          "cooldown": 35,
+          "scalingPolicies": [
+            {
+              "name": "downScaleWhenHighResource",
+              "adjustmentType": "NODE_COUNT",
+              "scalingAdjustment": -2,
+              "alarmId": "51"
+            },
+            {
+              "name": "upScaleWhenHighPendingContainers",
+              "adjustmentType": "PERCENTAGE",
+              "scalingAdjustment": 40,
+              "alarmId": "50"
+            }
+          ]
+        }
+
++ Response 200 (application/json)
+
+        {
+          "cooldown": 35,
+          "scalingPolicies": [
+            {
+              "alarmId": 50,
+              "scalingAdjustment": 40,
+              "adjustmentType": "PERCENTAGE",
+              "name": "upScaleWhenHighPendingContainers",
+              "id": 101
+            },
+            {
+              "alarmId": 51,
+              "scalingAdjustment": -2,
+              "adjustmentType": "NODE_COUNT",
+              "name": "downScaleWhenHighResource",
+              "id": 100
+            }
+          ],
+          "maxSize": 10,
+          "minSize": 2
+        }
+
+##Policy [/clusters/{clusterId}/policies]
+###List the scaling policies. [GET]
+
++ Parameters
+    + clusterId (required String `clusterID`) ... The id of the cluster.
+
++ Request (application/json)
+
+        {
+
+        }
+
++ Response 200 (application/json)
+
+        {
+          "cooldown": 35,
+          "scalingPolicies": [
+            {
+              "alarmId": 50,
+              "scalingAdjustment": 40,
+              "adjustmentType": "PERCENTAGE",
+              "name": "upScaleWhenHighPendingContainers",
+              "id": 101
+            },
+            {
+              "alarmId": 51,
+              "scalingAdjustment": -2,
+              "adjustmentType": "NODE_COUNT",
+              "name": "downScaleWhenHighResource",
+              "id": 100
+            }
+          ],
+          "maxSize": 10,
+          "minSize": 2
+        }
+
+##Policy [/clusters/{clusterId}/policies/{policyId}]
+###Delete a scaling policy. [DELETE]
+
++ Parameters
+    + clusterId (required String `clusterID`) ... The id of the cluster.
+    + policyId (required String `policyId`) ... The id of the policy.
+
++ Request (application/json)
+
+        {
+
+        }
+
++ Response 200 (application/json)
+
+        {
+          "cooldown": 35,
+          "scalingPolicies": [
+            {
+              "alarmId": 50,
+              "scalingAdjustment": 40,
+              "adjustmentType": "PERCENTAGE",
+              "name": "upScaleWhenHighPendingContainers",
+              "id": 101
+            }
+          ],
+          "maxSize": 10,
+          "minSize": 2
         }
 
 #Group Applications
 Applications related resources of the **Periscope API**.
 
-##Applications [/applications/{clusterId}]
+##Applications [/clusters/{clusterId}/applications]
 ###List the running applications in a cluster [GET]
 
 + Parameters
-    + clusterId (required String `clusterIUD`) ... The id of the cluster.
+    + clusterId (required String `clusterID`) ... The id of the cluster.
 
 + Request (application/json)
 
@@ -1669,11 +1801,11 @@ Applications related resources of the **Periscope API**.
 #Group Configuration
 Configuration related resources of the **Periscope API**.
 
-##Configuration [/configuration/{clusterId}]
-###Reload the Hadoop configuration [POST]
+##Configuration [/clusters/{clusterId}/configurations]
+###Reload the HADOOP configuration [POST]
 
 + Parameters
-    + clusterId (required String `clusterIUD`) ... The id of the cluster.
+    + clusterId (required String `clusterID`) ... The id of the cluster.
 
 + Request (application/json)
 
@@ -1690,4 +1822,64 @@ Configuration related resources of the **Periscope API**.
             "host": "172.24.0.2",
             "id": "multi-node"
         }
+<<<<<<< HEAD
 >>>>>>> 2a42905... PERI-2 update apiary
+=======
+
+##Configuration [/clusters/{clusterId}/configurations/queue]
+###Reconfigure the queue capacities [POST]
+
++ Parameters
+    + clusterId (required String `clusterID`) ... The id of the cluster.
+
++ Request (application/json)
+
+        {
+          "setup": [
+            {
+              "name": "default",
+              "capacity": 55
+            },
+            {
+              "name": "high",
+              "capacity": 45
+            }
+          ]
+        }
+
++ Response 200 (application/json)
+
+        {
+          "properties": {
+            "yarn.scheduler.capacity.root.capacity": "100",
+            "yarn.scheduler.capacity.root.high.maximum-capacity": "45",
+            "yarn.scheduler.capacity.root.default.user-limit-factor": "1",
+            "yarn.scheduler.capacity.root.high.user-limit-factor": "1",
+            "yarn.scheduler.capacity.root.default.acl_submit_applications": "*",
+            "yarn.scheduler.capacity.maximum-am-resource-percent": "0.2",
+            "yarn.scheduler.capacity.root.high.state": "RUNNING",
+            "yarn.scheduler.capacity.root.default.maximum-capacity": "55",
+            "yarn.scheduler.capacity.node-locality-delay": "40",
+            "yarn.scheduler.capacity.root.default.acl_administer_jobs": "*",
+            "yarn.scheduler.capacity.root.queues": "default,high",
+            "yarn.scheduler.capacity.root.default.state": "RUNNING",
+            "yarn.scheduler.capacity.root.unfunded.capacity": "50",
+            "yarn.scheduler.capacity.root.high.acl_administer_jobs": "*",
+            "yarn.scheduler.capacity.root.acl_administer_queue": "*",
+            "yarn.scheduler.capacity.root.high.acl_submit_applications": "*",
+            "yarn.scheduler.capacity.root.high.capacity": "45",
+            "yarn.scheduler.capacity.maximum-applications": "9999",
+            "yarn.scheduler.capacity.root.default.capacity": "55"
+          },
+          "setup": [
+            {
+              "capacity": 55,
+              "name": "default"
+            },
+            {
+              "capacity": 45,
+              "name": "high"
+            }
+          ]
+        }
+>>>>>>> 2826dd5... PERI-3 resources update + apiary update

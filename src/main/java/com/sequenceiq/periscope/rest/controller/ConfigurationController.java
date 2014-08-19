@@ -24,7 +24,7 @@ import com.sequenceiq.periscope.service.ClusterNotFoundException;
 import com.sequenceiq.periscope.service.ClusterService;
 
 @RestController
-@RequestMapping("/configuration")
+@RequestMapping("/clusters/{clusterId}/configurations")
 public class ConfigurationController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationController.class);
@@ -36,17 +36,17 @@ public class ConfigurationController {
     @Autowired
     private QueueSetupConverter queueSetupConverter;
 
-    @RequestMapping(value = "/{id}", method = RequestMethod.POST)
-    public ResponseEntity<ClusterJson> refreshConfiguration(@PathVariable String id)
+    @RequestMapping(method = RequestMethod.POST)
+    public ResponseEntity<ClusterJson> refreshConfiguration(@PathVariable String clusterId)
             throws ConnectionException, ClusterNotFoundException {
-        Cluster cluster = clusterService.refreshConfiguration(id);
+        Cluster cluster = clusterService.refreshConfiguration(clusterId);
         return new ResponseEntity<>(clusterConverter.convert(cluster), HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/{id}/queue", method = RequestMethod.POST)
-    public ResponseEntity<QueueSetupJson> setQueueConfig(@PathVariable String id, @RequestBody QueueSetupJson queueSetup)
+    @RequestMapping(value = "/queue", method = RequestMethod.POST)
+    public ResponseEntity<QueueSetupJson> setQueueConfig(@PathVariable String clusterId, @RequestBody QueueSetupJson queueSetup)
             throws ClusterNotFoundException, QueueSetupException {
-        Map<String, String> newSetup = clusterService.setQueueSetup(id, queueSetupConverter.convert(queueSetup));
+        Map<String, String> newSetup = clusterService.setQueueSetup(clusterId, queueSetupConverter.convert(queueSetup));
         QueueSetupJson responseJson = new QueueSetupJson("Queue setup successfully applied", queueSetup.getSetup(), newSetup);
         return new ResponseEntity<>(responseJson, HttpStatus.OK);
     }

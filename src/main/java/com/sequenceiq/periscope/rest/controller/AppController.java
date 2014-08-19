@@ -22,7 +22,7 @@ import com.sequenceiq.periscope.service.AppService;
 import com.sequenceiq.periscope.service.ClusterNotFoundException;
 
 @RestController
-@RequestMapping("/applications/{clusterId}")
+@RequestMapping("/clusters/{clusterId}/applications")
 public class AppController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AppController.class);
