@@ -1,10 +1,7 @@
 package com.sequenceiq.periscope.rest.controller;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,8 +27,6 @@ import com.sequenceiq.periscope.service.ClusterService;
 @RequestMapping("/clusters")
 public class ClusterController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterController.class);
-
     @Autowired
     private ClusterService clusterService;
     @Autowired
@@ -44,42 +39,43 @@ public class ClusterController {
     @RequestMapping(value = "/{id}", method = RequestMethod.POST)
     public ResponseEntity<ClusterJson> addCluster(@PathVariable String id, @RequestBody AmbariJson ambariServer)
             throws ConnectionException {
-        Cluster cluster = clusterService.add(id, ambariConverter.convert(ambariServer));
-        return new ResponseEntity<>(clusterConverter.convert(cluster), HttpStatus.CREATED);
+        return createClusterJsonResponse(clusterService.add(id, ambariConverter.convert(ambariServer)), HttpStatus.CREATED);
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public ResponseEntity<ClusterJson> getCluster(@PathVariable String id) throws ClusterNotFoundException {
-        Cluster cluster = clusterService.get(id);
-        return new ResponseEntity<>(clusterConverter.convert(cluster), HttpStatus.OK);
+        return createClusterJsonResponse(clusterService.get(id));
     }
 
     @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<List<ClusterJson>> getClusters() {
-        List<ClusterJson> result = new ArrayList<>();
         List<Cluster> clusters = clusterService.getAll();
-        result.addAll(clusterConverter.convertAllToJson(clusters));
-        return new ResponseEntity<>(result, HttpStatus.OK);
+        return new ResponseEntity<>(clusterConverter.convertAllToJson(clusters), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
     public ResponseEntity<ClusterJson> deleteCluster(@PathVariable String id) throws ClusterNotFoundException {
-        Cluster cluster = clusterService.remove(id);
-        return new ResponseEntity<>(clusterConverter.convert(cluster), HttpStatus.OK);
+        return createClusterJsonResponse(clusterService.remove(id));
     }
 
     @RequestMapping(value = "/{id}/state", method = RequestMethod.POST)
     public ResponseEntity<ClusterJson> setState(@PathVariable String id, @RequestBody StateJson stateJson)
             throws ClusterNotFoundException {
-        Cluster cluster = clusterService.setState(id, stateJson.getState());
-        return new ResponseEntity<>(clusterConverter.convert(cluster), HttpStatus.OK);
+        return createClusterJsonResponse(clusterService.setState(id, stateJson.getState()));
     }
 
     @RequestMapping(value = "/{id}/movement", method = RequestMethod.POST)
     public ResponseEntity<ClusterJson> enableMovement(@PathVariable String id, @RequestBody AppMovementJson appMovementJson)
             throws ClusterNotFoundException {
-        Cluster cluster = appService.allowAppMovement(id, appMovementJson.isAllowed());
-        return new ResponseEntity<>(clusterConverter.convert(cluster), HttpStatus.OK);
+        return createClusterJsonResponse(appService.allowAppMovement(id, appMovementJson.isAllowed()));
+    }
+
+    private ResponseEntity<ClusterJson> createClusterJsonResponse(Cluster cluster) {
+        return createClusterJsonResponse(cluster, HttpStatus.OK);
+    }
+
+    private ResponseEntity<ClusterJson> createClusterJsonResponse(Cluster cluster, HttpStatus status) {
+        return new ResponseEntity<>(clusterConverter.convert(cluster), status);
     }
 
 }
