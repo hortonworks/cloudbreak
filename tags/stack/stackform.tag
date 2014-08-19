@@ -56,7 +56,7 @@
         <label class="col-sm-3 control-label" for="emailneeded">Email notification when cluster is provisioned</label>
 
         <div class="col-sm-9">
-            <input type="checkbox" class="form-control" id="emailneeded" ng-model="emailneeded" name="emailneeded">
+            <input type="checkbox" class="" id="emailneeded" ng-model="emailneeded" name="emailneeded">
 
         </div>
         <!-- .col-sm-9 -->
