@@ -91,14 +91,13 @@ public class StackController {
     public ResponseEntity<Boolean> startOrStopAllOnStack(@CurrentUser User user, @PathVariable Long stackId, @RequestBody StatusRequestJson statusRequestJson) {
         Stack stack = stackService.get(user, stackId);
         stack.setNodeCount(stack.getNodeCount() + 1);
-        stackService.addNode(user, stack);
         switch (statusRequestJson.getStatusRequest()) {
-        case STOP:
-            return new ResponseEntity<>(stackService.stopAll(user, stackId), HttpStatus.OK);
-        case START:
-            return new ResponseEntity<>(stackService.startAll(user, stackId), HttpStatus.OK);
-        default:
-            throw new BadRequestException("The requested status not valid.");
+            case STOP:
+                return new ResponseEntity<>(stackService.stopAll(user, stackId), HttpStatus.OK);
+            case START:
+                return new ResponseEntity<>(stackService.startAll(user, stackId), HttpStatus.OK);
+            default:
+                throw new BadRequestException("The requested status not valid.");
         }
     }
 
@@ -107,7 +106,7 @@ public class StackController {
     public void increaseNodeCount(@CurrentUser User user, @PathVariable Long stackId, @PathVariable String hostgroup) throws HttpResponseException {
         Stack stack = stackService.get(user, stackId);
         try {
-            if(stackService.assignableHostgroup(stack, hostgroup)) {
+            if (stackService.assignableHostgroup(stack, hostgroup)) {
                 stack.setNodeCount(stack.getNodeCount() + 1);
                 stackService.addNode(user, stack, hostgroup);
             } else {
@@ -115,7 +114,7 @@ public class StackController {
                         stack.getCluster().getBlueprint().getId(), hostgroup));
             }
         } catch (Exception e) {
-            throw new BadRequestException(String.format("Stack %s put occurs a problem '%s': %s",stackId, e.getMessage(), e));
+            throw new BadRequestException(String.format("Stack %s put occurs a problem '%s': %s", stackId, e.getMessage(), e));
         }
 
     }

@@ -65,7 +65,7 @@ public class AzureMetadataSetup implements MetadataSetup {
         AzureClient azureClient = azureStackUtil.createAzureClient(azureCredential, filePath);
         Set<CoreInstanceMetaData> instanceMetaDatas = new HashSet<>();
         for (Resource resource : resourceList) {
-            if(ResourceType.VIRTUAL_MACHINE.equals(resource.getResourceType())) {
+            if (ResourceType.VIRTUAL_MACHINE.equals(resource.getResourceType())) {
                 CoreInstanceMetaData metadata = getMetadata(stack, azureClient, resource);
                 if (metadata == null) {
                     break;

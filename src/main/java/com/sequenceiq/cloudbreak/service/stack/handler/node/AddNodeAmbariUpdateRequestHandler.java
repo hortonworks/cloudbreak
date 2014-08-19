@@ -32,13 +32,13 @@ public class AddNodeAmbariUpdateRequestHandler implements Consumer<Event<AmbariA
     private StackRepository stackRepository;
 
     @Resource
-    private  Map<CloudPlatform, Provisioner> provisioners;
+    private Map<CloudPlatform, Provisioner> provisioners;
 
     @Override
     public void accept(Event<AmbariAddNode> event) {
         AmbariAddNode data = event.getData();
         LOGGER.info("Accepted {} event.", ReactorConfig.ADD_NODE_AMBARI_UPDATE_NODE_EVENT, data.getStackId());
         Stack stack = stackRepository.findOneWithLists(data.getStackId());
-        ambariClusterInstaller.installAmbariNode(stackRepository.findOneWithLists(data.getStackId()),data.getNewNodesInstanceMetaData(), data.getHostgroup());
+        ambariClusterInstaller.installAmbariNode(stackRepository.findOneWithLists(data.getStackId()), data.getNewNodesInstanceMetaData(), data.getHostgroup());
     }
 }
