@@ -61,6 +61,18 @@ public class Cluster {
         return clusterDetails.getAmbari().getPass();
     }
 
+    public int getMinSize() {
+        return clusterDetails.getMinSize();
+    }
+
+    public int getMaxSize() {
+        return clusterDetails.getMaxSize();
+    }
+
+    public int getCoolDown() {
+        return clusterDetails.getCoolDown();
+    }
+
     public boolean isAppMovementAllowed() {
         return clusterDetails.isAppMovementAllowed();
     }
@@ -117,8 +129,8 @@ public class Cluster {
         return lastScalingActivity;
     }
 
-    public void setLastScalingActivity(long lastScalingActivity) {
-        this.lastScalingActivity = lastScalingActivity;
+    public void setLastScalingActivityCurrent() {
+        this.lastScalingActivity = System.currentTimeMillis();
     }
 
     public void updateMetrics(ClusterMetricsInfo metrics) {

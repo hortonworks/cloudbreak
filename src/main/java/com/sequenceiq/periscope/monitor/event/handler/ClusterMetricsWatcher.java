@@ -21,7 +21,6 @@ import com.sequenceiq.periscope.utils.ClusterUtils;
 public class ClusterMetricsWatcher implements ApplicationListener<ClusterMetricsUpdateEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterMetricsWatcher.class);
-    private static final int SEC_IN_MS = 1000;
 
     @Autowired
     private ClusterService clusterService;
@@ -122,14 +121,13 @@ public class ClusterMetricsWatcher implements ApplicationListener<ClusterMetrics
         String alarmName = alarm.getAlarmName();
         long hitsSince = alarm.getAlarmHitsSince();
         if (hitsSince == 0) {
-            LOGGER.info("No previous hit for alarm: {} on cluster: {}", alarmName, clusterId);
+            LOGGER.info("Counter starts until hit for alarm: {} on cluster: {}", alarmName, clusterId);
             setCurrentTime(alarm);
         } else {
             long elapsedTime = System.currentTimeMillis() - hitsSince;
-            result = elapsedTime > (alarm.getPeriod() * SEC_IN_MS);
+            result = elapsedTime > (alarm.getPeriod() * ClusterUtils.SEC_IN_MS);
             LOGGER.info("Alarm: {} stands since {}ms on cluster {}", alarmName, elapsedTime, clusterId);
             if (result) {
-                resetTime(alarm);
                 LOGGER.info("Alarm: {} HIT on cluster: {}", alarmName, clusterId);
             }
         }
@@ -137,15 +135,12 @@ public class ClusterMetricsWatcher implements ApplicationListener<ClusterMetrics
     }
 
     private void resetTime(Alarm alarm) {
-        setTime(alarm, 0);
+        alarm.resetAlarmHitsSince();
     }
 
     private void setCurrentTime(Alarm alarm) {
-        setTime(alarm, System.currentTimeMillis());
+        alarm.setAlarmHitsSince(System.currentTimeMillis());
     }
 
-    private void setTime(Alarm alarm, long time) {
-        alarm.setAlarmHitsSince(time);
-    }
 
 }

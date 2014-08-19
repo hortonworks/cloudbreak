@@ -34,21 +34,11 @@ public class ScalingService {
     public void scale(Cluster cluster, ScalingPolicy policy) {
         int desiredNodeCount = getDesiredNodeCount(cluster, policy);
         int totalNodes = cluster.getTotalNodes();
-        if (desiredNodeCount > totalNodes) {
-            scaleUpTo(cluster, desiredNodeCount);
-        } else if (desiredNodeCount < totalNodes) {
-            scaleDownTo(cluster, desiredNodeCount);
+        if (totalNodes != desiredNodeCount) {
+            scale(cluster, policy, totalNodes, desiredNodeCount);
         } else {
             LOGGER.info("No scaling activity required on {}", cluster.getId());
         }
-    }
-
-    public void scaleUpTo(Cluster cluster, int nodeCount) {
-        LOGGER.info("Should add {} new nodes with cloudbreak to {}", nodeCount - cluster.getTotalNodes(), cluster.getId());
-    }
-
-    public void scaleDownTo(Cluster cluster, int nodeCount) {
-        LOGGER.info("Should remove {} nodes with cloudbreak from {}", cluster.getTotalNodes() - nodeCount, cluster.getId());
     }
 
     public ScalingPolicies setScalingPolicies(String clusterId, ScalingPolicies scalingPolicies) throws ClusterNotFoundException {
@@ -81,15 +71,53 @@ public class ScalingService {
         return group;
     }
 
+    private void scale(Cluster cluster, ScalingPolicy policy, int totalNodes, int desiredNodeCount) {
+        if (canScale(cluster)) {
+            if (desiredNodeCount > totalNodes) {
+                scaleUpTo(cluster, desiredNodeCount);
+            } else if (desiredNodeCount < totalNodes) {
+                scaleDownTo(cluster, desiredNodeCount);
+            }
+            Alarm alarm = policy.getAlarm();
+            alarm.resetAlarmHitsSince();
+            cluster.setLastScalingActivityCurrent();
+            LOGGER.info("Resetting time on alarm: {} on cluster: {}", alarm.getAlarmName(), cluster.getId());
+        } else {
+            LOGGER.info("Cluster: {} is in cooling state, cannot scale", cluster.getId());
+        }
+    }
+
+    private boolean canScale(Cluster cluster) {
+        int coolDown = cluster.getCoolDown();
+        long lastScalingActivity = cluster.getLastScalingActivity();
+        return lastScalingActivity == 0
+                || (System.currentTimeMillis() - lastScalingActivity) > (coolDown * ClusterUtils.SEC_IN_MS);
+    }
+
+    private void scaleUpTo(Cluster cluster, int nodeCount) {
+        LOGGER.info("Should add {} new nodes with cloudbreak to {}", nodeCount - cluster.getTotalNodes(), cluster.getId());
+    }
+
+    private void scaleDownTo(Cluster cluster, int nodeCount) {
+        LOGGER.info("Should remove {} nodes with cloudbreak from {}", cluster.getTotalNodes() - nodeCount, cluster.getId());
+    }
+
     private int getDesiredNodeCount(Cluster cluster, ScalingPolicy policy) {
         int scalingAdjustment = policy.getScalingAdjustment();
+        int desiredNodeCount;
         switch (policy.getAdjustmentType()) {
             case NODE_COUNT:
-                return cluster.getTotalNodes() + scalingAdjustment;
+                desiredNodeCount = cluster.getTotalNodes() + scalingAdjustment;
+                break;
             case PERCENTAGE:
-                return cluster.getTotalNodes() + (int) (ceil(cluster.getTotalNodes() * (Double.valueOf(scalingAdjustment) / ClusterUtils.MAX_CAPACITY)));
+                desiredNodeCount = cluster.getTotalNodes()
+                        + (int) (ceil(cluster.getTotalNodes() * (Double.valueOf(scalingAdjustment) / ClusterUtils.MAX_CAPACITY)));
+                break;
             default:
-                return cluster.getTotalNodes();
+                desiredNodeCount = cluster.getTotalNodes();
         }
+        int minSize = cluster.getMinSize();
+        int maxSize = cluster.getMaxSize();
+        return desiredNodeCount < minSize ? minSize : desiredNodeCount > maxSize ? maxSize : desiredNodeCount;
     }
 }

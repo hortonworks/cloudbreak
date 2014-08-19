@@ -83,6 +83,10 @@ public class Alarm {
         this.alarmHitsSince = alarmHitsSince;
     }
 
+    public void resetAlarmHitsSince() {
+        setAlarmHitsSince(0);
+    }
+
     public ScalingPolicy getScalingPolicy() {
         return scalingPolicy;
     }
