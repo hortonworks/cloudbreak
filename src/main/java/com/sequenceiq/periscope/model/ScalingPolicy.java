@@ -8,6 +8,9 @@ import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 @Entity
 public class ScalingPolicy {
 
@@ -59,5 +62,15 @@ public class ScalingPolicy {
 
     public void setScalingAdjustment(int scalingAdjustment) {
         this.scalingAdjustment = scalingAdjustment;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return EqualsBuilder.reflectionEquals(this, o, new String[]{"alarm"});
+    }
+
+    @Override
+    public int hashCode() {
+        return HashCodeBuilder.reflectionHashCode(this, new String[]{"alarm"});
     }
 }

@@ -28,17 +28,25 @@ public class AlarmController {
     private AlarmConverter alarmConverter;
 
     @RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity<AlarmsJson> createAlarms(@PathVariable String clusterId, @RequestBody AlarmsJson alarms)
+    public ResponseEntity<AlarmsJson> createAlarms(@PathVariable String clusterId, @RequestBody AlarmsJson json)
             throws ClusterNotFoundException {
-        List<Alarm> metricAlarms = alarmConverter.convertAllFromJson(alarms.getAlarms());
-        List<AlarmJson> alarmResponse = alarmConverter.convertAllToJson(alarmService.addAlarms(clusterId, metricAlarms));
-        return new ResponseEntity<>(new AlarmsJson(alarmResponse), HttpStatus.OK);
+        List<Alarm> alarms = alarmConverter.convertAllFromJson(json.getAlarms());
+        return createAlarmsResponse(alarmService.addAlarms(clusterId, alarms));
     }
 
     @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<AlarmsJson> getAlarms(@PathVariable String clusterId) throws ClusterNotFoundException {
-        List<Alarm> alarms = alarmService.getAlarms(clusterId);
-        List<AlarmJson> metrics = alarmConverter.convertAllToJson(alarms);
-        return new ResponseEntity<>(new AlarmsJson(metrics), HttpStatus.OK);
+        return createAlarmsResponse(alarmService.getAlarms(clusterId));
+    }
+
+    @RequestMapping(value = "/{alarmId}", method = RequestMethod.DELETE)
+    public ResponseEntity<AlarmsJson> deleteAlarm(@PathVariable String clusterId, @PathVariable long alarmId)
+            throws ClusterNotFoundException {
+        return createAlarmsResponse(alarmService.deleteAlarm(clusterId, alarmId));
+    }
+
+    private ResponseEntity<AlarmsJson> createAlarmsResponse(List<Alarm> alarms) {
+        List<AlarmJson> alarmResponse = alarmConverter.convertAllToJson(alarms);
+        return new ResponseEntity<>(new AlarmsJson(alarmResponse), HttpStatus.OK);
     }
 }

@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.sequenceiq.periscope.registry.ConnectionException;
 import com.sequenceiq.periscope.registry.QueueSetupException;
-import com.sequenceiq.periscope.rest.AlarmNotFoundException;
 import com.sequenceiq.periscope.rest.json.ExceptionMessageJson;
 import com.sequenceiq.periscope.rest.json.IdExceptionMessageJson;
+import com.sequenceiq.periscope.service.AlarmNotFoundException;
 import com.sequenceiq.periscope.service.ClusterNotFoundException;
 
 @ControllerAdvice

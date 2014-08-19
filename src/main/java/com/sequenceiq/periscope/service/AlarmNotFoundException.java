@@ -1,4 +1,4 @@
-package com.sequenceiq.periscope.rest;
+package com.sequenceiq.periscope.service;
 
 public class AlarmNotFoundException extends RuntimeException {
 

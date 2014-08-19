@@ -6,8 +6,8 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.periscope.model.Alarm;
 import com.sequenceiq.periscope.model.ScalingPolicy;
 import com.sequenceiq.periscope.repository.AlarmRepository;
-import com.sequenceiq.periscope.rest.AlarmNotFoundException;
 import com.sequenceiq.periscope.rest.json.ScalingPolicyJson;
+import com.sequenceiq.periscope.service.AlarmNotFoundException;
 
 @Component
 public class ScalingPolicyConverter extends AbstractConverter<ScalingPolicyJson, ScalingPolicy> {

@@ -314,6 +314,7 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-security:1.0.2.RELEASE")
     compile("org.springframework.boot:spring-boot-starter-actuator:1.0.2.RELEASE")
     compile("org.springframework.boot:spring-boot-starter-data-jpa:1.0.2.RELEASE")
+    compile("org.apache.commons:commons-lang3:3.3.2")
     compile("org.hsqldb:hsqldb:2.3.2")
     compile("org.apache.hadoop:hadoop-yarn-client:${hadoopVersion}")
     compile("org.apache.hadoop:hadoop-yarn-server-resourcemanager:${hadoopVersion}")
