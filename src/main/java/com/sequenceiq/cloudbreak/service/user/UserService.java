@@ -16,7 +16,7 @@ public interface UserService {
 
     String inviteUser(User admin, String email);
 
-    User registerUserUponInvite(String hash);
+    User invitedUser(String hash);
 
     User setUserStatus(Long userId, UserStatus userStatus);
 

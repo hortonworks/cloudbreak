@@ -55,10 +55,10 @@ public class UserRegistrationController {
     }
 
     @RequestMapping(value = "/invite/{inviteToken}", method = RequestMethod.GET)
-    public ResponseEntity<Long> registerFromInvite(@PathVariable String inviteToken) {
+    public ResponseEntity<UserJson> getInvitedUser(@PathVariable String inviteToken) {
         LOGGER.debug("Registering after invite (token: {})... ", inviteToken);
-        User activeUser = userService.registerUserUponInvite(inviteToken);
+        User activeUser = userService.invitedUser(inviteToken);
         LOGGER.debug("Registration confirmed (token: {}) for {}", new Object[]{ inviteToken, activeUser });
-        return new ResponseEntity<>(activeUser.getId(), HttpStatus.OK);
+        return new ResponseEntity<>(userConverter.convert(activeUser), HttpStatus.OK);
     }
 }

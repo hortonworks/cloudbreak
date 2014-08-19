@@ -146,8 +146,9 @@ public class SimpleUserService implements UserService {
 
         Map<String, Object> model = new HashMap<>();
 
+        model.put("user", adminUser);
         model.put("invite", getInviteRegistrationPath() + invitedUser.getConfToken());
-        String emailText = emailService.messageText(model, getResetTemplate());
+        String emailText = emailService.messageText(model, getInviteTemplate());
 
         MimeMessagePreparator messagePreparator = emailService.messagePreparator(invitedUser.getEmail(), msgFrom, "Cloudbreak - invitation", emailText);
         emailService.sendEmail(messagePreparator);
@@ -156,17 +157,18 @@ public class SimpleUserService implements UserService {
     }
 
     @Override
-    public User registerUserUponInvite(String inviteToken) {
+    public User invitedUser(String inviteToken) {
         LOGGER.debug("Registering upon invitation. Token: {}", inviteToken);
-        User registeringUser = userRepository.findUserByConfToken(inviteToken);
-        if (!UserStatus.INVITED.equals(registeringUser.getStatus())) {
+        User invitedUser = userRepository.findUserByConfToken(inviteToken);
+        if (!UserStatus.INVITED.equals(invitedUser.getStatus())) {
             throw new IllegalStateException("The user has already been registered!");
         }
-        registeringUser.setStatus(UserStatus.ACTIVE);
-        registeringUser.setConfToken(null);
-        registeringUser.setRegistrationDate(new Date());
-        registeringUser = userRepository.save(registeringUser);
-        return registeringUser;
+        invitedUser.setRegistrationDate(new Date());
+        invitedUser.setFirstName("");
+        invitedUser.setLastName("");
+        invitedUser.setPassword("");
+
+        return invitedUser;
     }
 
     @Override

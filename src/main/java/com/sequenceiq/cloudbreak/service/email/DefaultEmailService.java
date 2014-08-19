@@ -46,7 +46,7 @@ public class DefaultEmailService implements EmailService {
                 message.setFrom(emailFrom);
                 message.setTo(emailTo);
                 message.setSubject(subject);
-                message.setText(emailText);
+                message.setText(emailText, true);
             }
         };
     }
