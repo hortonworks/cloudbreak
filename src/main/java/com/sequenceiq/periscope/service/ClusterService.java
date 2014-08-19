@@ -37,17 +37,17 @@ public class ClusterService {
     @Autowired
     private ClusterDetailsRepository clusterDetailsRepository;
 
+    public Cluster add(String clusterId, Ambari ambari) throws ConnectionException {
+        Cluster cluster = clusterRegistry.add(clusterId, ambari);
+        clusterDetailsRepository.save(cluster.getClusterDetails());
+        return cluster;
+    }
+
     public Cluster get(String clusterId) throws ClusterNotFoundException {
         Cluster cluster = clusterRegistry.get(clusterId);
         if (cluster == null) {
             throw new ClusterNotFoundException(clusterId);
         }
-        return cluster;
-    }
-
-    public Cluster add(String clusterId, Ambari ambari) throws ConnectionException {
-        Cluster cluster = clusterRegistry.add(clusterId, ambari);
-        clusterDetailsRepository.save(cluster.getClusterDetails());
         return cluster;
     }
 
@@ -60,12 +60,14 @@ public class ClusterService {
         if (cluster == null) {
             throw new ClusterNotFoundException(clusterId);
         }
+        clusterDetailsRepository.delete(cluster.getClusterDetails());
         return cluster;
     }
 
     public Cluster setState(String clusterId, ClusterState state) throws ClusterNotFoundException {
         Cluster cluster = get(clusterId);
         cluster.setState(state);
+        clusterDetailsRepository.save(cluster.getClusterDetails());
         return cluster;
     }
 
