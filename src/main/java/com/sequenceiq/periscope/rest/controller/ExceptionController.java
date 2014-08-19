@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.sequenceiq.periscope.registry.ConnectionException;
 import com.sequenceiq.periscope.registry.QueueSetupException;
+import com.sequenceiq.periscope.rest.AlarmNotFoundException;
 import com.sequenceiq.periscope.rest.json.ExceptionMessageJson;
 import com.sequenceiq.periscope.rest.json.IdExceptionMessageJson;
 import com.sequenceiq.periscope.service.ClusterNotFoundException;
@@ -36,6 +37,11 @@ public class ExceptionController {
     @ExceptionHandler(ClusterNotFoundException.class)
     public ResponseEntity<IdExceptionMessageJson> handleClusterNotFoundException(ClusterNotFoundException e) {
         return createIdExceptionMessage(e.getId(), "Cluster not found", HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(AlarmNotFoundException.class)
+    public ResponseEntity<IdExceptionMessageJson> handleClusterNotFoundException(AlarmNotFoundException e) {
+        return createIdExceptionMessage("" + e.getId(), "Alarm not found", HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(ConnectionException.class)

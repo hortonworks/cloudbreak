@@ -8,7 +8,7 @@ public class ScalingPolicyJson implements Json {
     private String name;
     private AdjustmentType adjustmentType;
     private int scalingAdjustment;
-    private Long alarmId;
+    private long alarmId;
 
     public Long getId() {
         return id;
@@ -18,11 +18,11 @@ public class ScalingPolicyJson implements Json {
         this.id = id;
     }
 
-    public Long getAlarmId() {
+    public long getAlarmId() {
         return alarmId;
     }
 
-    public void setAlarmId(Long alarmId) {
+    public void setAlarmId(long alarmId) {
         this.alarmId = alarmId;
     }
 

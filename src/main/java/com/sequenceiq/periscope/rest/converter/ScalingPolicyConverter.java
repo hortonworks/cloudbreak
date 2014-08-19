@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.periscope.model.Alarm;
 import com.sequenceiq.periscope.model.ScalingPolicy;
 import com.sequenceiq.periscope.repository.AlarmRepository;
+import com.sequenceiq.periscope.rest.AlarmNotFoundException;
 import com.sequenceiq.periscope.rest.json.ScalingPolicyJson;
 
 @Component
@@ -18,12 +19,13 @@ public class ScalingPolicyConverter extends AbstractConverter<ScalingPolicyJson,
     public ScalingPolicy convert(ScalingPolicyJson source) {
         ScalingPolicy policy = new ScalingPolicy();
         policy.setAdjustmentType(source.getAdjustmentType());
-        Long alarmId = source.getAlarmId();
-        if (alarmId != null) {
-            Alarm alarm = alarmRepository.findOne(alarmId);
-            policy.setAlarm(alarm);
-            alarm.setScalingPolicy(policy);
+        long alarmId = source.getAlarmId();
+        Alarm alarm = alarmRepository.findOne(alarmId);
+        if (alarm == null) {
+            throw new AlarmNotFoundException(alarmId);
         }
+        policy.setAlarm(alarm);
+        alarm.setScalingPolicy(policy);
         policy.setName(source.getName());
         policy.setScalingAdjustment(source.getScalingAdjustment());
         return policy;
