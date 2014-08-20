@@ -1535,9 +1535,7 @@ Based on our contribution to the CapacityScheduler [YARN-2248](https://issues.ap
         }
 
 #Group Alarms
-An alarm watches a metric over a specified time period, and used by one or more action or scaling policy based on the value of the metric relative to a given threshold over a number of time periods.
-The current `metrics` are: 
-
+An alarm watches a `metric` over a specified time period, and used by one or more action or scaling policy based on the value of the metric relative to a given threshold over a number of time periods. In case Periscope raises an alarm an action (e.g. sending an email) or a scaling policy is triggered. Alarms are based on metrics. The current supported `metrics` are: 
 *`PENDING_CONTAINERS`- pending YARN containers
 
 *`PENDING_APPLICATIONS` - pending/queued YARN applications
@@ -1548,12 +1546,11 @@ The current `metrics` are:
 
 *`GLOBAL_RESOURCES` - global resources 
 
-The `comparison operators` are: `LESS_THAN`, `GREATER_THAN`, `LESS_OR_EQUAL_THAN`, `GREATER_OR_EQUAL_THAN`, `EQUALS`.
+Measured `metrics` are compared with pre-configured values using operators. The `comparison operators` are: `LESS_THAN`, `GREATER_THAN`, `LESS_OR_EQUAL_THAN`, `GREATER_OR_EQUAL_THAN`, `EQUALS`.
+In order to avoid reacting for sudden spikes in the system and apply policies only in case of a sustained system stress, `alarms` have to be sustained over a `period` of time.  The `period` specifies the time period in minutes during the alarm has to be sustained. 
 
-The `period`  parameter specifies the time period in minutes during the alarm has to be sustained. 
-This allows operators to avoid reacting for sudden spikes in the system and apply policies only in case of a sustained system stress.
+Also a `threshold` can be configured, which specifies the variance applied by the operator for the selected `metric`.
 
-The `threshold` parameter specifies the variance applied by the `operator` for the selected `metric`.
 
 ##Add, remove and show [/clusters/{clusterId}/alarms]
 ###Create an alarm [POST]
