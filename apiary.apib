@@ -1521,7 +1521,7 @@ Based on our contribution to the CapacityScheduler [YARN-2248](https://issues.ap
 + Request (application/json)
 
         {
-          "allowed": "false"
+          "allowed": "false" 
         }
 
 +  Response 200 (application/json)
@@ -1536,6 +1536,24 @@ Based on our contribution to the CapacityScheduler [YARN-2248](https://issues.ap
 
 #Group Alarms
 An alarm watches a metric over a specified time period, and used by one or more action or scaling policy based on the value of the metric relative to a given threshold over a number of time periods.
+The current `metrics` are: 
+
+*`PENDING_CONTAINERS`- pending YARN containers
+
+*`PENDING_APPLICATIONS` - pending/queued YARN applications
+
+*`LOST_NODES` - cluster nodes lost
+
+*`UNHEALTHY_NODES` - unhealthy cluster nodes
+
+*`GLOBAL_RESOURCES` - global resources 
+
+The `comparison operators` are: `LESS_THAN`, `GREATER_THAN`, `LESS_OR_EQUAL_THAN`, `GREATER_OR_EQUAL_THAN`, `EQUALS`.
+
+The `period`  parameter specifies the time period in minutes during the alarm has to be sustained. 
+This allows operators to avoid reacting for sudden spikes in the system and apply policies only in case of a sustained system stress.
+
+The `threshold` parameter specifies the variance applied by the `operator` for the selected `metric`.
 
 ##Add, remove and show [/clusters/{clusterId}/alarms]
 ###Create an alarm [POST]
