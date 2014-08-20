@@ -1465,9 +1465,9 @@ To link a Hadoop cluster with Periscope the only required this is the Apache Amb
             "host": "172.24.0.2",
             "id": "multi-node"
         }
-        
-##Show [/clusters]
-###Retrieve cluster(s) information [GET]
+    
+##List [/clusters]
+###Retrieve cluster information [GET]
 
 + Request
 
@@ -1537,7 +1537,7 @@ Based on our contribution to the CapacityScheduler [YARN-2248](https://issues.ap
 #Group Alarms
 An alarm watches a metric over a specified time period, and used by one or more action or scaling policy based on the value of the metric relative to a given threshold over a number of time periods.
 
-##Add, remove and show[/clusters/{clusterId}/alarms]
+##Add, remove and show [/clusters/{clusterId}/alarms]
 ###Create an alarm [POST]
 
 + Parameters
@@ -1823,7 +1823,7 @@ A Hadoop YARN application is a workload submitted to a cluster. An application r
 The CapacityScheduler is designed to run Hadoop applications as a shared, multi-tenant cluster in an operator-friendly manner while maximizing the throughput and the utilization of the cluster.
 Periscope facilites the reconfiguration of the CapacityScheduler, used by the application movement/re-prioritization of running applications.
 
-##Queue config [/clusters/{clusterId}/configurations]
+##Update [/clusters/{clusterId}/configurations]
 ###Reload Hadoop YARN configuration [POST]
 
 + Parameters
@@ -1848,7 +1848,7 @@ Periscope facilites the reconfiguration of the CapacityScheduler, used by the ap
 >>>>>>> 2a42905... PERI-2 update apiary
 =======
 
-##Configuration [/clusters/{clusterId}/configurations/queue]
+##Queue setup [/clusters/{clusterId}/configurations/queue]
 ###Reconfigure the queue capacities [POST]
 
 + Parameters
