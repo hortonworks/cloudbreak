@@ -1801,7 +1801,10 @@ In an SLA scaling policy the triggered rules are applied in order.
         }
 
 #Group Applications
-A Hadoop YARN application is a workload submitted to a cluster. An application requests for resources from YARN Resource Manager. The resources are allocated as YARN containers.
+A Hadoop YARN application is a packaged workload submitted to a cluster. An application requests resources from YARN Resource Manager. The resources are allocated as YARN containers. By default Periscope works with the Hadoop YARN Capacity Scheduler. Using the Capacity Scheduler applications are submitted in different priority queues. The queue configurations, their depth, associated resources, etc have to be designed ahead - and adapted in case of new tenants, applications or workloads are using the cluster.
+At SequenceIQ, through our contributions to Apache YARN we facilitate moving applications between queues - and thus use the SLA policies attached to these queues. Even more, those SLA policies which were previously attached to Capacity Scheduler queues now can be attached to submitted jobs/applications. 
+Also we facilitate changing the resources allocated to a running application - even though they were submitted and already running. 
+_Note: not all of the features above are supported in the first `public beta` version. There are dependencies we contributed to Hadoop, Ambari and YARN and they will be included in the next releases (1.7 and 2.6)_
 
 ##List [/clusters/{clusterId}/applications]
 ###List running applications and their resources [GET]
@@ -1838,8 +1841,8 @@ A Hadoop YARN application is a workload submitted to a cluster. An application r
 =======
 
 #Group Configuration
-The CapacityScheduler is designed to run Hadoop applications as a shared, multi-tenant cluster in an operator-friendly manner while maximizing the throughput and the utilization of the cluster.
-Periscope facilites the reconfiguration of the CapacityScheduler, used by the application movement/re-prioritization of running applications.
+Periscope brings in the capability to reconfigure a running cluster - in particular resource properties heavily used. 
+These properties currently are mostly related to the Capacity Scheduler configurations, but as we add functionality to Periscope this set of properties will constantly increase.
 
 ##Update [/clusters/{clusterId}/configurations]
 ###Reload Hadoop YARN configuration [POST]
