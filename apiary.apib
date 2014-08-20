@@ -1397,7 +1397,7 @@ Clusters related resources of the **Periscope API**.
 A Hadoop cluster is a set of components and services launched in order to store, analyze and process unstructured data. 
 Periscope can work with any Hadoop 2/ YARN cluster provisioned with Apache Ambari, and supports any YARN application.
 
-##Clusters [/clusters/{id}]
+##Add, remove or show [/clusters/{id}]
 ###Add a cluster [POST]
 Add a Hadoop cluster to be monitored by Periscope. Note that Periscope does not require any pre-installation of components on cluster nodes. 
 To link a Hadoop cluster with Periscope the only required this is the Apache Ambari REST API endpoint.
@@ -1424,8 +1424,6 @@ To link a Hadoop cluster with Periscope the only required this is the Apache Amb
             "id": "multi-node"
         }
 
-
-##  Clusters [/clusters/{id}]
 ###Retrieve cluster information [GET]
 
 + Parameters
@@ -1447,7 +1445,6 @@ To link a Hadoop cluster with Periscope the only required this is the Apache Amb
             "id": "multi-node"
         }
 
-##  Clusters [/clusters/{id}]
 ###Remove a cluster [DELETE]
 
 + Parameters
@@ -1467,6 +1464,28 @@ To link a Hadoop cluster with Periscope the only required this is the Apache Amb
             "host": "172.24.0.2",
             "id": "multi-node"
         }
+        
+##Show [/clusters]
+###Retrieved cluster(s) information[GET]
+
++ Request
+
+        {
+
+        }
+
++ Response 200 (application/json)
+
+        [
+          {
+            "appMovement": "allowed",
+            "state": "RUNNING",
+            "port": "8080",
+            "host": "172.24.0.2",
+            "id": "multi-node"
+          }
+        ]
+        
 
 ## Clusters [/clusters/{clusterId}/state]
 ###Set state [POST]
@@ -1513,27 +1532,6 @@ Based on our contribution to the CapacityScheduler [YARN-2248](https://issues.ap
             "host": "172.24.0.2",
             "id": "multi-node"
         }
-
-##  Clusters [/clusters]
-###Retrieved cluster(s) information[GET]
-
-+ Request
-
-        {
-
-        }
-
-+ Response 200 (application/json)
-
-        [
-          {
-            "appMovement": "allowed",
-            "state": "RUNNING",
-            "port": "8080",
-            "host": "172.24.0.2",
-            "id": "multi-node"
-          }
-        ]
 
 #Group Alarms
 An alarm watches a metric over a specified time period, and used by one or more action or scaling policy based on the value of the metric relative to a given threshold over a number of time periods.
@@ -1592,8 +1590,7 @@ An alarm watches a metric over a specified time period, and used by one or more 
              "id": 51
             }
          ]
-      }
-
+        }
 
 ##Alarm [/clusters/{clusterId}/alarms]
 ###Retrieve configured alarms [GET]
