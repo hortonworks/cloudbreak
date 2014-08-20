@@ -1451,6 +1451,7 @@ To link a Hadoop cluster with Periscope the only required this is the Apache Amb
     + id (required String `id`) ... The id of the cluster.
 
 + Request
+
         {
 
         }
@@ -1466,7 +1467,7 @@ To link a Hadoop cluster with Periscope the only required this is the Apache Amb
         }
         
 ##Show [/clusters]
-###Retrieved cluster(s) information[GET]
+###Retrieve cluster(s) information [GET]
 
 + Request
 
@@ -1487,7 +1488,7 @@ To link a Hadoop cluster with Periscope the only required this is the Apache Amb
         ]
         
 
-## Clusters [/clusters/{clusterId}/state]
+##State [/clusters/{clusterId}/state]
 ###Set state [POST]
 
 + Parameters
@@ -1509,7 +1510,7 @@ To link a Hadoop cluster with Periscope the only required this is the Apache Amb
             "id": "multi-node"
         }
 
-## Clusters [/clusters/{clusterId}/movement]
+##Movements [/clusters/{clusterId}/movement]
 ###Configure application movements [POST]
 Configure whether moveing the submitted applications between different queues to set a priority among them is allowed or not. 
 Based on our contribution to the CapacityScheduler [YARN-2248](https://issues.apache.org/jira/browse/YARN-2248) we made available to move running applications between queues.
@@ -1536,7 +1537,7 @@ Based on our contribution to the CapacityScheduler [YARN-2248](https://issues.ap
 #Group Alarms
 An alarm watches a metric over a specified time period, and used by one or more action or scaling policy based on the value of the metric relative to a given threshold over a number of time periods.
 
-##Alarm [/clusters/{clusterId}/alarms]
+##Add, remove and show[/clusters/{clusterId}/alarms]
 ###Create an alarm [POST]
 
 + Parameters
@@ -1592,7 +1593,6 @@ An alarm watches a metric over a specified time period, and used by one or more 
          ]
         }
 
-##Alarm [/clusters/{clusterId}/alarms]
 ###Retrieve configured alarms [GET]
 
 + Parameters
@@ -1631,7 +1631,6 @@ An alarm watches a metric over a specified time period, and used by one or more 
           ]
         }
 
-##Alarm [/clusters/{clusterId}/alarms/{alarmId}]
 ###Delete an alarm [DELETE]
 
 + Parameters
@@ -1666,7 +1665,7 @@ Scaling is the ability to increase or decrease the capacity of the Hadoop cluste
 When scaleing policies are used, the capacity is automatically increased or decreased according to the conditions defined.
 Periscope will do the heavy lifting and based on the alarms and the scaling policy linked to them it executes the associated policy.
 
-##Policy [/clusters/{clusterId}/policies]
+##Add, remove and show [/clusters/{clusterId}/policies]
 ###Create a scaling policy. [POST]
 
 + Parameters
@@ -1718,7 +1717,6 @@ Periscope will do the heavy lifting and based on the alarms and the scaling poli
           "minSize": 2
         }
 
-##Policy [/clusters/{clusterId}/policies]
 ###List the scaling policies. [GET]
 
 + Parameters
@@ -1787,7 +1785,7 @@ Periscope will do the heavy lifting and based on the alarms and the scaling poli
 #Group Applications
 A Hadoop YARN application is a workload submitted to a cluster. An application requests for resources from YARN Resource Manager. The resources are allocated as YARN containers.
 
-##Applications [/clusters/{clusterId}/applications]
+##List [/clusters/{clusterId}/applications]
 ###List running applications and their resources [GET]
 
 + Parameters
@@ -1825,7 +1823,7 @@ A Hadoop YARN application is a workload submitted to a cluster. An application r
 The CapacityScheduler is designed to run Hadoop applications as a shared, multi-tenant cluster in an operator-friendly manner while maximizing the throughput and the utilization of the cluster.
 Periscope facilites the reconfiguration of the CapacityScheduler, used by the application movement/re-prioritization of running applications.
 
-##Configuration [/clusters/{clusterId}/configurations]
+##Queue config [/clusters/{clusterId}/configurations]
 ###Reload Hadoop YARN configuration [POST]
 
 + Parameters
