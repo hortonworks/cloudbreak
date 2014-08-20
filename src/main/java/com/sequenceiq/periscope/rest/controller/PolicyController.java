@@ -28,7 +28,7 @@ public class PolicyController {
     public ResponseEntity<ScalingPoliciesJson> setScaling(@PathVariable String clusterId,
             @RequestBody ScalingPoliciesJson scalingPolicies) throws ClusterNotFoundException {
         return createScalingPoliciesJsonResponse(scalingService.setScalingPolicies(clusterId,
-                policiesConverter.convert(scalingPolicies)));
+                policiesConverter.convert(scalingPolicies)), HttpStatus.CREATED);
     }
 
     @RequestMapping(method = RequestMethod.GET)
@@ -43,7 +43,11 @@ public class PolicyController {
     }
 
     private ResponseEntity<ScalingPoliciesJson> createScalingPoliciesJsonResponse(ScalingPolicies scalingPolicies) {
-        return new ResponseEntity<>(policiesConverter.convert(scalingPolicies), HttpStatus.OK);
+        return createScalingPoliciesJsonResponse(scalingPolicies, HttpStatus.OK);
+    }
+
+    private ResponseEntity<ScalingPoliciesJson> createScalingPoliciesJsonResponse(ScalingPolicies scalingPolicies, HttpStatus status) {
+        return new ResponseEntity<>(policiesConverter.convert(scalingPolicies), status);
     }
 
 }

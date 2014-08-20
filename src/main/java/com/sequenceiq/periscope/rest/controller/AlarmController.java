@@ -31,7 +31,7 @@ public class AlarmController {
     public ResponseEntity<AlarmsJson> createAlarms(@PathVariable String clusterId, @RequestBody AlarmsJson json)
             throws ClusterNotFoundException {
         List<Alarm> alarms = alarmConverter.convertAllFromJson(json.getAlarms());
-        return createAlarmsResponse(alarmService.addAlarms(clusterId, alarms));
+        return createAlarmsResponse(alarmService.addAlarms(clusterId, alarms), HttpStatus.CREATED);
     }
 
     @RequestMapping(method = RequestMethod.GET)
@@ -46,7 +46,11 @@ public class AlarmController {
     }
 
     private ResponseEntity<AlarmsJson> createAlarmsResponse(List<Alarm> alarms) {
+        return createAlarmsResponse(alarms, HttpStatus.OK);
+    }
+
+    private ResponseEntity<AlarmsJson> createAlarmsResponse(List<Alarm> alarms, HttpStatus status) {
         List<AlarmJson> alarmResponse = alarmConverter.convertAllToJson(alarms);
-        return new ResponseEntity<>(new AlarmsJson(alarmResponse), HttpStatus.OK);
+        return new ResponseEntity<>(new AlarmsJson(alarmResponse), status);
     }
 }
