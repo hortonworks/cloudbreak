@@ -17,7 +17,7 @@ import com.sequenceiq.periscope.model.ClusterDetails;
 public class AmbariClusterRegistry implements ClusterRegistry {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariClusterRegistry.class);
-    private Map<String, Cluster> clusters = new ConcurrentHashMap<>();
+    private final Map<String, Cluster> clusters = new ConcurrentHashMap<>();
 
     @Override
     public Cluster add(String id, Ambari ambari) throws ConnectionException {

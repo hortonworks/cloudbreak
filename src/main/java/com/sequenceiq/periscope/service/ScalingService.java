@@ -69,7 +69,7 @@ public class ScalingService {
         return getScalingPolicies(clusterService.get(clusterId).getClusterDetails());
     }
 
-    public ScalingPolicies getScalingPolicies(ClusterDetails clusterDetails) throws ClusterNotFoundException {
+    public ScalingPolicies getScalingPolicies(ClusterDetails clusterDetails) {
         ScalingPolicies group = new ScalingPolicies();
         group.setMaxSize(clusterDetails.getMaxSize());
         group.setMinSize(clusterDetails.getMinSize());
@@ -125,7 +125,7 @@ public class ScalingService {
                 break;
             case PERCENTAGE:
                 desiredNodeCount = cluster.getTotalNodes()
-                        + (int) (ceil(cluster.getTotalNodes() * (Double.valueOf(scalingAdjustment) / ClusterUtils.MAX_CAPACITY)));
+                        + (int) (ceil(cluster.getTotalNodes() * ((double) scalingAdjustment / ClusterUtils.MAX_CAPACITY)));
                 break;
             default:
                 desiredNodeCount = cluster.getTotalNodes();

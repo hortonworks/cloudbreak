@@ -23,7 +23,7 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
 
     @Autowired
     private ClusterService clusterService;
-    private Map<String, Integer> updateFailures = new ConcurrentHashMap<>();
+    private final Map<String, Integer> updateFailures = new ConcurrentHashMap<>();
 
     @Override
     public void onApplicationEvent(UpdateFailedEvent event) {

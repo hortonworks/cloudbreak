@@ -11,7 +11,7 @@ public class QueueSetupJson implements Json {
     public QueueSetupJson() {
     }
 
-    public QueueSetupJson(String message, List<QueueJson> setup, Map<String, String> properties) {
+    public QueueSetupJson(List<QueueJson> setup, Map<String, String> properties) {
         this.setup = setup;
         this.properties = properties;
     }

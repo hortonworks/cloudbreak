@@ -2,8 +2,6 @@ package com.sequenceiq.periscope.rest.controller;
 
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,8 +25,6 @@ import com.sequenceiq.periscope.service.ClusterService;
 @RequestMapping("/clusters/{clusterId}/configurations")
 public class ConfigurationController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationController.class);
-
     @Autowired
     private ClusterService clusterService;
     @Autowired
@@ -47,7 +43,7 @@ public class ConfigurationController {
     public ResponseEntity<QueueSetupJson> setQueueConfig(@PathVariable String clusterId, @RequestBody QueueSetupJson queueSetup)
             throws ClusterNotFoundException, QueueSetupException {
         Map<String, String> newSetup = clusterService.setQueueSetup(clusterId, queueSetupConverter.convert(queueSetup));
-        QueueSetupJson responseJson = new QueueSetupJson("Queue setup successfully applied", queueSetup.getSetup(), newSetup);
+        QueueSetupJson responseJson = new QueueSetupJson(queueSetup.getSetup(), newSetup);
         return new ResponseEntity<>(responseJson, HttpStatus.OK);
     }
 }

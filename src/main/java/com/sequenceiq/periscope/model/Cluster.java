@@ -23,7 +23,7 @@ import com.sequenceiq.periscope.service.configuration.ConfigParam;
 public class Cluster {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Cluster.class);
-    private Map<Priority, Map<ApplicationId, SchedulerApplication>> applications;
+    private final Map<Priority, Map<ApplicationId, SchedulerApplication>> applications;
     private boolean restarting;
     private long lastScalingActivity;
     private Configuration configuration;

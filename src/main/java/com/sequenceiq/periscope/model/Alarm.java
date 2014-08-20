@@ -108,11 +108,11 @@ public class Alarm {
 
     @Override
     public boolean equals(Object o) {
-        return EqualsBuilder.reflectionEquals(this, o, new String[]{"alarmHitsSince", "scalingPolicy"});
+        return EqualsBuilder.reflectionEquals(this, o, "alarmHitsSince", "scalingPolicy");
     }
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this, new String[]{"alarmHitsSince", "scalingPolicy"});
+        return HashCodeBuilder.reflectionHashCode(this, "alarmHitsSince", "scalingPolicy");
     }
 }

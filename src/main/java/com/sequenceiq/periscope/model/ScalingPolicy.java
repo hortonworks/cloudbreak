@@ -66,11 +66,11 @@ public class ScalingPolicy {
 
     @Override
     public boolean equals(Object o) {
-        return EqualsBuilder.reflectionEquals(this, o, new String[]{"alarm"});
+        return EqualsBuilder.reflectionEquals(this, o, "alarm");
     }
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this, new String[]{"alarm"});
+        return HashCodeBuilder.reflectionHashCode(this, "alarm");
     }
 }

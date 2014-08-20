@@ -1,7 +1,5 @@
 package com.sequenceiq.periscope.rest.converter;
 
-import java.util.ArrayList;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +14,6 @@ public class QueueSetupConverter extends AbstractConverter<QueueSetupJson, Queue
 
     @Override
     public QueueSetup convert(QueueSetupJson source) {
-        return new QueueSetup(new ArrayList(queueConverter.convertAllFromJson(source.getSetup())));
+        return new QueueSetup(queueConverter.convertAllFromJson(source.getSetup()));
     }
 }
