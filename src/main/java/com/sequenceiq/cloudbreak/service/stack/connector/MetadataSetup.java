@@ -10,7 +10,7 @@ public interface MetadataSetup {
 
     void setupMetadata(Stack stack);
 
-    void addNodeMetadatas(Stack stack, Set<Resource> resourceList);
+    void addNewNodesToMetadata(Stack stack, Set<Resource> resourceList);
 
     CloudPlatform getCloudPlatform();
 

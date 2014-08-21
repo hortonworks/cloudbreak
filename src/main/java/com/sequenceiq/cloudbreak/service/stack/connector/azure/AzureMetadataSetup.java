@@ -60,7 +60,7 @@ public class AzureMetadataSetup implements MetadataSetup {
     }
 
     @Override
-    public void addNodeMetadatas(Stack stack, Set<Resource> resourceList) {
+    public void addNewNodesToMetadata(Stack stack, Set<Resource> resourceList) {
         AzureCredential azureCredential = (AzureCredential) stack.getCredential();
         String filePath = AzureCertificateService.getUserJksFileName(azureCredential, stack.getUser().emailAsFolder());
         AzureClient azureClient = azureStackUtil.createAzureClient(azureCredential, filePath);

@@ -42,12 +42,13 @@ public class CloudFormationStackUtil {
         AwsTemplate awsTemplate = (AwsTemplate) stack.getTemplate();
         AwsCredential awsCredential = (AwsCredential) stack.getCredential();
         AmazonAutoScalingClient amazonASClient = awsStackUtil.createAutoScalingClient(awsTemplate.getRegion(), awsCredential);
-        return getInstanceIds(stack, amazonASClient);
+        AmazonCloudFormationClient amazonCFClient = awsStackUtil.createCloudFormationClient(awsTemplate.getRegion(), awsCredential);
+        return getInstanceIds(stack, amazonASClient, amazonCFClient);
     }
 
-    public List<String> getInstanceIds(Stack stack, AmazonAutoScalingClient amazonASClient) {
+    public List<String> getInstanceIds(Stack stack, AmazonAutoScalingClient amazonASClient, AmazonCloudFormationClient amazonCFClient) {
         DescribeAutoScalingGroupsResult describeAutoScalingGroupsResult = amazonASClient
-                .describeAutoScalingGroups(new DescribeAutoScalingGroupsRequest().withAutoScalingGroupNames(getAutoscalingGroupName(stack)));
+                .describeAutoScalingGroups(new DescribeAutoScalingGroupsRequest().withAutoScalingGroupNames(getAutoscalingGroupName(stack, amazonCFClient)));
         List<String> instanceIds = new ArrayList<>();
         if (describeAutoScalingGroupsResult.getAutoScalingGroups().get(0).getInstances() != null) {
             for (Instance instance : describeAutoScalingGroupsResult.getAutoScalingGroups().get(0).getInstances()) {
