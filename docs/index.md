@@ -89,8 +89,8 @@ Scaling is the ability to increase or decrease the capacity of the Hadoop cluste
 When scaling policies are used, the capacity is automatically increased or decreased according to the conditions defined.
 Periscope will do the heavy lifting and based on the alarms and the scaling policy linked to them it executes the associated policy.
 By default a fully configured and running [Cloudbreak](https://cloudbreak.sequenceiq.com/) cluster contains no SLA policies. 
-An SLA scaling policy can contain multiple alarms. While part of the scaling policies `scalingAdjustment` are applied, also to keep the cluster size within boundaries, a `minSize` and `maxSize` is attached to the cluster - thus a scaling policy - though trough an alarm is triggered - can never over or undersize a cluster.
-In an SLA scaling policy the triggered rules are applied in order.
+An SLA scaling policy can contain multiple alarms. As an alarm is triggered a  `scalingAdjustment` is applied, however to keep the cluster size within boundaries a `minSize` and `maxSize` is attached to the cluster - thus a scaling policy can never over or undersize a cluster. Also in order to avoid stressing the cluster we have introduced a `cooldown` period (minutes) - though an alarm is raised and there is an associated scaling policy, the system will not apply the policy within the configured timeframe. In an SLA scaling policy the triggered rules are applied in order.
+
 ###Applications
 A Hadoop YARN application is a packaged workload submitted to a cluster. An application requests resources from YARN Resource Manager. The resources are allocated as YARN containers. By default Periscope works with the Hadoop YARN Capacity Scheduler. Using the Capacity Scheduler applications are submitted in different priority queues. The queue configurations, their depth, associated resources, etc have to be designed ahead - and adapted in case of new tenants, applications or workloads are using the cluster.
 At SequenceIQ, through our contributions to Apache YARN we facilitate moving applications between queues - and thus use the SLA policies attached to these queues. Even more, those SLA policies which were previously attached to Capacity Scheduler queues now can be attached to submitted jobs/applications. 
@@ -105,12 +105,32 @@ Periscope brings in the capability to reconfigure a running cluster - in particu
 
 ##Releases, future plans
 
+Quite a while ago we have been thinking about `autoscaling` Hadoop clusters. First of all - being a cost aware young startup - we always had to manually manage our cloud based VM instances, doing what exactly Periscope does. Having short and long running Hadoop jobs on different clusters, and maintaining in parallel different clusters it was a very error prone and tedious job. While Amazon for instance gives a quite good API (remember we always use a CLI as an alternative for UI) but this still wasn’t easy when you have 10+ clusters of different sizes. On the other hand we have started to use different cloud providers as well - Microsoft’s Azure and Google’s Cloud Compute.
+This diversity started to eat into too much DevOps time - and we decided to automate everything and create Periscope.
+
+###  Public Beta - 0.1
+
+The `first public beta` does support autoscaling clusters on **Amazon AWS** and **Microsoft Azure** - and we will bring in the other Cloudbreak providers as we add them. Once our contributions in Apache Hadoop, YARN and Ambari will be released (patches are accepted and in trunk - target versions are *2.6.0 and 1.7.0* - Periscope will start supporting the `static` cluster features such as application SLA policies.
+
+The currently supported Hadoop is the Hortonworks Data Platform - the 100% open source Hadoop distribution and the respective component versions are:
+
+CentOS - 6.5 Hortonworks Data Platform - 2.1 Apache Hadoop - 2.4.0 Apache Tez - 0.4 Apache Pig - 0.12.1 Apache Hive & HCatalog - 0.13.0 Apache HBase - 0.98.0 Apache Phoenix - 4.0.0 Apache Accumulo - 1.5.1 Apache Storm - 0.9.1 Apache Mahout - 0.9.0 Apache Solr - 4.7.2 Apache Falcon - 0.5.0 Apache Sqoop - 1.4.4 Apache Flume - 1.4.0 Apache Ambari - 1.6.1 Apache Oozie - 4.0.0 Apache Zookeeper - 3.4.5 Apache Knox - 0.4.0 Docker - 1.1 Serf - 0.5.0 dnsmasq - 2.7
+
+###Future releases
+
+While this is already a good achievement - bringing autoscaling to Hadoop - we don’t stop here. Periscope will be a centralized place to manage your cluster through SLA policies, check your cluster metrics and logs and correlate them with events/cluster heath. The analytics and visualization capabilities will allow you for a deeper understanding of your jobs, the nature of resources consumed and ultimately leverage the features provided by cloud providers. For instance a CPU heavy job can always launch purpose build (compute optimized) instance types.
+
+As we have already mentioned we are running a YARN monitoring project based on R - based on the experience and what we have learnt the end goal is to built a high level heuristic model which maintains a healthy cluster, without the need of predefined SLA policy rules.
+
+
 ##Contribution
 
 So you are about to contribute to Periscope? Awesome! There are many different ways in which you can contribute. We strongly value your feedback, questions, bug reports, and feature requests.
 Periscope consist of the following main projects:
 
+###Periscope code
 
+Available: <a href=https://github.com/sequenceiq/periscope>https://github.com/sequenceiq/periscope</a>
 
 ###Periscope API
 
