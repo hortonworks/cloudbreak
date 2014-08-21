@@ -44,6 +44,6 @@ public class AddNodeCompleteHandler implements Consumer<Event<AddNodeComplete>> 
         Set<Resource> resources = stack.getResources();
         resources.addAll(resourcesSet);
         retryingStackUpdater.updateStackResources(stackId, resources);
-        metadataSetupContext.setupHostMetadata(cloudPlatform, stackId, resourcesSet, data.getHostgroup());
+        metadataSetupContext.setupHostMetadata(cloudPlatform, stackId, resourcesSet);
     }
 }

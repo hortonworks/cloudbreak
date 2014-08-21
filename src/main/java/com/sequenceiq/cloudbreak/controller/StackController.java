@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import groovyx.net.http.HttpResponseException;
-
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
@@ -96,25 +94,6 @@ public class StackController {
             stackService.updateNodeCount(user, stackId, updateStackJson.getNodeCount());
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-    }
-
-    // TODO: delete this method, refactor its content to DefaultStackService.updateNodeCount
-    @RequestMapping(method = RequestMethod.PUT, value = "/r/{stackId}/{hostgroup}")
-    @ResponseBody
-    public void increaseNodeCount(@CurrentUser User user, @PathVariable Long stackId, @PathVariable String hostgroup) throws HttpResponseException {
-        Stack stack = stackService.get(user, stackId);
-        try {
-            if (stackService.assignableHostgroup(stack, hostgroup)) {
-                stack.setNodeCount(stack.getNodeCount() + 1);
-                stackService.addNode(user, stack, hostgroup);
-            } else {
-                throw new BadRequestException(String.format("Invalid hostgroup: blueprint %s does not contain %s hostgroup.",
-                        stack.getCluster().getBlueprint().getId(), hostgroup));
-            }
-        } catch (Exception e) {
-            throw new BadRequestException(String.format("Stack %s put occurs a problem '%s': %s", stackId, e.getMessage(), e));
-        }
-
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/metadata/{hash}")

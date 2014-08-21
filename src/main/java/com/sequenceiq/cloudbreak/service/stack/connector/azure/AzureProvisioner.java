@@ -120,7 +120,7 @@ public class AzureProvisioner implements Provisioner {
     }
 
     @Override
-    public void addNode(Stack stack, String userData, String hostgroup) {
+    public void addNode(Stack stack, String userData) {
         AzureTemplate azureTemplate = (AzureTemplate) stack.getTemplate();
         Credential credential =  stack.getCredential();
         String emailAsFolder = stack.getUser().emailAsFolder();
@@ -145,7 +145,7 @@ public class AzureProvisioner implements Provisioner {
             resourceSet.add(new Resource(ResourceType.BLOB, vmName, stack));
         }
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_NODE_COMPLETE_EVENT, stack.getId());
-        reactor.notify(ReactorConfig.ADD_NODE_COMPLETE_EVENT, Event.wrap(new AddNodeComplete(CloudPlatform.AZURE, stack.getId(), resourceSet, hostgroup)));
+        reactor.notify(ReactorConfig.ADD_NODE_COMPLETE_EVENT, Event.wrap(new AddNodeComplete(CloudPlatform.AZURE, stack.getId(), resourceSet)));
     }
 
     @Override

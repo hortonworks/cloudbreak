@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
-import java.io.IOException;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
@@ -22,10 +21,6 @@ public interface StackService {
     Set<InstanceMetaData> getMetaData(String hash);
 
     StackDescription getStackDescription(User user, Stack stack);
-
-    void addNode(User user, Stack stack, String hostgroup);
-
-    Boolean assignableHostgroup(Stack stack, String hostgroup) throws IOException;
 
     void updateStatus(User user, Long stackId, StatusRequest status);
 

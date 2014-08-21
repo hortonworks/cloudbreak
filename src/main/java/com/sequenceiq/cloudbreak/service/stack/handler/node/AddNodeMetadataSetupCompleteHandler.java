@@ -29,6 +29,6 @@ public class AddNodeMetadataSetupCompleteHandler implements Consumer<Event<AddNo
         Long stackId = data.getStackId();
         Set<CoreInstanceMetaData> coreInstanceMetaData = data.getCoreInstanceMetaData();
         LOGGER.info("Accepted {} event.", ReactorConfig.ADD_NODE_UPDATE_METADATA_EVENT_COMPLETE, stackId);
-        ambariRoleAllocator.updateInstanceMetadata(stackId, coreInstanceMetaData, data.getResources(), data.getHostgroup());
+        ambariRoleAllocator.updateInstanceMetadata(stackId, coreInstanceMetaData, data.getResources());
     }
 }

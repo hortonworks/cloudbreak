@@ -14,10 +14,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sequenceiq.cloudbreak.controller.json.ClusterRequest;
 import com.sequenceiq.cloudbreak.controller.json.ClusterResponse;
-import com.sequenceiq.cloudbreak.controller.json.UpdateStackJson;
+import com.sequenceiq.cloudbreak.controller.json.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.converter.ClusterConverter;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.security.CurrentUser;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -56,17 +57,18 @@ public class ClusterController {
 
     @RequestMapping(method = RequestMethod.PUT)
     @ResponseBody
-    public ResponseEntity<String> startOrStopAllServiceOnCluster(@CurrentUser User user, @PathVariable Long stackId,
-            @RequestBody UpdateStackJson statusRequestJson) {
-        switch (statusRequestJson.getStatus()) {
-        case STOPPED:
-            clusterService.stopAllService(user, stackId);
-            return new ResponseEntity<>(HttpStatus.OK);
-        case STARTED:
-            clusterService.startAllService(user, stackId);
-            return new ResponseEntity<>(HttpStatus.OK);
-        default:
-            throw new BadRequestException("The requested status not valid.");
+    public ResponseEntity<String> updateCluster(@CurrentUser User user, @PathVariable Long stackId, @RequestBody UpdateClusterJson updateClusterJson) {
+        Stack stack = stackService.get(user, stackId);
+        if (stack.getStatus().equals(Status.AVAILABLE)) {
+            if (updateClusterJson.getStatus() != null) {
+                clusterService.updateStatus(user, stackId, updateClusterJson.getStatus());
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            } else {
+                clusterService.updateHosts(user, stackId, updateClusterJson.getHosts());
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+        } else {
+            return new ResponseEntity<String>("Put is not enabled when stack is not ready for update.", HttpStatus.NO_CONTENT);
         }
     }
 }

@@ -47,11 +47,11 @@ public class MetadataSetupContext {
 
     }
 
-    public void setupHostMetadata(CloudPlatform cloudPlatform, Long stackId, Set<Resource> resourceSet, String hostgroup) {
+    public void setupHostMetadata(CloudPlatform cloudPlatform, Long stackId, Set<Resource> resourceSet) {
         try {
             Stack stack = stackRepository.findOneWithLists(stackId);
             MetadataSetup metadataSetup = metadataSetups.get(cloudPlatform);
-            metadataSetup.addNodeMetadatas(stack, resourceSet, hostgroup);
+            metadataSetup.addNodeMetadatas(stack, resourceSet);
         } catch (Exception e) {
             //TODO what happening if the node update not success
             LOGGER.error("Unhandled exception occured while creating stack.", e);

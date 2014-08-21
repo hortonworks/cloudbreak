@@ -106,7 +106,7 @@ public class AwsMetadataSetup implements MetadataSetup {
     }
 
     @Override
-    public void addNodeMetadatas(Stack stack, Set<Resource> resourceList, String hostgroup) {
+    public void addNodeMetadatas(Stack stack, Set<Resource> resourceList) {
         //TODO implement functionality
     }
 

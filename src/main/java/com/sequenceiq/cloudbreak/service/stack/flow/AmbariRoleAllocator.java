@@ -14,7 +14,6 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.stack.event.AmbariAddNode;
 import com.sequenceiq.cloudbreak.service.stack.event.AmbariRoleAllocationComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.StackCreationFailure;
 import com.sequenceiq.cloudbreak.service.stack.event.domain.CoreInstanceMetaData;
@@ -64,7 +63,7 @@ public class AmbariRoleAllocator {
         }
     }
 
-    public void updateInstanceMetadata(Long stackId, Set<CoreInstanceMetaData> coreInstanceMetaData, Set<Resource> resources, String hostgroup) {
+    public void updateInstanceMetadata(Long stackId, Set<CoreInstanceMetaData> coreInstanceMetaData, Set<Resource> resources) {
         try {
             Stack stack = stackRepository.findOneWithLists(stackId);
             Set<InstanceMetaData> originalMetadata = stack.getInstanceMetaData();
@@ -73,8 +72,8 @@ public class AmbariRoleAllocator {
             stackUpdater.updateStackMetaData(stackId, originalMetadata);
             stackUpdater.updateMetadataReady(stackId);
             LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_NODE_AMBARI_UPDATE_NODE_EVENT, stackId);
-            reactor.notify(ReactorConfig.ADD_NODE_AMBARI_UPDATE_NODE_EVENT, Event.wrap(
-                    new AmbariAddNode(stackId, getAmbariIp(instanceMetaDatas), instanceMetaDatas, resources, hostgroup)));
+            // reactor.notify(ReactorConfig.ADD_NODE_AMBARI_UPDATE_NODE_EVENT, Event.wrap(
+            // new AmbariAddNode(stackId, getAmbariIp(instanceMetaDatas), instanceMetaDatas, resources));
         } catch (WrongMetadataException e) {
             LOGGER.error(e.getMessage(), e);
             notifyStackCreateFailed(stackId, e.getMessage());

@@ -73,7 +73,7 @@ public class AwsProvisioner implements Provisioner {
     }
 
     @Override
-    public void addNode(Stack stack, String userData, String hostgroup) {
+    public void addNode(Stack stack, String userData) {
 
     }
 

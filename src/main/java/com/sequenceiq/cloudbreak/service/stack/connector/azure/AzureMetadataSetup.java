@@ -60,7 +60,7 @@ public class AzureMetadataSetup implements MetadataSetup {
     }
 
     @Override
-    public void addNodeMetadatas(Stack stack, Set<Resource> resourceList, String hostgroup) {
+    public void addNodeMetadatas(Stack stack, Set<Resource> resourceList) {
         AzureCredential azureCredential = (AzureCredential) stack.getCredential();
         String filePath = AzureCertificateService.getUserJksFileName(azureCredential, stack.getUser().emailAsFolder());
         AzureClient azureClient = azureStackUtil.createAzureClient(azureCredential, filePath);
@@ -73,7 +73,7 @@ public class AzureMetadataSetup implements MetadataSetup {
         Set<CoreInstanceMetaData> instanceMetaDatas = collectMetaData(stack, azureClient, resources);
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_NODE_UPDATE_METADATA_EVENT_COMPLETE, stack.getId());
         reactor.notify(ReactorConfig.ADD_NODE_UPDATE_METADATA_EVENT_COMPLETE,
-                Event.wrap(new AddNodeMetadataSetupComplete(CloudPlatform.AZURE, stack.getId(), instanceMetaDatas, resourceList, hostgroup)));
+                Event.wrap(new AddNodeMetadataSetupComplete(CloudPlatform.AZURE, stack.getId(), instanceMetaDatas, resourceList)));
     }
 
     private Set<CoreInstanceMetaData> collectMetaData(Stack stack, AzureClient azureClient, List<Resource> resources) {

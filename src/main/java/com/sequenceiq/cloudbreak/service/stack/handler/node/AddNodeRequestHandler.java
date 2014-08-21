@@ -43,6 +43,6 @@ public class AddNodeRequestHandler implements Consumer<Event<AddNodeRequest>> {
         Stack one = stackRepository.findOneWithLists(stackId);
         LOGGER.info("Accepted {} event.", ReactorConfig.ADD_NODE_REQUEST_EVENT, stackId);
         provisioners.get(cloudPlatform)
-                .addNode(one, userDataBuilder.build(cloudPlatform, one.getHash(), new HashMap<String, String>()), request.getHostgroup());
+                .addNode(one, userDataBuilder.build(cloudPlatform, one.getHash(), new HashMap<String, String>()));
     }
 }

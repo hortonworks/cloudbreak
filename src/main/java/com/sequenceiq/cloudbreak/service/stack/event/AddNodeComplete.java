@@ -7,12 +7,10 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 
 public class AddNodeComplete extends ProvisionEvent {
     private Set<Resource> resources;
-    private String hostgroup;
 
-    public AddNodeComplete(CloudPlatform cloudPlatform, Long stackId, Set<Resource> resources, String hostgroup) {
+    public AddNodeComplete(CloudPlatform cloudPlatform, Long stackId, Set<Resource> resources) {
         super(cloudPlatform, stackId);
         this.resources = resources;
-        this.hostgroup = hostgroup;
     }
 
     public Set<Resource> getResources() {
@@ -23,11 +21,4 @@ public class AddNodeComplete extends ProvisionEvent {
         this.resources = resources;
     }
 
-    public String getHostgroup() {
-        return hostgroup;
-    }
-
-    public void setHostgroup(String hostgroup) {
-        this.hostgroup = hostgroup;
-    }
 }

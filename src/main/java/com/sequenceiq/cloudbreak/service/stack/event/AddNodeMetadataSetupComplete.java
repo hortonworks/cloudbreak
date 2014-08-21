@@ -10,14 +10,11 @@ import com.sequenceiq.cloudbreak.service.stack.event.domain.CoreInstanceMetaData
 public class AddNodeMetadataSetupComplete extends ProvisionEvent {
     private Set<CoreInstanceMetaData> coreInstanceMetaData = new HashSet<>();
     private Set<Resource> resources = new HashSet<>();
-    private String hostgroup;
 
-    public AddNodeMetadataSetupComplete(CloudPlatform cloudPlatform, Long stackId, Set<CoreInstanceMetaData> coreInstanceMetaData,
-            Set<Resource> resources, String hostgroup) {
+    public AddNodeMetadataSetupComplete(CloudPlatform cloudPlatform, Long stackId, Set<CoreInstanceMetaData> coreInstanceMetaData, Set<Resource> resources) {
         super(cloudPlatform, stackId);
         this.coreInstanceMetaData = coreInstanceMetaData;
         this.resources = resources;
-        this.hostgroup = hostgroup;
     }
 
     public Set<CoreInstanceMetaData> getCoreInstanceMetaData() {
@@ -36,11 +33,4 @@ public class AddNodeMetadataSetupComplete extends ProvisionEvent {
         this.resources = resources;
     }
 
-    public String getHostgroup() {
-        return hostgroup;
-    }
-
-    public void setHostgroup(String hostgroup) {
-        this.hostgroup = hostgroup;
-    }
 }
