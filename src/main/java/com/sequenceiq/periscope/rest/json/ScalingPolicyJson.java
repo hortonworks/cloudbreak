@@ -9,6 +9,7 @@ public class ScalingPolicyJson implements Json {
     private AdjustmentType adjustmentType;
     private int scalingAdjustment;
     private long alarmId;
+    private String hostGroup;
 
     public Long getId() {
         return id;
@@ -48,5 +49,13 @@ public class ScalingPolicyJson implements Json {
 
     public void setScalingAdjustment(int scalingAdjustment) {
         this.scalingAdjustment = scalingAdjustment;
+    }
+
+    public String getHostGroup() {
+        return hostGroup;
+    }
+
+    public void setHostGroup(String hostGroup) {
+        this.hostGroup = hostGroup;
     }
 }

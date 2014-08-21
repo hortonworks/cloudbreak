@@ -28,6 +28,7 @@ public class ScalingPolicyConverter extends AbstractConverter<ScalingPolicyJson,
         alarm.setScalingPolicy(policy);
         policy.setName(source.getName());
         policy.setScalingAdjustment(source.getScalingAdjustment());
+        policy.setHostGroup(source.getHostGroup());
         return policy;
     }
 
@@ -40,6 +41,7 @@ public class ScalingPolicyConverter extends AbstractConverter<ScalingPolicyJson,
         json.setAlarmId(alarm == null ? null : alarm.getId());
         json.setName(source.getName());
         json.setScalingAdjustment(source.getScalingAdjustment());
+        json.setHostGroup(source.getHostGroup());
         return json;
     }
 }

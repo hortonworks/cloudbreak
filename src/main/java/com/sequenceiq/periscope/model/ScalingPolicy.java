@@ -23,6 +23,7 @@ public class ScalingPolicy {
     private int scalingAdjustment;
     @OneToOne(cascade = CascadeType.PERSIST)
     private Alarm alarm;
+    private String hostGroup;
 
     public long getId() {
         return id;
@@ -62,6 +63,14 @@ public class ScalingPolicy {
 
     public void setScalingAdjustment(int scalingAdjustment) {
         this.scalingAdjustment = scalingAdjustment;
+    }
+
+    public String getHostGroup() {
+        return hostGroup;
+    }
+
+    public void setHostGroup(String hostGroup) {
+        this.hostGroup = hostGroup;
     }
 
     @Override
