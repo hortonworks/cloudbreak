@@ -8,6 +8,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import reactor.core.Reactor;
+import reactor.event.Event;
+
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -17,9 +20,6 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.event.AmbariRoleAllocationComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.StackCreationFailure;
 import com.sequenceiq.cloudbreak.service.stack.event.domain.CoreInstanceMetaData;
-
-import reactor.core.Reactor;
-import reactor.event.Event;
 
 @Service
 public class AmbariRoleAllocator {
@@ -67,18 +67,18 @@ public class AmbariRoleAllocator {
         try {
             Stack stack = stackRepository.findOneWithLists(stackId);
             Set<InstanceMetaData> originalMetadata = stack.getInstanceMetaData();
-            Set<InstanceMetaData> instanceMetaDatas = prepareInstanceMetaData(stack, coreInstanceMetaData, stack.getInstanceMetaData().size() + 1);
-            originalMetadata.addAll(instanceMetaDatas);
+            Set<InstanceMetaData> instanceMetaData = prepareInstanceMetaData(stack, coreInstanceMetaData, stack.getInstanceMetaData().size() + 1);
+            originalMetadata.addAll(instanceMetaData);
             stackUpdater.updateStackMetaData(stackId, originalMetadata);
             stackUpdater.updateMetadataReady(stackId);
-            stackUpdater.updateNodeCountReady(stackId, originalMetadata.size() + coreInstanceMetaData.size());
+            stackUpdater.updateNodeCount(stackId, originalMetadata.size() + coreInstanceMetaData.size());
             stackUpdater.updateStackStatus(stackId, Status.AVAILABLE);
         } catch (WrongMetadataException e) {
             LOGGER.error(e.getMessage(), e);
-            notifyStackCreateFailed(stackId, e.getMessage());
+            // TODO: handle update failure
         } catch (Exception e) {
             LOGGER.error("Unhandled exception occured while creating stack.", e);
-            notifyStackCreateFailed(stackId, "Unhandled exception occured while creating stack.");
+            // TODO: handle update failure
         }
     }
 

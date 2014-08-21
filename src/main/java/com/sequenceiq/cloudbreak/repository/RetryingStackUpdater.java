@@ -138,7 +138,7 @@ public class RetryingStackUpdater {
         }
     }
 
-    public Stack updateNodeCountReady(Long stackId, Integer nodeCount) {
+    public Stack updateNodeCount(Long stackId, Integer nodeCount) {
         int attempt = 1;
         try {
             return doUpdateNodeCount(stackId, nodeCount);
