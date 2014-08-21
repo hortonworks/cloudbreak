@@ -13,9 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
-import reactor.core.Reactor;
-import reactor.event.Event;
-
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
@@ -39,6 +36,9 @@ import com.sequenceiq.cloudbreak.service.stack.event.AddNodeRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataIncompleteException;
+
+import reactor.core.Reactor;
+import reactor.event.Event;
 
 @Service
 public class DefaultStackService implements StackService {
@@ -181,10 +181,14 @@ public class DefaultStackService implements StackService {
     public Set<InstanceMetaData> getMetaData(String hash) {
         Stack stack = stackRepository.findStackByHash(hash);
         if (stack != null) {
-            if (!stack.isMetadataReady()) {
+            if (!Status.UPDATE_IN_PROGRESS.equals(stack.getStatus())) {
+                if (!stack.isMetadataReady()) {
+                    throw new MetadataIncompleteException("Instance metadata is incomplete.");
+                } else if (!stack.getInstanceMetaData().isEmpty()) {
+                    return stack.getInstanceMetaData();
+                }
+            } else {
                 throw new MetadataIncompleteException("Instance metadata is incomplete.");
-            } else if (!stack.getInstanceMetaData().isEmpty()) {
-                return stack.getInstanceMetaData();
             }
         }
         throw new NotFoundException("Metadata not found on stack.");
