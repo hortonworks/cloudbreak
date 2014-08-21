@@ -3,8 +3,8 @@ package com.sequenceiq.periscope.rest.converter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.periscope.model.Alarm;
-import com.sequenceiq.periscope.model.ScalingPolicy;
+import com.sequenceiq.periscope.domain.Alarm;
+import com.sequenceiq.periscope.domain.ScalingPolicy;
 import com.sequenceiq.periscope.repository.AlarmRepository;
 import com.sequenceiq.periscope.rest.json.ScalingPolicyJson;
 import com.sequenceiq.periscope.service.AlarmNotFoundException;

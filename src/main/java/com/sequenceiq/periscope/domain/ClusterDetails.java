@@ -1,4 +1,4 @@
-package com.sequenceiq.periscope.model;
+package com.sequenceiq.periscope.domain;
 
 import java.util.ArrayList;
 import java.util.List;

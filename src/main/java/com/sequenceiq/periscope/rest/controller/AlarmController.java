@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.sequenceiq.periscope.model.Alarm;
+import com.sequenceiq.periscope.domain.Alarm;
 import com.sequenceiq.periscope.rest.converter.AlarmConverter;
 import com.sequenceiq.periscope.rest.json.AlarmJson;
 import com.sequenceiq.periscope.rest.json.AlarmsJson;

@@ -2,8 +2,8 @@ package com.sequenceiq.periscope.rest.converter;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.periscope.model.Alarm;
-import com.sequenceiq.periscope.model.ScalingPolicy;
+import com.sequenceiq.periscope.domain.Alarm;
+import com.sequenceiq.periscope.domain.ScalingPolicy;
 import com.sequenceiq.periscope.rest.json.AlarmJson;
 
 @Component

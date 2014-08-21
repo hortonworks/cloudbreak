@@ -13,9 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.periscope.model.Ambari;
+import com.sequenceiq.periscope.domain.Ambari;
+import com.sequenceiq.periscope.domain.ClusterDetails;
 import com.sequenceiq.periscope.model.Cluster;
-import com.sequenceiq.periscope.model.ClusterDetails;
 import com.sequenceiq.periscope.model.Queue;
 import com.sequenceiq.periscope.model.QueueSetup;
 import com.sequenceiq.periscope.registry.ClusterRegistry;

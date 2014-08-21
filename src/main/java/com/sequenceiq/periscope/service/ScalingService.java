@@ -10,11 +10,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.periscope.model.Alarm;
+import com.sequenceiq.periscope.domain.Alarm;
+import com.sequenceiq.periscope.domain.ClusterDetails;
+import com.sequenceiq.periscope.domain.ScalingPolicy;
 import com.sequenceiq.periscope.model.Cluster;
-import com.sequenceiq.periscope.model.ClusterDetails;
 import com.sequenceiq.periscope.model.ScalingPolicies;
-import com.sequenceiq.periscope.model.ScalingPolicy;
 import com.sequenceiq.periscope.repository.AlarmRepository;
 import com.sequenceiq.periscope.repository.ClusterDetailsRepository;
 import com.sequenceiq.periscope.utils.ClusterUtils;

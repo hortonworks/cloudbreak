@@ -9,8 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.periscope.domain.ClusterDetails;
 import com.sequenceiq.periscope.model.Cluster;
-import com.sequenceiq.periscope.model.ClusterDetails;
 
 @Component
 public class AmbariClusterRegistry implements ClusterRegistry {

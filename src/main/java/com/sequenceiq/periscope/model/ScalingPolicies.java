@@ -2,6 +2,8 @@ package com.sequenceiq.periscope.model;
 
 import java.util.List;
 
+import com.sequenceiq.periscope.domain.ScalingPolicy;
+
 public class ScalingPolicies {
 
     private int minSize;

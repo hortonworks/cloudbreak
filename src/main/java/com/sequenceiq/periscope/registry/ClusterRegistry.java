@@ -2,8 +2,8 @@ package com.sequenceiq.periscope.registry;
 
 import java.util.List;
 
+import com.sequenceiq.periscope.domain.ClusterDetails;
 import com.sequenceiq.periscope.model.Cluster;
-import com.sequenceiq.periscope.model.ClusterDetails;
 
 public interface ClusterRegistry {
 

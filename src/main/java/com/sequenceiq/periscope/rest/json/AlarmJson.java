@@ -1,7 +1,7 @@
 package com.sequenceiq.periscope.rest.json;
 
-import com.sequenceiq.periscope.model.ComparisonOperator;
-import com.sequenceiq.periscope.model.Metric;
+import com.sequenceiq.periscope.domain.ComparisonOperator;
+import com.sequenceiq.periscope.domain.Metric;
 
 public class AlarmJson implements Json {
 

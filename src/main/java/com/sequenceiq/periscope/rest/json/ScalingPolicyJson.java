@@ -1,6 +1,6 @@
 package com.sequenceiq.periscope.rest.json;
 
-import com.sequenceiq.periscope.model.AdjustmentType;
+import com.sequenceiq.periscope.domain.AdjustmentType;
 
 public class ScalingPolicyJson implements Json {
 

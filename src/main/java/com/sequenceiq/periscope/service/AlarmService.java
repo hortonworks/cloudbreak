@@ -5,9 +5,9 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.periscope.model.Alarm;
+import com.sequenceiq.periscope.domain.Alarm;
+import com.sequenceiq.periscope.domain.ClusterDetails;
 import com.sequenceiq.periscope.model.Cluster;
-import com.sequenceiq.periscope.model.ClusterDetails;
 import com.sequenceiq.periscope.repository.AlarmRepository;
 import com.sequenceiq.periscope.repository.ClusterDetailsRepository;
 

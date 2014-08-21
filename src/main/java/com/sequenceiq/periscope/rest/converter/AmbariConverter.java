@@ -2,7 +2,7 @@ package com.sequenceiq.periscope.rest.converter;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.periscope.model.Ambari;
+import com.sequenceiq.periscope.domain.Ambari;
 import com.sequenceiq.periscope.rest.json.AmbariJson;
 
 @Component

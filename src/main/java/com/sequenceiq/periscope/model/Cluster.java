@@ -15,6 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.periscope.domain.Alarm;
+import com.sequenceiq.periscope.domain.ClusterDetails;
 import com.sequenceiq.periscope.registry.ClusterState;
 import com.sequenceiq.periscope.registry.ConnectionException;
 import com.sequenceiq.periscope.service.configuration.AmbariConfigurationService;

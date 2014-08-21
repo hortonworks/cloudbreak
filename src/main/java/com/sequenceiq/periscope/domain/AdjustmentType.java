@@ -1,4 +1,4 @@
-package com.sequenceiq.periscope.model;
+package com.sequenceiq.periscope.domain;
 
 public enum AdjustmentType {
     NODE_COUNT,
