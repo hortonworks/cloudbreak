@@ -125,7 +125,7 @@ public class ClusterMetricsWatcher implements ApplicationListener<ClusterMetrics
             setCurrentTime(alarm);
         } else {
             long elapsedTime = System.currentTimeMillis() - hitsSince;
-            result = elapsedTime > (alarm.getPeriod() * ClusterUtils.SEC_IN_MS);
+            result = elapsedTime > (alarm.getPeriod() * ClusterUtils.MIN_IN_MS);
             LOGGER.info("Alarm: {} stands since {}ms on cluster {}", alarmName, elapsedTime, clusterId);
             if (result) {
                 LOGGER.info("Alarm: {} HIT on cluster: {}", alarmName, clusterId);

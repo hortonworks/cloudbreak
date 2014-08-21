@@ -14,7 +14,7 @@ import com.sequenceiq.periscope.model.Cluster;
 public final class ClusterUtils {
 
     public static final int MAX_CAPACITY = 100;
-    public static final int SEC_IN_MS = 1000;
+    public static final int MIN_IN_MS = 1000 * 60;
 
     private ClusterUtils() {
         throw new IllegalStateException();

@@ -105,7 +105,7 @@ public class ScalingService {
         int coolDown = cluster.getCoolDown();
         long lastScalingActivity = cluster.getLastScalingActivity();
         return lastScalingActivity == 0
-                || (System.currentTimeMillis() - lastScalingActivity) > (coolDown * ClusterUtils.SEC_IN_MS);
+                || (System.currentTimeMillis() - lastScalingActivity) > (coolDown * ClusterUtils.MIN_IN_MS);
     }
 
     private void scaleUpTo(Cluster cluster, int nodeCount) {
