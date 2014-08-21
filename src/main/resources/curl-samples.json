@@ -23,7 +23,7 @@ curl -X POST localhost:8081/clusters/1/configurations | jq .
 curl -X POST -H "Content-Type: application/json" -d '{"setup":[{"name":"default", "capacity":55}, {"name":"high", "capacity":45}]}' localhost:8081/clusters/1/configurations/queue | jq .
 
 # set metric alarms
-curl -X POST -H "Content-Type: application/json" -d '{"alarms":[{"alarmName":"pendingContainerHigh","description":"Number of pending containers is high","metric":"PENDING_CONTAINERS","threshold":10,"comparisonOperator":"GREATER_THAN","period":1},{"alarmName":"freeGlobalResourcesRateLow","description":"Low free global resource rate","metric":"GLOBAL_RESOURCES","threshold":1,"comparisonOperator":"EQUALS","period":1}]}' localhost:8081/clusters/1/alarms | jq .
+curl -X POST -H "Content-Type: application/json" -d '{"alarms":[{"alarmName":"pendingContainerHigh","description":"Number of pending containers is high","metric":"PENDING_CONTAINERS","threshold":10,"comparisonOperator":"GREATER_THAN","period":1},{"alarmName":"freeGlobalResourcesRateLow","description":"Low free global resource rate","metric":"GLOBAL_RESOURCES","threshold":1,"comparisonOperator":"EQUALS","period":1,"notifications":[{"target":["some1@gmail.com"],"notificationType":"EMAIL"}]}]}' localhost:8081/clusters/1/alarms | jq .
 curl -X GET localhost:8081/clusters/1/alarms | jq .
 curl -X DELETE localhost:8081/clusters/1/alarms/100 | jq .
 

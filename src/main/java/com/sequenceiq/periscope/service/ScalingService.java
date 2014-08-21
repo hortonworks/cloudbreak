@@ -42,16 +42,18 @@ public class ScalingService {
     }
 
     public ScalingPolicies setScalingPolicies(long clusterId, ScalingPolicies scalingPolicies) throws ClusterNotFoundException {
+        Cluster cluster = clusterService.get(clusterId);
         ClusterDetails clusterDetails = clusterDetailsRepository.findOne(clusterId);
         clusterDetails.setCoolDown(scalingPolicies.getCoolDown());
         clusterDetails.setMinSize(scalingPolicies.getMinSize());
         clusterDetails.setMaxSize(scalingPolicies.getMaxSize());
-        clusterService.get(clusterId).setClusterDetails(clusterDetails);
+        cluster.setClusterDetails(clusterDetails);
         clusterDetailsRepository.save(clusterDetails);
         return getScalingPolicies(clusterDetails);
     }
 
     public ScalingPolicies deletePolicy(long clusterId, long policyId) throws ClusterNotFoundException {
+        Cluster cluster = clusterService.get(clusterId);
         ClusterDetails clusterDetails = clusterDetailsRepository.findOne(clusterId);
         for (Alarm alarm : clusterDetails.getAlarms()) {
             ScalingPolicy scalingPolicy = alarm.getScalingPolicy();
@@ -60,7 +62,7 @@ public class ScalingService {
                 break;
             }
         }
-        clusterService.get(clusterId).setClusterDetails(clusterDetails);
+        cluster.setClusterDetails(clusterDetails);
         clusterDetailsRepository.save(clusterDetails);
         return getScalingPolicies(clusterId);
     }
@@ -93,9 +95,9 @@ public class ScalingService {
                 scaleDownTo(cluster, desiredNodeCount);
             }
             Alarm alarm = policy.getAlarm();
-            alarm.resetAlarmHitsSince();
+            alarm.reset();
             cluster.setLastScalingActivityCurrent();
-            LOGGER.info("Resetting time on alarm: {} on cluster: {}", alarm.getAlarmName(), cluster.getId());
+            LOGGER.info("Resetting time on alarm: {} on cluster: {}", alarm.getName(), cluster.getId());
         } else {
             LOGGER.info("Cluster: {} is in cooling state, cannot scale", cluster.getId());
         }

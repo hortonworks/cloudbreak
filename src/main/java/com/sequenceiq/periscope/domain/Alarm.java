@@ -1,10 +1,15 @@
 package com.sequenceiq.periscope.domain;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Transient;
@@ -19,7 +24,7 @@ public class Alarm {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "template_generator")
     @SequenceGenerator(name = "template_generator", sequenceName = "sequence_table")
     private long id;
-    private String alarmName;
+    private String name;
     private String description;
     private Metric metric;
     private double threshold;
@@ -27,15 +32,19 @@ public class Alarm {
     private int period;
     @Transient
     private long alarmHitsSince;
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @Transient
+    private boolean notificationSent;
+    @OneToOne(cascade = CascadeType.ALL, optional = true)
     private ScalingPolicy scalingPolicy;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<Notification> notifications = new ArrayList<>();
 
-    public String getAlarmName() {
-        return alarmName;
+    public String getName() {
+        return name;
     }
 
-    public void setAlarmName(String alarmName) {
-        this.alarmName = alarmName;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getDescription() {
@@ -86,8 +95,9 @@ public class Alarm {
         this.alarmHitsSince = alarmHitsSince;
     }
 
-    public void resetAlarmHitsSince() {
+    public void reset() {
         setAlarmHitsSince(0);
+        setNotificationSent(false);
     }
 
     public ScalingPolicy getScalingPolicy() {
@@ -104,6 +114,22 @@ public class Alarm {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public List<Notification> getNotifications() {
+        return notifications;
+    }
+
+    public void setNotifications(List<Notification> notifications) {
+        this.notifications = notifications;
+    }
+
+    public boolean isNotificationSent() {
+        return notificationSent;
+    }
+
+    public void setNotificationSent(boolean notificationSent) {
+        this.notificationSent = notificationSent;
     }
 
     @Override

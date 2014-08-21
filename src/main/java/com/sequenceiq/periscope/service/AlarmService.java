@@ -23,10 +23,11 @@ public class AlarmService {
 
     public List<Alarm> addAlarms(long clusterId, List<Alarm> alarms) throws ClusterNotFoundException {
         Cluster cluster = clusterService.get(clusterId);
-        ClusterDetails clusterDetails = cluster.getClusterDetails();
+        ClusterDetails clusterDetails = clusterDetailsRepository.findOne(clusterId);
         clusterDetails.addAlarms(alarms);
         alarmRepository.save(alarms);
         clusterDetailsRepository.save(clusterDetails);
+        cluster.setClusterDetails(clusterDetails);
         return clusterDetails.getAlarms();
     }
 
@@ -36,13 +37,15 @@ public class AlarmService {
 
     public List<Alarm> deleteAlarm(long clusterId, long alarmId) throws ClusterNotFoundException {
         Cluster cluster = clusterService.get(clusterId);
+        ClusterDetails clusterDetails = clusterDetailsRepository.findOne(clusterId);
         Alarm alarm = alarmRepository.findOne(alarmId);
         if (alarm == null) {
             throw new AlarmNotFoundException(alarmId);
         }
-        List<Alarm> alarms = cluster.getAlarms();
+        List<Alarm> alarms = clusterDetails.getAlarms();
         alarms.remove(alarm);
-        clusterDetailsRepository.save(cluster.getClusterDetails());
+        cluster.setClusterDetails(clusterDetails);
+        clusterDetailsRepository.save(clusterDetails);
         return alarms;
     }
 

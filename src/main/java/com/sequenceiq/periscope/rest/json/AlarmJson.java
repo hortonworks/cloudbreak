@@ -1,5 +1,7 @@
 package com.sequenceiq.periscope.rest.json;
 
+import java.util.List;
+
 import com.sequenceiq.periscope.domain.ComparisonOperator;
 import com.sequenceiq.periscope.domain.Metric;
 
@@ -13,6 +15,7 @@ public class AlarmJson implements Json {
     private ComparisonOperator comparisonOperator;
     private int period;
     private Long scalingPolicyId;
+    private List<NotificationJson> notifications;
 
     public String getAlarmName() {
         return alarmName;
@@ -76,5 +79,13 @@ public class AlarmJson implements Json {
 
     public void setScalingPolicyId(Long scalingPolicyId) {
         this.scalingPolicyId = scalingPolicyId;
+    }
+
+    public List<NotificationJson> getNotifications() {
+        return notifications;
+    }
+
+    public void setNotifications(List<NotificationJson> notifications) {
+        this.notifications = notifications;
     }
 }

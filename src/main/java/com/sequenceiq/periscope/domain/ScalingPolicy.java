@@ -1,6 +1,5 @@
 package com.sequenceiq.periscope.domain;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -21,7 +20,7 @@ public class ScalingPolicy {
     private String name;
     private AdjustmentType adjustmentType;
     private int scalingAdjustment;
-    @OneToOne(cascade = CascadeType.PERSIST)
+    @OneToOne
     private Alarm alarm;
     private String hostGroup;
 
