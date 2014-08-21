@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.service.cluster;
 
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
+import com.sequenceiq.cloudbreak.controller.json.HostGroupJson;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StatusRequest;
@@ -91,13 +92,13 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
-    public void updateHosts(User user, Long stackId, Map<String, Integer> hosts) {
+    public void updateHosts(User user, Long stackId, Set<HostGroupJson> hosts) {
         Stack stack = stackRepository.findOneWithLists(stackId);
-        for (String hostGroupName : hosts.keySet()) {
+        for (HostGroupJson hostGroup : hosts) {
             try {
-                if (!assignableHostgroup(stack.getCluster(), hostGroupName)) {
+                if (!assignableHostgroup(stack.getCluster(), hostGroup.getName())) {
                     throw new BadRequestException(String.format("Invalid hostgroup: blueprint %s does not contain %s hostgroup.",
-                            stack.getCluster().getBlueprint().getId(), hostGroupName));
+                            stack.getCluster().getBlueprint().getId(), hostGroup.getName()));
                 }
             } catch (Exception e) {
                 throw new BadRequestException(String.format("Stack %s put occurs a problem '%s': %s", stackId, e.getMessage(), e));

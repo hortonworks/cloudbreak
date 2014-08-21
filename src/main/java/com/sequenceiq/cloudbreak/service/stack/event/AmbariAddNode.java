@@ -1,14 +1,16 @@
 package com.sequenceiq.cloudbreak.service.stack.event;
 
-import java.util.Map;
+import java.util.Set;
+
+import com.sequenceiq.cloudbreak.controller.json.HostGroupJson;
 
 public class AmbariAddNode {
 
     private Long stackId;
     private String ambariIp;
-    private Map<String, Integer> hosts;
+    private Set<HostGroupJson> hosts;
 
-    public AmbariAddNode(Long stackId, String ambariIp, Map<String, Integer> hosts) {
+    public AmbariAddNode(Long stackId, String ambariIp, Set<HostGroupJson> hosts) {
         this.stackId = stackId;
         this.ambariIp = ambariIp;
         this.hosts = hosts;
@@ -30,11 +32,11 @@ public class AmbariAddNode {
         this.ambariIp = ambariIp;
     }
 
-    public Map<String, Integer> getHosts() {
+    public Set<HostGroupJson> getHosts() {
         return hosts;
     }
 
-    public void setHosts(Map<String, Integer> hosts) {
+    public void setHosts(Set<HostGroupJson> hosts) {
         this.hosts = hosts;
     }
 }

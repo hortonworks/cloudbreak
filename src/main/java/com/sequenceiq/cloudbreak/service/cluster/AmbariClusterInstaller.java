@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,7 @@ import com.sequenceiq.ambari.client.InvalidHostGroupHostAssociation;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
+import com.sequenceiq.cloudbreak.controller.json.HostGroupJson;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -81,16 +83,16 @@ public class AmbariClusterInstaller {
         }
     }
 
-    public void installAmbariNode(Stack stack, Map<String, Integer> hostgroups) {
+    public void installAmbariNode(Stack stack, Set<HostGroupJson> hostgroups) {
         Cluster cluster = stack.getCluster();
         AmbariClient ambariClient = createAmbariClient(stack.getAmbariIp());
         pollAmbariServer(stack, ambariClient);
         try {
             LOGGER.info("Add host to Ambari cluster for stack '{}' [Ambari server address: {}]", stack.getId(), stack.getAmbariIp());
             List<String> unregisteredHostNames = ambariClient.getUnregisteredHostNames();
-            for (Map.Entry<String, Integer> entry : hostgroups.entrySet()) {
-                for (int i = 0; i < entry.getValue(); i++) {
-                    addHost(ambariClient, stack, unregisteredHostNames.get(0), entry.getKey());
+            for (HostGroupJson entry : hostgroups) {
+                for (int i = 0; i < entry.getNodeCount(); i++) {
+                    addHost(ambariClient, stack, unregisteredHostNames.get(0), entry.getName());
                     unregisteredHostNames.remove(0);
                 }
             }

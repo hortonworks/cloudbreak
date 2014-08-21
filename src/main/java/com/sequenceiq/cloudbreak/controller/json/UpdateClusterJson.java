@@ -1,13 +1,13 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.sequenceiq.cloudbreak.domain.StatusRequest;
 
 public class UpdateClusterJson implements JsonEntity {
 
-    private Map<String, Integer> hosts = new HashMap<>();
+    private Set<HostGroupJson> hosts = new HashSet<>();
     private StatusRequest status;
 
     public UpdateClusterJson() {
@@ -22,11 +22,11 @@ public class UpdateClusterJson implements JsonEntity {
         this.status = status;
     }
 
-    public Map<String, Integer> getHosts() {
+    public Set<HostGroupJson> getHosts() {
         return hosts;
     }
 
-    public void setHosts(Map<String, Integer> hosts) {
+    public void setHosts(Set<HostGroupJson> hosts) {
         this.hosts = hosts;
     }
 }
