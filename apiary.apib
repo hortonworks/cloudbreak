@@ -1401,7 +1401,7 @@ Clusters related resources of the **Periscope API**.
 A Hadoop cluster is a set of components and services launched in order to store, analyze and process unstructured data. 
 Periscope can work with any Hadoop 2/ YARN cluster provisioned with Apache Ambari, and supports any YARN application.
 
-##Cluster [/clusters]
+##Add [/clusters/{id}]
 ###Add a cluster [POST]
 Add a Hadoop cluster to be monitored by Periscope. Note that Periscope does not require any pre-installation of components on cluster nodes. 
 To link a Hadoop cluster with Periscope the only required this is the Apache Ambari REST API endpoint.
@@ -1426,7 +1426,7 @@ To link a Hadoop cluster with Periscope the only required this is the Apache Amb
             "id": "1"
         }
 
-##Cluster [/clusters/{id}]
+##List, remove or show [/clusters]
 ###Retrieve cluster information [GET]
 
 + Parameters
@@ -1448,7 +1448,6 @@ To link a Hadoop cluster with Periscope the only required this is the Apache Amb
             "id": "1"
         }
 
-##Cluster [/clusters/{id}]
 ###Remove a cluster [DELETE]
 
 + Parameters
@@ -1470,8 +1469,7 @@ To link a Hadoop cluster with Periscope the only required this is the Apache Amb
             "id": "1"
         }
     
-##List [/clusters]
-###Retrieve cluster information [GET]
+###List all cluster information [GET]
 
 + Request
 
