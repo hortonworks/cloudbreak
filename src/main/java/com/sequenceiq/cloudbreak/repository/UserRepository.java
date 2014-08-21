@@ -1,5 +1,10 @@
 package com.sequenceiq.cloudbreak.repository;
 
+import java.util.Date;
+
+import javax.transaction.Transactional;
+
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
@@ -13,4 +18,9 @@ public interface UserRepository extends CrudRepository<User, Long> {
 
     User findUserByConfToken(@Param("confToken") String confToken);
 
+    @Modifying
+    @Transactional
+    void expireInvites(@Param("expiryDate") Date expiryDate);
+
 }
+

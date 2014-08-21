@@ -37,8 +37,11 @@ import org.hibernate.validator.constraints.NotEmpty;
                         + "LEFT JOIN FETCH u.awsCredentials "
                         + "LEFT JOIN FETCH u.azureCredentials "
                         + "LEFT JOIN FETCH u.clusters "
-                        + "WHERE u.id= :id")
-
+                        + "WHERE u.id= :id"),
+        @NamedQuery(
+                name = "User.expireInvites",
+                query = "DELETE FROM User u WHERE u.registrationDate < :expiryDate"
+        )
 })
 @Table(name = "cloudbreakuser")
 public class User implements ProvisionEntity {

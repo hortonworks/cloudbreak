@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.service.user;
 
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -11,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.MimeMessagePreparator;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
@@ -47,6 +50,12 @@ public class SimpleUserService implements UserService {
 
     @Value("${cb.mail.ui.enabled:false}")
     private boolean uiEnabled;
+
+    @Value("${cb.clean.invites.cron:}")
+    private String cleanInvitesCron;
+
+    @Value("${cb.invite.expire.days:60}")
+    private int inviteExpiryInDays;
 
     @Autowired
     private EmailService emailService;
@@ -263,4 +272,20 @@ public class SimpleUserService implements UserService {
         return uiEnabled ? uiAddress : hostAddress;
     }
 
+    @Scheduled(cron = "${cb.clean.invites.cron:0 * * * * *}")
+    @Override
+    public void expireInvites() {
+        LOGGER.info("Expire invites ...");
+
+        Calendar cal = GregorianCalendar.getInstance();
+        LOGGER.info("Current date: {}", cal.getTime());
+
+        cal.add(Calendar.DAY_OF_MONTH, -1 * inviteExpiryInDays);
+        Date expiryDate = cal.getTime();
+        LOGGER.info("Expiry date: {}", cal.getTime());
+        userRepository.expireInvites(expiryDate);
+
+        LOGGER.info("Expire invites DONE.");
+    }
 }
+

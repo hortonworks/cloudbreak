@@ -29,4 +29,6 @@ public interface UserService {
 
     User setUserRoles(Long userId, Set<UserRole> roles);
 
+    void expireInvites();
 }
+
