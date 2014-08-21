@@ -23,10 +23,10 @@ Periscope was designed around the idea of `autoscaling` clusters - without any n
 
 ##How it works
 
-Periscope monitors the application progress, the number of YARN containers/resources and their allocation, queue depths, and the number of available cluster nodes and their health. 
+Periscope monitors the application progress, the number of YARN containers/resources and their allocation, queue depths, and the number of available cluster nodes and their health.
 Since we have switched to YARN a while ago (been among the first adopters) we have run an open source [monitoring project](https://github.com/sequenceiq/yarn-monitoring), based on R.
 We have been collecting metrics from the YARN Timeline server, Hadoop Metrics2 and Ambari's Nagios/Ganglia - and profiling the applications and correlating with these metrics.
-One of the key findings was that while low level metrics are good to understand the cluster health - they might not necessarily help on making decisions when applying different SLA policies on a multi-tenant cluster. 
+One of the key findings was that while low level metrics are good to understand the cluster health - they might not necessarily help on making decisions when applying different SLA policies on a multi-tenant cluster.
 Focusing on higher level building blocks as queue depth, YARN containers, etc actually brings in the same quality of service, while not being lost in low level details.
 
 Periscope works with two types of Hadoop clusters: `static` and `dynamic`. Periscope does not require any pre-installation - the only thing it requires is to be `attached` to an Ambari server's REST API.
@@ -35,7 +35,7 @@ Periscope works with two types of Hadoop clusters: `static` and `dynamic`. Peris
 
 ###Apache YARN
 
-Since the emergence of Hadoop 2 and the YARN based architecture we have a platform where we can run multiple applications (of different types) not constrained only to MapReduce. 
+Since the emergence of Hadoop 2 and the YARN based architecture we have a platform where we can run multiple applications (of different types) not constrained only to MapReduce.
 
 The idea of YARN is to have a global ResourceManager (RM) and per-application ApplicationMaster (AM). The ResourceManager and per-node slave, the NodeManager (NM), form the data-computation framework. The ResourceManager is the ultimate authority that arbitrates resources among all the applications in the system. The per-application ApplicationMaster is, in effect, a framework specific library and is tasked with negotiating resources from the ResourceManager and working with the NodeManager(s) to execute and monitor the tasks.
 
@@ -48,7 +48,7 @@ Periscope is using the Capacity Scheduler to apply SLA policies to applications.
 
 The Apache Ambari project is aimed at making Hadoop management simpler by developing software for provisioning, managing, and monitoring Apache Hadoop clusters. Ambari provides an intuitive, easy-to-use Hadoop management web UI backed by its RESTful APIs.
 
-![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/ambari-overview.png)
+![](https://raw.githubusercontent.com/sequenceiq/periscope/master/docs/images/ambari-overview.png)
 
 Ambari enables System Administrators to:
 
@@ -67,7 +67,7 @@ Ambari enables System Administrators to:
 Ambari enables to integrate Hadoop provisioning, management and monitoring capabilities into applications with the Ambari REST APIs.
 Ambari Blueprints are a declarative definition of a cluster. With a Blueprint, you can specify a Stack, the Component layout and the Configurations to materialise a Hadoop cluster instance (via a REST API) without having to use the Ambari Cluster Install Wizard.
 
-![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/ambari-create-cluster.png)
+![](https://raw.githubusercontent.com/sequenceiq/periscope/master/docs/images/ambari-create-cluster.png)
 
 ###Cloudbreak
 
@@ -113,7 +113,7 @@ Given the option of provisioning or decommissioning cluster nodes on the fly, Pe
 _Note: not all of the features above are supported in the first `public beta` version. There are dependencies we contributed to Hadoop, Ambari and YARN and they will be included in the next releases (1.7 and 2.6)_
 
 ###Alarms
-An alarm watches a `metric` over a specified time period, and used by one or more action or scaling policy based on the value of the metric relative to a given threshold over a number of time periods. In case Periscope raises an alarm an action (e.g. sending an email) or a scaling policy is triggered. Alarms are based on metrics. The current supported `metrics` are: 
+An alarm watches a `metric` over a specified time period, and used by one or more action or scaling policy based on the value of the metric relative to a given threshold over a number of time periods. In case Periscope raises an alarm an action (e.g. sending an email) or a scaling policy is triggered. Alarms are based on metrics. The current supported `metrics` are:
 *`PENDING_CONTAINERS`- pending YARN containers
 
 *`PENDING_APPLICATIONS` - pending/queued YARN applications
@@ -122,24 +122,24 @@ An alarm watches a `metric` over a specified time period, and used by one or mor
 
 *`UNHEALTHY_NODES` - unhealthy cluster nodes
 
-*`GLOBAL_RESOURCES` - global resources 
+*`GLOBAL_RESOURCES` - global resources
 
 Measured `metrics` are compared with pre-configured values using operators. The `comparison operators` are: `LESS_THAN`, `GREATER_THAN`, `LESS_OR_EQUAL_THAN`, `GREATER_OR_EQUAL_THAN`, `EQUALS`.
-In order to avoid reacting for sudden spikes in the system and apply policies only in case of a sustained system stress, `alarms` have to be sustained over a `period` of time.  The `period` specifies the time period in minutes during the alarm has to be sustained. 
+In order to avoid reacting for sudden spikes in the system and apply policies only in case of a sustained system stress, `alarms` have to be sustained over a `period` of time.  The `period` specifies the time period in minutes during the alarm has to be sustained.
 
 Also a `threshold` can be configured, which specifies the variance applied by the operator for the selected `metric`.
 
 ###SLA Scaling Policies
-Scaling is the ability to increase or decrease the capacity of the Hadoop cluster or application. 
+Scaling is the ability to increase or decrease the capacity of the Hadoop cluster or application.
 When scaling policies are used, the capacity is automatically increased or decreased according to the conditions defined.
 Periscope will do the heavy lifting and based on the alarms and the scaling policy linked to them it executes the associated policy.
-By default a fully configured and running [Cloudbreak](https://cloudbreak.sequenceiq.com/) cluster contains no SLA policies. 
+By default a fully configured and running [Cloudbreak](https://cloudbreak.sequenceiq.com/) cluster contains no SLA policies.
 An SLA scaling policy can contain multiple alarms. As an alarm is triggered a  `scalingAdjustment` is applied, however to keep the cluster size within boundaries a `minSize` and `maxSize` is attached to the cluster - thus a scaling policy can never over or undersize a cluster. Also in order to avoid stressing the cluster we have introduced a `cooldown` period (minutes) - though an alarm is raised and there is an associated scaling policy, the system will not apply the policy within the configured timeframe. In an SLA scaling policy the triggered rules are applied in order.
 
 ###Applications
 A Hadoop YARN application is a packaged workload submitted to a cluster. An application requests resources from YARN Resource Manager. The resources are allocated as YARN containers. By default Periscope works with the Hadoop YARN Capacity Scheduler. Using the Capacity Scheduler applications are submitted in different priority queues. The queue configurations, their depth, associated resources, etc have to be designed ahead - and adapted in case of new tenants, applications or workloads are using the cluster.
-At SequenceIQ, through our contributions to Apache YARN we facilitate moving applications between queues - and thus use the SLA policies attached to these queues. Even more, those SLA policies which were previously attached to Capacity Scheduler queues now can be attached to submitted jobs/applications. 
-Also we facilitate changing the resources allocated to a running application - even though they were submitted and already running. 
+At SequenceIQ, through our contributions to Apache YARN we facilitate moving applications between queues - and thus use the SLA policies attached to these queues. Even more, those SLA policies which were previously attached to Capacity Scheduler queues now can be attached to submitted jobs/applications.
+Also we facilitate changing the resources allocated to a running application - even though they were submitted and already running.
 _Note: not all of the features above are supported in the first `public beta` version. There are dependencies we contributed to Hadoop, Ambari and YARN and they will be included in the next releases (1.7 and 2.6)_
 
 ###Configuration
@@ -148,7 +148,7 @@ Periscope brings in the capability to reconfigure a running cluster - in particu
 
 ##QuickStart and installation
 
-The easiest way to start using Periscope is to use our hosted solution. We host, maintain and support [Periscope API](https://periscope-api.sequenceiq.com) for you. 
+The easiest way to start using Periscope is to use our hosted solution. We host, maintain and support [Periscope API](https://periscope-api.sequenceiq.com) for you.
 
 Periscope requires an Apache Ambari endpoint of your Hadoop cluster to start to apply your SLA policies. We suggest to start with [Cloudbreak](http://sequenceiq.com/cloudbreak/#quickstart-and-installation). Create a hosted free [Cloudbreak](https://cloudbreak.sequenceiq.com/) account and start experimenting.
 
