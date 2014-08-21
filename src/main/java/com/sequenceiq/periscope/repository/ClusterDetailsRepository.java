@@ -4,5 +4,5 @@ import org.springframework.data.repository.CrudRepository;
 
 import com.sequenceiq.periscope.model.ClusterDetails;
 
-public interface ClusterDetailsRepository extends CrudRepository<ClusterDetails, String> {
+public interface ClusterDetailsRepository extends CrudRepository<ClusterDetails, Long> {
 }

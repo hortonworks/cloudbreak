@@ -23,11 +23,11 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
 
     @Autowired
     private ClusterService clusterService;
-    private final Map<String, Integer> updateFailures = new ConcurrentHashMap<>();
+    private final Map<Long, Integer> updateFailures = new ConcurrentHashMap<>();
 
     @Override
     public void onApplicationEvent(UpdateFailedEvent event) {
-        String id = event.getClusterId();
+        long id = event.getClusterId();
         try {
             Cluster cluster = clusterService.get(id);
             if (!cluster.isRestarting()) {

@@ -37,7 +37,7 @@ public class Cluster {
         initConfiguration();
     }
 
-    public String getId() {
+    public long getId() {
         return clusterDetails.getId();
     }
 

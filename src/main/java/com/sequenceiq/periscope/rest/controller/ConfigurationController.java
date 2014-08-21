@@ -33,14 +33,14 @@ public class ConfigurationController {
     private QueueSetupConverter queueSetupConverter;
 
     @RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity<ClusterJson> refreshConfiguration(@PathVariable String clusterId)
+    public ResponseEntity<ClusterJson> refreshConfiguration(@PathVariable long clusterId)
             throws ConnectionException, ClusterNotFoundException {
         Cluster cluster = clusterService.refreshConfiguration(clusterId);
         return new ResponseEntity<>(clusterConverter.convert(cluster), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/queue", method = RequestMethod.POST)
-    public ResponseEntity<QueueSetupJson> setQueueConfig(@PathVariable String clusterId, @RequestBody QueueSetupJson queueSetup)
+    public ResponseEntity<QueueSetupJson> setQueueConfig(@PathVariable long clusterId, @RequestBody QueueSetupJson queueSetup)
             throws ClusterNotFoundException, QueueSetupException {
         Map<String, String> newSetup = clusterService.setQueueSetup(clusterId, queueSetupConverter.convert(queueSetup));
         QueueSetupJson responseJson = new QueueSetupJson(queueSetup.getSetup(), newSetup);

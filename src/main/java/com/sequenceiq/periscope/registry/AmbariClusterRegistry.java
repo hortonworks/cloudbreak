@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.periscope.model.Ambari;
 import com.sequenceiq.periscope.model.Cluster;
 import com.sequenceiq.periscope.model.ClusterDetails;
 
@@ -17,25 +16,26 @@ import com.sequenceiq.periscope.model.ClusterDetails;
 public class AmbariClusterRegistry implements ClusterRegistry {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariClusterRegistry.class);
-    private final Map<String, Cluster> clusters = new ConcurrentHashMap<>();
+    private final Map<Long, Cluster> clusters = new ConcurrentHashMap<>();
 
     @Override
-    public Cluster add(String id, Ambari ambari) throws ConnectionException {
+    public Cluster add(ClusterDetails clusterDetails) throws ConnectionException {
         // TODO should be per user registry
-        Cluster cluster = new Cluster(new ClusterDetails(id, ambari));
+        long id = clusterDetails.getId();
+        Cluster cluster = new Cluster(clusterDetails);
         clusters.put(id, cluster);
-        LOGGER.info("Cluster: {} registered with id: {}", ambari.getHost(), id);
+        LOGGER.info("Cluster: {} registered with id: {}", cluster.getHost(), id);
         return cluster;
     }
 
     @Override
-    public Cluster remove(String id) {
+    public Cluster remove(long id) {
         LOGGER.info("Cluster: {} removed from registry", id);
         return clusters.remove(id);
     }
 
     @Override
-    public Cluster get(String id) {
+    public Cluster get(long id) {
         return clusters.get(id);
     }
 

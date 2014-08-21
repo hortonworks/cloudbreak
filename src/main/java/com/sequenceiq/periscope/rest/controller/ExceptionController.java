@@ -41,7 +41,7 @@ public class ExceptionController {
 
     @ExceptionHandler(AlarmNotFoundException.class)
     public ResponseEntity<IdExceptionMessageJson> handleClusterNotFoundException(AlarmNotFoundException e) {
-        return createIdExceptionMessage("" + e.getId(), "Alarm not found", HttpStatus.NOT_FOUND);
+        return createIdExceptionMessage(e.getId(), "Alarm not found", HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(ConnectionException.class)
@@ -62,7 +62,7 @@ public class ExceptionController {
         return new ResponseEntity<>(new ExceptionMessageJson(message), statusCode);
     }
 
-    public static ResponseEntity<IdExceptionMessageJson> createIdExceptionMessage(String id, String message, HttpStatus statusCode) {
+    public static ResponseEntity<IdExceptionMessageJson> createIdExceptionMessage(long id, String message, HttpStatus statusCode) {
         return new ResponseEntity<>(new IdExceptionMessageJson(id, message), statusCode);
     }
 }

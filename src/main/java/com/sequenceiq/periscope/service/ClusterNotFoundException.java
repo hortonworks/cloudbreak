@@ -2,13 +2,13 @@ package com.sequenceiq.periscope.service;
 
 public class ClusterNotFoundException extends Exception {
 
-    private final String id;
+    private final long id;
 
-    public ClusterNotFoundException(String id) {
+    public ClusterNotFoundException(long id) {
         this.id = id;
     }
 
-    public String getId() {
+    public long getId() {
         return id;
     }
 }

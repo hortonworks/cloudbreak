@@ -8,5 +8,5 @@ public interface UpdateEvent {
      *
      * @return id of the cluster
      */
-    String getClusterId();
+    long getClusterId();
 }

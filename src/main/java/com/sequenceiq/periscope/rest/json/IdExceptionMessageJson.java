@@ -2,21 +2,21 @@ package com.sequenceiq.periscope.rest.json;
 
 public class IdExceptionMessageJson extends ExceptionMessageJson implements Json {
 
-    private String id;
+    private long id;
 
     public IdExceptionMessageJson() {
     }
 
-    public IdExceptionMessageJson(String id, String message) {
+    public IdExceptionMessageJson(long id, String message) {
         super(message);
         this.id = id;
     }
 
-    public String getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(long id) {
         this.id = id;
     }
 }

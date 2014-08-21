@@ -5,15 +5,15 @@ import org.springframework.context.ApplicationEvent;
 
 public class ClusterMetricsUpdateEvent extends ApplicationEvent implements UpdateEvent {
 
-    private final String clusterId;
+    private final long clusterId;
 
-    public ClusterMetricsUpdateEvent(ClusterMetricsInfo source, String clusterId) {
+    public ClusterMetricsUpdateEvent(ClusterMetricsInfo source, long clusterId) {
         super(source);
         this.clusterId = clusterId;
     }
 
     @Override
-    public String getClusterId() {
+    public long getClusterId() {
         return clusterId;
     }
 

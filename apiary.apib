@@ -1397,13 +1397,11 @@ Clusters related resources of the **Periscope API**.
 A Hadoop cluster is a set of components and services launched in order to store, analyze and process unstructured data. 
 Periscope can work with any Hadoop 2/ YARN cluster provisioned with Apache Ambari, and supports any YARN application.
 
-##Add, remove or show [/clusters/{id}]
+##Cluster [/clusters]
 ###Add a cluster [POST]
 Add a Hadoop cluster to be monitored by Periscope. Note that Periscope does not require any pre-installation of components on cluster nodes. 
 To link a Hadoop cluster with Periscope the only required this is the Apache Ambari REST API endpoint.
 
-+ Parameters
-    + id (required String `id`) ... The id of the cluster to be monitored.
 
 + Request (application/json)
 
@@ -1421,9 +1419,10 @@ To link a Hadoop cluster with Periscope the only required this is the Apache Amb
             "state": "RUNNING",
             "port": "8080",
             "host": "172.24.0.2",
-            "id": "multi-node"
+            "id": "1"
         }
 
+##Cluster [/clusters/{id}]
 ###Retrieve cluster information [GET]
 
 + Parameters
@@ -1442,9 +1441,10 @@ To link a Hadoop cluster with Periscope the only required this is the Apache Amb
             "state": "RUNNING",
             "port": "8080",
             "host": "172.24.0.2",
-            "id": "multi-node"
+            "id": "1"
         }
 
+##Cluster [/clusters/{id}]
 ###Remove a cluster [DELETE]
 
 + Parameters
@@ -1463,7 +1463,7 @@ To link a Hadoop cluster with Periscope the only required this is the Apache Amb
             "state": "RUNNING",
             "port": "8080",
             "host": "172.24.0.2",
-            "id": "multi-node"
+            "id": "1"
         }
     
 ##List [/clusters]
@@ -1483,7 +1483,7 @@ To link a Hadoop cluster with Periscope the only required this is the Apache Amb
             "state": "RUNNING",
             "port": "8080",
             "host": "172.24.0.2",
-            "id": "multi-node"
+            "id": "1"
           }
         ]
         
@@ -1507,7 +1507,7 @@ To link a Hadoop cluster with Periscope the only required this is the Apache Amb
             "state": "SUSPENDED",
             "port": "8080",
             "host": "172.24.0.2",
-            "id": "multi-node"
+            "id": "1"
         }
 
 ##Movements [/clusters/{clusterId}/movement]
@@ -1531,7 +1531,7 @@ Based on our contribution to the CapacityScheduler [YARN-2248](https://issues.ap
             "state": "SUSPENDED",
             "port": "8080",
             "host": "172.24.0.2",
-            "id": "multi-node"
+            "id": "1"
         }
 
 #Group Alarms
@@ -1863,7 +1863,7 @@ These properties currently are mostly related to the Capacity Scheduler configur
             "state": "RUNNING",
             "port": "8080",
             "host": "172.24.0.2",
-            "id": "multi-node"
+            "id": "1"
         }
 <<<<<<< HEAD
 >>>>>>> 2a42905... PERI-2 update apiary

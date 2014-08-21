@@ -21,13 +21,13 @@ public class AppService {
     @Autowired
     private ClusterService clusterService;
 
-    public List<ApplicationReport> getApplicationReports(String clusterId) throws IOException, YarnException, ClusterNotFoundException {
+    public List<ApplicationReport> getApplicationReports(long clusterId) throws IOException, YarnException, ClusterNotFoundException {
         Cluster cluster = clusterService.get(clusterId);
         YarnClient yarnClient = cluster.getYarnClient();
         return yarnClient.getApplications();
     }
 
-    public void setPriorityToHighRandomly(String clusterId) throws ClusterNotFoundException {
+    public void setPriorityToHighRandomly(long clusterId) throws ClusterNotFoundException {
         Cluster cluster = clusterService.get(clusterId);
         Map<ApplicationId, SchedulerApplication> applications = cluster.getApplications(Priority.NORMAL);
         int i = 0;
@@ -38,7 +38,7 @@ public class AppService {
         }
     }
 
-    public Cluster allowAppMovement(String clusterId, boolean allow) throws ClusterNotFoundException {
+    public Cluster allowAppMovement(long clusterId, boolean allow) throws ClusterNotFoundException {
         Cluster cluster = clusterService.get(clusterId);
         cluster.allowAppMovement(allow);
         return cluster;

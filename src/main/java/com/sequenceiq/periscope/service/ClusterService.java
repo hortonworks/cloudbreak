@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.periscope.model.Ambari;
 import com.sequenceiq.periscope.model.Cluster;
+import com.sequenceiq.periscope.model.ClusterDetails;
 import com.sequenceiq.periscope.model.Queue;
 import com.sequenceiq.periscope.model.QueueSetup;
 import com.sequenceiq.periscope.registry.ClusterRegistry;
@@ -37,13 +38,13 @@ public class ClusterService {
     @Autowired
     private ClusterDetailsRepository clusterDetailsRepository;
 
-    public Cluster add(String clusterId, Ambari ambari) throws ConnectionException {
-        Cluster cluster = clusterRegistry.add(clusterId, ambari);
-        clusterDetailsRepository.save(cluster.getClusterDetails());
-        return cluster;
+    public Cluster add(Ambari ambari) throws ConnectionException {
+        ClusterDetails clusterDetails = new ClusterDetails(ambari);
+        clusterDetailsRepository.save(clusterDetails);
+        return clusterRegistry.add(clusterDetails);
     }
 
-    public Cluster get(String clusterId) throws ClusterNotFoundException {
+    public Cluster get(long clusterId) throws ClusterNotFoundException {
         Cluster cluster = clusterRegistry.get(clusterId);
         if (cluster == null) {
             throw new ClusterNotFoundException(clusterId);
@@ -55,7 +56,7 @@ public class ClusterService {
         return clusterRegistry.getAll();
     }
 
-    public Cluster remove(String clusterId) throws ClusterNotFoundException {
+    public Cluster remove(long clusterId) throws ClusterNotFoundException {
         Cluster cluster = clusterRegistry.remove(clusterId);
         if (cluster == null) {
             throw new ClusterNotFoundException(clusterId);
@@ -64,20 +65,20 @@ public class ClusterService {
         return cluster;
     }
 
-    public Cluster setState(String clusterId, ClusterState state) throws ClusterNotFoundException {
+    public Cluster setState(long clusterId, ClusterState state) throws ClusterNotFoundException {
         Cluster cluster = get(clusterId);
         cluster.setState(state);
         clusterDetailsRepository.save(cluster.getClusterDetails());
         return cluster;
     }
 
-    public Cluster refreshConfiguration(String clusterId) throws ConnectionException, ClusterNotFoundException {
+    public Cluster refreshConfiguration(long clusterId) throws ConnectionException, ClusterNotFoundException {
         Cluster cluster = get(clusterId);
         cluster.refreshConfiguration();
         return cluster;
     }
 
-    public Map<String, String> setQueueSetup(String clusterId, QueueSetup queueSetup)
+    public Map<String, String> setQueueSetup(long clusterId, QueueSetup queueSetup)
             throws QueueSetupException, ClusterNotFoundException {
         return setQueueSetup(get(clusterId), queueSetup);
     }

@@ -4,12 +4,12 @@ import org.springframework.context.ApplicationEvent;
 
 public class UpdateFailedEvent extends ApplicationEvent implements UpdateEvent {
 
-    public UpdateFailedEvent(String clusterId) {
+    public UpdateFailedEvent(long clusterId) {
         super(clusterId);
     }
 
     @Override
-    public String getClusterId() {
-        return (String) source;
+    public long getClusterId() {
+        return (long) source;
     }
 }

@@ -10,15 +10,15 @@ import com.sequenceiq.periscope.model.QueueAppUpdate;
 
 public class ApplicationUpdateEvent extends ApplicationEvent implements UpdateEvent {
 
-    private final String clusterId;
+    private final long clusterId;
 
-    public ApplicationUpdateEvent(String clusterId, QueueAppUpdate source) {
+    public ApplicationUpdateEvent(long clusterId, QueueAppUpdate source) {
         super(source);
         this.clusterId = clusterId;
     }
 
     @Override
-    public String getClusterId() {
+    public long getClusterId() {
         return clusterId;
     }
 

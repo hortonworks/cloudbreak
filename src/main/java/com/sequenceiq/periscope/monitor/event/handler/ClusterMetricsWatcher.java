@@ -29,7 +29,7 @@ public class ClusterMetricsWatcher implements ApplicationListener<ClusterMetrics
 
     @Override
     public void onApplicationEvent(ClusterMetricsUpdateEvent event) {
-        String clusterId = event.getClusterId();
+        long clusterId = event.getClusterId();
         try {
             Cluster cluster = clusterService.get(clusterId);
             ClusterMetricsInfo metrics = event.getClusterMetricsInfo();
@@ -66,7 +66,7 @@ public class ClusterMetricsWatcher implements ApplicationListener<ClusterMetrics
         }
     }
 
-    private boolean alarmHit(double value, Alarm alarm, String clusterId) {
+    private boolean alarmHit(double value, Alarm alarm, long clusterId) {
         switch (alarm.getComparisonOperator()) {
             case EQUALS:
                 return isEqualsHits(value, alarm, clusterId);
@@ -83,27 +83,27 @@ public class ClusterMetricsWatcher implements ApplicationListener<ClusterMetrics
         }
     }
 
-    private boolean isEqualsHits(double value, Alarm alarm, String clusterId) {
+    private boolean isEqualsHits(double value, Alarm alarm, long clusterId) {
         return isComparisonHit(value == alarm.getThreshold(), alarm, ComparisonOperator.EQUALS, clusterId);
     }
 
-    private boolean isGreaterOrEqualHits(double value, Alarm alarm, String clusterId) {
+    private boolean isGreaterOrEqualHits(double value, Alarm alarm, long clusterId) {
         return isComparisonHit(value >= alarm.getThreshold(), alarm, ComparisonOperator.GREATER_OR_EQUAL_THAN, clusterId);
     }
 
-    private boolean isGreaterHits(double value, Alarm alarm, String clusterId) {
+    private boolean isGreaterHits(double value, Alarm alarm, long clusterId) {
         return isComparisonHit(value > alarm.getThreshold(), alarm, ComparisonOperator.GREATER_THAN, clusterId);
     }
 
-    private boolean isLessOrEqualHits(double value, Alarm alarm, String clusterId) {
+    private boolean isLessOrEqualHits(double value, Alarm alarm, long clusterId) {
         return isComparisonHit(value <= alarm.getThreshold(), alarm, ComparisonOperator.LESS_OR_EQUAL_THAN, clusterId);
     }
 
-    private boolean isLessHits(double value, Alarm alarm, String clusterId) {
+    private boolean isLessHits(double value, Alarm alarm, long clusterId) {
         return isComparisonHit(value < alarm.getThreshold(), alarm, ComparisonOperator.LESS_THAN, clusterId);
     }
 
-    private boolean isComparisonHit(boolean valueHit, Alarm alarm, ComparisonOperator operator, String clusterId) {
+    private boolean isComparisonHit(boolean valueHit, Alarm alarm, ComparisonOperator operator, long clusterId) {
         boolean result = false;
         String alarmName = alarm.getAlarmName();
         if (valueHit) {
@@ -116,7 +116,7 @@ public class ClusterMetricsWatcher implements ApplicationListener<ClusterMetrics
         return result;
     }
 
-    private boolean setAndCheckTime(Alarm alarm, String clusterId) {
+    private boolean setAndCheckTime(Alarm alarm, long clusterId) {
         boolean result = false;
         String alarmName = alarm.getAlarmName();
         long hitsSince = alarm.getAlarmHitsSince();

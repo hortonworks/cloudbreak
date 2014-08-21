@@ -1,33 +1,33 @@
 # cluster
-curl -X POST -H "Content-Type: application/json" -d '{"host":"172.24.0.2", "port":"8080", "user":"admin", "pass":"admin"}' localhost:8081/clusters/multi-node | jq .
-curl -X GET localhost:8081/clusters/multi-node | jq .
+curl -X POST -H "Content-Type: application/json" -d '{"host":"172.24.0.2", "port":"8080", "user":"admin", "pass":"admin"}' localhost:8081/clusters | jq .
+curl -X GET localhost:8081/clusters/1 | jq .
 curl -X GET localhost:8081/clusters | jq .
-curl -X DELETE localhost:8081/clusters/multi-node | jq .
+curl -X DELETE localhost:8081/clusters/1 | jq .
 
 # set cluster state
-curl -X POST -H "Content-Type: application/json" -d '{"state":"SUSPENDED"}' localhost:8081/clusters/multi-node/state | jq .
+curl -X POST -H "Content-Type: application/json" -d '{"state":"SUSPENDED"}' localhost:8081/clusters/1/state | jq .
 
 # app movement
-curl -w '%{http_code}' -H "Content-Type: application/json" -X POST -d '{"allowed":"false"}' localhost:8081/clusters/multi-node/movement | jq .
+curl -w '%{http_code}' -H "Content-Type: application/json" -X POST -d '{"allowed":"false"}' localhost:8081/clusters/1/movement | jq .
 
 # set random priority
-curl -X POST -H "Content-Type: application/json" localhost:8081/applications/multi-node/random |jq .
+curl -X POST -H "Content-Type: application/json" localhost:8081/applications/1/random |jq .
 
 # list all app
-curl -X GET localhost:8081/clusters/multi-node/applications | jq .
+curl -X GET localhost:8081/clusters/1/applications | jq .
 
 # refresh ambari configuration
-curl -X POST localhost:8081/clusters/multi-node/configurations | jq .
+curl -X POST localhost:8081/clusters/1/configurations | jq .
 
 # set queue newSetup
-curl -X POST -H "Content-Type: application/json" -d '{"setup":[{"name":"default", "capacity":55}, {"name":"high", "capacity":45}]}' localhost:8081/clusters/multi-node/configurations/queue | jq .
+curl -X POST -H "Content-Type: application/json" -d '{"setup":[{"name":"default", "capacity":55}, {"name":"high", "capacity":45}]}' localhost:8081/clusters/1/configurations/queue | jq .
 
 # set metric alarms
-curl -X POST -H "Content-Type: application/json" -d '{"alarms":[{"alarmName":"pendingContainerHigh","description":"Number of pending containers is high","metric":"PENDING_CONTAINERS","threshold":10,"comparisonOperator":"GREATER_THAN","period":1},{"alarmName":"freeGlobalResourcesRateLow","description":"Low free global resource rate","metric":"GLOBAL_RESOURCES","threshold":1,"comparisonOperator":"EQUALS","period":1}]}' localhost:8081/clusters/multi-node/alarms | jq .
-curl -X GET localhost:8081/clusters/multi-node/alarms | jq .
-curl -X DELETE localhost:8081/clusters/multi-node/alarms/50 | jq .
+curl -X POST -H "Content-Type: application/json" -d '{"alarms":[{"alarmName":"pendingContainerHigh","description":"Number of pending containers is high","metric":"PENDING_CONTAINERS","threshold":10,"comparisonOperator":"GREATER_THAN","period":1},{"alarmName":"freeGlobalResourcesRateLow","description":"Low free global resource rate","metric":"GLOBAL_RESOURCES","threshold":1,"comparisonOperator":"EQUALS","period":1}]}' localhost:8081/clusters/1/alarms | jq .
+curl -X GET localhost:8081/clusters/1/alarms | jq .
+curl -X DELETE localhost:8081/clusters/1/alarms/100 | jq .
 
 # set scaling policy
-curl -X POST -H "Content-Type: application/json" -d '{"minSize":2,"maxSize":10,"cooldown":1,"scalingPolicies":[{"name":"downScaleWhenHighResource","adjustmentType":"NODE_COUNT","scalingAdjustment":-2,"alarmId":"51"},{"name":"upScaleWhenHighPendingContainers","adjustmentType":"PERCENTAGE","scalingAdjustment":40,"alarmId":"50"}]}' localhost:8081/clusters/multi-node/policies | jq .
-curl -X GET localhost:8081/clusters/multi-node/policies | jq .
-curl -X DELETE localhost:8081/clusters/multi-node/policies/100 | jq .
+curl -X POST -H "Content-Type: application/json" -d '{"minSize":2,"maxSize":10,"cooldown":1,"scalingPolicies":[{"name":"downScaleWhenHighResource","adjustmentType":"NODE_COUNT","scalingAdjustment":-2,"alarmId":"101"},{"name":"upScaleWhenHighPendingContainers","adjustmentType":"PERCENTAGE","scalingAdjustment":40,"alarmId":"100"}]}' localhost:8081/clusters/1/policies | jq .
+curl -X GET localhost:8081/clusters/1/policies | jq .
+curl -X DELETE localhost:8081/clusters/1/policies/150 | jq .

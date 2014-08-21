@@ -36,14 +36,13 @@ public class ClusterController {
     @Autowired
     private AppService appService;
 
-    @RequestMapping(value = "/{id}", method = RequestMethod.POST)
-    public ResponseEntity<ClusterJson> addCluster(@PathVariable String id, @RequestBody AmbariJson ambariServer)
-            throws ConnectionException {
-        return createClusterJsonResponse(clusterService.add(id, ambariConverter.convert(ambariServer)), HttpStatus.CREATED);
+    @RequestMapping(method = RequestMethod.POST)
+    public ResponseEntity<ClusterJson> addCluster(@RequestBody AmbariJson ambariServer) throws ConnectionException {
+        return createClusterJsonResponse(clusterService.add(ambariConverter.convert(ambariServer)), HttpStatus.CREATED);
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
-    public ResponseEntity<ClusterJson> getCluster(@PathVariable String id) throws ClusterNotFoundException {
+    public ResponseEntity<ClusterJson> getCluster(@PathVariable long id) throws ClusterNotFoundException {
         return createClusterJsonResponse(clusterService.get(id));
     }
 
@@ -54,18 +53,18 @@ public class ClusterController {
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
-    public ResponseEntity<ClusterJson> deleteCluster(@PathVariable String id) throws ClusterNotFoundException {
+    public ResponseEntity<ClusterJson> deleteCluster(@PathVariable long id) throws ClusterNotFoundException {
         return createClusterJsonResponse(clusterService.remove(id));
     }
 
     @RequestMapping(value = "/{id}/state", method = RequestMethod.POST)
-    public ResponseEntity<ClusterJson> setState(@PathVariable String id, @RequestBody StateJson stateJson)
+    public ResponseEntity<ClusterJson> setState(@PathVariable long id, @RequestBody StateJson stateJson)
             throws ClusterNotFoundException {
         return createClusterJsonResponse(clusterService.setState(id, stateJson.getState()));
     }
 
     @RequestMapping(value = "/{id}/movement", method = RequestMethod.POST)
-    public ResponseEntity<ClusterJson> enableMovement(@PathVariable String id, @RequestBody AppMovementJson appMovementJson)
+    public ResponseEntity<ClusterJson> enableMovement(@PathVariable long id, @RequestBody AppMovementJson appMovementJson)
             throws ClusterNotFoundException {
         return createClusterJsonResponse(appService.allowAppMovement(id, appMovementJson.isAllowed()));
     }

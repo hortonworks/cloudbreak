@@ -5,9 +5,12 @@ import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
 
 import com.sequenceiq.periscope.registry.ClusterState;
 
@@ -15,7 +18,9 @@ import com.sequenceiq.periscope.registry.ClusterState;
 public class ClusterDetails {
 
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "template_generator")
+    @SequenceGenerator(name = "template_generator", sequenceName = "sequence_table")
+    private long id;
     @OneToOne(cascade = CascadeType.ALL)
     private Ambari ambari;
     private boolean appMovementAllowed;
@@ -29,16 +34,15 @@ public class ClusterDetails {
     public ClusterDetails() {
     }
 
-    public ClusterDetails(String id, Ambari ambari) {
-        this.id = id;
+    public ClusterDetails(Ambari ambari) {
         this.ambari = ambari;
     }
 
-    public String getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(long id) {
         this.id = id;
     }
 

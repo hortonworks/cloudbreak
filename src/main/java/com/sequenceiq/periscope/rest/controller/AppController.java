@@ -33,13 +33,13 @@ public class AppController {
     private AppReportConverter appReportConverter;
 
     @RequestMapping(value = "/random", method = RequestMethod.POST)
-    public ResponseEntity<String> randomize(@PathVariable String clusterId) throws ClusterNotFoundException {
+    public ResponseEntity<String> randomize(@PathVariable long clusterId) throws ClusterNotFoundException {
         appService.setPriorityToHighRandomly(clusterId);
         return new ResponseEntity<>("OK", HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public ResponseEntity<List<AppReportJson>> getApp(@PathVariable String clusterId) {
+    public ResponseEntity<List<AppReportJson>> getApp(@PathVariable long clusterId) {
         ResponseEntity<List<AppReportJson>> result;
         try {
             List<ApplicationReport> reports = appService.getApplicationReports(clusterId);

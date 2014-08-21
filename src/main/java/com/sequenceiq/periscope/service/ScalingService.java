@@ -41,7 +41,7 @@ public class ScalingService {
         }
     }
 
-    public ScalingPolicies setScalingPolicies(String clusterId, ScalingPolicies scalingPolicies) throws ClusterNotFoundException {
+    public ScalingPolicies setScalingPolicies(long clusterId, ScalingPolicies scalingPolicies) throws ClusterNotFoundException {
         ClusterDetails clusterDetails = clusterDetailsRepository.findOne(clusterId);
         clusterDetails.setCoolDown(scalingPolicies.getCoolDown());
         clusterDetails.setMinSize(scalingPolicies.getMinSize());
@@ -51,7 +51,7 @@ public class ScalingService {
         return getScalingPolicies(clusterDetails);
     }
 
-    public ScalingPolicies deletePolicy(String clusterId, long policyId) throws ClusterNotFoundException {
+    public ScalingPolicies deletePolicy(long clusterId, long policyId) throws ClusterNotFoundException {
         ClusterDetails clusterDetails = clusterDetailsRepository.findOne(clusterId);
         for (Alarm alarm : clusterDetails.getAlarms()) {
             ScalingPolicy scalingPolicy = alarm.getScalingPolicy();
@@ -65,7 +65,7 @@ public class ScalingService {
         return getScalingPolicies(clusterId);
     }
 
-    public ScalingPolicies getScalingPolicies(String clusterId) throws ClusterNotFoundException {
+    public ScalingPolicies getScalingPolicies(long clusterId) throws ClusterNotFoundException {
         return getScalingPolicies(clusterService.get(clusterId).getClusterDetails());
     }
 

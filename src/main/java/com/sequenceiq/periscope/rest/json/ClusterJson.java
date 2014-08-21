@@ -2,7 +2,7 @@ package com.sequenceiq.periscope.rest.json;
 
 public class ClusterJson implements Json {
 
-    private String id;
+    private long id;
     private String host;
     private String port;
     private String state;
@@ -11,19 +11,11 @@ public class ClusterJson implements Json {
     public ClusterJson() {
     }
 
-    public ClusterJson(String id, String host, String port, String state, String appMovement) {
-        this.id = id;
-        this.host = host;
-        this.port = port;
-        this.state = state;
-        this.appMovement = appMovement;
-    }
-
-    public String getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -59,12 +51,4 @@ public class ClusterJson implements Json {
         this.appMovement = appMovement;
     }
 
-    public static ClusterJson emptyJson() {
-        return new ClusterJson("", "", "", "", "");
-    }
-
-    public ClusterJson withId(String id) {
-        this.id = id;
-        return this;
-    }
 }
