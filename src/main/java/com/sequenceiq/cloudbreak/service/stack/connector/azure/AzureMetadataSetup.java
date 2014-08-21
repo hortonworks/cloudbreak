@@ -65,7 +65,7 @@ public class AzureMetadataSetup implements MetadataSetup {
         String filePath = AzureCertificateService.getUserJksFileName(azureCredential, stack.getUser().emailAsFolder());
         AzureClient azureClient = azureStackUtil.createAzureClient(azureCredential, filePath);
         List<Resource> resources = new ArrayList<>();
-        for(Resource resource : resourceList) {
+        for (Resource resource : resourceList) {
             if (ResourceType.VIRTUAL_MACHINE.equals(resource.getResourceType())) {
                 resources.add(resource);
             }

@@ -39,9 +39,9 @@ public class StackCreationSuccessHandler implements Consumer<Event<StackCreation
         LOGGER.info("Accepted {} event.", ReactorConfig.STACK_CREATE_SUCCESS_EVENT, stackId);
         String ambariIp = stackCreationSuccess.getAmbariIp();
         Stack stack = stackUpdater.updateAmbariIp(stackId, ambariIp);
-        stack = stackUpdater.updateStackStatus(stackId, Status.CREATE_COMPLETED);
+        stack = stackUpdater.updateStackStatus(stackId, Status.AVAILABLE);
         websocketService.sendToTopicUser(stack.getUser().getEmail(), WebsocketEndPoint.STACK,
-                new StatusMessage(stackId, stack.getName(), Status.CREATE_COMPLETED.name()));
+                new StatusMessage(stackId, stack.getName(), Status.AVAILABLE.name()));
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.AMBARI_STARTED_EVENT, stackId);
         reactor.notify(ReactorConfig.AMBARI_STARTED_EVENT, Event.wrap(stack));
     }

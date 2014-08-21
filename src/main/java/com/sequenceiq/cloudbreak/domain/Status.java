@@ -3,7 +3,8 @@ package com.sequenceiq.cloudbreak.domain;
 public enum Status {
     REQUESTED,
     CREATE_IN_PROGRESS,
-    CREATE_COMPLETED,
+    AVAILABLE,
+    UPDATE_IN_PROGRESS,
     CREATE_FAILED,
     DELETE_IN_PROGRESS,
     DELETE_FAILED,

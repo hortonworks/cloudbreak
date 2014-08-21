@@ -34,7 +34,7 @@ public class AddNodeAmbariUpdateSuccessHandler implements Consumer<Event<AddNode
         Cluster cluster = clusterRepository.findById(data.getClusterId());
         LOGGER.info("Accepted {} event.", ReactorConfig.ADD_NODE_AMBARI_UPDATE_NODE_SUCCESS_EVENT);
         websocketService.sendToTopicUser(cluster.getUser().getEmail(), WebsocketEndPoint.CLUSTER,
-                new StatusMessage(data.getClusterId(), cluster.getName(), Status.CREATE_COMPLETED.name()));
+                new StatusMessage(data.getClusterId(), cluster.getName(), Status.AVAILABLE.name()));
     }
 
 }

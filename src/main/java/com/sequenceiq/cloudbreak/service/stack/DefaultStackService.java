@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackDescription;
+import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.UserRole;
@@ -150,6 +151,7 @@ public class DefaultStackService implements StackService {
 
     @Override
     public void addNode(User user, Stack stack, String hostgroup) {
+        stack.setStatus(Status.UPDATE_IN_PROGRESS);
         stack = stackRepository.save(stack);
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_NODE_REQUEST_EVENT, stack.getId());
         reactor.notify(ReactorConfig.ADD_NODE_REQUEST_EVENT, Event.wrap(new AddNodeRequest(stack.getTemplate().cloudPlatform(), stack.getId(), hostgroup)));

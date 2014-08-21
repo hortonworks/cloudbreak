@@ -48,14 +48,14 @@ public class ClusterCreationSuccessHandler implements Consumer<Event<ClusterCrea
         Long clusterId = clusterCreationSuccess.getClusterId();
         LOGGER.info("Accepted {} event.", ReactorConfig.CLUSTER_CREATE_SUCCESS_EVENT, clusterId);
         Cluster cluster = clusterRepository.findById(clusterId);
-        cluster.setStatus(Status.CREATE_COMPLETED);
+        cluster.setStatus(Status.AVAILABLE);
         cluster.setCreationFinished(clusterCreationSuccess.getCreationFinished());
         Cluster save = clusterRepository.save(cluster);
         if (cluster.getEmailNeeded()) {
             ambariClusterInstallerMailSenderService.sendSuccessEmail(cluster.getUser(), event.getData().getAmbariIp());
         }
         websocketService.sendToTopicUser(cluster.getUser().getEmail(), WebsocketEndPoint.CLUSTER,
-                new StatusMessage(clusterId, cluster.getName(), Status.CREATE_COMPLETED.name()));
+                new StatusMessage(clusterId, cluster.getName(), Status.AVAILABLE.name()));
     }
 
 }

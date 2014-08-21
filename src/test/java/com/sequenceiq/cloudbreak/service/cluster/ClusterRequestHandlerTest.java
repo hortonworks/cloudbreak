@@ -72,7 +72,7 @@ public class ClusterRequestHandlerTest {
         // GIVEN
         stackEvent.setKey(CLUSTER_REQUESTED);
         stackEvent.getData().setCluster(createClusterWithStatus(Status.REQUESTED));
-        stackEvent.getData().setStatus(Status.CREATE_COMPLETED);
+        stackEvent.getData().setStatus(Status.AVAILABLE);
         doNothing().when(ambariClusterInstaller).installAmbariCluster(stackEvent.getData());
         // WHEN
         underTest.accept(stackEvent);
