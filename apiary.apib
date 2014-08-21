@@ -1680,8 +1680,8 @@ Scaling is the ability to increase or decrease the capacity of the Hadoop cluste
 When scaling policies are used, the capacity is automatically increased or decreased according to the conditions defined.
 Periscope will do the heavy lifting and based on the alarms and the scaling policy linked to them it executes the associated policy.
 By default a fully configured and running [Cloudbreak](https://cloudbreak.sequenceiq.com/) cluster contains no SLA policies. 
-An SLA scaling policy can contain multiple alarms. While part of the scaling policies `scalingAdjustment` are applied, also to keep the cluster size within boundaries, a `minSize` and `maxSize` is attached to the cluster - thus a scaling policy - though trough an alarm is triggered - can never over or undersize a cluster.
-In an SLA scaling policy the triggered rules are applied in order.
+An SLA scaling policy can contain multiple alarms. As an alarm is triggered a  `scalingAdjustment` is applied, however to keep the cluster size within boundaries a `minSize` and `maxSize` is attached to the cluster - thus a scaling policy can never over or undersize a cluster. Also in order to avoid stressing the cluster we have introduced a `cooldown` period (minutes) - though an alarm is raised and there is an associated scaling policy, the system will not apply the policy within the configured timeframe. In an SLA scaling policy the triggered rules are applied in order.
+
 
 ##Add, remove and show [/clusters/{clusterId}/policies]
 ###Create a scaling policy. [POST]
