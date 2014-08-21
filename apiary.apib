@@ -1309,9 +1309,9 @@ Retrieve usage information for the deployer user.
 
 ![SequenceIQ](https://raw.githubusercontent.com/sequenceiq/sequenceiq.github.io/master/img/logo.png)
 
-
 *Periscope is a powerful, fast, thick and top-to-bottom right-hander, eastward from Sumbawa's famous west-coast. Timing is critical, as needs a number of elements to align before it shows its true colors.*
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 *Periscope is a heuristic Hadoop scheduler you associate with a QoS profile. Built on YARN schedulers, cloud and VM resource management API's it allows you to associate SLA's to applications and customers.*
 <<<<<<< HEAD
@@ -1320,6 +1320,10 @@ Retrieve usage information for the deployer user.
 =======
 *Periscope is a heuristic Hadoop scheduler you associate with a QoS profile. Built on YARN schedulers, cloud and VM resource management API's it allows you to associate SLAs to applications and customers.*
 >>>>>>> a0f5794... PERI-2 apiary changes
+=======
+*Periscope brings QoS and autoscaling to Hadoop YARN. Built on cloud resource management and YARN schedulers, allows to associate SLA policies to applications.*
+
+>>>>>>> 2a07954... PERI-2 minor fix
 
 ##Overview
 
@@ -1331,7 +1335,7 @@ The scheduler works around the concept of queues. These queues are typically set
 While this is a pretty good abstraction and brings some level of SLA for `predictable` workloads, it often needs proper `design ahead`.
 The queue hierarchy and resource allocation needs to be changed when new tenants and workloads are moved to the cluster.
 
-Periscope was designed around the idea of `dynamic` clusters - without any need to preconfigure queues, cluster nodes or apply capacity planning ahead.
+Periscope was designed around the idea of `autoscaling` clusters - without any need to preconfigure queues, cluster nodes or apply capacity planning ahead.
 
 ##How it works
 
@@ -1361,7 +1365,7 @@ Periscope introspects the job submission process, monitors the applications and 
   5. Support for distributed (but not YARN ready) applications using Apache Slider
   6. Attach priorities to SLAs
 
-### Dynamic clusters
+### Autoscaling clusters
 From Periscope point of view we consider a cluster `dynamic` when the cluster capacity can be increased horizontally.
 This means that nodes can be added or removed dynamically - thus the throughput can be increased or decreased based on the cluster load, and scheduled applications.
 In order to do that Periscope instructs [Cloudbreak](http://sequenceiq.com/cloudbreak/) to add or remove nodes from the cluster based on the SLAs and thus continuously provide a high *quality of service* for the multi-tenand Hadoop cluster.
