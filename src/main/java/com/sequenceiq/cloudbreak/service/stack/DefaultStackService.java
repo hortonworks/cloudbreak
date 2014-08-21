@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.domain.StatusRequest;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.UserRole;
+import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
@@ -61,6 +62,9 @@ public class DefaultStackService implements StackService {
 
     @Resource
     private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
+
+    @Autowired
+    private RetryingStackUpdater stackUpdater;
 
     @Autowired
     private Reactor reactor;
@@ -144,7 +148,7 @@ public class DefaultStackService implements StackService {
 
     @Override
     public void updateNodeCount(User user, Long stackId, Integer nodeCount) {
-        Stack stack = stackRepository.findOneWithLists(stackId);
+        Stack stack = stackRepository.findOne(stackId);
         if (!Status.AVAILABLE.equals(stack.getStatus())) {
             throw new BadRequestException(String.format("Stack '%s' is currently in '%s' state. Node count can only be updated if it's running.", stackId,
                     stack.getStatus()));
@@ -158,10 +162,10 @@ public class DefaultStackService implements StackService {
                             + "Decommisioning nodes is not yet supported by the Cloudbreak API.",
                             nodeCount, stackId, stack.getNodeCount()));
         }
-        stack.setStatus(Status.UPDATE_IN_PROGRESS);
-        stack = stackRepository.save(stack);
+        stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS);
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_NODE_REQUEST_EVENT, stack.getId());
-        reactor.notify(ReactorConfig.ADD_NODE_REQUEST_EVENT, Event.wrap(new AddNodeRequest(stack.getTemplate().cloudPlatform(), stack.getId())));
+        reactor.notify(ReactorConfig.ADD_NODE_REQUEST_EVENT,
+                Event.wrap(new AddNodeRequest(stack.getTemplate().cloudPlatform(), stack.getId(), nodeCount - stack.getNodeCount())));
     }
 
     @Override

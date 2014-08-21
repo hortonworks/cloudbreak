@@ -6,6 +6,9 @@ import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStack
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.NOT_FOUND;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.SERVICENAME;
 
+import groovyx.net.http.HttpResponseDecorator;
+import groovyx.net.http.HttpResponseException;
+
 import java.io.FileNotFoundException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
@@ -23,6 +26,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import reactor.core.Reactor;
+import reactor.event.Event;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
@@ -43,11 +49,6 @@ import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateServic
 import com.sequenceiq.cloudbreak.service.stack.connector.Provisioner;
 import com.sequenceiq.cloudbreak.service.stack.event.AddNodeComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
-
-import groovyx.net.http.HttpResponseDecorator;
-import groovyx.net.http.HttpResponseException;
-import reactor.core.Reactor;
-import reactor.event.Event;
 
 @Component
 public class AzureProvisioner implements Provisioner {
@@ -120,21 +121,20 @@ public class AzureProvisioner implements Provisioner {
     }
 
     @Override
-    public void addNode(Stack stack, String userData) {
+    public void addNode(Stack stack, String userData, Integer nodeCount) {
         AzureTemplate azureTemplate = (AzureTemplate) stack.getTemplate();
-        Credential credential =  stack.getCredential();
+        Credential credential = stack.getCredential();
         String emailAsFolder = stack.getUser().emailAsFolder();
         String filePath = AzureCertificateService.getUserJksFileName(credential, emailAsFolder);
         AzureClient azureClient = azureStackUtil.createAzureClient(credential, filePath);
 
-        List<Resource> cloudService = stack.getResourcesByType(ResourceType.CLOUD_SERVICE);
         Resource network = stack.getResourceByType(ResourceType.NETWORK);
 
         String name = network.getResourceName();
         String commonName = ((AzureCredential) credential).getCommonName();
         Set<Resource> resourceSet = new HashSet<>();
 
-        for (int i = cloudService.size(); i < stack.getNodeCount(); i++) {
+        for (int i = 0; i < nodeCount; i++) {
             String vmName = azureStackUtil.getVmName(name, i) + String.valueOf(new Date().getTime());
             createCloudService(azureClient, azureTemplate, vmName, commonName);
             createServiceCertificate(azureClient, azureTemplate, credential, vmName, emailAsFolder);

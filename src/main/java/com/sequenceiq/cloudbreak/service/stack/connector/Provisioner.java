@@ -9,7 +9,7 @@ public interface Provisioner {
 
     void buildStack(Stack stack, String userData, Map<String, Object> setupProperties);
 
-    void addNode(Stack stack, String userData);
+    void addNode(Stack stack, String userData, Integer nodeCount);
 
     CloudPlatform getCloudPlatform();
 

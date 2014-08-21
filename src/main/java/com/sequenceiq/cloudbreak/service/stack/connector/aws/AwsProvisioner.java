@@ -85,15 +85,17 @@ public class AwsProvisioner implements Provisioner {
     }
 
     @Override
-    public void addNode(Stack stack, String userData) {
+    public void addNode(Stack stack, String userData, Integer nodeCount) {
         AmazonAutoScalingClient amazonASClient = awsStackUtil.createAutoScalingClient(
                 ((AwsTemplate) stack.getTemplate()).getRegion(),
                 (AwsCredential) stack.getCredential());
         String asGroupName = cfStackUtil.getAutoscalingGroupName(stack);
         amazonASClient.updateAutoScalingGroup(new UpdateAutoScalingGroupRequest()
                 .withAutoScalingGroupName(asGroupName)
-                .withDesiredCapacity(stack.getNodeCount()));
-        LOGGER.info("Updated AutoScaling group: [stack: '{}', desiredCapacity: '{}']", stack.getId(), stack.getNodeCount());
+                .withMaxSize(stack.getNodeCount() + nodeCount)
+                .withDesiredCapacity(stack.getNodeCount() + nodeCount));
+        LOGGER.info("Updated AutoScaling group's desiredCapacity: [stack: '{}', from: '{}', to: '{}']", stack.getId(), stack.getNodeCount(),
+                stack.getNodeCount() + nodeCount);
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_NODE_COMPLETE_EVENT, stack.getId());
         reactor.notify(ReactorConfig.ADD_NODE_COMPLETE_EVENT, Event.wrap(new AddNodeComplete(CloudPlatform.AWS, stack.getId(), null)));
     }
