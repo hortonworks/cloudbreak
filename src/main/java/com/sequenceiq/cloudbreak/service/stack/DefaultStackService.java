@@ -13,7 +13,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
+import reactor.core.Reactor;
+import reactor.event.Event;
+
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.converter.StackConverter;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
@@ -34,9 +38,6 @@ import com.sequenceiq.cloudbreak.service.stack.event.AddNodeRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataIncompleteException;
-
-import reactor.core.Reactor;
-import reactor.event.Event;
 
 @Service
 public class DefaultStackService implements StackService {
@@ -144,6 +145,19 @@ public class DefaultStackService implements StackService {
     @Override
     public void updateNodeCount(User user, Long stackId, Integer nodeCount) {
         Stack stack = stackRepository.findOneWithLists(stackId);
+        if (!Status.AVAILABLE.equals(stack.getStatus())) {
+            throw new BadRequestException(String.format("Stack '%s' is currently in '%s' state. Node count can only be updated if it's running.", stackId,
+                    stack.getStatus()));
+        }
+        if (stack.getNodeCount() == nodeCount) {
+            throw new BadRequestException(String.format("Stack '%s' already has exactly %s nodes. Nothing to do.", stackId, nodeCount));
+        }
+        if (stack.getNodeCount() > nodeCount) {
+            throw new BadRequestException(
+                    String.format("Requested node count (%s) on stack '%s' is lower than the current node count (%s). "
+                            + "Decommisioning nodes is not yet supported by the Cloudbreak API.",
+                            nodeCount, stackId, stack.getNodeCount()));
+        }
         stack.setStatus(Status.UPDATE_IN_PROGRESS);
         stack = stackRepository.save(stack);
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_NODE_REQUEST_EVENT, stack.getId());
