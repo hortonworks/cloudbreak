@@ -7,6 +7,8 @@ buildscript {
     dependencies { classpath 'org.ajoberstar:gradle-git:0.8.0' }
 }
 
+def env = project.hasProperty('env') ? project.getProperty('env') : 'local'
+def config = new ConfigSlurper(env).parse(file("$rootDir/gradle/config/buildConfig.groovy").toURL())
 Calendar calendar = Calendar.getInstance();
 DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss")
 def buildId = dateFormat.format(calendar.getTime())
@@ -26,8 +28,8 @@ if ("HEAD".equals(branch)) {
 String versionNum
 if(jobName != null) {
     def f = new File("$rootDir/metadata.xml")
+    def metadata = config.metadata
     if (!f.exists()) {
-        def metadata = System.getenv("METADATA_URL")
         new URL(metadata).withInputStream { i ->
             f.withOutputStream {
                 it << i
