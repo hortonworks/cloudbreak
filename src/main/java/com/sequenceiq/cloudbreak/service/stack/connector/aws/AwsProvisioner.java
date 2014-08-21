@@ -12,10 +12,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import reactor.core.Reactor;
+import reactor.event.Event;
+
+import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
+import com.amazonaws.services.autoscaling.model.UpdateAutoScalingGroupRequest;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.CreateStackRequest;
-import com.amazonaws.services.cloudformation.model.CreateStackResult;
 import com.amazonaws.services.cloudformation.model.Parameter;
+import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
@@ -24,6 +29,7 @@ import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.stack.connector.Provisioner;
+import com.sequenceiq.cloudbreak.service.stack.event.AddNodeComplete;
 
 @Component
 public class AwsProvisioner implements Provisioner {
@@ -38,6 +44,12 @@ public class AwsProvisioner implements Provisioner {
 
     @Autowired
     private RetryingStackUpdater stackUpdater;
+
+    @Autowired
+    private CloudFormationStackUtil cfStackUtil;
+
+    @Autowired
+    private Reactor reactor;
 
     @Override
     public synchronized void buildStack(Stack stack, String userData, Map<String, Object> setupProperties) {
@@ -65,7 +77,7 @@ public class AwsProvisioner implements Provisioner {
                 .withTemplateBody(cfTemplateBuilder.build("templates/aws-cf-stack.ftl", awsTemplate.getVolumeCount(), spotPriced))
                 .withNotificationARNs((String) setupProperties.get(SnsTopicManager.NOTIFICATION_TOPIC_ARN_KEY))
                 .withParameters(parameters);
-        CreateStackResult createStackResult = client.createStack(createStackRequest);
+        client.createStack(createStackRequest);
         Set<Resource> resources = new HashSet<>();
         resources.add(new Resource(ResourceType.CLOUDFORMATION_STACK, stackName, stack));
         Stack updatedStack = stackUpdater.updateStackResources(stack.getId(), resources);
@@ -74,7 +86,16 @@ public class AwsProvisioner implements Provisioner {
 
     @Override
     public void addNode(Stack stack, String userData) {
-
+        AmazonAutoScalingClient amazonASClient = awsStackUtil.createAutoScalingClient(
+                ((AwsTemplate) stack.getTemplate()).getRegion(),
+                (AwsCredential) stack.getCredential());
+        String asGroupName = cfStackUtil.getAutoscalingGroupName(stack);
+        amazonASClient.updateAutoScalingGroup(new UpdateAutoScalingGroupRequest()
+                .withAutoScalingGroupName(asGroupName)
+                .withDesiredCapacity(stack.getNodeCount()));
+        LOGGER.info("Updated AutoScaling group: [stack: '{}', desiredCapacity: '{}']", stack.getId(), stack.getNodeCount());
+        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_NODE_COMPLETE_EVENT, stack.getId());
+        reactor.notify(ReactorConfig.ADD_NODE_COMPLETE_EVENT, Event.wrap(new AddNodeComplete(CloudPlatform.AWS, stack.getId(), null)));
     }
 
     protected CreateStackRequest createStackRequest() {
