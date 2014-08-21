@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +20,6 @@ import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.service.stack.connector.HadoopConfigurationProvider;
@@ -83,15 +81,15 @@ public class AmbariClusterInstaller {
         }
     }
 
-    public void installAmbariNode(Stack stack, Set<InstanceMetaData> metaDatas, String hostgroup) {
+    public void installAmbariNode(Stack stack, Map<String, Integer> hostgroups) {
         Cluster cluster = stack.getCluster();
         AmbariClient ambariClient = createAmbariClient(stack.getAmbariIp());
         pollAmbariServer(stack, ambariClient);
         try {
             LOGGER.info("Add host to Ambari cluster for stack '{}' [Ambari server address: {}]", stack.getId(), stack.getAmbariIp());
-            for (InstanceMetaData instanceMetaData : metaDatas) {
+            /*for (InstanceMetaData instanceMetaData : metaDatas) {
                 addHost(ambariClient, stack, instanceMetaData.getLongName(), hostgroup);
-            }
+            }*/
             BigDecimal installProgress = pollAmbariInstall(stack, cluster, ambariClient);
             if (installProgress.compareTo(COMPLETED) == 0) {
                 ambariClient.startAllServices();

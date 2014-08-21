@@ -10,8 +10,8 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.event.AmbariRoleAllocationComplete;
@@ -63,7 +63,7 @@ public class AmbariRoleAllocator {
         }
     }
 
-    public void updateInstanceMetadata(Long stackId, Set<CoreInstanceMetaData> coreInstanceMetaData, Set<Resource> resources) {
+    public void updateInstanceMetadata(Long stackId, Set<CoreInstanceMetaData> coreInstanceMetaData) {
         try {
             Stack stack = stackRepository.findOneWithLists(stackId);
             Set<InstanceMetaData> originalMetadata = stack.getInstanceMetaData();
@@ -71,9 +71,7 @@ public class AmbariRoleAllocator {
             originalMetadata.addAll(instanceMetaDatas);
             stackUpdater.updateStackMetaData(stackId, originalMetadata);
             stackUpdater.updateMetadataReady(stackId);
-            LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_NODE_AMBARI_UPDATE_NODE_EVENT, stackId);
-            // reactor.notify(ReactorConfig.ADD_NODE_AMBARI_UPDATE_NODE_EVENT, Event.wrap(
-            // new AmbariAddNode(stackId, getAmbariIp(instanceMetaDatas), instanceMetaDatas, resources));
+            stackUpdater.updateStackStatus(stackId, Status.AVAILABLE);
         } catch (WrongMetadataException e) {
             LOGGER.error(e.getMessage(), e);
             notifyStackCreateFailed(stackId, e.getMessage());

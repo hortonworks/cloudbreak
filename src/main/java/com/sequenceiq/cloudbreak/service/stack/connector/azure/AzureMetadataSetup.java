@@ -73,7 +73,7 @@ public class AzureMetadataSetup implements MetadataSetup {
         Set<CoreInstanceMetaData> instanceMetaDatas = collectMetaData(stack, azureClient, resources);
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_NODE_UPDATE_METADATA_EVENT_COMPLETE, stack.getId());
         reactor.notify(ReactorConfig.ADD_NODE_UPDATE_METADATA_EVENT_COMPLETE,
-                Event.wrap(new AddNodeMetadataSetupComplete(CloudPlatform.AZURE, stack.getId(), instanceMetaDatas, resourceList)));
+                Event.wrap(new AddNodeMetadataSetupComplete(CloudPlatform.AZURE, stack.getId(), instanceMetaDatas)));
     }
 
     private Set<CoreInstanceMetaData> collectMetaData(Stack stack, AzureClient azureClient, List<Resource> resources) {

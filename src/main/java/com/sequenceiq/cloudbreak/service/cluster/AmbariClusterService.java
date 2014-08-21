@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.stack.event.AmbariAddNode;
 
 import groovyx.net.http.HttpResponseException;
 import reactor.core.Reactor;
@@ -103,8 +104,9 @@ public class AmbariClusterService implements ClusterService {
             }
         }
         LOGGER.info("Cluster update requested for stack '{}' [BlueprintId: {}]", stackId, stack.getCluster().getBlueprint().getId());
-        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.CLUSTER_REQUESTED_EVENT, stack.getId());
-        reactor.notify(ReactorConfig.CLUSTER_REQUESTED_EVENT, Event.wrap(stack));
+        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_NODE_AMBARI_UPDATE_NODE_EVENT, stack.getId());
+        reactor.notify(ReactorConfig.ADD_NODE_AMBARI_UPDATE_NODE_EVENT, Event.wrap(
+            new AmbariAddNode(stackId, stack.getAmbariIp(), hosts)));
     }
 
     private Boolean assignableHostgroup(Cluster cluster, String hostgroup) throws IOException {

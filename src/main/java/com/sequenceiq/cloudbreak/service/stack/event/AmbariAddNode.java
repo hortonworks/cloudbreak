@@ -1,24 +1,17 @@
 package com.sequenceiq.cloudbreak.service.stack.event;
 
-import java.util.Set;
-
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.Resource;
+import java.util.Map;
 
 public class AmbariAddNode {
 
     private Long stackId;
     private String ambariIp;
-    private Set<InstanceMetaData> newNodesInstanceMetaData;
-    private Set<Resource> resources;
-    private String hostgroup;
+    private Map<String, Integer> hosts;
 
-    public AmbariAddNode(Long stackId, String ambariIp, Set<InstanceMetaData> newNodesInstanceMetaData, Set<Resource> resources, String hostgroup) {
+    public AmbariAddNode(Long stackId, String ambariIp, Map<String, Integer> hosts) {
         this.stackId = stackId;
         this.ambariIp = ambariIp;
-        this.newNodesInstanceMetaData = newNodesInstanceMetaData;
-        this.resources = resources;
-        this.hostgroup = hostgroup;
+        this.hosts = hosts;
     }
 
     public Long getStackId() {
@@ -37,27 +30,11 @@ public class AmbariAddNode {
         this.ambariIp = ambariIp;
     }
 
-    public Set<Resource> getResources() {
-        return resources;
+    public Map<String, Integer> getHosts() {
+        return hosts;
     }
 
-    public void setResources(Set<Resource> resources) {
-        this.resources = resources;
-    }
-
-    public String getHostgroup() {
-        return hostgroup;
-    }
-
-    public void setHostgroup(String hostgroup) {
-        this.hostgroup = hostgroup;
-    }
-
-    public Set<InstanceMetaData> getNewNodesInstanceMetaData() {
-        return newNodesInstanceMetaData;
-    }
-
-    public void setNewNodesInstanceMetaData(Set<InstanceMetaData> newNodesInstanceMetaData) {
-        this.newNodesInstanceMetaData = newNodesInstanceMetaData;
+    public void setHosts(Map<String, Integer> hosts) {
+        this.hosts = hosts;
     }
 }
