@@ -87,9 +87,13 @@ public class AmbariClusterInstaller {
         pollAmbariServer(stack, ambariClient);
         try {
             LOGGER.info("Add host to Ambari cluster for stack '{}' [Ambari server address: {}]", stack.getId(), stack.getAmbariIp());
-            /*for (InstanceMetaData instanceMetaData : metaDatas) {
-                addHost(ambariClient, stack, instanceMetaData.getLongName(), hostgroup);
-            }*/
+            List<String> unregisteredHostNames = ambariClient.getUnregisteredHostNames();
+            for (Map.Entry<String, Integer> entry : hostgroups.entrySet()) {
+                for (int i = 0; i < entry.getValue(); i++) {
+                    addHost(ambariClient, stack, unregisteredHostNames.get(0), entry.getKey());
+                    unregisteredHostNames.remove(0);
+                }
+            }
             BigDecimal installProgress = pollAmbariInstall(stack, cluster, ambariClient);
             if (installProgress.compareTo(COMPLETED) == 0) {
                 ambariClient.startAllServices();
