@@ -134,7 +134,7 @@ public class AzureProvisioner implements Provisioner {
         String commonName = ((AzureCredential) credential).getCommonName();
         Set<Resource> resourceSet = new HashSet<>();
 
-        for (int i = resourceByType.size(); i < resourceByType.size()+ nodeCount; i++) {
+        for (int i = resourceByType.size(); i < resourceByType.size() + nodeCount; i++) {
             String vmName = azureStackUtil.getVmName(name, i) + String.valueOf(new Date().getTime());
             createCloudService(azureClient, azureTemplate, vmName, commonName);
             createServiceCertificate(azureClient, azureTemplate, credential, vmName, emailAsFolder);
