@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sequenceiq.cloudbreak.controller.json.ClusterRequest;
 import com.sequenceiq.cloudbreak.controller.json.ClusterResponse;
-import com.sequenceiq.cloudbreak.controller.json.StatusRequestJson;
+import com.sequenceiq.cloudbreak.controller.json.UpdateStackJson;
 import com.sequenceiq.cloudbreak.converter.ClusterConverter;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -57,16 +57,16 @@ public class ClusterController {
     @RequestMapping(method = RequestMethod.PUT)
     @ResponseBody
     public ResponseEntity<String> startOrStopAllServiceOnCluster(@CurrentUser User user, @PathVariable Long stackId,
-            @RequestBody StatusRequestJson statusRequestJson) {
-        switch (statusRequestJson.getStatusRequest()) {
-            case STOP:
-                clusterService.stopAllService(user, stackId);
-                return new ResponseEntity<>(HttpStatus.OK);
-            case START:
-                clusterService.startAllService(user, stackId);
-                return new ResponseEntity<>(HttpStatus.OK);
-            default:
-                throw new BadRequestException("The requested status not valid.");
+            @RequestBody UpdateStackJson statusRequestJson) {
+        switch (statusRequestJson.getStatus()) {
+        case STOPPED:
+            clusterService.stopAllService(user, stackId);
+            return new ResponseEntity<>(HttpStatus.OK);
+        case STARTED:
+            clusterService.startAllService(user, stackId);
+            return new ResponseEntity<>(HttpStatus.OK);
+        default:
+            throw new BadRequestException("The requested status not valid.");
         }
     }
 }

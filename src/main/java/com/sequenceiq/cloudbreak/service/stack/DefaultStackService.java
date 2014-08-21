@@ -15,6 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
+import reactor.core.Reactor;
+import reactor.event.Event;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
@@ -25,6 +28,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackDescription;
 import com.sequenceiq.cloudbreak.domain.Status;
+import com.sequenceiq.cloudbreak.domain.StatusRequest;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.UserRole;
@@ -37,9 +41,6 @@ import com.sequenceiq.cloudbreak.service.stack.event.AddNodeRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataIncompleteException;
-
-import reactor.core.Reactor;
-import reactor.event.Event;
 
 @Service
 public class DefaultStackService implements StackService {
@@ -140,13 +141,13 @@ public class DefaultStackService implements StackService {
     }
 
     @Override
-    public Boolean startAll(User user, Long stackId) {
-        return Boolean.TRUE;
+    public void updateStatus(User user, Long stackId, StatusRequest status) {
+        // TODO implement start/stop
     }
 
     @Override
-    public Boolean stopAll(User user, Long stackId) {
-        return Boolean.TRUE;
+    public void updateNodeCount(User user, Long stackId, Integer nodeCount) {
+        // TODO refactor addNode to be here
     }
 
     @Override
@@ -197,4 +198,5 @@ public class DefaultStackService implements StackService {
         int hashCode = HashCodeBuilder.reflectionHashCode(stack);
         return DigestUtils.md5DigestAsHex(String.valueOf(hashCode).getBytes());
     }
+
 }

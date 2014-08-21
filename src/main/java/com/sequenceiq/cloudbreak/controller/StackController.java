@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.controller;
 
+import groovyx.net.http.HttpResponseException;
+
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
@@ -18,8 +20,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
 import com.sequenceiq.cloudbreak.controller.json.InstanceMetaDataJson;
 import com.sequenceiq.cloudbreak.controller.json.StackJson;
-import com.sequenceiq.cloudbreak.controller.json.StatusRequestJson;
 import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
+import com.sequenceiq.cloudbreak.controller.json.UpdateStackJson;
 import com.sequenceiq.cloudbreak.converter.MetaDataConverter;
 import com.sequenceiq.cloudbreak.converter.StackConverter;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
@@ -30,8 +32,6 @@ import com.sequenceiq.cloudbreak.repository.UserRepository;
 import com.sequenceiq.cloudbreak.security.CurrentUser;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataIncompleteException;
-
-import groovyx.net.http.HttpResponseException;
 
 @Controller
 @RequestMapping("stacks")
@@ -88,19 +88,17 @@ public class StackController {
 
     @RequestMapping(method = RequestMethod.PUT, value = "{stackId}")
     @ResponseBody
-    public ResponseEntity<Boolean> startOrStopAllOnStack(@CurrentUser User user, @PathVariable Long stackId, @RequestBody StatusRequestJson statusRequestJson) {
-        Stack stack = stackService.get(user, stackId);
-        stack.setNodeCount(stack.getNodeCount() + 1);
-        switch (statusRequestJson.getStatusRequest()) {
-            case STOP:
-                return new ResponseEntity<>(stackService.stopAll(user, stackId), HttpStatus.OK);
-            case START:
-                return new ResponseEntity<>(stackService.startAll(user, stackId), HttpStatus.OK);
-            default:
-                throw new BadRequestException("The requested status not valid.");
+    public ResponseEntity<String> updateStack(@CurrentUser User user, @PathVariable Long stackId, @Valid @RequestBody UpdateStackJson updateStackJson) {
+        if (updateStackJson.getStatus() != null) {
+            stackService.updateStatus(user, stackId, updateStackJson.getStatus());
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            stackService.updateNodeCount(user, stackId, updateStackJson.getNodeCount());
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
     }
 
+    // TODO: delete this method, refactor its content to DefaultStackService.updateNodeCount
     @RequestMapping(method = RequestMethod.PUT, value = "/r/{stackId}/{hostgroup}")
     @ResponseBody
     public void increaseNodeCount(@CurrentUser User user, @PathVariable Long stackId, @PathVariable String hostgroup) throws HttpResponseException {
