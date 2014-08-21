@@ -5,7 +5,7 @@ import java.util.concurrent.ExecutorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
-import com.sequenceiq.periscope.model.Cluster;
+import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.registry.ClusterRegistry;
 
 public abstract class AbstractMonitor implements Monitor {

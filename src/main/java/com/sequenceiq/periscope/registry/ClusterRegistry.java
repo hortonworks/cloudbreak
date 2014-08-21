@@ -2,17 +2,14 @@ package com.sequenceiq.periscope.registry;
 
 import java.util.List;
 
-import com.sequenceiq.periscope.domain.ClusterDetails;
-import com.sequenceiq.periscope.model.Cluster;
+import com.sequenceiq.periscope.domain.Cluster;
 
 public interface ClusterRegistry {
 
     /**
      * Adds a new hadoop cluster to the registry.
-     *
-     * @param clusterDetails details of the cluster
      */
-    Cluster add(ClusterDetails clusterDetails) throws ConnectionException;
+    Cluster add(Cluster cluster) throws ConnectionException;
 
     /**
      * Removes a cluster from the registry.

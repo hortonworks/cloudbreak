@@ -11,12 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.periscope.domain.Alarm;
-import com.sequenceiq.periscope.domain.ClusterDetails;
+import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
-import com.sequenceiq.periscope.model.Cluster;
 import com.sequenceiq.periscope.model.ScalingPolicies;
 import com.sequenceiq.periscope.repository.AlarmRepository;
-import com.sequenceiq.periscope.repository.ClusterDetailsRepository;
+import com.sequenceiq.periscope.repository.ClusterRepository;
 import com.sequenceiq.periscope.utils.ClusterUtils;
 
 @Service
@@ -27,7 +26,7 @@ public class ScalingService {
     @Autowired
     private ClusterService clusterService;
     @Autowired
-    private ClusterDetailsRepository clusterDetailsRepository;
+    private ClusterRepository clusterRepository;
     @Autowired
     private AlarmRepository alarmRepository;
 
@@ -43,41 +42,41 @@ public class ScalingService {
 
     public ScalingPolicies setScalingPolicies(long clusterId, ScalingPolicies scalingPolicies) throws ClusterNotFoundException {
         Cluster cluster = clusterService.get(clusterId);
-        ClusterDetails clusterDetails = clusterDetailsRepository.findOne(clusterId);
-        clusterDetails.setCoolDown(scalingPolicies.getCoolDown());
-        clusterDetails.setMinSize(scalingPolicies.getMinSize());
-        clusterDetails.setMaxSize(scalingPolicies.getMaxSize());
-        cluster.setClusterDetails(clusterDetails);
-        clusterDetailsRepository.save(clusterDetails);
-        return getScalingPolicies(clusterDetails);
+        cluster.setCoolDown(scalingPolicies.getCoolDown());
+        cluster.setMinSize(scalingPolicies.getMinSize());
+        cluster.setMaxSize(scalingPolicies.getMaxSize());
+        cluster.setAlarms(clusterRepository.findOne(clusterId).getAlarms());
+        clusterRepository.save(cluster);
+        return getScalingPolicies(cluster);
     }
 
     public ScalingPolicies deletePolicy(long clusterId, long policyId) throws ClusterNotFoundException {
-        Cluster cluster = clusterService.get(clusterId);
-        ClusterDetails clusterDetails = clusterDetailsRepository.findOne(clusterId);
-        for (Alarm alarm : clusterDetails.getAlarms()) {
+        Cluster runningCluster = clusterService.get(clusterId);
+        Cluster savedCluster = clusterRepository.findOne(clusterId);
+        List<Alarm> alarms = savedCluster.getAlarms();
+        for (Alarm alarm : alarms) {
             ScalingPolicy scalingPolicy = alarm.getScalingPolicy();
             if (scalingPolicy != null && scalingPolicy.getId() == policyId) {
                 alarm.setScalingPolicy(null);
                 break;
             }
         }
-        cluster.setClusterDetails(clusterDetails);
-        clusterDetailsRepository.save(clusterDetails);
+        clusterRepository.save(savedCluster);
+        runningCluster.setAlarms(alarms);
         return getScalingPolicies(clusterId);
     }
 
     public ScalingPolicies getScalingPolicies(long clusterId) throws ClusterNotFoundException {
-        return getScalingPolicies(clusterService.get(clusterId).getClusterDetails());
+        return getScalingPolicies(clusterService.get(clusterId));
     }
 
-    public ScalingPolicies getScalingPolicies(ClusterDetails clusterDetails) {
+    public ScalingPolicies getScalingPolicies(Cluster cluster) {
         ScalingPolicies group = new ScalingPolicies();
-        group.setMaxSize(clusterDetails.getMaxSize());
-        group.setMinSize(clusterDetails.getMinSize());
-        group.setCoolDown(clusterDetails.getCoolDown());
+        group.setMaxSize(cluster.getMaxSize());
+        group.setMinSize(cluster.getMinSize());
+        group.setCoolDown(cluster.getCoolDown());
         List<ScalingPolicy> policies = new ArrayList<>();
-        for (Alarm alarm : clusterDetails.getAlarms()) {
+        for (Alarm alarm : cluster.getAlarms()) {
             ScalingPolicy scalingPolicy = alarm.getScalingPolicy();
             if (scalingPolicy != null) {
                 policies.add(scalingPolicy);

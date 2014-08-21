@@ -8,10 +8,10 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.periscope.domain.Alarm;
+import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ComparisonOperator;
 import com.sequenceiq.periscope.domain.Notification;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
-import com.sequenceiq.periscope.model.Cluster;
 import com.sequenceiq.periscope.monitor.event.ClusterMetricsUpdateEvent;
 import com.sequenceiq.periscope.service.ClusterNotFoundException;
 import com.sequenceiq.periscope.service.ClusterService;

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.sequenceiq.periscope.model.Cluster;
+import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.registry.ConnectionException;
 import com.sequenceiq.periscope.registry.QueueSetupException;
 import com.sequenceiq.periscope.rest.converter.ClusterConverter;

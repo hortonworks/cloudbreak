@@ -1,10 +1,21 @@
-package com.sequenceiq.periscope.model;
+package com.sequenceiq.periscope.domain;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Transient;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -15,32 +26,111 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.periscope.domain.Alarm;
-import com.sequenceiq.periscope.domain.ClusterDetails;
+import com.sequenceiq.periscope.model.Priority;
+import com.sequenceiq.periscope.model.SchedulerApplication;
 import com.sequenceiq.periscope.registry.ClusterState;
 import com.sequenceiq.periscope.registry.ConnectionException;
 import com.sequenceiq.periscope.service.configuration.AmbariConfigurationService;
 import com.sequenceiq.periscope.service.configuration.ConfigParam;
 
+@Entity
 public class Cluster {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Cluster.class);
-    private final Map<Priority, Map<ApplicationId, SchedulerApplication>> applications;
-    private boolean restarting;
-    private long lastScalingActivity;
-    private Configuration configuration;
-    private YarnClient yarnClient;
-    private ClusterMetricsInfo metrics;
-    private ClusterDetails clusterDetails;
 
-    public Cluster(ClusterDetails clusterDetails) throws ConnectionException {
-        this.clusterDetails = clusterDetails;
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "template_generator")
+    @SequenceGenerator(name = "template_generator", sequenceName = "sequence_table")
+    private long id;
+    @OneToOne(cascade = CascadeType.ALL)
+    private Ambari ambari;
+    private boolean appMovementAllowed;
+    private ClusterState state = ClusterState.RUNNING;
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Alarm> alarms = new ArrayList<>();
+    private int minSize;
+    private int maxSize;
+    private int coolDown;
+    @Transient
+    private Map<Priority, Map<ApplicationId, SchedulerApplication>> applications;
+    @Transient
+    private boolean restarting;
+    @Transient
+    private long lastScalingActivity;
+    @Transient
+    private Configuration configuration;
+    @Transient
+    private YarnClient yarnClient;
+    @Transient
+    private ClusterMetricsInfo metrics;
+
+    public Cluster() {
+    }
+
+    public Cluster(Ambari ambari) throws ConnectionException {
+        this.ambari = ambari;
         this.applications = new ConcurrentHashMap<>();
         initConfiguration();
     }
 
     public long getId() {
-        return clusterDetails.getId();
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public boolean isAppMovementAllowed() {
+        return appMovementAllowed;
+    }
+
+    public void setAppMovementAllowed(boolean appMovementAllowed) {
+        this.appMovementAllowed = appMovementAllowed;
+    }
+
+    public ClusterState getState() {
+        return state;
+    }
+
+    public void setState(ClusterState state) {
+        this.state = state;
+    }
+
+    public List<Alarm> getAlarms() {
+        return alarms;
+    }
+
+    public void setAlarms(List<Alarm> alarms) {
+        this.alarms = alarms;
+    }
+
+    public int getMinSize() {
+        return minSize;
+    }
+
+    public void setMinSize(int minSize) {
+        this.minSize = minSize;
+    }
+
+    public int getMaxSize() {
+        return maxSize;
+    }
+
+    public void setMaxSize(int maxSize) {
+        this.maxSize = maxSize;
+    }
+
+    public int getCoolDown() {
+        return coolDown;
+    }
+
+    public void setCoolDown(int coolDown) {
+        this.coolDown = coolDown;
+    }
+
+    public void setLastScalingActivity(long lastScalingActivity) {
+        this.lastScalingActivity = lastScalingActivity;
     }
 
     public YarnClient getYarnClient() {
@@ -48,55 +138,35 @@ public class Cluster {
     }
 
     public String getHost() {
-        return clusterDetails.getAmbari().getHost();
+        return ambari.getHost();
     }
 
     public String getPort() {
-        return clusterDetails.getAmbari().getPort();
+        return ambari.getPort();
     }
 
     public String getUser() {
-        return clusterDetails.getAmbari().getUser();
+        return ambari.getUser();
     }
 
     public String getPass() {
-        return clusterDetails.getAmbari().getPass();
-    }
-
-    public int getMinSize() {
-        return clusterDetails.getMinSize();
-    }
-
-    public int getMaxSize() {
-        return clusterDetails.getMaxSize();
-    }
-
-    public int getCoolDown() {
-        return clusterDetails.getCoolDown();
-    }
-
-    public boolean isAppMovementAllowed() {
-        return clusterDetails.isAppMovementAllowed();
-    }
-
-    public ClusterState getState() {
-        return clusterDetails.getState();
-    }
-
-    public void setState(ClusterState state) {
-        clusterDetails.setState(state);
+        return ambari.getPass();
     }
 
     public boolean isRunning() {
-        return clusterDetails.getState() == ClusterState.RUNNING;
+        return state == ClusterState.RUNNING;
     }
 
     public void allowAppMovement(boolean appMovementAllowed) {
-        clusterDetails.setAppMovementAllowed(appMovementAllowed);
+        this.appMovementAllowed = appMovementAllowed;
     }
 
     public String getConfigValue(ConfigParam param, String defaultValue) {
         return configuration.get(param.key(), defaultValue);
+    }
+
+    public void addAlarms(List<Alarm> alarm) {
+        this.alarms.addAll(alarm);
     }
 
     public int getTotalNodes() {
@@ -113,18 +183,6 @@ public class Cluster {
 
     public void setRestarting(boolean restarting) {
         this.restarting = restarting;
-    }
-
-    public List<Alarm> getAlarms() {
-        return clusterDetails.getAlarms();
-    }
-
-    public ClusterDetails getClusterDetails() {
-        return clusterDetails;
-    }
-
-    public void setClusterDetails(ClusterDetails clusterDetails) {
-        this.clusterDetails = clusterDetails;
     }
 
     public long getLastScalingActivity() {
@@ -161,7 +219,7 @@ public class Cluster {
         }
         ApplicationId applicationId = application.getApplicationId();
         applicationMap.put(applicationId, application);
-        LOGGER.info("Application ({}) added to cluster {}", applicationId.toString(), getId());
+        LOGGER.info("Application ({}) added to cluster {}", applicationId.toString(), id);
         return application;
     }
 
@@ -174,7 +232,7 @@ public class Cluster {
                 if (id.equals(applicationId)) {
                     SchedulerApplication application = apps.get(id);
                     iterator.remove();
-                    LOGGER.info("Application ({}) removed from cluster {}", applicationId, getId());
+                    LOGGER.info("Application ({}) removed from cluster {}", applicationId, id);
                     return application;
                 }
             }

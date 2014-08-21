@@ -11,7 +11,7 @@ import org.apache.hadoop.yarn.exceptions.YarnException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.periscope.model.Cluster;
+import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.model.Priority;
 import com.sequenceiq.periscope.model.SchedulerApplication;
 

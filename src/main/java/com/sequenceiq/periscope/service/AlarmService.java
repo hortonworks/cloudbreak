@@ -6,29 +6,29 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.periscope.domain.Alarm;
-import com.sequenceiq.periscope.domain.ClusterDetails;
-import com.sequenceiq.periscope.model.Cluster;
+import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.repository.AlarmRepository;
-import com.sequenceiq.periscope.repository.ClusterDetailsRepository;
+import com.sequenceiq.periscope.repository.ClusterRepository;
 
 @Service
 public class AlarmService {
 
     @Autowired
-    private ClusterDetailsRepository clusterDetailsRepository;
+    private ClusterRepository clusterRepository;
     @Autowired
     private AlarmRepository alarmRepository;
     @Autowired
     private ClusterService clusterService;
 
     public List<Alarm> addAlarms(long clusterId, List<Alarm> alarms) throws ClusterNotFoundException {
-        Cluster cluster = clusterService.get(clusterId);
-        ClusterDetails clusterDetails = clusterDetailsRepository.findOne(clusterId);
-        clusterDetails.addAlarms(alarms);
+        Cluster runningCluster = clusterService.get(clusterId);
+        Cluster savedCluster = clusterRepository.findOne(clusterId);
+        savedCluster.addAlarms(alarms);
         alarmRepository.save(alarms);
-        clusterDetailsRepository.save(clusterDetails);
-        cluster.setClusterDetails(clusterDetails);
-        return clusterDetails.getAlarms();
+        clusterRepository.save(savedCluster);
+        List<Alarm> alarmList = savedCluster.getAlarms();
+        runningCluster.setAlarms(alarmList);
+        return alarmList;
     }
 
     public List<Alarm> getAlarms(long clusterId) throws ClusterNotFoundException {
@@ -36,16 +36,16 @@ public class AlarmService {
     }
 
     public List<Alarm> deleteAlarm(long clusterId, long alarmId) throws ClusterNotFoundException {
-        Cluster cluster = clusterService.get(clusterId);
-        ClusterDetails clusterDetails = clusterDetailsRepository.findOne(clusterId);
+        Cluster runningCluster = clusterService.get(clusterId);
+        Cluster savedCluster = clusterRepository.findOne(clusterId);
         Alarm alarm = alarmRepository.findOne(alarmId);
         if (alarm == null) {
             throw new AlarmNotFoundException(alarmId);
         }
-        List<Alarm> alarms = clusterDetails.getAlarms();
+        List<Alarm> alarms = savedCluster.getAlarms();
         alarms.remove(alarm);
-        cluster.setClusterDetails(clusterDetails);
-        clusterDetailsRepository.save(clusterDetails);
+        clusterRepository.save(savedCluster);
+        runningCluster.setAlarms(alarms);
         return alarms;
     }
 

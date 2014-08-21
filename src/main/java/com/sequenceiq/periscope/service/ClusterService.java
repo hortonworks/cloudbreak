@@ -14,15 +14,16 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.periscope.domain.Ambari;
-import com.sequenceiq.periscope.domain.ClusterDetails;
-import com.sequenceiq.periscope.model.Cluster;
+import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.model.Queue;
 import com.sequenceiq.periscope.model.QueueSetup;
 import com.sequenceiq.periscope.registry.ClusterRegistry;
 import com.sequenceiq.periscope.registry.ClusterState;
 import com.sequenceiq.periscope.registry.ConnectionException;
 import com.sequenceiq.periscope.registry.QueueSetupException;
-import com.sequenceiq.periscope.repository.ClusterDetailsRepository;
+import com.sequenceiq.periscope.repository.AlarmRepository;
+import com.sequenceiq.periscope.repository.ClusterRepository;
+import com.sequenceiq.periscope.repository.ScalingPolicyRepository;
 import com.sequenceiq.periscope.utils.ClusterUtils;
 
 @Service
@@ -36,12 +37,16 @@ public class ClusterService {
     @Autowired
     private ClusterRegistry clusterRegistry;
     @Autowired
-    private ClusterDetailsRepository clusterDetailsRepository;
+    private ClusterRepository clusterRepository;
+    @Autowired
+    private ScalingPolicyRepository policyRepository;
+    @Autowired
+    private AlarmRepository alarmRepository;
 
     public Cluster add(Ambari ambari) throws ConnectionException {
-        ClusterDetails clusterDetails = new ClusterDetails(ambari);
-        clusterDetailsRepository.save(clusterDetails);
-        return clusterRegistry.add(clusterDetails);
+        Cluster cluster = new Cluster(ambari);
+        clusterRepository.save(cluster);
+        return clusterRegistry.add(cluster);
     }
 
     public Cluster get(long clusterId) throws ClusterNotFoundException {
@@ -61,14 +66,15 @@ public class ClusterService {
         if (cluster == null) {
             throw new ClusterNotFoundException(clusterId);
         }
-        clusterDetailsRepository.delete(cluster.getClusterDetails());
+        cluster.setAlarms(null);
+        clusterRepository.delete(cluster);
         return cluster;
     }
 
     public Cluster setState(long clusterId, ClusterState state) throws ClusterNotFoundException {
         Cluster cluster = get(clusterId);
         cluster.setState(state);
-        clusterDetailsRepository.save(cluster.getClusterDetails());
+        clusterRepository.save(cluster);
         return cluster;
     }
 

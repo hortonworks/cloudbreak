@@ -9,8 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.periscope.domain.ClusterDetails;
-import com.sequenceiq.periscope.model.Cluster;
+import com.sequenceiq.periscope.domain.Cluster;
 
 @Component
 public class AmbariClusterRegistry implements ClusterRegistry {
@@ -19,10 +18,9 @@ public class AmbariClusterRegistry implements ClusterRegistry {
     private final Map<Long, Cluster> clusters = new ConcurrentHashMap<>();
 
     @Override
-    public Cluster add(ClusterDetails clusterDetails) throws ConnectionException {
+    public Cluster add(Cluster cluster) throws ConnectionException {
         // TODO should be per user registry
-        long id = clusterDetails.getId();
-        Cluster cluster = new Cluster(clusterDetails);
+        long id = cluster.getId();
         clusters.put(id, cluster);
         LOGGER.info("Cluster: {} registered with id: {}", cluster.getHost(), id);
         return cluster;
