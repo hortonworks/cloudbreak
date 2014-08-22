@@ -73,7 +73,7 @@ Ambari Blueprints are a declarative definition of a cluster. With a Blueprint, y
 
 Cloudbreak is SequenceIQ's RESTful Hadoop as a Service API. Once it is deployed in your favourite servlet container exposes a REST API allowing to span up Hadoop clusters of arbitrary sizes on your selected cloud provider. Provisioning Hadoop has never been easier. Cloudbreak is built on the foundation of cloud providers API (Amazon AWS, Microsoft Azure, Google Cloud Compute...), Apache Ambari, Docker containers, Serf and dnsmasq.
 
-Fir further documentation please check the [Cloudbreak documentation](http://sequenceiq.com/cloudbreak).
+For further information please check the [Cloudbreak documentation](http://sequenceiq.com/cloudbreak).
 
 ##Building blocks
 
@@ -161,7 +161,7 @@ This diversity started to eat into too much DevOps time - and we decided to auto
 ###  Public Beta - 0.1
 
 The `first public beta` does support autoscaling clusters on **Amazon AWS** and **Microsoft Azure** - and we will bring in the other Cloudbreak providers as we add them. Once our contributions in Apache Hadoop, YARN and Ambari will be released (patches are accepted and in trunk - target versions are *2.6.0 and 1.7.0* - Periscope will start supporting the `static` cluster features such as application SLA policies.
-
+Also note that the current version supports only up-scaling.
 The currently supported Hadoop is the Hortonworks Data Platform - the 100% open source Hadoop distribution and the respective component versions are:
 
 CentOS - 6.5 Hortonworks Data Platform - 2.1 Apache Hadoop - 2.4.0 Apache Tez - 0.4 Apache Pig - 0.12.1 Apache Hive & HCatalog - 0.13.0 Apache HBase - 0.98.0 Apache Phoenix - 4.0.0 Apache Accumulo - 1.5.1 Apache Storm - 0.9.1 Apache Mahout - 0.9.0 Apache Solr - 4.7.2 Apache Falcon - 0.5.0 Apache Sqoop - 1.4.4 Apache Flume - 1.4.0 Apache Ambari - 1.6.1 Apache Oozie - 4.0.0 Apache Zookeeper - 3.4.5 Apache Knox - 0.4.0 Docker - 1.1 Serf - 0.5.0 dnsmasq - 2.7
@@ -169,7 +169,7 @@ CentOS - 6.5 Hortonworks Data Platform - 2.1 Apache Hadoop - 2.4.0 Apache Tez - 
 ###Future releases
 
 While this is already a good achievement - bringing autoscaling to Hadoop - we don’t stop here. Periscope will be a centralized place to manage your cluster through SLA policies, check your cluster metrics and logs and correlate them with events/cluster heath. The analytics and visualization capabilities will allow you for a deeper understanding of your jobs, the nature of resources consumed and ultimately leverage the features provided by cloud providers. For instance a CPU heavy job can always launch purpose build (compute optimized) instance types.
-
+The next release will bring in down-scaling and OAuth2 support - and will incorporate the new features from YARN, Hadoop and Ambari.
 As we have already mentioned we are running a YARN monitoring project based on R - based on the experience and what we have learnt the end goal is to built a high level heuristic model which maintains a healthy cluster, without the need of predefined SLA policy rules.
 
 
@@ -259,11 +259,15 @@ Please consider submitting your resume and applying for open positions at jobs@s
 
 *Brought to you courtesy of our legal counsel.*
 
-Use and transfer of Cloudbreak may be subject to certain restrictions by the
+Use and transfer of Periscope may be subject to certain restrictions by the
 United States and other governments.  
 It is your responsibility to ensure that your use and/or transfer does not
 violate applicable laws.
 
 ### Licensing
+<<<<<<< HEAD
 Cloudbreak is licensed under the Apache License, Version 2.0. See [LICENSE](http://www.apache.org/licenses/LICENSE-2.0.html) for full license text.
 >>>>>>> a9d1b17... PERI-2 mkdocs generate
+=======
+Periscope is licensed under the Apache License, Version 2.0. See [LICENSE](http://www.apache.org/licenses/LICENSE-2.0.html) for full license text.
+>>>>>>> f73b8db... docs updated
