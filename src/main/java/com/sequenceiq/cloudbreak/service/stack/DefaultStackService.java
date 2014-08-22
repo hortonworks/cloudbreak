@@ -159,7 +159,7 @@ public class DefaultStackService implements StackService {
         if (0 > scalingAdjustment) {
             throw new BadRequestException(
                     String.format("Requested scaling adjustment on stack '%s' is negative (%s), but "
-                            + "decommisioning nodes is not yet supported by the Cloudbreak API.",
+                            + "node decommision is not yet supported by the Cloudbreak API.",
                             stackId, scalingAdjustment));
         }
         stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS);

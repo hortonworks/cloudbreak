@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +31,7 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.connector.HadoopConfigurationProvider;
 import com.sequenceiq.cloudbreak.service.stack.event.AddNodeFailed;
 import com.sequenceiq.cloudbreak.service.stack.event.AddNodeSuccess;
@@ -49,12 +52,15 @@ public class AmbariClusterInstaller {
     private static final String UNHANDLED_EXCEPTION_MSG = "Unhandled exception occurred while installing Ambari cluster.";
 
     @Autowired
+    private StackRepository stackRepository;
+
+    @Autowired
     private ClusterRepository clusterRepository;
 
     @Autowired
     private Reactor reactor;
 
-    @javax.annotation.Resource
+    @Resource
     private Map<CloudPlatform, HadoopConfigurationProvider> hadoopConfigurationProviders;
 
     public void installAmbariCluster(Stack stack) {
@@ -84,7 +90,8 @@ public class AmbariClusterInstaller {
         }
     }
 
-    public void installAmbariNode(Stack stack, Set<HostGroupAdjustmentJson> hostgroups) {
+    public void installAmbariNode(Long stackId, Set<HostGroupAdjustmentJson> hostgroups) {
+        Stack stack = stackRepository.findOneWithLists(stackId);
         Cluster cluster = stack.getCluster();
         AmbariClient ambariClient = createAmbariClient(stack.getAmbariIp());
         pollAmbariServer(stack, ambariClient);
@@ -125,6 +132,7 @@ public class AmbariClusterInstaller {
 
     private Map<String, List<String>> recommend(Stack stack, AmbariClient ambariClient, String blueprintName) throws InvalidHostGroupHostAssociation {
         pollAmbariServer(stack, ambariClient);
+        LOGGER.info("Asking Ambari client to recommend host-hostGroup mapping [Stack: {}, Ambari server address: {}]", stack.getId(), stack.getAmbariIp());
         return ambariClient.recommendAssignments(blueprintName);
     }
 
@@ -145,7 +153,6 @@ public class AmbariClusterInstaller {
                     MAX_RECOMMEND_POLLING_ATTEMPTS * POLLING_INTERVAL / MS_PER_SEC, nodeCount, stack.getNodeCount());
             throw new AmbariHostsUnavailableException(errorMessage);
         }
-        LOGGER.info("Asking Ambari client to recommend host-hostGroup mapping [Stack: {}, Ambari server address: {}]", stack.getId(), stack.getAmbariIp());
     }
 
     private void addBlueprint(Stack stack, Blueprint blueprint) {

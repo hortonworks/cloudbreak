@@ -95,53 +95,11 @@ public class AmbariClusterService implements ClusterService {
     @Override
     public void updateHosts(User user, Long stackId, Set<HostGroupAdjustmentJson> hostGroupAdjustments) {
         Stack stack = stackRepository.findOneWithLists(stackId);
-        int sumScalingAdjustments = 0;
-        for (HostGroupAdjustmentJson hostGroupAdjustment : hostGroupAdjustments) {
-            int scalingAdjustment = hostGroupAdjustment.getScalingAdjustment();
-            if (scalingAdjustment < 0) {
-                throw new BadRequestException(String.format("Requested scaling adjustment on hostGroup '%s' is negative (%s), but "
-                        + "node decommision is not yet supported by the Cloudbreak API.",
-                        hostGroupAdjustment.getHostGroup(), scalingAdjustment));
-            }
-            sumScalingAdjustments += scalingAdjustment;
-        }
-        AmbariClient ambariClient = new AmbariClient(stack.getAmbariIp());
-        List<String> unregisteredHosts = ambariClient.getUnregisteredHostNames();
-        if (unregisteredHosts.size() == 0) {
-            throw new BadRequestException(String.format(
-                    "There are no unregistered hosts in stack '%s'. Add some additional nodes to the stack before adding new hosts to the cluster.", stackId));
-        }
-        if (unregisteredHosts.size() < sumScalingAdjustments) {
-            throw new BadRequestException(String.format("Number of unregistered hosts in the stack is %s, but %s would be needed to complete the request.",
-                    unregisteredHosts.size(), sumScalingAdjustments));
-        }
-        for (HostGroupAdjustmentJson hostGroupAdjustment : hostGroupAdjustments) {
-            try {
-                if (!assignableHostgroup(stack.getCluster(), hostGroupAdjustment.getHostGroup())) {
-                    throw new BadRequestException(String.format("Invalid hostgroup: blueprint %s does not contain %s hostgroup.",
-                            stack.getCluster().getBlueprint().getId(), hostGroupAdjustment.getHostGroup()));
-                }
-            } catch (Exception e) {
-                throw new BadRequestException(String.format("Stack %s put occurs a problem '%s': %s", stackId, e.getMessage(), e));
-            }
-        }
+        validateRequest(stack, hostGroupAdjustments);
         LOGGER.info("Cluster update requested for stack '{}' [BlueprintId: {}]", stackId, stack.getCluster().getBlueprint().getId());
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_NODE_AMBARI_UPDATE_NODE_EVENT, stack.getId());
         reactor.notify(ReactorConfig.ADD_NODE_AMBARI_UPDATE_NODE_EVENT, Event.wrap(
                 new AmbariAddNode(stackId, stack.getAmbariIp(), hostGroupAdjustments)));
-    }
-
-    private Boolean assignableHostgroup(Cluster cluster, String hostgroup) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode root = mapper.readTree(cluster.getBlueprint().getBlueprintText());
-        Iterator<JsonNode> hostGroupsIterator = root.path("host_groups").elements();
-        while (hostGroupsIterator.hasNext()) {
-            JsonNode hostGroup = hostGroupsIterator.next();
-            if (hostGroup.path("name").asText().equals(hostgroup)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     @Override
@@ -152,5 +110,54 @@ public class AmbariClusterService implements ClusterService {
     @VisibleForTesting
     protected AmbariClient createAmbariClient(String ambariIp) {
         return new AmbariClient(ambariIp, PORT);
+    }
+
+    private void validateRequest(Stack stack, Set<HostGroupAdjustmentJson> hostGroupAdjustments) {
+        int sumScalingAdjustments = 0;
+        for (HostGroupAdjustmentJson hostGroupAdjustment : hostGroupAdjustments) {
+            int scalingAdjustment = hostGroupAdjustment.getScalingAdjustment();
+            if (scalingAdjustment < 0) {
+                throw new BadRequestException(String.format("Requested scaling adjustment on hostGroup '%s' is negative (%s), but "
+                        + "node decommision is not yet supported by the Cloudbreak API.",
+                        hostGroupAdjustment.getHostGroup(), scalingAdjustment));
+            }
+            sumScalingAdjustments += scalingAdjustment;
+        }
+        AmbariClient ambariClient = new AmbariClient(stack.getAmbariIp(), AmbariClusterService.PORT);
+        List<String> unregisteredHosts = ambariClient.getUnregisteredHostNames();
+        if (unregisteredHosts.size() == 0) {
+            throw new BadRequestException(String.format(
+                    "There are no unregistered hosts in stack '%s'. Add some additional nodes to the stack before adding new hosts to the cluster.",
+                    stack.getId()));
+        }
+        if (unregisteredHosts.size() < sumScalingAdjustments) {
+            throw new BadRequestException(String.format("Number of unregistered hosts in the stack is %s, but %s would be needed to complete the request.",
+                    unregisteredHosts.size(), sumScalingAdjustments));
+        }
+        for (HostGroupAdjustmentJson hostGroupAdjustment : hostGroupAdjustments) {
+            if (!assignableHostgroup(stack.getCluster(), hostGroupAdjustment.getHostGroup())) {
+                throw new BadRequestException(String.format(
+                        "Invalid hostgroup: blueprint '%s' that was used to create the cluster does not contain a hostgroup with this name.",
+                        stack.getCluster().getBlueprint().getId(), hostGroupAdjustment.getHostGroup()));
+            }
+        }
+    }
+
+    private Boolean assignableHostgroup(Cluster cluster, String hostgroup) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode root;
+            root = mapper.readTree(cluster.getBlueprint().getBlueprintText());
+            Iterator<JsonNode> hostGroupsIterator = root.path("host_groups").elements();
+            while (hostGroupsIterator.hasNext()) {
+                JsonNode hostGroup = hostGroupsIterator.next();
+                if (hostGroup.path("name").asText().equals(hostgroup)) {
+                    return true;
+                }
+            }
+        } catch (IOException e) {
+            throw new InternalServerException("Unhandled exception occured while reading blueprint: " + e.getMessage(), e);
+        }
+        return false;
     }
 }
