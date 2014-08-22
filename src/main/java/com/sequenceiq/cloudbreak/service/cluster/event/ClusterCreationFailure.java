@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.cluster;
+package com.sequenceiq.cloudbreak.service.cluster.event;
 
 public class ClusterCreationFailure {
 

@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.stack.event.domain.CoreInstanceMetaData;
 
 import reactor.core.Reactor;
 import reactor.event.Event;

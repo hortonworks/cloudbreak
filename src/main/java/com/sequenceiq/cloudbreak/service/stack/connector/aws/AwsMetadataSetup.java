@@ -28,9 +28,9 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
-import com.sequenceiq.cloudbreak.service.stack.event.AddNodeMetadataSetupComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataSetupComplete;
-import com.sequenceiq.cloudbreak.service.stack.event.domain.CoreInstanceMetaData;
+import com.sequenceiq.cloudbreak.service.stack.event.MetadataUpdateComplete;
+import com.sequenceiq.cloudbreak.service.stack.flow.CoreInstanceMetaData;
 
 @Component
 public class AwsMetadataSetup implements MetadataSetup {
@@ -81,7 +81,7 @@ public class AwsMetadataSetup implements MetadataSetup {
                         instance.getPrivateIpAddress(),
                         instance.getPublicIpAddress(),
                         instance.getBlockDeviceMappings().size() - 1,
-                        instance.getPublicDnsName()
+                        instance.getPrivateDnsName()
                         ));
             }
         }
@@ -94,6 +94,7 @@ public class AwsMetadataSetup implements MetadataSetup {
     @Override
     public void addNewNodesToMetadata(Stack stack, Set<Resource> resourceList) {
         Set<CoreInstanceMetaData> coreInstanceMetadata = new HashSet<>();
+        LOGGER.info("Adding new instances to metadata: [stack: '{}']", stack.getId());
         AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(
                 ((AwsTemplate) stack.getTemplate()).getRegion(),
                 (AwsCredential) stack.getCredential());
@@ -114,14 +115,15 @@ public class AwsMetadataSetup implements MetadataSetup {
                             instance.getPrivateIpAddress(),
                             instance.getPublicIpAddress(),
                             instance.getBlockDeviceMappings().size() - 1,
-                            instance.getPublicDnsName()
+                            instance.getPrivateDnsName()
                             ));
+                    LOGGER.info("New instance added to metadata: [stack: '{}', instanceId: '{}']", stack.getId(), instance.getInstanceId());
                 }
             }
         }
-        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_NODE_UPDATE_METADATA_EVENT_COMPLETE, stack.getId());
-        reactor.notify(ReactorConfig.ADD_NODE_UPDATE_METADATA_EVENT_COMPLETE,
-                Event.wrap(new AddNodeMetadataSetupComplete(CloudPlatform.AWS, stack.getId(), coreInstanceMetadata)));
+        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.METADATA_UPDATE_COMPLETE_EVENT, stack.getId());
+        reactor.notify(ReactorConfig.METADATA_UPDATE_COMPLETE_EVENT,
+                Event.wrap(new MetadataUpdateComplete(CloudPlatform.AWS, stack.getId(), coreInstanceMetadata)));
     }
 
     @Override

@@ -32,7 +32,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.Provisioner;
-import com.sequenceiq.cloudbreak.service.stack.event.AddNodeComplete;
+import com.sequenceiq.cloudbreak.service.stack.event.AddInstancesComplete;
 
 @Component
 public class AwsProvisioner implements Provisioner {
@@ -113,8 +113,8 @@ public class AwsProvisioner implements Provisioner {
         AutoScalingGroupReady asGroupReady = new AutoScalingGroupReady(amazonEC2Client, amazonASClient, asGroupName, requiredInstances);
         LOGGER.info("Polling autoscaling group until new instances are ready. [stack: {}, asGroup: {}]", stack.getId(), asGroupName);
         pollingService.pollWithTimeout(asGroupStatusCheckerTask, asGroupReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
-        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_NODE_COMPLETE_EVENT, stack.getId());
-        reactor.notify(ReactorConfig.ADD_NODE_COMPLETE_EVENT, Event.wrap(new AddNodeComplete(CloudPlatform.AWS, stack.getId(), null)));
+        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT, stack.getId());
+        reactor.notify(ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT, Event.wrap(new AddInstancesComplete(CloudPlatform.AWS, stack.getId(), null)));
     }
 
     protected CreateStackRequest createStackRequest() {

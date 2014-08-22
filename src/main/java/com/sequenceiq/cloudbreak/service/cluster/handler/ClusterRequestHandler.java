@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.cluster;
+package com.sequenceiq.cloudbreak.service.cluster.handler;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
+import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterInstaller;
 
 import reactor.event.Event;
 import reactor.function.Consumer;

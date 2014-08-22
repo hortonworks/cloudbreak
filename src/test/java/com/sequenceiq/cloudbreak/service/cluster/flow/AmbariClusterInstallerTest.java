@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.cluster;
+package com.sequenceiq.cloudbreak.service.cluster.flow;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;

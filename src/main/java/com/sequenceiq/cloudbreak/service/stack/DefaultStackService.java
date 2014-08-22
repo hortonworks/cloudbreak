@@ -35,7 +35,7 @@ import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
 import com.sequenceiq.cloudbreak.service.account.AccountService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
-import com.sequenceiq.cloudbreak.service.stack.event.AddNodeRequest;
+import com.sequenceiq.cloudbreak.service.stack.event.AddInstancesRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataIncompleteException;
@@ -163,9 +163,9 @@ public class DefaultStackService implements StackService {
                             stackId, scalingAdjustment));
         }
         stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS);
-        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_NODE_REQUEST_EVENT, stack.getId());
-        reactor.notify(ReactorConfig.ADD_NODE_REQUEST_EVENT,
-                Event.wrap(new AddNodeRequest(stack.getTemplate().cloudPlatform(), stack.getId(), scalingAdjustment)));
+        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_INSTANCES_REQUEST_EVENT, stack.getId());
+        reactor.notify(ReactorConfig.ADD_INSTANCES_REQUEST_EVENT,
+                Event.wrap(new AddInstancesRequest(stack.getTemplate().cloudPlatform(), stack.getId(), scalingAdjustment)));
     }
 
     @Override

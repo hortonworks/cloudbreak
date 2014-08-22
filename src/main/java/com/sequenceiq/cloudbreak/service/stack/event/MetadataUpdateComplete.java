@@ -4,12 +4,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
-import com.sequenceiq.cloudbreak.service.stack.event.domain.CoreInstanceMetaData;
+import com.sequenceiq.cloudbreak.service.stack.flow.CoreInstanceMetaData;
 
-public class AddNodeMetadataSetupComplete extends ProvisionEvent {
+public class MetadataUpdateComplete extends ProvisionEvent {
     private Set<CoreInstanceMetaData> coreInstanceMetaData = new HashSet<>();
 
-    public AddNodeMetadataSetupComplete(CloudPlatform cloudPlatform, Long stackId, Set<CoreInstanceMetaData> coreInstanceMetaData) {
+    public MetadataUpdateComplete(CloudPlatform cloudPlatform, Long stackId, Set<CoreInstanceMetaData> coreInstanceMetaData) {
         super(cloudPlatform, stackId);
         this.coreInstanceMetaData = coreInstanceMetaData;
     }

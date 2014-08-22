@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.stack.handler.node;
+package com.sequenceiq.cloudbreak.service.stack.handler;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,12 +19,12 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.connector.Provisioner;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
-import com.sequenceiq.cloudbreak.service.stack.event.AddNodeRequest;
+import com.sequenceiq.cloudbreak.service.stack.event.AddInstancesRequest;
 
 @Component
-public class AddNodeRequestHandler implements Consumer<Event<AddNodeRequest>> {
+public class AddInstancesRequestHandler implements Consumer<Event<AddInstancesRequest>> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AddNodeRequestHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AddInstancesRequestHandler.class);
 
     @Autowired
     private StackRepository stackRepository;
@@ -36,14 +36,14 @@ public class AddNodeRequestHandler implements Consumer<Event<AddNodeRequest>> {
     private UserDataBuilder userDataBuilder;
 
     @Override
-    public void accept(Event<AddNodeRequest> event) {
-        AddNodeRequest request = event.getData();
+    public void accept(Event<AddInstancesRequest> event) {
+        AddInstancesRequest request = event.getData();
         CloudPlatform cloudPlatform = request.getCloudPlatform();
         Long stackId = request.getStackId();
         Integer scalingAdjustment = request.getScalingAdjustment();
         try {
             Stack one = stackRepository.findOneWithLists(stackId);
-            LOGGER.info("Accepted {} event on stack: '{}'", ReactorConfig.ADD_NODE_REQUEST_EVENT, stackId);
+            LOGGER.info("Accepted {} event on stack: '{}'", ReactorConfig.ADD_INSTANCES_REQUEST_EVENT, stackId);
             provisioners.get(cloudPlatform)
                     .addNode(one, userDataBuilder.build(cloudPlatform, one.getHash(), new HashMap<String, String>()), scalingAdjustment);
         } catch (Exception e) {

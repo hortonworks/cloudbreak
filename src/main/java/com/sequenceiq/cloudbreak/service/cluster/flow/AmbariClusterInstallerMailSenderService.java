@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.cluster;
+package com.sequenceiq.cloudbreak.service.cluster.flow;
 
 import java.util.HashMap;
 import java.util.Map;

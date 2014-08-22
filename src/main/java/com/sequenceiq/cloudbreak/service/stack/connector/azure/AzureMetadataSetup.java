@@ -28,9 +28,9 @@ import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
-import com.sequenceiq.cloudbreak.service.stack.event.AddNodeMetadataSetupComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataSetupComplete;
-import com.sequenceiq.cloudbreak.service.stack.event.domain.CoreInstanceMetaData;
+import com.sequenceiq.cloudbreak.service.stack.event.MetadataUpdateComplete;
+import com.sequenceiq.cloudbreak.service.stack.flow.CoreInstanceMetaData;
 
 import reactor.core.Reactor;
 import reactor.event.Event;
@@ -71,9 +71,9 @@ public class AzureMetadataSetup implements MetadataSetup {
             }
         }
         Set<CoreInstanceMetaData> instanceMetaDatas = collectMetaData(stack, azureClient, resources);
-        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_NODE_UPDATE_METADATA_EVENT_COMPLETE, stack.getId());
-        reactor.notify(ReactorConfig.ADD_NODE_UPDATE_METADATA_EVENT_COMPLETE,
-                Event.wrap(new AddNodeMetadataSetupComplete(CloudPlatform.AZURE, stack.getId(), instanceMetaDatas)));
+        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.METADATA_UPDATE_COMPLETE_EVENT, stack.getId());
+        reactor.notify(ReactorConfig.METADATA_UPDATE_COMPLETE_EVENT,
+                Event.wrap(new MetadataUpdateComplete(CloudPlatform.AZURE, stack.getId(), instanceMetaDatas)));
     }
 
     private Set<CoreInstanceMetaData> collectMetaData(Stack stack, AzureClient azureClient, List<Resource> resources) {

@@ -169,7 +169,7 @@ public class RetryingStackUpdater {
         Stack stack = stackRepository.findById(stackId);
         stack.setInstanceMetaData(instanceMetaData);
         stack = stackRepository.save(stack);
-        LOGGER.info("Updated stack metadata: [stack: '{}', status: '{}', statusReason: '{}'].", stackId);
+        LOGGER.info("Updated stack metadata: [stack: '{}'].", stackId);
         return stack;
     }
 
@@ -213,7 +213,6 @@ public class RetryingStackUpdater {
         return stack;
     }
 
-
     private Stack doUpdateResources(Long stackId, Set<Resource> resources) {
         Stack stack = stackRepository.findById(stackId);
         stack.setResources(resources);
@@ -221,6 +220,5 @@ public class RetryingStackUpdater {
         LOGGER.info("Updated stack resources: [stack: '{}', status: '{}', statusReason: '{}'].", stackId);
         return stack;
     }
-
 
 }

@@ -31,7 +31,7 @@ import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.stack.event.AmbariAddNode;
+import com.sequenceiq.cloudbreak.service.cluster.event.AddAmbariHostsRequest;
 
 @Service
 public class AmbariClusterService implements ClusterService {
@@ -97,9 +97,9 @@ public class AmbariClusterService implements ClusterService {
         Stack stack = stackRepository.findOneWithLists(stackId);
         validateRequest(stack, hostGroupAdjustments);
         LOGGER.info("Cluster update requested for stack '{}' [BlueprintId: {}]", stackId, stack.getCluster().getBlueprint().getId());
-        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_NODE_AMBARI_UPDATE_NODE_EVENT, stack.getId());
-        reactor.notify(ReactorConfig.ADD_NODE_AMBARI_UPDATE_NODE_EVENT, Event.wrap(
-                new AmbariAddNode(stackId, stack.getAmbariIp(), hostGroupAdjustments)));
+        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_AMBARI_HOSTS_REQUEST_EVENT, stack.getId());
+        reactor.notify(ReactorConfig.ADD_AMBARI_HOSTS_REQUEST_EVENT, Event.wrap(
+                new AddAmbariHostsRequest(stackId, stack.getAmbariIp(), hostGroupAdjustments)));
     }
 
     @Override

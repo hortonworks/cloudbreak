@@ -19,7 +19,6 @@ import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.event.AmbariRoleAllocationComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.StackCreationFailure;
-import com.sequenceiq.cloudbreak.service.stack.event.domain.CoreInstanceMetaData;
 
 @Service
 public class AmbariRoleAllocator {

@@ -1,11 +1,11 @@
-package com.sequenceiq.cloudbreak.service.stack.event;
+package com.sequenceiq.cloudbreak.service.cluster.event;
 
-public class AddNodeSuccess {
+public class AddAmbariHostsSuccess {
 
     private Long clusterId;
     private String ambariIp;
 
-    public AddNodeSuccess(Long clusterId, String ambariIp) {
+    public AddAmbariHostsSuccess(Long clusterId, String ambariIp) {
         this.clusterId = clusterId;
         this.ambariIp = ambariIp;
     }

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.stack.handler.node;
+package com.sequenceiq.cloudbreak.service.cluster.handler;
 
 import java.util.Map;
 
@@ -14,14 +14,14 @@ import reactor.function.Consumer;
 
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
-import com.sequenceiq.cloudbreak.service.cluster.AmbariClusterInstaller;
+import com.sequenceiq.cloudbreak.service.cluster.event.AddAmbariHostsRequest;
+import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterInstaller;
 import com.sequenceiq.cloudbreak.service.stack.connector.Provisioner;
-import com.sequenceiq.cloudbreak.service.stack.event.AmbariAddNode;
 
 @Component
-public class AddNodeAmbariUpdateRequestHandler implements Consumer<Event<AmbariAddNode>> {
+public class AddAmbariHostsRequestHandler implements Consumer<Event<AddAmbariHostsRequest>> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AddNodeAmbariUpdateRequestHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AddAmbariHostsRequestHandler.class);
 
     @Autowired
     private AmbariClusterInstaller ambariClusterInstaller;
@@ -30,9 +30,9 @@ public class AddNodeAmbariUpdateRequestHandler implements Consumer<Event<AmbariA
     private Map<CloudPlatform, Provisioner> provisioners;
 
     @Override
-    public void accept(Event<AmbariAddNode> event) {
-        AmbariAddNode data = event.getData();
-        LOGGER.info("Accepted {} event.", ReactorConfig.ADD_NODE_AMBARI_UPDATE_NODE_EVENT, data.getStackId());
+    public void accept(Event<AddAmbariHostsRequest> event) {
+        AddAmbariHostsRequest data = event.getData();
+        LOGGER.info("Accepted {} event.", ReactorConfig.ADD_AMBARI_HOSTS_REQUEST_EVENT, data.getStackId());
         ambariClusterInstaller.installAmbariNode(data.getStackId(), data.getHosts());
     }
 }

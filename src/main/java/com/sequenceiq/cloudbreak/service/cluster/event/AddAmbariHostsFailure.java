@@ -1,11 +1,11 @@
-package com.sequenceiq.cloudbreak.service.stack.event;
+package com.sequenceiq.cloudbreak.service.cluster.event;
 
-public class AddNodeFailed {
+public class AddAmbariHostsFailure {
 
     private Long clusterId;
     private String detailedMessage;
 
-    public AddNodeFailed(Long clusterId, String detailedMessage) {
+    public AddAmbariHostsFailure(Long clusterId, String detailedMessage) {
         this.clusterId = clusterId;
         this.detailedMessage = detailedMessage;
     }

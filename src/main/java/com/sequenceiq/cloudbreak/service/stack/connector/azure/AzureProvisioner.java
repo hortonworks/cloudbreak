@@ -41,7 +41,7 @@ import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
 import com.sequenceiq.cloudbreak.service.stack.connector.Provisioner;
-import com.sequenceiq.cloudbreak.service.stack.event.AddNodeComplete;
+import com.sequenceiq.cloudbreak.service.stack.event.AddInstancesComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
 
 import groovyx.net.http.HttpResponseDecorator;
@@ -144,8 +144,8 @@ public class AzureProvisioner implements Provisioner {
             resourceSet.add(new Resource(ResourceType.CLOUD_SERVICE, vmName, stack));
             resourceSet.add(new Resource(ResourceType.BLOB, vmName, stack));
         }
-        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_NODE_COMPLETE_EVENT, stack.getId());
-        reactor.notify(ReactorConfig.ADD_NODE_COMPLETE_EVENT, Event.wrap(new AddNodeComplete(CloudPlatform.AZURE, stack.getId(), resourceSet)));
+        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT, stack.getId());
+        reactor.notify(ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT, Event.wrap(new AddInstancesComplete(CloudPlatform.AZURE, stack.getId(), resourceSet)));
     }
 
     @Override

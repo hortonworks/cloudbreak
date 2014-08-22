@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.stack.handler.node;
+package com.sequenceiq.cloudbreak.service.stack.handler;
 
 import java.util.Set;
 
@@ -8,27 +8,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
-import com.sequenceiq.cloudbreak.service.stack.event.AddNodeMetadataSetupComplete;
-import com.sequenceiq.cloudbreak.service.stack.event.domain.CoreInstanceMetaData;
+import com.sequenceiq.cloudbreak.service.stack.event.MetadataUpdateComplete;
 import com.sequenceiq.cloudbreak.service.stack.flow.AmbariRoleAllocator;
+import com.sequenceiq.cloudbreak.service.stack.flow.CoreInstanceMetaData;
 
 import reactor.event.Event;
 import reactor.function.Consumer;
 
 @Component
-public class AddNodeMetadataSetupCompleteHandler implements Consumer<Event<AddNodeMetadataSetupComplete>> {
+public class MetadataUpdateCompleteHandler implements Consumer<Event<MetadataUpdateComplete>> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AddNodeMetadataSetupCompleteHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MetadataUpdateCompleteHandler.class);
 
     @Autowired
     private AmbariRoleAllocator ambariRoleAllocator;
 
     @Override
-    public void accept(Event<AddNodeMetadataSetupComplete> event) {
-        AddNodeMetadataSetupComplete data = event.getData();
+    public void accept(Event<MetadataUpdateComplete> event) {
+        MetadataUpdateComplete data = event.getData();
         Long stackId = data.getStackId();
         Set<CoreInstanceMetaData> coreInstanceMetaData = data.getCoreInstanceMetaData();
-        LOGGER.info("Accepted {} event.", ReactorConfig.ADD_NODE_UPDATE_METADATA_EVENT_COMPLETE, stackId);
+        LOGGER.info("Accepted {} event.", ReactorConfig.METADATA_UPDATE_COMPLETE_EVENT, stackId);
         ambariRoleAllocator.updateInstanceMetadata(stackId, coreInstanceMetaData);
     }
 }

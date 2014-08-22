@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.cluster;
+package com.sequenceiq.cloudbreak.service.cluster.flow;
 
 import groovyx.net.http.HttpResponseException;
 
@@ -32,9 +32,15 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.cluster.AmbariClusterService;
+import com.sequenceiq.cloudbreak.service.cluster.AmbariHostsUnavailableException;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterInstallFailedException;
+import com.sequenceiq.cloudbreak.service.cluster.HadoopConfiguration;
+import com.sequenceiq.cloudbreak.service.cluster.event.AddAmbariHostsFailure;
+import com.sequenceiq.cloudbreak.service.cluster.event.AddAmbariHostsSuccess;
+import com.sequenceiq.cloudbreak.service.cluster.event.ClusterCreationFailure;
+import com.sequenceiq.cloudbreak.service.cluster.event.ClusterCreationSuccess;
 import com.sequenceiq.cloudbreak.service.stack.connector.HadoopConfigurationProvider;
-import com.sequenceiq.cloudbreak.service.stack.event.AddNodeFailed;
-import com.sequenceiq.cloudbreak.service.stack.event.AddNodeSuccess;
 
 @Service
 public class AmbariClusterInstaller {
@@ -208,13 +214,13 @@ public class AmbariClusterInstaller {
     }
 
     private void addNodeToCreateSuccess(Cluster cluster, String ambariIp) {
-        LOGGER.info("Publishing {} event [ClusterId: '{}']", ReactorConfig.ADD_NODE_AMBARI_UPDATE_NODE_SUCCESS_EVENT, cluster.getId());
-        reactor.notify(ReactorConfig.ADD_NODE_AMBARI_UPDATE_NODE_SUCCESS_EVENT, Event.wrap(new AddNodeSuccess(cluster.getId(), ambariIp)));
+        LOGGER.info("Publishing {} event [ClusterId: '{}']", ReactorConfig.ADD_AMBARI_HOSTS_SUCCESS_EVENT, cluster.getId());
+        reactor.notify(ReactorConfig.ADD_AMBARI_HOSTS_SUCCESS_EVENT, Event.wrap(new AddAmbariHostsSuccess(cluster.getId(), ambariIp)));
     }
 
     private void addNodeToCreateFailed(Cluster cluster, String message) {
-        LOGGER.info("Publishing {} event [ClusterId: '{}']", ReactorConfig.ADD_NODE_AMBARI_UPDATE_NODE_FAILED_EVENT, cluster.getId());
-        reactor.notify(ReactorConfig.ADD_NODE_AMBARI_UPDATE_NODE_FAILED_EVENT, Event.wrap(new AddNodeFailed(cluster.getId(), message)));
+        LOGGER.info("Publishing {} event [ClusterId: '{}']", ReactorConfig.ADD_AMBARI_HOSTS_FAILED_EVENT, cluster.getId());
+        reactor.notify(ReactorConfig.ADD_AMBARI_HOSTS_FAILED_EVENT, Event.wrap(new AddAmbariHostsFailure(cluster.getId(), message)));
     }
 
     public void sleep(int duration) {

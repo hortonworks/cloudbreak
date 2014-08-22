@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.stack.event.domain;
+package com.sequenceiq.cloudbreak.service.stack.flow;
 
 public class CoreInstanceMetaData {
 

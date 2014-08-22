@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
-import com.sequenceiq.cloudbreak.service.cluster.AmbariClusterInstallerMailSenderService;
+import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterInstallerMailSenderService;
 import com.sequenceiq.cloudbreak.service.stack.event.StackCreationFailure;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;

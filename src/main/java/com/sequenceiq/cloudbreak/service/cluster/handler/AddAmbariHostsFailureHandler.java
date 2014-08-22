@@ -1,26 +1,26 @@
-package com.sequenceiq.cloudbreak.service.stack.handler.node;
+package com.sequenceiq.cloudbreak.service.cluster.handler;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import reactor.event.Event;
+import reactor.function.Consumer;
+
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
-import com.sequenceiq.cloudbreak.service.stack.event.AddNodeFailed;
+import com.sequenceiq.cloudbreak.service.cluster.event.AddAmbariHostsFailure;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
-import reactor.event.Event;
-import reactor.function.Consumer;
-
 @Service
-public class AddNodeAmbariUpdateFailedHandler implements Consumer<Event<AddNodeFailed>> {
+public class AddAmbariHostsFailureHandler implements Consumer<Event<AddAmbariHostsFailure>> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AddNodeAmbariUpdateFailedHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AddAmbariHostsFailureHandler.class);
 
     @Autowired
     private WebsocketService websocketService;
@@ -29,10 +29,10 @@ public class AddNodeAmbariUpdateFailedHandler implements Consumer<Event<AddNodeF
     private ClusterRepository clusterRepository;
 
     @Override
-    public void accept(Event<AddNodeFailed> event) {
-        AddNodeFailed data = event.getData();
+    public void accept(Event<AddAmbariHostsFailure> event) {
+        AddAmbariHostsFailure data = event.getData();
         Cluster cluster = clusterRepository.findById(data.getClusterId());
-        LOGGER.info("Accepted {} event.", ReactorConfig.ADD_NODE_AMBARI_UPDATE_NODE_FAILED_EVENT);
+        LOGGER.info("Accepted {} event.", ReactorConfig.ADD_AMBARI_HOSTS_FAILED_EVENT);
         websocketService.sendToTopicUser(cluster.getUser().getEmail(), WebsocketEndPoint.CLUSTER,
                 new StatusMessage(data.getClusterId(), cluster.getName(), Status.CREATE_FAILED.name()));
     }

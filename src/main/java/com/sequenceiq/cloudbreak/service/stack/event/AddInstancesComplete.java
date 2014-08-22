@@ -5,10 +5,11 @@ import java.util.Set;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Resource;
 
-public class AddNodeComplete extends ProvisionEvent {
+public class AddInstancesComplete extends ProvisionEvent {
+
     private Set<Resource> resources;
 
-    public AddNodeComplete(CloudPlatform cloudPlatform, Long stackId, Set<Resource> resources) {
+    public AddInstancesComplete(CloudPlatform cloudPlatform, Long stackId, Set<Resource> resources) {
         super(cloudPlatform, stackId);
         this.resources = resources;
     }

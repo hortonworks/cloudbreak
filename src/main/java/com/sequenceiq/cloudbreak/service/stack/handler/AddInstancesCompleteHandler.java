@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.stack.handler.node;
+package com.sequenceiq.cloudbreak.service.stack.handler;
 
 import java.util.Set;
 
@@ -16,13 +16,13 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.stack.event.AddNodeComplete;
+import com.sequenceiq.cloudbreak.service.stack.event.AddInstancesComplete;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupContext;
 
 @Component
-public class AddNodeCompleteHandler implements Consumer<Event<AddNodeComplete>> {
+public class AddInstancesCompleteHandler implements Consumer<Event<AddInstancesComplete>> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AddNodeCompleteHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AddInstancesCompleteHandler.class);
 
     @Autowired
     private StackRepository stackRepository;
@@ -34,12 +34,12 @@ public class AddNodeCompleteHandler implements Consumer<Event<AddNodeComplete>> 
     private RetryingStackUpdater retryingStackUpdater;
 
     @Override
-    public void accept(Event<AddNodeComplete> event) {
-        AddNodeComplete data = event.getData();
+    public void accept(Event<AddInstancesComplete> event) {
+        AddInstancesComplete data = event.getData();
         CloudPlatform cloudPlatform = data.getCloudPlatform();
         Long stackId = data.getStackId();
         Set<Resource> resourcesSet = event.getData().getResources();
-        LOGGER.info("Accepted {} event on stack '{}'.", ReactorConfig.ADD_NODE_COMPLETE_EVENT, stackId);
+        LOGGER.info("Accepted {} event on stack '{}'.", ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT, stackId);
         if (resourcesSet != null) {
             Stack stack = stackRepository.findOneWithLists(stackId);
             Set<Resource> resources = stack.getResources();
