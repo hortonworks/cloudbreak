@@ -18,7 +18,7 @@ public class AmbariClusterRegistry implements ClusterRegistry {
     private final Map<Long, Cluster> clusters = new ConcurrentHashMap<>();
 
     @Override
-    public Cluster add(Cluster cluster) throws ConnectionException {
+    public Cluster add(Cluster cluster) {
         // TODO should be per user registry
         long id = cluster.getId();
         clusters.put(id, cluster);

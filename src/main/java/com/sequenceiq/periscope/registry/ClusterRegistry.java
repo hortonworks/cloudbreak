@@ -9,7 +9,7 @@ public interface ClusterRegistry {
     /**
      * Adds a new hadoop cluster to the registry.
      */
-    Cluster add(Cluster cluster) throws ConnectionException;
+    Cluster add(Cluster cluster);
 
     /**
      * Removes a cluster from the registry.
