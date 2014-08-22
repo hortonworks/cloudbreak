@@ -4,6 +4,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -157,6 +158,7 @@ public class SimpleUserService implements UserService {
         } else {
             throw new UnsupportedOperationException(String.format("Invite role is too high %s", role));
         }
+        invitedUser.setRegistrationDate(Calendar.getInstance().getTime());
         invitedUser = userRepository.save(invitedUser);
 
         Map<String, Object> model = new HashMap<>();
@@ -282,9 +284,13 @@ public class SimpleUserService implements UserService {
 
         cal.add(Calendar.DAY_OF_MONTH, -1 * inviteExpiryInDays);
         Date expiryDate = cal.getTime();
-        LOGGER.info("Expiry date: {}", cal.getTime());
-        userRepository.expireInvites(expiryDate);
+        LOGGER.info("Expiry date: {}", expiryDate);
+        List<Long> expiredIds = userRepository.expiredInvites(expiryDate);
 
+        if (null != expiredIds && !expiredIds.isEmpty()) {
+            userRepository.deleteRoles(expiredIds);
+            userRepository.expireInvites(expiredIds);
+        }
         LOGGER.info("Expire invites DONE.");
     }
 }
