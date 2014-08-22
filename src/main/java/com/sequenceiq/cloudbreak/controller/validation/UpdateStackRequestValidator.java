@@ -14,10 +14,10 @@ public class UpdateStackRequestValidator implements ConstraintValidator<ValidUpd
 
     @Override
     public boolean isValid(UpdateStackJson value, ConstraintValidatorContext context) {
-        if (value.getStatus() != null && value.getNodeCount() != null) {
+        if (value.getStatus() != null && value.getScalingAdjustment() != null) {
             addConstraintViolation(context, "Invalid PUT request on this resource. NodeCount and status cannot be set in the same request.");
             return false;
-        } else if (value.getStatus() == null && value.getNodeCount() == null) {
+        } else if (value.getStatus() == null && value.getScalingAdjustment() == null) {
             addConstraintViolation(context, "Invalid PUT request on this resource. It should contain an update on the status or the node count.");
             return false;
         }

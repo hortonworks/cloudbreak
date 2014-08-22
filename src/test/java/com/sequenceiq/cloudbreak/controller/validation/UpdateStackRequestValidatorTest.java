@@ -45,7 +45,7 @@ public class UpdateStackRequestValidatorTest {
     @Test
     public void testIsValidShouldReturnTrueWhenStatusIsUpdated() {
         UpdateStackJson updateStackJson = new UpdateStackJson();
-        updateStackJson.setNodeCount(null);
+        updateStackJson.setScalingAdjustment(null);
         updateStackJson.setStatus(StatusRequest.STARTED);
         boolean valid = underTest.isValid(updateStackJson, constraintValidatorContext);
         assertTrue(valid);
@@ -54,7 +54,7 @@ public class UpdateStackRequestValidatorTest {
     @Test
     public void testIsValidShouldReturnTrueWhenNodeCountIsUpdated() {
         UpdateStackJson updateStackJson = new UpdateStackJson();
-        updateStackJson.setNodeCount(12);
+        updateStackJson.setScalingAdjustment(12);
         updateStackJson.setStatus(null);
         boolean valid = underTest.isValid(updateStackJson, constraintValidatorContext);
         assertTrue(valid);
@@ -63,7 +63,7 @@ public class UpdateStackRequestValidatorTest {
     @Test
     public void testIsValidShouldReturnFalseWhenRequestContainsNodeCountAndStatus() {
         UpdateStackJson updateStackJson = new UpdateStackJson();
-        updateStackJson.setNodeCount(4);
+        updateStackJson.setScalingAdjustment(4);
         updateStackJson.setStatus(StatusRequest.STARTED);
         boolean valid = underTest.isValid(updateStackJson, constraintValidatorContext);
         assertFalse(valid);
@@ -73,7 +73,7 @@ public class UpdateStackRequestValidatorTest {
     public void testIsValidShouldReturnFalseWhenRequestContainsOnlyNulls() {
 
         UpdateStackJson updateStackJson = new UpdateStackJson();
-        updateStackJson.setNodeCount(null);
+        updateStackJson.setScalingAdjustment(null);
         updateStackJson.setStatus(null);
         boolean valid = underTest.isValid(updateStackJson, constraintValidatorContext);
         assertFalse(valid);

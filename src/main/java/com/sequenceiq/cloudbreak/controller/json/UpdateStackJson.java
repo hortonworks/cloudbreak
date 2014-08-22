@@ -11,7 +11,7 @@ public class UpdateStackJson implements JsonEntity {
     private StatusRequest status;
 
     @Digits(fraction = 0, integer = 10, message = "Node count has to be a number")
-    private Integer nodeCount;
+    private Integer scalingAdjustment;
 
     public UpdateStackJson() {
 
@@ -25,11 +25,11 @@ public class UpdateStackJson implements JsonEntity {
         this.status = status;
     }
 
-    public Integer getNodeCount() {
-        return nodeCount;
+    public Integer getScalingAdjustment() {
+        return scalingAdjustment;
     }
 
-    public void setNodeCount(Integer nodeCount) {
-        this.nodeCount = nodeCount;
+    public void setScalingAdjustment(Integer scalingAdjustment) {
+        this.scalingAdjustment = scalingAdjustment;
     }
 }

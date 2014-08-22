@@ -59,16 +59,17 @@ public class ClusterController {
     @ResponseBody
     public ResponseEntity<String> updateCluster(@CurrentUser User user, @PathVariable Long stackId, @RequestBody UpdateClusterJson updateClusterJson) {
         Stack stack = stackService.get(user, stackId);
-        if (stack.getStatus().equals(Status.AVAILABLE)) {
-            if (updateClusterJson.getStatus() != null) {
-                clusterService.updateStatus(user, stackId, updateClusterJson.getStatus());
-                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-            } else {
-                clusterService.updateHosts(user, stackId, updateClusterJson.getHosts());
-                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-            }
+        if (!stack.getStatus().equals(Status.AVAILABLE)) {
+            throw new BadRequestException(String.format(
+                    "Stack '%s' is currently in '%s' state. PUT requests to a cluster can only be made if the underlying stack is 'AVAILABLE'.", stackId,
+                    stack.getStatus()));
+        }
+        if (updateClusterJson.getStatus() != null) {
+            clusterService.updateStatus(user, stackId, updateClusterJson.getStatus());
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
-            return new ResponseEntity<String>("Put is not enabled when stack is not ready for update.", HttpStatus.NO_CONTENT);
+            clusterService.updateHosts(user, stackId, updateClusterJson.getHostGroupAdjustments());
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
     }
 }

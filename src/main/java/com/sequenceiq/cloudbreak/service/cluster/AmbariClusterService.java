@@ -1,13 +1,19 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
+import groovyx.net.http.HttpResponseException;
+
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import reactor.core.Reactor;
+import reactor.event.Event;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,7 +23,7 @@ import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.controller.json.HostGroupJson;
+import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StatusRequest;
@@ -26,10 +32,6 @@ import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.event.AmbariAddNode;
-
-import groovyx.net.http.HttpResponseException;
-import reactor.core.Reactor;
-import reactor.event.Event;
 
 @Service
 public class AmbariClusterService implements ClusterService {
@@ -40,7 +42,6 @@ public class AmbariClusterService implements ClusterService {
 
     @Autowired
     private StackRepository stackRepository;
-
 
     @Autowired
     private ClusterRepository clusterRepository;
@@ -92,13 +93,33 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
-    public void updateHosts(User user, Long stackId, Set<HostGroupJson> hosts) {
+    public void updateHosts(User user, Long stackId, Set<HostGroupAdjustmentJson> hostGroupAdjustments) {
         Stack stack = stackRepository.findOneWithLists(stackId);
-        for (HostGroupJson hostGroup : hosts) {
+        int sumScalingAdjustments = 0;
+        for (HostGroupAdjustmentJson hostGroupAdjustment : hostGroupAdjustments) {
+            int scalingAdjustment = hostGroupAdjustment.getScalingAdjustment();
+            if (scalingAdjustment < 0) {
+                throw new BadRequestException(String.format("Requested scaling adjustment on hostGroup '%s' is negative (%s), but "
+                        + "node decommision is not yet supported by the Cloudbreak API.",
+                        hostGroupAdjustment.getHostGroup(), scalingAdjustment));
+            }
+            sumScalingAdjustments += scalingAdjustment;
+        }
+        AmbariClient ambariClient = new AmbariClient(stack.getAmbariIp());
+        List<String> unregisteredHosts = ambariClient.getUnregisteredHostNames();
+        if (unregisteredHosts.size() == 0) {
+            throw new BadRequestException(String.format(
+                    "There are no unregistered hosts in stack '%s'. Add some additional nodes to the stack before adding new hosts to the cluster.", stackId));
+        }
+        if (unregisteredHosts.size() < sumScalingAdjustments) {
+            throw new BadRequestException(String.format("Number of unregistered hosts in the stack is %s, but %s would be needed to complete the request.",
+                    unregisteredHosts.size(), sumScalingAdjustments));
+        }
+        for (HostGroupAdjustmentJson hostGroupAdjustment : hostGroupAdjustments) {
             try {
-                if (!assignableHostgroup(stack.getCluster(), hostGroup.getName())) {
+                if (!assignableHostgroup(stack.getCluster(), hostGroupAdjustment.getHostGroup())) {
                     throw new BadRequestException(String.format("Invalid hostgroup: blueprint %s does not contain %s hostgroup.",
-                            stack.getCluster().getBlueprint().getId(), hostGroup.getName()));
+                            stack.getCluster().getBlueprint().getId(), hostGroupAdjustment.getHostGroup()));
                 }
             } catch (Exception e) {
                 throw new BadRequestException(String.format("Stack %s put occurs a problem '%s': %s", stackId, e.getMessage(), e));
@@ -107,7 +128,7 @@ public class AmbariClusterService implements ClusterService {
         LOGGER.info("Cluster update requested for stack '{}' [BlueprintId: {}]", stackId, stack.getCluster().getBlueprint().getId());
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_NODE_AMBARI_UPDATE_NODE_EVENT, stack.getId());
         reactor.notify(ReactorConfig.ADD_NODE_AMBARI_UPDATE_NODE_EVENT, Event.wrap(
-            new AmbariAddNode(stackId, stack.getAmbariIp(), hosts)));
+                new AmbariAddNode(stackId, stack.getAmbariIp(), hostGroupAdjustments)));
     }
 
     private Boolean assignableHostgroup(Cluster cluster, String hostgroup) throws IOException {
@@ -125,7 +146,7 @@ public class AmbariClusterService implements ClusterService {
 
     @Override
     public void updateStatus(User user, Long stackId, StatusRequest statusRequest) {
-        // TODO implement start/stop
+        throw new BadRequestException("Stopping/restarting a cluster is not yet supported");
     }
 
     @VisibleForTesting

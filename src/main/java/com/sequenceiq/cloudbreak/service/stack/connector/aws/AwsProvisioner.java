@@ -97,8 +97,8 @@ public class AwsProvisioner implements Provisioner {
     }
 
     @Override
-    public void addNode(Stack stack, String userData, Integer nodeCount) {
-        Integer requiredInstances = stack.getNodeCount() + nodeCount;
+    public void addNode(Stack stack, String userData, Integer scalingAdjustment) {
+        Integer requiredInstances = stack.getNodeCount() + scalingAdjustment;
         Regions region = ((AwsTemplate) stack.getTemplate()).getRegion();
         AwsCredential credential = (AwsCredential) stack.getCredential();
         AmazonAutoScalingClient amazonASClient = awsStackUtil.createAutoScalingClient(region, credential);
@@ -109,7 +109,7 @@ public class AwsProvisioner implements Provisioner {
                 .withMaxSize(requiredInstances)
                 .withDesiredCapacity(requiredInstances));
         LOGGER.info("Updated AutoScaling group's desiredCapacity: [stack: '{}', from: '{}', to: '{}']", stack.getId(), stack.getNodeCount(),
-                stack.getNodeCount() + nodeCount);
+                stack.getNodeCount() + scalingAdjustment);
         AutoScalingGroupReady asGroupReady = new AutoScalingGroupReady(amazonEC2Client, amazonASClient, asGroupName, requiredInstances);
         LOGGER.info("Polling autoscaling group until new instances are ready. [stack: {}, asGroup: {}]", stack.getId(), asGroupName);
         pollingService.pollWithTimeout(asGroupStatusCheckerTask, asGroupReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);

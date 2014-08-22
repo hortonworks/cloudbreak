@@ -7,7 +7,7 @@ import com.sequenceiq.cloudbreak.domain.StatusRequest;
 
 public class UpdateClusterJson implements JsonEntity {
 
-    private Set<HostGroupJson> hosts = new HashSet<>();
+    private Set<HostGroupAdjustmentJson> hostGroupAdjustments = new HashSet<>();
     private StatusRequest status;
 
     public UpdateClusterJson() {
@@ -22,11 +22,11 @@ public class UpdateClusterJson implements JsonEntity {
         this.status = status;
     }
 
-    public Set<HostGroupJson> getHosts() {
-        return hosts;
+    public Set<HostGroupAdjustmentJson> getHostGroupAdjustments() {
+        return hostGroupAdjustments;
     }
 
-    public void setHosts(Set<HostGroupJson> hosts) {
-        this.hosts = hosts;
+    public void setHostGroupAdjustments(Set<HostGroupAdjustmentJson> hostGroupAdjustments) {
+        this.hostGroupAdjustments = hostGroupAdjustments;
     }
 }

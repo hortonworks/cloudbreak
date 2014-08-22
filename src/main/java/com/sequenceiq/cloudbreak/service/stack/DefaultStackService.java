@@ -143,29 +143,29 @@ public class DefaultStackService implements StackService {
 
     @Override
     public void updateStatus(User user, Long stackId, StatusRequest status) {
-        // TODO implement start/stop
+        throw new BadRequestException("Stopping/restarting a stack is not yet supported");
     }
 
     @Override
-    public void updateNodeCount(User user, Long stackId, Integer nodeCount) {
+    public void updateNodeCount(User user, Long stackId, Integer scalingAdjustment) {
         Stack stack = stackRepository.findOne(stackId);
         if (!Status.AVAILABLE.equals(stack.getStatus())) {
             throw new BadRequestException(String.format("Stack '%s' is currently in '%s' state. Node count can only be updated if it's running.", stackId,
                     stack.getStatus()));
         }
-        if (stack.getNodeCount() == nodeCount) {
-            throw new BadRequestException(String.format("Stack '%s' already has exactly %s nodes. Nothing to do.", stackId, nodeCount));
+        if (0 == scalingAdjustment) {
+            throw new BadRequestException(String.format("Requested scaling adjustment on stack '%s' is 0. Nothing to do.", stackId, scalingAdjustment));
         }
-        if (stack.getNodeCount() > nodeCount) {
+        if (0 > scalingAdjustment) {
             throw new BadRequestException(
-                    String.format("Requested node count (%s) on stack '%s' is lower than the current node count (%s). "
-                            + "Decommisioning nodes is not yet supported by the Cloudbreak API.",
-                            nodeCount, stackId, stack.getNodeCount()));
+                    String.format("Requested scaling adjustment on stack '%s' is negative (%s), but "
+                            + "decommisioning nodes is not yet supported by the Cloudbreak API.",
+                            stackId, scalingAdjustment));
         }
         stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS);
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_NODE_REQUEST_EVENT, stack.getId());
         reactor.notify(ReactorConfig.ADD_NODE_REQUEST_EVENT,
-                Event.wrap(new AddNodeRequest(stack.getTemplate().cloudPlatform(), stack.getId(), nodeCount - stack.getNodeCount())));
+                Event.wrap(new AddNodeRequest(stack.getTemplate().cloudPlatform(), stack.getId(), scalingAdjustment)));
     }
 
     @Override

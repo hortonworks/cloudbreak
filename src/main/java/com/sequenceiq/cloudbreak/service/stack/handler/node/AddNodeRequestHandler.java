@@ -40,12 +40,12 @@ public class AddNodeRequestHandler implements Consumer<Event<AddNodeRequest>> {
         AddNodeRequest request = event.getData();
         CloudPlatform cloudPlatform = request.getCloudPlatform();
         Long stackId = request.getStackId();
-        Integer nodeCount = request.getNodeCount();
+        Integer scalingAdjustment = request.getScalingAdjustment();
         try {
             Stack one = stackRepository.findOneWithLists(stackId);
             LOGGER.info("Accepted {} event on stack: '{}'", ReactorConfig.ADD_NODE_REQUEST_EVENT, stackId);
             provisioners.get(cloudPlatform)
-                    .addNode(one, userDataBuilder.build(cloudPlatform, one.getHash(), new HashMap<String, String>()), nodeCount);
+                    .addNode(one, userDataBuilder.build(cloudPlatform, one.getHash(), new HashMap<String, String>()), scalingAdjustment);
         } catch (Exception e) {
             LOGGER.error("Unhandled exception occured while creating stack.", e);
             // TODO: should we do something else? websocket nofitication, status

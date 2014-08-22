@@ -4,19 +4,18 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 
 public class AddNodeRequest extends ProvisionEvent {
 
-    private Integer nodeCount;
+    private Integer scalingAdjustment;
 
-    public AddNodeRequest(CloudPlatform cloudPlatform, Long stackId, Integer nodeCount) {
+    public AddNodeRequest(CloudPlatform cloudPlatform, Long stackId, Integer scalingAdjustment) {
         super(cloudPlatform, stackId);
-        this.nodeCount = nodeCount;
+        this.scalingAdjustment = scalingAdjustment;
     }
 
-    public Integer getNodeCount() {
-        return nodeCount;
+    public Integer getScalingAdjustment() {
+        return scalingAdjustment;
     }
 
-    public void setNodeCount(Integer nodeCount) {
-        this.nodeCount = nodeCount;
+    public void setScalingAdjustment(Integer scalingAdjustment) {
+        this.scalingAdjustment = scalingAdjustment;
     }
-
 }

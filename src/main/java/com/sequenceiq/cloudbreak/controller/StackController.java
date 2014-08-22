@@ -91,7 +91,7 @@ public class StackController {
             stackService.updateStatus(user, stackId, updateStackJson.getStatus());
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
-            stackService.updateNodeCount(user, stackId, updateStackJson.getNodeCount());
+            stackService.updateNodeCount(user, stackId, updateStackJson.getScalingAdjustment());
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
     }

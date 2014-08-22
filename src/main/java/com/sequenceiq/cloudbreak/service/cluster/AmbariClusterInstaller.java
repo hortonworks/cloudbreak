@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
+import groovyx.net.http.HttpResponseException;
+
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
@@ -12,13 +14,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import reactor.core.Reactor;
+import reactor.event.Event;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.ambari.client.InvalidHostGroupHostAssociation;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
-import com.sequenceiq.cloudbreak.controller.json.HostGroupJson;
+import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -27,10 +32,6 @@ import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.service.stack.connector.HadoopConfigurationProvider;
 import com.sequenceiq.cloudbreak.service.stack.event.AddNodeFailed;
 import com.sequenceiq.cloudbreak.service.stack.event.AddNodeSuccess;
-
-import groovyx.net.http.HttpResponseException;
-import reactor.core.Reactor;
-import reactor.event.Event;
 
 @Service
 public class AmbariClusterInstaller {
@@ -83,16 +84,16 @@ public class AmbariClusterInstaller {
         }
     }
 
-    public void installAmbariNode(Stack stack, Set<HostGroupJson> hostgroups) {
+    public void installAmbariNode(Stack stack, Set<HostGroupAdjustmentJson> hostgroups) {
         Cluster cluster = stack.getCluster();
         AmbariClient ambariClient = createAmbariClient(stack.getAmbariIp());
         pollAmbariServer(stack, ambariClient);
         try {
             LOGGER.info("Add host to Ambari cluster for stack '{}' [Ambari server address: {}]", stack.getId(), stack.getAmbariIp());
             List<String> unregisteredHostNames = ambariClient.getUnregisteredHostNames();
-            for (HostGroupJson entry : hostgroups) {
-                for (int i = 0; i < entry.getNodeCount(); i++) {
-                    addHost(ambariClient, stack, unregisteredHostNames.get(0), entry.getName());
+            for (HostGroupAdjustmentJson entry : hostgroups) {
+                for (int i = 0; i < entry.getScalingAdjustment(); i++) {
+                    addHost(ambariClient, stack, unregisteredHostNames.get(0), entry.getHostGroup());
                     unregisteredHostNames.remove(0);
                 }
             }

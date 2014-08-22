@@ -71,7 +71,7 @@ public class AmbariRoleAllocator {
             originalMetadata.addAll(instanceMetaData);
             stackUpdater.updateStackMetaData(stackId, originalMetadata);
             stackUpdater.updateMetadataReady(stackId);
-            stackUpdater.updateNodeCount(stackId, originalMetadata.size() + coreInstanceMetaData.size());
+            stackUpdater.updateNodeCount(stackId, originalMetadata.size());
             stackUpdater.updateStackStatus(stackId, Status.AVAILABLE);
         } catch (WrongMetadataException e) {
             LOGGER.error(e.getMessage(), e);
