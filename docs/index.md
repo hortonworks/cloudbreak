@@ -329,7 +329,7 @@ An account user is a user who has been invited to join Cloudbreak by an account 
 When we have started to work on Cloudbreak, our main goal was to create an easy to use, cloud and Hadoop distribution agnostic Hadoop as a Service API. Though we always like to automate everything and approach things with a very DevOps mindset, as a side project we have created a UI for Cloudbreak as well.
 The goal of the UI is to ease to process and allow you to create a Hadoop cluster on your favourite cloud provider in `one-click`.
 
-![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/docs/docs/images/UI-screenshot.png)
+![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/UI-screenshot.png)
 
 The UI is built on the foundation of the Cloudbreak REST API. You can access the UI [here](https://cloudbreak.sequenceiq.com/).
 
