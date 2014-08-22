@@ -20,7 +20,7 @@ public class ScalingPolicy {
     private String name;
     private AdjustmentType adjustmentType;
     private int scalingAdjustment;
-    @OneToOne
+    @OneToOne(mappedBy = "scalingPolicy")
     private Alarm alarm;
     private String hostGroup;
 
