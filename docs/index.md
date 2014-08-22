@@ -39,6 +39,7 @@ Since the emergence of Hadoop 2 and the YARN based architecture we have a platfo
 
 The idea of YARN is to have a global ResourceManager (RM) and per-application ApplicationMaster (AM). The ResourceManager and per-node slave, the NodeManager (NM), form the data-computation framework. The ResourceManager is the ultimate authority that arbitrates resources among all the applications in the system. The per-application ApplicationMaster is, in effect, a framework specific library and is tasked with negotiating resources from the ResourceManager and working with the NodeManager(s) to execute and monitor the tasks.
 
+![](https://raw.githubusercontent.com/sequenceiq/periscope/master/docs/images/yarn-architecture.png)
 
 Different applications or different MapReduce job profiles have different resource needs, however since Hadoop 2 is a multi tenant platform the different users could have different access patterns or need for cluster capacity. In Hadoop 2.0 this is achieved through YARN schedulers — to allocate resources to various applications subject to constraints of capacities and queues. The Scheduler is responsible for allocating resources to the various running applications subject to familiar constraints of capacities, queues etc. The Scheduler is pure scheduler in the sense that it performs no monitoring or tracking of status for the application.
 
@@ -86,7 +87,7 @@ From Periscope point of view we consider a cluster `static` when the cluster cap
 This means that the hardware resources are already given - and the throughput can't be increased by adding new nodes.
 Periscope introspects the job submission process, monitors the applications and applies the following SLAs:
 
-  1. Application ordering - can guaranty that a higher priority application finishes before another one (supporting parallel or sequential execution)
+  1. Application ordering - can guarantee that a higher priority application finishes before another one (supporting parallel or sequential execution)
   2. Moves running applications between priority queues
   3. *Attempts* to enforce time based SLA (execution time, finish by, finish between, recurring)
   4. *Attempts* to enforce guaranteed cluster capacity requests ( x % of the resources)
@@ -102,10 +103,10 @@ Periscope works with [Cloudbreak](http://sequenceiq.com/cloudbreak/) to add or r
 Just to refresh memories - [Cloudbreak](http://sequenceiq.com/products.html) is [SequenceIQ's](http://sequenceiq.com) open source, cloud agnostic Hadoop as a Service API.
 Given the option of provisioning or decommissioning cluster nodes on the fly, Periscope allows you to use the following set of SLAs:
 
-  1. Application ordering - can guaranty that a higher priority application finishes before another one (supporting parallel or sequential execution)
+  1. Application ordering - can guarantee that a higher priority application finishes before another one (supporting parallel or sequential execution)
   2. Moves running applications between priority queues
   3. *Enforce* time based SLA (execution time, finish by, finish between, recurring) by increasing cluster capacity and throughput
-  4. Smart decommissioning - avoids HDFS storms, keeps `payed` nodes alive till the last minute
+  4. Smart decommissioning - avoids HDFS storms, keeps `paid` nodes alive till the last minute
   5. *Enforce* guaranteed cluster capacity requests ( x % of the resources)
   6. *Private* cluster requests - supports provisioning of short lived private clusters with the possibility to merge
   7. Support for distributed (but not YARN ready) applications using Apache Slider
