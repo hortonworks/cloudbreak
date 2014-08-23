@@ -11,8 +11,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.sequenceiq.periscope.model.ScalingPolicies;
 import com.sequenceiq.periscope.rest.converter.ScalingPoliciesConverter;
+import com.sequenceiq.periscope.rest.converter.ScalingPolicyConverter;
 import com.sequenceiq.periscope.rest.json.ScalingPoliciesJson;
+import com.sequenceiq.periscope.rest.json.ScalingPolicyJson;
 import com.sequenceiq.periscope.service.ClusterNotFoundException;
+import com.sequenceiq.periscope.service.NoScalingGroupException;
 import com.sequenceiq.periscope.service.ScalingService;
 
 @RestController
@@ -23,12 +26,21 @@ public class PolicyController {
     private ScalingService scalingService;
     @Autowired
     private ScalingPoliciesConverter policiesConverter;
+    @Autowired
+    private ScalingPolicyConverter policyConverter;
 
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<ScalingPoliciesJson> setScaling(@PathVariable long clusterId,
             @RequestBody ScalingPoliciesJson scalingPolicies) throws ClusterNotFoundException {
         return createScalingPoliciesJsonResponse(scalingService.setScalingPolicies(clusterId,
                 policiesConverter.convert(scalingPolicies)), HttpStatus.CREATED);
+    }
+
+    @RequestMapping(method = RequestMethod.PUT)
+    public ResponseEntity<ScalingPoliciesJson> addScaling(@PathVariable long clusterId,
+            @RequestBody ScalingPolicyJson scalingPolicy) throws ClusterNotFoundException, NoScalingGroupException {
+        policyConverter.convert(scalingPolicy);
+        return createScalingPoliciesJsonResponse(scalingService.addScalingPolicy(clusterId), HttpStatus.CREATED);
     }
 
     @RequestMapping(method = RequestMethod.GET)

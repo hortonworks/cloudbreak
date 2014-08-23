@@ -1555,7 +1555,7 @@ Also a `threshold` can be configured, which specifies the variance applied by th
 
 
 ##Add, remove and show [/clusters/{clusterId}/alarms]
-###Create an alarm [POST]
+###Set the alarms [POST]
 
 + Parameters
     + clusterId (required String `clusterID`) ... The id of the cluster.
@@ -1608,6 +1608,69 @@ Also a `threshold` can be configured, which specifies the variance applied by th
              "id": 51
             }
          ]
+        }
+
+###Add new alarm [PUT]
+
++ Parameters
+    + clusterId (required String `clusterID`) ... The id of the cluster.
+
++ Request (application/json)
+
+        {
+          "alarmName": "unhealthyNodesHigh",
+          "description": "Number of unhealthy nodes is high",
+          "metric": "UNHEALTHY_NODES",
+          "threshold": 5,
+          "comparisonOperator": "GREATER_OR_EQUAL_THAN",
+          "period": 5
+        }
+
++ Response 201 (application/json)
+
+        {
+          "alarms": [
+            {
+              "notifications": [],
+              "id": 100,
+              "alarmName": "pendingContainerHigh",
+              "description": "Number of pending containers is high",
+              "metric": "PENDING_CONTAINERS",
+              "threshold": 10,
+              "comparisonOperator": "GREATER_THAN",
+              "period": 1,
+              "scalingPolicyId": null
+            },
+            {
+              "notifications": [
+                {
+                  "notificationType": "EMAIL",
+                  "target": [
+                    "some1@gmail.com"
+                  ]
+                }
+              ],
+              "id": 101,
+              "alarmName": "freeGlobalResourcesRateLow",
+              "description": "Low free global resource rate",
+              "metric": "GLOBAL_RESOURCES",
+              "threshold": 1,
+              "comparisonOperator": "EQUALS",
+              "period": 1,
+              "scalingPolicyId": null
+            },
+            {
+              "notifications": [],
+              "id": 102,
+              "alarmName": "unhealthyNodesHigh",
+              "description": "Number of unhealthy nodes is high",
+              "metric": "UNHEALTHY_NODES",
+              "threshold": 5,
+              "comparisonOperator": "GREATER_OR_EQUAL_THAN",
+              "period": 5,
+              "scalingPolicyId": null
+            }
+          ]
         }
 
 ###Retrieve configured alarms [GET]
@@ -1686,7 +1749,7 @@ An SLA scaling policy can contain multiple alarms. As an alarm is triggered a  `
 
 
 ##Add, remove and show [/clusters/{clusterId}/policies]
-###Create a scaling policy. [POST]
+###Set the scaling policies. [POST]
 
 + Parameters
     + clusterId (required String `clusterID`) ... The id of the cluster.
@@ -1735,6 +1798,55 @@ An SLA scaling policy can contain multiple alarms. As an alarm is triggered a  `
               "adjustmentType": "NODE_COUNT",
               "name": "downScaleWhenHighResource",
               "id": 100
+            }
+          ],
+          "maxSize": 10,
+          "minSize": 2
+        }
+
+###Add a scaling policy. [PUT]
+
++ Parameters
+    + clusterId (required String `clusterID`) ... The id of the cluster.
+
++ Request (application/json)
+
+        {
+          "name": "upScaleWhenHighUnhealthyNodes",
+          "adjustmentType": "NODE_COUNT",
+          "scalingAdjustment": 5,
+          "hostGroup": "slave_1",
+          "alarmId": "102"
+        }
+
++ Response 201 (application/json)
+
+        {
+          "cooldown": 1,
+          "scalingPolicies": [
+            {
+              "hostGroup": "slave_1",
+              "alarmId": 100,
+              "scalingAdjustment": 40,
+              "adjustmentType": "PERCENTAGE",
+              "name": "upScaleWhenHighPendingContainers",
+              "id": 200
+            },
+            {
+              "hostGroup": "slave_1",
+              "alarmId": 101,
+              "scalingAdjustment": -2,
+              "adjustmentType": "NODE_COUNT",
+              "name": "downScaleWhenHighResource",
+              "id": 201
+            },
+            {
+              "hostGroup": "slave_1",
+              "alarmId": 102,
+              "scalingAdjustment": 5,
+              "adjustmentType": "NODE_COUNT",
+              "name": "upScaleWhenHighUnhealthyNodes",
+              "id": 202
             }
           ],
           "maxSize": 10,

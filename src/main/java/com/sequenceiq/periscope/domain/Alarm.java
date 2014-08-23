@@ -34,7 +34,7 @@ public class Alarm {
     private long alarmHitsSince;
     @Transient
     private boolean notificationSent;
-    @OneToOne(cascade = CascadeType.ALL, optional = true)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private ScalingPolicy scalingPolicy;
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Notification> notifications = new ArrayList<>();

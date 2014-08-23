@@ -24,10 +24,12 @@ curl -X POST -H "Content-Type: application/json" -d '{"setup":[{"name":"default"
 
 # set metric alarms
 curl -X POST -H "Content-Type: application/json" -d '{"alarms":[{"alarmName":"pendingContainerHigh","description":"Number of pending containers is high","metric":"PENDING_CONTAINERS","threshold":10,"comparisonOperator":"GREATER_THAN","period":1},{"alarmName":"freeGlobalResourcesRateLow","description":"Low free global resource rate","metric":"GLOBAL_RESOURCES","threshold":1,"comparisonOperator":"EQUALS","period":1,"notifications":[{"target":["some1@gmail.com"],"notificationType":"EMAIL"}]}]}' localhost:8081/clusters/1/alarms | jq .
+curl -X PUT -H "Content-Type: application/json" -d '{"alarmName":"unhealthyNodesHigh","description":"Number of unhealthy nodes is high","metric":"UNHEALTHY_NODES","threshold":5,"comparisonOperator":"GREATER_OR_EQUAL_THAN","period":5}' localhost:8081/clusters/1/alarms | jq .
 curl -X GET localhost:8081/clusters/1/alarms | jq .
 curl -X DELETE localhost:8081/clusters/1/alarms/100 | jq .
 
 # set scaling policy
 curl -X POST -H "Content-Type: application/json" -d '{"minSize":2,"maxSize":10,"cooldown":1,"scalingPolicies":[{"name":"downScaleWhenHighResource","adjustmentType":"NODE_COUNT","scalingAdjustment":-2,"hostGroup":"slave_1","alarmId":"101"},{"name":"upScaleWhenHighPendingContainers","adjustmentType":"PERCENTAGE","scalingAdjustment":40,"hostGroup":"slave_1","alarmId":"100"}]}' localhost:8081/clusters/1/policies | jq .
+curl -X PUT -H "Content-Type: application/json" -d '{"name":"upScaleWhenHighUnhealthyNodes","adjustmentType":"NODE_COUNT","scalingAdjustment":5,"hostGroup":"slave_1","alarmId":"102"}' localhost:8081/clusters/1/policies | jq .
 curl -X GET localhost:8081/clusters/1/policies | jq .
 curl -X DELETE localhost:8081/clusters/1/policies/150 | jq .

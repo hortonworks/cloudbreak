@@ -45,6 +45,24 @@ public class ScalingService {
         cluster.setCoolDown(scalingPolicies.getCoolDown());
         cluster.setMinSize(scalingPolicies.getMinSize());
         cluster.setMaxSize(scalingPolicies.getMaxSize());
+        List<ScalingPolicy> policies = scalingPolicies.getScalingPolicies();
+        List<Alarm> alarms = clusterRepository.findOne(clusterId).getAlarms();
+        for (Alarm alarm : alarms) {
+            if (!policies.contains(alarm.getScalingPolicy())) {
+                alarm.setScalingPolicy(null);
+            }
+        }
+        cluster.setAlarms(alarms);
+        clusterRepository.save(cluster);
+        return getScalingPolicies(cluster);
+    }
+
+    public ScalingPolicies addScalingPolicy(long clusterId) throws ClusterNotFoundException, NoScalingGroupException {
+        Cluster cluster = clusterService.get(clusterId);
+        if (cluster.getCoolDown() == -1 || cluster.getMinSize() == -1 || cluster.getMaxSize() == -1) {
+            throw new NoScalingGroupException(clusterId,
+                    "Scaling parameters are not provided (cooldown, minSize, maxSize). Use POST first.");
+        }
         cluster.setAlarms(clusterRepository.findOne(clusterId).getAlarms());
         clusterRepository.save(cluster);
         return getScalingPolicies(cluster);

@@ -48,9 +48,9 @@ public class Cluster {
     private ClusterState state = ClusterState.RUNNING;
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Alarm> alarms = new ArrayList<>();
-    private int minSize;
-    private int maxSize;
-    private int coolDown;
+    private int minSize = -1;
+    private int maxSize = -1;
+    private int coolDown = -1;
     @Transient
     private Map<Priority, Map<ApplicationId, SchedulerApplication>> applications;
     @Transient

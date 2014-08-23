@@ -15,6 +15,7 @@ import com.sequenceiq.periscope.rest.json.ExceptionMessageJson;
 import com.sequenceiq.periscope.rest.json.IdExceptionMessageJson;
 import com.sequenceiq.periscope.service.AlarmNotFoundException;
 import com.sequenceiq.periscope.service.ClusterNotFoundException;
+import com.sequenceiq.periscope.service.NoScalingGroupException;
 
 @ControllerAdvice
 public class ExceptionController {
@@ -37,6 +38,11 @@ public class ExceptionController {
     @ExceptionHandler(ClusterNotFoundException.class)
     public ResponseEntity<IdExceptionMessageJson> handleClusterNotFoundException(ClusterNotFoundException e) {
         return createIdExceptionMessage(e.getId(), "Cluster not found", HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(NoScalingGroupException.class)
+    public ResponseEntity<IdExceptionMessageJson> handleNoScalingGroupException(NoScalingGroupException e) {
+        return createIdExceptionMessage(e.getId(), e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(AlarmNotFoundException.class)
