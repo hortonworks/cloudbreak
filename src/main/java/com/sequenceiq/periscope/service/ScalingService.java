@@ -4,17 +4,18 @@ import static java.lang.Math.ceil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.periscope.domain.Alarm;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
 import com.sequenceiq.periscope.model.ScalingPolicies;
-import com.sequenceiq.periscope.repository.AlarmRepository;
 import com.sequenceiq.periscope.repository.ClusterRepository;
 import com.sequenceiq.periscope.utils.ClusterUtils;
 
@@ -28,15 +29,28 @@ public class ScalingService {
     @Autowired
     private ClusterRepository clusterRepository;
     @Autowired
-    private AlarmRepository alarmRepository;
+    private ExecutorService executorService;
+    @Autowired
+    private ApplicationContext applicationContext;
 
     public void scale(Cluster cluster, ScalingPolicy policy) {
-        int desiredNodeCount = getDesiredNodeCount(cluster, policy);
-        int totalNodes = cluster.getTotalNodes();
-        if (totalNodes != desiredNodeCount) {
-            scale(cluster, policy, totalNodes, desiredNodeCount);
+        if (canScale(cluster)) {
+            int totalNodes = ClusterUtils.getTotalNodes(cluster);
+            int desiredNodeCount = getDesiredNodeCount(cluster, policy, totalNodes);
+            if (totalNodes != desiredNodeCount) {
+                LOGGER.info("Sending scaling request for cluster: {}", cluster.getId());
+                ScalingRequest scalingRequest = (ScalingRequest)
+                        applicationContext.getBean("ScalingRequest", cluster, policy, totalNodes, desiredNodeCount);
+                executorService.execute(scalingRequest);
+                Alarm alarm = policy.getAlarm();
+                alarm.reset();
+                cluster.setLastScalingActivityCurrent();
+                LOGGER.info("Resetting time on alarm: {} on cluster: {}", alarm.getName(), cluster.getId());
+            } else {
+                LOGGER.info("No scaling activity required on {}", cluster.getId());
+            }
         } else {
-            LOGGER.info("No scaling activity required on {}", cluster.getId());
+            LOGGER.info("Cluster: {} is in cooling state, cannot scale", cluster.getId());
         }
     }
 
@@ -104,22 +118,6 @@ public class ScalingService {
         return group;
     }
 
-    private void scale(Cluster cluster, ScalingPolicy policy, int totalNodes, int desiredNodeCount) {
-        if (canScale(cluster)) {
-            if (desiredNodeCount > totalNodes) {
-                scaleUp(cluster, policy, totalNodes, desiredNodeCount);
-            } else if (desiredNodeCount < totalNodes) {
-                scaleDown(cluster, policy, totalNodes, desiredNodeCount);
-            }
-            Alarm alarm = policy.getAlarm();
-            alarm.reset();
-            cluster.setLastScalingActivityCurrent();
-            LOGGER.info("Resetting time on alarm: {} on cluster: {}", alarm.getName(), cluster.getId());
-        } else {
-            LOGGER.info("Cluster: {} is in cooling state, cannot scale", cluster.getId());
-        }
-    }
-
     private boolean canScale(Cluster cluster) {
         int coolDown = cluster.getCoolDown();
         long lastScalingActivity = cluster.getLastScalingActivity();
@@ -127,27 +125,19 @@ public class ScalingService {
                 || (System.currentTimeMillis() - lastScalingActivity) > (coolDown * ClusterUtils.MIN_IN_MS);
     }
 
-    private void scaleUp(Cluster cluster, ScalingPolicy policy, int totalNodes, int desiredNodeCount) {
-        LOGGER.info("Should add {} new nodes with cloudbreak to {}", desiredNodeCount - cluster.getTotalNodes(), cluster.getId());
-    }
-
-    private void scaleDown(Cluster cluster, ScalingPolicy policy, int totalNodes, int desiredNodeCount) {
-        LOGGER.info("Should remove {} nodes with cloudbreak from {}", cluster.getTotalNodes() - desiredNodeCount, cluster.getId());
-    }
-
-    private int getDesiredNodeCount(Cluster cluster, ScalingPolicy policy) {
+    private int getDesiredNodeCount(Cluster cluster, ScalingPolicy policy, int totalNodes) {
         int scalingAdjustment = policy.getScalingAdjustment();
         int desiredNodeCount;
         switch (policy.getAdjustmentType()) {
             case NODE_COUNT:
-                desiredNodeCount = cluster.getTotalNodes() + scalingAdjustment;
+                desiredNodeCount = totalNodes + scalingAdjustment;
                 break;
             case PERCENTAGE:
-                desiredNodeCount = cluster.getTotalNodes()
-                        + (int) (ceil(cluster.getTotalNodes() * ((double) scalingAdjustment / ClusterUtils.MAX_CAPACITY)));
+                desiredNodeCount = totalNodes
+                        + (int) (ceil(totalNodes * ((double) scalingAdjustment / ClusterUtils.MAX_CAPACITY)));
                 break;
             default:
-                desiredNodeCount = cluster.getTotalNodes();
+                desiredNodeCount = totalNodes;
         }
         int minSize = cluster.getMinSize();
         int maxSize = cluster.getMaxSize();

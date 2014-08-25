@@ -129,10 +129,6 @@ public class Cluster {
         this.coolDown = coolDown;
     }
 
-    public void setLastScalingActivity(long lastScalingActivity) {
-        this.lastScalingActivity = lastScalingActivity;
-    }
-
     public YarnClient getYarnClient() {
         return yarnClient;
     }
@@ -163,14 +159,6 @@ public class Cluster {
 
     public String getConfigValue(ConfigParam param, String defaultValue) {
         return configuration.get(param.key(), defaultValue);
-    }
-
-    public void addAlarms(List<Alarm> alarm) {
-        this.alarms.addAll(alarm);
-    }
-
-    public int getTotalNodes() {
-        return metrics == null ? 0 : metrics.getTotalNodes();
     }
 
     public long getTotalMB() {

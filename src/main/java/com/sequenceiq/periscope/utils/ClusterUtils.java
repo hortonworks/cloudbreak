@@ -9,6 +9,7 @@ import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.CapacitySchedule
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.ClusterMetricsInfo;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.SchedulerInfo;
 
+import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.periscope.domain.Cluster;
 
 public final class ClusterUtils {
@@ -47,5 +48,13 @@ public final class ClusterUtils {
                 addQueueInfo(queueInfoList, info.getQueues());
             }
         }
+    }
+
+    public static int getTotalNodes(Cluster cluster) {
+        return getTotalNodes(cluster.newAmbariClient());
+    }
+
+    public static int getTotalNodes(AmbariClient ambariClient) {
+        return ambariClient.getHostNames().size();
     }
 }
