@@ -22,10 +22,10 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.client.api.YarnClient;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.ClusterMetricsInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.periscope.log.Logger;
+import com.sequenceiq.periscope.log.PeriscopeLoggerFactory;
 import com.sequenceiq.periscope.model.Priority;
 import com.sequenceiq.periscope.model.SchedulerApplication;
 import com.sequenceiq.periscope.registry.ClusterState;
@@ -36,7 +36,7 @@ import com.sequenceiq.periscope.service.configuration.ConfigParam;
 @Entity
 public class Cluster {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Cluster.class);
+    private static final Logger LOGGER = PeriscopeLoggerFactory.getLogger(Cluster.class);
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "template_generator")
@@ -207,7 +207,7 @@ public class Cluster {
         }
         ApplicationId applicationId = application.getApplicationId();
         applicationMap.put(applicationId, application);
-        LOGGER.info("Application ({}) added to cluster {}", applicationId.toString(), id);
+        LOGGER.info(this.id, "Application '{}' added", applicationId.toString());
         return application;
     }
 
@@ -220,7 +220,7 @@ public class Cluster {
                 if (id.equals(applicationId)) {
                     SchedulerApplication application = apps.get(id);
                     iterator.remove();
-                    LOGGER.info("Application ({}) removed from cluster {}", applicationId, id);
+                    LOGGER.info(this.id, "Application '{}' removed", applicationId);
                     return application;
                 }
             }
@@ -272,7 +272,7 @@ public class Cluster {
 
     private void initConfiguration() throws ConnectionException {
         try {
-            configuration = AmbariConfigurationService.getConfiguration(newAmbariClient());
+            configuration = AmbariConfigurationService.getConfiguration(id, newAmbariClient());
             if (yarnClient != null) {
                 yarnClient.stop();
             }

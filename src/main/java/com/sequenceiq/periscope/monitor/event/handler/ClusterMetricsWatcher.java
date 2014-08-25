@@ -1,8 +1,6 @@
 package com.sequenceiq.periscope.monitor.event.handler;
 
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.ClusterMetricsInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
@@ -12,6 +10,8 @@ import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ComparisonOperator;
 import com.sequenceiq.periscope.domain.Notification;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
+import com.sequenceiq.periscope.log.Logger;
+import com.sequenceiq.periscope.log.PeriscopeLoggerFactory;
 import com.sequenceiq.periscope.monitor.event.ClusterMetricsUpdateEvent;
 import com.sequenceiq.periscope.service.ClusterNotFoundException;
 import com.sequenceiq.periscope.service.ClusterService;
@@ -21,7 +21,7 @@ import com.sequenceiq.periscope.utils.ClusterUtils;
 @Component
 public class ClusterMetricsWatcher implements ApplicationListener<ClusterMetricsUpdateEvent> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterMetricsWatcher.class);
+    private static final Logger LOGGER = PeriscopeLoggerFactory.getLogger(ClusterMetricsWatcher.class);
 
     @Autowired
     private ClusterService clusterService;
@@ -36,7 +36,7 @@ public class ClusterMetricsWatcher implements ApplicationListener<ClusterMetrics
             ClusterMetricsInfo metrics = event.getClusterMetricsInfo();
             cluster.updateMetrics(metrics);
             for (Alarm alarm : cluster.getAlarms()) {
-                LOGGER.info("Checking alarm: {} on cluster: {}", alarm.getName(), clusterId);
+                LOGGER.info(clusterId, "Checking alarm: {}", alarm.getName());
                 double value = getMetricValue(metrics, alarm);
                 if (alarmHit(value, alarm, clusterId)) {
                     handleNotifications(cluster, alarm);
@@ -44,7 +44,7 @@ public class ClusterMetricsWatcher implements ApplicationListener<ClusterMetrics
                 }
             }
         } catch (ClusterNotFoundException e) {
-            LOGGER.error("Cluster not found, id: " + clusterId, e);
+            LOGGER.error(clusterId, "Cluster not found", e);
         }
     }
 
@@ -106,10 +106,10 @@ public class ClusterMetricsWatcher implements ApplicationListener<ClusterMetrics
         boolean result = false;
         String alarmName = alarm.getName();
         if (valueHit) {
-            LOGGER.info("{} comparison hit for alarm: {}, on cluster: {}", operator, alarmName, clusterId);
+            LOGGER.info(clusterId, "{} comparison hit for alarm: {}", operator, alarmName);
             result = setAndCheckTime(alarm, clusterId);
         } else {
-            LOGGER.info("{} comparison failed for alarm: {}, on cluster: {}", operator, alarmName, clusterId);
+            LOGGER.info(clusterId, "{} comparison failed for alarm: {}", operator, alarmName);
             reset(alarm);
         }
         return result;
@@ -120,14 +120,14 @@ public class ClusterMetricsWatcher implements ApplicationListener<ClusterMetrics
         String alarmName = alarm.getName();
         long hitsSince = alarm.getAlarmHitsSince();
         if (hitsSince == 0) {
-            LOGGER.info("Counter starts until hit for alarm: {} on cluster: {}", alarmName, clusterId);
+            LOGGER.info(clusterId, "Counter starts until hit for alarm: {}", alarmName);
             setCurrentTime(alarm);
         } else {
             long elapsedTime = System.currentTimeMillis() - hitsSince;
             result = elapsedTime > (alarm.getPeriod() * ClusterUtils.MIN_IN_MS);
-            LOGGER.info("Alarm: {} stands since {}ms on cluster {}", alarmName, elapsedTime, clusterId);
+            LOGGER.info(clusterId, "Alarm: {} stands since {}ms", alarmName, elapsedTime);
             if (result) {
-                LOGGER.info("Alarm: {} HIT on cluster: {}", alarmName, clusterId);
+                LOGGER.info(clusterId, "Alarm: {} HIT", alarmName);
             }
         }
         return result;
@@ -151,7 +151,7 @@ public class ClusterMetricsWatcher implements ApplicationListener<ClusterMetrics
     private void handleNotifications(Cluster cluster, Alarm alarm) {
         if (!alarm.isNotificationSent()) {
             for (Notification notification : alarm.getNotifications()) {
-                LOGGER.info("Sending notification: {}", notification.getTarget());
+                LOGGER.info(cluster.getId(), "Sending notification: {}", notification.getTarget());
             }
             alarm.setNotificationSent(true);
         }

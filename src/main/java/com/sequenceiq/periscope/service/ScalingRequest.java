@@ -4,8 +4,6 @@ import static com.sequenceiq.periscope.utils.ClusterUtils.getTotalNodes;
 import static java.lang.Math.abs;
 import static java.util.Collections.singletonMap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -14,12 +12,14 @@ import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
+import com.sequenceiq.periscope.log.Logger;
+import com.sequenceiq.periscope.log.PeriscopeLoggerFactory;
 
 @Component("ScalingRequest")
 @Scope("prototype")
 public class ScalingRequest implements Runnable {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ScalingRequest.class);
+    private static final Logger LOGGER = PeriscopeLoggerFactory.getLogger(ScalingRequest.class);
     private static final int TIMEOUT = 1000 * 60 * 30;
     private static final int SLEEP = 5000;
     private final int desiredNodeCount;
@@ -60,18 +60,18 @@ public class ScalingRequest implements Runnable {
         long clusterId = cluster.getId();
         long startTime = System.currentTimeMillis();
         try {
-            LOGGER.info("Sending request to add {} instance(s) to cluster: {}", scalingAdjustment, clusterId);
+            LOGGER.info(clusterId, "Sending request to add {} instance(s)", scalingAdjustment);
             client.putStack(ambari, scalingAdjustment);
             boolean started = waitForInstancesToStart(cluster, startTime);
             if (started) {
-                LOGGER.info("Sending request to add host group node '{}' to cluster: {}", hostGroup, clusterId);
+                LOGGER.info(clusterId, "Sending request to add node(s) to host group '{}'", hostGroup);
                 client.putCluster(ambari, singletonMap(hostGroup, scalingAdjustment));
             } else {
-                LOGGER.info("Instance(s) didn't start in time, skipping scaling on cluster: {}", clusterId);
+                LOGGER.info(clusterId, "Instance(s) didn't start in time, skipping scaling");
                 // TODO should we terminate the launched instances?
             }
         } catch (Exception e) {
-            LOGGER.error("Error adding nodes to cluster: " + clusterId, e);
+            LOGGER.error(clusterId, "Error adding nodes to cluster", e);
         }
     }
 
@@ -81,18 +81,18 @@ public class ScalingRequest implements Runnable {
         long clusterId = cluster.getId();
         long startTime = System.currentTimeMillis();
         try {
-            LOGGER.info("Sending request to remove host group node '{}' from cluster: {}", hostGroup, clusterId);
+            LOGGER.info(clusterId, "Sending request to remove node(s) from host group '{}'", hostGroup);
             client.putCluster(ambari, singletonMap(hostGroup, scalingAdjustment));
             boolean stopped = waitForInstancesToStop(cluster, scalingAdjustment, startTime);
             if (stopped) {
-                LOGGER.info("Sending request to terminate {} instance(s) from cluster: {}", scalingAdjustment, clusterId);
+                LOGGER.info(clusterId, "Sending request to terminate {} instance(s)", scalingAdjustment);
                 client.putStack(ambari, scalingAdjustment);
             } else {
-                LOGGER.info("Instance(s) didn't stop in time, skipping scaling on cluster: {}", clusterId);
+                LOGGER.info(clusterId, "Instance(s) didn't stop in time, skipping scaling");
                 // TODO should we force instance termination?
             }
         } catch (Exception e) {
-            LOGGER.error("Error removing nodes from cluster: " + clusterId, e);
+            LOGGER.error(clusterId, "Error removing nodes from the cluster", e);
         }
     }
 
@@ -106,7 +106,7 @@ public class ScalingRequest implements Runnable {
             }
             currentNodes = getTotalNodes(ambariClient);
             Thread.sleep(SLEEP);
-            LOGGER.info("Waiting for instances to start on cluster: {}", cluster.getId());
+            LOGGER.info(cluster.getId(), "Waiting for instances to start");
         }
         return result;
     }
@@ -122,7 +122,7 @@ public class ScalingRequest implements Runnable {
             }
             removedNodes = ambariClient.getUnregisteredHostNames().size();
             Thread.sleep(SLEEP);
-            LOGGER.info("Waiting for instances to stop on cluster: {}", cluster.getId());
+            LOGGER.info(cluster.getId(), "Waiting for instances to stop");
         }
         return result;
     }

@@ -10,14 +10,14 @@ import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.exceptions.YarnException;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.SchedulerInfo;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.SchedulerTypeInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestOperations;
 
 import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.log.Logger;
+import com.sequenceiq.periscope.log.PeriscopeLoggerFactory;
 import com.sequenceiq.periscope.model.QueueAppUpdate;
 import com.sequenceiq.periscope.monitor.event.ApplicationUpdateEvent;
 import com.sequenceiq.periscope.monitor.event.UpdateFailedEvent;
@@ -27,7 +27,7 @@ import com.sequenceiq.periscope.service.configuration.ConfigParam;
 @Scope("prototype")
 public class ApplicationRequest extends AbstractEventPublisher implements EventPublisher {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationRequest.class);
+    private static final Logger LOGGER = PeriscopeLoggerFactory.getLogger(ApplicationRequest.class);
     private static final String WS_URL = "/ws/v1/cluster/scheduler";
     private final Cluster cluster;
 
@@ -46,7 +46,7 @@ public class ApplicationRequest extends AbstractEventPublisher implements EventP
             QueueAppUpdate appUpdate = new QueueAppUpdate(applicationReport, schedulerInfo);
             publishEvent(new ApplicationUpdateEvent(cluster.getId(), appUpdate));
         } catch (Exception e) {
-            LOGGER.error("Error occurred during application update from cluster {}", cluster.getId(), e);
+            LOGGER.error(cluster.getId(), "Error occurred during application update", e);
             publishEvent(new UpdateFailedEvent(cluster.getId()));
         }
     }

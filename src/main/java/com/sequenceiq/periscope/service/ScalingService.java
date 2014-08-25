@@ -6,8 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -15,6 +13,8 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.periscope.domain.Alarm;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
+import com.sequenceiq.periscope.log.Logger;
+import com.sequenceiq.periscope.log.PeriscopeLoggerFactory;
 import com.sequenceiq.periscope.model.ScalingPolicies;
 import com.sequenceiq.periscope.repository.ClusterRepository;
 import com.sequenceiq.periscope.utils.ClusterUtils;
@@ -22,7 +22,7 @@ import com.sequenceiq.periscope.utils.ClusterUtils;
 @Service
 public class ScalingService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ScalingService.class);
+    private static final Logger LOGGER = PeriscopeLoggerFactory.getLogger(ScalingService.class);
 
     @Autowired
     private ClusterService clusterService;
@@ -34,23 +34,23 @@ public class ScalingService {
     private ApplicationContext applicationContext;
 
     public void scale(Cluster cluster, ScalingPolicy policy) {
+        long clusterId = cluster.getId();
         if (canScale(cluster)) {
             int totalNodes = ClusterUtils.getTotalNodes(cluster);
             int desiredNodeCount = getDesiredNodeCount(cluster, policy, totalNodes);
             if (totalNodes != desiredNodeCount) {
-                LOGGER.info("Sending scaling request for cluster: {}", cluster.getId());
                 ScalingRequest scalingRequest = (ScalingRequest)
                         applicationContext.getBean("ScalingRequest", cluster, policy, totalNodes, desiredNodeCount);
                 executorService.execute(scalingRequest);
                 Alarm alarm = policy.getAlarm();
                 alarm.reset();
                 cluster.setLastScalingActivityCurrent();
-                LOGGER.info("Resetting time on alarm: {} on cluster: {}", alarm.getName(), cluster.getId());
+                LOGGER.info(clusterId, "Resetting time on alarm: {}", alarm.getName());
             } else {
-                LOGGER.info("No scaling activity required on {}", cluster.getId());
+                LOGGER.info(clusterId, "No scaling activity required");
             }
         } else {
-            LOGGER.info("Cluster: {} is in cooling state, cannot scale", cluster.getId());
+            LOGGER.info(clusterId, "Cluster is in cooling state, cannot scale");
         }
     }
 

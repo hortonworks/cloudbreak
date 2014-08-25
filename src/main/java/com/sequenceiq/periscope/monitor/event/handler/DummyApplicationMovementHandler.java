@@ -14,13 +14,13 @@ import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.exceptions.YarnException;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.CapacitySchedulerQueueInfo;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.SchedulerInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.log.Logger;
+import com.sequenceiq.periscope.log.PeriscopeLoggerFactory;
 import com.sequenceiq.periscope.model.Priority;
 import com.sequenceiq.periscope.model.SchedulerApplication;
 import com.sequenceiq.periscope.monitor.event.ApplicationUpdateEvent;
@@ -30,7 +30,7 @@ import com.sequenceiq.periscope.service.ClusterService;
 @Component
 public class DummyApplicationMovementHandler implements ApplicationListener<ApplicationUpdateEvent> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DummyApplicationMovementHandler.class);
+    private static final Logger LOGGER = PeriscopeLoggerFactory.getLogger(DummyApplicationMovementHandler.class);
 
     @Autowired
     private ClusterService clusterService;
@@ -39,13 +39,14 @@ public class DummyApplicationMovementHandler implements ApplicationListener<Appl
     public void onApplicationEvent(ApplicationUpdateEvent event) {
         List<ApplicationReport> appReports = event.getReports();
         SchedulerInfo schedulerInfo = event.getSchedulerInfo();
+        long clusterId = event.getClusterId();
 
         List<CapacitySchedulerQueueInfo> allQueueInfo = getAllQueueInfo(schedulerInfo);
         Cluster cluster;
         try {
-            cluster = clusterService.get(event.getClusterId());
+            cluster = clusterService.get(clusterId);
         } catch (ClusterNotFoundException e) {
-            LOGGER.error("Cluster not found and cannot move applications, id: " + event.getClusterId(), e);
+            LOGGER.error(clusterId, "Cluster not found and cannot move applications", e);
             return;
         }
 
@@ -59,7 +60,7 @@ public class DummyApplicationMovementHandler implements ApplicationListener<Appl
             if (cluster.isAppMovementAllowed() && allQueueInfo.size() > 1) {
                 apps = cluster.getApplicationsPriorityOrder();
                 if (isApplicationHighPriority(apps, id)) {
-                    LOGGER.info("Try to move high priority app {}", id);
+                    LOGGER.info(clusterId, "Try to move high priority app {}", id);
                     CapacitySchedulerQueueInfo queue = getQueueWithMostAvailableCapacity(cluster, allQueueInfo);
                     if (!application.isMoved()) {
                         float availableMemory = computeFreeQueueResourceCapacity(cluster, queue);
@@ -68,14 +69,14 @@ public class DummyApplicationMovementHandler implements ApplicationListener<Appl
                             try {
                                 cluster.getYarnClient().moveApplicationAcrossQueues(id, queue.getQueueName());
                                 application.setMoved(true);
-                                LOGGER.info("Application {} moved to queue {}", id.toString(), queue.getQueueName());
+                                LOGGER.info(clusterId, "Application {} moved to queue {}", id.toString(), queue.getQueueName());
                                 break;
                             } catch (IOException | YarnException e) {
-                                LOGGER.error("Error moving {} to {}", id.toString(), queue.getQueueName(), e);
+                                LOGGER.error(clusterId, "Error moving {} to {}", id.toString(), queue.getQueueName(), e);
                             }
                         }
                     }
-                    LOGGER.info("Queue with most available resource : {}", queue.getQueueName());
+                    LOGGER.info(clusterId, "Queue with most available resource : {}", queue.getQueueName());
                 }
             }
         }

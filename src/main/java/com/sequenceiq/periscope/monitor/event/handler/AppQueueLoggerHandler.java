@@ -9,13 +9,13 @@ import java.util.List;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.ApplicationResourceUsageReport;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.CapacitySchedulerQueueInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.log.Logger;
+import com.sequenceiq.periscope.log.PeriscopeLoggerFactory;
 import com.sequenceiq.periscope.monitor.event.ApplicationUpdateEvent;
 import com.sequenceiq.periscope.service.ClusterNotFoundException;
 import com.sequenceiq.periscope.service.ClusterService;
@@ -23,7 +23,7 @@ import com.sequenceiq.periscope.service.ClusterService;
 @Component
 public class AppQueueLoggerHandler implements ApplicationListener<ApplicationUpdateEvent> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AppQueueLoggerHandler.class);
+    private static final Logger LOGGER = PeriscopeLoggerFactory.getLogger(AppQueueLoggerHandler.class);
 
     @Autowired
     private ClusterService clusterService;
@@ -35,7 +35,7 @@ public class AppQueueLoggerHandler implements ApplicationListener<ApplicationUpd
             printQueueReport(getAllQueueInfo(event.getSchedulerInfo()), cluster);
             printApplicationReport(event.getReports(), cluster);
         } catch (ClusterNotFoundException e) {
-            LOGGER.error("Cluster not found and cannot be logged, id: " + event.getClusterId(), e);
+            LOGGER.error(event.getClusterId(), "Cluster not found and cannot be logged", e);
         }
     }
 
@@ -54,7 +54,7 @@ public class AppQueueLoggerHandler implements ApplicationListener<ApplicationUpd
             sb.append("\nused resources: ").append(queue.getResourcesUsed());
             sb.append("\n");
         }
-        LOGGER.info("Queue update of {} {}", cluster.getId(), sb);
+        LOGGER.info(cluster.getId(), "Queue update: {}", sb);
     }
 
     private void printApplicationReport(List<ApplicationReport> reports, Cluster cluster) {
@@ -62,7 +62,7 @@ public class AppQueueLoggerHandler implements ApplicationListener<ApplicationUpd
         for (ApplicationReport report : reports) {
             printApplicationReport(report, sb);
         }
-        LOGGER.info("Application update of {} {}", cluster.getId(), sb);
+        LOGGER.info(cluster.getId(), "Application update: {}", sb);
     }
 
     private void printApplicationReport(ApplicationReport report, StringBuilder sb) {

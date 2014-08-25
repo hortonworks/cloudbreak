@@ -5,16 +5,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.log.Logger;
+import com.sequenceiq.periscope.log.PeriscopeLoggerFactory;
 
 @Component
 public class AmbariClusterRegistry implements ClusterRegistry {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AmbariClusterRegistry.class);
+    private static final Logger LOGGER = PeriscopeLoggerFactory.getLogger(AmbariClusterRegistry.class);
     private final Map<Long, Cluster> clusters = new ConcurrentHashMap<>();
 
     @Override
@@ -22,13 +22,13 @@ public class AmbariClusterRegistry implements ClusterRegistry {
         // TODO should be per user registry
         long id = cluster.getId();
         clusters.put(id, cluster);
-        LOGGER.info("Cluster: {} registered with id: {}", cluster.getHost(), id);
+        LOGGER.info(id, "Cluster registered with ambari host: {}", cluster.getHost());
         return cluster;
     }
 
     @Override
     public Cluster remove(long id) {
-        LOGGER.info("Cluster: {} removed from registry", id);
+        LOGGER.info(id, "Cluster removed from registry", id);
         return clusters.remove(id);
     }
 
