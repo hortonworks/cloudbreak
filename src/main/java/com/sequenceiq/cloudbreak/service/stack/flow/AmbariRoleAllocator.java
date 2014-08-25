@@ -44,12 +44,12 @@ public class AmbariRoleAllocator {
                     throw new WrongMetadataException(String.format(
                             "Size of the collected metadata set does not equal the node count of the stack. [stack: '%s']", stack.getId()));
                 }
-                Set<InstanceMetaData> instanceMetaDatas = prepareInstanceMetaData(stack, coreInstanceMetaData);
-                stackUpdater.updateStackMetaData(stackId, instanceMetaDatas);
+                Set<InstanceMetaData> instanceMetaData = prepareInstanceMetaData(stack, coreInstanceMetaData);
+                stackUpdater.updateStackMetaData(stackId, instanceMetaData);
                 stackUpdater.updateMetadataReady(stackId);
                 LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.AMBARI_ROLE_ALLOCATION_COMPLETE_EVENT, stackId);
                 reactor.notify(ReactorConfig.AMBARI_ROLE_ALLOCATION_COMPLETE_EVENT, Event.wrap(new AmbariRoleAllocationComplete(stackId,
-                        getAmbariIp(instanceMetaDatas))));
+                        getAmbariIp(instanceMetaData))));
             } else {
                 LOGGER.info("Metadata of stack '{}' is already created, ignoring '{}' event.", stackId, ReactorConfig.METADATA_SETUP_COMPLETE_EVENT);
             }
@@ -83,7 +83,7 @@ public class AmbariRoleAllocator {
 
     private String getAmbariIp(Set<InstanceMetaData> instanceMetaDatas) {
         for (InstanceMetaData instanceMetaData : instanceMetaDatas) {
-            if (Boolean.TRUE.equals(instanceMetaData.getAmbariServer())) {
+            if (instanceMetaData.getAmbariServer()) {
                 return instanceMetaData.getPublicIp();
             }
         }

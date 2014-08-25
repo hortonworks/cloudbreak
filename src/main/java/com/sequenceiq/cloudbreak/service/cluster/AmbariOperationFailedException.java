@@ -2,9 +2,9 @@ package com.sequenceiq.cloudbreak.service.cluster;
 
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 
-public class ClusterInstallFailedException extends InternalServerException {
+public class AmbariOperationFailedException extends InternalServerException {
 
-    public ClusterInstallFailedException(String message) {
+    public AmbariOperationFailedException(String message) {
         super(message);
     }
 
