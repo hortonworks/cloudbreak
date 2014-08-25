@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.cluster.flow;
 import groovyx.net.http.HttpResponseException;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -120,6 +121,7 @@ public class AmbariClusterInstaller {
             boolean allFinished = waitForServiceInstalls(stack, ambariClient, installRequests);
             if (allFinished) {
                 ambariClient.startAllServices();
+                ambariClient.restartServiceComponents("NAGIOS", Arrays.asList("NAGIOS_SERVER"));
                 addHostSuccessful(cluster, stack.getAmbariIp());
             } else {
                 addHostFailed(cluster, "Ambari failed to install services.");
