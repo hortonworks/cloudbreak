@@ -19,7 +19,7 @@ public interface UserService {
 
     String inviteUser(User admin, String email, UserRole userRole);
 
-    User invitedUser(String hash);
+    User invitedUser(String inviteToken);
 
     User setUserStatus(Long userId, UserStatus userStatus);
 
@@ -30,5 +30,7 @@ public interface UserService {
     User setUserRoles(Long userId, Set<UserRole> roles);
 
     void expireInvites();
+
+    User registerUponInvitation(String inviteToken, User userInput);
 }
 

@@ -105,6 +105,22 @@ public class SimpleUserService implements UserService {
     }
 
     @Override
+    public User registerUponInvitation(String inviteToken, User userInput) {
+        User invitedUser = userRepository.findUserByConfToken(inviteToken);
+        if (invitedUser != null) {
+            invitedUser.setPassword(passwordEncoder.encode(userInput.getPassword()));
+            invitedUser.setFirstName(userInput.getFirstName());
+            invitedUser.setLastName(userInput.getLastName());
+            invitedUser.setStatus(UserStatus.ACTIVE);
+            invitedUser.setRegistrationDate(Calendar.getInstance().getTime());
+            invitedUser = userRepository.save(invitedUser);
+        } else {
+            throw new NotFoundException("There's no user invite pending for inviteToken: " + userInput);
+        }
+        return invitedUser;
+    }
+
+    @Override
     public String generatePasswordResetToken(String email) {
         User user = userRepository.findByEmail(email);
         if (user != null) {
@@ -277,7 +293,7 @@ public class SimpleUserService implements UserService {
     @Scheduled(cron = "${cb.clean.invites.cron:0 * * * * *}")
     @Override
     public void expireInvites() {
-        LOGGER.info("Expire invites ...");
+        LOGGER.info("Expire invites older than {}", inviteExpiryInDays);
 
         Calendar cal = GregorianCalendar.getInstance();
         LOGGER.info("Current date: {}", cal.getTime());

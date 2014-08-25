@@ -9,7 +9,9 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         property = "type")
 @JsonSubTypes({
         @JsonSubTypes.Type(value = StatusUpdateRequest.class, name = "statusUpdate"),
-        @JsonSubTypes.Type(value = RoleUpdateRequest.class, name = "roleUpdate") })
+        @JsonSubTypes.Type(value = RoleUpdateRequest.class, name = "roleUpdate"),
+        @JsonSubTypes.Type(value = InviteConfirmationRequest.class, name = "inviteConfirmation") })
+
 public interface UpdateRequest extends JsonEntity {
 
 }

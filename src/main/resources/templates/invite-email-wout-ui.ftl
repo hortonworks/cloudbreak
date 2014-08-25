@@ -9,10 +9,7 @@
 
 </br>
     You've been invited by ${user.firstName} to join his/her Cloudbreak account.
-    To register - POST ${invite} with the password.
-<p>
-  Command line example: curl -X POST -H "Content-Type: application/json" -d '{"password":"&#60;new password&#62;"}' ${invite} | jq .
-<p>
+    To register - GET ${invite}
   Thank you,
 
   </br>

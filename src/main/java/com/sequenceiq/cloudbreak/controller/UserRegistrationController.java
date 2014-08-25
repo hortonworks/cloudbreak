@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
+import com.sequenceiq.cloudbreak.controller.json.InviteConfirmationRequest;
 import com.sequenceiq.cloudbreak.controller.json.UserJson;
 import com.sequenceiq.cloudbreak.converter.UserConverter;
 import com.sequenceiq.cloudbreak.domain.User;
@@ -58,4 +59,14 @@ public class UserRegistrationController {
         LOGGER.debug("Registration confirmed (token: {}) for {}", new Object[]{ inviteToken, activeUser });
         return new ResponseEntity<>(userConverter.convert(activeUser), HttpStatus.OK);
     }
+
+    @RequestMapping(value = "/invite/{inviteToken}", method = RequestMethod.PUT)
+    public ResponseEntity<UserJson> confirmInvite(@PathVariable String inviteToken, @RequestBody InviteConfirmationRequest inviteConfirmationRequest) {
+        LOGGER.debug("Confirm invitation (token: {})... ", inviteToken);
+        UserJson confirmedUser = userRegistrationFacade.confirmInvite(inviteToken, inviteConfirmationRequest);
+        LOGGER.debug("Registration confirmed (token: {}) for {}", new Object[]{ inviteToken, confirmedUser });
+        return new ResponseEntity<>(confirmedUser, HttpStatus.OK);
+    }
+
+
 }

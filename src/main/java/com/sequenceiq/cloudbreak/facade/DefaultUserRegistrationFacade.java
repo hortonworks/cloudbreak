@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.controller.json.InviteConfirmationRequest;
 import com.sequenceiq.cloudbreak.controller.json.UserJson;
 import com.sequenceiq.cloudbreak.converter.UserConverter;
 import com.sequenceiq.cloudbreak.domain.Account;
@@ -39,6 +40,16 @@ public class DefaultUserRegistrationFacade implements UserRegistrationFacade {
         } else {
             throw new IllegalStateException(String.format("User registration went wrong. User already registered; id: %s", user.getId()));
         }
+        return userConverter.convert(user);
+    }
+
+    @Override
+    public UserJson confirmInvite(String inviteToken, InviteConfirmationRequest inviteConfirmationRequest) {
+        User user = new User();
+        user.setPassword(inviteConfirmationRequest.getPassword());
+        user.setFirstName(inviteConfirmationRequest.getFirstName());
+        user.setLastName(inviteConfirmationRequest.getLastName());
+        user = userService.registerUponInvitation(inviteToken, user);
         return userConverter.convert(user);
     }
 }
