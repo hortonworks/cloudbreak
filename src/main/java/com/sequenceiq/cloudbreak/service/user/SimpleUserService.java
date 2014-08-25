@@ -112,6 +112,7 @@ public class SimpleUserService implements UserService {
             invitedUser.setFirstName(userInput.getFirstName());
             invitedUser.setLastName(userInput.getLastName());
             invitedUser.setStatus(UserStatus.ACTIVE);
+            invitedUser.setConfToken(null);
             invitedUser.setRegistrationDate(Calendar.getInstance().getTime());
             invitedUser = userRepository.save(invitedUser);
         } else {
