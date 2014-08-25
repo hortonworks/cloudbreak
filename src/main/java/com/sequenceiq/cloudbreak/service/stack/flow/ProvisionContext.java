@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.connector.Provisioner;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
-import com.sequenceiq.cloudbreak.service.stack.event.StackCreationFailure;
+import com.sequenceiq.cloudbreak.service.stack.event.StackOperationFailure;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
@@ -64,7 +64,7 @@ public class ProvisionContext {
         } catch (Exception e) {
             LOGGER.error("Unhandled exception occured while creating stack.", e);
             LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_CREATE_FAILED_EVENT, stackId);
-            StackCreationFailure stackCreationFailure = new StackCreationFailure(stackId,
+            StackOperationFailure stackCreationFailure = new StackOperationFailure(stackId,
                     "Internal server error occured while creating stack.");
             reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(stackCreationFailure));
         }

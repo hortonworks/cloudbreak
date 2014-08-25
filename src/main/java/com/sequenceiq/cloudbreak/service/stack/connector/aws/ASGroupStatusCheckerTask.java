@@ -11,8 +11,8 @@ import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusRequest;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusResult;
 import com.amazonaws.services.ec2.model.InstanceStatus;
-import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.stack.AddInstancesFailedException;
 
 @Component
 public class ASGroupStatusCheckerTask implements StatusCheckerTask<AutoScalingGroupReady> {
@@ -46,7 +46,8 @@ public class ASGroupStatusCheckerTask implements StatusCheckerTask<AutoScalingGr
 
     @Override
     public void handleTimeout(AutoScalingGroupReady t) {
-        throw new InternalServerException(String.format("Something went wrong. Instances in Auto Scaling group '%s' not started in a reasonable timeframe.",
+        throw new AddInstancesFailedException(String.format(
+                "Something went wrong. Instances in Auto Scaling group '%s' not started in a reasonable timeframe.",
                 t.getAutoScalingGroupName()));
     }
 

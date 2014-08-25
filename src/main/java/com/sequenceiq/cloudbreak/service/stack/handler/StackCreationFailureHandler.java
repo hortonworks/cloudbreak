@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterInstallerMailSenderService;
-import com.sequenceiq.cloudbreak.service.stack.event.StackCreationFailure;
+import com.sequenceiq.cloudbreak.service.stack.event.StackOperationFailure;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
@@ -19,7 +19,7 @@ import reactor.event.Event;
 import reactor.function.Consumer;
 
 @Service
-public class StackCreationFailureHandler implements Consumer<Event<StackCreationFailure>> {
+public class StackCreationFailureHandler implements Consumer<Event<StackOperationFailure>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackCreationFailureHandler.class);
 
@@ -33,8 +33,8 @@ public class StackCreationFailureHandler implements Consumer<Event<StackCreation
     private AmbariClusterInstallerMailSenderService ambariClusterInstallerMailSenderService;
 
     @Override
-    public void accept(Event<StackCreationFailure> event) {
-        StackCreationFailure stackCreationFailure = event.getData();
+    public void accept(Event<StackOperationFailure> event) {
+        StackOperationFailure stackCreationFailure = event.getData();
         Long stackId = stackCreationFailure.getStackId();
         LOGGER.info("Accepted {} event.", ReactorConfig.STACK_CREATE_FAILED_EVENT, stackId);
         String detailedMessage = stackCreationFailure.getDetailedMessage();

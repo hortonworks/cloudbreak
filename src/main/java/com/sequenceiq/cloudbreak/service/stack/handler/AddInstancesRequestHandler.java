@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import reactor.core.Reactor;
 import reactor.event.Event;
 import reactor.function.Consumer;
 
@@ -17,9 +18,11 @@ import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.stack.AddInstancesFailedException;
 import com.sequenceiq.cloudbreak.service.stack.connector.Provisioner;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
 import com.sequenceiq.cloudbreak.service.stack.event.AddInstancesRequest;
+import com.sequenceiq.cloudbreak.service.stack.event.StackOperationFailure;
 
 @Component
 public class AddInstancesRequestHandler implements Consumer<Event<AddInstancesRequest>> {
@@ -35,6 +38,9 @@ public class AddInstancesRequestHandler implements Consumer<Event<AddInstancesRe
     @Autowired
     private UserDataBuilder userDataBuilder;
 
+    @Autowired
+    private Reactor reactor;
+
     @Override
     public void accept(Event<AddInstancesRequest> event) {
         AddInstancesRequest request = event.getData();
@@ -46,10 +52,18 @@ public class AddInstancesRequestHandler implements Consumer<Event<AddInstancesRe
             LOGGER.info("Accepted {} event on stack: '{}'", ReactorConfig.ADD_INSTANCES_REQUEST_EVENT, stackId);
             provisioners.get(cloudPlatform)
                     .addNode(one, userDataBuilder.build(cloudPlatform, one.getHash(), new HashMap<String, String>()), scalingAdjustment);
+        } catch (AddInstancesFailedException e) {
+            LOGGER.error(e.getMessage(), e);
+            notifyUpdateFailed(stackId, e.getMessage());
         } catch (Exception e) {
-            LOGGER.error("Unhandled exception occured while creating stack.", e);
-            // TODO: should we do something else? websocket nofitication, status
-            // to available/update failed? update statusReason?
+            String errMessage = "Unhandled exception occured while updating stack.";
+            LOGGER.error(errMessage, e);
+            notifyUpdateFailed(stackId, errMessage);
         }
+    }
+
+    private void notifyUpdateFailed(Long stackId, String detailedMessage) {
+        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_UPDATE_FAILED_EVENT, stackId);
+        reactor.notify(ReactorConfig.STACK_UPDATE_FAILED_EVENT, Event.wrap(new StackOperationFailure(stackId, detailedMessage)));
     }
 }

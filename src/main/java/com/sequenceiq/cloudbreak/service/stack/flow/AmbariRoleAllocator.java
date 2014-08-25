@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.event.AmbariRoleAllocationComplete;
-import com.sequenceiq.cloudbreak.service.stack.event.StackCreationFailure;
+import com.sequenceiq.cloudbreak.service.stack.event.StackOperationFailure;
 
 @Service
 public class AmbariRoleAllocator {
@@ -126,7 +126,7 @@ public class AmbariRoleAllocator {
 
     private void notifyStackCreateFailed(Long stackId, String cause) {
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_CREATE_FAILED_EVENT, stackId);
-        StackCreationFailure stackCreationFailure = new StackCreationFailure(stackId, cause);
+        StackOperationFailure stackCreationFailure = new StackOperationFailure(stackId, cause);
         reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(stackCreationFailure));
     }
 

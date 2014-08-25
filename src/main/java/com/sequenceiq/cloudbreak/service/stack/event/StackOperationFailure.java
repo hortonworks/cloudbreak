@@ -1,12 +1,12 @@
 package com.sequenceiq.cloudbreak.service.stack.event;
 
 
-public class StackCreationFailure {
+public class StackOperationFailure {
 
     private Long stackId;
     private String detailedMessage;
 
-    public StackCreationFailure(Long stackId, String detailedMessage) {
+    public StackOperationFailure(Long stackId, String detailedMessage) {
         this.stackId = stackId;
         this.detailedMessage = detailedMessage;
     }

@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
-import com.sequenceiq.cloudbreak.service.stack.event.StackCreationFailure;
+import com.sequenceiq.cloudbreak.service.stack.event.StackOperationFailure;
 
 @Service
 public class SnsMessageHandler {
@@ -99,7 +99,7 @@ public class SnsMessageHandler {
                     cfMessage.get("StackId"));
         } else if (!stack.isStackCompleted() && !Status.CREATE_FAILED.equals(stack.getStatus())) {
             LOGGER.info("CloudFormation stack creation failed. [Id: '{}']", stack.getId());
-            StackCreationFailure stackCreationFailure = new StackCreationFailure(stack.getId(), "Error while creating CloudFormation stack: "
+            StackOperationFailure stackCreationFailure = new StackOperationFailure(stack.getId(), "Error while creating CloudFormation stack: "
                     + cfMessage.get("ResourceStatusReason"));
             LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_CREATE_FAILED_EVENT, stack.getId());
             reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(stackCreationFailure));

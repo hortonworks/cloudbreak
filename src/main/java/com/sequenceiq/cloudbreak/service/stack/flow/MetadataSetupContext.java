@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
-import com.sequenceiq.cloudbreak.service.stack.event.StackCreationFailure;
+import com.sequenceiq.cloudbreak.service.stack.event.StackOperationFailure;
 
 @Service
 public class MetadataSetupContext {
@@ -41,7 +41,7 @@ public class MetadataSetupContext {
         } catch (Exception e) {
             LOGGER.error("Unhandled exception occured while creating stack.", e);
             LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_CREATE_FAILED_EVENT, stackId);
-            StackCreationFailure stackCreationFailure = new StackCreationFailure(stackId, "Internal server error occured while creating stack.");
+            StackOperationFailure stackCreationFailure = new StackOperationFailure(stackId, "Internal server error occured while creating stack.");
             reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(stackCreationFailure));
         }
 

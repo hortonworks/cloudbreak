@@ -13,7 +13,7 @@ import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariHostsUnavailableException;
 import com.sequenceiq.cloudbreak.service.stack.connector.aws.AwsStackUtil;
-import com.sequenceiq.cloudbreak.service.stack.event.StackCreationFailure;
+import com.sequenceiq.cloudbreak.service.stack.event.StackOperationFailure;
 import com.sequenceiq.cloudbreak.service.stack.event.StackCreationSuccess;
 
 @Service
@@ -60,7 +60,7 @@ public class AmbariStartupListener {
         } catch (Exception e) {
             LOGGER.error("Unhandled exception occured while trying to reach initializing Ambari server.", e);
             LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_CREATE_FAILED_EVENT, stackId);
-            StackCreationFailure stackCreationFailure = new StackCreationFailure(stackId,
+            StackOperationFailure stackCreationFailure = new StackOperationFailure(stackId,
                     "Unhandled exception occured while trying to reach initializing Ambari server.");
             reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(stackCreationFailure));
         }

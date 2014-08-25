@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
-import com.sequenceiq.cloudbreak.service.stack.event.StackCreationFailure;
+import com.sequenceiq.cloudbreak.service.stack.event.StackOperationFailure;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 
 import reactor.event.Event;
@@ -38,7 +38,7 @@ public class StackCreationFailureHandlerTest {
     @Mock
     private WebsocketService websocketService;
 
-    private Event<StackCreationFailure> event;
+    private Event<StackOperationFailure> event;
 
     private Stack stack;
 
@@ -61,9 +61,9 @@ public class StackCreationFailureHandlerTest {
         verify(websocketService, times(1)).sendToTopicUser(anyString(), any(WebsocketEndPoint.class), any());
     }
 
-    private Event<StackCreationFailure> createEvent() {
-        StackCreationFailure data = new StackCreationFailure(1L, "message");
-        return new Event<StackCreationFailure>(data);
+    private Event<StackOperationFailure> createEvent() {
+        StackOperationFailure data = new StackOperationFailure(1L, "message");
+        return new Event<StackOperationFailure>(data);
     }
 
     private Stack createStack() {
