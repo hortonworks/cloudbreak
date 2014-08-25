@@ -72,12 +72,11 @@ public class AmbariRoleAllocator {
             stackUpdater.updateMetadataReady(stackId);
             stackUpdater.updateNodeCount(stackId, originalMetadata.size());
             stackUpdater.updateStackStatus(stackId, Status.AVAILABLE);
-        } catch (WrongMetadataException e) {
-            LOGGER.error(e.getMessage(), e);
-            // TODO: handle update failure
         } catch (Exception e) {
-            LOGGER.error("Unhandled exception occured while creating stack.", e);
-            // TODO: handle update failure
+            String errMessage = "Unhandled exception occured while updating stack metadata.";
+            LOGGER.error(errMessage, e);
+            LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_UPDATE_FAILED_EVENT, stackId);
+            reactor.notify(ReactorConfig.STACK_UPDATE_FAILED_EVENT, Event.wrap(new StackOperationFailure(stackId, errMessage)));
         }
     }
 

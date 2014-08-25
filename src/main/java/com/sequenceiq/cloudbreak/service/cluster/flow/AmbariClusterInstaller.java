@@ -53,7 +53,7 @@ public class AmbariClusterInstaller {
     private static final int MAX_ATTEMPTS_FOR_AMBARI_OPS = -1;
     private static final int MAX_ATTEMPTS_FOR_HOSTS = 240;
 
-    private static final String UNHANDLED_EXCEPTION_MSG = "Unhandled exception occurred while installing Ambari cluster.";
+    private static final String UNHANDLED_EXCEPTION_MSG = "Unhandled exception occurred while installing Ambari services.";
 
     @Autowired
     private StackRepository stackRepository;

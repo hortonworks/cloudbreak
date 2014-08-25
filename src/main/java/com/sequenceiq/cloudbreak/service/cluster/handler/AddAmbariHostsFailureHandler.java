@@ -33,8 +33,11 @@ public class AddAmbariHostsFailureHandler implements Consumer<Event<AddAmbariHos
         AddAmbariHostsFailure data = event.getData();
         Cluster cluster = clusterRepository.findById(data.getClusterId());
         LOGGER.info("Accepted {} event.", ReactorConfig.ADD_AMBARI_HOSTS_FAILED_EVENT);
+        cluster.setStatus(Status.AVAILABLE);
+        cluster.setStatusReason(data.getDetailedMessage());
+        clusterRepository.save(cluster);
         websocketService.sendToTopicUser(cluster.getUser().getEmail(), WebsocketEndPoint.CLUSTER,
-                new StatusMessage(data.getClusterId(), cluster.getName(), Status.CREATE_FAILED.name()));
+                new StatusMessage(data.getClusterId(), cluster.getName(), "UPDATE_FAILED"));
     }
 
 }
