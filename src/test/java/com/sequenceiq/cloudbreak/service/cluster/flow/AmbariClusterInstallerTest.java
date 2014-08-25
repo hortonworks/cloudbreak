@@ -70,7 +70,7 @@ public class AmbariClusterInstallerTest {
         doReturn(ambariClient).when(underTest).createAmbariClient(stack.getAmbariIp());
         given(ambariClient.recommendAssignments(anyString())).willReturn(strListMap);
         doNothing().when(ambariClient).createCluster(cluster.getName(), blueprint.getBlueprintName(), strListMap);
-        given(ambariClient.getInstallProgress()).willReturn(new BigDecimal(100.0));
+        given(ambariClient.getRequestProgress()).willReturn(new BigDecimal(100.0));
         // WHEN
         underTest.installAmbariCluster(stack);
         // THEN

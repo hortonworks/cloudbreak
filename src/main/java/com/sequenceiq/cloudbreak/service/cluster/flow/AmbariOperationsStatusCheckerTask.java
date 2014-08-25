@@ -22,7 +22,7 @@ public class AmbariOperationsStatusCheckerTask implements StatusCheckerTask<Amba
         Map<String, Integer> installRequests = t.getRequests();
         boolean allFinished = true;
         for (Entry<String, Integer> request : installRequests.entrySet()) {
-            BigDecimal installProgress = t.getAmbariClient().getInstallProgress(request.getValue());
+            BigDecimal installProgress = t.getAmbariClient().getRequestProgress(request.getValue());
             LOGGER.info("Ambari operation: '{}', Progress: {} [Stack: '{}']", request.getKey(), installProgress, t.getStackId());
             allFinished = allFinished && installProgress.compareTo(COMPLETED) == 0;
             if (installProgress.compareTo(FAILED) == 0) {
