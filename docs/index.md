@@ -200,11 +200,8 @@ CentOS - 6.5 Hortonworks Data Platform - 2.1 Apache Hadoop - 2.4.0 Apache Tez - 
 
 ###Future releases
 
-While this is already a good achievement - bringing autoscaling to Hadoop - we don’t stop here. Periscope will be a centralized place to manage your cluster through SLA policies, check your cluster metrics and logs and correlate them with events/cluster heath. The analytics and visualization capabilities will allow you for a deeper understanding of your jobs, the nature of resources consumed and ultimately leverage the features provided by cloud providers. For instance a CPU heavy job can always launch purpose build (compute optimized) instance types.
-The next release will bring in down-scaling and OAuth2 support - and will incorporate the new features from YARN, Hadoop and Ambari.
-As we have already mentioned we are running a YARN monitoring project based on R - based on the experience and what we have learnt the end goal is to built a high level heuristic model which maintains a healthy cluster, without the need of predefined SLA policy rules.
-
-
+While this is already a good achievement - bringing autoscaling to cloud based Hadoop clusters - we don’t stop here. Periscope will be a centralized place to manage your cluster through SLA policies, check your cluster metrics and logs and correlate them with events/cluster heath - built on the well proven ELK stack (Elasticsearch, Logstash, Kibana). The analytics and visualization capabilities will allow a deeper understanding of running jobs, the nature of resources consumed and ultimately leverage the features provided by cloud providers. For instance a CPU heavy job can always launch purpose built (compute optimized) instance types.
+The next release will bring in OAuth2 support - and will incorporate the new features from YARN, Hadoop and Ambari, thus you will be able to attach SLA policies to static clusters. As we have already mentioned we are running a YARN monitoring project based on R - based on the experience and what we have learnt the end goal is to built a high level heuristic model which maintains a healthy cluster, without the need of predefined SLA policy rules.
 ##Contribution
 
 So you are about to contribute to Periscope? Awesome! There are many different ways in which you can contribute. We strongly value your feedback, questions, bug reports, and feature requests.
