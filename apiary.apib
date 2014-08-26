@@ -1401,11 +1401,10 @@ Clusters related resources of the **Periscope API**.
 A Hadoop cluster is a set of components and services launched in order to store, analyze and process unstructured data. 
 Periscope can work with any Hadoop 2/ YARN cluster provisioned with Apache Ambari, and supports any YARN application.
 
-##Add [/clusters/{id}]
+##Add [/clusters]
 ###Add a cluster [POST]
 Add a Hadoop cluster to be monitored by Periscope. Note that Periscope does not require any pre-installation of components on cluster nodes. 
 To link a Hadoop cluster with Periscope the only required this is the Apache Ambari REST API endpoint.
-
 
 + Request (application/json)
 
@@ -1426,7 +1425,7 @@ To link a Hadoop cluster with Periscope the only required this is the Apache Amb
             "id": "1"
         }
 
-##List, remove or show [/clusters]
+##Get [/clusters/{id}]
 ###Retrieve cluster information [GET]
 
 + Parameters
@@ -1448,6 +1447,7 @@ To link a Hadoop cluster with Periscope the only required this is the Apache Amb
             "id": "1"
         }
 
+##Remove [/clusters/{id}]
 ###Remove a cluster [DELETE]
 
 + Parameters
@@ -1468,7 +1468,8 @@ To link a Hadoop cluster with Periscope the only required this is the Apache Amb
             "host": "172.24.0.2",
             "id": "1"
         }
-    
+
+##List [/clusters]
 ###List all cluster information [GET]
 
 + Request
@@ -1578,7 +1579,16 @@ Also a `threshold` can be configured, which specifies the variance applied by th
               "metric": "GLOBAL_RESOURCES",
               "threshold": 1,
               "comparisonOperator": "EQUALS",
-              "period": 10
+              "period": 10,
+              "notifications": [
+                {
+                  "target": [
+                    "some1@gmail.com",
+                    "other1@gmail.com"
+                  ],
+                  "notificationType": "EMAIL"
+                }
+              ]
             }
           ]
         }
@@ -1586,28 +1596,38 @@ Also a `threshold` can be configured, which specifies the variance applied by th
 + Response 201 (application/json)
 
         {
-         "alarms": [
+          "alarms": [
             {
-             "scalingPolicyId": null,
-             "period": 10,
-             "comparisonOperator": "GREATER_THAN",
-             "threshold": 10,
-             "metric": "PENDING_CONTAINERS",
-             "description": "Number of pending containers is high",
-             "alarmName": "pendingContainerHigh",
-             "id": 50
+              "notifications": [],
+              "id": 102,
+              "alarmName": "pendingContainerHigh",
+              "description": "Number of pending containers is high",
+              "metric": "PENDING_CONTAINERS",
+              "threshold": 10,
+              "comparisonOperator": "GREATER_THAN",
+              "period": 1,
+              "scalingPolicyId": null
             },
             {
-             "scalingPolicyId": null,
-             "period": 10,
-             "comparisonOperator": "EQUALS",
-             "threshold": 1,
-             "metric": "GLOBAL_RESOURCES",
-             "description": "Low free global resource rate",
-             "alarmName": "freeGlobalResourcesRateLow",
-             "id": 51
+              "notifications": [
+                {
+                  "notificationType": "EMAIL",
+                  "target": [
+                    "some1@gmail.com",
+                    "other1@gmail.com"
+                  ]
+                }
+              ],
+              "id": 103,
+              "alarmName": "freeGlobalResourcesRateLow",
+              "description": "Low free global resource rate",
+              "metric": "GLOBAL_RESOURCES",
+              "threshold": 1,
+              "comparisonOperator": "EQUALS",
+              "period": 1,
+              "scalingPolicyId": null
             }
-         ]
+          ]
         }
 
 ###Add new alarm [PUT]
@@ -1689,6 +1709,7 @@ Also a `threshold` can be configured, which specifies the variance applied by th
         {
           "alarms": [
             {
+              "notifications": [],
               "scalingPolicyId": null,
               "period": 10,
               "comparisonOperator": "GREATER_THAN",
@@ -1699,6 +1720,7 @@ Also a `threshold` can be configured, which specifies the variance applied by th
               "id": 50
             },
             {
+              "notifications": [],
               "scalingPolicyId": null,
               "period": 10,
               "comparisonOperator": "EQUALS",
@@ -1711,6 +1733,7 @@ Also a `threshold` can be configured, which specifies the variance applied by th
           ]
         }
 
+##Delete [/clusters/{clusterId}/alarms/{alarmId}]
 ###Delete an alarm [DELETE]
 
 + Parameters
@@ -1728,6 +1751,7 @@ Also a `threshold` can be configured, which specifies the variance applied by th
         {
           "alarms": [
             {
+              "notifications": [],
               "scalingPolicyId": null,
               "period": 10,
               "comparisonOperator": "EQUALS",

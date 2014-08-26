@@ -27,13 +27,13 @@ public class ScalingRequest implements Runnable {
     private final Cluster cluster;
     private final ScalingPolicy policy;
 
-    @Value("${cloudbreak.host}")
+    @Value("${periscope.cloudbreak.host}")
     private String host;
-    @Value("${cloudbreak.port}")
+    @Value("${periscope.cloudbreak.port}")
     private int port;
-    @Value("${cloudbreak.user}")
+    @Value("${periscope.cloudbreak.user}")
     private String user;
-    @Value("${cloudbreak.pass}")
+    @Value("${periscope.cloudbreak.pass}")
     private String pass;
 
     public ScalingRequest(Cluster cluster, ScalingPolicy policy, int totalNodes, int desiredNodeCount) {

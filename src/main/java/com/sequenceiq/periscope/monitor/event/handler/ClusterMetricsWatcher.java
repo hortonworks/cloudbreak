@@ -15,6 +15,7 @@ import com.sequenceiq.periscope.log.PeriscopeLoggerFactory;
 import com.sequenceiq.periscope.monitor.event.ClusterMetricsUpdateEvent;
 import com.sequenceiq.periscope.service.ClusterNotFoundException;
 import com.sequenceiq.periscope.service.ClusterService;
+import com.sequenceiq.periscope.service.NotificationService;
 import com.sequenceiq.periscope.service.ScalingService;
 import com.sequenceiq.periscope.utils.ClusterUtils;
 
@@ -27,6 +28,8 @@ public class ClusterMetricsWatcher implements ApplicationListener<ClusterMetrics
     private ClusterService clusterService;
     @Autowired
     private ScalingService scalingService;
+    @Autowired
+    private NotificationService notificationService;
 
     @Override
     public void onApplicationEvent(ClusterMetricsUpdateEvent event) {
@@ -151,7 +154,7 @@ public class ClusterMetricsWatcher implements ApplicationListener<ClusterMetrics
     private void handleNotifications(Cluster cluster, Alarm alarm) {
         if (!alarm.isNotificationSent()) {
             for (Notification notification : alarm.getNotifications()) {
-                LOGGER.info(cluster.getId(), "Sending notification: {}", notification.getTarget());
+                notificationService.sendNotification(cluster, alarm, notification);
             }
             alarm.setNotificationSent(true);
         }
