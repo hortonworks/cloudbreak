@@ -153,6 +153,37 @@ The easiest way to start using Periscope is to use our hosted solution. We host,
 
 Periscope requires an Apache Ambari endpoint of your Hadoop cluster to start to apply your SLA policies. We suggest to start with [Cloudbreak](http://sequenceiq.com/cloudbreak/#quickstart-and-installation). Create a hosted free [Cloudbreak](https://cloudbreak.sequenceiq.com/) account and start experimenting.
 
+###Build and run
+The Periscope code is available at our [GitHub repository](https://github.com/sequenceiq/periscope.git). 
+```
+git clone https://github.com/sequenceiq/periscope.git
+cd periscope
+```
+In order to build Periscope you will need [Gradle](http://www.gradle.org/).
+
+```
+./gradlew clean build
+```
+
+You are almost done. In order to start using Periscope you will need to set or pass the following environment variables.
+
+```
+periscope.cloudbreak.host - Clousbreak host 
+periscope.cloudbreak.port - Cloudbreak port
+periscope.cloudbreak.user - Cloudbreak user name
+periscope.cloudbreak.pass - Cloudbreak password
+periscope.smtp.host - SMTP host for sending emails
+periscope.smtp.port - SMTP port 
+periscope.smtp.username - SMTP username 
+periscope.smtp.password - SMTP password 
+periscope.smtp.from - SMTP from address, e.g. no-reply@somedomain.com
+```
+
+Periscope is a [Spring Boot](http://projects.spring.io/spring-boot/) based application. In order to start please run the following.
+
+```
+java -jar periscope.jar
+```
 
 ##Releases, future plans
 
