@@ -21,13 +21,13 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.AddInstancesFailedException;
 import com.sequenceiq.cloudbreak.service.stack.connector.Provisioner;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
-import com.sequenceiq.cloudbreak.service.stack.event.AddInstancesRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackOperationFailure;
+import com.sequenceiq.cloudbreak.service.stack.event.UpdateInstancesRequest;
 
 @Component
-public class AddInstancesRequestHandler implements Consumer<Event<AddInstancesRequest>> {
+public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInstancesRequest>> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AddInstancesRequestHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(UpdateInstancesRequestHandler.class);
 
     @Autowired
     private StackRepository stackRepository;
@@ -42,16 +42,20 @@ public class AddInstancesRequestHandler implements Consumer<Event<AddInstancesRe
     private Reactor reactor;
 
     @Override
-    public void accept(Event<AddInstancesRequest> event) {
-        AddInstancesRequest request = event.getData();
+    public void accept(Event<UpdateInstancesRequest> event) {
+        UpdateInstancesRequest request = event.getData();
         CloudPlatform cloudPlatform = request.getCloudPlatform();
         Long stackId = request.getStackId();
         Integer scalingAdjustment = request.getScalingAdjustment();
         try {
             Stack one = stackRepository.findOneWithLists(stackId);
-            LOGGER.info("Accepted {} event on stack: '{}'", ReactorConfig.ADD_INSTANCES_REQUEST_EVENT, stackId);
-            provisioners.get(cloudPlatform)
-                    .addNode(one, userDataBuilder.build(cloudPlatform, one.getHash(), new HashMap<String, String>()), scalingAdjustment);
+            LOGGER.info("Accepted {} event on stack: '{}'", ReactorConfig.UPDATE_INSTANCES_REQUEST_EVENT, stackId);
+            if (scalingAdjustment > 0) {
+                provisioners.get(cloudPlatform)
+                        .addNode(one, userDataBuilder.build(cloudPlatform, one.getHash(), new HashMap<String, String>()), scalingAdjustment);
+            } else {
+                // removeNode
+            }
         } catch (AddInstancesFailedException e) {
             LOGGER.error(e.getMessage(), e);
             notifyUpdateFailed(stackId, e.getMessage());

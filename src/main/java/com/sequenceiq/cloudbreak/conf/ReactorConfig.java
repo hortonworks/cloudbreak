@@ -25,7 +25,7 @@ public class ReactorConfig {
     public static final String CLUSTER_CREATE_SUCCESS_EVENT = "CLUSTER_CREATE_SUCCESS";
     public static final String CLUSTER_CREATE_FAILED_EVENT = "CLUSTER_CREATE_FAILED";
 
-    public static final String ADD_INSTANCES_REQUEST_EVENT = "ADD_INSTANCES_REQUEST";
+    public static final String UPDATE_INSTANCES_REQUEST_EVENT = "UPDATE_INSTANCES_REQUEST";
     public static final String ADD_INSTANCES_COMPLETE_EVENT = "ADD_INSTANCES_COMPLETE";
     public static final String METADATA_UPDATE_COMPLETE_EVENT = "METADATA_UPDATE_COMPLETE";
     public static final String STACK_UPDATE_FAILED_EVENT = "STACK_UPDATE_FAILED";

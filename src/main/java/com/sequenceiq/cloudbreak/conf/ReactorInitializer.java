@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.service.cluster.handler.ClusterCreationSuccessH
 import com.sequenceiq.cloudbreak.service.cluster.handler.ClusterRequestHandler;
 import com.sequenceiq.cloudbreak.service.history.HistoryEventHandler;
 import com.sequenceiq.cloudbreak.service.stack.handler.AddInstancesCompleteHandler;
-import com.sequenceiq.cloudbreak.service.stack.handler.AddInstancesRequestHandler;
+import com.sequenceiq.cloudbreak.service.stack.handler.UpdateInstancesRequestHandler;
 import com.sequenceiq.cloudbreak.service.stack.handler.AmbariRoleAllocationCompleteHandler;
 import com.sequenceiq.cloudbreak.service.stack.handler.MetadataSetupCompleteHandler;
 import com.sequenceiq.cloudbreak.service.stack.handler.MetadataUpdateCompleteHandler;
@@ -69,7 +69,7 @@ public class ReactorInitializer implements InitializingBean {
     private StackDeleteRequestHandler stackDeleteRequestHandler;
 
     @Autowired
-    private AddInstancesRequestHandler addInstancesRequestHandler;
+    private UpdateInstancesRequestHandler updateInstancesRequestHandler;
 
     @Autowired
     private AddInstancesCompleteHandler addInstancesCompleteHandler;
@@ -112,7 +112,7 @@ public class ReactorInitializer implements InitializingBean {
         reactor.on($(ReactorConfig.CLUSTER_CREATE_SUCCESS_EVENT), clusterCreationSuccessHandler);
         reactor.on($(ReactorConfig.CLUSTER_CREATE_FAILED_EVENT), clusterCreationFailureHandler);
 
-        reactor.on($(ReactorConfig.ADD_INSTANCES_REQUEST_EVENT), addInstancesRequestHandler);
+        reactor.on($(ReactorConfig.UPDATE_INSTANCES_REQUEST_EVENT), updateInstancesRequestHandler);
         reactor.on($(ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT), addInstancesCompleteHandler);
         reactor.on($(ReactorConfig.METADATA_UPDATE_COMPLETE_EVENT), metadataUpdateCompleteHandler);
         reactor.on($(ReactorConfig.STACK_UPDATE_FAILED_EVENT), stackUpdateFailureHandler);
