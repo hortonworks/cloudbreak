@@ -45,7 +45,7 @@ public class PollingService<T> {
         try {
             Thread.sleep(duration);
         } catch (InterruptedException e) {
-            LOGGER.info("Interrupted exception occured during polling.", e);
+            LOGGER.info("Interrupted exception occurred during polling.", e);
             Thread.currentThread().interrupt();
         }
     }

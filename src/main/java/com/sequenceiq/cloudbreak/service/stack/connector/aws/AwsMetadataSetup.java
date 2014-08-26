@@ -106,7 +106,7 @@ public class AwsMetadataSetup implements MetadataSetup {
                 boolean metadataExists = FluentIterable.from(stack.getInstanceMetaData()).anyMatch(new Predicate<InstanceMetaData>() {
                     @Override
                     public boolean apply(InstanceMetaData input) {
-                        return input.getInstanceId().equals(instance.getInstanceId()) ? true : false;
+                        return input.getInstanceId().equals(instance.getInstanceId());
                     }
                 });
                 if (!metadataExists) {

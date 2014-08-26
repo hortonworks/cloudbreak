@@ -39,9 +39,9 @@ public class MetadataSetupContext {
             MetadataSetup metadataSetup = metadataSetups.get(cloudPlatform);
             metadataSetup.setupMetadata(stack);
         } catch (Exception e) {
-            LOGGER.error("Unhandled exception occured while creating stack.", e);
+            LOGGER.error("Unhandled exception occurred while creating stack.", e);
             LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_CREATE_FAILED_EVENT, stackId);
-            StackOperationFailure stackCreationFailure = new StackOperationFailure(stackId, "Internal server error occured while creating stack.");
+            StackOperationFailure stackCreationFailure = new StackOperationFailure(stackId, "Internal server error occurred while creating stack.");
             reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(stackCreationFailure));
         }
     }
@@ -51,7 +51,7 @@ public class MetadataSetupContext {
             Stack stack = stackRepository.findOneWithLists(stackId);
             metadataSetups.get(cloudPlatform).addNewNodesToMetadata(stack, resourceSet);
         } catch (Exception e) {
-            String errMessage = "Unhandled exception occured while updating stack metadata.";
+            String errMessage = "Unhandled exception occurred while updating stack metadata.";
             LOGGER.error(errMessage, e);
             LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_UPDATE_FAILED_EVENT, stackId);
             reactor.notify(ReactorConfig.STACK_UPDATE_FAILED_EVENT, Event.wrap(new StackOperationFailure(stackId, errMessage)));

@@ -56,7 +56,7 @@ public class AddInstancesRequestHandler implements Consumer<Event<AddInstancesRe
             LOGGER.error(e.getMessage(), e);
             notifyUpdateFailed(stackId, e.getMessage());
         } catch (Exception e) {
-            String errMessage = "Unhandled exception occured while updating stack.";
+            String errMessage = "Unhandled exception occurred while updating stack.";
             LOGGER.error(errMessage, e);
             notifyUpdateFailed(stackId, errMessage);
         }

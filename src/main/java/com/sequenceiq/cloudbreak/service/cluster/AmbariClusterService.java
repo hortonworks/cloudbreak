@@ -99,7 +99,7 @@ public class AmbariClusterService implements ClusterService {
         LOGGER.info("Cluster update requested for stack '{}' [BlueprintId: {}]", stackId, stack.getCluster().getBlueprint().getId());
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_AMBARI_HOSTS_REQUEST_EVENT, stack.getId());
         reactor.notify(ReactorConfig.ADD_AMBARI_HOSTS_REQUEST_EVENT, Event.wrap(
-                new AddAmbariHostsRequest(stackId, stack.getAmbariIp(), hostGroupAdjustments)));
+                new AddAmbariHostsRequest(stackId, hostGroupAdjustments)));
     }
 
     @Override
@@ -118,7 +118,7 @@ public class AmbariClusterService implements ClusterService {
             int scalingAdjustment = hostGroupAdjustment.getScalingAdjustment();
             if (scalingAdjustment < 0) {
                 throw new BadRequestException(String.format("Requested scaling adjustment on hostGroup '%s' is negative (%s), but "
-                        + "node decommision is not yet supported by the Cloudbreak API.",
+                        + "node decommission is not yet supported by the Cloudbreak API.",
                         hostGroupAdjustment.getHostGroup(), scalingAdjustment));
             }
             sumScalingAdjustments += scalingAdjustment;

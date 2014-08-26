@@ -73,7 +73,7 @@ public class AmbariRoleAllocator {
             stackUpdater.updateNodeCount(stackId, originalMetadata.size());
             stackUpdater.updateStackStatus(stackId, Status.AVAILABLE);
         } catch (Exception e) {
-            String errMessage = "Unhandled exception occured while updating stack metadata.";
+            String errMessage = "Unhandled exception occurred while updating stack metadata.";
             LOGGER.error(errMessage, e);
             LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_UPDATE_FAILED_EVENT, stackId);
             reactor.notify(ReactorConfig.STACK_UPDATE_FAILED_EVENT, Event.wrap(new StackOperationFailure(stackId, errMessage)));

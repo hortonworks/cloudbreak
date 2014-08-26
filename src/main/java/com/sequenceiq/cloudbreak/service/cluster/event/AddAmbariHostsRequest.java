@@ -9,7 +9,7 @@ public class AddAmbariHostsRequest {
     private Long stackId;
     private Set<HostGroupAdjustmentJson> hosts;
 
-    public AddAmbariHostsRequest(Long stackId, String ambariIp, Set<HostGroupAdjustmentJson> hosts) {
+    public AddAmbariHostsRequest(Long stackId, Set<HostGroupAdjustmentJson> hosts) {
         this.stackId = stackId;
         this.hosts = hosts;
     }
