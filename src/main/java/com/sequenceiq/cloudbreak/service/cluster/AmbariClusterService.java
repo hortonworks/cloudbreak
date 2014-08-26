@@ -136,9 +136,19 @@ public class AmbariClusterService implements ClusterService {
             }
             sumScalingAdjustments += scalingAdjustment;
         }
+        validateZeroScalingAdjustments(sumScalingAdjustments);
+        validateUnregisteredHosts(stack, sumScalingAdjustments);
+        validateHostGroups(stack, hostGroupAdjustments);
+        return negative;
+    }
+
+    private void validateZeroScalingAdjustments(int sumScalingAdjustments) {
         if (sumScalingAdjustments == 0) {
             throw new BadRequestException("No scaling adjustments specified. Nothing to do.");
         }
+    }
+
+    private void validateUnregisteredHosts(Stack stack, int sumScalingAdjustments) {
         AmbariClient ambariClient = createAmbariClient(stack.getAmbariIp());
         List<String> unregisteredHosts = ambariClient.getUnregisteredHostNames();
         if (unregisteredHosts.size() == 0) {
@@ -150,6 +160,9 @@ public class AmbariClusterService implements ClusterService {
             throw new BadRequestException(String.format("Number of unregistered hosts in the stack is %s, but %s would be needed to complete the request.",
                     unregisteredHosts.size(), sumScalingAdjustments));
         }
+    }
+
+    private void validateHostGroups(Stack stack, Set<HostGroupAdjustmentJson> hostGroupAdjustments) {
         for (HostGroupAdjustmentJson hostGroupAdjustment : hostGroupAdjustments) {
             if (!assignableHostgroup(stack.getCluster(), hostGroupAdjustment.getHostGroup())) {
                 throw new BadRequestException(String.format(
@@ -157,7 +170,6 @@ public class AmbariClusterService implements ClusterService {
                         stack.getCluster().getBlueprint().getId(), hostGroupAdjustment.getHostGroup()));
             }
         }
-        return negative;
     }
 
     private Boolean assignableHostgroup(Cluster cluster, String hostgroup) {

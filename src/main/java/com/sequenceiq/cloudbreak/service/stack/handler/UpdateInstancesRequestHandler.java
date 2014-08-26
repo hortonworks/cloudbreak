@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.service.stack.handler;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Resource;
 
@@ -16,6 +18,7 @@ import reactor.function.Consumer;
 
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.AddInstancesFailedException;
@@ -48,13 +51,23 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
         Long stackId = request.getStackId();
         Integer scalingAdjustment = request.getScalingAdjustment();
         try {
-            Stack one = stackRepository.findOneWithLists(stackId);
+            Stack stack = stackRepository.findOneWithLists(stackId);
             LOGGER.info("Accepted {} event on stack: '{}'", ReactorConfig.UPDATE_INSTANCES_REQUEST_EVENT, stackId);
             if (scalingAdjustment > 0) {
                 provisioners.get(cloudPlatform)
-                        .addNode(one, userDataBuilder.build(cloudPlatform, one.getHash(), new HashMap<String, String>()), scalingAdjustment);
+                        .addInstances(stack, userDataBuilder.build(cloudPlatform, stack.getHash(), new HashMap<String, String>()), scalingAdjustment);
             } else {
-                // removeNode
+                Set<String> instanceIds = new HashSet<>();
+                int i = 0;
+                for (InstanceMetaData metadataEntry : stack.getInstanceMetaData()) {
+                    if (metadataEntry.isRemovable()) {
+                        instanceIds.add(metadataEntry.getInstanceId());
+                        if (++i >= scalingAdjustment * -1) {
+                            break;
+                        }
+                    }
+                }
+                provisioners.get(cloudPlatform).removeInstances(stack, instanceIds);
             }
         } catch (AddInstancesFailedException e) {
             LOGGER.error(e.getMessage(), e);

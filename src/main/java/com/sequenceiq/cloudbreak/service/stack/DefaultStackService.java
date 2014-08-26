@@ -35,9 +35,9 @@ import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
 import com.sequenceiq.cloudbreak.service.account.AccountService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
-import com.sequenceiq.cloudbreak.service.stack.event.UpdateInstancesRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
+import com.sequenceiq.cloudbreak.service.stack.event.UpdateInstancesRequest;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataIncompleteException;
 
 @Service
@@ -72,7 +72,6 @@ public class DefaultStackService implements StackService {
     @Override
     public Set<Stack> getAll(User user) {
         Set<Stack> legacyStacks = new HashSet<>();
-        Set<Stack> terminatedStacks = new HashSet<>();
         Set<Stack> userStacks = user.getStacks();
         LOGGER.debug("User stacks: #{}", userStacks.size());
 
@@ -167,13 +166,15 @@ public class DefaultStackService implements StackService {
                     removeableHosts++;
                 }
             }
-            if (removeableHosts < -1 * scalingAdjustment)
+            if (removeableHosts < -1 * scalingAdjustment) {
                 throw new BadRequestException(
                         String.format("There are %s removable hosts on stack '%s' but %s were requested. Decomission nodes from the cluster first!",
                                 removeableHosts, stackId, scalingAdjustment * -1));
+            }
         }
         stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS);
-        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.UPDATE_INSTANCES_REQUEST_EVENT, stack.getId());
+        LOGGER.info("Publishing {} event [stackId: '{}', scalingAdjustment: '{}']", ReactorConfig.UPDATE_INSTANCES_REQUEST_EVENT, stack.getId(),
+                scalingAdjustment);
         reactor.notify(ReactorConfig.UPDATE_INSTANCES_REQUEST_EVENT,
                 Event.wrap(new UpdateInstancesRequest(stack.getTemplate().cloudPlatform(), stack.getId(), scalingAdjustment)));
     }
