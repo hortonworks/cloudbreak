@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.cluster;
 import groovyx.net.http.HttpResponseException;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -93,9 +94,9 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
-    public void updateHosts(User user, Long stackId, Set<HostGroupAdjustmentJson> hostGroupAdjustments) {
+    public void updateHosts(Long stackId, Set<HostGroupAdjustmentJson> hostGroupAdjustments) {
         Stack stack = stackRepository.findOneWithLists(stackId);
-        validateRequest(stack, hostGroupAdjustments);
+        boolean decommisionRequest = validateRequest(stack, hostGroupAdjustments);
         LOGGER.info("Cluster update requested for stack '{}' [BlueprintId: {}]", stackId, stack.getCluster().getBlueprint().getId());
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_AMBARI_HOSTS_REQUEST_EVENT, stack.getId());
         reactor.notify(ReactorConfig.ADD_AMBARI_HOSTS_REQUEST_EVENT, Event.wrap(
@@ -103,7 +104,7 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
-    public void updateStatus(User user, Long stackId, StatusRequest statusRequest) {
+    public void updateStatus(Long stackId, StatusRequest statusRequest) {
         throw new BadRequestException("Stopping/restarting a cluster is not yet supported");
     }
 
@@ -112,18 +113,33 @@ public class AmbariClusterService implements ClusterService {
         return new AmbariClient(ambariIp, PORT);
     }
 
-    private void validateRequest(Stack stack, Set<HostGroupAdjustmentJson> hostGroupAdjustments) {
+    private boolean validateRequest(Stack stack, Set<HostGroupAdjustmentJson> hostGroupAdjustments) {
         int sumScalingAdjustments = 0;
+        boolean positive = false;
+        boolean negative = false;
+        Set<String> hostGroupNames = new HashSet<>();
         for (HostGroupAdjustmentJson hostGroupAdjustment : hostGroupAdjustments) {
+            if (hostGroupNames.contains(hostGroupAdjustment.getHostGroup())) {
+                throw new BadRequestException(String.format(
+                        "Hostgroups cannot be listed more than once in an update request, but '%s' is listed multiple times.",
+                        hostGroupAdjustment.getHostGroup()));
+            }
+            hostGroupNames.add(hostGroupAdjustment.getHostGroup());
             int scalingAdjustment = hostGroupAdjustment.getScalingAdjustment();
             if (scalingAdjustment < 0) {
-                throw new BadRequestException(String.format("Requested scaling adjustment on hostGroup '%s' is negative (%s), but "
-                        + "node decommission is not yet supported by the Cloudbreak API.",
-                        hostGroupAdjustment.getHostGroup(), scalingAdjustment));
+                negative = true;
+            } else if (scalingAdjustment > 0) {
+                positive = true;
+            }
+            if (positive && negative) {
+                throw new BadRequestException("An update request must contain only decomissions or only additions.");
             }
             sumScalingAdjustments += scalingAdjustment;
         }
-        AmbariClient ambariClient = new AmbariClient(stack.getAmbariIp(), AmbariClusterService.PORT);
+        if (sumScalingAdjustments == 0) {
+            throw new BadRequestException("No scaling adjustments specified. Nothing to do.");
+        }
+        AmbariClient ambariClient = createAmbariClient(stack.getAmbariIp());
         List<String> unregisteredHosts = ambariClient.getUnregisteredHostNames();
         if (unregisteredHosts.size() == 0) {
             throw new BadRequestException(String.format(
@@ -141,6 +157,7 @@ public class AmbariClusterService implements ClusterService {
                         stack.getCluster().getBlueprint().getId(), hostGroupAdjustment.getHostGroup()));
             }
         }
+        return negative;
     }
 
     private Boolean assignableHostgroup(Cluster cluster, String hostgroup) {

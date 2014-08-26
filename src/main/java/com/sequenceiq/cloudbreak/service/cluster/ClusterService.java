@@ -12,9 +12,9 @@ public interface ClusterService {
 
     Cluster retrieveCluster(User user, Long stackId);
 
-    void updateStatus(User user, Long stackId, StatusRequest statusRequest);
-
     String getClusterJson(String ambariIp, Long stackId);
 
-    void updateHosts(User user, Long stackId, Set<HostGroupAdjustmentJson> hostGroups);
+    void updateHosts(Long stackId, Set<HostGroupAdjustmentJson> hostGroupAdjustments);
+
+    void updateStatus(Long stackId, StatusRequest statusRequest);
 }
