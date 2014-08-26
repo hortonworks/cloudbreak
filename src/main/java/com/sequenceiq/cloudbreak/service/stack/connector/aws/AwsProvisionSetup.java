@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.aws;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,9 +55,27 @@ public class AwsProvisionSetup implements ProvisionSetup {
                     snsTopic.getTopicArn(), snsTopic.getId());
             LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT, stack.getId());
             reactor.notify(ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT, Event.wrap(new ProvisionSetupComplete(getCloudPlatform(), stack.getId())
-                    .withSetupProperty(SnsTopicManager.NOTIFICATION_TOPIC_ARN_KEY, snsTopic.getTopicArn())));
+                    .withSetupProperties(getSetupProperties(stack))
+                    .withUserDataParams(getUserDataProperties(stack))
+                )
+            );
         }
+    }
 
+    public Map<String, Object> getSetupProperties(Stack stack) {
+        AwsTemplate awsTemplate = (AwsTemplate) stack.getTemplate();
+        AwsCredential awsCredential = (AwsCredential) stack.getCredential();
+
+        SnsTopic snsTopic = snsTopicRepository.findOneForCredentialInRegion(awsCredential.getId(), awsTemplate.getRegion());
+        Map<String, Object> properties = new HashMap<>();
+        properties.put(SnsTopicManager.NOTIFICATION_TOPIC_ARN_KEY, snsTopic.getTopicArn());
+
+        return properties;
+    }
+
+    @Override
+    public Map<String, String> getUserDataProperties(Stack stack) {
+        return new HashMap<>();
     }
 
     @Override

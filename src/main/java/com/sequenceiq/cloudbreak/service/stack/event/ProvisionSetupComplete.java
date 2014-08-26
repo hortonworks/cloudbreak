@@ -35,8 +35,18 @@ public class ProvisionSetupComplete extends ProvisionEvent {
         return this;
     }
 
+    public ProvisionSetupComplete withSetupProperties(Map<String, Object> properties) {
+        this.setupProperties = properties;
+        return this;
+    }
+
     public ProvisionSetupComplete withUserDataParam(String key, String value) {
         this.userDataParams.put(key, value);
+        return this;
+    }
+
+    public ProvisionSetupComplete withUserDataParams(Map<String, String> properties) {
+        this.userDataParams = properties;
         return this;
     }
 

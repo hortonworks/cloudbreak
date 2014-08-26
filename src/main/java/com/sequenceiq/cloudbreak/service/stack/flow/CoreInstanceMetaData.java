@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.stack.event.domain;
+package com.sequenceiq.cloudbreak.service.stack.flow;
 
 public class CoreInstanceMetaData {
 
@@ -7,6 +7,9 @@ public class CoreInstanceMetaData {
     private String publicIp;
     private Integer volumeCount;
     private String longName;
+
+    public CoreInstanceMetaData() {
+    }
 
     public CoreInstanceMetaData(String instanceId, String privateIp, String publicIp, Integer volumeCount, String longName) {
         this.instanceId = instanceId;

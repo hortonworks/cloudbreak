@@ -4,8 +4,10 @@ import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStack
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.SERVICENAME;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -13,6 +15,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import reactor.core.Reactor;
+import reactor.event.Event;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,10 +32,8 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataSetupComplete;
-import com.sequenceiq.cloudbreak.service.stack.event.domain.CoreInstanceMetaData;
-
-import reactor.core.Reactor;
-import reactor.event.Event;
+import com.sequenceiq.cloudbreak.service.stack.event.MetadataUpdateComplete;
+import com.sequenceiq.cloudbreak.service.stack.flow.CoreInstanceMetaData;
 
 @Component
 public class AzureMetadataSetup implements MetadataSetup {
@@ -47,37 +50,62 @@ public class AzureMetadataSetup implements MetadataSetup {
     @Override
     public void setupMetadata(Stack stack) {
         AzureCredential azureCredential = (AzureCredential) stack.getCredential();
-
         String filePath = AzureCertificateService.getUserJksFileName(azureCredential, stack.getUser().emailAsFolder());
         AzureClient azureClient = azureStackUtil.createAzureClient(azureCredential, filePath);
         String name = stack.getName().replaceAll("\\s+", "");
-        Set<CoreInstanceMetaData> instanceMetaDatas = collectMetaData(stack, azureClient, name);
+        Set<CoreInstanceMetaData> instanceMetaDatas = collectMetaData(stack, azureClient);
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.METADATA_SETUP_COMPLETE_EVENT, stack.getId());
         reactor.notify(ReactorConfig.METADATA_SETUP_COMPLETE_EVENT,
                 Event.wrap(new MetadataSetupComplete(CloudPlatform.AZURE, stack.getId(), instanceMetaDatas)));
     }
 
-    private Set<CoreInstanceMetaData> collectMetaData(Stack stack, AzureClient azureClient, String name) {
-        Set<CoreInstanceMetaData> instanceMetaDatas = new HashSet<>();
-        for (Resource resource : stack.getResourcesByType(ResourceType.VIRTUAL_MACHINE)) {
-            Map<String, Object> props = new HashMap<>();
-            props.put(NAME, resource.getResourceName());
-            props.put(SERVICENAME, resource.getResourceName());
-            Object virtualMachine = azureClient.getVirtualMachine(props);
-            try {
-                CoreInstanceMetaData instanceMetaData = new CoreInstanceMetaData(
-                        resource.getResourceName(),
-                        getPrivateIP((String) virtualMachine),
-                        getVirtualIP((String) virtualMachine),
-                        stack.getTemplate().getVolumeCount(),
-                        getLongName((String) virtualMachine)
-                );
-                instanceMetaDatas.add(instanceMetaData);
-            } catch (IOException e) {
-                LOGGER.error(String.format("The instance %s was not reacheable: %s", resource.getResourceName(), e.getMessage()), e);
+    @Override
+    public void addNewNodesToMetadata(Stack stack, Set<Resource> resourceList) {
+        AzureCredential azureCredential = (AzureCredential) stack.getCredential();
+        String filePath = AzureCertificateService.getUserJksFileName(azureCredential, stack.getUser().emailAsFolder());
+        AzureClient azureClient = azureStackUtil.createAzureClient(azureCredential, filePath);
+        List<Resource> resources = new ArrayList<>();
+        for (Resource resource : resourceList) {
+            if (ResourceType.VIRTUAL_MACHINE.equals(resource.getResourceType())) {
+                resources.add(resource);
             }
         }
+        Set<CoreInstanceMetaData> instanceMetaDatas = collectMetaData(stack, azureClient, resources);
+        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.METADATA_UPDATE_COMPLETE_EVENT, stack.getId());
+        reactor.notify(ReactorConfig.METADATA_UPDATE_COMPLETE_EVENT,
+                Event.wrap(new MetadataUpdateComplete(CloudPlatform.AZURE, stack.getId(), instanceMetaDatas)));
+    }
+
+    private Set<CoreInstanceMetaData> collectMetaData(Stack stack, AzureClient azureClient, List<Resource> resources) {
+        Set<CoreInstanceMetaData> instanceMetaDatas = new HashSet<>();
+        for (Resource resource : resources) {
+            instanceMetaDatas.add(getMetadata(stack, azureClient, resource));
+        }
         return instanceMetaDatas;
+    }
+
+    private Set<CoreInstanceMetaData> collectMetaData(Stack stack, AzureClient azureClient) {
+        return collectMetaData(stack, azureClient, stack.getResourcesByType(ResourceType.VIRTUAL_MACHINE));
+    }
+
+    private CoreInstanceMetaData getMetadata(Stack stack, AzureClient azureClient, Resource resource) {
+        Map<String, Object> props = new HashMap<>();
+        props.put(NAME, resource.getResourceName());
+        props.put(SERVICENAME, resource.getResourceName());
+        Object virtualMachine = azureClient.getVirtualMachine(props);
+        try {
+            CoreInstanceMetaData instanceMetaData = new CoreInstanceMetaData(
+                    resource.getResourceName(),
+                    getPrivateIP((String) virtualMachine),
+                    getVirtualIP((String) virtualMachine),
+                    stack.getTemplate().getVolumeCount(),
+                    getLongName((String) virtualMachine)
+                    );
+            return instanceMetaData;
+        } catch (IOException e) {
+            LOGGER.error(String.format("Instance %s is not reachable: %s", resource.getResourceName(), e.getMessage()), e);
+        }
+        return null;
     }
 
     @VisibleForTesting

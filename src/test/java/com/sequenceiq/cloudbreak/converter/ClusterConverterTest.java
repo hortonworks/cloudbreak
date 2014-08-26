@@ -118,7 +118,7 @@ public class ClusterConverterTest {
         cluster.setDescription(DUMMY_DESCRIPTION);
         cluster.setId(1L);
         cluster.setName(DUMMY_NAME);
-        cluster.setStatus(Status.CREATE_COMPLETED);
+        cluster.setStatus(Status.AVAILABLE);
         cluster.setStatusReason(DUMMY_STATUS_REASON);
         cluster.setUser(new User());
         return cluster;

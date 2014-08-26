@@ -2,13 +2,15 @@ package com.sequenceiq.cloudbreak.service.stack.handler;
 
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataSetupComplete;
-import com.sequenceiq.cloudbreak.service.stack.event.domain.CoreInstanceMetaData;
 import com.sequenceiq.cloudbreak.service.stack.flow.AmbariRoleAllocator;
+import com.sequenceiq.cloudbreak.service.stack.flow.CoreInstanceMetaData;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
 import reactor.event.Event;
 
 import java.util.HashSet;

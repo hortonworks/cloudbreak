@@ -17,20 +17,25 @@ import reactor.core.Reactor;
 import reactor.event.Event;
 
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.converter.StackConverter;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackDescription;
+import com.sequenceiq.cloudbreak.domain.Status;
+import com.sequenceiq.cloudbreak.domain.StatusRequest;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.UserRole;
+import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
 import com.sequenceiq.cloudbreak.service.account.AccountService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
+import com.sequenceiq.cloudbreak.service.stack.event.AddInstancesRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataIncompleteException;
@@ -57,6 +62,9 @@ public class DefaultStackService implements StackService {
 
     @Resource
     private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
+
+    @Autowired
+    private RetryingStackUpdater stackUpdater;
 
     @Autowired
     private Reactor reactor;
@@ -134,13 +142,30 @@ public class DefaultStackService implements StackService {
     }
 
     @Override
-    public Boolean startAll(User user, Long stackId) {
-        return Boolean.TRUE;
+    public void updateStatus(User user, Long stackId, StatusRequest status) {
+        throw new BadRequestException("Stopping/restarting a stack is not yet supported");
     }
 
     @Override
-    public Boolean stopAll(User user, Long stackId) {
-        return Boolean.TRUE;
+    public void updateNodeCount(User user, Long stackId, Integer scalingAdjustment) {
+        Stack stack = stackRepository.findOne(stackId);
+        if (!Status.AVAILABLE.equals(stack.getStatus())) {
+            throw new BadRequestException(String.format("Stack '%s' is currently in '%s' state. Node count can only be updated if it's running.", stackId,
+                    stack.getStatus()));
+        }
+        if (0 == scalingAdjustment) {
+            throw new BadRequestException(String.format("Requested scaling adjustment on stack '%s' is 0. Nothing to do.", stackId));
+        }
+        if (0 > scalingAdjustment) {
+            throw new BadRequestException(
+                    String.format("Requested scaling adjustment on stack '%s' is negative (%s), but "
+                            + "node decommission is not yet supported by the Cloudbreak API.",
+                            stackId, scalingAdjustment));
+        }
+        stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS);
+        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_INSTANCES_REQUEST_EVENT, stack.getId());
+        reactor.notify(ReactorConfig.ADD_INSTANCES_REQUEST_EVENT,
+                Event.wrap(new AddInstancesRequest(stack.getTemplate().cloudPlatform(), stack.getId(), scalingAdjustment)));
     }
 
     @Override
@@ -156,9 +181,13 @@ public class DefaultStackService implements StackService {
     public Set<InstanceMetaData> getMetaData(String hash) {
         Stack stack = stackRepository.findStackByHash(hash);
         if (stack != null) {
+            if (Status.UPDATE_IN_PROGRESS.equals(stack.getStatus())) {
+                throw new MetadataIncompleteException("Instance metadata is incomplete.");
+            }
             if (!stack.isMetadataReady()) {
                 throw new MetadataIncompleteException("Instance metadata is incomplete.");
-            } else if (!stack.getInstanceMetaData().isEmpty()) {
+            }
+            if (!stack.getInstanceMetaData().isEmpty()) {
                 return stack.getInstanceMetaData();
             }
         }
@@ -169,4 +198,5 @@ public class DefaultStackService implements StackService {
         int hashCode = HashCodeBuilder.reflectionHashCode(stack);
         return DigestUtils.md5DigestAsHex(String.valueOf(hashCode).getBytes());
     }
+
 }

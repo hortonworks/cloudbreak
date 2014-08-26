@@ -138,6 +138,22 @@ public class RetryingStackUpdater {
         }
     }
 
+    public Stack updateNodeCount(Long stackId, Integer nodeCount) {
+        int attempt = 1;
+        try {
+            return doUpdateNodeCount(stackId, nodeCount);
+        } catch (OptimisticLockException | OptimisticLockingFailureException e) {
+            if (attempt <= MAX_RETRIES) {
+                LOGGER.info("Failed to update stack while trying to set 'nodecount'. [id: '{}', attempt: '{}', Cause: {}]. Trying to save it again.",
+                        stackId, attempt++, e.getClass().getSimpleName());
+                return doUpdateStackCreateComplete(stackId);
+            } else {
+                throw new InternalServerException(String.format("Failed to update stack '%s' in 5 attempts. (while trying to set 'nodecount')",
+                        stackId), e);
+            }
+        }
+    }
+
     private Stack doUpdateStackStatus(Long stackId, Status status, String statusReason) {
         Stack stack = stackRepository.findById(stackId);
         stack.setStatus(status);
@@ -153,7 +169,7 @@ public class RetryingStackUpdater {
         Stack stack = stackRepository.findById(stackId);
         stack.setInstanceMetaData(instanceMetaData);
         stack = stackRepository.save(stack);
-        LOGGER.info("Updated stack metadata: [stack: '{}', status: '{}', statusReason: '{}'].", stackId);
+        LOGGER.info("Updated stack metadata: [stack: '{}'].", stackId);
         return stack;
     }
 
@@ -162,6 +178,14 @@ public class RetryingStackUpdater {
         stack.setAmbariIp(ambariIp);
         stack = stackRepository.save(stack);
         LOGGER.info("Updated stack: [stack: '{}' ambariIp: '{}'].", stackId, ambariIp);
+        return stack;
+    }
+
+    private Stack doUpdateNodeCount(Long stackId, Integer nodeCount) {
+        Stack stack = stackRepository.findById(stackId);
+        stack.setNodeCount(nodeCount);
+        stack = stackRepository.save(stack);
+        LOGGER.info("Updated stack: [stack: '{}' nodeCount: '{}'].", stackId, nodeCount);
         return stack;
     }
 
@@ -189,7 +213,6 @@ public class RetryingStackUpdater {
         return stack;
     }
 
-
     private Stack doUpdateResources(Long stackId, Set<Resource> resources) {
         Stack stack = stackRepository.findById(stackId);
         stack.setResources(resources);
@@ -197,6 +220,5 @@ public class RetryingStackUpdater {
         LOGGER.info("Updated stack resources: [stack: '{}', status: '{}', statusReason: '{}'].", stackId);
         return stack;
     }
-
 
 }

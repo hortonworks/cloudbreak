@@ -199,7 +199,7 @@ public class StackConverterTest {
         stack.setMetadataReady(METADATA_READY);
         stack.setName(DUMMY_NAME);
         stack.setNodeCount(NODE_COUNT);
-        stack.setStatus(Status.CREATE_COMPLETED);
+        stack.setStatus(Status.AVAILABLE);
         stack.setStatusReason(DUMMY_STATUS_REASON);
         stack.setUser(new User());
         stack.setVersion(VERSION);
@@ -217,7 +217,7 @@ public class StackConverterTest {
         stackJson.setMetadata(new HashSet<InstanceMetaDataJson>());
         stackJson.setName(DUMMY_NAME);
         stackJson.setNodeCount(NODE_COUNT);
-        stackJson.setStatus(Status.CREATE_COMPLETED);
+        stackJson.setStatus(Status.AVAILABLE);
         stackJson.setTemplateId(DUMMY_ID);
         return stackJson;
     }

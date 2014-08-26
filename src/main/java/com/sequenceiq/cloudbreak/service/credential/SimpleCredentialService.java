@@ -132,7 +132,7 @@ public class SimpleCredentialService implements CredentialService {
         awsCredential.setAwsCredentialOwner(user);
         awsCredential = awsCredentialRepository.save(awsCredential);
         websocketService.sendToTopicUser(user.getEmail(), WebsocketEndPoint.CREDENTIAL,
-                new StatusMessage(awsCredential.getId(), awsCredential.getName(), Status.CREATE_COMPLETED.name()));
+                new StatusMessage(awsCredential.getId(), awsCredential.getName(), Status.AVAILABLE.name()));
         return awsCredential;
     }
 
@@ -145,7 +145,7 @@ public class SimpleCredentialService implements CredentialService {
         }
         azureCertificateService.generateCertificate(azureCredential, user);
         websocketService.sendToTopicUser(user.getEmail(), WebsocketEndPoint.CREDENTIAL,
-                new StatusMessage(azureCredential.getId(), azureCredential.getName(), Status.CREATE_COMPLETED.name()));
+                new StatusMessage(azureCredential.getId(), azureCredential.getName(), Status.AVAILABLE.name()));
         return azureCredential;
     }
 

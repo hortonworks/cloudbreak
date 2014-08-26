@@ -12,10 +12,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import reactor.core.Reactor;
+import reactor.event.Event;
+
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
+import com.amazonaws.services.autoscaling.model.UpdateAutoScalingGroupRequest;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.CreateStackRequest;
-import com.amazonaws.services.cloudformation.model.CreateStackResult;
 import com.amazonaws.services.cloudformation.model.Parameter;
+import com.amazonaws.services.ec2.AmazonEC2Client;
+import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
@@ -23,12 +30,17 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
+import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.Provisioner;
+import com.sequenceiq.cloudbreak.service.stack.event.AddInstancesComplete;
 
 @Component
 public class AwsProvisioner implements Provisioner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsProvisioner.class);
+
+    private static final int MAX_POLLING_ATTEMPTS = 60;
+    private static final int POLLING_INTERVAL = 5000;
 
     @Autowired
     private AwsStackUtil awsStackUtil;
@@ -38,6 +50,18 @@ public class AwsProvisioner implements Provisioner {
 
     @Autowired
     private RetryingStackUpdater stackUpdater;
+
+    @Autowired
+    private CloudFormationStackUtil cfStackUtil;
+
+    @Autowired
+    private PollingService<AutoScalingGroupReady> pollingService;
+
+    @Autowired
+    private ASGroupStatusCheckerTask asGroupStatusCheckerTask;
+
+    @Autowired
+    private Reactor reactor;
 
     @Override
     public synchronized void buildStack(Stack stack, String userData, Map<String, Object> setupProperties) {
@@ -65,11 +89,32 @@ public class AwsProvisioner implements Provisioner {
                 .withTemplateBody(cfTemplateBuilder.build("templates/aws-cf-stack.ftl", awsTemplate.getVolumeCount(), spotPriced))
                 .withNotificationARNs((String) setupProperties.get(SnsTopicManager.NOTIFICATION_TOPIC_ARN_KEY))
                 .withParameters(parameters);
-        CreateStackResult createStackResult = client.createStack(createStackRequest);
+        client.createStack(createStackRequest);
         Set<Resource> resources = new HashSet<>();
         resources.add(new Resource(ResourceType.CLOUDFORMATION_STACK, stackName, stack));
         Stack updatedStack = stackUpdater.updateStackResources(stack.getId(), resources);
         LOGGER.info("CloudFormation stack creation request sent with stack name: '{}' for stack: '{}'", stackName, updatedStack.getId());
+    }
+
+    @Override
+    public void addNode(Stack stack, String userData, Integer scalingAdjustment) {
+        Integer requiredInstances = stack.getNodeCount() + scalingAdjustment;
+        Regions region = ((AwsTemplate) stack.getTemplate()).getRegion();
+        AwsCredential credential = (AwsCredential) stack.getCredential();
+        AmazonAutoScalingClient amazonASClient = awsStackUtil.createAutoScalingClient(region, credential);
+        AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(region, credential);
+        String asGroupName = cfStackUtil.getAutoscalingGroupName(stack);
+        amazonASClient.updateAutoScalingGroup(new UpdateAutoScalingGroupRequest()
+                .withAutoScalingGroupName(asGroupName)
+                .withMaxSize(requiredInstances)
+                .withDesiredCapacity(requiredInstances));
+        LOGGER.info("Updated AutoScaling group's desiredCapacity: [stack: '{}', from: '{}', to: '{}']", stack.getId(), stack.getNodeCount(),
+                stack.getNodeCount() + scalingAdjustment);
+        AutoScalingGroupReady asGroupReady = new AutoScalingGroupReady(amazonEC2Client, amazonASClient, asGroupName, requiredInstances);
+        LOGGER.info("Polling autoscaling group until new instances are ready. [stack: {}, asGroup: {}]", stack.getId(), asGroupName);
+        pollingService.pollWithTimeout(asGroupStatusCheckerTask, asGroupReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT, stack.getId());
+        reactor.notify(ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT, Event.wrap(new AddInstancesComplete(CloudPlatform.AWS, stack.getId(), null)));
     }
 
     protected CreateStackRequest createStackRequest() {

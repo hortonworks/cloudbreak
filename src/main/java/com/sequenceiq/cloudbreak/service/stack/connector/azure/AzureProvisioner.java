@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
 import com.sequenceiq.cloudbreak.service.stack.connector.Provisioner;
+import com.sequenceiq.cloudbreak.service.stack.event.AddInstancesComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
 
 import groovyx.net.http.HttpResponseDecorator;
@@ -116,6 +117,35 @@ public class AzureProvisioner implements Provisioner {
         }
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_COMPLETE_EVENT, stack.getId());
         reactor.notify(ReactorConfig.PROVISION_COMPLETE_EVENT, Event.wrap(new ProvisionComplete(CloudPlatform.AZURE, stack.getId(), resourceSet)));
+    }
+
+    @Override
+    public void addNode(Stack stack, String userData, Integer nodeCount) {
+        AzureTemplate azureTemplate = (AzureTemplate) stack.getTemplate();
+        Credential credential = stack.getCredential();
+        String emailAsFolder = stack.getUser().emailAsFolder();
+        String filePath = AzureCertificateService.getUserJksFileName(credential, emailAsFolder);
+        AzureClient azureClient = azureStackUtil.createAzureClient(credential, filePath);
+
+        Resource network = stack.getResourceByType(ResourceType.NETWORK);
+        List<Resource> resourceByType = stack.getResourcesByType(ResourceType.VIRTUAL_MACHINE);
+
+        String name = network.getResourceName();
+        String commonName = ((AzureCredential) credential).getCommonName();
+        Set<Resource> resourceSet = new HashSet<>();
+
+        for (int i = resourceByType.size(); i < resourceByType.size() + nodeCount; i++) {
+            String vmName = azureStackUtil.getVmName(name, i) + String.valueOf(new Date().getTime());
+            createCloudService(azureClient, azureTemplate, vmName, commonName);
+            createServiceCertificate(azureClient, azureTemplate, credential, vmName, emailAsFolder);
+            String internalIp = "172.16.0." + (i + VALID_IP_RANGE_START);
+            createVirtualMachine(azureClient, azureTemplate, credential, name, vmName, commonName, userData, internalIp);
+            resourceSet.add(new Resource(ResourceType.VIRTUAL_MACHINE, vmName, stack));
+            resourceSet.add(new Resource(ResourceType.CLOUD_SERVICE, vmName, stack));
+            resourceSet.add(new Resource(ResourceType.BLOB, vmName, stack));
+        }
+        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT, stack.getId());
+        reactor.notify(ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT, Event.wrap(new AddInstancesComplete(CloudPlatform.AZURE, stack.getId(), resourceSet)));
     }
 
     @Override

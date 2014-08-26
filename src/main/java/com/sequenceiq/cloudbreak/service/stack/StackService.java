@@ -5,6 +5,7 @@ import java.util.Set;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackDescription;
+import com.sequenceiq.cloudbreak.domain.StatusRequest;
 import com.sequenceiq.cloudbreak.domain.User;
 
 public interface StackService {
@@ -17,12 +18,12 @@ public interface StackService {
 
     void delete(User user, Long id);
 
-    Boolean startAll(User user, Long stackId);
-
-    Boolean stopAll(User user, Long stackId);
-
     Set<InstanceMetaData> getMetaData(String hash);
 
     StackDescription getStackDescription(User user, Stack stack);
+
+    void updateStatus(User user, Long stackId, StatusRequest status);
+
+    void updateNodeCount(User user, Long stackId, Integer nodeCount);
 
 }

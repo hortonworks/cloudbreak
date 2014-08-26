@@ -46,7 +46,7 @@ public class DefaultBlueprintService implements BlueprintService {
         }
         blueprint = blueprintRepository.save(blueprint);
         websocketService.sendToTopicUser(user.getEmail(), WebsocketEndPoint.BLUEPRINT,
-                new StatusMessage(blueprint.getId(), blueprint.getName(), Status.CREATE_COMPLETED.name()));
+                new StatusMessage(blueprint.getId(), blueprint.getName(), Status.AVAILABLE.name()));
         return blueprint;
     }
 

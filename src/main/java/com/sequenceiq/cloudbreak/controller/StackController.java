@@ -18,8 +18,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
 import com.sequenceiq.cloudbreak.controller.json.InstanceMetaDataJson;
 import com.sequenceiq.cloudbreak.controller.json.StackJson;
-import com.sequenceiq.cloudbreak.controller.json.StatusRequestJson;
 import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
+import com.sequenceiq.cloudbreak.controller.json.UpdateStackJson;
 import com.sequenceiq.cloudbreak.converter.MetaDataConverter;
 import com.sequenceiq.cloudbreak.converter.StackConverter;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
@@ -86,14 +86,13 @@ public class StackController {
 
     @RequestMapping(method = RequestMethod.PUT, value = "{stackId}")
     @ResponseBody
-    public ResponseEntity<Boolean> startOrStopAllOnStack(@CurrentUser User user, @PathVariable Long stackId, @RequestBody StatusRequestJson statusRequestJson) {
-        switch (statusRequestJson.getStatusRequest()) {
-        case STOP:
-            return new ResponseEntity<>(stackService.stopAll(user, stackId), HttpStatus.OK);
-        case START:
-            return new ResponseEntity<>(stackService.startAll(user, stackId), HttpStatus.OK);
-        default:
-            throw new BadRequestException("The requested status not valid.");
+    public ResponseEntity<String> updateStack(@CurrentUser User user, @PathVariable Long stackId, @Valid @RequestBody UpdateStackJson updateStackJson) {
+        if (updateStackJson.getStatus() != null) {
+            stackService.updateStatus(user, stackId, updateStackJson.getStatus());
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            stackService.updateNodeCount(user, stackId, updateStackJson.getScalingAdjustment());
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
     }
 

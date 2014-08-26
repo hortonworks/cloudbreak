@@ -1,8 +1,7 @@
-package com.sequenceiq.cloudbreak.service.cluster;
+package com.sequenceiq.cloudbreak.service.cluster.flow;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -68,11 +67,10 @@ public class AmbariClusterInstallerTest {
         // GIVEN
         Map<String, List<String>> strListMap = createStringListMap();
         given(clusterRepository.save(cluster)).willReturn(cluster);
-        doNothing().when(underTest).sleep(anyInt());
         doReturn(ambariClient).when(underTest).createAmbariClient(stack.getAmbariIp());
         given(ambariClient.recommendAssignments(anyString())).willReturn(strListMap);
         doNothing().when(ambariClient).createCluster(cluster.getName(), blueprint.getBlueprintName(), strListMap);
-        given(ambariClient.getInstallProgress()).willReturn(new BigDecimal(100.0));
+        given(ambariClient.getRequestProgress()).willReturn(new BigDecimal(100.0));
         // WHEN
         underTest.installAmbariCluster(stack);
         // THEN
@@ -84,7 +82,6 @@ public class AmbariClusterInstallerTest {
         // GIVEN
         Map<String, List<String>> strListMap = createStringListMap();
         given(clusterRepository.save(cluster)).willReturn(cluster);
-        doNothing().when(underTest).sleep(anyInt());
         doReturn(ambariClient).when(underTest).createAmbariClient(stack.getAmbariIp());
         given(ambariClient.recommendAssignments(anyString())).willReturn(strListMap);
         doNothing().when(ambariClient).createCluster(cluster.getName(), blueprint.getBlueprintName(), strListMap);
@@ -99,7 +96,6 @@ public class AmbariClusterInstallerTest {
         // GIVEN
         Map<String, List<String>> strListMap = createStringListMap();
         given(clusterRepository.save(cluster)).willReturn(cluster);
-        doNothing().when(underTest).sleep(anyInt());
         doReturn(ambariClient).when(underTest).createAmbariClient(stack.getAmbariIp());
         given(ambariClient.recommendAssignments(anyString())).willReturn(strListMap);
         doThrow(new IllegalArgumentException()).when(ambariClient).createCluster(cluster.getName(), blueprint.getBlueprintName(), strListMap);
@@ -115,7 +111,6 @@ public class AmbariClusterInstallerTest {
         Map<String, List<String>> strListMap = createStringListMap();
         stack.setNodeCount(0);
         given(clusterRepository.save(cluster)).willReturn(cluster);
-        doNothing().when(underTest).sleep(anyInt());
         doReturn(ambariClient).when(underTest).createAmbariClient(stack.getAmbariIp());
         given(ambariClient.recommendAssignments(anyString())).willReturn(strListMap);
         // WHEN

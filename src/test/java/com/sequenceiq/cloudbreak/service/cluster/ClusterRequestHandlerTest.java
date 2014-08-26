@@ -20,6 +20,8 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterInstaller;
+import com.sequenceiq.cloudbreak.service.cluster.handler.ClusterRequestHandler;
 import com.sequenceiq.cloudbreak.service.stack.connector.aws.AwsConnectorTestUtil;
 
 import reactor.event.Event;
@@ -72,7 +74,7 @@ public class ClusterRequestHandlerTest {
         // GIVEN
         stackEvent.setKey(CLUSTER_REQUESTED);
         stackEvent.getData().setCluster(createClusterWithStatus(Status.REQUESTED));
-        stackEvent.getData().setStatus(Status.CREATE_COMPLETED);
+        stackEvent.getData().setStatus(Status.AVAILABLE);
         doNothing().when(ambariClusterInstaller).installAmbariCluster(stackEvent.getData());
         // WHEN
         underTest.accept(stackEvent);

@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
-import com.sequenceiq.cloudbreak.service.stack.event.domain.CoreInstanceMetaData;
+import com.sequenceiq.cloudbreak.service.stack.flow.CoreInstanceMetaData;
 
 public class MetadataSetupComplete extends ProvisionEvent {
 
