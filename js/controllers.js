@@ -257,7 +257,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     return "state2-run-blink";
                 case "CREATE_IN_PROGRESS":
                     return "state2-run-blink";
-                case "CREATE_COMPLETED":
+                case "AVAILABLE":
                     return "state5-run";
                 case "CREATE_FAILED":
                     return "state3-stop";
@@ -275,7 +275,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     return $rootScope.error_msg.title_requested;
                 case "CREATE_IN_PROGRESS":
                     return $rootScope.error_msg.title_create_in_progress;
-                case "CREATE_COMPLETED":
+                case "AVAILABLE":
                     return $rootScope.error_msg.title_create_completed;
                 case "CREATE_FAILED":
                     return $rootScope.error_msg.title_create_failed;
@@ -293,7 +293,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     return "fa-pause";
                 case "CREATE_IN_PROGRESS":
                     return "fa-pause";
-                case "CREATE_COMPLETED":
+                case "AVAILABLE":
                     return "fa-stop";
                 case "CREATE_FAILED":
                     return "fa-play";
@@ -941,7 +941,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
         }
 
         function logStackInfo(body) {
-            if(body.status === 'CREATE_COMPLETED') {
+            if(body.status === 'AVAILABLE') {
                 $scope.modifyStatusMessage($rootScope.error_msg.stack_create_completed, body.name);
                 $scope.modifyStatusClass("has-success");
             } else if(body.status === 'CREATE_IN_PROGRESS')  {
@@ -1040,7 +1040,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
 
 
         function logClusterInfo(body) {
-            if(body.status === 'CREATE_COMPLETED') {
+            if(body.status === 'AVAILABLE') {
                 $scope.modifyStatusMessage($rootScope.error_msg.cluster_create_completed, body.name);
                 $scope.modifyStatusClass("has-success");
             } else if(body.status === 'CREATE_IN_PROGRESS')  {
