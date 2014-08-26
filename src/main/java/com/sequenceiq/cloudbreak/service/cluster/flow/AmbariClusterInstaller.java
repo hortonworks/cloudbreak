@@ -31,7 +31,9 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
+import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClusterService;
@@ -62,6 +64,9 @@ public class AmbariClusterInstaller {
     private ClusterRepository clusterRepository;
 
     @Autowired
+    private RetryingStackUpdater stackUpdater;
+
+    @Autowired
     private Reactor reactor;
 
     @Resource
@@ -77,6 +82,7 @@ public class AmbariClusterInstaller {
         Cluster cluster = stack.getCluster();
         try {
             LOGGER.info("Starting Ambari cluster installation for stack '{}' [Ambari server address: {}]", stack.getId(), stack.getAmbariIp());
+            stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS);
             cluster.setCreationStarted(new Date().getTime());
             cluster = clusterRepository.save(cluster);
             Blueprint blueprint = cluster.getBlueprint();
@@ -100,6 +106,7 @@ public class AmbariClusterInstaller {
         Stack stack = stackRepository.findOneWithLists(stackId);
         Cluster cluster = stack.getCluster();
         try {
+            stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS);
             AmbariClient ambariClient = createAmbariClient(stack.getAmbariIp());
             waitForHosts(stack, ambariClient);
             Map<String, Integer> installRequests = installServices(hostGroupAdjustments, stack, ambariClient);

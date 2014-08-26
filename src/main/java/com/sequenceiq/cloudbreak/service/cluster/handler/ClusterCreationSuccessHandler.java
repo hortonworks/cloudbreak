@@ -7,19 +7,23 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailSender;
 import org.springframework.stereotype.Service;
 
+import reactor.event.Event;
+import reactor.function.Consumer;
+
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
+import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterCreationSuccess;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterInstallerMailSenderService;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
 import freemarker.template.Configuration;
-import reactor.event.Event;
-import reactor.function.Consumer;
 
 @Service
 public class ClusterCreationSuccessHandler implements Consumer<Event<ClusterCreationSuccess>> {
@@ -31,6 +35,12 @@ public class ClusterCreationSuccessHandler implements Consumer<Event<ClusterCrea
 
     @Autowired
     private ClusterRepository clusterRepository;
+
+    @Autowired
+    private StackRepository stackRepository;
+
+    @Autowired
+    private RetryingStackUpdater stackUpdater;
 
     @Value("${cb.smtp.sender.from}")
     private String msgFrom;
@@ -52,7 +62,9 @@ public class ClusterCreationSuccessHandler implements Consumer<Event<ClusterCrea
         Cluster cluster = clusterRepository.findById(clusterId);
         cluster.setStatus(Status.AVAILABLE);
         cluster.setCreationFinished(clusterCreationSuccess.getCreationFinished());
-        Cluster save = clusterRepository.save(cluster);
+        clusterRepository.save(cluster);
+        Stack stack = stackRepository.findStackForCluster(clusterId);
+        stackUpdater.updateStackStatus(stack.getId(), Status.AVAILABLE);
         if (cluster.getEmailNeeded()) {
             ambariClusterInstallerMailSenderService.sendSuccessEmail(cluster.getUser(), event.getData().getAmbariIp());
         }

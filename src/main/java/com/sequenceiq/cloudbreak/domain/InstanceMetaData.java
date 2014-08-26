@@ -19,6 +19,7 @@ public class InstanceMetaData implements ProvisionEntity {
     private Boolean ambariServer;
     private String dockerSubnet;
     private String longName;
+    private Boolean removable;
     @ManyToOne
     private Stack stack;
 
@@ -104,5 +105,13 @@ public class InstanceMetaData implements ProvisionEntity {
 
     public void setLongName(String longName) {
         this.longName = longName;
+    }
+
+    public Boolean isRemovable() {
+        return removable;
+    }
+
+    public void setRemovable(Boolean removable) {
+        this.removable = removable;
     }
 }

@@ -157,10 +157,20 @@ public class DefaultStackService implements StackService {
             throw new BadRequestException(String.format("Requested scaling adjustment on stack '%s' is 0. Nothing to do.", stackId));
         }
         if (0 > scalingAdjustment) {
-            throw new BadRequestException(
-                    String.format("Requested scaling adjustment on stack '%s' is negative (%s), but "
-                            + "node decommission is not yet supported by the Cloudbreak API.",
-                            stackId, scalingAdjustment));
+            if (-1 * scalingAdjustment > stack.getNodeCount()) {
+                throw new BadRequestException(String.format("There are %s instances in stack '%s'. Cannot remove %s instances.", stack.getNodeCount(), stackId,
+                        -1 * scalingAdjustment));
+            }
+            int removeableHosts = 0;
+            for (InstanceMetaData metadataEntry : stack.getInstanceMetaData()) {
+                if (metadataEntry.isRemovable()) {
+                    removeableHosts++;
+                }
+            }
+            if (removeableHosts < -1 * scalingAdjustment)
+                throw new BadRequestException(
+                        String.format("There are %s removable hosts on stack '%s' but %s were requested. Decomission nodes from the cluster first!",
+                                removeableHosts, stackId, scalingAdjustment * -1));
         }
         stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS);
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_INSTANCES_REQUEST_EVENT, stack.getId());

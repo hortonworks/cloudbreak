@@ -108,6 +108,7 @@ public class AmbariRoleAllocator {
             instanceMetaDataEntry.setDockerSubnet(DOCKER_SUBNET_PREFIX + instanceIndex);
             if (instanceIndex == 0) {
                 instanceMetaDataEntry.setAmbariServer(Boolean.TRUE);
+                instanceMetaDataEntry.setRemovable(false);
                 ambariIp = instanceMetaDataEntry.getPublicIp();
                 if (ambariIp == null) {
                     throw new WrongMetadataException(String.format("Public IP of Ambari server cannot be null [stack: '%s', instanceId: '%s' ]",
@@ -115,6 +116,7 @@ public class AmbariRoleAllocator {
                 }
             } else {
                 instanceMetaDataEntry.setAmbariServer(Boolean.FALSE);
+                instanceMetaDataEntry.setRemovable(true);
             }
             instanceIndex++;
             instanceMetaDataEntry.setStack(stack);
