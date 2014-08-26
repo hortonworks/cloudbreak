@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.Provisioner;
 import com.sequenceiq.cloudbreak.service.stack.event.AddInstancesComplete;
+import com.sequenceiq.cloudbreak.service.stack.event.StackUpdateSuccess;
 
 @Component
 public class AwsProvisioner implements Provisioner {
@@ -132,7 +133,8 @@ public class AwsProvisioner implements Provisioner {
         amazonASClient.detachInstances(detachInstancesRequest);
         amazonEC2Client.terminateInstances(new TerminateInstancesRequest().withInstanceIds(instanceIds));
         LOGGER.info("Terminated instances in stack '{}': '{}'", stack.getId(), instanceIds);
-        // TODO: removeSuccess -> delete from metadata, + set to available again
+        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, stack.getId());
+        reactor.notify(ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, Event.wrap(new StackUpdateSuccess(stack.getId(), true, instanceIds)));
     }
 
     protected CreateStackRequest createStackRequest() {

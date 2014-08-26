@@ -14,11 +14,11 @@ import reactor.event.Event;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.event.AmbariRoleAllocationComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.StackOperationFailure;
+import com.sequenceiq.cloudbreak.service.stack.event.StackUpdateSuccess;
 
 @Service
 public class AmbariRoleAllocator {
@@ -70,8 +70,12 @@ public class AmbariRoleAllocator {
             originalMetadata.addAll(instanceMetaData);
             stackUpdater.updateStackMetaData(stackId, originalMetadata);
             stackUpdater.updateMetadataReady(stackId);
-            stackUpdater.updateNodeCount(stackId, originalMetadata.size());
-            stackUpdater.updateStackStatus(stackId, Status.AVAILABLE);
+            Set<String> instanceIds = new HashSet<>();
+            for (InstanceMetaData metadataEntry : instanceMetaData) {
+                instanceIds.add(metadataEntry.getInstanceId());
+            }
+            LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, stackId);
+            reactor.notify(ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, Event.wrap(new StackUpdateSuccess(stackId, false, instanceIds)));
         } catch (Exception e) {
             String errMessage = "Unhandled exception occurred while updating stack metadata.";
             LOGGER.error(errMessage, e);

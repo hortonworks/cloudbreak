@@ -14,7 +14,6 @@ import javax.persistence.NamedQuery;
                 query = "SELECT i FROM InstanceMetaData i "
                         + "WHERE i.stack.id= :stackId "
                         + "AND i.longName= :hostName")
-
 })
 public class InstanceMetaData implements ProvisionEntity {
 

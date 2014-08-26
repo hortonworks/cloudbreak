@@ -16,7 +16,6 @@ import com.sequenceiq.cloudbreak.service.cluster.handler.ClusterCreationSuccessH
 import com.sequenceiq.cloudbreak.service.cluster.handler.ClusterRequestHandler;
 import com.sequenceiq.cloudbreak.service.history.HistoryEventHandler;
 import com.sequenceiq.cloudbreak.service.stack.handler.AddInstancesCompleteHandler;
-import com.sequenceiq.cloudbreak.service.stack.handler.UpdateInstancesRequestHandler;
 import com.sequenceiq.cloudbreak.service.stack.handler.AmbariRoleAllocationCompleteHandler;
 import com.sequenceiq.cloudbreak.service.stack.handler.MetadataSetupCompleteHandler;
 import com.sequenceiq.cloudbreak.service.stack.handler.MetadataUpdateCompleteHandler;
@@ -28,6 +27,8 @@ import com.sequenceiq.cloudbreak.service.stack.handler.StackCreationSuccessHandl
 import com.sequenceiq.cloudbreak.service.stack.handler.StackDeleteCompleteHandler;
 import com.sequenceiq.cloudbreak.service.stack.handler.StackDeleteRequestHandler;
 import com.sequenceiq.cloudbreak.service.stack.handler.StackUpdateFailureHandler;
+import com.sequenceiq.cloudbreak.service.stack.handler.StackUpdateSuccessHandler;
+import com.sequenceiq.cloudbreak.service.stack.handler.UpdateInstancesRequestHandler;
 
 @Component
 public class ReactorInitializer implements InitializingBean {
@@ -78,6 +79,9 @@ public class ReactorInitializer implements InitializingBean {
     private MetadataUpdateCompleteHandler metadataUpdateCompleteHandler;
 
     @Autowired
+    private StackUpdateSuccessHandler stackUpdateSuccessHandler;
+
+    @Autowired
     private StackUpdateFailureHandler stackUpdateFailureHandler;
 
     @Autowired
@@ -115,6 +119,7 @@ public class ReactorInitializer implements InitializingBean {
         reactor.on($(ReactorConfig.UPDATE_INSTANCES_REQUEST_EVENT), updateInstancesRequestHandler);
         reactor.on($(ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT), addInstancesCompleteHandler);
         reactor.on($(ReactorConfig.METADATA_UPDATE_COMPLETE_EVENT), metadataUpdateCompleteHandler);
+        reactor.on($(ReactorConfig.STACK_UPDATE_SUCCESS_EVENT), stackUpdateSuccessHandler);
         reactor.on($(ReactorConfig.STACK_UPDATE_FAILED_EVENT), stackUpdateFailureHandler);
 
         reactor.on($(ReactorConfig.ADD_AMBARI_HOSTS_REQUEST_EVENT), addAmbariHostsRequestHandler);
