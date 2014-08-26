@@ -4,8 +4,18 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 
 @Entity
+@NamedQueries({
+        @NamedQuery(
+                name = "InstanceMetaData.findHostInStack",
+                query = "SELECT i FROM InstanceMetaData i "
+                        + "WHERE i.stack.id= :stackId "
+                        + "AND i.longName= :hostName")
+
+})
 public class InstanceMetaData implements ProvisionEntity {
 
     @Id

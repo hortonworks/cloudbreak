@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster.handler;
 
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +14,7 @@ import reactor.function.Consumer;
 
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
@@ -64,7 +67,13 @@ public class ClusterCreationSuccessHandler implements Consumer<Event<ClusterCrea
         cluster.setCreationFinished(clusterCreationSuccess.getCreationFinished());
         clusterRepository.save(cluster);
         Stack stack = stackRepository.findStackForCluster(clusterId);
+        Set<InstanceMetaData> instances = stack.getInstanceMetaData();
+        for (InstanceMetaData instanceMetaData : instances) {
+            instanceMetaData.setRemovable(false);
+        }
+        stackUpdater.updateStackMetaData(stack.getId(), instances);
         stackUpdater.updateStackStatus(stack.getId(), Status.AVAILABLE);
+
         if (cluster.getEmailNeeded()) {
             ambariClusterInstallerMailSenderService.sendSuccessEmail(cluster.getUser(), event.getData().getAmbariIp());
         }

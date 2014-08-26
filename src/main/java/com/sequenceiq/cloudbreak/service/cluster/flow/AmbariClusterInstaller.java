@@ -109,11 +109,12 @@ public class AmbariClusterInstaller {
             stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS);
             AmbariClient ambariClient = createAmbariClient(stack.getAmbariIp());
             waitForHosts(stack, ambariClient);
-            Map<String, Integer> installRequests = installServices(hostGroupAdjustments, stack, ambariClient);
+            Map<String, String> hosts = findHosts(hostGroupAdjustments, ambariClient);
+            Map<String, Integer> installRequests = installServices(hosts, stack, ambariClient);
             waitForServiceInstalls(stack, ambariClient, installRequests);
             ambariClient.startAllServices();
             ambariClient.restartServiceComponents("NAGIOS", Arrays.asList("NAGIOS_SERVER"));
-            addHostSuccessful(cluster, stack.getAmbariIp());
+            addHostSuccessful(cluster, hosts.keySet());
         } catch (AmbariHostsUnavailableException | AmbariOperationFailedException e) {
             LOGGER.error(e.getMessage(), e);
             addHostFailed(cluster, e.getMessage());
@@ -174,17 +175,25 @@ public class AmbariClusterInstaller {
         waitForServiceInstalls(stack, ambariClient, clusterInstallRequest);
     }
 
-    private Map<String, Integer> installServices(Set<HostGroupAdjustmentJson> hostGroupAdjustments, Stack stack, AmbariClient ambariClient) {
+    private Map<String, String> findHosts(Set<HostGroupAdjustmentJson> hostGroupAdjustments, AmbariClient ambariClient) {
         List<String> unregisteredHostNames = ambariClient.getUnregisteredHostNames();
-        Map<String, Integer> installRequests = new HashMap<>();
+        Map<String, String> hosts = new HashMap<>();
         for (HostGroupAdjustmentJson entry : hostGroupAdjustments) {
             for (int i = 0; i < entry.getScalingAdjustment(); i++) {
                 String host = unregisteredHostNames.get(0);
-                Map<String, Integer> hostInstallRequests = prepareHost(ambariClient, stack, host, entry.getHostGroup());
-                for (Entry<String, Integer> request : hostInstallRequests.entrySet()) {
-                    installRequests.put(String.format("%s-%s", host, request.getKey()), request.getValue());
-                }
+                hosts.put(host, entry.getHostGroup());
                 unregisteredHostNames.remove(0);
+            }
+        }
+        return hosts;
+    }
+
+    private Map<String, Integer> installServices(Map<String, String> hosts, Stack stack, AmbariClient ambariClient) {
+        Map<String, Integer> installRequests = new HashMap<>();
+        for (Entry<String, String> host : hosts.entrySet()) {
+            Map<String, Integer> hostInstallRequests = prepareHost(ambariClient, stack, host.getKey(), host.getValue());
+            for (Entry<String, Integer> request : hostInstallRequests.entrySet()) {
+                installRequests.put(String.format("%s-%s", host, request.getKey()), request.getValue());
             }
         }
         return installRequests;
@@ -227,9 +236,9 @@ public class AmbariClusterInstaller {
         reactor.notify(ReactorConfig.CLUSTER_CREATE_FAILED_EVENT, Event.wrap(new ClusterCreationFailure(cluster.getId(), message)));
     }
 
-    private void addHostSuccessful(Cluster cluster, String ambariIp) {
+    private void addHostSuccessful(Cluster cluster, Set<String> hostNames) {
         LOGGER.info("Publishing {} event [ClusterId: '{}']", ReactorConfig.ADD_AMBARI_HOSTS_SUCCESS_EVENT, cluster.getId());
-        reactor.notify(ReactorConfig.ADD_AMBARI_HOSTS_SUCCESS_EVENT, Event.wrap(new AddAmbariHostsSuccess(cluster.getId(), ambariIp)));
+        reactor.notify(ReactorConfig.ADD_AMBARI_HOSTS_SUCCESS_EVENT, Event.wrap(new AddAmbariHostsSuccess(cluster.getId(), hostNames)));
     }
 
     private void addHostFailed(Cluster cluster, String message) {

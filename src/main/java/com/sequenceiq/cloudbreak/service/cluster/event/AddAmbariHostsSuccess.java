@@ -1,21 +1,15 @@
 package com.sequenceiq.cloudbreak.service.cluster.event;
 
+import java.util.Set;
+
 public class AddAmbariHostsSuccess {
 
     private Long clusterId;
-    private String ambariIp;
+    private Set<String> hostNames;
 
-    public AddAmbariHostsSuccess(Long clusterId, String ambariIp) {
+    public AddAmbariHostsSuccess(Long clusterId, Set<String> hostNames) {
         this.clusterId = clusterId;
-        this.ambariIp = ambariIp;
-    }
-
-    public String getAmbariIp() {
-        return ambariIp;
-    }
-
-    public void setAmbariIp(String ambariIp) {
-        this.ambariIp = ambariIp;
+        this.hostNames = hostNames;
     }
 
     public Long getClusterId() {
@@ -24,5 +18,13 @@ public class AddAmbariHostsSuccess {
 
     public void setClusterId(Long clusterId) {
         this.clusterId = clusterId;
+    }
+
+    public Set<String> getHostNames() {
+        return hostNames;
+    }
+
+    public void setHostNames(Set<String> hostNames) {
+        this.hostNames = hostNames;
     }
 }
