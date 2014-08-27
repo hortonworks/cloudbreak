@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import reactor.core.Reactor;
 
 import com.sequenceiq.cloudbreak.service.cluster.handler.AddAmbariHostsFailureHandler;
-import com.sequenceiq.cloudbreak.service.cluster.handler.AddAmbariHostsRequestHandler;
+import com.sequenceiq.cloudbreak.service.cluster.handler.UpdateAmbariHostsRequestHandler;
 import com.sequenceiq.cloudbreak.service.cluster.handler.AddAmbariHostsSuccessHandler;
 import com.sequenceiq.cloudbreak.service.cluster.handler.ClusterCreationFailureHandler;
 import com.sequenceiq.cloudbreak.service.cluster.handler.ClusterCreationSuccessHandler;
@@ -85,7 +85,7 @@ public class ReactorInitializer implements InitializingBean {
     private StackUpdateFailureHandler stackUpdateFailureHandler;
 
     @Autowired
-    private AddAmbariHostsRequestHandler addAmbariHostsRequestHandler;
+    private UpdateAmbariHostsRequestHandler updateAmbariHostsRequestHandler;
 
     @Autowired
     private AddAmbariHostsFailureHandler addAmbariHostsFailureHandler;
@@ -122,7 +122,7 @@ public class ReactorInitializer implements InitializingBean {
         reactor.on($(ReactorConfig.STACK_UPDATE_SUCCESS_EVENT), stackUpdateSuccessHandler);
         reactor.on($(ReactorConfig.STACK_UPDATE_FAILED_EVENT), stackUpdateFailureHandler);
 
-        reactor.on($(ReactorConfig.ADD_AMBARI_HOSTS_REQUEST_EVENT), addAmbariHostsRequestHandler);
+        reactor.on($(ReactorConfig.UPDATE_AMBARI_HOSTS_REQUEST_EVENT), updateAmbariHostsRequestHandler);
         reactor.on($(ReactorConfig.ADD_AMBARI_HOSTS_SUCCESS_EVENT), addAmbariHostsSuccessHandler);
         reactor.on($(ReactorConfig.ADD_AMBARI_HOSTS_FAILED_EVENT), addAmbariHostsFailureHandler);
 

@@ -36,7 +36,7 @@ public class AmbariClusterInstallerTest {
 
     @InjectMocks
     @Spy
-    private AmbariClusterInstaller underTest;
+    private AmbariClusterConnector underTest;
 
     @Mock
     private ClusterRepository clusterRepository;
@@ -55,7 +55,7 @@ public class AmbariClusterInstallerTest {
 
     @Before
     public void setUp() {
-        underTest = new AmbariClusterInstaller();
+        underTest = new AmbariClusterConnector();
         MockitoAnnotations.initMocks(this);
         blueprint = createBlueprint();
         cluster = createCluster(blueprint);

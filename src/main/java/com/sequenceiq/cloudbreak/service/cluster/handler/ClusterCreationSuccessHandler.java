@@ -66,7 +66,7 @@ public class ClusterCreationSuccessHandler implements Consumer<Event<ClusterCrea
         cluster.setStatus(Status.AVAILABLE);
         cluster.setCreationFinished(clusterCreationSuccess.getCreationFinished());
         clusterRepository.save(cluster);
-        Stack stack = stackRepository.findStackForCluster(clusterId);
+        Stack stack = stackRepository.findStackWithListsForCluster(clusterId);
         Set<InstanceMetaData> instances = stack.getInstanceMetaData();
         for (InstanceMetaData instanceMetaData : instances) {
             instanceMetaData.setRemovable(false);

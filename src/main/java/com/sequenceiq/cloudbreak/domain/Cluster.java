@@ -1,12 +1,18 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
@@ -14,10 +20,17 @@ import javax.persistence.UniqueConstraint;
 @Table(name = "Cluster", uniqueConstraints = {
         @UniqueConstraint(columnNames = { "cluster_user", "name" })
 })
-@NamedQuery(
-        name = "Cluster.findAllClusterByBlueprint",
-        query = "SELECT c FROM Cluster c "
-                + "WHERE c.blueprint.id= :id")
+@NamedQueries({
+        @NamedQuery(
+                name = "Cluster.findAllClusterByBlueprint",
+                query = "SELECT c FROM Cluster c "
+                        + "WHERE c.blueprint.id= :id"),
+        @NamedQuery(
+                name = "Cluster.findOneWithLists",
+                query = "SELECT c FROM Cluster c "
+                        + "LEFT JOIN FETCH c.hostMetadata "
+                        + "WHERE c.id= :id")
+})
 public class Cluster implements ProvisionEntity {
 
     @Id
@@ -45,6 +58,9 @@ public class Cluster implements ProvisionEntity {
     private String statusReason;
 
     private Boolean emailNeeded;
+
+    @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<HostMetadata> hostMetadata = new HashSet<>();
 
     public String getDescription() {
         return description;
@@ -124,5 +140,13 @@ public class Cluster implements ProvisionEntity {
 
     public void setEmailNeeded(Boolean emailNeeded) {
         this.emailNeeded = emailNeeded;
+    }
+
+    public Set<HostMetadata> getHostMetadata() {
+        return hostMetadata;
+    }
+
+    public void setHostMetadata(Set<HostMetadata> hostMetadata) {
+        this.hostMetadata = hostMetadata;
     }
 }

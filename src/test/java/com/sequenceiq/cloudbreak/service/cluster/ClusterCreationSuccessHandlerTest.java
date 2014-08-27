@@ -76,7 +76,7 @@ public class ClusterCreationSuccessHandlerTest {
     public void testAccept() {
         // GIVEN
         given(clusterRepository.findById(1L)).willReturn(cluster);
-        given(stackRepository.findStackForCluster(1L)).willReturn(stack);
+        given(stackRepository.findStackWithListsForCluster(1L)).willReturn(stack);
         doNothing().when(websocketService).sendToTopicUser(anyString(), any(WebsocketEndPoint.class), any(StatusMessage.class));
         // WHEN
         underTest.accept(event);

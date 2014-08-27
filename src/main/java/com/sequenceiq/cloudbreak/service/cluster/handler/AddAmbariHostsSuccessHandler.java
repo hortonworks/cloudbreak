@@ -50,7 +50,7 @@ public class AddAmbariHostsSuccessHandler implements Consumer<Event<AddAmbariHos
         Cluster cluster = clusterRepository.findById(data.getClusterId());
         Set<String> hostNames = data.getHostNames();
         LOGGER.info("Accepted {} event.", ReactorConfig.ADD_AMBARI_HOSTS_SUCCESS_EVENT);
-        Stack stack = stackRepository.findStackForCluster(data.getClusterId());
+        Stack stack = stackRepository.findStackWithListsForCluster(data.getClusterId());
         for (String hostName : hostNames) {
             InstanceMetaData metadataEntry = metadataRepository.findHostInStack(stack.getId(), hostName);
             metadataEntry.setRemovable(false);

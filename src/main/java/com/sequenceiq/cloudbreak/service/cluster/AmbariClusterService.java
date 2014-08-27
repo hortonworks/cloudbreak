@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.cluster;
 import groovyx.net.http.HttpResponseException;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -26,13 +27,15 @@ import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StatusRequest;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
+import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.cluster.event.AddAmbariHostsRequest;
+import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
 
 @Service
 public class AmbariClusterService implements ClusterService {
@@ -49,6 +52,9 @@ public class AmbariClusterService implements ClusterService {
 
     @Autowired
     private RetryingStackUpdater stackUpdater;
+
+    @Autowired
+    private HostMetadataRepository hostMetadataRepository;
 
     @Autowired
     private Reactor reactor;
@@ -98,9 +104,9 @@ public class AmbariClusterService implements ClusterService {
         Stack stack = stackRepository.findOneWithLists(stackId);
         boolean decommisionRequest = validateRequest(stack, hostGroupAdjustments);
         LOGGER.info("Cluster update requested for stack '{}' [BlueprintId: {}]", stackId, stack.getCluster().getBlueprint().getId());
-        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_AMBARI_HOSTS_REQUEST_EVENT, stack.getId());
-        reactor.notify(ReactorConfig.ADD_AMBARI_HOSTS_REQUEST_EVENT, Event.wrap(
-                new AddAmbariHostsRequest(stackId, hostGroupAdjustments)));
+        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.UPDATE_AMBARI_HOSTS_REQUEST_EVENT, stack.getId());
+        reactor.notify(ReactorConfig.UPDATE_AMBARI_HOSTS_REQUEST_EVENT, Event.wrap(
+                new UpdateAmbariHostsRequest(stackId, hostGroupAdjustments, decommisionRequest)));
     }
 
     @Override
@@ -137,7 +143,11 @@ public class AmbariClusterService implements ClusterService {
             sumScalingAdjustments += scalingAdjustment;
         }
         validateZeroScalingAdjustments(sumScalingAdjustments);
-        validateUnregisteredHosts(stack, sumScalingAdjustments);
+        if (!negative) {
+            validateUnregisteredHosts(stack, sumScalingAdjustments);
+        } else {
+            validateRegisteredHosts(stack, hostGroupAdjustments);
+        }
         validateHostGroups(stack, hostGroupAdjustments);
         return negative;
     }
@@ -159,6 +169,22 @@ public class AmbariClusterService implements ClusterService {
         if (unregisteredHosts.size() < sumScalingAdjustments) {
             throw new BadRequestException(String.format("Number of unregistered hosts in the stack is %s, but %s would be needed to complete the request.",
                     unregisteredHosts.size(), sumScalingAdjustments));
+        }
+    }
+
+    private void validateRegisteredHosts(Stack stack, Set<HostGroupAdjustmentJson> hostGroupAdjustments) {
+        List<String> validationErrors = new ArrayList<>();
+        for (HostGroupAdjustmentJson hostGroupAdjustment : hostGroupAdjustments) {
+            Set<HostMetadata> hostMetadata = hostMetadataRepository.findHostsInHostgroup(hostGroupAdjustment.getHostGroup(), stack.getCluster().getId());
+            if (hostMetadata.size() <= -1 * hostGroupAdjustment.getScalingAdjustment()) {
+                validationErrors.add(String.format("[hostGroup: '%s', current hosts: %s, decommisions requested: %s]",
+                        hostGroupAdjustment.getHostGroup(), hostMetadata.size(), -1 * hostGroupAdjustment.getScalingAdjustment()));
+            }
+        }
+        if (validationErrors.size() > 0) {
+            throw new BadRequestException(String.format(
+                    "Every host group must contain at least 1 host after the decommision: %s",
+                    validationErrors));
         }
     }
 
