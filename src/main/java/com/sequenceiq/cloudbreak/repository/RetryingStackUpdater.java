@@ -122,15 +122,15 @@ public class RetryingStackUpdater {
         }
     }
 
-    public Stack updateMetadataReady(Long stackId) {
+    public Stack updateMetadataReady(Long stackId, boolean ready) {
         int attempt = 1;
         try {
-            return doUpdateMetadataReady(stackId);
+            return doUpdateMetadataReady(stackId, ready);
         } catch (OptimisticLockException | OptimisticLockingFailureException e) {
             if (attempt <= MAX_RETRIES) {
                 LOGGER.info("Failed to update stack while trying to set 'metadataReady'. [id: '{}', attempt: '{}', Cause: {}]. Trying to save it again.",
                         stackId, attempt++, e.getClass().getSimpleName());
-                return doUpdateStackCreateComplete(stackId);
+                return doUpdateMetadataReady(stackId, ready);
             } else {
                 throw new InternalServerException(String.format("Failed to update stack '%s' in 5 attempts. (while trying to set 'metadataReady')",
                         stackId), e);
@@ -205,9 +205,9 @@ public class RetryingStackUpdater {
         return stack;
     }
 
-    private Stack doUpdateMetadataReady(Long stackId) {
+    private Stack doUpdateMetadataReady(Long stackId, boolean ready) {
         Stack stack = stackRepository.findById(stackId);
-        stack.setMetadataReady(true);
+        stack.setMetadataReady(ready);
         stack = stackRepository.save(stack);
         LOGGER.info("Updated stack: [stack: '{}' metadataReady: 'true'].", stackId);
         return stack;

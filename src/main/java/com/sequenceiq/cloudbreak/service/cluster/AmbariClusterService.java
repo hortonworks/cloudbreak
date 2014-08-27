@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.service.cluster;
 import groovyx.net.http.HttpResponseException;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -25,13 +27,17 @@ import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.HostMetadata;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StatusRequest;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
+import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
+import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.cluster.event.AddAmbariHostsRequest;
+import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
 
 @Service
 public class AmbariClusterService implements ClusterService {
@@ -48,6 +54,12 @@ public class AmbariClusterService implements ClusterService {
 
     @Autowired
     private RetryingStackUpdater stackUpdater;
+
+    @Autowired
+    private InstanceMetaDataRepository instanceMetadataRepository;
+
+    @Autowired
+    private HostMetadataRepository hostMetadataRepository;
 
     @Autowired
     private Reactor reactor;
@@ -93,17 +105,17 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
-    public void updateHosts(User user, Long stackId, Set<HostGroupAdjustmentJson> hostGroupAdjustments) {
+    public void updateHosts(Long stackId, Set<HostGroupAdjustmentJson> hostGroupAdjustments) {
         Stack stack = stackRepository.findOneWithLists(stackId);
-        validateRequest(stack, hostGroupAdjustments);
+        boolean decommisionRequest = validateRequest(stack, hostGroupAdjustments);
         LOGGER.info("Cluster update requested for stack '{}' [BlueprintId: {}]", stackId, stack.getCluster().getBlueprint().getId());
-        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_AMBARI_HOSTS_REQUEST_EVENT, stack.getId());
-        reactor.notify(ReactorConfig.ADD_AMBARI_HOSTS_REQUEST_EVENT, Event.wrap(
-                new AddAmbariHostsRequest(stackId, hostGroupAdjustments)));
+        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.UPDATE_AMBARI_HOSTS_REQUEST_EVENT, stack.getId());
+        reactor.notify(ReactorConfig.UPDATE_AMBARI_HOSTS_REQUEST_EVENT, Event.wrap(
+                new UpdateAmbariHostsRequest(stackId, hostGroupAdjustments, decommisionRequest)));
     }
 
     @Override
-    public void updateStatus(User user, Long stackId, StatusRequest statusRequest) {
+    public void updateStatus(Long stackId, StatusRequest statusRequest) {
         throw new BadRequestException("Stopping/restarting a cluster is not yet supported");
     }
 
@@ -112,19 +124,47 @@ public class AmbariClusterService implements ClusterService {
         return new AmbariClient(ambariIp, PORT);
     }
 
-    private void validateRequest(Stack stack, Set<HostGroupAdjustmentJson> hostGroupAdjustments) {
+    private boolean validateRequest(Stack stack, Set<HostGroupAdjustmentJson> hostGroupAdjustments) {
         int sumScalingAdjustments = 0;
+        boolean positive = false;
+        boolean negative = false;
+        Set<String> hostGroupNames = new HashSet<>();
         for (HostGroupAdjustmentJson hostGroupAdjustment : hostGroupAdjustments) {
+            if (hostGroupNames.contains(hostGroupAdjustment.getHostGroup())) {
+                throw new BadRequestException(String.format(
+                        "Hostgroups cannot be listed more than once in an update request, but '%s' is listed multiple times.",
+                        hostGroupAdjustment.getHostGroup()));
+            }
+            hostGroupNames.add(hostGroupAdjustment.getHostGroup());
             int scalingAdjustment = hostGroupAdjustment.getScalingAdjustment();
             if (scalingAdjustment < 0) {
-                throw new BadRequestException(String.format("Requested scaling adjustment on hostGroup '%s' is negative (%s), but "
-                        + "node decommission is not yet supported by the Cloudbreak API.",
-                        hostGroupAdjustment.getHostGroup(), scalingAdjustment));
+                negative = true;
+            } else if (scalingAdjustment > 0) {
+                positive = true;
+            }
+            if (positive && negative) {
+                throw new BadRequestException("An update request must contain only decomissions or only additions.");
             }
             sumScalingAdjustments += scalingAdjustment;
         }
-        AmbariClient ambariClient = new AmbariClient(stack.getAmbariIp(), AmbariClusterService.PORT);
-        List<String> unregisteredHosts = ambariClient.getUnregisteredHostNames();
+        validateZeroScalingAdjustments(sumScalingAdjustments);
+        if (!negative) {
+            validateUnregisteredHosts(stack, sumScalingAdjustments);
+        } else {
+            validateRegisteredHosts(stack, hostGroupAdjustments);
+        }
+        validateHostGroups(stack, hostGroupAdjustments);
+        return negative;
+    }
+
+    private void validateZeroScalingAdjustments(int sumScalingAdjustments) {
+        if (sumScalingAdjustments == 0) {
+            throw new BadRequestException("No scaling adjustments specified. Nothing to do.");
+        }
+    }
+
+    private void validateUnregisteredHosts(Stack stack, int sumScalingAdjustments) {
+        Set<InstanceMetaData> unregisteredHosts = instanceMetadataRepository.findUnregisteredHostsInStack(stack.getId());
         if (unregisteredHosts.size() == 0) {
             throw new BadRequestException(String.format(
                     "There are no unregistered hosts in stack '%s'. Add some additional nodes to the stack before adding new hosts to the cluster.",
@@ -134,6 +174,25 @@ public class AmbariClusterService implements ClusterService {
             throw new BadRequestException(String.format("Number of unregistered hosts in the stack is %s, but %s would be needed to complete the request.",
                     unregisteredHosts.size(), sumScalingAdjustments));
         }
+    }
+
+    private void validateRegisteredHosts(Stack stack, Set<HostGroupAdjustmentJson> hostGroupAdjustments) {
+        List<String> validationErrors = new ArrayList<>();
+        for (HostGroupAdjustmentJson hostGroupAdjustment : hostGroupAdjustments) {
+            Set<HostMetadata> hostMetadata = hostMetadataRepository.findHostsInHostgroup(hostGroupAdjustment.getHostGroup(), stack.getCluster().getId());
+            if (hostMetadata.size() <= -1 * hostGroupAdjustment.getScalingAdjustment()) {
+                validationErrors.add(String.format("[hostGroup: '%s', current hosts: %s, decommisions requested: %s]",
+                        hostGroupAdjustment.getHostGroup(), hostMetadata.size(), -1 * hostGroupAdjustment.getScalingAdjustment()));
+            }
+        }
+        if (validationErrors.size() > 0) {
+            throw new BadRequestException(String.format(
+                    "Every host group must contain at least 1 host after the decommision: %s",
+                    validationErrors));
+        }
+    }
+
+    private void validateHostGroups(Stack stack, Set<HostGroupAdjustmentJson> hostGroupAdjustments) {
         for (HostGroupAdjustmentJson hostGroupAdjustment : hostGroupAdjustments) {
             if (!assignableHostgroup(stack.getCluster(), hostGroupAdjustment.getHostGroup())) {
                 throw new BadRequestException(String.format(

@@ -7,22 +7,29 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import reactor.event.Event;
+
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
+import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterCreationSuccess;
 import com.sequenceiq.cloudbreak.service.cluster.handler.ClusterCreationSuccessHandler;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
-
-import reactor.event.Event;
 
 public class ClusterCreationSuccessHandlerTest {
 
@@ -35,11 +42,19 @@ public class ClusterCreationSuccessHandlerTest {
     @Mock
     private ClusterRepository clusterRepository;
 
+    @Mock
+    private StackRepository stackRepository;
+
+    @Mock
+    private RetryingStackUpdater stackUpdater;
+
     private ClusterCreationSuccess clusterCreationSuccess;
 
     private Event<ClusterCreationSuccess> event;
 
     private Cluster cluster;
+
+    private Stack stack;
 
     @Before
     public void setUp() {
@@ -49,6 +64,9 @@ public class ClusterCreationSuccessHandlerTest {
         event = new Event<>(clusterCreationSuccess);
         cluster = new Cluster();
         cluster.setEmailNeeded(false);
+        stack = new Stack();
+        Set<InstanceMetaData> instanceMetaData = new HashSet<>();
+        stack.setInstanceMetaData(instanceMetaData);
         User user = new User();
         user.setEmail("dummy@myemail.com");
         cluster.setUser(user);
@@ -56,12 +74,13 @@ public class ClusterCreationSuccessHandlerTest {
 
     @Test
     public void testAccept() {
-        //GIVEN
+        // GIVEN
         given(clusterRepository.findById(1L)).willReturn(cluster);
+        given(stackRepository.findStackWithListsForCluster(1L)).willReturn(stack);
         doNothing().when(websocketService).sendToTopicUser(anyString(), any(WebsocketEndPoint.class), any(StatusMessage.class));
-        //WHEN
+        // WHEN
         underTest.accept(event);
-        //THEN
+        // THEN
         verify(websocketService, times(1)).sendToTopicUser(anyString(), any(WebsocketEndPoint.class), any(StatusMessage.class));
     }
 }

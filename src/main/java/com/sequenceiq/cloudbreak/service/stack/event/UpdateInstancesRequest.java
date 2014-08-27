@@ -2,11 +2,11 @@ package com.sequenceiq.cloudbreak.service.stack.event;
 
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 
-public class AddInstancesRequest extends ProvisionEvent {
+public class UpdateInstancesRequest extends ProvisionEvent {
 
     private Integer scalingAdjustment;
 
-    public AddInstancesRequest(CloudPlatform cloudPlatform, Long stackId, Integer scalingAdjustment) {
+    public UpdateInstancesRequest(CloudPlatform cloudPlatform, Long stackId, Integer scalingAdjustment) {
         super(cloudPlatform, stackId);
         this.scalingAdjustment = scalingAdjustment;
     }

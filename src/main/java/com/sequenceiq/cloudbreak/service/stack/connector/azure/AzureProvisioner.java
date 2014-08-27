@@ -6,6 +6,9 @@ import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStack
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.NOT_FOUND;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.SERVICENAME;
 
+import groovyx.net.http.HttpResponseDecorator;
+import groovyx.net.http.HttpResponseException;
+
 import java.io.FileNotFoundException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
@@ -23,6 +26,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import reactor.core.Reactor;
+import reactor.event.Event;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
@@ -43,11 +49,6 @@ import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateServic
 import com.sequenceiq.cloudbreak.service.stack.connector.Provisioner;
 import com.sequenceiq.cloudbreak.service.stack.event.AddInstancesComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
-
-import groovyx.net.http.HttpResponseDecorator;
-import groovyx.net.http.HttpResponseException;
-import reactor.core.Reactor;
-import reactor.event.Event;
 
 @Component
 public class AzureProvisioner implements Provisioner {
@@ -120,7 +121,7 @@ public class AzureProvisioner implements Provisioner {
     }
 
     @Override
-    public void addNode(Stack stack, String userData, Integer nodeCount) {
+    public void addInstances(Stack stack, String userData, Integer instanceCount) {
         AzureTemplate azureTemplate = (AzureTemplate) stack.getTemplate();
         Credential credential = stack.getCredential();
         String emailAsFolder = stack.getUser().emailAsFolder();
@@ -134,7 +135,7 @@ public class AzureProvisioner implements Provisioner {
         String commonName = ((AzureCredential) credential).getCommonName();
         Set<Resource> resourceSet = new HashSet<>();
 
-        for (int i = resourceByType.size(); i < resourceByType.size() + nodeCount; i++) {
+        for (int i = resourceByType.size(); i < resourceByType.size() + instanceCount; i++) {
             String vmName = azureStackUtil.getVmName(name, i) + String.valueOf(new Date().getTime());
             createCloudService(azureClient, azureTemplate, vmName, commonName);
             createServiceCertificate(azureClient, azureTemplate, credential, vmName, emailAsFolder);
@@ -146,6 +147,11 @@ public class AzureProvisioner implements Provisioner {
         }
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT, stack.getId());
         reactor.notify(ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT, Event.wrap(new AddInstancesComplete(CloudPlatform.AZURE, stack.getId(), resourceSet)));
+    }
+
+    @Override
+    public void removeInstances(Stack stack, Set<String> instanceIds) {
+        // TODO remove virtual machines
     }
 
     @Override

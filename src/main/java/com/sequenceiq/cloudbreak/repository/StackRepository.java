@@ -23,6 +23,8 @@ public interface StackRepository extends CrudRepository<Stack, Long> {
 
     Stack findStackForCluster(@Param("id") Long id);
 
+    Stack findStackWithListsForCluster(@Param("id") Long id);
+
     List<Stack> findRequestedStacksWithCredential(@Param("credentialId") Long credentialId);
 
     Stack findStackByHash(@Param("hash") String hash);

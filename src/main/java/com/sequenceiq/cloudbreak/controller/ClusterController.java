@@ -65,10 +65,10 @@ public class ClusterController {
                     stack.getStatus()));
         }
         if (updateClusterJson.getStatus() != null) {
-            clusterService.updateStatus(user, stackId, updateClusterJson.getStatus());
+            clusterService.updateStatus(stackId, updateClusterJson.getStatus());
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
-            clusterService.updateHosts(user, stackId, updateClusterJson.getHostGroupAdjustments());
+            clusterService.updateHosts(stackId, updateClusterJson.getHostGroupAdjustments());
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
     }

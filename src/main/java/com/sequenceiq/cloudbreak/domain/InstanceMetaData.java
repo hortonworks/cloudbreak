@@ -4,8 +4,22 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 
 @Entity
+@NamedQueries({
+        @NamedQuery(
+                name = "InstanceMetaData.findHostInStack",
+                query = "SELECT i FROM InstanceMetaData i "
+                        + "WHERE i.stack.id= :stackId "
+                        + "AND i.longName= :hostName"),
+        @NamedQuery(
+                name = "InstanceMetaData.findUnregisteredHostsInStack",
+                query = "SELECT i FROM InstanceMetaData i "
+                        + "WHERE i.stack.id= :stackId "
+                        + "AND i.removable= true")
+})
 public class InstanceMetaData implements ProvisionEntity {
 
     @Id
@@ -19,6 +33,7 @@ public class InstanceMetaData implements ProvisionEntity {
     private Boolean ambariServer;
     private String dockerSubnet;
     private String longName;
+    private Boolean removable;
     @ManyToOne
     private Stack stack;
 
@@ -104,5 +119,13 @@ public class InstanceMetaData implements ProvisionEntity {
 
     public void setLongName(String longName) {
         this.longName = longName;
+    }
+
+    public Boolean isRemovable() {
+        return removable;
+    }
+
+    public void setRemovable(Boolean removable) {
+        this.removable = removable;
     }
 }

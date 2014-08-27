@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.User;
-import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterInstaller;
+import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.cluster.handler.ClusterRequestHandler;
 import com.sequenceiq.cloudbreak.service.stack.connector.aws.AwsConnectorTestUtil;
 
@@ -33,7 +33,7 @@ public class ClusterRequestHandlerTest {
     private ClusterRequestHandler underTest;
 
     @Mock
-    private AmbariClusterInstaller ambariClusterInstaller;
+    private AmbariClusterConnector ambariClusterInstaller;
 
     private Event<Stack> stackEvent;
 

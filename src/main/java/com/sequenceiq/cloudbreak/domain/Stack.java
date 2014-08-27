@@ -48,6 +48,12 @@ import javax.persistence.Version;
                 query = "SELECT c FROM Stack c "
                         + "WHERE c.cluster.id= :id"),
         @NamedQuery(
+                name = "Stack.findStackWithListsForCluster",
+                query = "SELECT c FROM Stack c "
+                        + "LEFT JOIN FETCH c.resources "
+                        + "LEFT JOIN FETCH c.instanceMetaData "
+                        + "WHERE c.cluster.id= :id"),
+        @NamedQuery(
                 name = "Stack.findRequestedStacksWithCredential",
                 query = "SELECT c FROM Stack c "
                         + "WHERE c.credential.id= :credentialId "

@@ -17,11 +17,13 @@ import reactor.event.Event;
 
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
+import com.amazonaws.services.autoscaling.model.DetachInstancesRequest;
 import com.amazonaws.services.autoscaling.model.UpdateAutoScalingGroupRequest;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.CreateStackRequest;
 import com.amazonaws.services.cloudformation.model.Parameter;
 import com.amazonaws.services.ec2.AmazonEC2Client;
+import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
@@ -33,6 +35,7 @@ import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.Provisioner;
 import com.sequenceiq.cloudbreak.service.stack.event.AddInstancesComplete;
+import com.sequenceiq.cloudbreak.service.stack.event.StackUpdateSuccess;
 
 @Component
 public class AwsProvisioner implements Provisioner {
@@ -97,8 +100,8 @@ public class AwsProvisioner implements Provisioner {
     }
 
     @Override
-    public void addNode(Stack stack, String userData, Integer scalingAdjustment) {
-        Integer requiredInstances = stack.getNodeCount() + scalingAdjustment;
+    public void addInstances(Stack stack, String userData, Integer instanceCount) {
+        Integer requiredInstances = stack.getNodeCount() + instanceCount;
         Regions region = ((AwsTemplate) stack.getTemplate()).getRegion();
         AwsCredential credential = (AwsCredential) stack.getCredential();
         AmazonAutoScalingClient amazonASClient = awsStackUtil.createAutoScalingClient(region, credential);
@@ -109,12 +112,29 @@ public class AwsProvisioner implements Provisioner {
                 .withMaxSize(requiredInstances)
                 .withDesiredCapacity(requiredInstances));
         LOGGER.info("Updated AutoScaling group's desiredCapacity: [stack: '{}', from: '{}', to: '{}']", stack.getId(), stack.getNodeCount(),
-                stack.getNodeCount() + scalingAdjustment);
+                stack.getNodeCount() + instanceCount);
         AutoScalingGroupReady asGroupReady = new AutoScalingGroupReady(amazonEC2Client, amazonASClient, asGroupName, requiredInstances);
         LOGGER.info("Polling autoscaling group until new instances are ready. [stack: {}, asGroup: {}]", stack.getId(), asGroupName);
         pollingService.pollWithTimeout(asGroupStatusCheckerTask, asGroupReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT, stack.getId());
         reactor.notify(ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT, Event.wrap(new AddInstancesComplete(CloudPlatform.AWS, stack.getId(), null)));
+    }
+
+    @Override
+    public void removeInstances(Stack stack, Set<String> instanceIds) {
+        Regions region = ((AwsTemplate) stack.getTemplate()).getRegion();
+        AwsCredential credential = (AwsCredential) stack.getCredential();
+        AmazonAutoScalingClient amazonASClient = awsStackUtil.createAutoScalingClient(region, credential);
+        AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(region, credential);
+
+        String asGroupName = cfStackUtil.getAutoscalingGroupName(stack);
+        DetachInstancesRequest detachInstancesRequest = new DetachInstancesRequest().withAutoScalingGroupName(asGroupName).withInstanceIds(instanceIds)
+                .withShouldDecrementDesiredCapacity(true);
+        amazonASClient.detachInstances(detachInstancesRequest);
+        amazonEC2Client.terminateInstances(new TerminateInstancesRequest().withInstanceIds(instanceIds));
+        LOGGER.info("Terminated instances in stack '{}': '{}'", stack.getId(), instanceIds);
+        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, stack.getId());
+        reactor.notify(ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, Event.wrap(new StackUpdateSuccess(stack.getId(), true, instanceIds)));
     }
 
     protected CreateStackRequest createStackRequest() {

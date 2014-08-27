@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterInstaller;
+import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
 
 import reactor.event.Event;
 import reactor.function.Consumer;
@@ -19,7 +19,7 @@ public class ClusterRequestHandler implements Consumer<Event<Stack>> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterRequestHandler.class);
 
     @Autowired
-    private AmbariClusterInstaller ambariClusterInstaller;
+    private AmbariClusterConnector ambariClusterInstaller;
 
     @Override
     public void accept(Event<Stack> event) {
