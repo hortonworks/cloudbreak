@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.cluster.flow;
 
 import groovyx.net.http.HttpResponseException;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -32,10 +33,12 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
+import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
@@ -68,6 +71,9 @@ public class AmbariClusterConnector {
 
     @Autowired
     private HostMetadataRepository hostMetadataRepository;
+
+    @Autowired
+    private InstanceMetaDataRepository instanceMetadataRepository;
 
     @Autowired
     private RetryingStackUpdater stackUpdater;
@@ -119,7 +125,7 @@ public class AmbariClusterConnector {
             Map<String, String> hosts = findHosts(hostGroupAdjustments, ambariClient);
             addHostMetadata(cluster, hosts);
             Map<String, Integer> installRequests = installServices(hosts, stack, ambariClient);
-            waitForServiceInstalls(stack, ambariClient, installRequests);
+            waitForAmbariOperations(stack, ambariClient, installRequests);
             ambariClient.startAllServices();
             ambariClient.restartServiceComponents("NAGIOS", Arrays.asList("NAGIOS_SERVER"));
             updateHostSuccessful(cluster, hosts.keySet(), false);
@@ -145,14 +151,43 @@ public class AmbariClusterConnector {
                 Set<HostMetadata> hostsInHostGroup = hostMetadataRepository.findHostsInHostgroup(hostGroupAdjustment.getHostGroup(), cluster.getId());
                 int i = 0;
                 for (HostMetadata hostMetadata : hostsInHostGroup) {
-                    if (i < -1 * hostGroupAdjustment.getScalingAdjustment()) {
-                        LOGGER.info("Host '{}' will be removed from Ambari cluster '{}'", hostMetadata.getHostName(), cluster.getId());
-                        metadataToRemove.add(hostMetadata);
-                        ambariClient.removeHost(hostMetadata.getHostName());
-                    } else {
-                        break;
+                    String hostName = hostMetadata.getHostName();
+                    InstanceMetaData instanceMetaData = instanceMetadataRepository.findHostInStack(stack.getId(), hostName);
+                    if (!instanceMetaData.getAmbariServer()) {
+                        if (i < -1 * hostGroupAdjustment.getScalingAdjustment()) {
+                            LOGGER.info("Host '{}' will be removed from Ambari cluster '{}'", hostName, cluster.getId());
+                            metadataToRemove.add(hostMetadata);
+                            Set<String> components = ambariClient.getHostComponentsMap(hostName).keySet();
+                            Map<String, Integer> installRequests = new HashMap<>();
+                            if (components.contains("NODEMANAGER")) {
+                                Integer requestId = ambariClient.decommissionNodeManager(hostName);
+                                installRequests.put("NODEMANAGER_DECOMMISION", requestId);
+                            }
+                            if (components.contains("DATANODE")) {
+                                Integer requestId = ambariClient.decommissionDataNode(hostName);
+                                installRequests.put("DATANODE_DECOMMISION", requestId);
+                            }
+                            List<String> componentsList = new ArrayList<>();
+                            componentsList.addAll(components);
+                            Map<String, Integer> stopRequests = ambariClient.stopComponentsOnHost(hostName, componentsList);
+                            installRequests.putAll(stopRequests);
+                            waitForAmbariOperations(stack, ambariClient, installRequests);
+                            ambariClient.deleteHostComponents(hostName, componentsList);
+                            ambariClient.deleteHost(hostName);
+
+                            installRequests = new HashMap<>();
+                            Integer zookeeperRequestId = ambariClient.restartServiceComponents("ZOOKEEPER", Arrays.asList("ZOOKEEPER_SERVER"));
+                            installRequests.put("ZOOKEEPER", zookeeperRequestId);
+                            if (ambariClient.getServiceComponentsMap().containsKey("NAGIOS")) {
+                                Integer nagiosRequestId = ambariClient.restartServiceComponents("NAGIOS", Arrays.asList("NAGIOS_SERVER"));
+                                installRequests.put("NAGIOS", nagiosRequestId);
+                            }
+                            waitForAmbariOperations(stack, ambariClient, installRequests);
+                        } else {
+                            break;
+                        }
+                        i++;
                     }
-                    i++;
                 }
             }
             cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
@@ -245,7 +280,7 @@ public class AmbariClusterConnector {
     private void waitForClusterInstall(Stack stack, AmbariClient ambariClient) {
         Map<String, Integer> clusterInstallRequest = new HashMap<>();
         clusterInstallRequest.put("CLUSTER_INSTALL", 1);
-        waitForServiceInstalls(stack, ambariClient, clusterInstallRequest);
+        waitForAmbariOperations(stack, ambariClient, clusterInstallRequest);
     }
 
     private Map<String, String> findHosts(Set<HostGroupAdjustmentJson> hostGroupAdjustments, AmbariClient ambariClient) {
@@ -272,11 +307,11 @@ public class AmbariClusterConnector {
         return installRequests;
     }
 
-    private void waitForServiceInstalls(Stack stack, AmbariClient ambariClient, Map<String, Integer> installRequests) {
-        LOGGER.info("Waiting for Ambari services to finish installation. [Stack: '{}', Install requests: {}]", stack.getId(), installRequests);
+    private void waitForAmbariOperations(Stack stack, AmbariClient ambariClient, Map<String, Integer> operationRequests) {
+        LOGGER.info("Waiting for Ambari operations to finish. [Stack: '{}', Operation requests: {}]", stack.getId(), operationRequests);
         operationsPollingService.pollWithTimeout(
                 new AmbariOperationsStatusCheckerTask(),
-                new AmbariOperations(stack.getId(), ambariClient, installRequests),
+                new AmbariOperations(stack.getId(), ambariClient, operationRequests),
                 POLLING_INTERVAL,
                 MAX_ATTEMPTS_FOR_AMBARI_OPS);
     }
