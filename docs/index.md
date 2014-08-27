@@ -149,8 +149,6 @@ Periscope brings in the capability to reconfigure a running cluster - in particu
 
 ##QuickStart and installation
 
-The easiest way to start using Periscope is to use our hosted solution. We host, maintain and support [Periscope API](https://periscope-api.sequenceiq.com) for you.
-
 Periscope requires an Apache Ambari endpoint of your Hadoop cluster to start to apply your SLA policies. We suggest to start with [Cloudbreak](http://sequenceiq.com/cloudbreak/#quickstart-and-installation). Create a hosted free [Cloudbreak](https://cloudbreak.sequenceiq.com/) account and start experimenting.
 
 ###Build and run
