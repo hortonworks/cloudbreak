@@ -161,7 +161,9 @@ public class AzureProvisioner implements Provisioner {
         List<Port> ports = new ArrayList<>();
         ports.add(new Port("Ambari", "8080", "8080", "tcp"));
         ports.add(new Port("NameNode", "50070", "50070", "tcp"));
-        ports.add(new Port("ResourceManager", "8088", "8088", "tcp"));
+        ports.add(new Port("RM Web", "8088", "8088", "tcp"));
+        ports.add(new Port("RM Scheduler", "8030", "8030", "tcp"));
+        ports.add(new Port("RM IPC", "8050", "8050", "tcp"));
         ports.add(new Port("Job History Server", "19888", "19888", "tcp"));
         ports.add(new Port("HBase Master", "60010", "60010", "tcp"));
         ports.add(new Port("Falcon", "15000", "15000", "tcp"));
