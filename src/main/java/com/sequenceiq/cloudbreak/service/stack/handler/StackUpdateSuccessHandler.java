@@ -53,6 +53,7 @@ public class StackUpdateSuccessHandler implements Consumer<Event<StackUpdateSucc
         } else {
             stackUpdater.updateNodeCount(stackId, stack.getNodeCount() + instanceIds.size());
         }
+        stackUpdater.updateMetadataReady(stackId, true);
         stackUpdater.updateStackStatus(stackId, Status.AVAILABLE);
 
     }

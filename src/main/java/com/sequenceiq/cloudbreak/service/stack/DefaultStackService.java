@@ -192,9 +192,6 @@ public class DefaultStackService implements StackService {
     public Set<InstanceMetaData> getMetaData(String hash) {
         Stack stack = stackRepository.findStackByHash(hash);
         if (stack != null) {
-            if (Status.UPDATE_IN_PROGRESS.equals(stack.getStatus())) {
-                throw new MetadataIncompleteException("Instance metadata is incomplete.");
-            }
             if (!stack.isMetadataReady()) {
                 throw new MetadataIncompleteException("Instance metadata is incomplete.");
             }

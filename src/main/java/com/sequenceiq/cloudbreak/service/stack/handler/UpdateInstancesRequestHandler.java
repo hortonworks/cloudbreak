@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.AddInstancesFailedException;
 import com.sequenceiq.cloudbreak.service.stack.connector.Provisioner;
@@ -34,6 +35,9 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
 
     @Autowired
     private StackRepository stackRepository;
+
+    @Autowired
+    private RetryingStackUpdater stackUpdater;
 
     @Resource
     private Map<CloudPlatform, Provisioner> provisioners;
@@ -53,6 +57,7 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
         try {
             Stack stack = stackRepository.findOneWithLists(stackId);
             LOGGER.info("Accepted {} event on stack: '{}'", ReactorConfig.UPDATE_INSTANCES_REQUEST_EVENT, stackId);
+            stackUpdater.updateMetadataReady(stackId, false);
             if (scalingAdjustment > 0) {
                 provisioners.get(cloudPlatform)
                         .addInstances(stack, userDataBuilder.build(cloudPlatform, stack.getHash(), new HashMap<String, String>()), scalingAdjustment);

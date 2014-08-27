@@ -46,7 +46,7 @@ public class AmbariRoleAllocator {
                 }
                 Set<InstanceMetaData> instanceMetaData = prepareInstanceMetaData(stack, coreInstanceMetaData);
                 stackUpdater.updateStackMetaData(stackId, instanceMetaData);
-                stackUpdater.updateMetadataReady(stackId);
+                stackUpdater.updateMetadataReady(stackId, true);
                 LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.AMBARI_ROLE_ALLOCATION_COMPLETE_EVENT, stackId);
                 reactor.notify(ReactorConfig.AMBARI_ROLE_ALLOCATION_COMPLETE_EVENT, Event.wrap(new AmbariRoleAllocationComplete(stackId,
                         getAmbariIp(instanceMetaData))));
@@ -69,7 +69,7 @@ public class AmbariRoleAllocator {
             Set<InstanceMetaData> instanceMetaData = prepareInstanceMetaData(stack, coreInstanceMetaData, stack.getInstanceMetaData().size() + 1);
             originalMetadata.addAll(instanceMetaData);
             stackUpdater.updateStackMetaData(stackId, originalMetadata);
-            stackUpdater.updateMetadataReady(stackId);
+            stackUpdater.updateMetadataReady(stackId, true);
             Set<String> instanceIds = new HashSet<>();
             for (InstanceMetaData metadataEntry : instanceMetaData) {
                 instanceIds.add(metadataEntry.getInstanceId());

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anySet;
 import static org.mockito.Mockito.times;
@@ -16,13 +17,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import reactor.core.Reactor;
+import reactor.event.Event;
+
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-
-import reactor.core.Reactor;
-import reactor.event.Event;
 
 public class AmbariRoleAllocatorTest {
     @InjectMocks
@@ -54,12 +55,12 @@ public class AmbariRoleAllocatorTest {
         // GIVEN
         given(stackRepository.findById(1L)).willReturn(stack);
         given(stackUpdater.updateStackMetaData(anyLong(), anySet())).willReturn(stack);
-        given(stackUpdater.updateMetadataReady(1L)).willReturn(updatedStack());
+        given(stackUpdater.updateMetadataReady(1L, true)).willReturn(updatedStack());
         // WHEN
         underTest.allocateRoles(1L, coreInstanceMetaData);
         // THEN
         verify(reactor, times(1)).notify(any(ReactorConfig.class), any(Event.class));
-        verify(stackUpdater, times(1)).updateMetadataReady(anyLong());
+        verify(stackUpdater, times(1)).updateMetadataReady(anyLong(), anyBoolean());
     }
 
     @Test
@@ -71,7 +72,7 @@ public class AmbariRoleAllocatorTest {
         underTest.allocateRoles(1L, coreInstanceMetaData);
         // THEN
         verify(reactor, times(0)).notify(any(ReactorConfig.class), any(Event.class));
-        verify(stackUpdater, times(0)).updateMetadataReady(anyLong());
+        verify(stackUpdater, times(0)).updateMetadataReady(anyLong(), anyBoolean());
     }
 
     @Test
@@ -83,7 +84,7 @@ public class AmbariRoleAllocatorTest {
         underTest.allocateRoles(1L, coreInstanceMetaData);
         // THEN
         verify(reactor, times(1)).notify(any(ReactorConfig.class), any(Event.class));
-        verify(stackUpdater, times(0)).updateMetadataReady(anyLong());
+        verify(stackUpdater, times(0)).updateMetadataReady(anyLong(), anyBoolean());
     }
 
     @Test
@@ -94,7 +95,7 @@ public class AmbariRoleAllocatorTest {
         underTest.allocateRoles(1L, coreInstanceMetaData);
         // THEN
         verify(reactor, times(1)).notify(any(ReactorConfig.class), any(Event.class));
-        verify(stackUpdater, times(0)).updateMetadataReady(anyLong());
+        verify(stackUpdater, times(0)).updateMetadataReady(anyLong(), anyBoolean());
     }
 
     private Set<CoreInstanceMetaData> createCoreInstanceMetaData() {

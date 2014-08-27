@@ -34,6 +34,7 @@ public class StackUpdateFailureHandler implements Consumer<Event<StackOperationF
         Long stackId = stackOperationFailure.getStackId();
         LOGGER.info("Accepted {} event.", ReactorConfig.STACK_UPDATE_FAILED_EVENT, stackId);
         String detailedMessage = stackOperationFailure.getDetailedMessage();
+        stackUpdater.updateMetadataReady(stackId, true);
         Stack stack = stackUpdater.updateStackStatus(stackId, Status.AVAILABLE, "Stack update failed. " + detailedMessage);
         websocketService.sendToTopicUser(stack.getUser().getEmail(), WebsocketEndPoint.STACK,
                 new StatusMessage(stackId, stack.getName(), "UPDATE_FAILED", detailedMessage));

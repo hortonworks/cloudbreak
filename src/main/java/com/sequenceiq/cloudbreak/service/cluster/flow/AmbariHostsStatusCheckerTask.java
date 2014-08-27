@@ -17,7 +17,7 @@ public class AmbariHostsStatusCheckerTask implements StatusCheckerTask<AmbariHos
         Map<String, String> hostNames = t.getAmbariClient().getHostNames();
         int hostsFound = hostNames.size();
         LOGGER.info("Ambari client found {} hosts ({} needed). [Stack: '{}']", hostsFound, t.getHostCount(), t.getStackId());
-        if (hostsFound == t.getHostCount()) {
+        if (hostsFound >= t.getHostCount()) {
             return true;
         }
         return false;

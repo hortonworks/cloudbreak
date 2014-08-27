@@ -28,11 +28,13 @@ import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StatusRequest;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
+import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
@@ -52,6 +54,9 @@ public class AmbariClusterService implements ClusterService {
 
     @Autowired
     private RetryingStackUpdater stackUpdater;
+
+    @Autowired
+    private InstanceMetaDataRepository instanceMetadataRepository;
 
     @Autowired
     private HostMetadataRepository hostMetadataRepository;
@@ -159,8 +164,7 @@ public class AmbariClusterService implements ClusterService {
     }
 
     private void validateUnregisteredHosts(Stack stack, int sumScalingAdjustments) {
-        AmbariClient ambariClient = createAmbariClient(stack.getAmbariIp());
-        List<String> unregisteredHosts = ambariClient.getUnregisteredHostNames();
+        Set<InstanceMetaData> unregisteredHosts = instanceMetadataRepository.findUnregisteredHostsInStack(stack.getId());
         if (unregisteredHosts.size() == 0) {
             throw new BadRequestException(String.format(
                     "There are no unregistered hosts in stack '%s'. Add some additional nodes to the stack before adding new hosts to the cluster.",

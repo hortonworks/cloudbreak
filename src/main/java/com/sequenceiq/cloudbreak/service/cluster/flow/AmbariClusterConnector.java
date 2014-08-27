@@ -122,7 +122,7 @@ public class AmbariClusterConnector {
             stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS);
             AmbariClient ambariClient = createAmbariClient(stack.getAmbariIp());
             waitForHosts(stack, ambariClient);
-            Map<String, String> hosts = findHosts(hostGroupAdjustments, ambariClient);
+            Map<String, String> hosts = findHosts(stack.getId(), hostGroupAdjustments);
             addHostMetadata(cluster, hosts);
             Map<String, Integer> installRequests = installServices(hosts, stack, ambariClient);
             waitForAmbariOperations(stack, ambariClient, installRequests);
@@ -283,8 +283,14 @@ public class AmbariClusterConnector {
         waitForAmbariOperations(stack, ambariClient, clusterInstallRequest);
     }
 
-    private Map<String, String> findHosts(Set<HostGroupAdjustmentJson> hostGroupAdjustments, AmbariClient ambariClient) {
-        List<String> unregisteredHostNames = ambariClient.getUnregisteredHostNames();
+    private Map<String, String> findHosts(Long stackId, Set<HostGroupAdjustmentJson> hostGroupAdjustments) {
+        // List<String> unregisteredHostNames =
+        // ambariClient.getUnregisteredHostNames();
+        List<String> unregisteredHostNames = new ArrayList<>();
+        Set<InstanceMetaData> unregisteredHosts = instanceMetadataRepository.findUnregisteredHostsInStack(stackId);
+        for (InstanceMetaData instanceMetaData : unregisteredHosts) {
+            unregisteredHostNames.add(instanceMetaData.getLongName());
+        }
         Map<String, String> hosts = new HashMap<>();
         for (HostGroupAdjustmentJson entry : hostGroupAdjustments) {
             for (int i = 0; i < entry.getScalingAdjustment(); i++) {
