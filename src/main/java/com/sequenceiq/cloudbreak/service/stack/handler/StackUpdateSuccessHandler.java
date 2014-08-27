@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.handler;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -47,10 +46,6 @@ public class StackUpdateSuccessHandler implements Consumer<Event<StackUpdateSucc
                         metadataToRemove.add(metadataEntry);
                     }
                 }
-            }
-            for (Iterator iterator = metadataToRemove.iterator(); iterator.hasNext();) {
-                InstanceMetaData instanceMetaData = (InstanceMetaData) iterator.next();
-
             }
             stack.getInstanceMetaData().removeAll(metadataToRemove);
             stackUpdater.updateStackMetaData(stackId, stack.getInstanceMetaData());

@@ -32,8 +32,8 @@ public class ReactorConfig {
     public static final String STACK_UPDATE_FAILED_EVENT = "STACK_UPDATE_FAILED";
 
     public static final String UPDATE_AMBARI_HOSTS_REQUEST_EVENT = "UPDATE_AMBARI_HOSTS_REQUEST";
-    public static final String ADD_AMBARI_HOSTS_SUCCESS_EVENT = "ADD_AMBARI_HOSTS_SUCCESS";
-    public static final String ADD_AMBARI_HOSTS_FAILED_EVENT = "ADD_AMBARI_HOSTS_FAILED";
+    public static final String UPDATE_AMBARI_HOSTS_SUCCESS_EVENT = "UPDATE_AMBARI_HOSTS_SUCCESS";
+    public static final String UPDATE_AMBARI_HOSTS_FAILED_EVENT = "UPDATE_AMBARI_HOSTS_FAILED";
 
     public static final String HISTORY_EVENT = "HISTORY_EVENT";
 

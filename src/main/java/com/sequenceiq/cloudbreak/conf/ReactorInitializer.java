@@ -8,9 +8,9 @@ import org.springframework.stereotype.Component;
 
 import reactor.core.Reactor;
 
-import com.sequenceiq.cloudbreak.service.cluster.handler.AddAmbariHostsFailureHandler;
+import com.sequenceiq.cloudbreak.service.cluster.handler.UpdateAmbariHostsFailureHandler;
 import com.sequenceiq.cloudbreak.service.cluster.handler.UpdateAmbariHostsRequestHandler;
-import com.sequenceiq.cloudbreak.service.cluster.handler.AddAmbariHostsSuccessHandler;
+import com.sequenceiq.cloudbreak.service.cluster.handler.UpdateAmbariHostsSuccessHandler;
 import com.sequenceiq.cloudbreak.service.cluster.handler.ClusterCreationFailureHandler;
 import com.sequenceiq.cloudbreak.service.cluster.handler.ClusterCreationSuccessHandler;
 import com.sequenceiq.cloudbreak.service.cluster.handler.ClusterRequestHandler;
@@ -88,10 +88,10 @@ public class ReactorInitializer implements InitializingBean {
     private UpdateAmbariHostsRequestHandler updateAmbariHostsRequestHandler;
 
     @Autowired
-    private AddAmbariHostsFailureHandler addAmbariHostsFailureHandler;
+    private UpdateAmbariHostsFailureHandler updateAmbariHostsFailureHandler;
 
     @Autowired
-    private AddAmbariHostsSuccessHandler addAmbariHostsSuccessHandler;
+    private UpdateAmbariHostsSuccessHandler updateAmbariHostsSuccessHandler;
 
     @Autowired
     private HistoryEventHandler historyEventHandler;
@@ -123,8 +123,8 @@ public class ReactorInitializer implements InitializingBean {
         reactor.on($(ReactorConfig.STACK_UPDATE_FAILED_EVENT), stackUpdateFailureHandler);
 
         reactor.on($(ReactorConfig.UPDATE_AMBARI_HOSTS_REQUEST_EVENT), updateAmbariHostsRequestHandler);
-        reactor.on($(ReactorConfig.ADD_AMBARI_HOSTS_SUCCESS_EVENT), addAmbariHostsSuccessHandler);
-        reactor.on($(ReactorConfig.ADD_AMBARI_HOSTS_FAILED_EVENT), addAmbariHostsFailureHandler);
+        reactor.on($(ReactorConfig.UPDATE_AMBARI_HOSTS_SUCCESS_EVENT), updateAmbariHostsSuccessHandler);
+        reactor.on($(ReactorConfig.UPDATE_AMBARI_HOSTS_FAILED_EVENT), updateAmbariHostsFailureHandler);
 
         reactor.on($(ReactorConfig.HISTORY_EVENT), historyEventHandler);
     }

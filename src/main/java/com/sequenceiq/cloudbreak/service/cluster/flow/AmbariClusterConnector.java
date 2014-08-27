@@ -43,10 +43,10 @@ import com.sequenceiq.cloudbreak.service.cluster.AmbariClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariHostsUnavailableException;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
 import com.sequenceiq.cloudbreak.service.cluster.HadoopConfiguration;
-import com.sequenceiq.cloudbreak.service.cluster.event.AddAmbariHostsFailure;
-import com.sequenceiq.cloudbreak.service.cluster.event.AddAmbariHostsSuccess;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterCreationFailure;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterCreationSuccess;
+import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsFailure;
+import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsSuccess;
 import com.sequenceiq.cloudbreak.service.stack.connector.HadoopConfigurationProvider;
 
 @Service
@@ -122,27 +122,31 @@ public class AmbariClusterConnector {
             waitForServiceInstalls(stack, ambariClient, installRequests);
             ambariClient.startAllServices();
             ambariClient.restartServiceComponents("NAGIOS", Arrays.asList("NAGIOS_SERVER"));
-            addHostSuccessful(cluster, hosts.keySet());
+            updateHostSuccessful(cluster, hosts.keySet(), false);
         } catch (AmbariHostsUnavailableException | AmbariOperationFailedException e) {
             LOGGER.error(e.getMessage(), e);
-            addHostFailed(cluster, e.getMessage());
+            updateHostFailed(cluster, e.getMessage());
         } catch (Exception e) {
             LOGGER.error(UNHANDLED_EXCEPTION_MSG, e);
-            addHostFailed(cluster, UNHANDLED_EXCEPTION_MSG);
+            updateHostFailed(cluster, UNHANDLED_EXCEPTION_MSG);
         }
     }
 
     public void decommisionAmbariNodes(Long stackId, Set<HostGroupAdjustmentJson> hosts) {
         Stack stack = stackRepository.findOneWithLists(stackId);
         Cluster cluster = stack.getCluster();
+        LOGGER.info("Decommision requested on cluster '{}'", cluster.getId());
         try {
+            stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS);
             AmbariClient ambariClient = createAmbariClient(stack.getAmbariIp());
             Set<HostMetadata> metadataToRemove = new HashSet<>();
             for (HostGroupAdjustmentJson hostGroupAdjustment : hosts) {
+                LOGGER.info("Decommisioning {} hosts on cluster '{}'", -1 * hostGroupAdjustment.getScalingAdjustment(), cluster.getId());
                 Set<HostMetadata> hostsInHostGroup = hostMetadataRepository.findHostsInHostgroup(hostGroupAdjustment.getHostGroup(), cluster.getId());
                 int i = 0;
                 for (HostMetadata hostMetadata : hostsInHostGroup) {
                     if (i < -1 * hostGroupAdjustment.getScalingAdjustment()) {
+                        LOGGER.info("Host '{}' will be removed from Ambari cluster '{}'", hostMetadata.getHostName(), cluster.getId());
                         metadataToRemove.add(hostMetadata);
                         ambariClient.removeHost(hostMetadata.getHostName());
                     } else {
@@ -154,9 +158,14 @@ public class AmbariClusterConnector {
             cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
             cluster.getHostMetadata().removeAll(metadataToRemove);
             clusterRepository.save(cluster);
+            Set<String> hostsRemoved = new HashSet<>();
+            for (HostMetadata hostMetadata : metadataToRemove) {
+                hostsRemoved.add(hostMetadata.getHostName());
+            }
+            updateHostSuccessful(cluster, hostsRemoved, true);
         } catch (Exception e) {
             LOGGER.error(UNHANDLED_EXCEPTION_MSG, e);
-            addHostFailed(cluster, UNHANDLED_EXCEPTION_MSG);
+            updateHostFailed(cluster, UNHANDLED_EXCEPTION_MSG);
         }
     }
 
@@ -300,13 +309,13 @@ public class AmbariClusterConnector {
         reactor.notify(ReactorConfig.CLUSTER_CREATE_FAILED_EVENT, Event.wrap(new ClusterCreationFailure(cluster.getId(), message)));
     }
 
-    private void addHostSuccessful(Cluster cluster, Set<String> hostNames) {
-        LOGGER.info("Publishing {} event [ClusterId: '{}']", ReactorConfig.ADD_AMBARI_HOSTS_SUCCESS_EVENT, cluster.getId());
-        reactor.notify(ReactorConfig.ADD_AMBARI_HOSTS_SUCCESS_EVENT, Event.wrap(new AddAmbariHostsSuccess(cluster.getId(), hostNames)));
+    private void updateHostSuccessful(Cluster cluster, Set<String> hostNames, boolean decommision) {
+        LOGGER.info("Publishing {} event [ClusterId: '{}']", ReactorConfig.UPDATE_AMBARI_HOSTS_SUCCESS_EVENT, cluster.getId());
+        reactor.notify(ReactorConfig.UPDATE_AMBARI_HOSTS_SUCCESS_EVENT, Event.wrap(new UpdateAmbariHostsSuccess(cluster.getId(), hostNames, decommision)));
     }
 
-    private void addHostFailed(Cluster cluster, String message) {
-        LOGGER.info("Publishing {} event [ClusterId: '{}']", ReactorConfig.ADD_AMBARI_HOSTS_FAILED_EVENT, cluster.getId());
-        reactor.notify(ReactorConfig.ADD_AMBARI_HOSTS_FAILED_EVENT, Event.wrap(new AddAmbariHostsFailure(cluster.getId(), message)));
+    private void updateHostFailed(Cluster cluster, String message) {
+        LOGGER.info("Publishing {} event [ClusterId: '{}']", ReactorConfig.UPDATE_AMBARI_HOSTS_FAILED_EVENT, cluster.getId());
+        reactor.notify(ReactorConfig.UPDATE_AMBARI_HOSTS_FAILED_EVENT, Event.wrap(new UpdateAmbariHostsFailure(cluster.getId(), message)));
     }
 }

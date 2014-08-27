@@ -20,14 +20,14 @@ import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.cluster.event.AddAmbariHostsSuccess;
+import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsSuccess;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
 @Service
-public class AddAmbariHostsSuccessHandler implements Consumer<Event<AddAmbariHostsSuccess>> {
+public class UpdateAmbariHostsSuccessHandler implements Consumer<Event<UpdateAmbariHostsSuccess>> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AddAmbariHostsSuccessHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(UpdateAmbariHostsSuccessHandler.class);
 
     @Autowired
     private WebsocketService websocketService;
@@ -45,15 +45,19 @@ public class AddAmbariHostsSuccessHandler implements Consumer<Event<AddAmbariHos
     private InstanceMetaDataRepository metadataRepository;
 
     @Override
-    public void accept(Event<AddAmbariHostsSuccess> event) {
-        AddAmbariHostsSuccess data = event.getData();
+    public void accept(Event<UpdateAmbariHostsSuccess> event) {
+        UpdateAmbariHostsSuccess data = event.getData();
         Cluster cluster = clusterRepository.findById(data.getClusterId());
         Set<String> hostNames = data.getHostNames();
-        LOGGER.info("Accepted {} event.", ReactorConfig.ADD_AMBARI_HOSTS_SUCCESS_EVENT);
+        LOGGER.info("Accepted {} event.", ReactorConfig.UPDATE_AMBARI_HOSTS_SUCCESS_EVENT);
         Stack stack = stackRepository.findStackWithListsForCluster(data.getClusterId());
         for (String hostName : hostNames) {
             InstanceMetaData metadataEntry = metadataRepository.findHostInStack(stack.getId(), hostName);
-            metadataEntry.setRemovable(false);
+            if (data.isDecommision()) {
+                metadataEntry.setRemovable(true);
+            } else {
+                metadataEntry.setRemovable(false);
+            }
             metadataRepository.save(metadataEntry);
         }
         stackUpdater.updateStackStatus(stack.getId(), Status.AVAILABLE);
