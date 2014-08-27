@@ -1,5 +1,7 @@
 package com.sequenceiq.periscope.monitor.event.handler;
 
+import java.text.DecimalFormat;
+
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.ClusterMetricsInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
@@ -23,6 +25,7 @@ import com.sequenceiq.periscope.utils.ClusterUtils;
 public class ClusterMetricsWatcher implements ApplicationListener<ClusterMetricsUpdateEvent> {
 
     private static final Logger LOGGER = PeriscopeLoggerFactory.getLogger(ClusterMetricsWatcher.class);
+    private static final DecimalFormat TIME_FORMAT = new DecimalFormat("##.##");
 
     @Autowired
     private ClusterService clusterService;
@@ -128,7 +131,8 @@ public class ClusterMetricsWatcher implements ApplicationListener<ClusterMetrics
         } else {
             long elapsedTime = System.currentTimeMillis() - hitsSince;
             result = elapsedTime > (alarm.getPeriod() * ClusterUtils.MIN_IN_MS);
-            LOGGER.info(clusterId, "Alarm: {} stands since {}ms", alarmName, elapsedTime);
+            LOGGER.info(clusterId, "Alarm: {} stands since {} minutes", alarmName,
+                    TIME_FORMAT.format((double) elapsedTime / ClusterUtils.MIN_IN_MS));
             if (result) {
                 LOGGER.info(clusterId, "Alarm: {} HIT", alarmName);
             }

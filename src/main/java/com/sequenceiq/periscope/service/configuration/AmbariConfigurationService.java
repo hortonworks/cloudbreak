@@ -16,6 +16,7 @@ public class AmbariConfigurationService {
 
     private static final Logger LOGGER = PeriscopeLoggerFactory.getLogger(AmbariConfigurationService.class);
     private static final List<String> CONFIG_LIST = new ArrayList<>(ConfigParam.values().length);
+    private static final String AZURE_ADDRESS = "cloudapp.net";
     private static final String RETRY_COUNT = "1";
 
     static {
@@ -50,8 +51,12 @@ public class AmbariConfigurationService {
         String result = entry.getValue();
         if (entry.getKey().startsWith("yarn.resourcemanager")) {
             int portStartIndex = result.indexOf(":");
-            String publicHost = ambariClient.resolveInternalHostName(result.substring(0, portStartIndex));
-            result = publicHost + result.substring(portStartIndex);
+            String internalAddress = result.substring(0, portStartIndex);
+            String publicAddress = ambariClient.resolveInternalHostName(internalAddress);
+            if (internalAddress.contains(AZURE_ADDRESS) && internalAddress.equals(publicAddress)) {
+                publicAddress = internalAddress.substring(0, internalAddress.indexOf(".") + 1) + AZURE_ADDRESS;
+            }
+            result = publicAddress + result.substring(portStartIndex);
         }
         return result;
     }
