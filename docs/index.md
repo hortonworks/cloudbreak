@@ -8,6 +8,7 @@ Periscope
 
 *Periscope brings QoS and autoscaling to Hadoop YARN. Built on cloud resource management and YARN schedulers, allows to associate SLA policies to applications.*
 
+Periscope [API documentation](http://docs.periscope.apiary.io/).
 
 ##Overview
 
