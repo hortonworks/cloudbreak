@@ -257,6 +257,8 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     return "state2-run-blink";
                 case "CREATE_IN_PROGRESS":
                     return "state2-run-blink";
+                case "UPDATE_IN_PROGRESS":
+                    return "state2-run-blink";
                 case "AVAILABLE":
                     return "state5-run";
                 case "CREATE_FAILED":
@@ -275,6 +277,8 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     return $rootScope.error_msg.title_requested;
                 case "CREATE_IN_PROGRESS":
                     return $rootScope.error_msg.title_create_in_progress;
+                case "UPDATE_IN_PROGRESS":
+                    return $rootScope.error_msg.title_update_in_progress;
                 case "AVAILABLE":
                     return $rootScope.error_msg.title_create_completed;
                 case "CREATE_FAILED":
@@ -292,6 +296,8 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 case "REQUESTED":
                     return "fa-pause";
                 case "CREATE_IN_PROGRESS":
+                    return "fa-pause";
+                case "UPDATE_IN_PROGRESS":
                     return "fa-pause";
                 case "AVAILABLE":
                     return "fa-stop";
@@ -947,6 +953,9 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             } else if(body.status === 'CREATE_IN_PROGRESS')  {
                 $scope.modifyStatusMessage($rootScope.error_msg.stack_create_in_progress, body.name);
                 $scope.modifyStatusClass("has-success");
+            } else if(body.status === 'UPDATE_IN_PROGRESS')  {
+                $scope.modifyStatusMessage($rootScope.error_msg.stack_update_in_progress, body.name);
+                $scope.modifyStatusClass("has-success");
             }  else if(body.status === 'CREATE_FAILED')  {
                 $scope.modifyStatusMessage($rootScope.error_msg.stack_create_failed, body.name);
                 $scope.modifyStatusClass("has-error");
@@ -1045,6 +1054,9 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 $scope.modifyStatusClass("has-success");
             } else if(body.status === 'CREATE_IN_PROGRESS')  {
                 $scope.modifyStatusMessage($rootScope.error_msg.cluster_create_inprogress, body.name);
+                $scope.modifyStatusClass("has-success");
+            } else if(body.status === 'UPDATE_IN_PROGRESS')  {
+                $scope.modifyStatusMessage($rootScope.error_msg.cluster_update_inprogress, body.name);
                 $scope.modifyStatusClass("has-success");
             }  else if(body.status === 'CREATE_FAILED') {
                 $scope.modifyStatusMessage($rootScope.error_msg.cluster_create_failed, body.name);
