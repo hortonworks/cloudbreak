@@ -95,7 +95,8 @@ Periscope introspects the job submission process, monitors the applications and 
   5. Support for distributed (but not YARN ready) applications using Apache Slider
   6. Attach priorities to SLAs
 
-_Note: not all of the features above are supported in the first `public beta` version. There are dependencies we contributed to Hadoop, Ambari and YARN and they will be included in the next releases (1.7 and 2.6)_
+_Note: not all of the features above are supported in the first `public beta` version. There are dependencies we contributed to Hadoop, YARN and Ambari and they will be included in the next releases (2.6 and 1.7)_
+
 
 **Autoscaling clusters**
 From Periscope point of view we consider a cluster `dynamic` when the cluster capacity can be increased horizontally.
@@ -112,7 +113,9 @@ Given the option of provisioning or decommissioning cluster nodes on the fly, Pe
   6. *Private* cluster requests - supports provisioning of short lived private clusters with the possibility to merge
   7. Support for distributed (but not YARN ready) applications using Apache Slider
   8. Attach priorities to SLAs
-_Note: not all of the features above are supported in the first `public beta` version. There are dependencies we contributed to Hadoop, Ambari and YARN and they will be included in the next releases (1.7 and 2.6)_
+
+_Note: not all of the features above are supported in the first `public beta` version. There are dependencies we contributed to Hadoop, YARN and Ambari and they will be included in the next releases (2.6 and 1.7)_
+
 
 ###Alarms
 An alarm watches a `metric` over a specified time period, and used by one or more action or scaling policy based on the value of the metric relative to a given threshold over a number of time periods. In case Periscope raises an alarm an action (e.g. sending an email) or a scaling policy is triggered. Alarms are based on metrics. The current supported `metrics` are:
