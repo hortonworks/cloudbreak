@@ -186,7 +186,7 @@
         "AvailabilityZones" : [{ "Fn::GetAtt" : [ "PublicSubnet", "AvailabilityZone" ] }],
         "VPCZoneIdentifier" : [{ "Ref" : "PublicSubnet" }],
         "LaunchConfigurationName" : { "Ref" : "AmbariNodeLaunchConfig" },
-        "MinSize" : { "Ref" : "InstanceCount" },
+        "MinSize" : 1,
         "MaxSize" : { "Ref" : "InstanceCount" },
         "DesiredCapacity" : { "Ref" : "InstanceCount" },
         "Tags" : [ { "Key" : "Name", "Value" : { "Ref" : "StackName" }, "PropagateAtLaunch" : "true" },
