@@ -34,6 +34,12 @@ Periscope works with two types of Hadoop clusters: `static` and `dynamic`. Peris
 
 ##Technology
 
+###Cloudbreak
+
+Cloudbreak is SequenceIQ's RESTful Hadoop as a Service API. Once it is deployed in your favourite servlet container exposes a REST API allowing to span up Hadoop clusters of arbitrary sizes on your selected cloud provider. Provisioning Hadoop has never been easier. Cloudbreak is built on the foundation of cloud providers API (Amazon AWS, Microsoft Azure, Google Cloud Compute...), Apache Ambari, Docker containers, Serf and dnsmasq.
+
+For further information please check the [Cloudbreak documentation](http://sequenceiq.com/cloudbreak).
+
 ###Apache YARN
 
 Since the emergence of Hadoop 2 and the YARN based architecture we have a platform where we can run multiple applications (of different types) not constrained only to MapReduce.
@@ -71,11 +77,34 @@ Ambari Blueprints are a declarative definition of a cluster. With a Blueprint, y
 
 ![](https://raw.githubusercontent.com/sequenceiq/periscope/master/docs/images/ambari-create-cluster.png)
 
-###Cloudbreak
+###Docker
 
-Cloudbreak is SequenceIQ's RESTful Hadoop as a Service API. Once it is deployed in your favourite servlet container exposes a REST API allowing to span up Hadoop clusters of arbitrary sizes on your selected cloud provider. Provisioning Hadoop has never been easier. Cloudbreak is built on the foundation of cloud providers API (Amazon AWS, Microsoft Azure, Google Cloud Compute...), Apache Ambari, Docker containers, Serf and dnsmasq.
+Docker is an open platform for developers and sysadmins to build, ship, and run distributed applications. Consisting of Docker Engine, a portable, lightweight runtime and packaging tool, and Docker Hub, a cloud service for sharing applications and automating workflows, Docker enables apps to be quickly assembled from components and eliminates the friction between development, QA, and production environments. As a result, IT can ship faster and run the same app, unchanged, on laptops, data center VMs, and any cloud.
 
-For further information please check the [Cloudbreak documentation](http://sequenceiq.com/cloudbreak).
+The main features of Docker are:
+
+1. Lightweight, portable
+2. Build once, run anywhere
+3. VM - without the overhead of a VM
+  * Each virtualised application includes not only the application and the necessary binaries and libraries, but also an entire guest operating system
+  * The Docker Engine container comprises just the application and its dependencies. It runs as an isolated process in userspace on the host operating system, sharing the kernel with other containers.
+    ![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/vm.png)
+
+4. Containers are isolated
+5. It can be automated and scripted
+
+###Serf
+
+Serf is a tool for cluster membership, failure detection, and orchestration that is decentralised, fault-tolerant and highly available. Serf runs on every major platform: Linux, Mac OS X, and Windows. It is extremely lightweight.
+Serf uses an efficient gossip protocol to solve three major problems:
+
+  * Membership: Serf maintains cluster membership lists and is able to execute custom handler scripts when that membership changes. For example, Serf can maintain the list of Hadoop servers of a cluster and notify the members when nodes come online or go offline.
+
+  * Failure detection and recovery: Serf automatically detects failed nodes within seconds, notifies the rest of the cluster, and executes handler scripts allowing you to handle these events. Serf will attempt to recover failed nodes by reconnecting to them periodically.
+    ![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/serf-gossip.png)
+
+  * Custom event propagation: Serf can broadcast custom events and queries to the cluster. These can be used to trigger deploys, propagate configuration, etc. Events are simple fire-and-forget broadcast, and Serf makes a best effort to deliver messages in the face of offline nodes or network partitions. Queries provide a simple realtime request/response mechanism.
+    ![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/serf-event.png)
 
 ##Building blocks
 
