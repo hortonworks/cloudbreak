@@ -17,6 +17,7 @@ import com.sequenceiq.periscope.log.PeriscopeLoggerFactory;
 public class ScalingRequest implements Runnable {
 
     private static final Logger LOGGER = PeriscopeLoggerFactory.getLogger(ScalingRequest.class);
+    private static final String AVAILABLE = "AVAILABLE";
     private static final int RETRY_COUNT = 100;
     private static final int SLEEP = 10000;
     private final int desiredNodeCount;
@@ -57,20 +58,12 @@ public class ScalingRequest implements Runnable {
         long clusterId = cluster.getId();
         try {
             LOGGER.info(clusterId, "Sending request to add {} instance(s)", scalingAdjustment);
-            client.putStack(ambari, scalingAdjustment);
-            int retry = 0;
-            while (retry < RETRY_COUNT) {
-                try {
-                    LOGGER.info(clusterId, "Sending request to install {} instance(s)", scalingAdjustment);
-                    client.putCluster(ambari, singletonMap(hostGroup, scalingAdjustment));
-                    break;
-                } catch (Exception e) {
-                    LOGGER.info(clusterId, "Hosts are not ready for install, retrying");
-                    retry++;
-                }
-                Thread.sleep(SLEEP);
-            }
-            if (retry == RETRY_COUNT) {
+            int stackId = client.putStack(ambari, scalingAdjustment);
+            boolean ready = waitForReadyState(clusterId, stackId, client);
+            if (ready) {
+                LOGGER.info(clusterId, "Sending request to install components to the host(s)");
+                client.putCluster(ambari, singletonMap(hostGroup, scalingAdjustment));
+            } else {
                 LOGGER.info(clusterId, "Instance(s) didn't start in time, skipping scaling");
                 // TODO should we terminate the launched instances?
             }
@@ -85,26 +78,34 @@ public class ScalingRequest implements Runnable {
         long clusterId = cluster.getId();
         try {
             LOGGER.info(clusterId, "Sending request to remove node(s) from host group '{}'", hostGroup);
-            client.putCluster(ambari, singletonMap(hostGroup, scalingAdjustment));
-            int retry = 0;
-            while (retry < RETRY_COUNT) {
-                try {
-                    LOGGER.info(clusterId, "Sending request to terminate {} instance(s)", scalingAdjustment);
-                    client.putStack(ambari, scalingAdjustment);
-                    break;
-                } catch (Exception e) {
-                    LOGGER.info(clusterId, "Hosts are not ready to be removed, retrying");
-                    retry++;
-                }
-                Thread.sleep(SLEEP);
-            }
-            if (retry == RETRY_COUNT) {
+            int stackId = client.putCluster(ambari, singletonMap(hostGroup, scalingAdjustment));
+            boolean ready = waitForReadyState(clusterId, stackId, client);
+            if (ready) {
+                LOGGER.info(clusterId, "Sending request to terminate instance(s)");
+                client.putStack(ambari, scalingAdjustment);
+            } else {
                 LOGGER.info(clusterId, "Instance(s) didn't stop in time, skipping scaling");
                 // TODO should we force instance termination?
             }
         } catch (Exception e) {
             LOGGER.error(clusterId, "Error removing nodes from the cluster", e);
         }
+    }
+
+    private boolean waitForReadyState(long clusterId, int stackId, CloudbreakClient client) throws InterruptedException {
+        boolean result = false;
+        int retry = 0;
+        while (retry < RETRY_COUNT && !result) {
+            LOGGER.info(clusterId, "Waiting for cluster to be {}", AVAILABLE);
+            String status = client.getStackStatus(stackId);
+            if (AVAILABLE.equals(status)) {
+                result = true;
+            } else {
+                retry++;
+            }
+            Thread.sleep(SLEEP);
+        }
+        return result;
     }
 
 }
