@@ -1,14 +1,11 @@
 package com.sequenceiq.periscope.service;
 
-import static com.sequenceiq.periscope.utils.ClusterUtils.getTotalNodes;
-import static java.lang.Math.abs;
 import static java.util.Collections.singletonMap;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
@@ -20,8 +17,8 @@ import com.sequenceiq.periscope.log.PeriscopeLoggerFactory;
 public class ScalingRequest implements Runnable {
 
     private static final Logger LOGGER = PeriscopeLoggerFactory.getLogger(ScalingRequest.class);
-    private static final int TIMEOUT = 1000 * 60 * 30;
-    private static final int SLEEP = 5000;
+    private static final int RETRY_COUNT = 100;
+    private static final int SLEEP = 10000;
     private final int desiredNodeCount;
     private final int totalNodes;
     private final Cluster cluster;
@@ -58,15 +55,22 @@ public class ScalingRequest implements Runnable {
         String hostGroup = policy.getHostGroup();
         String ambari = cluster.getHost();
         long clusterId = cluster.getId();
-        long startTime = System.currentTimeMillis();
         try {
             LOGGER.info(clusterId, "Sending request to add {} instance(s)", scalingAdjustment);
             client.putStack(ambari, scalingAdjustment);
-            boolean started = waitForInstancesToStart(cluster, startTime);
-            if (started) {
-                LOGGER.info(clusterId, "Sending request to add node(s) to host group '{}'", hostGroup);
-                client.putCluster(ambari, singletonMap(hostGroup, scalingAdjustment));
-            } else {
+            int retry = 0;
+            while (retry < RETRY_COUNT) {
+                try {
+                    LOGGER.info(clusterId, "Sending request to install {} instance(s)", scalingAdjustment);
+                    client.putCluster(ambari, singletonMap(hostGroup, scalingAdjustment));
+                    break;
+                } catch (Exception e) {
+                    LOGGER.info(clusterId, "Hosts are not ready for install, retrying");
+                    retry++;
+                }
+                Thread.sleep(SLEEP);
+            }
+            if (retry == RETRY_COUNT) {
                 LOGGER.info(clusterId, "Instance(s) didn't start in time, skipping scaling");
                 // TODO should we terminate the launched instances?
             }
@@ -79,56 +83,28 @@ public class ScalingRequest implements Runnable {
         String hostGroup = policy.getHostGroup();
         String ambari = cluster.getHost();
         long clusterId = cluster.getId();
-        long startTime = System.currentTimeMillis();
         try {
             LOGGER.info(clusterId, "Sending request to remove node(s) from host group '{}'", hostGroup);
             client.putCluster(ambari, singletonMap(hostGroup, scalingAdjustment));
-            boolean stopped = waitForInstancesToStop(cluster, scalingAdjustment, startTime);
-            if (stopped) {
-                LOGGER.info(clusterId, "Sending request to terminate {} instance(s)", scalingAdjustment);
-                client.putStack(ambari, scalingAdjustment);
-            } else {
+            int retry = 0;
+            while (retry < RETRY_COUNT) {
+                try {
+                    LOGGER.info(clusterId, "Sending request to terminate {} instance(s)", scalingAdjustment);
+                    client.putStack(ambari, scalingAdjustment);
+                    break;
+                } catch (Exception e) {
+                    LOGGER.info(clusterId, "Hosts are not ready to be removed, retrying");
+                    retry++;
+                }
+                Thread.sleep(SLEEP);
+            }
+            if (retry == RETRY_COUNT) {
                 LOGGER.info(clusterId, "Instance(s) didn't stop in time, skipping scaling");
                 // TODO should we force instance termination?
             }
         } catch (Exception e) {
             LOGGER.error(clusterId, "Error removing nodes from the cluster", e);
         }
-    }
-
-    private boolean waitForInstancesToStart(Cluster cluster, long requestStartTime) throws InterruptedException {
-        boolean result = true;
-        AmbariClient ambariClient = cluster.newAmbariClient();
-        int currentNodes = totalNodes;
-        while (currentNodes != desiredNodeCount && result) {
-            if (isTimeExceeded(requestStartTime)) {
-                result = false;
-            }
-            currentNodes = getTotalNodes(ambariClient);
-            Thread.sleep(SLEEP);
-            LOGGER.info(cluster.getId(), "Waiting for instances to start");
-        }
-        return result;
-    }
-
-    private boolean waitForInstancesToStop(Cluster cluster, int scalingAdjustment, long requestStartTime)
-            throws InterruptedException {
-        boolean result = true;
-        AmbariClient ambariClient = cluster.newAmbariClient();
-        int removedNodes = 0;
-        while (removedNodes != abs(scalingAdjustment) && result) {
-            if (isTimeExceeded(requestStartTime)) {
-                result = false;
-            }
-            removedNodes = ambariClient.getUnregisteredHostNames().size();
-            Thread.sleep(SLEEP);
-            LOGGER.info(cluster.getId(), "Waiting for instances to stop");
-        }
-        return result;
-    }
-
-    private boolean isTimeExceeded(long startTime) {
-        return (System.currentTimeMillis() - startTime) > TIMEOUT;
     }
 
 }
