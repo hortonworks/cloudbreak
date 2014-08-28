@@ -127,7 +127,9 @@ public class AmbariClusterConnector {
             Map<String, Integer> installRequests = installServices(hosts, stack, ambariClient);
             waitForAmbariOperations(stack, ambariClient, installRequests);
             ambariClient.startAllServices();
-            ambariClient.restartServiceComponents("NAGIOS", Arrays.asList("NAGIOS_SERVER"));
+            if (ambariClient.getServiceComponentsMap().containsKey("NAGIOS")) {
+                ambariClient.restartServiceComponents("NAGIOS", Arrays.asList("NAGIOS_SERVER"));
+            }
             updateHostSuccessful(cluster, hosts.keySet(), false);
         } catch (AmbariHostsUnavailableException | AmbariOperationFailedException e) {
             LOGGER.error(e.getMessage(), e);
