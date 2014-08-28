@@ -96,7 +96,7 @@ public class ScalingRequest implements Runnable {
         boolean result = false;
         int retry = 0;
         while (retry < RETRY_COUNT && !result) {
-            LOGGER.info(clusterId, "Waiting for cluster to be {}", AVAILABLE);
+            LOGGER.info(clusterId, "Scaling: Waiting for cluster to be {}", AVAILABLE);
             String status = client.getStackStatus(stackId);
             if (AVAILABLE.equals(status)) {
                 result = true;

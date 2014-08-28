@@ -210,6 +210,15 @@ periscope.smtp.password - SMTP password
 periscope.smtp.from - SMTP from address, e.g. no-reply@somedomain.com
 ```
 
+Monitoring requests and actions are async which means they run in a different thread under a thread pool. You can configure
+this pool, or you can leave the default values. These properties are optional.
+
+```
+periscope.threadpool.core.size - default: 10 - Base pool size
+periscope.threadpool.max.size - default: 100 - Maximum number of parallel requests
+periscope.threadpool.queue.size - default: 10 - Requests queue size
+```
+
 Periscope is a [Spring Boot](http://projects.spring.io/spring-boot/) based application. In order to start please run the following.
 
 ```
