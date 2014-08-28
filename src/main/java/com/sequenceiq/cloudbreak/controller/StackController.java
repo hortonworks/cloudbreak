@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.controller;
 
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
@@ -75,6 +76,12 @@ public class StackController {
         StackDescription stackDescription = stackService.getStackDescription(user, stack);
         StackJson stackJson = stackConverter.convert(stack, stackDescription);
         return new ResponseEntity<>(stackJson, HttpStatus.OK);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "{stackId}/status")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> getStackStatus(@CurrentUser User user, @PathVariable Long stackId) {
+        return new ResponseEntity<>(stackConverter.convertStackStatus(stackService.get(user, stackId)), HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.DELETE, value = "{stackId}")

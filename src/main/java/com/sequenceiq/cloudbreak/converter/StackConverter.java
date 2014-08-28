@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.converter;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,5 +101,12 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
             stackJsons.add(convert(stack));
         }
         return stackJsons;
+    }
+
+    public Map<String, Object> convertStackStatus(Stack stack) {
+        Map<String, Object> stackStatus = new HashMap<>();
+        stackStatus.put("id", stack.getId());
+        stackStatus.put("status", stack.getStatus().name());
+        return stackStatus;
     }
 }
