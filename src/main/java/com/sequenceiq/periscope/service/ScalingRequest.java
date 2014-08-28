@@ -77,11 +77,11 @@ public class ScalingRequest implements Runnable {
         String ambari = cluster.getHost();
         long clusterId = cluster.getId();
         try {
-            LOGGER.info(clusterId, "Sending request to remove node(s) from host group '{}'", hostGroup);
+            LOGGER.info(clusterId, "Sending request to remove {} node(s) from host group '{}'", scalingAdjustment, hostGroup);
             int stackId = client.putCluster(ambari, singletonMap(hostGroup, scalingAdjustment));
             boolean ready = waitForReadyState(clusterId, stackId, client);
             if (ready) {
-                LOGGER.info(clusterId, "Sending request to terminate instance(s)");
+                LOGGER.info(clusterId, "Sending request to terminate {} instance(s)", scalingAdjustment);
                 client.putStack(ambari, scalingAdjustment);
             } else {
                 LOGGER.info(clusterId, "Instance(s) didn't stop in time, skipping scaling");
