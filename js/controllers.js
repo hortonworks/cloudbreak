@@ -681,7 +681,10 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
         $scope.createBlueprint = function() {
             log.info("blueprint creation started...");
             try {
-              JSON.parse(bluePrintText.value)
+              var bpJson = "";
+              if (bluePrintText.value){
+                  bpJson = JSON.parse(bluePrintText.value)
+              }
               $http({
                   method: 'POST',
                   dataType: 'json',
@@ -692,7 +695,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                   },
                   data: {
                       url: blueprintUrl.value,
-                      ambariBlueprint: JSON.parse(bluePrintText.value),
+                      ambariBlueprint: bpJson,
                       name: bluePrintName.value,
                       description: bluePrintDescription.value
                   }
