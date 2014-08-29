@@ -288,7 +288,7 @@ If you wish to contribute to Periscope (which you're very welcome and encouraged
 ####Creating issues
 
 Any significant improvement should be documented as a GitHub issue before starting to work on it. Please use the appropriate labels - bug, enhancement, etc - this helps while creating the release notes for a version release.
-Before submitting issues please check for duplicate or similar issues. If you are unclear about an issue please feel free to [contact us](https://groups.google.com/forum/#!forum/periscope).
+Before submitting issues please check for duplicate or similar issues. If you are unclear about an issue please feel free to [contact us](https://groups.google.com/forum/#!forum/sequenceiq-periscope).
 
 ####Discuss your design
 
