@@ -85,10 +85,6 @@ public class Cluster {
         return appMovementAllowed;
     }
 
-    public void setAppMovementAllowed(boolean appMovementAllowed) {
-        this.appMovementAllowed = appMovementAllowed;
-    }
-
     public ClusterState getState() {
         return state;
     }

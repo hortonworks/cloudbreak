@@ -67,6 +67,7 @@ public class DummyApplicationMovementHandler implements ApplicationListener<Appl
                         int usedMemory = report.getApplicationResourceUsageReport().getUsedResources().getMemory();
                         if (availableMemory - usedMemory > 0) {
                             try {
+                                // TODO https://issues.apache.org/jira/browse/YARN-2248
                                 cluster.getYarnClient().moveApplicationAcrossQueues(id, queue.getQueueName());
                                 application.setMoved(true);
                                 LOGGER.info(clusterId, "Application {} moved to queue {}", id.toString(), queue.getQueueName());
