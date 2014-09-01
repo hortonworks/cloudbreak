@@ -6,9 +6,6 @@ import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStack
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.NOT_FOUND;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.SERVICENAME;
 
-import groovyx.net.http.HttpResponseDecorator;
-import groovyx.net.http.HttpResponseException;
-
 import java.io.FileNotFoundException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
@@ -26,9 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import reactor.core.Reactor;
-import reactor.event.Event;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
@@ -49,6 +43,12 @@ import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateServic
 import com.sequenceiq.cloudbreak.service.stack.connector.Provisioner;
 import com.sequenceiq.cloudbreak.service.stack.event.AddInstancesComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
+import com.sequenceiq.cloudbreak.service.stack.event.StackUpdateSuccess;
+
+import groovyx.net.http.HttpResponseDecorator;
+import groovyx.net.http.HttpResponseException;
+import reactor.core.Reactor;
+import reactor.event.Event;
 
 @Component
 public class AzureProvisioner implements Provisioner {
@@ -87,6 +87,9 @@ public class AzureProvisioner implements Provisioner {
 
     @Autowired
     private AzureStackUtil azureStackUtil;
+
+    @Autowired
+    private AzureConnector azureConnector;
 
     @Override
     public void buildStack(Stack stack, String userData, Map<String, Object> setupProperties) {
@@ -151,7 +154,25 @@ public class AzureProvisioner implements Provisioner {
 
     @Override
     public void removeInstances(Stack stack, Set<String> instanceIds) {
-        // TODO remove virtual machines
+        AzureCredential credential = (AzureCredential) stack.getCredential();
+        String emailAsFolder = stack.getUser().emailAsFolder();
+        String filePath = AzureCertificateService.getUserJksFileName(credential, emailAsFolder);
+        AzureClient azureClient = azureStackUtil.createAzureClient(credential, filePath);
+        for (String instanceId : instanceIds) {
+            try {
+                azureConnector.deleteVirtualMachine(azureClient, instanceId, instanceId);
+                azureConnector.deleteCloudService(azureClient, credential.getName().replaceAll("\\s+", ""), instanceId);
+
+            } catch (HttpResponseException ex) {
+                LOGGER.error(String.format("Error occurs on %s stack under the instance remove", stack.getId()), ex);
+                throw new InternalServerException(ex.getResponse().toString());
+            } catch (Exception ex) {
+                throw new InternalServerException(ex.getMessage());
+            }
+        }
+        LOGGER.info("Terminated instances in stack '{}': '{}'", stack.getId(), instanceIds);
+        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, stack.getId());
+        reactor.notify(ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, Event.wrap(new StackUpdateSuccess(stack.getId(), true, instanceIds)));
     }
 
     @Override

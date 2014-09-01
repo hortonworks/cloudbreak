@@ -149,14 +149,8 @@ public class AzureConnector implements CloudPlatformConnector {
 
     private void deleteCloudServices(User user, Stack stack, AzureCredential credential, AzureClient azureClient) {
         for (Resource resource : stack.getResourcesByType(ResourceType.CLOUD_SERVICE)) {
-            Map<String, String> props;
             try {
-                props = new HashMap<>();
-                props.put(SERVICENAME, ((AzureCredential) credential).getName().replaceAll("\\s+", ""));
-                props.put(NAME, resource.getResourceName());
-                HttpResponseDecorator deleteCloudServiceResult = (HttpResponseDecorator) azureClient.deleteCloudService(props);
-                String requestId = (String) azureClient.getRequestId(deleteCloudServiceResult);
-                azureClient.waitUntilComplete(requestId);
+                deleteCloudService(azureClient, credential.getName().replaceAll("\\s+", ""), resource.getResourceName());
             } catch (HttpResponseException ex) {
                 httpResponseExceptionHandler(ex, resource.getResourceName(), user.getId());
             } catch (Exception ex) {
@@ -165,23 +159,34 @@ public class AzureConnector implements CloudPlatformConnector {
         }
     }
 
+    public void deleteCloudService(AzureClient azureClient, String serviceName, String name) throws Exception {
+        Map<String, String> props = new HashMap<>();
+        props.put(SERVICENAME, serviceName);
+        props.put(NAME, name);
+        HttpResponseDecorator deleteCloudServiceResult = (HttpResponseDecorator) azureClient.deleteCloudService(props);
+        String requestId = (String) azureClient.getRequestId(deleteCloudServiceResult);
+        azureClient.waitUntilComplete(requestId);
+    }
+
     private void deleteVirtualMachines(User user, Stack stack, AzureClient azureClient) {
         for (Resource resource : stack.getResourcesByType(ResourceType.VIRTUAL_MACHINE)) {
-            Map<String, String> props;
             try {
-                props = new HashMap<>();
-                props.put(SERVICENAME, resource.getResourceName());
-                props.put(NAME, resource.getResourceName());
-                HttpResponseDecorator deleteVirtualMachineResult = (HttpResponseDecorator) azureClient.deleteVirtualMachine(props);
-                String requestId = (String) azureClient.getRequestId(deleteVirtualMachineResult);
-                azureClient.waitUntilComplete(requestId);
-
+                deleteVirtualMachine(azureClient, resource.getResourceName(), resource.getResourceName());
             } catch (HttpResponseException ex) {
                 httpResponseExceptionHandler(ex, resource.getResourceName(), user.getId());
             } catch (Exception ex) {
                 throw new InternalServerException(ex.getMessage());
             }
         }
+    }
+
+    public void deleteVirtualMachine(AzureClient azureClient, String serviceName, String name) throws Exception {
+        Map<String, String> props = new HashMap<>();
+        props.put(SERVICENAME, serviceName);
+        props.put(NAME, name);
+        HttpResponseDecorator deleteVirtualMachineResult = (HttpResponseDecorator) azureClient.deleteVirtualMachine(props);
+        String requestId = (String) azureClient.getRequestId(deleteVirtualMachineResult);
+        azureClient.waitUntilComplete(requestId);
     }
 
     private void httpResponseExceptionHandler(HttpResponseException ex, String resourceName, Long userId) {
