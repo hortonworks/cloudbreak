@@ -181,7 +181,7 @@ public class SimpleUserService implements UserService {
         Map<String, Object> model = new HashMap<>();
 
         model.put("user", adminUser);
-        model.put("invite", getInviteRegistrationPath() + invitedUser.getConfToken());
+        model.put("invite", getConfirmLinkPath() + getInviteRegistrationPath() + invitedUser.getConfToken());
         String emailText = emailService.messageText(model, getInviteTemplate());
 
         MimeMessagePreparator messagePreparator = emailService.messagePreparator(invitedUser.getEmail(), msgFrom, "Cloudbreak - invitation", emailText);
@@ -271,7 +271,7 @@ public class SimpleUserService implements UserService {
     }
 
     private String getInviteRegistrationPath() {
-        return uiEnabled ? "#?inviteToken=" : "/admin/users/invite/";
+        return uiEnabled ? "#?inviteToken=" : "/users/invite/";
     }
 
     private String getResetPasswordConfirmPath() {
