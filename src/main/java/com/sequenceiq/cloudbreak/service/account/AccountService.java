@@ -23,7 +23,4 @@ public interface AccountService {
      */
     User accountUserData(Long accountId, UserRole role);
 
-    Account findAccount(String accountName);
-
-
 }

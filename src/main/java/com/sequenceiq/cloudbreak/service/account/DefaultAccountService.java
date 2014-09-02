@@ -64,11 +64,6 @@ public class DefaultAccountService implements AccountService {
         return decoratedAdmin;
     }
 
-    @Override
-    public Account findAccount(String accountName) {
-        return accountRepository.findByName(accountName);
-    }
-
     private void getBlueprintsForRole(User decoratedAdmin, UserRole role) {
         Set<Blueprint> blueprintsInRole = new HashSet<>();
         for (Blueprint blueprint : decoratedAdmin.getBlueprints()) {
