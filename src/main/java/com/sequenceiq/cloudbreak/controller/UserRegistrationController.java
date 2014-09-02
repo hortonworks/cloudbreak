@@ -48,7 +48,7 @@ public class UserRegistrationController {
     public ResponseEntity<String> confirmRegistration(@PathVariable String confToken) {
         LOGGER.info("Confirming registration (token: {})... ", confToken);
         String activeUser = userService.confirmRegistration(confToken);
-        LOGGER.info("Registration confirmed (token: {}) for {}", new Object[]{ confToken, activeUser });
+        LOGGER.info("Registration confirmed (token: {}) for {}", confToken, activeUser);
         return new ResponseEntity<>(activeUser, HttpStatus.OK);
     }
 
@@ -64,7 +64,7 @@ public class UserRegistrationController {
     public ResponseEntity<UserJson> confirmInvite(@PathVariable String inviteToken, @RequestBody InviteConfirmationRequest inviteConfirmationRequest) {
         LOGGER.info("Confirm invite (token: {})... ", inviteToken);
         UserJson confirmedUser = userRegistrationFacade.confirmInvite(inviteToken, inviteConfirmationRequest);
-        LOGGER.info("Invite confirmed (token: {}) for {}", new Object[]{ inviteToken, confirmedUser });
+        LOGGER.info("Invite confirmed (token: {}) for {}", inviteToken, confirmedUser);
         return new ResponseEntity<>(confirmedUser, HttpStatus.OK);
     }
 
