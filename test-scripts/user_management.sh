@@ -16,7 +16,7 @@ cat << EOF >curl_config_admin_user
 EOF
 
 # Invite a user
-INVITE_TOKEN=$(curl --config curl_config_admin_user http://$API_HOST:$API_PORT/admin/users/invite -X POST --data @$JSONDIR/account_user_invite.json)
+INVITE_TOKEN=$(curl --config curl_config_admin_user http://$API_HOST:$API_PORT/users/invite -X POST --data @$JSONDIR/account_user_invite.json)
 echo "Invite token: $INVITE_TOKEN"
 
 # Get invited user
@@ -30,8 +30,8 @@ curl --config curl_config_admin_user http://$API_HOST:$API_PORT/users/invite/$IN
 USER_ID=21
 # Role update
 echo "Role update ..."
-curl --config curl_config_admin_user http://$API_HOST:$API_PORT/admin/users/$USER_ID -X PUT --data @$JSONDIR/role_update.json | jq '.'
+curl --config curl_config_admin_user http://$API_HOST:$API_PORT/users/$USER_ID -X PUT --data @$JSONDIR/role_update.json | jq '.'
 
 # Status update
 echo "Status update ..."
-curl --config curl_config_admin_user http://$API_HOST:$API_PORT/admin/users/$USER_ID -X PUT --data @$JSONDIR/status_update.json | jq '.'
+curl --config curl_config_admin_user http://$API_HOST:$API_PORT/users/$USER_ID -X PUT --data @$JSONDIR/status_update.json | jq '.'

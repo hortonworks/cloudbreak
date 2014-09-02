@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.facade.AdminUserFacade;
 import com.sequenceiq.cloudbreak.security.CurrentUser;
 
 @Controller
-@RequestMapping("/admin")
 public class AdminUserController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AdminUserController.class);
