@@ -102,15 +102,12 @@ public class DefaultAdminUserFacade implements AdminUserFacade {
     }
 
     private UserJson doRoleUpdate(User admin, Long userId, RoleUpdateRequest updateRequest) {
-        UserJson modifiedUser;
-        RoleUpdateRequest roleUpdateRequest = (RoleUpdateRequest) updateRequest;
-        LOGGER.debug("Role update request received for user id: {}, roles: {}", userId, roleUpdateRequest.getUserRole());
-        if (UserRolesUtil.isUserInRole(admin, roleUpdateRequest.getUserRole())) {
-            modifiedUser = putUserInRoles(userId, UserRolesUtil.getGroupForRole(roleUpdateRequest.getUserRole()));
+        LOGGER.debug("Role update request received for user id: {}, roles: {}", userId, updateRequest.getUserRole());
+        if (UserRolesUtil.isUserInRole(admin, updateRequest.getUserRole())) {
+            return putUserInRoles(userId, UserRolesUtil.getGroupForRole(updateRequest.getUserRole()));
         } else {
-            throw new UnsupportedOperationException(String.format("Can't set the role to %s", roleUpdateRequest.getUserRole()));
+            throw new UnsupportedOperationException(String.format("Can't set the role to %s", updateRequest.getUserRole()));
         }
-        return modifiedUser;
     }
 
     private UserJson doStatusUpdate(Long userId, StatusUpdateRequest updateRequest) {
