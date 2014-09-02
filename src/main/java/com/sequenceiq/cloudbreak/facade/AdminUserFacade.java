@@ -7,7 +7,7 @@ import com.sequenceiq.cloudbreak.controller.json.UpdateRequest;
 import com.sequenceiq.cloudbreak.controller.json.UserJson;
 import com.sequenceiq.cloudbreak.domain.User;
 
-public interface AdminUserFacade extends CloudBreakFacade {
+public interface AdminUserFacade extends CloudbreakFacade {
 
     String inviteUser(User admin, InviteRequest inviteRequest);
 

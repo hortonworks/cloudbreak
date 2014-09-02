@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.facade;
 import com.sequenceiq.cloudbreak.controller.json.InviteConfirmationRequest;
 import com.sequenceiq.cloudbreak.controller.json.UserJson;
 
-public interface UserRegistrationFacade extends CloudBreakFacade {
+public interface UserRegistrationFacade extends CloudbreakFacade {
 
     UserJson registerUser(UserJson userJson);
 
