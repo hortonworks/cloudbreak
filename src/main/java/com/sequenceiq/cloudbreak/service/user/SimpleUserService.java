@@ -192,11 +192,11 @@ public class SimpleUserService implements UserService {
 
     @Override
     public User invitedUser(String inviteToken) {
-        LOGGER.debug("Registering upon invitation. Token: {}", inviteToken);
+        LOGGER.debug("Retrieving invited user by token: {}", inviteToken);
         User invitedUser = userRepository.findUserByConfToken(inviteToken);
 
         if (invitedUser == null || !UserStatus.INVITED.equals(invitedUser.getStatus())) {
-            throw new IllegalStateException(String.format("The user hasn't been invited or has already been registered!"));
+            throw new NotFoundException(String.format("The user hasn't been invited or has already been registered!"));
         }
         invitedUser.setRegistrationDate(new Date());
         invitedUser.setFirstName("");
@@ -214,7 +214,7 @@ public class SimpleUserService implements UserService {
             throw new BadRequestException(String.format("User with email '%s' is not invited!", registeringUser.getEmail()));
         }
 
-        //invitedUser.setBlueprints(defaultBlueprintLoaderService.loadBlueprints(registeringUser));
+        invitedUser.setBlueprints(defaultBlueprintLoaderService.loadBlueprints(registeringUser));
         invitedUser.setStatus(UserStatus.ACTIVE);
         invitedUser.setConfToken(null);
         invitedUser.setRegistrationDate(new Date());
@@ -236,7 +236,7 @@ public class SimpleUserService implements UserService {
     public User setUserStatus(Long userId, UserStatus userStatus) {
         User user = userRepository.findOne(userId);
         if (user == null) {
-            throw new IllegalStateException(String.format("User with id [%s] not found", userId));
+            throw new NotFoundException(String.format("User with id [%s] not found", userId));
         }
         LOGGER.debug("Modifying user: {};  setting status from: [{}] to: [{}]", user.getStatus(), userStatus);
         user.setStatus(userStatus);
@@ -247,6 +247,9 @@ public class SimpleUserService implements UserService {
     @Override
     public User setUserRoles(Long userId, Set<UserRole> roles) {
         User user = userRepository.findOne(userId);
+        if (user == null) {
+            throw new NotFoundException(String.format("User with id [%s] not found", userId));
+        }
         LOGGER.debug("Modifying user: {};  setting roles from: [{}] to: [{}]", user.getUserRoles(), roles);
         user.getUserRoles().clear();
         user.getUserRoles().addAll(roles);

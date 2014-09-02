@@ -8,7 +8,7 @@
   </h1>
 
 </br>
-  You've been invited by ${user.firstName} to join his/her Cloudbreak account.
+  You've been invited by ${user.firstName} to join their Cloudbreak account.
 <p>
   Click the following <a href="${invite}">link</a> to easily manage clusters on your favourite cloud provider
 <p>

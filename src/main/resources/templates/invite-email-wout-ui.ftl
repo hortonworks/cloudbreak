@@ -8,7 +8,7 @@
   </h1>
 
 </br>
-    You've been invited by ${user.firstName} to join his/her Cloudbreak account.
+    You've been invited by ${user.firstName} to join their Cloudbreak account.
     To register - GET ${invite}
   Thank you,
 
