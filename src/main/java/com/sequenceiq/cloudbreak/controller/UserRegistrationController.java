@@ -54,17 +54,17 @@ public class UserRegistrationController {
 
     @RequestMapping(value = "/invite/{inviteToken}", method = RequestMethod.GET)
     public ResponseEntity<UserJson> getInvitedUser(@PathVariable String inviteToken) {
-        LOGGER.debug("Registering after invite (token: {})... ", inviteToken);
-        User activeUser = userService.invitedUser(inviteToken);
-        LOGGER.debug("Registration confirmed (token: {}) for {}", new Object[]{ inviteToken, activeUser });
-        return new ResponseEntity<>(userConverter.convert(activeUser), HttpStatus.OK);
+        LOGGER.debug("Retrieving invited user (token: {})... ", inviteToken);
+        User invitedUser = userService.invitedUser(inviteToken);
+        LOGGER.debug("Invited user found (token: {}) for {}", inviteToken, invitedUser);
+        return new ResponseEntity<>(userConverter.convert(invitedUser), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/invite/{inviteToken}", method = RequestMethod.PUT)
     public ResponseEntity<UserJson> confirmInvite(@PathVariable String inviteToken, @RequestBody InviteConfirmationRequest inviteConfirmationRequest) {
-        LOGGER.debug("Confirm invitation (token: {})... ", inviteToken);
+        LOGGER.debug("Confirm invite (token: {})... ", inviteToken);
         UserJson confirmedUser = userRegistrationFacade.confirmInvite(inviteToken, inviteConfirmationRequest);
-        LOGGER.debug("Registration confirmed (token: {}) for {}", new Object[]{ inviteToken, confirmedUser });
+        LOGGER.debug("Invite confirmed (token: {}) for {}", new Object[]{ inviteToken, confirmedUser });
         return new ResponseEntity<>(confirmedUser, HttpStatus.OK);
     }
 
