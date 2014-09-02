@@ -28,4 +28,12 @@ public class InviteConfirmationRequest implements UpdateRequest {
     public void setLastName(String lastName) {
         this.lastName = lastName;
     }
+
+    @Override
+    public String toString() {
+        return "InviteConfirmationRequest{" +
+                "password= ******, firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                '}';
+    }
 }

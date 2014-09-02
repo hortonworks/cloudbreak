@@ -12,4 +12,11 @@ public class StatusUpdateRequest implements UpdateRequest {
     public void setUserStatus(UserStatus userStatus) {
         this.userStatus = userStatus;
     }
+
+    @Override
+    public String toString() {
+        return "StatusUpdateRequest{" +
+                "userStatus=" + userStatus +
+                '}';
+    }
 }
