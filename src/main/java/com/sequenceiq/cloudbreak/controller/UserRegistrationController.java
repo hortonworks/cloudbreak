@@ -46,25 +46,25 @@ public class UserRegistrationController {
 
     @RequestMapping(value = "/confirm/{confToken}", method = RequestMethod.POST)
     public ResponseEntity<String> confirmRegistration(@PathVariable String confToken) {
-        LOGGER.debug("Confirming registration (token: {})... ", confToken);
+        LOGGER.info("Confirming registration (token: {})... ", confToken);
         String activeUser = userService.confirmRegistration(confToken);
-        LOGGER.debug("Registration confirmed (token: {}) for {}", new Object[]{ confToken, activeUser });
+        LOGGER.info("Registration confirmed (token: {}) for {}", new Object[]{ confToken, activeUser });
         return new ResponseEntity<>(activeUser, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/invite/{inviteToken}", method = RequestMethod.GET)
     public ResponseEntity<UserJson> getInvitedUser(@PathVariable String inviteToken) {
-        LOGGER.debug("Retrieving invited user (token: {})... ", inviteToken);
+        LOGGER.info("Retrieving invited user (token: {})... ", inviteToken);
         User invitedUser = userService.invitedUser(inviteToken);
-        LOGGER.debug("Invited user found (token: {}) for {}", inviteToken, invitedUser);
+        LOGGER.info("Invited user found (token: {}) for {}", inviteToken, invitedUser);
         return new ResponseEntity<>(userConverter.convert(invitedUser), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/invite/{inviteToken}", method = RequestMethod.PUT)
     public ResponseEntity<UserJson> confirmInvite(@PathVariable String inviteToken, @RequestBody InviteConfirmationRequest inviteConfirmationRequest) {
-        LOGGER.debug("Confirm invite (token: {})... ", inviteToken);
+        LOGGER.info("Confirm invite (token: {})... ", inviteToken);
         UserJson confirmedUser = userRegistrationFacade.confirmInvite(inviteToken, inviteConfirmationRequest);
-        LOGGER.debug("Invite confirmed (token: {}) for {}", new Object[]{ inviteToken, confirmedUser });
+        LOGGER.info("Invite confirmed (token: {}) for {}", new Object[]{ inviteToken, confirmedUser });
         return new ResponseEntity<>(confirmedUser, HttpStatus.OK);
     }
 
