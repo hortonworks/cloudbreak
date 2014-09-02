@@ -15,8 +15,9 @@ public class RoleUpdateRequest implements UpdateRequest {
 
     @Override
     public String toString() {
-        return "RoleUpdateRequest{" +
-                "userRole=" + userRole +
-                '}';
+        return "RoleUpdateRequest{"
+                + "userRole="
+                + userRole
+                + '}';
     }
 }

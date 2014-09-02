@@ -31,9 +31,12 @@ public class InviteConfirmationRequest implements UpdateRequest {
 
     @Override
     public String toString() {
-        return "InviteConfirmationRequest{" +
-                "password= ******, firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                '}';
+        return "InviteConfirmationRequest{"
+                + "password= ******, firstName='"
+                + firstName + '\''
+                + ", lastName='"
+                + lastName
+                + '\''
+                + '}';
     }
 }

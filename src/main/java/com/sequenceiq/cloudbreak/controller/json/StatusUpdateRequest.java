@@ -15,8 +15,9 @@ public class StatusUpdateRequest implements UpdateRequest {
 
     @Override
     public String toString() {
-        return "StatusUpdateRequest{" +
-                "userStatus=" + userStatus +
-                '}';
+        return "StatusUpdateRequest{"
+                + "userStatus="
+                + userStatus
+                + '}';
     }
 }
