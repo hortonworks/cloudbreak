@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.repository;
 
 import java.util.Set;
 
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
@@ -14,4 +15,6 @@ public interface AccountRepository extends CrudRepository<Account, Long> {
 
     User findAccountAdmin(@Param("accountId") Long accountId);
 
+    @Query(value = "select count(u)>0 from User u where u.id=?2 and u.account.id=?1")
+    boolean isUserInAccount(Long accountId, Long userId);
 }

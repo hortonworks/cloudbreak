@@ -23,4 +23,5 @@ public interface AccountService {
      */
     User accountUserData(Long accountId, UserRole role);
 
+    boolean isUserInAccount(Long accountId, Long userId);
 }

@@ -45,6 +45,12 @@ public class DefaultAdminUserFacade implements AdminUserFacade {
     @Override
     public UserJson updateUser(User admin, Long userId, UpdateRequest updateRequest) {
         UserJson modifiedUser = null;
+
+        // check if the user belongs to the admin's account!
+        if (!accountService.isUserInAccount(admin.getAccount().getId(), userId)) {
+            throw new UnsupportedOperationException(String.format("User %s doesn't belong to the account %s", userId, admin.getAccount().getId()));
+        }
+
         if (updateRequest instanceof StatusUpdateRequest) {
             modifiedUser = doStatusUpdate(userId, (StatusUpdateRequest) updateRequest);
         } else if (updateRequest instanceof RoleUpdateRequest) {
