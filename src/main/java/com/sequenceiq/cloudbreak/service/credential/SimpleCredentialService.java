@@ -11,10 +11,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
+import com.sequenceiq.cloudbreak.converter.GccCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.UserRole;
@@ -22,6 +24,7 @@ import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.AwsCredentialRepository;
 import com.sequenceiq.cloudbreak.repository.AzureCredentialRepository;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
+import com.sequenceiq.cloudbreak.repository.GccCredentialRepository;
 import com.sequenceiq.cloudbreak.service.account.AccountService;
 import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
@@ -42,6 +45,12 @@ public class SimpleCredentialService implements CredentialService {
     private AwsCredentialRepository awsCredentialRepository;
 
     @Autowired
+    private GccCredentialRepository gccCredentialRepository;
+
+    @Autowired
+    private GccCredentialConverter gccCredentialConverter;
+
+    @Autowired
     private AzureCertificateService azureCertificateService;
 
     @Autowired
@@ -55,6 +64,7 @@ public class SimpleCredentialService implements CredentialService {
         Set<Credential> legacyCredentials = new HashSet<>();
         userCredentials.addAll(user.getAwsCredentials());
         userCredentials.addAll(user.getAzureCredentials());
+        userCredentials.addAll(user.getGccCredentials());
         LOGGER.debug("User credentials: #{}", userCredentials.size());
 
         if (user.getUserRoles().contains(UserRole.ACCOUNT_ADMIN)) {
@@ -106,14 +116,16 @@ public class SimpleCredentialService implements CredentialService {
 
     public Credential save(User user, Credential credential) {
         switch (credential.getCloudPlatform()) {
-        case AWS:
-            return saveAwsCredential(user, credential);
-        case AZURE:
-            return saveAzureCredential(user, credential);
-        default:
-            websocketService.sendToTopicUser(user.getEmail(), WebsocketEndPoint.CREDENTIAL,
-                    new StatusMessage(-1L, credential.getCredentialName(), Status.CREATE_FAILED.name()));
-            throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", credential.getCloudPlatform()));
+            case AWS:
+                return saveAwsCredential(user, credential);
+            case AZURE:
+                return saveAzureCredential(user, credential);
+            case GCC:
+                return saveGccCredential(user, credential);
+            default:
+                websocketService.sendToTopicUser(user.getEmail(), WebsocketEndPoint.CREDENTIAL,
+                        new StatusMessage(-1L, credential.getCredentialName(), Status.CREATE_FAILED.name()));
+                throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", credential.getCloudPlatform()));
         }
     }
 
@@ -147,6 +159,16 @@ public class SimpleCredentialService implements CredentialService {
         websocketService.sendToTopicUser(user.getEmail(), WebsocketEndPoint.CREDENTIAL,
                 new StatusMessage(azureCredential.getId(), azureCredential.getName(), Status.AVAILABLE.name()));
         return azureCredential;
+    }
+
+
+    private Credential saveGccCredential(User user, Credential credential) {
+        GccCredential gccCredential = (GccCredential) credential;
+        gccCredential.setGccCredentialOwner(user);
+        gccCredential = gccCredentialRepository.save(gccCredential);
+        websocketService.sendToTopicUser(user.getEmail(), WebsocketEndPoint.CREDENTIAL,
+                new StatusMessage(gccCredential.getId(), gccCredential.getName(), Status.AVAILABLE.name()));
+        return gccCredential;
     }
 
     @Override

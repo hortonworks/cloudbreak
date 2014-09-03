@@ -23,8 +23,10 @@ import com.sequenceiq.cloudbreak.controller.json.IdJson;
 import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
 import com.sequenceiq.cloudbreak.converter.AwsTemplateConverter;
 import com.sequenceiq.cloudbreak.converter.AzureTemplateConverter;
+import com.sequenceiq.cloudbreak.converter.GccTemplateConverter;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
+import com.sequenceiq.cloudbreak.domain.GccTemplate;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
@@ -44,6 +46,9 @@ public class TemplateController {
 
     @Autowired
     private AwsTemplateConverter awsTemplateConverter;
+
+    @Autowired
+    private GccTemplateConverter gccTemplateConverter;
 
     @Autowired
     private AzureTemplateConverter azureTemplateConverter;
@@ -90,6 +95,9 @@ public class TemplateController {
             case AZURE:
                 template = azureTemplateConverter.convert(templateRequest);
                 break;
+            case GCC:
+                template = gccTemplateConverter.convert(templateRequest);
+                break;
             default:
                 throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", templateRequest.getCloudPlatform()));
         }
@@ -105,6 +113,9 @@ public class TemplateController {
                 break;
             case AZURE:
                 templateJson = azureTemplateConverter.convert((AzureTemplate) template);
+                break;
+            case GCC:
+                templateJson = gccTemplateConverter.convert((GccTemplate) template);
                 break;
             default:
                 throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", template.cloudPlatform()));

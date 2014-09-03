@@ -62,6 +62,9 @@ public class User implements ProvisionEntity {
     @OneToMany(mappedBy = "azureCredentialOwner", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<AzureCredential> azureCredentials = new HashSet<>();
 
+    @OneToMany(mappedBy = "gccCredentialOwner", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<GccCredential> gccCredentials = new HashSet<>();
+
     @NotEmpty
     private String password;
 
@@ -78,6 +81,9 @@ public class User implements ProvisionEntity {
 
     @OneToMany(mappedBy = "awsTemplateOwner", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<AwsTemplate> awsTemplates = new HashSet<>();
+
+    @OneToMany(mappedBy = "gccTemplateOwner", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<GccTemplate> gccTemplates = new HashSet<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Stack> stacks = new HashSet<>();
@@ -107,8 +113,10 @@ public class User implements ProvisionEntity {
         this.confToken = user.confToken;
         this.awsTemplates = user.awsTemplates;
         this.azureTemplates = user.azureTemplates;
+        this.gccTemplates = user.gccTemplates;
         this.awsCredentials = user.awsCredentials;
         this.azureCredentials = user.azureCredentials;
+        this.gccCredentials = user.gccCredentials;
         this.stacks = user.stacks;
         this.blueprints = user.blueprints;
         this.clusters = user.clusters;
@@ -186,6 +194,22 @@ public class User implements ProvisionEntity {
     public Set<AwsCredential> getAwsCredentials() {
 
         return awsCredentials;
+    }
+
+    public Set<GccTemplate> getGccTemplates() {
+        return gccTemplates;
+    }
+
+    public void setGccTemplates(Set<GccTemplate> gccTemplates) {
+        this.gccTemplates = gccTemplates;
+    }
+
+    public Set<GccCredential> getGccCredentials() {
+        return gccCredentials;
+    }
+
+    public void setGccCredentials(Set<GccCredential> gccCredentials) {
+        this.gccCredentials = gccCredentials;
     }
 
     public void setAwsCredentials(Set<AwsCredential> awsCredentials) {

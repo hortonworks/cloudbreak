@@ -10,5 +10,11 @@ public enum ResourceType {
     AFFINITY_GROUP,
 
     // AWS
-    CLOUDFORMATION_STACK
+    CLOUDFORMATION_STACK,
+
+    // GCC
+    DISK,
+    ATTACHED_DISK,
+    NETWORK_INTERFACE,
+    FIREWALL
 }

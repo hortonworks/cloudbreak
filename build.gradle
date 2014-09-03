@@ -94,6 +94,7 @@ repositories {
     mavenCentral()
     maven { url "http://maven.sequenceiq.com/snapshots" }
     maven { url "http://maven.sequenceiq.com/release" }
+    maven { url "http://maven.sequenceiq.com/releases" }
     maven { url "http://seq-repo.s3-website-eu-west-1.amazonaws.com/releases" }
     maven { url "http://seq-repo.s3-website-eu-west-1.amazonaws.com/snapshots" }
 }
@@ -115,7 +116,7 @@ dependencies {
     compile('com.sequenceiq.azure:azure-client:1.0-SNAPSHOT') {
         exclude group: 'log4j';
     }
-    compile('com.sequenceiq.ambari:ambari-client:1.6.0-SNAPSHOT') {
+    compile('com.sequenceiq:ambari-client:0.1.1') {
         exclude group: 'org.slf4j';
     }
     compile 'org.apache.commons:commons-lang3:3.3.2'
@@ -133,9 +134,12 @@ dependencies {
     compile group: 'javax.mail', name: 'mail', version: '1.5.0-b01'
     compile group: 'org.freemarker', name: 'freemarker', version: '2.3.20'
     runtime group: 'activation', name: 'activation', version: '1.0.2'
-
-
-
+    compile group: 'com.google.http-client', name: 'google-http-client-jackson2', version: '1.17.0-rc'
+    compile group: 'com.google.oauth-client', name: 'google-oauth-client-jetty', version: '1.17.0-rc'
+    compile group: 'com.google.apis', name: 'google-api-services-compute', version: 'v1-rev1-1.17.0-rc'
+    compile group: 'com.google.apis', name: 'google-api-services-storage', version: 'v1-rev6-1.19.0'
+    compile group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.47'
+    compile group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: '1.47'
 
     testCompile 'org.springframework.boot:spring-boot-starter-test:1.0.2.RELEASE'
     deployerJars 'org.springframework.build.aws:org.springframework.build.aws.maven:3.0.0.RELEASE'
