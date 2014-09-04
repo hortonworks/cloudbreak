@@ -40,6 +40,7 @@ import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.StorageScopes;
 import com.google.common.collect.ImmutableList;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
+import com.sequenceiq.cloudbreak.domain.GccTemplate;
 import com.sequenceiq.cloudbreak.domain.Stack;
 
 @Component
@@ -49,7 +50,7 @@ public class GccStackUtil {
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
     private static final List<String> SCOPES = Arrays.asList(ComputeScopes.COMPUTE, StorageScopes.DEVSTORAGE_FULL_CONTROL);
     private static final String READY = "READY";
-    public static final int WAIT_TIME = 1000;
+    private static final int WAIT_TIME = 1000;
 
     public Compute buildCompute(GccCredential gccCredential, Stack stack) {
         try {
@@ -198,16 +199,30 @@ public class GccStackUtil {
         firewallInsert.execute();
     }
 
-    public List<AttachedDisk> buildAttachedDisks(String projectId, String name, Disk disk, GccImageType imageType, GccZone zone) {
+    public List<AttachedDisk> buildAttachedDisks(String name, Disk disk, Compute compute, GccTemplate gccTemplate) throws IOException {
+        List<AttachedDisk> listOfDisks = new ArrayList<>();
+
         AttachedDisk diskToInsert = new AttachedDisk();
         diskToInsert.setBoot(true);
         diskToInsert.setType(GccDiskType.PERSISTENT.getValue());
         diskToInsert.setMode(GccDiskMode.READ_WRITE.getValue());
         diskToInsert.setDeviceName(name);
         diskToInsert.setSource(String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/disks/%s?sourceImage=%s",
-                projectId, zone.getValue(), disk.getName(), imageType.getValue()));
-        List<AttachedDisk> listOfDisks = new ArrayList<>();
+                gccTemplate.getProjectId(), gccTemplate.getGccZone().getValue(), disk.getName(), gccTemplate.getGccZone()));
         listOfDisks.add(diskToInsert);
+
+        for (int i = 0; i < gccTemplate.getVolumeCount(); i++) {
+            String value = name + i;
+            Disk disk1 = buildRawDisk(compute, gccTemplate.getProjectId(), gccTemplate.getGccZone(), value, Long.parseLong(gccTemplate.getVolumeSize().toString()));
+            AttachedDisk diskToInsert1 = new AttachedDisk();
+            diskToInsert1.setBoot(false);
+            diskToInsert1.setType(GccDiskType.PERSISTENT.getValue());
+            diskToInsert1.setMode(GccDiskMode.READ_WRITE.getValue());
+            diskToInsert1.setDeviceName(value);
+            diskToInsert1.setSource(String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/disks/%s",
+                    gccTemplate.getProjectId(), gccTemplate.getGccZone().getValue(), disk1.getName()));
+            listOfDisks.add(diskToInsert1);
+        }
         return listOfDisks;
     }
 
@@ -217,6 +232,24 @@ public class GccStackUtil {
         disk.setName(name);
         Compute.Disks.Insert insDisk = compute.disks().insert(projectId, zone.getValue(), disk);
         insDisk.setSourceImage(GccImageType.UBUNTU_HACK.getAmbariUbuntu(projectId));
+        insDisk.execute();
+        try {
+            Thread.sleep(WAIT_TIME);
+            Compute.Disks.Get getDisk = compute.disks().get(projectId, zone.getValue(), name);
+            while (!getDisk.execute().getStatus().equals(READY)) {
+                Thread.sleep(WAIT_TIME);
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return disk;
+    }
+
+    public Disk buildRawDisk(Compute compute, String projectId, GccZone zone, String name, Long size) throws IOException {
+        Disk disk = new Disk();
+        disk.setSizeGb(size.longValue());
+        disk.setName(name);
+        Compute.Disks.Insert insDisk = compute.disks().insert(projectId, zone.getValue(), disk);
         insDisk.execute();
         try {
             Thread.sleep(WAIT_TIME);

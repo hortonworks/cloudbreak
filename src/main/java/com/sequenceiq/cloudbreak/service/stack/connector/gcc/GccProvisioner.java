@@ -41,6 +41,8 @@ public class GccProvisioner implements Provisioner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GccProvisioner.class);
     private static final long SIZE = 20L;
+    private static final String RUNNING = "RUNNING";
+    private static final int WAIT_TIME = 1000;
 
     @Autowired
     private Reactor reactor;
@@ -77,7 +79,7 @@ public class GccProvisioner implements Provisioner {
                 Disk disk = gccStackUtil.buildDisk(compute, gccTemplate.getProjectId(), gccTemplate.getGccZone(), forName, SIZE);
 
                 instance.setDisks(
-                        gccStackUtil.buildAttachedDisks(gccTemplate.getProjectId(), forName, disk, gccTemplate.getGccImageType(), gccTemplate.getGccZone())
+                        gccStackUtil.buildAttachedDisks(forName, disk, compute, gccTemplate)
                 );
                 Metadata metadata = new Metadata();
                 metadata.setItems(Lists.<Metadata.Items>newArrayList());
@@ -97,6 +99,15 @@ public class GccProvisioner implements Provisioner {
 
                 ins.setPrettyPrint(Boolean.TRUE);
                 ins.execute();
+                try {
+                    Thread.sleep(WAIT_TIME);
+                    Compute.Instances.Get getInstances = compute.instances().get(gccTemplate.getProjectId(), gccTemplate.getGccZone().getValue(), forName);
+                    while (!getInstances.execute().getStatus().equals(RUNNING)) {
+                        Thread.sleep(WAIT_TIME);
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 resourceSet.add(new Resource(ResourceType.DISK, forName, stack));
                 resourceSet.add(new Resource(ResourceType.VIRTUAL_MACHINE, forName, stack));
                 resourceSet.add(new Resource(ResourceType.ATTACHED_DISK, forName, stack));

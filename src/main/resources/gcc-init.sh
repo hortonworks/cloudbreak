@@ -29,7 +29,7 @@ METADATA_RESULT=$(cat /tmp/metadata_result)
 VOLUME_COUNT=$(echo $METADATA_RESULT | jq "$INSTANCE_SELECTOR" | jq '.[].volumeCount' | sed s/\"//g)
 START_LABEL=61
 for (( i=1; i<=VOLUME_COUNT; i++ )); do
-  LABEL=$(printf "\x$((START_LABEL+1))")
+  LABEL=$(printf "\x$((START_LABEL+i))")
   mkfs -F -t ext4 /dev/sd${LABEL}
   mkdir /mnt/fs${i}
   mount /dev/sd${LABEL} /mnt/fs${i}
