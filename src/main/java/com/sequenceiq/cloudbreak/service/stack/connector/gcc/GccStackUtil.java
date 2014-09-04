@@ -23,6 +23,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
@@ -34,11 +35,15 @@ import com.google.api.services.compute.model.Address;
 import com.google.api.services.compute.model.AttachedDisk;
 import com.google.api.services.compute.model.Disk;
 import com.google.api.services.compute.model.Firewall;
+import com.google.api.services.compute.model.Instance;
+import com.google.api.services.compute.model.Metadata;
 import com.google.api.services.compute.model.Network;
 import com.google.api.services.compute.model.NetworkInterface;
+import com.google.api.services.compute.model.Operation;
 import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.StorageScopes;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.domain.GccTemplate;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -50,7 +55,10 @@ public class GccStackUtil {
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
     private static final List<String> SCOPES = Arrays.asList(ComputeScopes.COMPUTE, StorageScopes.DEVSTORAGE_FULL_CONTROL);
     private static final String READY = "READY";
+    private static final String RUNNING = "RUNNING";
     private static final int WAIT_TIME = 1000;
+    private static final int FINISHED = 100;
+    private static final int NOT_FOUND = 404;
 
     public Compute buildCompute(GccCredential gccCredential, Stack stack) {
         try {
@@ -77,6 +85,86 @@ public class GccStackUtil {
             LOGGER.info("Problem with the Google cloud stack generation: " + e.getMessage());
         }
         return null;
+    }
+
+    public Instance buildInstance(Compute compute, GccTemplate gccTemplate, GccCredential credential,
+            List<NetworkInterface> networkInterfaces, List<AttachedDisk> attachedDisks, String forName, String userData) throws IOException {
+        Instance instance = new Instance();
+        instance.setMachineType(buildMachineType(gccTemplate.getProjectId(), gccTemplate.getGccZone(), gccTemplate.getGccInstanceType()));
+        instance.setName(forName);
+        instance.setCanIpForward(Boolean.TRUE);
+        instance.setNetworkInterfaces(networkInterfaces);
+        instance.setDisks(attachedDisks);
+        Metadata metadata = new Metadata();
+        metadata.setItems(Lists.<Metadata.Items>newArrayList());
+
+        Metadata.Items item1 = new Metadata.Items();
+        item1.setKey("sshKeys");
+        item1.setValue("ubuntu:" + credential.getPublicKey());
+
+        Metadata.Items item2 = new Metadata.Items();
+        item2.setKey("startup-script");
+        item2.setValue(userData);
+
+        metadata.getItems().add(item1);
+        metadata.getItems().add(item2);
+        instance.setMetadata(metadata);
+        Compute.Instances.Insert ins = compute.instances().insert(gccTemplate.getProjectId(), gccTemplate.getGccZone().getValue(), instance);
+
+        ins.setPrettyPrint(Boolean.TRUE);
+        ins.execute();
+        try {
+            Thread.sleep(WAIT_TIME);
+            try {
+                Compute.Instances.Get getInstances = compute.instances().get(gccTemplate.getProjectId(), gccTemplate.getGccZone().getValue(), forName);
+                while (!getInstances.execute().getStatus().equals(RUNNING)) {
+                    Thread.sleep(WAIT_TIME);
+                }
+            } catch (NullPointerException e) {
+                e.printStackTrace();
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return instance;
+    }
+
+    public void removeInstance(Compute compute, GccTemplate gccTemplate, GccCredential credential, String name) throws IOException {
+        try {
+            Operation execute = compute.instances().delete(gccTemplate.getProjectId(), gccTemplate.getGccZone().getValue(), name).execute();
+            Integer progress = compute.globalOperations().get(gccTemplate.getProjectId(), execute.getName()).execute().getProgress();
+            while (progress.intValue() != FINISHED) {
+                progress = compute.globalOperations().get(gccTemplate.getProjectId(), execute.getName()).execute().getProgress();
+            }
+        } catch (GoogleJsonResponseException ex) {
+            exceptionHandler(ex, name);
+        }
+    }
+
+
+
+    public void removeDisk(Compute compute, GccTemplate gccTemplate, GccCredential credential, String name) throws IOException {
+        try {
+            Operation execute = compute.disks().delete(gccTemplate.getProjectId(), gccTemplate.getGccZone().getValue(), name).execute();
+            Integer progress = compute.globalOperations().get(gccTemplate.getProjectId(), execute.getName()).execute().getProgress();
+            while (progress.intValue() != FINISHED) {
+                progress = compute.globalOperations().get(gccTemplate.getProjectId(), execute.getName()).execute().getProgress();
+            }
+        } catch (GoogleJsonResponseException ex) {
+            exceptionHandler(ex, name);
+        }
+    }
+
+    public void removeNetwork(Compute compute, GccTemplate gccTemplate, String name) throws IOException {
+        try {
+            Operation execute = compute.networks().delete(gccTemplate.getProjectId(), name).execute();
+            Integer progress = compute.globalOperations().get(gccTemplate.getProjectId(), execute.getName()).execute().getProgress();
+            while (progress.intValue() != FINISHED) {
+                progress = compute.globalOperations().get(gccTemplate.getProjectId(), execute.getName()).execute().getProgress();
+            }
+        } catch (GoogleJsonResponseException ex) {
+            exceptionHandler(ex, name);
+        }
     }
 
     public Storage buildStorage(GccCredential gccCredential, Stack stack) {
@@ -137,6 +225,11 @@ public class GccStackUtil {
         buildFireWallOut(compute, projectId, name);
         buildFireWallIn(compute, projectId, name);
         List<NetworkInterface> networkInterfaces = new ArrayList<>();
+        networkInterfaces.add(buildNetworkInterface(projectId, name));
+        return networkInterfaces;
+    }
+
+    public NetworkInterface buildNetworkInterface(String projectId, String name) {
         NetworkInterface iface = new NetworkInterface();
         iface.setName(name);
         AccessConfig accessConfig = new AccessConfig();
@@ -144,8 +237,7 @@ public class GccStackUtil {
         accessConfig.setType("ONE_TO_ONE_NAT");
         iface.setAccessConfigs(ImmutableList.of(accessConfig));
         iface.setNetwork(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s", projectId, name));
-        networkInterfaces.add(iface);
-        return networkInterfaces;
+        return iface;
     }
 
     public void buildAddress(Compute compute, String projectId, GccZone gccZone, String name) throws IOException {
@@ -235,9 +327,13 @@ public class GccStackUtil {
         insDisk.execute();
         try {
             Thread.sleep(WAIT_TIME);
-            Compute.Disks.Get getDisk = compute.disks().get(projectId, zone.getValue(), name);
-            while (!getDisk.execute().getStatus().equals(READY)) {
-                Thread.sleep(WAIT_TIME);
+            try {
+                Compute.Disks.Get getDisk = compute.disks().get(projectId, zone.getValue(), name);
+                while (!getDisk.execute().getStatus().equals(READY)) {
+                    Thread.sleep(WAIT_TIME);
+                }
+            } catch (NullPointerException e) {
+                e.printStackTrace();
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -253,14 +349,26 @@ public class GccStackUtil {
         insDisk.execute();
         try {
             Thread.sleep(WAIT_TIME);
-            Compute.Disks.Get getDisk = compute.disks().get(projectId, zone.getValue(), name);
-            while (!getDisk.execute().getStatus().equals(READY)) {
-                Thread.sleep(WAIT_TIME);
+            try {
+                Compute.Disks.Get getDisk = compute.disks().get(projectId, zone.getValue(), name);
+                while (!getDisk.execute().getStatus().equals(READY)) {
+                    Thread.sleep(WAIT_TIME);
+                }
+            } catch (NullPointerException e) {
+                e.printStackTrace();
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
         return disk;
+    }
+
+    private void exceptionHandler(GoogleJsonResponseException ex, String name) throws GoogleJsonResponseException {
+        if (ex.getDetails().get("code").equals(NOT_FOUND)) {
+            LOGGER.info(String.format("Resource was delete with name: %s", name));
+        } else {
+            throw ex;
+        }
     }
 
     public String getVmName(String stackName, int i) {

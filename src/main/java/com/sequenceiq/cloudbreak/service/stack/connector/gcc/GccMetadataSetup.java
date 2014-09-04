@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.gcc;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -21,6 +22,7 @@ import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataSetupComplete;
+import com.sequenceiq.cloudbreak.service.stack.event.MetadataUpdateComplete;
 import com.sequenceiq.cloudbreak.service.stack.flow.CoreInstanceMetaData;
 
 import reactor.core.Reactor;
@@ -42,25 +44,7 @@ public class GccMetadataSetup implements MetadataSetup {
         Set<CoreInstanceMetaData> instanceMetaDatas = new HashSet<>();
         List<Resource> resourcesByType = stack.getResourcesByType(ResourceType.VIRTUAL_MACHINE);
         GccTemplate template = (GccTemplate) stack.getTemplate();
-        Compute compute = gccStackUtil.buildCompute((GccCredential) stack.getCredential(), stack);
-        try {
-            for (Resource resource : resourcesByType) {
-                Compute.Instances.Get instanceGet = compute.instances().get(
-                        template.getProjectId(), template.getGccZone().getValue(), resource.getResourceName());
-                Instance executeInstance = instanceGet.execute();
-                CoreInstanceMetaData coreInstanceMetaData = new CoreInstanceMetaData(
-                        resource.getResourceName(),
-                        executeInstance.getNetworkInterfaces().get(0).getNetworkIP(),
-                        executeInstance.getNetworkInterfaces().get(0).getAccessConfigs().get(0).getNatIP(),
-                        template.getVolumeCount(),
-                        longName(resource.getResourceName(), template.getProjectId())
-
-                );
-                instanceMetaDatas.add(coreInstanceMetaData);
-            }
-        } catch (IOException ex) {
-            LOGGER.info("Exception {} occured under the metadata setup: {}", ex.getMessage(), ex.getStackTrace());
-        }
+        instanceMetaDatas = collectMetaData(stack, template, resourcesByType);
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.METADATA_SETUP_COMPLETE_EVENT, stack.getId());
         reactor.notify(ReactorConfig.METADATA_SETUP_COMPLETE_EVENT,
                 Event.wrap(new MetadataSetupComplete(CloudPlatform.GCC, stack.getId(), instanceMetaDatas)));
@@ -70,9 +54,46 @@ public class GccMetadataSetup implements MetadataSetup {
         return String.format("%s.c.%s.internal", resourceName, projectId);
     }
 
+    private Set<CoreInstanceMetaData> collectMetaData(Stack stack, GccTemplate template, List<Resource> resources) {
+        Set<CoreInstanceMetaData> instanceMetaDatas = new HashSet<>();
+        Compute compute = gccStackUtil.buildCompute((GccCredential) stack.getCredential(), stack);
+        for (Resource resource : resources) {
+            instanceMetaDatas.add(getMetadata(template, compute, resource));
+        }
+        return instanceMetaDatas;
+    }
+
     @Override
     public void addNewNodesToMetadata(Stack stack, Set<Resource> resourceList) {
-        // TODO need to implement
+        List<Resource> resources = new ArrayList<>();
+        for (Resource resource : resourceList) {
+            if (ResourceType.VIRTUAL_MACHINE.equals(resource.getResourceType())) {
+                resources.add(resource);
+            }
+        }
+        Set<CoreInstanceMetaData> instanceMetaDatas = collectMetaData(stack, (GccTemplate) stack.getTemplate(), resources);
+        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.METADATA_UPDATE_COMPLETE_EVENT, stack.getId());
+        reactor.notify(ReactorConfig.METADATA_UPDATE_COMPLETE_EVENT,
+                Event.wrap(new MetadataUpdateComplete(CloudPlatform.AZURE, stack.getId(), instanceMetaDatas)));
+    }
+
+    private CoreInstanceMetaData getMetadata(GccTemplate template, Compute compute, Resource resource) {
+        try {
+            Compute.Instances.Get instanceGet = compute.instances().get(
+                    template.getProjectId(), template.getGccZone().getValue(), resource.getResourceName());
+            Instance executeInstance = instanceGet.execute();
+            CoreInstanceMetaData coreInstanceMetaData = new CoreInstanceMetaData(
+                    resource.getResourceName(),
+                    executeInstance.getNetworkInterfaces().get(0).getNetworkIP(),
+                    executeInstance.getNetworkInterfaces().get(0).getAccessConfigs().get(0).getNatIP(),
+                    template.getVolumeCount(),
+                    longName(resource.getResourceName(), template.getProjectId())
+            );
+            return coreInstanceMetaData;
+        } catch (IOException e) {
+            LOGGER.error(String.format("Instance %s is not reachable: %s", resource.getResourceName(), e.getMessage()), e);
+        }
+        return null;
     }
 
     @Override
