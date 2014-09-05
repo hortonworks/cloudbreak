@@ -8,6 +8,7 @@ import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStack
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,6 +94,15 @@ public class AzureConnector implements CloudPlatformConnector {
             }
         }
         return detailedAzureStackDescription;
+    }
+
+    public void rollback(User user, Stack stack, Credential credential, Set<Resource> resourceSet) {
+        String filePath = AzureCertificateService.getUserJksFileName(credential, user.emailAsFolder());
+        AzureClient azureClient = azureStackUtil.createAzureClient(credential, filePath);
+        deleteVirtualMachines(user, stack, azureClient);
+        deleteCloudServices(user, stack, (AzureCredential) credential, azureClient);
+        deleteNetwork(user, stack, azureClient);
+        deleteBlobs(user, stack, azureClient);
     }
 
     @Override

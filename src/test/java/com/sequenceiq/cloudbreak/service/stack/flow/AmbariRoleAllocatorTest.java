@@ -17,13 +17,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import reactor.core.Reactor;
-import reactor.event.Event;
-
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+
+import reactor.core.Reactor;
+import reactor.event.Event;
 
 public class AmbariRoleAllocatorTest {
     @InjectMocks
@@ -80,6 +80,7 @@ public class AmbariRoleAllocatorTest {
         // GIVEN
         stack.setNodeCount(3);
         given(stackRepository.findById(1L)).willReturn(stack);
+        given(stackRepository.findOneWithLists(1L)).willReturn(stack);
         // WHEN
         underTest.allocateRoles(1L, coreInstanceMetaData);
         // THEN
@@ -91,6 +92,7 @@ public class AmbariRoleAllocatorTest {
     public void testAllocateRolesWhenExceptionOccurs() {
         // GIVEN
         given(stackRepository.findById(1L)).willThrow(new IllegalStateException());
+        given(stackRepository.findOneWithLists(1L)).willReturn(stack);
         // WHEN
         underTest.allocateRoles(1L, coreInstanceMetaData);
         // THEN

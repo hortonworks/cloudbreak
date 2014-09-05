@@ -9,9 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import reactor.core.Reactor;
-import reactor.event.Event;
-
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -23,6 +20,9 @@ import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.StackOperationFailure;
+
+import reactor.core.Reactor;
+import reactor.event.Event;
 
 @Service
 public class SnsMessageHandler {
@@ -100,7 +100,7 @@ public class SnsMessageHandler {
         } else if (!stack.isStackCompleted() && !Status.CREATE_FAILED.equals(stack.getStatus())) {
             LOGGER.info("CloudFormation stack creation failed. [Id: '{}']", stack.getId());
             StackOperationFailure stackCreationFailure = new StackOperationFailure(stack.getId(), "Error while creating CloudFormation stack: "
-                    + cfMessage.get("ResourceStatusReason"));
+                    + cfMessage.get("ResourceStatusReason"), stack.getResources());
             LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_CREATE_FAILED_EVENT, stack.getId());
             reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(stackCreationFailure));
         } else {

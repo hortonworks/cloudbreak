@@ -8,18 +8,29 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import com.sequenceiq.cloudbreak.domain.AzureCredential;
+import com.sequenceiq.cloudbreak.domain.AzureTemplate;
+import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
+import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformRollbackHandler;
+import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureCloudPlatformRollbackHandler;
 import com.sequenceiq.cloudbreak.service.stack.event.StackOperationFailure;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 
@@ -42,6 +53,12 @@ public class StackCreationFailureHandlerTest {
 
     private Stack stack;
 
+    @Mock
+    private AzureCloudPlatformRollbackHandler azureCloudPlatformRollbackHandler;
+
+    @Mock
+    private Map<CloudPlatform, CloudPlatformRollbackHandler> cloudPlatformRollbackHandlers;
+
     @Before
     public void setUp() {
         underTest = new StackCreationFailureHandler();
@@ -55,6 +72,9 @@ public class StackCreationFailureHandlerTest {
         // GIVEN
         given(stackUpdater.updateStackStatus(anyLong(), any(Status.class), anyString())).willReturn(stack);
         doNothing().when(websocketService).sendToTopicUser(anyString(), any(WebsocketEndPoint.class), any());
+        given(cloudPlatformRollbackHandlers.get(any(CloudPlatform.class))).willReturn(azureCloudPlatformRollbackHandler);
+
+        doNothing().when(azureCloudPlatformRollbackHandler).rollback(any(User.class), any(Stack.class), any(Credential.class), any(Set.class));
         // WHEN
         underTest.accept(event);
         // THEN
@@ -62,7 +82,7 @@ public class StackCreationFailureHandlerTest {
     }
 
     private Event<StackOperationFailure> createEvent() {
-        StackOperationFailure data = new StackOperationFailure(1L, "message");
+        StackOperationFailure data = new StackOperationFailure(1L, "message", new HashSet<Resource>());
         return new Event<StackOperationFailure>(data);
     }
 
@@ -76,6 +96,9 @@ public class StackCreationFailureHandlerTest {
         User user = new User();
         user.setEmail(DUMMY_EMAIL);
         stack.setUser(user);
+        stack.setCredential(new AzureCredential());
+        AzureTemplate azureTemplate = new AzureTemplate();
+        stack.setTemplate(azureTemplate);
         return stack;
     }
 }

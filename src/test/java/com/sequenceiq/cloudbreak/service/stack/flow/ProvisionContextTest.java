@@ -1,5 +1,22 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
+import static org.mockito.BDDMockito.doNothing;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.times;
+import static org.mockito.BDDMockito.verify;
+import static org.mockito.Matchers.anyMap;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.any;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -12,24 +29,9 @@ import com.sequenceiq.cloudbreak.service.stack.connector.Provisioner;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+
 import reactor.core.Reactor;
 import reactor.event.Event;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.mockito.Matchers.anyMap;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.doNothing;
-import static org.mockito.BDDMockito.times;
-import static org.mockito.BDDMockito.verify;
 
 public class ProvisionContextTest {
 
@@ -109,6 +111,7 @@ public class ProvisionContextTest {
     public void testBuildStackWhenExceptionOccurs() {
         // GIVEN
         given(stackRepository.findById(1L)).willReturn(stack);
+        given(stackRepository.findOneWithLists(1L)).willReturn(stack);
         given(stackUpdater.updateStackStatus(1L, Status.CREATE_IN_PROGRESS)).willThrow(new IllegalStateException());
         // WHEN
         underTest.buildStack(cloudPlatform, 1L, setupProperties, userDataParams);

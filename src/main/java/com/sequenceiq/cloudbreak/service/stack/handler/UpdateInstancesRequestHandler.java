@@ -86,6 +86,7 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
 
     private void notifyUpdateFailed(Long stackId, String detailedMessage) {
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_UPDATE_FAILED_EVENT, stackId);
-        reactor.notify(ReactorConfig.STACK_UPDATE_FAILED_EVENT, Event.wrap(new StackOperationFailure(stackId, detailedMessage)));
+        reactor.notify(ReactorConfig.STACK_UPDATE_FAILED_EVENT, Event.wrap(new StackOperationFailure(stackId, detailedMessage,
+                stackRepository.findOneWithLists(stackId).getResources())));
     }
 }

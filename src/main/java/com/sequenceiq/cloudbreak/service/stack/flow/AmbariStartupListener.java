@@ -5,16 +5,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import reactor.core.Reactor;
-import reactor.event.Event;
-
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariHostsUnavailableException;
 import com.sequenceiq.cloudbreak.service.stack.connector.aws.AwsStackUtil;
-import com.sequenceiq.cloudbreak.service.stack.event.StackOperationFailure;
 import com.sequenceiq.cloudbreak.service.stack.event.StackCreationSuccess;
+import com.sequenceiq.cloudbreak.service.stack.event.StackOperationFailure;
+
+import reactor.core.Reactor;
+import reactor.event.Event;
 
 @Service
 public class AmbariStartupListener {
@@ -31,6 +32,9 @@ public class AmbariStartupListener {
 
     @Autowired
     private AwsStackUtil awsStackUtil;
+
+    @Autowired
+    private StackRepository stackRepository;
 
     public void waitForAmbariServer(Long stackId, String ambariIp) {
         try {
@@ -61,7 +65,8 @@ public class AmbariStartupListener {
             LOGGER.error("Unhandled exception occured while trying to reach initializing Ambari server.", e);
             LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_CREATE_FAILED_EVENT, stackId);
             StackOperationFailure stackCreationFailure = new StackOperationFailure(stackId,
-                    "Unhandled exception occured while trying to reach initializing Ambari server.");
+                    "Unhandled exception occured while trying to reach initializing Ambari server.",
+                    stackRepository.findOneWithLists(stackId).getResources());
             reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(stackCreationFailure));
         }
     }
