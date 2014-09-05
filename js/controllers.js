@@ -546,20 +546,37 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
         $scope.createAwsTemplateRequest = function() {
             $scope.azureTemplate = false;
             $scope.awsTemplate = true;
+            $scope.gccTemplate = false;
+
         }
 
         $scope.createAzureTemplateRequest = function() {
             $scope.azureTemplate = true;
             $scope.awsTemplate = false;
+            $scope.gccTemplate = false;
+        }
+
+        $scope.createGccTemplateRequest = function() {
+            $scope.gccTemplate = true;
+            $scope.azureTemplate = false;
+            $scope.awsTemplate = false;
         }
 
         $scope.createAwsCredentialRequest = function() {
+            $scope.gccCredential = false;
             $scope.azureCredential = false;
             $scope.awsCredential = true;
         }
 
         $scope.createAzureCredentialRequest = function() {
+            $scope.gccCredential = false;
             $scope.azureCredential = true;
+            $scope.awsCredential = false;
+        }
+
+        $scope.createGccCredentialRequest = function() {
+            $scope.gccCredential = true;
+            $scope.azureCredential = false;
             $scope.awsCredential = false;
         }
 
@@ -794,6 +811,42 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
             });
         }
 
+        $scope.createGccTemplate = function() {
+            $scope.isSuccessCreation = true;
+            $scope.isFailedCreation = false;
+            $http({
+                method: 'POST',
+                dataType: 'json',
+                withCredentials: true,
+                url:  $rootScope.apiUrl + "/templates",
+                headers: {
+                    'Authorization': 'Basic ' + $rootScope.basic_auth
+                },
+                data: {
+                    cloudPlatform: "GCC",
+                    name: gcc_tclusterName.value,
+                    description: gcc_tdescription.value,
+                    volumeCount: parseInt(gcc_tvolumecount.value),
+                    volumeSize: parseInt(gcc_tvolumesize.value),
+                    parameters: {
+                        gccZone: gcc_tregion.value,
+                        gccInstanceType: gcc_tinstanceType.value,
+                        gccImageType: "UBUNTU_HACK"
+                    }
+                }
+            }).success(function (data, status, headers, config) {
+                $scope.modifyStatusMessage("Google cloud template '" + data.id + "' was created successfully");
+                $scope.modifyStatusClass("has-success");
+                $scope.getTemplates();
+                gcc_tclusterName.value = "";
+                gcc_tdescription.value = "";
+                gcc_tprojectId.value = "";
+            }).error(function (data, status, headers, config) {
+                $scope.modifyStatusMessage("Google cloud template creation failed: " + data.message);
+                $scope.modifyStatusClass("has-error");
+            });
+        }
+
         $scope.createAwsCredential = function() {
             log.info("create aws credential");
             $scope.awsCredentialInCreate = true;
@@ -866,6 +919,40 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 $scope.modifyStatusClass("has-error");
             });
         }
+
+        $scope.createGccCredential = function() {
+            $http({
+                method: 'POST',
+                dataType: 'json',
+                withCredentials: true,
+                url:  $rootScope.apiUrl + "/credentials",
+                headers: {
+                    'Authorization': 'Basic ' + $rootScope.basic_auth
+                },
+                data: {
+                    cloudPlatform: "GCC",
+                    name: gcccname.value,
+                    description: gcccdescription.value,
+                    publicKey: gcc_sshPublicKey.value,
+                    parameters: {
+                        serviceAccountId: gcccsubscriptionId.value,
+                        serviceAccountPrivateKey: gcc_csshPublicKey.value,
+                        projectId: gcc_tprojectId.value
+                    }
+                }
+            }).success(function (data, status, headers, config) {
+                $scope.getCredentials();
+                $scope.modifyStatusMessage("Google cloud credential '" + data.id + "' was created successfully");
+                $scope.modifyStatusClass("has-success");
+                cname.value = "";
+                cdescription.value = "";
+                serviceAccountId.value = "";
+            }).error(function (data, status, headers, config) {
+                $scope.modifyStatusMessage("Google cloud credential creation failed: " + data.message);
+                $scope.modifyStatusClass("has-error");
+            });
+        }
+
 
         $scope.doQuerys = function() {
             $http.get('connection.properties').then(function (response) {
