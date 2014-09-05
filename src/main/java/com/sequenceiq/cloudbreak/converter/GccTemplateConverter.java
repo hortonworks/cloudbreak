@@ -28,7 +28,6 @@ public class GccTemplateConverter extends AbstractConverter<TemplateJson, GccTem
         Map<String, Object> props = new HashMap<>();
         putProperty(props, GccTemplateParam.IMAGETYPE.getName(), entity.getGccImageType());
         putProperty(props, GccTemplateParam.INSTANCETYPE.getName(), entity.getGccInstanceType());
-        putProperty(props, GccTemplateParam.PROJECTID.getName(), entity.getProjectId());
         putProperty(props, GccTemplateParam.ZONE.getName(), entity.getGccZone());
         gccTemplateJson.setParameters(props);
         gccTemplateJson.setDescription(entity.getDescription() == null ? "" : entity.getDescription());
@@ -44,7 +43,6 @@ public class GccTemplateConverter extends AbstractConverter<TemplateJson, GccTem
         gccTemplate.setVolumeSize((json.getVolumeSize() == null) ? 0 : json.getVolumeSize());
         gccTemplate.setGccImageType(GccImageType.valueOf(json.getParameters().get(GccTemplateParam.IMAGETYPE.getName()).toString()));
         gccTemplate.setGccInstanceType(GccInstanceType.valueOf(json.getParameters().get(GccTemplateParam.INSTANCETYPE.getName()).toString()));
-        gccTemplate.setProjectId(String.valueOf(json.getParameters().get(GccTemplateParam.PROJECTID.getName()).toString()));
         gccTemplate.setGccZone(GccZone.valueOf(json.getParameters().get(GccTemplateParam.ZONE.getName()).toString()));
         gccTemplate.setDescription(json.getDescription());
         return gccTemplate;

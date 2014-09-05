@@ -56,8 +56,8 @@ public class GccStackUtil {
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
     private static final List<String> SCOPES = Arrays.asList(ComputeScopes.COMPUTE, StorageScopes.DEVSTORAGE_FULL_CONTROL);
 
-    private static final int MAX_POLLING_ATTEMPTS = 10;
-    private static final int POLLING_INTERVAL = 2000;
+    private static final int MAX_POLLING_ATTEMPTS = 60;
+    private static final int POLLING_INTERVAL = 5000;
 
     @Autowired
     private GccInstanceCheckerStatus gccInstanceReadyCheckerStatus;
@@ -109,7 +109,7 @@ public class GccStackUtil {
         GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
         GccCredential credential = (GccCredential) stack.getCredential();
         Instance instance = new Instance();
-        instance.setMachineType(buildMachineType(gccTemplate.getProjectId(), gccTemplate.getGccZone(), gccTemplate.getGccInstanceType()));
+        instance.setMachineType(buildMachineType(credential.getProjectId(), gccTemplate.getGccZone(), gccTemplate.getGccInstanceType()));
         instance.setName(forName);
         instance.setCanIpForward(Boolean.TRUE);
         instance.setNetworkInterfaces(networkInterfaces);
@@ -128,7 +128,7 @@ public class GccStackUtil {
         metadata.getItems().add(item1);
         metadata.getItems().add(item2);
         instance.setMetadata(metadata);
-        Compute.Instances.Insert ins = compute.instances().insert(gccTemplate.getProjectId(), gccTemplate.getGccZone().getValue(), instance);
+        Compute.Instances.Insert ins = compute.instances().insert(credential.getProjectId(), gccTemplate.getGccZone().getValue(), instance);
 
         ins.setPrettyPrint(Boolean.TRUE);
         ins.execute();
@@ -140,7 +140,7 @@ public class GccStackUtil {
     public void removeInstance(Compute compute, Stack stack, String name) throws IOException {
         GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
         GccCredential gccCredential = (GccCredential) stack.getCredential();
-        Operation execute = compute.instances().delete(gccTemplate.getProjectId(), gccTemplate.getGccZone().getValue(), name).execute();
+        Operation execute = compute.instances().delete(gccCredential.getProjectId(), gccTemplate.getGccZone().getValue(), name).execute();
         GccRemoveReadyPollerObject gccRemoveReady = new GccRemoveReadyPollerObject(compute, execute, stack, name);
         gccRemoveReadyPollerObjectPollingService.pollWithTimeout(gccRemoveCheckerStatus, gccRemoveReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
     }
@@ -148,14 +148,16 @@ public class GccStackUtil {
 
     public void removeDisk(Compute compute, Stack stack, String name) throws IOException {
         GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
-        Operation execute = compute.disks().delete(gccTemplate.getProjectId(), gccTemplate.getGccZone().getValue(), name).execute();
+        GccCredential gccCredential = (GccCredential) stack.getCredential();
+        Operation execute = compute.disks().delete(gccCredential.getProjectId(), gccTemplate.getGccZone().getValue(), name).execute();
         GccRemoveReadyPollerObject gccRemoveReady = new GccRemoveReadyPollerObject(compute, execute, stack, name);
         gccRemoveReadyPollerObjectPollingService.pollWithTimeout(gccRemoveCheckerStatus, gccRemoveReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
     }
 
     public void removeNetwork(Compute compute, Stack stack, String name) throws IOException {
         GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
-        Operation execute = compute.networks().delete(gccTemplate.getProjectId(), name).execute();
+        GccCredential gccCredential = (GccCredential) stack.getCredential();
+        Operation execute = compute.networks().delete(gccCredential.getProjectId(), name).execute();
         GccRemoveReadyPollerObject gccRemoveReady = new GccRemoveReadyPollerObject(compute, execute, stack, name);
         gccRemoveReadyPollerObjectPollingService.pollWithTimeout(gccRemoveCheckerStatus, gccRemoveReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
     }
@@ -286,6 +288,7 @@ public class GccStackUtil {
 
     public List<AttachedDisk> buildAttachedDisks(String name, Disk disk, Compute compute, Stack stack) throws IOException {
         GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
+        GccCredential gccCredential = (GccCredential) stack.getCredential();
         List<AttachedDisk> listOfDisks = new ArrayList<>();
 
         AttachedDisk diskToInsert = new AttachedDisk();
@@ -294,12 +297,12 @@ public class GccStackUtil {
         diskToInsert.setMode(GccDiskMode.READ_WRITE.getValue());
         diskToInsert.setDeviceName(name);
         diskToInsert.setSource(String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/disks/%s?sourceImage=%s",
-                gccTemplate.getProjectId(), gccTemplate.getGccZone().getValue(), disk.getName(), gccTemplate.getGccZone()));
+                gccCredential.getProjectId(), gccTemplate.getGccZone().getValue(), disk.getName(), gccTemplate.getGccZone()));
         listOfDisks.add(diskToInsert);
 
         for (int i = 0; i < gccTemplate.getVolumeCount(); i++) {
             String value = name + i;
-            Disk disk1 = buildRawDisk(compute, stack, gccTemplate.getProjectId(),
+            Disk disk1 = buildRawDisk(compute, stack, gccCredential.getProjectId(),
                     gccTemplate.getGccZone(), value, Long.parseLong(gccTemplate.getVolumeSize().toString()));
             AttachedDisk diskToInsert1 = new AttachedDisk();
             diskToInsert1.setBoot(false);
@@ -307,7 +310,7 @@ public class GccStackUtil {
             diskToInsert1.setMode(GccDiskMode.READ_WRITE.getValue());
             diskToInsert1.setDeviceName(value);
             diskToInsert1.setSource(String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/disks/%s",
-                    gccTemplate.getProjectId(), gccTemplate.getGccZone().getValue(), disk1.getName()));
+                    gccCredential.getProjectId(), gccTemplate.getGccZone().getValue(), disk1.getName()));
             listOfDisks.add(diskToInsert1);
         }
         return listOfDisks;

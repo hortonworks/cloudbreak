@@ -5,7 +5,8 @@ import com.google.common.base.Optional;
 public enum GccCredentialParam implements TemplateParam {
 
     SERVICE_ACCOUNT_ID("serviceAccountId", true, String.class, Optional.<String>absent()),
-    SERVICE_ACCOUNT_PRIVATE_KEY("serviceAccountPrivateKey", true, String.class, Optional.<String>absent());
+    SERVICE_ACCOUNT_PRIVATE_KEY("serviceAccountPrivateKey", true, String.class, Optional.<String>absent()),
+    PROJECTID("projectId", true, String.class, Optional.<String>absent());
 
     private final String paramName;
     private final Class clazz;

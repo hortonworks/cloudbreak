@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.api.services.compute.Compute;
+import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.domain.GccTemplate;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.AddInstancesFailedException;
@@ -23,11 +24,12 @@ public class GccInstanceCheckerStatus implements StatusCheckerTask<GccInstanceRe
                 gccInstanceReadyPollerObject.getName(),
                 gccInstanceReadyPollerObject.getStack().getId());
         GccTemplate gccTemplate = (GccTemplate) gccInstanceReadyPollerObject.getStack().getTemplate();
+        GccCredential gccCredential = (GccCredential) gccInstanceReadyPollerObject.getStack().getCredential();
         try {
             Compute.Instances.Get getInstances = gccInstanceReadyPollerObject
                     .getCompute()
                     .instances()
-                    .get(gccTemplate.getProjectId(), gccTemplate.getGccZone().getValue(), gccInstanceReadyPollerObject.getName());
+                    .get(gccCredential.getProjectId(), gccTemplate.getGccZone().getValue(), gccInstanceReadyPollerObject.getName());
             String status = getInstances.execute().getStatus();
             return RUNNING.equals(status) ? true : false;
         } catch (NullPointerException | IOException e) {

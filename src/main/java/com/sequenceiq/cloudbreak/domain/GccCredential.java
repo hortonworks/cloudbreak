@@ -15,6 +15,7 @@ public class GccCredential  extends Credential implements ProvisionEntity {
     private String serviceAccountId;
     @Column(columnDefinition = "TEXT")
     private String serviceAccountPrivateKey;
+    private String projectId;
 
     public GccCredential() {
 
@@ -50,6 +51,14 @@ public class GccCredential  extends Credential implements ProvisionEntity {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(String projectId) {
+        this.projectId = projectId;
     }
 
     @Override

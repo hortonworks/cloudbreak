@@ -51,13 +51,14 @@ public class GccProvisionSetup implements ProvisionSetup {
             Storage storage = gccStackUtil.buildStorage((GccCredential) stack.getCredential(), stack);
             Compute compute = gccStackUtil.buildCompute((GccCredential) stack.getCredential(), stack);
             GccTemplate template = (GccTemplate) stack.getTemplate();
+            GccCredential credential = (GccCredential) stack.getCredential();
 
-            ImageList list = compute.images().list(template.getProjectId()).execute();
+            ImageList list = compute.images().list(credential.getProjectId()).execute();
             if (!containsSpecificImage(list)) {
                 Bucket bucket = new Bucket();
                 bucket.setName(BUCKET_NAME);
                 bucket.setStorageClass("STANDARD");
-                Storage.Buckets.Insert ins = storage.buckets().insert(template.getProjectId(), bucket);
+                Storage.Buckets.Insert ins = storage.buckets().insert(credential.getProjectId(), bucket);
                 ins.execute();
                 Storage.Objects.Copy copy = storage.objects().copy(MAIN_PROJECT, TAR_NAME, BUCKET_NAME, TAR_NAME, new StorageObject());
                 copy.execute();
@@ -67,7 +68,7 @@ public class GccProvisionSetup implements ProvisionSetup {
                 Image.RawDisk rawDisk = new Image.RawDisk();
                 rawDisk.setSource(String.format("http://storage.googleapis.com/%s/%s", BUCKET_NAME, TAR_NAME));
                 image.setRawDisk(rawDisk);
-                Compute.Images.Insert ins1 = compute.images().insert(template.getProjectId(), image);
+                Compute.Images.Insert ins1 = compute.images().insert(credential.getProjectId(), image);
                 ins1.execute();
             }
         } catch (IOException e) {

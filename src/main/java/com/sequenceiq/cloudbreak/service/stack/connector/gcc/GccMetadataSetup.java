@@ -58,7 +58,7 @@ public class GccMetadataSetup implements MetadataSetup {
         Set<CoreInstanceMetaData> instanceMetaDatas = new HashSet<>();
         Compute compute = gccStackUtil.buildCompute((GccCredential) stack.getCredential(), stack);
         for (Resource resource : resources) {
-            instanceMetaDatas.add(getMetadata(template, compute, resource));
+            instanceMetaDatas.add(getMetadata(stack, compute, resource));
         }
         return instanceMetaDatas;
     }
@@ -77,17 +77,19 @@ public class GccMetadataSetup implements MetadataSetup {
                 Event.wrap(new MetadataUpdateComplete(CloudPlatform.AZURE, stack.getId(), instanceMetaDatas)));
     }
 
-    private CoreInstanceMetaData getMetadata(GccTemplate template, Compute compute, Resource resource) {
+    private CoreInstanceMetaData getMetadata(Stack stack, Compute compute, Resource resource) {
         try {
+            GccCredential credential = (GccCredential) stack.getCredential();
+            GccTemplate template = (GccTemplate) stack.getTemplate();
             Compute.Instances.Get instanceGet = compute.instances().get(
-                    template.getProjectId(), template.getGccZone().getValue(), resource.getResourceName());
+                    credential.getProjectId(), template.getGccZone().getValue(), resource.getResourceName());
             Instance executeInstance = instanceGet.execute();
             CoreInstanceMetaData coreInstanceMetaData = new CoreInstanceMetaData(
                     resource.getResourceName(),
                     executeInstance.getNetworkInterfaces().get(0).getNetworkIP(),
                     executeInstance.getNetworkInterfaces().get(0).getAccessConfigs().get(0).getNatIP(),
                     template.getVolumeCount(),
-                    longName(resource.getResourceName(), template.getProjectId())
+                    longName(resource.getResourceName(), credential.getProjectId())
             );
             return coreInstanceMetaData;
         } catch (IOException e) {

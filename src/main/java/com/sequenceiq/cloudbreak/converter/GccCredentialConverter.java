@@ -30,6 +30,7 @@ public class GccCredentialConverter extends AbstractConverter<CredentialJson, Gc
         Map<String, Object> params = new HashMap<>();
         params.put(GccCredentialParam.SERVICE_ACCOUNT_ID.getName(), entity.getServiceAccountId());
         params.put(GccCredentialParam.SERVICE_ACCOUNT_PRIVATE_KEY.getName(), entity.getServiceAccountPrivateKey());
+        params.put(GccCredentialParam.PROJECTID.getName(), entity.getProjectId());
         credentialJson.setParameters(params);
         credentialJson.setDescription(entity.getDescription() == null ? "" : entity.getDescription());
         return credentialJson;
@@ -37,13 +38,14 @@ public class GccCredentialConverter extends AbstractConverter<CredentialJson, Gc
 
     @Override
     public GccCredential convert(CredentialJson json) {
-        GccCredential awsCredential = new GccCredential();
-        awsCredential.setName(json.getName());
-        awsCredential.setServiceAccountId(String.valueOf(json.getParameters().get(GccCredentialParam.SERVICE_ACCOUNT_ID.getName())));
-        awsCredential.setServiceAccountPrivateKey(String.valueOf(json.getParameters().get(GccCredentialParam.SERVICE_ACCOUNT_PRIVATE_KEY.getName())));
-        awsCredential.setCloudPlatform(CloudPlatform.GCC);
-        awsCredential.setDescription(json.getDescription());
-        awsCredential.setPublicKey(json.getPublicKey());
-        return awsCredential;
+        GccCredential gccCredential = new GccCredential();
+        gccCredential.setName(json.getName());
+        gccCredential.setServiceAccountId(String.valueOf(json.getParameters().get(GccCredentialParam.SERVICE_ACCOUNT_ID.getName())));
+        gccCredential.setServiceAccountPrivateKey(String.valueOf(json.getParameters().get(GccCredentialParam.SERVICE_ACCOUNT_PRIVATE_KEY.getName())));
+        gccCredential.setProjectId(String.valueOf(json.getParameters().get(GccCredentialParam.PROJECTID.getName())));
+        gccCredential.setCloudPlatform(CloudPlatform.GCC);
+        gccCredential.setDescription(json.getDescription());
+        gccCredential.setPublicKey(json.getPublicKey());
+        return gccCredential;
     }
 }

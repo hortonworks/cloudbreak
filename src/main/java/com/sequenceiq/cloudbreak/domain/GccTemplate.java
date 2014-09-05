@@ -26,7 +26,6 @@ public class GccTemplate extends Template implements ProvisionEntity {
     @ManyToOne
     @JoinColumn(name = "gccTemplate_gccTemplateOwner")
     private User gccTemplateOwner;
-    private String projectId;
 
     public GccTemplate() {
 
@@ -78,14 +77,6 @@ public class GccTemplate extends Template implements ProvisionEntity {
 
     public void setGccTemplateOwner(User gccTemplateOwner) {
         this.gccTemplateOwner = gccTemplateOwner;
-    }
-
-    public String getProjectId() {
-        return projectId;
-    }
-
-    public void setProjectId(String projectId) {
-        this.projectId = projectId;
     }
 
     @Override

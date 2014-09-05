@@ -65,19 +65,21 @@ public class GccProvisioner implements Provisioner {
             throw new StackCreationFailureException(new Exception("Error while creating Google cloud stack could not create compute instance"));
         }
         try {
-            List<NetworkInterface> networkInterfaces = gccStackUtil.buildNetworkInterfaces(compute, gccTemplate.getProjectId(), stack.getName());
+            List<NetworkInterface> networkInterfaces = gccStackUtil.buildNetworkInterfaces(compute, credential.getProjectId(), stack.getName());
             resourceSet.add(new Resource(ResourceType.NETWORK, stack.getName(), stack));
             resourceSet.add(new Resource(ResourceType.NETWORK_INTERFACE, stack.getName(), stack));
             resourceSet.add(new Resource(ResourceType.FIREWALL, stack.getName(), stack));
             for (int i = 0; i < stack.getNodeCount(); i++) {
                 String forName = gccStackUtil.getVmName(stack.getName(), i);
-                Disk disk = gccStackUtil.buildDisk(compute, stack, gccTemplate.getProjectId(), gccTemplate.getGccZone(), forName, SIZE);
+                Disk disk = gccStackUtil.buildDisk(compute, stack, credential.getProjectId(), gccTemplate.getGccZone(), forName, SIZE);
                 List<AttachedDisk> attachedDisks = gccStackUtil.buildAttachedDisks(forName, disk, compute, stack);
                 Instance instance = gccStackUtil.buildInstance(compute, stack, networkInterfaces, attachedDisks, forName, userData);
 
                 resourceSet.add(new Resource(ResourceType.DISK, forName, stack));
                 for (AttachedDisk attachedDisk : attachedDisks) {
-                    resourceSet.add(new Resource(ResourceType.ATTACHED_DISK, attachedDisk.getDeviceName(), stack));
+                    if (!attachedDisk.getDeviceName().equals(forName)) {
+                        resourceSet.add(new Resource(ResourceType.ATTACHED_DISK, attachedDisk.getDeviceName(), stack));
+                    }
                 }
                 resourceSet.add(new Resource(ResourceType.VIRTUAL_MACHINE, forName, stack));
             }
@@ -100,17 +102,19 @@ public class GccProvisioner implements Provisioner {
         String name = network.getResourceName();
         Set<Resource> resourceSet = new HashSet<>();
         try {
-            NetworkInterface networkInterface = gccStackUtil.buildNetworkInterface(gccTemplate.getProjectId(), name);
+            NetworkInterface networkInterface = gccStackUtil.buildNetworkInterface(credential.getProjectId(), name);
             List<NetworkInterface> networkInterfaces = Arrays.asList(networkInterface);
 
             for (int i = resourceByType.size(); i < resourceByType.size() + instanceCount; i++) {
                 String forName = gccStackUtil.getVmName(stack.getName(), i);
-                Disk disk = gccStackUtil.buildDisk(compute, stack, gccTemplate.getProjectId(), gccTemplate.getGccZone(), forName, SIZE);
+                Disk disk = gccStackUtil.buildDisk(compute, stack, credential.getProjectId(), gccTemplate.getGccZone(), forName, SIZE);
                 List<AttachedDisk> attachedDisks = gccStackUtil.buildAttachedDisks(forName, disk, compute, stack);
                 Instance instance = gccStackUtil.buildInstance(compute, stack, networkInterfaces, attachedDisks, forName, userData);
                 resourceSet.add(new Resource(ResourceType.DISK, forName, stack));
                 for (AttachedDisk attachedDisk : attachedDisks) {
-                    resourceSet.add(new Resource(ResourceType.ATTACHED_DISK, attachedDisk.getDeviceName(), stack));
+                    if (!attachedDisk.getDeviceName().equals(forName)) {
+                        resourceSet.add(new Resource(ResourceType.ATTACHED_DISK, attachedDisk.getDeviceName(), stack));
+                    }
                 }
                 resourceSet.add(new Resource(ResourceType.VIRTUAL_MACHINE, forName, stack));
             }

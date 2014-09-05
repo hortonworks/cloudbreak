@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.api.services.compute.Compute;
+import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.domain.GccTemplate;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.AddInstancesFailedException;
@@ -23,11 +24,12 @@ public class GccDiskCheckerStatus implements StatusCheckerTask<GccDiskReadyPolle
                 gccDiskReadyPollerObject.getName(),
                 gccDiskReadyPollerObject.getStack().getId());
         GccTemplate gccTemplate = (GccTemplate) gccDiskReadyPollerObject.getStack().getTemplate();
+        GccCredential credential = (GccCredential) gccDiskReadyPollerObject.getStack().getCredential();
         try {
             Compute.Disks.Get getDisks = gccDiskReadyPollerObject
                     .getCompute()
                     .disks()
-                    .get(gccTemplate.getProjectId(), gccTemplate.getGccZone().getValue(), gccDiskReadyPollerObject.getName());
+                    .get(credential.getProjectId(), gccTemplate.getGccZone().getValue(), gccDiskReadyPollerObject.getName());
             String status = getDisks.execute().getStatus();
             return READY.equals(status) ? true : false;
         } catch (NullPointerException | IOException e) {

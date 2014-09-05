@@ -48,9 +48,10 @@ public class GccConnector implements CloudPlatformConnector {
         DetailedGccStackDescription detailedGccStackDescription = new DetailedGccStackDescription();
         Compute compute = gccStackUtil.buildCompute((GccCredential) credential, stack);
         GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
+        GccCredential gccCredential = (GccCredential) stack.getCredential();
         for (Resource resource : stack.getResourcesByType(ResourceType.VIRTUAL_MACHINE)) {
             try {
-                Compute.Instances.Get getVm = compute.instances().get(gccTemplate.getProjectId(), gccTemplate.getGccZone().getValue(),
+                Compute.Instances.Get getVm = compute.instances().get(gccCredential.getProjectId(), gccTemplate.getGccZone().getValue(),
                         resource.getResourceName());
                 detailedGccStackDescription.getVirtualMachines().add(getVm.execute().toPrettyString());
             } catch (IOException e) {
@@ -60,7 +61,7 @@ public class GccConnector implements CloudPlatformConnector {
         }
         for (Resource resource : stack.getResourcesByType(ResourceType.VIRTUAL_MACHINE)) {
             try {
-                Compute.Disks.Get getDisk = compute.disks().get(gccTemplate.getProjectId(), gccTemplate.getGccZone().getValue(), resource.getResourceName());
+                Compute.Disks.Get getDisk = compute.disks().get(gccCredential.getProjectId(), gccTemplate.getGccZone().getValue(), resource.getResourceName());
                 detailedGccStackDescription.getDisks().add(getDisk.execute().toPrettyString());
             } catch (IOException e) {
                 detailedGccStackDescription.getVirtualMachines().add(jsonHelper.createJsonFromString(String.format("{\"Disk\": {%s}}", ERROR)).toString());
@@ -68,7 +69,7 @@ public class GccConnector implements CloudPlatformConnector {
         }
         for (Resource resource : stack.getResourcesByType(ResourceType.NETWORK)) {
             try {
-                Compute.Networks.Get getNetwork = compute.networks().get(gccTemplate.getProjectId(), resource.getResourceName());
+                Compute.Networks.Get getNetwork = compute.networks().get(gccCredential.getProjectId(), resource.getResourceName());
                 detailedGccStackDescription.setNetwork(jsonHelper.createJsonFromString(getNetwork.execute().toPrettyString()));
             } catch (IOException e) {
                 detailedGccStackDescription.getVirtualMachines().add(jsonHelper.createJsonFromString(String.format("{\"Network\": {%s}}", ERROR)).toString());

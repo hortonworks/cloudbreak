@@ -9,8 +9,7 @@ public enum GccTemplateParam implements TemplateParam {
 
     ZONE("gccZone", true, GccZone.class, Optional.<String>absent()),
     IMAGETYPE("gccImageType", true, GccImageType.class, Optional.<String>absent()),
-    INSTANCETYPE("gccInstanceType", true, GccInstanceType.class, Optional.<String>absent()),
-    PROJECTID("projectId", true, String.class, Optional.<String>absent());
+    INSTANCETYPE("gccInstanceType", true, GccInstanceType.class, Optional.<String>absent());
 
     private final String paramName;
     private final Class clazz;

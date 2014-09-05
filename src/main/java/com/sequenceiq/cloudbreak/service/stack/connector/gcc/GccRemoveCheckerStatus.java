@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.domain.GccTemplate;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.AddInstancesFailedException;
@@ -23,9 +24,10 @@ public class GccRemoveCheckerStatus implements StatusCheckerTask<GccRemoveReadyP
         LOGGER.info("Checking status of remove '{}' on '{}' stack.",
                 gccRemoveReadyPollerObject.getName(), gccRemoveReadyPollerObject.getStack().getId());
         GccTemplate gccTemplate = (GccTemplate) gccRemoveReadyPollerObject.getStack().getTemplate();
+        GccCredential gccCredential = (GccCredential) gccRemoveReadyPollerObject.getStack().getCredential();
         try {
             Integer progress = gccRemoveReadyPollerObject.getCompute().globalOperations()
-                    .get(gccTemplate.getProjectId(), gccRemoveReadyPollerObject.getOperation().getName()).execute().getProgress();
+                    .get(gccCredential.getProjectId(), gccRemoveReadyPollerObject.getOperation().getName()).execute().getProgress();
             return (progress.intValue() != FINISHED) ? false : true;
         } catch (GoogleJsonResponseException ex) {
             return exceptionHandler(ex, gccRemoveReadyPollerObject.getName());
