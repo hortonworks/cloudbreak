@@ -84,28 +84,28 @@ public class GccConnector implements CloudPlatformConnector {
         GccCredential gccCredential = (GccCredential) stack.getCredential();
         for (Resource resource : stack.getResourcesByType(ResourceType.VIRTUAL_MACHINE)) {
             try {
-                gccStackUtil.removeInstance(compute, gccTemplate, gccCredential, resource.getResourceName());
+                gccStackUtil.removeInstance(compute, stack, resource.getResourceName());
             } catch (IOException e) {
                 throw new InternalServerException(e.getMessage());
             }
         }
         for (Resource resource : stack.getResourcesByType(ResourceType.DISK)) {
             try {
-                gccStackUtil.removeDisk(compute, gccTemplate, gccCredential, resource.getResourceName());
+                gccStackUtil.removeDisk(compute, stack, resource.getResourceName());
             } catch (IOException e) {
                 throw new InternalServerException(e.getMessage());
             }
         }
         for (Resource resource : stack.getResourcesByType(ResourceType.ATTACHED_DISK)) {
             try {
-                gccStackUtil.removeDisk(compute, gccTemplate, gccCredential, resource.getResourceName());
+                gccStackUtil.removeDisk(compute, stack, resource.getResourceName());
             } catch (IOException e) {
                 throw new InternalServerException(e.getMessage());
             }
         }
         for (Resource resource : stack.getResourcesByType(ResourceType.NETWORK)) {
             try {
-                gccStackUtil.removeNetwork(compute, gccTemplate, resource.getResourceName());
+                gccStackUtil.removeNetwork(compute, stack, resource.getResourceName());
             } catch (IOException e) {
                 throw new InternalServerException(e.getMessage());
             }

@@ -14,6 +14,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.api.client.auth.oauth2.Credential;
@@ -23,7 +24,6 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
@@ -47,6 +47,7 @@ import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.domain.GccTemplate;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.service.PollingService;
 
 @Component
 public class GccStackUtil {
@@ -54,11 +55,27 @@ public class GccStackUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(GccStackUtil.class);
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
     private static final List<String> SCOPES = Arrays.asList(ComputeScopes.COMPUTE, StorageScopes.DEVSTORAGE_FULL_CONTROL);
-    private static final String READY = "READY";
-    private static final String RUNNING = "RUNNING";
-    private static final int WAIT_TIME = 1000;
-    private static final int FINISHED = 100;
-    private static final int NOT_FOUND = 404;
+
+    private static final int MAX_POLLING_ATTEMPTS = 10;
+    private static final int POLLING_INTERVAL = 2000;
+
+    @Autowired
+    private GccInstanceCheckerStatus gccInstanceReadyCheckerStatus;
+
+    @Autowired
+    private PollingService<GccInstanceReadyPollerObject> gccInstanceReadyPollerObjectPollingService;
+
+    @Autowired
+    private GccDiskCheckerStatus gccDiskCheckerStatus;
+
+    @Autowired
+    private PollingService<GccDiskReadyPollerObject> gccDiskReadyPollerObjectPollingService;
+
+    @Autowired
+    private GccRemoveCheckerStatus gccRemoveCheckerStatus;
+
+    @Autowired
+    private PollingService<GccRemoveReadyPollerObject> gccRemoveReadyPollerObjectPollingService;
 
     public Compute buildCompute(GccCredential gccCredential, Stack stack) {
         try {
@@ -87,8 +104,10 @@ public class GccStackUtil {
         return null;
     }
 
-    public Instance buildInstance(Compute compute, GccTemplate gccTemplate, GccCredential credential,
+    public Instance buildInstance(Compute compute, Stack stack,
             List<NetworkInterface> networkInterfaces, List<AttachedDisk> attachedDisks, String forName, String userData) throws IOException {
+        GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
+        GccCredential credential = (GccCredential) stack.getCredential();
         Instance instance = new Instance();
         instance.setMachineType(buildMachineType(gccTemplate.getProjectId(), gccTemplate.getGccZone(), gccTemplate.getGccInstanceType()));
         instance.setName(forName);
@@ -113,58 +132,32 @@ public class GccStackUtil {
 
         ins.setPrettyPrint(Boolean.TRUE);
         ins.execute();
-        try {
-            Thread.sleep(WAIT_TIME);
-            try {
-                Compute.Instances.Get getInstances = compute.instances().get(gccTemplate.getProjectId(), gccTemplate.getGccZone().getValue(), forName);
-                while (!getInstances.execute().getStatus().equals(RUNNING)) {
-                    Thread.sleep(WAIT_TIME);
-                }
-            } catch (NullPointerException e) {
-                e.printStackTrace();
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        GccInstanceReadyPollerObject gccInstanceReady = new GccInstanceReadyPollerObject(compute, stack, forName);
+        gccInstanceReadyPollerObjectPollingService.pollWithTimeout(gccInstanceReadyCheckerStatus, gccInstanceReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
         return instance;
     }
 
-    public void removeInstance(Compute compute, GccTemplate gccTemplate, GccCredential credential, String name) throws IOException {
-        try {
-            Operation execute = compute.instances().delete(gccTemplate.getProjectId(), gccTemplate.getGccZone().getValue(), name).execute();
-            Integer progress = compute.globalOperations().get(gccTemplate.getProjectId(), execute.getName()).execute().getProgress();
-            while (progress.intValue() != FINISHED) {
-                progress = compute.globalOperations().get(gccTemplate.getProjectId(), execute.getName()).execute().getProgress();
-            }
-        } catch (GoogleJsonResponseException ex) {
-            exceptionHandler(ex, name);
-        }
+    public void removeInstance(Compute compute, Stack stack, String name) throws IOException {
+        GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
+        GccCredential gccCredential = (GccCredential) stack.getCredential();
+        Operation execute = compute.instances().delete(gccTemplate.getProjectId(), gccTemplate.getGccZone().getValue(), name).execute();
+        GccRemoveReadyPollerObject gccRemoveReady = new GccRemoveReadyPollerObject(compute, execute, stack, name);
+        gccRemoveReadyPollerObjectPollingService.pollWithTimeout(gccRemoveCheckerStatus, gccRemoveReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
     }
 
 
-
-    public void removeDisk(Compute compute, GccTemplate gccTemplate, GccCredential credential, String name) throws IOException {
-        try {
-            Operation execute = compute.disks().delete(gccTemplate.getProjectId(), gccTemplate.getGccZone().getValue(), name).execute();
-            Integer progress = compute.globalOperations().get(gccTemplate.getProjectId(), execute.getName()).execute().getProgress();
-            while (progress.intValue() != FINISHED) {
-                progress = compute.globalOperations().get(gccTemplate.getProjectId(), execute.getName()).execute().getProgress();
-            }
-        } catch (GoogleJsonResponseException ex) {
-            exceptionHandler(ex, name);
-        }
+    public void removeDisk(Compute compute, Stack stack, String name) throws IOException {
+        GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
+        Operation execute = compute.disks().delete(gccTemplate.getProjectId(), gccTemplate.getGccZone().getValue(), name).execute();
+        GccRemoveReadyPollerObject gccRemoveReady = new GccRemoveReadyPollerObject(compute, execute, stack, name);
+        gccRemoveReadyPollerObjectPollingService.pollWithTimeout(gccRemoveCheckerStatus, gccRemoveReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
     }
 
-    public void removeNetwork(Compute compute, GccTemplate gccTemplate, String name) throws IOException {
-        try {
-            Operation execute = compute.networks().delete(gccTemplate.getProjectId(), name).execute();
-            Integer progress = compute.globalOperations().get(gccTemplate.getProjectId(), execute.getName()).execute().getProgress();
-            while (progress.intValue() != FINISHED) {
-                progress = compute.globalOperations().get(gccTemplate.getProjectId(), execute.getName()).execute().getProgress();
-            }
-        } catch (GoogleJsonResponseException ex) {
-            exceptionHandler(ex, name);
-        }
+    public void removeNetwork(Compute compute, Stack stack, String name) throws IOException {
+        GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
+        Operation execute = compute.networks().delete(gccTemplate.getProjectId(), name).execute();
+        GccRemoveReadyPollerObject gccRemoveReady = new GccRemoveReadyPollerObject(compute, execute, stack, name);
+        gccRemoveReadyPollerObjectPollingService.pollWithTimeout(gccRemoveCheckerStatus, gccRemoveReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
     }
 
     public Storage buildStorage(GccCredential gccCredential, Stack stack) {
@@ -291,7 +284,8 @@ public class GccStackUtil {
         firewallInsert.execute();
     }
 
-    public List<AttachedDisk> buildAttachedDisks(String name, Disk disk, Compute compute, GccTemplate gccTemplate) throws IOException {
+    public List<AttachedDisk> buildAttachedDisks(String name, Disk disk, Compute compute, Stack stack) throws IOException {
+        GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
         List<AttachedDisk> listOfDisks = new ArrayList<>();
 
         AttachedDisk diskToInsert = new AttachedDisk();
@@ -305,7 +299,8 @@ public class GccStackUtil {
 
         for (int i = 0; i < gccTemplate.getVolumeCount(); i++) {
             String value = name + i;
-            Disk disk1 = buildRawDisk(compute, gccTemplate.getProjectId(), gccTemplate.getGccZone(), value, Long.parseLong(gccTemplate.getVolumeSize().toString()));
+            Disk disk1 = buildRawDisk(compute, stack, gccTemplate.getProjectId(),
+                    gccTemplate.getGccZone(), value, Long.parseLong(gccTemplate.getVolumeSize().toString()));
             AttachedDisk diskToInsert1 = new AttachedDisk();
             diskToInsert1.setBoot(false);
             diskToInsert1.setType(GccDiskType.PERSISTENT.getValue());
@@ -318,58 +313,29 @@ public class GccStackUtil {
         return listOfDisks;
     }
 
-    public Disk buildDisk(Compute compute, String projectId, GccZone zone, String name, Long size) throws IOException {
+    public Disk buildDisk(Compute compute, Stack stack, String projectId, GccZone zone, String name, Long size) throws IOException {
         Disk disk = new Disk();
         disk.setSizeGb(size.longValue());
         disk.setName(name);
         Compute.Disks.Insert insDisk = compute.disks().insert(projectId, zone.getValue(), disk);
         insDisk.setSourceImage(GccImageType.UBUNTU_HACK.getAmbariUbuntu(projectId));
         insDisk.execute();
-        try {
-            Thread.sleep(WAIT_TIME);
-            try {
-                Compute.Disks.Get getDisk = compute.disks().get(projectId, zone.getValue(), name);
-                while (!getDisk.execute().getStatus().equals(READY)) {
-                    Thread.sleep(WAIT_TIME);
-                }
-            } catch (NullPointerException e) {
-                e.printStackTrace();
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        GccDiskReadyPollerObject gccDiskReady = new GccDiskReadyPollerObject(compute, stack, name);
+        gccDiskReadyPollerObjectPollingService.pollWithTimeout(gccDiskCheckerStatus, gccDiskReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
         return disk;
     }
 
-    public Disk buildRawDisk(Compute compute, String projectId, GccZone zone, String name, Long size) throws IOException {
+    public Disk buildRawDisk(Compute compute, Stack stack, String projectId, GccZone zone, String name, Long size) throws IOException {
         Disk disk = new Disk();
         disk.setSizeGb(size.longValue());
         disk.setName(name);
         Compute.Disks.Insert insDisk = compute.disks().insert(projectId, zone.getValue(), disk);
         insDisk.execute();
-        try {
-            Thread.sleep(WAIT_TIME);
-            try {
-                Compute.Disks.Get getDisk = compute.disks().get(projectId, zone.getValue(), name);
-                while (!getDisk.execute().getStatus().equals(READY)) {
-                    Thread.sleep(WAIT_TIME);
-                }
-            } catch (NullPointerException e) {
-                e.printStackTrace();
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        GccDiskReadyPollerObject gccDiskReady = new GccDiskReadyPollerObject(compute, stack, name);
+        gccDiskReadyPollerObjectPollingService.pollWithTimeout(gccDiskCheckerStatus, gccDiskReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
         return disk;
     }
 
-    private void exceptionHandler(GoogleJsonResponseException ex, String name) throws GoogleJsonResponseException {
-        if (ex.getDetails().get("code").equals(NOT_FOUND)) {
-            LOGGER.info(String.format("Resource was delete with name: %s", name));
-        } else {
-            throw ex;
-        }
-    }
 
     public String getVmName(String stackName, int i) {
         return String.format("%s-%s", stackName, i);

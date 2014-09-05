@@ -20,7 +20,10 @@
     <suppress checks="ParameterNumber" files="AzureProvisioner.java"/>
     <suppress checks="ParameterNumber" files="CloudbreakUsageController.java"/>
     <suppress checks="IllegalCatch" files="CredentialController.java"/>
-    
+    <suppress checks="IllegalCatch" files="GccDiskCheckerStatus.java"/>
+    <suppress checks="IllegalCatch" files="GccInstanceCheckerStatus.java"/>
+    <suppress checks="IllegalCatch" files="GccRemoveCheckerStatus.java"/>
+
     <!-- -->
 
     <!-- suppress everything in generated code -->

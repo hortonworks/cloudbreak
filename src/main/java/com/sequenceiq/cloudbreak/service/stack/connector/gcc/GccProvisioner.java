@@ -71,9 +71,9 @@ public class GccProvisioner implements Provisioner {
             resourceSet.add(new Resource(ResourceType.FIREWALL, stack.getName(), stack));
             for (int i = 0; i < stack.getNodeCount(); i++) {
                 String forName = gccStackUtil.getVmName(stack.getName(), i);
-                Disk disk = gccStackUtil.buildDisk(compute, gccTemplate.getProjectId(), gccTemplate.getGccZone(), forName, SIZE);
-                List<AttachedDisk> attachedDisks = gccStackUtil.buildAttachedDisks(forName, disk, compute, gccTemplate);
-                Instance instance = gccStackUtil.buildInstance(compute, gccTemplate, credential, networkInterfaces, attachedDisks, forName, userData);
+                Disk disk = gccStackUtil.buildDisk(compute, stack, gccTemplate.getProjectId(), gccTemplate.getGccZone(), forName, SIZE);
+                List<AttachedDisk> attachedDisks = gccStackUtil.buildAttachedDisks(forName, disk, compute, stack);
+                Instance instance = gccStackUtil.buildInstance(compute, stack, networkInterfaces, attachedDisks, forName, userData);
 
                 resourceSet.add(new Resource(ResourceType.DISK, forName, stack));
                 for (AttachedDisk attachedDisk : attachedDisks) {
@@ -105,9 +105,9 @@ public class GccProvisioner implements Provisioner {
 
             for (int i = resourceByType.size(); i < resourceByType.size() + instanceCount; i++) {
                 String forName = gccStackUtil.getVmName(stack.getName(), i);
-                Disk disk = gccStackUtil.buildDisk(compute, gccTemplate.getProjectId(), gccTemplate.getGccZone(), forName, SIZE);
-                List<AttachedDisk> attachedDisks = gccStackUtil.buildAttachedDisks(forName, disk, compute, gccTemplate);
-                Instance instance = gccStackUtil.buildInstance(compute, gccTemplate, credential, networkInterfaces, attachedDisks, forName, userData);
+                Disk disk = gccStackUtil.buildDisk(compute, stack, gccTemplate.getProjectId(), gccTemplate.getGccZone(), forName, SIZE);
+                List<AttachedDisk> attachedDisks = gccStackUtil.buildAttachedDisks(forName, disk, compute, stack);
+                Instance instance = gccStackUtil.buildInstance(compute, stack, networkInterfaces, attachedDisks, forName, userData);
                 resourceSet.add(new Resource(ResourceType.DISK, forName, stack));
                 for (AttachedDisk attachedDisk : attachedDisks) {
                     resourceSet.add(new Resource(ResourceType.ATTACHED_DISK, attachedDisk.getDeviceName(), stack));
@@ -129,13 +129,13 @@ public class GccProvisioner implements Provisioner {
         Compute compute = gccStackUtil.buildCompute(credential, stack);
         for (String instanceId : instanceIds) {
             try {
-                gccStackUtil.removeInstance(compute, gccTemplate, credential, instanceId);
+                gccStackUtil.removeInstance(compute, stack, instanceId);
                 for (Resource resource : stack.getResourcesByType(ResourceType.ATTACHED_DISK)) {
                     if (resource.getResourceName().startsWith(instanceId)) {
-                        gccStackUtil.removeDisk(compute, gccTemplate, credential, resource.getResourceName());
+                        gccStackUtil.removeDisk(compute, stack, resource.getResourceName());
                     }
                 }
-                gccStackUtil.removeDisk(compute, gccTemplate, credential, instanceId);
+                gccStackUtil.removeDisk(compute, stack, instanceId);
             } catch (Exception ex) {
                 throw new InternalServerException(ex.getMessage());
             }

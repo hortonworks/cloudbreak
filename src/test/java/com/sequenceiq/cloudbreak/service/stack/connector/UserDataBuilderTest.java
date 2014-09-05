@@ -44,4 +44,13 @@ public class UserDataBuilderTest {
         Assert.assertEquals(expectedScript, userDataBuilder.build(CloudPlatform.AZURE, "hash123", map));
     }
 
+    @Test
+    public void testBuildUserDataGcc() throws IOException {
+        String expectedScript = FileReaderUtils.readFileFromClasspath("gcc-init-test-expected.sh");
+        Map<String, String> map = new HashMap<>();
+        map.put("NODE_PREFIX", "testamb");
+        map.put("MYDOMAIN", "test.kom");
+        Assert.assertEquals(expectedScript, userDataBuilder.build(CloudPlatform.GCC, "hash123", map));
+    }
+
 }
