@@ -1,17 +1,26 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import com.sequenceiq.cloudbreak.controller.json.CredentialJson;
-import com.sequenceiq.cloudbreak.controller.validation.RequiredAzureCredentialParam;
-import com.sequenceiq.cloudbreak.domain.AzureCredential;
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.any;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
+import com.sequenceiq.cloudbreak.controller.json.CredentialJson;
+import com.sequenceiq.cloudbreak.controller.validation.RequiredAzureCredentialParam;
+import com.sequenceiq.cloudbreak.domain.AzureCredential;
+import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.service.credential.azure.AzureCredentialInitializer;
+
+@RunWith(MockitoJUnitRunner.class)
 public class AzureCredentialConverterTest {
 
     private static final String DUMMY_JKS = "dummyJks";
@@ -19,6 +28,10 @@ public class AzureCredentialConverterTest {
     private static final String DUMMY_SUBSCRIPTION_ID = "dummySubscriptionId";
     private static final String DUMMY_DESCRIPTION = "dummyDescription";
 
+    @Mock
+    private AzureCredentialInitializer azureCredentialInitializer;
+
+    @InjectMocks
     private AzureCredentialConverter underTest;
 
     private AzureCredential azureCredential;
@@ -27,7 +40,6 @@ public class AzureCredentialConverterTest {
 
     @Before
     public void setUp() {
-        underTest = new AzureCredentialConverter();
         azureCredential = createAzureCredential();
         credentialJson = createCredentialJson();
     }
@@ -48,6 +60,7 @@ public class AzureCredentialConverterTest {
     @Test
     public void testConvertAzureCredentialJsonToEntity() {
         // GIVEN
+        given(azureCredentialInitializer.init(any(AzureCredential.class))).willReturn(createAzureCredential());
         // WHEN
         AzureCredential result = underTest.convert(credentialJson);
         // THEN
