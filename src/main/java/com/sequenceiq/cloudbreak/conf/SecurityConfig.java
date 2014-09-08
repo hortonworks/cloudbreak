@@ -1,56 +1,145 @@
 package com.sequenceiq.cloudbreak.conf;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.codec.Base64;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
+import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails;
 import org.springframework.security.oauth2.provider.token.RemoteTokenServices;
+import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import com.sequenceiq.cloudbreak.domain.CbUser;
 
 @Configuration
-@EnableResourceServer
-public class SecurityConfig extends ResourceServerConfigurerAdapter {
+public class SecurityConfig {
 
-    @Autowired
-    private UserDetailsService userDetailsService;
+    @Configuration
+    @EnableResourceServer
+    protected static class ResourceServerConfiguration extends ResourceServerConfigurerAdapter {
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+        @Bean
+        RemoteTokenServices remoteTokenServices() {
+            RemoteTokenServices rts = new RemoteTokenServices();
+            rts.setClientId("cloudbreak");
+            rts.setClientSecret("cloudbreaksecret");
+            rts.setCheckTokenEndpointUrl("http://172.20.0.27:8080/check_token");
+            return rts;
+        }
 
-    @Bean
-    RemoteTokenServices remoteTokenServices() {
-        RemoteTokenServices rts = new RemoteTokenServices();
-        rts.setClientId("cloudbreak");
-        rts.setClientSecret("cloudbreaksecret");
-        rts.setCheckTokenEndpointUrl("http://172.20.0.21:8080/check_token");
-        return rts;
+        @Override
+        public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
+            resources.resourceId("cloudbreak");
+            resources.tokenServices(remoteTokenServices());
+        }
+
+        @Override
+        public void configure(HttpSecurity http) throws Exception {
+            http.csrf().disable()
+                    .headers()
+                    .contentTypeOptions()
+                    .and()
+                    .addFilterAfter(new ScimAccountGroupReaderFilter(), AbstractPreAuthenticatedProcessingFilter.class)
+                    .authorizeRequests()
+                    .antMatchers("/user/blueprints").access("#oauth2.hasScope('cloudbreak.blueprints')")
+                    .antMatchers("/account/blueprints").access("#oauth2.hasScope('cloudbreak.blueprints')")
+                    .antMatchers("/user/templates").access("#oauth2.hasScope('cloudbreak.templates')")
+                    .antMatchers("/account/templates").access("#oauth2.hasScope('cloudbreak.templates')")
+                    .antMatchers("/notification/**").permitAll()
+                    .antMatchers("/sns/**").permitAll()
+                    .antMatchers(HttpMethod.POST, "/users/**").permitAll()
+                    .antMatchers(HttpMethod.GET, "/users/confirm/**").permitAll()
+                    .antMatchers(HttpMethod.POST, "/password/reset/**").permitAll()
+                    .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                    .antMatchers(HttpMethod.GET, "/stacks/metadata/**").permitAll();
+        }
     }
 
-    @Override
-    public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
-        resources.resourceId("cloudbreak");
-        resources.tokenServices(remoteTokenServices());
+    private static class ScimAccountGroupReaderFilter extends OncePerRequestFilter {
+
+        @SuppressWarnings("unchecked")
+        @Override
+        protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException,
+                IOException {
+            String username = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            OAuth2AuthenticationDetails authDetails = (OAuth2AuthenticationDetails) SecurityContextHolder.getContext().getAuthentication().getDetails();
+
+            RestTemplate restTemplate = new RestTemplate();
+
+            HttpHeaders userInfoHeaders = new HttpHeaders();
+            userInfoHeaders.set("Authorization", "Bearer " + authDetails.getTokenValue());
+
+            Map<String, String> userInfoResponse = restTemplate.exchange(
+                    "http://172.20.0.27:8080/userinfo",
+                    HttpMethod.GET,
+                    new HttpEntity<>(userInfoHeaders),
+                    Map.class).getBody();
+
+            HttpHeaders tokenRequestHeaders = new HttpHeaders();
+            tokenRequestHeaders.set("Authorization", getAuthorizationHeader("cloudbreak", "cloudbreaksecret"));
+
+            Map<String, String> tokenResponse = restTemplate.exchange(
+                    "http://172.20.0.27:8080/oauth/token?grant_type=client_credentials",
+                    HttpMethod.POST,
+                    new HttpEntity<>(tokenRequestHeaders),
+                    Map.class).getBody();
+
+            HttpHeaders scimRequestHeaders = new HttpHeaders();
+            scimRequestHeaders.set("Authorization", "Bearer " + tokenResponse.get("access_token"));
+
+            String scimResponse = restTemplate.exchange(
+                    "http://172.20.0.27:8080/Users/" + userInfoResponse.get("user_id"),
+                    HttpMethod.GET,
+                    new HttpEntity<>(scimRequestHeaders),
+                    String.class).getBody();
+
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode root = mapper.readTree(scimResponse);
+            List<String> roles = new ArrayList<>();
+            for (Iterator<JsonNode> iterator = root.get("groups").getElements(); iterator.hasNext();) {
+                JsonNode node = iterator.next();
+                String group = node.get("display").asText();
+                if (group.startsWith("cloudbreak.account")) {
+                    roles.add(group);
+                }
+            }
+
+            CbUser user = new CbUser(username, roles);
+            request.setAttribute("user", user);
+
+            filterChain.doFilter(request, response);
+        }
+
+        private String getAuthorizationHeader(String clientId, String clientSecret) {
+            String creds = String.format("%s:%s", clientId, clientSecret);
+            try {
+                return "Basic " + new String(Base64.encode(creds.getBytes("UTF-8")));
+            } catch (UnsupportedEncodingException e) {
+                throw new IllegalStateException("Could not convert String");
+            }
+        }
     }
 
-    @Override
-    public void configure(HttpSecurity http) throws Exception {
-        http.csrf().disable()
-                .headers()
-                .contentTypeOptions()
-                .and()
-                .authorizeRequests()
-                .antMatchers("/templates").access("#oauth2.hasScope('cloudbreak.read')")
-                .antMatchers("/notification/**").permitAll()
-                .antMatchers("/sns/**").permitAll()
-                .antMatchers(HttpMethod.POST, "/users/**").permitAll()
-                .antMatchers(HttpMethod.GET, "/users/confirm/**").permitAll()
-                .antMatchers(HttpMethod.POST, "/password/reset/**").permitAll()
-                .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .antMatchers(HttpMethod.GET, "/stacks/metadata/**").permitAll();
-    }
 }
