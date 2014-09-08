@@ -100,7 +100,7 @@ public class SnsMessageHandler {
         } else if (!stack.isStackCompleted() && !Status.CREATE_FAILED.equals(stack.getStatus())) {
             LOGGER.info("CloudFormation stack creation failed. [Id: '{}']", stack.getId());
             StackOperationFailure stackCreationFailure = new StackOperationFailure(stack.getId(), "Error while creating CloudFormation stack: "
-                    + cfMessage.get("ResourceStatusReason"), stack.getResources());
+                    + cfMessage.get("ResourceStatusReason"));
             LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_CREATE_FAILED_EVENT, stack.getId());
             reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(stackCreationFailure));
         } else {

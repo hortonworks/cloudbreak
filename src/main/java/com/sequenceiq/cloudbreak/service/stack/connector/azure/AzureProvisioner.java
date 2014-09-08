@@ -93,34 +93,39 @@ public class AzureProvisioner implements Provisioner {
 
     @Override
     public void buildStack(Stack stack, String userData, Map<String, Object> setupProperties) {
-        AzureTemplate azureTemplate = (AzureTemplate) stack.getTemplate();
-        Credential credential = (Credential) setupProperties.get(CREDENTIAL);
-        String emailAsFolder = (String) setupProperties.get(EMAILASFOLDER);
-
-        String filePath = AzureCertificateService.getUserJksFileName(credential, emailAsFolder);
-        AzureClient azureClient = azureStackUtil.createAzureClient(credential, filePath);
-        retryingStackUpdater.updateStackStatus(stack.getId(), Status.CREATE_IN_PROGRESS);
-        String name = stack.getName().replaceAll("\\s+", "") + String.valueOf(new Date().getTime());
-        String commonName = ((AzureCredential) credential).getCommonName();
-        createAffinityGroup(stack, azureClient, azureTemplate, commonName);
-        createStorageAccount(stack, azureClient, azureTemplate, commonName);
-        createVirtualNetwork(azureClient, name, commonName);
         Set<Resource> resourceSet = new HashSet<>();
-        resourceSet.add(new Resource(ResourceType.AFFINITY_GROUP, commonName, stack));
-        resourceSet.add(new Resource(ResourceType.STORAGE, commonName, stack));
-        resourceSet.add(new Resource(ResourceType.NETWORK, name, stack));
-        for (int i = 0; i < stack.getNodeCount(); i++) {
-            String vmName = azureStackUtil.getVmName(name, i) + String.valueOf(new Date().getTime());
-            createCloudService(azureClient, azureTemplate, vmName, commonName);
-            createServiceCertificate(azureClient, azureTemplate, credential, vmName, emailAsFolder);
-            String internalIp = "172.16.0." + (i + VALID_IP_RANGE_START);
-            createVirtualMachine(azureClient, azureTemplate, credential, name, vmName, commonName, userData, internalIp);
-            resourceSet.add(new Resource(ResourceType.VIRTUAL_MACHINE, vmName, stack));
-            resourceSet.add(new Resource(ResourceType.CLOUD_SERVICE, vmName, stack));
-            resourceSet.add(new Resource(ResourceType.BLOB, vmName, stack));
+        try {
+            AzureTemplate azureTemplate = (AzureTemplate) stack.getTemplate();
+            Credential credential = (Credential) setupProperties.get(CREDENTIAL);
+            String emailAsFolder = (String) setupProperties.get(EMAILASFOLDER);
+
+            String filePath = AzureCertificateService.getUserJksFileName(credential, emailAsFolder);
+            AzureClient azureClient = azureStackUtil.createAzureClient(credential, filePath);
+            retryingStackUpdater.updateStackStatus(stack.getId(), Status.CREATE_IN_PROGRESS);
+            String name = stack.getName().replaceAll("\\s+", "") + String.valueOf(new Date().getTime());
+            String commonName = ((AzureCredential) credential).getCommonName();
+            createAffinityGroup(stack, azureClient, azureTemplate, commonName);
+            resourceSet.add(new Resource(ResourceType.AFFINITY_GROUP, commonName, stack));
+            createStorageAccount(stack, azureClient, azureTemplate, commonName);
+            resourceSet.add(new Resource(ResourceType.STORAGE, commonName, stack));
+            createVirtualNetwork(azureClient, name, commonName);
+            resourceSet.add(new Resource(ResourceType.NETWORK, name, stack));
+            for (int i = 0; i < stack.getNodeCount(); i++) {
+                String vmName = azureStackUtil.getVmName(name, i) + String.valueOf(new Date().getTime());
+                createCloudService(azureClient, azureTemplate, vmName, commonName);
+                resourceSet.add(new Resource(ResourceType.CLOUD_SERVICE, vmName, stack));
+                createServiceCertificate(azureClient, azureTemplate, credential, vmName, emailAsFolder);
+                String internalIp = "172.16.0." + (i + VALID_IP_RANGE_START);
+                createVirtualMachine(azureClient, azureTemplate, credential, name, vmName, commonName, userData, internalIp);
+                resourceSet.add(new Resource(ResourceType.VIRTUAL_MACHINE, vmName, stack));
+                resourceSet.add(new Resource(ResourceType.BLOB, vmName, stack));
+            }
+            LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_COMPLETE_EVENT, stack.getId());
+            reactor.notify(ReactorConfig.PROVISION_COMPLETE_EVENT, Event.wrap(new ProvisionComplete(CloudPlatform.AZURE, stack.getId(), resourceSet)));
+        } catch (Exception e) {
+            retryingStackUpdater.updateStackResources(stack.getId(), resourceSet);
+            throw new StackCreationFailureException(e.getMessage(), e);
         }
-        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_COMPLETE_EVENT, stack.getId());
-        reactor.notify(ReactorConfig.PROVISION_COMPLETE_EVENT, Event.wrap(new ProvisionComplete(CloudPlatform.AZURE, stack.getId(), resourceSet)));
     }
 
     @Override
@@ -141,11 +146,11 @@ public class AzureProvisioner implements Provisioner {
         for (int i = resourceByType.size(); i < resourceByType.size() + instanceCount; i++) {
             String vmName = azureStackUtil.getVmName(name, i) + String.valueOf(new Date().getTime());
             createCloudService(azureClient, azureTemplate, vmName, commonName);
+            resourceSet.add(new Resource(ResourceType.CLOUD_SERVICE, vmName, stack));
             createServiceCertificate(azureClient, azureTemplate, credential, vmName, emailAsFolder);
             String internalIp = "172.16.0." + (i + VALID_IP_RANGE_START);
             createVirtualMachine(azureClient, azureTemplate, credential, name, vmName, commonName, userData, internalIp);
             resourceSet.add(new Resource(ResourceType.VIRTUAL_MACHINE, vmName, stack));
-            resourceSet.add(new Resource(ResourceType.CLOUD_SERVICE, vmName, stack));
             resourceSet.add(new Resource(ResourceType.BLOB, vmName, stack));
         }
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT, stack.getId());

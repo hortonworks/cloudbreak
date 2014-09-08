@@ -12,10 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import reactor.core.Reactor;
-import reactor.event.Event;
-import reactor.function.Consumer;
-
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
@@ -27,6 +23,10 @@ import com.sequenceiq.cloudbreak.service.stack.connector.Provisioner;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
 import com.sequenceiq.cloudbreak.service.stack.event.StackOperationFailure;
 import com.sequenceiq.cloudbreak.service.stack.event.UpdateInstancesRequest;
+
+import reactor.core.Reactor;
+import reactor.event.Event;
+import reactor.function.Consumer;
 
 @Component
 public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInstancesRequest>> {
@@ -86,7 +86,6 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
 
     private void notifyUpdateFailed(Long stackId, String detailedMessage) {
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_UPDATE_FAILED_EVENT, stackId);
-        reactor.notify(ReactorConfig.STACK_UPDATE_FAILED_EVENT, Event.wrap(new StackOperationFailure(stackId, detailedMessage,
-                stackRepository.findOneWithLists(stackId).getResources())));
+        reactor.notify(ReactorConfig.STACK_UPDATE_FAILED_EVENT, Event.wrap(new StackOperationFailure(stackId, detailedMessage)));
     }
 }

@@ -40,7 +40,7 @@ public class ProvisionSetupContext {
             LOGGER.error("Unhandled exception occured while setting up provisioning.", e);
             LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_CREATE_FAILED_EVENT, stackId);
             reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(new StackOperationFailure(stackId,
-                    "Internal server error occured while setting up provisioning.", stackRepository.findOneWithLists(stackId).getResources())));
+                    "Internal server error occured while setting up provisioning.")));
         }
     }
 

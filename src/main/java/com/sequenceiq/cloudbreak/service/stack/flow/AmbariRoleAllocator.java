@@ -80,8 +80,7 @@ public class AmbariRoleAllocator {
             String errMessage = "Unhandled exception occurred while updating stack metadata.";
             LOGGER.error(errMessage, e);
             LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_UPDATE_FAILED_EVENT, stackId);
-            reactor.notify(ReactorConfig.STACK_UPDATE_FAILED_EVENT, Event.wrap(new StackOperationFailure(stackId, errMessage,
-                    stackRepository.findOneWithLists(stackId).getResources())));
+            reactor.notify(ReactorConfig.STACK_UPDATE_FAILED_EVENT, Event.wrap(new StackOperationFailure(stackId, errMessage)));
         }
     }
 
@@ -132,7 +131,7 @@ public class AmbariRoleAllocator {
 
     private void notifyStackCreateFailed(Long stackId, String cause) {
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_CREATE_FAILED_EVENT, stackId);
-        StackOperationFailure stackCreationFailure = new StackOperationFailure(stackId, cause, stackRepository.findOneWithLists(stackId).getResources());
+        StackOperationFailure stackCreationFailure = new StackOperationFailure(stackId, cause);
         reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(stackCreationFailure));
     }
 

@@ -221,7 +221,7 @@ public class AzureProvisionerTest {
         verify(azureClient, times(0)).createVirtualMachine(anyMap());
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test(expected = StackCreationFailureException.class)
     public void testBuildStackWhenExceptionThrowsDuringCloudServiceCreation() throws FileNotFoundException, CertificateException, NoSuchAlgorithmException {
         // GIVEN
         given(retryingStackUpdater.updateStackStatus(anyLong(), any(Status.class))).willReturn(stack);

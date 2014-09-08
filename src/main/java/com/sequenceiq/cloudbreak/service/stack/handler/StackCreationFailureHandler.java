@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterInstallerMailSenderService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformRollbackHandler;
 import com.sequenceiq.cloudbreak.service.stack.event.StackOperationFailure;
@@ -38,6 +39,9 @@ public class StackCreationFailureHandler implements Consumer<Event<StackOperatio
     @Autowired
     private AmbariClusterInstallerMailSenderService ambariClusterInstallerMailSenderService;
 
+    @Autowired
+    private StackRepository stackRepository;
+
     @Resource
     private Map<CloudPlatform, CloudPlatformRollbackHandler> cloudPlatformRollbackHandlers;
 
@@ -51,8 +55,7 @@ public class StackCreationFailureHandler implements Consumer<Event<StackOperatio
         if (stack.getCluster().getEmailNeeded()) {
             ambariClusterInstallerMailSenderService.sendFailEmail(stack.getUser());
         }
-        cloudPlatformRollbackHandlers.get(stack.getTemplate().cloudPlatform()).rollback(stack.getUser(), stack, stack.getCredential(),
-                event.getData().getResourceSet());
+        cloudPlatformRollbackHandlers.get(stack.getTemplate().cloudPlatform()).rollback(stackRepository.findOneWithLists(stackId), stack.getResources());
         websocketService.sendToTopicUser(stack.getUser().getEmail(), WebsocketEndPoint.STACK,
                 new StatusMessage(stackId, stack.getName(), Status.CREATE_FAILED.name(), detailedMessage));
     }

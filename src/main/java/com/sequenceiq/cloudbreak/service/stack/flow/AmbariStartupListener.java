@@ -65,8 +65,7 @@ public class AmbariStartupListener {
             LOGGER.error("Unhandled exception occured while trying to reach initializing Ambari server.", e);
             LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_CREATE_FAILED_EVENT, stackId);
             StackOperationFailure stackCreationFailure = new StackOperationFailure(stackId,
-                    "Unhandled exception occured while trying to reach initializing Ambari server.",
-                    stackRepository.findOneWithLists(stackId).getResources());
+                    "Unhandled exception occured while trying to reach initializing Ambari server.");
             reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(stackCreationFailure));
         }
     }

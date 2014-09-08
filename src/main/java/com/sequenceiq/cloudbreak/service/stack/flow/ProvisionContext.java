@@ -64,8 +64,7 @@ public class ProvisionContext {
         } catch (Exception e) {
             LOGGER.error("Unhandled exception occured while creating stack.", e);
             LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_CREATE_FAILED_EVENT, stackId);
-            StackOperationFailure stackCreationFailure = new StackOperationFailure(stackId,
-                    "Internal server error occured while creating stack.", stackRepository.findOneWithLists(stackId).getResources());
+            StackOperationFailure stackCreationFailure = new StackOperationFailure(stackId, "Internal server error occured while creating stack.");
             reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(stackCreationFailure));
         }
     }
