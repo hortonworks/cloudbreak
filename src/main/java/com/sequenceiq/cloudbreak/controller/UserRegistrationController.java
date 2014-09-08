@@ -44,7 +44,7 @@ public class UserRegistrationController {
         return new ResponseEntity<>(new IdJson(newUser.getUserId()), HttpStatus.CREATED);
     }
 
-    @RequestMapping(value = "/confirm/{confToken}", method = RequestMethod.POST)
+    @RequestMapping(value = "/confirm/{confToken}", method = RequestMethod.GET)
     public ResponseEntity<String> confirmRegistration(@PathVariable String confToken) {
         LOGGER.info("Confirming registration (token: {})... ", confToken);
         String activeUser = userService.confirmRegistration(confToken);
