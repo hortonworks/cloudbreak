@@ -1334,7 +1334,7 @@ Retrieves a particular cluster configuration for the user
 
         }
 
-# Group events
+# Group Events
 
 Events are used to track stack creation initiated by cloudbreak users.
 
@@ -1371,7 +1371,7 @@ Events are used to track stack creation initiated by cloudbreak users.
 
 
 ## Retrieve events [/events{?since}]
-Retrieves all events for the authenticated user
+Retrieve events for the authenticated user
 
 + Parameters
     + since (optional, string) ... Timestamp
@@ -1404,14 +1404,14 @@ Retrieves all events for the authenticated user
 
 + Response 200
 
-          [events][]
+    [Retrieve events][]
 
-# Group usage
+# Group Usage
 
 Usage resources provide insights into user activities.
 
 
-## Retrieve account usage information [/account/usage{?since,cloud,zone,vmtype,hours,account,user,blueprint}]
+## Retrieve account usage [/account/usage{?since,cloud,zone,vmtype,hours,account,user,blueprint}]
 
 Retrieves usage information for the account of the authenticated user (administrators only)
 
@@ -1419,7 +1419,7 @@ Retrieves usage information for the account of the authenticated user (administr
     + since (optional, string) ... Timestamp
     + cloud (optional, string) ... The cloud provider
     + zone (optional, string) ... the region
-    + vmType (optional, string) ... the instance type
+    + vmtype (optional, string) ... the instance type
     + hours (optional, integer) ... running hours
     + account (optional, long) ... account identifier
     + user (optional, long) ... user identifier
@@ -1429,11 +1429,9 @@ Retrieves usage information for the account of the authenticated user (administr
 
     JSON representation of the usage information
 
-
     + Headers
 
             x-auth-token: user:c45sdfdsfo234jgkhsdgf324
-
 
     + Body
 
@@ -1450,11 +1448,23 @@ Retrieves usage information for the account of the authenticated user (administr
 
  + Response 200
 
+      [Retrieve account usage][]
 
-            [usage][]
 
-## Retrieve user usage information [/user/usage]
+## User usage [/user/usage{?since,cloud,zone,vmtype,hours,account,user,blueprint}]
+### Retrieve user usage [GET]
 
-Retrieves usage information for the authenticated user.
+Retrieve usage information for the authetnicated user.
 
-## Retrieve usage information for the Deployer [/usage]
++ Response 200
+
+     [Retrieve account usage][]
+
+## Deployer usage [/usage{?since,cloud,zone,vmtype,hours,account,user,blueprint}]
+### Retrieve deployer usage [GET]
+
+Retrieve usage information for the deployer user.
+
++ Response 200
+
+     [Retrieve account usage][]
