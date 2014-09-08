@@ -170,9 +170,11 @@ public class AzureProvisioner implements Provisioner {
 
             } catch (HttpResponseException ex) {
                 LOGGER.error(String.format("Error occurs on %s stack under the instance remove", stack.getId()), ex);
-                throw new InternalServerException(ex.getResponse().toString());
+                throw new InternalServerException(String.format("Error occurred while removing instance '%s' on stack '%s'. Message: '%s'",
+                        instanceId, stack.getId(), ex.getResponse().toString()), ex);
             } catch (Exception ex) {
-                throw new InternalServerException(ex.getMessage());
+                throw new InternalServerException(String.format("Error occurred while removing instance '%s' on stack '%s'. Message: '%s'",
+                        instanceId, stack.getId(), ex.getMessage()), ex);
             }
         }
         LOGGER.info("Terminated instances in stack '{}': '{}'", stack.getId(), instanceIds);
