@@ -29,7 +29,7 @@ import com.sequenceiq.cloudbreak.security.CurrentUser;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 
 @Controller
-@RequestMapping("blueprints")
+@RequestMapping("user/blueprints")
 public class BlueprintController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintController.class);
