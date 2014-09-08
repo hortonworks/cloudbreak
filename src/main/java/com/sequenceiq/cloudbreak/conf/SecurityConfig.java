@@ -1,22 +1,20 @@
 package com.sequenceiq.cloudbreak.conf;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.annotation.web.servlet.configuration.EnableWebMvcSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
+import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
+import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
+import org.springframework.security.oauth2.provider.token.RemoteTokenServices;
 
 @Configuration
-@EnableWebMvcSecurity
-@EnableWebSecurity
-@EnableGlobalMethodSecurity
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
+@EnableResourceServer
+public class SecurityConfig extends ResourceServerConfigurerAdapter {
 
     @Autowired
     private UserDetailsService userDetailsService;
@@ -24,27 +22,35 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @Override
-    public void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder);
+    @Bean
+    RemoteTokenServices remoteTokenServices() {
+        RemoteTokenServices rts = new RemoteTokenServices();
+        rts.setClientId("cloudbreak");
+        rts.setClientSecret("cloudbreaksecret");
+        rts.setCheckTokenEndpointUrl("http://172.20.0.21:8080/check_token");
+        return rts;
     }
 
     @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
+        resources.resourceId("cloudbreak");
+        resources.tokenServices(remoteTokenServices());
+    }
+
+    @Override
+    public void configure(HttpSecurity http) throws Exception {
         http.csrf().disable()
                 .headers()
                 .contentTypeOptions()
                 .and()
                 .authorizeRequests()
+                .antMatchers("/templates").access("#oauth2.hasScope('cloudbreak.read')")
                 .antMatchers("/notification/**").permitAll()
                 .antMatchers("/sns/**").permitAll()
                 .antMatchers(HttpMethod.POST, "/users/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/users/confirm/**").permitAll()
                 .antMatchers(HttpMethod.POST, "/password/reset/**").permitAll()
                 .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .antMatchers(HttpMethod.GET, "/stacks/metadata/**").permitAll()
-                .anyRequest().authenticated().and()
-                .httpBasic();
+                .antMatchers(HttpMethod.GET, "/stacks/metadata/**").permitAll();
     }
-
 }
