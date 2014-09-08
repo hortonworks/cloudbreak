@@ -15,10 +15,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
+import com.sequenceiq.cloudbreak.controller.json.InviteConfirmationRequest;
 import com.sequenceiq.cloudbreak.controller.json.UserJson;
 import com.sequenceiq.cloudbreak.converter.UserConverter;
-import com.sequenceiq.cloudbreak.domain.Account;
-import com.sequenceiq.cloudbreak.service.account.AccountService;
+import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.facade.UserRegistrationFacade;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
 @Controller
@@ -30,26 +31,42 @@ public class UserRegistrationController {
     private UserService userService;
 
     @Autowired
-    private AccountService accountService;
+    private UserConverter userConverter;
 
     @Autowired
-    private UserConverter userConverter;
+    private UserRegistrationFacade userRegistrationFacade;
 
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<IdJson> registerAccountAdmin(@RequestBody @Valid UserJson userJson) {
+    public ResponseEntity<IdJson> register(@RequestBody @Valid UserJson userJson) {
         LOGGER.info("Register user request arrived: [email: '{}']", userJson.getEmail());
-        String accountName = userJson.getCompany();
-        Account account = accountService.registerAccount(accountName);
-        Long id = userService.registerUserInAccount(userConverter.convert(userJson), account);
-        return new ResponseEntity<>(new IdJson(id), HttpStatus.CREATED);
+        UserJson newUser = userRegistrationFacade.registerUser(userJson);
+        return new ResponseEntity<>(new IdJson(newUser.getUserId()), HttpStatus.CREATED);
     }
 
     @RequestMapping(value = "/confirm/{confToken}", method = RequestMethod.GET)
     public ResponseEntity<String> confirmRegistration(@PathVariable String confToken) {
-        LOGGER.debug("Confirming registration (token: {})... ", confToken);
+        LOGGER.info("Confirming registration (token: {})... ", confToken);
         String activeUser = userService.confirmRegistration(confToken);
-        LOGGER.debug("Registration confirmed (token: {}) for {}", new Object[] { confToken, activeUser });
+        LOGGER.info("Registration confirmed (token: {}) for {}", confToken, activeUser);
         return new ResponseEntity<>(activeUser, HttpStatus.OK);
     }
+
+    @RequestMapping(value = "/invite/{inviteToken}", method = RequestMethod.GET)
+    public ResponseEntity<UserJson> getInvitedUser(@PathVariable String inviteToken) {
+        LOGGER.info("Retrieving invited user (token: {})... ", inviteToken);
+        User invitedUser = userService.invitedUser(inviteToken);
+        LOGGER.info("Invited user found (token: {}) for {}", inviteToken, invitedUser);
+        return new ResponseEntity<>(userConverter.convert(invitedUser), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/invite/{inviteToken}", method = RequestMethod.PUT)
+    public ResponseEntity<UserJson> confirmInvite(@PathVariable String inviteToken, @RequestBody InviteConfirmationRequest inviteConfirmationRequest) {
+        LOGGER.info("Confirm invite (token: {})... ", inviteToken);
+        UserJson confirmedUser = userRegistrationFacade.confirmInvite(inviteToken, inviteConfirmationRequest);
+        LOGGER.info("Invite confirmed (token: {}) for {}", inviteToken, confirmedUser);
+        return new ResponseEntity<>(confirmedUser, HttpStatus.OK);
+    }
+
+
 }

@@ -38,7 +38,6 @@ import org.hibernate.validator.constraints.NotEmpty;
                         + "LEFT JOIN FETCH u.azureCredentials "
                         + "LEFT JOIN FETCH u.clusters "
                         + "WHERE u.id= :id")
-
 })
 @Table(name = "cloudbreakuser")
 public class User implements ProvisionEntity {

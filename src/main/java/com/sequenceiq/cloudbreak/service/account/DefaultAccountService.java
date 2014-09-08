@@ -64,6 +64,14 @@ public class DefaultAccountService implements AccountService {
         return decoratedAdmin;
     }
 
+    @Override
+    public boolean isUserInAccount(Long accountId, Long userId) {
+        LOGGER.debug("Checking whether user id {} belongs to the account with id {} ...", userId, accountId);
+        boolean userInAccount = accountRepository.isUserInAccount(accountId, userId);
+        LOGGER.debug("Result: {}", userInAccount);
+        return userInAccount;
+    }
+
     private void getBlueprintsForRole(User decoratedAdmin, UserRole role) {
         Set<Blueprint> blueprintsInRole = new HashSet<>();
         for (Blueprint blueprint : decoratedAdmin.getBlueprints()) {

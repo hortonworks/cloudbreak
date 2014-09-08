@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.domain.UserRole;
 import com.sequenceiq.cloudbreak.domain.UserStatus;
 import com.sequenceiq.cloudbreak.repository.AccountRepository;
 import com.sequenceiq.cloudbreak.service.blueprint.DefaultBlueprintLoaderService;
+import com.sequenceiq.cloudbreak.util.UserRolesUtil;
 
 @Component
 public class UserInitializer implements InitializingBean {
@@ -64,7 +65,7 @@ public class UserInitializer implements InitializingBean {
             user.setPassword(passwordEncoder.encode(defaultUserPassword));
             user.setStatus(UserStatus.ACTIVE);
             user.setAccount(account);
-            user.getUserRoles().add(UserRole.DEPLOYER);
+            user.getUserRoles().addAll(UserRolesUtil.getGroupForRole(UserRole.DEPLOYER));
 
             Set<Blueprint> blueprints = defaultBlueprintLoaderService.loadBlueprints(user);
             user.setBlueprints(blueprints);

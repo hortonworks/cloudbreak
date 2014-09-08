@@ -1,8 +1,10 @@
 package com.sequenceiq.cloudbreak.service.user;
 
-import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.domain.User;
-import com.sequenceiq.cloudbreak.repository.UserRepository;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -13,13 +15,10 @@ import org.springframework.mail.javamail.MimeMessagePreparator;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import com.sequenceiq.cloudbreak.controller.NotFoundException;
+import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.repository.UserRepository;
+import com.sequenceiq.cloudbreak.service.email.EmailService;
 
 public class SimpleUserServiceTest {
 
@@ -42,6 +41,9 @@ public class SimpleUserServiceTest {
     @Mock
     private MimeMessagePreparator mimeMessagePreparator;
 
+    @Mock
+    private EmailService emailService;
+
     private User user;
 
     @Before
@@ -49,20 +51,6 @@ public class SimpleUserServiceTest {
         underTest = new SimpleUserService();
         MockitoAnnotations.initMocks(this);
         user = createUser();
-    }
-
-    @Test
-    public void testGenerateResetPasswordToken() {
-        // GIVEN
-        given(userRepository.findByEmail(anyString())).willReturn(user);
-        given(userRepository.save(user)).willReturn(user);
-        doReturn(mimeMessagePreparator).when(underTest).prepareMessage(any(User.class), anyString(), anyString(), anyString());
-        doNothing().when(underTest).sendConfirmationEmail(mimeMessagePreparator);
-        // WHEN
-        underTest.generatePasswordResetToken(DUMMY_EMAIL);
-        // THEN
-        verify(underTest, times(1)).sendConfirmationEmail(mimeMessagePreparator);
-
     }
 
     @Test(expected = NotFoundException.class)

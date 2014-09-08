@@ -22,9 +22,6 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 @Entity
 @NamedQueries({
         @NamedQuery(
-                name = "Account.findByName",
-                query = "SELECT c FROM Account c WHERE c.name = :name"),
-        @NamedQuery(
                 name = "Account.accountUsers",
                 query = "SELECT cu FROM User cu "
                         + "LEFT JOIN FETCH cu.azureTemplates "

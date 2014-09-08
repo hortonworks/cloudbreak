@@ -1,36 +1,34 @@
 package com.sequenceiq.cloudbreak.service.user;
 
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
-
-import javax.mail.internet.MimeMessage;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.MailSender;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.mail.javamail.MimeMessagePreparator;
-import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import org.springframework.util.DigestUtils;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Account;
 import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.domain.UserRole;
 import com.sequenceiq.cloudbreak.domain.UserStatus;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
 import com.sequenceiq.cloudbreak.service.blueprint.DefaultBlueprintLoaderService;
-
-import freemarker.template.Configuration;
+import com.sequenceiq.cloudbreak.service.email.EmailService;
+import com.sequenceiq.cloudbreak.util.UserRolesUtil;
 
 @Service
 public class SimpleUserService implements UserService {
@@ -38,12 +36,6 @@ public class SimpleUserService implements UserService {
 
     @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private MailSender mailSender;
-
-    @Autowired
-    private Configuration freemarkerConfiguration;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -60,23 +52,38 @@ public class SimpleUserService implements UserService {
     @Value("${cb.mail.ui.enabled:false}")
     private boolean uiEnabled;
 
+    @Value("${cb.clean.invites.cron:}")
+    private String cleanInvitesCron;
+
+    @Value("${cb.invite.expire.days:60}")
+    private int inviteExpiryInDays;
+
+    @Autowired
+    private EmailService emailService;
+
     @Autowired
     private DefaultBlueprintLoaderService defaultBlueprintLoaderService;
 
     @Override
-    public Long registerUserInAccount(User user, Account account) {
+    public User registerUserInAccount(User user, Account account) {
         if (userRepository.findByEmail(user.getEmail()) == null) {
             String confToken = generateConfToken(user);
             user.setConfToken(confToken);
             user.setBlueprints(defaultBlueprintLoaderService.loadBlueprints(user));
             user.setAccount(account);
+            user.getUserRoles().addAll(UserRolesUtil.getGroupForRole(UserRole.ACCOUNT_ADMIN));
             User savedUser = userRepository.save(user);
 
             LOGGER.info("User '{}' for account '{}' successfully registered", savedUser.getId(), account.getId());
-            MimeMessagePreparator msgPreparator = prepareMessage(user, "templates/confirmation-email.ftl",
-                    getRegisterUserConfirmPath(), "Cloudbreak - confirm registration");
-            sendConfirmationEmail(msgPreparator);
-            return savedUser.getId();
+            Map<String, Object> model = new HashMap<>();
+            model.put("user", user);
+            model.put("confirm", getConfirmLinkPath() + getRegisterUserConfirmPath() + user.getConfToken());
+
+            String messageText = emailService.messageText(model, "templates/confirmation-email.ftl");
+            MimeMessagePreparator msgPreparator = emailService.messagePreparator(user.getEmail(), msgFrom, "Cloudbreak - confirm registration", messageText);
+            emailService.sendEmail(msgPreparator);
+
+            return savedUser;
         } else {
             throw new BadRequestException(String.format("User with email '%s' already exists.", user.getEmail()));
         }
@@ -98,6 +105,23 @@ public class SimpleUserService implements UserService {
     }
 
     @Override
+    public User registerUponInvitation(String inviteToken, User userInput) {
+        User invitedUser = userRepository.findUserByConfToken(inviteToken);
+        if (invitedUser != null) {
+            invitedUser.setPassword(passwordEncoder.encode(userInput.getPassword()));
+            invitedUser.setFirstName(userInput.getFirstName());
+            invitedUser.setLastName(userInput.getLastName());
+            invitedUser.setStatus(UserStatus.ACTIVE);
+            invitedUser.setConfToken(null);
+            invitedUser.setRegistrationDate(Calendar.getInstance().getTime());
+            invitedUser = userRepository.save(invitedUser);
+        } else {
+            throw new NotFoundException("There's no user invite pending for inviteToken: " + userInput);
+        }
+        return invitedUser;
+    }
+
+    @Override
     public String generatePasswordResetToken(String email) {
         User user = userRepository.findByEmail(email);
         if (user != null) {
@@ -105,9 +129,14 @@ public class SimpleUserService implements UserService {
             String confToken = DigestUtils.md5DigestAsHex(UUID.randomUUID().toString().getBytes());
             user.setConfToken(confToken);
             User updatedUser = userRepository.save(user);
-            MimeMessagePreparator msgPreparator = prepareMessage(user, getResetTemplate(),
-                    getResetPasswordConfirmPath(), "Cloudbreak - reset password");
-            sendConfirmationEmail(msgPreparator);
+
+            Map<String, Object> model = new HashMap<>();
+            model.put("user", user);
+            model.put("confirm", getConfirmLinkPath() + getResetPasswordConfirmPath() + user.getConfToken());
+
+            String emailText = emailService.messageText(model, getResetTemplate());
+            MimeMessagePreparator messagePreparator = emailService.messagePreparator(user.getEmail(), msgFrom, "Cloudbreak - reset password", emailText);
+            emailService.sendEmail(messagePreparator);
             return email;
         } else {
             LOGGER.warn("There's no user for email: {} ", email);
@@ -129,12 +158,120 @@ public class SimpleUserService implements UserService {
         }
     }
 
+    @Override
+    public String inviteUser(User adminUser, String email, UserRole role) {
+        String inviteHash = generateInviteToken(adminUser.getAccount().getName(), email);
+        // create a new user with the account, email and hash
+        User invitedUser = new User();
+        invitedUser.setAccount(adminUser.getAccount());
+        invitedUser.setEmail(email);
+        invitedUser.setConfToken(inviteHash);
+        invitedUser.setStatus(UserStatus.INVITED);
+        invitedUser.setFirstName(UUID.randomUUID().toString());
+        invitedUser.setLastName(UUID.randomUUID().toString());
+        invitedUser.setPassword(UUID.randomUUID().toString());
+        if (UserRolesUtil.isUserInRole(adminUser, role)) {
+            invitedUser.getUserRoles().addAll(UserRolesUtil.getGroupForRole(role));
+        } else {
+            throw new UnsupportedOperationException(String.format("Invite role is too high %s", role));
+        }
+        invitedUser.setRegistrationDate(Calendar.getInstance().getTime());
+        invitedUser = userRepository.save(invitedUser);
+
+        Map<String, Object> model = new HashMap<>();
+
+        model.put("user", adminUser);
+        model.put("invite", getConfirmLinkPath() + getInviteRegistrationPath() + invitedUser.getConfToken());
+        String emailText = emailService.messageText(model, getInviteTemplate());
+
+        MimeMessagePreparator messagePreparator = emailService.messagePreparator(invitedUser.getEmail(), msgFrom, "Cloudbreak - invitation", emailText);
+        emailService.sendEmail(messagePreparator);
+
+        return inviteHash;
+    }
+
+    @Override
+    public User invitedUser(String inviteToken) {
+        LOGGER.debug("Retrieving invited user by token: {}", inviteToken);
+        User invitedUser = userRepository.findUserByConfToken(inviteToken);
+
+        if (invitedUser == null || !UserStatus.INVITED.equals(invitedUser.getStatus())) {
+            throw new NotFoundException(String.format("The user hasn't been invited or has already been registered!"));
+        }
+        invitedUser.setRegistrationDate(new Date());
+        invitedUser.setFirstName("");
+        invitedUser.setLastName("");
+        invitedUser.setPassword("");
+
+        return invitedUser;
+    }
+
+    @Override
+    public User registerInvitedUser(User registeringUser) {
+        User invitedUser = userRepository.findByEmail(registeringUser.getEmail());
+
+        if (invitedUser == null || !invitedUser.getStatus().equals(UserStatus.INVITED)) {
+            throw new BadRequestException(String.format("User with email '%s' is not invited!", registeringUser.getEmail()));
+        }
+
+        invitedUser.setBlueprints(defaultBlueprintLoaderService.loadBlueprints(registeringUser));
+        invitedUser.setStatus(UserStatus.ACTIVE);
+        invitedUser.setConfToken(null);
+        invitedUser.setRegistrationDate(new Date());
+
+        invitedUser.setFirstName(registeringUser.getFirstName());
+        invitedUser.setLastName(registeringUser.getLastName());
+        invitedUser.setPassword(registeringUser.getPassword());
+        invitedUser = userRepository.save(invitedUser);
+
+        return invitedUser;
+    }
+
+    @Override
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
+    @Override
+    public User setUserStatus(Long userId, UserStatus userStatus) {
+        User user = userRepository.findOne(userId);
+        if (user == null) {
+            throw new NotFoundException(String.format("User with id [%s] not found", userId));
+        }
+        LOGGER.debug("Modifying user: {};  setting status from: [{}] to: [{}]", user.getStatus(), userStatus);
+        user.setStatus(userStatus);
+        user = userRepository.save(user);
+        return user;
+    }
+
+    @Override
+    public User setUserRoles(Long userId, Set<UserRole> roles) {
+        User user = userRepository.findOne(userId);
+        if (user == null) {
+            throw new NotFoundException(String.format("User with id [%s] not found", userId));
+        }
+        LOGGER.debug("Modifying user: {};  setting roles from: [{}] to: [{}]", user.getUserRoles(), roles);
+        user.getUserRoles().clear();
+        user.getUserRoles().addAll(roles);
+        user = userRepository.save(user);
+        return user;
+
+    }
+
     private String getResetTemplate() {
         return uiEnabled ? "templates/reset-email.ftl" : "templates/reset-email-wout-ui.ftl";
     }
 
+    private String getInviteTemplate() {
+        return uiEnabled ? "templates/invite-email.ftl" : "templates/invite-email-wout-ui.ftl";
+    }
+
     private String getRegisterUserConfirmPath() {
         return uiEnabled ? "#?confirmSignUpToken=" : "/users/confirm/";
+    }
+
+    private String getInviteRegistrationPath() {
+        return uiEnabled ? "#?inviteToken=" : "/users/invite/";
     }
 
     private String getResetPasswordConfirmPath() {
@@ -147,42 +284,34 @@ public class SimpleUserService implements UserService {
         return DigestUtils.md5DigestAsHex(textToDigest.getBytes());
     }
 
-    private String getEmailBody(User user, String template, String confirmPath) {
-        String text = null;
-        try {
-            Map<String, Object> model = new HashMap<>();
-            model.put("user", user);
-            model.put("confirm", getConfirmLinkPath() + confirmPath + user.getConfToken());
-            text = FreeMarkerTemplateUtils.processTemplateIntoString(freemarkerConfiguration.getTemplate(template, "UTF-8"), model);
-        } catch (Exception e) {
-            LOGGER.error("Confirmation email assembling failed. Exception: {}", e);
-            throw new BadRequestException("Failed to assemble confirmation email message", e);
-        }
-        return text;
-    }
-
-    @VisibleForTesting
-    protected MimeMessagePreparator prepareMessage(final User user, final String template, final String confirmPath, final String subject) {
-        return new MimeMessagePreparator() {
-            public void prepare(MimeMessage mimeMessage) throws Exception {
-                MimeMessageHelper message = new MimeMessageHelper(mimeMessage);
-                message.setFrom(msgFrom);
-                message.setTo(user.getEmail());
-                message.setSubject("Cloudbreak - confirm registration");
-                message.setText(getEmailBody(user, template, confirmPath), true);
-            }
-        };
+    private String generateInviteToken(String accountName, String email) {
+        LOGGER.debug("Generating invite token ...");
+        String textToDigest = accountName + email + new Date().getTime();
+        return DigestUtils.md5DigestAsHex(textToDigest.getBytes());
     }
 
     private String getConfirmLinkPath() {
         return uiEnabled ? uiAddress : hostAddress;
     }
 
-    @Async
-    public void sendConfirmationEmail(final MimeMessagePreparator preparator) {
-        LOGGER.info("Sending confirmation email ...");
-        ((JavaMailSender) mailSender).send(preparator);
-        LOGGER.info("Confirmation email sent");
-    }
+    @Scheduled(cron = "${cb.clean.invites.cron:0 * * * * *}")
+    @Override
+    public void expireInvites() {
+        LOGGER.info("Expire invites older than {}", inviteExpiryInDays);
 
+        Calendar cal = GregorianCalendar.getInstance();
+        LOGGER.info("Current date: {}", cal.getTime());
+
+        cal.add(Calendar.DAY_OF_MONTH, -1 * inviteExpiryInDays);
+        Date expiryDate = cal.getTime();
+        LOGGER.info("Expiry date: {}", expiryDate);
+        List<Long> expiredIds = userRepository.expiredInvites(expiryDate);
+
+        if (null != expiredIds && !expiredIds.isEmpty()) {
+            userRepository.deleteRoles(expiredIds);
+            userRepository.expireInvites(expiredIds);
+        }
+        LOGGER.info("Expire invites DONE.");
+    }
 }
+
