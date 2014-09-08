@@ -105,6 +105,8 @@ dependencies {
     compile 'org.springframework.boot:spring-boot-starter-websocket:1.0.2.RELEASE'
     compile 'org.springframework.security:spring-security-config:3.2.3.RELEASE'
     compile 'org.springframework.security:spring-security-web:3.2.3.RELEASE'
+    compile 'org.springframework.security.oauth:spring-security-oauth2:2.0.3.RELEASE'
+//    compile 'org.cloudfoundry.identity:cloudfoundry-identity-common:1.4.3'
     compile 'org.springframework:spring-messaging:4.0.3.RELEASE'
     compile 'org.projectreactor:reactor-spring:1.0.1.RELEASE'
     compile 'org.postgresql:postgresql:9.3-1101-jdbc41'
