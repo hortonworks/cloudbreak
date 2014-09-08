@@ -1333,3 +1333,128 @@ Retrieves a particular cluster configuration for the user
           }
 
         }
+
+# Group events
+
+Events are used to track stack creation initiated by cloudbreak users.
+
+##  Create events [/events]
+### Register an event [POST]
+
++ Request
+
+    + Headers
+
+            x-auth-token: user:c45sdfdsfo234jgkhsdgf324
+
+    + Body
+
+            {
+               "eventTimestamp":"1409929066 ",
+               "eventType":"STACK_STARTED"
+               "userName":"John Doe",
+               "userId":14,
+               "accountName":"Company gmbh."
+               "accountId":5
+               "eventDescription":"Stack Started",
+               "cloud":"AWS",
+               "region":"eu-west-1",
+               "vmType":"xlarge",
+               "blueprint":"lambda",
+            }
+
++ Response 200 (application/json)
+
+        {
+          "eventId":1
+        }
+
+
+## Retrieve events [/events{?since}]
+Retrieves all events for the authenticated user
+
++ Parameters
+    + since (optional, string) ... Timestamp
+
++ Model (application/json)
+
+    JSON representation of the event
+
+    + Headers
+
+            x-auth-token: user:c45sdfdsfo234jgkhsdgf324
+
+    + Body
+
+            {
+               "eventTimestamp":"1409929066 ",
+               "eventType":"STACK_STARTED"
+               "userName":"John Doe",
+               "userId":14,
+               "accountName":"Company gmbh."
+               "accountId":5
+               "eventDescription":"Stack Started",
+               "cloud":"AWS",
+               "region":"eu-west-1",
+               "vmType":"xlarge",
+               "blueprint":"lambda",
+            }
+
+### Retrieve events [GET]
+
++ Response 200
+
+          [events][]
+
+# Group usage
+
+Usage resources provide insights into user activities.
+
+
+## Retrieve account usage information [/account/usage{?since,cloud,zone,vmtype,hours,account,user,blueprint}]
+
+Retrieves usage information for the account of the authenticated user (administrators only)
+
++ Parameters
+    + since (optional, string) ... Timestamp
+    + cloud (optional, string) ... The cloud provider
+    + zone (optional, string) ... the region
+    + vmType (optional, string) ... the instance type
+    + hours (optional, integer) ... running hours
+    + account (optional, long) ... account identifier
+    + user (optional, long) ... user identifier
+    + blueprint (optional, long) ... blueprint identifier
+
++ Model (application/json)
+
+    JSON representation of the usage information
+
+
+    + Headers
+
+            x-auth-token: user:c45sdfdsfo234jgkhsdgf324
+
+
+    + Body
+
+            {
+              "day":"2014/01/5",
+              "cloud":"AWS",
+              "region":"eu-west-1",
+              "runningHours":"15",
+              "account":"testing ltd",
+              "blueprint":"lambda-architecture"
+            }
+
+### Retrieve filtered usage information for the account [GET]
+
+ + Response 200
+
+
+            [usage][]
+
+## Retrieve user usage information [/user/usage]
+
+Retrieves usage information for the authenticated user.
+
+## Retrieve usage information for the Deployer [/usage]
