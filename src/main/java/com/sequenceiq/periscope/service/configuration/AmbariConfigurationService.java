@@ -53,8 +53,10 @@ public class AmbariConfigurationService {
             int portStartIndex = result.indexOf(":");
             String internalAddress = result.substring(0, portStartIndex);
             String publicAddress = ambariClient.resolveInternalHostName(internalAddress);
-            if (internalAddress.contains(AZURE_ADDRESS) && internalAddress.equals(publicAddress)) {
-                publicAddress = internalAddress.substring(0, internalAddress.indexOf(".") + 1) + AZURE_ADDRESS;
+            if (internalAddress.equals(publicAddress)) {
+                if (internalAddress.contains(AZURE_ADDRESS)) {
+                    publicAddress = internalAddress.substring(0, internalAddress.indexOf(".") + 1) + AZURE_ADDRESS;
+                }
             }
             result = publicAddress + result.substring(portStartIndex);
         }
