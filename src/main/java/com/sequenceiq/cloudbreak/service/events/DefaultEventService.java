@@ -5,6 +5,7 @@ import java.util.Calendar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
@@ -13,6 +14,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.EventRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 
+@Service
 public class DefaultEventService implements EventService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultEventService.class);
@@ -24,71 +26,67 @@ public class DefaultEventService implements EventService {
     private EventRepository eventRepository;
 
     @Override
-    public void createStackEvent(Long stackId, String eventType, String eventMessage) {
-        LOGGER.debug("Createinf stack event for stackId {}, eventType {}, eventMessage {}", stackId, eventType, eventMessage);
+    public Event createStackEvent(Long stackId, String eventType, String eventMessage) {
+        LOGGER.debug("Create stack event for stackId {}, eventType {}, eventMessage {}", stackId, eventType, eventMessage);
         Stack stack = stackRepository.findById(stackId);
-
         Event stackEvent = createStackEvent(stack, eventType, eventMessage);
-
         stackEvent = eventRepository.save(stackEvent);
-
         LOGGER.debug("Stack event saved: {}", stackEvent);
 
-
+        return  stackEvent;
     }
 
     private Event createStackEvent(Stack stack, String eventType, String eventMessage) {
         Event stackEvent = new Event();
+
         stackEvent.setEventTimestamp(Calendar.getInstance().getTimeInMillis());
         stackEvent.setEventMessage(eventMessage);
         stackEvent.setEventType(eventType);
 
-        stackEvent.setAccountId(stack.getUser().getAccount().getId());
-        stackEvent.setAccountName(stack.getUser().getAccount().getName());
-        stackEvent.setBlueprintId(stack.getCluster().getBlueprint().getId());
-        stackEvent.setBlueprintName(stack.getCluster().getBlueprint().getBlueprintName());
-        stackEvent.setCloud(stack.getTemplate().cloudPlatform().name());
-
-        stackEvent.setRegion(getRegion(stack));
         stackEvent.setUserId(stack.getUser().getId());
         stackEvent.setUserName(stack.getUser().getFirstName() + " " + stack.getUser().getLastName());
-        stackEvent.setVmType(getVmType(stack));
+
+        stackEvent.setAccountId(stack.getUser().getAccount().getId());
+        stackEvent.setAccountName(stack.getUser().getAccount().getName());
+
+        populateClusterData(stackEvent, stack);
+        populateTemplateData(stackEvent, stack);
 
         return stackEvent;
     }
 
-    private String getVmType(Stack stack) {
-        String vmType = null;
-        switch (stack.getTemplate().cloudPlatform()) {
-            case AWS:
-                vmType = ((AwsTemplate) stack.getTemplate()).getInstanceType().name();
-                break;
-            case AZURE:
-                vmType = ((AzureTemplate) stack.getTemplate()).getVmType();
-                break;
-            default:
-                throw new IllegalStateException("Unsupported cloud platform :" + stack.getTemplate().cloudPlatform());
+    private void populateClusterData(Event stackEvent, Stack stack) {
+        if (null != stack.getCluster()) {
+            stackEvent.setBlueprintId(stack.getCluster().getBlueprint().getId());
+            stackEvent.setBlueprintName(stack.getCluster().getBlueprint().getBlueprintName());
+        } else {
+            LOGGER.debug("No cluster data available for the stack: {}", stack.getId());
         }
-        return vmType;
     }
 
-    private String getRegion(Stack stack) {
+    private void populateTemplateData(Event stackEvent, Stack stack) {
+        String vmType = null;
         String region = null;
         switch (stack.getTemplate().cloudPlatform()) {
             case AWS:
+                vmType = ((AwsTemplate) stack.getTemplate()).getInstanceType().name();
                 region = ((AwsTemplate) stack.getTemplate()).getRegion().getName();
                 break;
             case AZURE:
+                vmType = ((AzureTemplate) stack.getTemplate()).getVmType();
                 region = ((AzureTemplate) stack.getTemplate()).getLocation().location();
                 break;
             default:
                 throw new IllegalStateException("Unsupported cloud platform :" + stack.getTemplate().cloudPlatform());
         }
-        return region;
+        stackEvent.setVmType(vmType);
+        stackEvent.setRegion(region);
+        stackEvent.setCloud(stack.getTemplate().cloudPlatform().name());
     }
 
-    @Override
-    public void createClusterEvent(Long stackId, String eventType, String eventMessage) {
 
+    @Override
+    public Event createClusterEvent(Long stackId, String eventType, String eventMessage) {
+        throw new UnsupportedOperationException("Not yet implemented!");
     }
 }
