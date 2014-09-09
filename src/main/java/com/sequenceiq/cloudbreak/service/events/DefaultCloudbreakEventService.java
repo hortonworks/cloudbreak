@@ -89,15 +89,10 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
         stackEvent.setCloud(stack.getTemplate().cloudPlatform().name());
     }
 
-
-    @Override
-    public com.sequenceiq.cloudbreak.domain.CloudbreakEvent createClusterEvent(Long stackId, String eventType, String eventMessage) {
-        throw new UnsupportedOperationException("Not yet implemented!");
-    }
-
     @Override
     public void fireCloudbreakEvent(Long stackId, String eventType, String eventMessage) {
         CloudbreakEventData eventData = new CloudbreakEventData(stackId, eventType, eventMessage);
+        LOGGER.info("Fireing cloudbreak event: {}", eventData);
         Event reactorEvent = Event.wrap(eventData);
         reactor.notify(ReactorConfig.CLOUDBREAK_EVENT, reactorEvent);
     }

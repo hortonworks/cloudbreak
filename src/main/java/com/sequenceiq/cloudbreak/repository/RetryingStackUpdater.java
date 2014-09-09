@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
+import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 
 @Component
 public class RetryingStackUpdater {
@@ -26,6 +27,9 @@ public class RetryingStackUpdater {
 
     @Autowired
     private StackRepository stackRepository;
+
+    @Autowired
+    private CloudbreakEventService cloudbreakEventService;
 
     public Stack updateStackStatus(Long stackId, Status status) {
         return updateStackStatus(stackId, status, null);
@@ -162,6 +166,8 @@ public class RetryingStackUpdater {
         }
         stack = stackRepository.save(stack);
         LOGGER.info("Updated stack: [stack: '{}', status: '{}', statusReason: '{}'].", stackId, status.name(), statusReason);
+
+        cloudbreakEventService.fireCloudbreakEvent(stackId, status.name(), statusReason);
         return stack;
     }
 
