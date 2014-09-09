@@ -24,8 +24,6 @@ import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateServic
 public class SimpleTemplateService implements TemplateService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleCredentialService.class);
 
-    private static final String CLOUD_PLATFORM_NOT_SUPPORTED_MSG = "The cloudPlatform '%s' is not supported.";
-
     private static final String TEMPLATE_NOT_FOUND_MSG = "Template '%s' not found.";
 
     @Autowired

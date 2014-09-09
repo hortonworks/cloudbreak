@@ -1,8 +1,6 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.hibernate.validator.constraints.NotBlank;
@@ -11,7 +9,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRawValue;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.sequenceiq.cloudbreak.domain.UserRole;
 
 public class BlueprintJson implements JsonEntity {
 
@@ -24,8 +21,8 @@ public class BlueprintJson implements JsonEntity {
     @Size(max = 50)
     private String description;
     private Integer hostGroupCount;
-
-    private List<UserRole> roles = new ArrayList<>();
+    @NotNull
+    private Boolean publicInAccount;
 
     @JsonRawValue
     public String getAmbariBlueprint() {
@@ -90,11 +87,11 @@ public class BlueprintJson implements JsonEntity {
         this.hostGroupCount = hostGroupCount;
     }
 
-    public List<UserRole> getRoles() {
-        return roles;
+    public Boolean isPublicInAccount() {
+        return publicInAccount;
     }
 
-    public void setRoles(List<UserRole> roles) {
-        this.roles = roles;
+    public void setPublicInAccount(Boolean publicInAccount) {
+        this.publicInAccount = publicInAccount;
     }
 }

@@ -68,7 +68,7 @@ public class SimpleUserService implements UserService {
         if (userRepository.findByEmail(user.getEmail()) == null) {
             String confToken = generateConfToken(user);
             user.setConfToken(confToken);
-            user.setBlueprints(defaultBlueprintLoaderService.loadBlueprints(user));
+            // user.setBlueprints(defaultBlueprintLoaderService.loadBlueprints(user));
             user.setAccount(account);
             user.getUserRoles().addAll(UserRolesUtil.getGroupForRole(UserRole.ACCOUNT_ADMIN));
             User savedUser = userRepository.save(user);
@@ -213,7 +213,7 @@ public class SimpleUserService implements UserService {
             throw new BadRequestException(String.format("User with email '%s' is not invited!", registeringUser.getEmail()));
         }
 
-        invitedUser.setBlueprints(defaultBlueprintLoaderService.loadBlueprints(registeringUser));
+        // invitedUser.setBlueprints(defaultBlueprintLoaderService.loadBlueprints(registeringUser));
         invitedUser.setStatus(UserStatus.ACTIVE);
         invitedUser.setConfToken(null);
         invitedUser.setRegistrationDate(new Date());
@@ -313,4 +313,3 @@ public class SimpleUserService implements UserService {
         LOGGER.info("Expire invites DONE.");
     }
 }
-
