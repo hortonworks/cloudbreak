@@ -28,8 +28,8 @@ public class CloudbreakEventController {
 
     @RequestMapping(method = RequestMethod.GET, value = "/events")
     @ResponseBody
-    public ResponseEntity<List<CloudbreakEventsJson>> events(@CurrentUser User user, @RequestParam("since") long since) {
-        LOGGER.info("Retrieving events for user {}, since {}", user.getId(), new Date(since));
+    public ResponseEntity<List<CloudbreakEventsJson>> events(@CurrentUser User user, @RequestParam(value = "since", required = false) Long since) {
+        LOGGER.info("Retrieving events for user {}, since {}", user.getId(), since == null ? null : new Date(since));
         List<CloudbreakEventsJson> cloudbreakEvents = cloudbreakEventsFacade.retrieveEvents(user.getId(), since);
         return new ResponseEntity<>(cloudbreakEvents, HttpStatus.OK);
     }

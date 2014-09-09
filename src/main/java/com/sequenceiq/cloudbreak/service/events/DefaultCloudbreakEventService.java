@@ -52,7 +52,10 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     }
 
     @Override
-    public List<CloudbreakEvent> cloudbreakEvents(Long userId, long since) {
+    public List<CloudbreakEvent> cloudbreakEvents(Long userId, Long since) {
+        if (null == since) {
+            since = 0L;
+        }
         List<CloudbreakEvent> events = eventRepository.cloudbreakEvents(userId, since);
         return null != events ? events : Collections.EMPTY_LIST;
     }
@@ -60,7 +63,7 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     private CloudbreakEvent createStackEvent(Stack stack, String eventType, String eventMessage) {
         CloudbreakEvent stackEvent = new CloudbreakEvent();
 
-        stackEvent.setEventTimestamp(Calendar.getInstance().getTimeInMillis());
+        stackEvent.setEventTimestamp(Calendar.getInstance().getTime());
         stackEvent.setEventMessage(eventMessage);
         stackEvent.setEventType(eventType);
 

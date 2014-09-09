@@ -24,7 +24,8 @@ public class DefaultCloudbreakEventsFacade implements CloudbreakEventsFacade {
     private CloudbreakEventConverter eventConverter;
 
     @Override
-    public List<CloudbreakEventsJson> retrieveEvents(Long userId, long since) {
+    public List<CloudbreakEventsJson> retrieveEvents(Long userId, Long since) {
+
         List<CloudbreakEvent> cloudbreakEvents = cloudbreakEventService.cloudbreakEvents(userId, since);
         return new ArrayList(eventConverter.convertAllEntityToJson(cloudbreakEvents));
     }

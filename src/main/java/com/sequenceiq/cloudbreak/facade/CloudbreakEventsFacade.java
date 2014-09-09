@@ -6,6 +6,6 @@ import com.sequenceiq.cloudbreak.controller.json.CloudbreakEventsJson;
 
 public interface CloudbreakEventsFacade {
 
-    List<CloudbreakEventsJson> retrieveEvents(Long userId, long since);
+    List<CloudbreakEventsJson> retrieveEvents(Long userId, Long since);
 
 }

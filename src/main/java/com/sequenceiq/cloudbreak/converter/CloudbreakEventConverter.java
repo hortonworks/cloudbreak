@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import java.util.Date;
+
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.json.CloudbreakEventsJson;
@@ -18,7 +20,7 @@ public class CloudbreakEventConverter extends AbstractConverter<CloudbreakEvents
         json.setCloud(entity.getCloud());
         json.setEventMessage(entity.getEventMessage());
         json.setEventType(entity.getEventType());
-        json.setEventTimestamp(entity.getEventTimestamp());
+        json.setEventTimestamp(entity.getEventTimestamp().getTime());
         json.setRegion(entity.getRegion());
         json.setVmType(entity.getVmType());
         json.setUserName(entity.getUserName());
@@ -36,7 +38,7 @@ public class CloudbreakEventConverter extends AbstractConverter<CloudbreakEvents
         entity.setCloud(json.getCloud());
         entity.setEventMessage(json.getEventMessage());
         entity.setEventType(json.getEventType());
-        entity.setEventTimestamp(json.getEventTimestamp());
+        entity.setEventTimestamp(new Date(json.getEventTimestamp()));
         entity.setRegion(json.getRegion());
         entity.setVmType(json.getVmType());
         entity.setUserName(json.getUserName());

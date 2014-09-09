@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import java.util.Date;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -12,7 +14,8 @@ public class CloudbreakEvent implements ProvisionEntity {
     private Long id;
 
     private String eventType;
-    private long eventTimestamp;
+
+    private Date eventTimestamp;
     private String eventMessage;
     private String userName;
     private long userId;
@@ -40,11 +43,11 @@ public class CloudbreakEvent implements ProvisionEntity {
         this.eventType = eventType;
     }
 
-    public long getEventTimestamp() {
+    public Date getEventTimestamp() {
         return eventTimestamp;
     }
 
-    public void setEventTimestamp(long eventTimestamp) {
+    public void setEventTimestamp(Date eventTimestamp) {
         this.eventTimestamp = eventTimestamp;
     }
 
@@ -130,7 +133,7 @@ public class CloudbreakEvent implements ProvisionEntity {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("Event{");
+        final StringBuilder sb = new StringBuilder("CloudbreakEvent{");
         sb.append("id=").append(id);
         sb.append(", eventType='").append(eventType).append('\'');
         sb.append(", eventTimestamp=").append(eventTimestamp);
