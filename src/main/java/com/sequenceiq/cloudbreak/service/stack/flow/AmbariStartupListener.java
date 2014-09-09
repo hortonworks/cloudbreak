@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariHostsUnavailableException;
 import com.sequenceiq.cloudbreak.service.stack.connector.aws.AwsStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.event.StackCreationSuccess;
@@ -32,9 +31,6 @@ public class AmbariStartupListener {
 
     @Autowired
     private AwsStackUtil awsStackUtil;
-
-    @Autowired
-    private StackRepository stackRepository;
 
     public void waitForAmbariServer(Long stackId, String ambariIp) {
         try {
