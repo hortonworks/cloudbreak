@@ -15,8 +15,7 @@ import com.sequenceiq.cloudbreak.controller.json.BlueprintJson;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.converter.BlueprintConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.User;
-import com.sequenceiq.cloudbreak.domain.UserRole;
+import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @Component
@@ -32,10 +31,10 @@ public class DefaultBlueprintLoaderService {
     @Autowired
     private JsonHelper jsonHelper;
 
-    public Set<Blueprint> loadBlueprints(User user) {
+    public Set<Blueprint> loadBlueprints(CbUser user) {
         Set<Blueprint> blueprints = new HashSet<>();
         for (String blueprintName : blueprintArray) {
-            LOGGER.info("Adding default blueprint '{}' for user '{}'", blueprintName, user.getEmail());
+            LOGGER.info("Adding default blueprint '{}' for user '{}'", blueprintName, user.getUsername());
             try {
                 BlueprintJson blueprintJson = new BlueprintJson();
                 blueprintJson.setBlueprintName(blueprintName);
@@ -45,10 +44,8 @@ public class DefaultBlueprintLoaderService {
                         jsonHelper.createJsonFromString(FileReaderUtils.readFileFromClasspath(String.format("blueprints/%s.bp", blueprintName)))
                         );
 
-                blueprintJson.getRoles().add(UserRole.ACCOUNT_ADMIN);
-
                 Blueprint bp = blueprintConverter.convert(blueprintJson);
-                bp.setUser(user);
+                bp.setOwner(user.getUsername());
                 blueprints.add(bp);
             } catch (IOException e) {
                 LOGGER.error(blueprintName + " blueprint is not available.", e);

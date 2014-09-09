@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.domain.Account;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.UserRole;
@@ -57,7 +56,7 @@ public class DefaultAccountService implements AccountService {
         // getAwsTemplatesForRole(decoratedAdmin, role);
         // getAzureTemplatesForRole(decoratedAdmin, role);
         getSatcksForRole(decoratedAdmin, role);
-        getBlueprintsForRole(decoratedAdmin, role);
+        // getBlueprintsForRole(decoratedAdmin, role);
 
         return decoratedAdmin;
     }
@@ -70,16 +69,16 @@ public class DefaultAccountService implements AccountService {
         return userInAccount;
     }
 
-    private void getBlueprintsForRole(User decoratedAdmin, UserRole role) {
-        Set<Blueprint> blueprintsInRole = new HashSet<>();
-        for (Blueprint blueprint : decoratedAdmin.getBlueprints()) {
-            if (blueprint.getUserRoles().contains(role)) {
-                blueprintsInRole.add(blueprint);
-            }
-        }
-        decoratedAdmin.getBlueprints().clear();
-        decoratedAdmin.getBlueprints().addAll(blueprintsInRole);
-    }
+    // private void getBlueprintsForRole(User decoratedAdmin, UserRole role) {
+    // Set<Blueprint> blueprintsInRole = new HashSet<>();
+    // for (Blueprint blueprint : decoratedAdmin.getBlueprints()) {
+    // if (blueprint.getUserRoles().contains(role)) {
+    // blueprintsInRole.add(blueprint);
+    // }
+    // }
+    // decoratedAdmin.getBlueprints().clear();
+    // decoratedAdmin.getBlueprints().addAll(blueprintsInRole);
+    // }
 
     private void getSatcksForRole(User decoratedAdmin, UserRole role) {
         Set<Stack> stacksInRole = new HashSet<>();

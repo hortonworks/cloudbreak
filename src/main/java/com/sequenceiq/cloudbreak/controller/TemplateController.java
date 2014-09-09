@@ -61,18 +61,18 @@ public class TemplateController {
         return new ResponseEntity<>(convert(templates), HttpStatus.OK);
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "templates/{templateId}")
+    @RequestMapping(value = "templates/{id}", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<TemplateJson> getTemplate(@ModelAttribute("user") CbUser user, @PathVariable Long templateId) {
-        Template template = templateService.get(templateId);
+    public ResponseEntity<TemplateJson> getTemplate(@ModelAttribute("user") CbUser user, @PathVariable Long id) {
+        Template template = templateService.get(id);
         TemplateJson templateJson = convert(template);
         return new ResponseEntity<>(templateJson, HttpStatus.OK);
     }
 
-    @RequestMapping(method = RequestMethod.DELETE, value = "templates/{templateId}")
+    @RequestMapping(value = "templates/{id}", method = RequestMethod.DELETE)
     @ResponseBody
-    public ResponseEntity<TemplateJson> deleteTemplate(@ModelAttribute("user") CbUser user, @PathVariable Long templateId) {
-        templateService.delete(templateId);
+    public ResponseEntity<TemplateJson> deleteTemplate(@ModelAttribute("user") CbUser user, @PathVariable Long id) {
+        templateService.delete(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

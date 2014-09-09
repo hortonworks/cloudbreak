@@ -11,9 +11,8 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.domain.User;
-import com.sequenceiq.cloudbreak.domain.UserRole;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
@@ -39,56 +38,19 @@ public class DefaultBlueprintService implements BlueprintService {
     private AccountService accountService;
 
     @Override
-    public Blueprint addBlueprint(User user, Blueprint blueprint) {
-        blueprint.setUser(user);
-        if (blueprint.getUserRoles().isEmpty()) {
-            blueprint.getUserRoles().addAll(user.getUserRoles());
-        }
-        blueprint = blueprintRepository.save(blueprint);
-        websocketService.sendToTopicUser(user.getEmail(), WebsocketEndPoint.BLUEPRINT,
-                new StatusMessage(blueprint.getId(), blueprint.getName(), Status.AVAILABLE.name()));
-        return blueprint;
+    public Set<Blueprint> retrievePrivateBlueprints(CbUser user) {
+        return blueprintRepository.findForUser(user.getUsername());
     }
 
     @Override
-    public Set<Blueprint> getAll(User user) {
-        Set<Blueprint> userBluePrints = user.getBlueprints();
-        Set<Blueprint> legacyBlueprints = new HashSet<>();
-        LOGGER.debug("User blueprints: #{}", userBluePrints.size());
-
-        if (user.getUserRoles().contains(UserRole.ACCOUNT_ADMIN)) {
-            LOGGER.debug("Getting company user blueprints for company admin; id: [{}]", user.getId());
-            legacyBlueprints = getCompanyUserBlueprints(user);
-        } else if (user.getUserRoles().contains(UserRole.ACCOUNT_USER)) {
-            LOGGER.debug("Getting company wide blueprints for company user; id: [{}]", user.getId());
-            legacyBlueprints = getCompanyBlueprints(user);
-        }
-        LOGGER.debug("Found #{} legacy blueprints for user [{}]", legacyBlueprints.size(), user.getId());
-        userBluePrints.addAll(legacyBlueprints);
-
-        return userBluePrints;
-    }
-
-    private Set<Blueprint> getCompanyBlueprints(User user) {
-        Set<Blueprint> companyBlueprints = new HashSet<>();
-        User adminWithFilteredData = accountService.accountUserData(user.getAccount().getId(), user.getUserRoles().iterator().next());
-        if (adminWithFilteredData != null) {
-            companyBlueprints = adminWithFilteredData.getBlueprints();
+    public Set<Blueprint> retrieveAccountBlueprints(CbUser user) {
+        Set<Blueprint> blueprints = new HashSet<>();
+        if (user.getRoles().contains("admin")) {
+            blueprints = blueprintRepository.findAllInAccount(user.getAccount());
         } else {
-            LOGGER.debug("There's no company admin for user: [{}]", user.getId());
+            blueprints = blueprintRepository.findPublicsInAccount(user.getAccount());
         }
-        return companyBlueprints;
-    }
-
-    private Set<Blueprint> getCompanyUserBlueprints(User user) {
-        Set<Blueprint> companyUserBlueprints = new HashSet<>();
-        Set<User> companyUsers = accountService.accountUsers(user.getAccount().getId());
-        companyUsers.remove(user);
-        for (User cUser : companyUsers) {
-            LOGGER.debug("Adding blueprints of company user: [{}]", cUser.getId());
-            companyUserBlueprints.addAll(cUser.getBlueprints());
-        }
-        return companyUserBlueprints;
+        return blueprints;
     }
 
     @Override
@@ -101,6 +63,17 @@ public class DefaultBlueprintService implements BlueprintService {
     }
 
     @Override
+    public Blueprint create(CbUser user, Blueprint blueprint) {
+        LOGGER.debug("Creating blueprint: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
+        blueprint.setOwner(user.getUsername());
+        blueprint.setAccount(user.getAccount());
+        Blueprint savedBlueprint = blueprintRepository.save(blueprint);
+        websocketService.sendToTopicUser(user.getUsername(), WebsocketEndPoint.BLUEPRINT,
+                new StatusMessage(savedBlueprint.getId(), savedBlueprint.getName(), Status.AVAILABLE.name()));
+        return savedBlueprint;
+    }
+
+    @Override
     public void delete(Long id) {
         Blueprint blueprint = blueprintRepository.findOne(id);
         if (blueprint == null) {
@@ -109,7 +82,7 @@ public class DefaultBlueprintService implements BlueprintService {
         if (clusterRepository.findAllClusterByBlueprint(blueprint.getId()).isEmpty()) {
 
             blueprintRepository.delete(blueprint);
-            websocketService.sendToTopicUser(blueprint.getUser().getEmail(), WebsocketEndPoint.BLUEPRINT,
+            websocketService.sendToTopicUser(blueprint.getOwner(), WebsocketEndPoint.BLUEPRINT,
                     new StatusMessage(blueprint.getId(), blueprint.getName(), Status.DELETE_COMPLETED.name()));
         } else {
             throw new BadRequestException(String.format(
