@@ -37,6 +37,7 @@ public class AwsTemplateConverter extends AbstractConverter<TemplateJson, AwsTem
         templateJson.setParameters(props);
         templateJson.setCloudPlatform(CloudPlatform.AWS);
         templateJson.setDescription(entity.getDescription() == null ? "" : entity.getDescription());
+        templateJson.setPublicInAccount(entity.isPublicInAccount());
         return templateJson;
     }
 
@@ -58,6 +59,7 @@ public class AwsTemplateConverter extends AbstractConverter<TemplateJson, AwsTem
                 && json.getParameters().get(AwsTemplateParam.SPOT_PRICE.getName()) != null
                 ? Double.valueOf(json.getParameters().get(AwsTemplateParam.SPOT_PRICE.getName()).toString()) : null;
         awsTemplate.setSpotPrice(spotPrice);
+        awsTemplate.setPublicInAccount(json.isPublicInAccount());
         return awsTemplate;
     }
 }

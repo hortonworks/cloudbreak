@@ -30,8 +30,6 @@ import org.hibernate.validator.constraints.NotEmpty;
         @NamedQuery(
                 name = "User.findOneWithLists",
                 query = "SELECT u FROM User u "
-                        + "LEFT JOIN FETCH u.azureTemplates "
-                        + "LEFT JOIN FETCH u.awsTemplates "
                         + "LEFT JOIN FETCH u.stacks "
                         + "LEFT JOIN FETCH u.blueprints "
                         + "LEFT JOIN FETCH u.awsCredentials "
@@ -76,15 +74,6 @@ public class User implements ProvisionEntity {
 
     private Date registrationDate;
 
-    @OneToMany(mappedBy = "azureTemplateOwner", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<AzureTemplate> azureTemplates = new HashSet<>();
-
-    @OneToMany(mappedBy = "awsTemplateOwner", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<AwsTemplate> awsTemplates = new HashSet<>();
-
-    @OneToMany(mappedBy = "gccTemplateOwner", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<GccTemplate> gccTemplates = new HashSet<>();
-
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Stack> stacks = new HashSet<>();
 
@@ -111,9 +100,6 @@ public class User implements ProvisionEntity {
         this.email = user.email;
         this.password = user.password;
         this.confToken = user.confToken;
-        this.awsTemplates = user.awsTemplates;
-        this.azureTemplates = user.azureTemplates;
-        this.gccTemplates = user.gccTemplates;
         this.awsCredentials = user.awsCredentials;
         this.azureCredentials = user.azureCredentials;
         this.gccCredentials = user.gccCredentials;
@@ -167,22 +153,6 @@ public class User implements ProvisionEntity {
         this.email = email;
     }
 
-    public Set<AwsTemplate> getAwsTemplates() {
-        return awsTemplates;
-    }
-
-    public void setAwsTemplates(Set<AwsTemplate> awsTemplates) {
-        this.awsTemplates = awsTemplates;
-    }
-
-    public Set<AzureTemplate> getAzureTemplates() {
-        return azureTemplates;
-    }
-
-    public void setAzureTemplates(Set<AzureTemplate> azureTemplates) {
-        this.azureTemplates = azureTemplates;
-    }
-
     public Set<AzureCredential> getAzureCredentials() {
         return azureCredentials;
     }
@@ -194,14 +164,6 @@ public class User implements ProvisionEntity {
     public Set<AwsCredential> getAwsCredentials() {
 
         return awsCredentials;
-    }
-
-    public Set<GccTemplate> getGccTemplates() {
-        return gccTemplates;
-    }
-
-    public void setGccTemplates(Set<GccTemplate> gccTemplates) {
-        this.gccTemplates = gccTemplates;
     }
 
     public Set<GccCredential> getGccCredentials() {
@@ -238,10 +200,6 @@ public class User implements ProvisionEntity {
 
     public void setClusters(Set<Cluster> clusters) {
         this.clusters = clusters;
-    }
-
-    public String emailAsFolder() {
-        return email.replaceAll("@", "_").replace(".", "_");
     }
 
     public String getConfToken() {
