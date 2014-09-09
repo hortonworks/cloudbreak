@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.service.events;
 
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +14,7 @@ import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.repository.EventRepository;
+import com.sequenceiq.cloudbreak.repository.CloudbreakEventRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 
 import reactor.core.Reactor;
@@ -26,10 +28,18 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     private StackRepository stackRepository;
 
     @Autowired
-    private EventRepository eventRepository;
+    private CloudbreakEventRepository eventRepository;
 
     @Autowired
     private Reactor reactor;
+
+    @Override
+    public void fireCloudbreakEvent(Long stackId, String eventType, String eventMessage) {
+        CloudbreakEventData eventData = new CloudbreakEventData(stackId, eventType, eventMessage);
+        LOGGER.info("Fireing cloudbreak event: {}", eventData);
+        Event reactorEvent = Event.wrap(eventData);
+        reactor.notify(ReactorConfig.CLOUDBREAK_EVENT, reactorEvent);
+    }
 
     @Override
     public CloudbreakEvent createStackEvent(Long stackId, String eventType, String eventMessage) {
@@ -39,6 +49,12 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
         stackEvent = eventRepository.save(stackEvent);
         LOGGER.debug("Stack event saved: {}", stackEvent);
         return stackEvent;
+    }
+
+    @Override
+    public List<CloudbreakEvent> cloudbreakEvents(Long userId, long since) {
+        List<CloudbreakEvent> events = eventRepository.cloudbreakEvents(userId, since);
+        return null != events ? events : Collections.EMPTY_LIST;
     }
 
     private CloudbreakEvent createStackEvent(Stack stack, String eventType, String eventMessage) {
@@ -87,13 +103,5 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
         stackEvent.setVmType(vmType);
         stackEvent.setRegion(region);
         stackEvent.setCloud(stack.getTemplate().cloudPlatform().name());
-    }
-
-    @Override
-    public void fireCloudbreakEvent(Long stackId, String eventType, String eventMessage) {
-        CloudbreakEventData eventData = new CloudbreakEventData(stackId, eventType, eventMessage);
-        LOGGER.info("Fireing cloudbreak event: {}", eventData);
-        Event reactorEvent = Event.wrap(eventData);
-        reactor.notify(ReactorConfig.CLOUDBREAK_EVENT, reactorEvent);
     }
 }

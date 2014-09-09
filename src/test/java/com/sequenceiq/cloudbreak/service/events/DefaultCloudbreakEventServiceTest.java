@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.UserRole;
-import com.sequenceiq.cloudbreak.repository.EventRepository;
+import com.sequenceiq.cloudbreak.repository.CloudbreakEventRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.ServiceTestUtils;
 
@@ -29,7 +29,7 @@ public class DefaultCloudbreakEventServiceTest {
     private DefaultCloudbreakEventService eventService;
 
     @Mock
-    private EventRepository eventRepository;
+    private CloudbreakEventRepository eventRepository;
 
     @Mock
     private StackRepository stackRepository;
