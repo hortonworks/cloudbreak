@@ -13,7 +13,6 @@ import com.sequenceiq.cloudbreak.service.cluster.handler.UpdateAmbariHostsFailur
 import com.sequenceiq.cloudbreak.service.cluster.handler.UpdateAmbariHostsRequestHandler;
 import com.sequenceiq.cloudbreak.service.cluster.handler.UpdateAmbariHostsSuccessHandler;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventHandler;
-import com.sequenceiq.cloudbreak.service.history.HistoryEventHandler;
 import com.sequenceiq.cloudbreak.service.stack.handler.AddInstancesCompleteHandler;
 import com.sequenceiq.cloudbreak.service.stack.handler.AmbariRoleAllocationCompleteHandler;
 import com.sequenceiq.cloudbreak.service.stack.handler.MetadataSetupCompleteHandler;
@@ -95,9 +94,6 @@ public class ReactorInitializer implements InitializingBean {
     private UpdateAmbariHostsSuccessHandler updateAmbariHostsSuccessHandler;
 
     @Autowired
-    private HistoryEventHandler historyEventHandler;
-
-    @Autowired
     private CloudbreakEventHandler cloudbreakEventHandler;
 
     @Autowired
@@ -130,7 +126,6 @@ public class ReactorInitializer implements InitializingBean {
         reactor.on($(ReactorConfig.UPDATE_AMBARI_HOSTS_SUCCESS_EVENT), updateAmbariHostsSuccessHandler);
         reactor.on($(ReactorConfig.UPDATE_AMBARI_HOSTS_FAILED_EVENT), updateAmbariHostsFailureHandler);
 
-        reactor.on($(ReactorConfig.HISTORY_EVENT), historyEventHandler);
         reactor.on($(ReactorConfig.CLOUDBREAK_EVENT), cloudbreakEventHandler);
 
     }
