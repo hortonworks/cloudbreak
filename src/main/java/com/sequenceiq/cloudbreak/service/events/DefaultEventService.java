@@ -7,16 +7,19 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
-import com.sequenceiq.cloudbreak.domain.Event;
+import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.EventRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 
+import reactor.core.Reactor;
+import reactor.event.Event;
+
 @Service
 public class DefaultEventService implements EventService {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultEventService.class);
 
     @Autowired
@@ -25,19 +28,21 @@ public class DefaultEventService implements EventService {
     @Autowired
     private EventRepository eventRepository;
 
+    @Autowired
+    private Reactor reactor;
+
     @Override
-    public Event createStackEvent(Long stackId, String eventType, String eventMessage) {
+    public CloudbreakEvent createStackEvent(Long stackId, String eventType, String eventMessage) {
         LOGGER.debug("Create stack event for stackId {}, eventType {}, eventMessage {}", stackId, eventType, eventMessage);
         Stack stack = stackRepository.findById(stackId);
-        Event stackEvent = createStackEvent(stack, eventType, eventMessage);
+        CloudbreakEvent stackEvent = createStackEvent(stack, eventType, eventMessage);
         stackEvent = eventRepository.save(stackEvent);
         LOGGER.debug("Stack event saved: {}", stackEvent);
-
-        return  stackEvent;
+        return stackEvent;
     }
 
-    private Event createStackEvent(Stack stack, String eventType, String eventMessage) {
-        Event stackEvent = new Event();
+    private CloudbreakEvent createStackEvent(Stack stack, String eventType, String eventMessage) {
+        CloudbreakEvent stackEvent = new CloudbreakEvent();
 
         stackEvent.setEventTimestamp(Calendar.getInstance().getTimeInMillis());
         stackEvent.setEventMessage(eventMessage);
@@ -55,7 +60,7 @@ public class DefaultEventService implements EventService {
         return stackEvent;
     }
 
-    private void populateClusterData(Event stackEvent, Stack stack) {
+    private void populateClusterData(CloudbreakEvent stackEvent, Stack stack) {
         if (null != stack.getCluster()) {
             stackEvent.setBlueprintId(stack.getCluster().getBlueprint().getId());
             stackEvent.setBlueprintName(stack.getCluster().getBlueprint().getBlueprintName());
@@ -64,7 +69,7 @@ public class DefaultEventService implements EventService {
         }
     }
 
-    private void populateTemplateData(Event stackEvent, Stack stack) {
+    private void populateTemplateData(CloudbreakEvent stackEvent, Stack stack) {
         String vmType = null;
         String region = null;
         switch (stack.getTemplate().cloudPlatform()) {
@@ -86,7 +91,14 @@ public class DefaultEventService implements EventService {
 
 
     @Override
-    public Event createClusterEvent(Long stackId, String eventType, String eventMessage) {
+    public com.sequenceiq.cloudbreak.domain.CloudbreakEvent createClusterEvent(Long stackId, String eventType, String eventMessage) {
         throw new UnsupportedOperationException("Not yet implemented!");
+    }
+
+    @Override
+    public void fireCloudbreakEvent(Long stackId, String eventType, String eventMessage) {
+        CloudbreakEventData eventData = new CloudbreakEventData(stackId, eventType, eventMessage);
+        Event reactorEvent = Event.wrap(eventData);
+        reactor.notify(ReactorConfig.CLOUDBREAK_EVENT, reactorEvent);
     }
 }

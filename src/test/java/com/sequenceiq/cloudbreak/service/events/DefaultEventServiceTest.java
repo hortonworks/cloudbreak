@@ -13,8 +13,8 @@ import org.mockito.MockitoAnnotations;
 import com.sequenceiq.cloudbreak.domain.Account;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.Event;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.User;
@@ -35,7 +35,7 @@ public class DefaultEventServiceTest {
     private StackRepository stackRepository;
 
     @Captor
-    private ArgumentCaptor<Event> captor;
+    private ArgumentCaptor<CloudbreakEvent> captor;
 
     @Before
     public void setUp() throws Exception {
@@ -58,7 +58,7 @@ public class DefaultEventServiceTest {
 
         //THEN
         BDDMockito.verify(eventRepository).save(captor.capture());
-        Event event = captor.getValue();
+        CloudbreakEvent event = captor.getValue();
 
         Assert.assertNotNull(event);
         Assert.assertEquals("The user name is not the expected", "John Doe", event.getUserName());
@@ -80,7 +80,7 @@ public class DefaultEventServiceTest {
 
         //THEN
         BDDMockito.verify(eventRepository).save(captor.capture());
-        Event event = captor.getValue();
+        CloudbreakEvent event = captor.getValue();
 
         Assert.assertNotNull(event);
         Assert.assertEquals("The user name is not the expected", "John Doe", event.getUserName());
@@ -104,7 +104,7 @@ public class DefaultEventServiceTest {
 
         //THEN
         BDDMockito.verify(eventRepository).save(captor.capture());
-        Event event = captor.getValue();
+        com.sequenceiq.cloudbreak.domain.CloudbreakEvent event = captor.getValue();
 
         Assert.assertNotNull(event);
         Assert.assertEquals("The user name is not the expected", "John Doe", event.getUserName());

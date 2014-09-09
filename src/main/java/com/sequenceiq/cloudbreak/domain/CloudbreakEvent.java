@@ -5,7 +5,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
 @Entity
-public class Event implements ProvisionEntity {
+public class CloudbreakEvent implements ProvisionEntity {
 
     @Id
     @GeneratedValue

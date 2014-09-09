@@ -1,10 +1,12 @@
 package com.sequenceiq.cloudbreak.service.events;
 
-import com.sequenceiq.cloudbreak.domain.Event;
+import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 
 public interface EventService {
 
-    Event createStackEvent(Long stackId, String eventType, String eventMessage);
+    CloudbreakEvent createStackEvent(Long stackId, String eventType, String eventMessage);
 
-    Event createClusterEvent(Long stackId, String eventType, String eventMessage);
+    com.sequenceiq.cloudbreak.domain.CloudbreakEvent createClusterEvent(Long stackId, String eventType, String eventMessage);
+
+    void fireCloudbreakEvent(Long stackId, String eventType, String eventMessage);
 }

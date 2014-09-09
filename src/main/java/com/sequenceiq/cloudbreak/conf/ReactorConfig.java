@@ -36,6 +36,7 @@ public class ReactorConfig {
     public static final String UPDATE_AMBARI_HOSTS_FAILED_EVENT = "UPDATE_AMBARI_HOSTS_FAILED";
 
     public static final String HISTORY_EVENT = "HISTORY_EVENT";
+    public static final String CLOUDBREAK_EVENT = "CLOUDBREAK_EVENT";
 
     @Bean
     public Environment env() {
