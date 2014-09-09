@@ -1,26 +1,34 @@
 package com.sequenceiq.cloudbreak.domain;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.persistence.Column;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 @Entity
 @Table(name = "Blueprint", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "blueprint_user", "name" })
+        @UniqueConstraint(columnNames = { "account", "name" })
+})
+@NamedQueries({
+        @NamedQuery(
+                name = "Blueprint.findForUser",
+                query = "SELECT b FROM Blueprint b "
+                        + "WHERE b.owner= :user"),
+        @NamedQuery(
+                name = "Blueprint.findPublicsInAccount",
+                query = "SELECT b FROM Blueprint b "
+                        + "WHERE b.account= :account "
+                        + "AND b.publicInAccount= true"),
+        @NamedQuery(
+                name = "Blueprint.findAllInAccount",
+                query = "SELECT b FROM Blueprint b "
+                        + "WHERE b.account= :account ")
 })
 public class Blueprint implements ProvisionEntity {
 
@@ -29,25 +37,22 @@ public class Blueprint implements ProvisionEntity {
     @SequenceGenerator(name = "blueprint_generator", sequenceName = "blueprint_table")
     private Long id;
 
+    @Column(nullable = false)
+    private String name;
+
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String blueprintText;
 
     private String blueprintName;
 
-    @Column(nullable = false)
-    private String name;
-
     private String description;
 
     private int hostGroupCount;
 
-    @ManyToOne
-    @JoinColumn(name = "blueprint_user")
-    private User user;
+    private String owner;
+    private String account;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @Enumerated(EnumType.STRING)
-    private List<UserRole> userRoles = new ArrayList<>();
+    private boolean publicInAccount;
 
     public Blueprint() {
 
@@ -93,14 +98,6 @@ public class Blueprint implements ProvisionEntity {
         this.blueprintName = blueprintName;
     }
 
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
     public int getHostGroupCount() {
         return hostGroupCount;
     }
@@ -109,11 +106,27 @@ public class Blueprint implements ProvisionEntity {
         this.hostGroupCount = hostGroupCount;
     }
 
-    public List<UserRole> getUserRoles() {
-        return userRoles;
+    public String getOwner() {
+        return owner;
     }
 
-    public void setUserRoles(List<UserRole> userRoles) {
-        this.userRoles = userRoles;
+    public void setOwner(String owner) {
+        this.owner = owner;
+    }
+
+    public String getAccount() {
+        return account;
+    }
+
+    public void setAccount(String account) {
+        this.account = account;
+    }
+
+    public boolean isPublicInAccount() {
+        return publicInAccount;
+    }
+
+    public void setPublicInAccount(boolean publicInAccount) {
+        this.publicInAccount = publicInAccount;
     }
 }

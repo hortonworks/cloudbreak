@@ -31,7 +31,6 @@ import org.hibernate.validator.constraints.NotEmpty;
                 name = "User.findOneWithLists",
                 query = "SELECT u FROM User u "
                         + "LEFT JOIN FETCH u.stacks "
-                        + "LEFT JOIN FETCH u.blueprints "
                         + "LEFT JOIN FETCH u.awsCredentials "
                         + "LEFT JOIN FETCH u.azureCredentials "
                         + "LEFT JOIN FETCH u.clusters "
@@ -78,9 +77,6 @@ public class User implements ProvisionEntity {
     private Set<Stack> stacks = new HashSet<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Blueprint> blueprints = new HashSet<>();
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Cluster> clusters = new HashSet<>();
 
     @ElementCollection(fetch = FetchType.EAGER)
@@ -104,7 +100,6 @@ public class User implements ProvisionEntity {
         this.azureCredentials = user.azureCredentials;
         this.gccCredentials = user.gccCredentials;
         this.stacks = user.stacks;
-        this.blueprints = user.blueprints;
         this.clusters = user.clusters;
         this.status = user.getStatus();
         this.lastLogin = user.lastLogin;
@@ -184,14 +179,6 @@ public class User implements ProvisionEntity {
 
     public void setStacks(Set<Stack> stacks) {
         this.stacks = stacks;
-    }
-
-    public Set<Blueprint> getBlueprints() {
-        return blueprints;
-    }
-
-    public void setBlueprints(Set<Blueprint> blueprints) {
-        this.blueprints = blueprints;
     }
 
     public Set<Cluster> getClusters() {
