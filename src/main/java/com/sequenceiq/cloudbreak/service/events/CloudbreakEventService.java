@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.service.events;
 
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 
-public interface EventService {
+public interface CloudbreakEventService {
 
     CloudbreakEvent createStackEvent(Long stackId, String eventType, String eventMessage);
 

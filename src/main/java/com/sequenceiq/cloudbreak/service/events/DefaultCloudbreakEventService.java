@@ -19,8 +19,8 @@ import reactor.core.Reactor;
 import reactor.event.Event;
 
 @Service
-public class DefaultEventService implements EventService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultEventService.class);
+public class DefaultCloudbreakEventService implements CloudbreakEventService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCloudbreakEventService.class);
 
     @Autowired
     private StackRepository stackRepository;

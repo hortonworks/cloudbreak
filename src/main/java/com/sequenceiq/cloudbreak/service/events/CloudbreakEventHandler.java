@@ -14,7 +14,7 @@ public class CloudbreakEventHandler implements Consumer<Event<CloudbreakEventDat
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakEventHandler.class);
 
     @Autowired
-    private EventService eventService;
+    private CloudbreakEventService eventService;
 
     @Override
     public void accept(Event<CloudbreakEventData> cloudbreakEvent) {

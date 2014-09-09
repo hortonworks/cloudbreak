@@ -23,10 +23,10 @@ import com.sequenceiq.cloudbreak.repository.EventRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.ServiceTestUtils;
 
-public class DefaultEventServiceTest {
+public class DefaultCloudbreakEventServiceTest {
 
     @InjectMocks
-    private DefaultEventService eventService;
+    private DefaultCloudbreakEventService eventService;
 
     @Mock
     private EventRepository eventRepository;
@@ -39,7 +39,7 @@ public class DefaultEventServiceTest {
 
     @Before
     public void setUp() throws Exception {
-        eventService = new DefaultEventService();
+        eventService = new DefaultCloudbreakEventService();
         MockitoAnnotations.initMocks(this);
     }
 
