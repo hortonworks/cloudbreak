@@ -77,10 +77,10 @@ public class SimpleTemplateServiceTest {
         user = new User();
         awsTemplate = new AwsTemplate();
         awsTemplate.setId(1L);
-        awsTemplate.setUser(user);
+        awsTemplate.setOwner(user);
         azureTemplate = new AzureTemplate();
         azureTemplate.setId(1L);
-        azureTemplate.setUser(user);
+        azureTemplate.setOwner(user);
     }
 
     @Test

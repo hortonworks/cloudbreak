@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import java.security.Principal;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -52,11 +51,11 @@ public class BlueprintController {
 
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<Set<BlueprintJson>> retrieveBlueprints(Principal principal, HttpServletRequest request) {
+    public ResponseEntity<Set<BlueprintJson>> retrieveBlueprints(@CurrentUser User user, HttpServletRequest request) {
         Set<Blueprint> blueprints = new HashSet<>();
-        // User loadedUser = userRepository.findOneWithLists(user.getId());
+        User loadedUser = userRepository.findOneWithLists(user.getId());
 
-        blueprints.add(blueprintService.get(50l));
+        blueprints = blueprintService.getAll(loadedUser);
 
         return new ResponseEntity<>(blueprintConverter.convertAllEntityToJson(blueprints), HttpStatus.OK);
     }

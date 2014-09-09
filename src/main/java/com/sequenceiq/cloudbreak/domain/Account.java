@@ -24,8 +24,6 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
         @NamedQuery(
                 name = "Account.accountUsers",
                 query = "SELECT cu FROM User cu "
-                        + "LEFT JOIN FETCH cu.azureTemplates "
-                        + "LEFT JOIN FETCH cu.awsTemplates "
                         + "LEFT JOIN FETCH cu.stacks "
                         + "LEFT JOIN FETCH cu.blueprints "
                         + "LEFT JOIN FETCH cu.awsCredentials "

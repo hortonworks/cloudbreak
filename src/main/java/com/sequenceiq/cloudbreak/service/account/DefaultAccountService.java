@@ -10,9 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.domain.Account;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
-import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
-import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.User;
@@ -56,8 +54,8 @@ public class DefaultAccountService implements AccountService {
 
         getAwsCredentialsForRole(decoratedAdmin, role);
         getAzureCredentialsForRole(decoratedAdmin, role);
-        getAwsTemplatesForRole(decoratedAdmin, role);
-        getAzureTemplatesForRole(decoratedAdmin, role);
+        // getAwsTemplatesForRole(decoratedAdmin, role);
+        // getAzureTemplatesForRole(decoratedAdmin, role);
         getSatcksForRole(decoratedAdmin, role);
         getBlueprintsForRole(decoratedAdmin, role);
 
@@ -94,27 +92,28 @@ public class DefaultAccountService implements AccountService {
         decoratedAdmin.getStacks().addAll(stacksInRole);
     }
 
-    private void getAzureTemplatesForRole(User decoratedAdmin, UserRole role) {
-        Set<AzureTemplate> azureTemplatesInRole = new HashSet<>();
-        for (AzureTemplate azureTemplate : decoratedAdmin.getAzureTemplates()) {
-            if (azureTemplate.getUserRoles().contains(role)) {
-                azureTemplatesInRole.add(azureTemplate);
-            }
-        }
-        decoratedAdmin.getAzureTemplates().clear();
-        decoratedAdmin.getAzureTemplates().addAll(azureTemplatesInRole);
-    }
-
-    private void getAwsTemplatesForRole(User decoratedAdmin, UserRole role) {
-        Set<AwsTemplate> awsTemplatesInRole = new HashSet<>();
-        for (AwsTemplate awsTemplate : decoratedAdmin.getAwsTemplates()) {
-            if (awsTemplate.getUserRoles().contains(role)) {
-                awsTemplatesInRole.add(awsTemplate);
-            }
-        }
-        decoratedAdmin.getAwsTemplates().clear();
-        decoratedAdmin.getAwsTemplates().addAll(awsTemplatesInRole);
-    }
+    // private void getAzureTemplatesForRole(User decoratedAdmin, UserRole role)
+    // {
+    // Set<AzureTemplate> azureTemplatesInRole = new HashSet<>();
+    // for (AzureTemplate azureTemplate : decoratedAdmin.getAzureTemplates()) {
+    // if (azureTemplate.getUserRoles().contains(role)) {
+    // azureTemplatesInRole.add(azureTemplate);
+    // }
+    // }
+    // decoratedAdmin.getAzureTemplates().clear();
+    // decoratedAdmin.getAzureTemplates().addAll(azureTemplatesInRole);
+    // }
+    //
+    // private void getAwsTemplatesForRole(User decoratedAdmin, UserRole role) {
+    // Set<AwsTemplate> awsTemplatesInRole = new HashSet<>();
+    // for (AwsTemplate awsTemplate : decoratedAdmin.getAwsTemplates()) {
+    // if (awsTemplate.getUserRoles().contains(role)) {
+    // awsTemplatesInRole.add(awsTemplate);
+    // }
+    // }
+    // decoratedAdmin.getAwsTemplates().clear();
+    // decoratedAdmin.getAwsTemplates().addAll(awsTemplatesInRole);
+    // }
 
     private void getAzureCredentialsForRole(User decoratedAdmin, UserRole role) {
         Set<AzureCredential> azureCredentialsInRole = new HashSet<>();

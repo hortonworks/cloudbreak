@@ -6,6 +6,9 @@ import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStack
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.SERVICENAME;
 
 import java.util.ArrayList;
+import groovyx.net.http.HttpResponseDecorator;
+import groovyx.net.http.HttpResponseException;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +18,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import reactor.core.Reactor;
+import reactor.event.Event;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -39,11 +45,6 @@ import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteComplete;
 import com.sequenceiq.cloudbreak.service.stack.flow.AzureInstanceStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.flow.AzureInstances;
 
-import groovyx.net.http.HttpResponseDecorator;
-import groovyx.net.http.HttpResponseException;
-import reactor.core.Reactor;
-import reactor.event.Event;
-
 @Service
 public class AzureConnector implements CloudPlatformConnector {
 
@@ -64,7 +65,7 @@ public class AzureConnector implements CloudPlatformConnector {
 
     @Override
     public StackDescription describeStackWithResources(User user, Stack stack, Credential credential) {
-        String filePath = AzureCertificateService.getUserJksFileName(credential, user.emailAsFolder());
+        String filePath = AzureCertificateService.getUserJksFileName(credential, azureStackUtil.emailAsFolder(user.getEmail()));
         AzureClient azureClient = azureStackUtil.createAzureClient(credential, filePath);
         DetailedAzureStackDescription detailedAzureStackDescription = new DetailedAzureStackDescription();
         try {
@@ -115,7 +116,7 @@ public class AzureConnector implements CloudPlatformConnector {
 
     @Override
     public void deleteStack(User user, Stack stack, Credential credential) {
-        String filePath = AzureCertificateService.getUserJksFileName(credential, user.emailAsFolder());
+        String filePath = AzureCertificateService.getUserJksFileName(credential, azureStackUtil.emailAsFolder(user.getEmail()));
         AzureClient azureClient = azureStackUtil.createAzureClient(credential, filePath);
         deleteVirtualMachines(user, stack, azureClient);
         deleteCloudServices(user, stack, (AzureCredential) credential, azureClient);
