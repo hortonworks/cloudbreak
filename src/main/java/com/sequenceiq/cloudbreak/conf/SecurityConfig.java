@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpEntity;
@@ -40,28 +41,38 @@ public class SecurityConfig {
     @EnableResourceServer
     protected static class ResourceServerConfiguration extends ResourceServerConfigurerAdapter {
 
+        @Value("${cb.client.id}")
+        private String clientId;
+
+        @Value("${cb.client.secret}")
+        private String clientSecret;
+
+        @Value("${cb.identity.server.url}")
+        private String identityServerUrl;
+
         @Bean
         RemoteTokenServices remoteTokenServices() {
             RemoteTokenServices rts = new RemoteTokenServices();
-            rts.setClientId("cloudbreak");
-            rts.setClientSecret("cloudbreaksecret");
-            rts.setCheckTokenEndpointUrl("http://172.20.0.27:8080/check_token");
+            rts.setClientId(clientId);
+            rts.setClientSecret(clientSecret);
+            rts.setCheckTokenEndpointUrl(identityServerUrl + "/check_token");
             return rts;
         }
 
         @Override
         public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
-            resources.resourceId("cloudbreak");
+            resources.resourceId(clientId);
             resources.tokenServices(remoteTokenServices());
         }
 
         @Override
         public void configure(HttpSecurity http) throws Exception {
-            http.csrf().disable()
+            http.csrf()
+                    .disable()
                     .headers()
                     .contentTypeOptions()
                     .and()
-                    .addFilterAfter(new ScimAccountGroupReaderFilter(), AbstractPreAuthenticatedProcessingFilter.class)
+                    .addFilterAfter(new ScimAccountGroupReaderFilter(clientId, clientSecret, identityServerUrl), AbstractPreAuthenticatedProcessingFilter.class)
                     .authorizeRequests()
                     .antMatchers("/user/blueprints").access("#oauth2.hasScope('cloudbreak.blueprints')")
                     .antMatchers("/account/blueprints").access("#oauth2.hasScope('cloudbreak.blueprints')")
@@ -84,6 +95,16 @@ public class SecurityConfig {
         private static final int ACCOUNT_PART = 2;
         private static final int ROLE_PART = 3;
 
+        private String clientId;
+        private String clientSecret;
+        private String identityServerUrl;
+
+        public ScimAccountGroupReaderFilter(String clientId, String clientSecret, String identityServerUrl) {
+            this.clientId = clientId;
+            this.clientSecret = clientSecret;
+            this.identityServerUrl = identityServerUrl;
+        }
+
         @SuppressWarnings("unchecked")
         @Override
         protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException,
@@ -98,16 +119,16 @@ public class SecurityConfig {
                 userInfoHeaders.set("Authorization", "Bearer " + authDetails.getTokenValue());
 
                 Map<String, String> userInfoResponse = restTemplate.exchange(
-                        "http://172.20.0.27:8080/userinfo",
+                        identityServerUrl + "/userinfo",
                         HttpMethod.GET,
                         new HttpEntity<>(userInfoHeaders),
                         Map.class).getBody();
 
                 HttpHeaders tokenRequestHeaders = new HttpHeaders();
-                tokenRequestHeaders.set("Authorization", getAuthorizationHeader("cloudbreak", "cloudbreaksecret"));
+                tokenRequestHeaders.set("Authorization", getAuthorizationHeader(clientId, clientSecret));
 
                 Map<String, String> tokenResponse = restTemplate.exchange(
-                        "http://172.20.0.27:8080/oauth/token?grant_type=client_credentials",
+                        identityServerUrl + "/oauth/token?grant_type=client_credentials",
                         HttpMethod.POST,
                         new HttpEntity<>(tokenRequestHeaders),
                         Map.class).getBody();
@@ -116,7 +137,7 @@ public class SecurityConfig {
                 scimRequestHeaders.set("Authorization", "Bearer " + tokenResponse.get("access_token"));
 
                 String scimResponse = restTemplate.exchange(
-                        "http://172.20.0.27:8080/Users/" + userInfoResponse.get("user_id"),
+                        identityServerUrl + "/Users/" + userInfoResponse.get("user_id"),
                         HttpMethod.GET,
                         new HttpEntity<>(scimRequestHeaders),
                         String.class).getBody();
