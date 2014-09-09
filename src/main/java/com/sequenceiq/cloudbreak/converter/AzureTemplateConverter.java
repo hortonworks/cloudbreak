@@ -32,6 +32,7 @@ public class AzureTemplateConverter extends AbstractConverter<TemplateJson, Azur
         azureTemplateJson.setDescription(entity.getDescription() == null ? "" : entity.getDescription());
         azureTemplateJson.setVolumeCount(entity.getVolumeCount());
         azureTemplateJson.setVolumeSize(entity.getVolumeSize());
+        azureTemplateJson.setPublicInAccount(entity.isPublicInAccount());
         return azureTemplateJson;
     }
 
@@ -51,10 +52,10 @@ public class AzureTemplateConverter extends AbstractConverter<TemplateJson, Azur
         if (azureVmType.maxDiskSize() < azureTemplate.getVolumeCount()) {
             throw new BadRequestException(
                     String.format("Azure not support this volumesize on the %s. The max suppported size is: %s",
-                    azureVmType.vmType(),
-                    azureVmType.maxDiskSize())
-            );
+                            azureVmType.vmType(),
+                            azureVmType.maxDiskSize()));
         }
+        azureTemplate.setPublicInAccount(json.isPublicInAccount());
         return azureTemplate;
     }
 

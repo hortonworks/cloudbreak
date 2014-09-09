@@ -10,6 +10,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -23,6 +24,12 @@ import com.sequenceiq.cloudbreak.controller.json.ValidationResult;
 public class ExceptionControllerAdvice {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExceptionControllerAdvice.class);
+
+    @ExceptionHandler({ AuthenticationCredentialsNotFoundException.class })
+    public ResponseEntity<ExceptionResult> unauthorized(Exception e) {
+        LOGGER.error(e.getMessage(), e);
+        return new ResponseEntity<>(new ExceptionResult(e.getMessage()), HttpStatus.UNAUTHORIZED);
+    }
 
     @ExceptionHandler({ HttpMessageNotReadableException.class, BadRequestException.class })
     public ResponseEntity<ExceptionResult> badRequest(Exception e) {

@@ -65,8 +65,10 @@ public class SecurityConfig {
                     .authorizeRequests()
                     .antMatchers("/user/blueprints").access("#oauth2.hasScope('cloudbreak.blueprints')")
                     .antMatchers("/account/blueprints").access("#oauth2.hasScope('cloudbreak.blueprints')")
+                    .antMatchers("/blueprints/**").access("#oauth2.hasScope('cloudbreak.blueprints')")
                     .antMatchers("/user/templates").access("#oauth2.hasScope('cloudbreak.templates')")
                     .antMatchers("/account/templates").access("#oauth2.hasScope('cloudbreak.templates')")
+                    .antMatchers("/templates/**").access("#oauth2.hasScope('cloudbreak.templates')")
                     .antMatchers("/notification/**").permitAll()
                     .antMatchers("/sns/**").permitAll()
                     .antMatchers(HttpMethod.POST, "/users/**").permitAll()
@@ -79,56 +81,66 @@ public class SecurityConfig {
 
     private static class ScimAccountGroupReaderFilter extends OncePerRequestFilter {
 
+        private static final int ACCOUNT_PART = 2;
+        private static final int ROLE_PART = 3;
+
         @SuppressWarnings("unchecked")
         @Override
         protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException,
                 IOException {
-            String username = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            OAuth2AuthenticationDetails authDetails = (OAuth2AuthenticationDetails) SecurityContextHolder.getContext().getAuthentication().getDetails();
+            if (SecurityContextHolder.getContext().getAuthentication() != null) {
+                String username = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+                OAuth2AuthenticationDetails authDetails = (OAuth2AuthenticationDetails) SecurityContextHolder.getContext().getAuthentication().getDetails();
 
-            RestTemplate restTemplate = new RestTemplate();
+                RestTemplate restTemplate = new RestTemplate();
 
-            HttpHeaders userInfoHeaders = new HttpHeaders();
-            userInfoHeaders.set("Authorization", "Bearer " + authDetails.getTokenValue());
+                HttpHeaders userInfoHeaders = new HttpHeaders();
+                userInfoHeaders.set("Authorization", "Bearer " + authDetails.getTokenValue());
 
-            Map<String, String> userInfoResponse = restTemplate.exchange(
-                    "http://172.20.0.27:8080/userinfo",
-                    HttpMethod.GET,
-                    new HttpEntity<>(userInfoHeaders),
-                    Map.class).getBody();
+                Map<String, String> userInfoResponse = restTemplate.exchange(
+                        "http://172.20.0.27:8080/userinfo",
+                        HttpMethod.GET,
+                        new HttpEntity<>(userInfoHeaders),
+                        Map.class).getBody();
 
-            HttpHeaders tokenRequestHeaders = new HttpHeaders();
-            tokenRequestHeaders.set("Authorization", getAuthorizationHeader("cloudbreak", "cloudbreaksecret"));
+                HttpHeaders tokenRequestHeaders = new HttpHeaders();
+                tokenRequestHeaders.set("Authorization", getAuthorizationHeader("cloudbreak", "cloudbreaksecret"));
 
-            Map<String, String> tokenResponse = restTemplate.exchange(
-                    "http://172.20.0.27:8080/oauth/token?grant_type=client_credentials",
-                    HttpMethod.POST,
-                    new HttpEntity<>(tokenRequestHeaders),
-                    Map.class).getBody();
+                Map<String, String> tokenResponse = restTemplate.exchange(
+                        "http://172.20.0.27:8080/oauth/token?grant_type=client_credentials",
+                        HttpMethod.POST,
+                        new HttpEntity<>(tokenRequestHeaders),
+                        Map.class).getBody();
 
-            HttpHeaders scimRequestHeaders = new HttpHeaders();
-            scimRequestHeaders.set("Authorization", "Bearer " + tokenResponse.get("access_token"));
+                HttpHeaders scimRequestHeaders = new HttpHeaders();
+                scimRequestHeaders.set("Authorization", "Bearer " + tokenResponse.get("access_token"));
 
-            String scimResponse = restTemplate.exchange(
-                    "http://172.20.0.27:8080/Users/" + userInfoResponse.get("user_id"),
-                    HttpMethod.GET,
-                    new HttpEntity<>(scimRequestHeaders),
-                    String.class).getBody();
+                String scimResponse = restTemplate.exchange(
+                        "http://172.20.0.27:8080/Users/" + userInfoResponse.get("user_id"),
+                        HttpMethod.GET,
+                        new HttpEntity<>(scimRequestHeaders),
+                        String.class).getBody();
 
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode root = mapper.readTree(scimResponse);
-            List<String> roles = new ArrayList<>();
-            for (Iterator<JsonNode> iterator = root.get("groups").getElements(); iterator.hasNext();) {
-                JsonNode node = iterator.next();
-                String group = node.get("display").asText();
-                if (group.startsWith("cloudbreak.account")) {
-                    roles.add(group);
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode root = mapper.readTree(scimResponse);
+                List<String> roles = new ArrayList<>();
+                String account = null;
+                for (Iterator<JsonNode> iterator = root.get("groups").getElements(); iterator.hasNext();) {
+                    JsonNode node = iterator.next();
+                    String group = node.get("display").asText();
+                    if (group.startsWith("cloudbreak.account")) {
+                        String[] parts = group.split("\\.");
+                        if (account != null && account != parts[2]) {
+                            throw new IllegalStateException("A user can belong to only one account.");
+                        }
+                        account = parts[ACCOUNT_PART];
+                        roles.add(parts[ROLE_PART]);
+                    }
                 }
+
+                CbUser user = new CbUser(username, account, roles);
+                request.setAttribute("user", user);
             }
-
-            CbUser user = new CbUser(username, roles);
-            request.setAttribute("user", user);
-
             filterChain.doFilter(request, response);
         }
 

@@ -49,7 +49,7 @@ public class AzureConnectorTestUtil extends ConnectorTestUtil {
     public static AzureTemplate createAzureTemplate(User user) {
         AzureTemplate azureTemplate = new AzureTemplate();
         azureTemplate.setId(DEFAULT_ID);
-        azureTemplate.setUser(user);
+        azureTemplate.setOwner(user);
         azureTemplate.setLocation(AzureLocation.NORTH_EUROPE);
         azureTemplate.setVmType(AzureVmType.MEDIUM.toString());
         azureTemplate.setDescription(AZURE_DESCRIPTION);

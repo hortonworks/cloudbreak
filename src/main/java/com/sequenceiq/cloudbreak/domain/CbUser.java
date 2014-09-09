@@ -5,10 +5,12 @@ import java.util.List;
 public class CbUser {
 
     private String username;
+    private String account;
     private List<String> roles;
 
-    public CbUser(String username, List<String> roles) {
+    public CbUser(String username, String account, List<String> roles) {
         this.username = username;
+        this.account = account;
         this.roles = roles;
     }
 
@@ -16,16 +18,12 @@ public class CbUser {
         return username;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public String getAccount() {
+        return account;
     }
 
     public List<String> getRoles() {
         return roles;
-    }
-
-    public void setRoles(List<String> roles) {
-        this.roles = roles;
     }
 
 }

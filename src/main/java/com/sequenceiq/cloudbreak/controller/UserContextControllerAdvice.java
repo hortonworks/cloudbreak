@@ -11,8 +11,7 @@ import com.sequenceiq.cloudbreak.domain.CbUser;
 public class UserContextControllerAdvice {
 
     @ModelAttribute("user")
-    public CbUser getRoles(HttpServletRequest request)
-    {
+    public CbUser getRoles(HttpServletRequest request) {
         return (CbUser) request.getAttribute("user");
     }
 }

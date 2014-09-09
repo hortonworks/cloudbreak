@@ -1,9 +1,7 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -14,7 +12,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.controller.validation.ValidProvisionRequest;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
-import com.sequenceiq.cloudbreak.domain.UserRole;
 
 @ValidProvisionRequest
 public class TemplateJson implements JsonEntity {
@@ -31,8 +28,8 @@ public class TemplateJson implements JsonEntity {
     @Min(value = 0, message = "Volume size must be greater than or equal to 0")
     @Max(value = 1024, message = "Volume size must be lesser than or equal to 1024")
     private Integer volumeSize;
-
-    private Set<UserRole> userRoles = new HashSet();
+    @NotNull
+    private Boolean publicInAccount;
 
     @JsonProperty("id")
     public Long getId() {
@@ -76,14 +73,6 @@ public class TemplateJson implements JsonEntity {
         this.parameters = parameters;
     }
 
-    public Set<UserRole> getUserRoles() {
-        return userRoles;
-    }
-
-    public void setUserRoles(Set<UserRole> userRoles) {
-        this.userRoles = userRoles;
-    }
-
     public Integer getVolumeSize() {
         return volumeSize;
     }
@@ -98,6 +87,14 @@ public class TemplateJson implements JsonEntity {
 
     public void setVolumeCount(Integer volumeCount) {
         this.volumeCount = volumeCount;
+    }
+
+    public Boolean isPublicInAccount() {
+        return publicInAccount;
+    }
+
+    public void setPublicInAccount(Boolean publicInAccount) {
+        this.publicInAccount = publicInAccount;
     }
 
 }
