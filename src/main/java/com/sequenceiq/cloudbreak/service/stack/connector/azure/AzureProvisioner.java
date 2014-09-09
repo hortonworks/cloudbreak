@@ -26,6 +26,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
+import com.sequenceiq.cloudbreak.controller.BuildStackFailureException;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.StackCreationFailureException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
@@ -123,8 +124,7 @@ public class AzureProvisioner implements Provisioner {
             LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_COMPLETE_EVENT, stack.getId());
             reactor.notify(ReactorConfig.PROVISION_COMPLETE_EVENT, Event.wrap(new ProvisionComplete(CloudPlatform.AZURE, stack.getId(), resourceSet)));
         } catch (Exception e) {
-            retryingStackUpdater.updateStackResources(stack.getId(), resourceSet);
-            throw new StackCreationFailureException(e.getMessage(), e);
+            throw new BuildStackFailureException(e.getMessage(), e, resourceSet);
         }
     }
 

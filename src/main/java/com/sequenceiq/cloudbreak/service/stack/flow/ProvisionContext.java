@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
+import com.sequenceiq.cloudbreak.controller.BuildStackFailureException;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
@@ -61,6 +62,12 @@ public class ProvisionContext {
                 LOGGER.info("CloudFormation stack creation was requested for a stack, that is not in REQUESTED status anymore. [stackId: '{}', status: '{}']",
                         stack.getId(), stack.getStatus());
             }
+        } catch (BuildStackFailureException e) {
+            stackUpdater.updateStackResources(stackId, e.getResourceSet());
+            LOGGER.error("Unhandled exception occured while creating stack.", e);
+            LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_CREATE_FAILED_EVENT, stackId);
+            StackOperationFailure stackCreationFailure = new StackOperationFailure(stackId, "Internal server error occured while creating stack.");
+            reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(stackCreationFailure));
         } catch (Exception e) {
             LOGGER.error("Unhandled exception occured while creating stack.", e);
             LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_CREATE_FAILED_EVENT, stackId);
