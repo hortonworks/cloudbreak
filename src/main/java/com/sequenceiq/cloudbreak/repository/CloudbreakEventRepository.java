@@ -10,6 +10,6 @@ import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 
 public interface CloudbreakEventRepository extends CrudRepository<CloudbreakEvent, Long> {
 
-    @Query("select * from CloudbreakEvent cbe where cbe.userId= :userid and cb.eventTimestamp> :since")
+    @Query("select cbe from CloudbreakEvent cbe where cbe.userId= :userId and cbe.eventTimestamp> :since")
     List<CloudbreakEvent> cloudbreakEvents(@Param("userId") Long userId, @Param("since") long since);
 }

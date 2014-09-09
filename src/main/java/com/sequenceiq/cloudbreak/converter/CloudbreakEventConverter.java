@@ -1,9 +1,13 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.controller.json.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 
+@Component
 public class CloudbreakEventConverter extends AbstractConverter<CloudbreakEventsJson, CloudbreakEvent> {
+
     @Override
     public CloudbreakEventsJson convert(CloudbreakEvent entity) {
         CloudbreakEventsJson json = new CloudbreakEventsJson();
