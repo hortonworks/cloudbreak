@@ -16,9 +16,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
-import com.sequenceiq.cloudbreak.service.account.AccountService;
 import com.sequenceiq.cloudbreak.service.credential.SimpleCredentialService;
-import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
 
 @Service
 public class SimpleTemplateService implements TemplateService {
@@ -31,12 +29,6 @@ public class SimpleTemplateService implements TemplateService {
 
     @Autowired
     private StackRepository stackRepository;
-
-    @Autowired
-    private AzureCertificateService azureCertificateService;
-
-    @Autowired
-    private AccountService accountService;
 
     @Override
     public Set<Template> retrievePrivateTemplates(CbUser user) {

@@ -46,21 +46,21 @@ public class BlueprintController {
 
     @RequestMapping(value = "user/blueprints", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<Set<BlueprintJson>> retrievePrivateBlueprints(@ModelAttribute("user") CbUser user, HttpServletRequest request) {
+    public ResponseEntity<Set<BlueprintJson>> getPrivateBlueprints(@ModelAttribute("user") CbUser user, HttpServletRequest request) {
         Set<Blueprint> blueprints = blueprintService.retrievePrivateBlueprints(user);
         return new ResponseEntity<>(blueprintConverter.convertAllEntityToJson(blueprints), HttpStatus.OK);
     }
 
     @RequestMapping(value = "account/blueprints", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<Set<BlueprintJson>> retrieveAccountBlueprints(@ModelAttribute("user") CbUser user, HttpServletRequest request) {
+    public ResponseEntity<Set<BlueprintJson>> getAccountBlueprints(@ModelAttribute("user") CbUser user, HttpServletRequest request) {
         Set<Blueprint> blueprints = blueprintService.retrieveAccountBlueprints(user);
         return new ResponseEntity<>(blueprintConverter.convertAllEntityToJson(blueprints), HttpStatus.OK);
     }
 
     @RequestMapping(value = "blueprints/{id}", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<BlueprintJson> retrieveBlueprint(@ModelAttribute("user") CbUser user, @PathVariable Long id) {
+    public ResponseEntity<BlueprintJson> getBlueprint(@ModelAttribute("user") CbUser user, @PathVariable Long id) {
         Blueprint blueprint = blueprintService.get(id);
         return new ResponseEntity<>(blueprintConverter.convert(blueprint), HttpStatus.OK);
     }

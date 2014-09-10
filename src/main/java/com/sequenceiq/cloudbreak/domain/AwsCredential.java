@@ -4,10 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
-import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
@@ -15,13 +12,6 @@ import javax.persistence.OneToOne;
 public class AwsCredential extends Credential implements ProvisionEntity {
 
     private String roleArn;
-
-    @ManyToOne
-    @JoinColumn(name = "awsCredential_awsCredentialOwner")
-    private User awsCredentialOwner;
-
-    @Column(nullable = false)
-    private String name;
 
     private String keyPairName;
 
@@ -35,12 +25,9 @@ public class AwsCredential extends Credential implements ProvisionEntity {
 
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+    @Override
+    public CloudPlatform cloudPlatform() {
+        return CloudPlatform.AWS;
     }
 
     public String getKeyPairName() {
@@ -49,14 +36,6 @@ public class AwsCredential extends Credential implements ProvisionEntity {
 
     public void setKeyPairName(String keyPairName) {
         this.keyPairName = keyPairName;
-    }
-
-    public User getAwsCredentialOwner() {
-        return awsCredentialOwner;
-    }
-
-    public void setAwsCredentialOwner(User awsCredentialOwner) {
-        this.awsCredentialOwner = awsCredentialOwner;
     }
 
     public String getRoleArn() {
@@ -81,21 +60,6 @@ public class AwsCredential extends Credential implements ProvisionEntity {
 
     public void setSnsTopics(Set<SnsTopic> snsTopics) {
         this.snsTopics = snsTopics;
-    }
-
-    @Override
-    public CloudPlatform cloudPlatform() {
-        return CloudPlatform.AWS;
-    }
-
-    @Override
-    public User getOwner() {
-        return awsCredentialOwner;
-    }
-
-    @Override
-    public String getCredentialName() {
-        return name;
     }
 
 }

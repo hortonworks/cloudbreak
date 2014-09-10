@@ -76,17 +76,14 @@ public final class ServiceTestUtils {
         switch (platform) {
             case AZURE:
                 cred = new AzureCredential();
-                ((AzureCredential) cred).setAzureCredentialOwner(user);
                 break;
             case AWS:
                 cred = new AwsCredential();
-                ((AwsCredential) cred).setAwsCredentialOwner(user);
                 break;
             default:
                 break;
         }
         cred.setCloudPlatform(platform);
-        cred.getUserRoles().add(role);
         return cred;
     }
 

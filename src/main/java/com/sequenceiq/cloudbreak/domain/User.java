@@ -31,8 +31,6 @@ import org.hibernate.validator.constraints.NotEmpty;
                 name = "User.findOneWithLists",
                 query = "SELECT u FROM User u "
                         + "LEFT JOIN FETCH u.stacks "
-                        + "LEFT JOIN FETCH u.awsCredentials "
-                        + "LEFT JOIN FETCH u.azureCredentials "
                         + "LEFT JOIN FETCH u.clusters "
                         + "WHERE u.id= :id")
 })
@@ -52,15 +50,6 @@ public class User implements ProvisionEntity {
     @NotEmpty
     @Column(unique = true, nullable = false)
     private String email;
-
-    @OneToMany(mappedBy = "awsCredentialOwner", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<AwsCredential> awsCredentials = new HashSet<>();
-
-    @OneToMany(mappedBy = "azureCredentialOwner", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<AzureCredential> azureCredentials = new HashSet<>();
-
-    @OneToMany(mappedBy = "gccCredentialOwner", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<GccCredential> gccCredentials = new HashSet<>();
 
     @NotEmpty
     private String password;
@@ -96,9 +85,6 @@ public class User implements ProvisionEntity {
         this.email = user.email;
         this.password = user.password;
         this.confToken = user.confToken;
-        this.awsCredentials = user.awsCredentials;
-        this.azureCredentials = user.azureCredentials;
-        this.gccCredentials = user.gccCredentials;
         this.stacks = user.stacks;
         this.clusters = user.clusters;
         this.status = user.getStatus();
@@ -146,31 +132,6 @@ public class User implements ProvisionEntity {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public Set<AzureCredential> getAzureCredentials() {
-        return azureCredentials;
-    }
-
-    public void setAzureCredentials(Set<AzureCredential> azureCredentials) {
-        this.azureCredentials = azureCredentials;
-    }
-
-    public Set<AwsCredential> getAwsCredentials() {
-
-        return awsCredentials;
-    }
-
-    public Set<GccCredential> getGccCredentials() {
-        return gccCredentials;
-    }
-
-    public void setGccCredentials(Set<GccCredential> gccCredentials) {
-        this.gccCredentials = gccCredentials;
-    }
-
-    public void setAwsCredentials(Set<AwsCredential> awsCredentials) {
-        this.awsCredentials = awsCredentials;
     }
 
     public Set<Stack> getStacks() {

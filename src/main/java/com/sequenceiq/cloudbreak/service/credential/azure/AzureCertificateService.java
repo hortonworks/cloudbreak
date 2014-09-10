@@ -19,8 +19,8 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
+import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.AzureCredentialRepository;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.KeyGeneratorService;
@@ -79,17 +79,17 @@ public class AzureCertificateService {
         return String.format("%s/%s/%s.cer", getCertificateFolder(user), credential.getId(), user);
     }
 
-    public File getCertificateFile(Long credentialId, User user) {
+    public File getCertificateFile(Long credentialId, CbUser user) {
         AzureCredential credential = azureCredentialRepository.findOne(credentialId);
         if (credential == null) {
             throw new NotFoundException(String.format("Credential '%s' not found", credentialId));
         }
-        return new File(getUserCerFileName(credential, azureStackUtil.emailAsFolder(user.getEmail())));
+        return new File(getUserCerFileName(credential, azureStackUtil.emailAsFolder(user.getUsername())));
     }
 
-    public void generateCertificate(AzureCredential azureCredential, User user) {
+    public void generateCertificate(CbUser user, AzureCredential azureCredential) {
         try {
-            String emailAsFolder = azureStackUtil.emailAsFolder(user.getEmail());
+            String emailAsFolder = azureStackUtil.emailAsFolder(user.getUsername());
             File sourceFolder = new File(DATADIR);
             if (!sourceFolder.exists()) {
                 FileUtils.forceMkdir(new File(DATADIR));
@@ -123,13 +123,13 @@ public class AzureCertificateService {
         }
     }
 
-    public File getSshPublicKeyFile(User user, Long azureCredentialId) {
-        return new File(getPemFile(azureStackUtil.emailAsFolder(user.getEmail()), azureCredentialId));
+    public File getSshPublicKeyFile(CbUser user, Long azureCredentialId) {
+        return new File(getPemFile(azureStackUtil.emailAsFolder(user.getUsername()), azureCredentialId));
     }
 
-    public void generateSshCertificate(User user, AzureCredential azureCredential, String sshKey) {
+    public void generateSshCertificate(CbUser user, AzureCredential azureCredential, String sshKey) {
         try {
-            String emailAsFolder = azureStackUtil.emailAsFolder(user.getEmail());
+            String emailAsFolder = azureStackUtil.emailAsFolder(user.getUsername());
             File userFolder = new File(getSimpleUserFolder(emailAsFolder));
             if (!userFolder.exists()) {
                 FileUtils.forceMkdir(new File(getSimpleUserFolder(emailAsFolder)));

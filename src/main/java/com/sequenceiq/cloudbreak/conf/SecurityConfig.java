@@ -146,7 +146,7 @@ public class SecurityConfig {
                 JsonNode root = mapper.readTree(scimResponse);
                 List<String> roles = new ArrayList<>();
                 String account = null;
-                for (Iterator<JsonNode> iterator = root.get("groups").getElements(); iterator.hasNext(); ) {
+                for (Iterator<JsonNode> iterator = root.get("groups").getElements(); iterator.hasNext();) {
                     JsonNode node = iterator.next();
                     String group = node.get("display").asText();
                     if (group.startsWith("cloudbreak.account")) {

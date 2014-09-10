@@ -27,6 +27,8 @@ public class CredentialJson implements JsonEntity {
     private String description;
     @NotNull
     private String publicKey;
+    @NotNull
+    private Boolean publicInAccount;
 
     private Set<UserRole> userRoles = new HashSet();
 
@@ -84,11 +86,11 @@ public class CredentialJson implements JsonEntity {
         this.parameters = parameters;
     }
 
-    public Set<UserRole> getUserRoles() {
-        return userRoles;
+    public Boolean isPublicInAccount() {
+        return publicInAccount;
     }
 
-    public void setUserRoles(Set<UserRole> userRoles) {
-        this.userRoles = userRoles;
+    public void setPublicInAccount(Boolean publicInAccount) {
+        this.publicInAccount = publicInAccount;
     }
 }

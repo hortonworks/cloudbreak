@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,17 +29,15 @@ import com.sequenceiq.cloudbreak.converter.AzureCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.GccCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
+import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
-import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
-import com.sequenceiq.cloudbreak.security.CurrentUser;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 
 @Controller
-@RequestMapping("credentials")
 public class CredentialController {
 
     @Autowired
@@ -62,62 +61,55 @@ public class CredentialController {
     @Autowired
     private AzureStackUtil azureStackUtil;
 
-    @RequestMapping(method = RequestMethod.POST)
+    @RequestMapping(value = "user/credentials", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<IdJson> saveCredential(@CurrentUser User user, @Valid @RequestBody CredentialJson credentialRequest) throws Exception {
+    public ResponseEntity<IdJson> saveCredential(@ModelAttribute("user") CbUser user, @Valid @RequestBody CredentialJson credentialRequest) throws Exception {
         Credential credential = convert(credentialRequest);
-        if (credential.getUserRoles().isEmpty()) {
-            credential.getUserRoles().addAll(user.getUserRoles());
-        }
-        credential = credentialService.save(user, credential);
+        credential = credentialService.create(user, credential);
         return new ResponseEntity<>(new IdJson(credential.getId()), HttpStatus.CREATED);
     }
 
-    @RequestMapping(method = RequestMethod.GET)
+    @RequestMapping(value = "user/credentials", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<Set<CredentialJson>> getAllCredentials(@CurrentUser User user) {
-        User loadedUser = userRepository.findOneWithLists(user.getId());
-        Set<Credential> credentials = credentialService.getAll(loadedUser);
-        Set<CredentialJson> credentialJsons = convertCredentials(credentials);
-        return new ResponseEntity<>(credentialJsons, HttpStatus.OK);
+    public ResponseEntity<Set<CredentialJson>> getPrivateCredentials(@ModelAttribute("user") CbUser user) {
+        Set<Credential> credentials = credentialService.retrievePrivateCredentials(user);
+        return new ResponseEntity<>(convertCredentials(credentials), HttpStatus.OK);
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/{credentialId}")
+    @RequestMapping(value = "account/credentials", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<CredentialJson> getCredential(@CurrentUser User user, @PathVariable Long credentialId) {
-        try {
-            Credential credential = credentialService.get(credentialId);
-            return new ResponseEntity<>(convert(credential), HttpStatus.OK);
-        } catch (IllegalArgumentException e) {
-            throw new BadRequestException("Unknown cloud platform: " + credentialId, e);
-        }
+    public ResponseEntity<Set<CredentialJson>> getAccountCredentials(@ModelAttribute("user") CbUser user) {
+        Set<Credential> credentials = credentialService.retrieveAccountCredentials(user);
+        return new ResponseEntity<>(convertCredentials(credentials), HttpStatus.OK);
     }
 
-    @RequestMapping(method = RequestMethod.DELETE, value = "/{credentialId}")
+    @RequestMapping(value = "credentials/{credentialId}", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<CredentialJson> deleteCredential(@CurrentUser User user, @PathVariable Long credentialId) {
-        try {
-            credentialService.delete(credentialId);
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (Exception e) {
-            throw new BadRequestException(
-                    String.format("Deletion of: %s was not success. Delete all resources before you delete the credential.", credentialId), e);
-        }
+    public ResponseEntity<CredentialJson> getCredential(@ModelAttribute("user") CbUser user, @PathVariable Long credentialId) {
+        Credential credential = credentialService.get(credentialId);
+        return new ResponseEntity<>(convert(credential), HttpStatus.OK);
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/certificate/{credentialId}")
+    @RequestMapping(value = "credentials/{credentialId}", method = RequestMethod.DELETE)
     @ResponseBody
-    public ModelAndView getJksFile(@CurrentUser User user, @PathVariable Long credentialId, HttpServletResponse response) throws Exception {
+    public ResponseEntity<CredentialJson> deleteCredential(@ModelAttribute("user") CbUser user, @PathVariable Long credentialId) {
+        credentialService.delete(credentialId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "credentials/certificate/{credentialId}", method = RequestMethod.GET)
+    @ResponseBody
+    public ModelAndView getJksFile(@ModelAttribute("user") CbUser user, @PathVariable Long credentialId, HttpServletResponse response) throws Exception {
         File cerFile = azureCertificateService.getCertificateFile(credentialId, user);
         response.setContentType("application/octet-stream");
-        response.setHeader("Content-Disposition", "attachment;filename=" + azureStackUtil.emailAsFolder(user.getEmail()) + ".cer");
+        response.setHeader("Content-Disposition", "attachment;filename=" + azureStackUtil.emailAsFolder(user.getUsername()) + ".cer");
         FileCopyUtils.copy(Files.readAllBytes(cerFile.toPath()), response.getOutputStream());
         return null;
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "{credentialId}/sshkey")
+    @RequestMapping(value = "credentials/{credentialId}/sshkey", method = RequestMethod.GET)
     @ResponseBody
-    public ModelAndView getSshFile(@CurrentUser User user, @PathVariable Long credentialId, HttpServletResponse response) throws Exception {
+    public ModelAndView getSshFile(@ModelAttribute("user") CbUser user, @PathVariable Long credentialId, HttpServletResponse response) throws Exception {
         File cerFile = azureCertificateService.getSshPublicKeyFile(user, credentialId);
         response.setContentType("application/octet-stream");
         response.setHeader("Content-Disposition", "attachment;filename=public_key.pem");
@@ -140,7 +132,6 @@ public class CredentialController {
             default:
                 throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", json.getCloudPlatform()));
         }
-        ret.getUserRoles().addAll(json.getUserRoles());
         return ret;
     }
 
