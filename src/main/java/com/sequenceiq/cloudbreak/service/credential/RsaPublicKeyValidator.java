@@ -11,16 +11,11 @@ import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Credential;
 
 @Component
-public class RsaPublicKeyInitializer {
+public class RsaPublicKeyValidator {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RsaPublicKeyInitializer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RsaPublicKeyValidator.class);
 
-    public Credential init(Credential credential) {
-        validateRsaPublicKey(credential);
-        return credential;
-    }
-
-    private void validateRsaPublicKey(Credential credential) {
+    public void validate(Credential credential) {
         try {
             SshRsaCrypto rsa = new SshRsaCrypto();
             PublicKey publicKey = rsa.readPublicKey(rsa.slurpPublicKey(credential.getPublicKey()));

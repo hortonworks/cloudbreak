@@ -12,6 +12,7 @@ import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.ImportKeyPairRequest;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
+import com.sequenceiq.cloudbreak.service.credential.RsaPublicKeyValidator;
 import com.sequenceiq.cloudbreak.service.stack.connector.aws.AwsStackUtil;
 
 @Component
@@ -24,12 +25,16 @@ public class AwsCredentialInitializer {
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsCredentialInitializer.class);
 
     @Autowired
+    private RsaPublicKeyValidator rsaPublicKeyValidator;
+
+    @Autowired
     private CrossAccountCredentialsProvider crossAccountCredentialsProvider;
 
     @Autowired
     private AwsStackUtil awsStackUtil;
 
     public AwsCredential init(AwsCredential awsCredential) {
+        rsaPublicKeyValidator.validate(awsCredential);
         validateIamRole(awsCredential);
         return importKeyPairs(awsCredential);
     }

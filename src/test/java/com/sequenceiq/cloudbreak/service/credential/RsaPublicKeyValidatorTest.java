@@ -7,18 +7,18 @@ import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.Credential;
 
-public class RsaPublicKeyInitializerTest {
+public class RsaPublicKeyValidatorTest {
 
-    private RsaPublicKeyInitializer rsaPublicKeyInitializer;
+    private RsaPublicKeyValidator rsaPublicKeyValidator;
 
     @Before
     public void setUp() {
-        rsaPublicKeyInitializer = new RsaPublicKeyInitializer();
+        rsaPublicKeyValidator = new RsaPublicKeyValidator();
     }
 
     @Test
     public void validPublicKeyWillNotFail() {
-        rsaPublicKeyInitializer.init(
+        rsaPublicKeyValidator.validate(
                 azureCredential(
                         "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCasJyap4swb4Hk4xOlnF3OmKVwzmv2e053yrtvcUPaxCeboSltOBReuT"
                                 + "QxX+kYCgKCdtEwpIvEDXk16T6nCI4tSptAalFgpUWn+JOysCuLuWnwrk6mSKOzEiPYCrB54444mDY6rbBDSRuE/V"
@@ -30,7 +30,7 @@ public class RsaPublicKeyInitializerTest {
 
     @Test(expected = BadRequestException.class)
     public void inValidPublicKeyWillFailWhenMissingUser() {
-        rsaPublicKeyInitializer.init(
+        rsaPublicKeyValidator.validate(
                 azureCredential(
                         "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCasJyap4swb4Hk4xOlnF3OmKVwzmv2e053yrtvcUPaxCeboSltOBReuT"
                                 + "QxX+kYCgKCdtEwpIvEDXk16T6nCI4tSptAalFgpUWn+JOysCuLuWnwrk6mSKOzEiPYCrB54444mDY6rbBDSRuE/V"
@@ -42,7 +42,7 @@ public class RsaPublicKeyInitializerTest {
 
     @Test(expected = BadRequestException.class)
     public void inValidPublicKeyWillFailWhenMissingSshRsa() {
-        rsaPublicKeyInitializer.init(
+        rsaPublicKeyValidator.validate(
                 azureCredential(
                         "AAAAB3NzaC1yc2EAAAADAQABAAABAQCasJyap4swb4Hk4xOlnF3OmKVwzmv2e053yrtvcUPaxCeboSltOBReuT"
                                 + "QxX+kYCgKCdtEwpIvEDXk16T6nCI4tSptAalFgpUWn+JOysCuLuWnwrk6mSKOzEiPYCrB54444mDY6rbBDSRuE/V"
@@ -54,7 +54,7 @@ public class RsaPublicKeyInitializerTest {
 
     @Test(expected = BadRequestException.class)
     public void inValidPublicKeyWillFailWhenTooShortBody() {
-        rsaPublicKeyInitializer.init(
+        rsaPublicKeyValidator.validate(
                 azureCredential(
                         "ssh-rsa AAAA sequence-eu")
         );
@@ -62,7 +62,7 @@ public class RsaPublicKeyInitializerTest {
 
     @Test(expected = BadRequestException.class)
     public void inValidPublicKeyWillFailWhenMissingUserAndSshRsa() {
-        rsaPublicKeyInitializer.init(
+        rsaPublicKeyValidator.validate(
                 azureCredential(
                         "AAAAB3NzaC1yc2EAAAADAQABAAABAQCasJyap4swb4Hk4xOlnF3OmKVwzmv2e053yrtvcUPaxCeboSltOBReuT"
                                 + "QxX+kYCgKCdtEwpIvEDXk16T6nCI4tSptAalFgpUWn+JOysCuLuWnwrk6mSKOzEiPYCrB54444mDY6rbBDSRuE/V"
@@ -74,7 +74,7 @@ public class RsaPublicKeyInitializerTest {
 
     @Test(expected = BadRequestException.class)
     public void inValidPublicKeyWillFailWhenTotallyInvalidString() {
-        rsaPublicKeyInitializer.init(
+        rsaPublicKeyValidator.validate(
                 azureCredential(
                         "ImBAD")
         );
