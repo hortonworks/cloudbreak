@@ -1,21 +1,20 @@
 package com.sequenceiq.cloudbreak.service.credential;
 
-import java.io.File;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.User;
 
 public interface CredentialService {
 
-    Credential save(User user, Credential credential);
+    Set<Credential> retrievePrivateCredentials(CbUser user);
 
-    Set<Credential> getAll(User user);
+    Set<Credential> retrieveAccountCredentials(CbUser user);
 
     Credential get(Long id);
 
-    void delete(Long id);
+    Credential create(CbUser user, Credential credential);
 
-    File getSshPublicKeyFile(User user, Long credentialId);
+    void delete(Long id);
 
 }

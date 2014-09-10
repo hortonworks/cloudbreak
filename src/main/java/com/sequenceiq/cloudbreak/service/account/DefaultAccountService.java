@@ -9,8 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.domain.Account;
-import com.sequenceiq.cloudbreak.domain.AwsCredential;
-import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.UserRole;
@@ -51,8 +49,8 @@ public class DefaultAccountService implements AccountService {
         User admin = accountRepository.findAccountAdmin(accountId);
         User decoratedAdmin = userRepository.findOneWithLists(admin.getId());
 
-        getAwsCredentialsForRole(decoratedAdmin, role);
-        getAzureCredentialsForRole(decoratedAdmin, role);
+//        getAwsCredentialsForRole(decoratedAdmin, role);
+//        getAzureCredentialsForRole(decoratedAdmin, role);
         // getAwsTemplatesForRole(decoratedAdmin, role);
         // getAzureTemplatesForRole(decoratedAdmin, role);
         getSatcksForRole(decoratedAdmin, role);
@@ -114,26 +112,26 @@ public class DefaultAccountService implements AccountService {
     // decoratedAdmin.getAwsTemplates().addAll(awsTemplatesInRole);
     // }
 
-    private void getAzureCredentialsForRole(User decoratedAdmin, UserRole role) {
-        Set<AzureCredential> azureCredentialsInRole = new HashSet<>();
-        for (AzureCredential azureCredential : decoratedAdmin.getAzureCredentials()) {
-            if (azureCredential.getUserRoles().contains(role)) {
-                azureCredentialsInRole.add(azureCredential);
-            }
-        }
-        decoratedAdmin.getAzureCredentials().clear();
-        decoratedAdmin.getAzureCredentials().addAll(azureCredentialsInRole);
-    }
-
-    private void getAwsCredentialsForRole(User decoratedAdmin, UserRole role) {
-        Set<AwsCredential> awsCredentialsInRole = new HashSet<>();
-        for (AwsCredential awsCredential : decoratedAdmin.getAwsCredentials()) {
-            if (awsCredential.getUserRoles().contains(role)) {
-                awsCredentialsInRole.add(awsCredential);
-            }
-        }
-        decoratedAdmin.getAwsCredentials().clear();
-        decoratedAdmin.getAwsCredentials().addAll(awsCredentialsInRole);
-    }
+//    private void getAzureCredentialsForRole(User decoratedAdmin, UserRole role) {
+//        Set<AzureCredential> azureCredentialsInRole = new HashSet<>();
+//        for (AzureCredential azureCredential : decoratedAdmin.getAzureCredentials()) {
+//            if (azureCredential.getUserRoles().contains(role)) {
+//                azureCredentialsInRole.add(azureCredential);
+//            }
+//        }
+//        decoratedAdmin.getAzureCredentials().clear();
+//        decoratedAdmin.getAzureCredentials().addAll(azureCredentialsInRole);
+//    }
+//
+//    private void getAwsCredentialsForRole(User decoratedAdmin, UserRole role) {
+//        Set<AwsCredential> awsCredentialsInRole = new HashSet<>();
+//        for (AwsCredential awsCredential : decoratedAdmin.getAwsCredentials()) {
+//            if (awsCredential.getUserRoles().contains(role)) {
+//                awsCredentialsInRole.add(awsCredential);
+//            }
+//        }
+//        decoratedAdmin.getAwsCredentials().clear();
+//        decoratedAdmin.getAwsCredentials().addAll(awsCredentialsInRole);
+//    }
 
 }
