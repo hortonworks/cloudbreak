@@ -6,15 +6,13 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import reactor.core.Reactor;
-
-import com.sequenceiq.cloudbreak.service.cluster.handler.UpdateAmbariHostsFailureHandler;
-import com.sequenceiq.cloudbreak.service.cluster.handler.UpdateAmbariHostsRequestHandler;
-import com.sequenceiq.cloudbreak.service.cluster.handler.UpdateAmbariHostsSuccessHandler;
 import com.sequenceiq.cloudbreak.service.cluster.handler.ClusterCreationFailureHandler;
 import com.sequenceiq.cloudbreak.service.cluster.handler.ClusterCreationSuccessHandler;
 import com.sequenceiq.cloudbreak.service.cluster.handler.ClusterRequestHandler;
-import com.sequenceiq.cloudbreak.service.history.HistoryEventHandler;
+import com.sequenceiq.cloudbreak.service.cluster.handler.UpdateAmbariHostsFailureHandler;
+import com.sequenceiq.cloudbreak.service.cluster.handler.UpdateAmbariHostsRequestHandler;
+import com.sequenceiq.cloudbreak.service.cluster.handler.UpdateAmbariHostsSuccessHandler;
+import com.sequenceiq.cloudbreak.service.events.CloudbreakEventHandler;
 import com.sequenceiq.cloudbreak.service.stack.handler.AddInstancesCompleteHandler;
 import com.sequenceiq.cloudbreak.service.stack.handler.AmbariRoleAllocationCompleteHandler;
 import com.sequenceiq.cloudbreak.service.stack.handler.MetadataSetupCompleteHandler;
@@ -29,6 +27,8 @@ import com.sequenceiq.cloudbreak.service.stack.handler.StackDeleteRequestHandler
 import com.sequenceiq.cloudbreak.service.stack.handler.StackUpdateFailureHandler;
 import com.sequenceiq.cloudbreak.service.stack.handler.StackUpdateSuccessHandler;
 import com.sequenceiq.cloudbreak.service.stack.handler.UpdateInstancesRequestHandler;
+
+import reactor.core.Reactor;
 
 @Component
 public class ReactorInitializer implements InitializingBean {
@@ -94,7 +94,7 @@ public class ReactorInitializer implements InitializingBean {
     private UpdateAmbariHostsSuccessHandler updateAmbariHostsSuccessHandler;
 
     @Autowired
-    private HistoryEventHandler historyEventHandler;
+    private CloudbreakEventHandler cloudbreakEventHandler;
 
     @Autowired
     private Reactor reactor;
@@ -126,7 +126,8 @@ public class ReactorInitializer implements InitializingBean {
         reactor.on($(ReactorConfig.UPDATE_AMBARI_HOSTS_SUCCESS_EVENT), updateAmbariHostsSuccessHandler);
         reactor.on($(ReactorConfig.UPDATE_AMBARI_HOSTS_FAILED_EVENT), updateAmbariHostsFailureHandler);
 
-        reactor.on($(ReactorConfig.HISTORY_EVENT), historyEventHandler);
+        reactor.on($(ReactorConfig.CLOUDBREAK_EVENT), cloudbreakEventHandler);
+
     }
 
 }

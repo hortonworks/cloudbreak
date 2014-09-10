@@ -18,6 +18,7 @@
     <suppress id="string-instantiation" files="AzureProvisioner.java"/>
     <suppress id="string-instantiation" files="AwsStackUtil.java"/>
     <suppress checks="ParameterNumber" files="AzureProvisioner.java"/>
+    <suppress checks="ParameterNumber" files="CloudbreakUsageController.java"/>
     <suppress checks="IllegalCatch" files="CredentialController.java"/>
     
     <!-- -->

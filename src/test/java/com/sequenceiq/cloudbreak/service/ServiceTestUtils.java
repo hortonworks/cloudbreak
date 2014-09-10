@@ -1,12 +1,16 @@
 package com.sequenceiq.cloudbreak.service;
 
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.ec2.model.InstanceType;
 import com.sequenceiq.cloudbreak.domain.Account;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
+import com.sequenceiq.cloudbreak.domain.AzureLocation;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Template;
@@ -26,6 +30,13 @@ public final class ServiceTestUtils {
         return usr;
     }
 
+    public static User createUser(UserRole role, Account account, Long userId, String firstname, String lastname) {
+        User usr = createUser(role, account, userId);
+        usr.setFirstName(firstname);
+        usr.setLastName(lastname);
+        return usr;
+    }
+
     public static Account createAccount(String name, Long companyId) {
         Account account = new Account();
         account.setName(name);
@@ -37,7 +48,7 @@ public final class ServiceTestUtils {
         Blueprint blueprint = new Blueprint();
         blueprint.setId(1L);
         blueprint.setUser(bpUser);
-        blueprint.setBlueprintName("dummyName");
+        blueprint.setBlueprintName("test-blueprint");
         blueprint.setBlueprintText("dummyText");
         blueprint.getUserRoles().addAll(bpUser.getUserRoles());
         return blueprint;
@@ -47,6 +58,14 @@ public final class ServiceTestUtils {
         Stack stack = new Stack();
         stack.setUser(user);
         stack.getUserRoles().addAll(user.getUserRoles());
+        stack.setName("test-stack");
+        return stack;
+    }
+
+    public static Stack createStack(User user, Template template, Cluster cluster) {
+        Stack stack = createStack(user);
+        stack.setTemplate(template);
+        stack.setCluster(cluster);
         return stack;
     }
 
@@ -75,15 +94,27 @@ public final class ServiceTestUtils {
         case AZURE:
             template = new AzureTemplate();
             ((AzureTemplate) template).setAzureTemplateOwner(user);
+            ((AzureTemplate) template).setVmType("test-vm-type");
+            ((AzureTemplate) template).setLocation(AzureLocation.NORTH_EUROPE);
             break;
         case AWS:
             template = new AwsTemplate();
             ((AwsTemplate) template).setAwsTemplateOwner(user);
+            ((AwsTemplate) template).setInstanceType(InstanceType.C1Medium);
+            ((AwsTemplate) template).setRegion(Regions.EU_WEST_1);
             break;
         default:
             break;
         }
         template.getUserRoles().add(role);
         return template;
+    }
+
+    public static Cluster createCluster(User user, Blueprint blueprint) {
+        Cluster cluster = new Cluster();
+        cluster.setName("test-cluster");
+        cluster.setUser(user);
+        cluster.setBlueprint(blueprint);
+        return cluster;
     }
 }
