@@ -48,7 +48,6 @@ public class AwsConnectorTestUtil extends ConnectorTestUtil {
     public static AwsTemplate createAwsTemplate(User user) {
         AwsTemplate awsTemplate = new AwsTemplate();
         awsTemplate.setId(DEFAULT_ID);
-        awsTemplate.setOwner(user);
         awsTemplate.setRegion(Regions.DEFAULT_REGION);
         awsTemplate.setInstanceType(InstanceType.C1Medium);
         awsTemplate.setSshLocation(SSH_LOCATION);
@@ -62,7 +61,6 @@ public class AwsConnectorTestUtil extends ConnectorTestUtil {
     public static AwsTemplate createAwsTemplateWithZeroVolumes(User user) {
         AwsTemplate awsTemplate = new AwsTemplate();
         awsTemplate.setId(DEFAULT_ID);
-        awsTemplate.setOwner(user);
         awsTemplate.setRegion(Regions.DEFAULT_REGION);
         awsTemplate.setInstanceType(InstanceType.C1Medium);
         awsTemplate.setSshLocation(SSH_LOCATION);
