@@ -8,6 +8,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
@@ -16,6 +17,7 @@ import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.CloudbreakEventRepository;
+import com.sequenceiq.cloudbreak.repository.CloudbreakEventSpecifications;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 
 import reactor.core.Reactor;
@@ -56,10 +58,12 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     public List<CloudbreakEvent> cloudbreakEvents(Long userId, Long since) {
         List<CloudbreakEvent> events = null;
         if (null == since) {
-            events = eventRepository.cloudbreakEvents(userId);
+            events = eventRepository.findAll(CloudbreakEventSpecifications.eventsForUser(userId));
         } else {
             Date sinceDate = new Date(since);
-            events = eventRepository.cloudbreakEventsSince(userId, sinceDate);
+            events = eventRepository.findAll(Specifications
+                    .where(CloudbreakEventSpecifications.eventsForUser(userId))
+                    .and(CloudbreakEventSpecifications.eventsSince(since)));
         }
         return null != events ? events : Collections.EMPTY_LIST;
     }
