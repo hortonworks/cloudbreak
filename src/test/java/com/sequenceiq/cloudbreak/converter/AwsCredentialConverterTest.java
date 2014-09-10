@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anySetOf;
+import static org.mockito.Mockito.doNothing;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,6 +23,7 @@ import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.SnsTopic;
 import com.sequenceiq.cloudbreak.domain.TemporaryAwsCredentials;
+import com.sequenceiq.cloudbreak.service.credential.RsaPublicKeyValidator;
 import com.sequenceiq.cloudbreak.service.credential.aws.AwsCredentialInitializer;
 
 public class AwsCredentialConverterTest {
@@ -34,6 +36,9 @@ public class AwsCredentialConverterTest {
 
     @Mock
     private SnsTopicConverter snsTopicConverter;
+
+    @Mock
+    private RsaPublicKeyValidator rsaPublicKeyValidator;
 
     @Mock
     private AwsCredentialInitializer awsCredentialInitializer;
@@ -83,6 +88,7 @@ public class AwsCredentialConverterTest {
     public void testConvertAwsCredentialJsonToEntity() {
         // GIVEN
         given(awsCredentialInitializer.init(any(AwsCredential.class))).willReturn(awsCredentialWithKeyName);
+        doNothing().when(rsaPublicKeyValidator).validate(any(AwsCredential.class));
         // WHEN
         AwsCredential result = underTest.convert(credentialJson);
         // THEN

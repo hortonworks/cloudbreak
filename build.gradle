@@ -124,6 +124,7 @@ dependencies {
     compile 'commons-io:commons-io:2.4'
     compile 'com.google.guava:guava:16.0.1'
     compile 'com.thoughtworks.xstream:xstream:1.4.7'
+    compile 'com.github.fommil:openssh:1.0'
     compile("org.codehaus.groovy.modules.http-builder:http-builder:0.7.1") {
         exclude group: "commons-logging";
         exclude group: "xml-apis";
