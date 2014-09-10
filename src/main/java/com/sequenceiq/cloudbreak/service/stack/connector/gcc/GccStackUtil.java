@@ -40,6 +40,11 @@ import com.google.api.services.compute.model.Metadata;
 import com.google.api.services.compute.model.Network;
 import com.google.api.services.compute.model.NetworkInterface;
 import com.google.api.services.compute.model.Operation;
+import com.google.api.services.dns.Dns;
+import com.google.api.services.dns.model.Change;
+import com.google.api.services.dns.model.ManagedZone;
+import com.google.api.services.dns.model.ManagedZonesListResponse;
+import com.google.api.services.dns.model.ResourceRecordSet;
 import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.StorageScopes;
 import com.google.common.collect.ImmutableList;
@@ -58,6 +63,7 @@ public class GccStackUtil {
 
     private static final int MAX_POLLING_ATTEMPTS = 60;
     private static final int POLLING_INTERVAL = 5000;
+    private static final int TTL = 3600;
 
     @Autowired
     private GccInstanceCheckerStatus gccInstanceReadyCheckerStatus;
@@ -102,6 +108,78 @@ public class GccStackUtil {
             LOGGER.info("Problem with the Google cloud stack generation: " + e.getMessage());
         }
         return null;
+    }
+
+    public Dns buildDns(GccCredential gccCredential, Stack stack) {
+        try {
+            HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+            BufferedReader br = new BufferedReader(new StringReader(gccCredential.getServiceAccountPrivateKey()));
+            Security.addProvider(new BouncyCastleProvider());
+            KeyPair kp = (KeyPair) new PEMReader(br).readObject();
+            GoogleCredential credential = new GoogleCredential.Builder().setTransport(httpTransport)
+                    .setJsonFactory(JSON_FACTORY)
+                    .setServiceAccountId(gccCredential.getServiceAccountId())
+                    .setServiceAccountScopes(SCOPES)
+                    .setServiceAccountPrivateKey(kp.getPrivate())
+                    .build();
+
+            Dns dns = new Dns.Builder(httpTransport, JSON_FACTORY, null).setApplicationName(stack.getName())
+                    .setHttpRequestInitializer(credential)
+                    .build();
+
+            return dns;
+        } catch (GeneralSecurityException e) {
+            LOGGER.info("Problem with the Google cloud stack generation: " + e.getMessage());
+        } catch (IOException e) {
+            LOGGER.info("Problem with the Google cloud stack generation: " + e.getMessage());
+        } catch (Exception e) {
+            LOGGER.info("Problem with the Google cloud stack generation: " + e.getMessage());
+        }
+        return null;
+    }
+
+    public ManagedZone buildManagedZone(Dns dns, Stack stack) throws IOException {
+        GccCredential credential = (GccCredential) stack.getCredential();
+        ManagedZonesListResponse execute1 = dns.managedZones().list(credential.getProjectId()).execute();
+        ManagedZone original = null;
+        for (ManagedZone managedZone : execute1.getManagedZones()) {
+            if (managedZone.getName().equals(credential.getProjectId())) {
+                original = managedZone;
+                break;
+            }
+        }
+        if (original == null) {
+            ManagedZone managedZone = new ManagedZone();
+            managedZone.setName(credential.getProjectId());
+            managedZone.setDnsName(String.format("%s.%s", credential.getProjectId(), "com"));
+            ManagedZone execute = dns.managedZones().create(credential.getProjectId(), managedZone).execute();
+            return execute;
+        }
+        return original;
+    }
+
+    public Change buildChanges(Dns dns, Stack stack, ManagedZone managedZone, List<String> ips) throws IOException {
+        GccCredential credential = (GccCredential) stack.getCredential();
+        Change originalChange = dns.changes().get(credential.getProjectId(), credential.getProjectId(), credential.getProjectId()).execute();
+        if (originalChange != null) {
+            originalChange.getAdditions().add(buildResourceRecordSet(stack, ips));
+        } else {
+            originalChange = new Change();
+            originalChange.setAdditions(Arrays.asList(buildResourceRecordSet(stack, ips)));
+            originalChange.setId(credential.getProjectId());
+        }
+        Change execute = dns.changes().create(credential.getProjectId(), managedZone.getName(), originalChange).execute();
+        return execute;
+    }
+
+    public ResourceRecordSet buildResourceRecordSet(Stack stack, List<String> ips) throws IOException {
+        GccCredential credential = (GccCredential) stack.getCredential();
+        ResourceRecordSet resourceRecordSet = new ResourceRecordSet();
+        resourceRecordSet.setName(String.format("%s.%s.", credential.getProjectId(), "com"));
+        resourceRecordSet.setTtl(TTL);
+        resourceRecordSet.setType("A");
+        resourceRecordSet.setRrdatas(ips);
+        return resourceRecordSet;
     }
 
     public Instance buildInstance(Compute compute, Stack stack,
