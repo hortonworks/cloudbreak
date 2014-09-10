@@ -50,10 +50,9 @@ public final class ServiceTestUtils {
     public static Blueprint createBlueprint(User bpUser) {
         Blueprint blueprint = new Blueprint();
         blueprint.setId(1L);
-        blueprint.setUser(bpUser);
         blueprint.setBlueprintName("test-blueprint");
+        blueprint.setBlueprintName("dummyName");
         blueprint.setBlueprintText("dummyText");
-        blueprint.getUserRoles().addAll(bpUser.getUserRoles());
         return blueprint;
     }
 
@@ -96,20 +95,17 @@ public final class ServiceTestUtils {
         switch (platform) {
             case AZURE:
                 template = new AzureTemplate();
-                ((AzureTemplate) template).setAzureTemplateOwner(user);
                 ((AzureTemplate) template).setVmType("test-vm-type");
                 ((AzureTemplate) template).setLocation(AzureLocation.NORTH_EUROPE);
                 break;
             case AWS:
                 template = new AwsTemplate();
-                ((AwsTemplate) template).setAwsTemplateOwner(user);
                 ((AwsTemplate) template).setInstanceType(InstanceType.C1Medium);
                 ((AwsTemplate) template).setRegion(Regions.EU_WEST_1);
                 break;
             default:
                 break;
         }
-        template.getUserRoles().add(role);
         return template;
     }
 

@@ -47,7 +47,6 @@ public class UserConverter extends AbstractConverter<UserJson, User> {
         userJson.setLastName(entity.getLastName());
         userJson.setCredentials(convertCredentials(entity));
         userJson.setStacks(stackConverter.convertAllEntityToJsonWithClause(entity.getStacks()));
-        userJson.setBlueprints(blueprintConverter.convertAllToIdList(entity.getBlueprints()));
         userJson.setCompany(entity.getAccount().getName());
         userJson.setUserId(entity.getId());
         return userJson;
