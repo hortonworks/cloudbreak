@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.repository;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.Query;
@@ -10,6 +11,10 @@ import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 
 public interface CloudbreakEventRepository extends CrudRepository<CloudbreakEvent, Long> {
 
-    @Query("select cbe from CloudbreakEvent cbe where (cbe.userId= :userId) and ( :since IS NULL or cbe.eventTimestamp > to_timestamp(:since))")
-    List<CloudbreakEvent> cloudbreakEvents(@Param("userId") Long userId, @Param("since") Long since);
+    @Query("select cbe from CloudbreakEvent cbe where cbe.userId= :userId")
+    List<CloudbreakEvent> cloudbreakEvents(@Param("userId") Long userId);
+
+    @Query("select cbe from CloudbreakEvent cbe where cbe.userId= :userId and cbe.eventTimestamp > :since")
+    List<CloudbreakEvent> cloudbreakEventsSince(@Param("userId") Long userId, @Param("since") Date since);
+
 }

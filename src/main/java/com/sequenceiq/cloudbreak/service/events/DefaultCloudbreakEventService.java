@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.events;
 
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -53,10 +54,13 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
 
     @Override
     public List<CloudbreakEvent> cloudbreakEvents(Long userId, Long since) {
+        List<CloudbreakEvent> events = null;
         if (null == since) {
-            since = 0L;
+            events = eventRepository.cloudbreakEvents(userId);
+        } else {
+            Date sinceDate = new Date(since);
+            events = eventRepository.cloudbreakEventsSince(userId, sinceDate);
         }
-        List<CloudbreakEvent> events = eventRepository.cloudbreakEvents(userId, since);
         return null != events ? events : Collections.EMPTY_LIST;
     }
 
