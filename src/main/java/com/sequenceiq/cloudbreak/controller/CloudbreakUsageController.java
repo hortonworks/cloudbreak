@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import java.util.Date;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -34,10 +33,10 @@ public class CloudbreakUsageController {
             @RequestParam(value = "account", required = false) Long accountId,
             @RequestParam(value = "cloud", required = false) String cloud,
             @RequestParam(value = "zone", required = false) String zone,
-            @RequestParam(value = "vmtype", required = false) Long vmtype,
+            @RequestParam(value = "vmtype", required = false) String vmtype,
             @RequestParam(value = "hours", required = false) String hours) {
-        LOGGER.info("Retrieving events for user {}, since {}", user.getId(), since == null ? null : new Date(since));
-        return new ResponseEntity<>(HttpStatus.OK);
+        List<CloudbreakUsageJson> usages = cloudbreakUsagesFacade.loadUsages(user, since, userId, accountId, cloud, zone, vmtype, hours);
+        return new ResponseEntity<>(usages, HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/accounts/usages")
@@ -48,10 +47,10 @@ public class CloudbreakUsageController {
             @RequestParam(value = "account", required = false) Long accountId,
             @RequestParam(value = "cloud", required = false) String cloud,
             @RequestParam(value = "zone", required = false) String zone,
-            @RequestParam(value = "vmtype", required = false) Long vmtype,
+            @RequestParam(value = "vmtype", required = false) String vmtype,
             @RequestParam(value = "hours", required = false) String hours) {
-        LOGGER.info("Retrieving events for user {}, since {}", user.getId(), since == null ? null : new Date(since));
-        return new ResponseEntity<>(HttpStatus.OK);
+        List<CloudbreakUsageJson> usages = cloudbreakUsagesFacade.loadAccountUsages(user, since, userId, accountId, cloud, zone, vmtype, hours);
+        return new ResponseEntity<>(usages, HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/user/usages")
@@ -62,10 +61,10 @@ public class CloudbreakUsageController {
             @RequestParam(value = "account", required = false) Long accountId,
             @RequestParam(value = "cloud", required = false) String cloud,
             @RequestParam(value = "zone", required = false) String zone,
-            @RequestParam(value = "vmtype", required = false) Long vmtype,
+            @RequestParam(value = "vmtype", required = false) String vmtype,
             @RequestParam(value = "hours", required = false) String hours) {
-        LOGGER.info("Retrieving events for user {}, since {}", user.getId(), since == null ? null : new Date(since));
-        return new ResponseEntity<>(HttpStatus.OK);
+        List<CloudbreakUsageJson> usages = cloudbreakUsagesFacade.loadUserUsages(user, since, userId, accountId, cloud, zone, vmtype, hours);
+        return new ResponseEntity<>(usages, HttpStatus.OK);
     }
 
 
