@@ -1,13 +1,9 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.controller.json.CredentialJson;
 import com.sequenceiq.cloudbreak.controller.json.UserJson;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.AccountRepository;
@@ -45,18 +41,10 @@ public class UserConverter extends AbstractConverter<UserJson, User> {
         userJson.setEmail(entity.getEmail());
         userJson.setFirstName(entity.getFirstName());
         userJson.setLastName(entity.getLastName());
-        userJson.setCredentials(convertCredentials(entity));
         userJson.setStacks(stackConverter.convertAllEntityToJsonWithClause(entity.getStacks()));
         userJson.setCompany(entity.getAccount().getName());
         userJson.setUserId(entity.getId());
         return userJson;
-    }
-
-    private Set<CredentialJson> convertCredentials(User entity) {
-        Set<CredentialJson> jsons = new HashSet<>();
-        jsons.addAll(awsCredentialConverter.convertAllEntityToJson(entity.getAwsCredentials()));
-        jsons.addAll(azureCredentialConverter.convertAllEntityToJson(entity.getAzureCredentials()));
-        return jsons;
     }
 
     @Override

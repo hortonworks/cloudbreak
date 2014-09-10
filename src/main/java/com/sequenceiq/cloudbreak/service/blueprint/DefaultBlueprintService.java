@@ -16,7 +16,6 @@ import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
-import com.sequenceiq.cloudbreak.service.account.AccountService;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
@@ -33,9 +32,6 @@ public class DefaultBlueprintService implements BlueprintService {
 
     @Autowired
     private WebsocketService websocketService;
-
-    @Autowired
-    private AccountService accountService;
 
     @Override
     public Set<Blueprint> retrievePrivateBlueprints(CbUser user) {

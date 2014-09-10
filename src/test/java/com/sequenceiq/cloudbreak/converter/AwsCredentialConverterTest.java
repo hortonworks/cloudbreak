@@ -94,7 +94,7 @@ public class AwsCredentialConverterTest {
         // THEN
         assertEquals(result.getRoleArn(),
                 credentialJson.getParameters().get(AWSCredentialParam.ROLE_ARN.getName()));
-        assertEquals(result.getCredentialName(), credentialJson.getName());
+        assertEquals(result.getName(), credentialJson.getName());
         assertEquals(result.getKeyPairName(), "mykeypair");
 
     }
