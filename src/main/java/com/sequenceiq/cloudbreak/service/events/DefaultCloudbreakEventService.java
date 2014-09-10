@@ -71,6 +71,8 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     private CloudbreakEvent createStackEvent(Stack stack, String eventType, String eventMessage) {
         CloudbreakEvent stackEvent = new CloudbreakEvent();
 
+        stackEvent.setStackId(stack.getId());
+
         stackEvent.setEventTimestamp(Calendar.getInstance().getTime());
         stackEvent.setEventMessage(eventMessage);
         stackEvent.setEventType(eventType);

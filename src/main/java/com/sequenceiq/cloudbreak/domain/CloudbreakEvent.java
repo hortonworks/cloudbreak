@@ -14,7 +14,6 @@ public class CloudbreakEvent implements ProvisionEntity {
     private Long id;
 
     private String eventType;
-
     private Date eventTimestamp;
     private String eventMessage;
     private String userName;
@@ -26,6 +25,7 @@ public class CloudbreakEvent implements ProvisionEntity {
     private String vmType;
     private String blueprintName;
     private long blueprintId;
+    private Long stackId;
 
     public Long getId() {
         return id;
@@ -131,6 +131,14 @@ public class CloudbreakEvent implements ProvisionEntity {
         this.blueprintId = blueprintId;
     }
 
+    public Long getStackId() {
+        return stackId;
+    }
+
+    public void setStackId(Long stackId) {
+        this.stackId = stackId;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("CloudbreakEvent{");
@@ -147,6 +155,7 @@ public class CloudbreakEvent implements ProvisionEntity {
         sb.append(", vmType='").append(vmType).append('\'');
         sb.append(", blueprintName='").append(blueprintName).append('\'');
         sb.append(", blueprintId=").append(blueprintId);
+        sb.append(", stackId=").append(stackId);
         sb.append('}');
         return sb.toString();
     }
