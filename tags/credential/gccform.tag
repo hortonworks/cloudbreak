@@ -61,7 +61,9 @@
         <label class="col-sm-3 control-label" for="gcc_csshPublicKey">Credential public key:</label>
 
         <div class="col-sm-9">
-            <textarea rows="4" type="text" class="form-control" ng-model="gcc_csshPublicKey" name="gcc_csshPublicKey" id="gcc_csshPublicKey"
+            <textarea rows="4" type="text" placeholder="-----BEGIN RSA PRIVATE KEY-----
+MIICXAIBAAKBgQ...
+-----END RSA PRIVATE KEY-----" class="form-control" ng-model="gcc_csshPublicKey" name="gcc_csshPublicKey" id="gcc_csshPublicKey"
                       required></textarea>
 
             <div class="help-block" ng-show="gccCredentialForm.gcc_csshPublicKey.$dirty && gccCredentialForm.gcc_csshPublicKey.$invalid">
@@ -76,7 +78,7 @@
         <label class="col-sm-3 control-label" for="gcc_sshPublicKey">SSH public key:</label>
 
         <div class="col-sm-9">
-            <textarea rows="4" type="text" class="form-control" ng-model="gcc_sshPublicKey" name="gcc_sshPublicKey" id="gcc_sshPublicKey" required></textarea>
+            <textarea rows="4" placeholder="ssh-rsa AAAAB3... user-eu" type="text" class="form-control" ng-model="gcc_sshPublicKey" name="gcc_sshPublicKey" id="gcc_sshPublicKey" required></textarea>
 
             <div class="help-block" ng-show="gccCredentialForm.gcc_sshPublicKey.$dirty && gccCredentialForm.gcc_sshPublicKey.$invalid">
                 <i class="fa fa-warning"></i> {{error_msg.credential_ssh_key_invalid}}

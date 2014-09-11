@@ -54,10 +54,12 @@
     </div>
 
     <div class="form-group" ng-class="{ 'has-error': azureCredentialForm.azure_sshPublicKey.$dirty && azureCredentialForm.azure_sshPublicKey.$invalid }">
-        <label class="col-sm-3 control-label" for="azure_sshPublicKey">SSH public key:</label>
+        <label class="col-sm-3 control-label" for="azure_sshPublicKey">SSH certificate:</label>
 
         <div class="col-sm-9">
-            <textarea rows="4" type="text" class="form-control" ng-model="azure_sshPublicKey" name="azure_sshPublicKey" id="azure_sshPublicKey" required></textarea>
+            <textarea rows="4" type="text" placeholder="-----BEGIN CERTIFICATE-----
+MIICsDCCAhmgAwIBA...
+-----END CERTIFICATE-----" class="form-control" ng-model="azure_sshPublicKey" name="azure_sshPublicKey" id="azure_sshPublicKey" required></textarea>
             <div class="help-block" ng-show="azureCredentialForm.azure_sshPublicKey.$dirty && azureCredentialForm.azure_sshPublicKey.$invalid">
                 <i class="fa fa-warning"></i> {{error_msg.credential_ssh_key_invalid}}
             </div>

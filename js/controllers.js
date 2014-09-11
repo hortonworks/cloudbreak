@@ -831,7 +831,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     parameters: {
                         gccZone: gcc_tregion.value,
                         gccInstanceType: gcc_tinstanceType.value,
-                        gccImageType: "UBUNTU_HACK"
+                        gccImageType: "DEBIAN_HACK"
                     }
                 }
             }).success(function (data, status, headers, config) {
@@ -875,7 +875,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 awscname.value = "";
                 croleArn.value = "";
                 awscdescription.value = "";
-                aws_sshPublicKey.value = "";
+                aws_sshPublicKey.value = '';
             }).error(function (data, status, headers, config) {
                 $scope.awsCredentialInCreate = false;
                 $scope.modifyStatusMessage($rootScope.error_msg.aws_credential_failed + data.message);
@@ -911,7 +911,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                 cdescription.value = "";
                 csubscriptionId.value = "";
                 cjksPassword.value = "";
-                azure_sshPublicKey.value = "";
+                azure_sshPublicKey.value = '';
                 console.log("download" + data.id);
                 $scope.getAzureCertification(data.id);
             }).error(function (data, status, headers, config) {
@@ -921,6 +921,7 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
         }
 
         $scope.createGccCredential = function() {
+            $scope.awsCredentialInCreate = true;
             $http({
                 method: 'POST',
                 dataType: 'json',
@@ -941,13 +942,17 @@ cloudbreakControllers.controller('cloudbreakController', ['$scope', '$http', 'Te
                     }
                 }
             }).success(function (data, status, headers, config) {
+                $scope.awsCredentialInCreate = false;
                 $scope.getCredentials();
                 $scope.modifyStatusMessage("Google cloud credential '" + data.id + "' was created successfully");
                 $scope.modifyStatusClass("has-success");
-                cname.value = "";
-                cdescription.value = "";
-                serviceAccountId.value = "";
+                gcccsubscriptionId.value = "";
+                gcc_csshPublicKey.value = '';
+                gcc_tprojectId.value = "";
+                gcc_sshPublicKey.value = '';
+                gcccdescription.value = "";
             }).error(function (data, status, headers, config) {
+                $scope.awsCredentialInCreate = false;
                 $scope.modifyStatusMessage("Google cloud credential creation failed: " + data.message);
                 $scope.modifyStatusClass("has-error");
             });
