@@ -44,7 +44,8 @@ public class ClusterRequestHandlerTest {
         User user = AwsConnectorTestUtil.createUser();
         AwsCredential credential = AwsConnectorTestUtil.createAwsCredential();
         AwsTemplate awsTemplate = AwsConnectorTestUtil.createAwsTemplate();
-        stackEvent = new Event<>(AwsConnectorTestUtil.createStack(AwsConnectorTestUtil.DUMMY_OWNER, AwsConnectorTestUtil.DUMMY_ACCOUNT, credential, awsTemplate, new HashSet<Resource>()));
+        stackEvent = new Event<>(AwsConnectorTestUtil.createStack(
+                AwsConnectorTestUtil.DUMMY_OWNER, AwsConnectorTestUtil.DUMMY_ACCOUNT, credential, awsTemplate, new HashSet<Resource>()));
         stackEvent.setKey(AMBARI_STARTED);
     }
 

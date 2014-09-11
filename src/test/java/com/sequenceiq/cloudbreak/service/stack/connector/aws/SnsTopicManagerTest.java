@@ -81,7 +81,12 @@ public class SnsTopicManagerTest {
         confirmSubscriptionResult.setSubscriptionArn(AwsConnectorTestUtil.DEFAULT_TOPIC_ARN);
         snsTopic = AwsConnectorTestUtil.createSnsTopic(credential);
         user = AwsConnectorTestUtil.createUser();
-        stack = AwsConnectorTestUtil.createStack(AwsConnectorTestUtil.DUMMY_OWNER, AwsConnectorTestUtil.DUMMY_ACCOUNT, credential, AwsConnectorTestUtil.createAwsTemplate(), new HashSet<Resource>());
+        stack = AwsConnectorTestUtil.createStack(
+                AwsConnectorTestUtil.DUMMY_OWNER,
+                AwsConnectorTestUtil.DUMMY_ACCOUNT,
+                credential,
+                AwsConnectorTestUtil.createAwsTemplate(),
+                new HashSet<Resource>());
     }
 
     @Test

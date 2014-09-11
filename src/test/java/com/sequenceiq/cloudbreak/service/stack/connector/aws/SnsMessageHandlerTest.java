@@ -70,7 +70,12 @@ public class SnsMessageHandlerTest {
         User user = AwsConnectorTestUtil.createUser();
         AwsCredential credential = AwsConnectorTestUtil.createAwsCredential();
         AwsTemplate awsTemplate = AwsConnectorTestUtil.createAwsTemplate();
-        stack = AwsConnectorTestUtil.createStack(AwsConnectorTestUtil.DUMMY_OWNER, AwsConnectorTestUtil.DUMMY_ACCOUNT, credential, awsTemplate, new HashSet<Resource>());
+        stack = AwsConnectorTestUtil.createStack(
+                AwsConnectorTestUtil.DUMMY_OWNER,
+                AwsConnectorTestUtil.DUMMY_ACCOUNT,
+                credential,
+                awsTemplate,
+                new HashSet<Resource>());
     }
 
     @Test
