@@ -186,9 +186,13 @@ public class GccStackUtil {
     public List<Disk> listDisks(Compute compute, GccCredential gccCredential) throws IOException {
         List<Disk> disks = new ArrayList<>();
         for (GccZone gccZone : GccZone.values()) {
-            Compute.Disks.List list = compute.disks().list(gccCredential.getProjectId(), gccZone.getValue());
-            DiskList execute = list.execute();
-            disks.addAll(execute.getItems());
+            try {
+                Compute.Disks.List list = compute.disks().list(gccCredential.getProjectId(), gccZone.getValue());
+                DiskList execute = list.execute();
+                disks.addAll(execute.getItems());
+            } catch (NullPointerException ex) {
+                disks.addAll(new ArrayList<Disk>());
+            }
         }
         return disks;
     }

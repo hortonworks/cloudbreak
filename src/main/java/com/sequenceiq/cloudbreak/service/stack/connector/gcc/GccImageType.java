@@ -10,16 +10,22 @@ public enum GccImageType {
     //OPENSUSE("https://www.googleapis.com/compute/v1/projects/opensuse-cloud/global/images/opensuse-13-1-v20140711"),
     //RHEL("https://www.googleapis.com/compute/v1/projects/rhel-cloud/global/images/rhel-6-v20140619"),
     //SLES("https://www.googleapis.com/compute/v1/projects/suse-cloud/global/images/sles-11-sp3-v20140712"),
-    DEBIAN_HACK("https://www.googleapis.com/compute/v1/projects/siq-haas/global/images/debian-docker-ambari");
+    DEBIAN_HACK("https://www.googleapis.com/compute/v1/projects/%s/global/images/debian-docker-ambari1", "debian-docker-ambari1");
 
     private final String value;
+    private final String imageName;
 
-    private GccImageType(String value) {
+    private GccImageType(String value, String imageName) {
         this.value = value;
+        this.imageName = imageName;
     }
 
     public String getValue() {
         return value;
+    }
+
+    public String getImageName() {
+        return imageName;
     }
 
     public String getAmbariUbuntu(String projectId) {

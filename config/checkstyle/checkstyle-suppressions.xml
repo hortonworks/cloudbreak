@@ -23,6 +23,7 @@
     <suppress checks="IllegalCatch" files="GccDiskCheckerStatus.java"/>
     <suppress checks="IllegalCatch" files="GccInstanceCheckerStatus.java"/>
     <suppress checks="IllegalCatch" files="GccRemoveCheckerStatus.java"/>
+    <suppress checks="IllegalCatch" files="GccStackUtil.java"/>
 
     <!-- -->
 
