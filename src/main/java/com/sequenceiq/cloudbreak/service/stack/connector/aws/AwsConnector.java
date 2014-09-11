@@ -84,7 +84,7 @@ public class AwsConnector implements CloudPlatformConnector {
     private StackRepository stackRepository;
 
     @Override
-    public StackDescription describeStackWithResources(User user, Stack stack, Credential credential) {
+    public StackDescription describeStackWithResources(Stack stack, Credential credential) {
         AwsTemplate awsInfra = (AwsTemplate) stack.getTemplate();
         AwsCredential awsCredential = (AwsCredential) credential;
         DescribeStacksResult stackResult = null;
@@ -129,7 +129,7 @@ public class AwsConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public void deleteStack(User user, Stack stack, Credential credential) {
+    public void deleteStack(Stack stack, Credential credential) {
         LOGGER.info("Deleting stack: {}", stack.getId());
         AwsTemplate template = (AwsTemplate) stack.getTemplate();
         AwsCredential awsCredential = (AwsCredential) credential;

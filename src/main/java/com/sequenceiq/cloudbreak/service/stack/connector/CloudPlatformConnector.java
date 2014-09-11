@@ -4,13 +4,12 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackDescription;
-import com.sequenceiq.cloudbreak.domain.User;
 
 public interface CloudPlatformConnector {
 
-    StackDescription describeStackWithResources(User user, Stack stack, Credential credential);
+    StackDescription describeStackWithResources(Stack stack, Credential credential);
 
-    void deleteStack(User user, Stack stack, Credential credential);
+    void deleteStack(Stack stack, Credential credential);
 
     CloudPlatform getCloudPlatform();
 

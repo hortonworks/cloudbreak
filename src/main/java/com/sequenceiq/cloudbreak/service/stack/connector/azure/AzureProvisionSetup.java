@@ -4,9 +4,6 @@ import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStack
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.EMAILASFOLDER;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.NOT_FOUND;
 
-import groovyx.net.http.HttpResponseDecorator;
-import groovyx.net.http.HttpResponseException;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,9 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import reactor.core.Reactor;
-import reactor.event.Event;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -37,6 +31,11 @@ import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
+
+import groovyx.net.http.HttpResponseDecorator;
+import groovyx.net.http.HttpResponseException;
+import reactor.core.Reactor;
+import reactor.event.Event;
 
 @Component
 public class AzureProvisionSetup implements ProvisionSetup {
@@ -69,7 +68,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
     @Override
     public void setupProvisioning(Stack stack) {
         Credential credential = stack.getCredential();
-        String emailAsFolder = azureStackUtil.emailAsFolder(stack.getUser().getEmail());
+        String emailAsFolder = azureStackUtil.emailAsFolder(stack.getOwner());
 
         String filePath = AzureCertificateService.getUserJksFileName(credential, emailAsFolder);
         AzureClient azureClient = azureStackUtil.createAzureClient(credential, filePath);
@@ -108,7 +107,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
                         copyStatusFromServer.get("totalBytes"),
                         copyPercentage));
 
-                websocketService.sendToTopicUser(stack.getUser().getEmail(), WebsocketEndPoint.COPY_IMAGE,
+                websocketService.sendToTopicUser(stack.getOwner(), WebsocketEndPoint.COPY_IMAGE,
                         new StatusMessage(stack.getId(), stack.getName(), PENDING, String.format("The copy status is: %s%%.", copyPercentage)));
                 try {
                     Thread.sleep(MILLIS);
@@ -129,10 +128,10 @@ public class AzureProvisionSetup implements ProvisionSetup {
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT, stack.getId());
         reactor.notify(ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT,
                 Event.wrap(new ProvisionSetupComplete(getCloudPlatform(), stack.getId())
-                        .withSetupProperty(CREDENTIAL, stack.getCredential())
-                        .withSetupProperty(EMAILASFOLDER, emailAsFolder)
-                        )
-                );
+                                .withSetupProperty(CREDENTIAL, stack.getCredential())
+                                .withSetupProperty(EMAILASFOLDER, emailAsFolder)
+                )
+        );
     }
 
     private void createStorage(Stack stack, AzureClient azureClient, String affinityGroupName) {
@@ -179,7 +178,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
     public Map<String, Object> getSetupProperties(Stack stack) {
         Map<String, Object> properties = new HashMap<>();
         properties.put(CREDENTIAL, stack.getCredential());
-        properties.put(EMAILASFOLDER, azureStackUtil.emailAsFolder(stack.getUser().getEmail()));
+        properties.put(EMAILASFOLDER, azureStackUtil.emailAsFolder(stack.getOwner()));
         return properties;
     }
 

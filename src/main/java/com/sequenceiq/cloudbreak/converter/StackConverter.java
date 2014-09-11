@@ -51,6 +51,7 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
         } else {
             stackJson.setCluster(new ClusterResponse());
         }
+        stackJson.setPublicInAccount(entity.isPublicInAccount());
         return stackJson;
     }
 
@@ -72,6 +73,7 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
         } else {
             stackJson.setCluster(new ClusterResponse());
         }
+        stackJson.setPublicInAccount(entity.isPublicInAccount());
         return stackJson;
     }
 
@@ -91,7 +93,7 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
             throw new AccessDeniedException(String.format("Access to template '%s' is denied or template doesn't exist.", json.getTemplateId()), e);
         }
         stack.setStatus(Status.REQUESTED);
-        stack.getUserRoles().addAll(json.getRoles());
+        stack.setPublicInAccount(json.isPublicInAccount());
         return stack;
     }
 

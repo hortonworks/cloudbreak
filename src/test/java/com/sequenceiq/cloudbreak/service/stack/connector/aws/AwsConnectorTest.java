@@ -40,7 +40,6 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackDescription;
-import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.service.stack.connector.ConnectorTestUtil;
 
 import reactor.core.Reactor;
@@ -66,8 +65,6 @@ public class AwsConnectorTest {
 
     // Domain models
 
-    private User user;
-
     private Stack stack;
 
     private AwsCredential credential;
@@ -84,10 +81,9 @@ public class AwsConnectorTest {
     public void setUp() {
         underTest = new AwsConnector();
         MockitoAnnotations.initMocks(this);
-        user = AwsConnectorTestUtil.createUser();
-        awsTemplate = AwsConnectorTestUtil.createAwsTemplate(user);
+        awsTemplate = AwsConnectorTestUtil.createAwsTemplate();
         credential = AwsConnectorTestUtil.createAwsCredential();
-        stack = AwsConnectorTestUtil.createStack(user, credential, awsTemplate, getDefaultResourceSet());
+        stack = AwsConnectorTestUtil.createStack(AwsConnectorTestUtil.DUMMY_OWNER, AwsConnectorTestUtil.DUMMY_ACCOUNT, credential, awsTemplate, getDefaultResourceSet());
         instancesResult = AwsConnectorTestUtil.createDescribeInstanceResult();
     }
 
@@ -106,7 +102,7 @@ public class AwsConnectorTest {
         given(awsStackUtil.createEC2Client(Regions.DEFAULT_REGION, credential)).willReturn(ec2Client);
         given(ec2Client.describeInstances(any(DescribeInstancesRequest.class))).willReturn(instancesResult);
         // WHEN
-        StackDescription result = underTest.describeStackWithResources(user, stack, credential);
+        StackDescription result = underTest.describeStackWithResources(stack, credential);
         // THEN
         verify(ec2Client, times(1)).describeInstances(any(DescribeInstancesRequest.class));
         assertTrue(result.getClass().isAssignableFrom(DetailedAwsStackDescription.class));
@@ -121,7 +117,7 @@ public class AwsConnectorTest {
         given(awsStackUtil.createEC2Client(Regions.DEFAULT_REGION, credential)).willReturn(ec2Client);
         given(ec2Client.describeInstances(any(DescribeInstancesRequest.class))).willReturn(instancesResult);
         // WHEN
-        StackDescription result = underTest.describeStackWithResources(user, stack, credential);
+        StackDescription result = underTest.describeStackWithResources(stack, credential);
         // THEN
         verify(ec2Client, times(1)).describeInstances(any(DescribeInstancesRequest.class));
         assertTrue(result.getClass().isAssignableFrom(DetailedAwsStackDescription.class));
@@ -137,7 +133,7 @@ public class AwsConnectorTest {
         given(awsStackUtil.createEC2Client(Regions.DEFAULT_REGION, credential)).willReturn(ec2Client);
         given(ec2Client.describeInstances(any(DescribeInstancesRequest.class))).willReturn(instancesResult);
         // WHEN
-        underTest.describeStackWithResources(user, stack, credential);
+        underTest.describeStackWithResources(stack, credential);
         // THEN
         verify(ec2Client, times(1)).describeInstances(any(DescribeInstancesRequest.class));
     }
@@ -151,7 +147,7 @@ public class AwsConnectorTest {
         given(amazonCloudFormationClient.describeStacks(any(DescribeStacksRequest.class))).willReturn(stackResult);
         given(amazonCloudFormationClient.describeStackResources(any(DescribeStackResourcesRequest.class))).willThrow(e);
         // WHEN
-        underTest.describeStackWithResources(user, stack, credential);
+        underTest.describeStackWithResources(stack, credential);
     }
 
     @Test
@@ -163,7 +159,7 @@ public class AwsConnectorTest {
         given(awsStackUtil.createCloudFormationClient(Regions.DEFAULT_REGION, credential)).willReturn(amazonCloudFormationClient);
         doNothing().when(amazonCloudFormationClient).deleteStack(any(DeleteStackRequest.class));
         // WHEN
-        underTest.deleteStack(user, stack, credential);
+        underTest.deleteStack(stack, credential);
         // THEN
         verify(amazonCloudFormationClient, times(1)).deleteStack(any(DeleteStackRequest.class));
     }
@@ -177,7 +173,7 @@ public class AwsConnectorTest {
         given(awsStackUtil.createCloudFormationClient(Regions.DEFAULT_REGION, credential)).willReturn(amazonCloudFormationClient);
         doNothing().when(amazonCloudFormationClient).deleteStack(any(DeleteStackRequest.class));
         // WHEN
-        underTest.deleteStack(user, stack, credential);
+        underTest.deleteStack(stack, credential);
         // THEN
         verify(amazonCloudFormationClient, times(1)).deleteStack(any(DeleteStackRequest.class));
     }

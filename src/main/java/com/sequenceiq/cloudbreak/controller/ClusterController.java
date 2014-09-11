@@ -48,7 +48,7 @@ public class ClusterController {
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<ClusterResponse> retrieveClusters(@CurrentUser User user, @PathVariable Long stackId) {
-        Stack stack = stackService.get(user, stackId);
+        Stack stack = stackService.get(stackId);
         Cluster cluster = clusterService.retrieveCluster(user, stackId);
         String clusterJson = clusterService.getClusterJson(stack.getAmbariIp(), stackId);
         ClusterResponse response = clusterConverter.convert(cluster, clusterJson);

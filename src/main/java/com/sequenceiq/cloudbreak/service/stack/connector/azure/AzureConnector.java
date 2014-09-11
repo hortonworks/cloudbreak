@@ -5,10 +5,10 @@ import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStack
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.NOT_FOUND;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.SERVICENAME;
 
-import java.util.ArrayList;
 import groovyx.net.http.HttpResponseDecorator;
 import groovyx.net.http.HttpResponseException;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,9 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import reactor.core.Reactor;
-import reactor.event.Event;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -45,6 +42,11 @@ import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteComplete;
 import com.sequenceiq.cloudbreak.service.stack.flow.AzureInstanceStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.flow.AzureInstances;
 
+import groovyx.net.http.HttpResponseDecorator;
+import groovyx.net.http.HttpResponseException;
+import reactor.core.Reactor;
+import reactor.event.Event;
+
 @Service
 public class AzureConnector implements CloudPlatformConnector {
 
@@ -64,8 +66,8 @@ public class AzureConnector implements CloudPlatformConnector {
     private PollingService<AzureInstances> azurePollingService;
 
     @Override
-    public StackDescription describeStackWithResources(User user, Stack stack, Credential credential) {
-        String filePath = AzureCertificateService.getUserJksFileName(credential, azureStackUtil.emailAsFolder(user.getEmail()));
+    public StackDescription describeStackWithResources(Stack stack, Credential credential) {
+        String filePath = AzureCertificateService.getUserJksFileName(credential, azureStackUtil.emailAsFolder(stack.getOwner()));
         AzureClient azureClient = azureStackUtil.createAzureClient(credential, filePath);
         DetailedAzureStackDescription detailedAzureStackDescription = new DetailedAzureStackDescription();
         try {
@@ -115,17 +117,17 @@ public class AzureConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public void deleteStack(User user, Stack stack, Credential credential) {
-        String filePath = AzureCertificateService.getUserJksFileName(credential, azureStackUtil.emailAsFolder(user.getEmail()));
+    public void deleteStack(Stack stack, Credential credential) {
+        String filePath = AzureCertificateService.getUserJksFileName(credential, azureStackUtil.emailAsFolder(stack.getOwner()));
         AzureClient azureClient = azureStackUtil.createAzureClient(credential, filePath);
-        deleteVirtualMachines(user, stack, azureClient);
-        deleteCloudServices(user, stack, (AzureCredential) credential, azureClient);
-        deleteNetwork(user, stack, azureClient);
-        deleteBlobs(user, stack, azureClient);
+        deleteVirtualMachines(stack, azureClient);
+        deleteCloudServices(stack, (AzureCredential) credential, azureClient);
+        deleteNetwork(stack, azureClient);
+        deleteBlobs(stack, azureClient);
         reactor.notify(ReactorConfig.DELETE_COMPLETE_EVENT, Event.wrap(new StackDeleteComplete(stack.getId())));
     }
 
-    private void deleteBlobs(User user, Stack stack, AzureClient azureClient) {
+    private void deleteBlobs(Stack stack, AzureClient azureClient) {
         Map<String, String> props;
         for (Resource resource : stack.getResourcesByType(ResourceType.BLOB)) {
             try {
@@ -142,14 +144,14 @@ public class AzureConnector implements CloudPlatformConnector {
                     }
                 }
             } catch (HttpResponseException ex) {
-                httpResponseExceptionHandler(ex, resource.getResourceName(), user.getId());
+                httpResponseExceptionHandler(ex, resource.getResourceName(), stack.getOwner());
             } catch (Exception ex) {
                 throw new InternalServerException(ex.getMessage());
             }
         }
     }
 
-    private void deleteNetwork(User user, Stack stack, AzureClient azureClient) {
+    private void deleteNetwork(Stack stack, AzureClient azureClient) {
         for (Resource resource : stack.getResourcesByType(ResourceType.NETWORK)) {
             Map<String, String> props;
             try {
@@ -159,19 +161,19 @@ public class AzureConnector implements CloudPlatformConnector {
                 String requestId = (String) azureClient.getRequestId(deleteVirtualNetworkResult);
                 azureClient.waitUntilComplete(requestId);
             } catch (HttpResponseException ex) {
-                httpResponseExceptionHandler(ex, resource.getResourceName(), user.getId());
+                httpResponseExceptionHandler(ex, resource.getResourceName(), stack.getOwner());
             } catch (Exception ex) {
                 throw new InternalServerException(ex.getMessage());
             }
         }
     }
 
-    private void deleteCloudServices(User user, Stack stack, AzureCredential credential, AzureClient azureClient) {
+    private void deleteCloudServices(Stack stack, AzureCredential credential, AzureClient azureClient) {
         for (Resource resource : stack.getResourcesByType(ResourceType.CLOUD_SERVICE)) {
             try {
                 deleteCloudService(azureClient, credential.getName().replaceAll("\\s+", ""), resource.getResourceName());
             } catch (HttpResponseException ex) {
-                httpResponseExceptionHandler(ex, resource.getResourceName(), user.getId());
+                httpResponseExceptionHandler(ex, resource.getResourceName(), stack.getOwner());
             } catch (Exception ex) {
                 throw new InternalServerException(ex.getMessage());
             }
@@ -187,12 +189,12 @@ public class AzureConnector implements CloudPlatformConnector {
         azureClient.waitUntilComplete(requestId);
     }
 
-    private void deleteVirtualMachines(User user, Stack stack, AzureClient azureClient) {
+    private void deleteVirtualMachines(Stack stack, AzureClient azureClient) {
         for (Resource resource : stack.getResourcesByType(ResourceType.VIRTUAL_MACHINE)) {
             try {
                 deleteVirtualMachine(azureClient, resource.getResourceName(), resource.getResourceName());
             } catch (HttpResponseException ex) {
-                httpResponseExceptionHandler(ex, resource.getResourceName(), user.getId());
+                httpResponseExceptionHandler(ex, resource.getResourceName(), stack.getOwner());
             } catch (Exception ex) {
                 throw new InternalServerException(ex.getMessage());
             }
@@ -208,11 +210,11 @@ public class AzureConnector implements CloudPlatformConnector {
         azureClient.waitUntilComplete(requestId);
     }
 
-    private void httpResponseExceptionHandler(HttpResponseException ex, String resourceName, Long userId) {
+    private void httpResponseExceptionHandler(HttpResponseException ex, String resourceName, String user) {
         if (ex.getStatusCode() != NOT_FOUND) {
             throw new InternalServerException(ex.getMessage());
         } else {
-            LOGGER.error(String.format("Azure resource not found with %s name for %s userId.", resourceName, userId));
+            LOGGER.error(String.format("Azure resource not found with %s name for %s user.", resourceName, user));
         }
     }
 

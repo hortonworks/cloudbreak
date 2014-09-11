@@ -21,7 +21,6 @@ import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -125,9 +124,7 @@ public class ProvisionContextTest {
         stack.setId(1L);
         stack.setStatus(Status.REQUESTED);
         stack.setName(DUMMY_NAME);
-        User u = new User();
-        u.setEmail("gipszjakab@myemail.com");
-        stack.setUser(u);
+        stack.setOwner("gipszjakab@myemail.com");
         return stack;
     }
 }

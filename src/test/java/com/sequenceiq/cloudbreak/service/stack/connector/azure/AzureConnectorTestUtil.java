@@ -29,7 +29,6 @@ public class AzureConnectorTestUtil extends ConnectorTestUtil {
         stack.setName(STACK_NAME);
         stack.setAmbariIp(AMBARI_IP);
         stack.setCredential(credential);
-        stack.setUser(user);
         stack.setTemplate(azureTemplate);
         stack.setNodeCount(NODE_COUNT);
         stack.setStatus(Status.REQUESTED);

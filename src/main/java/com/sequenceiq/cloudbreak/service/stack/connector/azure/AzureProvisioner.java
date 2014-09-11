@@ -6,9 +6,6 @@ import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStack
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.NOT_FOUND;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.SERVICENAME;
 
-import groovyx.net.http.HttpResponseDecorator;
-import groovyx.net.http.HttpResponseException;
-
 import java.io.FileNotFoundException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
@@ -26,9 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import reactor.core.Reactor;
-import reactor.event.Event;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
@@ -51,6 +45,11 @@ import com.sequenceiq.cloudbreak.service.stack.connector.Provisioner;
 import com.sequenceiq.cloudbreak.service.stack.event.AddInstancesComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.StackUpdateSuccess;
+
+import groovyx.net.http.HttpResponseDecorator;
+import groovyx.net.http.HttpResponseException;
+import reactor.core.Reactor;
+import reactor.event.Event;
 
 @Component
 public class AzureProvisioner implements Provisioner {
@@ -133,7 +132,7 @@ public class AzureProvisioner implements Provisioner {
     public void addInstances(Stack stack, String userData, Integer instanceCount) {
         AzureTemplate azureTemplate = (AzureTemplate) stack.getTemplate();
         Credential credential = stack.getCredential();
-        String emailAsFolder = azureStackUtil.emailAsFolder(stack.getUser().getEmail());
+        String emailAsFolder = azureStackUtil.emailAsFolder(stack.getOwner());
         String filePath = AzureCertificateService.getUserJksFileName(credential, emailAsFolder);
         AzureClient azureClient = azureStackUtil.createAzureClient(credential, filePath);
 
@@ -161,7 +160,7 @@ public class AzureProvisioner implements Provisioner {
     @Override
     public void removeInstances(Stack stack, Set<String> instanceIds) {
         AzureCredential credential = (AzureCredential) stack.getCredential();
-        String emailAsFolder = azureStackUtil.emailAsFolder(stack.getUser().getEmail());
+        String emailAsFolder = azureStackUtil.emailAsFolder(stack.getOwner());
         String filePath = AzureCertificateService.getUserJksFileName(credential, emailAsFolder);
         AzureClient azureClient = azureStackUtil.createAzureClient(credential, filePath);
         for (String instanceId : instanceIds) {

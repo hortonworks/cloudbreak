@@ -80,13 +80,13 @@ public class SecurityConfig {
                     .antMatchers("/user/templates").access("#oauth2.hasScope('cloudbreak.templates')")
                     .antMatchers("/account/templates").access("#oauth2.hasScope('cloudbreak.templates')")
                     .antMatchers("/templates/**").access("#oauth2.hasScope('cloudbreak.templates')")
-                    .antMatchers("/notification/**").permitAll()
-                    .antMatchers("/sns/**").permitAll()
-                    .antMatchers(HttpMethod.POST, "/users/**").permitAll()
-                    .antMatchers(HttpMethod.GET, "/users/confirm/**").permitAll()
-                    .antMatchers(HttpMethod.POST, "/password/reset/**").permitAll()
-                    .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                    .antMatchers(HttpMethod.GET, "/stacks/metadata/**").permitAll();
+                    .antMatchers("/user/credentials/**").access("#oauth2.hasScope('cloudbreak.credentials')")
+                    .antMatchers("/account/credentials/**").access("#oauth2.hasScope('cloudbreak.credentials')")
+                    .antMatchers("/credentials/**").access("#oauth2.hasScope('cloudbreak.credentials')")
+                    .antMatchers("/user/stacks/**").access("#oauth2.hasScope('cloudbreak.stacks')")
+                    .antMatchers("/account/stacks/**").access("#oauth2.hasScope('cloudbreak.stacks')")
+                    .antMatchers("/stacks/*").access("#oauth2.hasScope('cloudbreak.stacks')");
+
         }
     }
 
@@ -151,7 +151,7 @@ public class SecurityConfig {
                     String group = node.get("display").asText();
                     if (group.startsWith("cloudbreak.account")) {
                         String[] parts = group.split("\\.");
-                        if (account != null && account != parts[2]) {
+                        if (account != null && !account.equals(parts[2])) {
                             throw new IllegalStateException("A user can belong to only one account.");
                         }
                         account = parts[ACCOUNT_PART];

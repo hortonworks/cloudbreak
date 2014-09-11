@@ -30,7 +30,6 @@ import org.hibernate.validator.constraints.NotEmpty;
         @NamedQuery(
                 name = "User.findOneWithLists",
                 query = "SELECT u FROM User u "
-                        + "LEFT JOIN FETCH u.stacks "
                         + "LEFT JOIN FETCH u.clusters "
                         + "WHERE u.id= :id")
 })
@@ -63,9 +62,6 @@ public class User implements ProvisionEntity {
     private Date registrationDate;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Stack> stacks = new HashSet<>();
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Cluster> clusters = new HashSet<>();
 
     @ElementCollection(fetch = FetchType.EAGER)
@@ -85,7 +81,6 @@ public class User implements ProvisionEntity {
         this.email = user.email;
         this.password = user.password;
         this.confToken = user.confToken;
-        this.stacks = user.stacks;
         this.clusters = user.clusters;
         this.status = user.getStatus();
         this.lastLogin = user.lastLogin;
@@ -132,14 +127,6 @@ public class User implements ProvisionEntity {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public Set<Stack> getStacks() {
-        return stacks;
-    }
-
-    public void setStacks(Set<Stack> stacks) {
-        this.stacks = stacks;
     }
 
     public Set<Cluster> getClusters() {

@@ -2,28 +2,29 @@ package com.sequenceiq.cloudbreak.service.stack;
 
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackDescription;
 import com.sequenceiq.cloudbreak.domain.StatusRequest;
-import com.sequenceiq.cloudbreak.domain.User;
 
 public interface StackService {
 
-    Stack create(User user, Stack stack);
+    Set<Stack> retrievePrivateStacks(CbUser user);
 
-    Stack get(User user, Long id);
+    Set<Stack> retrieveAccountStacks(CbUser user);
 
-    Set<Stack> getAll(User user);
+    Stack get(Long id);
 
-    void delete(User user, Long id);
+    Stack create(CbUser user, Stack stack);
+
+    void delete(Long id);
 
     Set<InstanceMetaData> getMetaData(String hash);
 
-    StackDescription getStackDescription(User user, Stack stack);
+    StackDescription getStackDescription(Stack stack);
 
-    void updateStatus(User user, Long stackId, StatusRequest status);
+    void updateStatus(Long stackId, StatusRequest status);
 
-    void updateNodeCount(User user, Long stackId, Integer nodeCount);
-
+    void updateNodeCount(Long stackId, Integer nodeCount);
 }
