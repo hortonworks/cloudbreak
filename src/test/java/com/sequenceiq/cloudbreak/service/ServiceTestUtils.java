@@ -30,6 +30,9 @@ public final class ServiceTestUtils {
         blueprint.setId(1L);
         blueprint.setBlueprintName("test-blueprint");
         blueprint.setBlueprintText("dummyText");
+        blueprint.setOwner(owner);
+        blueprint.setAccount(account);
+        blueprint.setPublicInAccount(true);
         return blueprint;
     }
 
@@ -37,6 +40,7 @@ public final class ServiceTestUtils {
         Stack stack = new Stack();
         stack.setOwner(owner);
         stack.setAccount(account);
+        stack.setPublicInAccount(true);
         return stack;
     }
 
@@ -46,22 +50,26 @@ public final class ServiceTestUtils {
         stack.setAccount(account);
         stack.setTemplate(template);
         stack.setCluster(cluster);
+        stack.setPublicInAccount(true);
         return stack;
     }
 
     public static Credential createCredential(String owner, String account, CloudPlatform platform) {
         Credential cred = null;
         switch (platform) {
-            case AZURE:
-                cred = new AzureCredential();
-                break;
-            case AWS:
-                cred = new AwsCredential();
-                break;
-            default:
-                break;
+        case AZURE:
+            cred = new AzureCredential();
+            break;
+        case AWS:
+            cred = new AwsCredential();
+            break;
+        default:
+            break;
         }
+        cred.setOwner(owner);
+        cred.setAccount(account);
         cred.setCloudPlatform(platform);
+        cred.setPublicInAccount(true);
         return cred;
     }
 
@@ -85,6 +93,7 @@ public final class ServiceTestUtils {
         default:
             break;
         }
+        template.setPublicInAccount(true);
         return template;
     }
 
