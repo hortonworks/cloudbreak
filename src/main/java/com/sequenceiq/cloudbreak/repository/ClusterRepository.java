@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 
 public interface ClusterRepository extends CrudRepository<Cluster, Long> {
 
-    @PostAuthorize("returnObject?.user?.id == principal?.id")
+    @PostAuthorize("returnObject?.owner == principal")
     Cluster findOne(@Param("id") Long id);
 
     Cluster findById(@Param("id") Long id);

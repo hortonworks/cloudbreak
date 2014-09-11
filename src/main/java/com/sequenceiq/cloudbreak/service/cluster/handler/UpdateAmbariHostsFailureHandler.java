@@ -5,9 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import reactor.event.Event;
-import reactor.function.Consumer;
-
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -19,6 +16,9 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsFailure;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
+
+import reactor.event.Event;
+import reactor.function.Consumer;
 
 @Service
 public class UpdateAmbariHostsFailureHandler implements Consumer<Event<UpdateAmbariHostsFailure>> {
@@ -47,7 +47,7 @@ public class UpdateAmbariHostsFailureHandler implements Consumer<Event<UpdateAmb
         clusterRepository.save(cluster);
         Stack stack = stackRepository.findStackForCluster(cluster.getId());
         stackUpdater.updateStackStatus(stack.getId(), Status.AVAILABLE);
-        websocketService.sendToTopicUser(cluster.getUser().getEmail(), WebsocketEndPoint.CLUSTER, new StatusMessage(data.getClusterId(), cluster.getName(),
+        websocketService.sendToTopicUser(cluster.getOwner(), WebsocketEndPoint.CLUSTER, new StatusMessage(data.getClusterId(), cluster.getName(),
                 "UPDATE_FAILED"));
     }
 

@@ -7,9 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import reactor.event.Event;
-import reactor.function.Consumer;
-
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
@@ -23,6 +20,9 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsSuccess;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
+
+import reactor.event.Event;
+import reactor.function.Consumer;
 
 @Service
 public class UpdateAmbariHostsSuccessHandler implements Consumer<Event<UpdateAmbariHostsSuccess>> {
@@ -61,7 +61,7 @@ public class UpdateAmbariHostsSuccessHandler implements Consumer<Event<UpdateAmb
             metadataRepository.save(metadataEntry);
         }
         stackUpdater.updateStackStatus(stack.getId(), Status.AVAILABLE);
-        websocketService.sendToTopicUser(cluster.getUser().getEmail(), WebsocketEndPoint.CLUSTER,
+        websocketService.sendToTopicUser(cluster.getOwner(), WebsocketEndPoint.CLUSTER,
                 new StatusMessage(data.getClusterId(), cluster.getName(), Status.AVAILABLE.name()));
     }
 
