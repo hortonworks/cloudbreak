@@ -85,8 +85,8 @@ public class SecurityConfig {
                     .antMatchers("/credentials/**").access("#oauth2.hasScope('cloudbreak.credentials')")
                     .antMatchers("/user/stacks/**").access("#oauth2.hasScope('cloudbreak.stacks')")
                     .antMatchers("/account/stacks/**").access("#oauth2.hasScope('cloudbreak.stacks')")
-                    .antMatchers("/stacks/*").access("#oauth2.hasScope('cloudbreak.stacks')");
-
+                    .antMatchers("/stacks/*").access("#oauth2.hasScope('cloudbreak.stacks')")
+                    .antMatchers("/stacks/*/cluster/**").access("#oauth2.hasScope('cloudbreak.stacks')");
         }
     }
 
