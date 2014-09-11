@@ -80,6 +80,7 @@ public class AzureCredentialConverterTest {
         credentialJson.setId(1L);
         credentialJson.setName(DUMMY_NAME);
         credentialJson.setDescription(DUMMY_DESCRIPTION);
+        credentialJson.setPublicInAccount(true);
         return credentialJson;
     }
 
@@ -91,6 +92,7 @@ public class AzureCredentialConverterTest {
         azureCredential.setCloudPlatform(CloudPlatform.AZURE);
         azureCredential.setDescription(DUMMY_DESCRIPTION);
         azureCredential.setId(1L);
+        azureCredential.setPublicInAccount(true);
         return azureCredential;
     }
 }

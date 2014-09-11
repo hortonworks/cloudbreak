@@ -201,6 +201,7 @@ public class StackConverterTest {
         stack.setStatus(Status.AVAILABLE);
         stack.setStatusReason(DUMMY_STATUS_REASON);
         stack.setVersion(VERSION);
+        stack.setPublicInAccount(true);
         return stack;
     }
 
@@ -217,6 +218,7 @@ public class StackConverterTest {
         stackJson.setNodeCount(NODE_COUNT);
         stackJson.setStatus(Status.AVAILABLE);
         stackJson.setTemplateId(DUMMY_ID);
+        stackJson.setPublicInAccount(true);
         return stackJson;
     }
 

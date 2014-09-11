@@ -69,6 +69,7 @@ public class AwsTemplateConverterTest {
         templateJson.setVolumeSize(60);
         props.put(AwsTemplateParam.VOLUME_TYPE.getName(), "Gp2");
         templateJson.setParameters(props);
+        templateJson.setPublicInAccount(true);
         return templateJson;
     }
 
@@ -81,6 +82,7 @@ public class AwsTemplateConverterTest {
         awsTemplate.setSshLocation(DUMMY_SSH_LOCATION);
         awsTemplate.setAmiId(DUMMY_AMI_ID);
         awsTemplate.setName(DUMMY_NAME);
+        awsTemplate.setPublicInAccount(true);
         return awsTemplate;
     }
 

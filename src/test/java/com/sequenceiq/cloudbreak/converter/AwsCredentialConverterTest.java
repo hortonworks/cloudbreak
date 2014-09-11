@@ -108,6 +108,7 @@ public class AwsCredentialConverterTest {
         awsCredential.setDescription(DUMMY_DESCRIPTION);
         awsCredential.setTemporaryAwsCredentials(new TemporaryAwsCredentials());
         awsCredential.setCloudPlatform(CloudPlatform.AWS);
+        awsCredential.setPublicInAccount(true);
         return awsCredential;
     }
 
@@ -117,6 +118,7 @@ public class AwsCredentialConverterTest {
         credentialJson.setDescription(DUMMY_DESCRIPTION);
         credentialJson.setId(1L);
         credentialJson.setName(DUMMY_NAME);
+        credentialJson.setPublicInAccount(true);
         Map<String, Object> params = new HashMap<>();
         params.put(AWSCredentialParam.ROLE_ARN.getName(), DUMMY_ROLE_ARN);
         params.put(AWSCredentialParam.SNS_TOPICS.getName(), new HashSet<SnsTopic>());

@@ -180,6 +180,7 @@ public class BlueprintConverterTest {
         blueprintJson.setAmbariBlueprint(jsonNode);
         blueprintJson.setUrl(DUMMY_URL);
         blueprintJson.setDescription(DUMMY_DESCRIPTION);
+        blueprintJson.setPublicInAccount(true);
         return blueprintJson;
     }
 
@@ -189,6 +190,7 @@ public class BlueprintConverterTest {
         blueprint.setDescription(DUMMY_DESCRIPTION);
         blueprint.setId(Long.parseLong(DUMMY_ID));
         blueprint.setBlueprintText(DUMMY_BLUEPRINT_TEXT);
+        blueprint.setPublicInAccount(true);
         return blueprint;
     }
 
