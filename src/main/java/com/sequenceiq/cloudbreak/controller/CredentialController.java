@@ -30,7 +30,6 @@ import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.repository.UserRepository;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
@@ -43,9 +42,6 @@ public class CredentialController {
 
     @Autowired
     private AzureCertificateService azureCertificateService;
-
-    @Autowired
-    private UserRepository userRepository;
 
     @Autowired
     private AwsCredentialConverter awsCredentialConverter;

@@ -29,7 +29,7 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackDescription;
-import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.service.ServiceTestUtils;
 
 import groovyx.net.http.HttpResponseDecorator;
 import groovyx.net.http.HttpResponseException;
@@ -68,8 +68,6 @@ public class AzureConnectorTest {
 
     private Stack stack;
 
-    private User user;
-
     private AzureCredential credential;
 
     private AzureTemplate azureTemplate;
@@ -78,10 +76,10 @@ public class AzureConnectorTest {
     public void setUp() {
         underTest = new AzureConnector();
         MockitoAnnotations.initMocks(this);
-        user = AzureConnectorTestUtil.createUser();
-        azureTemplate = AzureConnectorTestUtil.createAzureTemplate(user);
+        azureTemplate = AzureConnectorTestUtil.createAzureTemplate(ServiceTestUtils.DUMMY_OWNER, ServiceTestUtils.DUMMY_ACCOUNT);
         credential = AzureConnectorTestUtil.createAzureCredential();
-        stack = AzureConnectorTestUtil.createStack(user, credential, azureTemplate, getDefaultResourceSet());
+        stack = AzureConnectorTestUtil.createStack(
+                ServiceTestUtils.DUMMY_OWNER, ServiceTestUtils.DUMMY_ACCOUNT, credential, azureTemplate, getDefaultResourceSet());
     }
 
     public Set<Resource> getDefaultResourceSet() {

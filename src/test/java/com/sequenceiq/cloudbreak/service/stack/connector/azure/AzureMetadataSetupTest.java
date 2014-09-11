@@ -28,7 +28,7 @@ import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.service.ServiceTestUtils;
 
 import reactor.core.Reactor;
 
@@ -54,8 +54,6 @@ public class AzureMetadataSetupTest {
 
     private Stack stack;
 
-    private User user;
-
     private AzureCredential credential;
 
     private AzureTemplate template;
@@ -64,10 +62,9 @@ public class AzureMetadataSetupTest {
     public void setUp() {
         underTest = new AzureMetadataSetup();
         MockitoAnnotations.initMocks(this);
-        user = AzureConnectorTestUtil.createUser();
         credential = AzureConnectorTestUtil.createAzureCredential();
-        template = AzureConnectorTestUtil.createAzureTemplate(user);
-        stack = AzureConnectorTestUtil.createStack(user, credential, template, getDefaultResourceSet());
+        template = AzureConnectorTestUtil.createAzureTemplate(ServiceTestUtils.DUMMY_OWNER, ServiceTestUtils.DUMMY_ACCOUNT);
+        stack = AzureConnectorTestUtil.createStack(ServiceTestUtils.DUMMY_OWNER, ServiceTestUtils.DUMMY_ACCOUNT, credential, template, getDefaultResourceSet());
     }
 
     public Set<Resource> getDefaultResourceSet() {

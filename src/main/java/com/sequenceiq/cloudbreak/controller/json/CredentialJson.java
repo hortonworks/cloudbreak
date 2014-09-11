@@ -1,9 +1,7 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -12,7 +10,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.controller.validation.ValidCredentialRequest;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
-import com.sequenceiq.cloudbreak.domain.UserRole;
 
 @ValidCredentialRequest
 public class CredentialJson implements JsonEntity {
@@ -29,8 +26,6 @@ public class CredentialJson implements JsonEntity {
     private String publicKey;
     @NotNull
     private Boolean publicInAccount;
-
-    private Set<UserRole> userRoles = new HashSet();
 
     public CredentialJson() {
 

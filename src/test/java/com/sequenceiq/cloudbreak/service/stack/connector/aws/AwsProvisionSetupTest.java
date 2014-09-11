@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.SnsTopic;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.SnsTopicRepository;
 
 import reactor.core.Reactor;
@@ -42,8 +41,6 @@ public class AwsProvisionSetupTest {
     @Mock
     private Reactor reactor;
 
-    private User user;
-
     private AwsTemplate awsTemplate;
 
     private Stack stack;
@@ -57,7 +54,6 @@ public class AwsProvisionSetupTest {
         underTest = new AwsProvisionSetup();
         MockitoAnnotations.initMocks(this);
         awsCredential = AwsConnectorTestUtil.createAwsCredential();
-        user = AwsConnectorTestUtil.createUser();
         awsTemplate = AwsConnectorTestUtil.createAwsTemplate();
         stack = AwsConnectorTestUtil.createStack(
                 AwsConnectorTestUtil.DUMMY_OWNER, AwsConnectorTestUtil.DUMMY_ACCOUNT, awsCredential, awsTemplate, new HashSet<Resource>());

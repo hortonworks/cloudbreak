@@ -7,13 +7,10 @@ import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.controller.json.BlueprintJson;
 import com.sequenceiq.cloudbreak.converter.BlueprintConverter;
-import com.sequenceiq.cloudbreak.domain.Account;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.service.ServiceTestUtils;
-import com.sequenceiq.cloudbreak.service.account.AccountService;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 
 public class BlueprintServiceTest {
@@ -35,26 +32,14 @@ public class BlueprintServiceTest {
     @Mock
     private BlueprintJson blueprintJson;
 
-    @Mock
-    private AccountService accountService;
-
-    private User user;
-
-    private Account account;
-
     private Blueprint blueprint;
 
     @Before
     public void setUp() {
         underTest = new DefaultBlueprintService();
-        account = new Account();
-        account.setId(1L);
 
         MockitoAnnotations.initMocks(this);
-        user = new User();
-        user.setEmail("dummy@mymail.com");
-        user.setAccount(account);
-        blueprint = ServiceTestUtils.createBlueprint(user);
+        blueprint = ServiceTestUtils.createBlueprint(ServiceTestUtils.DUMMY_OWNER, ServiceTestUtils.DUMMY_ACCOUNT);
     }
 
 //    @Test
