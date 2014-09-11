@@ -77,11 +77,11 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
         stackEvent.setEventMessage(eventMessage);
         stackEvent.setEventType(eventType);
 
-        stackEvent.setUserId(stack.getUser().getId());
-        stackEvent.setUserName(stack.getUser().getFirstName() + " " + stack.getUser().getLastName());
+        stackEvent.setUserId(1L);
+        stackEvent.setUserName(stack.getOwner());
 
-        stackEvent.setAccountId(stack.getUser().getAccount().getId());
-        stackEvent.setAccountName(stack.getUser().getAccount().getName());
+        stackEvent.setAccountId(1L);
+        stackEvent.setAccountName(stack.getAccount());
 
         populateClusterData(stackEvent, stack);
         populateTemplateData(stackEvent, stack);

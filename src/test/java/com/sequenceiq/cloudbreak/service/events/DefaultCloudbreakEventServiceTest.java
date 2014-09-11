@@ -49,7 +49,7 @@ public class DefaultCloudbreakEventServiceTest {
         Account account = ServiceTestUtils.createAccount("Testing Ltd.", 1L);
         User user = ServiceTestUtils.createUser(UserRole.ACCOUNT_ADMIN, account, 1L, "John", "Doe");
         Template template = ServiceTestUtils.createTemplate(user, CloudPlatform.AWS, UserRole.ACCOUNT_ADMIN);
-        Stack stack = ServiceTestUtils.createStack(user, template, null);
+        Stack stack = ServiceTestUtils.createStack("John", "Acme", template, null);
 
         BDDMockito.given(stackRepository.findById(1L)).willReturn(stack);
 
@@ -71,7 +71,7 @@ public class DefaultCloudbreakEventServiceTest {
         Account account = ServiceTestUtils.createAccount("Testing Ltd.", 1L);
         User user = ServiceTestUtils.createUser(UserRole.ACCOUNT_ADMIN, account, 1L, "John", "Doe");
         Template template = ServiceTestUtils.createTemplate(user, CloudPlatform.AZURE, UserRole.ACCOUNT_ADMIN);
-        Stack stack = ServiceTestUtils.createStack(user, template, null);
+        Stack stack = ServiceTestUtils.createStack("John", "Acme", template, null);
 
         BDDMockito.given(stackRepository.findById(1L)).willReturn(stack);
 
@@ -95,7 +95,7 @@ public class DefaultCloudbreakEventServiceTest {
         Template template = ServiceTestUtils.createTemplate(user, CloudPlatform.AZURE, UserRole.ACCOUNT_ADMIN);
         Blueprint blueprint = ServiceTestUtils.createBlueprint(user);
         Cluster cluster = ServiceTestUtils.createCluster(user, blueprint);
-        Stack stack = ServiceTestUtils.createStack(user, template, cluster);
+        Stack stack = ServiceTestUtils.createStack("John", "Acme", template, null);
 
         BDDMockito.given(stackRepository.findById(1L)).willReturn(stack);
 

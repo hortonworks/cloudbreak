@@ -83,7 +83,12 @@ public class AwsConnectorTest {
         MockitoAnnotations.initMocks(this);
         awsTemplate = AwsConnectorTestUtil.createAwsTemplate();
         credential = AwsConnectorTestUtil.createAwsCredential();
-        stack = AwsConnectorTestUtil.createStack(AwsConnectorTestUtil.DUMMY_OWNER, AwsConnectorTestUtil.DUMMY_ACCOUNT, credential, awsTemplate, getDefaultResourceSet());
+        stack = AwsConnectorTestUtil.createStack(
+                AwsConnectorTestUtil.DUMMY_OWNER,
+                AwsConnectorTestUtil.DUMMY_ACCOUNT,
+                credential,
+                awsTemplate,
+                getDefaultResourceSet());
         instancesResult = AwsConnectorTestUtil.createDescribeInstanceResult();
     }
 
