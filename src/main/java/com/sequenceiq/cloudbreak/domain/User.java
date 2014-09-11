@@ -2,11 +2,8 @@ package com.sequenceiq.cloudbreak.domain;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
@@ -19,7 +16,6 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.hibernate.validator.constraints.Email;
@@ -30,7 +26,6 @@ import org.hibernate.validator.constraints.NotEmpty;
         @NamedQuery(
                 name = "User.findOneWithLists",
                 query = "SELECT u FROM User u "
-                        + "LEFT JOIN FETCH u.clusters "
                         + "WHERE u.id= :id")
 })
 @Table(name = "cloudbreakuser")
@@ -61,9 +56,6 @@ public class User implements ProvisionEntity {
 
     private Date registrationDate;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Cluster> clusters = new HashSet<>();
-
     @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
     private List<UserRole> userRoles = new ArrayList<>();
@@ -81,7 +73,6 @@ public class User implements ProvisionEntity {
         this.email = user.email;
         this.password = user.password;
         this.confToken = user.confToken;
-        this.clusters = user.clusters;
         this.status = user.getStatus();
         this.lastLogin = user.lastLogin;
         this.registrationDate = user.registrationDate;
@@ -127,14 +118,6 @@ public class User implements ProvisionEntity {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public Set<Cluster> getClusters() {
-        return clusters;
-    }
-
-    public void setClusters(Set<Cluster> clusters) {
-        this.clusters = clusters;
     }
 
     public String getConfToken() {

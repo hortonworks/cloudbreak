@@ -20,7 +20,7 @@ curl -u cbuser@sequenceiq.com:test123 -sX POST -H "Content-Type:application/json
 curl -u cbuser@sequenceiq.com:test123 -sX POST -H "Content-Type:application/json" -d '{"cloudPlatform":"AWS","name":"awsinstancstemplate2","parameters":{"region":"EU_WEST_1", "amiId":"ami-7778af00","sshLocation":"0.0.0.0/0","instanceType":"T2Small", "volumeCount":2, "volumeSize":40, "volumeType":"Gp2", "spotPrice": 0.6}}' http://localhost:8080/templates | jq .  
 curl -u cbuser@sequenceiq.com:test123 -sX POST -H "Content-Type:application/json" -d '{"nodeCount":3, "templateId":"52", "name":"sundaywork2", "credentialId":"52"}' http://localhost:8080/stacks | jq .
 curl -u cbuser@sequenceiq.com:test123 -sX POST -H "Content-Type:application/json" -d '{"url":"https://raw.githubusercontent.com/sequenceiq/ambari-rest-client/master/src/main/resources/blueprints/multi-node-hdfs-yarn"}' http://localhost:8080/blueprints | jq .
-curl -u cbuser@sequenceiq.com:test123 -sX POST -H "Content-Type:application/json" -d '{"clusterName":"full-cloudbreak-api","blueprintId":52}' http://localhost:8080/stacks/51/cluster | jq .
+curl -u cbuser@sequenceiq.com:test123 -sX POST -H "Content-Type:application/json" -d '{"name":"full-cloudbreak-api","blueprintId":52}' http://localhost:8080/stacks/51/cluster | jq .
 
 curl -u cbuser@sequenceiq.com:test123 -sX GET -H "Content-Type:application/json" http://localhost:8080/credentials/51 | jq .
 curl -u cbuser@sequenceiq.com:test123 -sX GET -H "Content-Type:application/json" http://localhost:8080/templates/51 | jq .

@@ -75,9 +75,9 @@ public class ClusterCreationSuccessHandler implements Consumer<Event<ClusterCrea
         stackUpdater.updateStackStatus(stack.getId(), Status.AVAILABLE);
 
         if (cluster.getEmailNeeded()) {
-            ambariClusterInstallerMailSenderService.sendSuccessEmail(cluster.getUser(), event.getData().getAmbariIp());
+            ambariClusterInstallerMailSenderService.sendSuccessEmail(cluster.getOwner(), event.getData().getAmbariIp());
         }
-        websocketService.sendToTopicUser(cluster.getUser().getEmail(), WebsocketEndPoint.CLUSTER,
+        websocketService.sendToTopicUser(cluster.getOwner(), WebsocketEndPoint.CLUSTER,
                 new StatusMessage(clusterId, cluster.getName(), Status.AVAILABLE.name()));
     }
 

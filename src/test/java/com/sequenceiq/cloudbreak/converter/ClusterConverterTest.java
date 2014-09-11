@@ -1,24 +1,24 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.domain.User;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.anyLong;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.security.access.AccessDeniedException;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.controller.json.ClusterRequest;
 import com.sequenceiq.cloudbreak.controller.json.ClusterResponse;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.anyLong;
 
 public class ClusterConverterTest {
 
@@ -26,6 +26,8 @@ public class ClusterConverterTest {
     private static final String DUMMY_DESCRIPTION = "dummyDescription";
     private static final String DUMMY_NAME = "dummyName";
     private static final String DUMMY_STATUS_REASON = "dummyStatusReason";
+    private static final String DUMMY_ACCOUNT = "DummyAccount";
+    private static final String DUMMY_EMAIL = "john@doe.kom";
 
     @InjectMocks
     private ClusterConverter underTest;
@@ -120,14 +122,15 @@ public class ClusterConverterTest {
         cluster.setName(DUMMY_NAME);
         cluster.setStatus(Status.AVAILABLE);
         cluster.setStatusReason(DUMMY_STATUS_REASON);
-        cluster.setUser(new User());
+        cluster.setOwner(DUMMY_EMAIL);
+        cluster.setAccount(DUMMY_ACCOUNT);
         return cluster;
     }
 
     private ClusterRequest createClusterRequest() {
         ClusterRequest clusterRequest = new ClusterRequest();
         clusterRequest.setBlueprintId(1L);
-        clusterRequest.setClusterName(DUMMY_NAME);
+        clusterRequest.setName(DUMMY_NAME);
         clusterRequest.setDescription(DUMMY_DESCRIPTION);
         return clusterRequest;
     }

@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.controller.json;
 
 public class ClusterRequest {
 
-    private String clusterName;
+    private String name;
     private Long blueprintId;
     private String description;
     private Boolean emailNeeded = Boolean.FALSE;
@@ -15,12 +15,12 @@ public class ClusterRequest {
         this.description = description;
     }
 
-    public String getClusterName() {
-        return clusterName;
+    public String getName() {
+        return name;
     }
 
-    public void setClusterName(String clusterName) {
-        this.clusterName = clusterName;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public Long getBlueprintId() {

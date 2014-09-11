@@ -108,10 +108,11 @@ public final class ServiceTestUtils {
         return template;
     }
 
-    public static Cluster createCluster(User user, Blueprint blueprint) {
+    public static Cluster createCluster(String owner, String account, Blueprint blueprint) {
         Cluster cluster = new Cluster();
         cluster.setName("test-cluster");
-        cluster.setUser(user);
+        cluster.setOwner(owner);
+        cluster.setAccount(account);
         cluster.setBlueprint(blueprint);
         return cluster;
     }

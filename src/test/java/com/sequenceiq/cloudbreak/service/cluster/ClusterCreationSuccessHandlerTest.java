@@ -16,12 +16,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import reactor.event.Event;
-
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
@@ -30,6 +27,8 @@ import com.sequenceiq.cloudbreak.service.cluster.event.ClusterCreationSuccess;
 import com.sequenceiq.cloudbreak.service.cluster.handler.ClusterCreationSuccessHandler;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
+
+import reactor.event.Event;
 
 public class ClusterCreationSuccessHandlerTest {
 
@@ -67,9 +66,8 @@ public class ClusterCreationSuccessHandlerTest {
         stack = new Stack();
         Set<InstanceMetaData> instanceMetaData = new HashSet<>();
         stack.setInstanceMetaData(instanceMetaData);
-        User user = new User();
-        user.setEmail("dummy@myemail.com");
-        cluster.setUser(user);
+        cluster.setOwner("John");
+        cluster.setAccount("Acme");
     }
 
     @Test

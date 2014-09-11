@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 
 public interface StackRepository extends CrudRepository<Stack, Long> {
 
-    @PostAuthorize("returnObject?.user?.id == principal?.id")
+    @PostAuthorize("returnObject?.owner == principal")
     Stack findOne(@Param("id") Long id);
 
     Stack findById(@Param("id") Long id);

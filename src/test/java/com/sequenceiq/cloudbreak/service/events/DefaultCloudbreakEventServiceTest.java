@@ -94,7 +94,7 @@ public class DefaultCloudbreakEventServiceTest {
         User user = ServiceTestUtils.createUser(UserRole.ACCOUNT_ADMIN, account, 1L, "John", "Doe");
         Template template = ServiceTestUtils.createTemplate(user, CloudPlatform.AZURE, UserRole.ACCOUNT_ADMIN);
         Blueprint blueprint = ServiceTestUtils.createBlueprint(user);
-        Cluster cluster = ServiceTestUtils.createCluster(user, blueprint);
+        Cluster cluster = ServiceTestUtils.createCluster("John", "Acme", blueprint);
         Stack stack = ServiceTestUtils.createStack("John", "Acme", template, null);
 
         BDDMockito.given(stackRepository.findById(1L)).willReturn(stack);

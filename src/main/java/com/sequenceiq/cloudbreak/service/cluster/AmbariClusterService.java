@@ -21,13 +21,13 @@ import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.StatusRequest;
-import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
@@ -66,14 +66,15 @@ public class AmbariClusterService implements ClusterService {
     private Reactor reactor;
 
     @Override
-    public void createCluster(User user, Long stackId, Cluster cluster) {
+    public void create(CbUser user, Long stackId, Cluster cluster) {
         Stack stack = stackRepository.findOne(stackId);
         LOGGER.info("Cluster requested for stack '{}' [BlueprintId: {}]", stackId, cluster.getBlueprint().getId());
         if (stack.getCluster() != null) {
             throw new BadRequestException(String.format("A cluster is already created on this stack! [stack: '%s', cluster: '%s']", stackId, stack.getCluster()
                     .getName()));
         }
-        cluster.setUser(user);
+        cluster.setOwner(user.getUsername());
+        cluster.setAccount(user.getAccount());
         cluster = clusterRepository.save(cluster);
         stack = stackUpdater.updateStackCluster(stack.getId(), cluster);
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.CLUSTER_REQUESTED_EVENT, stack.getId());
@@ -81,7 +82,7 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
-    public Cluster retrieveCluster(User user, Long stackId) {
+    public Cluster retrieveCluster(Long stackId) {
         Stack stack = stackRepository.findOne(stackId);
         return stack.getCluster();
     }
