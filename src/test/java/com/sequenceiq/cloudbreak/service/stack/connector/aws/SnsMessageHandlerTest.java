@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.SnsRequest;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 
@@ -67,7 +66,6 @@ public class SnsMessageHandlerTest {
         underTest = new SnsMessageHandler();
         MockitoAnnotations.initMocks(this);
         snsRequest = createSnsRequest();
-        User user = AwsConnectorTestUtil.createUser();
         AwsCredential credential = AwsConnectorTestUtil.createAwsCredential();
         AwsTemplate awsTemplate = AwsConnectorTestUtil.createAwsTemplate();
         stack = AwsConnectorTestUtil.createStack(

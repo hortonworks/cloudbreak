@@ -35,7 +35,6 @@ import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 
 import reactor.core.Reactor;
@@ -68,15 +67,12 @@ public class AwsProvisionerTest {
 
     private Stack stack;
 
-    private User user;
-
     private AwsCredential credential;
 
     @Before
     public void setUp() {
         underTest = new AwsProvisioner();
         MockitoAnnotations.initMocks(this);
-        user = AwsConnectorTestUtil.createUser();
         credential = AwsConnectorTestUtil.createAwsCredential();
         Set<Resource> resources = new HashSet<>();
         resources.add(new Resource(ResourceType.CLOUDFORMATION_STACK, "", stack));

@@ -34,8 +34,8 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
+import com.sequenceiq.cloudbreak.service.ServiceTestUtils;
 
 import groovyx.net.http.HttpResponseDecorator;
 import groovyx.net.http.HttpResponseException;
@@ -90,10 +90,9 @@ public class AzureProvisionerTest {
     public void setUp() {
         underTest = new AzureProvisioner();
         MockitoAnnotations.initMocks(this);
-        User user = AzureConnectorTestUtil.createUser();
-        template = AzureConnectorTestUtil.createAzureTemplate(user);
+        template = AzureConnectorTestUtil.createAzureTemplate(ServiceTestUtils.DUMMY_OWNER, ServiceTestUtils.DUMMY_ACCOUNT);
         credential = AzureConnectorTestUtil.createAzureCredential();
-        stack = AzureConnectorTestUtil.createStack(user, credential, template, getDefaultResourceSet());
+        stack = AzureConnectorTestUtil.createStack(ServiceTestUtils.DUMMY_OWNER, ServiceTestUtils.DUMMY_ACCOUNT, credential, template, getDefaultResourceSet());
         setupProperties = createSetupProperties();
     }
 

@@ -25,14 +25,11 @@ public class DefaultCloudbreakUsagesRetrievalService implements CloudbreakUsages
     @Autowired
     private CloudbreakUsageRepository usageRepository;
 
-    @Autowired
-    private AccountRepository accountRepository;
-
     @Override
-    public List<CloudbreakUsage> findUsagesForUser(Long userId, Long since, String cloud, String zone, String vmtype, String hours) {
+    public List<CloudbreakUsage> findUsagesForUser(String user, Long since, String cloud, String zone, String vmtype, String hours) {
 
         List<CloudbreakUsage> usages = usageRepository.findAll(Specifications
-                .where(CloudbreakUsageSpecifications.usagesWithLongField("userId", userId))
+                .where(CloudbreakUsageSpecifications.usagesWithLongField("userId", user))
                 .and(CloudbreakUsageSpecifications.usagesSince(since))
                 .and(CloudbreakUsageSpecifications.usagesWithStringFields("cloud", cloud))
                 .and(CloudbreakUsageSpecifications.usagesWithStringFields("zone", zone))
@@ -43,7 +40,7 @@ public class DefaultCloudbreakUsagesRetrievalService implements CloudbreakUsages
     }
 
     @Override
-    public List<CloudbreakUsage> findUsagesForAccount(Long accountId, Long filterUserid, Long since, String cloud, String zone, String vmtype, String hours) {
+    public List<CloudbreakUsage> findUsagesForAccount(String account, String filterUserid, Long since, String cloud, String zone, String vmtype, String hours) {
         List<CloudbreakUsage> usages = new ArrayList<>();
         Set<User> accountUsers = accountRepository.accountUsers(accountId);
         for (User user : accountUsers) {

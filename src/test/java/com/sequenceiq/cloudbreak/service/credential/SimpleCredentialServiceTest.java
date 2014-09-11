@@ -11,13 +11,10 @@ import com.sequenceiq.cloudbreak.converter.AzureCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
-import com.sequenceiq.cloudbreak.domain.User;
-import com.sequenceiq.cloudbreak.domain.UserRole;
 import com.sequenceiq.cloudbreak.repository.AwsCredentialRepository;
 import com.sequenceiq.cloudbreak.repository.AzureCredentialRepository;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.service.ServiceTestUtils;
-import com.sequenceiq.cloudbreak.service.account.AccountService;
 import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 
@@ -50,11 +47,6 @@ public class SimpleCredentialServiceTest {
     @Mock
     private WebsocketService websocketService;
 
-    @Mock
-    private AccountService accountService;
-
-    private User user;
-
     private AwsCredential awsCredential;
 
     private AzureCredential azureCredential;
@@ -63,10 +55,10 @@ public class SimpleCredentialServiceTest {
     public void setUp() {
         underTest = new SimpleCredentialService();
         MockitoAnnotations.initMocks(this);
-        user = new User();
-        user.setEmail("dummy@mymail.com");
-        awsCredential = (AwsCredential) ServiceTestUtils.createCredential(user, CloudPlatform.AWS, UserRole.ACCOUNT_USER);
-        azureCredential = (AzureCredential) ServiceTestUtils.createCredential(user, CloudPlatform.AZURE, UserRole.ACCOUNT_USER);
+        awsCredential = (AwsCredential) ServiceTestUtils.createCredential(
+                ServiceTestUtils.DUMMY_OWNER, ServiceTestUtils.DUMMY_ACCOUNT, CloudPlatform.AWS);
+        azureCredential = (AzureCredential) ServiceTestUtils.createCredential(
+                ServiceTestUtils.DUMMY_OWNER, ServiceTestUtils.DUMMY_ACCOUNT, CloudPlatform.AZURE);
     }
 
 //    @Test
