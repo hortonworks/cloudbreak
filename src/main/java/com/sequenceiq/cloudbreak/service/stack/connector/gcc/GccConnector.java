@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.stack.connector.gcc;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.ERROR;
 
 import java.io.IOException;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,32 +79,26 @@ public class GccConnector implements CloudPlatformConnector {
         return detailedGccStackDescription;
     }
 
+    public void rollback(User user, Stack stack, Credential credential, Set<Resource> resourceSet) {
+        GccCredential gccCredential = (GccCredential) credential;
+        Compute compute = gccStackUtil.buildCompute(gccCredential, stack.getName());
+        deleteVirtualMachines(stack, compute);
+        deleteDisks(stack, compute);
+        deleteAttachedDisks(stack, compute);
+        deleteNetwork(stack, compute);
+    }
+
     @Override
     public void deleteStack(User user, Stack stack, Credential credential) {
         Compute compute = gccStackUtil.buildCompute((GccCredential) credential, stack.getName());
-        GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
-        GccCredential gccCredential = (GccCredential) stack.getCredential();
-        for (Resource resource : stack.getResourcesByType(ResourceType.VIRTUAL_MACHINE)) {
-            try {
-                gccStackUtil.removeInstance(compute, stack, resource.getResourceName());
-            } catch (IOException e) {
-                throw new InternalServerException(e.getMessage());
-            }
-        }
-        for (Resource resource : stack.getResourcesByType(ResourceType.DISK)) {
-            try {
-                gccStackUtil.removeDisk(compute, stack, resource.getResourceName());
-            } catch (IOException e) {
-                throw new InternalServerException(e.getMessage());
-            }
-        }
-        for (Resource resource : stack.getResourcesByType(ResourceType.ATTACHED_DISK)) {
-            try {
-                gccStackUtil.removeDisk(compute, stack, resource.getResourceName());
-            } catch (IOException e) {
-                throw new InternalServerException(e.getMessage());
-            }
-        }
+        deleteVirtualMachines(stack, compute);
+        deleteDisks(stack, compute);
+        deleteAttachedDisks(stack, compute);
+        deleteNetwork(stack, compute);
+        reactor.notify(ReactorConfig.DELETE_COMPLETE_EVENT, Event.wrap(new StackDeleteComplete(stack.getId())));
+    }
+
+    private void deleteNetwork(Stack stack, Compute compute) {
         for (Resource resource : stack.getResourcesByType(ResourceType.NETWORK)) {
             try {
                 gccStackUtil.removeNetwork(compute, stack, resource.getResourceName());
@@ -111,7 +106,36 @@ public class GccConnector implements CloudPlatformConnector {
                 throw new InternalServerException(e.getMessage());
             }
         }
-        reactor.notify(ReactorConfig.DELETE_COMPLETE_EVENT, Event.wrap(new StackDeleteComplete(stack.getId())));
+    }
+
+    private void deleteAttachedDisks(Stack stack, Compute compute) {
+        for (Resource resource : stack.getResourcesByType(ResourceType.ATTACHED_DISK)) {
+            try {
+                gccStackUtil.removeDisk(compute, stack, resource.getResourceName());
+            } catch (IOException e) {
+                throw new InternalServerException(e.getMessage());
+            }
+        }
+    }
+
+    private void deleteDisks(Stack stack, Compute compute) {
+        for (Resource resource : stack.getResourcesByType(ResourceType.DISK)) {
+            try {
+                gccStackUtil.removeDisk(compute, stack, resource.getResourceName());
+            } catch (IOException e) {
+                throw new InternalServerException(e.getMessage());
+            }
+        }
+    }
+
+    private void deleteVirtualMachines(Stack stack, Compute compute) {
+        for (Resource resource : stack.getResourcesByType(ResourceType.VIRTUAL_MACHINE)) {
+            try {
+                gccStackUtil.removeInstance(compute, stack, resource.getResourceName());
+            } catch (IOException e) {
+                throw new InternalServerException(e.getMessage());
+            }
+        }
     }
 
     @Override

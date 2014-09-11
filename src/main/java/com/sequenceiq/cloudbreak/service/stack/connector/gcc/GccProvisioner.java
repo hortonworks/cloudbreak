@@ -20,6 +20,7 @@ import com.google.api.services.compute.model.Disk;
 import com.google.api.services.compute.model.Instance;
 import com.google.api.services.compute.model.NetworkInterface;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
+import com.sequenceiq.cloudbreak.controller.BuildStackFailureException;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.StackCreationFailureException;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
@@ -57,14 +58,10 @@ public class GccProvisioner implements Provisioner {
     public void buildStack(Stack stack, String userData, Map<String, Object> setupProperties) {
         retryingStackUpdater.updateStackStatus(stack.getId(), Status.REQUESTED);
         GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
-        GccCredential credential = (GccCredential) setupProperties.get(CREDENTIAL);
-        Compute compute = gccStackUtil.buildCompute(credential, stack.getName());
         Set<Resource> resourceSet = new HashSet<>();
-        if (compute == null) {
-            LOGGER.info("Compute instance can not created.");
-            throw new StackCreationFailureException(new Exception("Error while creating Google cloud stack could not create compute instance"));
-        }
+        GccCredential credential = (GccCredential) setupProperties.get(CREDENTIAL);
         try {
+            Compute compute = gccStackUtil.buildCompute(credential, stack.getName());
             List<NetworkInterface> networkInterfaces = gccStackUtil.buildNetworkInterfaces(compute, credential.getProjectId(), stack.getName());
             resourceSet.add(new Resource(ResourceType.NETWORK, stack.getName(), stack));
             resourceSet.add(new Resource(ResourceType.NETWORK_INTERFACE, stack.getName(), stack));
@@ -72,24 +69,21 @@ public class GccProvisioner implements Provisioner {
             for (int i = 0; i < stack.getNodeCount(); i++) {
                 String forName = gccStackUtil.getVmName(stack.getName(), i);
                 Disk disk = gccStackUtil.buildDisk(compute, stack, credential.getProjectId(), gccTemplate.getGccZone(), forName, SIZE);
-                List<AttachedDisk> attachedDisks = gccStackUtil.buildAttachedDisks(forName, disk, compute, stack);
-                Instance instance = gccStackUtil.buildInstance(compute, stack, networkInterfaces, attachedDisks, forName, userData);
-
                 resourceSet.add(new Resource(ResourceType.DISK, forName, stack));
+                List<AttachedDisk> attachedDisks = gccStackUtil.buildAttachedDisks(forName, disk, compute, stack);
                 for (AttachedDisk attachedDisk : attachedDisks) {
                     if (!attachedDisk.getDeviceName().equals(forName)) {
                         resourceSet.add(new Resource(ResourceType.ATTACHED_DISK, attachedDisk.getDeviceName(), stack));
                     }
                 }
+                Instance instance = gccStackUtil.buildInstance(compute, stack, networkInterfaces, attachedDisks, forName, userData);
                 resourceSet.add(new Resource(ResourceType.VIRTUAL_MACHINE, forName, stack));
             }
-        } catch (IOException e) {
-            LOGGER.info("Problem with the Google cloud stack generation: " + e.getMessage());
-            throw new StackCreationFailureException(e);
+            LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_COMPLETE_EVENT, stack.getId());
+            reactor.notify(ReactorConfig.PROVISION_COMPLETE_EVENT, Event.wrap(new ProvisionComplete(CloudPlatform.GCC, stack.getId(), resourceSet)));
+        } catch (Exception e) {
+            throw new BuildStackFailureException(e.getMessage(), e, resourceSet);
         }
-        Stack updatedStack = retryingStackUpdater.updateStackCreateComplete(stack.getId());
-        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_COMPLETE_EVENT, updatedStack.getId());
-        reactor.notify(ReactorConfig.PROVISION_COMPLETE_EVENT, Event.wrap(new ProvisionComplete(CloudPlatform.GCC, updatedStack.getId(), resourceSet)));
     }
 
     @Override
