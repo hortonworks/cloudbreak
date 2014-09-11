@@ -134,6 +134,7 @@ public class AzureTemplateConverterTest {
         azureTemplate.setId(1L);
         Set<Port> ports = new HashSet<>();
         ports.add(new Port(DUMMY_NAME, PORT, LOCAL_PORT, DUMMY_PROTOCOL));
+        azureTemplate.setPublicInAccount(true);
         return azureTemplate;
     }
 
@@ -148,6 +149,7 @@ public class AzureTemplateConverterTest {
         props.put(AzureTemplateParam.IMAGENAME.getName(), DUMMY_IMAGE_NAME);
         props.put(AzureTemplateParam.VMTYPE.getName(), DUMMY_VM_TYPE);
         templateJson.setParameters(props);
+        templateJson.setPublicInAccount(true);
         return templateJson;
     }
 
