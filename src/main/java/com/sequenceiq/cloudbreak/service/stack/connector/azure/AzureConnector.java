@@ -95,13 +95,13 @@ public class AzureConnector implements CloudPlatformConnector {
         return detailedAzureStackDescription;
     }
 
-    public void rollback(User user, Stack stack, Credential credential, Set<Resource> resourceSet) {
-        String filePath = AzureCertificateService.getUserJksFileName(credential, user.emailAsFolder());
+    public void rollback(Stack stack, Credential credential, Set<Resource> resourceSet) {
+        String filePath = AzureCertificateService.getUserJksFileName(credential, azureStackUtil.emailAsFolder(stack.getOwner()));
         AzureClient azureClient = azureStackUtil.createAzureClient(credential, filePath);
-        deleteVirtualMachines(user, stack, azureClient);
-        deleteCloudServices(user, stack, (AzureCredential) credential, azureClient);
-        deleteNetwork(user, stack, azureClient);
-        deleteBlobs(user, stack, azureClient);
+        deleteVirtualMachines(stack, azureClient);
+        deleteCloudServices(stack, (AzureCredential) credential, azureClient);
+        deleteNetwork(stack, azureClient);
+        deleteBlobs(stack, azureClient);
     }
 
     @Override
