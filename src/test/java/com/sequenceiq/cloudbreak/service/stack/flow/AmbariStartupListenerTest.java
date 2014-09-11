@@ -1,25 +1,29 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
-import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.conf.ReactorConfig;
-import com.sequenceiq.cloudbreak.service.stack.connector.aws.AwsStackUtil;
+import static org.mockito.BDDMockito.doNothing;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.times;
+import static org.mockito.BDDMockito.verify;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doReturn;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+
+import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.cloudbreak.conf.ReactorConfig;
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.stack.connector.aws.AwsStackUtil;
+
 import reactor.core.Reactor;
 import reactor.event.Event;
-
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.doNothing;
-import static org.mockito.BDDMockito.verify;
-import static org.mockito.BDDMockito.times;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doReturn;
 
 public class AmbariStartupListenerTest {
     private static final String AMBARI_IP = "172.17.0.2";
@@ -38,10 +42,16 @@ public class AmbariStartupListenerTest {
     @Mock
     private AmbariClient ambariClient;
 
+    @Mock
+    private StackRepository stackRepository;
+
+    private Stack stack;
+
     @Before
     public void setUp() {
         underTest = new AmbariStartupListener();
         MockitoAnnotations.initMocks(this);
+        stack = createStack();
     }
 
     @Test
@@ -49,6 +59,7 @@ public class AmbariStartupListenerTest {
         // GIVEN
         doReturn(ambariClient).when(underTest).createAmbariClient(anyString());
         given(ambariClient.healthCheck()).willReturn("RUNNING");
+        given(stackRepository.findOneWithLists(1L)).willReturn(stack);
         doNothing().when(awsStackUtil).sleep(anyInt());
         // WHEN
         underTest.waitForAmbariServer(STACK_ID, AMBARI_IP);
@@ -61,6 +72,7 @@ public class AmbariStartupListenerTest {
         // GIVEN
         doReturn(ambariClient).when(underTest).createAmbariClient(anyString());
         given(ambariClient.healthCheck()).willReturn("dummyState");
+        given(stackRepository.findOneWithLists(1L)).willReturn(stack);
         doNothing().when(awsStackUtil).sleep(anyInt());
         // WHEN
         underTest.waitForAmbariServer(STACK_ID, AMBARI_IP);
@@ -73,6 +85,7 @@ public class AmbariStartupListenerTest {
         // GIVEN
         doReturn(ambariClient).when(underTest).createAmbariClient(anyString());
         given(ambariClient.healthCheck()).willThrow(new IllegalStateException());
+        given(stackRepository.findOneWithLists(1L)).willReturn(stack);
         doNothing().when(awsStackUtil).sleep(anyInt());
         // WHEN
         underTest.waitForAmbariServer(STACK_ID, AMBARI_IP);
@@ -80,5 +93,11 @@ public class AmbariStartupListenerTest {
         verify(reactor, times(1)).notify(any(ReactorConfig.class), any(Event.class));
     }
 
+    private Stack createStack() {
+        Stack stack = new Stack();
+        stack.setNodeCount(2);
+        stack.setId(1L);
+        return stack;
+    }
 
 }

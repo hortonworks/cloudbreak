@@ -11,6 +11,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformRollbackHandler;
 import com.sequenceiq.cloudbreak.service.stack.connector.HadoopConfigurationProvider;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
@@ -31,6 +32,9 @@ public class AppConfig {
     private List<ProvisionSetup> provisionSetups;
 
     @Autowired
+    private List<CloudPlatformRollbackHandler> rollbackHandlers;
+
+    @Autowired
     private List<Provisioner> provisioners;
 
     @Autowired
@@ -49,6 +53,15 @@ public class AppConfig {
         Map<CloudPlatform, CloudPlatformConnector> map = new HashMap<>();
         for (CloudPlatformConnector provisionService : cloudPlatformConnectorList) {
             map.put(provisionService.getCloudPlatform(), provisionService);
+        }
+        return map;
+    }
+
+    @Bean
+    public Map<CloudPlatform, CloudPlatformRollbackHandler> cloudPlatformRollbackHandlers() {
+        Map<CloudPlatform, CloudPlatformRollbackHandler> map = new HashMap<>();
+        for (CloudPlatformRollbackHandler cloudPlatformRollbackHandler : rollbackHandlers) {
+            map.put(cloudPlatformRollbackHandler.getCloudPlatform(), cloudPlatformRollbackHandler);
         }
         return map;
     }

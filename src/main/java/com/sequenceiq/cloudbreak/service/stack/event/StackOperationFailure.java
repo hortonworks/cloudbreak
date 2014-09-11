@@ -26,5 +26,4 @@ public class StackOperationFailure {
     public void setDetailedMessage(String detailedMessage) {
         this.detailedMessage = detailedMessage;
     }
-
 }
