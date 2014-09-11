@@ -54,9 +54,19 @@ public final class ServiceTestUtils {
         return blueprint;
     }
 
-    public static Stack createStack(User user) {
+    public static Stack createStack(String owner, String account) {
         Stack stack = new Stack();
-        stack.setOwner(user.getEmail());
+        stack.setOwner(owner);
+        stack.setAccount(account);
+        return stack;
+    }
+
+    public static Stack createStack(String owner, String account, Template template, Cluster cluster) {
+        Stack stack = new Stack();
+        stack.setOwner(owner);
+        stack.setAccount(account);
+        stack.setTemplate(template);
+        stack.setCluster(cluster);
         return stack;
     }
 

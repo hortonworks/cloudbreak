@@ -25,7 +25,6 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Controller
-@RequestMapping("/stacks/{stackId}/cluster")
 public class ClusterController {
 
     @Autowired
@@ -37,7 +36,7 @@ public class ClusterController {
     @Autowired
     private StackService stackService;
 
-    @RequestMapping(method = RequestMethod.POST)
+    @RequestMapping(value = "/stacks/{stackId}/cluster", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<String> createCluster(@CurrentUser User user, @PathVariable Long stackId, @RequestBody @Valid ClusterRequest clusterRequest) {
         Cluster cluster = clusterConverter.convert(clusterRequest);
