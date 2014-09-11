@@ -20,7 +20,7 @@ public class AzureCloudPlatformRollbackHandler implements CloudPlatformRollbackH
 
     @Override
     public void rollback(Stack stack, Set<Resource> resourceSet) {
-        azureConnector.rollback(stack.getUser(), stack, stack.getCredential(), resourceSet);
+        azureConnector.rollback(stack, stack.getCredential(), resourceSet);
     }
 
     @Override
