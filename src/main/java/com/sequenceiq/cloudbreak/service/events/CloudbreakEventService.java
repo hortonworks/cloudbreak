@@ -10,5 +10,5 @@ public interface CloudbreakEventService {
 
     CloudbreakEvent createStackEvent(Long stackId, String eventType, String eventMessage);
 
-    List<CloudbreakEvent> cloudbreakEvents(Long userId, Long since);
+    List<CloudbreakEvent> cloudbreakEvents(String user, Long since);
 }

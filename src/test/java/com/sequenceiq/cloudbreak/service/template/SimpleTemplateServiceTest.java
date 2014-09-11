@@ -10,10 +10,8 @@ import com.sequenceiq.cloudbreak.converter.AwsTemplateConverter;
 import com.sequenceiq.cloudbreak.converter.AzureTemplateConverter;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
-import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
-import com.sequenceiq.cloudbreak.service.account.AccountService;
 import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
 
 public class SimpleTemplateServiceTest {
@@ -39,11 +37,6 @@ public class SimpleTemplateServiceTest {
     @Mock
     private TemplateJson templateJson;
 
-    @Mock
-    private AccountService accountService;
-
-    private User user;
-
     private AwsTemplate awsTemplate;
 
     private AzureTemplate azureTemplate;
@@ -52,7 +45,6 @@ public class SimpleTemplateServiceTest {
     public void setUp() {
         underTest = new SimpleTemplateService();
         MockitoAnnotations.initMocks(this);
-        user = new User();
         awsTemplate = new AwsTemplate();
         awsTemplate.setId(1L);
         azureTemplate = new AzureTemplate();

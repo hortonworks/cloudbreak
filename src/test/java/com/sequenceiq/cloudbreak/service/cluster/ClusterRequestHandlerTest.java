@@ -19,7 +19,6 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.cluster.handler.ClusterRequestHandler;
 import com.sequenceiq.cloudbreak.service.stack.connector.aws.AwsConnectorTestUtil;
@@ -41,7 +40,6 @@ public class ClusterRequestHandlerTest {
     public void setUp() {
         underTest = new ClusterRequestHandler();
         MockitoAnnotations.initMocks(this);
-        User user = AwsConnectorTestUtil.createUser();
         AwsCredential credential = AwsConnectorTestUtil.createAwsCredential();
         AwsTemplate awsTemplate = AwsConnectorTestUtil.createAwsTemplate();
         stackEvent = new Event<>(AwsConnectorTestUtil.createStack(

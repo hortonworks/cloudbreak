@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.controller.json.IdJson;
 import com.sequenceiq.cloudbreak.converter.BlueprintConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
-import com.sequenceiq.cloudbreak.repository.UserRepository;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 
 @Controller
@@ -28,9 +27,6 @@ public class BlueprintController {
 
     @Autowired
     private BlueprintService blueprintService;
-
-    @Autowired
-    private UserRepository userRepository;
 
     @Autowired
     private BlueprintConverter blueprintConverter;

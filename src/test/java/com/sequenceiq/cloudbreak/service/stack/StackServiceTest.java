@@ -2,18 +2,12 @@ package com.sequenceiq.cloudbreak.service.stack;
 
 import org.junit.Before;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import com.sequenceiq.cloudbreak.service.account.AccountService;
 
 public class StackServiceTest {
 
     @InjectMocks
     private StackService stackService;
-
-    @Mock
-    private AccountService accountService;
 
     @Before
     public void before() {

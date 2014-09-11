@@ -27,7 +27,6 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.SnsRequest;
 import com.sequenceiq.cloudbreak.domain.SnsTopic;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.SnsTopicRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.credential.aws.CrossAccountCredentialsProvider;
@@ -69,8 +68,6 @@ public class SnsTopicManagerTest {
 
     private Stack stack;
 
-    private User user;
-
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -80,7 +77,6 @@ public class SnsTopicManagerTest {
         confirmSubscriptionResult = new ConfirmSubscriptionResult();
         confirmSubscriptionResult.setSubscriptionArn(AwsConnectorTestUtil.DEFAULT_TOPIC_ARN);
         snsTopic = AwsConnectorTestUtil.createSnsTopic(credential);
-        user = AwsConnectorTestUtil.createUser();
         stack = AwsConnectorTestUtil.createStack(
                 AwsConnectorTestUtil.DUMMY_OWNER,
                 AwsConnectorTestUtil.DUMMY_ACCOUNT,

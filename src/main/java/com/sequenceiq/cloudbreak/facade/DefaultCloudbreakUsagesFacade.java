@@ -8,9 +8,8 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.controller.json.CloudbreakUsageJson;
 import com.sequenceiq.cloudbreak.converter.CloudbreakUsageConverter;
+import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
-import com.sequenceiq.cloudbreak.domain.User;
-import com.sequenceiq.cloudbreak.service.account.AccountService;
 import com.sequenceiq.cloudbreak.service.usages.CloudbreakUsageGeneratorService;
 import com.sequenceiq.cloudbreak.service.usages.CloudbreakUsagesRetrievalService;
 
@@ -26,32 +25,29 @@ public class DefaultCloudbreakUsagesFacade implements CloudbreakUsagesFacade {
     @Autowired
     private CloudbreakUsageConverter cloudbreakUsageConverter;
 
-    @Autowired
-    private AccountService accountService;
-
     @Override
-    public List<CloudbreakUsageJson> getUsagesForUser(User user, Long since, Long filterUserId, Long accountId,
+    public List<CloudbreakUsageJson> getUsagesForUser(CbUser user, Long since, String filterUser, String account,
             String cloud, String zone, String vmtype, String hours) {
-        List<CloudbreakUsage> usages = cloudbreakUsagesService.findUsagesForUser(user.getId(), since, cloud, zone, vmtype, hours);
+        List<CloudbreakUsage> usages = cloudbreakUsagesService.findUsagesForUser(user.getUsername(), since, cloud, zone, vmtype, hours);
         return new ArrayList<CloudbreakUsageJson>(cloudbreakUsageConverter.convertAllEntityToJson(usages));
     }
 
     @Override
-    public List<CloudbreakUsageJson> getUsagesForAccount(Long accountId, Long since, Long filterUserId, String cloud, String zone,
+    public List<CloudbreakUsageJson> getUsagesForAccount(String account, Long since, String filterUser, String cloud, String zone,
             String vmtype, String hours) {
-        List<CloudbreakUsage> usages = cloudbreakUsagesService.findUsagesForAccount(accountId, since, filterUserId, cloud, zone, vmtype, hours);
+        List<CloudbreakUsage> usages = cloudbreakUsagesService.findUsagesForAccount(account, filterUser, since, cloud, zone, vmtype, hours);
         return new ArrayList<CloudbreakUsageJson>(cloudbreakUsageConverter.convertAllEntityToJson(usages));
     }
 
     @Override
-    public List<CloudbreakUsageJson> getUsagesForDeployer(User user, Long since, Long filterUserId, Long filterAccountId,
+    public List<CloudbreakUsageJson> getUsagesForDeployer(CbUser user, Long since, String filterUser, String filterAccount,
             String cloud, String zone, String vmtype, String hours) {
-        List<CloudbreakUsage> usages = cloudbreakUsagesService.findUsagesForDeployer(filterAccountId, since, filterUserId, cloud, zone, vmtype, hours);
+        List<CloudbreakUsage> usages = cloudbreakUsagesService.findUsagesForDeployer(filterAccount, filterUser, since, cloud, zone, vmtype, hours);
         return new ArrayList<CloudbreakUsageJson>(cloudbreakUsageConverter.convertAllEntityToJson(usages));
     }
 
     @Override
-    public void generateUserUsages(User user) {
-        cloudbreakUsageGeneratorService.generateCloudbreakUsages(user.getId());
+    public void generateUserUsages(CbUser user) {
+        cloudbreakUsageGeneratorService.generateCloudbreakUsages(user.getUsername());
     }
 }

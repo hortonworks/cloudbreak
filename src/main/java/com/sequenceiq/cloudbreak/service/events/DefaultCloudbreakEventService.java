@@ -55,14 +55,14 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     }
 
     @Override
-    public List<CloudbreakEvent> cloudbreakEvents(Long userId, Long since) {
+    public List<CloudbreakEvent> cloudbreakEvents(String user, Long since) {
         List<CloudbreakEvent> events = null;
         if (null == since) {
-            events = eventRepository.findAll(CloudbreakEventSpecifications.eventsForUser(userId));
+            events = eventRepository.findAll(CloudbreakEventSpecifications.eventsForUser(user));
         } else {
             Date sinceDate = new Date(since);
             events = eventRepository.findAll(Specifications
-                    .where(CloudbreakEventSpecifications.eventsForUser(userId))
+                    .where(CloudbreakEventSpecifications.eventsForUser(user))
                     .and(CloudbreakEventSpecifications.eventsSince(since)));
         }
         return null != events ? events : Collections.EMPTY_LIST;

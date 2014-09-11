@@ -36,17 +36,17 @@ public class DefaultCloudbreakUsageGeneratorService implements CloudbreakUsageGe
     private CloudbreakEventRepository eventRepository;
 
     @Override
-    public List<CloudbreakUsage> generateCloudbreakUsages(Long userId) {
-        LOGGER.info("Generating user usage for: {}", userId);
+    public List<CloudbreakUsage> generateCloudbreakUsages(String user) {
+        LOGGER.info("Generating user usage for: {}", user);
         List<CloudbreakUsage> usageList = new ArrayList<>();
         // retrieve all events for the user
-        List<CloudbreakEvent> cloudbreakEvents = eventRepository.cloudbreakEvents(userId);
+        List<CloudbreakEvent> cloudbreakEvents = eventRepository.cloudbreakEvents(user);
         // split events by stacks
         Map<Long, List<CloudbreakEvent>> stackEvents = splitCloudbreakEventsByStack(cloudbreakEvents);
 
         // iterate over events by stacks and generate usages
         for (Map.Entry<Long, List<CloudbreakEvent>> stackEventEntry : stackEvents.entrySet()) {
-            LOGGER.debug("Processing stackId {} for userid {}", stackEventEntry.getKey(), userId);
+            LOGGER.debug("Processing stackId {} for userid {}", stackEventEntry.getKey(), user);
             Map<String, CloudbreakUsage> stackDailyUsages = processStackEvents(stackEventEntry.getValue());
             usageList.addAll(stackDailyUsages.values());
         }

@@ -8,6 +8,6 @@ import com.sequenceiq.cloudbreak.domain.AwsCredential;
 
 public interface AwsCredentialRepository extends CrudRepository<AwsCredential, Long> {
 
-    @PostAuthorize("returnObject?.owner?.id == principal?.id")
+    @PostAuthorize("returnObject?.owner == principal")
     AwsCredential findOne(@Param("id") Long id);
 }
