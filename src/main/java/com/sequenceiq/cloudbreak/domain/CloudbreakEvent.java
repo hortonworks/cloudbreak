@@ -5,8 +5,22 @@ import java.util.Date;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
+import javax.persistence.Table;
 
-@Entity(name = "cloudbreakevent")
+@Entity
+@NamedQueries({
+        @NamedQuery(
+                name = "CloudbreakEvent.cloudbreakEvents",
+                query = "SELECT cbe FROM CloudbreakEvent cbe "
+                        + "WHERE cbe.userId= :userId"),
+        @NamedQuery(
+                name = "CloudbreakEvent.cloudbreakEventsSince",
+                query = "SELECT cbe FROM CloudbreakEvent cbe "
+                        + "WHERE cbe.userId= :userId AND cbe.eventTimestamp > :since")
+})
+@Table(name = "cloudbreakevent")
 public class CloudbreakEvent implements ProvisionEntity {
 
     @Id
