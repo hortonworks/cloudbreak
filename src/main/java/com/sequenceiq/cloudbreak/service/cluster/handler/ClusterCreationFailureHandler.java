@@ -43,9 +43,9 @@ public class ClusterCreationFailureHandler implements Consumer<Event<ClusterCrea
         cluster.setStatusReason(detailedMessage);
         clusterRepository.save(cluster);
         if (cluster.getEmailNeeded()) {
-            ambariClusterInstallerMailSenderService.sendFailEmail(cluster.getUser().getEmail());
+            ambariClusterInstallerMailSenderService.sendFailEmail(cluster.getOwner());
         }
-        websocketService.sendToTopicUser(cluster.getUser().getEmail(), WebsocketEndPoint.CLUSTER,
+        websocketService.sendToTopicUser(cluster.getOwner(), WebsocketEndPoint.CLUSTER,
                 new StatusMessage(clusterId, cluster.getName(), Status.CREATE_FAILED.name(), detailedMessage));
     }
 

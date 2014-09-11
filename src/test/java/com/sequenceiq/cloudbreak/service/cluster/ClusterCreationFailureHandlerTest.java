@@ -14,7 +14,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterCreationFailure;
@@ -49,9 +48,8 @@ public class ClusterCreationFailureHandlerTest {
         event = new Event<>(clusterCreationFailure);
         cluster = new Cluster();
         cluster.setEmailNeeded(false);
-        User user = new User();
-        user.setEmail("dummy@myemail.com");
-        cluster.setUser(user);
+        cluster.setOwner("dummy@myemail.com");
+        cluster.setAccount("myaccount");
     }
 
     @Test

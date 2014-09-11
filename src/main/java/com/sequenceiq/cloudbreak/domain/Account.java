@@ -24,7 +24,6 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
         @NamedQuery(
                 name = "Account.accountUsers",
                 query = "SELECT cu FROM User cu "
-                        + "LEFT JOIN FETCH cu.clusters "
                         + "WHERE cu.account.id= :accountId"),
         @NamedQuery(
                 name = "Account.findAccountAdmin",

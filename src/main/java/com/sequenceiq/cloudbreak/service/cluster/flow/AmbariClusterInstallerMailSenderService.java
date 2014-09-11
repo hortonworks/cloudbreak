@@ -17,7 +17,6 @@ import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.domain.User;
 
 import freemarker.template.Configuration;
 
@@ -36,13 +35,13 @@ public class AmbariClusterInstallerMailSenderService {
     private Configuration freemarkerConfiguration;
 
     @VisibleForTesting
-    protected MimeMessagePreparator prepareSuccessMessage(final User user, final String template, final String status,
+    protected MimeMessagePreparator prepareSuccessMessage(final String email, final String template, final String status,
             final String server) {
         return new MimeMessagePreparator() {
             public void prepare(MimeMessage mimeMessage) throws Exception {
                 MimeMessageHelper message = new MimeMessageHelper(mimeMessage);
                 message.setFrom(msgFrom);
-                message.setTo(user.getEmail());
+                message.setTo(email);
                 message.setSubject("Cloudbreak - stack installation");
                 message.setText(getEmailBody(status, server, template), true);
             }
@@ -63,8 +62,8 @@ public class AmbariClusterInstallerMailSenderService {
         };
     }
 
-    public void sendSuccessEmail(User user, String ambariServer) {
-        MimeMessagePreparator mimeMessagePreparator = prepareSuccessMessage(user, "templates/cluster-installer-mail-success.ftl", "SUCCESS", ambariServer);
+    public void sendSuccessEmail(String email, String ambariServer) {
+        MimeMessagePreparator mimeMessagePreparator = prepareSuccessMessage(email, "templates/cluster-installer-mail-success.ftl", "SUCCESS", ambariServer);
         sendInstallationEmail(mimeMessagePreparator);
     }
 
