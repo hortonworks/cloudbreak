@@ -43,8 +43,8 @@ public class ClusterRequestHandlerTest {
         MockitoAnnotations.initMocks(this);
         User user = AwsConnectorTestUtil.createUser();
         AwsCredential credential = AwsConnectorTestUtil.createAwsCredential();
-        AwsTemplate awsTemplate = AwsConnectorTestUtil.createAwsTemplate(user);
-        stackEvent = new Event<>(AwsConnectorTestUtil.createStack(user, credential, awsTemplate, new HashSet<Resource>()));
+        AwsTemplate awsTemplate = AwsConnectorTestUtil.createAwsTemplate();
+        stackEvent = new Event<>(AwsConnectorTestUtil.createStack(AwsConnectorTestUtil.DUMMY_OWNER, AwsConnectorTestUtil.DUMMY_ACCOUNT, credential, awsTemplate, new HashSet<Resource>()));
         stackEvent.setKey(AMBARI_STARTED);
     }
 

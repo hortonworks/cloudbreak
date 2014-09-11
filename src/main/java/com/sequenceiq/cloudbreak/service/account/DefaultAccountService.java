@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.account;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -9,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.domain.Account;
-import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.UserRole;
 import com.sequenceiq.cloudbreak.repository.AccountRepository;
@@ -53,7 +51,7 @@ public class DefaultAccountService implements AccountService {
 //        getAzureCredentialsForRole(decoratedAdmin, role);
         // getAwsTemplatesForRole(decoratedAdmin, role);
         // getAzureTemplatesForRole(decoratedAdmin, role);
-        getSatcksForRole(decoratedAdmin, role);
+//        getSatcksForRole(decoratedAdmin, role);
         // getBlueprintsForRole(decoratedAdmin, role);
 
         return decoratedAdmin;
@@ -78,16 +76,16 @@ public class DefaultAccountService implements AccountService {
     // decoratedAdmin.getBlueprints().addAll(blueprintsInRole);
     // }
 
-    private void getSatcksForRole(User decoratedAdmin, UserRole role) {
-        Set<Stack> stacksInRole = new HashSet<>();
-        for (Stack stack : decoratedAdmin.getStacks()) {
-            if (stack.getUserRoles().contains(role)) {
-                stacksInRole.add(stack);
-            }
-        }
-        decoratedAdmin.getStacks().clear();
-        decoratedAdmin.getStacks().addAll(stacksInRole);
-    }
+//    private void getSatcksForRole(User decoratedAdmin, UserRole role) {
+//        Set<Stack> stacksInRole = new HashSet<>();
+//        for (Stack stack : decoratedAdmin.getStacks()) {
+//            if (stack.getUserRoles().contains(role)) {
+//                stacksInRole.add(stack);
+//            }
+//        }
+//        decoratedAdmin.getStacks().clear();
+//        decoratedAdmin.getStacks().addAll(stacksInRole);
+//    }
 
     // private void getAzureTemplatesForRole(User decoratedAdmin, UserRole role)
     // {

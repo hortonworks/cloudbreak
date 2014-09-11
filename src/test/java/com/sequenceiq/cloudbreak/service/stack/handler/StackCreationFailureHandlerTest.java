@@ -23,7 +23,6 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -95,12 +94,10 @@ public class StackCreationFailureHandlerTest {
         cluster.setEmailNeeded(false);
         stack.setCluster(cluster);
         stack.setName(STACK_NAME);
-        User user = new User();
-        user.setEmail(DUMMY_EMAIL);
-        stack.setUser(user);
         stack.setCredential(new AzureCredential());
         AzureTemplate azureTemplate = new AzureTemplate();
         stack.setTemplate(azureTemplate);
+        stack.setOwner(DUMMY_EMAIL);
         return stack;
     }
 }

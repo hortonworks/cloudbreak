@@ -19,16 +19,20 @@ import com.sequenceiq.cloudbreak.service.stack.connector.ConnectorTestUtil;
 
 public class AwsConnectorTestUtil extends ConnectorTestUtil {
 
+    public static final String DUMMY_OWNER = "gipsz@jakab.kom";
+    public static final String DUMMY_ACCOUNT = "acmecorp";
+
     private AwsConnectorTestUtil() {
     }
 
-    public static Stack createStack(User user, Credential credential, AwsTemplate awsTemplate, Set<Resource> resources) {
+    public static Stack createStack(String owner, String account, Credential credential, AwsTemplate awsTemplate, Set<Resource> resources) {
         Stack stack = new Stack();
         stack.setId(DEFAULT_ID);
         stack.setName(STACK_NAME);
         stack.setAmbariIp(AMBARI_IP);
         stack.setCredential(credential);
-        stack.setUser(user);
+        stack.setOwner(owner);
+        stack.setAccount(account);
         stack.setTemplate(awsTemplate);
         stack.setNodeCount(NODE_COUNT);
         stack.setStatus(Status.REQUESTED);
@@ -45,7 +49,7 @@ public class AwsConnectorTestUtil extends ConnectorTestUtil {
         return credential;
     }
 
-    public static AwsTemplate createAwsTemplate(User user) {
+    public static AwsTemplate createAwsTemplate() {
         AwsTemplate awsTemplate = new AwsTemplate();
         awsTemplate.setId(DEFAULT_ID);
         awsTemplate.setRegion(Regions.DEFAULT_REGION);
@@ -58,7 +62,7 @@ public class AwsConnectorTestUtil extends ConnectorTestUtil {
         return awsTemplate;
     }
 
-    public static AwsTemplate createAwsTemplateWithZeroVolumes(User user) {
+    public static AwsTemplate createAwsTemplateWithZeroVolumes() {
         AwsTemplate awsTemplate = new AwsTemplate();
         awsTemplate.setId(DEFAULT_ID);
         awsTemplate.setRegion(Regions.DEFAULT_REGION);

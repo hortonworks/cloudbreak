@@ -51,23 +51,13 @@ public final class ServiceTestUtils {
         Blueprint blueprint = new Blueprint();
         blueprint.setId(1L);
         blueprint.setBlueprintName("test-blueprint");
-        blueprint.setBlueprintName("dummyName");
         blueprint.setBlueprintText("dummyText");
         return blueprint;
     }
 
     public static Stack createStack(User user) {
         Stack stack = new Stack();
-        stack.setUser(user);
-        stack.getUserRoles().addAll(user.getUserRoles());
-        stack.setName("test-stack");
-        return stack;
-    }
-
-    public static Stack createStack(User user, Template template, Cluster cluster) {
-        Stack stack = createStack(user);
-        stack.setTemplate(template);
-        stack.setCluster(cluster);
+        stack.setOwner(user.getEmail());
         return stack;
     }
 
@@ -90,18 +80,20 @@ public final class ServiceTestUtils {
     public static Template createTemplate(User user, CloudPlatform platform, UserRole role) {
         Template template = null;
         switch (platform) {
-            case AZURE:
-                template = new AzureTemplate();
-                ((AzureTemplate) template).setVmType("test-vm-type");
-                ((AzureTemplate) template).setLocation(AzureLocation.NORTH_EUROPE);
-                break;
-            case AWS:
-                template = new AwsTemplate();
-                ((AwsTemplate) template).setInstanceType(InstanceType.C1Medium);
-                ((AwsTemplate) template).setRegion(Regions.EU_WEST_1);
-                break;
-            default:
-                break;
+        case AZURE:
+            template = new AzureTemplate();
+            ((AzureTemplate) template).setOwner(user.getEmail());
+            ((AzureTemplate) template).setVmType("test-vm-type");
+            ((AzureTemplate) template).setLocation(AzureLocation.NORTH_EUROPE);
+            break;
+        case AWS:
+            template = new AwsTemplate();
+            ((AwsTemplate) template).setOwner(user.getEmail());
+            ((AwsTemplate) template).setInstanceType(InstanceType.C1Medium);
+            ((AwsTemplate) template).setRegion(Regions.EU_WEST_1);
+            break;
+        default:
+            break;
         }
         return template;
     }

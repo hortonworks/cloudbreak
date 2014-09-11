@@ -7,16 +7,12 @@ import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -28,13 +24,9 @@ import javax.persistence.Version;
 
 @Entity
 @Table(name = "Stack", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "stack_user", "name" })
+        @UniqueConstraint(columnNames = { "account", "name" })
 })
 @NamedQueries({
-        @NamedQuery(
-                name = "Stack.findOne",
-                query = "SELECT c FROM Stack c "
-                        + "WHERE c.id= :id"),
         @NamedQuery(
                 name = "Stack.findById",
                 query = "SELECT c FROM Stack c "
@@ -67,7 +59,20 @@ import javax.persistence.Version;
         @NamedQuery(
                 name = "Stack.findByStackResourceName",
                 query = "SELECT c FROM Stack c inner join c.resources res "
-                        + "WHERE res.resourceName = :stackName AND res.resourceType = 'CLOUDFORMATION_STACK'")
+                        + "WHERE res.resourceName = :stackName AND res.resourceType = 'CLOUDFORMATION_STACK'"),
+        @NamedQuery(
+                name = "Stack.findForUser",
+                query = "SELECT s FROM Stack s "
+                        + "WHERE s.owner= :user"),
+        @NamedQuery(
+                name = "Stack.findPublicsInAccount",
+                query = "SELECT s FROM Stack s "
+                        + "WHERE s.account= :account "
+                        + "AND s.publicInAccount= true"),
+        @NamedQuery(
+                name = "Stack.findAllInAccount",
+                query = "SELECT s FROM Stack s "
+                        + "WHERE s.account= :account ")
 })
 public class Stack implements ProvisionEntity {
 
@@ -76,10 +81,15 @@ public class Stack implements ProvisionEntity {
     @SequenceGenerator(name = "stack_generator", sequenceName = "stack_table")
     private Long id;
 
-    private Integer nodeCount;
-
     @Column(unique = true, nullable = false)
     private String name;
+
+    private String owner;
+    private String account;
+
+    private boolean publicInAccount;
+
+    private Integer nodeCount;
 
     private String description;
 
@@ -109,27 +119,11 @@ public class Stack implements ProvisionEntity {
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private Cluster cluster;
 
-    @ManyToOne
-    @JoinColumn(name = "stack_user")
-    private User user;
-
     @OneToMany(mappedBy = "stack", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Resource> resources = new HashSet<>();
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @Enumerated(EnumType.STRING)
-    private List<UserRole> userRoles = new ArrayList<>();
-
     @Version
     private Long version;
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
 
     public Long getId() {
         return id;
@@ -139,20 +133,52 @@ public class Stack implements ProvisionEntity {
         this.id = id;
     }
 
-    public Integer getNodeCount() {
-        return nodeCount;
-    }
-
-    public void setNodeCount(Integer nodeCount) {
-        this.nodeCount = nodeCount;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public String getOwner() {
+        return owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
+    }
+
+    public String getAccount() {
+        return account;
+    }
+
+    public void setAccount(String account) {
+        this.account = account;
+    }
+
+    public boolean isPublicInAccount() {
+        return publicInAccount;
+    }
+
+    public void setPublicInAccount(boolean publicInAccount) {
+        this.publicInAccount = publicInAccount;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Integer getNodeCount() {
+        return nodeCount;
+    }
+
+    public void setNodeCount(Integer nodeCount) {
+        this.nodeCount = nodeCount;
     }
 
     public Template getTemplate() {
@@ -169,14 +195,6 @@ public class Stack implements ProvisionEntity {
 
     public void setCluster(Cluster cluster) {
         this.cluster = cluster;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 
     public Credential getCredential() {
@@ -282,11 +300,4 @@ public class Stack implements ProvisionEntity {
         return template.getMultiplier();
     }
 
-    public List<UserRole> getUserRoles() {
-        return userRoles;
-    }
-
-    public void setUserRoles(List<UserRole> userRoles) {
-        this.userRoles = userRoles;
-    }
 }

@@ -48,7 +48,7 @@ public class ClusterController {
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<ClusterResponse> retrieveClusters(@CurrentUser User user, @PathVariable Long stackId) {
-        Stack stack = stackService.get(user, stackId);
+        Stack stack = stackService.get(stackId);
         Cluster cluster = clusterService.retrieveCluster(user, stackId);
         String clusterJson = clusterService.getClusterJson(stack.getAmbariIp(), stackId);
         ClusterResponse response = clusterConverter.convert(cluster, clusterJson);
@@ -58,7 +58,7 @@ public class ClusterController {
     @RequestMapping(method = RequestMethod.PUT)
     @ResponseBody
     public ResponseEntity<String> updateCluster(@CurrentUser User user, @PathVariable Long stackId, @RequestBody UpdateClusterJson updateClusterJson) {
-        Stack stack = stackService.get(user, stackId);
+        Stack stack = stackService.get(stackId);
         if (!stack.getStatus().equals(Status.AVAILABLE)) {
             throw new BadRequestException(String.format(
                     "Stack '%s' is currently in '%s' state. PUT requests to a cluster can only be made if the underlying stack is 'AVAILABLE'.", stackId,

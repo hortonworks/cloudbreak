@@ -16,9 +16,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import reactor.core.Reactor;
-import reactor.event.Event;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
@@ -35,6 +32,9 @@ import com.sequenceiq.cloudbreak.service.stack.event.MetadataSetupComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataUpdateComplete;
 import com.sequenceiq.cloudbreak.service.stack.flow.CoreInstanceMetaData;
 
+import reactor.core.Reactor;
+import reactor.event.Event;
+
 @Component
 public class AzureMetadataSetup implements MetadataSetup {
 
@@ -50,7 +50,7 @@ public class AzureMetadataSetup implements MetadataSetup {
     @Override
     public void setupMetadata(Stack stack) {
         AzureCredential azureCredential = (AzureCredential) stack.getCredential();
-        String filePath = AzureCertificateService.getUserJksFileName(azureCredential, azureStackUtil.emailAsFolder(stack.getUser().getEmail()));
+        String filePath = AzureCertificateService.getUserJksFileName(azureCredential, azureStackUtil.emailAsFolder(stack.getOwner()));
         AzureClient azureClient = azureStackUtil.createAzureClient(azureCredential, filePath);
         String name = stack.getName().replaceAll("\\s+", "");
         Set<CoreInstanceMetaData> instanceMetaDatas = collectMetaData(stack, azureClient);
@@ -62,7 +62,7 @@ public class AzureMetadataSetup implements MetadataSetup {
     @Override
     public void addNewNodesToMetadata(Stack stack, Set<Resource> resourceList) {
         AzureCredential azureCredential = (AzureCredential) stack.getCredential();
-        String filePath = AzureCertificateService.getUserJksFileName(azureCredential, azureStackUtil.emailAsFolder(stack.getUser().getEmail()));
+        String filePath = AzureCertificateService.getUserJksFileName(azureCredential, azureStackUtil.emailAsFolder(stack.getOwner()));
         AzureClient azureClient = azureStackUtil.createAzureClient(azureCredential, filePath);
         List<Resource> resources = new ArrayList<>();
         for (Resource resource : resourceList) {

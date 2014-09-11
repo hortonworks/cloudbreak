@@ -58,8 +58,8 @@ public class AwsProvisionSetupTest {
         MockitoAnnotations.initMocks(this);
         awsCredential = AwsConnectorTestUtil.createAwsCredential();
         user = AwsConnectorTestUtil.createUser();
-        awsTemplate = AwsConnectorTestUtil.createAwsTemplate(user);
-        stack = AwsConnectorTestUtil.createStack(user, awsCredential, awsTemplate, new HashSet<Resource>());
+        awsTemplate = AwsConnectorTestUtil.createAwsTemplate();
+        stack = AwsConnectorTestUtil.createStack(AwsConnectorTestUtil.DUMMY_OWNER, AwsConnectorTestUtil.DUMMY_ACCOUNT, awsCredential, awsTemplate, new HashSet<Resource>());
         snsTopic = AwsConnectorTestUtil.createSnsTopic(awsCredential);
     }
 

@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.controller;
 
 import java.util.Set;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,14 +45,14 @@ public class BlueprintController {
 
     @RequestMapping(value = "user/blueprints", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<Set<BlueprintJson>> getPrivateBlueprints(@ModelAttribute("user") CbUser user, HttpServletRequest request) {
+    public ResponseEntity<Set<BlueprintJson>> getPrivateBlueprints(@ModelAttribute("user") CbUser user) {
         Set<Blueprint> blueprints = blueprintService.retrievePrivateBlueprints(user);
         return new ResponseEntity<>(blueprintConverter.convertAllEntityToJson(blueprints), HttpStatus.OK);
     }
 
     @RequestMapping(value = "account/blueprints", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<Set<BlueprintJson>> getAccountBlueprints(@ModelAttribute("user") CbUser user, HttpServletRequest request) {
+    public ResponseEntity<Set<BlueprintJson>> getAccountBlueprints(@ModelAttribute("user") CbUser user) {
         Set<Blueprint> blueprints = blueprintService.retrieveAccountBlueprints(user);
         return new ResponseEntity<>(blueprintConverter.convertAllEntityToJson(blueprints), HttpStatus.OK);
     }
