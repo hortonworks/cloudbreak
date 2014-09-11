@@ -58,7 +58,7 @@ public class GccProvisioner implements Provisioner {
         retryingStackUpdater.updateStackStatus(stack.getId(), Status.REQUESTED);
         GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
         GccCredential credential = (GccCredential) setupProperties.get(CREDENTIAL);
-        Compute compute = gccStackUtil.buildCompute(credential, stack);
+        Compute compute = gccStackUtil.buildCompute(credential, stack.getName());
         Set<Resource> resourceSet = new HashSet<>();
         if (compute == null) {
             LOGGER.info("Compute instance can not created.");
@@ -98,7 +98,7 @@ public class GccProvisioner implements Provisioner {
         List<Resource> resourceByType = stack.getResourcesByType(ResourceType.VIRTUAL_MACHINE);
         GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
         GccCredential credential = (GccCredential) stack.getCredential();
-        Compute compute = gccStackUtil.buildCompute(credential, stack);
+        Compute compute = gccStackUtil.buildCompute(credential, stack.getName());
         String name = network.getResourceName();
         Set<Resource> resourceSet = new HashSet<>();
         try {
@@ -130,7 +130,7 @@ public class GccProvisioner implements Provisioner {
     public void removeInstances(Stack stack, Set<String> instanceIds) {
         GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
         GccCredential credential = (GccCredential) stack.getCredential();
-        Compute compute = gccStackUtil.buildCompute(credential, stack);
+        Compute compute = gccStackUtil.buildCompute(credential, stack.getName());
         for (String instanceId : instanceIds) {
             try {
                 gccStackUtil.removeInstance(compute, stack, instanceId);

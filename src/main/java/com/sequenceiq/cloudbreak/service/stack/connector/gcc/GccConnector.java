@@ -46,7 +46,7 @@ public class GccConnector implements CloudPlatformConnector {
     @Override
     public StackDescription describeStackWithResources(User user, Stack stack, Credential credential) {
         DetailedGccStackDescription detailedGccStackDescription = new DetailedGccStackDescription();
-        Compute compute = gccStackUtil.buildCompute((GccCredential) credential, stack);
+        Compute compute = gccStackUtil.buildCompute((GccCredential) credential, stack.getName());
         GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
         GccCredential gccCredential = (GccCredential) stack.getCredential();
         for (Resource resource : stack.getResourcesByType(ResourceType.VIRTUAL_MACHINE)) {
@@ -80,7 +80,7 @@ public class GccConnector implements CloudPlatformConnector {
 
     @Override
     public void deleteStack(User user, Stack stack, Credential credential) {
-        Compute compute = gccStackUtil.buildCompute((GccCredential) credential, stack);
+        Compute compute = gccStackUtil.buildCompute((GccCredential) credential, stack.getName());
         GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
         GccCredential gccCredential = (GccCredential) stack.getCredential();
         for (Resource resource : stack.getResourcesByType(ResourceType.VIRTUAL_MACHINE)) {

@@ -49,7 +49,7 @@ public class GccProvisionSetup implements ProvisionSetup {
     public void setupProvisioning(Stack stack) {
         try {
             Storage storage = gccStackUtil.buildStorage((GccCredential) stack.getCredential(), stack);
-            Compute compute = gccStackUtil.buildCompute((GccCredential) stack.getCredential(), stack);
+            Compute compute = gccStackUtil.buildCompute((GccCredential) stack.getCredential(), stack.getName());
             GccTemplate template = (GccTemplate) stack.getTemplate();
             GccCredential credential = (GccCredential) stack.getCredential();
 

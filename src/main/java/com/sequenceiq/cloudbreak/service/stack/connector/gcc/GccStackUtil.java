@@ -34,6 +34,7 @@ import com.google.api.services.compute.model.AccessConfig;
 import com.google.api.services.compute.model.Address;
 import com.google.api.services.compute.model.AttachedDisk;
 import com.google.api.services.compute.model.Disk;
+import com.google.api.services.compute.model.DiskList;
 import com.google.api.services.compute.model.Firewall;
 import com.google.api.services.compute.model.Instance;
 import com.google.api.services.compute.model.Metadata;
@@ -83,7 +84,7 @@ public class GccStackUtil {
     @Autowired
     private PollingService<GccRemoveReadyPollerObject> gccRemoveReadyPollerObjectPollingService;
 
-    public Compute buildCompute(GccCredential gccCredential, Stack stack) {
+    public Compute buildCompute(GccCredential gccCredential, String appName) {
         try {
             HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
             BufferedReader br = new BufferedReader(new StringReader(gccCredential.getServiceAccountPrivateKey()));
@@ -96,7 +97,7 @@ public class GccStackUtil {
                     .setServiceAccountPrivateKey(kp.getPrivate())
                     .build();
             Compute compute = new Compute.Builder(
-                    httpTransport, JSON_FACTORY, null).setApplicationName(stack.getName())
+                    httpTransport, JSON_FACTORY, null).setApplicationName(appName)
                     .setHttpRequestInitializer(credential)
                     .build();
             return compute;
@@ -181,6 +182,17 @@ public class GccStackUtil {
         resourceRecordSet.setRrdatas(ips);
         return resourceRecordSet;
     }
+
+    public List<Disk> listDisks(Compute compute, GccCredential gccCredential) throws IOException {
+        List<Disk> disks = new ArrayList<>();
+        for (GccZone gccZone : GccZone.values()) {
+            Compute.Disks.List list = compute.disks().list(gccCredential.getProjectId(), gccZone.getValue());
+            DiskList execute = list.execute();
+            disks.addAll(execute.getItems());
+        }
+        return disks;
+    }
+
 
     public Instance buildInstance(Compute compute, Stack stack,
             List<NetworkInterface> networkInterfaces, List<AttachedDisk> attachedDisks, String forName, String userData) throws IOException {
@@ -399,7 +411,7 @@ public class GccStackUtil {
         disk.setSizeGb(size.longValue());
         disk.setName(name);
         Compute.Disks.Insert insDisk = compute.disks().insert(projectId, zone.getValue(), disk);
-        insDisk.setSourceImage(GccImageType.UBUNTU_HACK.getAmbariUbuntu(projectId));
+        insDisk.setSourceImage(GccImageType.DEBIAN_HACK.getAmbariUbuntu(projectId));
         insDisk.execute();
         GccDiskReadyPollerObject gccDiskReady = new GccDiskReadyPollerObject(compute, stack, name);
         gccDiskReadyPollerObjectPollingService.pollWithTimeout(gccDiskCheckerStatus, gccDiskReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
