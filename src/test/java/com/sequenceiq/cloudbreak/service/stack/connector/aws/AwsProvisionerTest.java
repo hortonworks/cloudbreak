@@ -24,8 +24,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
-import reactor.core.Reactor;
-
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.CreateStackRequest;
@@ -39,6 +37,8 @@ import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
+
+import reactor.core.Reactor;
 
 public class AwsProvisionerTest {
 
@@ -80,7 +80,8 @@ public class AwsProvisionerTest {
         credential = AwsConnectorTestUtil.createAwsCredential();
         Set<Resource> resources = new HashSet<>();
         resources.add(new Resource(ResourceType.CLOUDFORMATION_STACK, "", stack));
-        stack = AwsConnectorTestUtil.createStack(user, credential, AwsConnectorTestUtil.createAwsTemplate(user), resources);
+        stack = AwsConnectorTestUtil.createStack(AwsConnectorTestUtil.DUMMY_OWNER, AwsConnectorTestUtil.DUMMY_ACCOUNT,
+                credential, AwsConnectorTestUtil.createAwsTemplate(), resources);
     }
 
     @Test

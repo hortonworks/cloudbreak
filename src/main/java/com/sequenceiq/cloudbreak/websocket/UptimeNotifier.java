@@ -42,11 +42,11 @@ public class UptimeNotifier {
             Stack stack = stackRepository.findStackForCluster(cluster.getId());
             if (stack != null) {
                 Long uptime = cluster.getCreationFinished() == null ? 0L : now - cluster.getCreationFinished();
-                if (uptimes.containsKey(stack.getUser().getEmail())) {
-                    uptimes.get(stack.getUser().getEmail()).add(new UptimeMessage(stack.getId(), uptime));
+                if (uptimes.containsKey(stack.getOwner())) {
+                    uptimes.get(stack.getOwner()).add(new UptimeMessage(stack.getId(), uptime));
                 } else {
-                    uptimes.put(stack.getUser().getEmail(), new ArrayList<UptimeMessage>());
-                    uptimes.get(stack.getUser().getEmail()).add(new UptimeMessage(stack.getId(), uptime));
+                    uptimes.put(stack.getOwner(), new ArrayList<UptimeMessage>());
+                    uptimes.get(stack.getOwner()).add(new UptimeMessage(stack.getId(), uptime));
                 }
             }
         }

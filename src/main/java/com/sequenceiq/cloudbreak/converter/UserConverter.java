@@ -41,7 +41,6 @@ public class UserConverter extends AbstractConverter<UserJson, User> {
         userJson.setEmail(entity.getEmail());
         userJson.setFirstName(entity.getFirstName());
         userJson.setLastName(entity.getLastName());
-        userJson.setStacks(stackConverter.convertAllEntityToJsonWithClause(entity.getStacks()));
         userJson.setCompany(entity.getAccount().getName());
         userJson.setUserId(entity.getId());
         return userJson;
@@ -53,7 +52,6 @@ public class UserConverter extends AbstractConverter<UserJson, User> {
         user.setEmail(json.getEmail());
         user.setFirstName(json.getFirstName());
         user.setLastName(json.getLastName());
-        user.setStacks(stackConverter.convertAllJsonToEntity(json.getStacks()));
         user.setPassword(passwordEncoder.encode(json.getPassword()));
         return user;
     }

@@ -53,10 +53,10 @@ public class StackCreationFailureHandler implements Consumer<Event<StackOperatio
         String detailedMessage = stackCreationFailure.getDetailedMessage();
         Stack stack = stackUpdater.updateStackStatus(stackId, Status.CREATE_FAILED, detailedMessage);
         if (stack.getCluster().getEmailNeeded()) {
-            ambariClusterInstallerMailSenderService.sendFailEmail(stack.getUser());
+            ambariClusterInstallerMailSenderService.sendFailEmail(stack.getOwner());
         }
         cloudPlatformRollbackHandlers.get(stack.getTemplate().cloudPlatform()).rollback(stackRepository.findOneWithLists(stackId), stack.getResources());
-        websocketService.sendToTopicUser(stack.getUser().getEmail(), WebsocketEndPoint.STACK,
+        websocketService.sendToTopicUser(stack.getOwner(), WebsocketEndPoint.STACK,
                 new StatusMessage(stackId, stack.getName(), Status.CREATE_FAILED.name(), detailedMessage));
     }
 

@@ -4,7 +4,7 @@
 </head>
 <body>
 <h1>
-    Hey ${firstName}.
+    Hey.
 </h1>
 
 </br>

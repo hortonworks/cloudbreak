@@ -107,7 +107,7 @@ public class AzureConnectorTest {
         given(azureClient.getVirtualMachine(anyMap())).willReturn(new Object());
         given(jsonHelper.createJsonFromString(anyString())).willReturn(jsonNode);
         // WHEN
-        StackDescription result = underTest.describeStackWithResources(user, stack, credential);
+        StackDescription result = underTest.describeStackWithResources(stack, credential);
         // THEN
         verify(jsonHelper, times(8)).createJsonFromString(anyString());
         assertNotNull(result);
@@ -125,7 +125,7 @@ public class AzureConnectorTest {
         given(azureClient.getVirtualMachine(anyMap())).willReturn(new Object());
         given(jsonHelper.createJsonFromString(anyString())).willReturn(jsonNode);
         // WHEN
-        StackDescription result = underTest.describeStackWithResources(user, stack, credential);
+        StackDescription result = underTest.describeStackWithResources(stack, credential);
         // THEN
         verify(jsonHelper, times(8)).createJsonFromString(anyString());
         assertNotNull(result);
@@ -143,7 +143,7 @@ public class AzureConnectorTest {
         given(azureClient.getVirtualMachine(anyMap())).willReturn(new Object());
         given(jsonHelper.createJsonFromString(anyString())).willReturn(jsonNode);
         // WHEN
-        StackDescription result = underTest.describeStackWithResources(user, stack, credential);
+        StackDescription result = underTest.describeStackWithResources(stack, credential);
         // THEN
         verify(jsonHelper, times(8)).createJsonFromString(anyString());
         assertNotNull(result);
@@ -161,7 +161,7 @@ public class AzureConnectorTest {
         given(azureClient.getVirtualMachine(anyMap())).willReturn(new Object());
         given(jsonHelper.createJsonFromString(anyString())).willReturn(jsonNode);
         // WHEN
-        StackDescription result = underTest.describeStackWithResources(user, stack, credential);
+        StackDescription result = underTest.describeStackWithResources(stack, credential);
         // THEN
         verify(jsonHelper, times(8)).createJsonFromString(anyString());
         assertNotNull(result);
@@ -179,7 +179,7 @@ public class AzureConnectorTest {
         given(azureClient.getVirtualMachine(anyMap())).willThrow(new IllegalStateException());
         given(jsonHelper.createJsonFromString(anyString())).willReturn(jsonNode);
         // WHEN
-        StackDescription result = underTest.describeStackWithResources(user, stack, credential);
+        StackDescription result = underTest.describeStackWithResources(stack, credential);
         // THEN
         verify(jsonHelper, times(8)).createJsonFromString(anyString());
         assertNotNull(result);
@@ -196,7 +196,7 @@ public class AzureConnectorTest {
         given(azureClient.getRequestId(httpResponseDecorator)).willReturn(DUMMY_REQUEST_ID);
         given(azureClient.waitUntilComplete(DUMMY_REQUEST_ID)).willReturn(new Object());
         // WHEN
-        underTest.deleteStack(user, stack, credential);
+        underTest.deleteStack(stack, credential);
         // THEN
         verify(azureClient, times(6)).waitUntilComplete(anyString());
     }
@@ -209,7 +209,7 @@ public class AzureConnectorTest {
         given(azureStackUtil.getVmName(anyString(), anyInt())).willReturn(DUMMY_VM_NAME);
         given(azureClient.deleteVirtualMachine(anyMap())).willThrow(new InternalServerException(EXCEPTION_MESSAGE));
         // WHEN
-        underTest.deleteStack(user, stack, credential);
+        underTest.deleteStack(stack, credential);
     }
 
     @Test(expected = InternalServerException.class)
@@ -223,7 +223,7 @@ public class AzureConnectorTest {
         given(azureClient.getRequestId(httpResponseDecorator)).willReturn(DUMMY_REQUEST_ID);
         given(azureClient.waitUntilComplete(DUMMY_REQUEST_ID)).willReturn(new Object());
         // WHEN
-        underTest.deleteStack(user, stack, credential);
+        underTest.deleteStack(stack, credential);
     }
 
     @Test
@@ -238,7 +238,7 @@ public class AzureConnectorTest {
         given(azureClient.getRequestId(httpResponseDecorator)).willReturn(DUMMY_REQUEST_ID);
         given(azureClient.waitUntilComplete(DUMMY_REQUEST_ID)).willReturn(new Object());
         // WHEN
-        underTest.deleteStack(user, stack, credential);
+        underTest.deleteStack(stack, credential);
         // THEN
         verify(azureClient, times(3)).waitUntilComplete(anyString());
     }
@@ -254,7 +254,7 @@ public class AzureConnectorTest {
         given(azureClient.getRequestId(httpResponseDecorator)).willReturn(DUMMY_REQUEST_ID);
         given(azureClient.waitUntilComplete(DUMMY_REQUEST_ID)).willReturn(new Object());
         // WHEN
-        underTest.deleteStack(user, stack, credential);
+        underTest.deleteStack(stack, credential);
         // THEN
         verify(azureClient, times(6)).waitUntilComplete(anyString());
     }
@@ -270,6 +270,6 @@ public class AzureConnectorTest {
         given(azureClient.getRequestId(httpResponseDecorator)).willReturn(DUMMY_REQUEST_ID);
         given(azureClient.waitUntilComplete(DUMMY_REQUEST_ID)).willReturn(new Object());
         // WHEN
-        underTest.deleteStack(user, stack, credential);
+        underTest.deleteStack(stack, credential);
     }
 }

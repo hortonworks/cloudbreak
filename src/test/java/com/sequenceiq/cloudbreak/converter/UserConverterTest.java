@@ -3,13 +3,8 @@ package com.sequenceiq.cloudbreak.converter;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anySetOf;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
-import java.util.Date;
 import java.util.HashSet;
 
 import org.junit.Before;
@@ -19,22 +14,17 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import com.sequenceiq.cloudbreak.controller.json.AccountJson;
 import com.sequenceiq.cloudbreak.controller.json.BlueprintJson;
 import com.sequenceiq.cloudbreak.controller.json.CredentialJson;
 import com.sequenceiq.cloudbreak.controller.json.StackJson;
 import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
 import com.sequenceiq.cloudbreak.controller.json.UserJson;
 import com.sequenceiq.cloudbreak.domain.Account;
-import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
-import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.User;
-import com.sequenceiq.cloudbreak.domain.UserStatus;
 import com.sequenceiq.cloudbreak.repository.AccountRepository;
 
 public class UserConverterTest {
@@ -103,7 +93,6 @@ public class UserConverterTest {
         // THEN
         assertEquals(result.getCompany(), user.getAccount().getName());
         assertEquals(result.getFirstName(), user.getFirstName());
-        assertEquals(result.getStacks().size(), user.getStacks().size());
         assertNotNull(result.getAwsTemplates());
         assertNotNull(result.getAzureTemplates());
         assertNotNull(result.getCredentials());

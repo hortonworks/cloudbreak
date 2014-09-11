@@ -15,7 +15,7 @@ import javax.persistence.UniqueConstraint;
 
 @Entity
 @Table(uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"account", "name"} )
+        @UniqueConstraint(columnNames = { "account", "name" })
 })
 @NamedQueries({
         @NamedQuery(

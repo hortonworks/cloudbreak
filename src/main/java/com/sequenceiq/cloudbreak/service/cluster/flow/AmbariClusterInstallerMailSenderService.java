@@ -44,20 +44,21 @@ public class AmbariClusterInstallerMailSenderService {
                 message.setFrom(msgFrom);
                 message.setTo(user.getEmail());
                 message.setSubject("Cloudbreak - stack installation");
-                message.setText(getEmailBody(user.getFirstName(), status, server, template), true);
+                message.setText(getEmailBody(status, server, template), true);
             }
         };
     }
 
     @VisibleForTesting
-    protected MimeMessagePreparator prepareFailMessage(final User user, final String template, final String status) {
+    protected MimeMessagePreparator prepareFailMessage(final String email, final String template, final String status) {
         return new MimeMessagePreparator() {
             public void prepare(MimeMessage mimeMessage) throws Exception {
                 MimeMessageHelper message = new MimeMessageHelper(mimeMessage);
                 message.setFrom(msgFrom);
-                message.setTo(user.getEmail());
+                message.setTo(email);
                 message.setSubject("Cloudbreak - stack installation");
-                message.setText(getEmailBody(user.getFirstName(), status, "", template), true);
+//                message.setText(getEmailBody(user.getFirstName(), status, "", template), true);
+                message.setText(getEmailBody(status, "", template), true);
             }
         };
     }
@@ -67,8 +68,8 @@ public class AmbariClusterInstallerMailSenderService {
         sendInstallationEmail(mimeMessagePreparator);
     }
 
-    public void sendFailEmail(User user) {
-        MimeMessagePreparator mimeMessagePreparator = prepareFailMessage(user, "templates/cluster-installer-mail-fail.ftl", "FAILED");
+    public void sendFailEmail(String email) {
+        MimeMessagePreparator mimeMessagePreparator = prepareFailMessage(email, "templates/cluster-installer-mail-fail.ftl", "FAILED");
         sendInstallationEmail(mimeMessagePreparator);
     }
 
@@ -78,11 +79,10 @@ public class AmbariClusterInstallerMailSenderService {
         LOGGER.info("Cluster installation email sent");
     }
 
-    private String getEmailBody(String firstName, String status, String server, String template) {
+    private String getEmailBody(String status, String server, String template) {
         String text = null;
         try {
             Map<String, Object> model = new HashMap<>();
-            model.put("firstName", firstName);
             model.put("status", status);
             model.put("server", server);
             text = FreeMarkerTemplateUtils.processTemplateIntoString(freemarkerConfiguration.getTemplate(template, "UTF-8"), model);

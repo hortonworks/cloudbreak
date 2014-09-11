@@ -13,13 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
-import reactor.core.Reactor;
-import reactor.event.Event;
-
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.converter.StackConverter;
+import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -27,18 +24,17 @@ import com.sequenceiq.cloudbreak.domain.StackDescription;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.StatusRequest;
 import com.sequenceiq.cloudbreak.domain.Template;
-import com.sequenceiq.cloudbreak.domain.User;
-import com.sequenceiq.cloudbreak.domain.UserRole;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
-import com.sequenceiq.cloudbreak.repository.UserRepository;
-import com.sequenceiq.cloudbreak.service.account.AccountService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.UpdateInstancesRequest;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataIncompleteException;
+
+import reactor.core.Reactor;
+import reactor.event.Event;
 
 @Service
 public class DefaultStackService implements StackService {
@@ -46,19 +42,10 @@ public class DefaultStackService implements StackService {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultStackService.class);
 
     @Autowired
-    private StackConverter stackConverter;
-
-    @Autowired
     private StackRepository stackRepository;
 
     @Autowired
     private TemplateRepository templateRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private AccountService accountService;
 
     @Resource
     private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
@@ -70,47 +57,23 @@ public class DefaultStackService implements StackService {
     private Reactor reactor;
 
     @Override
-    public Set<Stack> getAll(User user) {
-        Set<Stack> legacyStacks = new HashSet<>();
-        Set<Stack> userStacks = user.getStacks();
-        LOGGER.debug("User stacks: #{}", userStacks.size());
-
-        if (user.getUserRoles().contains(UserRole.ACCOUNT_ADMIN)) {
-            LOGGER.debug("Getting company user stacks for company admin; id: [{}]", user.getId());
-            legacyStacks = getCompanyUserStacks(user);
-        } else if (user.getUserRoles().contains(UserRole.ACCOUNT_USER)) {
-            LOGGER.debug("Getting company wide stacks for company user; id: [{}]", user.getId());
-            legacyStacks = getCompanyStacks(user);
-        }
-        LOGGER.debug("Found #{} legacy stacks for user [{}]", legacyStacks.size(), user.getId());
-        userStacks.addAll(legacyStacks);
-        return userStacks;
-    }
-
-    private Set<Stack> getCompanyStacks(User user) {
-        Set<Stack> companyStacks = new HashSet<>();
-        User adminWithFilteredData = accountService.accountUserData(user.getAccount().getId(), user.getUserRoles().iterator().next());
-        if (adminWithFilteredData != null) {
-            companyStacks = adminWithFilteredData.getStacks();
-        } else {
-            LOGGER.debug("There's no company admin for user: [{}]", user.getId());
-        }
-        return companyStacks;
-    }
-
-    private Set<Stack> getCompanyUserStacks(User user) {
-        Set<Stack> companyUserStacks = new HashSet<>();
-        Set<User> companyUsers = accountService.accountUsers(user.getAccount().getId());
-        companyUsers.remove(user);
-        for (User cUser : companyUsers) {
-            LOGGER.debug("Adding blueprints of company user: [{}]", cUser.getId());
-            companyUserStacks.addAll(cUser.getStacks());
-        }
-        return companyUserStacks;
+    public Set<Stack> retrievePrivateStacks(CbUser user) {
+        return stackRepository.findForUser(user.getUsername());
     }
 
     @Override
-    public Stack get(User user, Long id) {
+    public Set<Stack> retrieveAccountStacks(CbUser user) {
+        Set<Stack> stacks = new HashSet<>();
+        if (user.getRoles().contains("admin")) {
+            stacks = stackRepository.findAllInAccount(user.getAccount());
+        } else {
+            stacks = stackRepository.findPublicsInAccount(user.getAccount());
+        }
+        return stacks;
+    }
+
+    @Override
+    public Stack get(Long id) {
         Stack stack = stackRepository.findOne(id);
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", id));
@@ -119,18 +82,19 @@ public class DefaultStackService implements StackService {
     }
 
     @Override
-    public Stack create(User user, Stack stack) {
+    public Stack create(CbUser user, Stack stack) {
         Template template = templateRepository.findOne(stack.getTemplate().getId());
-        stack.setUser(user);
+        stack.setOwner(user.getUsername());
+        stack.setAccount(user.getAccount());
         stack.setHash(generateHash(stack));
-        stack = stackRepository.save(stack);
+        Stack savedStack = stackRepository.save(stack);
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_REQUEST_EVENT, stack.getId());
         reactor.notify(ReactorConfig.PROVISION_REQUEST_EVENT, Event.wrap(new ProvisionRequest(template.cloudPlatform(), stack.getId())));
         return stack;
     }
 
     @Override
-    public void delete(User user, Long id) {
+    public void delete(Long id) {
         LOGGER.info("Stack delete requested. [StackId: {}]", id);
         Stack stack = stackRepository.findOne(id);
         if (stack == null) {
@@ -141,12 +105,12 @@ public class DefaultStackService implements StackService {
     }
 
     @Override
-    public void updateStatus(User user, Long stackId, StatusRequest status) {
+    public void updateStatus(Long stackId, StatusRequest status) {
         throw new BadRequestException("Stopping/restarting a stack is not yet supported");
     }
 
     @Override
-    public void updateNodeCount(User user, Long stackId, Integer scalingAdjustment) {
+    public void updateNodeCount(Long stackId, Integer scalingAdjustment) {
         Stack stack = stackRepository.findOne(stackId);
         if (!Status.AVAILABLE.equals(stack.getStatus())) {
             throw new BadRequestException(String.format("Stack '%s' is currently in '%s' state. Node count can only be updated if it's running.", stackId,
@@ -180,10 +144,10 @@ public class DefaultStackService implements StackService {
     }
 
     @Override
-    public StackDescription getStackDescription(User user, Stack stack) {
+    public StackDescription getStackDescription(Stack stack) {
         CloudPlatform cp = stack.getTemplate().cloudPlatform();
         LOGGER.debug("Getting stack description for cloud platform: {} ...", cp);
-        StackDescription description = cloudPlatformConnectors.get(cp).describeStackWithResources(user, stack, stack.getCredential());
+        StackDescription description = cloudPlatformConnectors.get(cp).describeStackWithResources(stack, stack.getCredential());
         LOGGER.debug("Found stack description {}", description.getClass());
         return description;
     }
