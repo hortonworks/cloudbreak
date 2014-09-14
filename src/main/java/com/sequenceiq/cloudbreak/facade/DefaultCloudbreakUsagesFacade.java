@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.controller.json.CloudbreakUsageJson;
 import com.sequenceiq.cloudbreak.converter.CloudbreakUsageConverter;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.service.usages.CloudbreakUsageGeneratorService;
 import com.sequenceiq.cloudbreak.service.usages.CloudbreakUsagesService;
 
 @Service
@@ -17,6 +18,9 @@ public class DefaultCloudbreakUsagesFacade implements CloudbreakUsagesFacade {
 
     @Autowired
     private CloudbreakUsagesService cloudbreakUsagesService;
+
+    @Autowired
+    private CloudbreakUsageGeneratorService cloudbreakUsageGeneratorService;
 
     @Autowired
     private CloudbreakUsageConverter cloudbreakUsageConverter;
@@ -41,5 +45,10 @@ public class DefaultCloudbreakUsagesFacade implements CloudbreakUsagesFacade {
             String cloud, String zone, String vmtype, String hours) {
         List<CloudbreakUsage> usages = cloudbreakUsagesService.findUserUsages(user.getId(), since, accountId, cloud, zone, vmtype, hours);
         return new ArrayList<CloudbreakUsageJson>(cloudbreakUsageConverter.convertAllEntityToJson(usages));
+    }
+
+    @Override
+    public void generateUserUsages(User user) {
+        cloudbreakUsageGeneratorService.generateUserUsage(user.getId());
     }
 }

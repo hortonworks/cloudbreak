@@ -6,4 +6,5 @@ import org.springframework.data.repository.CrudRepository;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 
 public interface CloudbreakUsageRepository extends CrudRepository<CloudbreakUsage, Long>, JpaSpecificationExecutor {
+
 }

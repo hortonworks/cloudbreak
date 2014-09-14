@@ -16,6 +16,9 @@ EOF
 
 # Invite a user
 echo "Retrieve events ..."
-curl --config curl_config_admin_user  -X GET "http://$API_HOST:$API_PORT/events"
+# curl --config curl_config_admin_user  -X GET "http://$API_HOST:$API_PORT/events"
+
+# User Usages ...
+curl --config curl_config_admin_user  -X GET "http://$API_HOST:$API_PORT/user/usages"
 
 

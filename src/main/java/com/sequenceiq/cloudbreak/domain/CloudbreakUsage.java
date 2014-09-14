@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import java.util.Date;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -19,7 +21,7 @@ public class CloudbreakUsage implements ProvisionEntity {
     private String blueprintName;
     private Long blueprintId;
 
-    private String day;
+    private Date day;
 
     private String cloud;
 
@@ -85,14 +87,6 @@ public class CloudbreakUsage implements ProvisionEntity {
         this.blueprintId = blueprintId;
     }
 
-    public String getDay() {
-        return day;
-    }
-
-    public void setDay(String day) {
-        this.day = day;
-    }
-
     public String getCloud() {
         return cloud;
     }
@@ -123,5 +117,13 @@ public class CloudbreakUsage implements ProvisionEntity {
 
     public void setRunningHours(String runningHours) {
         this.runningHours = runningHours;
+    }
+
+    public Date getDay() {
+        return day;
+    }
+
+    public void setDay(Date day) {
+        this.day = day;
     }
 }

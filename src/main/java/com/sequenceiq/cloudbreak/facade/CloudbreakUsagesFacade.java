@@ -16,4 +16,6 @@ public interface CloudbreakUsagesFacade {
     List<CloudbreakUsageJson> loadUserUsages(User user, Long since, Long filterUserId, Long accountId,
             String cloud, String zone, String vmtype, String hours);
 
+    void generateUserUsages(User user);
+
 }

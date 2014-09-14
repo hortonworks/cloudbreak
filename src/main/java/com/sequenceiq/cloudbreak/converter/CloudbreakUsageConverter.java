@@ -1,8 +1,11 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.controller.json.CloudbreakUsageJson;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 
+@Component
 public class CloudbreakUsageConverter extends AbstractConverter<CloudbreakUsageJson, CloudbreakUsage> {
     @Override
     public CloudbreakUsageJson convert(CloudbreakUsage entity) {
@@ -17,7 +20,7 @@ public class CloudbreakUsageConverter extends AbstractConverter<CloudbreakUsageJ
         json.setZone(entity.getZone());
         json.setRunningHours(entity.getRunningHours());
         json.setMachineType(entity.getMachineType());
-        json.setDay(entity.getDay());
+        json.setDay(entity.getDay().toString());
         return json;
     }
 
@@ -34,7 +37,6 @@ public class CloudbreakUsageConverter extends AbstractConverter<CloudbreakUsageJ
         entity.setZone(json.getZone());
         entity.setRunningHours(json.getRunningHours());
         entity.setMachineType(json.getMachineType());
-        entity.setDay(json.getDay());
         return entity;
 
     }

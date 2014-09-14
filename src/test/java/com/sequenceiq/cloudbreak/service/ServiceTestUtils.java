@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service;
 
+import java.util.Date;
+
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.ec2.model.InstanceType;
 import com.sequenceiq.cloudbreak.domain.Account;
@@ -10,6 +12,7 @@ import com.sequenceiq.cloudbreak.domain.AzureLocation;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -72,16 +75,16 @@ public final class ServiceTestUtils {
     public static Credential createCredential(User user, CloudPlatform platform, UserRole role) {
         Credential cred = null;
         switch (platform) {
-        case AZURE:
-            cred = new AzureCredential();
-            ((AzureCredential) cred).setAzureCredentialOwner(user);
-            break;
-        case AWS:
-            cred = new AwsCredential();
-            ((AwsCredential) cred).setAwsCredentialOwner(user);
-            break;
-        default:
-            break;
+            case AZURE:
+                cred = new AzureCredential();
+                ((AzureCredential) cred).setAzureCredentialOwner(user);
+                break;
+            case AWS:
+                cred = new AwsCredential();
+                ((AwsCredential) cred).setAwsCredentialOwner(user);
+                break;
+            default:
+                break;
         }
         cred.setCloudPlatform(platform);
         cred.getUserRoles().add(role);
@@ -91,20 +94,20 @@ public final class ServiceTestUtils {
     public static Template createTemplate(User user, CloudPlatform platform, UserRole role) {
         Template template = null;
         switch (platform) {
-        case AZURE:
-            template = new AzureTemplate();
-            ((AzureTemplate) template).setAzureTemplateOwner(user);
-            ((AzureTemplate) template).setVmType("test-vm-type");
-            ((AzureTemplate) template).setLocation(AzureLocation.NORTH_EUROPE);
-            break;
-        case AWS:
-            template = new AwsTemplate();
-            ((AwsTemplate) template).setAwsTemplateOwner(user);
-            ((AwsTemplate) template).setInstanceType(InstanceType.C1Medium);
-            ((AwsTemplate) template).setRegion(Regions.EU_WEST_1);
-            break;
-        default:
-            break;
+            case AZURE:
+                template = new AzureTemplate();
+                ((AzureTemplate) template).setAzureTemplateOwner(user);
+                ((AzureTemplate) template).setVmType("test-vm-type");
+                ((AzureTemplate) template).setLocation(AzureLocation.NORTH_EUROPE);
+                break;
+            case AWS:
+                template = new AwsTemplate();
+                ((AwsTemplate) template).setAwsTemplateOwner(user);
+                ((AwsTemplate) template).setInstanceType(InstanceType.C1Medium);
+                ((AwsTemplate) template).setRegion(Regions.EU_WEST_1);
+                break;
+            default:
+                break;
         }
         template.getUserRoles().add(role);
         return template;
@@ -116,5 +119,15 @@ public final class ServiceTestUtils {
         cluster.setUser(user);
         cluster.setBlueprint(blueprint);
         return cluster;
+    }
+
+    public static CloudbreakEvent createEvent(Long stackId, Long userId, String eventStatus, Date eventTimestamp) {
+        CloudbreakEvent event = new CloudbreakEvent();
+        event.setStackId(stackId);
+        event.setUserId(userId);
+        event.setEventType(eventStatus);
+        event.setEventTimestamp(eventTimestamp);
+
+        return event;
     }
 }
