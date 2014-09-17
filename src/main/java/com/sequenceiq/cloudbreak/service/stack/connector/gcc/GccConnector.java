@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
@@ -102,6 +103,8 @@ public class GccConnector implements CloudPlatformConnector {
         for (Resource resource : stack.getResourcesByType(ResourceType.NETWORK)) {
             try {
                 gccStackUtil.removeNetwork(compute, stack, resource.getResourceName());
+            } catch (GoogleJsonResponseException ex) {
+                gccStackUtil.exceptionHandler(ex, resource.getResourceName());
             } catch (IOException e) {
                 throw new InternalServerException(e.getMessage());
             }
@@ -112,6 +115,8 @@ public class GccConnector implements CloudPlatformConnector {
         for (Resource resource : stack.getResourcesByType(ResourceType.ATTACHED_DISK)) {
             try {
                 gccStackUtil.removeDisk(compute, stack, resource.getResourceName());
+            } catch (GoogleJsonResponseException ex) {
+                gccStackUtil.exceptionHandler(ex, resource.getResourceName());
             } catch (IOException e) {
                 throw new InternalServerException(e.getMessage());
             }
@@ -122,6 +127,8 @@ public class GccConnector implements CloudPlatformConnector {
         for (Resource resource : stack.getResourcesByType(ResourceType.DISK)) {
             try {
                 gccStackUtil.removeDisk(compute, stack, resource.getResourceName());
+            } catch (GoogleJsonResponseException ex) {
+                gccStackUtil.exceptionHandler(ex, resource.getResourceName());
             } catch (IOException e) {
                 throw new InternalServerException(e.getMessage());
             }
@@ -132,6 +139,8 @@ public class GccConnector implements CloudPlatformConnector {
         for (Resource resource : stack.getResourcesByType(ResourceType.VIRTUAL_MACHINE)) {
             try {
                 gccStackUtil.removeInstance(compute, stack, resource.getResourceName());
+            } catch (GoogleJsonResponseException ex) {
+                gccStackUtil.exceptionHandler(ex, resource.getResourceName());
             } catch (IOException e) {
                 throw new InternalServerException(e.getMessage());
             }

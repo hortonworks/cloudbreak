@@ -1,6 +1,6 @@
 : ${NODE_PREFIX=amb}
 : ${MYDOMAIN:=mycorp.kom}
-: ${IMAGE:="sequenceiq/ambari:pam-fix"}
+: ${IMAGE:="sequenceiq/ambari:1.6.0"}
 : ${INSTANCE_ID:="0"}
 
 # instance id from ec2 metadata

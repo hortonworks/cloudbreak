@@ -24,6 +24,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
@@ -50,6 +51,7 @@ import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.StorageScopes;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.domain.GccTemplate;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -65,6 +67,7 @@ public class GccStackUtil {
     private static final int MAX_POLLING_ATTEMPTS = 60;
     private static final int POLLING_INTERVAL = 5000;
     private static final int TTL = 3600;
+    private static final int NOT_FOUND = 404;
 
     @Autowired
     private GccInstanceCheckerStatus gccInstanceReadyCheckerStatus;
@@ -433,6 +436,13 @@ public class GccStackUtil {
         return disk;
     }
 
+    public void exceptionHandler(GoogleJsonResponseException ex, String name) {
+        if (ex.getDetails().get("code").equals(NOT_FOUND)) {
+            LOGGER.info(String.format("Resource was delete with name: %s", name));
+        } else {
+            throw new InternalServerException(ex.getMessage());
+        }
+    }
 
     public String getVmName(String stackName, int i) {
         return String.format("%s-%s", stackName, i);
