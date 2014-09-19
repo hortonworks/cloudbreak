@@ -7,8 +7,8 @@ buildscript {
     dependencies { classpath 'org.ajoberstar:gradle-git:0.8.0' }
 }
 
-def majorVersion = 0
-def minorVersion = 1
+Integer majorVersion = 0
+Integer minorVersion = 1
 
 def env = project.hasProperty('env') ? project.getProperty('env') : 'local'
 def config = new ConfigSlurper(env).parse(file("$rootDir/gradle/config/buildConfig.groovy").toURL())
@@ -44,7 +44,7 @@ if(jobName != null) {
         versionNum = "1"
         String tmpVersion = mergeRequests.versioning.versions.version.last().text().tokenize('.').last().tokenize('-').last()
         if (tmpVersion.length() < 5) {
-            String tmpMinorVersion = mergeRequests.versioning.versions.version.last().text().tokenize('.')[1]
+            Integer tmpMinorVersion = Integer.parseInt(mergeRequests.versioning.versions.version.last().text().tokenize('.')[1])
             if(tmpMinorVersion != minorVersion) {
                 versionNum = 1;
             } else {
