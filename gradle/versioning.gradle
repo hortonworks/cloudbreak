@@ -7,6 +7,9 @@ buildscript {
     dependencies { classpath 'org.ajoberstar:gradle-git:0.8.0' }
 }
 
+def majorVersion = 0
+def minorVersion = 1
+
 def env = project.hasProperty('env') ? project.getProperty('env') : 'local'
 def config = new ConfigSlurper(env).parse(file("$rootDir/gradle/config/buildConfig.groovy").toURL())
 Calendar calendar = Calendar.getInstance();
@@ -29,23 +32,32 @@ String versionNum
 if(jobName != null) {
     def f = new File("$rootDir/metadata.xml")
     def metadata = config.metadata
-    if (!f.exists()) {
-        new URL(metadata).withInputStream { i ->
-            f.withOutputStream {
-                it << i
+    try {
+        if (!f.exists()) {
+            new URL(metadata).withInputStream { i ->
+                f.withOutputStream {
+                    it << i
+                }
             }
         }
+        def mergeRequests = (new XmlParser()).parse("$rootDir/metadata.xml")
+        versionNum = "1"
+        String tmpVersion = mergeRequests.versioning.versions.version.last().text().tokenize('.').last().tokenize('-').last()
+        if (tmpVersion.length() < 5) {
+            String tmpMinorVersion = mergeRequests.versioning.versions.version.last().text().tokenize('.')[1]
+            if(tmpMinorVersion != minorVersion) {
+                versionNum = 1;
+            } else {
+                versionNum = tmpVersion.toInteger() + 1
+            }
+        }
+        f.delete()
+    } catch (Exception ex) {
+        versionNum = "1"
     }
-    def mergeRequests = (new XmlParser()).parse("$rootDir/metadata.xml")
-    versionNum = "1"
-    String tmpVersion = mergeRequests.versioning.versions.version.last().text().tokenize('.').last().tokenize('-').last()
-    if (tmpVersion.length() < 5) {
-        versionNum = tmpVersion.toInteger() + 1
-    }
-    f.delete()
 }
 
-version = new ProjectVersion(0, 1, jobName != null ? versionNum : "DEV", branch)
+version = new ProjectVersion(majorVersion, minorVersion, jobName != null ? versionNum : "DEV", branch)
 
 class ProjectVersion {
     Integer major
