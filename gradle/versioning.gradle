@@ -45,7 +45,7 @@ if(jobName != null) {
     f.delete()
 }
 
-version = new ProjectVersion(0, 1, jobName != null ? versionNum : "DEV", branch)
+version = new ProjectVersion(0, 2, jobName != null ? versionNum : "DEV", branch)
 
 class ProjectVersion {
     Integer major

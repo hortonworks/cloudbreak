@@ -46,7 +46,7 @@ public class ClusterController {
 
     @RequestMapping(value = "/stacks/{stackId}/cluster", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<ClusterResponse> retrieveCluster(@ModelAttribute CbUser user, @PathVariable Long stackId) {
+    public ResponseEntity<ClusterResponse> retrieveCluster(@ModelAttribute("user") CbUser user, @PathVariable Long stackId) {
         Stack stack = stackService.get(stackId);
         Cluster cluster = clusterService.retrieveCluster(stackId);
         String clusterJson = clusterService.getClusterJson(stack.getAmbariIp(), stackId);
@@ -56,7 +56,7 @@ public class ClusterController {
 
     @RequestMapping(value = "/stacks/{stackId}/cluster", method = RequestMethod.PUT)
     @ResponseBody
-    public ResponseEntity<String> updateCluster(@ModelAttribute CbUser user, @PathVariable Long stackId, @RequestBody UpdateClusterJson updateClusterJson) {
+    public ResponseEntity<String> updateCluster(@ModelAttribute("user") CbUser user, @PathVariable Long stackId, @RequestBody UpdateClusterJson updateClusterJson) {
         Stack stack = stackService.get(stackId);
         if (!stack.getStatus().equals(Status.AVAILABLE)) {
             throw new BadRequestException(String.format(
