@@ -161,18 +161,6 @@ public class BlueprintConverterTest {
         assertEquals(result.getBlueprintText(), blueprintJson.getAmbariBlueprint());
     }
 
-    @Test(expected = BadRequestException.class)
-    public void testConvertBlueprintJsonToEntityShouldThrowBadRequestWhenHostGroupDoNotHaveSlave() {
-        // GIVEN
-        given(jsonNode.toString()).willReturn(DUMMY_BLUEPRINT_TEXT_HOSTGROUPS_DONT_HAVE_SLAVE);
-        blueprintJson.setAmbariBlueprint(jsonNode);
-        blueprintJson.setUrl(null);
-        // WHEN
-        Blueprint result = underTest.convert(blueprintJson);
-        // THEN
-        assertEquals(result.getBlueprintText(), blueprintJson.getAmbariBlueprint());
-    }
-
     private BlueprintJson createBlueprintJson() {
         BlueprintJson blueprintJson = new BlueprintJson();
         blueprintJson.setBlueprintName(DUMMY_NAME);
