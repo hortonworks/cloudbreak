@@ -158,7 +158,6 @@ public class GccConnector implements CloudPlatformConnector {
                 throw new InternalServerException(e.getMessage());
             }
         }
-    }
 
     @Override
     public CloudPlatform getCloudPlatform() {
