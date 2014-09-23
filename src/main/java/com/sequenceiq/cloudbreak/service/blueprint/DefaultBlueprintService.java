@@ -6,6 +6,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
@@ -16,6 +17,7 @@ import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
+import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
@@ -61,11 +63,16 @@ public class DefaultBlueprintService implements BlueprintService {
     @Override
     public Blueprint create(CbUser user, Blueprint blueprint) {
         LOGGER.debug("Creating blueprint: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
+        Blueprint savedBlueprint = null;
         blueprint.setOwner(user.getUsername());
         blueprint.setAccount(user.getAccount());
-        Blueprint savedBlueprint = blueprintRepository.save(blueprint);
-        websocketService.sendToTopicUser(user.getUsername(), WebsocketEndPoint.BLUEPRINT,
-                new StatusMessage(savedBlueprint.getId(), savedBlueprint.getName(), Status.AVAILABLE.name()));
+        try {
+            savedBlueprint = blueprintRepository.save(blueprint);
+            websocketService.sendToTopicUser(user.getUsername(), WebsocketEndPoint.BLUEPRINT,
+                    new StatusMessage(savedBlueprint.getId(), savedBlueprint.getName(), Status.AVAILABLE.name()));
+        } catch (DataIntegrityViolationException ex) {
+            throw new DuplicateKeyValueException(blueprint.getName(), ex);
+        }
         return savedBlueprint;
     }
 
