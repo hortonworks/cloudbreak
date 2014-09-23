@@ -24,9 +24,8 @@ import com.sequenceiq.cloudbreak.repository.CloudbreakUsageRepository;
 
 @Service
 public class DefaultCloudbreakUsageGeneratorService implements CloudbreakUsageGeneratorService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCloudbreakUsagesService.class);
 
-    private static final Map<Long, CloudbreakEvent> RUNNING_STACKS = new HashMap<>();
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCloudbreakUsagesService.class);
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
     private static final int HOURS_IN_DAY = 24;
 
@@ -39,12 +38,9 @@ public class DefaultCloudbreakUsageGeneratorService implements CloudbreakUsageGe
     @Override
     public List<CloudbreakUsage> generateCloudbreakUsages(Long userId) {
         LOGGER.info("Generating user usage for: {}", userId);
-
         List<CloudbreakUsage> usageList = new ArrayList<>();
-
         // retrieve all events for the user
         List<CloudbreakEvent> cloudbreakEvents = eventRepository.cloudbreakEvents(userId);
-
         // split events by stacks
         Map<Long, List<CloudbreakEvent>> stackEvents = splitCloudbreakEventsByStack(cloudbreakEvents);
 
@@ -56,7 +52,6 @@ public class DefaultCloudbreakUsageGeneratorService implements CloudbreakUsageGe
         }
         LOGGER.debug("usages: {}", usageList);
         usageRepository.save(usageList);
-
         return usageList;
     }
 
@@ -97,78 +92,78 @@ public class DefaultCloudbreakUsageGeneratorService implements CloudbreakUsageGe
         Map<String, CloudbreakUsage> dailyCbUsagesMap = new HashMap<>();
         Date startTime = getStackStartTime(stackEvents);
         Date stopTime = getStackStopTime(stackEvents);
-
         if (startTime.after(stopTime)) {
             throw new IllegalStateException("Stack start time after stop time!");
         }
-
         try {
-            dailyCbUsagesMap = generateDailyUsagesForStack(startTime,
-                    stopTime, stackEvents.iterator().next());
+            dailyCbUsagesMap = generateDailyUsagesForStack(startTime, stopTime, stackEvents.iterator().next());
         } catch (ParseException e) {
             LOGGER.error("Invalid date in event! Ex: {}", e);
             throw new IllegalStateException(e);
         }
-
         return dailyCbUsagesMap;
     }
 
     private Map<String, CloudbreakUsage> generateDailyUsagesForStack(Date startTime, Date stopTime, CloudbreakEvent prototype) throws ParseException {
         Map<String, CloudbreakUsage> dailyStackUsageMap = new HashMap<>();
         long stackRunningTimeMs = stopTime.getTime() - startTime.getTime();
-
         long runningHours = 0;
-
         // getting stack-days
         long days = TimeUnit.MILLISECONDS.toDays(stackRunningTimeMs);
 
         if (days < 1) {
-
             runningHours = TimeUnit.MILLISECONDS.toHours(stopTime.getTime() - startTime.getTime());
             LOGGER.debug("Stack ran less than a day. runningHours: {}", runningHours);
             CloudbreakUsage cbUsageStart = getCloudbreakUsage(prototype, runningHours, startTime);
             dailyStackUsageMap.put(DATE_FORMAT.format(startTime), cbUsageStart);
-
         } else {
             LOGGER.debug("Stack run spans multiple days. startTime: {}, stopTime: {}", startTime, stopTime);
-
             // get start day running hours
-            String startDayStr = DATE_FORMAT.format(startTime);
-            long endOfTheDay = DATE_FORMAT.parse(startDayStr).getTime() + TimeUnit.HOURS.toMillis(HOURS_IN_DAY) - 1;
-            runningHours = TimeUnit.MILLISECONDS.toHours(endOfTheDay - startTime.getTime());
+            runningHours = runningHoursForStartOrStopDay(startTime, true);
             CloudbreakUsage startDayUsage = getCloudbreakUsage(prototype, runningHours, startTime);
             dailyStackUsageMap.put(DATE_FORMAT.format(startTime), startDayUsage);
             LOGGER.debug("Generated start day usage: {}", startDayUsage);
-
-
             // get stop day running hours
-            String stopDayStr = DATE_FORMAT.format(stopTime);
-            long startOfTheDay = DATE_FORMAT.parse(stopDayStr).getTime();
-            runningHours = TimeUnit.MILLISECONDS.toHours(stopTime.getTime() - startOfTheDay);
+            runningHours = runningHoursForStartOrStopDay(stopTime, false);
             CloudbreakUsage stopDayUsage = getCloudbreakUsage(prototype, runningHours, stopTime);
             dailyStackUsageMap.put(DATE_FORMAT.format(stopTime), stopDayUsage);
             LOGGER.debug("Generated start day usage: {}", stopDayUsage);
 
-            // generate all day running hours
-            Calendar start = Calendar.getInstance();
-            start.setTime(startTime);
-            start.add(Calendar.DATE, 1);
-            Calendar end = Calendar.getInstance();
-            end.setTime(stopTime);
-            end.add(Calendar.DATE, -1);
-
-            for (Date date = start.getTime(); !start.after(end); start.add(Calendar.DATE, 1), date = start.getTime()) {
-                CloudbreakUsage usage = getCloudbreakUsage(prototype, HOURS_IN_DAY, date);
-                dailyStackUsageMap.put(DATE_FORMAT.format(date), stopDayUsage);
-                LOGGER.debug("Generated daily usage: {}", startDayUsage);
-            }
+            generateAllDayStackUsages(startTime, stopTime, prototype, dailyStackUsageMap);
         }
         return dailyStackUsageMap;
+    }
+
+    private void generateAllDayStackUsages(Date startTime, Date stopTime, CloudbreakEvent prototype, Map<String, CloudbreakUsage> dailyStackUsageMap) {
+        // generate all day running hours
+        Calendar start = Calendar.getInstance();
+        start.setTime(startTime);
+        start.add(Calendar.DATE, 1);
+        Calendar end = Calendar.getInstance();
+        end.setTime(stopTime);
+        end.add(Calendar.DATE, -1);
+
+        for (Date date = start.getTime(); !start.after(end); start.add(Calendar.DATE, 1), date = start.getTime()) {
+            CloudbreakUsage usage = getCloudbreakUsage(prototype, HOURS_IN_DAY, date);
+            dailyStackUsageMap.put(DATE_FORMAT.format(date), usage);
+            LOGGER.debug("Generated daily usage: {}", usage);
+        }
+    }
+
+    private long runningHoursForStartOrStopDay(Date date, boolean start) throws ParseException {
+        String dayAsStr = DATE_FORMAT.format(date);
+        long dayStartOrEndInMillis = DATE_FORMAT.parse(dayAsStr).getTime();
+        if (start) {
+            // end of the day
+            dayStartOrEndInMillis += TimeUnit.HOURS.toMillis(HOURS_IN_DAY) - 1;
+        }
+        return Math.abs(date.getTime() - dayStartOrEndInMillis);
     }
 
     private CloudbreakUsage getCloudbreakUsage(CloudbreakEvent prototype, long runningHours, Date day) {
         CloudbreakUsage dailyUsage = usageFromEvent(prototype);
         dailyUsage.setRunningHours(String.valueOf(runningHours));
+        dailyUsage.setDay(day);
         return dailyUsage;
     }
 
@@ -179,18 +174,11 @@ public class DefaultCloudbreakUsageGeneratorService implements CloudbreakUsageGe
                 if (stopTime == null) {
                     stopTime = event.getEventTimestamp();
                 } else {
-                    stopTime = stopTime.after(event.getEventTimestamp())
-                            ? event.getEventTimestamp() : stopTime;
+                    stopTime = stopTime.after(event.getEventTimestamp()) ? event.getEventTimestamp() : stopTime;
                 }
             }
         }
         return stopTime;
-    }
-
-    private boolean isStopEvent(CloudbreakEvent event) {
-        List<Status> stopStatuses = Arrays.asList(Status.DELETE_IN_PROGRESS,
-                Status.DELETE_FAILED, Status.DELETE_COMPLETED);
-        return stopStatuses.contains(Status.valueOf(event.getEventType()));
     }
 
     private Date getStackStartTime(List<CloudbreakEvent> stackEvents) {
@@ -200,12 +188,16 @@ public class DefaultCloudbreakUsageGeneratorService implements CloudbreakUsageGe
                 if (startDate == null) {
                     startDate = event.getEventTimestamp();
                 } else {
-                    startDate = startDate.before(event.getEventTimestamp())
-                            ? startDate : event.getEventTimestamp();
+                    startDate = startDate.before(event.getEventTimestamp()) ? startDate : event.getEventTimestamp();
                 }
             }
         }
         return startDate;
+    }
+
+    private boolean isStopEvent(CloudbreakEvent event) {
+        List<Status> stopStatuses = Arrays.asList(Status.DELETE_IN_PROGRESS, Status.DELETE_FAILED, Status.DELETE_COMPLETED);
+        return stopStatuses.contains(Status.valueOf(event.getEventType()));
     }
 
     private boolean isStartEvent(CloudbreakEvent event) {
