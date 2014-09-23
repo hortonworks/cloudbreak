@@ -10,6 +10,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -32,6 +33,7 @@ import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
 
 import groovyx.net.http.HttpResponseException;
@@ -73,7 +75,11 @@ public class AmbariClusterService implements ClusterService {
         }
         cluster.setOwner(user.getUsername());
         cluster.setAccount(user.getAccount());
-        cluster = clusterRepository.save(cluster);
+        try {
+            cluster = clusterRepository.save(cluster);
+        } catch (DataIntegrityViolationException ex) {
+            throw new DuplicateKeyValueException(cluster.getName(), ex);
+        }
         stack = stackUpdater.updateStackCluster(stack.getId(), cluster);
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.CLUSTER_REQUESTED_EVENT, stack.getId());
         reactor.notify(ReactorConfig.CLUSTER_REQUESTED_EVENT, Event.wrap(stack));
