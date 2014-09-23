@@ -134,7 +134,7 @@ public class DefaultCloudbreakUsageGeneratorService implements CloudbreakUsageGe
 
             // get start day running hours
             String startDayStr = DATE_FORMAT.format(startTime);
-            long endOfTheDay = DATE_FORMAT.parse(startDayStr).getTime() + TimeUnit.HOURS.toMillis(24) - 1;
+            long endOfTheDay = DATE_FORMAT.parse(startDayStr).getTime() + TimeUnit.HOURS.toMillis(HOURS_IN_DAY) - 1;
             runningHours = TimeUnit.MILLISECONDS.toHours(endOfTheDay - startTime.getTime());
             CloudbreakUsage startDayUsage = getCloudbreakUsage(prototype, runningHours, startTime);
             dailyStackUsageMap.put(DATE_FORMAT.format(startTime), startDayUsage);
