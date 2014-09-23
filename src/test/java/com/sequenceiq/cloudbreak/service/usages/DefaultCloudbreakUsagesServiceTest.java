@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.usages;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
@@ -65,12 +66,24 @@ public class DefaultCloudbreakUsagesServiceTest {
     @Test
     public void testShouldGenerateUsageFromStackAvailableAndStackStopEvents() throws Exception {
         //GIVEN
-        CloudbreakEvent availableEvent = ServiceTestUtils.createEvent(1L, 1L, "AVAILABLE", new Date());
-        CloudbreakEvent notAvailableEvent = ServiceTestUtils.createEvent(1L, 1L, "WHATEVER", new Date());
+
+        Calendar cal = Calendar.getInstance();
+        cal.setLenient(true);
+        cal.setTime(new Date());
+        // yesterday
+        cal.roll(Calendar.DAY_OF_MONTH, false);
+        Date startDate = cal.getTime();
+
+        // tomorrow
+        cal.roll(Calendar.DAY_OF_MONTH, 2);
+        Date stopDate = cal.getTime();
+
+        CloudbreakEvent availableEvent = ServiceTestUtils.createEvent(1L, 1L, "AVAILABLE", startDate);
+        CloudbreakEvent notAvailableEvent = ServiceTestUtils.createEvent(1L, 1L, "DELETE_IN_PROGRESS", stopDate);
         BDDMockito.given(eventRepository.cloudbreakEvents(1L)).willReturn(Arrays.asList(availableEvent, notAvailableEvent));
 
         //WHEN
-        usagesGeneratorService.generateUserUsage(1L);
+        usagesGeneratorService.generateCloudbreakUsages(1L);
 
 
         //THEN
