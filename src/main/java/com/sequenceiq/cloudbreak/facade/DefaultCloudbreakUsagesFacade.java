@@ -2,14 +2,12 @@ package com.sequenceiq.cloudbreak.facade;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.controller.json.CloudbreakUsageJson;
 import com.sequenceiq.cloudbreak.converter.CloudbreakUsageConverter;
-import com.sequenceiq.cloudbreak.domain.Account;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.service.account.AccountService;
@@ -31,7 +29,6 @@ public class DefaultCloudbreakUsagesFacade implements CloudbreakUsagesFacade {
     @Autowired
     private AccountService accountService;
 
-
     @Override
     public List<CloudbreakUsageJson> getUsagesForUser(User user, Long since, Long filterUserId, Long accountId,
             String cloud, String zone, String vmtype, String hours) {
@@ -42,25 +39,14 @@ public class DefaultCloudbreakUsagesFacade implements CloudbreakUsagesFacade {
     @Override
     public List<CloudbreakUsageJson> getUsagesForAccount(Long accountId, Long since, Long filterUserId, String cloud, String zone,
             String vmtype, String hours) {
-        List<CloudbreakUsage> usages = new ArrayList<>();
-        Set<User> accountUsers = accountService.accountUsers(accountId);
-        for (User accountUser : accountUsers) {
-            usages.addAll(cloudbreakUsagesService.findUsagesForUser(accountUser.getId(), since, cloud, zone, vmtype, hours));
-        }
+        List<CloudbreakUsage> usages = cloudbreakUsagesService.findUsagesForAccount(accountId, since, filterUserId, cloud, zone, vmtype, hours);
         return new ArrayList<CloudbreakUsageJson>(cloudbreakUsageConverter.convertAllEntityToJson(usages));
     }
 
     @Override
     public List<CloudbreakUsageJson> getUsagesForDeployer(User user, Long since, Long filterUserId, Long filterAccountId,
             String cloud, String zone, String vmtype, String hours) {
-        List<CloudbreakUsage> usages = new ArrayList<>();
-
-        List<Account> accounts = accountService.getAccounts();
-        for (Account account : accounts) {
-
-        }
-
-
+        List<CloudbreakUsage> usages = cloudbreakUsagesService.findUsagesForDeployer(filterAccountId, since, filterUserId, cloud, zone, vmtype, hours);
         return new ArrayList<CloudbreakUsageJson>(cloudbreakUsageConverter.convertAllEntityToJson(usages));
     }
 
