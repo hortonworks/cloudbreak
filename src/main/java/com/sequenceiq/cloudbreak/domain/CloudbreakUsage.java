@@ -126,4 +126,23 @@ public class CloudbreakUsage implements ProvisionEntity {
     public void setDay(Date day) {
         this.day = day;
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("CloudbreakUsage{");
+        sb.append("id=").append(id);
+        sb.append(", userName='").append(userName).append('\'');
+        sb.append(", userId=").append(userId);
+        sb.append(", accountName='").append(accountName).append('\'');
+        sb.append(", accountId=").append(accountId);
+        sb.append(", blueprintName='").append(blueprintName).append('\'');
+        sb.append(", blueprintId=").append(blueprintId);
+        sb.append(", day=").append(day);
+        sb.append(", cloud='").append(cloud).append('\'');
+        sb.append(", zone='").append(zone).append('\'');
+        sb.append(", machineType='").append(machineType).append('\'');
+        sb.append(", runningHours='").append(runningHours).append('\'');
+        sb.append('}');
+        return sb.toString();
+    }
 }

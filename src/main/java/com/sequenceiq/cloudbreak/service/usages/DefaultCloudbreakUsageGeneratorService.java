@@ -77,7 +77,7 @@ public class DefaultCloudbreakUsageGeneratorService implements CloudbreakUsageGe
     private Map<Long, List<CloudbreakEvent>> splitCloudbreakEventsByStack(List<CloudbreakEvent> userStackEvents) {
         Map<Long, List<CloudbreakEvent>> stackIdToCbEventMap = new HashMap<>();
         for (CloudbreakEvent cbEvent : userStackEvents) {
-            LOGGER.debug("Processing stack {} for user {}", cbEvent.getId(), cbEvent.getUserId());
+            LOGGER.debug("Processing stack {} for user {}", cbEvent.getStackId(), cbEvent.getUserId());
             if (!stackIdToCbEventMap.containsKey(cbEvent.getStackId())) {
                 LOGGER.debug("New stack {} for user {}", cbEvent.getStackId(), cbEvent.getUserId());
                 stackIdToCbEventMap.put(cbEvent.getStackId(), new ArrayList<CloudbreakEvent>());
@@ -127,7 +127,7 @@ public class DefaultCloudbreakUsageGeneratorService implements CloudbreakUsageGe
             runningHours = runningHoursForStartOrStopDay(stopTime, false);
             CloudbreakUsage stopDayUsage = getCloudbreakUsage(prototype, runningHours, stopTime);
             dailyStackUsageMap.put(DATE_FORMAT.format(stopTime), stopDayUsage);
-            LOGGER.debug("Generated start day usage: {}", stopDayUsage);
+            LOGGER.debug("Generated stop day usage: {}", stopDayUsage);
 
             generateAllDayStackUsages(startTime, stopTime, prototype, dailyStackUsageMap);
         }
@@ -157,7 +157,7 @@ public class DefaultCloudbreakUsageGeneratorService implements CloudbreakUsageGe
             // end of the day
             dayStartOrEndInMillis += TimeUnit.HOURS.toMillis(HOURS_IN_DAY) - 1;
         }
-        return Math.abs(date.getTime() - dayStartOrEndInMillis);
+        return TimeUnit.MILLISECONDS.toHours(Math.abs(date.getTime() - dayStartOrEndInMillis));
     }
 
     private CloudbreakUsage getCloudbreakUsage(CloudbreakEvent prototype, long runningHours, Date day) {

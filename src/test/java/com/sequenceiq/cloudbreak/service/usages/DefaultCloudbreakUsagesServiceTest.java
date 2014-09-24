@@ -59,7 +59,6 @@ public class DefaultCloudbreakUsagesServiceTest {
     @Test
     public void testShouldGenerateUsageFromStackAvailableAndStackStopEvents() throws Exception {
         //GIVEN
-
         referenceCalendar.roll(Calendar.DAY_OF_MONTH, false);
         Date startDate = referenceCalendar.getTime();
 
