@@ -7,13 +7,12 @@ import com.sequenceiq.cloudbreak.domain.User;
 
 public interface CloudbreakUsagesFacade {
 
-    List<CloudbreakUsageJson> loadUsages(User user, Long since, Long filterUserId, Long accountId,
+    List<CloudbreakUsageJson> getUsagesForUser(User user, Long since, Long filterUserId, Long accountId,
             String cloud, String zone, String vmtype, String hours);
 
-    List<CloudbreakUsageJson> loadAccountUsages(User user, Long since, Long filterUserId, Long accountId,
-            String cloud, String zone, String vmtype, String hours);
+    List<CloudbreakUsageJson> getUsagesForAccount(Long accountId, Long since, Long filterUserId, String cloud, String zone, String vmtype, String hours);
 
-    List<CloudbreakUsageJson> loadUserUsages(User user, Long since, Long filterUserId, Long accountId,
+    List<CloudbreakUsageJson> getUsagesForDeployer(User user, Long since, Long filterUserId, Long accountId,
             String cloud, String zone, String vmtype, String hours);
 
     void generateUserUsages(User user);

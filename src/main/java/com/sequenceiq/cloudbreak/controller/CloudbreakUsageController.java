@@ -35,7 +35,7 @@ public class CloudbreakUsageController {
             @RequestParam(value = "zone", required = false) String zone,
             @RequestParam(value = "vmtype", required = false) String vmtype,
             @RequestParam(value = "hours", required = false) String hours) {
-        List<CloudbreakUsageJson> usages = cloudbreakUsagesFacade.loadUsages(user, since, userId, accountId, cloud, zone, vmtype, hours);
+        List<CloudbreakUsageJson> usages = cloudbreakUsagesFacade.getUsagesForUser(user, since, userId, accountId, cloud, zone, vmtype, hours);
         return new ResponseEntity<>(usages, HttpStatus.OK);
     }
 
@@ -49,7 +49,7 @@ public class CloudbreakUsageController {
             @RequestParam(value = "zone", required = false) String zone,
             @RequestParam(value = "vmtype", required = false) String vmtype,
             @RequestParam(value = "hours", required = false) String hours) {
-        List<CloudbreakUsageJson> usages = cloudbreakUsagesFacade.loadAccountUsages(user, since, userId, accountId, cloud, zone, vmtype, hours);
+        List<CloudbreakUsageJson> usages = cloudbreakUsagesFacade.getUsagesForAccount(user.getAccount().getId(), since, userId, cloud, zone, vmtype, hours);
         return new ResponseEntity<>(usages, HttpStatus.OK);
     }
 
@@ -63,7 +63,7 @@ public class CloudbreakUsageController {
             @RequestParam(value = "zone", required = false) String zone,
             @RequestParam(value = "vmtype", required = false) String vmtype,
             @RequestParam(value = "hours", required = false) String hours) {
-        //List<CloudbreakUsageJson> usages = cloudbreakUsagesFacade.loadUserUsages(user, since, userId, accountId, cloud, zone, vmtype, hours);
+        List<CloudbreakUsageJson> usages = cloudbreakUsagesFacade.getUsagesForDeployer(user, since, userId, accountId, cloud, zone, vmtype, hours);
         cloudbreakUsagesFacade.generateUserUsages(user);
         return new ResponseEntity<>(HttpStatus.OK);
     }

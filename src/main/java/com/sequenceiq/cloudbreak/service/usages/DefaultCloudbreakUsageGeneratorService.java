@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.repository.CloudbreakUsageRepository;
 @Service
 public class DefaultCloudbreakUsageGeneratorService implements CloudbreakUsageGeneratorService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCloudbreakUsagesService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCloudbreakUsagesRetrievalService.class);
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
     private static final int HOURS_IN_DAY = 24;
 
