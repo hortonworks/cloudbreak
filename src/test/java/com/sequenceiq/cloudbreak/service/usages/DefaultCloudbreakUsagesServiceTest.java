@@ -77,13 +77,11 @@ public class DefaultCloudbreakUsagesServiceTest {
         Assert.assertEquals("The start day is wrong", DATE_FORMAT.format(startDate), DATE_FORMAT.format(usageList.get(0).getDay()));
         Assert.assertEquals("The stop day is wrong", DATE_FORMAT.format(stopDate), DATE_FORMAT.format(usageList.get(2).getDay()));
         Assert.assertEquals("The span day is wrong", DATE_FORMAT.format(new Date()), DATE_FORMAT.format(usageList.get(1).getDay()));
-
     }
 
     @Test
     public void shouldGenerateASingleOneHourUsageWhenStackStartedAndStoppedInOneHour() {
         // GIVEN
-
         referenceCalendar.roll(Calendar.HOUR_OF_DAY, 1);
         Date startDate = referenceCalendar.getTime();
 
@@ -117,7 +115,6 @@ public class DefaultCloudbreakUsagesServiceTest {
         referenceCalendar.roll(Calendar.HOUR_OF_DAY, 1);
         Date stopDate2 = referenceCalendar.getTime();
 
-
         CloudbreakEvent availableEvent = ServiceTestUtils.createEvent(1L, 1L, "AVAILABLE", startDate);
         CloudbreakEvent notAvailableEvent = ServiceTestUtils.createEvent(1L, 1L, "DELETE_IN_PROGRESS", stopDate);
 
@@ -134,7 +131,6 @@ public class DefaultCloudbreakUsagesServiceTest {
         Assert.assertTrue("The number of the generated usages is not the expected", usageList.size() == 2);
         Assert.assertEquals("The start day is wrong", "1", usageList.get(0).getRunningHours());
         Assert.assertEquals("The start day is wrong", "1", usageList.get(1).getRunningHours());
-
     }
 
     @Test
@@ -149,10 +145,8 @@ public class DefaultCloudbreakUsagesServiceTest {
         referenceCalendar.roll(Calendar.HOUR_OF_DAY, 1);
         Date availableDate = referenceCalendar.getTime();
 
-
         referenceCalendar.roll(Calendar.HOUR_OF_DAY, 1);
         Date stopDate = referenceCalendar.getTime();
-
 
         CloudbreakEvent availableEvent = ServiceTestUtils.createEvent(1L, 1L, "AVAILABLE", startDate);
         CloudbreakEvent updateEvent = ServiceTestUtils.createEvent(1L, 1L, "UPDATE_IN_PROGRESS", updateDate);
@@ -168,6 +162,5 @@ public class DefaultCloudbreakUsagesServiceTest {
         // THEN
         Assert.assertTrue("The number of the generated usages is not the expected", usageList.size() == 1);
         Assert.assertEquals("The start day is wrong", "3", usageList.get(0).getRunningHours());
-
     }
 }
