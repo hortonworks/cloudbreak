@@ -53,7 +53,8 @@ public class DefaultCloudbreakUsagesRetrievalService implements CloudbreakUsages
     }
 
     @Override
-    public List<CloudbreakUsage> findUsagesForDeployer(Long filterAccountId, Long filterUserid, Long since, String cloud, String zone, String vmtype, String hours) {
+    public List<CloudbreakUsage> findUsagesForDeployer(Long filterAccountId, Long filterUserid, Long since, String cloud, String zone,
+            String vmtype, String hours) {
         List<CloudbreakUsage> usages = new ArrayList<>();
         Iterator<Account> accountIt = accountRepository.findAll().iterator();
 
