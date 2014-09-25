@@ -1,2 +1,2 @@
-sequenceiq-reg
+uaa-registration
 ==============
