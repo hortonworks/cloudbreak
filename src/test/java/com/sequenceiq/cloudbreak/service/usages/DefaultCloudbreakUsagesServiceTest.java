@@ -76,7 +76,7 @@ public class DefaultCloudbreakUsagesServiceTest {
         Assert.assertTrue("The number of the generated usages is not the expected", usageList.size() == 3);
         Assert.assertEquals("The start day is wrong", DATE_FORMAT.format(startDate), DATE_FORMAT.format(usageList.get(0).getDay()));
         Assert.assertEquals("The stop day is wrong", DATE_FORMAT.format(stopDate), DATE_FORMAT.format(usageList.get(2).getDay()));
-        Assert.assertEquals("The span day is wrong", DATE_FORMAT.format(new Date()), DATE_FORMAT.format(usageList.get(1).getDay()));
+        Assert.assertEquals("The span day is wrong", "2014-09-24", DATE_FORMAT.format(usageList.get(1).getDay()));
     }
 
     @Test
