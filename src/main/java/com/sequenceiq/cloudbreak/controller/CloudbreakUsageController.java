@@ -35,7 +35,8 @@ public class CloudbreakUsageController {
             @RequestParam(value = "zone", required = false) String zone,
             @RequestParam(value = "vmtype", required = false) String vmtype,
             @RequestParam(value = "hours", required = false) String hours) {
-        List<CloudbreakUsageJson> usages = cloudbreakUsagesFacade.getUsagesForUser(user, since, userId, accountId, cloud, zone, vmtype, hours);
+        List<CloudbreakUsageJson> usages = cloudbreakUsagesFacade.getUsagesForDeployer(user, since, userId, accountId, cloud, zone, vmtype, hours);
+
         return new ResponseEntity<>(usages, HttpStatus.OK);
     }
 
@@ -63,7 +64,14 @@ public class CloudbreakUsageController {
             @RequestParam(value = "zone", required = false) String zone,
             @RequestParam(value = "vmtype", required = false) String vmtype,
             @RequestParam(value = "hours", required = false) String hours) {
-        List<CloudbreakUsageJson> usages = cloudbreakUsagesFacade.getUsagesForDeployer(user, since, userId, accountId, cloud, zone, vmtype, hours);
+        List<CloudbreakUsageJson> usages = cloudbreakUsagesFacade.getUsagesForUser(user, since, userId, accountId, cloud, zone, vmtype, hours);
+
+        return new ResponseEntity<>(usages, HttpStatus.OK);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/usages/generate")
+    @ResponseBody
+    public ResponseEntity<List<CloudbreakUsageJson>> generateUsages(@CurrentUser User user) {
         cloudbreakUsagesFacade.generateUserUsages(user);
         return new ResponseEntity<>(HttpStatus.OK);
     }
