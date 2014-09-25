@@ -410,6 +410,7 @@
                                             <a id="awsTemplateChange" type="button" class="btn btn-info" role="button" ng-click="createAwsTemplateRequest()">Aws</a>
                                             <a id="azureTemplateChange" class="btn btn-default" role="button" ng-click="createAzureTemplateRequest()">Azure</a>
                                             <a id="gccTemplateChange" class="btn btn-default" role="button" ng-click="createGccTemplateRequest()">GoogleCloud</a>
+                                            <a id="gccHvxTemplateChange" class="btn btn-default" role="button" ng-click="createGccHvxTemplateRequest()">GoogleCloud Hvx</a>
                                         </div>
                                     </div>
                                 </div>
@@ -424,6 +425,10 @@
 
                                 <form class="form-horizontal" role="form" ng-show="gccTemplate" name="gccTemplateForm">
                                     <div ng-include src="'tags/template/gccform.tag'"></div>
+                                </form>
+
+                                <form class="form-horizontal" role="form" ng-show="gccHvxTemplate" name="gccHvxTemplateForm">
+                                    <div ng-include src="'tags/template/gccformhvx.tag'"></div>
                                 </form>
                             </div>
                         </div>

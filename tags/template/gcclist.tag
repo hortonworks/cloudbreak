@@ -61,6 +61,13 @@
         </div>
         <!-- .col-sm-9 -->
     </div>
+    <div class="form-group" ng-if="template.parameters.moreContainerOnOneHost">
+        <label class="col-sm-3 control-label" for="gcccontainercount">Count of Container per instance</label>
 
+        <div class="col-sm-9">
+            <p id="gcccontainercount" class="form-control-static">{{template.parameters.containerCount}}</p>
+        </div>
+        <!-- .col-sm-9 -->
+    </div>
 
 </form>
