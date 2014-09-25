@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>SequenceIQ Registration Page</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="SequenceIQ">
+    <link rel="shortcut icon" href="img/favicon.ico">
+      <script src="js/lib/jquery-1.11.0.min.js" type="text/javascript"></script>
+    <link href='http://fonts.googleapis.com/css?family=Roboto+Condensed:300,400,700&amp;subset=latin-ext'
+          rel='stylesheet' type='text/css'>
+
+    <link href="css/style.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.css" rel="stylesheet">
+		<!--[if lt IE 9]>
+			<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+			<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+		<![endif]-->
+    <script src="js/lib/angular.js"></script>
+    <script src="js/lib/angular-route.js"></script>
+    <script src="js/lib/angular-resource.js"></script>
+</head>
+<body id="page-home">
+
+<div class="fill-bg">
+    <img src="img/bg-reg-page.jpg" alt="">
+</div>
+
+<header>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-6">
+                <img src="img/reg.png" alt="logo">
+            </div>
+        </div>
+        <!-- .row -->
+    </div>
+    <!-- .container -->
+</header>
+<div>
+    <section>
+        <div class="container carousel slide">
+            <div class="row">
+                <div class="col-sm-8 col-sm-offset-2">
+
+                    <div class="panel panel-dark-transparent center-block">
+                        <div class="panel-heading">
+                            <h1 class="panel-title">Registration form</h1>
+                        </div>
+                        <div class="panel-body">
+
+                            <div class="carousel-inner">
+                                <div class="item active">
+                                    <form role="form" autocomplete="on" enctype="application/json">
+                                        <div class="form-group">
+                                            <label class="sr-only" for="email">email</label>
+
+                                            <div class="input-group">
+                                                <span class="input-group-addon"><i
+                                                        class="fa fa-envelope-o fa-fw"></i></span>
+                                                <input class="form-control" type="email" id="email" name="email"
+                                                       placeholder="email" required>
+                                            </div>
+                                            <!-- .input-group -->
+                                        </div>
+                                        <!-- .form-group -->
+                                        <div class="form-group">
+                                            <label class="sr-only" for="password">password</label>
+
+                                            <div class="input-group">
+                                                <span class="input-group-addon"><i class="fa fa-lock fa-fw"></i></span>
+                                                <input class="form-control" type="password" id="password"
+                                                       name="password" placeholder="password" required>
+                                            </div>
+                                            <!-- .input-group -->
+                                        </div>
+                                        <!-- .form-group -->
+                                        <div class="form-group">
+                                            <label class="sr-only" for="confirmPassword">repeat password</label>
+
+                                            <div class="input-group">
+                                                <span class="input-group-addon"><i class="fa fa-lock fa-fw"></i></span>
+                                                <input class="form-control" type="password" id="confirmPassword"
+                                                       name="confirmPassword" placeholder="repeat password" required>
+                                            </div>
+                                            <!-- .input-group -->
+                                        </div>
+                                        <!-- .form-group -->
+                                        <div class="form-group">
+                                            <label class="sr-only" for="firstName">first name</label>
+
+                                            <div class="input-group">
+                                                <span class="input-group-addon"><i class="fa fa-male fa-fw"></i></span>
+                                                <input class="form-control" type="text" id="firstName"
+                                                       name="firstName" placeholder="name" required>
+                                            </div>
+                                            <!-- .input-group -->
+                                        </div>
+                                        <!-- .form-group -->
+                                        <div class="form-group">
+                                            <label class="sr-only" for="lastName">last name</label>
+
+                                            <div class="input-group">
+                                                <span class="input-group-addon"><i class="fa fa-male fa-fw"></i></span>
+                                                <input class="form-control" type="text" id="lastName"
+                                                       name="lastName" placeholder="name" required>
+                                            </div>
+                                            <!-- .input-group -->
+                                        </div>
+                                        <!-- .form-group -->
+                                        <div class="form-group">
+                                            <label class="sr-only" for="company">company</label>
+
+                                            <div class="input-group">
+                                                <span class="input-group-addon"><i class="fa fa-institution fa-fw"></i></span>
+                                                <input class="form-control" type="text" id="company"
+                                                       name="company" placeholder="company" required>
+                                            </div>
+                                            <!-- .input-group -->
+                                        </div>
+                                        <!-- .form-group -->
+
+                                        <a href="#" id="signup-btn" class="btn btn-info btn-block" role="button"><i
+                                                class="fa fa-user fa-fw"></i>
+                                            sign up</a>
+
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+</body>
+</html>
