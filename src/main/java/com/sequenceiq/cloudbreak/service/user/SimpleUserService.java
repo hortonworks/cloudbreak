@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.MimeMessagePreparator;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
@@ -294,7 +293,7 @@ public class SimpleUserService implements UserService {
         return uiEnabled ? uiAddress : hostAddress;
     }
 
-    @Scheduled(cron = "${cb.clean.invites.cron:0 * * * * *}")
+    //@Scheduled(cron = "${cb.clean.invites.cron:0 * * * * *}")
     @Override
     public void expireInvites() {
         LOGGER.info("Expire invites older than {}", inviteExpiryInDays);

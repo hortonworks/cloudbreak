@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import java.util.Date;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -19,7 +21,7 @@ public class CloudbreakUsage implements ProvisionEntity {
     private String blueprintName;
     private Long blueprintId;
 
-    private String day;
+    private Date day;
 
     private String cloud;
 
@@ -85,14 +87,6 @@ public class CloudbreakUsage implements ProvisionEntity {
         this.blueprintId = blueprintId;
     }
 
-    public String getDay() {
-        return day;
-    }
-
-    public void setDay(String day) {
-        this.day = day;
-    }
-
     public String getCloud() {
         return cloud;
     }
@@ -123,5 +117,32 @@ public class CloudbreakUsage implements ProvisionEntity {
 
     public void setRunningHours(String runningHours) {
         this.runningHours = runningHours;
+    }
+
+    public Date getDay() {
+        return day;
+    }
+
+    public void setDay(Date day) {
+        this.day = day;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("CloudbreakUsage{");
+        sb.append("id=").append(id);
+        sb.append(", userName='").append(userName).append('\'');
+        sb.append(", userId=").append(userId);
+        sb.append(", accountName='").append(accountName).append('\'');
+        sb.append(", accountId=").append(accountId);
+        sb.append(", blueprintName='").append(blueprintName).append('\'');
+        sb.append(", blueprintId=").append(blueprintId);
+        sb.append(", day=").append(day);
+        sb.append(", cloud='").append(cloud).append('\'');
+        sb.append(", zone='").append(zone).append('\'');
+        sb.append(", machineType='").append(machineType).append('\'');
+        sb.append(", runningHours='").append(runningHours).append('\'');
+        sb.append('}');
+        return sb.toString();
     }
 }
