@@ -4,8 +4,8 @@ echo "Testing events ..."
 : ${API_PORT:=8080}
 : ${API_HOST:=localhost}
 : ${JSONDIR:=json/invite}
-: ${ADMIN_EMAIL:=laszlo.puskas@sequenceiq.com}
-: ${ADMIN_PASS:=cloudbreak}
+: ${ADMIN_EMAIL:=test@company.com}
+: ${ADMIN_PASS:=pwd}
 
 # curl onfiguration for shorten the lines
 cat << EOF >curl_config_admin_user
