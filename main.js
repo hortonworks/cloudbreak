@@ -20,7 +20,15 @@ app.use(favicon(path.join(__dirname,'public','img','favicon.ico')));
 
 // index.html
 app.get('/', function(req, res) {
-  res.render('index')
+  res.render('index',
+  {
+   emailErrorMsg: 'invalid email address',
+   passwordErrorMsg: 'password is invalid (6 to 30 char)',
+   confirmPasswordErrorMsg: 'passwords do not match!',
+   firstNameErrorMsg: 'first name is empty',
+   lastNameErrorMsg: 'last name is empty',
+   companyErrorMsg: 'company name is empty'
+   })
 });
 
 // errors
