@@ -3,7 +3,10 @@ var app = express();
 var cons = require('consolidate');
 var path = require('path');
 var favicon = require('serve-favicon');
+var bodyParser = require('body-parser');
 var check = require('validator').check;
+
+var mailer = require('./mailer');
 
 var uaaHost = process.env.UAA_HOST;
 var uaaPort = process.env.UAA_PORT;
@@ -17,6 +20,7 @@ app.set('views', './app')
 app.set('view engine', 'html')
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(favicon(path.join(__dirname,'public','img','favicon.ico')));
+app.use(bodyParser.json())
 
 // index.html
 app.get('/', function(req, res) {
@@ -29,6 +33,11 @@ app.get('/', function(req, res) {
    lastNameErrorMsg: 'last name is empty',
    companyErrorMsg: 'company name is empty'
    })
+});
+
+app.post('/registration', function(req, res){
+    mailer.sendMail(req.body.email, 'sample' , 'sample')
+    res.end('SUCCESS');
 });
 
 // errors
