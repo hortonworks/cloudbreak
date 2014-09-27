@@ -71,7 +71,8 @@ public class GccStackUtil {
     private static final int POLLING_INTERVAL = 5000;
     private static final int TTL = 3600;
     private static final int NOT_FOUND = 404;
-    private static final long PRIORITY = 900l;
+    private static final long PRIORITY = 900L;
+    private static final int LAST = 3;
 
     @Autowired
     private GccInstanceCheckerStatus gccInstanceReadyCheckerStatus;
@@ -263,6 +264,14 @@ public class GccStackUtil {
         gccRemoveReadyPollerObjectPollingService.pollWithTimeout(gccRemoveCheckerStatus, gccRemoveReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
     }
 
+    public void removeRoute(Compute compute, Stack stack, String name) throws IOException {
+        GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
+        GccCredential gccCredential = (GccCredential) stack.getCredential();
+        Operation execute = compute.routes().delete(gccCredential.getProjectId(), name).execute();
+        GccRemoveReadyPollerObject gccRemoveReady = new GccRemoveReadyPollerObject(compute, execute, stack, name);
+        gccRemoveReadyPollerObjectPollingService.pollWithTimeout(gccRemoveCheckerStatus, gccRemoveReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+    }
+
     public Storage buildStorage(GccCredential gccCredential, Stack stack) {
         try {
             HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
@@ -332,7 +341,8 @@ public class GccStackUtil {
         route.setPriority(PRIORITY);
         CoreInstanceMetaData metadata = getMetadata(stack, compute, machineResource.getResourceName());
         route.setNextHopIp(metadata.getPrivateIp());
-        route.setDestRange(String.format("172.18.%s.0/24", metadata.getPrivateIp().split("\\.")[3]));
+        route.setDestRange(String.format("172.18.%s.0/24", metadata.getPrivateIp().split("\\.")[
+                LAST]));
         Compute.Routes.Insert routeInsert = compute.routes().insert(projectId, route);
         routeInsert.execute();
         return route;

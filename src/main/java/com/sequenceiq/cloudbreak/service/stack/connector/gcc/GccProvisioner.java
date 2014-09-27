@@ -90,6 +90,7 @@ public class GccProvisioner implements Provisioner {
                             stack,
                             gccStackUtil.getVmIdByName(vm.getResourceName()),
                             vm);
+                    resourceSet.add(new Resource(ResourceType.ROUTE, String.format("route-%s", vm.getResourceName()), stack));
                 }
 
             }

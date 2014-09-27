@@ -86,6 +86,7 @@ public class GccConnector implements CloudPlatformConnector {
         deleteVirtualMachines(stack, compute);
         deleteDisks(stack, compute);
         deleteAttachedDisks(stack, compute);
+        deleteRoutes(stack, compute);
         deleteNetwork(stack, compute);
     }
 
@@ -95,8 +96,21 @@ public class GccConnector implements CloudPlatformConnector {
         deleteVirtualMachines(stack, compute);
         deleteDisks(stack, compute);
         deleteAttachedDisks(stack, compute);
+        deleteRoutes(stack, compute);
         deleteNetwork(stack, compute);
         reactor.notify(ReactorConfig.DELETE_COMPLETE_EVENT, Event.wrap(new StackDeleteComplete(stack.getId())));
+    }
+
+    private void deleteRoutes(Stack stack, Compute compute) {
+        for (Resource resource : stack.getResourcesByType(ResourceType.ROUTE)) {
+            try {
+                gccStackUtil.removeRoute(compute, stack, resource.getResourceName());
+            } catch (GoogleJsonResponseException ex) {
+                gccStackUtil.exceptionHandler(ex, resource.getResourceName());
+            } catch (IOException e) {
+                throw new InternalServerException(e.getMessage());
+            }
+        }
     }
 
     private void deleteNetwork(Stack stack, Compute compute) {

@@ -16,5 +16,6 @@ public enum ResourceType {
     DISK,
     ATTACHED_DISK,
     NETWORK_INTERFACE,
-    FIREWALL
+    FIREWALL,
+    ROUTE
 }

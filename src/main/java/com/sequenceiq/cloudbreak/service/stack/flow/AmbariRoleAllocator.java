@@ -27,6 +27,7 @@ public class AmbariRoleAllocator {
     private static final String DOCKER_SUBNET_PREFIX = "172.17.%s.0";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariRoleAllocator.class);
+    private static final int LAST = 3;
 
     @Autowired
     private StackRepository stackRepository;
@@ -113,7 +114,7 @@ public class AmbariRoleAllocator {
             instanceMetaDataEntry.setVolumeCount(coreInstanceMetaDataEntry.getVolumeCount());
             instanceMetaDataEntry.setLongName(coreInstanceMetaDataEntry.getLongName());
             instanceMetaDataEntry.setInstanceIndex(instanceIndex);
-            instanceMetaDataEntry.setDockerSubnet(String.format("172.18.%s.1", coreInstanceMetaDataEntry.getPrivateIp().split("\\.")[3]));
+            instanceMetaDataEntry.setDockerSubnet(String.format("172.18.%s.1", coreInstanceMetaDataEntry.getPrivateIp().split("\\.")[LAST]));
             instanceMetaDataEntry.setContainerCount(coreInstanceMetaDataEntry.getContainerCount());
             if (instanceIndex == 0) {
                 instanceMetaDataEntry.setAmbariServer(Boolean.TRUE);

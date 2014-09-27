@@ -37,7 +37,7 @@ public class GccProvisionSetup implements ProvisionSetup {
 
     private static final String BUCKET_NAME = "sequenceiqimage";
     private static final String MAIN_PROJECT = "siq-haas";
-    private static final String TAR_NAME = "c009a67b598a70ea84781428ab3e9c0a8dc8f8bd.image.tar.gz";
+    private static final String TAR_NAME = "debian.image.tar.gz";
     private static final int CONFLICT = 409;
 
     @Autowired
