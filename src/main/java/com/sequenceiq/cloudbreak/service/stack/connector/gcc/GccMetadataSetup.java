@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.gcc;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -12,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.api.services.compute.Compute;
-import com.google.api.services.compute.model.Instance;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
@@ -50,10 +48,6 @@ public class GccMetadataSetup implements MetadataSetup {
                 Event.wrap(new MetadataSetupComplete(CloudPlatform.GCC, stack.getId(), instanceMetaDatas)));
     }
 
-    private String longName(String resourceName, String projectId) {
-        return String.format("%s.c.%s.internal", resourceName, projectId);
-    }
-
     private Set<CoreInstanceMetaData> collectMetaData(Stack stack, GccTemplate template, List<Resource> resources) {
         Set<CoreInstanceMetaData> instanceMetaDatas = new HashSet<>();
         Compute compute = gccStackUtil.buildCompute((GccCredential) stack.getCredential(), stack.getName());
@@ -78,24 +72,7 @@ public class GccMetadataSetup implements MetadataSetup {
     }
 
     private CoreInstanceMetaData getMetadata(Stack stack, Compute compute, Resource resource) {
-        try {
-            GccCredential credential = (GccCredential) stack.getCredential();
-            GccTemplate template = (GccTemplate) stack.getTemplate();
-            Compute.Instances.Get instanceGet = compute.instances().get(
-                    credential.getProjectId(), template.getGccZone().getValue(), resource.getResourceName());
-            Instance executeInstance = instanceGet.execute();
-            CoreInstanceMetaData coreInstanceMetaData = new CoreInstanceMetaData(
-                    resource.getResourceName(),
-                    executeInstance.getNetworkInterfaces().get(0).getNetworkIP(),
-                    executeInstance.getNetworkInterfaces().get(0).getAccessConfigs().get(0).getNatIP(),
-                    template.getVolumeCount(),
-                    longName(resource.getResourceName(), credential.getProjectId())
-            );
-            return coreInstanceMetaData;
-        } catch (IOException e) {
-            LOGGER.error(String.format("Instance %s is not reachable: %s", resource.getResourceName(), e.getMessage()), e);
-        }
-        return null;
+        return gccStackUtil.getMetadata(stack, compute, resource.getResourceName());
     }
 
     @Override

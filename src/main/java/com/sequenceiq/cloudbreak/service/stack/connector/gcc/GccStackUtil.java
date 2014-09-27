@@ -42,6 +42,7 @@ import com.google.api.services.compute.model.Metadata;
 import com.google.api.services.compute.model.Network;
 import com.google.api.services.compute.model.NetworkInterface;
 import com.google.api.services.compute.model.Operation;
+import com.google.api.services.compute.model.Route;
 import com.google.api.services.dns.Dns;
 import com.google.api.services.dns.model.Change;
 import com.google.api.services.dns.model.ManagedZone;
@@ -54,8 +55,10 @@ import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.domain.GccTemplate;
+import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.PollingService;
+import com.sequenceiq.cloudbreak.service.stack.flow.CoreInstanceMetaData;
 
 @Component
 public class GccStackUtil {
@@ -68,6 +71,7 @@ public class GccStackUtil {
     private static final int POLLING_INTERVAL = 5000;
     private static final int TTL = 3600;
     private static final int NOT_FOUND = 404;
+    private static final long PRIORITY = 900l;
 
     @Autowired
     private GccInstanceCheckerStatus gccInstanceReadyCheckerStatus;
@@ -311,7 +315,7 @@ public class GccStackUtil {
     public List<NetworkInterface> buildNetworkInterfaces(Compute compute, String projectId, String name) throws IOException {
         Network network = new Network();
         network.setName(name);
-        network.setIPv4Range("10.0.0.0/16");
+        network.setIPv4Range("10.0.0.0/24");
         Compute.Networks.Insert networkInsert = compute.networks().insert(projectId, network);
         networkInsert.execute();
         buildFireWallOut(compute, projectId, name);
@@ -319,6 +323,19 @@ public class GccStackUtil {
         List<NetworkInterface> networkInterfaces = new ArrayList<>();
         networkInterfaces.add(buildNetworkInterface(projectId, name));
         return networkInterfaces;
+    }
+
+    public Route buildRoute(Compute compute, String projectId, String networkName, Stack stack, int node, Resource machineResource) throws IOException {
+        Route route = new Route();
+        route.setNetwork(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s", projectId, networkName));
+        route.setName(String.format("route-%s", machineResource.getResourceName()));
+        route.setPriority(PRIORITY);
+        CoreInstanceMetaData metadata = getMetadata(stack, compute, machineResource.getResourceName());
+        route.setNextHopIp(metadata.getPrivateIp());
+        route.setDestRange(String.format("172.18.%s.0/24", metadata.getPrivateIp().split("\\.")[3]));
+        Compute.Routes.Insert routeInsert = compute.routes().insert(projectId, route);
+        routeInsert.execute();
+        return route;
     }
 
     public NetworkInterface buildNetworkInterface(String projectId, String name) {
@@ -444,8 +461,38 @@ public class GccStackUtil {
         }
     }
 
+    public CoreInstanceMetaData getMetadata(Stack stack, Compute compute, String resource) {
+        try {
+            GccCredential credential = (GccCredential) stack.getCredential();
+            GccTemplate template = (GccTemplate) stack.getTemplate();
+            Compute.Instances.Get instanceGet = compute.instances().get(
+                    credential.getProjectId(), template.getGccZone().getValue(), resource);
+            Instance executeInstance = instanceGet.execute();
+            CoreInstanceMetaData coreInstanceMetaData = new CoreInstanceMetaData(
+                    resource,
+                    executeInstance.getNetworkInterfaces().get(0).getNetworkIP(),
+                    executeInstance.getNetworkInterfaces().get(0).getAccessConfigs().get(0).getNatIP(),
+                    template.getVolumeCount(),
+                    longName(resource, credential.getProjectId()),
+                    template.getContainerCount()
+            );
+            return coreInstanceMetaData;
+        } catch (IOException e) {
+            LOGGER.error(String.format("Instance %s is not reachable: %s", resource, e.getMessage()), e);
+        }
+        return null;
+    }
+
+    private String longName(String resourceName, String projectId) {
+        return String.format("%s.c.%s.internal", resourceName, projectId);
+    }
+
     public String getVmName(String stackName, int i) {
         return String.format("%s-%s", stackName, i);
+    }
+
+    public Integer getVmIdByName(String name) {
+        return Integer.valueOf(name.split("-")[name.split("-").length - 1]);
     }
 
 }

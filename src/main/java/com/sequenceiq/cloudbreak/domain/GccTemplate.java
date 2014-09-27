@@ -26,6 +26,8 @@ public class GccTemplate extends Template implements ProvisionEntity {
     @ManyToOne
     @JoinColumn(name = "gccTemplate_gccTemplateOwner")
     private User gccTemplateOwner;
+    private Boolean moreContainerOnOneHost = Boolean.FALSE;
+    private Integer containerCount = 0;
 
     public GccTemplate() {
 
@@ -79,6 +81,22 @@ public class GccTemplate extends Template implements ProvisionEntity {
         this.gccTemplateOwner = gccTemplateOwner;
     }
 
+    public Boolean getMoreContainerOnOneHost() {
+        return moreContainerOnOneHost;
+    }
+
+    public void setMoreContainerOnOneHost(Boolean moreContainerOnOneHost) {
+        this.moreContainerOnOneHost = moreContainerOnOneHost;
+    }
+
+    public Integer getContainerCount() {
+        return containerCount;
+    }
+
+    public void setContainerCount(Integer containerCount) {
+        this.containerCount = containerCount;
+    }
+
     @Override
     public void setUser(User user) {
         this.gccTemplateOwner = user;
@@ -92,5 +110,10 @@ public class GccTemplate extends Template implements ProvisionEntity {
     @Override
     public User getOwner() {
         return gccTemplateOwner;
+    }
+
+    @Override
+    public Integer getMultiplier() {
+        return containerCount == 0 ? 1 : containerCount;
     }
 }

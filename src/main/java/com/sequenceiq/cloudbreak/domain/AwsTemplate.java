@@ -105,6 +105,11 @@ public class AwsTemplate extends Template implements ProvisionEntity {
         return awsTemplateOwner;
     }
 
+    @Override
+    public Integer getMultiplier() {
+        return 1;
+    }
+
     public VolumeType getVolumeType() {
         return volumeType;
     }

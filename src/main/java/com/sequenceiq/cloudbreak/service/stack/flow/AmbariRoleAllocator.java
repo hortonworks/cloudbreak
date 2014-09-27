@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.event.AmbariRoleAllocationComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.StackOperationFailure;
 import com.sequenceiq.cloudbreak.service.stack.event.StackUpdateSuccess;
@@ -23,7 +24,7 @@ import reactor.event.Event;
 @Service
 public class AmbariRoleAllocator {
 
-    private static final String DOCKER_SUBNET_PREFIX = "172.17.1";
+    private static final String DOCKER_SUBNET_PREFIX = "172.17.%s.0";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariRoleAllocator.class);
 
@@ -35,6 +36,9 @@ public class AmbariRoleAllocator {
 
     @Autowired
     private Reactor reactor;
+
+    @Autowired
+    private GccStackUtil gccStackUtil;
 
     public void allocateRoles(Long stackId, Set<CoreInstanceMetaData> coreInstanceMetaData) {
         try {
@@ -109,7 +113,8 @@ public class AmbariRoleAllocator {
             instanceMetaDataEntry.setVolumeCount(coreInstanceMetaDataEntry.getVolumeCount());
             instanceMetaDataEntry.setLongName(coreInstanceMetaDataEntry.getLongName());
             instanceMetaDataEntry.setInstanceIndex(instanceIndex);
-            instanceMetaDataEntry.setDockerSubnet(DOCKER_SUBNET_PREFIX + instanceIndex);
+            instanceMetaDataEntry.setDockerSubnet(String.format("172.18.%s.1", coreInstanceMetaDataEntry.getPrivateIp().split("\\.")[3]));
+            instanceMetaDataEntry.setContainerCount(coreInstanceMetaDataEntry.getContainerCount());
             if (instanceIndex == 0) {
                 instanceMetaDataEntry.setAmbariServer(Boolean.TRUE);
                 instanceMetaDataEntry.setRemovable(false);

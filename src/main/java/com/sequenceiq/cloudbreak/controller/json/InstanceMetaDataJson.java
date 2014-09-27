@@ -10,6 +10,7 @@ public class InstanceMetaDataJson implements JsonEntity {
     private Boolean ambariServer;
     private String dockerSubnet;
     private String longName;
+    private Integer containerCount;
 
     public InstanceMetaDataJson() {
 
@@ -77,5 +78,13 @@ public class InstanceMetaDataJson implements JsonEntity {
 
     public void setLongName(String longName) {
         this.longName = longName;
+    }
+
+    public Integer getContainerCount() {
+        return containerCount;
+    }
+
+    public void setContainerCount(Integer containerCount) {
+        this.containerCount = containerCount;
     }
 }

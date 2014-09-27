@@ -34,6 +34,7 @@ public class InstanceMetaData implements ProvisionEntity {
     private String dockerSubnet;
     private String longName;
     private Boolean removable;
+    private Integer containerCount = 0;
     @ManyToOne
     private Stack stack;
 
@@ -127,5 +128,17 @@ public class InstanceMetaData implements ProvisionEntity {
 
     public void setRemovable(Boolean removable) {
         this.removable = removable;
+    }
+
+    public Boolean getRemovable() {
+        return removable;
+    }
+
+    public Integer getContainerCount() {
+        return containerCount;
+    }
+
+    public void setContainerCount(Integer containerCount) {
+        this.containerCount = containerCount;
     }
 }

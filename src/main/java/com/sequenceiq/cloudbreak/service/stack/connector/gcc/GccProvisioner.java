@@ -60,6 +60,7 @@ public class GccProvisioner implements Provisioner {
         GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
         Set<Resource> resourceSet = new HashSet<>();
         GccCredential credential = (GccCredential) setupProperties.get(CREDENTIAL);
+        Set<Resource> vms = new HashSet<>();
         try {
             Compute compute = gccStackUtil.buildCompute(credential, stack.getName());
             List<NetworkInterface> networkInterfaces = gccStackUtil.buildNetworkInterfaces(compute, credential.getProjectId(), stack.getName());
@@ -78,12 +79,25 @@ public class GccProvisioner implements Provisioner {
                 }
                 Instance instance = gccStackUtil.buildInstance(compute, stack, networkInterfaces, attachedDisks, forName, userData);
                 resourceSet.add(new Resource(ResourceType.VIRTUAL_MACHINE, forName, stack));
+                vms.add(new Resource(ResourceType.VIRTUAL_MACHINE, forName, stack));
             }
-            LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_COMPLETE_EVENT, stack.getId());
-            reactor.notify(ReactorConfig.PROVISION_COMPLETE_EVENT, Event.wrap(new ProvisionComplete(CloudPlatform.GCC, stack.getId(), resourceSet)));
+            if (gccTemplate.getMoreContainerOnOneHost()) {
+                for (Resource vm : vms) {
+                    gccStackUtil.buildRoute(
+                            compute,
+                            credential.getProjectId(),
+                            stack.getName(),
+                            stack,
+                            gccStackUtil.getVmIdByName(vm.getResourceName()),
+                            vm);
+                }
+
+            }
         } catch (Exception e) {
             throw new BuildStackFailureException(e.getMessage(), e, resourceSet);
         }
+        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_COMPLETE_EVENT, stack.getId());
+        reactor.notify(ReactorConfig.PROVISION_COMPLETE_EVENT, Event.wrap(new ProvisionComplete(CloudPlatform.GCC, stack.getId(), resourceSet)));
     }
 
     @Override

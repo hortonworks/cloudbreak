@@ -10,7 +10,7 @@ public enum GccImageType {
     //OPENSUSE("https://www.googleapis.com/compute/v1/projects/opensuse-cloud/global/images/opensuse-13-1-v20140711"),
     //RHEL("https://www.googleapis.com/compute/v1/projects/rhel-cloud/global/images/rhel-6-v20140619"),
     //SLES("https://www.googleapis.com/compute/v1/projects/suse-cloud/global/images/sles-11-sp3-v20140712"),
-    DEBIAN_HACK("https://www.googleapis.com/compute/v1/projects/%s/global/images/withoutpamdebian", "withoutpamdebian");
+    DEBIAN_HACK("https://www.googleapis.com/compute/v1/projects/%s/global/images/debian-docker-ambari", "debian-docker-ambari");
 
     private final String value;
     private final String imageName;

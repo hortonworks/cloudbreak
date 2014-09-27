@@ -29,6 +29,8 @@ public class GccTemplateConverter extends AbstractConverter<TemplateJson, GccTem
         putProperty(props, GccTemplateParam.IMAGETYPE.getName(), entity.getGccImageType());
         putProperty(props, GccTemplateParam.INSTANCETYPE.getName(), entity.getGccInstanceType());
         putProperty(props, GccTemplateParam.ZONE.getName(), entity.getGccZone());
+        putProperty(props, GccTemplateParam.CONTAINERCOUNT.getName(), entity.getContainerCount());
+        putProperty(props, GccTemplateParam.MORECONTAINERONONEHOST.getName(), entity.getMoreContainerOnOneHost());
         gccTemplateJson.setParameters(props);
         gccTemplateJson.setDescription(entity.getDescription() == null ? "" : entity.getDescription());
         return gccTemplateJson;
@@ -44,6 +46,14 @@ public class GccTemplateConverter extends AbstractConverter<TemplateJson, GccTem
         gccTemplate.setGccImageType(GccImageType.valueOf(json.getParameters().get(GccTemplateParam.IMAGETYPE.getName()).toString()));
         gccTemplate.setGccInstanceType(GccInstanceType.valueOf(json.getParameters().get(GccTemplateParam.INSTANCETYPE.getName()).toString()));
         gccTemplate.setGccZone(GccZone.valueOf(json.getParameters().get(GccTemplateParam.ZONE.getName()).toString()));
+        Object containerCount = json.getParameters().get(GccTemplateParam.CONTAINERCOUNT.getName());
+        if (containerCount != null) {
+            gccTemplate.setContainerCount(Integer.valueOf(containerCount.toString()));
+        }
+        Object moreContainerOnHost = json.getParameters().get(GccTemplateParam.MORECONTAINERONONEHOST.getName());
+        if (moreContainerOnHost != null) {
+            gccTemplate.setMoreContainerOnOneHost(Boolean.valueOf(moreContainerOnHost.toString()));
+        }
         gccTemplate.setDescription(json.getDescription());
         return gccTemplate;
     }

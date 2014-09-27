@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
-import groovyx.net.http.HttpResponseException;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -18,9 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import reactor.core.Reactor;
-import reactor.event.Event;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.ambari.client.AmbariClient;
@@ -51,6 +46,10 @@ import com.sequenceiq.cloudbreak.service.cluster.event.ClusterCreationSuccess;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsFailure;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsSuccess;
 import com.sequenceiq.cloudbreak.service.stack.connector.HadoopConfigurationProvider;
+
+import groovyx.net.http.HttpResponseException;
+import reactor.core.Reactor;
+import reactor.event.Event;
 
 @Service
 public class AmbariClusterConnector {
@@ -238,7 +237,7 @@ public class AmbariClusterConnector {
         LOGGER.info("Waiting for hosts to connect. [Stack: {}, Ambari server address: {}]", stack.getId(), stack.getAmbariIp());
         hostsPollingService.pollWithTimeout(
                 new AmbariHostsStatusCheckerTask(),
-                new AmbariHosts(stack.getId(), ambariClient, stack.getNodeCount()),
+                new AmbariHosts(stack.getId(), ambariClient, stack.getNodeCount() * stack.getMultiplier()),
                 POLLING_INTERVAL,
                 MAX_ATTEMPTS_FOR_HOSTS);
     }
