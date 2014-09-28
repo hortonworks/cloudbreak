@@ -81,14 +81,6 @@ public class GccTemplate extends Template implements ProvisionEntity {
         this.gccTemplateOwner = gccTemplateOwner;
     }
 
-    public Boolean getMoreContainerOnOneHost() {
-        return moreContainerOnOneHost;
-    }
-
-    public void setMoreContainerOnOneHost(Boolean moreContainerOnOneHost) {
-        this.moreContainerOnOneHost = moreContainerOnOneHost;
-    }
-
     public Integer getContainerCount() {
         return containerCount;
     }

@@ -81,15 +81,9 @@ public class GccProvisioner implements Provisioner {
                 resourceSet.add(new Resource(ResourceType.VIRTUAL_MACHINE, forName, stack));
                 vms.add(new Resource(ResourceType.VIRTUAL_MACHINE, forName, stack));
             }
-            if (gccTemplate.getMoreContainerOnOneHost()) {
+            if (gccTemplate.getContainerCount() > 0) {
                 for (Resource vm : vms) {
-                    gccStackUtil.buildRoute(
-                            compute,
-                            credential.getProjectId(),
-                            stack.getName(),
-                            stack,
-                            gccStackUtil.getVmIdByName(vm.getResourceName()),
-                            vm);
+                    gccStackUtil.buildRoute(compute, credential.getProjectId(), stack.getName(), stack, gccStackUtil.getVmIdByName(vm.getResourceName()), vm);
                     resourceSet.add(new Resource(ResourceType.ROUTE, String.format("route-%s", vm.getResourceName()), stack));
                 }
 
