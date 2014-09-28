@@ -11,7 +11,6 @@ var mailer = require('./mailer');
 var uaaHost = process.env.UAA_HOST;
 var uaaPort = process.env.UAA_PORT;
 
-
 console.log("UAA server location: %s:%d", uaaHost, uaaPort)
 
 app.engine('html', cons.underscore);
@@ -36,7 +35,8 @@ app.get('/', function(req, res) {
 });
 
 app.post('/registration', function(req, res){
-    mailer.sendMail(req.body.email, 'sample' , 'sample')
+    var templateFile = path.join(__dirname,'templates','confirmation-email.jade')
+    mailer.sendMail(req.body.email, 'Registration' , templateFile, {user: req.body.firstName, confirm: 'link'})
     res.end('SUCCESS');
 });
 
