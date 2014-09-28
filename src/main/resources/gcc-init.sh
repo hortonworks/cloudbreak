@@ -66,6 +66,14 @@ fi
 service docker restart
 sleep 8
 
+
+if [ "$CONTAINER_COUNT" -gt 0 ]
+then
+    SEGMENT=`echo $DOCKER_SUBNET | cut -d \. -f 3`
+    iptables -t nat -F POSTROUTING
+    iptables -t nat -A POSTROUTING -s 172.18.$SEGMENT.0/24 ! -d 172.18.0.0/16 -j MASQUERADE
+fi
+
  # determines if this instance is the Ambari server or not and sets the tags accordingly
 AMBARI_SERVER=$(echo $METADATA_RESULT | jq "$INSTANCE_SELECTOR" | jq '.[].ambariServer' | sed s/\"//g)
 [ "$AMBARI_SERVER" == true ] && AMBARI_ROLE="--tag ambari-server=true" || AMBARI_ROLE=""
