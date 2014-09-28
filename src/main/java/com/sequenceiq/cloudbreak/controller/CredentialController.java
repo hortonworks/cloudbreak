@@ -25,9 +25,11 @@ import com.sequenceiq.cloudbreak.controller.json.CredentialJson;
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
 import com.sequenceiq.cloudbreak.converter.AwsCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.AzureCredentialConverter;
+import com.sequenceiq.cloudbreak.converter.GccCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.UserRepository;
 import com.sequenceiq.cloudbreak.security.CurrentUser;
@@ -52,6 +54,9 @@ public class CredentialController {
 
     @Autowired
     private AzureCredentialConverter azureCredentialConverter;
+
+    @Autowired
+    private GccCredentialConverter gccCredentialConverter;
 
 
     @RequestMapping(method = RequestMethod.POST)
@@ -126,6 +131,9 @@ public class CredentialController {
             case AZURE:
                 ret = azureCredentialConverter.convert(json);
                 break;
+            case GCC:
+                ret = gccCredentialConverter.convert(json);
+                break;
             default:
                 throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", json.getCloudPlatform()));
         }
@@ -141,6 +149,9 @@ public class CredentialController {
                 break;
             case AZURE:
                 ret = azureCredentialConverter.convert((AzureCredential) credential);
+                break;
+            case GCC:
+                ret = gccCredentialConverter.convert((GccCredential) credential);
                 break;
             default:
                 throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", credential.getCloudPlatform()));

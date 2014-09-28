@@ -2,7 +2,8 @@ package com.sequenceiq.cloudbreak.domain;
 
 public enum CloudPlatform {
     AWS("ec2"),
-    AZURE("azure");
+    AZURE("azure"),
+    GCC("gcc");
 
     private final String initScriptPrefix;
 

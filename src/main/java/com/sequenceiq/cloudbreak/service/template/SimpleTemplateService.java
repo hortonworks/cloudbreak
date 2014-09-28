@@ -52,6 +52,7 @@ public class SimpleTemplateService implements TemplateService {
 
         userTemplates.addAll(user.getAwsTemplates());
         userTemplates.addAll(user.getAzureTemplates());
+        userTemplates.addAll(user.getGccTemplates());
         LOGGER.debug("User credentials: #{}", userTemplates.size());
 
         if (user.getUserRoles().contains(UserRole.ACCOUNT_ADMIN)) {

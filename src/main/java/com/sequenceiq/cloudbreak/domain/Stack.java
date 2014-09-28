@@ -278,6 +278,10 @@ public class Stack implements ProvisionEntity {
         return null;
     }
 
+    public Integer getMultiplier() {
+        return template.getMultiplier();
+    }
+
     public List<UserRole> getUserRoles() {
         return userRoles;
     }

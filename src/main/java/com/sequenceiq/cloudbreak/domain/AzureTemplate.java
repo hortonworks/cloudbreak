@@ -88,6 +88,11 @@ public class AzureTemplate extends Template implements ProvisionEntity {
         return azureTemplateOwner;
     }
 
+    @Override
+    public Integer getMultiplier() {
+        return 1;
+    }
+
     public String nameAsFolder() {
         return name.replaceAll("@", "_").replace(".", "_").replace(" ", "_");
     }
