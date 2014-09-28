@@ -284,6 +284,10 @@
                                     <div class="panel-body" ng-if="activeStack.template.cloudPlatform == 'AWS' ">
                                         <div ng-include src="'tags/stack/activeawstemplate.tag'"></div>
                                     </div>
+
+                                    <div class="panel-body" ng-if="activeStack.template.cloudPlatform == 'GCC' ">
+                                        <div ng-include src="'tags/stack/activegcctemplate.tag'"></div>
+                                    </div>
                                 </div>
                             </div>
                             <!-- .panel -->
@@ -405,6 +409,8 @@
                                         <div class="btn-group btn-group-justified">
                                             <a id="awsTemplateChange" type="button" class="btn btn-info" role="button" ng-click="createAwsTemplateRequest()">Aws</a>
                                             <a id="azureTemplateChange" class="btn btn-default" role="button" ng-click="createAzureTemplateRequest()">Azure</a>
+                                            <a id="gccTemplateChange" class="btn btn-default" role="button" ng-click="createGccTemplateRequest()">GoogleCloud</a>
+                                            <a id="gccHvxTemplateChange" class="btn btn-default" role="button" ng-click="createGccHvxTemplateRequest()">GoogleCloud Hvx</a>
                                         </div>
                                     </div>
                                 </div>
@@ -415,6 +421,14 @@
 
                                 <form class="form-horizontal" role="form" ng-show="awsTemplate" name="awsTemplateForm">
                                     <div ng-include src="'tags/template/awsform.tag'"></div>
+                                </form>
+
+                                <form class="form-horizontal" role="form" ng-show="gccTemplate" name="gccTemplateForm">
+                                    <div ng-include src="'tags/template/gccform.tag'"></div>
+                                </form>
+
+                                <form class="form-horizontal" role="form" ng-show="gccHvxTemplate" name="gccHvxTemplateForm">
+                                    <div ng-include src="'tags/template/gccformhvx.tag'"></div>
                                 </form>
                             </div>
                         </div>
@@ -448,6 +462,10 @@
 
                                 <div class="panel-body" ng-if="template.cloudPlatform == 'AWS' ">
                                     <div ng-include src="'tags/template/awslist.tag'"></div>
+                                </div>
+
+                                <div class="panel-body" ng-if="template.cloudPlatform == 'GCC' ">
+                                    <div ng-include src="'tags/template/gcclist.tag'"></div>
                                 </div>
                             </div>
                         </div>
@@ -580,11 +598,13 @@
                                         <div class="btn-group btn-group-justified">
                                             <a id="awsChange" type="button" class="btn btn-info" ng-click="createAwsCredentialRequest()">Aws</a>
                                             <a id="azureChange" type="button" class="btn btn-default" ng-click="createAzureCredentialRequest()">Azure</a>
+                                            <a id="gccChange" type="button" class="btn btn-default" ng-click="createGccCredentialRequest()">GoogleCloud</a>
                                         </div>
                                     </div>
                                 </div>
                                 <div ng-include src="'tags/credential/azureform.tag'"></div>
                                 <div ng-include src="'tags/credential/awsform.tag'"></div>
+                                <div ng-include src="'tags/credential/gccform.tag'"></div>
                             </div>
                         </div>
                     </div>
@@ -617,6 +637,10 @@
 
                                 <div class="panel-body" ng-if="credential.cloudPlatform == 'AWS' ">
                                     <div ng-include src="'tags/credential/awslist.tag'"></div>
+                                </div>
+
+                                <div class="panel-body" ng-if="credential.cloudPlatform == 'GCC' ">
+                                    <div ng-include src="'tags/credential/gcclist.tag'"></div>
                                 </div>
                             </div>
                         </div>
