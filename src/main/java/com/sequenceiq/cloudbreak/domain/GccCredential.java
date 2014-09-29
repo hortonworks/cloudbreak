@@ -5,8 +5,6 @@ import javax.persistence.Entity;
 
 @Entity
 public class GccCredential  extends Credential implements ProvisionEntity {
-    @Column(nullable = false)
-    private String name;
     private String serviceAccountId;
     @Column(columnDefinition = "TEXT")
     private String serviceAccountPrivateKey;
@@ -30,14 +28,6 @@ public class GccCredential  extends Credential implements ProvisionEntity {
 
     public void setServiceAccountPrivateKey(String serviceAccountPrivateKey) {
         this.serviceAccountPrivateKey = serviceAccountPrivateKey;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getProjectId() {
