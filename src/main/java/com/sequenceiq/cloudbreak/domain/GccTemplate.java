@@ -4,8 +4,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccImageType;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccInstanceType;
@@ -23,9 +21,6 @@ public class GccTemplate extends Template implements ProvisionEntity {
     private GccImageType gccImageType;
     @Enumerated(EnumType.STRING)
     private GccInstanceType gccInstanceType;
-    @ManyToOne
-    @JoinColumn(name = "gccTemplate_gccTemplateOwner")
-    private User gccTemplateOwner;
     private Boolean moreContainerOnOneHost = Boolean.FALSE;
     private Integer containerCount = 0;
 
@@ -73,14 +68,6 @@ public class GccTemplate extends Template implements ProvisionEntity {
         this.gccInstanceType = gccInstanceType;
     }
 
-    public User getGccTemplateOwner() {
-        return gccTemplateOwner;
-    }
-
-    public void setGccTemplateOwner(User gccTemplateOwner) {
-        this.gccTemplateOwner = gccTemplateOwner;
-    }
-
     public Integer getContainerCount() {
         return containerCount;
     }
@@ -90,18 +77,8 @@ public class GccTemplate extends Template implements ProvisionEntity {
     }
 
     @Override
-    public void setUser(User user) {
-        this.gccTemplateOwner = user;
-    }
-
-    @Override
     public CloudPlatform cloudPlatform() {
         return CloudPlatform.GCC;
-    }
-
-    @Override
-    public User getOwner() {
-        return gccTemplateOwner;
     }
 
     @Override

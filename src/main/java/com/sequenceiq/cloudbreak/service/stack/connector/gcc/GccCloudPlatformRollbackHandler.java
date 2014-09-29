@@ -20,7 +20,7 @@ public class GccCloudPlatformRollbackHandler implements CloudPlatformRollbackHan
 
     @Override
     public void rollback(Stack stack, Set<Resource> resourceSet) {
-        gccConnector.rollback(stack.getUser(), stack, stack.getCredential(), resourceSet);
+        gccConnector.rollback(stack, stack.getCredential(), resourceSet);
     }
 
     @Override
