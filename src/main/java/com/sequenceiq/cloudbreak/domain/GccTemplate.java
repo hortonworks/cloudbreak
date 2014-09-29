@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.domain;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -12,9 +11,6 @@ import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccZone;
 @Entity
 public class GccTemplate extends Template implements ProvisionEntity {
 
-    @Column(nullable = false)
-    private String name;
-    private String description;
     @Enumerated(EnumType.STRING)
     private GccZone gccZone;
     @Enumerated(EnumType.STRING)
@@ -26,22 +22,6 @@ public class GccTemplate extends Template implements ProvisionEntity {
 
     public GccTemplate() {
 
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     public GccZone getGccZone() {
