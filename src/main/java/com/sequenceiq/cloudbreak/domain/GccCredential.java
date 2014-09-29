@@ -2,14 +2,9 @@ package com.sequenceiq.cloudbreak.domain;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 
 @Entity
 public class GccCredential  extends Credential implements ProvisionEntity {
-    @ManyToOne
-    @JoinColumn(name = "gccCredential_gccCredentialOwner")
-    private User gccCredentialOwner;
     @Column(nullable = false)
     private String name;
     private String serviceAccountId;
@@ -37,14 +32,6 @@ public class GccCredential  extends Credential implements ProvisionEntity {
         this.serviceAccountPrivateKey = serviceAccountPrivateKey;
     }
 
-    public User getGccCredentialOwner() {
-        return gccCredentialOwner;
-    }
-
-    public void setGccCredentialOwner(User gccCredentialOwner) {
-        this.gccCredentialOwner = gccCredentialOwner;
-    }
-
     public String getName() {
         return name;
     }
@@ -66,13 +53,4 @@ public class GccCredential  extends Credential implements ProvisionEntity {
         return CloudPlatform.GCC;
     }
 
-    @Override
-    public User getOwner() {
-        return gccCredentialOwner;
-    }
-
-    @Override
-    public String getCredentialName() {
-        return name;
-    }
 }

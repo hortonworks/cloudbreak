@@ -32,7 +32,7 @@ public class GccCredentialInitializer {
             gccStackUtil.listDisks(compute, gccCredential);
         } catch (Exception e) {
             String errorMessage = String.format("Could not validate credential [credential: '%s'], detailed message: %s",
-                    gccCredential.getCredentialName(), e.getMessage());
+                    gccCredential.getName(), e.getMessage());
             LOGGER.error(errorMessage, e);
             throw new BadRequestException(errorMessage, e);
         }

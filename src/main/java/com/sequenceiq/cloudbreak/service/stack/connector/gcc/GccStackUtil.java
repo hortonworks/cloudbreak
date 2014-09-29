@@ -313,7 +313,7 @@ public class GccStackUtil {
                 .build();
 
         return new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver())
-                .authorize(gccCredential.getGccCredentialOwner().getEmail());
+                .authorize(gccCredential.getOwner());
     }
 
     public String buildMachineType(String projectId, GccZone gccZone, GccInstanceType instanceType) {
