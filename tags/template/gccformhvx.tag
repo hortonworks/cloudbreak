@@ -94,7 +94,7 @@
 </div>
 
 <div class="form-group">
-    <label class="col-sm-3 control-label" for="gcchvx_containerCount">Count of container per Instance</label>
+    <label class="col-sm-3 control-label" for="gcchvx_containerCount">Number of containers per instance</label>
 
     <div class="col-sm-9">
         <input type="number" name="gcchvx_containerCount" class="form-control" ng-model="gcchvx_containerCount" id="gcchvx_containerCount" min="1"
