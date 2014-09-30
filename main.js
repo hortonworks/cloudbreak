@@ -38,6 +38,81 @@ app.get('/', function(req, res) {
    })
 });
 
+// reset.html
+app.get('/reset/:resetToken', function(req, res) {
+  res.render('reset')
+});
+
+app.post('/reset/:resetToken', function(req, res) {
+    var resetToken = req.param('resetToken')
+    var options = {
+      headers: { 'Authorization': 'Basic ' + new Buffer(clientId + ':'+ clientSecret).toString('base64') }
+    }
+    needle.post('http://' + uaaHost + ':' + uaaPort + '/oauth/token', 'grant_type=client_credentials',
+       options, function(err, tokenResp) {
+       if (tokenResp.statusCode == 200){
+          var token = tokenResp.body.access_token;
+          var userOptions = {
+              headers: {
+                'Accept' : 'application/json',
+                'scope': 'password.write',
+                'aud' : 'password',
+                'Authorization' : 'Bearer ' + token,
+                'Content-Type' : 'application/json' }
+          }
+          var newPasswordData = {'password' : req.body.password}
+          needle.put('http://' + uaaHost + ':' + uaaPort + '/Users/' + resetToken + '/password', JSON.stringify(newPasswordData),
+            userOptions, function(err, resetResp) {
+                if (resetResp.statusCode == 200){
+                    res.end('SUCCESS');
+                } else {
+                    res.end('Password update failed.')
+                }
+            })
+       } else {
+          res.end('No token for client');
+       }
+   });
+});
+
+// forget for login
+app.post('/forget', function(req, res){
+    var userName = req.body.email
+    var options = {
+        headers: { 'Authorization': 'Basic ' + new Buffer(clientId + ':'+ clientSecret).toString('base64') }
+    }
+    needle.post('http://' + uaaHost + ':' + uaaPort + '/oauth/token', 'grant_type=client_credentials',
+        options, function(err, tokenResp) {
+            if (tokenResp.statusCode == 200){
+                var token = tokenResp.body.access_token;
+                var usrOptions = {
+                headers: {
+                    'Accept' : 'application/json',
+                    'scope': 'scim.read',
+                    'aud' : 'scim',
+                    'Authorization' : 'Bearer ' + token,
+                    'Content-Type' : 'application/json' }
+                }
+                needle.get('http://' + uaaHost + ':' + uaaPort + '/Users/?attributes=id,givenName&filter=userName eq "' + userName + '"', usrOptions , function(err, usrResp){
+                    if (usrResp.statusCode == 200){
+                        console.log(usrResp.body)
+                        if (usrResp.body.resources.length == 1){
+                            var templateFile = path.join(__dirname,'templates','reset-password-email.jade')
+                            mailer.sendMail(req.body.email, 'Password reset' , templateFile, {user: usrResp.body.resources[0].givenName,
+                                confirm: 'http://' +  process.env.UR_HOST + ':' + process.env.UR_PORT + '/reset/' + usrResp.body.resources[0].id })
+                            res.end('SUCCESS');
+                        } else {
+                            res.end('User Not Found');
+                        }
+                    } else {
+                       res.end('Could not access for database');
+                    }
+                });
+            } else { res.end('No token for client'); }
+        }
+    );
+});
+
 app.post('/register', function(req, res){
     var result = 'FAILED'
     var options = {

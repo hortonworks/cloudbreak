@@ -3,7 +3,7 @@ var $jq = jQuery.noConflict();
 
 var regApp = angular.module('regApp', ['ngRoute']);
 
-regApp.controller("regController", ['$scope', '$http', '$location',
+regApp.controller("regController", ['$scope', '$http',
     function ($scope, $http) {
         $scope.signUp = function() {
             $http({method: 'POST',dataType: 'json',url:  "/registration",
@@ -11,6 +11,25 @@ regApp.controller("regController", ['$scope', '$http', '$location',
                           company: company.value}
                   }).success(function(responseData){
                     $jq('.carousel').carousel(1);
+                  }).error(function (data, status, headers, config){
+                     console.log("error :"+ status)
+                  });
+        }
+    }
+]);
+
+regApp.controller("resetController", ['$scope', '$http',
+    function ($scope, $http, $location) {
+        $scope.resetPassword = function() {
+                    var resetToken =  window.location.pathname.split('/')[2]
+                    $http({method: 'POST',dataType: 'json', url:  "/reset/" + resetToken,
+                           data: {password: resetPasswField.value}
+                          }).success(function(responseData){
+                            if (responseData == 'SUCCESS'){
+                              console.log("password update succeed") // TODO
+                            } else {
+                              console.log("password update failed") // TODO
+                            }
                   }).error(function (data, status, headers, config){
                      console.log("error :"+ status)
                   });
