@@ -632,8 +632,9 @@ Though Cloudbreak controls your Hadoop cluster lifecycle (start, stop, pause), w
 To deploy a running Coudbreak instance the only thing you will need to do is to get the code first.
 
 ```
-git clone https://github.com/sequenceiq/docker-cloudbreak/tree/0.1.21
+git clone https://github.com/sequenceiq/docker-cloudbreak.git
 cd docker-cloudbreak
+git checkout -b 0.1.21
 ```
 
 Lauch the script below and follow the instructions.
