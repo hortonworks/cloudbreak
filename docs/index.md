@@ -632,7 +632,7 @@ Though Cloudbreak controls your Hadoop cluster lifecycle (start, stop, pause), w
 To deploy a running Coudbreak instance the only thing you will need to do is to get the code first.
 
 ```
-git clone https://github.com/sequenceiq/cloudbreak.git
+git clone https://github.com/sequenceiq/docker-cloudbreak/tree/0.1.21
 cd docker-cloudbreak
 ```
 
@@ -658,7 +658,7 @@ All the Hadoop ecosystem related code, configuration and services are inside Doc
 
 We needed to find a unified way to provision, manage and configure Hadoop clusters - welcome **Apache Ambari**.
 
-###Public Beta - 0.1
+###Public Beta - 0.1.21
 The first public beta version of Cloudbreak supports Hadoop on Amazon's EC2 and Microsoft's Azure cloud providers. The currently supported Hadoop is the Hortonworks Data Platform - the 100% open source Hadoop distribution.
 
 Versions:
