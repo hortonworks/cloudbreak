@@ -24,6 +24,7 @@
     <suppress checks="IllegalCatch" files="GccInstanceCheckerStatus.java"/>
     <suppress checks="IllegalCatch" files="GccRemoveCheckerStatus.java"/>
     <suppress checks="IllegalCatch" files="GccStackUtil.java"/>
+    <suppress checks="IllegalCatch" files="GccProvisionSetup.java"/>
 
     <!-- -->
 
