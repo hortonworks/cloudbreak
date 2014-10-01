@@ -69,7 +69,6 @@ public class AwsTemplateConverterTest {
         templateJson.setVolumeSize(60);
         props.put(AwsTemplateParam.VOLUME_TYPE.getName(), "Gp2");
         templateJson.setParameters(props);
-        templateJson.setPublicInAccount(true);
         return templateJson;
     }
 

@@ -41,7 +41,6 @@ public class BlueprintConverter extends AbstractConverter<BlueprintJson, Bluepri
         blueprintJson.setName(entity.getName());
         blueprintJson.setDescription(entity.getDescription() == null ? "" : entity.getDescription());
         blueprintJson.setHostGroupCount(entity.getHostGroupCount());
-        blueprintJson.setPublicInAccount(entity.isPublicInAccount());
         try {
             blueprintJson.setAmbariBlueprint(jsonHelper.createJsonFromString(entity.getBlueprintText()));
         } catch (Exception e) {
@@ -82,7 +81,6 @@ public class BlueprintConverter extends AbstractConverter<BlueprintJson, Bluepri
                 hostGroupCount++;
             }
             blueprint.setHostGroupCount(hostGroupCount);
-            blueprint.setPublicInAccount(json.isPublicInAccount());
         } catch (IOException e) {
             throw new BadRequestException("Invalid Blueprint: Failed to parse JSON.", e);
         }

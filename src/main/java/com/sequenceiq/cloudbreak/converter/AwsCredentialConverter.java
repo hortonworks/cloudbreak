@@ -33,7 +33,6 @@ public class AwsCredentialConverter extends AbstractConverter<CredentialJson, Aw
         credentialJson.setParameters(params);
         credentialJson.setDescription(entity.getDescription() == null ? "" : entity.getDescription());
         credentialJson.setPublicKey(entity.getPublicKey());
-        credentialJson.setPublicInAccount(entity.isPublicInAccount());
         return credentialJson;
     }
 
@@ -45,7 +44,6 @@ public class AwsCredentialConverter extends AbstractConverter<CredentialJson, Aw
         awsCredential.setCloudPlatform(CloudPlatform.AWS);
         awsCredential.setDescription(json.getDescription());
         awsCredential.setPublicKey(json.getPublicKey());
-        awsCredential.setPublicInAccount(json.isPublicInAccount());
         awsCredential = awsCredentialInitializer.init(awsCredential);
         return awsCredential;
     }

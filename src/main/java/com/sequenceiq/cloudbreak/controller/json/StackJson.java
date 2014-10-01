@@ -6,7 +6,6 @@ import java.util.Set;
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
@@ -36,8 +35,6 @@ public class StackJson implements JsonEntity {
     private String hash;
     private ClusterResponse cluster;
     private Set<InstanceMetaDataJson> metadata = new HashSet<>();
-    @NotNull
-    private Boolean publicInAccount;
 
     public StackJson() {
     }
@@ -154,11 +151,4 @@ public class StackJson implements JsonEntity {
         this.cluster = cluster;
     }
 
-    public Boolean isPublicInAccount() {
-        return publicInAccount;
-    }
-
-    public void setPublicInAccount(Boolean publicInAccount) {
-        this.publicInAccount = publicInAccount;
-    }
 }

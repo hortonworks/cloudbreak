@@ -149,7 +149,6 @@ public class AzureTemplateConverterTest {
         props.put(AzureTemplateParam.IMAGENAME.getName(), DUMMY_IMAGE_NAME);
         props.put(AzureTemplateParam.VMTYPE.getName(), DUMMY_VM_TYPE);
         templateJson.setParameters(props);
-        templateJson.setPublicInAccount(true);
         return templateJson;
     }
 

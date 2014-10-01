@@ -44,10 +44,14 @@ public class StackController {
 
     @RequestMapping(value = "user/stacks", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<IdJson> createStack(@ModelAttribute("user") CbUser user, @RequestBody @Valid StackJson stackRequest) {
-        Stack stack = stackConverter.convert(stackRequest);
-        stack = stackService.create(user, stack);
-        return new ResponseEntity<>(new IdJson(stack.getId()), HttpStatus.CREATED);
+    public ResponseEntity<IdJson> createPrivateStack(@ModelAttribute("user") CbUser user, @RequestBody @Valid StackJson stackRequest) {
+        return createStack(user, stackRequest, false);
+    }
+
+    @RequestMapping(value = "account/stacks", method = RequestMethod.POST)
+    @ResponseBody
+    public ResponseEntity<IdJson> createAccountStack(@ModelAttribute("user") CbUser user, @RequestBody @Valid StackJson stackRequest) {
+        return createStack(user, stackRequest, true);
     }
 
     @RequestMapping(value = "user/stacks", method = RequestMethod.GET)
@@ -107,6 +111,13 @@ public class StackController {
         } catch (MetadataIncompleteException e) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
+    }
+
+    private ResponseEntity<IdJson> createStack(CbUser user, StackJson stackRequest, Boolean publicInAccount) {
+        Stack stack = stackConverter.convert(stackRequest);
+        stack.setPublicInAccount(publicInAccount);
+        stack = stackService.create(user, stack);
+        return new ResponseEntity<>(new IdJson(stack.getId()), HttpStatus.CREATED);
     }
 
 }

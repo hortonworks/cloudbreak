@@ -59,10 +59,14 @@ public class CredentialController {
 
     @RequestMapping(value = "user/credentials", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<IdJson> saveCredential(@ModelAttribute("user") CbUser user, @Valid @RequestBody CredentialJson credentialRequest) throws Exception {
-        Credential credential = convert(credentialRequest);
-        credential = credentialService.create(user, credential);
-        return new ResponseEntity<>(new IdJson(credential.getId()), HttpStatus.CREATED);
+    public ResponseEntity<IdJson> savePrivateCredential(@ModelAttribute("user") CbUser user, @Valid @RequestBody CredentialJson credentialRequest) {
+        return createCredential(user, credentialRequest, false);
+    }
+
+    @RequestMapping(value = "account/credentials", method = RequestMethod.POST)
+    @ResponseBody
+    public ResponseEntity<IdJson> saveAccountCredential(@ModelAttribute("user") CbUser user, @Valid @RequestBody CredentialJson credentialRequest)  {
+        return createCredential(user, credentialRequest, true);
     }
 
     @RequestMapping(value = "user/credentials", method = RequestMethod.GET)
@@ -111,6 +115,13 @@ public class CredentialController {
         response.setHeader("Content-Disposition", "attachment;filename=public_key.pem");
         FileCopyUtils.copy(Files.readAllBytes(cerFile.toPath()), response.getOutputStream());
         return null;
+    }
+
+    private ResponseEntity<IdJson> createCredential(CbUser user, CredentialJson credentialRequest, Boolean publicInAccount) {
+        Credential credential = convert(credentialRequest);
+        credential.setPublicInAccount(publicInAccount);
+        credential = credentialService.create(user, credential);
+        return new ResponseEntity<>(new IdJson(credential.getId()), HttpStatus.CREATED);
     }
 
     private Credential convert(CredentialJson json) {

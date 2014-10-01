@@ -168,7 +168,6 @@ public class BlueprintConverterTest {
         blueprintJson.setAmbariBlueprint(jsonNode);
         blueprintJson.setUrl(DUMMY_URL);
         blueprintJson.setDescription(DUMMY_DESCRIPTION);
-        blueprintJson.setPublicInAccount(true);
         return blueprintJson;
     }
 

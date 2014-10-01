@@ -80,7 +80,6 @@ public class AzureCredentialConverterTest {
         credentialJson.setId(1L);
         credentialJson.setName(DUMMY_NAME);
         credentialJson.setDescription(DUMMY_DESCRIPTION);
-        credentialJson.setPublicInAccount(true);
         return credentialJson;
     }
 
