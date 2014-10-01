@@ -28,8 +28,6 @@ public class TemplateJson implements JsonEntity {
     @Min(value = 0, message = "Volume size must be greater than or equal to 0")
     @Max(value = 1024, message = "Volume size must be lesser than or equal to 1024")
     private Integer volumeSize;
-    @NotNull
-    private Boolean publicInAccount;
 
     @JsonProperty("id")
     public Long getId() {
@@ -87,14 +85,6 @@ public class TemplateJson implements JsonEntity {
 
     public void setVolumeCount(Integer volumeCount) {
         this.volumeCount = volumeCount;
-    }
-
-    public Boolean isPublicInAccount() {
-        return publicInAccount;
-    }
-
-    public void setPublicInAccount(Boolean publicInAccount) {
-        this.publicInAccount = publicInAccount;
     }
 
 }

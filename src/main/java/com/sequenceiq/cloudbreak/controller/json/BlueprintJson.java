@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.hibernate.validator.constraints.NotBlank;
@@ -21,8 +20,6 @@ public class BlueprintJson implements JsonEntity {
     @Size(max = 50)
     private String description;
     private Integer hostGroupCount;
-    @NotNull
-    private Boolean publicInAccount;
 
     @JsonRawValue
     public String getAmbariBlueprint() {
@@ -87,11 +84,4 @@ public class BlueprintJson implements JsonEntity {
         this.hostGroupCount = hostGroupCount;
     }
 
-    public Boolean isPublicInAccount() {
-        return publicInAccount;
-    }
-
-    public void setPublicInAccount(Boolean publicInAccount) {
-        this.publicInAccount = publicInAccount;
-    }
 }
