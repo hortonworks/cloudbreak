@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.stack.connector.gcc;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.CREDENTIAL;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -53,12 +54,12 @@ public class GccProvisionSetup implements ProvisionSetup {
             Compute compute = gccStackUtil.buildCompute((GccCredential) stack.getCredential(), stack.getName());
             GccTemplate template = (GccTemplate) stack.getTemplate();
             GccCredential credential = (GccCredential) stack.getCredential();
-
             ImageList list = compute.images().list(credential.getProjectId()).execute();
+            Long time = new Date().getTime();
             if (!containsSpecificImage(list)) {
                 try {
                     Bucket bucket = new Bucket();
-                    bucket.setName(BUCKET_NAME);
+                    bucket.setName(credential.getProjectId() + time);
                     bucket.setStorageClass("STANDARD");
                     Storage.Buckets.Insert ins = storage.buckets().insert(credential.getProjectId(), bucket);
                     ins.execute();
@@ -67,13 +68,14 @@ public class GccProvisionSetup implements ProvisionSetup {
                         throw  ex;
                     }
                 }
-                Storage.Objects.Copy copy = storage.objects().copy(MAIN_PROJECT, TAR_NAME, BUCKET_NAME, TAR_NAME, new StorageObject());
+                Storage.Objects.Copy copy = storage.objects().copy(BUCKET_NAME, TAR_NAME, credential.getProjectId() + time, TAR_NAME,
+                        new StorageObject());
                 copy.execute();
 
                 Image image = new Image();
                 image.setName(GccImageType.DEBIAN_HACK.getImageName());
                 Image.RawDisk rawDisk = new Image.RawDisk();
-                rawDisk.setSource(String.format("http://storage.googleapis.com/%s/%s", BUCKET_NAME, TAR_NAME));
+                rawDisk.setSource(String.format("http://storage.googleapis.com/%s/%s", credential.getProjectId() + time, TAR_NAME));
                 image.setRawDisk(rawDisk);
                 Compute.Images.Insert ins1 = compute.images().insert(credential.getProjectId(), image);
                 ins1.execute();
@@ -92,10 +94,14 @@ public class GccProvisionSetup implements ProvisionSetup {
     }
 
     private boolean containsSpecificImage(ImageList imageList) {
-        for (Image image : imageList.getItems()) {
-            if (image.getName().equals(GccImageType.DEBIAN_HACK.getImageName())) {
-                return true;
+        try {
+            for (Image image : imageList.getItems()) {
+                if (image.getName().equals(GccImageType.DEBIAN_HACK.getImageName())) {
+                    return true;
+                }
             }
+        } catch (NullPointerException ex) {
+            return false;
         }
         return false;
     }
