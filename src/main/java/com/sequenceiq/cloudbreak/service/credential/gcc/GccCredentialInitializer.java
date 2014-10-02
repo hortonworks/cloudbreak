@@ -29,6 +29,9 @@ public class GccCredentialInitializer {
     private void validateCredential(GccCredential gccCredential) {
         try {
             Compute compute = gccStackUtil.buildCompute(gccCredential, "myapp");
+            if (compute == null) {
+                throw new BadRequestException("Problem with your credential key please use the correct format.");
+            }
             gccStackUtil.listDisks(compute, gccCredential);
         } catch (Exception e) {
             String errorMessage = String.format("Could not validate credential [credential: '%s'], detailed message: %s",
