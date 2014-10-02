@@ -35,12 +35,12 @@ public class SecurityConfig {
     protected static class MethodSecurityConfig extends GlobalMethodSecurityConfiguration {
 
         @Autowired
-        private OAuth2PermissionEvaluator oAuth2PermissionEvaluator;
+        private OwnerBasedPermissionEvaluator ownerBasedPermissionEvaluator;
 
         @Override
         protected MethodSecurityExpressionHandler createExpressionHandler() {
             DefaultMethodSecurityExpressionHandler expressionHandler = new DefaultMethodSecurityExpressionHandler();
-            expressionHandler.setPermissionEvaluator(oAuth2PermissionEvaluator);
+            expressionHandler.setPermissionEvaluator(ownerBasedPermissionEvaluator);
             return expressionHandler;
         }
     }

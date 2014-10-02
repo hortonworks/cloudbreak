@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 
 public interface BlueprintRepository extends CrudRepository<Blueprint, Long> {
 
-    @PostAuthorize("returnObject?.owner == principal")
+    @PostAuthorize("hasPermission(returnObject,'read')")
     Blueprint findOne(@Param("id") Long id);
 
     Blueprint findByName(@Param("name") String name);

@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 
 public interface StackRepository extends CrudRepository<Stack, Long> {
 
-    @PostAuthorize("returnObject?.owner == principal")
+    @PostAuthorize("hasPermission(returnObject,'read')")
     Stack findOne(@Param("id") Long id);
 
     Stack findById(@Param("id") Long id);

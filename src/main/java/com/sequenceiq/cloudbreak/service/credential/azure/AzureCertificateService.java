@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.repository.AzureCredentialRepository;
+import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.KeyGeneratorService;
 
@@ -38,7 +38,7 @@ public class AzureCertificateService {
     private KeyGeneratorService keyGeneratorService;
 
     @Autowired
-    private AzureCredentialRepository azureCredentialRepository;
+    private CredentialRepository credentialRepository;
 
     @Autowired
     private AzureStackUtil azureStackUtil;
@@ -80,7 +80,7 @@ public class AzureCertificateService {
     }
 
     public File getCertificateFile(Long credentialId, CbUser user) {
-        AzureCredential credential = azureCredentialRepository.findOne(credentialId);
+        Credential credential = credentialRepository.findOne(credentialId);
         if (credential == null) {
             throw new NotFoundException(String.format("Credential '%s' not found", credentialId));
         }

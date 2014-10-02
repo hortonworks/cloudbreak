@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.domain.Template;
 
 public interface TemplateRepository extends CrudRepository<Template, Long> {
 
-    @PostAuthorize("returnObject?.owner == principal")
+    @PostAuthorize("hasPermission(returnObject,'read')")
     Template findOne(@Param("id") Long id);
 
     Template findByName(@Param("name") String name);

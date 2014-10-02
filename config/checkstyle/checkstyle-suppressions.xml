@@ -17,7 +17,7 @@
     <suppress id="string-instantiation" files="AzureProvisionService.java"/>
     <suppress id="string-instantiation" files="AzureProvisioner.java"/>
     <suppress id="string-instantiation" files="AwsStackUtil.java"/>
-    <suppress id="string-instantiation" files="SecurityConfig.java"/>
+    <suppress id="string-instantiation" files="RemoteUserDetailsService.java"/>
     <suppress checks="ParameterNumber" files="AzureProvisioner.java"/>
     <suppress checks="ParameterNumber" files="CloudbreakUsageController.java|CloudbreakUsagesFacade.java|DefaultCloudbreakUsagesFacade.java"/>
     <suppress checks="IllegalCatch" files="CredentialController.java"/>

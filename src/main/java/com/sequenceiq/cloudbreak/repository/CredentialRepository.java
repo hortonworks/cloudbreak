@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.domain.Credential;
 
 public interface CredentialRepository extends CrudRepository<Credential, Long> {
 
-    @PostAuthorize("returnObject?.owner == principal")
+    @PostAuthorize("hasPermission(returnObject,'read')")
     Credential findOne(@Param("id") Long id);
 
     Credential findByName(@Param("name") String name);
