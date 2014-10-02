@@ -5,6 +5,6 @@ import com.sequenceiq.cloudbreak.controller.InternalServerException;
 public class UserDetailsUnavailableException extends InternalServerException {
 
     public UserDetailsUnavailableException(String message, Throwable cause) {
-        super(message,cause);
+        super(message, cause);
     }
 }

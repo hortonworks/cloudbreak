@@ -11,8 +11,6 @@ import com.sequenceiq.cloudbreak.converter.AzureCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
-import com.sequenceiq.cloudbreak.repository.AwsCredentialRepository;
-import com.sequenceiq.cloudbreak.repository.AzureCredentialRepository;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.service.ServiceTestUtils;
 import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
@@ -27,16 +25,10 @@ public class SimpleCredentialServiceTest {
     private CredentialRepository credentialRepository;
 
     @Mock
-    private AwsCredentialRepository awsCredentialRepository;
-
-    @Mock
     private AwsCredentialConverter awsCredentialConverter;
 
     @Mock
     private AzureCertificateService azureCertificateService;
-
-    @Mock
-    private AzureCredentialRepository azureCredentialRepository;
 
     @Mock
     private AzureCredentialConverter azureCredentialConverter;
