@@ -55,7 +55,7 @@ public class RemoteUserDetailsService implements UserDetailsService {
         scimRequestHeaders.set("Authorization", "Bearer " + tokenResponse.get("access_token"));
 
         String scimResponse = restTemplate.exchange(
-                identityServerUrl + "/Users/" + "?filter=userName eq '" + username + "'",
+                identityServerUrl + "/Users/" + "?filter=userName eq \"" + username + "\"",
                 HttpMethod.GET,
                 new HttpEntity<>(scimRequestHeaders),
                 String.class).getBody();
@@ -78,7 +78,9 @@ public class RemoteUserDetailsService implements UserDetailsService {
                     roles.add(CbUserRole.fromString(parts[ROLE_PART]));
                 }
             }
-            return new CbUser(username, account, roles);
+            String givenName = root.get("resources").get(0).get("name").get("givenName").asText();
+            String familyName = root.get("resources").get(0).get("name").get("familyName").asText();
+            return new CbUser(username, account, roles, givenName, familyName);
         } catch (IOException e) {
             throw new UserDetailsUnavailableException("User details cannot be retrieved from identity server.", e);
         }
