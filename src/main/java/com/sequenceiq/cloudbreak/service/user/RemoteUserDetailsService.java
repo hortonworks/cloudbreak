@@ -10,6 +10,7 @@ import java.util.Map;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -35,7 +36,9 @@ public class RemoteUserDetailsService implements UserDetailsService {
     private String identityServerUrl;
 
     @Override
+    @Cacheable("userCache")
     public CbUser getDetails(String username) {
+
         RestTemplate restTemplate = new RestTemplate();
 
         HttpHeaders tokenRequestHeaders = new HttpHeaders();

@@ -107,6 +107,7 @@ dependencies {
     compile 'org.springframework.security.oauth:spring-security-oauth2:2.0.3.RELEASE'
     compile 'org.springframework:spring-messaging:4.0.3.RELEASE'
     compile 'org.projectreactor:reactor-spring:1.0.1.RELEASE'
+    compile 'net.sf.ehcache:ehcache:2.8.3'
     compile 'org.postgresql:postgresql:9.3-1101-jdbc41'
     compile('com.amazonaws:aws-java-sdk:1.8.9') {
         exclude group: 'commons-logging'

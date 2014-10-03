@@ -35,13 +35,22 @@ public class SecurityConfig {
     protected static class MethodSecurityConfig extends GlobalMethodSecurityConfiguration {
 
         @Autowired
+        private UserDetailsService userDetailsService;
+
+        @Autowired
         private OwnerBasedPermissionEvaluator ownerBasedPermissionEvaluator;
+
+        @Bean
+        MethodSecurityExpressionHandler expressionHandler() {
+            DefaultMethodSecurityExpressionHandler expressionHandler = new DefaultMethodSecurityExpressionHandler();
+            ownerBasedPermissionEvaluator.setUserDetailsService(userDetailsService);
+            expressionHandler.setPermissionEvaluator(ownerBasedPermissionEvaluator);
+            return expressionHandler;
+        }
 
         @Override
         protected MethodSecurityExpressionHandler createExpressionHandler() {
-            DefaultMethodSecurityExpressionHandler expressionHandler = new DefaultMethodSecurityExpressionHandler();
-            expressionHandler.setPermissionEvaluator(ownerBasedPermissionEvaluator);
-            return expressionHandler;
+            return expressionHandler();
         }
     }
 
