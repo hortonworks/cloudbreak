@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.domain.CbUserRole;
 
 @Service
 public class RemoteUserDetailsService implements UserDetailsService {
@@ -63,7 +64,7 @@ public class RemoteUserDetailsService implements UserDetailsService {
         JsonNode root = null;
         try {
             root = mapper.readTree(scimResponse);
-            List<String> roles = new ArrayList<>();
+            List<CbUserRole> roles = new ArrayList<>();
             String account = null;
             for (Iterator<JsonNode> iterator = root.get("resources").get(0).get("groups").getElements(); iterator.hasNext();) {
                 JsonNode node = iterator.next();
@@ -74,7 +75,7 @@ public class RemoteUserDetailsService implements UserDetailsService {
                         throw new IllegalStateException("A user can belong to only one account.");
                     }
                     account = parts[ACCOUNT_PART];
-                    roles.add(parts[ROLE_PART]);
+                    roles.add(CbUserRole.fromString(parts[ROLE_PART]));
                 }
             }
             return new CbUser(username, account, roles);

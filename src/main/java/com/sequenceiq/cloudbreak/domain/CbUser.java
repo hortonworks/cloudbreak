@@ -6,9 +6,9 @@ public class CbUser {
 
     private String username;
     private String account;
-    private List<String> roles;
+    private List<CbUserRole> roles;
 
-    public CbUser(String username, String account, List<String> roles) {
+    public CbUser(String username, String account, List<CbUserRole> roles) {
         this.username = username;
         this.account = account;
         this.roles = roles;
@@ -22,7 +22,7 @@ public class CbUser {
         return account;
     }
 
-    public List<String> getRoles() {
+    public List<CbUserRole> getRoles() {
         return roles;
     }
 

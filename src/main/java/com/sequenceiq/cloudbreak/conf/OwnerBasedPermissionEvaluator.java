@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 
 import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.domain.CbUserRole;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 
 @Component
@@ -28,7 +29,7 @@ public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
             }
             CbUser user = userDetailsService.getDetails(username);
             if (getAccount(targetDomainObject).equals(user.getAccount())) {
-                if (user.getRoles().contains("admin") || isPublicInAccount(targetDomainObject)) {
+                if (user.getRoles().contains(CbUserRole.ADMIN) || isPublicInAccount(targetDomainObject)) {
                     return true;
                 }
             }
