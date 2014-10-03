@@ -10,6 +10,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
@@ -27,6 +28,7 @@ import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
+import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
@@ -83,14 +85,19 @@ public class DefaultStackService implements StackService {
 
     @Override
     public Stack create(CbUser user, Stack stack) {
+        Stack savedStack = null;
         Template template = templateRepository.findOne(stack.getTemplate().getId());
         stack.setOwner(user.getUsername());
         stack.setAccount(user.getAccount());
         stack.setHash(generateHash(stack));
-        Stack savedStack = stackRepository.save(stack);
-        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_REQUEST_EVENT, stack.getId());
-        reactor.notify(ReactorConfig.PROVISION_REQUEST_EVENT, Event.wrap(new ProvisionRequest(template.cloudPlatform(), stack.getId())));
-        return stack;
+        try {
+            savedStack = stackRepository.save(stack);
+            LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_REQUEST_EVENT, stack.getId());
+            reactor.notify(ReactorConfig.PROVISION_REQUEST_EVENT, Event.wrap(new ProvisionRequest(template.cloudPlatform(), stack.getId())));
+        } catch (DataIntegrityViolationException ex) {
+            throw new DuplicateKeyValueException(stack.getName(), ex);
+        }
+        return savedStack;
     }
 
     @Override
