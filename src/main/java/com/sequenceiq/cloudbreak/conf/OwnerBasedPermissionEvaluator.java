@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.conf;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -15,7 +14,6 @@ import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 @Component
 public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
 
-    @Autowired
     private UserDetailsService userDetailsService;
 
     @Override
@@ -43,6 +41,10 @@ public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
     @Override
     public boolean hasPermission(Authentication authentication, Serializable targetId, String targetType, Object permission) {
         return false;
+    }
+
+    public void setUserDetailsService(UserDetailsService userDetailsService) {
+        this.userDetailsService = userDetailsService;
     }
 
     private String getAccount(Object targetDomainObject) throws IllegalAccessException {
