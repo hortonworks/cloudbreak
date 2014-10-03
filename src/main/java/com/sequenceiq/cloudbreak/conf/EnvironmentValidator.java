@@ -19,20 +19,12 @@ public class EnvironmentValidator implements InitializingBean {
     @Value("${cb.host.addr}")
     private String hostAddress;
 
-    @Value("${cb.ui.addr}")
-    private String uiAddress;
-
     @Override
     public void afterPropertiesSet() throws Exception {
         if (!hostAddress.matches(URL_PATTERN)) {
             throw new IllegalArgumentException(
                     "Host address is not a valid URL, it should include the scheme, the address and optionally a port. "
                             + "It shouldn't be an internal address either." + hostAddress);
-        }
-        if (!uiAddress.matches(URL_PATTERN) && !uiAddress.startsWith("http://localhost")) {
-            throw new IllegalArgumentException(
-                    "UI address is not a valid URL, it should include the scheme, the address and optionally a port. "
-                            + "Or it should start with http://localhost." + uiAddress);
         }
     }
 
