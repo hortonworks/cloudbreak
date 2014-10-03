@@ -7,11 +7,15 @@ public class CbUser {
     private String username;
     private String account;
     private List<CbUserRole> roles;
+    private String givenName;
+    private String familyName;
 
-    public CbUser(String username, String account, List<CbUserRole> roles) {
+    public CbUser(String username, String account, List<CbUserRole> roles, String givenName, String familyName) {
         this.username = username;
         this.account = account;
         this.roles = roles;
+        this.givenName = givenName;
+        this.familyName = familyName;
     }
 
     public String getUsername() {
@@ -26,4 +30,11 @@ public class CbUser {
         return roles;
     }
 
+    public String getGivenName() {
+        return givenName;
+    }
+
+    public String getFamilyName() {
+        return familyName;
+    }
 }
