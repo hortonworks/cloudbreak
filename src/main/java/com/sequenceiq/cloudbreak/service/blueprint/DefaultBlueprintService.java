@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.domain.CbUserRole;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
@@ -43,7 +44,7 @@ public class DefaultBlueprintService implements BlueprintService {
     @Override
     public Set<Blueprint> retrieveAccountBlueprints(CbUser user) {
         Set<Blueprint> blueprints = new HashSet<>();
-        if (user.getRoles().contains("admin")) {
+        if (user.getRoles().contains(CbUserRole.ADMIN)) {
             blueprints = blueprintRepository.findAllInAccount(user.getAccount());
         } else {
             blueprints = blueprintRepository.findPublicsInAccount(user.getAccount());

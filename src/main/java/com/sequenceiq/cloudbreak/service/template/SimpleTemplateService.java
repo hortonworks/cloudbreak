@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.domain.CbUserRole;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -40,7 +41,7 @@ public class SimpleTemplateService implements TemplateService {
     @Override
     public Set<Template> retrieveAccountTemplates(CbUser user) {
         Set<Template> templates = new HashSet<>();
-        if (user.getRoles().contains("admin")) {
+        if (user.getRoles().contains(CbUserRole.ADMIN)) {
             templates = templateRepository.findAllInAccount(user.getAccount());
         } else {
             templates = templateRepository.findPublicsInAccount(user.getAccount());

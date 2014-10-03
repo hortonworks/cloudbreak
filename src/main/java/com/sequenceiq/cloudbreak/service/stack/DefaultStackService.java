@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.domain.CbUserRole;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -73,7 +74,7 @@ public class DefaultStackService implements StackService {
     @Override
     public Set<Stack> retrieveAccountStacks(CbUser user) {
         Set<Stack> stacks = new HashSet<>();
-        if (user.getRoles().contains("admin")) {
+        if (user.getRoles().contains(CbUserRole.ADMIN)) {
             stacks = stackRepository.findAllInAccount(user.getAccount());
         } else {
             stacks = stackRepository.findPublicsInAccount(user.getAccount());

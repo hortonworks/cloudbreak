@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.domain.CbUserRole;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Status;
@@ -45,7 +46,7 @@ public class SimpleCredentialService implements CredentialService {
     @Override
     public Set<Credential> retrieveAccountCredentials(CbUser user) {
         Set<Credential> credentials = new HashSet<>();
-        if (user.getRoles().contains("admin")) {
+        if (user.getRoles().contains(CbUserRole.ADMIN)) {
             credentials = credentialRepository.findAllInAccount(user.getAccount());
         } else {
             credentials = credentialRepository.findPublicsInAccount(user.getAccount());
