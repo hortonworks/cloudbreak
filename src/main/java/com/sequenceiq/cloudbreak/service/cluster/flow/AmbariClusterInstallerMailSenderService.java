@@ -17,6 +17,7 @@ import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 
 import freemarker.template.Configuration;
 
@@ -34,6 +35,9 @@ public class AmbariClusterInstallerMailSenderService {
     @Autowired
     private Configuration freemarkerConfiguration;
 
+    @Autowired
+    private UserDetailsService userDetailsService;
+
     @VisibleForTesting
     protected MimeMessagePreparator prepareSuccessMessage(final String email, final String template, final String status,
             final String server) {
@@ -43,7 +47,7 @@ public class AmbariClusterInstallerMailSenderService {
                 message.setFrom(msgFrom);
                 message.setTo(email);
                 message.setSubject("Cloudbreak - stack installation");
-                message.setText(getEmailBody(status, server, template), true);
+                message.setText(getEmailBody(email, status, server, template), true);
             }
         };
     }
@@ -56,8 +60,7 @@ public class AmbariClusterInstallerMailSenderService {
                 message.setFrom(msgFrom);
                 message.setTo(email);
                 message.setSubject("Cloudbreak - stack installation");
-//                message.setText(getEmailBody(user.getFirstName(), status, "", template), true);
-                message.setText(getEmailBody(status, "", template), true);
+                message.setText(getEmailBody(email, status, "", template), true);
             }
         };
     }
@@ -78,12 +81,13 @@ public class AmbariClusterInstallerMailSenderService {
         LOGGER.info("Cluster installation email sent");
     }
 
-    private String getEmailBody(String status, String server, String template) {
+    private String getEmailBody(String username, String status, String server, String template) {
         String text = null;
         try {
             Map<String, Object> model = new HashMap<>();
             model.put("status", status);
             model.put("server", server);
+            model.put("name", userDetailsService.getDetails(username).getGivenName());
             text = FreeMarkerTemplateUtils.processTemplateIntoString(freemarkerConfiguration.getTemplate(template, "UTF-8"), model);
         } catch (Exception e) {
             LOGGER.error("Cluster installer email assembling failed. Exception: {}", e);
