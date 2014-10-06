@@ -236,7 +236,7 @@ public class AmbariClusterConnector {
             result = false;
         }
         if (requestId != -1) {
-            LOGGER.info("Waiting for Hadoop services to %s on stack: {}", action, stackId);
+            LOGGER.info("Waiting for Hadoop services to {} on stack: {}", action, stackId);
             operationsPollingService.pollWithTimeout(
                     new AmbariOperationsStatusCheckerTask(),
                     new AmbariOperations(stackId, ambariClient, singletonMap(action + " services", requestId)),
