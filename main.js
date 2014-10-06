@@ -222,6 +222,7 @@ app.post('/reset/:resetToken', function(req, res) {
                              }
                  });
                  } else {
+                 res.statusCode = 400
                  res.end('Reset URL is obsolete.');
                  }
              } else {
@@ -230,6 +231,7 @@ app.post('/reset/:resetToken', function(req, res) {
              }
            });
        } else {
+          res.statusCode = 400
           res.end('No token for client');
        }
    });
