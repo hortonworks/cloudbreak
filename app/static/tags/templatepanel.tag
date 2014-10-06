@@ -28,6 +28,7 @@
                                     <div class="btn-group btn-group-justified">
                                         <a id="awsTemplateChange" type="button" class="btn btn-info" role="button" ng-click="createAwsTemplateRequest()">Aws</a>
                                         <a id="azureTemplateChange" class="btn btn-default" role="button" ng-click="createAzureTemplateRequest()">Azure</a>
+                                        <a id="gccTemplateChange" class="btn btn-default" role="button" ng-click="createGccTemplateRequest()">Gcc</a>
                                     </div>
                                 </div>
                             </div>
@@ -38,6 +39,10 @@
 
                             <form class="form-horizontal" role="form" ng-show="awsTemplate" name="awsTemplateForm">
                                 <div ng-include src="'tags/template/awsform.tag'"></div>
+                            </form>
+
+                            <form class="form-horizontal" role="form" ng-show="gccTemplate" name="gccTemplateForm" ng-show="gccTemplate">
+                                <div ng-include src="'tags/template/gccform.tag'"></div>
                             </form>
                         </div>
                     </div>
@@ -67,6 +72,10 @@
 
                             <div class="panel-body" ng-if="template.cloudPlatform == 'AZURE' ">
                                 <div ng-include src="'tags/template/azurelist.tag'"></div>
+                            </div>
+
+                            <div class="panel-body" ng-if="template.cloudPlatform == 'GCC' ">
+                                <div ng-include src="'tags/template/gcclist.tag'"></div>
                             </div>
 
                             <div class="panel-body" ng-if="template.cloudPlatform == 'AWS' ">

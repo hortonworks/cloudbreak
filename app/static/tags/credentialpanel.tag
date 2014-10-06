@@ -31,11 +31,13 @@
                                     <div class="btn-group btn-group-justified">
                                         <a id="awsChange" type="button" class="btn btn-info" ng-click="createAwsCredentialRequest()">Aws</a>
                                         <a id="azureChange" type="button" class="btn btn-default" ng-click="createAzureCredentialRequest()">Azure</a>
+                                        <a id="gccChange" type="button" class="btn btn-default" ng-click="createGccCredentialRequest()">Gcc</a>
                                     </div>
                                 </div>
                             </div>
                             <div ng-include src="'tags/credential/azureform.tag'"></div>
                             <div ng-include src="'tags/credential/awsform.tag'"></div>
+                            <div ng-include src="'tags/credential/gccform.tag'"></div>
                         </div>
                     </div>
                 </div>
@@ -64,6 +66,10 @@
 
                             <div class="panel-body" ng-if="credential.cloudPlatform == 'AZURE' ">
                                 <div ng-include src="'tags/credential/azurelist.tag'"></div>
+                            </div>
+
+                            <div class="panel-body" ng-if="credential.cloudPlatform == 'GCC' ">
+                                <div ng-include src="'tags/credential/gcclist.tag'"></div>
                             </div>
 
                             <div class="panel-body" ng-if="credential.cloudPlatform == 'AWS' ">

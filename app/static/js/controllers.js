@@ -49,26 +49,6 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
 
         }
 
-        $scope.createAwsTemplateRequest = function() {
-            $scope.azureTemplate = false;
-            $scope.awsTemplate = true;
-        }
-
-        $scope.createAzureTemplateRequest = function() {
-            $scope.azureTemplate = true;
-            $scope.awsTemplate = false;
-        }
-
-        $scope.createAwsCredentialRequest = function() {
-            $scope.azureCredential = false;
-            $scope.awsCredential = true;
-        }
-
-        $scope.createAzureCredentialRequest = function() {
-            $scope.azureCredential = true;
-            $scope.awsCredential = false;
-        }
-
         function logStackInfo(body) {
             if(body.status === 'AVAILABLE') {
                 $scope.modifyStatusMessage($rootScope.error_msg.stack_create_completed, body.name);

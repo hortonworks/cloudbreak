@@ -69,6 +69,9 @@
                         <div class="panel-body" ng-if="activeClusterTemplate.cloudPlatform == 'AZURE' ">
                             <div ng-include="'tags/template/azurelist.tag'" ng-repeat="template in [activeClusterTemplate]"></div>
                         </div>
+                        <div class="panel-body" ng-if="activeClusterTemplate.cloudPlatform == 'GCC' ">
+                            <div ng-include="'tags/template/gcclist.tag'" ng-repeat="template in [activeClusterTemplate]"></div>
+                        </div>
                     </div>
                 </div>
                 <div class="panel panel-default">
@@ -91,6 +94,9 @@
                         </div>
                         <div class="panel-body" ng-if="activeClusterCredential.cloudPlatform == 'AZURE' ">
                             <div ng-include="'tags/credential/azurelist.tag'" ng-repeat="credential in [activeClusterCredential]"></div>
+                        </div>
+                        <div class="panel-body" ng-if="activeClusterCredential.cloudPlatform == 'GCC' ">
+                            <div ng-include="'tags/credential/gcclist.tag'" ng-repeat="credential in [activeClusterCredential]"></div>
                         </div>
                     </div>
                 </div>

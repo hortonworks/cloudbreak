@@ -7,6 +7,25 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
         $rootScope.credentials = UserCredential.query();
         $scope.credentialAws = {};
         $scope.credentialAzure = {};
+        $scope.credentialGcc = {};
+
+        $scope.createAwsCredentialRequest = function() {
+            $scope.azureCredential = false;
+            $scope.awsCredential = true;
+            $scope.gccCredential = false;
+        }
+
+        $scope.createAzureCredentialRequest = function() {
+            $scope.azureCredential = true;
+            $scope.awsCredential = false;
+            $scope.gccCredential = false;
+        }
+
+        $scope.createGccCredentialRequest = function() {
+            $scope.azureCredential = false;
+            $scope.awsCredential = false;
+            $scope.gccCredential = true;
+        }
 
         $scope.createAwsCredential = function() {
             $scope.credentialAws.cloudPlatform = "AWS";
@@ -38,6 +57,21 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
                 $scope.modifyStatusMessage($rootScope.error_msg.azure_credential_success1 + result.id + $rootScope.error_msg.azure_credential_success2);
                 $scope.modifyStatusClass("has-success");
                 $scope.getAzureCertification(result.id);
+            }, function (error) {
+                $scope.modifyStatusMessage($rootScope.error_msg.azure_credential_failed + error.data.message);
+                $scope.modifyStatusClass("has-error");
+            });
+        }
+
+        $scope.createGccCredential = function() {
+            $scope.credentialGcc.cloudPlatform = "GCC";
+
+            UserCredential.save($scope.credentialGcc, function(result){
+                $scope.credentialGcc.id = result.id;
+                $rootScope.credentials.push($scope.credentialGcc);
+                $scope.credentialGcc = {};
+                $scope.modifyStatusMessage($rootScope.error_msg.azure_credential_success1 + result.id + $rootScope.error_msg.azure_credential_success2);
+                $scope.modifyStatusClass("has-success");
             }, function (error) {
                 $scope.modifyStatusMessage($rootScope.error_msg.azure_credential_failed + error.data.message);
                 $scope.modifyStatusClass("has-error");
