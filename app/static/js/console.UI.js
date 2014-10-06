@@ -221,7 +221,7 @@ function addCrudControls(){
     });
 }
 
-function addPanelJQSelectors(panel){
+function addPanelJQueryEventListeners(panel){
     $jq('#panel-' + panel + ' .panel-heading > h5 > a').click(function (e) {
         e.preventDefault();
         accordion = $jq(this).attr("data-parent");

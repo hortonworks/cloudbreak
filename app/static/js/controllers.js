@@ -93,16 +93,8 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
             }
         }
 
-        $scope.addTemplatePanelJQSelectors = function() {
-          addPanelJQSelectors("templates");
-        }
-
-        $scope.addCredentialPanelJQSelectors = function() {
-          addPanelJQSelectors("credentials");
-        }
-
-        $scope.addBlueprintPanelJQSelectors = function() {
-          addPanelJQSelectors("blueprints");
+        $scope.addPanelJQueryEventListeners = function(panel) {
+          addPanelJQueryEventListeners(panel);
         }
     }
 ]);
