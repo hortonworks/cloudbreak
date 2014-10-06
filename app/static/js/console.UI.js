@@ -313,7 +313,6 @@ function addCrudControls(){
         });
         $jq(this).removeClass(active).addClass(selected);
 
-        // do something...
     });
 
 }

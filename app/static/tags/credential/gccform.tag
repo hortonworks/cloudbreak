@@ -1,8 +1,9 @@
-<form class="form-horizontal" role="form" name=gccCredentialForm" ng-show="gccCredential">
+<div class="alert alert-info" role="alert" ng-show="gccCredentialInCreate && gccCredential"><b>Please wait!</b> creation in progress...</div>
+<form class="form-horizontal" role="form" name="gccCredentialForm" ng-show="gccCredential && !gccCredentialInCreate">
     <div class="form-group" ng-class="{ 'has-error': gccCredentialForm.gcccname.$dirty && gccCredentialForm.gcccname.$invalid }">
         <label class="col-sm-3 control-label" for="gcccname">Name</label>
         <div class="col-sm-9">
-            <input type="text" ng-pattern="/^[a-zA-Z][-a-zA-Z0-9]*$/" class="form-control" ng-model="gcccname" id="gcccname" name="gcccname" ng-minlength="5"  ng-model="credentialGcc.name"  ng-maxlength="20" required placeholder="min. 5 max. 20 char">
+            <input type="text" ng-pattern="/^[a-zA-Z][-a-zA-Z0-9]*$/" class="form-control" ng-model="credentialGcc.name" id="gcccname" name="gcccname" ng-minlength="5"  ng-model="credentialGcc.name"  ng-maxlength="20" required placeholder="min. 5 max. 20 char">
 
             <div class="help-block" ng-show="gccCredentialForm.gcccname.$dirty && gccCredentialForm.gcccname.$invalid">
                 <i class="fa fa-warning"></i> {{error_msg.credential_name_invalid}}
@@ -41,7 +42,8 @@
     <div class="form-group" ng-class="{ 'has-error': gccCredentialForm.gcc_csshPublicKey.$dirty && gccCredentialForm.gcc_csshPublicKey.$invalid }">
         <label class="col-sm-3 control-label" for="gcc_csshPublicKey">Service account public key:</label>
         <div class="col-sm-9">
-            <textarea rows="4" type="text" placeholder="-----BEGIN RSA PRIVATE KEY-----
+            <textarea rows="4" type="text"
+placeholder="-----BEGIN RSA PRIVATE KEY-----
 MIICXAIBAAKBgQ...
 -----END RSA PRIVATE KEY-----" class="form-control" ng-model="gcc_csshPublicKey" name="gcc_csshPublicKey" id="gcc_csshPublicKey" ng-model="credentialGcc.serviceAccountPrivateKey"  required></textarea>
             <div class="help-block" ng-show="gccCredentialForm.gcc_csshPublicKey.$dirty && gccCredentialForm.gcc_csshPublicKey.$invalid">

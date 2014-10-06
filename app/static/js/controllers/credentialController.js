@@ -8,6 +8,8 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
         $scope.credentialAws = {};
         $scope.credentialAzure = {};
         $scope.credentialGcc = {};
+        $scope.awsCredentialInCreate = false;
+        $scope.gccCredentialInCreate = false;
 
         $scope.createAwsCredentialRequest = function() {
             $scope.azureCredential = false;
@@ -29,7 +31,7 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
 
         $scope.createAwsCredential = function() {
             $scope.credentialAws.cloudPlatform = "AWS";
-
+            $scope.awsCredentialInCreate = true;
             // $scope.awsCredentialInCreate = true;
             UserCredential.save($scope.credentialAws, function(result) {
                 $scope.credentialAws.id = result.id;
@@ -37,11 +39,12 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
                 $scope.credentialAws = {};
                 $scope.modifyStatusMessage($rootScope.error_msg.aws_credential_success1 + result.id + $rootScope.error_msg.aws_credential_success2);
                 $scope.modifyStatusClass("has-success");
-
+                $scope.awsCredentialInCreate = false;
                 // $scope.awsCredentialInCreate = false;
             }, function (error) {
                 $scope.modifyStatusMessage($rootScope.error_msg.aws_credential_failed + error.data.message);
                 $scope.modifyStatusClass("has-error");
+                $scope.awsCredentialInCreate = false;
                 // $scope.isFailedCreation = true;
                 // $scope.awsCredentialInCreate = false;
             });
@@ -65,6 +68,7 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
 
         $scope.createGccCredential = function() {
             $scope.credentialGcc.cloudPlatform = "GCC";
+            $scope.gccCredentialInCreate = true;
 
             UserCredential.save($scope.credentialGcc, function(result){
                 $scope.credentialGcc.id = result.id;
@@ -72,9 +76,11 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
                 $scope.credentialGcc = {};
                 $scope.modifyStatusMessage($rootScope.error_msg.azure_credential_success1 + result.id + $rootScope.error_msg.azure_credential_success2);
                 $scope.modifyStatusClass("has-success");
+                $scope.gccCredentialInCreate = false;
             }, function (error) {
                 $scope.modifyStatusMessage($rootScope.error_msg.azure_credential_failed + error.data.message);
                 $scope.modifyStatusClass("has-error");
+                $scope.gccCredentialInCreate = false;
             });
         }
 
