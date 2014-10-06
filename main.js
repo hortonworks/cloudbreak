@@ -1,8 +1,10 @@
 var express = require('express');
 var app = express();
+var uid = require('uid2');
 var cons = require('consolidate');
 var path = require('path');
 var favicon = require('serve-favicon');
+var session = require('express-session');
 var bodyParser = require('body-parser');
 var needle = require('needle');
 var check = require('validator').check;
@@ -23,7 +25,17 @@ app.set('views', './app')
 app.set('view engine', 'html')
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(favicon(path.join(__dirname,'public','img','favicon.ico')));
+app.use(session({
+  genid: function(req) {
+    return uid(30);
+  },
+  secret: uid(30),
+  resave: true,
+  saveUninitialized: true,
+  cookie: {}
+}))
 app.use(bodyParser.json())
+
 
 // index.html
 app.get('/', function(req, res) {
@@ -38,9 +50,134 @@ app.get('/', function(req, res) {
    })
 });
 
+// login.html
+app.get('/login', function(req, res) {
+    res.render('login')
+});
+
+app.post('/logout', function(req, res) {
+   req.session = null
+   res.end('SUCCESS')
+});
+
 // reset.html
 app.get('/reset/:resetToken', function(req, res) {
   res.render('reset')
+});
+
+
+app.post('/login', function(req, res){
+    var username = req.body.username
+    var password = req.body.password
+    var userCredentials = {username: username, password: password}
+    needle.post('http://' + uaaHost + ':' + uaaPort + '/login.do', userCredentials,
+       function(err, tokenResp) {
+       console.log('set-cookie' + tokenResp.headers.location)
+        var splittedLocation = tokenResp.headers.location.split('?')
+        if (splittedLocation.length == 1 || splittedLocation[1] != 'error=true'){
+            var cookies = tokenResp.headers['set-cookie'][0].split(';')
+            var sessionId;
+            for (var i = 0 ; i < cookies.length; i++) {
+                var cookie = cookies[i].split('=')
+                if (cookie.length == 2 && cookie[0] == 'JSESSIONID'){
+                   sessionId = cookie[1]
+                }
+            }
+            res.cookie('uaa_cookie', sessionId) // TODO check sessionId
+            res.end('SUCCESS')
+        } else {
+            res.end('authentication failed')
+        }
+    });
+});
+
+app.get('/oauth/authorize', function(req, res){
+    if (req.param('client_id') && req.param('response_type') && req.param('scope') && req.param('redirect_uri')){
+        req.session.client_id = req.param('client_id')
+        req.session.response_type = req.param('response_type')
+        req.session.scope = req.param('scope')
+        req.session.redirect_uri = req.param('redirect_uri')
+        if (isUaaSession(req)) {
+            res.redirect('/confirm')
+        } else {
+            res.redirect('/login')
+        }
+    } else {
+        res.statusCode = 404
+        res.send('Error 404 check client_id, response_type, scope and redirect_uri params')
+    }
+});
+
+isUaaSession = function(req) {
+    return (getCookie(req, 'uaa_cookie') != null)
+}
+
+parseCookies = function (request) {
+    var list = {},
+        rc = request.headers.cookie;
+    rc && rc.split(';').forEach(function(cookie) {
+        var parts = cookie.split('=');
+        list[parts.shift().trim()] = unescape(parts.join('='));
+    });
+    return list;
+}
+
+getCookie = function(request, cookie) {
+    return parseCookies(request)[cookie]
+}
+
+app.get('/confirm', function(req, res){
+  if (isUaaSession(req)){
+    // TODO: handle when there is
+    var confirmParams = 'client_id=' + req.session.client_id
+                        + '&response_type=' + req.session.response_type
+                        + '&scope=' + req.session.scope
+                        + '&redirect_uri=' + req.session.redirect_uri;
+    var confirmOptions = {
+                      headers: {
+                        'Cookie': 'JSESSIONID=' + getCookie(req, 'uaa_cookie')
+                         }
+                  }
+    needle.get('http://' + uaaHost + ':' + uaaPort + '/oauth/authorize?' + confirmParams, confirmOptions,
+        function(err, confirmResp) {
+            if (confirmResp.statusCode == 200){
+                // TODO: set confirmation key
+                console.log(JSON.stringify(confirmResp.body))
+                res.end()
+            } else if (confirmResp.statusCode == 302){
+                res.cookie('JSESSIONID', getCookie(req, 'uaa_cookie'))
+                res.cookie('uaa_cookie') // FIX ME: this
+                res.redirect(confirmResp.headers.location)
+            } else {
+
+            }
+        });
+  } else {
+     res.statusCode = 500
+     res.send('Invalid state');
+  }
+});
+
+app.post('/confirm', function(req, res){
+    var choose = req.param('choose');
+    if (choose == 'yes') {
+        // TODO: rewrite it
+        var confirmParams = {client_id: req.session.client_id, response_type: req.session.response_type,
+                          scope: req.session.scope, redirect_uri: req.session.redirect_uri}
+        var confirmOptions = {
+                          headers: {
+                            'Accept' : 'application/json',
+                            'Set-Cookie': 'JSESSIONID=' + getCookie(req, 'uaa_cookie'),
+                            'Content-Type' : 'application/json' }
+                      }
+        needle.post('http://' + uaaHost + ':' + uaaPort + '/oauth/authorize', confirmParams,
+                    JSON.stringify(confirmOptions), function(err, confirmResp) {
+                res.redirect(res.headers.location) // TODO check
+        });
+    } else {
+        res.statusCode = 400
+        res.end()
+    }
 });
 
 app.post('/reset/:resetToken', function(req, res) {
@@ -63,7 +200,7 @@ app.post('/reset/:resetToken', function(req, res) {
           var newPasswordData = {'password' : req.body.password}
           needle.put('http://' + uaaHost + ':' + uaaPort + '/Users/' + resetToken + '/password', JSON.stringify(newPasswordData),
             userOptions, function(err, resetResp) {
-                if (resetResp.statusCode == 200){
+                if (resetResp.statusCode = 200){
                     res.end('SUCCESS');
                 } else {
                     res.end('Password update failed.')
