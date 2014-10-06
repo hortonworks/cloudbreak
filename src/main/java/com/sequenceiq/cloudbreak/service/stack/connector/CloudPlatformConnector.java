@@ -13,8 +13,8 @@ public interface CloudPlatformConnector {
 
     CloudPlatform getCloudPlatform();
 
-    boolean startAll(User user, Stack stack);
+    boolean startAll(Stack stack);
 
-    boolean stopAll(User user, Stack stack);
+    boolean stopAll(Stack stack);
 
 }

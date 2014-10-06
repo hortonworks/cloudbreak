@@ -40,7 +40,6 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackDescription;
-import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -146,12 +145,12 @@ public class AwsConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public boolean startAll(User user, Stack stack) {
+    public boolean startAll(Stack stack) {
         return setStackState(stack, false);
     }
 
     @Override
-    public boolean stopAll(User user, Stack stack) {
+    public boolean stopAll(Stack stack) {
         return setStackState(stack, true);
     }
 

@@ -158,6 +158,7 @@ public class GccConnector implements CloudPlatformConnector {
                 throw new InternalServerException(e.getMessage());
             }
         }
+    }
 
     @Override
     public CloudPlatform getCloudPlatform() {
@@ -165,12 +166,12 @@ public class GccConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public boolean startAll(Long stackId) {
+    public boolean startAll(Stack stack) {
         return true;
     }
 
     @Override
-    public boolean stopAll(Long stackId) {
+    public boolean stopAll(Stack stack) {
         return true;
     }
 }

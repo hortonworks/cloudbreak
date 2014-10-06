@@ -26,8 +26,6 @@ import com.sequenceiq.cloudbreak.domain.StackDescription;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.StatusRequest;
 import com.sequenceiq.cloudbreak.domain.Template;
-import com.sequenceiq.cloudbreak.domain.User;
-import com.sequenceiq.cloudbreak.domain.UserRole;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -120,7 +118,7 @@ public class DefaultStackService implements StackService {
     }
 
     @Override
-    public void updateStatus(User user, Long stackId, StatusRequest status) {
+    public void updateStatus(Long stackId, StatusRequest status) {
         Stack stack = stackRepository.findOne(stackId);
         Status stackStatus = stack.getStatus();
         if (status.equals(StatusRequest.STARTED)) {
@@ -131,7 +129,7 @@ public class DefaultStackService implements StackService {
             stackRepository.save(stack);
             LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_STATUS_UPDATE_EVENT, stack.getId());
             reactor.notify(ReactorConfig.STACK_STATUS_UPDATE_EVENT,
-                    Event.wrap(new StackStatusUpdateRequest(stack.getUser(), stack.getTemplate().cloudPlatform(), stack.getId(), status)));
+                    Event.wrap(new StackStatusUpdateRequest(stack.getTemplate().cloudPlatform(), stack.getId(), status)));
         } else {
             Status clusterStatus = clusterRepository.findOneWithLists(stack.getCluster().getId()).getStatus();
             if (Status.STOP_IN_PROGRESS.equals(clusterStatus)) {
@@ -148,7 +146,7 @@ public class DefaultStackService implements StackService {
                 }
                 LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_STATUS_UPDATE_EVENT, stack.getId());
                 reactor.notify(ReactorConfig.STACK_STATUS_UPDATE_EVENT,
-                        Event.wrap(new StackStatusUpdateRequest(stack.getUser(), stack.getTemplate().cloudPlatform(), stack.getId(), status)));
+                        Event.wrap(new StackStatusUpdateRequest(stack.getTemplate().cloudPlatform(), stack.getId(), status)));
             }
         }
     }

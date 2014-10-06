@@ -5,9 +5,6 @@ import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStack
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.NOT_FOUND;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.SERVICENAME;
 
-import groovyx.net.http.HttpResponseDecorator;
-import groovyx.net.http.HttpResponseException;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,7 +30,6 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackDescription;
-import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
@@ -224,8 +220,8 @@ public class AzureConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public boolean startAll(User user, Stack stack) {
-        AzureClient azureClient = createAzureClient(user, stack);
+    public boolean startAll(Stack stack) {
+        AzureClient azureClient = createAzureClient(stack);
         boolean started = setStackState(stack, azureClient, false);
         if (started) {
             List<Resource> resources = stack.getResourcesByType(ResourceType.VIRTUAL_MACHINE);
@@ -244,13 +240,13 @@ public class AzureConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public boolean stopAll(User user, Stack stack) {
-        return setStackState(stack, createAzureClient(user, stack), true);
+    public boolean stopAll(Stack stack) {
+        return setStackState(stack, createAzureClient(stack), true);
     }
 
-    private AzureClient createAzureClient(User user, Stack stack) {
+    private AzureClient createAzureClient(Stack stack) {
         Credential credential = stack.getCredential();
-        String filePath = AzureCertificateService.getUserJksFileName(credential, user.emailAsFolder());
+        String filePath = AzureCertificateService.getUserJksFileName(credential, azureStackUtil.emailAsFolder(stack.getOwner()));
         return azureStackUtil.createAzureClient(credential, filePath);
     }
 

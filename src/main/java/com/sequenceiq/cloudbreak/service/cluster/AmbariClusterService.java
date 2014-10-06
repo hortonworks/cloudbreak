@@ -123,7 +123,7 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
-    public void updateStatus(User user, Long stackId, StatusRequest statusRequest) {
+    public void updateStatus(Long stackId, StatusRequest statusRequest) {
         Stack stack = stackRepository.findOne(stackId);
         Cluster cluster = stack.getCluster();
         long clusterId = cluster.getId();
@@ -147,7 +147,7 @@ public class AmbariClusterService implements ClusterService {
                 clusterRepository.save(cluster);
                 LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.CLUSTER_STATUS_UPDATE_EVENT, stack.getId());
                 reactor.notify(ReactorConfig.CLUSTER_STATUS_UPDATE_EVENT,
-                        Event.wrap(new ClusterStatusUpdateRequest(user, stack.getId(), statusRequest)));
+                        Event.wrap(new ClusterStatusUpdateRequest(stack.getId(), statusRequest)));
             }
         } else {
             if (!Status.AVAILABLE.equals(clusterStatus)) {
@@ -162,7 +162,7 @@ public class AmbariClusterService implements ClusterService {
             clusterRepository.save(cluster);
             LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.CLUSTER_STATUS_UPDATE_EVENT, stack.getId());
             reactor.notify(ReactorConfig.CLUSTER_STATUS_UPDATE_EVENT,
-                    Event.wrap(new ClusterStatusUpdateRequest(user, stack.getId(), statusRequest)));
+                    Event.wrap(new ClusterStatusUpdateRequest(stack.getId(), statusRequest)));
         }
     }
 
