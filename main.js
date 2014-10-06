@@ -184,8 +184,6 @@ app.post('/reset/:resetToken', function(req, res) {
     var split = resetToken.split('-')
     var version = split[5];
     var userId = resetToken.substring(0, resetToken.length - split[5].length - 1);
-    console.log(userId);
-    console.log(version);
     var options = {
       headers: { 'Authorization': 'Basic ' + new Buffer(clientId + ':'+ clientSecret).toString('base64') }
     }
