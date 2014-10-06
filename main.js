@@ -318,7 +318,7 @@ app.post('/register', function(req, res){
                     mailer.sendMail(req.body.email, 'Registration' , templateFile, {user: req.body.firstName,
                         confirm: 'http://' +  process.env.UR_HOST + ':' + process.env.UR_PORT + '/confirm/' + createResp.body.id})
                     result = 'SUCCESS'
-                    res = postGroups(token, createResp.body.id, req.body.company, res)
+                    postGroups(token, createResp.body.id, req.body.company)
                     res.end(result)
                 } else {
                     res.end(result)
@@ -330,25 +330,20 @@ app.post('/register', function(req, res){
     });
 });
 
-postGroups = function(token, userId, company, res) {
-    res = postGroup(token, userId, company, res, "sequenceiq." + userId + ".user")
-    if (res.statusCode == 201){
-        res = postGroup(token, userId, company, res, "sequenceiq." + userId + ".admin")
-        if (res.statusCode == 201){
-            res = postGroup(token, userId, company, res, "sequenceiq." + userId + ".account." + company.toLowerCase())
-        }
-    }
-    return res
+postGroups = function(token, userId, company) {
+    postGroup(token, userId, company, "sequenceiq." + userId + ".user")
+    postGroup(token, userId, company, "sequenceiq." + userId + ".admin")
+    postGroup(token, userId, company, "sequenceiq." + userId + ".account." + company.toLowerCase())
 }
 
-postGroup = function(token, userId, company, res, displayName){
+postGroup = function(token, userId, company, displayName){
         var groupOptions = {
               headers: {
                  'Accept' : 'application/json',
                  'scope': 'scim.write',
                  'aud' : 'scim',
                  'Authorization' : 'Bearer ' + token,
-                  'Content-Type' : 'application/json'
+                 'Content-Type' : 'application/json'
                   }
         }
         var groupData = {
@@ -360,13 +355,10 @@ postGroup = function(token, userId, company, res, displayName){
         }
         needle.post('http://' + uaaHost + ':' + uaaPort + '/Groups', JSON.stringify(groupData), groupOptions,
             function(err, groupResp){
-                console.log(groupResp.body)
-                if (groupResp.statusCode != 201) {
-                  res.statusCode = groupResp.statusCode;
-                  return res
+                if (groupResp.statusCode != 201 && groupRes.statusCode != 200) {
+                  console.log('failed group creation ' + groupResp.statusCode + ', for user id: ' + userId)
                 }
         });
-        return res
 }
 
 app.get('/confirm/:confirm_token', function(req, res){
