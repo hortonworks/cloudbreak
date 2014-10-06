@@ -144,15 +144,15 @@
 <section class="management-panels">
 <div class="container-fluid">
 <div class="row">
-    <div ng-include src="'tags/templatepanel.tag'"></div>
+    <div ng-include onload="addTemplatePanelJQSelectors()" src="'tags/templatepanel.tag'"></div>
 </div>
 <div class="row">
-    <div ng-include src="'tags/blueprintpanel.tag'"></div>
+    <div ng-include onload="addBlueprintPanelJQSelectors()" src="'tags/blueprintpanel.tag'"></div>
 </div>
 <!-- .row -->
 <div class="row">
 
-    <div ng-include src="'tags/credentialpanel.tag'"></div>
+    <div ng-include onload="addCredentialPanelJQSelectors()" src="'tags/credentialpanel.tag'"></div>
 
 </div>
 <!-- .row -->

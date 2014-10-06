@@ -1,6 +1,6 @@
 <!-- .... CREDENTIALS PANEL ................................................ -->
 
-<div ng-controller="credentialController" class="col-md-12 col-lg-9">
+<div id="panel-credentials" ng-controller="credentialController" class="col-md-12 col-lg-9">
 
     <div class="panel panel-default">
         <div class="panel-heading panel-heading-nav">
@@ -16,7 +16,7 @@
             <div class="panel-body">
 
                 <p class="btn-row-over-panel">
-                    <a href="" class="btn btn-success" role="button" data-toggle="collapse" data-target="#panel-create-credential-collapse">
+                    <a href="" class="btn btn-success" role="button" data-toggle="collapse" data-target="#panel-create-credentials-collapse">
                         <i class="fa fa-plus fa-fw"></i><span> create credential</span>
                     </a>
                 </p>
@@ -24,7 +24,7 @@
                 <!-- ............ CREATE FORM ............................................. -->
 
                 <div class="panel panel-default">
-                    <div id="panel-create-credential-collapse" class="panel-under-btn-collapse collapse">
+                    <div id="panel-create-credentials-collapse" class="panel-under-btn-collapse collapse">
                         <div class="panel-body">
                             <div class="row " style="padding-bottom: 10px">
                                 <div class="btn-segmented-control" id="providerSelector1">

@@ -92,5 +92,17 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
                 $scope.modifyStatusClass("has-error");
             }
         }
+
+        $scope.addTemplatePanelJQSelectors = function() {
+          addPanelJQSelectors("templates");
+        }
+
+        $scope.addCredentialPanelJQSelectors = function() {
+          addPanelJQSelectors("credentials");
+        }
+
+        $scope.addBlueprintPanelJQSelectors = function() {
+          addPanelJQSelectors("blueprints");
+        }
     }
 ]);

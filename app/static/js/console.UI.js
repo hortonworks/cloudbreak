@@ -174,6 +174,26 @@ function addCrudControls(){
         $jq(this).parent().find('.panel-heading .btn i').removeClass('fa-angle-down').addClass('fa-angle-up');
     });*/
 // create * panels
+
+    // management panel click
+    $jq('.panel-panel-container > .panel-heading > a').click(function (e) {
+        e.preventDefault();
+        $jq(this).parent().next().collapse('toggle');
+    });
+
+    //just in dashboard.html
+    $jq('#terminateStackBtn').on('click', function () {
+
+        // must force isotope redraw, its container height set 0 by by some fucking shite
+        $container.isotope();
+        $jq('.carousel').carousel(0);
+        // enable toolbar buttons
+        $jq('#toggle-cluster-block-btn').removeClass('disabled');
+        $jq('#sort-clusters-btn').removeClass('disabled');
+        $jq('#create-cluster-btn').removeClass('disabled');
+        $jq("#notification-n-filtering").prop("disabled", false);
+    });
+
     // panel collapse page scrolling
     // solo/accordion panel click
     $jq('.panel-heading > h5 > a').click(function (e) {
@@ -184,17 +204,6 @@ function addCrudControls(){
         }
         $jq(this).parent().parent().next().collapse('toggle');
     });
-    // create panel click
-    $jq('.btn-row-over-panel > a').click(function (e) {
-        e.preventDefault();
-        $jq(this).parent().parent().next().collapse('toggle');
-    });
-    // management panel click
-    $jq('.panel-panel-container > .panel-heading > a').click(function (e) {
-        e.preventDefault();
-        $jq(this).parent().next().collapse('toggle');
-    });
-
     // solo panel or in accordion shown
     $jq('.panel-collapse').on('shown.bs.collapse', function (e) {
         e.stopPropagation();
@@ -210,8 +219,41 @@ function addCrudControls(){
     $jq('.panel-collapse').on('hidden.bs.collapse', function (e) {
         e.stopPropagation();
     });
+}
+
+function addPanelJQSelectors(panel){
+    $jq('#panel-' + panel + ' .panel-heading > h5 > a').click(function (e) {
+        e.preventDefault();
+        accordion = $jq(this).attr("data-parent");
+        if (accordion != "") {
+            $jq(accordion).find('.in').collapse('hide');
+        }
+        $jq(this).parent().parent().next().collapse('toggle');
+    });
+    // solo panel or in accordion shown
+    $jq('#panel-create-' + panel + '-collapse .panel-collapse').on('shown.bs.collapse', function (e) {
+        e.stopPropagation();
+        var panel = $jq(this).parent();		// panel
+        var offset = panel.offset().top;
+        if(offset) {
+            $jq('html,body').animate({
+                scrollTop: offset - 64
+            }, 500);
+        }
+    });
+    // solo panel or in accordion hidden
+    $jq('#panel-create-' + panel + '-collapse .panel-collapse').on('hidden.bs.collapse', function (e) {
+        e.stopPropagation();
+    });
+
+
+    // create panel click
+    $jq('#panel-' + panel + '-collapse .btn-row-over-panel > a').click(function (e) {
+        e.preventDefault();
+        $jq(this).parent().parent().next().collapse('toggle');
+    });
     // create template/blueprint/credential panel shown
-    $jq('.panel-under-btn-collapse').on('shown.bs.collapse', function (e) {
+    $jq('#panel-create-' + panel + '-collapse').on('shown.bs.collapse', function (e) {
         e.stopPropagation();
         // button switch
         $jq(this).parent().prev()
@@ -231,7 +273,7 @@ function addCrudControls(){
         }
     });
     // create template/blueprint/credential panel hidden
-    $jq('.panel-under-btn-collapse').on('hidden.bs.collapse', function (e) {
+    $jq('#panel-create-' + panel + '-collapse').on('hidden.bs.collapse', function (e) {
         e.stopPropagation();
         $jq(this).parent().prev()
             .find('.btn').fadeTo("fast", 0, function () {
@@ -242,68 +284,31 @@ function addCrudControls(){
             });
     });
     // management panel shown
-    $jq('.panel-btn-in-header-collapse').on('shown.bs.collapse', function (e) {
+    $jq('#panel-' + panel + '-collapse').on('shown.bs.collapse', function (e) {
         // button switch
-        $jq(this).parent().find('.panel-heading .btn i').removeClass('fa-angle-down').addClass('fa-angle-up');
-        // scroll
-        var panel = $jq(this).parent().parent();	// panel
-        var offset = panel.offset().top;
-        if(offset) {
-            $jq('html,body').animate({
-                scrollTop: offset - 64
-            }, 500);
+        var thisPanel = $jq(this);
+        if(thisPanel.context.id == e.target.id) {
+            thisPanel.parent().find('.panel-heading .btn i').removeClass('fa-angle-down').addClass('fa-angle-up');
+            // scroll
+            var panel = $jq(this).parent().parent();	// panel
+            var offset = panel.offset().top;
+            if(offset) {
+                $jq('html,body').animate({
+                    scrollTop: offset - 64
+                }, 500);
+            }
         }
     });
     // management panel hidden
-    $jq('.panel-btn-in-header-collapse').on('hidden.bs.collapse', function (e) {
+    $jq('#panel-' + panel + '-collapse').on('hidden.bs.collapse', function (e) {
         // button switch
-        $jq(this).parent().find('.panel-heading .btn i').removeClass('fa-angle-up').addClass('fa-angle-down');
-    });
-
-    // $jq('#createCluster').on('click', function () {
-    //     // must force isotope redraw, its container height set 0 by by some fucking shite
-    //     $container.isotope();
-    //     $jq('.carousel').carousel(0);
-    //     // enable toolbar buttons
-    //     $jq('#toggle-cluster-block-btn').removeClass('disabled');
-    //     $jq('#sort-clusters-btn').removeClass('disabled');
-    //     $jq('#create-cluster-btn').removeClass('disabled');
-    //     $jq("#notification-n-filtering").prop("disabled", false);
-    // });
-
-    $jq('#terminateStackBtn').on('click', function () {
-
-        // must force isotope redraw, its container height set 0 by by some fucking shite
-        $container.isotope();
-        $jq('.carousel').carousel(0);
-        // enable toolbar buttons
-        $jq('#toggle-cluster-block-btn').removeClass('disabled');
-        $jq('#sort-clusters-btn').removeClass('disabled');
-        $jq('#create-cluster-btn').removeClass('disabled');
-        $jq("#notification-n-filtering").prop("disabled", false);
-    });
-
-
-    // management panel shown
-    $jq('.panel-btn-in-header-collapse').on('shown.bs.collapse', function (e) {
-        // button switch
-        $jq(this).parent().find('.panel-heading .btn i').removeClass('fa-angle-down').addClass('fa-angle-up');
-        // scroll
-        var panel = $jq(this).parent().parent();	// panel
-        var offset = panel.offset().top;
-        if(offset) {
-            $jq('html,body').animate({
-                scrollTop: offset - 64
-            }, 500);
+        var thisPanel = $jq(this);
+        if(thisPanel.context.id == e.target.id) {
+            $jq(this).parent().find('.panel-heading .btn i').removeClass('fa-angle-up').addClass('fa-angle-down');
         }
     });
-    // management panel hidden
-    $jq('.panel-btn-in-header-collapse').on('hidden.bs.collapse', function (e) {
-        // button switch
-        $jq(this).parent().find('.panel-heading .btn i').removeClass('fa-angle-up').addClass('fa-angle-down');
-    });
 
-    $jq('.btn-segmented-control a').click(function (e) {
+    $jq('#panel-' + panel + '-collapse .btn-segmented-control a').click(function (e) {
         var selected = 'btn-info';
         var active = 'btn-default';
         var control = $jq(this).parent().parent();
@@ -314,5 +319,4 @@ function addCrudControls(){
         $jq(this).removeClass(active).addClass(selected);
 
     });
-
 }
