@@ -16,5 +16,5 @@ public interface ClusterService {
 
     void updateHosts(Long stackId, Set<HostGroupAdjustmentJson> hostGroupAdjustments);
 
-    void updateStatus(Long stackId, StatusRequest statusRequest);
+    void updateStatus(User user, Long stackId, StatusRequest statusRequest);
 }

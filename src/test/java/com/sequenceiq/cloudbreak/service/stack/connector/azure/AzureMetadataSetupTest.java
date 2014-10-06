@@ -4,10 +4,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.times;
 import static org.mockito.BDDMockito.verify;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 
 import java.io.IOException;
@@ -75,20 +72,6 @@ public class AzureMetadataSetupTest {
         resources.add(new com.sequenceiq.cloudbreak.domain.Resource(ResourceType.CLOUD_SERVICE, DUMMY_VM_NAME, stack));
         resources.add(new com.sequenceiq.cloudbreak.domain.Resource(ResourceType.VIRTUAL_MACHINE, DUMMY_VM_NAME, stack));
         return resources;
-    }
-
-    @Test
-    public void testSetupMetadata() throws IOException {
-        // GIVEN
-        given(azureStackUtil.createAzureClient(any(Credential.class), anyString())).willReturn(azureClient);
-        doReturn(DUMMY_PRIVATE_IP).when(underTest).getPrivateIP(anyString());
-        doReturn(DUMMY_VIRTUAL_IP).when(underTest).getVirtualIP(anyString());
-        given(azureClient.getVirtualMachine(anyMap())).willReturn(DUMMY_VIRTUAL_MACHINE);
-        given(azureStackUtil.getVmName(anyString(), anyInt())).willReturn(DUMMY_VM_NAME);
-        // WHEN
-        underTest.setupMetadata(stack);
-        // THEN
-        verify(underTest, times(1)).getVirtualIP(anyString());
     }
 
     @Test

@@ -13,9 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
-import reactor.core.Reactor;
-import reactor.event.Event;
-
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
@@ -29,6 +26,7 @@ import com.sequenceiq.cloudbreak.domain.StatusRequest;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.domain.UserRole;
+import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
@@ -37,8 +35,12 @@ import com.sequenceiq.cloudbreak.service.account.AccountService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
+import com.sequenceiq.cloudbreak.service.stack.event.StackStatusUpdateRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.UpdateInstancesRequest;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataIncompleteException;
+
+import reactor.core.Reactor;
+import reactor.event.Event;
 
 @Service
 public class DefaultStackService implements StackService {
@@ -68,6 +70,9 @@ public class DefaultStackService implements StackService {
 
     @Autowired
     private Reactor reactor;
+
+    @Autowired
+    private ClusterRepository clusterRepository;
 
     @Override
     public Set<Stack> getAll(User user) {
@@ -142,7 +147,36 @@ public class DefaultStackService implements StackService {
 
     @Override
     public void updateStatus(User user, Long stackId, StatusRequest status) {
-        throw new BadRequestException("Stopping/restarting a stack is not yet supported");
+        Stack stack = stackRepository.findOne(stackId);
+        Status stackStatus = stack.getStatus();
+        if (status.equals(StatusRequest.STARTED)) {
+            if (!Status.STOPPED.equals(stackStatus)) {
+                throw new BadRequestException(String.format("Cannot update the status of stack '%s' to STARTED, because it isn't in STOPPED state.", stackId));
+            }
+            stack.setStatus(Status.START_IN_PROGRESS);
+            stackRepository.save(stack);
+            LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_STATUS_UPDATE_EVENT, stack.getId());
+            reactor.notify(ReactorConfig.STACK_STATUS_UPDATE_EVENT,
+                    Event.wrap(new StackStatusUpdateRequest(stack.getUser(), stack.getTemplate().cloudPlatform(), stack.getId(), status)));
+        } else {
+            Status clusterStatus = clusterRepository.findOneWithLists(stack.getCluster().getId()).getStatus();
+            if (Status.STOP_IN_PROGRESS.equals(clusterStatus)) {
+                stack.setStatus(Status.STOP_REQUESTED);
+                stackRepository.save(stack);
+            } else {
+                if (!Status.AVAILABLE.equals(stackStatus)) {
+                    throw new BadRequestException(
+                            String.format("Cannot update the status of stack '%s' to STOPPED, because it isn't in AVAILABLE state.", stackId));
+                }
+                if (!Status.STOPPED.equals(clusterStatus)) {
+                    throw new BadRequestException(
+                            String.format("Cannot update the status of stack '%s' to STOPPED, because the cluster is not in STOPPED state.", stackId));
+                }
+                LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_STATUS_UPDATE_EVENT, stack.getId());
+                reactor.notify(ReactorConfig.STACK_STATUS_UPDATE_EVENT,
+                        Event.wrap(new StackStatusUpdateRequest(stack.getUser(), stack.getTemplate().cloudPlatform(), stack.getId(), status)));
+            }
+        }
     }
 
     @Override

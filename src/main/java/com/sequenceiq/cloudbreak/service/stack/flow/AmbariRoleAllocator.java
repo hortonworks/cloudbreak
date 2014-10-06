@@ -109,7 +109,7 @@ public class AmbariRoleAllocator {
         for (CoreInstanceMetaData coreInstanceMetaDataEntry : coreInstanceMetaData) {
             InstanceMetaData instanceMetaDataEntry = new InstanceMetaData();
             instanceMetaDataEntry.setPrivateIp(coreInstanceMetaDataEntry.getPrivateIp());
-            instanceMetaDataEntry.setPublicIp(coreInstanceMetaDataEntry.getPublicIp());
+            instanceMetaDataEntry.setPublicIp(coreInstanceMetaDataEntry.getPublicDns());
             instanceMetaDataEntry.setInstanceId(coreInstanceMetaDataEntry.getInstanceId());
             instanceMetaDataEntry.setVolumeCount(coreInstanceMetaDataEntry.getVolumeCount());
             instanceMetaDataEntry.setLongName(coreInstanceMetaDataEntry.getLongName());

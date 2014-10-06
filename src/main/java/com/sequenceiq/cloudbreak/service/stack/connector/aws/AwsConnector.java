@@ -1,11 +1,19 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.aws;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.AmazonServiceException;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
+import com.amazonaws.services.autoscaling.model.ResumeProcessesRequest;
+import com.amazonaws.services.autoscaling.model.SuspendProcessesRequest;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.DeleteStackRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStackResourcesRequest;
@@ -16,19 +24,32 @@ import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.Filter;
+import com.amazonaws.services.ec2.model.Instance;
+import com.amazonaws.services.ec2.model.Reservation;
+import com.amazonaws.services.ec2.model.StartInstancesRequest;
+import com.amazonaws.services.ec2.model.StopInstancesRequest;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.DetailedAwsStackDescription;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackDescription;
 import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.repository.ClusterRepository;
+import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.PollingService;
+import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteComplete;
+import com.sequenceiq.cloudbreak.service.stack.flow.AwsInstanceStatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.stack.flow.AwsInstances;
 
 import reactor.core.Reactor;
 import reactor.event.Event;
@@ -46,6 +67,21 @@ public class AwsConnector implements CloudPlatformConnector {
 
     @Autowired
     private Reactor reactor;
+
+    @Autowired
+    private CloudFormationStackUtil cfStackUtil;
+
+    @Autowired
+    private InstanceMetaDataRepository instanceMetaDataRepository;
+
+    @Autowired
+    private PollingService<AwsInstances> awsPollingService;
+
+    @Autowired
+    private ClusterRepository clusterRepository;
+
+    @Autowired
+    private StackRepository stackRepository;
 
     @Override
     public StackDescription describeStackWithResources(User user, Stack stack, Credential credential) {
@@ -110,13 +146,68 @@ public class AwsConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public Boolean startAll(User user, Long stackId) {
-        return Boolean.TRUE;
+    public boolean startAll(User user, Stack stack) {
+        return setStackState(stack, false);
     }
 
     @Override
-    public Boolean stopAll(User user, Long stackId) {
-        return Boolean.TRUE;
+    public boolean stopAll(User user, Stack stack) {
+        return setStackState(stack, true);
+    }
+
+    private boolean setStackState(Stack stack, boolean stopped) {
+        boolean result = true;
+        Regions region = ((AwsTemplate) stack.getTemplate()).getRegion();
+        AwsCredential credential = (AwsCredential) stack.getCredential();
+        AmazonAutoScalingClient amazonASClient = awsStackUtil.createAutoScalingClient(region, credential);
+        AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(region, credential);
+        String asGroupName = cfStackUtil.getAutoscalingGroupName(stack);
+        Set<InstanceMetaData> instanceMetaData = stack.getInstanceMetaData();
+        Collection<String> instances = new ArrayList<>(instanceMetaData.size());
+        for (InstanceMetaData instance : instanceMetaData) {
+            instances.add(instance.getInstanceId());
+        }
+        try {
+            if (stopped) {
+                amazonASClient.suspendProcesses(new SuspendProcessesRequest().withAutoScalingGroupName(asGroupName));
+                amazonEC2Client.stopInstances(new StopInstancesRequest().withInstanceIds(instances));
+            } else {
+                amazonASClient.resumeProcesses(new ResumeProcessesRequest().withAutoScalingGroupName(asGroupName));
+                amazonEC2Client.startInstances(new StartInstancesRequest().withInstanceIds(instances));
+                awsPollingService.pollWithTimeout(
+                        new AwsInstanceStatusCheckerTask(),
+                        new AwsInstances(stack.getId(), amazonEC2Client, new ArrayList(instances), "Running"),
+                        AmbariClusterConnector.POLLING_INTERVAL,
+                        AmbariClusterConnector.MAX_ATTEMPTS_FOR_AMBARI_OPS);
+                updateInstanceMetadata(stack, amazonEC2Client, instanceMetaData, instances);
+            }
+        } catch (Exception e) {
+            LOGGER.error(String.format("Failed to %s AWS instances on stack: %s", stopped ? "stop" : "start", stack.getId()));
+            result = false;
+        }
+        return result;
+    }
+
+    private void updateInstanceMetadata(Stack stack, AmazonEC2Client amazonEC2Client, Set<InstanceMetaData> instanceMetaData, Collection<String> instances) {
+        DescribeInstancesResult describeResult = amazonEC2Client.describeInstances(new DescribeInstancesRequest().withInstanceIds(instances));
+        for (Reservation reservation : describeResult.getReservations()) {
+            for (Instance instance : reservation.getInstances()) {
+                for (InstanceMetaData metaData : instanceMetaData) {
+                    if (metaData.getInstanceId().equals(instance.getInstanceId())) {
+                        String publicDnsName = instance.getPublicDnsName();
+                        if (metaData.getAmbariServer()) {
+                            stack.setAmbariIp(publicDnsName);
+                            Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
+                            stack.setCluster(cluster);
+                            stackRepository.save(stack);
+                        }
+                        metaData.setPublicIp(publicDnsName);
+                        instanceMetaDataRepository.save(metaData);
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     @Override

@@ -167,12 +167,12 @@ public class GccConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public Boolean startAll(User user, Long stackId) {
-        return Boolean.TRUE;
+    public boolean startAll(User user, Stack stack) {
+        return true;
     }
 
     @Override
-    public Boolean stopAll(User user, Long stackId) {
-        return Boolean.TRUE;
+    public boolean stopAll(User user, Stack stack) {
+        return true;
     }
 }
