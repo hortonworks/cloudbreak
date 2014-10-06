@@ -40,11 +40,11 @@
                     </div>
                     <div class="form-group">
                         <label class="col-sm-3 control-label" for="sl_cloudStatus">Cluster status</label>
-                        <div class="col-sm-9" ng-if="activeStack.cluster.statusReason === null && activeStack.statusReason != null">
-                            <p id="sl_cloudStatus" class="form-control-static">{{activeStack.statusReason}}</p>
+                        <div class="col-sm-9" ng-if="activeCluster.cluster.statusReason === null && activeCluster.statusReason != null">
+                            <p id="sl_cloudStatus" class="form-control-static">{{activeCluster.statusReason}}</p>
                         </div>
-                        <div class="col-sm-9" ng-if="activeStack.cluster.statusReason != null">
-                            <p id="sl_cloudStatus" class="form-control-static">{{activeStack.statusReason}}</p>
+                        <div class="col-sm-9" ng-if="activeCluster.cluster.statusReason != null">
+                            <p id="sl_cloudStatus" class="form-control-static">{{activeCluster.cluster.statusReason}}</p>
                         </div>
                     </div>
                 </form>
