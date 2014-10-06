@@ -34,6 +34,7 @@ public class StackJson implements JsonEntity {
     private String ambariServerIp;
     private String hash;
     private ClusterResponse cluster;
+    private String statusReason;
     private Set<InstanceMetaDataJson> metadata = new HashSet<>();
 
     public StackJson() {
@@ -109,6 +110,16 @@ public class StackJson implements JsonEntity {
     @JsonIgnore
     public void setStatus(Status status) {
         this.status = status;
+    }
+
+    @JsonProperty("statusReason")
+    public String getStatusReason() {
+        return statusReason;
+    }
+
+    @JsonIgnore
+    public void setStatusReason(String statusReason) {
+        this.statusReason = statusReason;
     }
 
     @JsonProperty("ambariServerIp")

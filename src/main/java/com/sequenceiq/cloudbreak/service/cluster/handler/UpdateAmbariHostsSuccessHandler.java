@@ -60,7 +60,7 @@ public class UpdateAmbariHostsSuccessHandler implements Consumer<Event<UpdateAmb
             }
             metadataRepository.save(metadataEntry);
         }
-        stackUpdater.updateStackStatus(stack.getId(), Status.AVAILABLE);
+        stackUpdater.updateStackStatus(stack.getId(), Status.AVAILABLE, "");
         websocketService.sendToTopicUser(cluster.getOwner(), WebsocketEndPoint.CLUSTER,
                 new StatusMessage(data.getClusterId(), cluster.getName(), Status.AVAILABLE.name()));
     }

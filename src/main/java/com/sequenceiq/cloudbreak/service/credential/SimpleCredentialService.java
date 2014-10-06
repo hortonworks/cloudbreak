@@ -75,9 +75,10 @@ public class SimpleCredentialService implements CredentialService {
         } catch (DataIntegrityViolationException ex) {
             throw new DuplicateKeyValueException(credential.getName(), ex);
         }
-        createAzureCertificates(user, credential);
+        createAzureCertificates(user, savedCredential);
         websocketService.sendToTopicUser(user.getUsername(), WebsocketEndPoint.CREDENTIAL,
                 new StatusMessage(credential.getId(), credential.getName(), Status.AVAILABLE.name()));
+
         return savedCredential;
     }
 

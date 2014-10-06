@@ -12,6 +12,7 @@ public class ClusterResponse {
     private String cluster;
     private Long blueprintId;
     private String description;
+    private String statusReason;
 
     public String getDescription() {
         return description;
@@ -51,6 +52,14 @@ public class ClusterResponse {
 
     public void setMinutesUp(int minutesUp) {
         this.minutesUp = minutesUp;
+    }
+
+    public String getStatusReason() {
+        return statusReason;
+    }
+
+    public void setStatusReason(String statusReason) {
+        this.statusReason = statusReason;
     }
 
     @JsonRawValue

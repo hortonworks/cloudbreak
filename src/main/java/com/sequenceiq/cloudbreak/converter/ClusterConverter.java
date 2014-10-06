@@ -55,6 +55,7 @@ public class ClusterConverter {
             clusterResponse.setHoursUp(0);
             clusterResponse.setMinutesUp(0);
         }
+        clusterResponse.setStatusReason(cluster.getStatusReason());
         clusterResponse.setBlueprintId(cluster.getBlueprint().getId());
         clusterResponse.setDescription(cluster.getDescription() == null ? "" : cluster.getDescription());
         return clusterResponse;

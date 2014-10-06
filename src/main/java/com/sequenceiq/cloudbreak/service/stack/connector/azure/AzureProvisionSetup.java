@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
+import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
@@ -64,6 +65,9 @@ public class AzureProvisionSetup implements ProvisionSetup {
 
     @Autowired
     private WebsocketService websocketService;
+
+    @Autowired
+    private RetryingStackUpdater retryingStackUpdater;
 
     @Override
     public void setupProvisioning(Stack stack) {
@@ -109,6 +113,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
 
                 websocketService.sendToTopicUser(stack.getOwner(), WebsocketEndPoint.COPY_IMAGE,
                         new StatusMessage(stack.getId(), stack.getName(), PENDING, String.format("The copy status is: %s%%.", copyPercentage)));
+                retryingStackUpdater.updateStackStatusReason(stack.getId(), String.format("The copy status is: %s%%.", copyPercentage));
                 try {
                     Thread.sleep(MILLIS);
                 } catch (InterruptedException e) {

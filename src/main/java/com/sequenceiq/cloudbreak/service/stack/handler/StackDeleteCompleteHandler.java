@@ -41,5 +41,6 @@ public class StackDeleteCompleteHandler implements Consumer<Event<StackDeleteCom
         stackRepository.delete(oneWithLists);
         websocketService.sendToTopicUser(oneWithLists.getOwner(), WebsocketEndPoint.TERMINATE,
                 new StatusMessage(oneWithLists.getId(), oneWithLists.getName(), Status.DELETE_COMPLETED.name(), String.format("Stack delete complated")));
+        retryingStackUpdater.updateStackStatusReason(oneWithLists.getId(), String.format("Stack delete complated"));
     }
 }

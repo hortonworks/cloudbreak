@@ -4,6 +4,7 @@ import static org.mockito.BDDMockito.doNothing;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.times;
 import static org.mockito.BDDMockito.verify;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.any;
@@ -84,6 +85,7 @@ public class ProvisionContextTest {
         // GIVEN
         given(stackRepository.findById(1L)).willReturn(stack);
         given(stackUpdater.updateStackStatus(1L, Status.CREATE_IN_PROGRESS)).willReturn(stack);
+        given(stackUpdater.updateStackStatusReason(anyLong(), anyString())).willReturn(stack);
         given(provisioners.get(any(CloudPlatform.class))).willReturn(provisioner);
         doNothing().when(websocketService).sendToTopicUser(anyString(), any(WebsocketEndPoint.class), any(StatusMessage.class));
         given(userDataBuilder.build(any(CloudPlatform.class), anyString(), anyMap())).willReturn(DUMMY_USER_DATA);

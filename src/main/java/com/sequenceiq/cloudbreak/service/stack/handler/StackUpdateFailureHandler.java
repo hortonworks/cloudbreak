@@ -38,6 +38,7 @@ public class StackUpdateFailureHandler implements Consumer<Event<StackOperationF
         Stack stack = stackUpdater.updateStackStatus(stackId, Status.AVAILABLE, "Stack update failed. " + detailedMessage);
         websocketService.sendToTopicUser(stack.getOwner(), WebsocketEndPoint.STACK,
                 new StatusMessage(stackId, stack.getName(), "UPDATE_FAILED", detailedMessage));
+        stackUpdater.updateStackStatusReason(stack.getId(), detailedMessage);
     }
 
 }

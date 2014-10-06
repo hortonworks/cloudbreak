@@ -9,9 +9,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailSender;
 import org.springframework.stereotype.Service;
 
-import reactor.event.Event;
-import reactor.function.Consumer;
-
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
@@ -27,6 +24,8 @@ import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
 import freemarker.template.Configuration;
+import reactor.event.Event;
+import reactor.function.Consumer;
 
 @Service
 public class ClusterCreationSuccessHandler implements Consumer<Event<ClusterCreationSuccess>> {
@@ -64,6 +63,7 @@ public class ClusterCreationSuccessHandler implements Consumer<Event<ClusterCrea
         LOGGER.info("Accepted {} event.", ReactorConfig.CLUSTER_CREATE_SUCCESS_EVENT, clusterId);
         Cluster cluster = clusterRepository.findById(clusterId);
         cluster.setStatus(Status.AVAILABLE);
+        cluster.setStatusReason("");
         cluster.setCreationFinished(clusterCreationSuccess.getCreationFinished());
         clusterRepository.save(cluster);
         Stack stack = stackRepository.findStackWithListsForCluster(clusterId);

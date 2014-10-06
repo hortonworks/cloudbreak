@@ -43,6 +43,7 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
         stackJson.setCloudPlatform(entity.getTemplate().cloudPlatform());
         stackJson.setCredentialId(entity.getCredential().getId());
         stackJson.setStatus(entity.getStatus());
+        stackJson.setStatusReason(entity.getStatusReason());
         stackJson.setAmbariServerIp(entity.getAmbariIp());
         stackJson.setHash(entity.getHash());
         stackJson.setMetadata(metaDataConverter.convertAllEntityToJson(entity.getInstanceMetaData()));
@@ -65,6 +66,7 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
         stackJson.setDescription(description);
         stackJson.setStatus(entity.getStatus());
         stackJson.setHash(entity.getHash());
+        stackJson.setStatusReason(entity.getStatusReason());
         stackJson.setMetadata(metaDataConverter.convertAllEntityToJson(entity.getInstanceMetaData()));
         stackJson.setAmbariServerIp(entity.getAmbariIp());
         if (entity.getCluster() != null) {

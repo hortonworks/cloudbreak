@@ -45,6 +45,9 @@ public class StackCreationFailureHandler implements Consumer<Event<StackOperatio
     @Resource
     private Map<CloudPlatform, CloudPlatformRollbackHandler> cloudPlatformRollbackHandlers;
 
+    @Autowired
+    private RetryingStackUpdater retryingStackUpdater;
+
     @Override
     public void accept(Event<StackOperationFailure> event) {
         StackOperationFailure stackCreationFailure = event.getData();
@@ -58,6 +61,7 @@ public class StackCreationFailureHandler implements Consumer<Event<StackOperatio
         cloudPlatformRollbackHandlers.get(stack.getTemplate().cloudPlatform()).rollback(stackRepository.findOneWithLists(stackId), stack.getResources());
         websocketService.sendToTopicUser(stack.getOwner(), WebsocketEndPoint.STACK,
                 new StatusMessage(stackId, stack.getName(), Status.CREATE_FAILED.name(), detailedMessage));
+        retryingStackUpdater.updateStackStatusReason(stackId, detailedMessage);
     }
 
 }

@@ -81,7 +81,7 @@ public class SecurityConfig {
 
         @Override
         public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
-            resources.resourceId(clientId);
+            resources.resourceId("cloudbreak");
             resources.tokenServices(remoteTokenServices());
         }
 

@@ -50,6 +50,21 @@ public class RetryingStackUpdater {
         }
     }
 
+    public Stack updateStackStatusReason(Long stackId, String statusReason) {
+        int attempt = 1;
+        try {
+            return doUpdateStackStatusReason(stackId, statusReason);
+        } catch (OptimisticLockException | OptimisticLockingFailureException e) {
+            LOGGER.info("Failed to update stack status. [id: '{}', attempt: '{}', Cause: {}]. Trying to save it again.",
+                    stackId, attempt++, e.getClass().getSimpleName());
+            if (attempt <= MAX_RETRIES) {
+                return doUpdateStackStatusReason(stackId, statusReason);
+            } else {
+                throw new InternalServerException(String.format("Failed to update stack '%s' in 5 attempts. (while trying to update status)", stackId), e);
+            }
+        }
+    }
+
     public Stack updateStackMetaData(Long stackId, Set<InstanceMetaData> instanceMetaData) {
         int attempt = 1;
         try {
@@ -160,7 +175,9 @@ public class RetryingStackUpdater {
 
     private Stack doUpdateStackStatus(Long stackId, Status status, String statusReason) {
         Stack stack = stackRepository.findById(stackId);
-        stack.setStatus(status);
+        if (status != null) {
+            stack.setStatus(status);
+        }
         if (statusReason != null) {
             stack.setStatusReason(statusReason);
         }
@@ -168,6 +185,16 @@ public class RetryingStackUpdater {
         LOGGER.info("Updated stack: [stack: '{}', status: '{}', statusReason: '{}'].", stackId, status.name(), statusReason);
 
         cloudbreakEventService.fireCloudbreakEvent(stackId, status.name(), statusReason);
+        return stack;
+    }
+
+    private Stack doUpdateStackStatusReason(Long stackId, String statusReason) {
+        Stack stack = stackRepository.findById(stackId);
+        if (statusReason != null) {
+            stack.setStatusReason(statusReason);
+        }
+        stack = stackRepository.save(stack);
+        LOGGER.info("Updated stack: [stack: '{}', statusReason: '{}'].", stackId, statusReason);
         return stack;
     }
 
