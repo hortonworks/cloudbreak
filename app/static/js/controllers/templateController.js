@@ -80,6 +80,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                 initializeAwsTemp();
                 $scope.modifyStatusMessage($rootScope.error_msg.aws_template_success1 + result.id + $rootScope.error_msg.aws_template_success2);
                 $scope.modifyStatusClass("has-success");
+                $scope.awsTemplateForm.$setPristine();
             }, function (error) {
                 $scope.modifyStatusMessage($rootScope.error_msg.aws_template_failed + ": " + error.data.message);
                 $scope.modifyStatusClass("has-error");
@@ -95,6 +96,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                 $scope.gccTemp = {};
                 $scope.modifyStatusMessage($rootScope.error_msg.aws_template_success1 + result.id + $rootScope.error_msg.aws_template_success2);
                 $scope.modifyStatusClass("has-success");
+                $scope.gccTemplateForm.$setPristine();
             }, function (error) {
                 $scope.modifyStatusMessage($rootScope.error_msg.aws_template_failed + ": " + error.data.message);
                 $scope.modifyStatusClass("has-error");
@@ -111,6 +113,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                 $scope.azureTemp = {};
                 $scope.modifyStatusMessage($rootScope.error_msg.azure_template_success1 + result.id + $rootScope.error_msg.azure_template_success2);
                 $scope.modifyStatusClass("has-success");
+                $scope.azureTemplateForm.$setPristine();
             }, function (error) {
                 $scope.modifyStatusMessage($rootScope.error_msg.azure_template_failed + ": " + error.data.message);
                 $scope.modifyStatusClass("has-error");
