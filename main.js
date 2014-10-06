@@ -146,7 +146,6 @@ app.get('/confirm', function(req, res){
                 res.end()
             } else if (confirmResp.statusCode == 302){
                 res.cookie('JSESSIONID', getCookie(req, 'uaa_cookie'))
-                res.cookie('uaa_cookie') // FIX ME: this
                 res.redirect(confirmResp.headers.location)
             } else {
 
