@@ -259,13 +259,13 @@ app.post('/forget', function(req, res){
                     'Authorization' : 'Bearer ' + token,
                     'Content-Type' : 'application/json' }
                 }
-                needle.get('http://' + uaaHost + ':' + uaaPort + '/Users/?attributes=id,givenName&filter=userName eq "' + userName + '"', usrOptions , function(err, usrResp){
+                needle.get('http://' + uaaHost + ':' + uaaPort + '/Users/?attributes=id,givenName,version&filter=userName eq "' + userName + '"', usrOptions , function(err, usrResp){
                     if (usrResp.statusCode == 200){
                         console.log(usrResp.body)
                         if (usrResp.body.resources.length == 1){
                             var templateFile = path.join(__dirname,'templates','reset-password-email.jade')
                             mailer.sendMail(req.body.email, 'Password reset' , templateFile, {user: usrResp.body.resources[0].givenName,
-                                confirm: 'http://' +  process.env.UR_HOST + ':' + process.env.UR_PORT + '/reset/' + usrResp.body.resources[0].id })
+                                confirm: 'http://' +  process.env.UR_HOST + ':' + process.env.UR_PORT + '/reset/' + usrResp.body.resources[0].id + '-' + usrResp.body.resources[0].version})
                             res.end('SUCCESS');
                         } else {
                             res.end('User Not Found');
