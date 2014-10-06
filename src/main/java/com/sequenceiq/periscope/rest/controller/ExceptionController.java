@@ -24,13 +24,13 @@ public class ExceptionController {
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ExceptionMessageJson> handleIllegalArgException(IllegalArgumentException e) {
-        LOGGER.error(-1, "Unexpected illegal argument exception", e);
+        LOGGER.error(LOGGER.NOT_CLUSTER_RELATED, "Unexpected illegal argument exception", e);
         return createExceptionMessage(e.getMessage());
     }
 
     @ExceptionHandler(NoSuchElementException.class)
     public ResponseEntity<ExceptionMessageJson> handleNotFoundExceptions(Exception e) {
-        LOGGER.error(-1, "Not found", e);
+        LOGGER.error(LOGGER.NOT_CLUSTER_RELATED, "Not found", e);
         String message = e.getMessage();
         return createExceptionMessage(message == null ? "Not found" : message, HttpStatus.NOT_FOUND);
     }

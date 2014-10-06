@@ -48,7 +48,7 @@ public class AppConfig implements AsyncConfigurer {
         try {
             return getThreadPoolExecutorFactoryBean().getObject();
         } catch (Exception e) {
-            LOGGER.error(-1, "Error creating task executor.", e);
+            LOGGER.error(LOGGER.NOT_CLUSTER_RELATED, "Error creating task executor.", e);
         }
         return null;
     }

@@ -4,6 +4,7 @@ import org.slf4j.LoggerFactory;
 
 public class Logger implements PeriscopeLogger {
 
+    public static final int NOT_CLUSTER_RELATED = -1;
     private static final String DECORATOR = " * * * ";
     private final org.slf4j.Logger sl4jLogger;
 
@@ -167,6 +168,9 @@ public class Logger implements PeriscopeLogger {
     }
 
     private String getPrefix(long clusterId) {
+        if (NOT_CLUSTER_RELATED == clusterId) {
+            return "";
+        }
         return DECORATOR + clusterId + DECORATOR;
     }
 
