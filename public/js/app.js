@@ -6,7 +6,7 @@ var regApp = angular.module('regApp', ['ngRoute']);
 regApp.controller("regController", ['$scope', '$http',
     function ($scope, $http) {
         $scope.signUp = function() {
-            $http({method: 'POST',dataType: 'json',url:  "/registration",
+            $http({method: 'POST',dataType: 'json',url:  "/register",
                    data: {email: email.value, firstName: firstName.value, lastName: lastName.value, password: password.value,
                           company: company.value}
                   }).success(function(responseData){

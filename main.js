@@ -128,7 +128,6 @@ getCookie = function(request, cookie) {
 
 app.get('/confirm', function(req, res){
   if (isUaaSession(req)){
-    // TODO: handle when there is
     var confirmParams = 'client_id=' + req.session.client_id
                         + '&response_type=' + req.session.response_type
                         + '&scope=' + req.session.scope
@@ -181,6 +180,12 @@ app.post('/confirm', function(req, res){
 
 app.post('/reset/:resetToken', function(req, res) {
     var resetToken = req.param('resetToken')
+    if (resetToken != null && resetToken.split('-').length == 6) {
+    var split = resetToken.split('-')
+    var version = split[5];
+    var userId = resetToken.substring(0, resetToken.length - split[5].length - 1);
+    console.log(userId);
+    console.log(version);
     var options = {
       headers: { 'Authorization': 'Basic ' + new Buffer(clientId + ':'+ clientSecret).toString('base64') }
     }
@@ -188,27 +193,52 @@ app.post('/reset/:resetToken', function(req, res) {
        options, function(err, tokenResp) {
        if (tokenResp.statusCode == 200){
           var token = tokenResp.body.access_token;
-          var userOptions = {
+          var usrInfoOptions = {
               headers: {
-                'Accept' : 'application/json',
-                'scope': 'password.write',
-                'aud' : 'password',
-                'Authorization' : 'Bearer ' + token,
-                'Content-Type' : 'application/json' }
+               'Accept' : 'application/json',
+               'scope': 'scim.read',
+               'aud' : 'scim',
+               'Authorization' : 'Bearer ' + token,
+               'Content-Type' : 'application/json' }
           }
-          var newPasswordData = {'password' : req.body.password}
-          needle.put('http://' + uaaHost + ':' + uaaPort + '/Users/' + resetToken + '/password', JSON.stringify(newPasswordData),
-            userOptions, function(err, resetResp) {
-                if (resetResp.statusCode = 200){
-                    res.end('SUCCESS');
-                } else {
-                    res.end('Password update failed.')
+           needle.get('http://' + uaaHost + ':' + uaaPort + '/Users/?attributes=version,id&filter=id eq "' + userId + '"', usrInfoOptions ,
+            function(err, infoResp){
+             if (infoResp.statusCode == 200){
+              if (infoResp.body.resources[0].version == version) {
+                var userOptions = {
+                           headers: {
+                             'Accept' : 'application/json',
+                             'scope': 'password.write',
+                             'aud' : 'password',
+                             'Authorization' : 'Bearer ' + token,
+                             'Content-Type' : 'application/json' }
                 }
-            })
+                var newPasswordData = {'password' : req.body.password}
+                needle.put('http://' + uaaHost + ':' + uaaPort + '/Users/' + userId + '/password', JSON.stringify(newPasswordData),
+                         userOptions, function(err, resetResp) {
+                             console.log(resetResp.body)
+                             if (resetResp.statusCode = 200){
+                                 res.end('SUCCESS');
+                             } else {
+                                 res.end('Password update failed.')
+                             }
+                 });
+                 } else {
+                 res.end('Reset URL is obsolete.');
+                 }
+             } else {
+                 res.statusCode = 400
+                 res.end('Bad Request')
+             }
+           });
        } else {
           res.end('No token for client');
        }
    });
+   } else {
+    res.statusCode = 400
+    res.end('Bad Request')
+   }
 });
 
 // forget for login
