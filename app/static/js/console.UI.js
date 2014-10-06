@@ -1,5 +1,7 @@
 var $jq = jQuery.noConflict();
-$jq(document).ready(function () {
+
+function addCrudControls(){
+
     $jq("#menu-credential ul li a").click(function () {
         if (!($jq(this).hasClass("not-option") )) {
             $jq(this).parents("#menu-credential").find('.dropdown-toggle span').text($jq(this).text()).removeClass('text-danger');
@@ -118,6 +120,7 @@ $jq(document).ready(function () {
         $jq('#sort-clusters-btn').addClass('disabled');
         $jq("#notification-n-filtering").prop("disabled", true);
     });
+
     // back to clusters
     $jq("#cluster-details-back-btn").click(function () {
         $jq('.carousel').carousel(0);
@@ -132,6 +135,7 @@ $jq(document).ready(function () {
         $jq('#sort-clusters-btn').removeClass('disabled');
         $jq("#notification-n-filtering").prop("disabled", false);
     });
+
     // show create cluster panel
     $jq('#create-cluster-btn').click(function () {
         $jq('.carousel').carousel(2);
@@ -145,6 +149,7 @@ $jq(document).ready(function () {
         $jq('#sort-clusters-btn').addClass('disabled');
         $jq("#notification-n-filtering").prop("disabled", true);
     });
+
     // back to clusters
     $jq("#create-cluster-back-btn").click(function () {
         $jq('.carousel').carousel(0);
@@ -311,4 +316,4 @@ $jq(document).ready(function () {
         // do something...
     });
 
-});
+}

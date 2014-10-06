@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="cloudbreakApp">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="favicon.ico">
+
+    <title>Cloudbreak</title>
+    <script src="js/lib/jquery-1.11.0.min.js" type="text/javascript"></script>
+
+    <link href='https://fonts.googleapis.com/css?family=Roboto+Condensed:300,400,700&amp;subset=latin-ext' rel='stylesheet' type='text/css'>
+
+    <link href="css/Cloudbreak.min.css" rel="stylesheet">
+    <link href="https://netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.css" rel="stylesheet">
+
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="https://rawgit.com/jmesnil/stomp-websocket/master/lib/stomp.js"></script>
+    <script src="js/lib/sockjs-0.3.4.min.js"></script>
+    <script src="js/lib/blob.js" type="text/javascript"></script>
+    <script src="js/lib/filesaver.js" type="text/javascript"></script>
+    <script src="js/lib/retina.min.js" type="text/javascript"></script>
+    <script src="js/lib/log4javascript.js" type="text/javascript"></script>
+    <script src="js/lib/angular.js"></script>
+    <script src="js/lib/angular-route.js"></script>
+    <script src="js/lib/angular-resource.js"></script>
+
+    <script src="js/lib/isotope.pkgd.min.js" type="text/javascript"></script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+    <script src="js/console.UI.js" type="text/javascript"></script>
+
+    <script src="js/app.js"></script>
+    <script src="js/controllers.js"></script>
+    <script src="js/controllers/templateController.js"></script>
+    <script src="js/controllers/blueprintController.js"></script>
+    <script src="js/controllers/credentialController.js"></script>
+    <script src="js/controllers/clusterController.js"></script>
+    <script src="js/services.js"></script>
+</head>
+
+<body>
+  <div class="view-container" ng-init="authorizeUrl='<%= authorizeUrl %>'">
+    <div ng-view class="view-frame"></div>
+  </div>
+
+  <script>
+      (function (i, s, o, g, r, a, m) {
+          i['GoogleAnalyticsObject'] = r;
+          i[r] = i[r] || function () {
+              (i[r].q = i[r].q || []).push(arguments)
+          }
+                  , i[r].l = 1 * new Date();
+          a = s.createElement(o),
+                  m = s.getElementsByTagName(o)[0];
+          a.async = 1;
+          a.src = g;
+          m.parentNode.insertBefore(a, m)
+      })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
+      ga('create', 'UA-52877937-1', 'auto');
+      ga('send', 'pageview');
+  </script>
+</body>
+
+</html>

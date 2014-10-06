@@ -23,9 +23,9 @@
         <label class="col-sm-3 control-label" for="source">Source</label>
 
         <div class="col-sm-9">
-                                                                    <pre id="source" class="form-control-static blueprint-source">
+           <pre id="source" class="form-control-static blueprint-source">
 {{blueprint.ambariBlueprint | json}}
-                                                                    </pre>
+           </pre>
         </div>
         <!-- .col-sm-9 -->
     </div>

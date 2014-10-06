@@ -1,0 +1,182 @@
+<div data-spy="scroll" data-target="#notification-controls" jquery-event-listener-registrar>
+
+<!-- NAVBAR ............................................................... -->
+
+<nav class="navbar navbar-default" role="navigation">
+    <div class="container-fluid">
+
+        <div class="navbar-header">
+                <span class="navbar-brand">
+                    CLOUDBREAK
+                </span>
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-1">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+        </div>
+        <!-- .navbar-header -->
+
+        <div class="collapse navbar-collapse" id="navbar-collapse-1">
+
+            <ul class="nav navbar-nav navbar-right">
+
+                <!-- ........ USER DROPDOWN ................................................ -->
+
+                <li class="dropdown">
+                    <a href="" class="dropdown-toggle" data-toggle="dropdown">
+                        <i class="fa fa-user fa-fw"></i> {{user.email}} <b class="caret"></b>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a ng-click="signOut()" data-value="cred-001"><i class="fa fa-sign-out fa-fw"></i> logout</a></li>
+                    </ul>
+                </li>
+
+                <!-- ........ CREDENTIALS DROPDOWN ......................................... -->
+
+                <li class="dropdown" id="menu-credential">
+                    <a href="" class="dropdown-toggle" data-toggle="dropdown">
+                        <i class="fa fa-tag fa-fw"></i>
+                        <span ng-class="$root.activeCredential === undefined ? 'text-danger' : 'text'">{{$root.activeCredential === undefined ? "select a credential" : $root.activeCredential.name}}</span>
+                        <b class="caret"></b>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li ng-repeat="credential in $root.credentials">
+                            <a href="" id="{{credential.id}}" value="{{credential.name}}"
+                               ng-click="$root.activeCredential = credential">{{credential.name}}</a>
+                        </li>
+                        <li class="divider"></li>
+                        <li>
+                            <a href="" class="not-option" data-toggle="collapse" data-target="#panel-credentials-collapse"><i class="fa fa-edit fa-fw"></i>
+                                manage credentials</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+            <!-- .navbar-nav -->
+        </div>
+        <!-- navbar-collapse -->
+    </div>
+    <!-- .container -->
+</nav>
+
+
+<section class="clusters">
+<div class="container-fluid carousel slide">
+
+<!-- .... CLUSTERS PANEL NOTIFICATION AND CONTROLS BAR ...................... -->
+
+    <div class="row" id="clusters-bar" data-spy="affix" data-offset-top="52"><!-- data-offset-top = @navbar-height -->
+
+        <!-- collapse/open button and notification -->
+        <div class="col-sm-7 col-xs-8 combo-box {{statusclass}}">
+            <div class="input-group">
+                    <span class="input-group-btn">
+                        <a href="" id="toggle-cluster-block-btn" class="btn btn-fa-2x btn-info" role="button" title="toggle cluster panel"><i class="fa fa-angle-up fa-2x fa-fw-forced"></i></a>
+                    </span>
+                <input id="notification-n-filtering" role="alert" type="text" disabled class="form-control" placeholder="" value="{{statusMessage}}">
+                <i class="fa fa-warning form-control-feedback" style="line-height: 40px !important;"></i>
+            </div>
+        </div>
+        <div class="col-sm-2 col-xs-2">
+            <div class="dropdown">
+                <button class="btn btn-info btn-block btn-collapse-title dropdown-toggle" type="button" id="sort-clusters-btn" data-toggle="dropdown">
+                    <i class="fa fa-sort-amount-asc fa-fw"></i><span class="sr-only">sorted by </span><span class="title"> state</span>
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                    <li class="dropdown-header">Sort by</li>
+                    <li class="disabled"><a href="" data-sort-by="state" data-sort-asc="true">state</a></li>
+                    <li><a href="" data-sort-by="name" data-sort-asc="true">name</a></li>
+                    <li><a href="" data-sort-by="nodes" data-sort-asc="false">nodes</a></li>
+                    <li><a href="" data-sort-by="uptime" data-sort-asc="false">uptime</a></li>
+                </ul>
+            </div>
+            <!-- .dropdown -->
+        </div>
+
+        <!-- create cluster button -->
+        <div class="col-sm-3 col-xs-2">
+            <button id="create-cluster-btn" ng-disabled="activeCredential === undefined" class="btn btn-success btn-block btn-collapse-title" role="button">
+                <i class="fa fa-plus fa-fw"></i>
+                <span> create cluster</span>
+            </button>
+        </div>
+
+    </div>
+<!-- .row .notification-controls -->
+
+    <div class="carousel-inner">
+
+        <!-- .... CLUSTERS "SLIDE 1" ................................................ -->
+
+        <div class="item active">
+            <div ng-include src="'tags/stack/clusterlistpanel.tag'"></div>
+        </div>
+        <!-- .item -->
+
+        <!-- .... CLUSTER DETAILS "SLIDE 2" ......................................... -->
+
+        <div class="item">
+            <div class="row cluster-details" ng-include src="'tags/stack/activecluster.tag'"></div>
+        </div>
+        <!-- .item -->
+
+        <!-- .... CREATE CLUSTER "SLIDE 3" .......................................... -->
+
+        <!-- <div class="item"> -->
+        <div class="item">
+            <div class="row create-cluster" ng-include src="'tags/stack/clusterform.tag'"></div>
+            <!-- .create-cluster -->
+        </div>
+        <!-- .item -->
+
+    </div>
+<!-- .carousel-inner -->
+
+
+</div>
+<!-- .container-fluid carousel -->
+</section>
+
+
+<section class="management-panels">
+<div class="container-fluid">
+<div class="row">
+    <div ng-include src="'tags/templatepanel.tag'"></div>
+</div>
+<div class="row">
+    <div ng-include src="'tags/blueprintpanel.tag'"></div>
+</div>
+<!-- .row -->
+<div class="row">
+
+    <div ng-include src="'tags/credentialpanel.tag'"></div>
+
+</div>
+<!-- .row -->
+</div>
+<!-- .container-fluid -->
+</section>
+
+
+<footer>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-xs-3">
+                <a href="http://sequenceiq.com"><img src="img/logo-sm.png" alt="logo"></a>
+            </div>
+            <div class="col-xs-9">
+                <p class="text-right">© SequenceIQ Inc. 2014. <span class="hidden-xs">All rights reserved.</span>
+                    <br><a href="http://sequenceiq.com/pp.html">Privacy Policy</a> &nbsp; <a href="http://sequenceiq.com/tos.html">Terms of Service</a></p>
+            </div>
+        </div>
+        <!-- .row -->
+    </div>
+    <!-- .container -->
+</footer>
+
+<!-- ............. modals ................. -->
+
+</div>

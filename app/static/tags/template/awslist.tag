@@ -35,7 +35,7 @@
         <label class="col-sm-3 control-label" for="awsregion">Region</label>
 
         <div class="col-sm-9">
-            <p id="awsregion" class="form-control-static">{{getRegionName(template.parameters.region)}}</p>
+            <p id="awsregion" class="form-control-static">{{awsRegions[template.parameters.region]}}</p>
         </div>
         <!-- .col-sm-9 -->
     </div>
@@ -67,7 +67,7 @@
         <label class="col-sm-3 control-label" for="awsvolumetype">Volume type</label>
 
         <div class="col-sm-9">
-            <p id="awsvolumetype" class="form-control-static">{{getVolumeName(template.parameters.volumeType)}}</p>
+            <p id="awsvolumetype" class="form-control-static">{{volumeTypes[template.parameters.volumeType]}}</p>
         </div>
         <!-- .col-sm-9 -->
     </div>
