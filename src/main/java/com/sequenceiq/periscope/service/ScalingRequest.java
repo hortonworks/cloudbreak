@@ -2,6 +2,7 @@ package com.sequenceiq.periscope.service;
 
 import static java.util.Collections.singletonMap;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -29,10 +30,9 @@ public class ScalingRequest implements Runnable {
     private String host;
     @Value("${periscope.cloudbreak.port}")
     private int port;
-    @Value("${periscope.cloudbreak.user}")
-    private String user;
-    @Value("${periscope.cloudbreak.pass}")
-    private String pass;
+
+    @Autowired
+    private TokenService tokenService;
 
     public ScalingRequest(Cluster cluster, ScalingPolicy policy, int totalNodes, int desiredNodeCount) {
         this.cluster = cluster;
@@ -43,12 +43,16 @@ public class ScalingRequest implements Runnable {
 
     @Override
     public void run() {
-        CloudbreakClient client = new CloudbreakClient(host, port, user, pass);
-        int scalingAdjustment = desiredNodeCount - totalNodes;
-        if (scalingAdjustment > 0) {
-            scaleUp(client, scalingAdjustment);
-        } else {
-            scaleDown(client, scalingAdjustment);
+        try {
+            CloudbreakClient client = new CloudbreakClient(host, port, tokenService.getToken());
+            int scalingAdjustment = desiredNodeCount - totalNodes;
+            if (scalingAdjustment > 0) {
+                scaleUp(client, scalingAdjustment);
+            } else {
+                scaleDown(client, scalingAdjustment);
+            }
+        } catch (TokenUnavailableException e) {
+            LOGGER.error(LOGGER.NOT_CLUSTER_RELATED, "Cannot retrieve an oauth token from the identity server", e);
         }
     }
 
