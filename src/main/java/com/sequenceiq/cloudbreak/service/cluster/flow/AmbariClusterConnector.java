@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
+import static java.util.Collections.singletonMap;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -54,12 +56,11 @@ import reactor.event.Event;
 @Service
 public class AmbariClusterConnector {
 
+    public static final int POLLING_INTERVAL = 5000;
+    public static final int MAX_ATTEMPTS_FOR_AMBARI_OPS = -1;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariClusterConnector.class);
-
-    private static final int POLLING_INTERVAL = 5000;
-    private static final int MAX_ATTEMPTS_FOR_AMBARI_OPS = -1;
     private static final int MAX_ATTEMPTS_FOR_HOSTS = 240;
-
     private static final String UNHANDLED_EXCEPTION_MSG = "Unhandled exception occurred while installing Ambari services.";
 
     @Autowired
@@ -208,6 +209,41 @@ public class AmbariClusterConnector {
     @VisibleForTesting
     protected AmbariClient createAmbariClient(String ambariIp) {
         return new AmbariClient(ambariIp, AmbariClusterService.PORT);
+    }
+
+    public boolean stopCluster(Stack stack) {
+        return setClusterState(stack, true);
+    }
+
+    public boolean startCluster(Stack stack) {
+        return setClusterState(stack, false);
+    }
+
+    private boolean setClusterState(Stack stack, boolean stopped) {
+        boolean result = true;
+        AmbariClient ambariClient = new AmbariClient(stack.getAmbariIp(), AmbariClusterService.PORT);
+        long stackId = stack.getId();
+        String action = stopped ? "stop" : "start";
+        int requestId = -1;
+        try {
+            if (stopped) {
+                requestId = ambariClient.stopAllServices();
+            } else {
+                requestId = ambariClient.startAllServices();
+            }
+        } catch (Exception e) {
+            LOGGER.warn(String.format("Failed to %s Hadoop services on stack: %s", action, stackId), e);
+            result = false;
+        }
+        if (requestId != -1) {
+            LOGGER.info("Waiting for Hadoop services to %s on stack: {}", action, stackId);
+            operationsPollingService.pollWithTimeout(
+                    new AmbariOperationsStatusCheckerTask(),
+                    new AmbariOperations(stackId, ambariClient, singletonMap(action + " services", requestId)),
+                    AmbariClusterConnector.POLLING_INTERVAL,
+                    AmbariClusterConnector.MAX_ATTEMPTS_FOR_AMBARI_OPS);
+        }
+        return result;
     }
 
     private void addBlueprint(Stack stack, AmbariClient ambariClient, Blueprint blueprint) {

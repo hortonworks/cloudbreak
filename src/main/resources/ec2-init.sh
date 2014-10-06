@@ -1,6 +1,6 @@
 : ${NODE_PREFIX=amb}
 : ${MYDOMAIN:=mycorp.kom}
-: ${IMAGE:="sequenceiq/ambari:pam-fix"}
+: ${IMAGE:="sequenceiq/ambari:1.6.0"}
 
 # instance id from ec2 metadata
 INSTANCE_ID=$(curl -s 169.254.169.254/latest/meta-data/instance-id)
@@ -26,15 +26,21 @@ done
 METADATA_RESULT=$(cat /tmp/metadata_result)
 
 # format and mount disks
+# persist the mount points to fstab
 VOLUME_COUNT=$(echo $METADATA_RESULT | jq "$INSTANCE_SELECTOR" | jq '.[].volumeCount' | sed s/\"//g)
 START_LABEL=65
 for (( i=1; i<=VOLUME_COUNT; i++ )); do
   LABEL=$(printf "\x$((START_LABEL+i))")
   mkfs -t ext4 /dev/xvd${LABEL}
   mkdir /mnt/fs${i}
-  mount /dev/xvd${LABEL} /mnt/fs${i}
+  echo /dev/xvd${LABEL} /mnt/fs${i} ext4  defaults 0 2 >> /etc/fstab
+  mount /mnt/fs${i}
   DOCKER_VOLUME_PARAMS="${DOCKER_VOLUME_PARAMS} -v /mnt/fs${i}:/mnt/fs${i}"
 done
+
+# temp solution to update docker
+service docker stop
+wget https://get.docker.io/builds/Linux/x86_64/docker-1.2.0 -O /usr/bin/docker && chmod +x /usr/bin/docker
 
 service docker restart
 sleep 5
@@ -46,7 +52,7 @@ AMBARI_SERVER=$(echo $METADATA_RESULT | jq "$INSTANCE_SELECTOR" | jq '.[].ambari
 INSTANCE_IDX=$(echo $METADATA_RESULT | jq "$INSTANCE_SELECTOR" | jq '.[].instanceIndex' | sed s/\"//g)
 
 AMBARI_SERVER_IP=$(echo $METADATA_RESULT | jq "$AMBARI_SERVER_SELECTOR" | jq '.[].privateIp' | sed s/\"//g)
-CMD="docker run -d $DOCKER_VOLUME_PARAMS -e SERF_JOIN_IP=$AMBARI_SERVER_IP --net=host --name ${NODE_PREFIX}${INSTANCE_IDX} --entrypoint /usr/local/serf/bin/start-serf-agent.sh  $IMAGE $AMBARI_ROLE"
+CMD="docker run -d $DOCKER_VOLUME_PARAMS --restart=always -e SERF_JOIN_IP=$AMBARI_SERVER_IP --net=host --name ${NODE_PREFIX}${INSTANCE_IDX} --entrypoint /usr/local/serf/bin/start-serf-agent.sh  $IMAGE $AMBARI_ROLE"
 
 cat << EOF
 =========================================

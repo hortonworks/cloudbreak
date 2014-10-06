@@ -1,9 +1,9 @@
 : ${NODE_PREFIX=amb}
 : ${MYDOMAIN:=mycorp.kom}
-: ${IMAGE:="sequenceiq/ambari:pam-fix"}
+: ${IMAGE:="sequenceiq/ambari:1.6.0"}
 : ${INSTANCE_ID:="0"}
 
-# instance id from ec2 metadata
+# instance id from azure metadata
 INSTANCE_ID=$(sudo cat /var/lib/waagent/ovf-env.xml |grep -oPm1 "(?<=<HostName>)[^<]+")
 
 # jq expression that selects the json entry of the current instance from the array returned by the metadata service
@@ -27,13 +27,15 @@ done
 METADATA_RESULT=$(cat /tmp/metadata_result)
 
 # format and mount disks
+# persist the mount points to fstab
 VOLUME_COUNT=$(echo $METADATA_RESULT | jq "$INSTANCE_SELECTOR" | jq '.[].volumeCount' | sed s/\"//g)
 START_LABEL=62
 for (( i=1; i<=VOLUME_COUNT; i++ )); do
   LABEL=$(printf "\x$((START_LABEL+i))")
   mkfs -F -t ext4 /dev/sd${LABEL}
   mkdir /mnt/fs${i}
-  mount /dev/sd${LABEL} /mnt/fs${i}
+  echo /dev/sd${LABEL} /mnt/fs${i} ext4  defaults 0 2 >> /etc/fstab
+  mount /mnt/fs${i}
   DOCKER_VOLUME_PARAMS="${DOCKER_VOLUME_PARAMS} -v /mnt/fs${i}:/mnt/fs${i}"
 done
 
@@ -43,6 +45,16 @@ DOMAIN=$(echo $FQDN | cut -d'.' -f 2-6)
 echo "nameserver 127.0.0.1" > /run/resolvconf/resolv.conf
 echo "search $DOMAIN" >> /run/resolvconf/resolv.conf
 echo "nameserver 168.63.129.16" >> /run/resolvconf/resolv.conf
+
+# on restart azure removes a nameserver from resolv.conf
+# on instance start write it back otherwise
+# datanodes fail to resolve the hostnames
+cat <<EOF > /etc/init.d/update_resolvconf
+  #!/bin/bash
+  sed -i '1i nameserver 127.0.0.1' /run/resolvconf/resolv.conf
+EOF
+chmod +x /etc/init.d/update_resolvconf
+update-rc.d update_resolvconf defaults
 
 service docker restart
 sleep 5
@@ -54,7 +66,7 @@ AMBARI_SERVER=$(echo $METADATA_RESULT | jq "$INSTANCE_SELECTOR" | jq '.[].ambari
 INSTANCE_IDX=$(echo $METADATA_RESULT | jq "$INSTANCE_SELECTOR" | jq '.[].instanceIndex' | sed s/\"//g)
 
 AMBARI_SERVER_IP=$(echo $METADATA_RESULT | jq "$AMBARI_SERVER_SELECTOR" | jq '.[].privateIp' | sed s/\"//g)
-CMD="docker run -d $DOCKER_VOLUME_PARAMS -e SERF_JOIN_IP=$AMBARI_SERVER_IP --net=host --name ${NODE_PREFIX}${INSTANCE_IDX} --entrypoint /usr/local/serf/bin/start-serf-agent.sh  $IMAGE $AMBARI_ROLE"
+CMD="docker run -d $DOCKER_VOLUME_PARAMS --restart=always -e SERF_JOIN_IP=$AMBARI_SERVER_IP --net=host --name ${NODE_PREFIX}${INSTANCE_IDX} --entrypoint /usr/local/serf/bin/start-serf-agent.sh  $IMAGE $AMBARI_ROLE"
 
 cat << EOF
 =========================================

@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
-import groovyx.net.http.HttpResponseException;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -13,9 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import reactor.core.Reactor;
-import reactor.event.Event;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,6 +25,7 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.StatusRequest;
 import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
@@ -37,7 +33,12 @@ import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.cluster.event.ClusterStatusUpdateRequest;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
+
+import groovyx.net.http.HttpResponseException;
+import reactor.core.Reactor;
+import reactor.event.Event;
 
 @Service
 public class AmbariClusterService implements ClusterService {
@@ -115,8 +116,47 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
-    public void updateStatus(Long stackId, StatusRequest statusRequest) {
-        throw new BadRequestException("Stopping/restarting a cluster is not yet supported");
+    public void updateStatus(User user, Long stackId, StatusRequest statusRequest) {
+        Stack stack = stackRepository.findOne(stackId);
+        Cluster cluster = stack.getCluster();
+        long clusterId = cluster.getId();
+        Status clusterStatus = cluster.getStatus();
+        Status stackStatus = stack.getStatus();
+        if (statusRequest.equals(StatusRequest.STARTED)) {
+            if (Status.START_IN_PROGRESS.equals(stackStatus)) {
+                LOGGER.info("Stack is starting, set cluster state to: {}", Status.START_REQUESTED);
+                cluster.setStatus(Status.START_REQUESTED);
+                clusterRepository.save(cluster);
+            } else {
+                if (!Status.STOPPED.equals(clusterStatus)) {
+                    throw new BadRequestException(
+                            String.format("Cannot update the status of cluster '%s' to STARTED, because it isn't in STOPPED state.", clusterId));
+                }
+                if (!Status.AVAILABLE.equals(stackStatus)) {
+                    throw new BadRequestException(
+                            String.format("Cannot update the status of cluster '%s' to STARTED, because the stack is not AVAILABLE", clusterId));
+                }
+                cluster.setStatus(Status.START_IN_PROGRESS);
+                clusterRepository.save(cluster);
+                LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.CLUSTER_STATUS_UPDATE_EVENT, stack.getId());
+                reactor.notify(ReactorConfig.CLUSTER_STATUS_UPDATE_EVENT,
+                        Event.wrap(new ClusterStatusUpdateRequest(user, stack.getId(), statusRequest)));
+            }
+        } else {
+            if (!Status.AVAILABLE.equals(clusterStatus)) {
+                throw new BadRequestException(
+                        String.format("Cannot update the status of cluster '%s' to STOPPED, because it isn't in AVAILABLE state.", clusterId));
+            }
+            if (!Status.AVAILABLE.equals(stackStatus) && !Status.STOP_REQUESTED.equals(stackStatus)) {
+                throw new BadRequestException(
+                        String.format("Cannot update the status of cluster '%s' to STARTED, because the stack is not AVAILABLE", clusterId));
+            }
+            cluster.setStatus(Status.STOP_IN_PROGRESS);
+            clusterRepository.save(cluster);
+            LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.CLUSTER_STATUS_UPDATE_EVENT, stack.getId());
+            reactor.notify(ReactorConfig.CLUSTER_STATUS_UPDATE_EVENT,
+                    Event.wrap(new ClusterStatusUpdateRequest(user, stack.getId(), statusRequest)));
+        }
     }
 
     @VisibleForTesting

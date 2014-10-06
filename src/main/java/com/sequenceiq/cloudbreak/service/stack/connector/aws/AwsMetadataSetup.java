@@ -9,9 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import reactor.core.Reactor;
-import reactor.event.Event;
-
 import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.ec2.AmazonEC2Client;
@@ -31,6 +28,9 @@ import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataSetupComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataUpdateComplete;
 import com.sequenceiq.cloudbreak.service.stack.flow.CoreInstanceMetaData;
+
+import reactor.core.Reactor;
+import reactor.event.Event;
 
 @Component
 public class AwsMetadataSetup implements MetadataSetup {
@@ -79,7 +79,7 @@ public class AwsMetadataSetup implements MetadataSetup {
                 coreInstanceMetadata.add(new CoreInstanceMetaData(
                         instance.getInstanceId(),
                         instance.getPrivateIpAddress(),
-                        instance.getPublicIpAddress(),
+                        instance.getPublicDnsName(),
                         instance.getBlockDeviceMappings().size() - 1,
                         instance.getPrivateDnsName()
                         ));
@@ -113,7 +113,7 @@ public class AwsMetadataSetup implements MetadataSetup {
                     coreInstanceMetadata.add(new CoreInstanceMetaData(
                             instance.getInstanceId(),
                             instance.getPrivateIpAddress(),
-                            instance.getPublicIpAddress(),
+                            instance.getPublicDnsName(),
                             instance.getBlockDeviceMappings().size() - 1,
                             instance.getPrivateDnsName()
                             ));

@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStack
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.NOT_FOUND;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.SERVICENAME;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,9 +31,13 @@ import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackDescription;
 import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.service.PollingService;
+import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteComplete;
+import com.sequenceiq.cloudbreak.service.stack.flow.AzureInstanceStatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.stack.flow.AzureInstances;
 
 import groovyx.net.http.HttpResponseDecorator;
 import groovyx.net.http.HttpResponseException;
@@ -53,6 +58,9 @@ public class AzureConnector implements CloudPlatformConnector {
 
     @Autowired
     private AzureStackUtil azureStackUtil;
+
+    @Autowired
+    private PollingService<AzureInstances> azurePollingService;
 
     @Override
     public StackDescription describeStackWithResources(User user, Stack stack, Credential credential) {
@@ -213,12 +221,51 @@ public class AzureConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public Boolean startAll(User user, Long stackId) {
-        return Boolean.TRUE;
+    public boolean startAll(User user, Stack stack) {
+        AzureClient azureClient = createAzureClient(user, stack);
+        boolean started = setStackState(stack, azureClient, false);
+        if (started) {
+            List<Resource> resources = stack.getResourcesByType(ResourceType.VIRTUAL_MACHINE);
+            List<String> instanceNames = new ArrayList<>(resources.size());
+            for (Resource resource : resources) {
+                instanceNames.add(resource.getResourceName());
+            }
+            azurePollingService.pollWithTimeout(
+                    new AzureInstanceStatusCheckerTask(),
+                    new AzureInstances(stack.getId(), azureClient, instanceNames, "Running"),
+                    AmbariClusterConnector.POLLING_INTERVAL,
+                    AmbariClusterConnector.MAX_ATTEMPTS_FOR_AMBARI_OPS);
+            return true;
+        }
+        return false;
     }
 
     @Override
-    public Boolean stopAll(User user, Long stackId) {
-        return Boolean.TRUE;
+    public boolean stopAll(User user, Stack stack) {
+        return setStackState(stack, createAzureClient(user, stack), true);
+    }
+
+    private AzureClient createAzureClient(User user, Stack stack) {
+        Credential credential = stack.getCredential();
+        String filePath = AzureCertificateService.getUserJksFileName(credential, user.emailAsFolder());
+        return azureStackUtil.createAzureClient(credential, filePath);
+    }
+
+    private boolean setStackState(Stack stack, AzureClient azureClient, boolean stopped) {
+        boolean result = true;
+        try {
+            for (Resource resource : stack.getResourcesByType(ResourceType.VIRTUAL_MACHINE)) {
+                Map<String, String> vmContext = azureStackUtil.createVMContext(resource.getResourceName());
+                if (stopped) {
+                    azureClient.stopVirtualMachine(vmContext);
+                } else {
+                    azureClient.startVirtualMachine(vmContext);
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.error(String.format("Failed to %s AZURE instances on stack: %s", stopped ? "stop" : "start", stack.getId()));
+            result = false;
+        }
+        return result;
     }
 }

@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.service.stack.connector.azure;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.security.cert.CertificateException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
@@ -35,6 +37,13 @@ public class AzureStackUtil {
         return new AzureClient(
                 ((AzureCredential) credential).getSubscriptionId(), file.getAbsolutePath(), ((AzureCredential) credential).getJks()
         );
+    }
+
+    public static Map<String, String> createVMContext(String vmName) {
+        Map<String, String> context = new HashMap<>();
+        context.put(SERVICENAME, vmName);
+        context.put(NAME, vmName);
+        return context;
     }
 
     public X509Certificate createX509Certificate(AzureCredential azureCredential, String emailAsFolder) throws FileNotFoundException, CertificateException {

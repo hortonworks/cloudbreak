@@ -16,9 +16,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import reactor.core.Reactor;
-import reactor.event.Event;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
@@ -34,6 +31,9 @@ import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataSetupComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataUpdateComplete;
 import com.sequenceiq.cloudbreak.service.stack.flow.CoreInstanceMetaData;
+
+import reactor.core.Reactor;
+import reactor.event.Event;
 
 @Component
 public class AzureMetadataSetup implements MetadataSetup {
@@ -97,7 +97,7 @@ public class AzureMetadataSetup implements MetadataSetup {
             CoreInstanceMetaData instanceMetaData = new CoreInstanceMetaData(
                     resource.getResourceName(),
                     getPrivateIP((String) virtualMachine),
-                    getVirtualIP((String) virtualMachine),
+                    resource.getResourceName() + ".cloudapp.net",
                     stack.getTemplate().getVolumeCount(),
                     getLongName((String) virtualMachine)
                     );

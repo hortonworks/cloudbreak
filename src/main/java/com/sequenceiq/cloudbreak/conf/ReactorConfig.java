@@ -19,7 +19,7 @@ public class ReactorConfig {
     public static final String STACK_CREATE_FAILED_EVENT = "STACK_CREATE_FAILED";
 
     public static final String DELETE_REQUEST_EVENT = "DELETE_REQUEST";
-    public static final String DELETE_COMPLETE_EVENT = "DELETE_COMLPETE";
+    public static final String DELETE_COMPLETE_EVENT = "DELETE_COMPLETE";
     public static final String CLUSTER_REQUESTED_EVENT = "CLUSTER_REQUESTED";
     public static final String AMBARI_STARTED_EVENT = "AMBARI_STARTED";
     public static final String CLUSTER_CREATE_SUCCESS_EVENT = "CLUSTER_CREATE_SUCCESS";
@@ -30,6 +30,9 @@ public class ReactorConfig {
     public static final String METADATA_UPDATE_COMPLETE_EVENT = "METADATA_UPDATE_COMPLETE";
     public static final String STACK_UPDATE_SUCCESS_EVENT = "STACK_UPDATE_SUCCESS";
     public static final String STACK_UPDATE_FAILED_EVENT = "STACK_UPDATE_FAILED";
+
+    public static final String STACK_STATUS_UPDATE_EVENT = "STACK_STATUS_UPDATE_REQUEST";
+    public static final String CLUSTER_STATUS_UPDATE_EVENT = "CLUSTER_STATUS_UPDATE_REQUEST";
 
     public static final String UPDATE_AMBARI_HOSTS_REQUEST_EVENT = "UPDATE_AMBARI_HOSTS_REQUEST";
     public static final String UPDATE_AMBARI_HOSTS_SUCCESS_EVENT = "UPDATE_AMBARI_HOSTS_SUCCESS";
