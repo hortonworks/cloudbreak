@@ -202,7 +202,7 @@ app.post('/reset/:resetToken', function(req, res) {
            needle.get('http://' + uaaHost + ':' + uaaPort + '/Users/?attributes=version,id&filter=id eq "' + userId + '"', usrInfoOptions ,
             function(err, infoResp){
              if (infoResp.statusCode == 200){
-              if (infoResp.body.resources[0].version == version) {
+              if (infoResp.body.resources.length > 0 && infoResp.body.resources[0].version == version) {
                 var userOptions = {
                            headers: {
                              'Accept' : 'application/json',
@@ -318,6 +318,7 @@ app.post('/register', function(req, res){
                     mailer.sendMail(req.body.email, 'Registration' , templateFile, {user: req.body.firstName,
                         confirm: 'http://' +  process.env.UR_HOST + ':' + process.env.UR_PORT + '/confirm/' + createResp.body.id})
                     result = 'SUCCESS'
+                    res = postGroups(token, createResp.body.id, req.body.company, res)
                     res.end(result)
                 } else {
                     res.end(result)
@@ -328,6 +329,45 @@ app.post('/register', function(req, res){
         }
     });
 });
+
+postGroups = function(token, userId, company, res) {
+    res = postGroup(token, userId, company, res, "sequenceiq." + userId + ".user")
+    if (res.statusCode == 201){
+        res = postGroup(token, userId, company, res, "sequenceiq." + userId + ".admin")
+        if (res.statusCode == 201){
+            res = postGroup(token, userId, company, res, "sequenceiq." + userId + ".account." + company.toLowerCase())
+        }
+    }
+    return res
+}
+
+postGroup = function(token, userId, company, res, displayName){
+        var groupOptions = {
+              headers: {
+                 'Accept' : 'application/json',
+                 'scope': 'scim.write',
+                 'aud' : 'scim',
+                 'Authorization' : 'Bearer ' + token,
+                  'Content-Type' : 'application/json'
+                  }
+        }
+        var groupData = {
+          "schemas":["urn:scim:schemas:core:1.0"],
+          "displayName": displayName,
+          "members":[
+              { "type":"USER", "value": userId }
+          ]
+        }
+        needle.post('http://' + uaaHost + ':' + uaaPort + '/Groups', JSON.stringify(groupData), groupOptions,
+            function(err, groupResp){
+                console.log(groupResp.body)
+                if (groupResp.statusCode != 201) {
+                  res.statusCode = groupResp.statusCode;
+                  return res
+                }
+        });
+        return res
+}
 
 app.get('/confirm/:confirm_token', function(req, res){
    var confirmToken = req.param("confirm_token")
