@@ -49,9 +49,6 @@ public class ProvisionContext {
     @Autowired
     private UserDataBuilder userDataBuilder;
 
-    @Autowired
-    private RetryingStackUpdater retryingStackUpdater;
-
     public void buildStack(CloudPlatform cloudPlatform, Long stackId, Map<String, Object> setupProperties, Map<String, String> userDataParams) {
         try {
             Stack stack = stackRepository.findById(stackId);
@@ -59,7 +56,7 @@ public class ProvisionContext {
                 stack = stackUpdater.updateStackStatus(stack.getId(), Status.CREATE_IN_PROGRESS);
                 websocketService.sendToTopicUser(stack.getOwner(), WebsocketEndPoint.STACK, new StatusMessage(stack.getId(), stack.getName(), stack
                         .getStatus().name()));
-                retryingStackUpdater.updateStackStatusReason(stack.getId(), stack.getStatus().name());
+                stackUpdater.updateStackStatusReason(stack.getId(), stack.getStatus().name());
                 Provisioner provisioner = provisioners.get(cloudPlatform);
                 provisioner.buildStack(stack, userDataBuilder.build(cloudPlatform, stack.getHash(), userDataParams), setupProperties);
             } else {

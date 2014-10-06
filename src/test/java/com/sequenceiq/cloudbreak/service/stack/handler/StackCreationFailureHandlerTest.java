@@ -71,6 +71,7 @@ public class StackCreationFailureHandlerTest {
     public void testAcceptStackCreationFailureEvent() {
         // GIVEN
         given(stackUpdater.updateStackStatus(anyLong(), any(Status.class), anyString())).willReturn(stack);
+        given(stackUpdater.updateStackStatusReason(anyLong(), anyString())).willReturn(stack);
         doNothing().when(websocketService).sendToTopicUser(anyString(), any(WebsocketEndPoint.class), any());
         given(cloudPlatformRollbackHandlers.get(any(CloudPlatform.class))).willReturn(azureCloudPlatformRollbackHandler);
         given(stackRepository.findOneWithLists(anyLong())).willReturn(stack);

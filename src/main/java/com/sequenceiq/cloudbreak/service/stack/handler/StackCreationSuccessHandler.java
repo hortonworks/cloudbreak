@@ -32,9 +32,6 @@ public class StackCreationSuccessHandler implements Consumer<Event<StackCreation
     @Autowired
     private Reactor reactor;
 
-    @Autowired
-    private RetryingStackUpdater retryingStackUpdater;
-
     @Override
     public void accept(Event<StackCreationSuccess> event) {
         StackCreationSuccess stackCreationSuccess = event.getData();
@@ -45,7 +42,7 @@ public class StackCreationSuccessHandler implements Consumer<Event<StackCreation
         stack = stackUpdater.updateStackStatus(stackId, Status.AVAILABLE);
         websocketService.sendToTopicUser(stack.getOwner(), WebsocketEndPoint.STACK,
                 new StatusMessage(stackId, stack.getName(), Status.AVAILABLE.name()));
-        retryingStackUpdater.updateStackStatusReason(stack.getId(), "");
+        stackUpdater.updateStackStatusReason(stack.getId(), "");
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.AMBARI_STARTED_EVENT, stackId);
         reactor.notify(ReactorConfig.AMBARI_STARTED_EVENT, Event.wrap(stack));
     }
