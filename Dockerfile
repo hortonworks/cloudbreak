@@ -1,7 +1,10 @@
-FROM nginx
+FROM node:0.10.32
 MAINTAINER SequenceIQ
 
-ADD . /usr/local/nginx/html
-ADD start.sh /
+ENV ULU_SERVER_PORT 3000
+RUN apt-get update
+RUN apt-get install -y curl unzip
+EXPOSE 3000
+ADD start.sh /uluwatu/
 
-CMD /start.sh
+CMD ["/uluwatu/start.sh"]
