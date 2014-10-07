@@ -47,6 +47,7 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
                 $scope.modifyStatusClass("has-success");
                 $scope.awsCredentialInCreate = false;
                 $scope.awsCredentialForm.$setPristine();
+                collapseCreateCredentialFormPanel();
                 // $scope.awsCredentialInCreate = false;
             }, function (error) {
                 $scope.modifyStatusMessage($rootScope.error_msg.aws_credential_failed + error.data.message);
@@ -68,6 +69,7 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
                 $scope.modifyStatusClass("has-success");
                 $scope.getAzureCertification(result.id);
                 $scope.azureCredentialForm.$setPristine();
+                collapseCreateCredentialFormPanel();
             }, function (error) {
                 $scope.modifyStatusMessage($rootScope.error_msg.azure_credential_failed + error.data.message);
                 $scope.modifyStatusClass("has-error");
@@ -86,6 +88,7 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
                 $scope.modifyStatusClass("has-success");
                 $scope.gccCredentialInCreate = false;
                 $scope.gccCredentialForm.$setPristine();
+                collapseCreateCredentialFormPanel();
             }, function (error) {
                 $scope.modifyStatusMessage($rootScope.error_msg.gcc_credential_failed + error.data.message);
                 $scope.modifyStatusClass("has-error");
@@ -113,6 +116,10 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
                 $scope.modifyStatusClass("has-error");
             });
 
+        }
+
+        function collapseCreateCredentialFormPanel() {
+          angular.element(document.querySelector('#panel-create-credentials-collapse-btn')).click();
         }
     }]
 );

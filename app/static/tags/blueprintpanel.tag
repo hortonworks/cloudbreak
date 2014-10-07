@@ -13,7 +13,7 @@
             <div class="panel-body">
 
                 <p class="btn-row-over-panel">
-                    <a href="" class="btn btn-success" role="button" data-toggle="collapse" data-target="#panel-create-blueprints-collapse">
+                    <a href="" id="panel-create-blueprints-collapse-btn" class="btn btn-success" role="button" data-toggle="collapse" data-target="#panel-create-blueprints-collapse">
                         <i class="fa fa-plus fa-fw"></i><span> create blueprint</span>
                     </a>
                 </p>

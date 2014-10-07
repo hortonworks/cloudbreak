@@ -16,7 +16,7 @@
             <div class="panel-body">
 
                 <p class="btn-row-over-panel">
-                    <a href="" class="btn btn-success" role="button" data-toggle="collapse" data-target="#panel-create-credentials-collapse">
+                    <a href="" id="panel-create-credentials-collapse-btn" class="btn btn-success" role="button" data-toggle="collapse" data-target="#panel-create-credentials-collapse">
                         <i class="fa fa-plus fa-fw"></i><span> create credential</span>
                     </a>
                 </p>
@@ -35,9 +35,20 @@
                                     </div>
                                 </div>
                             </div>
-                            <div ng-include src="'tags/credential/azureform.tag'"></div>
-                            <div ng-include src="'tags/credential/awsform.tag'"></div>
-                            <div ng-include src="'tags/credential/gccform.tag'"></div>
+
+                            <div class="alert alert-info" role="alert" ng-show="awsCredentialInCreate && awsCredential"><b>Please wait!</b> creation in progress...</div>
+                            <form class="form-horizontal" role="form" ng-show="awsCredential  && !awsCredentialInCreate" name="awsCredentialForm">
+                              <div ng-include src="'tags/credential/awsform.tag'"></div>
+                            </form>
+
+                            <form class="form-horizontal" role="form" name="azureCredentialForm"  ng-show="azureCredential">
+                                <div ng-include src="'tags/credential/azureform.tag'"></div>
+                            </form>
+
+                            <div class="alert alert-info" role="alert" ng-show="gccCredentialInCreate && gccCredential"><b>Please wait!</b> creation in progress...</div>
+                            <form class="form-horizontal" role="form" name="gccCredentialForm" ng-show="gccCredential && !gccCredentialInCreate">
+                                <div ng-include src="'tags/credential/gccform.tag'"></div>
+                            </form>
                         </div>
                     </div>
                 </div>
