@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.domain.CbUserRole;
 public class RemoteUserDetailsService implements UserDetailsService {
 
     private static final int ACCOUNT_PART = 2;
-    private static final int ROLE_PART = 3;
+    private static final int ROLE_PART = 2;
 
     @Value("${cb.client.id}")
     private String clientId;
@@ -69,12 +69,14 @@ public class RemoteUserDetailsService implements UserDetailsService {
             for (Iterator<JsonNode> iterator = root.get("resources").get(0).get("groups").getElements(); iterator.hasNext();) {
                 JsonNode node = iterator.next();
                 String group = node.get("display").asText();
-                if (group.startsWith("cloudbreak.account")) {
+                if (group.startsWith("sequenceiq.account")) {
                     String[] parts = group.split("\\.");
-                    if (account != null && !account.equals(parts[2])) {
+                    if (account != null && !account.equals(parts[ACCOUNT_PART])) {
                         throw new IllegalStateException("A user can belong to only one account.");
                     }
                     account = parts[ACCOUNT_PART];
+                } else if (group.startsWith("sequenceiq.cloudbreak")) {
+                    String[] parts = group.split("\\.");
                     roles.add(CbUserRole.fromString(parts[ROLE_PART]));
                 }
             }
