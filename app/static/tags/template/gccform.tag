@@ -20,7 +20,7 @@
 <div class="form-group">
     <label class="col-sm-3 control-label" for="gcc_tregion">Region</label>
     <div class="col-sm-9">
-        <select class="form-control" id="gcc_tregion" ng-model="gccTemp.gccZone">
+        <select class="form-control" id="gcc_tregion" ng-model="gccTemp.parameters.gccZone">
             <option value="US_CENTRAL1_A">us-central1-a</option>
             <option value="US_CENTRAL1_B">us-central1-b</option>
             <option value="US_CENTRAL1_F">us-central1-f</option>
@@ -34,7 +34,7 @@
 <div class="form-group">
     <label class="col-sm-3 control-label" for="gcc_tinstanceType">Instance type</label>
     <div class="col-sm-9">
-        <select class="form-control" id="gcc_tinstanceType" ng-model="gccTemp.gccImageType">
+        <select class="form-control" id="gcc_tinstanceType" ng-model="gccTemp.parameters.gccImageType">
             <option value="N1_STANDARD_1">n1-standard-1</option>
             <option value="N1_STANDARD_2">n1-standard-2</option>
             <option value="N1_STANDARD_4">n1-standard-4</option>
