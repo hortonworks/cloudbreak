@@ -1,4 +1,5 @@
 #!/bin/bash
+: ${ULU_ZIP:=oauth}
 
 if [ -z "$ULU_CLOUDBREAK_ADDRESS" ]; then
   echo ULU_CLOUDBREAK_ADDRESS must be set;
@@ -29,4 +30,4 @@ if [ $MISSING_ENV_VARS ]; then
   exit 1;
 fi
 
-cd /uluwatu && node server.js
+mkdir /uluwatu && cd /uluwatu && curl -LO $ULU_URL && unzip /uluwatu/$ULU_ZIP && cd /uluwatu/uluwatu-$ULU_ZIP && node install && node server.js
