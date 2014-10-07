@@ -112,14 +112,14 @@
         <!-- .... CLUSTERS "SLIDE 1" ................................................ -->
 
         <div class="item active">
-            <div ng-include src="'tags/stack/clusterlistpanel.tag'"></div>
+            <div ng-include src="'tags/stack/clusterlistpanel.tag'" onload="addClusterListPanelJQEventListeners()"></div>
         </div>
         <!-- .item -->
 
         <!-- .... CLUSTER DETAILS "SLIDE 2" ......................................... -->
 
         <div class="item">
-            <div class="row cluster-details" ng-include src="'tags/stack/activecluster.tag'"></div>
+            <div class="row cluster-details" ng-include src="'tags/stack/activecluster.tag'" onload="addActiveClusterJQEventListeners()"></div>
         </div>
         <!-- .item -->
 
@@ -127,7 +127,7 @@
 
         <!-- <div class="item"> -->
         <div class="item">
-            <div class="row create-cluster" ng-include src="'tags/stack/clusterform.tag'"></div>
+            <div class="row create-cluster" ng-include src="'tags/stack/clusterform.tag'" onload="addClusterFormJQEventListeners()"></div>
             <!-- .create-cluster -->
         </div>
         <!-- .item -->
@@ -144,15 +144,15 @@
 <section class="management-panels">
 <div class="container-fluid">
 <div class="row">
-    <div ng-include src="'tags/templatepanel.tag'"></div>
+    <div ng-include onload="addPanelJQueryEventListeners('templates')" src="'tags/templatepanel.tag'"></div>
 </div>
 <div class="row">
-    <div ng-include src="'tags/blueprintpanel.tag'"></div>
+    <div ng-include onload="addPanelJQueryEventListeners('blueprints')" src="'tags/blueprintpanel.tag'"></div>
 </div>
 <!-- .row -->
 <div class="row">
 
-    <div ng-include src="'tags/credentialpanel.tag'"></div>
+    <div ng-include onload="addPanelJQueryEventListeners('credentials')" src="'tags/credentialpanel.tag'"></div>
 
 </div>
 <!-- .row -->

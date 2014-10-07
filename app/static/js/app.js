@@ -45,11 +45,3 @@ cloudbreakApp.config([ '$routeProvider', '$locationProvider', '$httpProvider', f
     $httpProvider.responseInterceptors.push(authInterceptor);
 
 } ]);
-
-cloudbreakApp.directive('jqueryEventListenerRegistrar',['$timeout', function (timer) {
-    return {
-        link: function (scope, elem, attrs, ctrl) {
-            timer(addCrudControls, 0);
-        }
-    }
-}]);

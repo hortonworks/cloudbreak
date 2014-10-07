@@ -1,6 +1,6 @@
 <!-- .... BLUEPRINTS PANEL ................................................. -->
 
-<div ng-controller="blueprintController" class="col-md-12 col-lg-9">
+<div id="panel-blueprints" ng-controller="blueprintController" class="col-md-12 col-lg-9">
 
     <div class="panel panel-default">
         <div class="panel-heading panel-heading-nav">
@@ -13,7 +13,7 @@
             <div class="panel-body">
 
                 <p class="btn-row-over-panel">
-                    <a href="" class="btn btn-success" role="button" data-toggle="collapse" data-target="#panel-create-blueprint-collapse">
+                    <a href="" class="btn btn-success" role="button" data-toggle="collapse" data-target="#panel-create-blueprints-collapse">
                         <i class="fa fa-plus fa-fw"></i><span> create blueprint</span>
                     </a>
                 </p>
@@ -21,7 +21,7 @@
                 <!-- ............ CREATE FORM ............................................. -->
 
                 <div class="panel panel-default">
-                    <div id="panel-create-blueprint-collapse" class="panel-collapse panel-under-btn-collapse collapse">
+                    <div id="panel-create-blueprints-collapse" class="panel-collapse panel-under-btn-collapse collapse">
                         <div class="panel-body">
                             <div class="row " style="padding-bottom: 10px">
                                 <div class="btn-segmented-control" id="providerSelector2">

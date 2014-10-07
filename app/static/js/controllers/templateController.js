@@ -12,8 +12,8 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
 
         $scope.awsRegions = {
             'US_EAST_1': 'US East(N. Virginia)',
-            'US_WEST_1': 'US West (Oregon)',
-            'US_WEST_2': 'US West (N. California)',
+            'US_WEST_1': 'US West (N. California)',
+            'US_WEST_2': 'US West (Oregon)',
             'EU_WEST_1': 'EU (Ireland)',
             'AP_SOUTHEAST_1': 'Asia Pacific (Singapore)',
             'AP_SOUTHEAST_2': 'Asia Pacific (Sydney)',

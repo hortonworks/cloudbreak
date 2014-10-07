@@ -47,7 +47,7 @@
 
 <body>
   <div class="view-container" ng-init="authorizeUrl='<%= authorizeUrl %>'">
-    <div ng-view class="view-frame"></div>
+    <div ng-view class="view-frame" onload="addCrudControls()"></div>
   </div>
 
   <script>

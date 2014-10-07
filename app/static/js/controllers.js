@@ -92,5 +92,25 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
                 $scope.modifyStatusClass("has-error");
             }
         }
+
+        $scope.addPanelJQueryEventListeners = function(panel) {
+          addPanelJQueryEventListeners(panel);
+        }
+
+        $scope.addClusterFormJQEventListeners = function() {
+          addClusterFormJQEventListeners();
+        }
+
+        $scope.addActiveClusterJQEventListeners = function() {
+          addActiveClusterJQEventListeners();
+        }
+
+        $scope.addClusterListPanelJQEventListeners = function() {
+           addClusterListPanelJQEventListeners();
+        }
+
+        $scope.addCrudControls = function() {
+          addCrudControls();
+        }
     }
 ]);
