@@ -1,47 +1,11 @@
 #!/bin/bash
-
-if [ -z "$SEQ_REG_PORT" ]; then
-  echo SEQ_REG_PORT must be set;
-  MISSING_ENV_VARS=true;
-fi
-
-if [ -z "$UAA_HOST" ]; then
-  echo UAA_HOST must be set;
-  MISSING_ENV_VARS=true;
-fi
-
-if [ -z "$UAA_PORT" ]; then
-  echo UAA_PORT must be set;
-  MISSING_ENV_VARS=true;
-fi
-
-if [ -z "$UR_SMTP_SENDER_HOST" ]; then
-  echo UR_SMTP_SENDER_HOST must be set;
-  MISSING_ENV_VARS=true;
-fi
-
-if [ -z "$UR_SMTP_SENDER_PORT" ]; then
-  echo UR_SMTP_SENDER_PORT must be set;
-  MISSING_ENV_VARS=true;
-fi
-
-if [ -z "$UR_SMTP_SENDER_USERNAME" ]; then
-  echo UR_SMTP_SENDER_USERNAME must be set;
-  MISSING_ENV_VARS=true;
-fi
-
-if [ -z "$UR_SMTP_SENDER_PASSWORD" ]; then
-  echo UR_SMTP_SENDER_PASSWORD must be set;
-  MISSING_ENV_VARS=true;
-fi
-
-if [ -z "$UR_SMTP_SENDER_FROM" ]; then
-  echo UR_SMTP_SENDER_FROM must be set;
-  MISSING_ENV_VARS=true;
-fi
-
-if [ $MISSING_ENV_VARS ]; then
-  exit 1;
-fi
+: ${UR_PORT:?"Please set the UR_PORT environment variable!"}
+: ${UAA_HOST:?"Please set the UAA_HOST environment variable!"}
+: ${UAA_PORT:?"Please set the UR_PORT environment variable!"}
+: ${UR_SMTP_SENDER_HOST:?"Please set the UR_SMTP_SENDER_HOST environment variable!"}
+: ${UR_SMTP_SENDER_PORT:?"Please set the UR_SMTP_SENDER_PORT environment variable!"}
+: ${UR_SMTP_SENDER_USERNAME:?"Please set the UR_SMTP_SENDER_USERNAME environment variable!"}
+: ${UR_SMTP_SENDER_PASSWORD:?"Please set the UR_SMTP_SENDER_PASSWORD environment variable!"}
+: ${UR_SMTP_SENDER_FROM:?"Please set the UR_SMTP_SENDER_FROM environment variable!"}
 
 npm install && node main
