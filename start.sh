@@ -1,5 +1,5 @@
 #!/bin/bash
-: ${ULU_ZIP:=oauth}
+: ${ULU_ZIP:=master}
 
 ULU_URL=https://github.com/sequenceiq/uluwatu/archive/$ULU_ZIP.zip
 
