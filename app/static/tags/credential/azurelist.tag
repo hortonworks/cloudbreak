@@ -40,7 +40,7 @@
         <label class="col-sm-3 control-label" for="jksFile">Certification file</label>
 
         <div class="col-sm-9">
-            <a href="#" id="jksFile" ng-click="getAzureCertification(credential.id)" download="file.cer" class="btn btn-success btn-block" role="button"><i
+            <a id="jksFile" ng-click="getAzureCertification(credential.id)" download="file.cer" class="btn btn-success btn-block" role="button"><i
                     class="fa fa-file fa-fw"></i>
                 Download certificate file</a>
         </div>

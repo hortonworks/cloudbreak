@@ -50,6 +50,9 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
         $rootScope.templates = UserTemplate.query();
         $scope.azureTemp = {};
         $scope.gccTemp = {};
+        $scope.awsTemplateForm = {};
+        $scope.gccTemplateForm = {};
+        $scope.azureTemplateForm = {};
         initializeAwsTemp();
 
         $scope.createAwsTemplateRequest = function() {

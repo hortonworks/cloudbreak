@@ -30,4 +30,3 @@ if [ $MISSING_ENV_VARS ]; then
 fi
 
 cd /uluwatu && node server.js
-

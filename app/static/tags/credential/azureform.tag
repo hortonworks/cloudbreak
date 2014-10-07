@@ -70,7 +70,7 @@ your key...
     
     <div class="row btn-row">
         <div class="col-sm-9 col-sm-offset-3">
-            <a href="#" id="createAzureCredential" ng-disabled="azureCredentialForm.$invalid" class="btn btn-success btn-block" ng-click="createAzureCredential()" role="button"><i
+            <a id="createAzureCredential" ng-disabled="azureCredentialForm.$invalid" class="btn btn-success btn-block" ng-click="createAzureCredential()" role="button"><i
                     class="fa fa-plus fa-fw"></i>
                 create credential</a>
         </div>

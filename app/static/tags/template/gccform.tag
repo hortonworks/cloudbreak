@@ -72,7 +72,7 @@
 </div>
 <div class="row btn-row">
     <div class="col-sm-9 col-sm-offset-3">
-        <a href="#" id="createGccTemplate" ng-disabled="gccTemplateForm.$invalid" class="btn btn-success btn-block" ng-click="createGccTemplate()" role="button"><i class="fa fa-plus fa-fw"></i>
+        <a id="createGccTemplate" ng-disabled="gccTemplateForm.$invalid" class="btn btn-success btn-block" ng-click="createGccTemplate()" role="button"><i class="fa fa-plus fa-fw"></i>
             create template</a>
     </div>
 </div>

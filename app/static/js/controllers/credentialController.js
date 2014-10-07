@@ -13,6 +13,9 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
         $scope.azureCredential = false;
         $scope.awsCredential = true;
         $scope.gccCredential = false;
+        $scope.awsCredentialForm = {};
+        $scope.gccCredentialForm = {};
+        $scope.azureCredentialForm = {};
 
         $scope.createAwsCredentialRequest = function() {
             $scope.azureCredential = false;

@@ -63,7 +63,7 @@ MIICXAIBAAKBgQ...
     </div>
     <div class="row btn-row">
         <div class="col-sm-9 col-sm-offset-3">
-            <a href="#" id="createGccCredential" ng-disabled="gccCredentialForm.$invalid" ng-click="createGccCredential()" class="btn btn-success btn-block" role="button"><i class="fa fa-plus fa-fw"></i> create credential</a>
+            <a id="createGccCredential" ng-disabled="gccCredentialForm.$invalid" ng-click="createGccCredential()" class="btn btn-success btn-block" role="button"><i class="fa fa-plus fa-fw"></i> create credential</a>
         </div>
     </div>
 </form>

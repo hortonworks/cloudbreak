@@ -55,7 +55,7 @@
     
     <div class="row btn-row">
         <div class="col-sm-9 col-sm-offset-3">
-            <a href="#" id="createAwsCredential" ng-disabled="awsCredentialForm.$invalid" ng-click="createAwsCredential()" class="btn btn-success btn-block" role="button"><i
+            <a id="createAwsCredential" ng-disabled="awsCredentialForm.$invalid" ng-click="createAwsCredential()" class="btn btn-success btn-block" role="button"><i
                     class="fa fa-plus fa-fw"></i>
                 create credential</a>
         </div>

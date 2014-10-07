@@ -79,7 +79,7 @@
 
 <div class="row btn-row">
     <div class="col-sm-9 col-sm-offset-3">
-        <a href="" id="createAzureTemplate" ng-disabled="azureTemplateForm.$invalid" class="btn btn-success btn-block" ng-click="createAzureTemplate()" role="button"><i
+        <a id="createAzureTemplate" ng-disabled="azureTemplateForm.$invalid" class="btn btn-success btn-block" ng-click="createAzureTemplate()" role="button"><i
                 class="fa fa-plus fa-fw"></i> create template</a>
     </div>
 </div>
