@@ -34,7 +34,7 @@
 <div class="form-group">
     <label class="col-sm-3 control-label" for="gcc_tinstanceType">Instance type</label>
     <div class="col-sm-9">
-        <select class="form-control" id="gcc_tinstanceType" ng-model="gccTemp.parameters.gccImageType">
+        <select class="form-control" id="gcc_tinstanceType" ng-model="gccTemp.parameters.gccInstanceType">
             <option value="N1_STANDARD_1">n1-standard-1</option>
             <option value="N1_STANDARD_2">n1-standard-2</option>
             <option value="N1_STANDARD_4">n1-standard-4</option>
@@ -54,7 +54,7 @@
 <div class="form-group">
     <label class="col-sm-3 control-label" for="gcc_tvolumecount">Attached volumes per instance</label>
     <div class="col-sm-9">
-        <input type="number" name="gcc_tvolumecount" class="form-control" ng-model="gcc_tvolumecount" id="gcc_tvolumecount" min="1" ng-model="gccTemp.volumeCount" required>
+        <input type="number" name="gcc_tvolumecount" class="form-control" id="gcc_tvolumecount" min="1" ng-model="gccTemp.volumeCount" required>
         <div class="help-block"  ng-show="gccTemplateForm.gcc_tvolumecount.$dirty && gccTemplateForm.gcc_tvolumecount.$invalid"><i class="fa fa-warning"></i>
             {{error_msg.volume_count_invalid}}
         </div>
