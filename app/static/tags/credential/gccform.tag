@@ -23,7 +23,7 @@
         <label class="col-sm-3 control-label" for="gcc_tprojectId">Project Id</label>
 
         <div class="col-sm-9">
-            <input type="text" class="form-control" id="gcc_tprojectId" ng-model="credentialGcc.projectId" name="gcc_tprojectId" ng-model="gcc_tprojectId" placeholder="projectid" required">
+            <input type="text" class="form-control" id="gcc_tprojectId" ng-model="credentialGcc.parameters.projectId" name="gcc_tprojectId" placeholder="projectid" required">
             <div class="help-block" ng-show="gccTemplateForm.gcc_tprojectId.$dirty && gccTemplateForm.gcc_tprojectId.$invalid">
                 <i class="fa fa-warning"></i> {{error_msg.template_project_id_empty}}
             </div>
@@ -32,7 +32,7 @@
     <div class="form-group" ng-class="{ 'has-error': gccCredentialForm.gcccsubscriptionId.$dirty && gccCredentialForm.gcccsubscriptionId.$invalid }">
         <label class="col-sm-3 control-label" for="gcccsubscriptionId">Service Account Id</label>
         <div class="col-sm-9">
-            <input type="text" class="form-control" ng-model="credentialGcc.serviceAccountId" id="gcccsubscriptionId" name="gcccsubscriptionId" ng-model="gcccsubscriptionId" required  placeholder="your subscription id">
+            <input type="text" class="form-control" ng-model="credentialGcc.parameters.serviceAccountId" id="gcccsubscriptionId" name="gcccsubscriptionId" required  placeholder="your subscription id">
             <div class="help-block" ng-show="gccCredentialForm.gcccsubscriptionId.$dirty && gccCredentialForm.gcccsubscriptionId.$invalid">
                 <i class="fa fa-warning"></i> {{error_msg.credential_subscription_invalid}}
             </div>
@@ -45,7 +45,7 @@
             <textarea rows="4" type="text"
 placeholder="-----BEGIN RSA PRIVATE KEY-----
 MIICXAIBAAKBgQ...
------END RSA PRIVATE KEY-----" class="form-control" ng-model="gcc_csshPublicKey" name="gcc_csshPublicKey" id="gcc_csshPublicKey" ng-model="credentialGcc.serviceAccountPrivateKey"  required></textarea>
+-----END RSA PRIVATE KEY-----" class="form-control" name="gcc_csshPublicKey" id="gcc_csshPublicKey" ng-model="credentialGcc.parameters.serviceAccountPrivateKey"  required></textarea>
             <div class="help-block" ng-show="gccCredentialForm.gcc_csshPublicKey.$dirty && gccCredentialForm.gcc_csshPublicKey.$invalid">
                 <i class="fa fa-warning"></i> {{error_msg.credential_ssh_key_invalid}}
             </div>
@@ -55,7 +55,7 @@ MIICXAIBAAKBgQ...
         <label class="col-sm-3 control-label" for="gcc_sshPublicKey">SSH public key:</label>
 
         <div class="col-sm-9">
-            <textarea rows="4" placeholder="ssh-rsa AAAAB3... user-eu" type="text" class="form-control" ng-model="gcc_sshPublicKey" ng-model="credentialGcc.publicKey" name="gcc_sshPublicKey" id="gcc_sshPublicKey" required></textarea>
+            <textarea rows="4" placeholder="ssh-rsa AAAAB3... user-eu" type="text" class="form-control" ng-model="credentialGcc.publicKey" name="gcc_sshPublicKey" id="gcc_sshPublicKey" required></textarea>
             <div class="help-block" ng-show="gccCredentialForm.gcc_sshPublicKey.$dirty && gccCredentialForm.gcc_sshPublicKey.$invalid">
                 <i class="fa fa-warning"></i> {{error_msg.credential_ssh_key_invalid}}
             </div>
