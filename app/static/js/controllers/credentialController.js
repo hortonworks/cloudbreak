@@ -10,6 +10,9 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
         $scope.credentialGcc = {};
         $scope.awsCredentialInCreate = false;
         $scope.gccCredentialInCreate = false;
+        $scope.azureCredential = false;
+        $scope.awsCredential = true;
+        $scope.gccCredential = false;
 
         $scope.createAwsCredentialRequest = function() {
             $scope.azureCredential = false;
@@ -31,7 +34,7 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
 
         $scope.createAwsCredential = function() {
             $scope.credentialAws.cloudPlatform = "AWS";
-            $scope.awsCredentialInCreate = true;
+            $rootScope.awsCredentialInCreate = true;
             // $scope.awsCredentialInCreate = true;
             UserCredential.save($scope.credentialAws, function(result) {
                 $scope.credentialAws.id = result.id;
@@ -70,7 +73,7 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
 
         $scope.createGccCredential = function() {
             $scope.credentialGcc.cloudPlatform = "GCC";
-            $scope.gccCredentialInCreate = true;
+            $rootScope.gccCredentialInCreate = true;
 
             UserCredential.save($scope.credentialGcc, function(result){
                 $scope.credentialGcc.id = result.id;

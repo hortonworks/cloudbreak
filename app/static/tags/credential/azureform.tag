@@ -59,7 +59,7 @@
         <div class="col-sm-9">
             <textarea rows="4" type="text" placeholder="-----BEGIN CERTIFICATE-----
 your key...
------END CERTIFICATE-----" class="form-control" ng-model="credentialAzure.azure_sshPublicKey" name="azure_sshPublicKey" id="azure_sshPublicKey" required></textarea>
+-----END CERTIFICATE-----" class="form-control" ng-model="credentialAzure.publicKey" name="azure_sshPublicKey" id="azure_sshPublicKey" required></textarea>
             <div class="help-block" ng-show="azureCredentialForm.azure_sshPublicKey.$dirty && azureCredentialForm.azure_sshPublicKey.$invalid">
                 <i class="fa fa-warning"></i> {{error_msg.credential_ssh_key_invalid}}
             </div>

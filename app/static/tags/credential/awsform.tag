@@ -44,7 +44,7 @@
         <label class="col-sm-3 control-label" for="aws_sshPublicKey">SSH public key:</label>
 
         <div class="col-sm-9">
-            <textarea placeholder="ssh-rsa AAAAB3... user-eu" rows="4" type="text" class="form-control" ng-model="credentialAws.aws_sshPublicKey" name="aws_sshPublicKey" id="aws_sshPublicKey" required></textarea>
+            <textarea placeholder="ssh-rsa AAAAB3... user-eu" rows="4" type="text" class="form-control" ng-model="credentialAws.publicKey" name="aws_sshPublicKey" id="aws_sshPublicKey" required></textarea>
             <div class="help-block" ng-show="awsCredentialForm.aws_sshPublicKey.$dirty && awsCredentialForm.aws_sshPublicKey.$invalid">
                 <i class="fa fa-warning"></i> {{error_msg.credential_ssh_key_invalid}}
             </div>

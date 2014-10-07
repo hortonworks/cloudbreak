@@ -55,7 +55,7 @@ MIICXAIBAAKBgQ...
         <label class="col-sm-3 control-label" for="gcc_sshPublicKey">SSH public key:</label>
 
         <div class="col-sm-9">
-            <textarea rows="4" placeholder="ssh-rsa AAAAB3... user-eu" type="text" class="form-control" ng-model="gcc_sshPublicKey" ng-model="credentialGcc.sshPublicKey" name="gcc_sshPublicKey" id="gcc_sshPublicKey" required></textarea>
+            <textarea rows="4" placeholder="ssh-rsa AAAAB3... user-eu" type="text" class="form-control" ng-model="gcc_sshPublicKey" ng-model="credentialGcc.publicKey" name="gcc_sshPublicKey" id="gcc_sshPublicKey" required></textarea>
             <div class="help-block" ng-show="gccCredentialForm.gcc_sshPublicKey.$dirty && gccCredentialForm.gcc_sshPublicKey.$invalid">
                 <i class="fa fa-warning"></i> {{error_msg.credential_ssh_key_invalid}}
             </div>
