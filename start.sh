@@ -1,7 +1,7 @@
 #!/bin/bash
 : ${ULU_ZIP:=oauth}
 
-export ULU_URL=https://github.com/sequenceiq/uluwatu/archive/$ULU_ZIP.zip
+ULU_URL=https://github.com/sequenceiq/uluwatu/archive/$ULU_ZIP.zip
 
 if [ -z "$ULU_CLOUDBREAK_ADDRESS" ]; then
   echo ULU_CLOUDBREAK_ADDRESS must be set;
