@@ -20,7 +20,7 @@ import com.sequenceiq.periscope.log.PeriscopeLoggerFactory;
 public class TokenService {
 
     private static final Logger LOGGER = PeriscopeLoggerFactory.getLogger(TokenService.class);
-    private static final String CLIENT_ID = "periscope_client";
+    private static final String CLIENT_ID = "periscope-client";
 
     @Value("${periscope.identity.host}")
     private String identityServerHost;
