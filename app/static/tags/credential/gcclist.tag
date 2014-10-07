@@ -30,7 +30,7 @@
         <label class="col-sm-3 control-label" for="gcclprojectId">Project Id</label>
 
         <div class="col-sm-9">
-            <p id="gcclprojectId" class="form-control-static">{{template.parameters.projectId}}</p>
+            <p id="gcclprojectId" class="form-control-static">{{credential.parameters.projectId}}</p>
         </div>
         <!-- .col-sm-9 -->
     </div>
