@@ -31,6 +31,7 @@ regApp.controller("resetController", ['$scope', '$http',
                           }).success(function(responseData){
                             if (responseData == 'SUCCESS'){
                               console.log("password update succeed") // TODO
+                              window.location = '/login'
                             } else {
                               console.log("password update failed") // TODO
                             }
@@ -80,16 +81,15 @@ regApp.controller("loginController", ['$scope', '$http',
 
 regApp.controller("confirmController", ['$scope', '$http',
     function ($scope, $http, $location) {
-        $scope.signIn = function(choose) {
+        $scope.confirm = function(choose) {
             var target = '/login'
             $http({method: 'POST',dataType: 'json', url:  "/confirm",
                  data: {choose: choose},
                  headers: {'Content-Type': 'application/json'}
             }).success(function(responseData){
-                if (responseData) {
-                    window.location = target
+                if (responseData.statusCode == 302) {
+                    window.location = responseData
                 } else {
-                  // TODO
                   window.location = target
                 }
             }).error(function(data) {

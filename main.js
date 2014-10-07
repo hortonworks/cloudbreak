@@ -72,7 +72,6 @@ app.post('/login', function(req, res){
     var userCredentials = {username: username, password: password}
     needle.post('http://' + uaaHost + ':' + uaaPort + '/login.do', userCredentials,
        function(err, tokenResp) {
-       console.log('set-cookie' + tokenResp.headers.location)
         var splittedLocation = tokenResp.headers.location.split('?')
         if (splittedLocation.length == 1 || splittedLocation[1] != 'error=true'){
             var cookies = tokenResp.headers['set-cookie'][0].split(';')
@@ -140,14 +139,12 @@ app.get('/confirm', function(req, res){
     needle.get('http://' + uaaHost + ':' + uaaPort + '/oauth/authorize?' + confirmParams, confirmOptions,
         function(err, confirmResp) {
             if (confirmResp.statusCode == 200){
-                // TODO: set confirmation key
-                console.log(JSON.stringify(confirmResp.body))
-                res.end()
+                res.render('confirm', {client_id : req.session.client_id})
             } else if (confirmResp.statusCode == 302){
                 res.cookie('JSESSIONID', getCookie(req, 'uaa_cookie'))
                 res.redirect(confirmResp.headers.location)
             } else {
-
+                res.end('Error from token server')
             }
         });
   } else {
@@ -159,22 +156,32 @@ app.get('/confirm', function(req, res){
 app.post('/confirm', function(req, res){
     var choose = req.param('choose');
     if (choose == 'yes') {
-        // TODO: rewrite it
-        var confirmParams = {client_id: req.session.client_id, response_type: req.session.response_type,
-                          scope: req.session.scope, redirect_uri: req.session.redirect_uri}
-        var confirmOptions = {
-                          headers: {
-                            'Accept' : 'application/json',
-                            'Set-Cookie': 'JSESSIONID=' + getCookie(req, 'uaa_cookie'),
-                            'Content-Type' : 'application/json' }
-                      }
-        needle.post('http://' + uaaHost + ':' + uaaPort + '/oauth/authorize', confirmParams,
-                    JSON.stringify(confirmOptions), function(err, confirmResp) {
-                res.redirect(res.headers.location) // TODO check
-        });
+    var confirmParams = 'client_id=' + req.session.client_id
+                        + '&response_type=' + req.session.response_type
+                        + '&scope=' + req.session.scope
+                        + '&redirect_uri=' + req.session.redirect_uri;
+    var confirmOptions = {
+                      headers: {
+                        'Cookie': 'JSESSIONID=' + getCookie(req, 'uaa_cookie')
+                         }
+                  }
+    // change to POST /oauth/authorize?user_oauth_approval=true
+    needle.get('http://' + uaaHost + ':' + uaaPort + '/oauth/authorize?' + confirmParams, confirmOptions,
+        function(err, confirmResp) {
+            if (confirmResp.statusCode == 200){
+                res.cookie('JSESSIONID', getCookie(req, 'uaa_cookie'))
+                res.render('confirm', {client_id : req.session.client_id})
+            } else if (confirmResp.statusCode == 302){
+                res.cookie('JSESSIONID', getCookie(req, 'uaa_cookie'))
+                res.statusCode = 302
+                res.end(confirmResp.headers.location)
+            } else {
+                res.end('Error from token server')
+            }
+     });
     } else {
         res.statusCode = 400
-        res.end()
+        res.render('login')
     }
 });
 
@@ -214,7 +221,6 @@ app.post('/reset/:resetToken', function(req, res) {
                 var newPasswordData = {'password' : req.body.password}
                 needle.put('http://' + uaaHost + ':' + uaaPort + '/Users/' + userId + '/password', JSON.stringify(newPasswordData),
                          userOptions, function(err, resetResp) {
-                             console.log(resetResp.body)
                              if (resetResp.statusCode = 200){
                                  res.end('SUCCESS');
                              } else {
@@ -363,7 +369,6 @@ postGroup = function(token, userId, company, displayName){
 
 app.get('/confirm/:confirm_token', function(req, res){
    var confirmToken = req.param("confirm_token")
-   var result = 'FAILED'
    var options = {
      headers: { 'Authorization': 'Basic ' + new Buffer(clientId + ':'+ clientSecret).toString('base64') }
    }
@@ -407,18 +412,17 @@ app.get('/confirm/:confirm_token', function(req, res){
                         }
                         needle.put('http://' + uaaHost + ':' + uaaPort + '/Users/' + confirmToken, JSON.stringify(userData),
                         updateOptions, function(err, updateResp){
-                            result = 'SUCCESS'
-                            res.end(result)
+                            res.render('login')
                         });
                     } else {
-                     res.end(result)
+                     res.end('Cannot retrieve user by confirm token.')
                     }
                    } else {
-                    res.end(result)
+                    res.end('Cannot retrieve user.')
                    }
             });
         } else {
-          res.end(result)
+          res.end('Cannot retrieve token')
         }
    });
 
