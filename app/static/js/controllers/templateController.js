@@ -5,12 +5,12 @@ var log = log4javascript.getLogger("templateController-logger");
 angular.module('uluwatuControllers').controller('templateController', ['$scope', '$rootScope', 'UserTemplate', 'GlobalTemplate',
     function ($scope, $rootScope, UserTemplate, GlobalTemplate) {
 
-        $scope.volumeTypes = {
+        $rootScope.volumeTypes = {
             'Gp2': 'SSD',
             'Standard': 'Magnetic'
         }
 
-        $scope.awsRegions = {
+        $rootScope.awsRegions = {
             'US_EAST_1': 'US East(N. Virginia)',
             'US_WEST_1': 'US West (N. California)',
             'US_WEST_2': 'US West (Oregon)',
@@ -21,7 +21,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
             'SA_EAST_1': 'South America (São Paulo)'
         }
 
-        $scope.amis = {
+        $rootScope.amis = {
             'US_EAST_1': 'ami-0609d86e',
             'US_WEST_1': 'ami-73000d36',
             'US_WEST_2': 'ami-07bdc737',
@@ -32,7 +32,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
             'SA_EAST_1': 'ami-17f45c0a'
         }
 
-        $scope.azureRegions = {
+        $rootScope.azureRegions = {
             'NORTH_EUROPE': 'North Europe',
             'EAST_ASIA': 'East Asia',
             'EAST_US': 'East US',
@@ -40,7 +40,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
             'BRAZIL_SOUTH': 'Brazil South'
         }
 
-        $scope.azureVmTypes = {
+        $rootScope.azureVmTypes = {
             'SMALL': 'Small',
             'MEDIUM': 'Medium',
             'LARGE': 'Large',
@@ -75,7 +75,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
 
         $scope.createAwsTemplate = function () {
             $scope.awsTemp.cloudPlatform = 'AWS';
-            $scope.awsTemp.parameters.amiId = $scope.amis[$scope.awsTemp.parameters.region];
+            $scope.awsTemp.parameters.amiId = $rootScope.amis[$scope.awsTemp.parameters.region];
 
             UserTemplate.save($scope.awsTemp, function (result) {
                 $scope.awsTemp.id = result.id;
