@@ -1,4 +1,4 @@
-<div ng-controller="clusterController" class="col-sm-11 col-md-9 col-lg-9">
+<div id="cluster-form-panel" ng-controller="clusterController" class="col-sm-11 col-md-9 col-lg-9">
     <div class="panel panel-default">
         <div class="panel-heading panel-heading-nav">
             <a href="" id="create-cluster-back-btn" class="btn btn-info btn-fa-2x" role="button"><i class="fa fa-angle-left fa-2x fa-fw-forced"></i></a>

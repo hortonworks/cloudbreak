@@ -96,5 +96,21 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
         $scope.addPanelJQueryEventListeners = function(panel) {
           addPanelJQueryEventListeners(panel);
         }
+
+        $scope.addClusterFormJQEventListeners = function() {
+          addClusterFormJQEventListeners();
+        }
+
+        $scope.addActiveClusterJQEventListeners = function() {
+          addActiveClusterJQEventListeners();
+        }
+
+        $scope.addClusterListPanelJQEventListeners = function() {
+           addClusterListPanelJQEventListeners();
+        }
+
+        $scope.addCrudControls = function() {
+          addCrudControls();
+        }
     }
 ]);

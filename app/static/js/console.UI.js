@@ -8,18 +8,16 @@ function addCrudControls(){
             $jq('#create-cluster-btn').removeClass('disabled');
         }
     });
-
-// switch cluster title to normal word break if title has space in the middle
+    // switch cluster title to normal word break if title has space in the middle
     $jq(".cluster h4 .btn-cluster").each(function () {
         var s = $jq(this).text().trim();
         if (s.indexOf(" ") > -1 && ( s.indexOf(" ") > 4 || s.lastIndexOf(" ") < 15 )) {
             $jq(this).css("word-break", "normal");
         }
     });
-
     // initialize Isotope with sort and filter
     var qsRegex;
-    var $container = $jq('.isotope-wrapper').isotope({
+    $container = $jq('.isotope-wrapper').isotope({
         itemSelector: '.cluster',
         layoutMode: 'masonry',
         masonry: {
@@ -77,8 +75,7 @@ function addCrudControls(){
             timeout = setTimeout(delayed, threshold || 100);
         }
     }
-
-// notification/filter field clearing on focus for filtering
+    // notification/filter field clearing on focus for filtering
     $jq("#notification-n-filtering").focusin(function () {
         $jq(this).val("").trigger("keyup")
             // delete warning sign
@@ -86,27 +83,13 @@ function addCrudControls(){
         // delete error classes
         $jq('.combo-box').removeClass('has-feedback has-error has-warning has-success');
     });
-
-// cluster-block hide/show
+    // cluster-block hide/show
     $jq('#toggle-cluster-block-btn').click(function () {
         $jq('.cluster-block').collapse('toggle');
         // must force isotope redraw, its container height set 0 by some fucking shite
         $container.isotope();
     });
-    // toggle fa-angle-up/down icon and sort button
-    $jq('.cluster-block').on('hidden.bs.collapse', function () {
-        $jq('#toggle-cluster-block-btn i').removeClass('fa-angle-up').addClass('fa-angle-down');
-        $jq('#sort-clusters-btn').addClass('disabled');
-        $jq("#notification-n-filtering").prop("disabled", true);
-    });
-    $jq('.cluster-block').on('shown.bs.collapse', function () {
-        $jq('#toggle-cluster-block-btn i').removeClass('fa-angle-down').addClass('fa-angle-up');
-        $jq('#sort-clusters-btn').removeClass('disabled');
-        $jq("#notification-n-filtering").prop("disabled", false);
-    });
-
-// Bootstrap carousel as clusters / cluster details / create cluster slider
-    // init
+    // Bootstrap carousel as clusters / cluster details / create cluster slider init
     $jq('.carousel').carousel('pause');
     // show cluster details
     $jq(document).on("click", ".cluster h4 .btn-cluster", function() {
@@ -120,22 +103,46 @@ function addCrudControls(){
         $jq('#sort-clusters-btn').addClass('disabled');
         $jq("#notification-n-filtering").prop("disabled", true);
     });
+}
 
-    // back to clusters
-    $jq("#cluster-details-back-btn").click(function () {
-        $jq('.carousel').carousel(0);
-        // must force isotope redraw, its container height set 0 by by some fucking shite
-        $jq('.carousel').on('slid.bs.carousel', function () {
-            // unbind event
-            $jq(this).off('slid.bs.carousel');
-            $jq('#cluster-details-panel-collapse').collapse('hide');
-        });
-        $container.isotope();
-        $jq('#toggle-cluster-block-btn').removeClass('disabled');
-        $jq('#sort-clusters-btn').removeClass('disabled');
-        $jq("#notification-n-filtering").prop("disabled", false);
+function addClusterListPanelJQEventListeners() {
+  // toggle fa-angle-up/down icon and sort button
+  $jq('.cluster-block').on('hidden.bs.collapse', function () {
+      $jq('#toggle-cluster-block-btn i').removeClass('fa-angle-up').addClass('fa-angle-down');
+      $jq('#sort-clusters-btn').addClass('disabled');
+      $jq("#notification-n-filtering").prop("disabled", true);
+  });
+  $jq('.cluster-block').on('shown.bs.collapse', function () {
+      $jq('#toggle-cluster-block-btn i').removeClass('fa-angle-down').addClass('fa-angle-up');
+      $jq('#sort-clusters-btn').removeClass('disabled');
+      $jq("#notification-n-filtering").prop("disabled", false);
+  });
+}
+
+function addClusterFormJQEventListeners() {
+    $jq('#cluster-form-panel .panel-heading > h5 > a').click(function (e) {
+        e.preventDefault();
+        accordion = $jq(this).attr("data-parent");
+        if (accordion != "") {
+            $jq(accordion).find('.in').collapse('hide');
+        }
+        $jq(this).parent().parent().next().collapse('toggle');
     });
-
+    // solo panel or in accordion shown
+    $jq('#cluster-form-panel .panel-collapse').on('shown.bs.collapse', function (e) {
+        e.stopPropagation();
+        var panel = $jq(this).parent();		// panel
+        var offset = panel.offset().top;
+        if(offset) {
+            $jq('html,body').animate({
+                scrollTop: offset - 64
+            }, 500);
+        }
+    });
+    // solo panel or in accordion hidden
+    $jq('#cluster-form-panel .panel-collapse').on('hidden.bs.collapse', function (e) {
+        e.stopPropagation();
+    });
     // show create cluster panel
     $jq('#create-cluster-btn').click(function () {
         $jq('.carousel').carousel(2);
@@ -149,7 +156,6 @@ function addCrudControls(){
         $jq('#sort-clusters-btn').addClass('disabled');
         $jq("#notification-n-filtering").prop("disabled", true);
     });
-
     // back to clusters
     $jq("#create-cluster-back-btn").click(function () {
         $jq('.carousel').carousel(0);
@@ -165,38 +171,10 @@ function addCrudControls(){
         $jq('#sort-clusters-btn').removeClass('disabled');
         $jq("#notification-n-filtering").prop("disabled", false);
     });
+}
 
-// main template/blueprint/credential panels icon toggle
-  /*  $jq('.panel-btn-in-header-collapse').on('hidden.bs.collapse', function () {
-        $jq(this).parent().find('.panel-heading .btn i').removeClass('fa-angle-up').addClass('fa-angle-down');
-    });
-    $jq('.panel-btn-in-header-collapse').on('shown.bs.collapse', function () {
-        $jq(this).parent().find('.panel-heading .btn i').removeClass('fa-angle-down').addClass('fa-angle-up');
-    });*/
-// create * panels
-
-    // management panel click
-    $jq('.panel-panel-container > .panel-heading > a').click(function (e) {
-        e.preventDefault();
-        $jq(this).parent().next().collapse('toggle');
-    });
-
-    //just in dashboard.html
-    $jq('#terminateStackBtn').on('click', function () {
-
-        // must force isotope redraw, its container height set 0 by by some fucking shite
-        $container.isotope();
-        $jq('.carousel').carousel(0);
-        // enable toolbar buttons
-        $jq('#toggle-cluster-block-btn').removeClass('disabled');
-        $jq('#sort-clusters-btn').removeClass('disabled');
-        $jq('#create-cluster-btn').removeClass('disabled');
-        $jq("#notification-n-filtering").prop("disabled", false);
-    });
-
-    // panel collapse page scrolling
-    // solo/accordion panel click
-    $jq('.panel-heading > h5 > a').click(function (e) {
+function addActiveClusterJQEventListeners() {
+    $jq('#active-cluster-panel .panel-heading > h5 > a').click(function (e) {
         e.preventDefault();
         accordion = $jq(this).attr("data-parent");
         if (accordion != "") {
@@ -205,7 +183,7 @@ function addCrudControls(){
         $jq(this).parent().parent().next().collapse('toggle');
     });
     // solo panel or in accordion shown
-    $jq('.panel-collapse').on('shown.bs.collapse', function (e) {
+    $jq('#active-cluster-panel .panel-collapse').on('shown.bs.collapse', function (e) {
         e.stopPropagation();
         var panel = $jq(this).parent();		// panel
         var offset = panel.offset().top;
@@ -216,8 +194,32 @@ function addCrudControls(){
         }
     });
     // solo panel or in accordion hidden
-    $jq('.panel-collapse').on('hidden.bs.collapse', function (e) {
+    $jq('#active-cluster-panel .panel-collapse').on('hidden.bs.collapse', function (e) {
         e.stopPropagation();
+    });
+    // back to clusters
+    $jq("#cluster-details-back-btn").click(function () {
+        $jq('.carousel').carousel(0);
+        // must force isotope redraw, its container height set 0 by by some fucking shite
+        $jq('.carousel').on('slid.bs.carousel', function () {
+            // unbind event
+            $jq(this).off('slid.bs.carousel');
+            $jq('#cluster-details-panel-collapse').collapse('hide');
+        });
+        $container.isotope();
+        $jq('#toggle-cluster-block-btn').removeClass('disabled');
+        $jq('#sort-clusters-btn').removeClass('disabled');
+        $jq("#notification-n-filtering").prop("disabled", false);
+    });
+    $jq('#terminateStackBtn').on('click', function () {
+        // must force isotope redraw, its container height set 0 by by some fucking shite
+        $container.isotope();
+        $jq('.carousel').carousel(0);
+        // enable toolbar buttons
+        $jq('#toggle-cluster-block-btn').removeClass('disabled');
+        $jq('#sort-clusters-btn').removeClass('disabled');
+        $jq('#create-cluster-btn').removeClass('disabled');
+        $jq("#notification-n-filtering").prop("disabled", false);
     });
 }
 
@@ -245,8 +247,6 @@ function addPanelJQueryEventListeners(panel){
     $jq('#panel-create-' + panel + '-collapse .panel-collapse').on('hidden.bs.collapse', function (e) {
         e.stopPropagation();
     });
-
-
     // create panel click
     $jq('#panel-' + panel + '-collapse .btn-row-over-panel > a').click(function (e) {
         e.preventDefault();
@@ -317,6 +317,5 @@ function addPanelJQueryEventListeners(panel){
             $jq(this).removeClass(selected).addClass(active);
         });
         $jq(this).removeClass(active).addClass(selected);
-
     });
 }
