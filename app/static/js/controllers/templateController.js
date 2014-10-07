@@ -96,11 +96,11 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                 $scope.gccTemp.id = result.id;
                 $rootScope.templates.push($scope.gccTemp);
                 $scope.gccTemp = {};
-                $scope.modifyStatusMessage($rootScope.error_msg.aws_template_success1 + result.id + $rootScope.error_msg.aws_template_success2);
+                $scope.modifyStatusMessage($rootScope.error_msg.gcc_template_success1 + result.id + $rootScope.error_msg.gcc_template_success2);
                 $scope.modifyStatusClass("has-success");
                 $scope.gccTemplateForm.$setPristine();
             }, function (error) {
-                $scope.modifyStatusMessage($rootScope.error_msg.aws_template_failed + ": " + error.data.message);
+                $scope.modifyStatusMessage($rootScope.error_msg.gcc_template_failed + ": " + error.data.message);
                 $scope.modifyStatusClass("has-error");
             });
         }

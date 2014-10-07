@@ -82,12 +82,12 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
                 $scope.credentialGcc.id = result.id;
                 $rootScope.credentials.push($scope.credentialGcc);
                 $scope.credentialGcc = {};
-                $scope.modifyStatusMessage($rootScope.error_msg.azure_credential_success1 + result.id + $rootScope.error_msg.azure_credential_success2);
+                $scope.modifyStatusMessage($rootScope.error_msg.gcc_credential_success1 + result.id + $rootScope.error_msg.gcc_credential_success2);
                 $scope.modifyStatusClass("has-success");
                 $scope.gccCredentialInCreate = false;
                 $scope.gccCredentialForm.$setPristine();
             }, function (error) {
-                $scope.modifyStatusMessage($rootScope.error_msg.azure_credential_failed + error.data.message);
+                $scope.modifyStatusMessage($rootScope.error_msg.gcc_credential_failed + error.data.message);
                 $scope.modifyStatusClass("has-error");
                 $scope.gccCredentialInCreate = false;
             });
