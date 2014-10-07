@@ -95,8 +95,6 @@ repositories {
     maven { url "http://maven.sequenceiq.com/snapshots" }
     maven { url "http://maven.sequenceiq.com/release" }
     maven { url "http://maven.sequenceiq.com/releases" }
-    maven { url "http://seq-repo.s3-website-eu-west-1.amazonaws.com/releases" }
-    maven { url "http://seq-repo.s3-website-eu-west-1.amazonaws.com/snapshots" }
 }
 
 dependencies {
@@ -106,8 +104,10 @@ dependencies {
     compile 'org.springframework.boot:spring-boot-starter-websocket:1.0.2.RELEASE'
     compile 'org.springframework.security:spring-security-config:3.2.3.RELEASE'
     compile 'org.springframework.security:spring-security-web:3.2.3.RELEASE'
+    compile 'org.springframework.security.oauth:spring-security-oauth2:2.0.3.RELEASE'
     compile 'org.springframework:spring-messaging:4.0.3.RELEASE'
     compile 'org.projectreactor:reactor-spring:1.0.1.RELEASE'
+    compile 'net.sf.ehcache:ehcache:2.8.3'
     compile 'org.postgresql:postgresql:9.3-1101-jdbc41'
     compile('com.amazonaws:aws-java-sdk:1.8.9') {
         exclude group: 'commons-logging'

@@ -3,13 +3,13 @@ package com.sequenceiq.cloudbreak.controller;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,21 +23,15 @@ import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
 import com.sequenceiq.cloudbreak.controller.json.UpdateStackJson;
 import com.sequenceiq.cloudbreak.converter.MetaDataConverter;
 import com.sequenceiq.cloudbreak.converter.StackConverter;
+import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackDescription;
-import com.sequenceiq.cloudbreak.domain.User;
-import com.sequenceiq.cloudbreak.repository.UserRepository;
-import com.sequenceiq.cloudbreak.security.CurrentUser;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataIncompleteException;
 
 @Controller
-@RequestMapping("stacks")
 public class StackController {
-
-    @Autowired
-    private UserRepository userRepository;
 
     @Autowired
     private StackService stackService;
@@ -48,62 +42,67 @@ public class StackController {
     @Autowired
     private MetaDataConverter metaDataConverter;
 
-    @RequestMapping(method = RequestMethod.POST)
+    @RequestMapping(value = "user/stacks", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<IdJson> createStack(@CurrentUser User user, @RequestBody @Valid StackJson stackRequest) {
-        User loadedUser = userRepository.findOneWithLists(user.getId());
-        Stack stack = stackConverter.convert(stackRequest);
-        if (stack.getUserRoles().isEmpty()) {
-            stack.getUserRoles().addAll(loadedUser.getUserRoles());
-        }
-        stack = stackService.create(loadedUser, stack);
-        return new ResponseEntity<>(new IdJson(stack.getId()), HttpStatus.CREATED);
+    public ResponseEntity<IdJson> createPrivateStack(@ModelAttribute("user") CbUser user, @RequestBody @Valid StackJson stackRequest) {
+        return createStack(user, stackRequest, false);
     }
 
-    @RequestMapping(method = RequestMethod.GET)
+    @RequestMapping(value = "account/stacks", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<Set<StackJson>> getAllStacks(@CurrentUser User user, HttpServletRequest request) {
-        User currentUser = userRepository.findOneWithLists(user.getId());
-        Set<Stack> stacks = stackService.getAll(currentUser);
-        Set<StackJson> stackJsons = stackConverter.convertAllEntityToJson(stacks);
-        return new ResponseEntity<>(stackJsons, HttpStatus.OK);
+    public ResponseEntity<IdJson> createAccountStack(@ModelAttribute("user") CbUser user, @RequestBody @Valid StackJson stackRequest) {
+        return createStack(user, stackRequest, true);
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "{stackId}")
+    @RequestMapping(value = "user/stacks", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<StackJson> getStack(@CurrentUser User user, @PathVariable Long stackId) {
-        Stack stack = stackService.get(user, stackId);
-        StackDescription stackDescription = stackService.getStackDescription(user, stack);
+    public ResponseEntity<Set<StackJson>> getPrivateStacks(@ModelAttribute("user") CbUser user) {
+        Set<Stack> stacks = stackService.retrievePrivateStacks(user);
+        return new ResponseEntity<>(stackConverter.convertAllEntityToJson(stacks), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "account/stacks", method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity<Set<StackJson>> getAccountStacks(@ModelAttribute("user") CbUser user) {
+        Set<Stack> stacks = stackService.retrieveAccountStacks(user);
+        return new ResponseEntity<>(stackConverter.convertAllEntityToJson(stacks), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "stacks/{id}", method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity<StackJson> getStack(@ModelAttribute("user") CbUser user, @PathVariable Long id) {
+        Stack stack = stackService.get(id);
+        StackDescription stackDescription = stackService.getStackDescription(stack);
         StackJson stackJson = stackConverter.convert(stack, stackDescription);
         return new ResponseEntity<>(stackJson, HttpStatus.OK);
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "{stackId}/status")
+    @RequestMapping(value = "stacks/{id}/status", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> getStackStatus(@CurrentUser User user, @PathVariable Long stackId) {
-        return new ResponseEntity<>(stackConverter.convertStackStatus(stackService.get(user, stackId)), HttpStatus.OK);
+    public ResponseEntity<Map<String, Object>> getStackStatus(@ModelAttribute("user") CbUser user, @PathVariable Long id) {
+        return new ResponseEntity<>(stackConverter.convertStackStatus(stackService.get(id)), HttpStatus.OK);
     }
 
-    @RequestMapping(method = RequestMethod.DELETE, value = "{stackId}")
+    @RequestMapping(value = "stacks/{id}", method = RequestMethod.DELETE)
     @ResponseBody
-    public ResponseEntity<TemplateJson> deleteStack(@CurrentUser User user, @PathVariable Long stackId) {
-        stackService.delete(userRepository.findOne(user.getId()), stackId);
+    public ResponseEntity<TemplateJson> deleteStack(@ModelAttribute("user") CbUser user, @PathVariable Long id) {
+        stackService.delete(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @RequestMapping(method = RequestMethod.PUT, value = "{stackId}")
+    @RequestMapping(value = "stacks/{id}", method = RequestMethod.PUT)
     @ResponseBody
-    public ResponseEntity<String> updateStack(@CurrentUser User user, @PathVariable Long stackId, @Valid @RequestBody UpdateStackJson updateStackJson) {
-        if (updateStackJson.getStatus() != null) {
-            stackService.updateStatus(user, stackId, updateStackJson.getStatus());
+    public ResponseEntity<String> updateStack(@ModelAttribute("user") CbUser user, @PathVariable Long id, @Valid @RequestBody UpdateStackJson updateRequest) {
+        if (updateRequest.getStatus() != null) {
+            stackService.updateStatus(id, updateRequest.getStatus());
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
-            stackService.updateNodeCount(user, stackId, updateStackJson.getScalingAdjustment());
+            stackService.updateNodeCount(id, updateRequest.getScalingAdjustment());
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/metadata/{hash}")
+    @RequestMapping(value = "stacks/metadata/{hash}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<Set<InstanceMetaDataJson>> getStackMetadata(@PathVariable String hash) {
         try {
@@ -112,6 +111,13 @@ public class StackController {
         } catch (MetadataIncompleteException e) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
+    }
+
+    private ResponseEntity<IdJson> createStack(CbUser user, StackJson stackRequest, Boolean publicInAccount) {
+        Stack stack = stackConverter.convert(stackRequest);
+        stack.setPublicInAccount(publicInAccount);
+        stack = stackService.create(user, stack);
+        return new ResponseEntity<>(new IdJson(stack.getId()), HttpStatus.CREATED);
     }
 
 }

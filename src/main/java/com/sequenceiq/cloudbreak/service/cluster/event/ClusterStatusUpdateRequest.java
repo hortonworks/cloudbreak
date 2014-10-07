@@ -1,16 +1,13 @@
 package com.sequenceiq.cloudbreak.service.cluster.event;
 
 import com.sequenceiq.cloudbreak.domain.StatusRequest;
-import com.sequenceiq.cloudbreak.domain.User;
 
 public class ClusterStatusUpdateRequest {
 
     private Long stackId;
     private StatusRequest statusRequest;
-    private User user;
 
-    public ClusterStatusUpdateRequest(User user, long stackId, StatusRequest statusRequest) {
-        this.user = user;
+    public ClusterStatusUpdateRequest(long stackId, StatusRequest statusRequest) {
         this.stackId = stackId;
         this.statusRequest = statusRequest;
     }
@@ -31,11 +28,4 @@ public class ClusterStatusUpdateRequest {
         this.statusRequest = statusRequest;
     }
 
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
 }

@@ -7,26 +7,23 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
+import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.domain.CbUserRole;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Template;
-import com.sequenceiq.cloudbreak.domain.User;
-import com.sequenceiq.cloudbreak.domain.UserRole;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
-import com.sequenceiq.cloudbreak.repository.UserRepository;
-import com.sequenceiq.cloudbreak.service.account.AccountService;
+import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.service.credential.SimpleCredentialService;
-import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
 
 @Service
 public class SimpleTemplateService implements TemplateService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleCredentialService.class);
-
-    private static final String CLOUD_PLATFORM_NOT_SUPPORTED_MSG = "The cloudPlatform '%s' is not supported.";
 
     private static final String TEMPLATE_NOT_FOUND_MSG = "Template '%s' not found.";
 
@@ -36,35 +33,20 @@ public class SimpleTemplateService implements TemplateService {
     @Autowired
     private StackRepository stackRepository;
 
-    @Autowired
-    private AzureCertificateService azureCertificateService;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private AccountService accountService;
+    @Override
+    public Set<Template> retrievePrivateTemplates(CbUser user) {
+        return templateRepository.findForUser(user.getUsername());
+    }
 
     @Override
-    public Set<Template> getAll(User user) {
-        Set<Template> userTemplates = new HashSet<>();
-        Set<Template> legacyTemplates = new HashSet<>();
-
-        userTemplates.addAll(user.getAwsTemplates());
-        userTemplates.addAll(user.getAzureTemplates());
-        userTemplates.addAll(user.getGccTemplates());
-        LOGGER.debug("User credentials: #{}", userTemplates.size());
-
-        if (user.getUserRoles().contains(UserRole.ACCOUNT_ADMIN)) {
-            LOGGER.debug("Getting company user templates for company admin; id: [{}]", user.getId());
-            legacyTemplates = getCompanyUserTemplates(user);
-        } else if (user.getUserRoles().contains(UserRole.ACCOUNT_USER)) {
-            LOGGER.debug("Getting company templates for company user; id: [{}]", user.getId());
-            legacyTemplates = getCompanyTemplates(user);
+    public Set<Template> retrieveAccountTemplates(CbUser user) {
+        Set<Template> templates = new HashSet<>();
+        if (user.getRoles().contains(CbUserRole.ADMIN)) {
+            templates = templateRepository.findAllInAccount(user.getAccount());
+        } else {
+            templates = templateRepository.findPublicsInAccount(user.getAccount());
         }
-        LOGGER.debug("Found #{} legacy templates for user [{}]", legacyTemplates.size(), user.getId());
-        userTemplates.addAll(legacyTemplates);
-        return userTemplates;
+        return templates;
     }
 
     @Override
@@ -78,14 +60,17 @@ public class SimpleTemplateService implements TemplateService {
     }
 
     @Override
-    public Template create(User user, Template template) {
-        LOGGER.debug("Creating template for user: [{}]", user.getId());
-        template.setUser(user);
-        if (template.getUserRoles().isEmpty()) {
-            template.getUserRoles().addAll(user.getUserRoles());
+    public Template create(CbUser user, Template template) {
+        LOGGER.debug("Creating template: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
+        Template savedTemplate = null;
+        template.setOwner(user.getUsername());
+        template.setAccount(user.getAccount());
+        try {
+            savedTemplate = templateRepository.save(template);
+        } catch (DataIntegrityViolationException ex) {
+            throw new DuplicateKeyValueException(template.getName(), ex);
         }
-        template = templateRepository.save(template);
-        return template;
+        return savedTemplate;
     }
 
     @Override
@@ -100,31 +85,34 @@ public class SimpleTemplateService implements TemplateService {
             templateRepository.delete(template);
         } else {
             throw new BadRequestException(String.format(
-                    "There are stacks associated with template '%s'. Please remove these before the deleting the template.", templateId));
+                    "There are stacks associated with template '%s'. Please remove these before deleting the template.", templateId));
         }
     }
 
-    private Set<Template> getCompanyTemplates(User user) {
-        Set<Template> companyTemplates = new HashSet<>();
-        User adminWithFilteredData = accountService.accountUserData(user.getAccount().getId(), user.getUserRoles().iterator().next());
-        if (adminWithFilteredData != null) {
-            companyTemplates.addAll(adminWithFilteredData.getAwsTemplates());
-            companyTemplates.addAll(adminWithFilteredData.getAzureTemplates());
-        } else {
-            LOGGER.debug("There's no company admin for user: [{}]", user.getId());
-        }
-        return companyTemplates;
-    }
-
-    private Set<Template> getCompanyUserTemplates(User user) {
-        Set<Template> companyUserTemplates = new HashSet<>();
-        Set<User> companyUsers = accountService.accountUsers(user.getAccount().getId());
-        companyUsers.remove(user);
-        for (User cUser : companyUsers) {
-            LOGGER.debug("Adding templates of company user: [{}]", cUser.getId());
-            companyUserTemplates.addAll(cUser.getAwsTemplates());
-            companyUserTemplates.addAll(cUser.getAzureTemplates());
-        }
-        return companyUserTemplates;
-    }
+    // private Set<Template> getCompanyTemplates(User user) {
+    // Set<Template> companyTemplates = new HashSet<>();
+    // User adminWithFilteredData =
+    // accountService.accountUserData(user.getAccount().getId(),
+    // user.getUserRoles().iterator().next());
+    // if (adminWithFilteredData != null) {
+    // companyTemplates.addAll(adminWithFilteredData.getAwsTemplates());
+    // companyTemplates.addAll(adminWithFilteredData.getAzureTemplates());
+    // } else {
+    // LOGGER.debug("There's no company admin for user: [{}]", user.getId());
+    // }
+    // return companyTemplates;
+    // }
+    //
+    // private Set<Template> getCompanyUserTemplates(User user) {
+    // Set<Template> companyUserTemplates = new HashSet<>();
+    // Set<User> companyUsers =
+    // accountService.accountUsers(user.getAccount().getId());
+    // companyUsers.remove(user);
+    // for (User cUser : companyUsers) {
+    // LOGGER.debug("Adding templates of company user: [{}]", cUser.getId());
+    // companyUserTemplates.addAll(cUser.getAwsTemplates());
+    // companyUserTemplates.addAll(cUser.getAzureTemplates());
+    // }
+    // return companyUserTemplates;
+    // }
 }

@@ -33,7 +33,6 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackDescription;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 
@@ -201,8 +200,8 @@ public class StackConverterTest {
         stack.setNodeCount(NODE_COUNT);
         stack.setStatus(Status.AVAILABLE);
         stack.setStatusReason(DUMMY_STATUS_REASON);
-        stack.setUser(new User());
         stack.setVersion(VERSION);
+        stack.setPublicInAccount(true);
         return stack;
     }
 

@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service.stack.connector;
 
-import com.sequenceiq.cloudbreak.domain.User;
-
 public abstract class ConnectorTestUtil {
     public static final Integer NODE_COUNT = 3;
     public static final long DEFAULT_ID = 1L;
@@ -14,11 +12,4 @@ public abstract class ConnectorTestUtil {
     public static final String CF_STACK_NAME = "cfStackName";
     public static final String PUBLIC_KEY = "mypublickey";
     public static final String SSH_LOCATION = "ssh_location";
-
-    public static User createUser() {
-        User user = new User();
-        user.setId(DEFAULT_ID);
-        user.setEmail(DUMMY_EMAIL);
-        return user;
-    }
 }

@@ -16,9 +16,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import reactor.core.Reactor;
-import reactor.event.Event;
-
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
@@ -27,9 +24,11 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.SnsRequest;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+
+import reactor.core.Reactor;
+import reactor.event.Event;
 
 public class SnsMessageHandlerTest {
 
@@ -67,10 +66,14 @@ public class SnsMessageHandlerTest {
         underTest = new SnsMessageHandler();
         MockitoAnnotations.initMocks(this);
         snsRequest = createSnsRequest();
-        User user = AwsConnectorTestUtil.createUser();
         AwsCredential credential = AwsConnectorTestUtil.createAwsCredential();
-        AwsTemplate awsTemplate = AwsConnectorTestUtil.createAwsTemplate(user);
-        stack = AwsConnectorTestUtil.createStack(user, credential, awsTemplate, new HashSet<Resource>());
+        AwsTemplate awsTemplate = AwsConnectorTestUtil.createAwsTemplate();
+        stack = AwsConnectorTestUtil.createStack(
+                AwsConnectorTestUtil.DUMMY_OWNER,
+                AwsConnectorTestUtil.DUMMY_ACCOUNT,
+                credential,
+                awsTemplate,
+                new HashSet<Resource>());
     }
 
     @Test

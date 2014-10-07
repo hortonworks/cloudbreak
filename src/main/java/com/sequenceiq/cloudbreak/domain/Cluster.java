@@ -8,7 +8,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -18,7 +17,7 @@ import javax.persistence.UniqueConstraint;
 
 @Entity
 @Table(name = "Cluster", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "cluster_user", "name" })
+        @UniqueConstraint(columnNames = { "account", "name" })
 })
 @NamedQueries({
         @NamedQuery(
@@ -40,12 +39,11 @@ public class Cluster implements ProvisionEntity {
     @ManyToOne
     private Blueprint blueprint;
 
-    @ManyToOne
-    @JoinColumn(name = "cluster_user")
-    private User user;
-
     @Column(nullable = false)
     private String name;
+
+    private String owner;
+    private String account;
 
     private String description;
 
@@ -86,16 +84,24 @@ public class Cluster implements ProvisionEntity {
         this.blueprint = blueprint;
     }
 
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
     public String getName() {
         return name;
+    }
+
+    public String getOwner() {
+        return owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
+    }
+
+    public String getAccount() {
+        return account;
+    }
+
+    public void setAccount(String account) {
+        this.account = account;
     }
 
     public void setName(String name) {

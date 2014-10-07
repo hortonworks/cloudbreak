@@ -94,7 +94,7 @@ public class AwsCredentialConverterTest {
         // THEN
         assertEquals(result.getRoleArn(),
                 credentialJson.getParameters().get(AWSCredentialParam.ROLE_ARN.getName()));
-        assertEquals(result.getCredentialName(), credentialJson.getName());
+        assertEquals(result.getName(), credentialJson.getName());
         assertEquals(result.getKeyPairName(), "mykeypair");
 
     }
@@ -108,6 +108,7 @@ public class AwsCredentialConverterTest {
         awsCredential.setDescription(DUMMY_DESCRIPTION);
         awsCredential.setTemporaryAwsCredentials(new TemporaryAwsCredentials());
         awsCredential.setCloudPlatform(CloudPlatform.AWS);
+        awsCredential.setPublicInAccount(true);
         return awsCredential;
     }
 

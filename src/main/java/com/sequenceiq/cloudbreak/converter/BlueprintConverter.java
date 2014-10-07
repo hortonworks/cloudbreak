@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.BlueprintJson;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.UserRole;
 
 @Component
 public class BlueprintConverter extends AbstractConverter<BlueprintJson, Blueprint> {
@@ -84,10 +83,6 @@ public class BlueprintConverter extends AbstractConverter<BlueprintJson, Bluepri
             blueprint.setHostGroupCount(hostGroupCount);
         } catch (IOException e) {
             throw new BadRequestException("Invalid Blueprint: Failed to parse JSON.", e);
-        }
-
-        for (UserRole role : json.getRoles()) {
-            blueprint.getUserRoles().add(role);
         }
 
         return blueprint;

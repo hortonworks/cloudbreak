@@ -91,6 +91,7 @@ public class AzureCredentialConverterTest {
         azureCredential.setCloudPlatform(CloudPlatform.AZURE);
         azureCredential.setDescription(DUMMY_DESCRIPTION);
         azureCredential.setId(1L);
+        azureCredential.setPublicInAccount(true);
         return azureCredential;
     }
 }

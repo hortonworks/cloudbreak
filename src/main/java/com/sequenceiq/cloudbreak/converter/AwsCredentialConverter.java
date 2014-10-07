@@ -32,6 +32,7 @@ public class AwsCredentialConverter extends AbstractConverter<CredentialJson, Aw
         params.put(AWSCredentialParam.SNS_TOPICS.getName(), snsTopicConverter.convertAllEntityToJson(entity.getSnsTopics()));
         credentialJson.setParameters(params);
         credentialJson.setDescription(entity.getDescription() == null ? "" : entity.getDescription());
+        credentialJson.setPublicKey(entity.getPublicKey());
         return credentialJson;
     }
 

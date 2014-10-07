@@ -32,7 +32,7 @@ public class ClusterConverter {
         } catch (AccessDeniedException e) {
             throw new AccessDeniedException(String.format("Access to blueprint '%s' is denied or blueprint doesn't exist.", clusterRequest.getBlueprintId()), e);
         }
-        cluster.setName(clusterRequest.getClusterName());
+        cluster.setName(clusterRequest.getName());
         cluster.setStatus(Status.REQUESTED);
         cluster.setDescription(clusterRequest.getDescription());
         cluster.setEmailNeeded(clusterRequest.getEmailNeeded());
@@ -55,6 +55,7 @@ public class ClusterConverter {
             clusterResponse.setHoursUp(0);
             clusterResponse.setMinutesUp(0);
         }
+        clusterResponse.setStatusReason(cluster.getStatusReason());
         clusterResponse.setBlueprintId(cluster.getBlueprint().getId());
         clusterResponse.setDescription(cluster.getDescription() == null ? "" : cluster.getDescription());
         return clusterResponse;

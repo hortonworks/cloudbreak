@@ -10,6 +10,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -21,19 +22,20 @@ import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.StatusRequest;
-import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterStatusUpdateRequest;
+import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
 
 import groovyx.net.http.HttpResponseException;
@@ -66,22 +68,27 @@ public class AmbariClusterService implements ClusterService {
     private Reactor reactor;
 
     @Override
-    public void createCluster(User user, Long stackId, Cluster cluster) {
+    public void create(CbUser user, Long stackId, Cluster cluster) {
         Stack stack = stackRepository.findOne(stackId);
         LOGGER.info("Cluster requested for stack '{}' [BlueprintId: {}]", stackId, cluster.getBlueprint().getId());
         if (stack.getCluster() != null) {
             throw new BadRequestException(String.format("A cluster is already created on this stack! [stack: '%s', cluster: '%s']", stackId, stack.getCluster()
                     .getName()));
         }
-        cluster.setUser(user);
-        cluster = clusterRepository.save(cluster);
+        cluster.setOwner(user.getUsername());
+        cluster.setAccount(user.getAccount());
+        try {
+            cluster = clusterRepository.save(cluster);
+        } catch (DataIntegrityViolationException ex) {
+            throw new DuplicateKeyValueException(cluster.getName(), ex);
+        }
         stack = stackUpdater.updateStackCluster(stack.getId(), cluster);
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.CLUSTER_REQUESTED_EVENT, stack.getId());
         reactor.notify(ReactorConfig.CLUSTER_REQUESTED_EVENT, Event.wrap(stack));
     }
 
     @Override
-    public Cluster retrieveCluster(User user, Long stackId) {
+    public Cluster retrieveCluster(Long stackId) {
         Stack stack = stackRepository.findOne(stackId);
         return stack.getCluster();
     }
@@ -116,7 +123,7 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
-    public void updateStatus(User user, Long stackId, StatusRequest statusRequest) {
+    public void updateStatus(Long stackId, StatusRequest statusRequest) {
         Stack stack = stackRepository.findOne(stackId);
         Cluster cluster = stack.getCluster();
         long clusterId = cluster.getId();
@@ -140,7 +147,7 @@ public class AmbariClusterService implements ClusterService {
                 clusterRepository.save(cluster);
                 LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.CLUSTER_STATUS_UPDATE_EVENT, stack.getId());
                 reactor.notify(ReactorConfig.CLUSTER_STATUS_UPDATE_EVENT,
-                        Event.wrap(new ClusterStatusUpdateRequest(user, stack.getId(), statusRequest)));
+                        Event.wrap(new ClusterStatusUpdateRequest(stack.getId(), statusRequest)));
             }
         } else {
             if (!Status.AVAILABLE.equals(clusterStatus)) {
@@ -155,7 +162,7 @@ public class AmbariClusterService implements ClusterService {
             clusterRepository.save(cluster);
             LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.CLUSTER_STATUS_UPDATE_EVENT, stack.getId());
             reactor.notify(ReactorConfig.CLUSTER_STATUS_UPDATE_EVENT,
-                    Event.wrap(new ClusterStatusUpdateRequest(user, stack.getId(), statusRequest)));
+                    Event.wrap(new ClusterStatusUpdateRequest(stack.getId(), statusRequest)));
         }
     }
 

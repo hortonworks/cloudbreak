@@ -3,16 +3,18 @@ package com.sequenceiq.cloudbreak.service.blueprint;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.domain.CbUser;
 
 public interface BlueprintService {
 
-    Blueprint addBlueprint(User user, Blueprint blueprint);
+    Set<Blueprint> retrievePrivateBlueprints(CbUser user);
 
-    Blueprint get(Long blueprintId);
+    Set<Blueprint> retrieveAccountBlueprints(CbUser user);
 
-    Set<Blueprint> getAll(User user);
+    Blueprint get(Long id);
 
-    void delete(Long blueprintId);
+    Blueprint create(CbUser user, Blueprint blueprintRequest);
+
+    void delete(Long id);
 
 }

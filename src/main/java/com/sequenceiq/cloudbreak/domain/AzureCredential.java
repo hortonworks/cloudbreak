@@ -1,9 +1,6 @@
 package com.sequenceiq.cloudbreak.domain;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 
 @Entity
 public class AzureCredential extends Credential implements ProvisionEntity {
@@ -15,23 +12,13 @@ public class AzureCredential extends Credential implements ProvisionEntity {
 
     private String postFix;
 
-    @ManyToOne
-    @JoinColumn(name = "azureCredential_azureCredentialOwner")
-    private User azureCredentialOwner;
-
-    @Column(nullable = false)
-    private String name;
-
     public AzureCredential() {
 
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+    @Override
+    public CloudPlatform cloudPlatform() {
+        return CloudPlatform.AZURE;
     }
 
     public String getSubscriptionId() {
@@ -58,31 +45,8 @@ public class AzureCredential extends Credential implements ProvisionEntity {
         this.postFix = postFix;
     }
 
-    public User getAzureCredentialOwner() {
-        return azureCredentialOwner;
-    }
-
-    public void setAzureCredentialOwner(User azureCredentialOwner) {
-        this.azureCredentialOwner = azureCredentialOwner;
-    }
-
-    @Override
-    public CloudPlatform cloudPlatform() {
-        return CloudPlatform.AZURE;
-    }
-
-    @Override
-    public User getOwner() {
-        return azureCredentialOwner;
-    }
-
-    @Override
-    public String getCredentialName() {
-        return name;
-    }
-
     public String getCommonName() {
-        String result = name.replaceAll("\\s+", "") + postFix;
+        String result = getName().replaceAll("\\s+", "") + postFix;
         if (result.length() > END_INDEX) {
             return result.substring(result.length() - END_INDEX, result.length());
         }

@@ -4,15 +4,13 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UnknownFormatConversionException;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,19 +25,12 @@ import com.sequenceiq.cloudbreak.converter.GccTemplateConverter;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.GccTemplate;
+import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Template;
-import com.sequenceiq.cloudbreak.domain.User;
-import com.sequenceiq.cloudbreak.repository.UserRepository;
-import com.sequenceiq.cloudbreak.security.CurrentUser;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
 
 @Controller
-@RequestMapping("templates")
 public class TemplateController {
-    private static final Logger LOGGER = LoggerFactory.getLogger(TemplateController.class);
-
-    @Autowired
-    private UserRepository userRepository;
 
     @Autowired
     private TemplateService templateService;
@@ -53,37 +44,52 @@ public class TemplateController {
     @Autowired
     private AzureTemplateConverter azureTemplateConverter;
 
-    @RequestMapping(method = RequestMethod.POST)
+    @RequestMapping(value = "user/templates", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<IdJson> createTemplate(@CurrentUser User user, @RequestBody @Valid TemplateJson templateRequest) {
-        User loadedUser = userRepository.findOneWithLists(user.getId());
-        Template template = convert(templateRequest);
-        template = templateService.create(loadedUser, template);
-        return new ResponseEntity<>(new IdJson(template.getId()), HttpStatus.CREATED);
+    public ResponseEntity<IdJson> createPrivateTemplate(@ModelAttribute("user") CbUser user, @RequestBody @Valid TemplateJson templateRequest) {
+        return createTemplate(user, templateRequest, false);
     }
 
-    @RequestMapping(method = RequestMethod.GET)
+    @RequestMapping(value = "account/templates", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<Set<TemplateJson>> getAllTemplates(@CurrentUser User user, HttpServletRequest request) {
-        User loadedUser = userRepository.findOneWithLists(user.getId());
-        Set<Template> templates = templateService.getAll(loadedUser);
-        Set<TemplateJson> templateJsons = convert(templates);
-        return new ResponseEntity<>(templateJsons, HttpStatus.OK);
+    public ResponseEntity<IdJson> createAccountTemplate(@ModelAttribute("user") CbUser user, @RequestBody @Valid TemplateJson templateRequest) {
+        return createTemplate(user, templateRequest, true);
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "{templateId}")
+    @RequestMapping(value = "user/templates", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<TemplateJson> getTemplate(@CurrentUser User user, @PathVariable Long templateId) {
-        Template template = templateService.get(templateId);
+    public ResponseEntity<Set<TemplateJson>> getPrivateTemplates(@ModelAttribute("user") CbUser user) {
+        Set<Template> templates = templateService.retrievePrivateTemplates(user);
+        return new ResponseEntity<>(convert(templates), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "account/templates", method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity<Set<TemplateJson>> getAccountTemplates(@ModelAttribute("user") CbUser user) {
+        Set<Template> templates = templateService.retrieveAccountTemplates(user);
+        return new ResponseEntity<>(convert(templates), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "templates/{id}", method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity<TemplateJson> getTemplate(@ModelAttribute("user") CbUser user, @PathVariable Long id) {
+        Template template = templateService.get(id);
         TemplateJson templateJson = convert(template);
         return new ResponseEntity<>(templateJson, HttpStatus.OK);
     }
 
-    @RequestMapping(method = RequestMethod.DELETE, value = "{templateId}")
+    @RequestMapping(value = "templates/{id}", method = RequestMethod.DELETE)
     @ResponseBody
-    public ResponseEntity<TemplateJson> deleteTemplate(@CurrentUser User user, @PathVariable Long templateId) {
-        templateService.delete(templateId);
+    public ResponseEntity<TemplateJson> deleteTemplate(@ModelAttribute("user") CbUser user, @PathVariable Long id) {
+        templateService.delete(id);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    private ResponseEntity<IdJson> createTemplate(CbUser user, TemplateJson templateRequest, boolean publicInAccount) {
+        Template template = convert(templateRequest);
+        template.setPublicInAccount(publicInAccount);
+        template = templateService.create(user, template);
+        return new ResponseEntity<>(new IdJson(template.getId()), HttpStatus.CREATED);
     }
 
     private Template convert(TemplateJson templateRequest) {
@@ -101,7 +107,6 @@ public class TemplateController {
             default:
                 throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", templateRequest.getCloudPlatform()));
         }
-        template.getUserRoles().addAll(templateRequest.getUserRoles());
         return template;
     }
 

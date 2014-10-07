@@ -132,7 +132,7 @@ public class AzureProvisioner implements Provisioner {
     public void addInstances(Stack stack, String userData, Integer instanceCount) {
         AzureTemplate azureTemplate = (AzureTemplate) stack.getTemplate();
         Credential credential = stack.getCredential();
-        String emailAsFolder = stack.getUser().emailAsFolder();
+        String emailAsFolder = azureStackUtil.emailAsFolder(stack.getOwner());
         String filePath = AzureCertificateService.getUserJksFileName(credential, emailAsFolder);
         AzureClient azureClient = azureStackUtil.createAzureClient(credential, filePath);
 
@@ -160,7 +160,7 @@ public class AzureProvisioner implements Provisioner {
     @Override
     public void removeInstances(Stack stack, Set<String> instanceIds) {
         AzureCredential credential = (AzureCredential) stack.getCredential();
-        String emailAsFolder = stack.getUser().emailAsFolder();
+        String emailAsFolder = azureStackUtil.emailAsFolder(stack.getOwner());
         String filePath = AzureCertificateService.getUserJksFileName(credential, emailAsFolder);
         AzureClient azureClient = azureStackUtil.createAzureClient(credential, filePath);
         for (String instanceId : instanceIds) {
@@ -214,7 +214,7 @@ public class AzureProvisioner implements Provisioner {
         props.put(USERNAME, DEFAULT_USER_NAME);
         X509Certificate sshCert = null;
         try {
-            sshCert = azureStackUtil.createX509Certificate((AzureCredential) credential, azureTemplate.getOwner().emailAsFolder());
+            sshCert = azureStackUtil.createX509Certificate((AzureCredential) credential, azureStackUtil.emailAsFolder(azureTemplate.getOwner()));
         } catch (FileNotFoundException e) {
             throw new StackCreationFailureException(e);
         } catch (CertificateException e) {

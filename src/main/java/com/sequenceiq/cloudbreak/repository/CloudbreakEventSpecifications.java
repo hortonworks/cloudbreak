@@ -16,12 +16,12 @@ public class CloudbreakEventSpecifications {
     private CloudbreakEventSpecifications() {
     }
 
-    public static Specification<CloudbreakEvent> eventsForUser(final Long userId) {
+    public static Specification<CloudbreakEvent> eventsForUser(final String user) {
         return new Specification<CloudbreakEvent>() {
             @Override
             public Predicate toPredicate(final Root<CloudbreakEvent> cloudbreakEventRoot, final CriteriaQuery<?> query,
                     final CriteriaBuilder cb) {
-                return cb.equal(cloudbreakEventRoot.get("userId"), userId);
+                return cb.equal(cloudbreakEventRoot.get("userId"), user);
             }
         };
     }

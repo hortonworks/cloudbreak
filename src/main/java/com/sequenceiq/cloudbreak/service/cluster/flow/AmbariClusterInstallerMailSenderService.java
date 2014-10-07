@@ -17,7 +17,7 @@ import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.domain.User;
+import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 
 import freemarker.template.Configuration;
 
@@ -35,40 +35,43 @@ public class AmbariClusterInstallerMailSenderService {
     @Autowired
     private Configuration freemarkerConfiguration;
 
+    @Autowired
+    private UserDetailsService userDetailsService;
+
     @VisibleForTesting
-    protected MimeMessagePreparator prepareSuccessMessage(final User user, final String template, final String status,
+    protected MimeMessagePreparator prepareSuccessMessage(final String email, final String template, final String status,
             final String server) {
         return new MimeMessagePreparator() {
             public void prepare(MimeMessage mimeMessage) throws Exception {
                 MimeMessageHelper message = new MimeMessageHelper(mimeMessage);
                 message.setFrom(msgFrom);
-                message.setTo(user.getEmail());
+                message.setTo(email);
                 message.setSubject("Cloudbreak - stack installation");
-                message.setText(getEmailBody(user.getFirstName(), status, server, template), true);
+                message.setText(getEmailBody(email, status, server, template), true);
             }
         };
     }
 
     @VisibleForTesting
-    protected MimeMessagePreparator prepareFailMessage(final User user, final String template, final String status) {
+    protected MimeMessagePreparator prepareFailMessage(final String email, final String template, final String status) {
         return new MimeMessagePreparator() {
             public void prepare(MimeMessage mimeMessage) throws Exception {
                 MimeMessageHelper message = new MimeMessageHelper(mimeMessage);
                 message.setFrom(msgFrom);
-                message.setTo(user.getEmail());
+                message.setTo(email);
                 message.setSubject("Cloudbreak - stack installation");
-                message.setText(getEmailBody(user.getFirstName(), status, "", template), true);
+                message.setText(getEmailBody(email, status, "", template), true);
             }
         };
     }
 
-    public void sendSuccessEmail(User user, String ambariServer) {
-        MimeMessagePreparator mimeMessagePreparator = prepareSuccessMessage(user, "templates/cluster-installer-mail-success.ftl", "SUCCESS", ambariServer);
+    public void sendSuccessEmail(String email, String ambariServer) {
+        MimeMessagePreparator mimeMessagePreparator = prepareSuccessMessage(email, "templates/cluster-installer-mail-success.ftl", "SUCCESS", ambariServer);
         sendInstallationEmail(mimeMessagePreparator);
     }
 
-    public void sendFailEmail(User user) {
-        MimeMessagePreparator mimeMessagePreparator = prepareFailMessage(user, "templates/cluster-installer-mail-fail.ftl", "FAILED");
+    public void sendFailEmail(String email) {
+        MimeMessagePreparator mimeMessagePreparator = prepareFailMessage(email, "templates/cluster-installer-mail-fail.ftl", "FAILED");
         sendInstallationEmail(mimeMessagePreparator);
     }
 
@@ -78,13 +81,13 @@ public class AmbariClusterInstallerMailSenderService {
         LOGGER.info("Cluster installation email sent");
     }
 
-    private String getEmailBody(String firstName, String status, String server, String template) {
+    private String getEmailBody(String username, String status, String server, String template) {
         String text = null;
         try {
             Map<String, Object> model = new HashMap<>();
-            model.put("firstName", firstName);
             model.put("status", status);
             model.put("server", server);
+            model.put("name", userDetailsService.getDetails(username).getGivenName());
             text = FreeMarkerTemplateUtils.processTemplateIntoString(freemarkerConfiguration.getTemplate(template, "UTF-8"), model);
         } catch (Exception e) {
             LOGGER.error("Cluster installer email assembling failed. Exception: {}", e);

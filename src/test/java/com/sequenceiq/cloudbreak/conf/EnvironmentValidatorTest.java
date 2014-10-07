@@ -12,7 +12,6 @@ public class EnvironmentValidatorTest {
     public void setUp() {
         underTest = new EnvironmentValidator();
         ReflectionTestUtils.setField(underTest, "hostAddress", "http://cloudbreak.sequenceiq.com");
-        ReflectionTestUtils.setField(underTest, "uiAddress", "http://localhost");
     }
 
     @Test
@@ -72,60 +71,6 @@ public class EnvironmentValidatorTest {
     @Test(expected = IllegalArgumentException.class)
     public void testAfterPropertiesSetShouldNotAcceptInternalAddresses2() throws Exception {
         ReflectionTestUtils.setField(underTest, "hostAddress", "http://192.168.0.1");
-        underTest.afterPropertiesSet();
-    }
-
-    @Test
-    public void testAfterPropertiesSetShouldAcceptUIAddressBasicUrls() throws Exception {
-        ReflectionTestUtils.setField(underTest, "uiAddress", "http://cloudbreak.sequenceiq.com");
-        underTest.afterPropertiesSet();
-    }
-
-    @Test
-    public void testAfterPropertiesSetShouldAcceptUIAddressBasicHttpsUrls() throws Exception {
-        ReflectionTestUtils.setField(underTest, "uiAddress", "https://cloudbreak.sequenceiq.com");
-        underTest.afterPropertiesSet();
-    }
-
-    @Test
-    public void testAfterPropertiesSetShouldAcceptUIAddressBasicUrlsSpecifiedAsIpAddress() throws Exception {
-        ReflectionTestUtils.setField(underTest, "uiAddress", "http://54.77.50.115");
-        underTest.afterPropertiesSet();
-    }
-
-    @Test
-    public void testAfterPropertiesSetShouldAcceptUIAddressUrlsWithPortSpecified() throws Exception {
-        ReflectionTestUtils.setField(underTest, "uiAddress", "http://cloudbreak.sequenceiq.com:8080");
-        underTest.afterPropertiesSet();
-    }
-
-    @Test
-    public void testAfterPropertiesSetShouldAcceptUIAddressLocalhost() throws Exception {
-        ReflectionTestUtils.setField(underTest, "uiAddress", "http://localhost");
-        underTest.afterPropertiesSet();
-    }
-
-    @Test
-    public void testAfterPropertiesSetShouldAcceptUIAddressLocalhostWithPort() throws Exception {
-        ReflectionTestUtils.setField(underTest, "uiAddress", "http://localhost:8080");
-        underTest.afterPropertiesSet();
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testAfterPropertiesSetShouldNotAcceptUIAddressUrlsWithoutAScheme() throws Exception {
-        ReflectionTestUtils.setField(underTest, "uiAddress", "urlwithoutascheme.com");
-        underTest.afterPropertiesSet();
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testAfterPropertiesSetShouldNotAcceptUIAddressInternalAddresses1() throws Exception {
-        ReflectionTestUtils.setField(underTest, "uiAddress", "http://10.0.0.1");
-        underTest.afterPropertiesSet();
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testAfterPropertiesSetShouldNotAcceptUIAddressInternalAddresses2() throws Exception {
-        ReflectionTestUtils.setField(underTest, "uiAddress", "http://192.168.0.1");
         underTest.afterPropertiesSet();
     }
 }

@@ -19,9 +19,10 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
+import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.User;
-import com.sequenceiq.cloudbreak.repository.AzureCredentialRepository;
+import com.sequenceiq.cloudbreak.repository.CredentialRepository;
+import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.KeyGeneratorService;
 
 @Service
@@ -37,7 +38,10 @@ public class AzureCertificateService {
     private KeyGeneratorService keyGeneratorService;
 
     @Autowired
-    private AzureCredentialRepository azureCredentialRepository;
+    private CredentialRepository credentialRepository;
+
+    @Autowired
+    private AzureStackUtil azureStackUtil;
 
     public static String getSshFolder(String user) {
         return String.format("%s/%s/%s", DATADIR, user, SSH_DATADIR);
@@ -75,33 +79,34 @@ public class AzureCertificateService {
         return String.format("%s/%s/%s.cer", getCertificateFolder(user), credential.getId(), user);
     }
 
-    public File getCertificateFile(Long credentialId, User user) {
-        AzureCredential credential = azureCredentialRepository.findOne(credentialId);
+    public File getCertificateFile(Long credentialId, CbUser user) {
+        Credential credential = credentialRepository.findOne(credentialId);
         if (credential == null) {
             throw new NotFoundException(String.format("Credential '%s' not found", credentialId));
         }
-        return new File(getUserCerFileName(credential, user.emailAsFolder()));
+        return new File(getUserCerFileName(credential, azureStackUtil.emailAsFolder(user.getUsername())));
     }
 
-    public void generateCertificate(AzureCredential azureCredential, User user) {
+    public void generateCertificate(CbUser user, AzureCredential azureCredential) {
         try {
+            String emailAsFolder = azureStackUtil.emailAsFolder(user.getUsername());
             File sourceFolder = new File(DATADIR);
             if (!sourceFolder.exists()) {
                 FileUtils.forceMkdir(new File(DATADIR));
             }
-            File userFolder = new File(getCertificateFolder(azureCredential, user.emailAsFolder()));
+            File userFolder = new File(getCertificateFolder(azureCredential, emailAsFolder));
             if (!userFolder.exists()) {
-                FileUtils.forceMkdir(new File(getCertificateFolder(azureCredential, user.emailAsFolder())));
+                FileUtils.forceMkdir(new File(getCertificateFolder(azureCredential, emailAsFolder)));
             }
-            if (new File(getUserJksFileName(azureCredential, user.emailAsFolder())).exists()) {
-                FileUtils.forceDelete(new File(getUserJksFileName(azureCredential, user.emailAsFolder())));
+            if (new File(getUserJksFileName(azureCredential, emailAsFolder)).exists()) {
+                FileUtils.forceDelete(new File(getUserJksFileName(azureCredential, emailAsFolder)));
             }
-            keyGeneratorService.generateKey(user, azureCredential, ENTRY, getUserJksFileName(azureCredential, user.emailAsFolder()));
+            keyGeneratorService.generateKey(user, azureCredential, ENTRY, getUserJksFileName(azureCredential, emailAsFolder));
             KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
             char[] pass = azureCredential.getJks().toCharArray();
             FileInputStream fis = null;
             try {
-                fis = new FileInputStream(new File(getUserJksFileName(azureCredential, user.emailAsFolder())));
+                fis = new FileInputStream(new File(getUserJksFileName(azureCredential, emailAsFolder)));
                 ks.load(fis, pass);
             } finally {
                 if (fis != null) {
@@ -109,7 +114,7 @@ public class AzureCertificateService {
                 }
             }
             Certificate certificate = ks.getCertificate(ENTRY);
-            final FileOutputStream os = new FileOutputStream(getUserCerFileName(azureCredential, user.emailAsFolder()));
+            final FileOutputStream os = new FileOutputStream(getUserCerFileName(azureCredential, emailAsFolder));
             os.write(Base64.encodeBase64(certificate.getEncoded(), true));
             os.close();
         } catch (Exception e) {
@@ -118,31 +123,32 @@ public class AzureCertificateService {
         }
     }
 
-    public File getSshPublicKeyFile(User user, Long azureCredentialId) {
-        return new File(getPemFile(user.emailAsFolder(), azureCredentialId));
+    public File getSshPublicKeyFile(CbUser user, Long azureCredentialId) {
+        return new File(getPemFile(azureStackUtil.emailAsFolder(user.getUsername()), azureCredentialId));
     }
 
-    public void generateSshCertificate(User user, AzureCredential azureCredential, String sshKey) {
+    public void generateSshCertificate(CbUser user, AzureCredential azureCredential, String sshKey) {
         try {
-            File userFolder = new File(getSimpleUserFolder(user.emailAsFolder()));
+            String emailAsFolder = azureStackUtil.emailAsFolder(user.getUsername());
+            File userFolder = new File(getSimpleUserFolder(emailAsFolder));
             if (!userFolder.exists()) {
-                FileUtils.forceMkdir(new File(getSimpleUserFolder(user.emailAsFolder())));
+                FileUtils.forceMkdir(new File(getSimpleUserFolder(emailAsFolder)));
             }
-            File sshFolder = new File(getSshFolder(user.emailAsFolder()));
+            File sshFolder = new File(getSshFolder(emailAsFolder));
             if (!sshFolder.exists()) {
-                FileUtils.forceMkdir(new File(getSshFolder(user.emailAsFolder())));
+                FileUtils.forceMkdir(new File(getSshFolder(emailAsFolder)));
             }
-            File templateFolder = new File(getSshFolderForTemplate(user.emailAsFolder(), azureCredential.getId()));
+            File templateFolder = new File(getSshFolderForTemplate(emailAsFolder, azureCredential.getId()));
             if (!templateFolder.exists()) {
-                FileUtils.forceMkdir(new File(getSshFolderForTemplate(user.emailAsFolder(), azureCredential.getId())));
+                FileUtils.forceMkdir(new File(getSshFolderForTemplate(emailAsFolder, azureCredential.getId())));
             }
             try {
-                File file = new File(getPemFile(user.emailAsFolder(), azureCredential.getId()));
+                File file = new File(getPemFile(emailAsFolder, azureCredential.getId()));
                 FileWriter fw = new FileWriter(file.getAbsoluteFile());
                 BufferedWriter bw = new BufferedWriter(fw);
                 bw.write(sshKey);
                 bw.close();
-                keyGeneratorService.generateSshKey(getSshFolderForTemplate(user.emailAsFolder(), azureCredential.getId()) + "/" + user.emailAsFolder());
+                keyGeneratorService.generateSshKey(getSshFolderForTemplate(emailAsFolder, azureCredential.getId()) + "/" + emailAsFolder);
             } catch (InterruptedException e) {
                 LOGGER.error("An error occured under the ssh generation for {} template. The error was: {} {}", azureCredential.getId(), e.getMessage(), e);
                 throw new InternalServerException(e.getMessage());

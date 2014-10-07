@@ -16,9 +16,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import reactor.core.Reactor;
-import reactor.event.Event;
-
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.sns.AmazonSNSClient;
 import com.amazonaws.services.sns.model.ConfirmSubscriptionResult;
@@ -30,10 +27,12 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.SnsRequest;
 import com.sequenceiq.cloudbreak.domain.SnsTopic;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.SnsTopicRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.credential.aws.CrossAccountCredentialsProvider;
+
+import reactor.core.Reactor;
+import reactor.event.Event;
 
 public class SnsTopicManagerTest {
 
@@ -69,8 +68,6 @@ public class SnsTopicManagerTest {
 
     private Stack stack;
 
-    private User user;
-
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -80,8 +77,12 @@ public class SnsTopicManagerTest {
         confirmSubscriptionResult = new ConfirmSubscriptionResult();
         confirmSubscriptionResult.setSubscriptionArn(AwsConnectorTestUtil.DEFAULT_TOPIC_ARN);
         snsTopic = AwsConnectorTestUtil.createSnsTopic(credential);
-        user = AwsConnectorTestUtil.createUser();
-        stack = AwsConnectorTestUtil.createStack(user, credential, AwsConnectorTestUtil.createAwsTemplate(user), new HashSet<Resource>());
+        stack = AwsConnectorTestUtil.createStack(
+                AwsConnectorTestUtil.DUMMY_OWNER,
+                AwsConnectorTestUtil.DUMMY_ACCOUNT,
+                credential,
+                AwsConnectorTestUtil.createAwsTemplate(),
+                new HashSet<Resource>());
     }
 
     @Test

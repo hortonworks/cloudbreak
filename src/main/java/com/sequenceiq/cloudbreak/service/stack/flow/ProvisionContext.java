@@ -54,8 +54,9 @@ public class ProvisionContext {
             Stack stack = stackRepository.findById(stackId);
             if (stack.getStatus().equals(Status.REQUESTED)) {
                 stack = stackUpdater.updateStackStatus(stack.getId(), Status.CREATE_IN_PROGRESS);
-                websocketService.sendToTopicUser(stack.getUser().getEmail(), WebsocketEndPoint.STACK, new StatusMessage(stack.getId(), stack.getName(), stack
+                websocketService.sendToTopicUser(stack.getOwner(), WebsocketEndPoint.STACK, new StatusMessage(stack.getId(), stack.getName(), stack
                         .getStatus().name()));
+                stackUpdater.updateStackStatusReason(stack.getId(), stack.getStatus().name());
                 Provisioner provisioner = provisioners.get(cloudPlatform);
                 provisioner.buildStack(stack, userDataBuilder.build(cloudPlatform, stack.getHash(), userDataParams), setupProperties);
             } else {

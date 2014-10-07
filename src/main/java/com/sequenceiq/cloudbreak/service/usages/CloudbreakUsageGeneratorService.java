@@ -5,5 +5,5 @@ import java.util.List;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 
 public interface CloudbreakUsageGeneratorService {
-    List<CloudbreakUsage> generateCloudbreakUsages(Long userId);
+    List<CloudbreakUsage> generateCloudbreakUsages(String user);
 }

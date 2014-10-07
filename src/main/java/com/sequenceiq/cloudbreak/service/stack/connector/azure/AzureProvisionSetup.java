@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
+import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
@@ -65,10 +66,13 @@ public class AzureProvisionSetup implements ProvisionSetup {
     @Autowired
     private WebsocketService websocketService;
 
+    @Autowired
+    private RetryingStackUpdater retryingStackUpdater;
+
     @Override
     public void setupProvisioning(Stack stack) {
         Credential credential = stack.getCredential();
-        String emailAsFolder = stack.getUser().emailAsFolder();
+        String emailAsFolder = azureStackUtil.emailAsFolder(stack.getOwner());
 
         String filePath = AzureCertificateService.getUserJksFileName(credential, emailAsFolder);
         AzureClient azureClient = azureStackUtil.createAzureClient(credential, filePath);
@@ -107,8 +111,9 @@ public class AzureProvisionSetup implements ProvisionSetup {
                         copyStatusFromServer.get("totalBytes"),
                         copyPercentage));
 
-                websocketService.sendToTopicUser(stack.getUser().getEmail(), WebsocketEndPoint.COPY_IMAGE,
+                websocketService.sendToTopicUser(stack.getOwner(), WebsocketEndPoint.COPY_IMAGE,
                         new StatusMessage(stack.getId(), stack.getName(), PENDING, String.format("The copy status is: %s%%.", copyPercentage)));
+                retryingStackUpdater.updateStackStatusReason(stack.getId(), String.format("The copy status is: %s%%.", copyPercentage));
                 try {
                     Thread.sleep(MILLIS);
                 } catch (InterruptedException e) {
@@ -129,7 +134,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
         reactor.notify(ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT,
                 Event.wrap(new ProvisionSetupComplete(getCloudPlatform(), stack.getId())
                                 .withSetupProperty(CREDENTIAL, stack.getCredential())
-                                .withSetupProperty(EMAILASFOLDER, stack.getUser().emailAsFolder())
+                                .withSetupProperty(EMAILASFOLDER, emailAsFolder)
                 )
         );
     }
@@ -178,7 +183,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
     public Map<String, Object> getSetupProperties(Stack stack) {
         Map<String, Object> properties = new HashMap<>();
         properties.put(CREDENTIAL, stack.getCredential());
-        properties.put(EMAILASFOLDER, stack.getUser().emailAsFolder());
+        properties.put(EMAILASFOLDER, azureStackUtil.emailAsFolder(stack.getOwner()));
         return properties;
     }
 

@@ -40,8 +40,9 @@ public class StackCreationSuccessHandler implements Consumer<Event<StackCreation
         String ambariIp = stackCreationSuccess.getAmbariIp();
         Stack stack = stackUpdater.updateAmbariIp(stackId, ambariIp);
         stack = stackUpdater.updateStackStatus(stackId, Status.AVAILABLE);
-        websocketService.sendToTopicUser(stack.getUser().getEmail(), WebsocketEndPoint.STACK,
+        websocketService.sendToTopicUser(stack.getOwner(), WebsocketEndPoint.STACK,
                 new StatusMessage(stackId, stack.getName(), Status.AVAILABLE.name()));
+        stackUpdater.updateStackStatusReason(stack.getId(), "");
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.AMBARI_STARTED_EVENT, stackId);
         reactor.notify(ReactorConfig.AMBARI_STARTED_EVENT, Event.wrap(stack));
     }

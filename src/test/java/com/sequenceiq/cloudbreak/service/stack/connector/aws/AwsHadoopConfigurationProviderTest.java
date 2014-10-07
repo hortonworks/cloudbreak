@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.service.stack.connector.HadoopConfigurationProvider;
 import com.sequenceiq.cloudbreak.service.stack.connector.LocalDirBuilderService;
 
@@ -32,7 +31,7 @@ public class AwsHadoopConfigurationProviderTest {
     @Mock
     private LocalDirBuilderService localDirBuilderService;
 
-    private User user;
+    private String owner;
     private AwsCredential credential;
     private Set<Resource> resources = new HashSet<>();
 
@@ -40,15 +39,14 @@ public class AwsHadoopConfigurationProviderTest {
     public void setUp() {
         underTest = new AwsHadoopConfigurationProvider();
         MockitoAnnotations.initMocks(this);
-        user = AwsConnectorTestUtil.createUser();
         credential = AwsConnectorTestUtil.createAwsCredential();
     }
 
     @Test
     public void testGetYarnSiteConfigsShouldReturnDirectoriesProperlyWithTwoVolumes() {
         // GIVEN
-        AwsTemplate template = AwsConnectorTestUtil.createAwsTemplate(user);
-        Stack stack = AwsConnectorTestUtil.createStack(user, credential, template, resources);
+        AwsTemplate template = AwsConnectorTestUtil.createAwsTemplate();
+        Stack stack = AwsConnectorTestUtil.createStack(AwsConnectorTestUtil.DUMMY_OWNER, AwsConnectorTestUtil.DUMMY_ACCOUNT, credential, template, resources);
         resources.add(new Resource(ResourceType.CLOUDFORMATION_STACK, "", stack));
         // WHEN
         given(localDirBuilderService.buildLocalDirs(anyInt())).willReturn("/mnt/fs1,/mnt/fs2");
@@ -60,8 +58,8 @@ public class AwsHadoopConfigurationProviderTest {
     @Test
     public void testGetYarnSiteConfigsShouldReturnNotReturnYarnLocalDirsPropertyWhenThereAreNoVolumesAttached() {
         // GIVEN
-        AwsTemplate template = AwsConnectorTestUtil.createAwsTemplateWithZeroVolumes(user);
-        Stack stack = AwsConnectorTestUtil.createStack(user, credential, template, resources);
+        AwsTemplate template = AwsConnectorTestUtil.createAwsTemplateWithZeroVolumes();
+        Stack stack = AwsConnectorTestUtil.createStack(AwsConnectorTestUtil.DUMMY_OWNER, AwsConnectorTestUtil.DUMMY_ACCOUNT, credential, template, resources);
         resources.add(new Resource(ResourceType.CLOUDFORMATION_STACK, "", stack));
         // WHEN
         Map<String, String> result = underTest.getYarnSiteConfigs(stack);
@@ -72,8 +70,8 @@ public class AwsHadoopConfigurationProviderTest {
     @Test
     public void testGetHdfsSiteConfigsShouldReturnDirectoriesProperlyWithTwoVolumes() {
         // GIVEN
-        AwsTemplate template = AwsConnectorTestUtil.createAwsTemplate(user);
-        Stack stack = AwsConnectorTestUtil.createStack(user, credential, template, resources);
+        AwsTemplate template = AwsConnectorTestUtil.createAwsTemplate();
+        Stack stack = AwsConnectorTestUtil.createStack(AwsConnectorTestUtil.DUMMY_OWNER, AwsConnectorTestUtil.DUMMY_ACCOUNT, credential, template, resources);
         resources.add(new Resource(ResourceType.CLOUDFORMATION_STACK, "", stack));
         // WHEN
         given(localDirBuilderService.buildLocalDirs(anyInt())).willReturn("/mnt/fs1,/mnt/fs2");
@@ -85,8 +83,8 @@ public class AwsHadoopConfigurationProviderTest {
     @Test
     public void testGetHdfsSiteConfigsShouldNotReturnHdfsDatanodeDataDirsPropertyWhenThereAreNoVolumesAttached() {
         // GIVEN
-        AwsTemplate template = AwsConnectorTestUtil.createAwsTemplateWithZeroVolumes(user);
-        Stack stack = AwsConnectorTestUtil.createStack(user, credential, template, resources);
+        AwsTemplate template = AwsConnectorTestUtil.createAwsTemplateWithZeroVolumes();
+        Stack stack = AwsConnectorTestUtil.createStack(AwsConnectorTestUtil.DUMMY_OWNER, AwsConnectorTestUtil.DUMMY_ACCOUNT, credential, template, resources);
         resources.add(new Resource(ResourceType.CLOUDFORMATION_STACK, "", stack));
         // WHEN
         Map<String, String> result = underTest.getHdfsSiteConfigs(stack);

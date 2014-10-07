@@ -1,22 +1,5 @@
 package com.sequenceiq.cloudbreak.service.stack.handler;
 
-import com.sequenceiq.cloudbreak.conf.ReactorConfig;
-import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.domain.User;
-import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
-import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
-import com.sequenceiq.cloudbreak.service.stack.event.StackCreationSuccess;
-import com.sequenceiq.cloudbreak.websocket.WebsocketService;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
-import reactor.core.Reactor;
-import reactor.event.Event;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
@@ -24,6 +7,23 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import com.sequenceiq.cloudbreak.conf.ReactorConfig;
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.Status;
+import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
+import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
+import com.sequenceiq.cloudbreak.service.stack.event.StackCreationSuccess;
+import com.sequenceiq.cloudbreak.websocket.WebsocketService;
+
+import reactor.core.Reactor;
+import reactor.event.Event;
 
 public class StackCreationSuccessHandlerTest {
 
@@ -60,6 +60,7 @@ public class StackCreationSuccessHandlerTest {
         // GIVEN
         given(stackUpdater.updateAmbariIp(anyLong(), anyString())).willReturn(stack);
         given(stackUpdater.updateStackStatus(anyLong(), any(Status.class))).willReturn(stack);
+        given(stackUpdater.updateStackStatusReason(anyLong(), anyString())).willReturn(stack);
         doNothing().when(websocketService).sendToTopicUser(anyString(), any(WebsocketEndPoint.class), any());
         // WHEN
         underTest.accept(event);
@@ -76,9 +77,7 @@ public class StackCreationSuccessHandlerTest {
     private Stack createStack() {
         Stack stack = new Stack();
         stack.setName(STACK_NAME);
-        User user = new User();
-        user.setEmail(DUMMY_EMAIL);
-        stack.setUser(user);
+        stack.setOwner(DUMMY_EMAIL);
         return stack;
     }
 }

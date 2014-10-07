@@ -134,6 +134,7 @@ public class AzureTemplateConverterTest {
         azureTemplate.setId(1L);
         Set<Port> ports = new HashSet<>();
         ports.add(new Port(DUMMY_NAME, PORT, LOCAL_PORT, DUMMY_PROTOCOL));
+        azureTemplate.setPublicInAccount(true);
         return azureTemplate;
     }
 

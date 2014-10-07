@@ -35,8 +35,7 @@ public class AzureStackUtil {
     public AzureClient createAzureClient(Credential credential, String filePath) {
         File file = new File(filePath);
         return new AzureClient(
-                ((AzureCredential) credential).getSubscriptionId(), file.getAbsolutePath(), ((AzureCredential) credential).getJks()
-        );
+                ((AzureCredential) credential).getSubscriptionId(), file.getAbsolutePath(), ((AzureCredential) credential).getJks());
     }
 
     public static Map<String, String> createVMContext(String vmName) {
@@ -48,5 +47,9 @@ public class AzureStackUtil {
 
     public X509Certificate createX509Certificate(AzureCredential azureCredential, String emailAsFolder) throws FileNotFoundException, CertificateException {
         return new X509Certificate(AzureCertificateService.getCerFile(emailAsFolder, azureCredential.getId()));
+    }
+
+    public String emailAsFolder(String email) {
+        return email.replaceAll("@", "_").replace(".", "_");
     }
 }

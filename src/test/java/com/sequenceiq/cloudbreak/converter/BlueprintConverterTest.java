@@ -177,6 +177,7 @@ public class BlueprintConverterTest {
         blueprint.setDescription(DUMMY_DESCRIPTION);
         blueprint.setId(Long.parseLong(DUMMY_ID));
         blueprint.setBlueprintText(DUMMY_BLUEPRINT_TEXT);
+        blueprint.setPublicInAccount(true);
         return blueprint;
     }
 

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.repository;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -10,10 +11,18 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 
 public interface StackRepository extends CrudRepository<Stack, Long> {
 
-    @PostAuthorize("returnObject?.user?.id == principal?.id")
+    @PostAuthorize("hasPermission(returnObject,'read')")
     Stack findOne(@Param("id") Long id);
 
     Stack findById(@Param("id") Long id);
+
+    Stack findByName(@Param("name") String name);
+
+    Set<Stack> findForUser(@Param("user") String user);
+
+    Set<Stack> findPublicsInAccount(@Param("account") String account);
+
+    Set<Stack> findAllInAccount(@Param("account") String account);
 
     Stack findOneWithLists(@Param("id") Long id);
 

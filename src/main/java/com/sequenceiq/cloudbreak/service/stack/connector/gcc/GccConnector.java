@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackDescription;
-import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteComplete;
 
@@ -46,7 +45,7 @@ public class GccConnector implements CloudPlatformConnector {
     private GccStackUtil gccStackUtil;
 
     @Override
-    public StackDescription describeStackWithResources(User user, Stack stack, Credential credential) {
+    public StackDescription describeStackWithResources(Stack stack, Credential credential) {
         DetailedGccStackDescription detailedGccStackDescription = new DetailedGccStackDescription();
         Compute compute = gccStackUtil.buildCompute((GccCredential) credential, stack.getName());
         GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
@@ -80,7 +79,7 @@ public class GccConnector implements CloudPlatformConnector {
         return detailedGccStackDescription;
     }
 
-    public void rollback(User user, Stack stack, Credential credential, Set<Resource> resourceSet) {
+    public void rollback(Stack stack, Credential credential, Set<Resource> resourceSet) {
         GccCredential gccCredential = (GccCredential) credential;
         Compute compute = gccStackUtil.buildCompute(gccCredential, stack.getName());
         deleteVirtualMachines(stack, compute);
@@ -91,7 +90,7 @@ public class GccConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public void deleteStack(User user, Stack stack, Credential credential) {
+    public void deleteStack(Stack stack, Credential credential) {
         Compute compute = gccStackUtil.buildCompute((GccCredential) credential, stack.getName());
         deleteVirtualMachines(stack, compute);
         deleteDisks(stack, compute);
@@ -167,12 +166,12 @@ public class GccConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public boolean startAll(User user, Stack stack) {
+    public boolean startAll(Stack stack) {
         return true;
     }
 
     @Override
-    public boolean stopAll(User user, Stack stack) {
+    public boolean stopAll(Stack stack) {
         return true;
     }
 }

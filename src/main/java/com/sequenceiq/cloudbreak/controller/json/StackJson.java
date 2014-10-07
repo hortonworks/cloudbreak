@@ -14,7 +14,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.StackDescription;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.domain.UserRole;
 
 public class StackJson implements JsonEntity {
 
@@ -35,8 +34,8 @@ public class StackJson implements JsonEntity {
     private String ambariServerIp;
     private String hash;
     private ClusterResponse cluster;
+    private String statusReason;
     private Set<InstanceMetaDataJson> metadata = new HashSet<>();
-    private Set<UserRole> roles = new HashSet<>();
 
     public StackJson() {
     }
@@ -113,6 +112,16 @@ public class StackJson implements JsonEntity {
         this.status = status;
     }
 
+    @JsonProperty("statusReason")
+    public String getStatusReason() {
+        return statusReason;
+    }
+
+    @JsonIgnore
+    public void setStatusReason(String statusReason) {
+        this.statusReason = statusReason;
+    }
+
     @JsonProperty("ambariServerIp")
     public String getAmbariServerIp() {
         return ambariServerIp;
@@ -153,11 +162,4 @@ public class StackJson implements JsonEntity {
         this.cluster = cluster;
     }
 
-    public Set<UserRole> getRoles() {
-        return roles;
-    }
-
-    public void setRoles(Set<UserRole> roles) {
-        this.roles = roles;
-    }
 }

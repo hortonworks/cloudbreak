@@ -40,7 +40,6 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackDescription;
-import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -84,7 +83,7 @@ public class AwsConnector implements CloudPlatformConnector {
     private StackRepository stackRepository;
 
     @Override
-    public StackDescription describeStackWithResources(User user, Stack stack, Credential credential) {
+    public StackDescription describeStackWithResources(Stack stack, Credential credential) {
         AwsTemplate awsInfra = (AwsTemplate) stack.getTemplate();
         AwsCredential awsCredential = (AwsCredential) credential;
         DescribeStacksResult stackResult = null;
@@ -129,7 +128,7 @@ public class AwsConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public void deleteStack(User user, Stack stack, Credential credential) {
+    public void deleteStack(Stack stack, Credential credential) {
         LOGGER.info("Deleting stack: {}", stack.getId());
         AwsTemplate template = (AwsTemplate) stack.getTemplate();
         AwsCredential awsCredential = (AwsCredential) credential;
@@ -146,12 +145,12 @@ public class AwsConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public boolean startAll(User user, Stack stack) {
+    public boolean startAll(Stack stack) {
         return setStackState(stack, false);
     }
 
     @Override
-    public boolean stopAll(User user, Stack stack) {
+    public boolean stopAll(Stack stack) {
         return setStackState(stack, true);
     }
 

@@ -16,7 +16,6 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.StatusRequest;
-import com.sequenceiq.cloudbreak.domain.User;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -67,9 +66,8 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
         StatusRequest statusRequest = statusUpdateRequest.getStatusRequest();
         long stackId = statusUpdateRequest.getStackId();
         Stack stack = stackRepository.findOneWithLists(stackId);
-        User user = statusUpdateRequest.getUser();
         if (StatusRequest.STOPPED.equals(statusRequest)) {
-            boolean stopped = connector.stopAll(user, stack);
+            boolean stopped = connector.stopAll(stack);
             if (stopped) {
                 LOGGER.info("Update stack {} state to: {}", stackId, Status.STOPPED);
                 stackUpdater.updateStackStatus(stackId, Status.STOPPED);
@@ -78,7 +76,7 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
                 stackUpdater.updateStackStatus(stackId, Status.STOP_FAILED);
             }
         } else {
-            boolean started = connector.startAll(user, stack);
+            boolean started = connector.startAll(stack);
             if (started) {
                 waitForAmbariToStart(stack);
                 Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
@@ -87,7 +85,7 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
                 if (cluster != null && Status.START_REQUESTED.equals(cluster.getStatus())) {
                     waitForHostsToJoin(stack);
                     reactor.notify(ReactorConfig.CLUSTER_STATUS_UPDATE_EVENT,
-                            Event.wrap(new ClusterStatusUpdateRequest(user, stack.getId(), statusRequest)));
+                            Event.wrap(new ClusterStatusUpdateRequest(stack.getId(), statusRequest)));
                 }
             } else {
                 LOGGER.info("Update stack {} state to: {}", stackId, Status.START_FAILED);
