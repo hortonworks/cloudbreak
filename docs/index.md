@@ -199,10 +199,12 @@ In order to build Periscope you will need [Gradle](http://www.gradle.org/).
 You are almost done. In order to start using Periscope you will need to set or pass the following environment variables.
 
 ```
-periscope.cloudbreak.host - Clousbreak host 
+periscope.cloudbreak.host - Cloudbreak host 
 periscope.cloudbreak.port - Cloudbreak port
 periscope.cloudbreak.user - Cloudbreak user name
 periscope.cloudbreak.pass - Cloudbreak password
+periscope.identity.host - Oauth identity server host
+periscope.identity.port - Oauth identity server port
 periscope.smtp.host - SMTP host for sending emails
 periscope.smtp.port - SMTP port 
 periscope.smtp.username - SMTP username 
