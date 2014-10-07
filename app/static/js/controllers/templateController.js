@@ -92,6 +92,8 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
 
         $scope.createGccTemplate = function () {
             $scope.gccTemp.cloudPlatform = 'GCC';
+            $scope.gccTemp.parameters.gccImageType = "DEBIAN_HACK";
+
             UserTemplate.save($scope.gccTemp, function (result) {
                 $scope.gccTemp.id = result.id;
                 $rootScope.templates.push($scope.gccTemp);
