@@ -13,7 +13,7 @@
             <div class="panel-body">
 
                 <p class="btn-row-over-panel">
-                    <a href="" class="btn btn-success" role="button" data-toggle="collapse" data-target="#panel-create-templates-collapse">
+                    <a href="" id="panel-create-templates-collapse-btn" class="btn btn-success" role="button" data-toggle="collapse" data-target="#panel-create-templates-collapse">
                         <i class="fa fa-plus fa-fw"></i><span> create template</span>
                     </a>
                 </p>

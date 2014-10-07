@@ -19,6 +19,7 @@ angular.module('uluwatuControllers').controller('blueprintController', ['$scope'
                 $scope.modifyStatusMessage($rootScope.error_msg.blueprint_success1 + result.id + $rootScope.error_msg.blueprint_success2);
                 $scope.modifyStatusClass("has-success");
                 $scope.blueprintForm.$setPristine();
+                angular.element(document.querySelector('#panel-create-blueprints-collapse-btn')).click();
             }, function (error) {
                 $scope.modifyStatusMessage($rootScope.error_msg.blueprint_template_failed + ": " + error.data.message);
                 $scope.modifyStatusClass("has-error");

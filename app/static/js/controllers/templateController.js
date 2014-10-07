@@ -84,6 +84,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                 $scope.modifyStatusMessage($rootScope.error_msg.aws_template_success1 + result.id + $rootScope.error_msg.aws_template_success2);
                 $scope.modifyStatusClass("has-success");
                 $scope.awsTemplateForm.$setPristine();
+                collapseCreateTemplateFormPanel();
             }, function (error) {
                 $scope.modifyStatusMessage($rootScope.error_msg.aws_template_failed + ": " + error.data.message);
                 $scope.modifyStatusClass("has-error");
@@ -101,6 +102,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                 $scope.modifyStatusMessage($rootScope.error_msg.gcc_template_success1 + result.id + $rootScope.error_msg.gcc_template_success2);
                 $scope.modifyStatusClass("has-success");
                 $scope.gccTemplateForm.$setPristine();
+                collapseCreateTemplateFormPanel();
             }, function (error) {
                 $scope.modifyStatusMessage($rootScope.error_msg.gcc_template_failed + ": " + error.data.message);
                 $scope.modifyStatusClass("has-error");
@@ -118,6 +120,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                 $scope.modifyStatusMessage($rootScope.error_msg.azure_template_success1 + result.id + $rootScope.error_msg.azure_template_success2);
                 $scope.modifyStatusClass("has-success");
                 $scope.azureTemplateForm.$setPristine();
+                collapseCreateTemplateFormPanel();
             }, function (error) {
                 $scope.modifyStatusMessage($rootScope.error_msg.azure_template_failed + ": " + error.data.message);
                 $scope.modifyStatusClass("has-error");
@@ -133,6 +136,10 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                 $scope.modifyStatusMessage($rootScope.error_msg.template_delete_failed + ": " + error.data.message);
                 $scope.modifyStatusClass("has-error");
             });
+        }
+
+        function collapseCreateTemplateFormPanel() {
+          angular.element(document.querySelector('#panel-create-templates-collapse-btn')).click();
         }
 
         function initializeAwsTemp() {
