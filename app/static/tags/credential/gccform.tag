@@ -13,7 +13,7 @@
     <div class="form-group" ng-class="{ 'has-error': gccCredentialForm.gcccdescription.$dirty && gccCredentialForm.gcccdescription.$invalid }">
         <label class="col-sm-3 control-label" for="gcccdescription">Description</label>
         <div class="col-sm-9">
-            <input type="text" class="form-control" ng-model="gcccdescription" id="gcccdescription" ng-model="credentialGcc.description" name="gcccdescription" ng-maxlength="20"  placeholder="max. 20 char">
+            <input type="text" class="form-control" id="gcccdescription" ng-model="credentialGcc.description" name="gcccdescription" ng-maxlength="20"  placeholder="max. 20 char">
             <div class="help-block" ng-show="gccCredentialForm.gcccdescription.$dirty && gccCredentialForm.gcccdescription.$invalid">
                 <i class="fa fa-warning"></i> {{error_msg.credential_description_invalid}}
             </div>
