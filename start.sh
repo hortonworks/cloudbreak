@@ -1,6 +1,8 @@
 #!/bin/bash
 : ${ULU_ZIP:=oauth}
 
+export ULU_URL=https://github.com/sequenceiq/uluwatu/archive/$ULU_ZIP.zip
+
 if [ -z "$ULU_CLOUDBREAK_ADDRESS" ]; then
   echo ULU_CLOUDBREAK_ADDRESS must be set;
   MISSING_ENV_VARS=true;
@@ -30,4 +32,4 @@ if [ $MISSING_ENV_VARS ]; then
   exit 1;
 fi
 
-mkdir /uluwatu && cd /uluwatu && curl -LO $ULU_URL && unzip /uluwatu/$ULU_ZIP && cd /uluwatu/uluwatu-$ULU_ZIP && node install && node server.js
+mkdir /uluwatu && cd /uluwatu && curl -LO $ULU_URL && unzip /uluwatu/$ULU_ZIP && cd /uluwatu/uluwatu-$ULU_ZIP && npm install && node server.js
