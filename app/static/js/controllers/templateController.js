@@ -23,7 +23,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
 
         $rootScope.amis = {
             'US_EAST_1': 'ami-aab508c2',
-            'US_WEST_1': 'ami-1f59535a'
+            'US_WEST_1': 'ami-1f59535a',
             'US_WEST_2': 'ami-959fd2a5',
             'EU_WEST_1': 'ami-f88d2f8f',
             'AP_SOUTHEAST_1': 'ami-0c496f5e',
