@@ -9,13 +9,14 @@ angular.module('uluwatuControllers').controller('blueprintController', ['$scope'
 
         $scope.createBlueprint = function () {
             UserBlueprint.save($scope.blueprint, function (result) {
-                $scope.blueprint.id = result.id;
-                $rootScope.blueprints.push($scope.blueprint);
-                initializeBlueprint();
-                $scope.modifyStatusMessage($rootScope.error_msg.blueprint_success1 + result.id + $rootScope.error_msg.blueprint_success2);
-                $scope.modifyStatusClass("has-success");
-                $scope.blueprintForm.$setPristine();
-                angular.element(document.querySelector('#panel-create-blueprints-collapse-btn')).click();
+                GlobalBlueprint.get({ id: result.id}, function(success) {
+                  $rootScope.blueprints.push(success);
+                  initializeBlueprint();
+                  $scope.modifyStatusMessage($rootScope.error_msg.blueprint_success1 + success.id + $rootScope.error_msg.blueprint_success2);
+                  $scope.modifyStatusClass("has-success");
+                  $scope.blueprintForm.$setPristine();
+                  angular.element(document.querySelector('#panel-create-blueprints-collapse-btn')).click();
+                });
             }, function (error) {
                 $scope.modifyStatusMessage($rootScope.error_msg.blueprint_template_failed + ": " + error.data.message);
                 $scope.modifyStatusClass("has-error");
