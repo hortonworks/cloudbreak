@@ -46,7 +46,7 @@
 
                         <div class="panel-heading">
                             <h5>
-                                <a href="" data-toggle="collapse" data-parent="#blueprint-list-accordion" data-target="#panel-blueprint-collapse{{blueprint.id}}"><i class="fa fa-file-o fa-fw"></i>{{blueprint.name}}</a>
+                                <a href="" data-toggle="collapse" data-parent="#blueprint-list-accordion" data-target="#panel-blueprint-collapse{{blueprint.id}}"><i class="fa fa-th fa-fw"></i>{{blueprint.name}}</a>
                             </h5>
                         </div>
                         <div id="panel-blueprint-collapse{{blueprint.id}}" class="panel-collapse collapse">
