@@ -177,7 +177,6 @@ app.post('/confirm', function(req, res){
                if (confirmResp.statusCode == 302){
                    console.log(confirmResp.headers.location)
                    res.cookie('JSESSIONID', getCookie(req, 'uaa_cookie'))
-                   //res.cookie('redirect', confirmResp.headers.location)
                    res.end(confirmResp.headers.location)
                } else {
                    res.render('login')
