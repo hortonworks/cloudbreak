@@ -22,13 +22,13 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
         }
 
         $rootScope.amis = {
-            'US_EAST_1': 'ami-0609d86e',
-            'US_WEST_1': 'ami-73000d36',
-            'US_WEST_2': 'ami-07bdc737',
-            'EU_WEST_1': 'ami-e09e4397',
-            'AP_SOUTHEAST_1': 'ami-363f6464',
-            'AP_SOUTHEAST_2': 'ami-3d9ef807',
-            'AP_NORTHEAST_1': 'ami-8dbde48c',
+            'US_EAST_1': 'ami-aab508c2',
+            'US_WEST_1': 'ami-1f59535a'
+            'US_WEST_2': 'ami-959fd2a5',
+            'EU_WEST_1': 'ami-f88d2f8f',
+            'AP_SOUTHEAST_1': 'ami-0c496f5e',
+            'AP_SOUTHEAST_2': 'ami-9fef8da5',
+            'AP_NORTHEAST_1': 'ami-99cbfe98',
             'SA_EAST_1': 'ami-17f45c0a'
         }
 
