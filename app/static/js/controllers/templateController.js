@@ -76,10 +76,12 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
         $rootScope.templates = UserTemplate.query();
         $scope.azureTemp = {};
         $scope.gccTemp = {};
+        $scope.azureTemp = {};
         $scope.awsTemplateForm = {};
         $scope.gccTemplateForm = {};
-        $scope.azureTemplateForm = {};
+        initializeAzureTemp();
         initializeAwsTemp();
+        initializeGccTemp();
 
         $scope.createAwsTemplateRequest = function () {
             $scope.azureTemplate = false;
@@ -124,7 +126,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
             UserTemplate.save($scope.gccTemp, function (result) {
                 $scope.gccTemp.id = result.id;
                 $rootScope.templates.push($scope.gccTemp);
-                $scope.gccTemp = {};
+                initializeGccTemp();
                 $scope.modifyStatusMessage($rootScope.error_msg.gcc_template_success1 + result.id + $rootScope.error_msg.gcc_template_success2);
                 $scope.modifyStatusClass("has-success");
                 $scope.gccTemplateForm.$setPristine();
@@ -142,7 +144,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
             UserTemplate.save($scope.azureTemp, function (result) {
                 $scope.azureTemp.id = result.id;
                 $rootScope.templates.push($scope.azureTemp);
-                $scope.azureTemp = {};
+                initializeAzureTemp();
                 $scope.modifyStatusMessage($rootScope.error_msg.azure_template_success1 + result.id + $rootScope.error_msg.azure_template_success2);
                 $scope.modifyStatusClass("has-success");
                 $scope.azureTemplateForm.$setPristine();
@@ -171,7 +173,28 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
         function initializeAwsTemp() {
             $scope.awsTemp = {
                 parameters: {
-                    sshLocation: "0.0.0.0/0"
+                    sshLocation: "0.0.0.0/0",
+                    region: "EU_WEST_1",
+                    instanceType: "T2Medium",
+                    volumeType: "Standard"
+                }
+            }
+        }
+
+        function initializeAzureTemp() {
+            $scope.azureTemp = {
+                parameters: {
+                    location: "NORTH_EUROPE",
+                    vmType: "MEDIUM"
+                }
+            }
+        }
+
+        function initializeGccTemp() {
+            $scope.gccTemp = {
+                parameters: {
+                    gccInstanceType: "N1_STANDARD_2",
+                    gccZone: "EUROPE_WEST1_A"
                 }
             }
         }
