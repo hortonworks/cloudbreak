@@ -18,6 +18,23 @@ cloudbreakApp.directive('match', function($parse) {
   };
 });
 
+cloudbreakApp.directive('validjson', function($parse) {
+    return {
+        require: 'ngModel',
+        link: function(scope, elem, attrs, ctrl) {
+            ctrl.$parsers.unshift(function(viewValue) {
+                try {
+                    JSON.parse(viewValue)
+                    ctrl.$setValidity('validjson', true);
+                } catch (err){
+                    ctrl.$setValidity('validjson', false);
+                }
+            });
+        }
+    };
+});
+
+
 cloudbreakApp.config([ '$routeProvider', '$locationProvider', '$httpProvider', function($routeProvider, $locationProvider, $httpProvider) {
     $routeProvider.when('/', {
         templateUrl: 'partials/dashboard.html',
