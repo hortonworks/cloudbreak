@@ -3,8 +3,8 @@
 var log = log4javascript.getLogger("clusterController-logger");
 var $jq = jQuery.noConflict();
 
-angular.module('uluwatuControllers').controller('clusterController', ['$scope', '$rootScope', '$filter', 'UluwatuCluster',
-    function ($scope, $rootScope, $filter, UluwatuCluster) {
+angular.module('uluwatuControllers').controller('clusterController', ['$scope', '$rootScope', '$filter', 'UluwatuCluster', 'GlobalStack',
+    function ($scope, $rootScope, $filter, UluwatuCluster, GlobalStack) {
 
         $scope.ledStyles = {
             "REQUESTED": "state2-run-blink",
@@ -92,10 +92,14 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         }
 
         $scope.changeActiveCluster = function (clusterId) {
-
             $rootScope.activeCluster = $filter('filter')($rootScope.clusters, { id: clusterId })[0];
             $rootScope.activeClusterBlueprint = $filter('filter')($rootScope.blueprints, { id: $rootScope.activeCluster.blueprintId })[0];
             $rootScope.activeClusterTemplate = $filter('filter')($rootScope.templates, {id: $rootScope.activeCluster.templateId })[0];
             $rootScope.activeClusterCredential = $filter('filter')($rootScope.credentials, {id: $rootScope.activeCluster.credentialId })[0];
+            $rootScope.activeCluster.cloudPlatform =  $rootScope.activeClusterCredential.cloudPlatform;
+            GlobalStack.get({ id: clusterId }, function(success) {
+                    $rootScope.activeCluster.description = success.description;
+                }
+            );
         }
     }]);
