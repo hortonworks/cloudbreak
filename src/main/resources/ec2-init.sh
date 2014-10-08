@@ -38,10 +38,6 @@ for (( i=1; i<=VOLUME_COUNT; i++ )); do
   DOCKER_VOLUME_PARAMS="${DOCKER_VOLUME_PARAMS} -v /mnt/fs${i}:/mnt/fs${i}"
 done
 
-# temp solution to update docker
-service docker stop
-wget https://get.docker.io/builds/Linux/x86_64/docker-1.2.0 -O /usr/bin/docker && chmod +x /usr/bin/docker
-
 service docker restart
 sleep 5
 
