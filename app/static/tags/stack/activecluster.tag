@@ -38,13 +38,19 @@
                             <p id="sl_nodeCount" class="form-control-static">{{activeCluster.nodeCount}}</p>
                         </div>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group" ng-if="activeCluster.cluster.statusReason === null && (activeCluster.statusReason != null && activeCluster.statusReason != '')">
                         <label class="col-sm-3 control-label" for="sl_cloudStatus">Cluster status</label>
-                        <div class="col-sm-9" ng-if="activeCluster.cluster.statusReason === null && activeCluster.statusReason != null">
-                            <p id="sl_cloudStatus" class="form-control-static">{{activeCluster.statusReason}}</p>
+                        <div class="col-sm-9">
+                            <p id="sl_cloudStatus" class="form-control-static">{{activeCluster.statusReason}}1</p>
                         </div>
-                        <div class="col-sm-9" ng-if="activeCluster.cluster.statusReason != null">
-                            <p id="sl_cloudStatus" class="form-control-static">{{activeCluster.cluster.statusReason}}</p>
+                        <div class="col-sm-9" ng-if="activeCluster.cluster.statusReason != null && activeCluster.cluster.statusReason != ''">
+                            <p id="sl_cloudStatus" class="form-control-static">{{activeCluster.cluster.statusReason}}2</p>
+                        </div>
+                    </div>
+                    <div class="form-group" ng-if="activeCluster.cluster.statusReason != null && activeCluster.cluster.statusReason != ''">
+                        <label class="col-sm-3 control-label" for="sl_cloudStatus">Cluster status</label>
+                        <div class="col-sm-9">
+                            <p id="sl_cloudStatus" class="form-control-static">{{activeCluster.cluster.statusReason}}2</p>
                         </div>
                     </div>
                 </form>
