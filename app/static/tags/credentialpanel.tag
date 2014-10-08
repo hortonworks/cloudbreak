@@ -36,17 +36,16 @@
                                 </div>
                             </div>
 
-                            <div class="alert alert-info" role="alert" ng-show="awsCredentialInCreate && awsCredential"><b>Please wait!</b> creation in progress...</div>
-                            <form class="form-horizontal" role="form" ng-show="awsCredential  && !awsCredentialInCreate" name="awsCredentialForm">
+                            <div class="alert alert-info" role="alert" ng-show="credentialInCreation"><b>Please wait!</b> creation in progress...</div>
+                            <form class="form-horizontal" role="form" ng-show="awsCredential  && !credentialInCreation" name="awsCredentialForm">
                               <div ng-include src="'tags/credential/awsform.tag'"></div>
                             </form>
 
-                            <form class="form-horizontal" role="form" name="azureCredentialForm"  ng-show="azureCredential">
+                            <form class="form-horizontal" role="form" name="azureCredentialForm"  ng-show="azureCredential && !credentialInCreation">
                                 <div ng-include src="'tags/credential/azureform.tag'"></div>
                             </form>
 
-                            <div class="alert alert-info" role="alert" ng-show="gccCredentialInCreate && gccCredential"><b>Please wait!</b> creation in progress...</div>
-                            <form class="form-horizontal" role="form" name="gccCredentialForm" ng-show="gccCredential && !gccCredentialInCreate">
+                            <form class="form-horizontal" role="form" name="gccCredentialForm" ng-show="gccCredential && !credentialInCreation">
                                 <div ng-include src="'tags/credential/gccform.tag'"></div>
                             </form>
                         </div>

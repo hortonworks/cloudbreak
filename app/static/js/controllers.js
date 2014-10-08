@@ -16,7 +16,6 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
 
         $scope.errormessage = "";
         $scope.statusclass = "";
-        $scope.awsCredentialInCreate = false;
         $http.defaults.headers.common['Content-Type'] = 'application/json';
 
         $scope.azureTemplate = false;
