@@ -58,9 +58,9 @@ public class AmbariClusterConnector {
 
     public static final int POLLING_INTERVAL = 5000;
     public static final int MAX_ATTEMPTS_FOR_AMBARI_OPS = -1;
+    public static final int MAX_ATTEMPTS_FOR_HOSTS = 240;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariClusterConnector.class);
-    private static final int MAX_ATTEMPTS_FOR_HOSTS = 240;
     private static final String UNHANDLED_EXCEPTION_MSG = "Unhandled exception occurred while installing Ambari services.";
 
     @Autowired

@@ -83,9 +83,15 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
                 LOGGER.info("Update stack {} state to: {}", stackId, Status.AVAILABLE);
                 stackUpdater.updateStackStatus(stackId, Status.AVAILABLE);
                 if (cluster != null && Status.START_REQUESTED.equals(cluster.getStatus())) {
-                    waitForHostsToJoin(stack);
-                    reactor.notify(ReactorConfig.CLUSTER_STATUS_UPDATE_EVENT,
-                            Event.wrap(new ClusterStatusUpdateRequest(stack.getId(), statusRequest)));
+                    boolean hostsJoined = waitForHostsToJoin(stack);
+                    if (hostsJoined) {
+                        reactor.notify(ReactorConfig.CLUSTER_STATUS_UPDATE_EVENT,
+                                Event.wrap(new ClusterStatusUpdateRequest(stack.getId(), statusRequest)));
+                    } else {
+                        cluster.setStatus(Status.START_FAILED);
+                        stack.setCluster(cluster);
+                        stackRepository.save(stack);
+                    }
                 }
             } else {
                 LOGGER.info("Update stack {} state to: {}", stackId, Status.START_FAILED);
@@ -99,14 +105,18 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
                 new AmbariHealthCheckerTask(),
                 new AmbariClient(stack.getAmbariIp()),
                 AmbariClusterConnector.POLLING_INTERVAL,
-                AmbariClusterConnector.MAX_ATTEMPTS_FOR_AMBARI_OPS);
+                AmbariClusterConnector.MAX_ATTEMPTS_FOR_HOSTS);
     }
 
-    private void waitForHostsToJoin(Stack stack) {
+    private boolean waitForHostsToJoin(Stack stack) {
+        AmbariHostsJoinStatusCheckerTask ambariHostsJoinStatusCheckerTask = new AmbariHostsJoinStatusCheckerTask();
+        AmbariHosts ambariHosts =
+                new AmbariHosts(stack.getId(), new AmbariClient(stack.getAmbariIp()), stack.getNodeCount() * stack.getMultiplier());
         ambariHostJoin.pollWithTimeout(
-                new AmbariHostsJoinStatusCheckerTask(),
-                new AmbariHosts(stack.getId(), new AmbariClient(stack.getAmbariIp()), stack.getNodeCount() * stack.getMultiplier()),
+                ambariHostsJoinStatusCheckerTask,
+                ambariHosts,
                 AmbariClusterConnector.POLLING_INTERVAL,
-                AmbariClusterConnector.MAX_ATTEMPTS_FOR_AMBARI_OPS);
+                AmbariClusterConnector.MAX_ATTEMPTS_FOR_HOSTS);
+        return ambariHostsJoinStatusCheckerTask.checkStatus(ambariHosts);
     }
 }
