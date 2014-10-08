@@ -50,12 +50,12 @@ if (!clientSecret || !redirectUri || !clientId) {
 }
 
 if (!identityServerAddress || (identityServerAddress.substring(0, 7) !== "http://" && identityServerAddress.substring(0, 8) !== "https://")){
-  console.log("ULU_IDENTITY_ADDRESS must be specified and it must be a standard URL: 'http[s]://host[:port]/'"); 
+  console.log("ULU_IDENTITY_ADDRESS must be specified and it must be a standard URL: 'http[s]://host[:port]/'");
   environmentSet = false;
 }
 
 if (!cloudbreakAddress || (cloudbreakAddress.substring(0, 7) !== "http://" && cloudbreakAddress.substring(0, 8) !== "https://")){
-  console.log("ULU_CLOUDBREAK_ADDRESS must be specified and it must be a standard URL: 'http[s]://host[:port]/'"); 
+  console.log("ULU_CLOUDBREAK_ADDRESS must be specified and it must be a standard URL: 'http[s]://host[:port]/'");
   environmentSet = false;
 }
 
@@ -80,7 +80,7 @@ identityServerClient.registerMethod("retrieveToken", identityServerAddress + "oa
 var cbRequestArgs = {
   headers:{
     "Content-Type": "application/json",
-  } 
+  }
 }
 
 // routes ======================================================================
@@ -92,7 +92,7 @@ app.get('/authorize', function(req, res, next){
     headers:{
       "Content-Type": "application/x-www-form-urlencoded",
     },
-    data: 
+    data:
       'grant_type=authorization_code'
       + '&redirect_uri=' + redirectUri
       + '&code=' + req.query.code
@@ -111,20 +111,22 @@ app.get('/authorize', function(req, res, next){
 // main page ===================================================================
 
 app.get('/', function(req, res) {
-  res.render('index', { 
-      authorizeUrl : 
-          identityServerAddress
-            + 'oauth/authorize?response_type=code'
-            + '&client_id=' + clientId
-            + '&scope=' + clientScopes
-            + '&redirect_uri=' + redirectUri });
+  var oauthFlowUrl = identityServerAddress
+      + 'oauth/authorize?response_type=code'
+      + '&client_id=' + clientId
+      + '&scope=' + clientScopes
+      + '&redirect_uri=' + redirectUri
+  if (!req.session.token){
+    res.redirect(oauthFlowUrl)
+  }
+  res.render('index', { authorizeUrl : oauthFlowUrl });
 });
 
 app.get('/user', function(req,res) {
   var requestArgs = {
     headers:{
       "Authorization": "Bearer " + req.session.token,
-    } 
+    }
   }
   identityServerClient.get(identityServerAddress + "userinfo", requestArgs, function(data,response){
     res.json(data);
