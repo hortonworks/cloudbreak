@@ -24,12 +24,13 @@ cloudbreakApp.directive('validjson', function($parse) {
         link: function(scope, elem, attrs, ctrl) {
             ctrl.$parsers.unshift(function(viewValue) {
                 var valid = false;
+                var json = {};
                 try {
-                    JSON.parse(viewValue)
+                    json = JSON.parse(viewValue);
                     valid = true;
                 } catch (err){}
                 ctrl.$setValidity('validjson', valid);
-                return valid ? viewValue : undefined;
+                return valid ? json : undefined;
             });
         }
     };
