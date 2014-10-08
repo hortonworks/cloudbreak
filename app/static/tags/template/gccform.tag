@@ -21,13 +21,13 @@
     <label class="col-sm-3 control-label" for="gcc_tregion">Region</label>
     <div class="col-sm-9">
         <select class="form-control" id="gcc_tregion" ng-model="gccTemp.parameters.gccZone">
+            <option value="ASIA_EAST1_A">asia-east1-a</option>
+            <option value="ASIA_EAST1_B">asia-east1-b</option>
+            <option value="EUROPE_WEST1_A">europe-west1-a</option>
+            <option value="EUROPE_WEST1_B">europe-west1-b</option>
             <option value="US_CENTRAL1_A">us-central1-a</option>
             <option value="US_CENTRAL1_B">us-central1-b</option>
             <option value="US_CENTRAL1_F">us-central1-f</option>
-            <option value="EUROPE_WEST1_A">europe-west1-a</option>
-            <option value="EUROPE_WEST1_B">europe-west1-b</option>
-            <option value="ASIA_EAST1_A">asia-east1-a</option>
-            <option value="ASIA_EAST1_B">asia-east1-b</option>
         </select>
     </div>
 </div>
@@ -40,14 +40,14 @@
             <option value="N1_STANDARD_4">n1-standard-4</option>
             <option value="N1_STANDARD_8">n1-standard-8</option>
             <option value="N1_STANDARD_16">n1-standard-16</option>
-            <option value="N1_HIGHMEM_2">n1-highmem-2</option>
-            <option value="N1_HIGHMEM_4">n1-highmem-4</option>
-            <option value="N1_HIGHMEM_8">n1-highmem-8</option>
-            <option value="N1_HIGHMEM_16">n1-highmem-16</option>
             <option value="N1_HIGHCPU_2">n1-highcpu-2</option>
             <option value="N1_HIGHCPU_4">n1-highcpu-4</option>
             <option value="N1_HIGHCPU_8">n1-highcpu-8</option>
             <option value="N1_HIGHCPU_16">n1-highcpu-16</option>
+            <option value="N1_HIGHMEM_2">n1-highmem-2</option>
+            <option value="N1_HIGHMEM_4">n1-highmem-4</option>
+            <option value="N1_HIGHMEM_8">n1-highmem-8</option>
+            <option value="N1_HIGHMEM_16">n1-highmem-16</option>
         </select>
     </div>
 </div>
