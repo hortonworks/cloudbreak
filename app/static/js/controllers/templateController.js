@@ -29,7 +29,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
             'AP_SOUTHEAST_1': 'ami-0c496f5e',
             'AP_SOUTHEAST_2': 'ami-9fef8da5',
             'AP_NORTHEAST_1': 'ami-99cbfe98',
-            'SA_EAST_1': 'ami-17f45c0a'
+            'SA_EAST_1': 'ami-c3398cde'
         }
 
         $rootScope.azureRegions = {
