@@ -28,11 +28,11 @@
 
     <div class="col-sm-9">
         <select class="form-control" id="azure_tlocation" ng-model="azureTemp.parameters.location" required>
-            <option value="NORTH_EUROPE">North Europe</option>
+            <option value="BRAZIL_SOUTH">Brazil South</option>
             <option value="EAST_ASIA">East Asia</option>
             <option value="EAST_US">East US</option>
+            <option value="NORTH_EUROPE">North Europe</option>
             <option value="WEST_US">West US</option>
-            <option value="BRAZIL_SOUTH">Brazil South</option>
         </select>
     </div>
     <!-- .col-sm-9 -->

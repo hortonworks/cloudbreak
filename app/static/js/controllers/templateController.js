@@ -33,11 +33,11 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
         }
 
         $rootScope.azureRegions = {
-            'NORTH_EUROPE': 'North Europe',
+            'BRAZIL_SOUTH': 'Brazil South',
             'EAST_ASIA': 'East Asia',
             'EAST_US': 'East US',
-            'WEST_US': 'West US',
-            'BRAZIL_SOUTH': 'Brazil South'
+            'NORTH_EUROPE': 'North Europe',
+            'WEST_US': 'West US'
         }
 
         $rootScope.azureVmTypes = {

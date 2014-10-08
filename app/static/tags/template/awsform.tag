@@ -41,14 +41,14 @@
 
         <div class="col-sm-9">
             <select class="form-control" id="aws_tregion" ng-model="awsTemp.parameters.region" required>
-                <option value="US_EAST_1">US East(N. Virginia)</option>
-                <option value="US_WEST_1">US West (Oregon)</option>
-                <option value="US_WEST_2">US West (N. California)</option>
-                <option value="EU_WEST_1">EU (Ireland)</option>
+                <option value="AP_NORTHEAST_1">Asia Pacific (Tokyo)</option>
                 <option value="AP_SOUTHEAST_1">Asia Pacific (Singapore)</option>
                 <option value="AP_SOUTHEAST_2">Asia Pacific (Sydney)</option>
-                <option value="AP_NORTHEAST_1">Asia Pacific (Tokyo)</option>
+                <option value="EU_WEST_1">EU (Ireland)</option>
                 <option value="SA_EAST_1">South America (São Paulo)</option>
+                <option value="US_EAST_1">US East(N. Virginia)</option>
+                <option value="US_WEST_1">US West (N. California)</option>
+                <option value="US_WEST_2">US West (Oregon)</option>
             </select>
         </div>
         <!-- .col-sm-9 -->
@@ -107,8 +107,8 @@
 
         <div class="col-sm-9">
             <select class="form-control" id="aws_tvolumetype" ng-model="awsTemp.parameters.volumeType" required>
-                <option value="Gp2">SSD</option>
                 <option value="Standard">Magnetic</option>
+                <option value="Gp2">SSD</option>
             </select>
         </div>
         <!-- .col-sm-9 -->

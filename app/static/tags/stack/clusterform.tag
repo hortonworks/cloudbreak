@@ -30,7 +30,7 @@
                         <label class="col-sm-3 control-label" for="selectTemplate">Template</label>
                         <div class="col-sm-9">
                             <select class="form-control" id="selectTemplate" ng-model="cluster.templateId" required >
-                                <option ng-repeat="template in $root.templates" data-value="{{template.id}}" value="{{template.id}}" id="{{template.id}}" ng-if="template.cloudPlatform == activeCredential.cloudPlatform"  ng-repeat="template in templates" >{{template.name}}
+                                <option ng-repeat="template in $root.templates | orderBy:'name'" data-value="{{template.id}}" value="{{template.id}}" id="{{template.id}}" ng-if="template.cloudPlatform == activeCredential.cloudPlatform">{{template.name}}
                                 </option>
                             </select>
                         </div>
@@ -39,7 +39,7 @@
                         <label class="col-sm-3 control-label" for="selectBlueprint">Blueprint</label>
                         <div class="col-sm-9">
                             <select class="form-control" id="selectBlueprint" ng-model="cluster.blueprintId"  required >
-                                <option ng-repeat="blueprint in $root.blueprints" data-value="{{blueprint.id}}" value="{{blueprint.id}}" id="{{blueprint.id}}">{{blueprint.name}}
+                                <option ng-repeat="blueprint in $root.blueprints | orderBy:'name'" data-value="{{blueprint.id}}" value="{{blueprint.id}}" id="{{blueprint.id}}">{{blueprint.name}}
                                 </option>
                             </select>
                         </div>
