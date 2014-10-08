@@ -87,14 +87,17 @@ regApp.controller("confirmController", ['$scope', '$http',
                  data: {choose: choose},
                  headers: {'Content-Type': 'application/json'}
             }).success(function(responseData){
-                alert(responseData);
-                if (responseData.statusCode == 302) {
-                    window.location = responseData
+                if (responseData.indexOf('?code=') > -1) { // this should be the proper behaviour
+                    window.location = '/confirm'
                 } else {
                     window.location = target
                 }
             }).error(function(data) {
-                 alert('Server error 500 ' + data)
+                if (data == null) {
+                    alert('Server error 500  with no error')
+                } else {
+                    alert('Server error 500 ' + data)
+                }
             });
         }
     }

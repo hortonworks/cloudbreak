@@ -138,14 +138,15 @@ app.get('/confirm', function(req, res){
                   }
     needle.get('http://' + uaaHost + ':' + uaaPort + '/oauth/authorize?' + confirmParams, confirmOptions,
         function(err, confirmResp) {
-            console.log('conf resp:' + JSON.stringify(confirmResp.body))
             if (confirmResp.statusCode == 200){
+                res.cookie('JSESSIONID', getCookie(req, 'uaa_cookie'))
                 res.render('confirm', {client_id : req.session.client_id})
             } else if (confirmResp.statusCode == 302){
                 res.cookie('JSESSIONID', getCookie(req, 'uaa_cookie'))
+                console.log(confirmResp.headers)
                 res.redirect(confirmResp.headers.location)
             } else {
-                res.end('Login/confirm: Error from token server')
+                res.end('Login/confirm: Error from token server, code: ' + confirmResp.statusCode)
             }
         });
   } else {
@@ -172,13 +173,13 @@ app.post('/confirm', function(req, res){
        formData = formData + 'user_oauth_approval=true'
        needle.post('http://' + uaaHost + ':' + uaaPort + '/oauth/authorize', formData, confirmOptions,
            function(err, confirmResp){
-               console.log('error: ' + JSON.stringify(confirmResp.body))
-               console.log('error header: ' + JSON.stringify(confirmResp.headers))
+               console.log(confirmResp.statusCode)
                if (confirmResp.statusCode == 302){
+                   console.log(confirmResp.headers.location)
                    res.cookie('JSESSIONID', getCookie(req, 'uaa_cookie'))
-                   res.redirect(confirmResp.headers.location)
+                   //res.cookie('redirect', confirmResp.headers.location)
+                   res.end(confirmResp.headers.location)
                } else {
-                   res.redirect(confirmResp.headers.location)
                    res.render('login')
                }
         });
