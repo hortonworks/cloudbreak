@@ -47,6 +47,32 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
             'EXTRA_LARGE': 'Extra Large'
         }
 
+        $rootScope.gccRegions = {
+            'US_CENTRAL1_A': 'us-central1-a',
+            'US_CENTRAL1_B': 'us-central1-b',
+            'US_CENTRAL1_F': 'us-central1-f',
+            'EUROPE_WEST1_A': 'europe-west1-a',
+            'EUROPE_WEST1_B': 'europe-west1-b',
+            'ASIA_EAST1_A': 'asia-east1-a',
+            'ASIA_EAST1_B': 'asia-east1-b'
+        }
+
+        $rootScope.gccInstanceTypes = {
+            'N1_STANDARD_1': 'n1-standard-1',
+            'N1_STANDARD_2': 'n1-standard-2',
+            'N1_STANDARD_4': 'n1-standard-4',
+            'N1_STANDARD_8': 'n1-standard-8',
+            'N1_STANDARD_16': 'n1-standard-16',
+            'N1_HIGHMEM_2': 'n1-highmem-2',
+            'N1_HIGHMEM_4': 'n1-highmem-4',
+            'N1_HIGHMEM_8': 'n1-highmem-8',
+            'N1_HIGHMEM_16': 'n1-highmem-16',
+            'N1_HIGHCPU_2': 'n1-highcpu-2',
+            'N1_HIGHCPU_4': 'n1-highcpu-4',
+            'N1_HIGHCPU_8': 'n1-highcpu-8',
+            'N1_HIGHCPU_16': 'n1-highcpu-16'
+        }
+
         $rootScope.templates = UserTemplate.query();
         $scope.azureTemp = {};
         $scope.gccTemp = {};
@@ -55,19 +81,19 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
         $scope.azureTemplateForm = {};
         initializeAwsTemp();
 
-        $scope.createAwsTemplateRequest = function() {
+        $scope.createAwsTemplateRequest = function () {
             $scope.azureTemplate = false;
             $scope.awsTemplate = true;
             $scope.gccTemplate = false;
         }
 
-        $scope.createAzureTemplateRequest = function() {
+        $scope.createAzureTemplateRequest = function () {
             $scope.azureTemplate = true;
             $scope.awsTemplate = false;
             $scope.gccTemplate = false;
         }
 
-        $scope.createGccTemplateRequest = function() {
+        $scope.createGccTemplateRequest = function () {
             $scope.azureTemplate = false;
             $scope.awsTemplate = false;
             $scope.gccTemplate = true;
