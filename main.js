@@ -129,7 +129,7 @@ app.get('/confirm', function(req, res){
   if (isUaaSession(req)){
     var confirmParams = 'client_id=' + req.session.client_id
                         + '&response_type=' + req.session.response_type
-                        + '&scope=' + req.session.scope
+                        + '&scope=' + req.session.scope;
                         + '&redirect_uri=' + req.session.redirect_uri;
     var confirmOptions = {
                       headers: {
@@ -138,13 +138,14 @@ app.get('/confirm', function(req, res){
                   }
     needle.get('http://' + uaaHost + ':' + uaaPort + '/oauth/authorize?' + confirmParams, confirmOptions,
         function(err, confirmResp) {
+            console.log('conf resp:' + JSON.stringify(confirmResp.body))
             if (confirmResp.statusCode == 200){
                 res.render('confirm', {client_id : req.session.client_id})
             } else if (confirmResp.statusCode == 302){
                 res.cookie('JSESSIONID', getCookie(req, 'uaa_cookie'))
                 res.redirect(confirmResp.headers.location)
             } else {
-                res.end('Error from token server')
+                res.end('Login/confirm: Error from token server')
             }
         });
   } else {
@@ -156,31 +157,32 @@ app.get('/confirm', function(req, res){
 app.post('/confirm', function(req, res){
     var choose = req.param('choose');
     if (choose == 'yes') {
-    var confirmParams = 'client_id=' + req.session.client_id
-                        + '&response_type=' + req.session.response_type
-                        + '&scope=' + req.session.scope
-                        + '&redirect_uri=' + req.session.redirect_uri;
-    var confirmOptions = {
-                      headers: {
-                        'Cookie': 'JSESSIONID=' + getCookie(req, 'uaa_cookie')
-                         }
-                  }
-    // change to POST /oauth/authorize?user_oauth_approval=true
-    needle.get('http://' + uaaHost + ':' + uaaPort + '/oauth/authorize?' + confirmParams, confirmOptions,
-        function(err, confirmResp) {
-            if (confirmResp.statusCode == 200){
-                res.cookie('JSESSIONID', getCookie(req, 'uaa_cookie'))
-                res.render('confirm', {client_id : req.session.client_id})
-            } else if (confirmResp.statusCode == 302){
-                res.cookie('JSESSIONID', getCookie(req, 'uaa_cookie'))
-                res.statusCode = 302
-                res.end(confirmResp.headers.location)
-            } else {
-                res.end('Error from token server')
+       var confirmOptions = {
+            headers: {
+                   'Accept' : 'text/html,application/xhtml+xml,application/xml',
+                   'Cookie' : 'JSESSIONID=' + getCookie(req, 'uaa_cookie'),
+                   'Content-Type' : 'application/x-www-form-urlencoded'
             }
-     });
+       }
+       var formData = '';
+       var scopes = req.session.scope.split(' ')
+       for (var i = 0; i < scopes.length; i++) {
+           formData = formData + 'scope.' + i.toString() + '=scope.' + scopes[i] + '&'
+       }
+       formData = formData + 'user_oauth_approval=true'
+       needle.post('http://' + uaaHost + ':' + uaaPort + '/oauth/authorize', formData, confirmOptions,
+           function(err, confirmResp){
+               console.log('error: ' + JSON.stringify(confirmResp.body))
+               console.log('error header: ' + JSON.stringify(confirmResp.headers))
+               if (confirmResp.statusCode == 302){
+                   res.cookie('JSESSIONID', getCookie(req, 'uaa_cookie'))
+                   res.redirect(confirmResp.headers.location)
+               } else {
+                   res.redirect(confirmResp.headers.location)
+                   res.render('login')
+               }
+        });
     } else {
-        res.statusCode = 400
         res.render('login')
     }
 });
@@ -265,7 +267,7 @@ app.post('/forget', function(req, res){
                     'Authorization' : 'Bearer ' + token,
                     'Content-Type' : 'application/json' }
                 }
-                needle.get('http://' + uaaHost + ':' + uaaPort + '/Users/?attributes=id,givenName,version&filter=userName eq "' + userName + '"', usrOptions , function(err, usrResp){
+                needle.get('http://' + uaaHost + ':' + uaaPort + '/Users/?attributes=id,givenName,version,userName&filter=userName eq "' + userName + '"', usrOptions , function(err, usrResp){
                     if (usrResp.statusCode == 200){
                         console.log(usrResp.body)
                         if (usrResp.body.resources.length == 1){
@@ -274,13 +276,18 @@ app.post('/forget', function(req, res){
                                 confirm: 'http://' +  process.env.UR_HOST + ':' + process.env.UR_PORT + '/reset/' + usrResp.body.resources[0].id + '-' + usrResp.body.resources[0].version})
                             res.end('SUCCESS');
                         } else {
+                            console.log('Forget: User Not Found')
                             res.end('User Not Found');
                         }
                     } else {
+                       console.log('Forget: Could not access for database')
                        res.end('Could not access for database');
                     }
                 });
-            } else { res.end('No token for client'); }
+            } else {
+                console.log('Forget: No token for client')
+                res.end('No token for client');
+            }
         }
     );
 });
@@ -324,7 +331,8 @@ app.post('/register', function(req, res){
                     mailer.sendMail(req.body.email, 'Registration' , templateFile, {user: req.body.firstName,
                         confirm: 'http://' +  process.env.UR_HOST + ':' + process.env.UR_PORT + '/confirm/' + createResp.body.id})
                     result = 'SUCCESS'
-                    postGroups(token, createResp.body.id, req.body.company)
+                    // updateAndPostSequenceIqGroups(token, createResp.body.id, req.body.company) // TODO: uncomment this before production
+                    updateCloudbreakGroups(token, createResp.body.id)
                     res.end(result)
                 } else {
                     res.end(result)
@@ -336,13 +344,7 @@ app.post('/register', function(req, res){
     });
 });
 
-postGroups = function(token, userId, company) {
-    postGroup(token, userId, company, "sequenceiq." + userId + ".user")
-    postGroup(token, userId, company, "sequenceiq." + userId + ".admin")
-    postGroup(token, userId, company, "sequenceiq." + userId + ".account." + company.toLowerCase())
-}
-
-postGroup = function(token, userId, company, displayName){
+postGroup = function(token, userId, displayName){
         var groupOptions = {
               headers: {
                  'Accept' : 'application/json',
@@ -361,9 +363,79 @@ postGroup = function(token, userId, company, displayName){
         }
         needle.post('http://' + uaaHost + ':' + uaaPort + '/Groups', JSON.stringify(groupData), groupOptions,
             function(err, groupResp){
-                if (groupResp.statusCode != 201 && groupRes.statusCode != 200) {
+                if (groupResp.statusCode != 201 && groupResp.statusCode != 200) {
                   console.log('failed group creation ' + groupResp.statusCode + ', for user id: ' + userId)
                 }
+        });
+}
+
+updateAndPostSequenceIqGroups = function (token, userId, company){
+    updateGroup(token, userId, 'sequenceiq.cloudbreak.user')
+    updateGroup(token, userId, 'sequenceiq.cloudbreak.admin')
+    postGroup(token, userId, 'sequenceiq.account.' + userId + '.' + company)
+}
+
+updateCloudbreakGroups = function (token, userId) {
+    updateGroup(token, userId, 'cloudbreak.templates')
+    updateGroup(token, userId, 'cloudbreak.stacks')
+    updateGroup(token, userId, 'cloudbreak.blueprints')
+    updateGroup(token, userId, 'cloudbreak.credentials')
+}
+
+updateGroup = function(token, userId, displayName) {
+        var getGroupOptions = {
+                      headers: {
+                         'Accept' : 'application/json',
+                         'scope': 'scim.read',
+                         'aud' : 'scim',
+                         'Authorization' : 'Bearer ' + token,
+                         'Content-Type' : 'application/json'
+                          }
+        }
+        needle.get('http://' + uaaHost + ':' + uaaPort + '/Groups?attributes=id,displayName,members,meta&filter=displayName eq "' + displayName +'"', getGroupOptions,
+            function(err, groupResp) {
+                if (groupResp.statusCode == 200 && groupResp.body.resources.length > 0){
+                    var id = groupResp.body.resources[0].id
+                    var displayName = groupResp.body.resources[0].displayName
+                    var members = groupResp.body.resources[0].members
+                    var meta = groupResp.body.resources[0].meta
+
+                var updateGroupOptions = {
+                     headers: {
+                      'Accept' : 'application/json',
+                      'scope': 'scim.write',
+                      'aud' : 'scim',
+                      'Authorization' : 'Bearer ' + token,
+                      'Content-Type' : 'application/json',
+                      'If-Match' : meta.version
+                      }
+                }
+
+                var newMembers = [];
+                for (var i = 0; i <  members.length ; i++){
+                    newMembers.push({"type":"USER","value": members[i].value})
+                }
+                newMembers.push({"type":"USER","value":userId})
+
+                var updateGroupData = {
+                    "schemas":["urn:scim:schemas:core:1.0"],
+                    "id": id,
+                    "displayName": displayName,
+                    "members" : newMembers
+                }
+
+                needle.put('http://' + uaaHost + ':' + uaaPort + '/Groups/' + id, JSON.stringify(updateGroupData), updateGroupOptions,
+                 function(err, updateResp) {
+                    if (updateResp.statusCode == 200) {
+                        console.log("PUT - update group (id:"+ id + ") is successful (registration)")
+                    } else {
+                        console.log("PUT - failed to update group (id:"+ id + ", registration), code: " + updateResp.statusCode)
+                    }
+                 });
+                } else {
+                    console.log("GET - cannot retrieve group (registration)")
+                }
+
         });
 }
 
