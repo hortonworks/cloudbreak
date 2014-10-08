@@ -21,16 +21,7 @@
         <label class="col-sm-3 control-label" for="gcclgccZone">Zone</label>
 
         <div class="col-sm-9">
-            <p id="gcclgccZone" class="form-control-static">{{template.parameters.gccZone}}</p>
-        </div>
-        <!-- .col-sm-9 -->
-    </div>
-    <!-- .form-group -->
-    <div class="form-group">
-        <label class="col-sm-3 control-label" for="gcclgccImageType">Image type</label>
-
-        <div class="col-sm-9">
-            <p id="gcclgccImageType" class="form-control-static">{{template.parameters.gccImageType}}</p>
+            <p id="gcclgccZone" class="form-control-static">{{gccRegions[template.parameters.gccZone]}}</p>
         </div>
         <!-- .col-sm-9 -->
     </div>
@@ -39,7 +30,7 @@
         <label class="col-sm-3 control-label" for="gcclgccInstanceType">Instance Type</label>
 
         <div class="col-sm-9">
-            <p id="gcclgccInstanceType" class="form-control-static">{{template.parameters.gccInstanceType}}</p>
+            <p id="gcclgccInstanceType" class="form-control-static">{{gccInstanceTypes[template.parameters.gccInstanceType]}}</p>
         </div>
         <!-- .col-sm-9 -->
     </div>
