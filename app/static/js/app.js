@@ -23,12 +23,13 @@ cloudbreakApp.directive('validjson', function($parse) {
         require: 'ngModel',
         link: function(scope, elem, attrs, ctrl) {
             ctrl.$parsers.unshift(function(viewValue) {
+                var valid = false;
                 try {
                     JSON.parse(viewValue)
-                    ctrl.$setValidity('validjson', true);
-                } catch (err){
-                    ctrl.$setValidity('validjson', false);
-                }
+                    valid = true;
+                } catch (err){}
+                ctrl.$setValidity('validjson', valid);
+                return valid ? viewValue : undefined;
             });
         }
     };

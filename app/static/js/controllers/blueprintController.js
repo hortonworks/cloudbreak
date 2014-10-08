@@ -8,10 +8,6 @@ angular.module('uluwatuControllers').controller('blueprintController', ['$scope'
         initializeBlueprint();
 
         $scope.createBlueprint = function () {
-            if ($scope.blueprint.ambariBlueprint){
-                var bpJson = JSON.parse($scope.blueprint.ambariBlueprint);
-                $scope.blueprint.ambariBlueprint = bpJson;
-            }
             UserBlueprint.save($scope.blueprint, function (result) {
                 $scope.blueprint.id = result.id;
                 $rootScope.blueprints.push($scope.blueprint);
