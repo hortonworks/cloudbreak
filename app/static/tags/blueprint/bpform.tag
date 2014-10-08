@@ -37,6 +37,6 @@
 <div class="row btn-row">
     <div class="col-sm-9 col-sm-offset-3">
         <a href="" id="createBlueprint" ng-click="createBlueprint()"
-           ng-disabled="blueprintForm.name.$invalid || (blueprintForm.url.$error.url && !blueprintForm.url.$error.required) || blueprintForm.ambariBlueprint.$error && !blueprintForm.ambariBlueprint.$error.required" class="btn btn-success btn-block" role="button"><i class="fa fa-plus fa-fw"></i> create blueprint</a>
+           ng-disabled="blueprintForm.name.$invalid || (blueprintForm.url.$error.url && !blueprintForm.url.$error.required) || blueprintForm.ambariBlueprint.$error.validjson && !blueprintForm.ambariBlueprint.$error.required" class="btn btn-success btn-block" role="button"><i class="fa fa-plus fa-fw"></i> create blueprint</a>
     </div>
 </div>
