@@ -42,6 +42,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
 
         $scope.cluster = {};
         $rootScope.activeCluster = {};
+        $scope.clusterCreationForm = {};
 
         $scope.createCluster = function () {
             var blueprint = $filter('filter')($rootScope.blueprints, {id: $scope.cluster.blueprintId}, true)[0];
@@ -72,6 +73,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 $jq('#sort-clusters-btn').removeClass('disabled');
                 $jq('#create-cluster-btn').removeClass('disabled');
                 $jq("#notification-n-filtering").prop("disabled", false);
+                $scope.clusterCreationForm.$setPristine();
             }, function(failure) {
                 $scope.modifyStatusMessage($rootScope.error_msg.cluster_failed + ": " + failure.data.message);
                 $scope.modifyStatusClass("has-error");
