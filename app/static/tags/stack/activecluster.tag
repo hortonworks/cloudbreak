@@ -41,10 +41,10 @@
                     <div class="form-group" ng-if="activeCluster.cluster.statusReason === null && (activeCluster.statusReason != null && activeCluster.statusReason != '')">
                         <label class="col-sm-3 control-label" for="sl_cloudStatus">Cluster status</label>
                         <div class="col-sm-9">
-                            <p id="sl_cloudStatus" class="form-control-static">{{activeCluster.statusReason}}1</p>
+                            <p id="sl_cloudStatus" class="form-control-static">{{activeCluster.statusReason}}</p>
                         </div>
                         <div class="col-sm-9" ng-if="activeCluster.cluster.statusReason != null && activeCluster.cluster.statusReason != ''">
-                            <p id="sl_cloudStatus" class="form-control-static">{{activeCluster.cluster.statusReason}}2</p>
+                            <p id="sl_cloudStatus" class="form-control-static">{{activeCluster.cluster.statusReason}}</p>
                         </div>
                     </div>
                     <div class="form-group" ng-if="activeCluster.cluster.statusReason != null && activeCluster.cluster.statusReason != ''">
