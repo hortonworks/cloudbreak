@@ -42,7 +42,7 @@
                         <b class="caret"></b>
                     </a>
                     <ul class="dropdown-menu">
-                        <li ng-repeat="credential in $root.credentials">
+                        <li ng-repeat="credential in $root.credentials | orderBy:'name'">
                             <a href="" id="{{credential.id}}" value="{{credential.name}}"
                                ng-click="$root.activeCredential = credential">{{credential.name}}</a>
                         </li>
