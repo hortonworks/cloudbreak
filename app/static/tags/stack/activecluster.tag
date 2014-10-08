@@ -7,7 +7,7 @@
         <div id="cluster-details-panel-collapse">
             <div class="panel-body">
                 <p class="text-right">
-                    <a href="" class="btn btn-info" role="button"><i class="fa fa-pause fa-fw"></i><span> stop</span></a>
+                    <a href="" class="btn btn-info" role="button" ng-show="activeCluster.cloudPlatform != 'GCC'"><i class="fa fa-pause fa-fw"></i><span> stop</span></a>
                     <a href="" id="terminate-btn" class="btn btn-danger" role="button" data-toggle="modal" data-target="#modal-terminate">
                         <i class="fa fa-times fa-fw"></i><span> terminate</span>
                     </a>
