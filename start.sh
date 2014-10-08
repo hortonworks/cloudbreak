@@ -1,5 +1,5 @@
 #!/bin/bash
-: ${UR_HOST:?"Please set the UR_PORT environment variable!"}
+: ${UR_HOST:?"Please set the UR_HOST environment variable!"}
 : ${UR_PORT:?"Please set the UR_PORT environment variable!"}
 : ${UAA_HOST:?"Please set the UAA_HOST environment variable!"}
 : ${UAA_PORT:?"Please set the UR_PORT environment variable!"}
