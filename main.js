@@ -225,6 +225,8 @@ app.post('/reset/:resetToken', function(req, res) {
            needle.get('http://' + uaaAddress + '/Users/?attributes=id,userName,familyName,givenName,version,emails,meta.lastModified&filter=id eq "' + userId + '"', usrInfoOptions ,
             function(err, infoResp){
              if (infoResp.statusCode == 200){
+              console.log(infoResp.body.resources[0]['meta.lastModified'] == lastModified)
+              console.log(infoResp.body.resources[0]['meta.lastModified'])
               if (infoResp.body.resources.length > 0 && infoResp.body.resources[0]['meta.lastModified'] == lastModified) {
                 var userOptions = {
                            headers: {
@@ -238,34 +240,6 @@ app.post('/reset/:resetToken', function(req, res) {
                 needle.put('http://' + uaaAddress + '/Users/' + userId + '/password', JSON.stringify(newPasswordData),
                          userOptions, function(err, resetResp) {
                              if (resetResp.statusCode = 200){
-                                 var newExternalId = uid(20)
-                                 console.log(newExternalId);
-                                 var updateOptions = {
-                                      headers: {
-                                           'Accept' : 'application/json',
-                                           'scope': 'scim.write',
-                                           'aud' : 'scim',
-                                           'Authorization' : 'Bearer ' + token,
-                                           'Content-Type' : 'application/json',
-                                           'If-Match': infoResp.body.resources[0].version}
-                                 }
-                                 var userData = {
-                                     'userName' : infoResp.body.userName,
-                                     'externalId' : newExternalId,
-                                     'name' : {
-                                         'familyName': infoResp.body.resources[0].familyName,
-                                         'givenName' : infoResp.body.resources[0].givenName
-                                     },
-                                     'emails':[
-                                      {
-                                       'value': infoResp.body.resources[0].emails[0].value
-                                      }
-                                      ]
-                                 }
-                                 needle.put('http://' + uaaAddress + '/Users/' + userId, JSON.stringify(userData), updateOptions,
-                                    function(err, extResp){
-                                    console.log('external id: ' + JSON.stringify(extResp.body))
-                                 });
                                  res.end('SUCCESS');
                              } else {
                                  res.end('Password update failed.')
@@ -312,9 +286,8 @@ app.post('/forget', function(req, res){
                 needle.get('http://' + uaaAddress + '/Users/?attributes=id,givenName,meta.lastModified,userName&filter=userName eq "' + userName + '"', usrOptions , function(err, usrResp){
                     console.log(usrResp.body)
                     if (usrResp.statusCode == 200){
-                        console.log(usrResp.body)
                         if (usrResp.body.resources.length == 1){
-                            var usrIdAndLastModified = usrResp.body.resources[0].id + '##' + usrResp.body.resources[0].lastModified
+                            var usrIdAndLastModified = usrResp.body.resources[0].id + '##' + usrResp.body.resources[0]['meta.lastModified']
                             var resetToken = new Buffer(usrIdAndLastModified).toString('base64')
                             var templateFile = path.join(__dirname,'templates','reset-password-email.jade')
                             mailer.sendMail(req.body.email, 'Password reset' , templateFile, {user: usrResp.body.resources[0].givenName,
