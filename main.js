@@ -142,9 +142,12 @@ app.get('/confirm', function(req, res){
                 res.cookie('JSESSIONID', getCookie(req, 'uaa_cookie'))
                 res.render('confirm', {client_id : req.session.client_id})
             } else if (confirmResp.statusCode == 302){
-                res.cookie('JSESSIONID', getCookie(req, 'uaa_cookie'))
-                console.log(confirmResp.headers)
-                res.redirect(confirmResp.headers.location)
+                if (endsWith(confirmResp.headers.location, '/login')){ // when redirects to UAA API login page
+                  res.render('login')
+                } else {
+                  res.cookie('JSESSIONID', getCookie(req, 'uaa_cookie'))
+                  res.redirect(confirmResp.headers.location)
+                }
             } else {
                 res.end('Login/confirm: Error from token server, code: ' + confirmResp.statusCode)
             }
@@ -154,6 +157,10 @@ app.get('/confirm', function(req, res){
      res.send('Invalid state');
   }
 });
+
+endsWith = function (str, suffix) {
+    return str.indexOf(suffix, str.length - suffix.length) !== -1;
+}
 
 app.post('/confirm', function(req, res){
     var choose = req.param('choose');
@@ -173,9 +180,7 @@ app.post('/confirm', function(req, res){
        formData = formData + 'user_oauth_approval=true'
        needle.post('http://' + uaaHost + ':' + uaaPort + '/oauth/authorize', formData, confirmOptions,
            function(err, confirmResp){
-               console.log(confirmResp.statusCode)
                if (confirmResp.statusCode == 302){
-                   console.log(confirmResp.headers.location)
                    res.cookie('JSESSIONID', getCookie(req, 'uaa_cookie'))
                    res.end(confirmResp.headers.location)
                } else {
