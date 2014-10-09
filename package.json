@@ -1,6 +1,6 @@
 {
   "name": "sequenceiq-reg",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "SequenceIQ Registration App",
   "main": "main.js",
   "author": "SequenceIQ",
