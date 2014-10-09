@@ -34,6 +34,7 @@ app.use(session({
   saveUninitialized: true,
   cookie: {}
 }))
+app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
 
@@ -52,7 +53,7 @@ app.get('/', function(req, res) {
 
 // login.html
 app.get('/login', function(req, res) {
-    res.render('login')
+    res.render('login',{ errorMessage: "" });
 });
 
 app.get('/dashboard', function(req, res) {
@@ -74,7 +75,7 @@ app.get('/reset/:resetToken', function(req, res) {
 
 
 app.post('/login', function(req, res){
-    var username = req.body.username
+    var username = req.body.email
     var password = req.body.password
     var userCredentials = {username: username, password: password}
     needle.post('http://' + uaaHost + ':' + uaaPort + '/login.do', userCredentials,
@@ -91,12 +92,14 @@ app.post('/login', function(req, res){
             }
             res.cookie('uaa_cookie', sessionId) // TODO check sessionId
             if (req.session.client_id == null) {
-                res.end('NO_CLIENT')
+                res.redirect('dashboard')
             } else {
-                res.end('SUCCESS')
+                //res.end('SUCCESS')
+                res.redirect('confirm')
             }
         } else {
-            res.end('Authentication failed.')
+            //res.end('Authentication failed.')
+            res.render('login',{ errorMessage: "The email or password you entered is incorrect." });
         }
     });
 });
@@ -154,7 +157,7 @@ app.get('/confirm', function(req, res){
                 res.render('confirm', {client_id : req.session.client_id})
             } else if (confirmResp.statusCode == 302){
                 if (endsWith(confirmResp.headers.location, '/login')){ // when redirects to UAA API login page
-                  res.render('login')
+                  res.render('login',{ errorMessage: "" });
                 } else {
                   res.cookie('JSESSIONID', getCookie(req, 'uaa_cookie'))
                   res.redirect(confirmResp.headers.location)
@@ -174,33 +177,28 @@ endsWith = function (str, suffix) {
 }
 
 app.post('/confirm', function(req, res){
-    var choose = req.param('choose');
-    if (choose == 'yes') {
-       var confirmOptions = {
-            headers: {
-                   'Accept' : 'text/html,application/xhtml+xml,application/xml',
-                   'Cookie' : 'JSESSIONID=' + getCookie(req, 'uaa_cookie'),
-                   'Content-Type' : 'application/x-www-form-urlencoded'
-            }
-       }
-       var formData = '';
-       var scopes = req.session.scope.split(' ')
-       for (var i = 0; i < scopes.length; i++) {
-           formData = formData + 'scope.' + i.toString() + '=scope.' + scopes[i] + '&'
-       }
-       formData = formData + 'user_oauth_approval=true'
-       needle.post('http://' + uaaHost + ':' + uaaPort + '/oauth/authorize', formData, confirmOptions,
+    var confirmOptions = {
+        headers: {
+               'Accept' : 'text/html,application/xhtml+xml,application/xml',
+               'Cookie' : 'JSESSIONID=' + getCookie(req, 'uaa_cookie'),
+               'Content-Type' : 'application/x-www-form-urlencoded'
+        }
+    }
+    var formData = '';
+    var scopes = req.session.scope.split(' ')
+    for (var i = 0; i < scopes.length; i++) {
+       formData = formData + 'scope.' + i.toString() + '=scope.' + scopes[i] + '&'
+    }
+    formData = formData + 'user_oauth_approval=true'
+    needle.post('http://' + uaaHost + ':' + uaaPort + '/oauth/authorize', formData, confirmOptions,
            function(err, confirmResp){
                if (confirmResp.statusCode == 302){
                    res.cookie('JSESSIONID', getCookie(req, 'uaa_cookie'))
-                   res.end(confirmResp.headers.location)
+                   res.redirect(confirmResp.headers.location)
                } else {
-                   res.render('login')
+                   res.render('login',{ errorMessage: "" });
                }
-        });
-    } else {
-        res.render('login')
-    }
+    });
 });
 
 app.post('/reset/:resetToken', function(req, res) {
@@ -498,7 +496,7 @@ app.get('/confirm/:confirm_token', function(req, res){
                         }
                         needle.put('http://' + uaaHost + ':' + uaaPort + '/Users/' + confirmToken, JSON.stringify(userData),
                         updateOptions, function(err, updateResp){
-                            res.render('login')
+                            res.render('login',{ errorMessage: "" });
                         });
                     } else {
                      res.end('Cannot retrieve user by confirm token.')

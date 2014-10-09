@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" ng-app="regApp">
 <head>
-    <title>SequenceIQ Loin Page</title>
+    <title>SequenceIQ Login Page</title>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -68,51 +68,49 @@
                             <h1 class="panel-title">Login</h1>
                         </div>
                         <div class="panel-body">
-
-                                <form role="form" autocomplete="on" name="loginForm">
-
+                                <form role="form" action="login" method="POST" autocomplete="on" name="loginForm" ng-controller="loginController">
                                     <div class="form-group"
-                                         ng-class="{ 'has-error has-feedback': showLoginEmailError && loginForm.emailFieldLogin.$invalid }">
+                                         ng-class="{ 'has-error has-feedback': showLoginEmailError && loginForm.email.$invalid }">
                                         <!-- OPTIONAL HTML:
                                         class: 'has-feedback' - got validation result AND
                                         class: 'has-error' – error OR
                                         class: 'has-success' - ok
                                         -->
-                                        <label class="sr-only" for="emailFieldLogin">email</label>
+                                        <label class="sr-only" for="email">email</label>
 
                                         <div class="input-group">
                                             <span class="input-group-addon"><i
                                                     class="fa fa-envelope-o fa-fw"></i></span>
-                                            <input class="form-control" type="email" ng-model="emailFieldLogin"
-                                                   ng-blur="showLoginEmailError=true;" id="emailFieldLogin"
-                                                   name="emailFieldLogin" placeholder="email"
+                                            <input class="form-control" type="email" ng-model="email"
+                                                   ng-blur="showLoginEmailError=true;" id="email"
+                                                   name="email" placeholder="email"
                                                    required>
                                             <i class="fa fa-warning form-control-feedback"
-                                               ng-show="showLoginEmailError && loginForm.emailFieldLogin.$invalid"></i>
+                                               ng-show="showLoginEmailError && loginForm.email.$invalid"></i>
                                         </div>
                                         <!-- .input-group -->
-                                    <span class="help-block" ng-show="showLoginEmailError && loginForm.emailFieldLogin.$invalid">
+                                    <span class="help-block" ng-show="showLoginEmailError && loginForm.email.$invalid">
                                         invalid email address
                                     </span>
 
                                     </div>
                                     <!-- .form-group -->
                                     <div class="form-group"
-                                         ng-class="{ 'has-error has-feedback': showLoginPasswordError && loginForm.passwFieldLogin.$invalid }">
-                                        <label class="sr-only" for="passwFieldLogin">jelszó</label>
+                                         ng-class="{ 'has-error has-feedback': showLoginPasswordError && loginForm.password.$invalid }">
+                                        <label class="sr-only" for="password">jelszó</label>
 
                                         <div class="input-group"
-                                             ng-class="{ 'has-error': showLoginPasswordError && loginForm.passwFieldLogin.$invalid }">
+                                             ng-class="{ 'has-error': showLoginPasswordError && loginForm.password.$invalid }">
                                             <span class="input-group-addon"><i class="fa fa-lock fa-fw"></i></span>
-                                            <input class="form-control" type="password" ng-model="passwFieldLogin"
-                                                   ng-blur="showLoginPasswordError=true;" name="passwFieldLogin"
-                                                   id="passwFieldLogin" placeholder="password" ng-minlength="6"
+                                            <input class="form-control" type="password" ng-model="password"
+                                                   ng-blur="showLoginPasswordError=true;" name="password"
+                                                   id="password" placeholder="password" ng-minlength="6"
                                                    ng-maxlength="200"
                                                    required>
                                             <i class="fa fa-warning form-control-feedback"
-                                               ng-show="showLoginPasswordError && loginForm.passwFieldLogin.$invalid"></i>
+                                               ng-show="showLoginPasswordError && loginForm.password.$invalid"></i>
                                         </div>
-                                        <span class="help-block" ng-show="showLoginPasswordError && loginForm.passwFieldLogin.$invalid">
+                                        <span class="help-block" ng-show="showLoginPasswordError && loginForm.password.$invalid">
                                             password is invalid (6 to 30 char)
                                         </span>
                                         <!-- .input-group -->
@@ -120,11 +118,11 @@
                                                 class="fa fa-question-circle fa-fw"></i> forgot my password</a>
                                         </p>
                                     </div>
-                                    <a href="javascript:void(0)" type="submit" ng-click="signIn()" ng-disabled="loginForm.$invalid"
+                                    <a href="" onclick="loginForm.submit()" ng-disabled="loginForm.$invalid"
                                        id="login-btn" class="btn btn-info btn-block" role="button">
                                         <i class="fa fa-sign-in fa-fw"></i> login</a>
                                     <a href="javascript:void(0)" id="forgot-btn" ng-click="forgotPassword()"
-                                       ng-disabled="loginForm.emailFieldLogin.$invalid"
+                                       ng-disabled="loginForm.email.$invalid"
                                        class="btn btn-info btn-block hidden" role="button"><i
                                             class='fa fa-paper-plane fa-fw'></i> reset email</a>
                                 </form>
@@ -134,7 +132,7 @@
             </div>
         </div>
     </section>
-    <div class="modal fade" role="dialog" id="msgDialog">
+    <div class="modal fade" role="dialog" id="msgDialog" ng-init="message='<%= errorMessage %>'">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -153,12 +151,12 @@
     $jq(document).on("click", "#login-forgot-passw", function() {
     if($jq(this).text() == " forgot my password"){
         $jq(this).text(" back to login")
-        $jq('#passwFieldLogin').prop("disabled", true);
+        $jq('#password').prop("disabled", true);
         $jq('#login-btn').addClass('hidden');
         $jq('#forgot-btn').removeClass('hidden');
     } else {
         $jq(this).html("<i class='fa fa-question-circle fa-fw'></i> forgot my password")
-        $jq('#passwFieldLogin').prop("disabled", false);
+        $jq('#password').prop("disabled", false);
         $jq('#login-btn').removeClass('hidden');
         $jq('#forgot-btn').addClass('hidden');
     }

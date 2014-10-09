@@ -48,26 +48,13 @@ regApp.controller("resetController", ['$scope', '$http',
     }
 ]);
 
-regApp.controller("loginController", ['$scope', '$http',
-    function ($scope, $http, $location) {
-        $scope.signIn = function() {
-            $http({method: 'POST',dataType: 'json', url:  "/login",
-                 data: {username: emailFieldLogin.value,  password: passwFieldLogin.value},
-                 headers: {'Content-Type': 'application/json'}
-            }).success(function(responseData){
-                if (responseData == 'SUCCESS') {
-                    window.location = '/confirm'
-                } else if (responseData == 'NO_CLIENT'){
-                    window.location = '/dashboard'
-                } else {
-                    $scope.message = responseData;
-                    $jq("#msgDialog").modal('show');
-                }
-            }).error(function(data) {
-                $scope.message = 'Server error 500';
-                $jq("#msgDialog").modal('show');
-            });
-        }
+regApp.controller("loginController", ['$scope', '$http', '$rootScope',
+    function ($scope, $http, $rootScope) {
+        $scope.$watch($scope.message, function(){
+          if ($scope.message.length > 0){
+            $jq("#msgDialog").modal('show');
+          }
+        });
         $scope.forgetPassword = function() {
             $http({method: 'POST',dataType: 'json', url:  "/forget",
                  data: {email: emailFieldLogin.value},
@@ -93,26 +80,6 @@ regApp.controller("loginController", ['$scope', '$http',
     }
 ]);
 
-regApp.controller("confirmController", ['$scope', '$http',
-    function ($scope, $http, $location) {
-        $scope.confirm = function(choose) {
-            var target = '/login'
-            $http({method: 'POST',dataType: 'json', url:  "/confirm",
-                 data: {choose: choose},
-                 headers: {'Content-Type': 'application/json'}
-            }).success(function(responseData){
-                if (responseData.indexOf('?code=') > -1) {
-                    window.location = '/confirm'
-                } else {
-                    window.location = target
-                }
-            }).error(function(data) {
-                $scope.message = 'Server error 500: ' + data;
-                $jq("#msgDialog").modal('show');
-            });
-        }
-    }
-]);
 
 regApp.directive('match', function($parse) {
   return {
