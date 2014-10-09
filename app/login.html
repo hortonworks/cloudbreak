@@ -151,12 +151,12 @@
     $jq(document).on("click", "#login-forgot-passw", function() {
     if($jq(this).text() == " reset my password"){
         $jq(this).text(" back to login")
-        $jq('#passwFieldLogin').prop("disabled", true);
+        $jq('#password').prop("disabled", true);
         $jq('#login-btn').addClass('hidden');
         $jq('#forgot-btn').removeClass('hidden');
     } else {
         $jq(this).html("<i class='fa fa-question-circle fa-fw'></i> reset my password")
-        $jq('#passwFieldLogin').prop("disabled", false);
+        $jq('#password').prop("disabled", false);
         $jq('#login-btn').removeClass('hidden');
         $jq('#forgot-btn').addClass('hidden');
     }
