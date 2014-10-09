@@ -42,6 +42,7 @@ var clientSecret = process.env.ULU_OAUTH_CLIENT_SECRET;
 var redirectUri = process.env.ULU_OAUTH_REDIRECT_URI;
 var clientScopes = 'openid+cloudbreak.templates+cloudbreak.credentials+cloudbreak.blueprints+cloudbreak.stacks';
 var identityServerAddress = process.env.ULU_IDENTITY_ADDRESS
+var sultansAddress = process.env.ULU_SULTANS_ADDRESS
 var cloudbreakAddress = process.env.ULU_CLOUDBREAK_ADDRESS
 
 if (!clientSecret || !redirectUri || !clientId) {
@@ -59,6 +60,11 @@ if (!cloudbreakAddress || (cloudbreakAddress.substring(0, 7) !== "http://" && cl
   environmentSet = false;
 }
 
+if (!sultansAddress || (sultansAddress.substring(0, 7) !== "http://" && sultansAddress.substring(0, 8) !== "https://")){
+  console.log("ULU_SULTANS_ADDRESS must be specified and it must be a standard URL: 'http[s]://host[:port]/'");
+  environmentSet = false;
+}
+
 if (!environmentSet) {
   process.exit(1);
 }
@@ -69,6 +75,10 @@ if (identityServerAddress.slice(-1) !== '/') {
 
 if (cloudbreakAddress.slice(-1) !== '/') {
   cloudbreakAddress += '/';
+}
+
+if (sultansAddress.slice(-1) !== '/') {
+  sultansAddress += '/';
 }
 
 var optionsAuth={user: clientId, password: clientSecret};
@@ -111,15 +121,16 @@ app.get('/authorize', function(req, res, next){
 // main page ===================================================================
 
 app.get('/', function(req, res) {
-  var oauthFlowUrl = identityServerAddress
+  var oauthFlowUrl = sultansAddress
       + 'oauth/authorize?response_type=code'
       + '&client_id=' + clientId
       + '&scope=' + clientScopes
       + '&redirect_uri=' + redirectUri
   if (!req.session.token){
     res.redirect(oauthFlowUrl)
+  } else {
+    res.render('index', { authorizeUrl : oauthFlowUrl });
   }
-  res.render('index', { authorizeUrl : oauthFlowUrl });
 });
 
 app.get('/user', function(req,res) {
