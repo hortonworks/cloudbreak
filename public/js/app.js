@@ -57,16 +57,15 @@ regApp.controller("loginController", ['$scope', '$http', '$rootScope',
         });
         $scope.forgetPassword = function() {
             $http({method: 'POST',dataType: 'json', url:  "/forget",
-                 data: {email: emailFieldLogin.value},
+                 data: {email: email.value},
                  headers: {'Content-Type': 'application/json'}
             }).success(function(responseData){
                 if (responseData == 'SUCCESS') {
-                    $jq("#login-forgot-passw").html("<i class='fa fa-question-circle fa-fw'></i> forgot my password")
+                    $jq("#login-forgot-passw").html("<i class='fa fa-question-circle fa-fw'></i> reset my password")
                     $jq('#passwFieldLogin').prop("disabled", false);
                     $jq('#login-btn').removeClass('hidden');
                     $jq('#forgot-btn').addClass('hidden');
-                    alert('forgot password email sent.');
-                    $scope.message = 'forgot password email sent to ' + emailFieldLogin.value;
+                    $scope.message = 'reset password email sent to ' + email.value;
                     $jq("#msgDialog").modal('show');
                 } else {
                     $scope.message = responseData;

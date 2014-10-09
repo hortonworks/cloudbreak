@@ -5,17 +5,17 @@ var fs = require('fs');
 
 exports.sendMail = function(to, subject, templateFile, data) {
     var transport = nodemailer.createTransport(smtpTransport({
-        host: process.env.UR_SMTP_SENDER_HOST,
-        port: process.env.UR_SMTP_SENDER_PORT,
+        host: process.env.SL_SMTP_SENDER_HOST,
+        port: process.env.SL_SMTP_SENDER_PORT,
         auth: {
-            user: process.env.UR_SMTP_SENDER_USERNAME,
-            pass: process.env.UR_SMTP_SENDER_PASSWORD
+            user: process.env.SL_SMTP_SENDER_USERNAME,
+            pass: process.env.SL_SMTP_SENDER_PASSWORD
         }
     }));
     console.log('sending mail to ' +  to);
     var content = getEmailContent(templateFile, data)
     transport.sendMail({
-        from: process.env.UR_SMTP_SENDER_FROM,
+        from: process.env.SL_SMTP_SENDER_FROM,
         to: to,
         subject: subject,
         html: content}, function(error, info){

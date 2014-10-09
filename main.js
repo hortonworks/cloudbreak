@@ -11,13 +11,13 @@ var check = require('validator').check;
 
 var mailer = require('./mailer');
 
-var uaaHost = process.env.UAA_HOST;
-var uaaPort = process.env.UAA_PORT;
+var uaaAddress = process.env.SL_UAA_ADDRESS;
+var uaaPort = process.env.SL_UAA_PORT;
 
-var clientId = process.env.UR_CLIENT_ID;
-var clientSecret = process.env.UR_CLIENT_SECRET;
+var clientId = process.env.SL_CLIENT_ID;
+var clientSecret = process.env.SL_CLIENT_SECRET;
 
-console.log("UAA server location: %s:%d", uaaHost, uaaPort)
+console.log("UAA server location: %s", uaaAddress)
 
 app.engine('html', cons.underscore);
 
@@ -43,7 +43,7 @@ app.get('/', function(req, res) {
   res.render('index',
   {
    emailErrorMsg: 'invalid email address',
-   passwordErrorMsg: 'password is invalid (6 to 30 char)',
+   passwordErrorMsg: 'password is invalid (6 to 200 char)',
    confirmPasswordErrorMsg: 'passwords do not match!',
    firstNameErrorMsg: 'first name is empty',
    lastNameErrorMsg: 'last name is empty',
@@ -59,7 +59,7 @@ app.get('/login', function(req, res) {
 app.get('/dashboard', function(req, res) {
     res.render('dashboard',
     {
-       cloudbreakAddress: process.env.CB_ADDRESS
+       cloudbreakAddress: process.env.SL_CB_ADDRESS
     })
 });
 
@@ -78,7 +78,7 @@ app.post('/login', function(req, res){
     var username = req.body.email
     var password = req.body.password
     var userCredentials = {username: username, password: password}
-    needle.post('http://' + uaaHost + ':' + uaaPort + '/login.do', userCredentials,
+    needle.post('http://' + uaaAddress + '/login.do', userCredentials,
        function(err, tokenResp) {
         var splittedLocation = tokenResp.headers.location.split('?')
         if (splittedLocation.length == 1 || splittedLocation[1] != 'error=true'){
@@ -150,7 +150,7 @@ app.get('/confirm', function(req, res){
                         'Cookie': 'JSESSIONID=' + getCookie(req, 'uaa_cookie')
                          }
                   }
-    needle.get('http://' + uaaHost + ':' + uaaPort + '/oauth/authorize?' + confirmParams, confirmOptions,
+    needle.get('http://' + uaaAddress + '/oauth/authorize?' + confirmParams, confirmOptions,
         function(err, confirmResp) {
             if (confirmResp.statusCode == 200){
                 res.cookie('JSESSIONID', getCookie(req, 'uaa_cookie'))
@@ -190,7 +190,7 @@ app.post('/confirm', function(req, res){
        formData = formData + 'scope.' + i.toString() + '=scope.' + scopes[i] + '&'
     }
     formData = formData + 'user_oauth_approval=true'
-    needle.post('http://' + uaaHost + ':' + uaaPort + '/oauth/authorize', formData, confirmOptions,
+    needle.post('http://' + uaaAddress + '/oauth/authorize', formData, confirmOptions,
            function(err, confirmResp){
                if (confirmResp.statusCode == 302){
                    res.cookie('JSESSIONID', getCookie(req, 'uaa_cookie'))
@@ -202,15 +202,15 @@ app.post('/confirm', function(req, res){
 });
 
 app.post('/reset/:resetToken', function(req, res) {
-    var resetToken = req.param('resetToken')
-    if (resetToken != null && resetToken.split('-').length == 6) {
-    var split = resetToken.split('-')
-    var version = split[5];
-    var userId = resetToken.substring(0, resetToken.length - split[5].length - 1);
+    var resetToken = new Buffer(req.param('resetToken'), 'base64').toString('utf-8')
+    if (resetToken != null && resetToken.split('##').length == 2) {
+    var split = resetToken.split('##')
+    var userId = split[0];
+    var lastModified = split[1];
     var options = {
       headers: { 'Authorization': 'Basic ' + new Buffer(clientId + ':'+ clientSecret).toString('base64') }
     }
-    needle.post('http://' + uaaHost + ':' + uaaPort + '/oauth/token', 'grant_type=client_credentials',
+    needle.post('http://' + uaaAddress + '/oauth/token', 'grant_type=client_credentials',
        options, function(err, tokenResp) {
        if (tokenResp.statusCode == 200){
           var token = tokenResp.body.access_token;
@@ -222,10 +222,10 @@ app.post('/reset/:resetToken', function(req, res) {
                'Authorization' : 'Bearer ' + token,
                'Content-Type' : 'application/json' }
           }
-           needle.get('http://' + uaaHost + ':' + uaaPort + '/Users/?attributes=version,id&filter=id eq "' + userId + '"', usrInfoOptions ,
+           needle.get('http://' + uaaAddress + '/Users/?attributes=id,userName,familyName,givenName,version,emails,meta.lastModified&filter=id eq "' + userId + '"', usrInfoOptions ,
             function(err, infoResp){
              if (infoResp.statusCode == 200){
-              if (infoResp.body.resources.length > 0 && infoResp.body.resources[0].version == version) {
+              if (infoResp.body.resources.length > 0 && infoResp.body.resources[0]['meta.lastModified'] == lastModified) {
                 var userOptions = {
                            headers: {
                              'Accept' : 'application/json',
@@ -235,9 +235,37 @@ app.post('/reset/:resetToken', function(req, res) {
                              'Content-Type' : 'application/json' }
                 }
                 var newPasswordData = {'password' : req.body.password}
-                needle.put('http://' + uaaHost + ':' + uaaPort + '/Users/' + userId + '/password', JSON.stringify(newPasswordData),
+                needle.put('http://' + uaaAddress + '/Users/' + userId + '/password', JSON.stringify(newPasswordData),
                          userOptions, function(err, resetResp) {
                              if (resetResp.statusCode = 200){
+                                 var newExternalId = uid(20)
+                                 console.log(newExternalId);
+                                 var updateOptions = {
+                                      headers: {
+                                           'Accept' : 'application/json',
+                                           'scope': 'scim.write',
+                                           'aud' : 'scim',
+                                           'Authorization' : 'Bearer ' + token,
+                                           'Content-Type' : 'application/json',
+                                           'If-Match': infoResp.body.resources[0].version}
+                                 }
+                                 var userData = {
+                                     'userName' : infoResp.body.userName,
+                                     'externalId' : newExternalId,
+                                     'name' : {
+                                         'familyName': infoResp.body.resources[0].familyName,
+                                         'givenName' : infoResp.body.resources[0].givenName
+                                     },
+                                     'emails':[
+                                      {
+                                       'value': infoResp.body.resources[0].emails[0].value
+                                      }
+                                      ]
+                                 }
+                                 needle.put('http://' + uaaAddress + '/Users/' + userId, JSON.stringify(userData), updateOptions,
+                                    function(err, extResp){
+                                    console.log('external id: ' + JSON.stringify(extResp.body))
+                                 });
                                  res.end('SUCCESS');
                              } else {
                                  res.end('Password update failed.')
@@ -269,7 +297,7 @@ app.post('/forget', function(req, res){
     var options = {
         headers: { 'Authorization': 'Basic ' + new Buffer(clientId + ':'+ clientSecret).toString('base64') }
     }
-    needle.post('http://' + uaaHost + ':' + uaaPort + '/oauth/token', 'grant_type=client_credentials',
+    needle.post('http://' + uaaAddress + '/oauth/token', 'grant_type=client_credentials',
         options, function(err, tokenResp) {
             if (tokenResp.statusCode == 200){
                 var token = tokenResp.body.access_token;
@@ -281,13 +309,16 @@ app.post('/forget', function(req, res){
                     'Authorization' : 'Bearer ' + token,
                     'Content-Type' : 'application/json' }
                 }
-                needle.get('http://' + uaaHost + ':' + uaaPort + '/Users/?attributes=id,givenName,version,userName&filter=userName eq "' + userName + '"', usrOptions , function(err, usrResp){
+                needle.get('http://' + uaaAddress + '/Users/?attributes=id,givenName,meta.lastModified,userName&filter=userName eq "' + userName + '"', usrOptions , function(err, usrResp){
+                    console.log(usrResp.body)
                     if (usrResp.statusCode == 200){
                         console.log(usrResp.body)
                         if (usrResp.body.resources.length == 1){
+                            var usrIdAndLastModified = usrResp.body.resources[0].id + '##' + usrResp.body.resources[0].lastModified
+                            var resetToken = new Buffer(usrIdAndLastModified).toString('base64')
                             var templateFile = path.join(__dirname,'templates','reset-password-email.jade')
                             mailer.sendMail(req.body.email, 'Password reset' , templateFile, {user: usrResp.body.resources[0].givenName,
-                                confirm: 'http://' +  process.env.UR_HOST + ':' + process.env.UR_PORT + '/reset/' + usrResp.body.resources[0].id + '-' + usrResp.body.resources[0].version})
+                                confirm: 'http://' +  process.env.SL_ADDRESS + '/reset/' + resetToken})
                             res.end('SUCCESS');
                         } else {
                             console.log('Forget: User Not Found')
@@ -310,7 +341,7 @@ app.post('/register', function(req, res){
     var options = {
         headers: { 'Authorization': 'Basic ' + new Buffer(clientId + ':'+ clientSecret).toString('base64') }
     }
-    needle.post('http://' + uaaHost + ':' + uaaPort + '/oauth/token', 'grant_type=client_credentials',
+    needle.post('http://' + uaaAddress + '/oauth/token', 'grant_type=client_credentials',
         options, function(err, tokenResp) {
         if (tokenResp.statusCode == 200){
             var token = tokenResp.body.access_token;
@@ -337,13 +368,13 @@ app.post('/register', function(req, res){
                       }
                 ]
             }
-            needle.post('http://' + uaaHost + ':' + uaaPort + '/Users', JSON.stringify(userData), regOptions, function(err, createResp) {
+            needle.post('http://' + uaaAddress + '/Users', JSON.stringify(userData), regOptions, function(err, createResp) {
                 if (createResp.statusCode == 201) {
                     console.log(createResp.body.id)
                     var templateFile = path.join(__dirname,'templates','confirmation-email.jade')
                     mailer.sendMail(req.body.email, 'Registration' , templateFile, {user: req.body.firstName,
-                        confirm: 'http://' +  process.env.UR_HOST + ':' + process.env.UR_PORT + '/confirm/' + createResp.body.id})
-                    // updateAndPostSequenceIqGroups(token, createResp.body.id, req.body.company) // TODO: uncomment this before production
+                        confirm: 'http://' +  process.env.SL_ADDRESS + '/confirm/' + createResp.body.id})
+                    updateAndPostSequenceIqGroups(token, createResp.body.id, req.body.company)
                     updateCloudbreakGroups(token, createResp.body.id)
                     res.end('SUCCESS')
                 } else {
@@ -373,7 +404,7 @@ postGroup = function(token, userId, displayName){
               { "type":"USER", "value": userId }
           ]
         }
-        needle.post('http://' + uaaHost + ':' + uaaPort + '/Groups', JSON.stringify(groupData), groupOptions,
+        needle.post('http://' + uaaAddress + '/Groups', JSON.stringify(groupData), groupOptions,
             function(err, groupResp){
                 if (groupResp.statusCode != 201 && groupResp.statusCode != 200) {
                   console.log('failed group creation ' + groupResp.statusCode + ', for user id: ' + userId)
@@ -404,7 +435,7 @@ updateGroup = function(token, userId, displayName) {
                          'Content-Type' : 'application/json'
                           }
         }
-        needle.get('http://' + uaaHost + ':' + uaaPort + '/Groups?attributes=id,displayName,members,meta&filter=displayName eq "' + displayName +'"', getGroupOptions,
+        needle.get('http://' + uaaAddress + '/Groups?attributes=id,displayName,members,meta&filter=displayName eq "' + displayName +'"', getGroupOptions,
             function(err, groupResp) {
                 if (groupResp.statusCode == 200 && groupResp.body.resources.length > 0){
                     var id = groupResp.body.resources[0].id
@@ -436,7 +467,7 @@ updateGroup = function(token, userId, displayName) {
                     "members" : newMembers
                 }
 
-                needle.put('http://' + uaaHost + ':' + uaaPort + '/Groups/' + id, JSON.stringify(updateGroupData), updateGroupOptions,
+                needle.put('http://' + uaaAddress + '/Groups/' + id, JSON.stringify(updateGroupData), updateGroupOptions,
                  function(err, updateResp) {
                     if (updateResp.statusCode == 200) {
                         console.log("PUT - update group (id:"+ id + ") is successful (registration)")
@@ -451,12 +482,13 @@ updateGroup = function(token, userId, displayName) {
         });
 }
 
+// confirm registration
 app.get('/confirm/:confirm_token', function(req, res){
    var confirmToken = req.param("confirm_token")
    var options = {
      headers: { 'Authorization': 'Basic ' + new Buffer(clientId + ':'+ clientSecret).toString('base64') }
    }
-   needle.post('http://' + uaaHost + ':' + uaaPort + '/oauth/token', 'grant_type=client_credentials',
+   needle.post('http://' + uaaAddress + '/oauth/token', 'grant_type=client_credentials',
            options, function(err, tokenResp) {
         if (tokenResp.statusCode == 200){
             var token = tokenResp.body.access_token;
@@ -468,7 +500,7 @@ app.get('/confirm/:confirm_token', function(req, res){
                 'Authorization' : 'Bearer ' + token,
                 'Content-Type' : 'application/json' }
             }
-            needle.get('http://' + uaaHost + ':' + uaaPort + '/Users/' + confirmToken,
+            needle.get('http://' + uaaAddress + '/Users/' + confirmToken,
                    usrOptions, function(err, userResp) {
                    if (userResp.statusCode == 200) {
                     if (confirmToken == userResp.body.id) {
@@ -494,7 +526,7 @@ app.get('/confirm/:confirm_token', function(req, res){
                              }
                              ]
                         }
-                        needle.put('http://' + uaaHost + ':' + uaaPort + '/Users/' + confirmToken, JSON.stringify(userData),
+                        needle.put('http://' + uaaAddress + '/Users/' + confirmToken, JSON.stringify(userData),
                         updateOptions, function(err, updateResp){
                             res.render('login',{ errorMessage: "" });
                         });
@@ -519,7 +551,7 @@ app.use(function(err, req, res, next){
 });
 
 // listen
-var port = process.env.UR_PORT || 8080;
+var port = process.env.SL_PORT || 8080;
 server = app.listen(port);
 
 console.log('Server listening on port %d in %s mode', server.address().port, app.settings.env);
