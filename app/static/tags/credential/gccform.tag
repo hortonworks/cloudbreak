@@ -11,7 +11,7 @@
 <div class="form-group" ng-class="{ 'has-error': gccCredentialForm.gcccdescription.$dirty && gccCredentialForm.gcccdescription.$invalid }">
     <label class="col-sm-3 control-label" for="gcccdescription">Description</label>
     <div class="col-sm-9">
-        <input type="text" class="form-control" id="gcccdescription" ng-model="credentialGcc.description" name="gcccdescription" ng-maxlength="20"  placeholder="max. 20 char">
+        <input type="text" class="form-control" id="gcccdescription" ng-model="credentialGcc.description" name="gcccdescription" ng-maxlength="50"  placeholder="max. 50 char">
         <div class="help-block" ng-show="gccCredentialForm.gcccdescription.$dirty && gccCredentialForm.gcccdescription.$invalid">
             <i class="fa fa-warning"></i> {{error_msg.credential_description_invalid}}
         </div>
@@ -22,8 +22,8 @@
     <div class="col-sm-9">
         <input type="text" class="form-control" id="gcc_tprojectId" ng-model="credentialGcc.parameters.projectId" name="gcc_tprojectId" placeholder="projectid" required>
 
-        <div class="help-block" ng-show="gccTemplateForm.gcc_tprojectId.$dirty && gccTemplateForm.gcc_tprojectId.$invalid">
-            <i class="fa fa-warning"></i> {{error_msg.template_project_id_empty}}
+        <div class="help-block" ng-show="gccCredentialForm.gcc_tprojectId.$dirty && gccCredentialForm.gcc_tprojectId.$invalid">
+            <i class="fa fa-warning"></i> {{error_msg.project_id_invalid}}
         </div>
     </div>
 </div>
@@ -37,14 +37,14 @@
     </div>
 </div>
 
-<div class="form-group" ng-class="{ 'has-error': gccCredentialForm.gcc_csshPublicKey.$dirty && gccCredentialForm.gcc_csshPublicKey.$invalid }">
-    <label class="col-sm-3 control-label" for="gcc_csshPublicKey">Service account private key:</label>
+<div class="form-group" ng-class="{ 'has-error': gccCredentialForm.gcc_caccPrivateKey.$dirty && gccCredentialForm.gcc_caccPrivateKey.$invalid }">
+    <label class="col-sm-3 control-label" for="gcc_caccPrivateKey">Service account private key:</label>
     <div class="col-sm-9">
         <textarea rows="4" type="text" placeholder="-----BEGIN RSA PRIVATE KEY-----
 MIICXAIBAAKBgQ...
------END RSA PRIVATE KEY-----" class="form-control" name="gcc_csshPublicKey" id="gcc_csshPublicKey" ng-model="credentialGcc.parameters.serviceAccountPrivateKey"  required></textarea>
-            <div class="help-block" ng-show="gccCredentialForm.gcc_csshPublicKey.$dirty && gccCredentialForm.gcc_csshPublicKey.$invalid">
-                <i class="fa fa-warning"></i> {{error_msg.credential_ssh_key_invalid}}
+-----END RSA PRIVATE KEY-----" class="form-control" name="gcc_caccPrivateKey" id="gcc_caccPrivateKey" ng-model="credentialGcc.parameters.serviceAccountPrivateKey"  required></textarea>
+            <div class="help-block" ng-show="gccCredentialForm.gcc_caccPrivateKey.$dirty && gccCredentialForm.gcc_caccPrivateKey.$invalid">
+                <i class="fa fa-warning"></i> {{error_msg.account_private_key_invalid}}
             </div>
         </div>
 </div>
