@@ -55,6 +55,13 @@ app.get('/login', function(req, res) {
     res.render('login')
 });
 
+app.get('/dashboard', function(req, res) {
+    res.render('dashboard',
+    {
+       cloudbreakAddress: process.env.CB_ADDRESS
+    })
+});
+
 app.post('/logout', function(req, res) {
    req.session = null
    res.end('SUCCESS')
@@ -83,7 +90,11 @@ app.post('/login', function(req, res){
                 }
             }
             res.cookie('uaa_cookie', sessionId) // TODO check sessionId
-            res.end('SUCCESS')
+            if (req.session.client_id == null) {
+                res.end('NO_CLIENT')
+            } else {
+                res.end('SUCCESS')
+            }
         } else {
             res.end('Authentication failed.')
         }

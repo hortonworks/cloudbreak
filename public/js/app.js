@@ -14,12 +14,12 @@ regApp.controller("regController", ['$scope', '$http',
                         $scope.email = email.value;
                         $jq('.carousel').carousel(1);
                     } else {
-                        $scope.errormessage = responseData
-                        $jq("#errorDialog").modal('show');
+                        $scope.message = responseData
+                        $jq("#msgDialog").modal('show');
                     }
                   }).error(function (data, status, headers, config){
-                        $scope.errormessage = "error :"+ status
-                        $jq("#errorDialog").modal('show');
+                        $scope.message = "error :"+ status
+                        $jq("#msgDialog").modal('show');
                   });
         }
     }
@@ -33,16 +33,16 @@ regApp.controller("resetController", ['$scope', '$http',
                            data: {password: resetPasswField.value}
                           }).success(function(responseData){
                             if (responseData == 'SUCCESS'){
-                              $scope.errormessage = "password update succeed"
+                              $scope.message = "password update succeed"
                               $jq("#errorDialog").modal('show');
                               window.location = '/login'
                             } else {
-                              $scope.errormessage = 'password update failed'
+                              $scope.message = 'password update failed'
                               $jq("#errorDialog").modal('show');
                             }
                   }).error(function (data, status, headers, config){
-                     $scope.errormessage = "error :"+ status
-                     $jq("#errorDialog").modal('show');
+                     $scope.message = "error :"+ status
+                     $jq("#msgDialog").modal('show');
                   });
         }
     }
@@ -57,13 +57,15 @@ regApp.controller("loginController", ['$scope', '$http',
             }).success(function(responseData){
                 if (responseData == 'SUCCESS') {
                     window.location = '/confirm'
+                } else if (responseData == 'NO_CLIENT'){
+                    window.location = '/dashboard'
                 } else {
-                    $scope.errormessage = responseData;
-                    $jq("#errorDialog").modal('show');
+                    $scope.message = responseData;
+                    $jq("#msgDialog").modal('show');
                 }
             }).error(function(data) {
-                $scope.errormessage = 'Server error 500';
-                $jq("#errorDialog").modal('show');
+                $scope.message = 'Server error 500';
+                $jq("#msgDialog").modal('show');
             });
         }
         $scope.forgetPassword = function() {
@@ -77,15 +79,15 @@ regApp.controller("loginController", ['$scope', '$http',
                     $jq('#login-btn').removeClass('hidden');
                     $jq('#forgot-btn').addClass('hidden');
                     alert('forgot password email sent.');
-                    $scope.errormessage = 'forgot password email sent to ' + emailFieldLogin.value;
-                    $jq("#errorDialog").modal('show');
+                    $scope.message = 'forgot password email sent to ' + emailFieldLogin.value;
+                    $jq("#msgDialog").modal('show');
                 } else {
-                    $scope.errormessage = responseData;
-                    $jq("#errorDialog").modal('show');
+                    $scope.message = responseData;
+                    $jq("#msgDialog").modal('show');
                 }
             }).error(function(data) {
-                    $scope.errormessage = 'Server error 500: ' + data;
-                    $jq("#errorDialog").modal('show');
+                    $scope.message = 'Server error 500: ' + data;
+                    $jq("#msgDialog").modal('show');
             });
         }
     }
@@ -105,8 +107,8 @@ regApp.controller("confirmController", ['$scope', '$http',
                     window.location = target
                 }
             }).error(function(data) {
-                $scope.errormessage = 'Server error 500: ' + data;
-                $jq("#errorDialog").modal('show');
+                $scope.message = 'Server error 500: ' + data;
+                $jq("#msgDialog").modal('show');
             });
         }
     }

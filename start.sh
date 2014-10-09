@@ -8,5 +8,6 @@
 : ${UR_SMTP_SENDER_USERNAME:?"Please set the UR_SMTP_SENDER_USERNAME environment variable!"}
 : ${UR_SMTP_SENDER_PASSWORD:?"Please set the UR_SMTP_SENDER_PASSWORD environment variable!"}
 : ${UR_SMTP_SENDER_FROM:?"Please set the UR_SMTP_SENDER_FROM environment variable!"}
+: ${CB_ADDRESS:?"Please set the CB_ADDRESS environment variable!"}
 
 npm install && node main
