@@ -15,7 +15,7 @@
     <label class="col-sm-3 control-label" for="awscdescription">Description</label>
 
     <div class="col-sm-9">
-        <input type="text" class="form-control" ng-model="credentialAws.description" id="awscdescription" name="awscdescription" ng-maxlength="20" placeholder="max. 20 char">
+        <input type="text" class="form-control" ng-model="credentialAws.description" id="awscdescription" name="awscdescription" ng-maxlength="50" placeholder="max. 50 char">
         <div class="help-block" ng-show="awsCredentialForm.awscdescription.$dirty && awsCredentialForm.awscdescription.$invalid">
             <i class="fa fa-warning"></i> {{error_msg.credential_description_invalid}}
         </div>

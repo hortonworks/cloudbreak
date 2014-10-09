@@ -14,7 +14,7 @@
     <label class="col-sm-3 control-label" for="azure_tdescription">Description</label>
 
     <div class="col-sm-9">
-        <input type="text" class="form-control" id="azure_tdescription" name="azure_tdescription" ng-model="azureTemp.description" ng-maxlength="20" placeholder="max. 20 char">
+        <input type="text" class="form-control" id="azure_tdescription" name="azure_tdescription" ng-model="azureTemp.description" ng-maxlength="50" placeholder="max. 50 char">
         <div class="help-block" ng-show="azureTemplateForm.azure_tdescription.$dirty && azureTemplateForm.azure_tdescription.$invalid">
             <i class="fa fa-warning"></i> {{error_msg.template_description_invalid}}
         </div>
@@ -55,7 +55,7 @@
     <label class="col-sm-3 control-label" for="azure_tvolumescount">Attached volumes per instance</label>
 
     <div class="col-sm-9">
-        <input type="number" class="form-control" id="azure_tvolumescount" name="azure_tvolumescount" ng-model="azureTemp.volumeCount"  placeholder="0" min="1" max="10" required>
+        <input type="number" class="form-control" id="azure_tvolumescount" name="azure_tvolumescount" ng-model="azureTemp.volumeCount"  placeholder="1 -10" min="1" max="10" required>
         <div class="help-block" ng-show="azureTemplateForm.azure_tvolumescount.$dirty && azureTemplateForm.azure_tvolumescount.$invalid">
             <i class="fa fa-warning"></i> {{error_msg.volume_count_invalid}}
         </div>
@@ -68,7 +68,7 @@
     <label class="col-sm-3 control-label" for="azure_tvolumesize">Volume size (GB)</label>
 
     <div class="col-sm-9">
-        <input type="number" class="form-control" id="azure_tvolumesize" name="azure_tvolumesize" ng-model="azureTemp.volumeSize"  placeholder="0 GB" min="10" max="1024" required>
+        <input type="number" class="form-control" id="azure_tvolumesize" name="azure_tvolumesize" ng-model="azureTemp.volumeSize"  placeholder="10 - 1024 GB" min="10" max="1024" required>
         <div class="help-block" ng-show="azureTemplateForm.azure_tvolumesize.$dirty && azureTemplateForm.azure_tvolumesize.$invalid">
             <i class="fa fa-warning"></i> {{error_msg.volume_size_invalid}}
         </div>

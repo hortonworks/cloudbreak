@@ -1,7 +1,7 @@
 <div class="form-group" ng-class="{ 'has-error': blueprintForm.name.$dirty && blueprintForm.name.$invalid }">
     <label class="col-sm-3 control-label" for="name">Name</label>
     <div class="col-sm-9">
-        <input type="text" class="form-control" id="name" ng-model="blueprint.name" name="name" ng-pattern="/^[a-zA-Z][-a-zA-Z0-9]*$/" ng-minlength="5" placeholder="set blueprint name" required>
+        <input type="text" class="form-control" id="name" ng-model="blueprint.name" name="name" ng-pattern="/^[a-zA-Z][-a-zA-Z0-9]*$/" ng-minlength="5" ng-maxlength="20" placeholder="min. 5 max. 20 char" required>
         <div class="help-block" ng-show="blueprintForm.name.$dirty && blueprintForm.name.$invalid"><i class="fa fa-warning"></i>
             {{error_msg.blueprint_name_invalid}}
         </div>
@@ -10,7 +10,7 @@
 <div class="form-group">
     <label class="col-sm-3 control-label" for="description">Description</label>
     <div class="col-sm-9">
-        <input type="text" class="form-control" id="description" ng-model="blueprint.description" name="description" placeholder="description" ng-maxlength="20">
+        <input type="text" class="form-control" id="description" ng-model="blueprint.description" name="description" placeholder="max. 50 char" ng-maxlength="50">
         <div class="help-block" ng-show="blueprintForm.description.$dirty && blueprintForm.description.$invalid"><i class="fa fa-warning"></i>
             {{error_msg.blueprint_description_invalid}}
         </div>
@@ -28,7 +28,7 @@
 <div class="form-group" ng-hide="blueprintForm.url.$dirty && !blueprintForm.url.$error.required" ng-class="{ 'has-error': blueprintForm.ambariBlueprint.$error.validjson && blueprintForm.ambariBlueprint.$dirty }">
     <label class="col-sm-3 control-label" for="ambariBlueprint">Manual copy</label>
     <div class="col-sm-9">
-        <textarea class="form-control" id="ambariBlueprint" ng-model="blueprint.ambariBlueprint" name="ambariBlueprint" placeholder="paste blueprint text here" validjson rows="10" required></textarea>
+        <textarea class="form-control" id="ambariBlueprint" ng-model="blueprint.ambariBlueprint" name="ambariBlueprint" placeholder="paste blueprint definition here as JSON...." validjson rows="10" required></textarea>
         <div class="help-block" ng-show="blueprintForm.ambariBlueprint.$error.validjson">
             <i class="fa fa-warning"></i> {{error_msg.blueprint_json_invalid}}
         </div>
