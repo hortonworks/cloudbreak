@@ -225,8 +225,6 @@ app.post('/reset/:resetToken', function(req, res) {
            needle.get('http://' + uaaAddress + '/Users/?attributes=id,userName,familyName,givenName,version,emails,meta.lastModified&filter=id eq "' + userId + '"', usrInfoOptions ,
             function(err, infoResp){
              if (infoResp.statusCode == 200){
-              console.log(infoResp.body.resources[0]['meta.lastModified'] == lastModified)
-              console.log(infoResp.body.resources[0]['meta.lastModified'])
               if (infoResp.body.resources.length > 0 && infoResp.body.resources[0]['meta.lastModified'] == lastModified) {
                 var userOptions = {
                            headers: {

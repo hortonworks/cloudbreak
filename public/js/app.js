@@ -18,7 +18,7 @@ regApp.controller("regController", ['$scope', '$http',
                         $jq("#msgDialog").modal('show');
                     }
                   }).error(function (data, status, headers, config){
-                        $scope.message = "error :"+ status
+                        $scope.message = data + " error code:"+ status
                         $jq("#msgDialog").modal('show');
                   });
         }
@@ -41,7 +41,7 @@ regApp.controller("resetController", ['$scope', '$http',
                               $jq("#errorDialog").modal('show');
                             }
                   }).error(function (data, status, headers, config){
-                     $scope.message = "error :"+ status
+                     $scope.message = data + " error code: "+ status
                      $jq("#msgDialog").modal('show');
                   });
         }
@@ -72,7 +72,7 @@ regApp.controller("loginController", ['$scope', '$http', '$rootScope',
                     $jq("#msgDialog").modal('show');
                 }
             }).error(function(data) {
-                    $scope.message = 'Server error 500: ' + data;
+                    $scope.message = data + " error code: "+ status
                     $jq("#msgDialog").modal('show');
             });
         }
