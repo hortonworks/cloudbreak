@@ -57,7 +57,7 @@
     </div>
     <!-- .container -->
 </header>
-<div ng-controller="confirmController">
+<div>
     <section>
         <div class="container carousel slide">
             <div class="row">
@@ -68,17 +68,18 @@
                             <h1 class="panel-title">Confirmation</h1>
                         </div>
                         <div class="panel-body">
+                          <form role="form" action="confirm" method="POST" name="confirmForm">
                             <div class="carousel-inner">
                                 <div>Do you want to authorize the application "<%= client_id %>" access to your resources?</div>
-                                <a href="javascript:void(0)" ng-click="confirm('yes')"
+                                <a onclick="confirmForm.submit()" href="javascript:void(0)"
                                    id="confirm-yes" class="btn btn-info btn-block" role="button"><i
                                         class="fa fa-user fa-fw"></i>
                                     Yes</a>
-                                <a href="javascript:void(0)" ng-click="confirm('no')"
-                                   id="confirm-no" class="btn btn-info btn-block" role="button"><i
+                                <a href="login" id="confirm-no" class="btn btn-info btn-block" role="button"><i
                                         class="fa fa-user fa-fw"></i>
                                     No</a>
                             </div>
+                          </form>
                         </div>
                     </div>
                 </div>
