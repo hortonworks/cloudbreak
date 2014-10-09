@@ -48,8 +48,13 @@ regApp.controller("resetController", ['$scope', '$http',
     }
 ]);
 
-regApp.controller("loginController", ['$scope', '$http',
-    function ($scope, $http, $location) {
+regApp.controller("loginController", ['$scope', '$http', '$rootScope',
+    function ($scope, $http, $rootScope) {
+        $scope.$watch($scope.message, function(){
+          if ($scope.message.length > 0){
+            $jq("#msgDialog").modal('show');
+          }
+        });
         $scope.forgetPassword = function() {
             $http({method: 'POST',dataType: 'json', url:  "/forget",
                  data: {email: emailFieldLogin.value},
@@ -74,6 +79,7 @@ regApp.controller("loginController", ['$scope', '$http',
         }
     }
 ]);
+
 
 regApp.directive('match', function($parse) {
   return {

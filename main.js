@@ -53,7 +53,7 @@ app.get('/', function(req, res) {
 
 // login.html
 app.get('/login', function(req, res) {
-    res.render('login')
+    res.render('login',{ errorMessage: "" });
 });
 
 app.get('/dashboard', function(req, res) {
@@ -92,15 +92,14 @@ app.post('/login', function(req, res){
             }
             res.cookie('uaa_cookie', sessionId) // TODO check sessionId
             if (req.session.client_id == null) {
-                res.end('NO_CLIENT')
+                res.redirect('dashboard')
             } else {
                 //res.end('SUCCESS')
                 res.redirect('confirm')
             }
         } else {
             //res.end('Authentication failed.')
-            // TODO: put the error message on the form with some template engine
-            res.redirect('login')
+            res.render('login',{ errorMessage: "The email or password you entered is incorrect." });
         }
     });
 });
@@ -158,7 +157,7 @@ app.get('/confirm', function(req, res){
                 res.render('confirm', {client_id : req.session.client_id})
             } else if (confirmResp.statusCode == 302){
                 if (endsWith(confirmResp.headers.location, '/login')){ // when redirects to UAA API login page
-                  res.render('login')
+                  res.render('login',{ errorMessage: "" });
                 } else {
                   res.cookie('JSESSIONID', getCookie(req, 'uaa_cookie'))
                   res.redirect(confirmResp.headers.location)
@@ -197,7 +196,7 @@ app.post('/confirm', function(req, res){
                    res.cookie('JSESSIONID', getCookie(req, 'uaa_cookie'))
                    res.redirect(confirmResp.headers.location)
                } else {
-                   res.render('login')
+                   res.render('login',{ errorMessage: "" });
                }
     });
 });
@@ -497,7 +496,7 @@ app.get('/confirm/:confirm_token', function(req, res){
                         }
                         needle.put('http://' + uaaHost + ':' + uaaPort + '/Users/' + confirmToken, JSON.stringify(userData),
                         updateOptions, function(err, updateResp){
-                            res.render('login')
+                            res.render('login',{ errorMessage: "" });
                         });
                     } else {
                      res.end('Cannot retrieve user by confirm token.')
