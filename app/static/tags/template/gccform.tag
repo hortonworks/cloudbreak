@@ -11,7 +11,7 @@
 <div class="form-group" ng-class="{ 'has-error': gccTemplateForm.gcc_tdescription.$dirty && gccTemplateForm.gcc_tdescription.$invalid }">
     <label class="col-sm-3 control-label" for="gcc_tdescription">Description</label>
     <div class="col-sm-9">
-        <input type="text" class="form-control" name="gcc_tdescription" ng-model="gccTemp.description" ng-maxlength="20" id="gcc_tdescription" placeholder="max. 20 char">
+        <input type="text" class="form-control" name="gcc_tdescription" ng-model="gccTemp.description" ng-maxlength="50" id="gcc_tdescription" placeholder="max. 50 char">
         <div class="help-block" ng-show="gccTemplateForm.gcc_tdescription.$dirty && gccTemplateForm.gcc_tdescription.$invalid">
             <i class="fa fa-warning"></i> {{error_msg.template_description_invalid}}
         </div>
@@ -54,7 +54,7 @@
 <div class="form-group">
     <label class="col-sm-3 control-label" for="gcc_tvolumecount">Attached volumes per instance</label>
     <div class="col-sm-9">
-        <input type="number" name="gcc_tvolumecount" class="form-control" id="gcc_tvolumecount" min="1" ng-model="gccTemp.volumeCount" required>
+        <input type="number" name="gcc_tvolumecount" class="form-control" id="gcc_tvolumecount" min="1" ng-model="gccTemp.volumeCount" placeholder="1 -10" max="10" required>
         <div class="help-block"  ng-show="gccTemplateForm.gcc_tvolumecount.$dirty && gccTemplateForm.gcc_tvolumecount.$invalid"><i class="fa fa-warning"></i>
             {{error_msg.volume_count_invalid}}
         </div>
@@ -63,7 +63,7 @@
 <div class="form-group">
     <label class="col-sm-3 control-label" for="gcc_tvolumesize">Volume size (GB)</label>
     <div class="col-sm-9">
-        <input type="number" name="gcc_tvolumesize" class="form-control" ng-model="gccTemp.volumeSize" id="gcc_tvolumesize" min="10" max="1024" required>
+        <input type="number" name="gcc_tvolumesize" class="form-control" ng-model="gccTemp.volumeSize" id="gcc_tvolumesize" min="10" max="1024" placeholder="10 - 1024 GB" required>
         <div class="help-block"
              ng-show="gccTemplateForm.gcc_tvolumesize.$dirty && gccTemplateForm.gcc_tvolumesize.$invalid"><i class="fa fa-warning"></i>
             {{error_msg.volume_size_invalid}}

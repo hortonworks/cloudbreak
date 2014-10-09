@@ -16,7 +16,7 @@
         <label class="col-sm-3 control-label" for="aws_tdescription">Description</label>
 
         <div class="col-sm-9">
-            <input type="text" class="form-control" name="aws_tdescription" ng-model="awsTemp.description" ng-maxlength="20" id="aws_tdescription" placeholder="max. 20 char">
+            <input type="text" class="form-control" name="aws_tdescription" ng-model="awsTemp.description" ng-maxlength="50" id="aws_tdescription" placeholder="max. 50 char">
             <div class="help-block" ng-show="awsTemplateForm.aws_tdescription.$dirty && awsTemplateForm.aws_tdescription.$invalid">
                 <i class="fa fa-warning"></i> {{error_msg.template_description_invalid}}
             </div>
@@ -77,7 +77,7 @@
 
         <div class="col-sm-9">
             <input type="number" name="aws_tvolumecount" class="form-control" ng-model="awsTemp.volumeCount" id="aws_tvolumecount" min="1" max="10"
-                   required>
+                   placeholder="1 -10" required>
 
             <div class="help-block"
                  ng-show="awsTemplateForm.aws_tvolumecount.$dirty && awsTemplateForm.aws_tvolumecount.$invalid"><i class="fa fa-warning"></i>
@@ -92,7 +92,7 @@
 
         <div class="col-sm-9">
             <input type="number" name="aws_tvolumesize" class="form-control" ng-model="awsTemp.volumeSize" id="aws_tvolumesize" min="10"
-                   max="1024" placeholder="0 GB" required>
+                   max="1024" placeholder="10 - 1024 GB" required>
 
             <div class="help-block"
                  ng-show="awsTemplateForm.aws_tvolumesize.$dirty && awsTemplateForm.aws_tvolumesize.$invalid"><i class="fa fa-warning"></i>
