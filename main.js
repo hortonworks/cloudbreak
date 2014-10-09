@@ -7,6 +7,7 @@ var favicon = require('serve-favicon');
 var session = require('express-session');
 var bodyParser = require('body-parser');
 var needle = require('needle');
+var md5 = require('MD5');
 var check = require('validator').check;
 
 var mailer = require('./mailer');
@@ -202,11 +203,13 @@ app.post('/confirm', function(req, res){
 });
 
 app.post('/reset/:resetToken', function(req, res) {
-    var resetToken = new Buffer(req.param('resetToken'), 'base64').toString('utf-8')
-    if (resetToken != null && resetToken.split('##').length == 2) {
-    var split = resetToken.split('##')
-    var userId = split[0];
-    var lastModified = split[1];
+    var resetToken = req.param('resetToken')
+    var referer = req.headers.referer
+    var email = null;
+    if (referer != null && referer.split('?').length > 1 && referer.split('?')[1].split('=')[0] == 'email'){
+        email = referer.split('?')[1].slice(6)
+    }
+    if (email != null) {
     var options = {
       headers: { 'Authorization': 'Basic ' + new Buffer(clientId + ':'+ clientSecret).toString('base64') }
     }
@@ -222,10 +225,10 @@ app.post('/reset/:resetToken', function(req, res) {
                'Authorization' : 'Bearer ' + token,
                'Content-Type' : 'application/json' }
           }
-           needle.get('http://' + uaaAddress + '/Users/?attributes=id,userName,familyName,givenName,version,emails,meta.lastModified&filter=id eq "' + userId + '"', usrInfoOptions ,
+           needle.get('http://' + uaaAddress + '/Users/?attributes=id,userName,familyName,givenName,version,emails,meta.lastModified&filter=userName eq "' + email + '"', usrInfoOptions ,
             function(err, infoResp){
              if (infoResp.statusCode == 200){
-              if (infoResp.body.resources.length > 0 && infoResp.body.resources[0]['meta.lastModified'] == lastModified) {
+              if (infoResp.body.resources.length > 0 && resetToken == md5(infoResp.body.resources[0].id + infoResp.body.resources[0]['meta.lastModified'])) {
                 var userOptions = {
                            headers: {
                              'Accept' : 'application/json',
@@ -235,6 +238,7 @@ app.post('/reset/:resetToken', function(req, res) {
                              'Content-Type' : 'application/json' }
                 }
                 var newPasswordData = {'password' : req.body.password}
+                var userId = infoResp.body.resources[0].id
                 needle.put('http://' + uaaAddress + '/Users/' + userId + '/password', JSON.stringify(newPasswordData),
                          userOptions, function(err, resetResp) {
                              if (resetResp.statusCode = 200){
@@ -259,7 +263,7 @@ app.post('/reset/:resetToken', function(req, res) {
    });
    } else {
     res.statusCode = 400
-    res.end('Bad Request. Cannot read token.')
+    res.end('Bad Request. Cannot read token without email address.')
    }
 });
 
@@ -282,14 +286,13 @@ app.post('/forget', function(req, res){
                     'Content-Type' : 'application/json' }
                 }
                 needle.get('http://' + uaaAddress + '/Users/?attributes=id,givenName,meta.lastModified,userName&filter=userName eq "' + userName + '"', usrOptions , function(err, usrResp){
-                    console.log(usrResp.body)
                     if (usrResp.statusCode == 200){
                         if (usrResp.body.resources.length == 1){
-                            var usrIdAndLastModified = usrResp.body.resources[0].id + '##' + usrResp.body.resources[0]['meta.lastModified']
-                            var resetToken = new Buffer(usrIdAndLastModified).toString('base64')
+                            var usrIdAndLastModified = usrResp.body.resources[0].id + usrResp.body.resources[0]['meta.lastModified']
+                            var resetToken = md5(usrIdAndLastModified)
                             var templateFile = path.join(__dirname,'templates','reset-password-email.jade')
                             mailer.sendMail(req.body.email, 'Password reset' , templateFile, {user: usrResp.body.resources[0].givenName,
-                                confirm: 'http://' +  process.env.SL_ADDRESS + '/reset/' + resetToken})
+                                confirm: 'http://' +  process.env.SL_ADDRESS + '/reset/' + resetToken + '?email=' + req.body.email})
                             res.end('SUCCESS');
                         } else {
                             console.log('Forget: User Not Found')
@@ -341,7 +344,7 @@ app.post('/register', function(req, res){
             }
             needle.post('http://' + uaaAddress + '/Users', JSON.stringify(userData), regOptions, function(err, createResp) {
                 if (createResp.statusCode == 201) {
-                    console.log(createResp.body.id)
+                    console.log('User created with ' + createResp.body.id + '(id) and name: ' + req.body.email)
                     var templateFile = path.join(__dirname,'templates','confirmation-email.jade')
                     mailer.sendMail(req.body.email, 'Registration' , templateFile, {user: req.body.firstName,
                         confirm: 'http://' +  process.env.SL_ADDRESS + '/confirm/' + createResp.body.id})
@@ -349,11 +352,11 @@ app.post('/register', function(req, res){
                     updateCloudbreakGroups(token, createResp.body.id)
                     res.end('SUCCESS')
                 } else {
-                    res.end('Registration failed. Status Code: ' + createResp.statusCode)
+                    res.end('Registration failed. ' + createResp.body.message)
                 }
             })
         } else {
-            res.end('Cannot get token from server')
+            res.end(tokenResp.body.message)
         }
     });
 });
@@ -499,7 +502,7 @@ app.get('/confirm/:confirm_token', function(req, res){
                         }
                         needle.put('http://' + uaaAddress + '/Users/' + confirmToken, JSON.stringify(userData),
                         updateOptions, function(err, updateResp){
-                            res.render('login',{ errorMessage: "" });
+                            res.render('login',{ errorMessage: "confirmation successful" });
                         });
                     } else {
                      res.end('Cannot retrieve user by confirm token.')
