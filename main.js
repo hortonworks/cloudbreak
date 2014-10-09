@@ -85,7 +85,7 @@ app.post('/login', function(req, res){
             res.cookie('uaa_cookie', sessionId) // TODO check sessionId
             res.end('SUCCESS')
         } else {
-            res.end('authentication failed')
+            res.end('Authentication failed.')
         }
     });
 });
@@ -235,7 +235,7 @@ app.post('/reset/:resetToken', function(req, res) {
                  }
              } else {
                  res.statusCode = 400
-                 res.end('Bad Request')
+                 res.end('Bad Request. Cannot retrieve token from server')
              }
            });
        } else {
@@ -245,7 +245,7 @@ app.post('/reset/:resetToken', function(req, res) {
    });
    } else {
     res.statusCode = 400
-    res.end('Bad Request')
+    res.end('Bad Request. Cannot read token.')
    }
 });
 
@@ -280,12 +280,12 @@ app.post('/forget', function(req, res){
                             res.end('User Not Found');
                         }
                     } else {
-                       console.log('Forget: Could not access for database')
-                       res.end('Could not access for database');
+                       console.log('Forget - Could not find user.')
+                       res.end('Could not find user.');
                     }
                 });
             } else {
-                console.log('Forget: No token for client')
+                console.log('Forget - No token for client')
                 res.end('No token for client');
             }
         }
@@ -293,7 +293,6 @@ app.post('/forget', function(req, res){
 });
 
 app.post('/register', function(req, res){
-    var result = 'FAILED'
     var options = {
         headers: { 'Authorization': 'Basic ' + new Buffer(clientId + ':'+ clientSecret).toString('base64') }
     }
@@ -330,16 +329,15 @@ app.post('/register', function(req, res){
                     var templateFile = path.join(__dirname,'templates','confirmation-email.jade')
                     mailer.sendMail(req.body.email, 'Registration' , templateFile, {user: req.body.firstName,
                         confirm: 'http://' +  process.env.UR_HOST + ':' + process.env.UR_PORT + '/confirm/' + createResp.body.id})
-                    result = 'SUCCESS'
                     // updateAndPostSequenceIqGroups(token, createResp.body.id, req.body.company) // TODO: uncomment this before production
                     updateCloudbreakGroups(token, createResp.body.id)
-                    res.end(result)
+                    res.end('SUCCESS')
                 } else {
-                    res.end(result)
+                    res.end('Registration failed. Status Code: ' + createResp.statusCode)
                 }
             })
         } else {
-            res.end(result)
+            res.end('Cannot get token from server')
         }
     });
 });

@@ -18,6 +18,7 @@
     <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
     <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
     <script src="/js/lib/angular.js"></script>
     <script src="/js/lib/angular-route.js"></script>
     <script src="/js/lib/angular-resource.js"></script>
@@ -56,7 +57,7 @@
     </div>
     <!-- .container -->
 </header>
-<div>
+<div ng-controller="confirmController">
     <section>
         <div class="container carousel slide">
             <div class="row">
@@ -66,7 +67,7 @@
                         <div class="panel-heading">
                             <h1 class="panel-title">Confirmation</h1>
                         </div>
-                        <div class="panel-body" ng-controller="confirmController">
+                        <div class="panel-body">
                             <div class="carousel-inner">
                                 <div>Do you want to authorize the application "<%= client_id %>" access to your resources?</div>
                                 <a href="javascript:void(0)" ng-click="confirm('yes')"
@@ -84,6 +85,19 @@
             </div>
         </div>
     </section>
+    <div class="modal fade" role="dialog" id="errorDialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="" style="color: black;">{{errormessage}}</h4>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
 </div>
 </body>
 </html>

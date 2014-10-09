@@ -18,6 +18,7 @@
 			<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
 			<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
 		<![endif]-->
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
     <script src="js/lib/angular.js"></script>
     <script src="js/lib/angular-route.js"></script>
     <script src="js/lib/angular-resource.js"></script>
@@ -56,7 +57,7 @@
     </div>
     <!-- .container -->
 </header>
-<div>
+<div ng-controller="regController">
     <section>
         <div class="container carousel slide">
             <div class="row">
@@ -69,7 +70,7 @@
                         <div class="panel-body">
 
                             <div class="carousel-inner">
-                                <div class="item active" ng-controller="regController">
+                                <div class="item active">
                                     <form role="form" name="signUpForm" autocomplete="on">
                                         <div class="form-group" ng-class="{ 'has-error has-feedback': emailError && signUpForm.email.$invalid }">
                                             <label class="sr-only" for="email">email</label>
@@ -175,8 +176,20 @@
             </div>
         </div>
     </section>
+    <div class="modal fade" role="dialog" id="errorDialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="" style="color: black;">{{errormessage}}</h4>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
     </div>
-    <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
     <script type="text/javascript">
             var $jq = jQuery.noConflict();
             $jq(document).ready(function ($) {
