@@ -1,5 +1,5 @@
 {
-  "name": "sequenceiq-reg",
+  "name": "sultans",
   "version": "0.1.3",
   "description": "SequenceIQ Registration App",
   "main": "main.js",
@@ -23,6 +23,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/sequenceiq/sequenceiq-reg.git"
+    "url": "https://github.com/sequenceiq/sultans.git"
   }
 }
