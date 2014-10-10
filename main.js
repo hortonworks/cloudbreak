@@ -46,7 +46,6 @@ app.get('/', function(req, res) {
     var logout = req.query.logout
     if (logout != null && logout == 'true'){
         req.session.destroy(function() {
-            console.log('clearSession')
             res.clearCookie('connect.sid', { path: '/' });
             res.clearCookie('JSESSIONID', { path: '/' });
             res.clearCookie('uaa_cookie', { path: '/' });
@@ -212,12 +211,9 @@ app.post('/confirm', function(req, res){
 
 app.post('/reset/:resetToken', function(req, res) {
     var resetToken = req.param('resetToken')
-    var referer = req.headers.referer
-    var email = null;
-    if (referer != null && referer.split('?').length > 1 && referer.split('?')[1].split('=')[0] == 'email'){
-        email = referer.split('?')[1].slice(6)
-    }
-    if (email != null) {
+    var email = req.body.email
+    console.log(email)
+    if (email != null){ // TODO check email format
     var options = {
       headers: { 'Authorization': 'Basic ' + new Buffer(clientId + ':'+ clientSecret).toString('base64') }
     }

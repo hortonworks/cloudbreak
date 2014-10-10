@@ -28,22 +28,31 @@ regApp.controller("regController", ['$scope', '$http',
 regApp.controller("resetController", ['$scope', '$http',
     function ($scope, $http, $location) {
         $scope.resetPassword = function() {
-                    var resetToken =  window.location.pathname.split('/')[2]
-                    $http({method: 'POST',dataType: 'json', url:  "/reset/" + resetToken,
-                           data: {password: resetPasswField.value}
-                          }).success(function(responseData){
-                            if (responseData == 'SUCCESS'){
-                              $scope.message = "password update succeed"
-                              $jq("#errorDialog").modal('show');
-                              window.location = '/'
-                            } else {
-                              $scope.message = 'password update failed'
-                              $jq("#errorDialog").modal('show');
-                            }
-                  }).error(function (data, status, headers, config){
-                     $scope.message = data + " error code: "+ status
-                     $jq("#msgDialog").modal('show');
-                  });
+                    var email = null;
+                    var url = window.location.href.split('?')
+                    if (url.length == 2 && url[1].split('=').length == 2 && url[1].split('=')[0] == 'email') {
+                        email = url[1].split('=')[1];
+                        var resetToken =  window.location.pathname.split('/')[2]
+                                            $http({method: 'POST',dataType: 'json', url:  "/reset/" + resetToken,
+                                                   data: {password: resetPasswField.value, email: email}
+                                                  }).success(function(responseData){
+                                                    if (responseData == 'SUCCESS'){
+                                                      $scope.message = "password update succeed"
+                                                      $jq("#errorDialog").modal('show');
+                                                      window.location = '/'
+                                                    } else {
+                                                      $scope.message = 'password update failed'
+                                                      $jq("#errorDialog").modal('show');
+                                                    }
+                                          }).error(function (data, status, headers, config){
+                                             $scope.message = data + " error code: "+ status
+                                             $jq("#msgDialog").modal('show');
+                                          });
+                    } else {
+                        $scope.message = 'Email query parameter is missing (or there are more query parameters)'
+                        $jq("#errorDialog").modal('show');
+                    }
+
         }
     }
 ]);
