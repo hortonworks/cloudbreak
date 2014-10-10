@@ -62,17 +62,20 @@ regApp.controller("loginController", ['$scope', '$http', '$rootScope',
             }).success(function(responseData){
                 if (responseData == 'SUCCESS') {
                     $jq("#login-forgot-passw").html("<i class='fa fa-question-circle fa-fw'></i> reset my password")
-                    $jq('#passwFieldLogin').prop("disabled", false);
+                    $jq('#password').prop("disabled", false);
                     $jq('#login-btn').removeClass('hidden');
                     $jq('#forgot-btn').addClass('hidden');
                     $scope.message = 'reset password email sent to ' + email.value;
+                    $jq(".modal-header h4").text($scope.message)
                     $jq("#msgDialog").modal('show');
                 } else {
                     $scope.message = responseData;
+                    $jq(".modal-header h4").text($scope.message)
                     $jq("#msgDialog").modal('show');
                 }
             }).error(function(data) {
                     $scope.message = data + " error code: "+ status
+                    $jq(".modal-header h4").text($scope.message)
                     $jq("#msgDialog").modal('show');
             });
         }
