@@ -6,12 +6,16 @@ import java.security.cert.CertificateException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
+import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
+import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
+import com.sequenceiq.cloudbreak.service.user.UserFilterField;
 
 @Component
 public class AzureStackUtil {
@@ -23,6 +27,9 @@ public class AzureStackUtil {
     public static final String CREDENTIAL = "credential";
     public static final String EMAILASFOLDER = "emailAsFolder";
     public static final String IMAGE_NAME = "ambari-docker-v1";
+
+    @Autowired
+    private UserDetailsService userDetailsService;
 
     public String getVmName(String azureTemplate, int i) {
         return String.format("%s-%s", azureTemplate, i);
@@ -49,7 +56,12 @@ public class AzureStackUtil {
         return new X509Certificate(AzureCertificateService.getCerFile(emailAsFolder, azureCredential.getId()));
     }
 
-    public String emailAsFolder(String email) {
+    public String emailAsFolder(String userId) {
+        String email = userDetailsService.getDetails(userId, UserFilterField.USERID).getUsername();
         return email.replaceAll("@", "_").replace(".", "_");
+    }
+
+    public String emailAsFolder(CbUser user) {
+        return user.getUsername().replaceAll("@", "_").replace(".", "_");
     }
 }

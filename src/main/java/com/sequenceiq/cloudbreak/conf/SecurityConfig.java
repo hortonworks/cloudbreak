@@ -26,6 +26,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
+import com.sequenceiq.cloudbreak.service.user.UserFilterField;
 
 @Configuration
 public class SecurityConfig {
@@ -124,7 +125,7 @@ public class SecurityConfig {
                 IOException {
             if (SecurityContextHolder.getContext().getAuthentication() != null) {
                 String username = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-                CbUser user = userDetailsService.getDetails(username);
+                CbUser user = userDetailsService.getDetails(username, UserFilterField.USERNAME);
                 request.setAttribute("user", user);
             }
             filterChain.doFilter(request, response);

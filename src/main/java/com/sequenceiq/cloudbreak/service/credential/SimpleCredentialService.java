@@ -40,7 +40,7 @@ public class SimpleCredentialService implements CredentialService {
 
     @Override
     public Set<Credential> retrievePrivateCredentials(CbUser user) {
-        return credentialRepository.findForUser(user.getUsername());
+        return credentialRepository.findForUser(user.getUserId());
     }
 
     @Override
@@ -68,7 +68,7 @@ public class SimpleCredentialService implements CredentialService {
     public Credential create(CbUser user, Credential credential) {
         LOGGER.debug("Creating credential: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         Credential savedCredential = null;
-        credential.setOwner(user.getUsername());
+        credential.setOwner(user.getUserId());
         credential.setAccount(user.getAccount());
         try {
             savedCredential = credentialRepository.save(credential);

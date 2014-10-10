@@ -45,7 +45,7 @@ public class DefaultBlueprintLoaderService {
                         );
 
                 Blueprint bp = blueprintConverter.convert(blueprintJson);
-                bp.setOwner(user.getUsername());
+                bp.setOwner(user.getUserId());
                 blueprints.add(bp);
             } catch (IOException e) {
                 LOGGER.error(blueprintName + " blueprint is not available.", e);

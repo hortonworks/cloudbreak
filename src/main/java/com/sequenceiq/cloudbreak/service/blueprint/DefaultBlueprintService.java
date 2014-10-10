@@ -38,7 +38,7 @@ public class DefaultBlueprintService implements BlueprintService {
 
     @Override
     public Set<Blueprint> retrievePrivateBlueprints(CbUser user) {
-        return blueprintRepository.findForUser(user.getUsername());
+        return blueprintRepository.findForUser(user.getUserId());
     }
 
     @Override
@@ -65,7 +65,7 @@ public class DefaultBlueprintService implements BlueprintService {
     public Blueprint create(CbUser user, Blueprint blueprint) {
         LOGGER.debug("Creating blueprint: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         Blueprint savedBlueprint = null;
-        blueprint.setOwner(user.getUsername());
+        blueprint.setOwner(user.getUserId());
         blueprint.setAccount(user.getAccount());
         try {
             savedBlueprint = blueprintRepository.save(blueprint);

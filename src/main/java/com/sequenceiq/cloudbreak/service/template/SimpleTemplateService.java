@@ -35,7 +35,7 @@ public class SimpleTemplateService implements TemplateService {
 
     @Override
     public Set<Template> retrievePrivateTemplates(CbUser user) {
-        return templateRepository.findForUser(user.getUsername());
+        return templateRepository.findForUser(user.getUserId());
     }
 
     @Override
@@ -63,7 +63,7 @@ public class SimpleTemplateService implements TemplateService {
     public Template create(CbUser user, Template template) {
         LOGGER.debug("Creating template: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         Template savedTemplate = null;
-        template.setOwner(user.getUsername());
+        template.setOwner(user.getUserId());
         template.setAccount(user.getAccount());
         try {
             savedTemplate = templateRepository.save(template);
@@ -89,30 +89,4 @@ public class SimpleTemplateService implements TemplateService {
         }
     }
 
-    // private Set<Template> getCompanyTemplates(User user) {
-    // Set<Template> companyTemplates = new HashSet<>();
-    // User adminWithFilteredData =
-    // accountService.accountUserData(user.getAccount().getId(),
-    // user.getUserRoles().iterator().next());
-    // if (adminWithFilteredData != null) {
-    // companyTemplates.addAll(adminWithFilteredData.getAwsTemplates());
-    // companyTemplates.addAll(adminWithFilteredData.getAzureTemplates());
-    // } else {
-    // LOGGER.debug("There's no company admin for user: [{}]", user.getId());
-    // }
-    // return companyTemplates;
-    // }
-    //
-    // private Set<Template> getCompanyUserTemplates(User user) {
-    // Set<Template> companyUserTemplates = new HashSet<>();
-    // Set<User> companyUsers =
-    // accountService.accountUsers(user.getAccount().getId());
-    // companyUsers.remove(user);
-    // for (User cUser : companyUsers) {
-    // LOGGER.debug("Adding templates of company user: [{}]", cUser.getId());
-    // companyUserTemplates.addAll(cUser.getAwsTemplates());
-    // companyUserTemplates.addAll(cUser.getAzureTemplates());
-    // }
-    // return companyUserTemplates;
-    // }
 }

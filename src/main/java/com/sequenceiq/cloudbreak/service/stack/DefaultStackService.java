@@ -66,7 +66,7 @@ public class DefaultStackService implements StackService {
 
     @Override
     public Set<Stack> retrievePrivateStacks(CbUser user) {
-        return stackRepository.findForUser(user.getUsername());
+        return stackRepository.findForUser(user.getUserId());
     }
 
     @Override
@@ -93,7 +93,7 @@ public class DefaultStackService implements StackService {
     public Stack create(CbUser user, Stack stack) {
         Stack savedStack = null;
         Template template = templateRepository.findOne(stack.getTemplate().getId());
-        stack.setOwner(user.getUsername());
+        stack.setOwner(user.getUserId());
         stack.setAccount(user.getAccount());
         stack.setHash(generateHash(stack));
         try {

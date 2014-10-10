@@ -102,7 +102,7 @@ public class CredentialController {
     public ModelAndView getJksFile(@ModelAttribute("user") CbUser user, @PathVariable Long credentialId, HttpServletResponse response) throws Exception {
         File cerFile = azureCertificateService.getCertificateFile(credentialId, user);
         response.setContentType("application/octet-stream");
-        response.setHeader("Content-Disposition", "attachment;filename=" + azureStackUtil.emailAsFolder(user.getUsername()) + ".cer");
+        response.setHeader("Content-Disposition", "attachment;filename=" + azureStackUtil.emailAsFolder(user) + ".cer");
         FileCopyUtils.copy(Files.readAllBytes(cerFile.toPath()), response.getOutputStream());
         return null;
     }

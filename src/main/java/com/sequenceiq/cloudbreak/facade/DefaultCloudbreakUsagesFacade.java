@@ -28,7 +28,7 @@ public class DefaultCloudbreakUsagesFacade implements CloudbreakUsagesFacade {
     @Override
     public List<CloudbreakUsageJson> getUsagesForUser(CbUser user, Long since, String filterUser, String account,
             String cloud, String zone, String vmtype, String hours) {
-        List<CloudbreakUsage> usages = cloudbreakUsagesService.findUsagesForUser(user.getUsername(), since, cloud, zone, vmtype, hours);
+        List<CloudbreakUsage> usages = cloudbreakUsagesService.findUsagesForUser(user.getUserId(), since, cloud, zone, vmtype, hours);
         return new ArrayList<CloudbreakUsageJson>(cloudbreakUsageConverter.convertAllEntityToJson(usages));
     }
 
@@ -48,6 +48,6 @@ public class DefaultCloudbreakUsagesFacade implements CloudbreakUsagesFacade {
 
     @Override
     public void generateUserUsages(CbUser user) {
-        cloudbreakUsageGeneratorService.generateCloudbreakUsages(user.getUsername());
+        cloudbreakUsageGeneratorService.generateCloudbreakUsages(user.getUserId());
     }
 }

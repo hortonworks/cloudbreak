@@ -38,7 +38,7 @@ public class RemoteUserDetailsService implements UserDetailsService {
 
     @Override
     @Cacheable("userCache")
-    public CbUser getDetails(String username) {
+    public CbUser getDetails(String filterValue, UserFilterField filterField) {
 
         RestTemplate restTemplate = new RestTemplate();
 
@@ -54,19 +54,37 @@ public class RemoteUserDetailsService implements UserDetailsService {
         HttpHeaders scimRequestHeaders = new HttpHeaders();
         scimRequestHeaders.set("Authorization", "Bearer " + tokenResponse.get("access_token"));
 
-        String scimResponse = restTemplate.exchange(
-                identityServerUrl + "/Users/" + "?filter=userName eq \"" + username + "\"",
-                HttpMethod.GET,
-                new HttpEntity<>(scimRequestHeaders),
-                String.class).getBody();
+        String scimResponse = null;
+
+        switch (filterField) {
+            case USERNAME:
+                scimResponse = restTemplate.exchange(
+                        identityServerUrl + "/Users/" + "?filter=userName eq \"" + filterValue + "\"",
+                        HttpMethod.GET,
+                        new HttpEntity<>(scimRequestHeaders),
+                        String.class).getBody();
+                break;
+            case USERID:
+                scimResponse = restTemplate.exchange(
+                        identityServerUrl + "/Users/" + filterValue,
+                        HttpMethod.GET,
+                        new HttpEntity<>(scimRequestHeaders),
+                        String.class).getBody();
+                break;
+            default:
+                throw new UserDetailsUnavailableException("User details cannot be retrieved.");
+        }
 
         ObjectMapper mapper = new ObjectMapper();
-        JsonNode root = null;
         try {
-            root = mapper.readTree(scimResponse);
+            JsonNode root = mapper.readTree(scimResponse);
             List<CbUserRole> roles = new ArrayList<>();
             String account = null;
-            for (Iterator<JsonNode> iterator = root.get("resources").get(0).get("groups").getElements(); iterator.hasNext();) {
+            JsonNode userNode = root;
+            if (UserFilterField.USERNAME.equals(filterField)) {
+                userNode = root.get("resources").get(0);
+            }
+            for (Iterator<JsonNode> iterator = userNode.get("groups").getElements(); iterator.hasNext();) {
                 JsonNode node = iterator.next();
                 String group = node.get("display").asText();
                 if (group.startsWith("sequenceiq.account")) {
@@ -80,9 +98,11 @@ public class RemoteUserDetailsService implements UserDetailsService {
                     roles.add(CbUserRole.fromString(parts[ROLE_PART]));
                 }
             }
-            String givenName = root.get("resources").get(0).get("name").get("givenName").asText();
-            String familyName = root.get("resources").get(0).get("name").get("familyName").asText();
-            return new CbUser(username, account, roles, givenName, familyName);
+            String userId = userNode.get("id").asText();
+            String email = userNode.get("userName").asText();
+            String givenName = userNode.get("name").get("givenName").asText();
+            String familyName = userNode.get("name").get("familyName").asText();
+            return new CbUser(userId, email, account, roles, givenName, familyName);
         } catch (IOException e) {
             throw new UserDetailsUnavailableException("User details cannot be retrieved from identity server.", e);
         }
