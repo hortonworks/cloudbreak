@@ -62,12 +62,12 @@ uluwatuServices.factory('UserStack', ['$resource',
 
 uluwatuServices.factory('Cluster', ['$resource',
     function ($resource) {
-        return $resource('stacks/:id/cluster');
+        return $resource('stacks/:id/cluster', null, { 'update': { method:'PUT' } });
     }]);
 
 uluwatuServices.factory('GlobalStack', ['$resource',
     function ($resource) {
-        return $resource('stacks/:id');
+        return $resource('stacks/:id', null, { 'update': { method:'PUT' } });
     }]);
 
 uluwatuServices.factory('UluwatuCluster', ['UserStack', 'Cluster', 'GlobalStack',

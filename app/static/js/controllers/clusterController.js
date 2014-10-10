@@ -3,8 +3,8 @@
 var log = log4javascript.getLogger("clusterController-logger");
 var $jq = jQuery.noConflict();
 
-angular.module('uluwatuControllers').controller('clusterController', ['$scope', '$rootScope', '$filter', 'UluwatuCluster', 'GlobalStack',
-    function ($scope, $rootScope, $filter, UluwatuCluster, GlobalStack) {
+angular.module('uluwatuControllers').controller('clusterController', ['$scope', '$rootScope', '$filter', 'UluwatuCluster', 'GlobalStack', 'Cluster',
+    function ($scope, $rootScope, $filter, UluwatuCluster, GlobalStack, Cluster) {
 
         $scope.ledStyles = {
             "REQUESTED": "state2-run-blink",
@@ -13,7 +13,12 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             "AVAILABLE": "state5-run",
             "CREATE_FAILED": "state3-stop",
             "DELETE_IN_PROGRESS": "state0-stop-blink",
-            "DELETE_COMPLETED": "state3-stop"
+            "DELETE_COMPLETED": "state3-stop",
+            "STOPPED": "state4-ready",
+            "START_REQUESTED": "state1-ready-blink",
+            "START_IN_PROGRESS": "state1-ready-blink",
+            "STOP_REQUESTED": "state1-ready-blink",
+            "STOP_IN_PROGRESS": "state1-ready-blink"
         }
 
         $scope.buttonStyles = {
@@ -23,7 +28,12 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             "AVAILABLE": "fa-stop",
             "CREATE_FAILED": "fa-play",
             "DELETE_IN_PROGRESS": "fa-pause",
-            "DELETE_COMPLETED": "fa-stop"
+            "DELETE_COMPLETED": "fa-stop",
+            "STOPPED": "fa-play",
+            "START_REQUESTED": "fa-refresh",
+            "START_IN_PROGRESS": "fa-refresh",
+            "STOP_REQUESTED": "fa-refresh",
+            "STOP_IN_PROGRESS": "fa-refresh"
         }
 
         $scope.titleStatus = {
@@ -101,5 +111,33 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                     $rootScope.activeCluster.description = success.description;
                 }
             );
+        }
+
+        $scope.stopCluster = function (activeCluster) {
+            var newStatus = {"status":"STOPPED"};
+            Cluster.update({id: activeCluster.id}, newStatus, function(success){
+                GlobalStack.update({id: activeCluster.id}, newStatus, function(result){
+                    $rootScope.activeCluster.status = "STOP_REQUESTED";
+                });
+            });
+        }
+
+        $scope.startCluster = function (activeCluster) {
+            var newStatus = {"status":"STARTED"};
+            GlobalStack.update({id: activeCluster.id}, newStatus, function(result){
+                Cluster.update({id: activeCluster.id}, newStatus, function(success){
+                    $rootScope.activeCluster.status = "START_REQUESTED";
+                });
+            });
+        }
+
+        $scope.$on("STATUS_CHANGE_REQUEST", statusChangeListener);
+
+        function statusChangeListener(event, cluster) {
+          if(cluster.status == "STOPPED") {
+              $scope.startCluster(cluster);
+          } else if(cluster.status == "AVAILABLE") {
+              $scope.stopCluster(cluster);
+          }
         }
     }]);

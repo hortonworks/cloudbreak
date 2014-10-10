@@ -167,6 +167,10 @@ app.delete('*', function(req,res){
   proxyCloudbreakRequest(req, res, cloudbreakClient.delete);
 });
 
+app.put('*', function(req,res){
+  proxyCloudbreakRequest(req, res, cloudbreakClient.put);
+});
+
 // proxy =======================================================================
 
 function proxyCloudbreakRequest(req, res, method){
