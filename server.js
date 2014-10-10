@@ -138,7 +138,7 @@ app.get('/logout', function(req, res){
         res.clearCookie('connect.sid', { path: '/' });
         res.clearCookie('JSESSIONID', { path: '/' });
         res.clearCookie('uaa_cookie', { path: '/' });
-        res.redirect(uaaRegistrationAddress + '?logout=true')
+        res.redirect(sultansAddress + '?logout=true')
     })
 })
 
