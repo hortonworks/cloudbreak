@@ -44,10 +44,6 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
             $scope.statusclass = status;
         }
 
-        $scope.signOut = function() {
-
-        }
-
         function logStackInfo(body) {
             if(body.status === 'AVAILABLE') {
                 $scope.modifyStatusMessage($rootScope.error_msg.stack_create_completed, body.name);
