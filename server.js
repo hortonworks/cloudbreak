@@ -133,6 +133,15 @@ app.get('/', function(req, res) {
   }
 });
 
+app.get('/logout', function(req, res){
+    req.session.destroy(function() {
+        res.clearCookie('connect.sid', { path: '/' });
+        res.clearCookie('JSESSIONID', { path: '/' });
+        res.clearCookie('uaa_cookie', { path: '/' });
+        res.redirect(sultansAddress);
+    })
+})
+
 app.get('/user', function(req,res) {
   var requestArgs = {
     headers:{
