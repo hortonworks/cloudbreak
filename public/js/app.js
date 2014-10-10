@@ -18,7 +18,7 @@ regApp.controller("regController", ['$scope', '$http',
                         $jq("#msgDialog").modal('show');
                     }
                   }).error(function (data, status, headers, config){
-                        $scope.message = data + " error code:"+ status
+                        $scope.message = data + " error code: "+ status
                         $jq("#msgDialog").modal('show');
                   });
         }
@@ -35,7 +35,7 @@ regApp.controller("resetController", ['$scope', '$http',
                             if (responseData == 'SUCCESS'){
                               $scope.message = "password update succeed"
                               $jq("#errorDialog").modal('show');
-                              window.location = '/login'
+                              window.location = '/'
                             } else {
                               $scope.message = 'password update failed'
                               $jq("#errorDialog").modal('show');

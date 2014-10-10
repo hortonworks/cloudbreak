@@ -38,22 +38,8 @@ app.use(session({
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
-
-// index.html
-app.get('/', function(req, res) {
-  res.render('index',
-  {
-   emailErrorMsg: 'invalid email address',
-   passwordErrorMsg: 'password is invalid (6 to 200 char)',
-   confirmPasswordErrorMsg: 'passwords do not match!',
-   firstNameErrorMsg: 'first name is empty',
-   lastNameErrorMsg: 'last name is empty',
-   companyErrorMsg: 'company name is empty'
-   })
-});
-
 // login.html
-app.get('/login', function(req, res) {
+app.get('/', function(req, res) {
     res.render('login',{ errorMessage: "" });
 });
 
@@ -64,9 +50,17 @@ app.get('/dashboard', function(req, res) {
     })
 });
 
-app.post('/logout', function(req, res) {
-   req.session = null
-   res.end('SUCCESS')
+// register.html
+app.get('/register', function(req, res) {
+  res.render('register',
+  {
+   emailErrorMsg: 'invalid email address',
+   passwordErrorMsg: 'password is invalid (6 to 200 char)',
+   confirmPasswordErrorMsg: 'passwords do not match!',
+   firstNameErrorMsg: 'first name is empty',
+   lastNameErrorMsg: 'last name is empty',
+   companyErrorMsg: 'company name is empty'
+   })
 });
 
 // reset.html
@@ -75,7 +69,7 @@ app.get('/reset/:resetToken', function(req, res) {
 });
 
 
-app.post('/login', function(req, res){
+app.post('/', function(req, res){
     var username = req.body.email
     var password = req.body.password
     var userCredentials = {username: username, password: password}
@@ -114,7 +108,7 @@ app.get('/oauth/authorize', function(req, res){
         if (isUaaSession(req)) {
             res.redirect('/confirm')
         } else {
-            res.redirect('/login')
+            res.redirect('/')
         }
     } else {
         res.statusCode = 404

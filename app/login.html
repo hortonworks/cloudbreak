@@ -68,7 +68,7 @@
                             <h1 class="panel-title">Login</h1>
                         </div>
                         <div class="panel-body">
-                                <form role="form" action="/login" method="POST" autocomplete="on" name="loginForm" ng-controller="loginController">
+                                <form role="form" action="/" method="POST" autocomplete="on" name="loginForm" ng-controller="loginController">
                                     <div class="form-group"
                                          ng-class="{ 'has-error has-feedback': showLoginEmailError && loginForm.email.$invalid }">
                                         <!-- OPTIONAL HTML:
@@ -120,7 +120,9 @@
                                     </div>
                                     <a href="" onclick="loginForm.submit()" ng-disabled="loginForm.$invalid"
                                        id="login-btn" class="btn btn-info btn-block" role="button">
-                                        <i class="fa fa-sign-in fa-fw"></i> login</a>
+                                        <i class="fa fa-sign-in fa-fw"></i> sign in</a>
+                                    <a href="/register" id="register-btn" class="btn btn-info btn-block" role="button">
+                                        <i class="fa fa-sign-in fa-fw"></i> sign up</a>
                                     <a href="javascript:void(0)" id="forgot-btn" ng-click="forgetPassword()"
                                        ng-disabled="loginForm.email.$invalid"
                                        class="btn btn-info btn-block hidden" role="button"><i
@@ -153,11 +155,13 @@
         $jq(this).text(" back to login")
         $jq('#password').prop("disabled", true);
         $jq('#login-btn').addClass('hidden');
+        $jq('#register-btn').addClass('hidden');
         $jq('#forgot-btn').removeClass('hidden');
     } else {
         $jq(this).html("<i class='fa fa-question-circle fa-fw'></i> reset my password")
         $jq('#password').prop("disabled", false);
         $jq('#login-btn').removeClass('hidden');
+        $jq('#register-btn').removeClass('hidden');
         $jq('#forgot-btn').addClass('hidden');
     }
     });
