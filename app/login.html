@@ -160,7 +160,14 @@
         $jq('#login-btn').removeClass('hidden');
         $jq('#forgot-btn').addClass('hidden');
     }
-   });
+    });
+    $jq(document).keypress(function(event){
+        if (event.keyCode == 13) {
+            if ($jq('#login-btn').attr('disabled') == undefined) { // TODO: same with forget
+                $jq('form[name=loginForm]').submit();
+            }
+        }
+    });
 </script>
 </body>
 </html>
