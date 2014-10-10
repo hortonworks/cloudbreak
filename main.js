@@ -356,7 +356,8 @@ app.post('/register', function(req, res){
                 }
             })
         } else {
-            res.end(tokenResp.body.message)
+            console.log("Register: Cannot retrieve token.")
+            res.end("Cannot retrieve token.")
         }
     });
 });
