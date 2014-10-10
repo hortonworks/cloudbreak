@@ -7,7 +7,12 @@
         <div id="cluster-details-panel-collapse">
             <div class="panel-body">
                 <p class="text-right">
-                    <a href="" class="btn btn-info" role="button" ng-show="activeCluster.cloudPlatform != 'GCC'"><i class="fa fa-pause fa-fw"></i><span> stop</span></a>
+                    <a href="" class="btn btn-success" role="button" ng-show="activeCluster.cloudPlatform != 'GCC' && activeCluster.status == 'STOPPED'" data-toggle="modal" data-target="#modal-start-cluster">
+                        <i class="fa fa-play fa-fw"></i><span> start</span>
+                    </a>
+                    <a href="" class="btn btn-warning" role="button" ng-show="activeCluster.cloudPlatform != 'GCC' && activeCluster.status == 'AVAILABLE'" data-toggle="modal" data-target="#modal-stop-cluster">
+                        <i class="fa fa-pause fa-fw"></i><span> stop</span>
+                    </a>
                     <a href="" id="terminate-btn" class="btn btn-danger" role="button" data-toggle="modal" data-target="#modal-terminate">
                         <i class="fa fa-times fa-fw"></i><span> terminate</span>
                     </a>
@@ -131,4 +136,45 @@
         </div>
     </div>
 
+    <div class="modal fade" id="modal-stop-cluster" tabindex="-1" role="dialog" aria-labelledby="modal01-title" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <!-- .modal-header -->
+                <div class="modal-body">
+                    <p>Stop cluster <strong>{{activeCluster.name}}</strong> and its stack?</p>
+                </div>
+                <div class="modal-footer">
+                    <div class="row">
+                        <div class="col-xs-6">
+                            <button type="button" class="btn btn-block btn-default" data-dismiss="modal">cancel</button>
+                        </div>
+                        <div class="col-xs-6">
+                            <button type="button" class="btn btn-block btn-warning" data-dismiss="modal" id="stackStackBtn" ng-click="stopCluster(activeCluster)"><i class="fa fa-pause fa-fw"></i>stop</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-start-cluster" tabindex="-1" role="dialog" aria-labelledby="modal01-title" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <!-- .modal-header -->
+                <div class="modal-body">
+                    <p>Start cluster <strong>{{activeCluster.name}}</strong> and its stack?</p>
+                </div>
+                <div class="modal-footer">
+                    <div class="row">
+                        <div class="col-xs-6">
+                            <button type="button" class="btn btn-block btn-default" data-dismiss="modal">cancel</button>
+                        </div>
+                        <div class="col-xs-6">
+                            <button type="button" class="btn btn-block btn-success" data-dismiss="modal" id="stackStackBtn" ng-click="startCluster(activeCluster)"><i class="fa fa-play fa-fw"></i>start</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
