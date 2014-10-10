@@ -11,6 +11,7 @@ import org.springframework.util.ReflectionUtils;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CbUserRole;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
+import com.sequenceiq.cloudbreak.service.user.UserFilterField;
 
 @Component
 public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
@@ -23,11 +24,10 @@ public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
             return false;
         }
         try {
-            String username = (String) authentication.getPrincipal();
-            if (getOwner(targetDomainObject).equals(username)) {
+            CbUser user = userDetailsService.getDetails((String) authentication.getPrincipal(), UserFilterField.USERNAME);
+            if (getOwner(targetDomainObject).equals(user.getUserId())) {
                 return true;
             }
-            CbUser user = userDetailsService.getDetails(username);
             if (getAccount(targetDomainObject).equals(user.getAccount())) {
                 if (user.getRoles().contains(CbUserRole.ADMIN) || isPublicInAccount(targetDomainObject)) {
                     return true;

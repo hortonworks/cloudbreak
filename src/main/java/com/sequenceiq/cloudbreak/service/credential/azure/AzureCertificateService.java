@@ -84,12 +84,12 @@ public class AzureCertificateService {
         if (credential == null) {
             throw new NotFoundException(String.format("Credential '%s' not found", credentialId));
         }
-        return new File(getUserCerFileName(credential, azureStackUtil.emailAsFolder(user.getUsername())));
+        return new File(getUserCerFileName(credential, azureStackUtil.emailAsFolder(user)));
     }
 
     public void generateCertificate(CbUser user, AzureCredential azureCredential) {
         try {
-            String emailAsFolder = azureStackUtil.emailAsFolder(user.getUsername());
+            String emailAsFolder = azureStackUtil.emailAsFolder(user);
             File sourceFolder = new File(DATADIR);
             if (!sourceFolder.exists()) {
                 FileUtils.forceMkdir(new File(DATADIR));
@@ -124,12 +124,12 @@ public class AzureCertificateService {
     }
 
     public File getSshPublicKeyFile(CbUser user, Long azureCredentialId) {
-        return new File(getPemFile(azureStackUtil.emailAsFolder(user.getUsername()), azureCredentialId));
+        return new File(getPemFile(azureStackUtil.emailAsFolder(user), azureCredentialId));
     }
 
     public void generateSshCertificate(CbUser user, AzureCredential azureCredential, String sshKey) {
         try {
-            String emailAsFolder = azureStackUtil.emailAsFolder(user.getUsername());
+            String emailAsFolder = azureStackUtil.emailAsFolder(user);
             File userFolder = new File(getSimpleUserFolder(emailAsFolder));
             if (!userFolder.exists()) {
                 FileUtils.forceMkdir(new File(getSimpleUserFolder(emailAsFolder)));

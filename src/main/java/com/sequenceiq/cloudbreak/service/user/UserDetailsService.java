@@ -7,6 +7,6 @@ import com.sequenceiq.cloudbreak.domain.CbUser;
 public interface UserDetailsService {
 
     @Cacheable("userCache")
-    CbUser getDetails(String username);
+    CbUser getDetails(String fieldValue, UserFilterField filterField);
 
 }

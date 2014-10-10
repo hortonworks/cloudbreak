@@ -75,7 +75,7 @@ public class AmbariClusterService implements ClusterService {
             throw new BadRequestException(String.format("A cluster is already created on this stack! [stack: '%s', cluster: '%s']", stackId, stack.getCluster()
                     .getName()));
         }
-        cluster.setOwner(user.getUsername());
+        cluster.setOwner(user.getUserId());
         cluster.setAccount(user.getAccount());
         try {
             cluster = clusterRepository.save(cluster);

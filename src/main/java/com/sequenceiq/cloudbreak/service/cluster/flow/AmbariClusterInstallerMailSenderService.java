@@ -17,7 +17,9 @@ import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
+import com.sequenceiq.cloudbreak.service.user.UserFilterField;
 
 import freemarker.template.Configuration;
 
@@ -39,28 +41,30 @@ public class AmbariClusterInstallerMailSenderService {
     private UserDetailsService userDetailsService;
 
     @VisibleForTesting
-    protected MimeMessagePreparator prepareSuccessMessage(final String email, final String template, final String status,
+    protected MimeMessagePreparator prepareSuccessMessage(final String userId, final String template, final String status,
             final String server) {
         return new MimeMessagePreparator() {
             public void prepare(MimeMessage mimeMessage) throws Exception {
+                CbUser user = userDetailsService.getDetails(userId, UserFilterField.USERID);
                 MimeMessageHelper message = new MimeMessageHelper(mimeMessage);
                 message.setFrom(msgFrom);
-                message.setTo(email);
+                message.setTo(user.getUsername());
                 message.setSubject("Cloudbreak - stack installation");
-                message.setText(getEmailBody(email, status, server, template), true);
+                message.setText(getEmailBody(user.getGivenName(), status, server, template), true);
             }
         };
     }
 
     @VisibleForTesting
-    protected MimeMessagePreparator prepareFailMessage(final String email, final String template, final String status) {
+    protected MimeMessagePreparator prepareFailMessage(final String userId, final String template, final String status) {
         return new MimeMessagePreparator() {
             public void prepare(MimeMessage mimeMessage) throws Exception {
+                CbUser user = userDetailsService.getDetails(userId, UserFilterField.USERID);
                 MimeMessageHelper message = new MimeMessageHelper(mimeMessage);
                 message.setFrom(msgFrom);
-                message.setTo(email);
+                message.setTo(user.getUsername());
                 message.setSubject("Cloudbreak - stack installation");
-                message.setText(getEmailBody(email, status, "", template), true);
+                message.setText(getEmailBody(user.getGivenName(), status, "", template), true);
             }
         };
     }
@@ -81,13 +85,13 @@ public class AmbariClusterInstallerMailSenderService {
         LOGGER.info("Cluster installation email sent");
     }
 
-    private String getEmailBody(String username, String status, String server, String template) {
+    private String getEmailBody(String name, String status, String server, String template) {
         String text = null;
         try {
             Map<String, Object> model = new HashMap<>();
             model.put("status", status);
             model.put("server", server);
-            model.put("name", userDetailsService.getDetails(username).getGivenName());
+            model.put("name", name);
             text = FreeMarkerTemplateUtils.processTemplateIntoString(freemarkerConfiguration.getTemplate(template, "UTF-8"), model);
         } catch (Exception e) {
             LOGGER.error("Cluster installer email assembling failed. Exception: {}", e);
