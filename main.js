@@ -10,6 +10,9 @@ var needle = require('needle');
 var md5 = require('MD5');
 var check = require('validator').check;
 
+var domain = require('domain'),
+d = domain.create();
+
 var mailer = require('./mailer');
 
 var uaaAddress = process.env.SL_UAA_ADDRESS;
@@ -40,7 +43,18 @@ app.use(bodyParser.json())
 
 // login.html
 app.get('/', function(req, res) {
-    res.render('login',{ errorMessage: "" });
+    var logout = req.query.logout
+    if (logout != null && logout == 'true'){
+        req.session.destroy(function() {
+            console.log('clearSession')
+            res.clearCookie('connect.sid', { path: '/' });
+            res.clearCookie('JSESSIONID', { path: '/' });
+            res.clearCookie('uaa_cookie', { path: '/' });
+            res.render('login',{ errorMessage: "" });
+        })
+    } else {
+        res.render('login',{ errorMessage: "" });
+    }
 });
 
 app.get('/dashboard', function(req, res) {
@@ -514,9 +528,14 @@ app.get('/confirm/:confirm_token', function(req, res){
 });
 
 // errors
+
 app.use(function(err, req, res, next){
   res.status(err.status);
   res.json({ error: {status: err.status, message: err.message} });
+});
+
+d.on('error', function(err) {
+  console.error(err);
 });
 
 // listen
