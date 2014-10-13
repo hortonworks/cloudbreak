@@ -8,12 +8,12 @@ var session = require('express-session');
 var bodyParser = require('body-parser');
 var needle = require('needle');
 var md5 = require('MD5');
-var check = require('validator').check;
 
 var domain = require('domain'),
 d = domain.create();
 
 var mailer = require('./mailer');
+var validator = require('./validator');
 
 var uaaAddress = process.env.SL_UAA_ADDRESS;
 
@@ -211,8 +211,8 @@ app.post('/confirm', function(req, res){
 app.post('/reset/:resetToken', function(req, res) {
     var resetToken = req.param('resetToken')
     var email = req.body.email
-    console.log(email)
-    if (email != null){ // TODO check email format
+    var errorResult = validateReset(email, req.body.password)
+    if (errorResult){
     var options = {
       headers: { 'Authorization': 'Basic ' + new Buffer(clientId + ':'+ clientSecret).toString('base64') }
     }
@@ -266,13 +266,16 @@ app.post('/reset/:resetToken', function(req, res) {
    });
    } else {
     res.statusCode = 400
-    res.end('Bad Request. Cannot read token without email address.')
+    console.log(errorResult)
+    res.end(errorResult);
    }
 });
 
 // forget for login
 app.post('/forget', function(req, res){
     var userName = req.body.email
+    var errorResult = validator.validateForget(userName)
+    if (errorResult == null) {
     var options = {
         headers: { 'Authorization': 'Basic ' + new Buffer(clientId + ':'+ clientSecret).toString('base64') }
     }
@@ -312,9 +315,15 @@ app.post('/forget', function(req, res){
             }
         }
     );
+    } else {
+        console.log(errorResult)
+        res.end(errorResult);
+    }
 });
 
 app.post('/register', function(req, res){
+    var errorResult = validator.validateRegister(req.body.email, req.body.password, req.body.firstName, req.body.lastName, req.body.company)
+    if (errorResult == null){
     var options = {
         headers: { 'Authorization': 'Basic ' + new Buffer(clientId + ':'+ clientSecret).toString('base64') }
     }
@@ -363,6 +372,10 @@ app.post('/register', function(req, res){
             res.end("Cannot retrieve token.")
         }
     });
+    } else {
+        console.log(errorResult)
+        res.end(errorResult)
+    }
 });
 
 postGroup = function(token, userId, displayName){
@@ -523,11 +536,11 @@ app.get('/confirm/:confirm_token', function(req, res){
 });
 
 // errors
-
+/*
 app.use(function(err, req, res, next){
   res.status(err.status);
   res.json({ error: {status: err.status, message: err.message} });
-});
+});*/
 
 d.on('error', function(err) {
   console.error(err);
