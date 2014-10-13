@@ -88,7 +88,7 @@
                 <ul class="dropdown-menu dropdown-menu-right" role="menu">
                     <li class="dropdown-header">Sort by</li>
                     <!-- <li class="disabled"><a href="" data-sort-by="state" data-sort-asc="true">state</a></li> -->
-                    <li><a href="" ng-click="order('name',false)">name</a></li>
+                    <li><a id="orderByNameBtn" href="" ng-click="order('name',false)">name</a></li>
                     <li><a href="" ng-click="order('nodeCount',false)">nodes</a></li>
                     <li><a href="" ng-click="orderByUptime()">uptime</a></li>
                 </ul>
@@ -107,7 +107,7 @@
     </div>
 <!-- .row .notification-controls -->
 
-    <div class="carousel-inner">
+    <div class="carousel-inner" ng-controller="clusterController">
 
         <!-- .... CLUSTERS "SLIDE 1" ................................................ -->
 
