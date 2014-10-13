@@ -24,7 +24,7 @@ exports.validateForget = function(email) {
     return result;
 };
 
-exports.validateReset = function(email, password, newPassword) {
+exports.validateReset = function(email, password) {
     var result = null;
     if (checkEmail(email, validator)) {
         result = 'email field is invalid'
