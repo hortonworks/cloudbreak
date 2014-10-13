@@ -212,7 +212,7 @@ app.post('/reset/:resetToken', function(req, res) {
     var resetToken = req.param('resetToken')
     var email = req.body.email
     var errorResult = validateReset(email, req.body.password)
-    if (errorResult){
+    if (errorResult == null){
     var options = {
       headers: { 'Authorization': 'Basic ' + new Buffer(clientId + ':'+ clientSecret).toString('base64') }
     }
