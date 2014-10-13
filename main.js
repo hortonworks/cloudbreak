@@ -536,11 +536,10 @@ app.get('/confirm/:confirm_token', function(req, res){
 });
 
 // errors
-/*
 app.use(function(err, req, res, next){
   res.status(err.status);
   res.json({ error: {status: err.status, message: err.message} });
-});*/
+});
 
 d.on('error', function(err) {
   console.error(err);
