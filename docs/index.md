@@ -252,25 +252,23 @@ Based on the requirements above our choice were the followings:
 
 In our monitoring solution one of the design goal was to provide a **generic, pluggable and isolated monitoring component** to existing Hadoop deployments. We also wanted to make it non-invasive and avoid adding any monitoring related dependency to our Ambari, Hadoop or other Docker images. For that reason we have packaged the monitoring client component into its own Docker image which can be launched alongside with a Hadoop running in another container or even alongside a Hadoop which is not even containerized.
 
--> {% img https://raw.githubusercontent.com/sequenceiq/sequenceiq-samples/master/hadoop-monitoring/hadoop-monitoring-arch.png %} <-
+![](https://raw.githubusercontent.com/sequenceiq/sequenceiq-samples/master/hadoop-monitoring/hadoop-monitoring-arch.png) 
 
 In a nutshell the monitoring solution consist of client and server containers. The `server` contains the Elasticsearch and the Kibana module. The server container is horizontally scalable and it can be clustered trough the clustering capabilities of Elasticsearch.
 
 The `client` container - which is deployed on the machine what is needed to be monitored - contains the Logstash and the collectd module. The Logstash connects to Elasticsearch cluster as client and stores the processed and transformed metrics data there.
 
-##Hadoop metrics
+###Hadoop metrics
 The metrics data what we are collecting and visualizing are provided by [Hadoop metrics](http://blog.cloudera.com/blog/2012/10/what-is-hadoop-metrics2), which is a collection of runtime information that are exposed by all Hadoop daemons. We have configured the Metrics subsystem in that way that it writes the valuable metrics information into the filesystem.
 
 In order to be able to access the metrics data from the monitoring client component - which is running inside a different Docker container - we used the capability of [Docker Volumes](https://docs.docker.com/userguide/dockervolumes) which basically let's you access a directory within one container form other container or even access directories from host systems.
 
 For example if you would like mount the ```/var/log``` from the container named ```ambari-singlenode``` under the ```/amb/log``` in the monitoring client container then the following sequence of commands needs to be executed:
 
-{% raw %}
 ```bash
 EXPOSED_LOG_DIR=$(docker inspect --format='{{index .Volumes "/var/log"}}' ambari-singlenode)
 docker run -i -t -v $EXPOSED_LOG_DIR:/amb/log  sequenceiq/baywatch-client /etc/bootstrap.sh -bash
 ```
-{% endraw %}
 
 Hundreds of different metrics are gathered form Hadoop metrics subsystem and all data is transformed by Logstash to JSON and stored in ElasticSearch to make it ready for querying or displaying it with Kibana.
 
@@ -280,7 +278,7 @@ In the benchmark, the jobs were submitted to the `default` queue and a bit later
 
 Such kind of dashboard is extremely useful when we are visualizing decisions made by [Periscope](http://blog.sequenceiq.com/blog/2014/08/27/announcing-periscope) and check e.g. how the applications are moved across [queues](http://blog.sequenceiq.com/blog/2014/07/02/move-applications-between-queues), or additional nodes are added or removed dynamically from the cluster.
 
--> {% img https://raw.githubusercontent.com/sequenceiq/sequenceiq-samples/master/hadoop-monitoring/hadoop_metrics.png %} <-
+![](https://raw.githubusercontent.com/sequenceiq/sequenceiq-samples/master/hadoop-monitoring/hadoop_metrics.png)
 
 To see it in large, please [click here](https://raw.githubusercontent.com/sequenceiq/sequenceiq-samples/master/hadoop-monitoring/hadoop_metrics.png).
 
@@ -290,7 +288,7 @@ Since all of the Hadoop metrics are stored in the Elasticsearch, therefore there
 
 Beside Hadoop metrics, "traditional" system resource data (cpu, memory, io, network) are gathered with the aid of [collectd](https://collectd.org). This can also run inside the monitoring client container since due to the [resource management](https://goldmann.pl/blog/2014/09/11/resource-management-in-docker/#_example_managing_the_cpu_shares_of_a_container) in Docker the containers can access and gather information about the whole system and a container can even "steal" the network of other container if you start with: ```--net=container:id-of-other-container``` which is very useful if cases when network traffic is monitored.
 
--> {% img https://raw.githubusercontent.com/sequenceiq/sequenceiq-samples/master/hadoop-monitoring/system_resource_metrics.png %} <-
+![](https://raw.githubusercontent.com/sequenceiq/sequenceiq-samples/master/hadoop-monitoring/system_resource_metrics.png)
 
 
 ##Releases, future plans
