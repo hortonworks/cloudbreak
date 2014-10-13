@@ -15,107 +15,47 @@ function addCrudControls(){
             $jq(this).css("word-break", "normal");
         }
     });
-    // initialize Isotope with sort and filter
-    var qsRegex;
-    $container = $jq('.isotope-wrapper').isotope({
-        itemSelector: '.cluster',
-        layoutMode: 'masonry',
-        masonry: {
-            columnWidth: 156,
-            gutter: 0
-        },
-        filter: function () {
-            return qsRegex ? $jq(this).find('h4 a').text().match(qsRegex) : true;
-        },
-        getSortData: {
-            // cluster name
-            name: function (itemElem) {
-                var str = $jq(itemElem).find('h4 a').text();
-                return str.toLowerCase();
-            },
-            // cluster node number
-            nodes: function (itemElem) {
-                var str = $jq(itemElem).find('.mod-nodes dd').text();
-                return parseInt(str);
-            },
-            // cluster state
-            state: function (itemElem) {
-                var str = $(itemElem).find('.mod-LED span').attr("class");
-                return str;
-            },
-            uptime: function (itemElem) {
-                var str = $(itemElem).find('.mod-uptime dd').text();
-                return parseInt(str);
-            }
-        }
+    // notification/filter field clearing on focus for filtering
+    $jq("#notification-n-filtering").focusin(function () {
+        $jq('.combo-box').removeClass('has-feedback has-error has-warning has-success');
     });
-    $container.isotope({ sortBy : 'state' });
     // sorting
     $jq('#sort-clusters-btn + ul li').on('click', 'a', function (e) {
-        var sortByValue = $jq(this).attr('data-sort-by');
-        var sortAsc = $jq(this).attr('data-sort-asc');
-        $container.isotope({ sortBy: sortByValue, sortAscending: sortAsc });
+        var sortByValue = $jq(this).text();
         // set button label to selected sort mode
         $jq("#sort-clusters-btn span.title").text(sortByValue);
         // disable selected menu item
         $jq(this).parents().find('.disabled').removeClass("disabled");
         $jq(this).parent().addClass("disabled");
     });
-    // filtering
-    var $quicksearch = $jq('#notification-n-filtering').keyup(debounce(function () {
-        qsRegex = new RegExp($quicksearch.val(), 'gi');
-        $container.isotope();
-    }, 300));
-    // debounce so filtering doesn't happen every millisecond
-    function debounce(fn, threshold) {
-        var timeout;
-        return function debounced() {
-            if (timeout) { clearTimeout(timeout); }
-            function delayed() { fn(); timeout = null; }
-            timeout = setTimeout(delayed, threshold || 100);
-        }
-    }
-    // notification/filter field clearing on focus for filtering
-    $jq("#notification-n-filtering").focusin(function () {
-        $jq(this).val("").trigger("keyup")
-            // delete warning sign
-            .next().addClass('hidden');
-        // delete error classes
-        $jq('.combo-box').removeClass('has-feedback has-error has-warning has-success');
-    });
-    // cluster-block hide/show
-    $jq('#toggle-cluster-block-btn').click(function () {
-        $jq('.cluster-block').collapse('toggle');
-        // must force isotope redraw, its container height set 0 by some fucking shite
-        $container.isotope();
-    });
-    // Bootstrap carousel as clusters / cluster details / create cluster slider init
-    $jq('.carousel').carousel('pause');
-    // show cluster details
-    $jq(document).on("click", ".cluster h4 .btn-cluster", function() {
-        $jq('.carousel').carousel(1);
-        $jq('.carousel').on('slid.bs.carousel', function () {
-            // unbind event
-            $jq(this).off('slid.bs.carousel');
-            $jq('#cluster-details-panel-collapse').collapse('show');
-        });
-        $jq('#toggle-cluster-block-btn').addClass('disabled');
-        $jq('#sort-clusters-btn').addClass('disabled');
-        $jq("#notification-n-filtering").prop("disabled", true);
-    });
 }
 
 function addClusterListPanelJQEventListeners() {
+  // cluster-block hide/show
+  $jq('#toggle-cluster-block-btn').click(function () {
+      $jq('.cluster-block').collapse('toggle');
+  });
   // toggle fa-angle-up/down icon and sort button
   $jq('.cluster-block').on('hidden.bs.collapse', function () {
       $jq('#toggle-cluster-block-btn i').removeClass('fa-angle-up').addClass('fa-angle-down');
       $jq('#sort-clusters-btn').addClass('disabled');
-      $jq("#notification-n-filtering").prop("disabled", true);
   });
   $jq('.cluster-block').on('shown.bs.collapse', function () {
       $jq('#toggle-cluster-block-btn i').removeClass('fa-angle-down').addClass('fa-angle-up');
       $jq('#sort-clusters-btn').removeClass('disabled');
-      $jq("#notification-n-filtering").prop("disabled", false);
+  });
+  // Bootstrap carousel as clusters / cluster details / create cluster slider init
+  $jq('.carousel').carousel('pause');
+  // show cluster details
+  $jq(document).on("click", ".cluster h4 .btn-cluster", function() {
+      $jq('.carousel').carousel(1);
+      $jq('.carousel').on('slid.bs.carousel', function () {
+          // unbind event
+          $jq(this).off('slid.bs.carousel');
+          $jq('#cluster-details-panel-collapse').collapse('show');
+      });
+      $jq('#toggle-cluster-block-btn').addClass('disabled');
+      $jq('#sort-clusters-btn').addClass('disabled');
   });
 }
 
@@ -154,7 +94,6 @@ function addClusterFormJQEventListeners() {
         $jq(this).addClass('disabled');
         $jq('#toggle-cluster-block-btn').addClass('disabled');
         $jq('#sort-clusters-btn').addClass('disabled');
-        $jq("#notification-n-filtering").prop("disabled", true);
     });
     // back to clusters
     $jq("#create-cluster-back-btn").click(function () {
@@ -164,12 +103,9 @@ function addClusterFormJQEventListeners() {
             $jq(this).off('slid.bs.carousel');
             $jq('#create-cluster-panel-collapse').collapse('hide');
         });
-        // must force isotope redraw, .isotope-wrapper's height set 0 by by some fucking shite
-        $container.isotope();
         $jq('#toggle-cluster-block-btn').removeClass('disabled');
         $jq('#create-cluster-btn').removeClass('disabled');
         $jq('#sort-clusters-btn').removeClass('disabled');
-        $jq("#notification-n-filtering").prop("disabled", false);
     });
 }
 
@@ -200,26 +136,20 @@ function addActiveClusterJQEventListeners() {
     // back to clusters
     $jq("#cluster-details-back-btn").click(function () {
         $jq('.carousel').carousel(0);
-        // must force isotope redraw, its container height set 0 by by some fucking shite
         $jq('.carousel').on('slid.bs.carousel', function () {
             // unbind event
             $jq(this).off('slid.bs.carousel');
             $jq('#cluster-details-panel-collapse').collapse('hide');
         });
-        $container.isotope();
         $jq('#toggle-cluster-block-btn').removeClass('disabled');
         $jq('#sort-clusters-btn').removeClass('disabled');
-        $jq("#notification-n-filtering").prop("disabled", false);
     });
     $jq('#terminateStackBtn').on('click', function () {
-        // must force isotope redraw, its container height set 0 by by some fucking shite
-        $container.isotope();
         $jq('.carousel').carousel(0);
         // enable toolbar buttons
         $jq('#toggle-cluster-block-btn').removeClass('disabled');
         $jq('#sort-clusters-btn').removeClass('disabled');
         $jq('#create-cluster-btn').removeClass('disabled');
-        $jq("#notification-n-filtering").prop("disabled", false);
     });
 }
 

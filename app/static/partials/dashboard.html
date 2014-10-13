@@ -75,22 +75,22 @@
                     <span class="input-group-btn">
                         <a href="" id="toggle-cluster-block-btn" class="btn btn-fa-2x btn-info" role="button" title="toggle cluster panel"><i class="fa fa-angle-up fa-2x fa-fw-forced"></i></a>
                     </span>
-                <input id="notification-n-filtering" role="alert" type="text" disabled class="form-control" placeholder="" value="{{statusMessage}}">
+                <input id="notification-n-filtering" disabled role="alert" type="text" disabled class="form-control" placeholder="" value="{{statusMessage}}">
                 <i class="fa fa-warning form-control-feedback" style="line-height: 40px !important;"></i>
             </div>
         </div>
         <div class="col-sm-2 col-xs-2">
             <div class="dropdown">
                 <button class="btn btn-info btn-block btn-collapse-title dropdown-toggle" type="button" id="sort-clusters-btn" data-toggle="dropdown">
-                    <i class="fa fa-sort-amount-asc fa-fw"></i><span class="sr-only">sorted by </span><span class="title"> state</span>
+                    <i class="fa fa-sort-amount-asc fa-fw"></i><span class="sr-only">sorted by </span><span class="title"> name</span>
                     <span class="caret"></span>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-right" role="menu">
                     <li class="dropdown-header">Sort by</li>
-                    <li class="disabled"><a href="" data-sort-by="state" data-sort-asc="true">state</a></li>
-                    <li><a href="" data-sort-by="name" data-sort-asc="true">name</a></li>
-                    <li><a href="" data-sort-by="nodes" data-sort-asc="false">nodes</a></li>
-                    <li><a href="" data-sort-by="uptime" data-sort-asc="false">uptime</a></li>
+                    <!-- <li class="disabled"><a href="" data-sort-by="state" data-sort-asc="true">state</a></li> -->
+                    <li><a href="" ng-click="order('name',false)">name</a></li>
+                    <li><a href="" ng-click="order('nodeCount',false)">nodes</a></li>
+                    <li><a href="" ng-click="orderByUptime()">uptime</a></li>
                 </ul>
             </div>
             <!-- .dropdown -->

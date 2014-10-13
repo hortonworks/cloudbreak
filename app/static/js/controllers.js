@@ -10,8 +10,9 @@ popUpAppender.setLayout(layout);
 
 var uluwatuControllers = angular.module('uluwatuControllers', []);
 
-uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '$rootScope',
-    function ($scope, $http, User, $rootScope) {
+uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '$rootScope', '$filter',
+    function ($scope, $http, User, $rootScope, $filter) {
+        var orderBy = $filter('orderBy');
         $scope.user = User.get();
 
         $scope.errormessage = "";
@@ -106,6 +107,18 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
 
         $scope.addCrudControls = function() {
           addCrudControls();
+        }
+
+        $scope.order = function(predicate, reverse) {
+          $rootScope.clusters = orderBy($rootScope.clusters, predicate, reverse);
+        }
+
+        $scope.orderByUptime = function() {
+          $rootScope.clusters = orderBy($rootScope.clusters,
+            function(element) {
+                return parseInt(element.hoursUp * 60 + element.minutesUp);
+            },
+            false);
         }
     }
 ]);

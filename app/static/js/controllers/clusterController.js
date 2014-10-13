@@ -48,6 +48,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
 
         UluwatuCluster.query(function (clusters) {
             $rootScope.clusters = clusters;
+            $scope.$parent.order('name', false);
         });
 
         $scope.cluster = {};
