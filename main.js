@@ -212,7 +212,7 @@ app.post('/reset/:resetToken', function(req, res) {
     var resetToken = req.param('resetToken')
     var email = req.body.email
     var errorResult = validateReset(email, req.body.password)
-    if (errorResult){
+    if (errorResult == null){
     var options = {
       headers: { 'Authorization': 'Basic ' + new Buffer(clientId + ':'+ clientSecret).toString('base64') }
     }
@@ -267,7 +267,7 @@ app.post('/reset/:resetToken', function(req, res) {
    } else {
     res.statusCode = 400
     console.log(errorResult)
-    res.end(errorResult);
+    res.end('Failed to reset password. Check inputs');
    }
 });
 
@@ -317,7 +317,7 @@ app.post('/forget', function(req, res){
     );
     } else {
         console.log(errorResult)
-        res.end(errorResult);
+        res.end('Failed to send reset password email. Check inputs');
     }
 });
 
@@ -374,7 +374,7 @@ app.post('/register', function(req, res){
     });
     } else {
         console.log(errorResult)
-        res.end(errorResult)
+        res.end('Failed to send register email. Check inputs');
     }
 });
 
