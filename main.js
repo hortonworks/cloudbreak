@@ -295,7 +295,7 @@ app.post('/forget', function(req, res){
                             var resetToken = md5(usrIdAndLastModified)
                             var templateFile = path.join(__dirname,'templates','reset-password-email.jade')
                             mailer.sendMail(req.body.email, 'Password reset' , templateFile, {user: usrResp.body.resources[0].givenName,
-                                confirm: 'http://' +  process.env.SL_ADDRESS + '/reset/' + resetToken + '?email=' + req.body.email})
+                                confirm: process.env.SL_ADDRESS + '/reset/' + resetToken + '?email=' + req.body.email})
                             res.end('SUCCESS');
                         } else {
                             console.log('Forget: User Not Found')
@@ -350,7 +350,7 @@ app.post('/register', function(req, res){
                     console.log('User created with ' + createResp.body.id + '(id) and name: ' + req.body.email)
                     var templateFile = path.join(__dirname,'templates','confirmation-email.jade')
                     mailer.sendMail(req.body.email, 'Registration' , templateFile, {user: req.body.firstName,
-                        confirm: 'http://' +  process.env.SL_ADDRESS + '/confirm/' + createResp.body.id})
+                        confirm: process.env.SL_ADDRESS + '/confirm/' + createResp.body.id})
                     updateAndPostSequenceIqGroups(token, createResp.body.id, req.body.company)
                     updateCloudbreakGroups(token, createResp.body.id)
                     res.end('SUCCESS')
