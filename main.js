@@ -16,7 +16,6 @@ d = domain.create();
 var mailer = require('./mailer');
 
 var uaaAddress = process.env.SL_UAA_ADDRESS;
-var uaaPort = process.env.SL_UAA_PORT;
 
 var clientId = process.env.SL_CLIENT_ID;
 var clientSecret = process.env.SL_CLIENT_SECRET;
@@ -86,7 +85,7 @@ app.post('/', function(req, res){
     var username = req.body.email
     var password = req.body.password
     var userCredentials = {username: username, password: password}
-    needle.post('http://' + uaaAddress + '/login.do', userCredentials,
+    needle.post(uaaAddress + '/login.do', userCredentials,
        function(err, tokenResp) {
         var splittedLocation = tokenResp.headers.location.split('?')
         if (splittedLocation.length == 1 || splittedLocation[1] != 'error=true'){
@@ -158,7 +157,7 @@ app.get('/confirm', function(req, res){
                         'Cookie': 'JSESSIONID=' + getCookie(req, 'uaa_cookie')
                          }
                   }
-    needle.get('http://' + uaaAddress + '/oauth/authorize?' + confirmParams, confirmOptions,
+    needle.get(uaaAddress + '/oauth/authorize?' + confirmParams, confirmOptions,
         function(err, confirmResp) {
             if (confirmResp.statusCode == 200){
                 res.cookie('JSESSIONID', getCookie(req, 'uaa_cookie'))
@@ -198,7 +197,7 @@ app.post('/confirm', function(req, res){
        formData = formData + 'scope.' + i.toString() + '=scope.' + scopes[i] + '&'
     }
     formData = formData + 'user_oauth_approval=true'
-    needle.post('http://' + uaaAddress + '/oauth/authorize', formData, confirmOptions,
+    needle.post(uaaAddress + '/oauth/authorize', formData, confirmOptions,
            function(err, confirmResp){
                if (confirmResp.statusCode == 302){
                    res.cookie('JSESSIONID', getCookie(req, 'uaa_cookie'))
@@ -217,7 +216,7 @@ app.post('/reset/:resetToken', function(req, res) {
     var options = {
       headers: { 'Authorization': 'Basic ' + new Buffer(clientId + ':'+ clientSecret).toString('base64') }
     }
-    needle.post('http://' + uaaAddress + '/oauth/token', 'grant_type=client_credentials',
+    needle.post(uaaAddress + '/oauth/token', 'grant_type=client_credentials',
        options, function(err, tokenResp) {
        if (tokenResp.statusCode == 200){
           var token = tokenResp.body.access_token;
@@ -229,7 +228,7 @@ app.post('/reset/:resetToken', function(req, res) {
                'Authorization' : 'Bearer ' + token,
                'Content-Type' : 'application/json' }
           }
-           needle.get('http://' + uaaAddress + '/Users/?attributes=id,userName,familyName,givenName,version,emails,meta.lastModified&filter=userName eq "' + email + '"', usrInfoOptions ,
+           needle.get(uaaAddress + '/Users/?attributes=id,userName,familyName,givenName,version,emails,meta.lastModified&filter=userName eq "' + email + '"', usrInfoOptions ,
             function(err, infoResp){
              if (infoResp.statusCode == 200){
               if (infoResp.body.resources.length > 0 && resetToken == md5(infoResp.body.resources[0].id + infoResp.body.resources[0]['meta.lastModified'])) {
@@ -243,7 +242,7 @@ app.post('/reset/:resetToken', function(req, res) {
                 }
                 var newPasswordData = {'password' : req.body.password}
                 var userId = infoResp.body.resources[0].id
-                needle.put('http://' + uaaAddress + '/Users/' + userId + '/password', JSON.stringify(newPasswordData),
+                needle.put(uaaAddress + '/Users/' + userId + '/password', JSON.stringify(newPasswordData),
                          userOptions, function(err, resetResp) {
                              if (resetResp.statusCode = 200){
                                  res.end('SUCCESS');
@@ -277,7 +276,7 @@ app.post('/forget', function(req, res){
     var options = {
         headers: { 'Authorization': 'Basic ' + new Buffer(clientId + ':'+ clientSecret).toString('base64') }
     }
-    needle.post('http://' + uaaAddress + '/oauth/token', 'grant_type=client_credentials',
+    needle.post(uaaAddress + '/oauth/token', 'grant_type=client_credentials',
         options, function(err, tokenResp) {
             if (tokenResp.statusCode == 200){
                 var token = tokenResp.body.access_token;
@@ -289,7 +288,7 @@ app.post('/forget', function(req, res){
                     'Authorization' : 'Bearer ' + token,
                     'Content-Type' : 'application/json' }
                 }
-                needle.get('http://' + uaaAddress + '/Users/?attributes=id,givenName,meta.lastModified,userName&filter=userName eq "' + userName + '"', usrOptions , function(err, usrResp){
+                needle.get(uaaAddress + '/Users/?attributes=id,givenName,meta.lastModified,userName&filter=userName eq "' + userName + '"', usrOptions , function(err, usrResp){
                     if (usrResp.statusCode == 200){
                         if (usrResp.body.resources.length == 1){
                             var usrIdAndLastModified = usrResp.body.resources[0].id + usrResp.body.resources[0]['meta.lastModified']
@@ -319,7 +318,7 @@ app.post('/register', function(req, res){
     var options = {
         headers: { 'Authorization': 'Basic ' + new Buffer(clientId + ':'+ clientSecret).toString('base64') }
     }
-    needle.post('http://' + uaaAddress + '/oauth/token', 'grant_type=client_credentials',
+    needle.post(uaaAddress + '/oauth/token', 'grant_type=client_credentials',
         options, function(err, tokenResp) {
         if (tokenResp.statusCode == 200){
             var token = tokenResp.body.access_token;
@@ -346,7 +345,7 @@ app.post('/register', function(req, res){
                       }
                 ]
             }
-            needle.post('http://' + uaaAddress + '/Users', JSON.stringify(userData), regOptions, function(err, createResp) {
+            needle.post(uaaAddress + '/Users', JSON.stringify(userData), regOptions, function(err, createResp) {
                 if (createResp.statusCode == 201) {
                     console.log('User created with ' + createResp.body.id + '(id) and name: ' + req.body.email)
                     var templateFile = path.join(__dirname,'templates','confirmation-email.jade')
@@ -383,7 +382,7 @@ postGroup = function(token, userId, displayName){
               { "type":"USER", "value": userId }
           ]
         }
-        needle.post('http://' + uaaAddress + '/Groups', JSON.stringify(groupData), groupOptions,
+        needle.post(uaaAddress + '/Groups', JSON.stringify(groupData), groupOptions,
             function(err, groupResp){
                 if (groupResp.statusCode != 201 && groupResp.statusCode != 200) {
                   console.log('failed group creation ' + groupResp.statusCode + ', for user id: ' + userId)
@@ -414,7 +413,7 @@ updateGroup = function(token, userId, displayName) {
                          'Content-Type' : 'application/json'
                           }
         }
-        needle.get('http://' + uaaAddress + '/Groups?attributes=id,displayName,members,meta&filter=displayName eq "' + displayName +'"', getGroupOptions,
+        needle.get(uaaAddress + '/Groups?attributes=id,displayName,members,meta&filter=displayName eq "' + displayName +'"', getGroupOptions,
             function(err, groupResp) {
                 if (groupResp.statusCode == 200 && groupResp.body.resources.length > 0){
                     var id = groupResp.body.resources[0].id
@@ -446,7 +445,7 @@ updateGroup = function(token, userId, displayName) {
                     "members" : newMembers
                 }
 
-                needle.put('http://' + uaaAddress + '/Groups/' + id, JSON.stringify(updateGroupData), updateGroupOptions,
+                needle.put(uaaAddress + '/Groups/' + id, JSON.stringify(updateGroupData), updateGroupOptions,
                  function(err, updateResp) {
                     if (updateResp.statusCode == 200) {
                         console.log("PUT - update group (id:"+ id + ") is successful (registration)")
@@ -467,7 +466,7 @@ app.get('/confirm/:confirm_token', function(req, res){
    var options = {
      headers: { 'Authorization': 'Basic ' + new Buffer(clientId + ':'+ clientSecret).toString('base64') }
    }
-   needle.post('http://' + uaaAddress + '/oauth/token', 'grant_type=client_credentials',
+   needle.post(uaaAddress + '/oauth/token', 'grant_type=client_credentials',
            options, function(err, tokenResp) {
         if (tokenResp.statusCode == 200){
             var token = tokenResp.body.access_token;
@@ -479,7 +478,7 @@ app.get('/confirm/:confirm_token', function(req, res){
                 'Authorization' : 'Bearer ' + token,
                 'Content-Type' : 'application/json' }
             }
-            needle.get('http://' + uaaAddress + '/Users/' + confirmToken,
+            needle.get(uaaAddress + '/Users/' + confirmToken,
                    usrOptions, function(err, userResp) {
                    if (userResp.statusCode == 200) {
                     if (confirmToken == userResp.body.id) {
@@ -505,7 +504,7 @@ app.get('/confirm/:confirm_token', function(req, res){
                              }
                              ]
                         }
-                        needle.put('http://' + uaaAddress + '/Users/' + confirmToken, JSON.stringify(userData),
+                        needle.put(uaaAddress + '/Users/' + confirmToken, JSON.stringify(userData),
                         updateOptions, function(err, updateResp){
                             res.render('login',{ errorMessage: "confirmation successful" });
                         });
