@@ -211,7 +211,7 @@ app.post('/confirm', function(req, res){
 app.post('/reset/:resetToken', function(req, res) {
     var resetToken = req.param('resetToken')
     var email = req.body.email
-    var errorResult = validateReset(email, req.body.password)
+    var errorResult = validator.validateReset(email, req.body.password)
     if (errorResult == null){
     var options = {
       headers: { 'Authorization': 'Basic ' + new Buffer(clientId + ':'+ clientSecret).toString('base64') }
@@ -536,10 +536,11 @@ app.get('/confirm/:confirm_token', function(req, res){
 });
 
 // errors
+/*
 app.use(function(err, req, res, next){
   res.status(err.status);
   res.json({ error: {status: err.status, message: err.message} });
-});
+});*/
 
 d.on('error', function(err) {
   console.error(err);
