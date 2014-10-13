@@ -329,7 +329,6 @@ java -jar gcc-credential-tester.jar <keyPEMFile> <serviceAccountEmailAddress> <p
 The expected result should be something like this:
 
 ```
-_gcc project name_
 Your credential is ok...
 ```
 
