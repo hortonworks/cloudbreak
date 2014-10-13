@@ -27,10 +27,6 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
         $scope.statusMessage = "";
         $scope.statusclass = "";
 
-        $http.get('messages.properties').then(function (messages) {
-            $rootScope.error_msg = messages.data
-        });
-
         $scope.modifyStatusMessage = function(message, name) {
             var now = new Date();
             var date = now.toTimeString().split(" ")[0];

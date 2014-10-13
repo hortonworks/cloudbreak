@@ -64,3 +64,9 @@ cloudbreakApp.config([ '$routeProvider', '$locationProvider', '$httpProvider', f
     $httpProvider.responseInterceptors.push(authInterceptor);
 
 } ]);
+
+cloudbreakApp.run(function ($rootScope, $http) {
+    $http.get('messages.properties').then(function (messages) {
+        $rootScope.error_msg = messages.data
+    });
+});
