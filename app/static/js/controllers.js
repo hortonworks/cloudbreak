@@ -23,6 +23,7 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
         $scope.awsTemplate = true;
         $scope.azureCredential = false;
         $scope.awsCredential = true;
+        $scope.lastOrderPredicate = 'name';
 
         $scope.statusMessage = "";
         $scope.statusclass = "";
@@ -106,15 +107,25 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
         }
 
         $scope.order = function(predicate, reverse) {
+          $scope.lastOrderPredicate = predicate;
           $rootScope.clusters = orderBy($rootScope.clusters, predicate, reverse);
         }
 
         $scope.orderByUptime = function() {
+          $scope.lastOrderPredicate = 'uptime';
           $rootScope.clusters = orderBy($rootScope.clusters,
             function(element) {
                 return parseInt(element.hoursUp * 60 + element.minutesUp);
             },
             false);
         }
+
+        $scope.orderClusters = function() {
+            if($scope.lastOrderPredicate == 'uptime') {
+                $scope.orderByUptime();
+            } else {
+                $scope.order($scope.lastOrderPredicate, false);
+            }
+        };
     }
 ]);

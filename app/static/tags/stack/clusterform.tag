@@ -6,7 +6,7 @@
         </div>
         <div id="create-cluster-panel-collapse" class="panel panel-default">
             <div class="panel-body">
-                <form class="form-horizontal" role="form" name="clusterCreationForm">
+                <form class="form-horizontal" role="form" name="$parent.clusterCreationForm">
                     <div class="form-group" ng-class="{ 'has-error': clusterCreationForm.cl_clusterName.$dirty && clusterCreationForm.cl_clusterName.$invalid }">
                         <label class="col-sm-3 control-label" for="cl_clusterName">Cluster name</label>
                         <div class="col-sm-9">

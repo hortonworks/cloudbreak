@@ -48,7 +48,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
 
         $rootScope.activeCluster = {};
         $scope.cluster = {};
-        $scope.clusterCreationForm = {};
         getUluwatuClusters();
 
         $scope.createCluster = function () {
@@ -155,6 +154,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         function getUluwatuClusters(){
           UluwatuCluster.query(function (clusters) {
               $rootScope.clusters = clusters;
+              $scope.$parent.orderClusters();
           });
         }
 
