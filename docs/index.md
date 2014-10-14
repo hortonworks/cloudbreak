@@ -36,7 +36,7 @@ Periscope works with two types of Hadoop clusters: `static` and `dynamic`. Peris
 
 ###Cloudbreak
 
-Cloudbreak is SequenceIQ's RESTful Hadoop as a Service API. Once it is deployed in your favourite servlet container exposes a REST API allowing to span up Hadoop clusters of arbitrary sizes on your selected cloud provider. Provisioning Hadoop has never been easier. Cloudbreak is built on the foundation of cloud providers API (Amazon AWS, Microsoft Azure, Google Cloud Compute...), Apache Ambari, Docker containers, Serf and dnsmasq.
+Cloudbreak is SequenceIQ's RESTful Hadoop as a Service API. Once it is deployed in your favorite servlet container exposes a REST API allowing to span up Hadoop clusters of arbitrary sizes on your selected cloud provider. Provisioning Hadoop has never been easier. Cloudbreak is built on the foundation of cloud providers API (Amazon AWS, Microsoft Azure, Google Cloud Compute...), Apache Ambari, Docker containers, Serf and dnsmasq.
 
 For further information please check the [Cloudbreak documentation](http://sequenceiq.com/cloudbreak).
 
@@ -73,7 +73,7 @@ Ambari enables System Administrators to:
   * Ambari leverages Nagios for system alerting and will send emails when your attention is needed (e.g. a node goes down, remaining disk space is low, etc).
 
 Ambari enables to integrate Hadoop provisioning, management and monitoring capabilities into applications with the Ambari REST APIs.
-Ambari Blueprints are a declarative definition of a cluster. With a Blueprint, you can specify a Stack, the Component layout and the Configurations to materialise a Hadoop cluster instance (via a REST API) without having to use the Ambari Cluster Install Wizard.
+Ambari Blueprints are a declarative definition of a cluster. With a Blueprint, you can specify a Stack, the Component layout and the Configurations to materialize a Hadoop cluster instance (via a REST API) without having to use the Ambari Cluster Install Wizard.
 
 ![](https://raw.githubusercontent.com/sequenceiq/periscope/master/docs/images/ambari-create-cluster.png)
 
