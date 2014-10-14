@@ -118,11 +118,3 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
         }
     }
 ]);
-
-uluwatuControllers.controller('clusterlistController',[ '$scope', function($scope) {
-
-    $scope.requestStatusChange = function(cluster) {
-      $scope.$broadcast("STATUS_CHANGE_REQUEST", cluster);
-    }
-
-}]);

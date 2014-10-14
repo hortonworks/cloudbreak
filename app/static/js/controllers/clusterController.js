@@ -49,7 +49,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         $rootScope.activeCluster = {};
         $scope.cluster = {};
         $scope.clusterCreationForm = {};
-        $scope.$on("STATUS_CHANGE_REQUEST", statusChangeListener);
         getUluwatuClusters();
 
         $scope.createCluster = function () {
@@ -145,12 +144,12 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             });
         }
 
-        function statusChangeListener(event, cluster) {
-          if(cluster.status == "STOPPED") {
-              $scope.startCluster(cluster);
-          } else if(cluster.status == "AVAILABLE") {
-              $scope.stopCluster(cluster);
-          }
+        $scope.requestStatusChange = function(cluster) {
+            if(cluster.status == "STOPPED") {
+                $scope.startCluster(cluster);
+            } else if(cluster.status == "AVAILABLE") {
+                $scope.stopCluster(cluster);
+            }
         }
 
         function getUluwatuClusters(){
