@@ -36,16 +36,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             "STOP_IN_PROGRESS": "fa-refresh"
         }
 
-        $rootScope.titleStatus = {
-            "REQUESTED": $rootScope.error_msg.title_requested,
-            "CREATE_IN_PROGRESS": $rootScope.error_msg.title_create_in_progress,
-            "UPDATE_IN_PROGRESS": $rootScope.error_msg.title_update_in_progress,
-            "AVAILABLE": $rootScope.error_msg.title_create_completed,
-            "CREATE_FAILED": $rootScope.error_msg.title_create_failed,
-            "DELETE_IN_PROGRESS": $rootScope.error_msg.title_delete_in_progress,
-            "DELETE_COMPLETED": $rootScope.error_msg.title_delete_completed
-        }
-
         $rootScope.activeCluster = {};
         $scope.cluster = {};
         getUluwatuClusters();
@@ -88,7 +78,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
 
         $scope.deleteCluster = function (cluster) {
             UluwatuCluster.delete(cluster, function (result) {
-                $rootScope.clusters.splice($rootScope.templates.indexOf(cluster), 1);
+                $rootScope.clusters = $filter('filter')($rootScope.clusters, { id: "!"+cluster.id });
                 $scope.modifyStatusMessage($rootScope.error_msg.cluster_delete_success1 + cluster.id + $rootScope.error_msg.cluster_delete_success2);
                 $scope.modifyStatusClass("has-success");
             }, function (failure){
