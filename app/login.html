@@ -95,24 +95,17 @@
 
                                     </div>
                                     <!-- .form-group -->
-                                    <div class="form-group"
-                                         ng-class="{ 'has-error has-feedback': showLoginPasswordError && loginForm.password.$invalid }">
-                                        <label class="sr-only" for="password">jelszó</label>
+                                    <div class="form-group">
+                                        <label class="sr-only" for="password">password</label>
 
-                                        <div class="input-group"
-                                             ng-class="{ 'has-error': showLoginPasswordError && loginForm.password.$invalid }">
+                                        <div class="input-group">
                                             <span class="input-group-addon"><i class="fa fa-lock fa-fw"></i></span>
                                             <input class="form-control" type="password" ng-model="password"
                                                    ng-blur="showLoginPasswordError=true;" name="password"
                                                    id="password" placeholder="password" ng-minlength="6"
                                                    ng-maxlength="200"
                                                    required>
-                                            <i class="fa fa-warning form-control-feedback"
-                                               ng-show="showLoginPasswordError && loginForm.password.$invalid"></i>
                                         </div>
-                                        <span class="help-block" ng-show="showLoginPasswordError && loginForm.password.$invalid">
-                                            password is invalid (6 to 30 char)
-                                        </span>
                                         <!-- .input-group -->
                                         <p class="text-right"><a href="javascript:void(0)" id="login-forgot-passw"><i
                                                 class="fa fa-question-circle fa-fw"></i> reset my password</a>
