@@ -58,11 +58,8 @@ public class DefaultCloudbreakUsageGeneratorService implements CloudbreakUsageGe
     private CloudbreakUsage usageFromEvent(CloudbreakEvent cbEvent) {
         CloudbreakUsage usage = new CloudbreakUsage();
 
-        usage.setUserId(cbEvent.getUserId());
-        usage.setUserName(cbEvent.getUserName());
-
-        usage.setAccountId(cbEvent.getAccountId());
-        usage.setAccountName(cbEvent.getAccountName());
+        usage.setOwner(cbEvent.getOwner());
+        usage.setAccount(cbEvent.getAccount());
 
         usage.setBlueprintId(cbEvent.getBlueprintId());
         usage.setBlueprintName(cbEvent.getBlueprintName());
@@ -77,9 +74,9 @@ public class DefaultCloudbreakUsageGeneratorService implements CloudbreakUsageGe
     private Map<Long, List<CloudbreakEvent>> splitCloudbreakEventsByStack(List<CloudbreakEvent> userStackEvents) {
         Map<Long, List<CloudbreakEvent>> stackIdToCbEventMap = new HashMap<>();
         for (CloudbreakEvent cbEvent : userStackEvents) {
-            LOGGER.debug("Processing stack {} for user {}", cbEvent.getStackId(), cbEvent.getUserId());
+            LOGGER.debug("Processing stack {} for user {}", cbEvent.getStackId(), cbEvent.getOwner());
             if (!stackIdToCbEventMap.containsKey(cbEvent.getStackId())) {
-                LOGGER.debug("New stack {} for user {}", cbEvent.getStackId(), cbEvent.getUserId());
+                LOGGER.debug("New stack {} for user {}", cbEvent.getStackId(), cbEvent.getOwner());
                 stackIdToCbEventMap.put(cbEvent.getStackId(), new ArrayList<CloudbreakEvent>());
             }
             stackIdToCbEventMap.get(cbEvent.getStackId()).add(cbEvent);

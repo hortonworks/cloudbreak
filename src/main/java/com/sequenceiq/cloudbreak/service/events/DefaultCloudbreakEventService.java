@@ -55,14 +55,14 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     }
 
     @Override
-    public List<CloudbreakEvent> cloudbreakEvents(String user, Long since) {
+    public List<CloudbreakEvent> cloudbreakEvents(String owner, Long since) {
         List<CloudbreakEvent> events = null;
         if (null == since) {
-            events = eventRepository.findAll(CloudbreakEventSpecifications.eventsForUser(user));
+            events = eventRepository.findAll(CloudbreakEventSpecifications.eventsForUser(owner));
         } else {
             Date sinceDate = new Date(since);
             events = eventRepository.findAll(Specifications
-                    .where(CloudbreakEventSpecifications.eventsForUser(user))
+                    .where(CloudbreakEventSpecifications.eventsForUser(owner))
                     .and(CloudbreakEventSpecifications.eventsSince(since)));
         }
         return null != events ? events : Collections.EMPTY_LIST;
@@ -76,12 +76,8 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
         stackEvent.setEventTimestamp(Calendar.getInstance().getTime());
         stackEvent.setEventMessage(eventMessage);
         stackEvent.setEventType(eventType);
-
-        stackEvent.setUserId(1L);
-        stackEvent.setUserName(stack.getOwner());
-
-        stackEvent.setAccountId(1L);
-        stackEvent.setAccountName(stack.getAccount());
+        stackEvent.setOwner(stack.getOwner());
+        stackEvent.setAccount(stack.getAccount());
 
         populateClusterData(stackEvent, stack);
         populateTemplateData(stackEvent, stack);

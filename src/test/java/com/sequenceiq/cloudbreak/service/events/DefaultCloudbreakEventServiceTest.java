@@ -56,7 +56,7 @@ public class DefaultCloudbreakEventServiceTest {
         CloudbreakEvent event = captor.getValue();
 
         Assert.assertNotNull(event);
-        Assert.assertEquals("The user name is not the expected", "John", event.getUserName());
+        Assert.assertEquals("The user name is not the expected", "John", event.getOwner());
         Assert.assertEquals("The cloudprovider is not the expected", CloudPlatform.AWS.name(), event.getCloud());
     }
 
@@ -76,7 +76,7 @@ public class DefaultCloudbreakEventServiceTest {
         CloudbreakEvent event = captor.getValue();
 
         Assert.assertNotNull(event);
-        Assert.assertEquals("The user name is not the expected", "John", event.getUserName());
+        Assert.assertEquals("The user name is not the expected", "John", event.getOwner());
         Assert.assertEquals("The cloudprovider is not the expected", CloudPlatform.AZURE.name(), event.getCloud());
     }
 
@@ -98,7 +98,7 @@ public class DefaultCloudbreakEventServiceTest {
         com.sequenceiq.cloudbreak.domain.CloudbreakEvent event = captor.getValue();
 
         Assert.assertNotNull(event);
-        Assert.assertEquals("The user name is not the expected", "John", event.getUserName());
+        Assert.assertEquals("The user name is not the expected", "John", event.getOwner());
         Assert.assertEquals("The blueprint name is not the expected", "test-blueprint", event.getBlueprintName());
         Assert.assertEquals("The blueprint id is not the expected", 1L, event.getBlueprintId());
 

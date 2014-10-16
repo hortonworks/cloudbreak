@@ -239,7 +239,6 @@ public final class ServiceTestUtils {
     public static CloudbreakEvent createEvent(Long stackId, Long userId, String eventStatus, Date eventTimestamp) {
         CloudbreakEvent event = new CloudbreakEvent();
         event.setStackId(stackId);
-        event.setUserId(userId);
         event.setEventType(eventStatus);
         event.setEventTimestamp(eventTimestamp);
         return event;

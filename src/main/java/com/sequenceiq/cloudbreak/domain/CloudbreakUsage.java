@@ -12,11 +12,9 @@ public class CloudbreakUsage implements ProvisionEntity {
     @GeneratedValue
     private Long id;
 
-    private String userName;
-    private Long userId;
+    private String owner;
 
-    private String accountName;
-    private Long accountId;
+    private String account;
 
     private String blueprintName;
     private Long blueprintId;
@@ -39,36 +37,20 @@ public class CloudbreakUsage implements ProvisionEntity {
         this.id = id;
     }
 
-    public String getUserName() {
-        return userName;
+    public String getOwner() {
+        return owner;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setOwner(String owner) {
+        this.owner = owner;
     }
 
-    public Long getUserId() {
-        return userId;
+    public String getAccount() {
+        return account;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public String getAccountName() {
-        return accountName;
-    }
-
-    public void setAccountName(String accountName) {
-        this.accountName = accountName;
-    }
-
-    public Long getAccountId() {
-        return accountId;
-    }
-
-    public void setAccountId(Long accountId) {
-        this.accountId = accountId;
+    public void setAccount(String account) {
+        this.account = account;
     }
 
     public String getBlueprintName() {
@@ -131,10 +113,8 @@ public class CloudbreakUsage implements ProvisionEntity {
     public String toString() {
         final StringBuilder sb = new StringBuilder("CloudbreakUsage{");
         sb.append("id=").append(id);
-        sb.append(", userName='").append(userName).append('\'');
-        sb.append(", userId=").append(userId);
-        sb.append(", accountName='").append(accountName).append('\'');
-        sb.append(", accountId=").append(accountId);
+        sb.append(", owner='").append(owner).append('\'');
+        sb.append(", account='").append(account).append('\'');
         sb.append(", blueprintName='").append(blueprintName).append('\'');
         sb.append(", blueprintId=").append(blueprintId);
         sb.append(", day=").append(day);
