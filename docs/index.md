@@ -110,5 +110,40 @@ _3. Create a VM image from the copied VHD blob._
 
 _This process will take 20 minutes so be patient - but this step will have do be done once and only once._
 
+##Technical details
+
+Uluwatu is a small [node.js](http://nodejs.org/) webapp with an [Angular.js](https://angularjs.org/) frontend. The main logic is on the client side, the node backend has only the following reposibilities:
+
+- provides an HTTP server that serves the static HTML/JS/CSS content
+- proxies every request coming from the Angular side to Cloudbreak therefore eliminating the need for [CORS](http://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
+- obtains an OAuth2 token to Cloudbreak by handling the authorization code flow
+
+###Running Uluwatu locally
+
+If you'd like to run Uluwatu on your local machine, you should have npm and node.js installed. After checking out the git repository, run `npm install` in Uluwatu's directory and set these environment variables:
+
+- ULU_CLOUDBREAK_ADDRESS: the address of the Cloudbreak backend (format: `http[s]://[host]:[port]`)
+- ULU_IDENTITY_ADDRESS: the address of the identity server - you'll either need to [run your own](http://blog.sequenceiq.com/blog/2014/10/16/using-uaa-as-an-identity-server/) UAA server properly configured, or you can use our own identity server deployed to our QA environment. If you'd like to connect to our QA server please contact us for connection details. (format: `http[s]://[host]:[port]`)
+- ULU_OAUTH_CLIENT_ID: the `client_id` of the Uluwatu app configured in the UAA server
+- ULU_OAUTH_CLIENT_SECRET: the `client_secret` of the Uluwatu app configured in the UAA server
+- ULU_OAUTH_REDIRECT_URI: the `redirect_url` of the Uluwatu app configured in the UAA server - when running Uluwatu locally in a dev environment it should be something like `http://localhost:3000/authorize`
+- ULU_SULTANS_ADDRESS: [Sultans](https://github.com/sequenceiq/sultans) is SequenceIQ's registration, user management and custom login service. If you'd like to have registration and custom login features you should deploy your own Sultans application and provide its base address here or you can use our deployed version on our QA environment. If you'd like to connect to our QA server please contact us for connection details. (format: `http[s]://[host]:[port]`)
+- ULU_SERVER_PORT: (optional, default: 3000) - if you'd like to run Uluwatu on a port different than the default
+
+If the environment variables are set, simply run `node server.js`
+
+###Running Uluwatu in Docker
+
+If you'd like to deploy a stable version of Uluwatu somewhere, we recommend to use its Docker image (that's how we do it in production) so it's not needed to have node installed on the server. This image grabs the latest release from the Github repo and starts the node server. The environment variables should be provided like above.
+```
+docker run -d --name uluwatu \
+ -e "ULU_CLOUDBREAK_ADDRESS=$ULU_CLOUDBREAK_ADDRESS" \
+ -e "ULU_IDENTITY_ADDRESS=$ULU_IDENTITY_ADDRESS" \
+ -e "ULU_SULTANS_ADDRESS=$ULU_SULTANS_ADDRESS" \
+ -e "ULU_OAUTH_CLIENT_ID=$ULU_OAUTH_CLIENT_ID" \
+ -e "ULU_OAUTH_CLIENT_SECRET=$ULU_OAUTH_CLIENT_SECRET" \
+ -e "ULU_OAUTH_REDIRECT_URI=$ULU_OAUTH_REDIRECT_URI" \
+ -p 3000:3000 sequenceiq/uluwatu
+ ```
 
 <!--ui.md-->
