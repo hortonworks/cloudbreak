@@ -29,180 +29,24 @@ Supports different Hadoop cluster blueprints. Hostgroups defined in blueprints c
 Allows the option to choose the favourite cloud provider and different pricing models. The API translated the calls towards different cloud vendors - uses one common API, no need to rewrite the code when changing between cloud providers.
 
 # Group User authentication
-Authentication related resources of the **Cloudbreak API**.
+*Note:* The **Cloudbreak API** no longer contains user authentication and user management endpoints as these became part of our OAuth2 based central identity management service.
 
-All operations against a REST resource must be authenticated.
+All operations against the API must contain a valid access token obtained from our identity server.
+The access token must travel in a standard **Authorization** header like `Authorization: Bearer some.valid.access.token`
 
-## Login [/login]
-### Login a user [POST]
-After successful authentication the call will return with an authentication token, and the user role. The token invalidates with the HTTP session or with the expiration of OAuth2 token.
+Examples of getting an access token:
+- with the **authorization_code** flow from a web application: [Uluwatu](https://github.com/sequenceiq/uluwatu/blob/master/server.js)
+- with the **implicit** flow from a command line shell application: [Cloudbreak shell](https://github.com/sequenceiq/cloudbreak-shell/blob/master/src/main/java/com/sequenceiq/cloudbreak/shell/configuration/ShellConfiguration.java)
 
-+ Request (application/json)
-
-        {
-            "username": "mick.fanning@surf.com",
-            "password": "magicseaweed"
-        }
-
-+ Response 200 (application/json)
-
-        {
-            1
-        }
-
-# Group User management
-User management related resources of the **Cloudbreak API**.
-
-## User management [/users]
-### Creates a new user [POST]
-Creates a new user with the specified username, password, company, role. The user will get an email with an accept token.
-
-+ Request (application/json)
-
-    + Headers
-
-            x-auth-token: user:c45sdfdsfo234zserfhsdgf324
-
-    + Body
-
-            {
-                "firstName": "Dean",
-                "lastName": "Frank",
-                "company": "SequenceIQ",
-                "username": "frank.dean@surf.com",
-                "password": "magicseaweed",
-                "userRole": {COMPANY_ADMIN, COMPANY_USER}
-            }
-
-+ Response 200 (application/json)
-
-        {
-            "id": "user-2"
-        }
-
-## Reset password [/password/reset]
-### Request a password reset [POST]
-Send an email to the user with the password reset information
-+ Request
-        [
-            {
-               "email": "frank.dean@surf.com"
-            }
-        ]
-+ Response 200 (application/json)
-
-
-## Change password [/password/reset/{resetToken}]
-### Change the actual password [POST]
-Change the current password
-
-+ Parameters
-    + resetToken (required String `resetToken`) ... The token of the password reset request.
-+ Request
-        [
-            {
-               "password": "newPassword123"
-            }
-        ]
-
-+ Response 200 (application/json)
-
-
-## User information [/me]
-Retrieve information about the authenticated user
-
-### Retrieve user configuration [GET]
-The information contains generic user info, cloud and Hadoop cluster configurations belonging to the particular user.
-
-+ Request
-
-    + Headers
-
-            x-auth-token: user:c45sdfdsfo2scfsgkhsdgf324
-
-+ Response 200 (application/json)
-
-            {
-              "blueprints": [],
-              "firstName": "Frank",
-              "lastName": "Louise",
-              "email": "frank.louise@sequenceiq.com",
-              "company": "SequenceIQ",
-              "credentials": [
-                {
-                  "id": 50,
-                  "description": "my aws credential",
-                  "parameters": {
-                    "roleArn": "rolearn",
-                    "snsTopics": []
-                  },
-                  "cloudPlatform": "AWS",
-                  "name": "aws_credential"
-                },
-                {
-                  "id": 51,
-                  "description": "my azure credential",
-                  "parameters": {
-                    "subscriptionId": "0000-0000-00000-0000",
-                    "jksPassword": "testabc"
-                  },
-                  "cloudPlatform": "AZURE",
-                  "name": "azurefrank"
-                }
-              ],
-              "azureTemplates": [
-                {
-                  "id": 51,
-                  "description": "azure template",
-                  "parameters": {
-                    "password": "",
-                    "location": "NORTH_EUROPE",
-                    "imageName": "ambari-docker-v1",
-                    "vmType": "SMALL",
-                    "ports": []
-                  },
-                  "name": "warmup",
-                  "cloudPlatform": "AZURE"
-                },
-              ],
-              "awsTemplates": [
-                {
-                  "id": 50,
-                  "description": "description sample",
-                  "parameters": {
-                    "amiId": "ami-25dc0852",
-                    "sshLocation": "0.0.0.0/0",
-                    "keyName": "sequence-eu",
-                    "region": "EU_WEST_1",
-                    "instanceType": "t2.small"
-                  },
-                  "name": "Aws development environment",
-                  "cloudPlatform": "AWS"
-                }
-              ],
-              "stacks": []
-            }
-
-##  Confirmation of the registration [/confirm/{confToken}]
-### Confirm the registration [GET]
-
-+ Parameters
-    + confToken (required String `confToken`) ... The token of the confirmation.
-
-+ Request
-
-+ Response 200 (application/json)
-
-        {
-          "frank.dean@surf.com"
-        }
+A token can only be obtained by a client that's registered at our identity server. Registering custom clients is currently not supported but planned in a later release.
+If you'd like to create a custom client for our deployed Cloudbreak API and use our identity server, please contact us.
 
 # Group Cloud authentication
 Cloud Authentication related resources of the **Cloudbreak API**.
 Adds an AWS IAM role ARN or Azure JKS to user's account.
 
 
-## Add cloud credentials for a user [/credentials]
+## Add cloud credentials for a user [/user/credentials]
 ### Add credentials [POST]
 Adds an AWS IAM role ARN with the user's account.
 
@@ -231,7 +75,7 @@ Adds an AWS IAM role ARN with the user's account.
         }
 
 
-## Add cloud credentials for the user [/credentials]
+## Add cloud credentials for the user [/user/credentials]
 ### Add credential [POST]
 Adds an Azure JKS the user's account.
 
@@ -267,7 +111,7 @@ The content of the myCert.pem file is the publicKey in the request
         }
 
 
-## Retrieve cloud credentials for the user [/credentials]
+## Retrieve cloud credentials for the user [/user/credentials]
 ### Retrieve credentials [GET]
 Retrieves registered cloud credentials for a user
 
@@ -378,7 +222,7 @@ Templates describe cloud infrastructures and are used for creating cloud stacks 
 + LARGE
 + EXTRA_LARGE
 
-## Create cloud template [/templates]
+## Create cloud template [/user/templates]
 ### Create AWS template [POST]
 Creates an AWS template (vpc, subnet, internetGateway, routeTable, securityGroups, ACLs, instances). The template internally is using an Amazon AWS Cloudformation template.
 
@@ -438,7 +282,7 @@ Creates an Azure cloud template. (vpc, subnet, instances)
             "id": "2"
         }
 
-## Retrieve templates for a user [/templates]
+## Retrieve templates for a user [/user/templates]
 ### List templates [GET]
 Retrieves a list with the cloud templates belonging to the user
 
@@ -539,7 +383,7 @@ Hadoop blueprint  related resources of the **Cloudbreak API**.
 Allows configurations of different blueprints to be used later to create Hadoop cluster instances.
 
 
-## Adding Hadoop blueprints [/blueprints]
+## Adding Hadoop blueprints [/user/blueprints]
 ### Create blueprint [POST]
 
 Creates a Hadoop blueprint. The blueprint specifies Hadoop services and other Hadoop specific configuration.
@@ -622,7 +466,7 @@ The cardinality specifies the desired number of nodes for the hostgroup. When th
         }
 
 
-## Create Hadoop blueprints [/blueprints]
+## Create Hadoop blueprints [/user/blueprints]
 ### Create a blueprint [POST]
 Creates a Hadoop blueprint using the provided `url`
 
@@ -646,7 +490,7 @@ Creates a Hadoop blueprint using the provided `url`
         }
 
 
-## Retrieve Hadoop blueprints [/blueprints]
+## Retrieve Hadoop blueprints [/user/blueprints]
 ### List blueprints for the user [GET]
 Retrieve blueprints for the user
 
@@ -831,7 +675,7 @@ Stacks related resources of the **Cloudbreak API**.
 Manages AWS or Azure clouds based on templates. Creates, launches, stops, deletes the specified number of instances in the selected template (infrastructure).
 
 
-## Create cloud [/stacks]
+## Create cloud [/user/stacks]
 ### Create stack [POST]
 Creates an AWS or Azure cloud from a template.
 
@@ -856,7 +700,7 @@ Creates an AWS or Azure cloud from a template.
             "id": "1"
         }
 
-## Retrieve stacks for the user [/stacks]
+## Retrieve stacks for the user [/user/stacks]
 ### List stacks [GET]
 Retrieves the cloud stacks belonging to the user
 
@@ -1340,7 +1184,7 @@ Events are used to track stack creation initiated by cloudbreak users.
 Events are generated by the backend when resources requested by the user become available or unavailable
 
 
-## Retrieve events [/events{?since}]
+## Retrieve events [/user/events{?since}]
 Retrieve events for the authenticated user.
 
 + Parameters
