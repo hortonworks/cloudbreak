@@ -116,19 +116,19 @@ Uluwatu is a small [node.js](http://nodejs.org/) webapp with an [Angular.js](htt
 
 - provides an HTTP server that serves the static HTML/JS/CSS content
 - proxies every request coming from the Angular side to Cloudbreak therefore eliminating the need for [CORS](http://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
-- obtains an OAuth2 token to Cloudbreak by handling the authorization code flow
+- obtains an OAuth2 token from an identity server to Cloudbreak by handling the authorization code flow
 
 ###Running Uluwatu locally
 
 If you'd like to run Uluwatu on your local machine, you should have npm and node.js installed. After checking out the git repository, run `npm install` in Uluwatu's directory and set these environment variables:
 
-- ULU_CLOUDBREAK_ADDRESS: the address of the Cloudbreak backend (format: `http[s]://[host]:[port]`)
-- ULU_IDENTITY_ADDRESS: the address of the identity server - you'll either need to [run your own](http://blog.sequenceiq.com/blog/2014/10/16/using-uaa-as-an-identity-server/) UAA server properly configured, or you can use our own identity server deployed to our QA environment. If you'd like to connect to our QA server please contact us for connection details. (format: `http[s]://[host]:[port]`)
-- ULU_OAUTH_CLIENT_ID: the `client_id` of the Uluwatu app configured in the UAA server
-- ULU_OAUTH_CLIENT_SECRET: the `client_secret` of the Uluwatu app configured in the UAA server
-- ULU_OAUTH_REDIRECT_URI: the `redirect_url` of the Uluwatu app configured in the UAA server - when running Uluwatu locally in a dev environment it should be something like `http://localhost:3000/authorize`
-- ULU_SULTANS_ADDRESS: [Sultans](https://github.com/sequenceiq/sultans) is SequenceIQ's registration, user management and custom login service. If you'd like to have registration and custom login features you should deploy your own Sultans application and provide its base address here or you can use our deployed version on our QA environment. If you'd like to connect to our QA server please contact us for connection details. (format: `http[s]://[host]:[port]`)
-- ULU_SERVER_PORT: (optional, default: 3000) - if you'd like to run Uluwatu on a port different than the default
+- `ULU_CLOUDBREAK_ADDRESS`: the address of the Cloudbreak backend (format: `http[s]://[host]:[port]`)
+- `ULU_IDENTITY_ADDRESS`: the address of the identity server - you'll either need to [run your own](http://blog.sequenceiq.com/blog/2014/10/16/using-uaa-as-an-identity-server/) UAA server properly configured, or you can use our own identity server deployed to our QA environment. If you'd like to connect to our QA server please contact us for connection details. (format: `http[s]://[host]:[port]`)
+- `ULU_OAUTH_CLIENT_ID`: the `client_id` of the Uluwatu app configured in the UAA server
+- `ULU_OAUTH_CLIENT_SECRET`: the `client_secret` of the Uluwatu app configured in the UAA server
+- `ULU_OAUTH_REDIRECT_URI`: the `redirect_url` of the Uluwatu app configured in the UAA server - when running Uluwatu locally in a dev environment it should be something like `http://localhost:3000/authorize`
+- `ULU_SULTANS_ADDRESS`: [Sultans](https://github.com/sequenceiq/sultans) is SequenceIQ's registration, user management and custom login service. If you'd like to have registration and custom login features you should deploy your own Sultans application and provide its base address here or you can use our deployed version on our QA environment. If you'd like to connect to our QA server please contact us for connection details. (format: `http[s]://[host]:[port]`)
+- `ULU_SERVER_PORT`: (optional, default: 3000) - if you'd like to run Uluwatu on a port different than the default
 
 If the environment variables are set, simply run `node server.js`
 
