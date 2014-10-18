@@ -295,6 +295,43 @@ _3. Create a VM image from the copied VHD blob._
 
 _This process will take 20 minutes so be patient - but this step will have do be done once and only once._
 
+
+###Configuring the Google Cloud account
+
+Follow the [instructions](https://cloud.google.com/storage/docs/authentication#service_accounts) fro, Google.
+Create a `Service account` and `Generate a new P12 key`. Once you have downloaded the key use `openssl` to convert it to PEM.
+
+`openssl pkcs12 -in path/to/key.p12 -nodes -nocerts > path/to/key.pem`
+
+Make sure that at API level (**APIs and auth** menu) you have enabled:
+
+* Google Compute Engine
+* Google Compute Engine Instance Group Manager API
+* Google Compute Engine Instance Groups API
+* BigQuery API 
+* Google Cloud Deployment Manager API 
+* Google Cloud DNS API 
+* Google Cloud SQL
+* Google Cloud Storage
+* Google Cloud Storage JSON API
+
+After that you are ready to test whether the account is configured OK. get this tester JAR file.
+
+```
+curl -LO https://github.com/sequenceiq/gcc-credential-tester/releases/download/1.0/gcc-credential-tester.jar
+```
+
+Once you have downloaded you are ready to test:
+
+```
+java -jar gcc-credential-tester.jar <keyPEMFile> <serviceAccountEmailAddress> <projectId>
+```
+The expected result should be something like this:
+
+```
+Your credential is ok...
+```
+
 <!--accounts.md-->
 
 ##Roles
@@ -362,6 +399,21 @@ Using manage credentials you can link your cloud account with the Cloudbreak acc
 `SSH public key:` if you specify an SSH public key you can use your private key later to log into your launched instances (The key generation process is described in the Configuring the Microsoft Azure account section)
 
 
+**Google Cloud**
+
+`Name:` name of your credential
+
+`Description:` short description of your linked credential
+
+`Project Id:` your GCC Project id - see Accounts
+
+`Service Account Id:` your GCC service account mail address - see Accounts
+
+`Service Account private key:` your GCC service account generated private key - see Accounts
+
+`SSH public key:` if you specify an SSH public key you can use your private key later to log into your launched instances 
+
+
 ###Manage templates
 
 Using manage templates you can create infrastructure templates.
@@ -399,6 +451,23 @@ Using manage templates you can create infrastructure templates.
 `Location:` Azure datacenter location where you'd like to launch your cluster
 
 `Image name:` The Azure base image used
+
+`Instance type:` the Azure instance type to be used - we suggest to use at least small or medium instances
+
+`Attached volumes per instance:` the number of disks to be attached
+
+`Volume size (GB):` the size of the attached disks (in GB)
+
+
+**Google Cloud**
+
+`Name:` name of your template
+
+`Description:` short description of your template
+
+`Location:` Google Cloud datacenter location where you'd like to launch your cluster
+
+`Image name:` The Google cloud base image used
 
 `Instance type:` the Azure instance type to be used - we suggest to use at least small or medium instances
 
