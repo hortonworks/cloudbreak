@@ -243,7 +243,9 @@ public class GccStackUtil {
         GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
         GccCredential gccCredential = (GccCredential) stack.getCredential();
         Operation execute = compute.instances().delete(gccCredential.getProjectId(), gccTemplate.getGccZone().getValue(), name).execute();
-        GccRemoveReadyPollerObject gccRemoveReady = new GccRemoveReadyPollerObject(compute, execute, stack, name);
+        Compute.ZoneOperations.Get zoneOperations = createZoneOperations(compute, gccCredential, gccTemplate, execute);
+        Compute.GlobalOperations.Get globalOperations = createGlobalOperations(compute, gccCredential, gccTemplate, execute);
+        GccRemoveReadyPollerObject gccRemoveReady = new GccRemoveReadyPollerObject(zoneOperations, globalOperations, stack.getId(), name);
         gccRemoveReadyPollerObjectPollingService.pollWithTimeout(gccRemoveCheckerStatus, gccRemoveReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
     }
 
@@ -252,7 +254,9 @@ public class GccStackUtil {
         GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
         GccCredential gccCredential = (GccCredential) stack.getCredential();
         Operation execute = compute.disks().delete(gccCredential.getProjectId(), gccTemplate.getGccZone().getValue(), name).execute();
-        GccRemoveReadyPollerObject gccRemoveReady = new GccRemoveReadyPollerObject(compute, execute, stack, name);
+        Compute.ZoneOperations.Get zoneOperations = createZoneOperations(compute, gccCredential, gccTemplate, execute);
+        Compute.GlobalOperations.Get globalOperations = createGlobalOperations(compute, gccCredential, gccTemplate, execute);
+        GccRemoveReadyPollerObject gccRemoveReady = new GccRemoveReadyPollerObject(zoneOperations, globalOperations, stack.getId(), name);
         gccRemoveReadyPollerObjectPollingService.pollWithTimeout(gccRemoveCheckerStatus, gccRemoveReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
     }
 
@@ -260,7 +264,9 @@ public class GccStackUtil {
         GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
         GccCredential gccCredential = (GccCredential) stack.getCredential();
         Operation execute = compute.networks().delete(gccCredential.getProjectId(), name).execute();
-        GccRemoveReadyPollerObject gccRemoveReady = new GccRemoveReadyPollerObject(compute, execute, stack, name);
+        Compute.ZoneOperations.Get zoneOperations = createZoneOperations(compute, gccCredential, gccTemplate, execute);
+        Compute.GlobalOperations.Get globalOperations = createGlobalOperations(compute, gccCredential, gccTemplate, execute);
+        GccRemoveReadyPollerObject gccRemoveReady = new GccRemoveReadyPollerObject(zoneOperations, globalOperations, stack.getId(), name);
         gccRemoveReadyPollerObjectPollingService.pollWithTimeout(gccRemoveCheckerStatus, gccRemoveReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
     }
 
@@ -269,7 +275,9 @@ public class GccStackUtil {
         GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
         GccCredential gccCredential = (GccCredential) stack.getCredential();
         Operation execute = compute.firewalls().delete(gccCredential.getProjectId(), name).execute();
-        GccRemoveReadyPollerObject gccRemoveReady = new GccRemoveReadyPollerObject(compute, execute, stack, name);
+        Compute.ZoneOperations.Get zoneOperations = createZoneOperations(compute, gccCredential, gccTemplate, execute);
+        Compute.GlobalOperations.Get globalOperations = createGlobalOperations(compute, gccCredential, gccTemplate, execute);
+        GccRemoveReadyPollerObject gccRemoveReady = new GccRemoveReadyPollerObject(zoneOperations, globalOperations, stack.getId(), name);
         gccRemoveReadyPollerObjectPollingService.pollWithTimeout(gccRemoveCheckerStatus, gccRemoveReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
     }
 
@@ -277,8 +285,20 @@ public class GccStackUtil {
         GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
         GccCredential gccCredential = (GccCredential) stack.getCredential();
         Operation execute = compute.routes().delete(gccCredential.getProjectId(), name).execute();
-        GccRemoveReadyPollerObject gccRemoveReady = new GccRemoveReadyPollerObject(compute, execute, stack, name);
+        Compute.ZoneOperations.Get zoneOperations = createZoneOperations(compute, gccCredential, gccTemplate, execute);
+        Compute.GlobalOperations.Get globalOperations = createGlobalOperations(compute, gccCredential, gccTemplate, execute);
+        GccRemoveReadyPollerObject gccRemoveReady = new GccRemoveReadyPollerObject(zoneOperations, globalOperations, stack.getId(), name);
         gccRemoveReadyPollerObjectPollingService.pollWithTimeout(gccRemoveCheckerStatus, gccRemoveReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+    }
+
+    private Compute.ZoneOperations.Get createZoneOperations(Compute compute, GccCredential gccCredential, GccTemplate gccTemplate, Operation operation)
+            throws IOException {
+        return compute.zoneOperations().get(gccCredential.getProjectId(), gccTemplate.getGccZone().getValue(), operation.getName());
+    }
+
+    private Compute.GlobalOperations.Get createGlobalOperations(Compute compute, GccCredential gccCredential, GccTemplate gccTemplate, Operation operation)
+            throws IOException {
+        return compute.globalOperations().get(gccCredential.getProjectId(), operation.getName());
     }
 
     public Storage buildStorage(GccCredential gccCredential, Stack stack) {
