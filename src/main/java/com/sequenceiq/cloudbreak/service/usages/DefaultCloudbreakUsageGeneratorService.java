@@ -26,9 +26,10 @@ import com.sequenceiq.cloudbreak.repository.CloudbreakUsageRepository;
 @Service
 public class DefaultCloudbreakUsageGeneratorService implements CloudbreakUsageGeneratorService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCloudbreakUsagesRetrievalService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCloudbreakUsageGeneratorService.class);
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
     private static final int HOURS_IN_DAY = 24;
+    private static final double MS_TO_HOUR = 3600000.0;
 
     private final List<Status> stopStatuses = Arrays.asList(Status.DELETE_IN_PROGRESS, Status.DELETE_FAILED, Status.DELETE_COMPLETED, Status.STOPPED);
 
@@ -40,7 +41,7 @@ public class DefaultCloudbreakUsageGeneratorService implements CloudbreakUsageGe
 
     @Override
     public List<CloudbreakUsage> generateCloudbreakUsages(String user) {
-        LOGGER.info("Generating user usage for: {}", user);
+        LOGGER.info("Generating usage for user: {}", user);
         List<CloudbreakUsage> usageList = new ArrayList<>();
         List<CloudbreakEvent> cloudbreakEvents = eventRepository.cloudbreakEvents(user);
         Map<Long, List<CloudbreakEvent>> stackEvents = splitCloudbreakEventsByStack(cloudbreakEvents);
@@ -66,7 +67,6 @@ public class DefaultCloudbreakUsageGeneratorService implements CloudbreakUsageGe
             }
             stackIdToCbEventMap.get(cbEvent.getStackId()).add(cbEvent);
         }
-        LOGGER.debug("The user has {} stacks.", stackIdToCbEventMap.keySet().size());
         return stackIdToCbEventMap;
     }
 
@@ -99,19 +99,19 @@ public class DefaultCloudbreakUsageGeneratorService implements CloudbreakUsageGe
         long days = TimeUnit.MILLISECONDS.toDays(stackRunningTimeMs);
 
         if (days < 1) {
-            runningHours = TimeUnit.MILLISECONDS.toHours(stopTime.getTime() - startTime.getTime());
+            runningHours = millisToCeiledHours(stopTime.getTime() - startTime.getTime());
             LOGGER.debug("Stack ran less than a day. runningHours: {}", runningHours);
             CloudbreakUsage cbUsageStart = getCloudbreakUsage(prototype, runningHours, startTime);
             dailyStackUsageMap.put(DATE_FORMAT.format(startTime), cbUsageStart);
         } else {
             LOGGER.debug("Stack run spans multiple days. startTime: {}, stopTime: {}", startTime, stopTime);
             // get start day running hours
-            runningHours = runningHoursForStartOrStopDay(startTime, true);
+            runningHours = runningHoursForDay(startTime, true);
             CloudbreakUsage startDayUsage = getCloudbreakUsage(prototype, runningHours, startTime);
             dailyStackUsageMap.put(DATE_FORMAT.format(startTime), startDayUsage);
             LOGGER.debug("Generated start day usage: {}", startDayUsage);
             // get stop day running hours
-            runningHours = runningHoursForStartOrStopDay(stopTime, false);
+            runningHours = runningHoursForDay(stopTime, false);
             CloudbreakUsage stopDayUsage = getCloudbreakUsage(prototype, runningHours, stopTime);
             dailyStackUsageMap.put(DATE_FORMAT.format(stopTime), stopDayUsage);
             LOGGER.debug("Generated stop day usage: {}", stopDayUsage);
@@ -126,9 +126,11 @@ public class DefaultCloudbreakUsageGeneratorService implements CloudbreakUsageGe
         Calendar start = Calendar.getInstance();
         start.setTime(startTime);
         start.add(Calendar.DATE, 1);
+        start.set(Calendar.HOUR_OF_DAY, 0);
         Calendar end = Calendar.getInstance();
         end.setTime(stopTime);
         end.add(Calendar.DATE, -1);
+        end.set(Calendar.HOUR_OF_DAY, 0);
 
         for (Date date = start.getTime(); !start.after(end); start.add(Calendar.DATE, 1), date = start.getTime()) {
             CloudbreakUsage usage = getCloudbreakUsage(prototype, HOURS_IN_DAY, date);
@@ -137,14 +139,21 @@ public class DefaultCloudbreakUsageGeneratorService implements CloudbreakUsageGe
         }
     }
 
-    private long runningHoursForStartOrStopDay(Date date, boolean start) throws ParseException {
+    private long runningHoursForDay(Date date, boolean start) throws ParseException {
         String dayAsStr = DATE_FORMAT.format(date);
         long dayStartOrEndInMillis = DATE_FORMAT.parse(dayAsStr).getTime();
         if (start) {
             // end of the day
-            dayStartOrEndInMillis += TimeUnit.HOURS.toMillis(HOURS_IN_DAY) - 1;
+            dayStartOrEndInMillis += TimeUnit.HOURS.toMillis(HOURS_IN_DAY);
         }
-        return TimeUnit.MILLISECONDS.toHours(Math.abs(date.getTime() - dayStartOrEndInMillis));
+        long hourInMillis = date.getTime() - dayStartOrEndInMillis;
+        return millisToCeiledHours(hourInMillis);
+    }
+
+    private long millisToCeiledHours(long hourInMillis) {
+        long absHourInMillis = Math.abs(hourInMillis);
+        Double ceiledHours = Math.ceil(absHourInMillis/MS_TO_HOUR);
+        return ceiledHours.longValue();
     }
 
     private CloudbreakUsage getCloudbreakUsage(CloudbreakEvent prototype, long runningHours, Date day) {

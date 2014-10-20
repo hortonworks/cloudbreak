@@ -55,13 +55,18 @@ public class DefaultCloudbreakUsageGeneratorServiceTest {
     }
 
     @Test
-    public void testShouldGenerateUsageFromStackAvailableStateUntilStackStopEvents() throws Exception {
-        int daysToRoll = 4;
+    public void testShouldGenerateUsageFromStackAvailableStateUntilStackStopEventsWithHourRoundUp() throws Exception {
         //GIVEN
-        referenceCalendar.roll(Calendar.DAY_OF_MONTH, false);
+        //set the start date time to 23:10
+        referenceCalendar.roll(Calendar.HOUR_OF_DAY, false);
+        referenceCalendar.set(Calendar.MINUTE, 10);
         Date startDate = referenceCalendar.getTime();
 
-        referenceCalendar.roll(Calendar.DAY_OF_MONTH, daysToRoll);
+        //date to oct 02 01:50
+        referenceCalendar.set(Calendar.DAY_OF_MONTH, 4);
+        referenceCalendar.set(Calendar.MONTH, Calendar.OCTOBER);
+        referenceCalendar.set(Calendar.HOUR_OF_DAY, 1);
+        referenceCalendar.set(Calendar.MINUTE, 50);
         Date stopDate = referenceCalendar.getTime();
 
         CloudbreakEvent availableEvent = ServiceTestUtils.createEvent(1L, 1L, "AVAILABLE", startDate);
@@ -79,9 +84,46 @@ public class DefaultCloudbreakUsageGeneratorServiceTest {
             }
         });
 
-        Assert.assertTrue("The number of the generated usages is not the expected", usageList.size() == daysToRoll + 1);
+        Assert.assertTrue("The number of the generated usages is not the expected", usageList.size() == 11);
         Assert.assertEquals("The start day is wrong", DATE_FORMAT.format(startDate), DATE_FORMAT.format(usageList.get(0).getDay()));
         Assert.assertEquals("The stop day is wrong", DATE_FORMAT.format(stopDate), DATE_FORMAT.format(usageList.get(usageList.size() - 1).getDay()));
+        Assert.assertEquals("The calculated hours of the last day is invalid", "2", usageList.get(usageList.size() - 1).getRunningHours());
+        Assert.assertEquals("The calculated hours of the first day is invalid", "1", usageList.get(0).getRunningHours());
+    }
+
+    @Test
+    public void testShouldGenerateUsageFromStackAvailableStateUntilStackStopEventsWithoutHourRoundUp() throws Exception {
+        //GIVEN
+        //set the start date time to 23:00
+        referenceCalendar.roll(Calendar.HOUR_OF_DAY, false);
+        Date startDate = referenceCalendar.getTime();
+
+        //date to oct 02 01:00
+        referenceCalendar.set(Calendar.DAY_OF_MONTH, 4);
+        referenceCalendar.set(Calendar.MONTH, Calendar.OCTOBER);
+        referenceCalendar.set(Calendar.HOUR_OF_DAY, 2);
+        Date stopDate = referenceCalendar.getTime();
+
+        CloudbreakEvent availableEvent = ServiceTestUtils.createEvent(1L, 1L, "AVAILABLE", startDate);
+        CloudbreakEvent notAvailableEvent = ServiceTestUtils.createEvent(1L, 1L, "DELETE_IN_PROGRESS", stopDate);
+        BDDMockito.given(eventRepository.cloudbreakEvents("testuser")).willReturn(Arrays.asList(availableEvent, notAvailableEvent));
+
+        //WHEN
+        List<CloudbreakUsage> usageList = usagesGeneratorService.generateCloudbreakUsages("testuser");
+
+        //THEN
+        Collections.sort(usageList, new Comparator<CloudbreakUsage>() {
+            @Override
+            public int compare(CloudbreakUsage o1, CloudbreakUsage o2) {
+                return o1.getDay().compareTo(o2.getDay());
+            }
+        });
+
+        Assert.assertTrue("The number of the generated usages is not the expected", usageList.size() == 11);
+        Assert.assertEquals("The start day is wrong", DATE_FORMAT.format(startDate), DATE_FORMAT.format(usageList.get(0).getDay()));
+        Assert.assertEquals("The stop day is wrong", DATE_FORMAT.format(stopDate), DATE_FORMAT.format(usageList.get(usageList.size() - 1).getDay()));
+        Assert.assertEquals("The calculated hours of the last day is invalid", "2", usageList.get(usageList.size() - 1).getRunningHours());
+        Assert.assertEquals("The calculated hours of the first day is invalid", "1", usageList.get(0).getRunningHours());
     }
 
     @Test
@@ -173,6 +215,7 @@ public class DefaultCloudbreakUsageGeneratorServiceTest {
     public void testGenerateCloudbreakUsagesShouldGenerateUsageForMultipleAvailableStackStatesOnTheSameDay() throws Exception {
         // GIVEN
         referenceCalendar.roll(Calendar.HOUR_OF_DAY, 1);
+        referenceCalendar.roll(Calendar.MINUTE, 20);
         Date startDate = referenceCalendar.getTime();
 
         referenceCalendar.roll(Calendar.HOUR_OF_DAY, 1);
@@ -182,6 +225,7 @@ public class DefaultCloudbreakUsageGeneratorServiceTest {
         Date restartDate = referenceCalendar.getTime();
 
         referenceCalendar.roll(Calendar.HOUR_OF_DAY, 1);
+        referenceCalendar.set(Calendar.MINUTE, 10);
         Date terminateDate = referenceCalendar.getTime();
 
         CloudbreakEvent startedEvent = ServiceTestUtils.createEvent(1L, 1L, "AVAILABLE", startDate);
@@ -197,5 +241,7 @@ public class DefaultCloudbreakUsageGeneratorServiceTest {
 
         // THEN
         Assert.assertTrue("The number of the generated usages is not the expected", usageList.size() == 2);
+        Assert.assertTrue("The number of the running hours is not the expected", usageList.get(0).getRunningHours().equals("1"));
+        Assert.assertTrue("The number of the running hours is not the expected", usageList.get(1).getRunningHours().equals("1"));
     }
 }
