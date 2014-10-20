@@ -26,20 +26,27 @@ public class GccRemoveCheckerStatus implements StatusCheckerTask<GccRemoveReadyP
         GccTemplate gccTemplate = (GccTemplate) gccRemoveReadyPollerObject.getStack().getTemplate();
         GccCredential gccCredential = (GccCredential) gccRemoveReadyPollerObject.getStack().getCredential();
         try {
-            Integer progress = gccRemoveReadyPollerObject.getCompute().globalOperations()
-                    .get(gccCredential.getProjectId(), gccRemoveReadyPollerObject.getOperation().getName()).execute().getProgress();
+            Integer progress = gccRemoveReadyPollerObject.getCompute().zoneOperations()
+                    .get(gccCredential.getProjectId(), gccTemplate.getGccZone().getValue(), gccRemoveReadyPollerObject.getOperation().getName()).execute().getProgress();
             return (progress.intValue() != FINISHED) ? false : true;
         } catch (GoogleJsonResponseException ex) {
-            return exceptionHandler(ex, gccRemoveReadyPollerObject.getName());
+            return exceptionHandler(ex, gccRemoveReadyPollerObject);
         } catch (NullPointerException | IOException e) {
             return false;
         }
     }
 
-    private boolean exceptionHandler(GoogleJsonResponseException ex, String name) {
+    private boolean exceptionHandler(GoogleJsonResponseException ex, GccRemoveReadyPollerObject gccRemoveReadyPollerObject) {
         if (ex.getDetails().get("code").equals(NOT_FOUND)) {
-            LOGGER.info(String.format("Resource was delete with name: %s", name));
-            return true;
+            GccCredential gccCredential = (GccCredential) gccRemoveReadyPollerObject.getStack().getCredential();
+            try {
+                Integer progress = gccRemoveReadyPollerObject.getCompute().globalOperations()
+                        .get(gccCredential.getProjectId(), gccRemoveReadyPollerObject.getOperation().getName())
+                        .execute().getProgress();
+                return (progress.intValue() != FINISHED) ? false : true;
+            } catch (IOException e) {
+                return false;
+            }
         } else {
             return false;
         }

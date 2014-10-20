@@ -113,6 +113,16 @@ public class GccConnector implements CloudPlatformConnector {
     }
 
     private void deleteNetwork(Stack stack, Compute compute) {
+        for (Resource resource : stack.getResourcesByType(ResourceType.FIREWALL)) {
+            try {
+                gccStackUtil.removeFireWall(compute, stack, resource.getResourceName());
+            } catch (GoogleJsonResponseException ex) {
+                gccStackUtil.exceptionHandler(ex, resource.getResourceName());
+            } catch (IOException e) {
+                throw new InternalServerException(e.getMessage());
+            }
+        }
+
         for (Resource resource : stack.getResourcesByType(ResourceType.NETWORK)) {
             try {
                 gccStackUtil.removeNetwork(compute, stack, resource.getResourceName());

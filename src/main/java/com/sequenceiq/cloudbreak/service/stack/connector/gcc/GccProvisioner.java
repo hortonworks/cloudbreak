@@ -66,7 +66,8 @@ public class GccProvisioner implements Provisioner {
             List<NetworkInterface> networkInterfaces = gccStackUtil.buildNetworkInterfaces(compute, credential.getProjectId(), stack.getName());
             resourceSet.add(new Resource(ResourceType.NETWORK, stack.getName(), stack));
             resourceSet.add(new Resource(ResourceType.NETWORK_INTERFACE, stack.getName(), stack));
-            resourceSet.add(new Resource(ResourceType.FIREWALL, stack.getName(), stack));
+            resourceSet.add(new Resource(ResourceType.FIREWALL, stack.getName() + "in", stack));
+            resourceSet.add(new Resource(ResourceType.FIREWALL, stack.getName() + "out", stack));
             for (int i = 0; i < stack.getNodeCount(); i++) {
                 String forName = gccStackUtil.getVmName(stack.getName(), i);
                 Disk disk = gccStackUtil.buildDisk(compute, stack, credential.getProjectId(), gccTemplate.getGccZone(), forName, SIZE);

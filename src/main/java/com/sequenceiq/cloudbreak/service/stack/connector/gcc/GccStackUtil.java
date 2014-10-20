@@ -264,6 +264,15 @@ public class GccStackUtil {
         gccRemoveReadyPollerObjectPollingService.pollWithTimeout(gccRemoveCheckerStatus, gccRemoveReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
     }
 
+
+    public void removeFireWall(Compute compute, Stack stack, String name) throws IOException {
+        GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
+        GccCredential gccCredential = (GccCredential) stack.getCredential();
+        Operation execute = compute.firewalls().delete(gccCredential.getProjectId(), name).execute();
+        GccRemoveReadyPollerObject gccRemoveReady = new GccRemoveReadyPollerObject(compute, execute, stack, name);
+        gccRemoveReadyPollerObjectPollingService.pollWithTimeout(gccRemoveCheckerStatus, gccRemoveReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+    }
+
     public void removeRoute(Compute compute, Stack stack, String name) throws IOException {
         GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
         GccCredential gccCredential = (GccCredential) stack.getCredential();
@@ -425,7 +434,7 @@ public class GccStackUtil {
         listOfDisks.add(diskToInsert);
 
         for (int i = 0; i < gccTemplate.getVolumeCount(); i++) {
-            String value = name + i;
+            String value = name + "-" + i;
             Disk disk1 = buildRawDisk(compute, stack, gccCredential.getProjectId(),
                     gccTemplate.getGccZone(), value, Long.parseLong(gccTemplate.getVolumeSize().toString()));
             AttachedDisk diskToInsert1 = new AttachedDisk();
