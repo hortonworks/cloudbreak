@@ -27,7 +27,8 @@ public class GccRemoveCheckerStatus implements StatusCheckerTask<GccRemoveReadyP
         GccCredential gccCredential = (GccCredential) gccRemoveReadyPollerObject.getStack().getCredential();
         try {
             Integer progress = gccRemoveReadyPollerObject.getCompute().zoneOperations()
-                    .get(gccCredential.getProjectId(), gccTemplate.getGccZone().getValue(), gccRemoveReadyPollerObject.getOperation().getName()).execute().getProgress();
+                    .get(gccCredential.getProjectId(), gccTemplate.getGccZone().getValue(), gccRemoveReadyPollerObject.getOperation().getName())
+                    .execute().getProgress();
             return (progress.intValue() != FINISHED) ? false : true;
         } catch (GoogleJsonResponseException ex) {
             return exceptionHandler(ex, gccRemoveReadyPollerObject);
