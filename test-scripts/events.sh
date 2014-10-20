@@ -32,6 +32,8 @@ curl -iX POST -H "accept: application/x-www-form-urlencoded" -d 'credentials={"u
 
 #get user events
 curl -H "authorization:Bearer token...." -X GET "http://localhost:8090/events" | jq '.'
+#generate user statistic
+curl -H "authorization:Bearer token...." -X GET "http://localhost:8090/usages/generate"
 
 #stop(start) cluster
 curl -X PUT -H "Content-Type:application/json" -H "Authorization: Bearer token..." -d '{"status":"STOPPED"}' http://localhost:8090/stacks/100/cluster | jq .
@@ -39,4 +41,4 @@ curl -X PUT -H "Content-Type:application/json" -H "Authorization: Bearer token..
 curl -X PUT -H "Content-Type:application/json" -H "Authorization: Bearer token..." -d '{"status":"STOPPED"}' http://localhost:8090/stacks/100 | jq .
 
 
-eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJhMTRmYThiNy00YjQ4LTRmMzAtOGM5ZS05NmE2NTNiMTM5NmQiLCJzdWIiOiIxM2NhN2RhNC04MDMyLTQ2NDEtODllOC0yN2JlZjhjNDRiZmUiLCJzY29wZSI6WyJjbG91ZGJyZWFrLnRlbXBsYXRlcyIsImNsb3VkYnJlYWsuY3JlZGVudGlhbHMiLCJjbG91ZGJyZWFrLnN0YWNrcyIsInBhc3N3b3JkLndyaXRlIiwib3BlbmlkIiwiY2xvdWRicmVhay5ibHVlcHJpbnRzIl0sImNsaWVudF9pZCI6ImNsb3VkYnJlYWtfc2hlbGwiLCJjaWQiOiJjbG91ZGJyZWFrX3NoZWxsIiwidXNlcl9pZCI6IjEzY2E3ZGE0LTgwMzItNDY0MS04OWU4LTI3YmVmOGM0NGJmZSIsInVzZXJfbmFtZSI6IndpbGJ1ckBzZXF1ZW5jZWlxLmNvbSIsImVtYWlsIjoid2lsYnVyQHNlcXVlbmNlaXEuY29tIiwiaWF0IjoxNDEzNDY3Njc2LCJleHAiOjE0MTM1MTA4NzYsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6ODA4MC91YWEvb2F1dGgvdG9rZW4iLCJhdWQiOlsiY2xvdWRicmVhayIsIm9wZW5pZCIsInBhc3N3b3JkIl19.1Yf6o9IkAXlIt8xqN0ILLT551sQSGJc1IyO6zEL5fsw
+eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJjNmMyOWEzNS1iZTQxLTQ1MGQtYmE2YS02NzJjMDdjODc2NWYiLCJzdWIiOiIxM2NhN2RhNC04MDMyLTQ2NDEtODllOC0yN2JlZjhjNDRiZmUiLCJzY29wZSI6WyJjbG91ZGJyZWFrLnRlbXBsYXRlcyIsImNsb3VkYnJlYWsuY3JlZGVudGlhbHMiLCJjbG91ZGJyZWFrLnN0YWNrcyIsInBhc3N3b3JkLndyaXRlIiwib3BlbmlkIiwiY2xvdWRicmVhay5ibHVlcHJpbnRzIl0sImNsaWVudF9pZCI6ImNsb3VkYnJlYWtfc2hlbGwiLCJjaWQiOiJjbG91ZGJyZWFrX3NoZWxsIiwidXNlcl9pZCI6IjEzY2E3ZGE0LTgwMzItNDY0MS04OWU4LTI3YmVmOGM0NGJmZSIsInVzZXJfbmFtZSI6IndpbGJ1ckBzZXF1ZW5jZWlxLmNvbSIsImVtYWlsIjoid2lsYnVyQHNlcXVlbmNlaXEuY29tIiwiaWF0IjoxNDEzNTMzOTM2LCJleHAiOjE0MTM1NzcxMzYsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6ODA4MC91YWEvb2F1dGgvdG9rZW4iLCJhdWQiOlsiY2xvdWRicmVhayIsIm9wZW5pZCIsInBhc3N3b3JkIl19.iEDO8NIYWN2EjAD_OUzxphr468IhOgmT0pxdqmlfglg

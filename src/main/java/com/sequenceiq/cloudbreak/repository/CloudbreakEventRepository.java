@@ -11,8 +11,8 @@ import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 
 public interface CloudbreakEventRepository extends CrudRepository<CloudbreakEvent, Long>, JpaSpecificationExecutor {
 
-    List<CloudbreakEvent> cloudbreakEvents(@Param("user") String user);
+    List<CloudbreakEvent> cloudbreakEvents(@Param("owner") String owner);
 
-    List<CloudbreakEvent> cloudbreakEventsSince(@Param("user") String user, @Param("since") Date since);
+    List<CloudbreakEvent> cloudbreakEventsSince(@Param("owner") String owner, @Param("since") Date since);
 
 }

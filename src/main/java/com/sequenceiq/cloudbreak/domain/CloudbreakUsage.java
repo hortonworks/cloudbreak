@@ -29,6 +29,8 @@ public class CloudbreakUsage implements ProvisionEntity {
 
     private String runningHours;
 
+    private Long stackId;
+
     public Long getId() {
         return id;
     }
@@ -109,6 +111,14 @@ public class CloudbreakUsage implements ProvisionEntity {
         this.day = day;
     }
 
+    public Long getStackId() {
+        return stackId;
+    }
+
+    public void setStackId(Long stackId) {
+        this.stackId = stackId;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("CloudbreakUsage{");
@@ -122,6 +132,7 @@ public class CloudbreakUsage implements ProvisionEntity {
         sb.append(", zone='").append(zone).append('\'');
         sb.append(", machineType='").append(machineType).append('\'');
         sb.append(", runningHours='").append(runningHours).append('\'');
+        sb.append(", stackId='").append(stackId).append('\'');
         sb.append('}');
         return sb.toString();
     }

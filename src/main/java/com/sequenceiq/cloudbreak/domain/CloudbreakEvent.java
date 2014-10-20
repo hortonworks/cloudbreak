@@ -14,11 +14,12 @@ import javax.persistence.Table;
         @NamedQuery(
                 name = "CloudbreakEvent.cloudbreakEvents",
                 query = "SELECT cbe FROM CloudbreakEvent cbe "
-                        + "WHERE cbe.owner= :user"),
+                        + "WHERE cbe.owner= :owner ORDER BY cbe.eventTimestamp ASC"),
         @NamedQuery(
                 name = "CloudbreakEvent.cloudbreakEventsSince",
                 query = "SELECT cbe FROM CloudbreakEvent cbe "
-                        + "WHERE cbe.owner= :user AND cbe.eventTimestamp > :since")
+                        + "WHERE cbe.owner= :owner AND cbe.eventTimestamp > :since "
+                        + "ORDER BY cbe.eventTimestamp ASC")
 })
 @Table(name = "cloudbreakevent")
 public class CloudbreakEvent implements ProvisionEntity {
