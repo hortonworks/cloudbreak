@@ -1,37 +1,35 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.gcc;
 
 import com.google.api.services.compute.Compute;
-import com.google.api.services.compute.model.Operation;
-import com.sequenceiq.cloudbreak.domain.Stack;
 
 public class GccRemoveReadyPollerObject {
 
-    private Compute compute;
-    private Stack stack;
+    private Compute.ZoneOperations.Get zoneOperations;
+    private Compute.GlobalOperations.Get globalOperations;
+    private Long stackId;
     private String name;
-    private Operation operation;
 
-    public GccRemoveReadyPollerObject(Compute compute, Operation operation, Stack stack, String name) {
-        this.compute = compute;
-        this.stack = stack;
+    public GccRemoveReadyPollerObject(Compute.ZoneOperations.Get zoneOperations, Compute.GlobalOperations.Get globalOperations, Long stackId, String name) {
+        this.stackId = stackId;
         this.name = name;
-        this.operation = operation;
+        this.zoneOperations = zoneOperations;
+        this.globalOperations = globalOperations;
     }
 
-    public Compute getCompute() {
-        return compute;
+    public Compute.ZoneOperations.Get getZoneOperations() {
+        return zoneOperations;
     }
 
-    public void setCompute(Compute compute) {
-        this.compute = compute;
+    public void setZoneOperations(Compute.ZoneOperations.Get zoneOperations) {
+        this.zoneOperations = zoneOperations;
     }
 
-    public Stack getStack() {
-        return stack;
+    public Compute.GlobalOperations.Get getGlobalOperations() {
+        return globalOperations;
     }
 
-    public void setStack(Stack stack) {
-        this.stack = stack;
+    public void setGlobalOperations(Compute.GlobalOperations.Get globalOperations) {
+        this.globalOperations = globalOperations;
     }
 
     public String getName() {
@@ -42,11 +40,11 @@ public class GccRemoveReadyPollerObject {
         this.name = name;
     }
 
-    public Operation getOperation() {
-        return operation;
+    public Long getStackId() {
+        return stackId;
     }
 
-    public void setOperation(Operation operation) {
-        this.operation = operation;
+    public void setStackId(Long stackId) {
+        this.stackId = stackId;
     }
 }

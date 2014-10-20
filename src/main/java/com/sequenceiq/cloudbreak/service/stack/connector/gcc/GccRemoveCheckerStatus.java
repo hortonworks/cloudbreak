@@ -7,8 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
-import com.sequenceiq.cloudbreak.domain.GccCredential;
-import com.sequenceiq.cloudbreak.domain.GccTemplate;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.AddInstancesFailedException;
 
@@ -21,25 +19,25 @@ public class GccRemoveCheckerStatus implements StatusCheckerTask<GccRemoveReadyP
 
     @Override
     public boolean checkStatus(GccRemoveReadyPollerObject gccRemoveReadyPollerObject) {
-        LOGGER.info("Checking status of remove '{}' on '{}' stack.",
-                gccRemoveReadyPollerObject.getName(), gccRemoveReadyPollerObject.getStack().getId());
-        GccTemplate gccTemplate = (GccTemplate) gccRemoveReadyPollerObject.getStack().getTemplate();
-        GccCredential gccCredential = (GccCredential) gccRemoveReadyPollerObject.getStack().getCredential();
+        LOGGER.info("Checking status of remove '{}' on '{}' stack.", gccRemoveReadyPollerObject.getName(), gccRemoveReadyPollerObject.getStackId());
         try {
-            Integer progress = gccRemoveReadyPollerObject.getCompute().globalOperations()
-                    .get(gccCredential.getProjectId(), gccRemoveReadyPollerObject.getOperation().getName()).execute().getProgress();
+            Integer progress = gccRemoveReadyPollerObject.getZoneOperations().execute().getProgress();
             return (progress.intValue() != FINISHED) ? false : true;
         } catch (GoogleJsonResponseException ex) {
-            return exceptionHandler(ex, gccRemoveReadyPollerObject.getName());
+            return exceptionHandler(ex, gccRemoveReadyPollerObject);
         } catch (NullPointerException | IOException e) {
             return false;
         }
     }
 
-    private boolean exceptionHandler(GoogleJsonResponseException ex, String name) {
+    private boolean exceptionHandler(GoogleJsonResponseException ex, GccRemoveReadyPollerObject gccRemoveReadyPollerObject) {
         if (ex.getDetails().get("code").equals(NOT_FOUND)) {
-            LOGGER.info(String.format("Resource was delete with name: %s", name));
-            return true;
+            try {
+                Integer progress =  gccRemoveReadyPollerObject.getGlobalOperations().execute().getProgress();
+                return (progress.intValue() != FINISHED) ? false : true;
+            } catch (IOException e) {
+                return false;
+            }
         } else {
             return false;
         }
@@ -49,12 +47,12 @@ public class GccRemoveCheckerStatus implements StatusCheckerTask<GccRemoveReadyP
     public void handleTimeout(GccRemoveReadyPollerObject gccRemoveReadyPollerObject) {
         throw new AddInstancesFailedException(String.format(
                 "Something went wrong. Remove of '%s' resource unsuccess in a reasonable timeframe on '%s' stack.",
-                gccRemoveReadyPollerObject.getName(), gccRemoveReadyPollerObject.getStack().getId()));
+                gccRemoveReadyPollerObject.getName(), gccRemoveReadyPollerObject.getStackId()));
     }
 
     @Override
     public String successMessage(GccRemoveReadyPollerObject gccRemoveReadyPollerObject) {
         return String.format("Gcc resource '%s' is removed success on '%s' stack",
-                gccRemoveReadyPollerObject.getName(), gccRemoveReadyPollerObject.getStack().getId());
+                gccRemoveReadyPollerObject.getName(), gccRemoveReadyPollerObject.getStackId());
     }
 }
