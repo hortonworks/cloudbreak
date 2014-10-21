@@ -2,6 +2,7 @@ package com.sequenceiq.periscope.service;
 
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -11,7 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestOperations;
 
 import com.sequenceiq.periscope.log.Logger;
 import com.sequenceiq.periscope.log.PeriscopeLoggerFactory;
@@ -22,6 +23,9 @@ public class TokenService {
     private static final Logger LOGGER = PeriscopeLoggerFactory.getLogger(TokenService.class);
     private static final String CLIENT_ID = "periscope-client";
 
+    @Autowired
+    private RestOperations restTemplate;
+
     @Value("${periscope.identity.host}")
     private String identityServerHost;
     @Value("${periscope.identity.port}")
@@ -31,10 +35,8 @@ public class TokenService {
     @Value("${periscope.cloudbreak.pass}")
     private String pass;
 
-    public String getToken() throws TokenUnavailableException {
-        String identityServerUrl = String.format("http://%s:%s", identityServerHost, identityServerPort);
-        RestTemplate restTemplate = new RestTemplate();
-
+    public String getToken() throws Exception {
+        String identityServerUrl = String.format("%s:%s", identityServerHost, identityServerPort);
         HttpHeaders headers = new HttpHeaders();
         headers.add("Accept", "application/json");
 

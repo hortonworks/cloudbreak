@@ -325,6 +325,7 @@ dependencies {
     compile("com.sequenceiq:cloudbreak-rest-client:0.2.7")
     compile("org.freemarker:freemarker:2.3.20")
     compile("javax.mail:mail:1.4.7")
+    compile("org.apache.httpcomponents:httpclient:4.3.5")
     testCompile("junit:junit:4.11")
     testCompile("org.mockito:mockito-all:1.9.5")
     testCompile("org.springframework:spring-test:4.0.2.RELEASE")
