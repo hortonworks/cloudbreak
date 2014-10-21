@@ -10,8 +10,8 @@ public class CloudbreakUsageConverter extends AbstractConverter<CloudbreakUsageJ
     @Override
     public CloudbreakUsageJson convert(CloudbreakUsage entity) {
         CloudbreakUsageJson json = new CloudbreakUsageJson();
-        json.setUserName(entity.getOwner());
-        json.setAccountName(entity.getAccount());
+        json.setOwner(entity.getOwner());
+        json.setAccount(entity.getAccount());
         json.setBlueprintName(entity.getBlueprintName());
         json.setBlueprintId(entity.getBlueprintId());
         json.setCloud(entity.getCloud());
@@ -25,8 +25,8 @@ public class CloudbreakUsageConverter extends AbstractConverter<CloudbreakUsageJ
     @Override
     public CloudbreakUsage convert(CloudbreakUsageJson json) {
         CloudbreakUsage entity = new CloudbreakUsage();
-        entity.setOwner(json.getUserName());
-        entity.setAccount(json.getAccountName());
+        entity.setOwner(json.getOwner());
+        entity.setAccount(json.getAccount());
         entity.setBlueprintName(json.getBlueprintName());
         entity.setBlueprintId(json.getBlueprintId());
         entity.setCloud(json.getCloud());
