@@ -259,25 +259,23 @@ buildscript {
     }
 }
 
-group = 'com.sequenceiq'
+def env = project.hasProperty('env') ? project.getProperty('env') : 'local'
 
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
-apply plugin: 'checkstyle'
 apply plugin: 'spring-boot'
 apply plugin: 'maven'
-apply plugin: 'groovy'
+apply plugin: 'checkstyle'
 apply plugin: 'jacoco'
+apply plugin: 'sonar-runner'
 
 sourceCompatibility = 1.7
-targetCompatibility = 1.7
+group = 'com.sequenceiq'
 
-def env = project.hasProperty('env') ? project.getProperty('env') : 'local'
-logger.quiet "Loading configuration for environment '$env'"
-
-repositories {
-    mavenCentral()
+allprojects {
+    apply from: "$rootDir/gradle/versioning.gradle"
+    ext.config = new ConfigSlurper(env).parse(file("$rootDir/gradle/config/buildConfig.groovy").toURL())
 }
 
 jar { baseName = 'periscope' }
@@ -291,11 +289,11 @@ uploadArchives {
     repositories {
         mavenDeployer {
             configuration = configurations.deployerJars
-            repository(url: "s3://seq-repo/releases") {
-                authentication(userName: "$System.env.aws_access_key_id", passphrase: "$System.env.aws_secret_access_key")
+            repository(url: "s3://maven.sequenceiq.com/releases") {
+                authentication(userName: "$System.env.AWS_ACCESS_KEY", passphrase: "$System.env.AWS_SECRET_ACCESS_KEY")
             }
-            snapshotRepository(url: "s3://seq-repo/snapshots") {
-                authentication(userName: "$System.env.aws_access_key_id", passphrase: "$System.env.aws_secret_access_key")
+            snapshotRepository(url: "s3://maven.sequenceiq.com/snapshots") {
+                authentication(userName: "$System.env.AWS_ACCESS_KEY", passphrase: "$System.env.AWS_SECRET_ACCESS_KEY")
             }
         }
     }
@@ -343,8 +341,6 @@ checkstyleTest {
     configProperties = ['config_loc': "$projectDir/config/checkstyle"]
 }
 
-task wrapper(type: Wrapper) { gradleVersion = "2.0" }
-
 test {
     include 'com/sequenceiq/**'
     testLogging.showStandardStreams = true
@@ -368,5 +364,63 @@ jacocoTestReport {
         csv.enabled false
         html.destination "${buildDir}/jacocoHtml"
 >>>>>>> 413c239... PERI-3 initial spring boot app
+    }
+}
+
+
+sonarRunner {
+    jacoco {
+        append = false
+        destinationFile = file("$buildDir/jacoco/jacocoTest.exec")
+        classDumpFile = file("$buildDir/jacoco/classpathdumps")
+    }
+    sonarProperties {
+        property "sonar.host.url", "$config.sonar_host_url"
+        property "sonar.jdbc.url", "$config.sonar_jdbc_url"
+        property "sonar.jdbc.driverClassName", "com.mysql.jdbc.Driver"
+        property "sonar.jdbc.username", "$System.env.SONAR_USERNAME"
+        property "sonar.jdbc.password", "$System.env.SONAR_PASSWORD"
+        property "project.reporting.outputEncoding", "UTF-8"
+        property "sonar.projectKey", "periscope"
+        property "sonar.projectName", "periscope"
+    }
+}
+
+
+task wrapper(type: Wrapper) { gradleVersion = "1.12" }
+
+task buildInfo(type: BuildInfoTask) {
+    systemProperties = System.properties
+    destination = file("$buildDir")
+    applicationPropertiesPath = "$buildDir"
+    basename = jar.baseName
+    buildVersion = version
+}
+
+compileJava.dependsOn buildInfo
+
+class BuildInfoTask extends DefaultTask {
+    File destination = new File("build.info")
+    String applicationPropertiesPath
+    String basename
+    String buildVersion
+
+    @TaskAction
+    def writeBuildInfo() {
+        destination.mkdirs()
+        File applicationDestination = new File(applicationPropertiesPath + "/resources/main")
+        applicationDestination.mkdirs()
+        new File(destination, "build.info").withWriter { out ->
+            [
+                    "ARTIFACT_BASENAME=" + basename,
+                    "ARTIFACT_VERSION=" + buildVersion,
+            ].each { out.println it }
+        }
+        new File(applicationDestination, "application.properties").withWriter { out ->
+            [
+                    "info.app.name=" + basename,
+                    "info.app.version=" + buildVersion
+            ].each { out.println it }
+        }
     }
 }
