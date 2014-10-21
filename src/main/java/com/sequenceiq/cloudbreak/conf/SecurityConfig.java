@@ -107,7 +107,11 @@ public class SecurityConfig {
                     .antMatchers("/user/stacks/**").access("#oauth2.hasScope('cloudbreak.stacks')")
                     .antMatchers("/account/stacks/**").access("#oauth2.hasScope('cloudbreak.stacks')")
                     .antMatchers("/stacks/*").access("#oauth2.hasScope('cloudbreak.stacks')")
-                    .antMatchers("/stacks/*/cluster/**").access("#oauth2.hasScope('cloudbreak.stacks')");
+                    .antMatchers("/stacks/*/cluster/**").access("#oauth2.hasScope('cloudbreak.stacks')")
+                    .antMatchers("/events").access("#oauth2.hasScope('cloudbreak.events')")
+                    .antMatchers("/usages/**").access("#oauth2.hasScope('cloudbreak.usages.global')")
+                    .antMatchers("/account/usages/**").access("#oauth2.hasScope('cloudbreak.usages.account')")
+                    .antMatchers("/user/usages/**").access("#oauth2.hasScope('cloudbreak.usages.user')");
         }
     }
 
