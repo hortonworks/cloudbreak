@@ -40,15 +40,16 @@ public class DefaultCloudbreakUsageGeneratorService implements CloudbreakUsageGe
     private CloudbreakEventRepository eventRepository;
 
     @Override
-    public List<CloudbreakUsage> generateCloudbreakUsages(String user) {
-        LOGGER.info("Generating usage for user: {}", user);
+    public List<CloudbreakUsage> generateCloudbreakUsages() {
+        LOGGER.info("Generating cloudbreak usages.");
         List<CloudbreakUsage> usageList = new ArrayList<>();
-        List<CloudbreakEvent> cloudbreakEvents = eventRepository.cloudbreakEvents(user);
+        usageRepository.deleteAll();
+        Iterable<CloudbreakEvent> cloudbreakEvents = eventRepository.findAll();
         Map<Long, List<CloudbreakEvent>> stackEvents = splitCloudbreakEventsByStack(cloudbreakEvents);
 
         // iterate over events by stacks and generate usages
         for (Map.Entry<Long, List<CloudbreakEvent>> stackEventEntry : stackEvents.entrySet()) {
-            LOGGER.debug("Processing stackId {} for userid {}", stackEventEntry.getKey(), user);
+            LOGGER.debug("Processing stackId {} for userid {}", stackEventEntry.getKey());
             List<CloudbreakUsage> stackDailyUsages = processStackEvents(stackEventEntry.getValue());
             usageList.addAll(stackDailyUsages);
         }
@@ -57,7 +58,7 @@ public class DefaultCloudbreakUsageGeneratorService implements CloudbreakUsageGe
         return usageList;
     }
 
-    private Map<Long, List<CloudbreakEvent>> splitCloudbreakEventsByStack(List<CloudbreakEvent> userStackEvents) {
+    private Map<Long, List<CloudbreakEvent>> splitCloudbreakEventsByStack(Iterable<CloudbreakEvent> userStackEvents) {
         Map<Long, List<CloudbreakEvent>> stackIdToCbEventMap = new HashMap<>();
         for (CloudbreakEvent cbEvent : userStackEvents) {
             LOGGER.debug("Processing stack {} for user {}", cbEvent.getStackId(), cbEvent.getOwner());
@@ -152,7 +153,7 @@ public class DefaultCloudbreakUsageGeneratorService implements CloudbreakUsageGe
 
     private long millisToCeiledHours(long hourInMillis) {
         long absHourInMillis = Math.abs(hourInMillis);
-        Double ceiledHours = Math.ceil(absHourInMillis/MS_TO_HOUR);
+        Double ceiledHours = Math.ceil(absHourInMillis / MS_TO_HOUR);
         return ceiledHours.longValue();
     }
 

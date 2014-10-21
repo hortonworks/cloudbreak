@@ -71,10 +71,10 @@ public class DefaultCloudbreakUsageGeneratorServiceTest {
 
         CloudbreakEvent availableEvent = ServiceTestUtils.createEvent(1L, 1L, "AVAILABLE", startDate);
         CloudbreakEvent notAvailableEvent = ServiceTestUtils.createEvent(1L, 1L, "DELETE_IN_PROGRESS", stopDate);
-        BDDMockito.given(eventRepository.cloudbreakEvents("testuser")).willReturn(Arrays.asList(availableEvent, notAvailableEvent));
+        BDDMockito.given(eventRepository.findAll()).willReturn(Arrays.asList(availableEvent, notAvailableEvent));
 
         //WHEN
-        List<CloudbreakUsage> usageList = usagesGeneratorService.generateCloudbreakUsages("testuser");
+        List<CloudbreakUsage> usageList = usagesGeneratorService.generateCloudbreakUsages();
 
         //THEN
         Collections.sort(usageList, new Comparator<CloudbreakUsage>() {
@@ -106,10 +106,10 @@ public class DefaultCloudbreakUsageGeneratorServiceTest {
 
         CloudbreakEvent availableEvent = ServiceTestUtils.createEvent(1L, 1L, "AVAILABLE", startDate);
         CloudbreakEvent notAvailableEvent = ServiceTestUtils.createEvent(1L, 1L, "DELETE_IN_PROGRESS", stopDate);
-        BDDMockito.given(eventRepository.cloudbreakEvents("testuser")).willReturn(Arrays.asList(availableEvent, notAvailableEvent));
+        BDDMockito.given(eventRepository.findAll()).willReturn(Arrays.asList(availableEvent, notAvailableEvent));
 
         //WHEN
-        List<CloudbreakUsage> usageList = usagesGeneratorService.generateCloudbreakUsages("testuser");
+        List<CloudbreakUsage> usageList = usagesGeneratorService.generateCloudbreakUsages();
 
         //THEN
         Collections.sort(usageList, new Comparator<CloudbreakUsage>() {
@@ -137,10 +137,10 @@ public class DefaultCloudbreakUsageGeneratorServiceTest {
 
         CloudbreakEvent availableEvent = ServiceTestUtils.createEvent(1L, 1L, "AVAILABLE", startDate);
         CloudbreakEvent notAvailableEvent = ServiceTestUtils.createEvent(1L, 1L, "DELETE_IN_PROGRESS", stopDate);
-        BDDMockito.given(eventRepository.cloudbreakEvents("testuser")).willReturn(Arrays.asList(availableEvent, notAvailableEvent));
+        BDDMockito.given(eventRepository.findAll()).willReturn(Arrays.asList(availableEvent, notAvailableEvent));
 
         // WHEN
-        List<CloudbreakUsage> usageList = usagesGeneratorService.generateCloudbreakUsages("testuser");
+        List<CloudbreakUsage> usageList = usagesGeneratorService.generateCloudbreakUsages();
 
         // THEN
         Assert.assertTrue("The number of the generated usages is not the expected", usageList.size() == 1);
@@ -168,11 +168,11 @@ public class DefaultCloudbreakUsageGeneratorServiceTest {
         CloudbreakEvent availableEvent2 = ServiceTestUtils.createEvent(2L, 1L, "AVAILABLE", startDate2);
         CloudbreakEvent notAvailableEvent2 = ServiceTestUtils.createEvent(2L, 1L, "DELETE_IN_PROGRESS", stopDate2);
 
-        BDDMockito.given(eventRepository.cloudbreakEvents("testuser"))
+        BDDMockito.given(eventRepository.findAll())
                 .willReturn(Arrays.asList(availableEvent, notAvailableEvent, availableEvent2, notAvailableEvent2));
 
         // WHEN
-        List<CloudbreakUsage> usageList = usagesGeneratorService.generateCloudbreakUsages("testuser");
+        List<CloudbreakUsage> usageList = usagesGeneratorService.generateCloudbreakUsages();
 
         // THEN
         Assert.assertTrue("The number of the generated usages is not the expected", usageList.size() == 2);
@@ -200,11 +200,11 @@ public class DefaultCloudbreakUsageGeneratorServiceTest {
         CloudbreakEvent availableEvent2 = ServiceTestUtils.createEvent(1L, 1L, "AVAILABLE", availableDate);
         CloudbreakEvent notAvailableEvent2 = ServiceTestUtils.createEvent(1L, 1L, "DELETE_IN_PROGRESS", stopDate);
 
-        BDDMockito.given(eventRepository.cloudbreakEvents("testuser"))
+        BDDMockito.given(eventRepository.findAll())
                 .willReturn(Arrays.asList(availableEvent, updateEvent, availableEvent2, notAvailableEvent2));
 
         // WHEN
-        List<CloudbreakUsage> usageList = usagesGeneratorService.generateCloudbreakUsages("testuser");
+        List<CloudbreakUsage> usageList = usagesGeneratorService.generateCloudbreakUsages();
 
         // THEN
         Assert.assertTrue("The number of the generated usages is not the expected", usageList.size() == 1);
@@ -233,15 +233,15 @@ public class DefaultCloudbreakUsageGeneratorServiceTest {
         CloudbreakEvent restartedEvent = ServiceTestUtils.createEvent(1L, 1L, "AVAILABLE", restartDate);
         CloudbreakEvent terminatedEvent = ServiceTestUtils.createEvent(1L, 1L, "DELETE_IN_PROGRESS", terminateDate);
 
-        BDDMockito.given(eventRepository.cloudbreakEvents("testuser"))
+        BDDMockito.given(eventRepository.findAll())
                 .willReturn(Arrays.asList(startedEvent, stoppedEvent, restartedEvent, terminatedEvent));
 
         // WHEN
-        List<CloudbreakUsage> usageList = usagesGeneratorService.generateCloudbreakUsages("testuser");
+        List<CloudbreakUsage> usageList = usagesGeneratorService.generateCloudbreakUsages();
 
         // THEN
         Assert.assertTrue("The number of the generated usages is not the expected", usageList.size() == 2);
-        Assert.assertTrue("The number of the running hours is not the expected", usageList.get(0).getRunningHours().equals("1"));
-        Assert.assertTrue("The number of the running hours is not the expected", usageList.get(1).getRunningHours().equals("1"));
+        Assert.assertEquals("The number of the running hours is not the expected", "1", usageList.get(0).getRunningHours());
+        Assert.assertEquals("The number of the running hours is not the expected", "1", usageList.get(1).getRunningHours());
     }
 }

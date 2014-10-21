@@ -47,7 +47,7 @@ public class DefaultCloudbreakUsagesFacade implements CloudbreakUsagesFacade {
     }
 
     @Override
-    public void generateUserUsages(CbUser user) {
-        cloudbreakUsageGeneratorService.generateCloudbreakUsages(user.getUserId());
+    public void generateUserUsages() {
+        cloudbreakUsageGeneratorService.generateCloudbreakUsages();
     }
 }
