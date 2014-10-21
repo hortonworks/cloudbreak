@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
+import com.sequenceiq.cloudbreak.domain.GccTemplate;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.CloudbreakEventRepository;
 import com.sequenceiq.cloudbreak.repository.CloudbreakEventSpecifications;
@@ -105,6 +106,10 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
             case AZURE:
                 vmType = ((AzureTemplate) stack.getTemplate()).getVmType();
                 region = ((AzureTemplate) stack.getTemplate()).getLocation().location();
+                break;
+            case GCC:
+                vmType = ((GccTemplate) stack.getTemplate()).getGccInstanceType().getValue();
+                region = ((GccTemplate) stack.getTemplate()).getGccZone().getValue();
                 break;
             default:
                 throw new IllegalStateException("Unsupported cloud platform :" + stack.getTemplate().cloudPlatform());
