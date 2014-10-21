@@ -327,6 +327,7 @@ dependencies {
     testCompile("junit:junit:4.11")
     testCompile("org.mockito:mockito-all:1.9.5")
     testCompile("org.springframework:spring-test:4.0.2.RELEASE")
+    deployerJars 'org.springframework.build.aws:org.springframework.build.aws.maven:3.0.0.RELEASE'
 }
 
 springBoot { mainClass = "com.sequenceiq.periscope.PeriscopeApplication" }
