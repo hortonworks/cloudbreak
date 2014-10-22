@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.aws.AwsConnector;
 import com.sequenceiq.cloudbreak.service.stack.event.StackOperationFailure;
@@ -59,6 +60,9 @@ public class StackCreationFailureHandlerTest {
     @Mock
     private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
 
+    @Mock
+    private CloudbreakEventService cloudbreakEventService;
+
     @Before
     public void setUp() {
         underTest = new StackCreationFailureHandler();
@@ -80,6 +84,7 @@ public class StackCreationFailureHandlerTest {
         underTest.accept(event);
         // THEN
         verify(websocketService, times(1)).sendToTopicUser(anyString(), any(WebsocketEndPoint.class), any());
+        verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(anyLong(), anyString(), anyString());
     }
 
     private Event<StackOperationFailure> createEvent() {
