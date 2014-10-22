@@ -75,7 +75,7 @@ public class DefaultCloudbreakUsageGeneratorServiceTest {
         BDDMockito.given(eventRepository.findAll()).willReturn(Arrays.asList(availableEvent, notAvailableEvent));
 
         //WHEN
-        List<CloudbreakUsage> usageList = usagesGeneratorService.generateCloudbreakUsages();
+        List<CloudbreakUsage> usageList = usagesGeneratorService.generateUsages();
 
         //THEN
         Collections.sort(usageList, new Comparator<CloudbreakUsage>() {
@@ -110,7 +110,7 @@ public class DefaultCloudbreakUsageGeneratorServiceTest {
         BDDMockito.given(eventRepository.findAll()).willReturn(Arrays.asList(availableEvent, notAvailableEvent));
 
         //WHEN
-        List<CloudbreakUsage> usageList = usagesGeneratorService.generateCloudbreakUsages();
+        List<CloudbreakUsage> usageList = usagesGeneratorService.generateUsages();
 
         //THEN
         Collections.sort(usageList, new Comparator<CloudbreakUsage>() {
@@ -141,7 +141,7 @@ public class DefaultCloudbreakUsageGeneratorServiceTest {
         BDDMockito.given(eventRepository.findAll()).willReturn(Arrays.asList(availableEvent, notAvailableEvent));
 
         // WHEN
-        List<CloudbreakUsage> usageList = usagesGeneratorService.generateCloudbreakUsages();
+        List<CloudbreakUsage> usageList = usagesGeneratorService.generateUsages();
 
         // THEN
         Assert.assertTrue("The number of the generated usages is not the expected", usageList.size() == 1);
@@ -173,7 +173,7 @@ public class DefaultCloudbreakUsageGeneratorServiceTest {
                 .willReturn(Arrays.asList(availableEvent, notAvailableEvent, availableEvent2, notAvailableEvent2));
 
         // WHEN
-        List<CloudbreakUsage> usageList = usagesGeneratorService.generateCloudbreakUsages();
+        List<CloudbreakUsage> usageList = usagesGeneratorService.generateUsages();
 
         // THEN
         Assert.assertTrue("The number of the generated usages is not the expected", usageList.size() == 2);
@@ -205,7 +205,7 @@ public class DefaultCloudbreakUsageGeneratorServiceTest {
                 .willReturn(Arrays.asList(availableEvent, updateEvent, availableEvent2, notAvailableEvent2));
 
         // WHEN
-        List<CloudbreakUsage> usageList = usagesGeneratorService.generateCloudbreakUsages();
+        List<CloudbreakUsage> usageList = usagesGeneratorService.generateUsages();
 
         // THEN
         Assert.assertTrue("The number of the generated usages is not the expected", usageList.size() == 1);
@@ -238,7 +238,7 @@ public class DefaultCloudbreakUsageGeneratorServiceTest {
                 .willReturn(Arrays.asList(startedEvent, stoppedEvent, restartedEvent, terminatedEvent));
 
         // WHEN
-        List<CloudbreakUsage> usageList = usagesGeneratorService.generateCloudbreakUsages();
+        List<CloudbreakUsage> usageList = usagesGeneratorService.generateUsages();
 
         // THEN
         Assert.assertEquals("The number of the generated usages is not the expected", 2, usageList.size());

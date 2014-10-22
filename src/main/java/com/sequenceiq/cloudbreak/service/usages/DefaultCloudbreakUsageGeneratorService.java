@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.domain.BillingStatus;
@@ -41,7 +42,12 @@ public class DefaultCloudbreakUsageGeneratorService implements CloudbreakUsageGe
     private CloudbreakEventRepository eventRepository;
 
     @Override
-    public List<CloudbreakUsage> generateCloudbreakUsages() {
+    @Scheduled(cron = "0 05 0 * * *")
+    public void generateCloudbreakUsages() {
+        generateUsages();
+    }
+
+    List<CloudbreakUsage> generateUsages() {
         LOGGER.info("Generating cloudbreak usages.");
         List<CloudbreakUsage> usageList = new ArrayList<>();
         usageRepository.deleteAll();
