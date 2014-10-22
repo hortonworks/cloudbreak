@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
+import com.sequenceiq.cloudbreak.domain.BillingStatus;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -30,6 +31,7 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariHealthCheckerTask;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariHosts;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariHostsJoinStatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.event.StackStatusUpdateRequest;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
@@ -77,6 +79,9 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
 
     @javax.annotation.Resource
     private Map<CloudPlatform, ResourceBuilderInit> resourceBuilderInits;
+
+    @Autowired
+    private CloudbreakEventService cloudbreakEventService;
 
     @Override
     public void accept(Event<StackStatusUpdateRequest> event) {
@@ -127,6 +132,7 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
             if (stopped) {
                 LOGGER.info("Update stack state to: {}", Status.STOPPED);
                 stackUpdater.updateStackStatus(stackId, Status.STOPPED);
+                cloudbreakEventService.fireCloudbreakEvent(stackId, BillingStatus.BILLING_STOPPED.name(), "Stack stopped.");
             } else {
                 LOGGER.info("Update stack state to: {}", Status.STOP_FAILED);
                 stackUpdater.updateStackStatus(stackId, Status.STOP_FAILED);
@@ -169,6 +175,7 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
                 }
             }
             if (started) {
+                cloudbreakEventService.fireCloudbreakEvent(stackId, BillingStatus.BILLING_STARTED.name(), "Stack started.");
                 waitForAmbariToStart(stack);
                 Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
                 LOGGER.info("Update stack state to: {}", Status.AVAILABLE);

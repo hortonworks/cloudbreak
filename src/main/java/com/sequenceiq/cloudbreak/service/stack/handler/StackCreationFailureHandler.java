@@ -13,6 +13,7 @@ import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
+import com.sequenceiq.cloudbreak.domain.BillingStatus;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -22,6 +23,7 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterInstallerMailSenderService;
+import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.event.StackOperationFailure;
 import com.sequenceiq.cloudbreak.service.stack.resource.DeleteContextObject;
@@ -64,6 +66,9 @@ public class StackCreationFailureHandler implements Consumer<Event<StackOperatio
 
     @javax.annotation.Resource
     private ConcurrentTaskExecutor resourceBuilderExecutor;
+
+    @Autowired
+    private CloudbreakEventService cloudbreakEventService;
 
     @Override
     public void accept(Event<StackOperationFailure> event) {
@@ -115,6 +120,7 @@ public class StackCreationFailureHandler implements Consumer<Event<StackOperatio
         websocketService.sendToTopicUser(stack.getOwner(), WebsocketEndPoint.STACK,
                 new StatusMessage(stackId, stack.getName(), Status.CREATE_FAILED.name(), detailedMessage));
         stackUpdater.updateStackStatusReason(stackId, detailedMessage);
+        cloudbreakEventService.fireCloudbreakEvent(stackId, BillingStatus.BILLING_STOPPED.name(), "Stack creation failed.");
     }
 
 }

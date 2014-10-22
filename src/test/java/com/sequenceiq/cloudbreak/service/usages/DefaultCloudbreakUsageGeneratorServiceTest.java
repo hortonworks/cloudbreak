@@ -20,6 +20,7 @@ import org.mockito.MockitoAnnotations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.domain.BillingStatus;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.repository.CloudbreakEventRepository;
@@ -69,8 +70,8 @@ public class DefaultCloudbreakUsageGeneratorServiceTest {
         referenceCalendar.set(Calendar.MINUTE, 50);
         Date stopDate = referenceCalendar.getTime();
 
-        CloudbreakEvent availableEvent = ServiceTestUtils.createEvent(1L, 1L, "AVAILABLE", startDate);
-        CloudbreakEvent notAvailableEvent = ServiceTestUtils.createEvent(1L, 1L, "DELETE_IN_PROGRESS", stopDate);
+        CloudbreakEvent availableEvent = ServiceTestUtils.createEvent(1L, 1L, BillingStatus.BILLING_STARTED.name(), startDate);
+        CloudbreakEvent notAvailableEvent = ServiceTestUtils.createEvent(1L, 1L, BillingStatus.BILLING_STOPPED.name(), stopDate);
         BDDMockito.given(eventRepository.findAll()).willReturn(Arrays.asList(availableEvent, notAvailableEvent));
 
         //WHEN
@@ -104,8 +105,8 @@ public class DefaultCloudbreakUsageGeneratorServiceTest {
         referenceCalendar.set(Calendar.HOUR_OF_DAY, 2);
         Date stopDate = referenceCalendar.getTime();
 
-        CloudbreakEvent availableEvent = ServiceTestUtils.createEvent(1L, 1L, "AVAILABLE", startDate);
-        CloudbreakEvent notAvailableEvent = ServiceTestUtils.createEvent(1L, 1L, "DELETE_IN_PROGRESS", stopDate);
+        CloudbreakEvent availableEvent = ServiceTestUtils.createEvent(1L, 1L, BillingStatus.BILLING_STARTED.name(), startDate);
+        CloudbreakEvent notAvailableEvent = ServiceTestUtils.createEvent(1L, 1L, BillingStatus.BILLING_STOPPED.name(), stopDate);
         BDDMockito.given(eventRepository.findAll()).willReturn(Arrays.asList(availableEvent, notAvailableEvent));
 
         //WHEN
@@ -135,8 +136,8 @@ public class DefaultCloudbreakUsageGeneratorServiceTest {
         referenceCalendar.roll(Calendar.HOUR_OF_DAY, 1);
         Date stopDate = referenceCalendar.getTime();
 
-        CloudbreakEvent availableEvent = ServiceTestUtils.createEvent(1L, 1L, "AVAILABLE", startDate);
-        CloudbreakEvent notAvailableEvent = ServiceTestUtils.createEvent(1L, 1L, "DELETE_IN_PROGRESS", stopDate);
+        CloudbreakEvent availableEvent = ServiceTestUtils.createEvent(1L, 1L, BillingStatus.BILLING_STARTED.name(), startDate);
+        CloudbreakEvent notAvailableEvent = ServiceTestUtils.createEvent(1L, 1L, BillingStatus.BILLING_STOPPED.name(), stopDate);
         BDDMockito.given(eventRepository.findAll()).willReturn(Arrays.asList(availableEvent, notAvailableEvent));
 
         // WHEN
@@ -162,11 +163,11 @@ public class DefaultCloudbreakUsageGeneratorServiceTest {
         referenceCalendar.roll(Calendar.HOUR_OF_DAY, 1);
         Date stopDate2 = referenceCalendar.getTime();
 
-        CloudbreakEvent availableEvent = ServiceTestUtils.createEvent(1L, 1L, "AVAILABLE", startDate);
-        CloudbreakEvent notAvailableEvent = ServiceTestUtils.createEvent(1L, 1L, "DELETE_IN_PROGRESS", stopDate);
+        CloudbreakEvent availableEvent = ServiceTestUtils.createEvent(1L, 1L, BillingStatus.BILLING_STARTED.name(), startDate);
+        CloudbreakEvent notAvailableEvent = ServiceTestUtils.createEvent(1L, 1L, BillingStatus.BILLING_STOPPED.name(), stopDate);
 
-        CloudbreakEvent availableEvent2 = ServiceTestUtils.createEvent(2L, 1L, "AVAILABLE", startDate2);
-        CloudbreakEvent notAvailableEvent2 = ServiceTestUtils.createEvent(2L, 1L, "DELETE_IN_PROGRESS", stopDate2);
+        CloudbreakEvent availableEvent2 = ServiceTestUtils.createEvent(2L, 1L, BillingStatus.BILLING_STARTED.name(), startDate2);
+        CloudbreakEvent notAvailableEvent2 = ServiceTestUtils.createEvent(2L, 1L, BillingStatus.BILLING_STOPPED.name(), stopDate2);
 
         BDDMockito.given(eventRepository.findAll())
                 .willReturn(Arrays.asList(availableEvent, notAvailableEvent, availableEvent2, notAvailableEvent2));
@@ -195,10 +196,10 @@ public class DefaultCloudbreakUsageGeneratorServiceTest {
         referenceCalendar.roll(Calendar.HOUR_OF_DAY, 1);
         Date stopDate = referenceCalendar.getTime();
 
-        CloudbreakEvent availableEvent = ServiceTestUtils.createEvent(1L, 1L, "AVAILABLE", startDate);
+        CloudbreakEvent availableEvent = ServiceTestUtils.createEvent(1L, 1L, BillingStatus.BILLING_STARTED.name(), startDate);
         CloudbreakEvent updateEvent = ServiceTestUtils.createEvent(1L, 1L, "UPDATE_IN_PROGRESS", updateDate);
         CloudbreakEvent availableEvent2 = ServiceTestUtils.createEvent(1L, 1L, "AVAILABLE", availableDate);
-        CloudbreakEvent notAvailableEvent2 = ServiceTestUtils.createEvent(1L, 1L, "DELETE_IN_PROGRESS", stopDate);
+        CloudbreakEvent notAvailableEvent2 = ServiceTestUtils.createEvent(1L, 1L, BillingStatus.BILLING_STOPPED.name(), stopDate);
 
         BDDMockito.given(eventRepository.findAll())
                 .willReturn(Arrays.asList(availableEvent, updateEvent, availableEvent2, notAvailableEvent2));
@@ -228,10 +229,10 @@ public class DefaultCloudbreakUsageGeneratorServiceTest {
         referenceCalendar.set(Calendar.MINUTE, 10);
         Date terminateDate = referenceCalendar.getTime();
 
-        CloudbreakEvent startedEvent = ServiceTestUtils.createEvent(1L, 1L, "AVAILABLE", startDate);
-        CloudbreakEvent stoppedEvent = ServiceTestUtils.createEvent(1L, 1L, "STOPPED", stopDate);
-        CloudbreakEvent restartedEvent = ServiceTestUtils.createEvent(1L, 1L, "AVAILABLE", restartDate);
-        CloudbreakEvent terminatedEvent = ServiceTestUtils.createEvent(1L, 1L, "DELETE_IN_PROGRESS", terminateDate);
+        CloudbreakEvent startedEvent = ServiceTestUtils.createEvent(1L, 1L, BillingStatus.BILLING_STARTED.name(), startDate);
+        CloudbreakEvent stoppedEvent = ServiceTestUtils.createEvent(1L, 1L, BillingStatus.BILLING_STOPPED.name(), stopDate);
+        CloudbreakEvent restartedEvent = ServiceTestUtils.createEvent(1L, 1L, BillingStatus.BILLING_STARTED.name(), restartDate);
+        CloudbreakEvent terminatedEvent = ServiceTestUtils.createEvent(1L, 1L, BillingStatus.BILLING_STOPPED.name(), terminateDate);
 
         BDDMockito.given(eventRepository.findAll())
                 .willReturn(Arrays.asList(startedEvent, stoppedEvent, restartedEvent, terminatedEvent));
@@ -240,7 +241,7 @@ public class DefaultCloudbreakUsageGeneratorServiceTest {
         List<CloudbreakUsage> usageList = usagesGeneratorService.generateCloudbreakUsages();
 
         // THEN
-        Assert.assertTrue("The number of the generated usages is not the expected", usageList.size() == 2);
+        Assert.assertEquals("The number of the generated usages is not the expected", 2, usageList.size());
         Assert.assertEquals("The number of the running hours is not the expected", "1", usageList.get(0).getRunningHours());
         Assert.assertEquals("The number of the running hours is not the expected", "1", usageList.get(1).getRunningHours());
     }

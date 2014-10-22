@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.domain.BillingStatus;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.domain.Status;
@@ -178,10 +179,10 @@ public class DefaultCloudbreakUsageGeneratorService implements CloudbreakUsageGe
     }
 
     private boolean isStopEvent(CloudbreakEvent event) {
-        return stopStatuses.contains(Status.valueOf(event.getEventType()));
+        return event.getEventType().equals(BillingStatus.BILLING_STOPPED.name());
     }
 
     private boolean isStartEvent(CloudbreakEvent event) {
-        return event.getEventType().equals(Status.AVAILABLE.name());
+        return event.getEventType().equals(BillingStatus.BILLING_STARTED.name());
     }
 }
