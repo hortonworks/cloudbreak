@@ -13,7 +13,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformRollbackHandler;
-import com.sequenceiq.cloudbreak.service.stack.connector.HadoopConfigurationProvider;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 import com.sequenceiq.cloudbreak.service.stack.connector.Provisioner;
@@ -39,9 +38,6 @@ public class AppConfig {
 
     @Autowired
     private List<MetadataSetup> metadataSetups;
-
-    @Autowired
-    private List<HadoopConfigurationProvider> hadoopConfigurationProviders;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -89,15 +85,6 @@ public class AppConfig {
         Map<CloudPlatform, MetadataSetup> map = new HashMap<>();
         for (MetadataSetup metadataSetup : metadataSetups) {
             map.put(metadataSetup.getCloudPlatform(), metadataSetup);
-        }
-        return map;
-    }
-
-    @Bean
-    public Map<CloudPlatform, HadoopConfigurationProvider> hadoopConfigurationProviders() {
-        Map<CloudPlatform, HadoopConfigurationProvider> map = new HashMap<>();
-        for (HadoopConfigurationProvider hadoopConfigurationProvider : hadoopConfigurationProviders) {
-            map.put(hadoopConfigurationProvider.getCloudPlatform(), hadoopConfigurationProvider);
         }
         return map;
     }

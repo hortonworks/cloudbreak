@@ -12,8 +12,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import javax.annotation.Resource;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +25,6 @@ import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
@@ -42,12 +39,11 @@ import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariHostsUnavailableException;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
-import com.sequenceiq.cloudbreak.service.cluster.HadoopConfiguration;
+import com.sequenceiq.cloudbreak.service.cluster.HadoopConfigurationService;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterCreationFailure;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterCreationSuccess;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsFailure;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsSuccess;
-import com.sequenceiq.cloudbreak.service.stack.connector.HadoopConfigurationProvider;
 
 import groovyx.net.http.HttpResponseException;
 import reactor.core.Reactor;
@@ -81,14 +77,14 @@ public class AmbariClusterConnector {
     @Autowired
     private Reactor reactor;
 
-    @Resource
-    private Map<CloudPlatform, HadoopConfigurationProvider> hadoopConfigurationProviders;
-
     @Autowired
     private PollingService<AmbariOperations> operationsPollingService;
 
     @Autowired
     private PollingService<AmbariHosts> hostsPollingService;
+
+    @Autowired
+    private HadoopConfigurationService hadoopConfigurationService;
 
     public void installAmbariCluster(Stack stack) {
         Cluster cluster = stack.getCluster();
@@ -248,7 +244,7 @@ public class AmbariClusterConnector {
 
     private void addBlueprint(Stack stack, AmbariClient ambariClient, Blueprint blueprint) {
         try {
-            ambariClient.addBlueprint(blueprint.getBlueprintText(), getExtendConfig(stack));
+            ambariClient.addBlueprint(blueprint.getBlueprintText(), hadoopConfigurationService.getConfiguration(stack));
             LOGGER.info("Blueprint added [Stack: {}, blueprint: '{}']", stack.getId(), blueprint.getId());
         } catch (HttpResponseException e) {
             if ("Conflict".equals(e.getMessage())) {
@@ -259,14 +255,6 @@ public class AmbariClusterConnector {
                 throw new InternalServerException("Something went wrong", e);
             }
         }
-    }
-
-    private Map<String, Map<String, String>> getExtendConfig(Stack stack) {
-        Map<String, Map<String, String>> extendConfig = new HashMap<>();
-        HadoopConfigurationProvider hadoopConfigurationProvider = hadoopConfigurationProviders.get(stack.getTemplate().cloudPlatform());
-        extendConfig.put(HadoopConfiguration.YARN_SITE.getKey(), hadoopConfigurationProvider.getYarnSiteConfigs(stack));
-        extendConfig.put(HadoopConfiguration.HDFS_SITE.getKey(), hadoopConfigurationProvider.getHdfsSiteConfigs(stack));
-        return extendConfig;
     }
 
     private void waitForHosts(Stack stack, AmbariClient ambariClient) {
