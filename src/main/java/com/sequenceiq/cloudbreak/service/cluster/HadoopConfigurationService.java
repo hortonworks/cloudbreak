@@ -4,11 +4,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.service.stack.connector.LocalDirBuilderService;
+import com.sequenceiq.cloudbreak.service.stack.connector.DiskAttachUtils;
 
 @Service
 public class HadoopConfigurationService {
@@ -19,14 +18,11 @@ public class HadoopConfigurationService {
     public static final String YARN_NODEMANAGER_LOG_DIRS = "yarn.nodemanager.log-dirs";
     public static final String HDFS_DATANODE_DATA_DIRS = "dfs.datanode.data.dir";
 
-    @Autowired
-    private LocalDirBuilderService localDirBuilderService;
-
     public Map<String, Map<String, String>> getConfiguration(Stack stack) {
         Map<String, Map<String, String>> hadoopConfig = new HashMap<>();
         int volumeCount = stack.getTemplate().getVolumeCount();
         if (volumeCount > 0) {
-            String localDirs = localDirBuilderService.buildLocalDirs(volumeCount);
+            String localDirs = DiskAttachUtils.buildDiskPathString(volumeCount);
             hadoopConfig.put(YARN_SITE, getYarnSiteConfigs(localDirs));
             hadoopConfig.put(HDFS_SITE, getHDFSSiteConfigs(localDirs));
         }

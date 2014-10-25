@@ -1,11 +1,12 @@
 package com.sequenceiq.cloudbreak.service.stack.connector;
 
-import org.springframework.stereotype.Service;
+public final class DiskAttachUtils {
 
-@Service
-public class SimpleLocalDirBuilderService implements LocalDirBuilderService {
-    @Override
-    public String buildLocalDirs(Integer volumeCount) {
+    private DiskAttachUtils() {
+        throw new IllegalStateException();
+    }
+
+    public static String buildDiskPathString(int volumeCount) {
         StringBuilder localDirs = new StringBuilder("");
         for (int i = 1; i <= volumeCount; i++) {
             localDirs.append("/mnt/fs").append(i);
