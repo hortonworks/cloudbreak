@@ -20,6 +20,7 @@ public class GccTemplate extends Template implements ProvisionEntity {
     private GccInstanceType gccInstanceType;
     private Boolean moreContainerOnOneHost = Boolean.FALSE;
     private Integer containerCount = 0;
+    @Enumerated(EnumType.STRING)
     private GccRawDiskType gccRawDiskType = GccRawDiskType.HDD;
 
     public GccTemplate() {
