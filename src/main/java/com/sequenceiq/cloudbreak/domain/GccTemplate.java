@@ -6,6 +6,7 @@ import javax.persistence.Enumerated;
 
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccImageType;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccInstanceType;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRawDiskType;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccZone;
 
 @Entity
@@ -19,6 +20,7 @@ public class GccTemplate extends Template implements ProvisionEntity {
     private GccInstanceType gccInstanceType;
     private Boolean moreContainerOnOneHost = Boolean.FALSE;
     private Integer containerCount = 0;
+    private GccRawDiskType gccRawDiskType = GccRawDiskType.HDD;
 
     public GccTemplate() {
 
@@ -54,6 +56,14 @@ public class GccTemplate extends Template implements ProvisionEntity {
 
     public void setContainerCount(Integer containerCount) {
         this.containerCount = containerCount;
+    }
+
+    public GccRawDiskType getGccRawDiskType() {
+        return gccRawDiskType;
+    }
+
+    public void setGccRawDiskType(GccRawDiskType gccRawDiskType) {
+        this.gccRawDiskType = gccRawDiskType;
     }
 
     @Override
