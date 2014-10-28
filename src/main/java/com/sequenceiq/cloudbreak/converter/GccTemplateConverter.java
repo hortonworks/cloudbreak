@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.GccTemplate;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccImageType;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccInstanceType;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRawDiskType;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccZone;
 
 @Component
@@ -30,6 +31,7 @@ public class GccTemplateConverter extends AbstractConverter<TemplateJson, GccTem
         putProperty(props, GccTemplateParam.INSTANCETYPE.getName(), entity.getGccInstanceType());
         putProperty(props, GccTemplateParam.ZONE.getName(), entity.getGccZone());
         putProperty(props, GccTemplateParam.CONTAINERCOUNT.getName(), entity.getContainerCount());
+        putProperty(props, GccTemplateParam.TYPE.getName(), entity.getGccRawDiskType());
         gccTemplateJson.setParameters(props);
         gccTemplateJson.setDescription(entity.getDescription() == null ? "" : entity.getDescription());
         return gccTemplateJson;
@@ -48,6 +50,10 @@ public class GccTemplateConverter extends AbstractConverter<TemplateJson, GccTem
         Object containerCount = json.getParameters().get(GccTemplateParam.CONTAINERCOUNT.getName());
         if (containerCount != null) {
             gccTemplate.setContainerCount(Integer.valueOf(containerCount.toString()));
+        }
+        Object type = json.getParameters().get(GccTemplateParam.TYPE.getName());
+        if (type != null) {
+            gccTemplate.setGccRawDiskType(GccRawDiskType.valueOf(type.toString()));
         }
         gccTemplate.setDescription(json.getDescription());
         return gccTemplate;

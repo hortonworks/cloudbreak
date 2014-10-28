@@ -473,6 +473,7 @@ public class GccStackUtil {
         Disk disk = new Disk();
         disk.setSizeGb(size.longValue());
         disk.setName(name);
+        disk.setKind(((GccTemplate) stack.getTemplate()).getGccRawDiskType().getUrl(projectId, zone));
         Compute.Disks.Insert insDisk = compute.disks().insert(projectId, zone.getValue(), disk);
         insDisk.setSourceImage(GccImageType.DEBIAN_HACK.getAmbariUbuntu(projectId));
         insDisk.execute();
@@ -485,6 +486,7 @@ public class GccStackUtil {
         Disk disk = new Disk();
         disk.setSizeGb(size.longValue());
         disk.setName(name);
+        disk.setKind(((GccTemplate) stack.getTemplate()).getGccRawDiskType().getUrl(projectId, zone));
         Compute.Disks.Insert insDisk = compute.disks().insert(projectId, zone.getValue(), disk);
         insDisk.execute();
         GccDiskReadyPollerObject gccDiskReady = new GccDiskReadyPollerObject(compute, stack, name);
