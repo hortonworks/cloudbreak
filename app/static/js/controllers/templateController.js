@@ -57,6 +57,11 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
             'ASIA_EAST1_B': 'asia-east1-b'
         }
 
+        $rootScope.gccDiskTypes = {
+            'HDD': 'HDD',
+            'SSD': 'SSD'
+        }
+
         $rootScope.gccInstanceTypes = {
             'N1_STANDARD_1': 'n1-standard-1',
             'N1_STANDARD_2': 'n1-standard-2',
@@ -122,6 +127,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
         $scope.createGccTemplate = function () {
             $scope.gccTemp.cloudPlatform = 'GCC';
             $scope.gccTemp.parameters.gccImageType = "DEBIAN_HACK";
+            $scope.gccTemp.parameters.volumeType = $rootScope.gccDiskTypes[$scope.gccTemp.parameters.volumeType];
 
             UserTemplate.save($scope.gccTemp, function (result) {
                 $scope.gccTemp.id = result.id;
@@ -194,7 +200,8 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
             $scope.gccTemp = {
                 parameters: {
                     gccInstanceType: "N1_STANDARD_2",
-                    gccZone: "EUROPE_WEST1_A"
+                    gccZone: "EUROPE_WEST1_A",
+                    volumeType: "HDD"
                 }
             }
         }
