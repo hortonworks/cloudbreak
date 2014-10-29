@@ -18,7 +18,7 @@
     </div>
 </div>
 <div class="form-group">
-    <label class="col-sm-3 control-label" for="gcc_tregion">Region</label>
+    <label class="col-sm-3 control-label" for="gcc_tregion">VolumeType</label>
     <div class="col-sm-9">
         <select class="form-control" id="gcc_tregion" ng-model="gccTemp.parameters.gccZone">
             <option value="ASIA_EAST1_A">asia-east1-a</option>
@@ -68,6 +68,15 @@
              ng-show="gccTemplateForm.gcc_tvolumesize.$dirty && gccTemplateForm.gcc_tvolumesize.$invalid"><i class="fa fa-warning"></i>
             {{error_msg.volume_size_invalid}}
         </div>
+    </div>
+</div>
+<div class="form-group">
+    <label class="col-sm-3 control-label" for="gcc_tvolumetype">Volume type</label>
+    <div class="col-sm-9">
+        <select class="form-control" id="gcc_tvolumetype" ng-model="gccTemp.parameters.volumeType">
+            <option value="HDD">Magnetic</option>
+            <option value="SSD">SSD</option>
+        </select>
     </div>
 </div>
 <div class="row btn-row">

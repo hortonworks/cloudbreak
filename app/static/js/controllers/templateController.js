@@ -57,6 +57,11 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
             'ASIA_EAST1_B': 'asia-east1-b'
         }
 
+        $rootScope.gccDiskTypes = {
+            'HDD': 'Magnetic',
+            'SSD': 'SSD'
+        }
+
         $rootScope.gccInstanceTypes = {
             'N1_STANDARD_1': 'n1-standard-1',
             'N1_STANDARD_2': 'n1-standard-2',
@@ -194,7 +199,8 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
             $scope.gccTemp = {
                 parameters: {
                     gccInstanceType: "N1_STANDARD_2",
-                    gccZone: "EUROPE_WEST1_A"
+                    gccZone: "EUROPE_WEST1_B",
+                    volumeType: "HDD"
                 }
             }
         }

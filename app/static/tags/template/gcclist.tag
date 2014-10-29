@@ -25,6 +25,7 @@
         </div>
         <!-- .col-sm-9 -->
     </div>
+
     <!-- .form-group -->
     <div class="form-group">
         <label class="col-sm-3 control-label" for="gcclgccInstanceType">Instance Type</label>
@@ -48,6 +49,14 @@
 
         <div class="col-sm-9">
             <p id="gccvolumesize" class="form-control-static">{{template.volumeSize}}</p>
+        </div>
+        <!-- .col-sm-9 -->
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="gcclgccVolumeType">VolumeType</label>
+
+        <div class="col-sm-9">
+            <p id="gcclgccVolumeType" class="form-control-static">{{gccDiskTypes[template.parameters.volumeType]}}</p>
         </div>
         <!-- .col-sm-9 -->
     </div>
