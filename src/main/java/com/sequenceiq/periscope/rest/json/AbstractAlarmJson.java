@@ -2,18 +2,11 @@ package com.sequenceiq.periscope.rest.json;
 
 import java.util.List;
 
-import com.sequenceiq.periscope.domain.ComparisonOperator;
-import com.sequenceiq.periscope.domain.Metric;
-
-public class AlarmJson implements Json {
+public abstract class AbstractAlarmJson implements Json {
 
     private Long id;
     private String alarmName;
     private String description;
-    private Metric metric;
-    private double threshold;
-    private ComparisonOperator comparisonOperator;
-    private int period;
     private Long scalingPolicyId;
     private List<NotificationJson> notifications;
 
@@ -31,38 +24,6 @@ public class AlarmJson implements Json {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public Metric getMetric() {
-        return metric;
-    }
-
-    public void setMetric(Metric metric) {
-        this.metric = metric;
-    }
-
-    public double getThreshold() {
-        return threshold;
-    }
-
-    public void setThreshold(double threshold) {
-        this.threshold = threshold;
-    }
-
-    public ComparisonOperator getComparisonOperator() {
-        return comparisonOperator;
-    }
-
-    public void setComparisonOperator(ComparisonOperator comparisonOperator) {
-        this.comparisonOperator = comparisonOperator;
-    }
-
-    public int getPeriod() {
-        return period;
-    }
-
-    public void setPeriod(int period) {
-        this.period = period;
     }
 
     public Long getId() {

@@ -9,8 +9,9 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.periscope.domain.Alarm;
+import com.sequenceiq.periscope.domain.BaseAlarm;
 import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.domain.MetricAlarm;
 import com.sequenceiq.periscope.domain.Notification;
 import com.sequenceiq.periscope.log.Logger;
 import com.sequenceiq.periscope.log.PeriscopeLoggerFactory;
@@ -27,7 +28,7 @@ public class NotificationService {
     @Autowired
     private EmailService emailService;
 
-    public void sendNotification(Cluster cluster, Alarm alarm, Notification notification) {
+    public void sendNotification(Cluster cluster, BaseAlarm alarm, Notification notification) {
         long clusterId = cluster.getId();
         switch (notification.getType()) {
             case EMAIL:
@@ -38,15 +39,17 @@ public class NotificationService {
         }
     }
 
-    private void sendEmailNotification(long clusterId, Alarm alarm, Notification notification) {
+    private void sendEmailNotification(long clusterId, BaseAlarm alarm, Notification notification) {
         String[] recipients = notification.getTarget();
         LOGGER.info(clusterId, "Sending e-mail notification to: {}", join(recipients, ","));
         Map<String, String> model = new HashMap<>();
         model.put("alarmName", alarm.getName());
         model.put("description", alarm.getDescription());
-        model.put("metric", alarm.getMetric().getName());
-        model.put("threshold", "" + alarm.getThreshold());
-        model.put("period", "" + alarm.getPeriod());
+        if (alarm instanceof MetricAlarm) {
+            model.put("metric", ((MetricAlarm) alarm).getMetric().getName());
+            model.put("threshold", "" + ((MetricAlarm) alarm).getThreshold());
+            model.put("period", "" + ((MetricAlarm) alarm).getPeriod());
+        }
         try {
             emailService.sendMail(recipients, SUBJECT, ALARM_TEMPLATE, model);
         } catch (IOException | TemplateException e) {

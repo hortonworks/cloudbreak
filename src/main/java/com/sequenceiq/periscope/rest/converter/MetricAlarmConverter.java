@@ -6,37 +6,37 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.periscope.domain.Alarm;
+import com.sequenceiq.periscope.domain.MetricAlarm;
 import com.sequenceiq.periscope.domain.Notification;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
-import com.sequenceiq.periscope.rest.json.AlarmJson;
+import com.sequenceiq.periscope.rest.json.MetricAlarmJson;
 import com.sequenceiq.periscope.rest.json.NotificationJson;
 
 @Component
-public class AlarmConverter extends AbstractConverter<AlarmJson, Alarm> {
+public class MetricAlarmConverter extends AbstractConverter<MetricAlarmJson, MetricAlarm> {
 
     @Autowired
     private NotificationConverter notificationConverter;
 
     @Override
-    public Alarm convert(AlarmJson source) {
-        Alarm alarm = new Alarm();
-        alarm.setName(source.getAlarmName());
-        alarm.setComparisonOperator(source.getComparisonOperator());
-        alarm.setDescription(source.getDescription());
-        alarm.setMetric(source.getMetric());
-        alarm.setPeriod(source.getPeriod());
-        alarm.setThreshold(source.getThreshold());
+    public MetricAlarm convert(MetricAlarmJson source) {
+        MetricAlarm metricAlarm = new MetricAlarm();
+        metricAlarm.setName(source.getAlarmName());
+        metricAlarm.setComparisonOperator(source.getComparisonOperator());
+        metricAlarm.setDescription(source.getDescription());
+        metricAlarm.setMetric(source.getMetric());
+        metricAlarm.setPeriod(source.getPeriod());
+        metricAlarm.setThreshold(source.getThreshold());
         List<NotificationJson> notifications = source.getNotifications();
         if (notifications != null && !notifications.isEmpty()) {
-            alarm.setNotifications(notificationConverter.convertAllFromJson(notifications));
+            metricAlarm.setNotifications(notificationConverter.convertAllFromJson(notifications));
         }
-        return alarm;
+        return metricAlarm;
     }
 
     @Override
-    public AlarmJson convert(Alarm source) {
-        AlarmJson json = new AlarmJson();
+    public MetricAlarmJson convert(MetricAlarm source) {
+        MetricAlarmJson json = new MetricAlarmJson();
         json.setId(source.getId());
         ScalingPolicy scalingPolicy = source.getScalingPolicy();
         json.setScalingPolicyId(scalingPolicy == null ? null : scalingPolicy.getId());

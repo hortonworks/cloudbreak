@@ -21,7 +21,7 @@ public class ScalingPolicy {
     private AdjustmentType adjustmentType;
     private int scalingAdjustment;
     @OneToOne(mappedBy = "scalingPolicy")
-    private Alarm alarm;
+    private BaseAlarm alarm;
     private String hostGroup;
 
     public long getId() {
@@ -32,11 +32,11 @@ public class ScalingPolicy {
         this.id = id;
     }
 
-    public Alarm getAlarm() {
+    public BaseAlarm getAlarm() {
         return alarm;
     }
 
-    public void setAlarm(Alarm alarm) {
+    public void setAlarm(BaseAlarm alarm) {
         this.alarm = alarm;
     }
 

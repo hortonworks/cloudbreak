@@ -47,7 +47,9 @@ public class Cluster {
     private boolean appMovementAllowed;
     private ClusterState state = ClusterState.RUNNING;
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Alarm> alarms = new ArrayList<>();
+    private List<MetricAlarm> metricAlarms = new ArrayList<>();
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TimeAlarm> timeAlarms = new ArrayList<>();
     private int minSize = -1;
     private int maxSize = -1;
     private int coolDown = -1;
@@ -93,12 +95,46 @@ public class Cluster {
         this.state = state;
     }
 
-    public List<Alarm> getAlarms() {
+    public void deleteAlarms() {
+        setMetricAlarms(null);
+        setTimeAlarms(null);
+    }
+
+    public List<BaseAlarm> getAlarms() {
+        List<BaseAlarm> alarms = new ArrayList<>();
+        alarms.addAll(timeAlarms);
+        alarms.addAll(metricAlarms);
         return alarms;
     }
 
-    public void setAlarms(List<Alarm> alarms) {
-        this.alarms = alarms;
+    public void setAlarms(List<BaseAlarm> alarms) {
+        List<TimeAlarm> timeAlarms = new ArrayList<>();
+        List<MetricAlarm> metricAlarms = new ArrayList<>();
+        for (BaseAlarm alarm : alarms) {
+            if (alarm instanceof TimeAlarm) {
+                timeAlarms.add((TimeAlarm) alarm);
+            } else {
+                metricAlarms.add((MetricAlarm) alarm);
+            }
+        }
+        setTimeAlarms(timeAlarms);
+        setMetricAlarms(metricAlarms);
+    }
+
+    public List<MetricAlarm> getMetricAlarms() {
+        return metricAlarms;
+    }
+
+    public void setMetricAlarms(List<MetricAlarm> metricAlarms) {
+        this.metricAlarms = metricAlarms;
+    }
+
+    public List<TimeAlarm> getTimeAlarms() {
+        return timeAlarms;
+    }
+
+    public void setTimeAlarms(List<TimeAlarm> timeAlarms) {
+        this.timeAlarms = timeAlarms;
     }
 
     public int getMinSize() {

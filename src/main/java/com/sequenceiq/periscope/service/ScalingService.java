@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.periscope.domain.Alarm;
+import com.sequenceiq.periscope.domain.BaseAlarm;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
 import com.sequenceiq.periscope.log.Logger;
@@ -42,7 +42,7 @@ public class ScalingService {
                 ScalingRequest scalingRequest = (ScalingRequest)
                         applicationContext.getBean("ScalingRequest", cluster, policy, totalNodes, desiredNodeCount);
                 executorService.execute(scalingRequest);
-                Alarm alarm = policy.getAlarm();
+                BaseAlarm alarm = policy.getAlarm();
                 alarm.reset();
                 cluster.setLastScalingActivityCurrent();
                 LOGGER.info(clusterId, "Resetting time on alarm: {}", alarm.getName());
@@ -60,8 +60,9 @@ public class ScalingService {
         cluster.setMinSize(scalingPolicies.getMinSize());
         cluster.setMaxSize(scalingPolicies.getMaxSize());
         List<ScalingPolicy> policies = scalingPolicies.getScalingPolicies();
-        List<Alarm> alarms = clusterRepository.findOne(clusterId).getAlarms();
-        for (Alarm alarm : alarms) {
+        Cluster savedCluster = clusterRepository.findOne(clusterId);
+        List<BaseAlarm> alarms = savedCluster.getAlarms();
+        for (BaseAlarm alarm : alarms) {
             if (!policies.contains(alarm.getScalingPolicy())) {
                 alarm.setScalingPolicy(null);
             }
@@ -85,8 +86,8 @@ public class ScalingService {
     public ScalingPolicies deletePolicy(long clusterId, long policyId) throws ClusterNotFoundException {
         Cluster runningCluster = clusterService.get(clusterId);
         Cluster savedCluster = clusterRepository.findOne(clusterId);
-        List<Alarm> alarms = savedCluster.getAlarms();
-        for (Alarm alarm : alarms) {
+        List<BaseAlarm> alarms = savedCluster.getAlarms();
+        for (BaseAlarm alarm : alarms) {
             ScalingPolicy scalingPolicy = alarm.getScalingPolicy();
             if (scalingPolicy != null && scalingPolicy.getId() == policyId) {
                 alarm.setScalingPolicy(null);
@@ -108,7 +109,7 @@ public class ScalingService {
         group.setMinSize(cluster.getMinSize());
         group.setCoolDown(cluster.getCoolDown());
         List<ScalingPolicy> policies = new ArrayList<>();
-        for (Alarm alarm : cluster.getAlarms()) {
+        for (BaseAlarm alarm : cluster.getAlarms()) {
             ScalingPolicy scalingPolicy = alarm.getScalingPolicy();
             if (scalingPolicy != null) {
                 policies.add(scalingPolicy);
