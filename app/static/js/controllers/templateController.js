@@ -199,7 +199,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
             $scope.gccTemp = {
                 parameters: {
                     gccInstanceType: "N1_STANDARD_2",
-                    gccZone: "EUROPE_WEST1_A",
+                    gccZone: "EUROPE_WEST1_B",
                     volumeType: "HDD"
                 }
             }
