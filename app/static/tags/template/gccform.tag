@@ -71,10 +71,10 @@
     </div>
 </div>
 <div class="form-group">
-    <label class="col-sm-3 control-label" for="gcc_tvolumetype">Volume Type</label>
+    <label class="col-sm-3 control-label" for="gcc_tvolumetype">Volume type</label>
     <div class="col-sm-9">
         <select class="form-control" id="gcc_tvolumetype" ng-model="gccTemp.parameters.volumeType">
-            <option value="HDD">HDD</option>
+            <option value="HDD">Magnetic</option>
             <option value="SSD">SSD</option>
         </select>
     </div>
