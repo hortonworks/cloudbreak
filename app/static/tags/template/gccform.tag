@@ -23,7 +23,6 @@
         <select class="form-control" id="gcc_tregion" ng-model="gccTemp.parameters.gccZone">
             <option value="ASIA_EAST1_A">asia-east1-a</option>
             <option value="ASIA_EAST1_B">asia-east1-b</option>
-            <option value="EUROPE_WEST1_A">europe-west1-a</option>
             <option value="EUROPE_WEST1_B">europe-west1-b</option>
             <option value="US_CENTRAL1_A">us-central1-a</option>
             <option value="US_CENTRAL1_B">us-central1-b</option>
