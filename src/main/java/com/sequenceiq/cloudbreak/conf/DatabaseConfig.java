@@ -29,6 +29,9 @@ public class DatabaseConfig {
     @Value("${cb.db.env.pass}")
     private String dbPassword;
 
+    @Value("${cb.db.env.db}")
+    private String dbName;
+
     @Value("${cb.db.port.5432.tcp.addr}")
     private String dbHost;
 
@@ -42,7 +45,7 @@ public class DatabaseConfig {
     public DataSource dataSource() {
         SimpleDriverDataSource dataSource = new SimpleDriverDataSource();
         dataSource.setDriverClass(Driver.class);
-        dataSource.setUrl(String.format("jdbc:postgresql://%s:%s/cloudbreak", dbHost, dbPort));
+        dataSource.setUrl(String.format("jdbc:postgresql://%s:%s/%s", dbHost, dbPort, dbName));
         dataSource.setUsername(dbUser);
         dataSource.setPassword(dbPassword);
         return dataSource;
