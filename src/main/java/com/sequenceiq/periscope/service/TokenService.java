@@ -56,9 +56,9 @@ public class TokenService {
                 String[] parts = location.split("#|&|=");
                 token = parts[2];
             } else {
-                LOGGER.info(LOGGER.NOT_CLUSTER_RELATED, "Couldn't get an access token from the identity server, check its configuration!");
-                LOGGER.info(LOGGER.NOT_CLUSTER_RELATED, "Response from identity server: ");
-                LOGGER.info(LOGGER.NOT_CLUSTER_RELATED, "Headers: " + authResponse);
+                LOGGER.info(Logger.NOT_CLUSTER_RELATED, "Couldn't get an access token from the identity server, check its configuration!");
+                LOGGER.info(Logger.NOT_CLUSTER_RELATED, "Response from identity server: ");
+                LOGGER.info(Logger.NOT_CLUSTER_RELATED, "Headers: " + authResponse);
                 throw new TokenUnavailableException("Wrong response from identity server.");
             }
         } catch (Exception e) {

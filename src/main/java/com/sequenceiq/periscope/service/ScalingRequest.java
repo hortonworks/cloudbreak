@@ -52,7 +52,7 @@ public class ScalingRequest implements Runnable {
                 scaleDown(client, scalingAdjustment);
             }
         } catch (Exception e) {
-            LOGGER.error(LOGGER.NOT_CLUSTER_RELATED, "Cannot retrieve an oauth token from the identity server", e);
+            LOGGER.error(Logger.NOT_CLUSTER_RELATED, "Cannot retrieve an oauth token from the identity server", e);
         }
     }
 

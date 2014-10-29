@@ -137,6 +137,9 @@ public class ScalingService {
                 desiredNodeCount = totalNodes
                         + (int) (ceil(totalNodes * ((double) scalingAdjustment / ClusterUtils.MAX_CAPACITY)));
                 break;
+            case EXACT:
+                desiredNodeCount = policy.getScalingAdjustment();
+                break;
             default:
                 desiredNodeCount = totalNodes;
         }

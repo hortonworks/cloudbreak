@@ -22,8 +22,6 @@ import com.sequenceiq.periscope.registry.ClusterState;
 import com.sequenceiq.periscope.registry.ConnectionException;
 import com.sequenceiq.periscope.registry.QueueSetupException;
 import com.sequenceiq.periscope.repository.ClusterRepository;
-import com.sequenceiq.periscope.repository.MetricAlarmRepository;
-import com.sequenceiq.periscope.repository.ScalingPolicyRepository;
 import com.sequenceiq.periscope.utils.ClusterUtils;
 
 @Service
@@ -38,10 +36,6 @@ public class ClusterService {
     private ClusterRegistry clusterRegistry;
     @Autowired
     private ClusterRepository clusterRepository;
-    @Autowired
-    private ScalingPolicyRepository policyRepository;
-    @Autowired
-    private MetricAlarmRepository metricAlarmRepository;
 
     public Cluster add(Ambari ambari) throws ConnectionException {
         Cluster cluster = new Cluster(ambari);
