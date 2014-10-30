@@ -4,13 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
@@ -57,6 +56,9 @@ public class StackDeleteRequestHandler implements Consumer<Event<StackDeleteRequ
     @Autowired
     private Reactor reactor;
 
+    @javax.annotation.Resource
+    private ConcurrentTaskExecutor resourceBuilderExecutor;
+
     @Override
     public void accept(Event<StackDeleteRequest> stackDeleteRequest) {
         final StackDeleteRequest data = stackDeleteRequest.getData();
@@ -68,13 +70,12 @@ public class StackDeleteRequestHandler implements Consumer<Event<StackDeleteRequ
                 ResourceBuilderInit resourceBuilderInit = resourceBuilderInits.get(data.getCloudPlatform());
                 final DeleteContextObject dCO = resourceBuilderInit.deleteInit(stack);
 
-                ExecutorService executor = Executors.newFixedThreadPool(stack.getNodeCount());
                 for (int i = instanceResourceBuilders.get(data.getCloudPlatform()).size() - 1; i >= 0; i--) {
                     List<Future<Boolean>> futures = new ArrayList<>();
                     final int index = i;
                     List<Resource> resourceByType = stack.getResourcesByType(instanceResourceBuilders.get(data.getCloudPlatform()).get(i).resourceType());
                     for (final Resource resource : resourceByType) {
-                        Future<Boolean> submit = executor.submit(new Callable<Boolean>() {
+                        Future<Boolean> submit = resourceBuilderExecutor.submit(new Callable<Boolean>() {
                             @Override
                             public Boolean call() throws Exception {
                                 return instanceResourceBuilders.get(data.getCloudPlatform()).get(index).delete(resource, dCO);

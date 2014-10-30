@@ -6,13 +6,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
@@ -67,9 +66,12 @@ public class ProvisionContext {
     private Map<CloudPlatform, List<ResourceBuilder>> networkResourceBuilders;
 
     @javax.annotation.Resource
+    private ConcurrentTaskExecutor resourceBuilderExecutor;
+
+    @javax.annotation.Resource
     private Map<CloudPlatform, ResourceBuilderInit> resourceBuilderInits;
 
-    public void buildStack(CloudPlatform cloudPlatform, Long stackId, Map<String, Object> setupProperties, Map<String, String> userDataParams) {
+    public void buildStack(final CloudPlatform cloudPlatform, Long stackId, Map<String, Object> setupProperties, Map<String, String> userDataParams) {
         try {
             Stack stack = stackRepository.findById(stackId);
             if (stack.getStatus().equals(Status.REQUESTED)) {
@@ -86,23 +88,23 @@ public class ProvisionContext {
                     for (ResourceBuilder resourceBuilder : networkResourceBuilders.get(cloudPlatform)) {
                         resourceSet.addAll(resourceBuilder.create(pCO));
                     }
-                    ExecutorService executor = Executors.newFixedThreadPool(stack.getNodeCount());
-
-                    for (final ResourceBuilder resourceBuilder : instanceResourceBuilders.get(cloudPlatform)) {
-                        List<Future<List<Resource>>> futures = new ArrayList<>();
-                        for (int i = 0; i < stack.getNodeCount(); i++) {
-                            final int index = i;
-                            Future<List<Resource>> submit = executor.submit(new Callable<List<Resource>>() {
-                                @Override
-                                public List<Resource> call() throws Exception {
-                                    return resourceBuilder.create(pCO, index);
+                    List<Future<List<Resource>>> futures = new ArrayList<>();
+                    for (int i = 0; i < stack.getNodeCount(); i++) {
+                        final int index = i;
+                        Future<List<Resource>> submit = resourceBuilderExecutor.submit(new Callable<List<Resource>>() {
+                            @Override
+                            public List<Resource> call() throws Exception {
+                                List<Resource> resources = new ArrayList<>();
+                                for (final ResourceBuilder resourceBuilder : instanceResourceBuilders.get(cloudPlatform)) {
+                                    resources.addAll(resourceBuilder.create(pCO, index));
                                 }
-                            });
-                            futures.add(submit);
-                        }
-                        for (Future<List<Resource>> future : futures) {
-                            resourceSet.addAll(future.get());
-                        }
+                                return resources;
+                            }
+                        });
+                        futures.add(submit);
+                    }
+                    for (Future<List<Resource>> future : futures) {
+                        resourceSet.addAll(future.get());
                     }
 
                     LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_COMPLETE_EVENT, stack.getId());

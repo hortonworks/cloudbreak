@@ -5,12 +5,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Optional;
@@ -40,6 +39,9 @@ public class GccConnector implements CloudPlatformConnector {
     @javax.annotation.Resource
     private Map<CloudPlatform, ResourceBuilderInit> resourceBuilderInits;
 
+    @javax.annotation.Resource
+    private ConcurrentTaskExecutor resourceBuilderExecutor;
+
     @Override
     public StackDescription describeStackWithResources(Stack stack, Credential credential) {
         DetailedGccStackDescription detailedGccStackDescription = new DetailedGccStackDescription();
@@ -56,13 +58,11 @@ public class GccConnector implements CloudPlatformConnector {
                     }
                 }
             }
-            ExecutorService executor = Executors.newFixedThreadPool(stack.getNodeCount());
-
             for (final ResourceBuilder resourceBuilder : instanceResourceBuilders.get(CloudPlatform.GCC)) {
                 List<Resource> resourceByType = stack.getResourcesByType(resourceBuilder.resourceType());
                 List<Future<Optional<String>>> futures = new ArrayList<>();
                 for (final Resource resource : resourceByType) {
-                    Future<Optional<String>> submit = executor.submit(new Callable<Optional<String>>() {
+                    Future<Optional<String>> submit = resourceBuilderExecutor.submit(new Callable<Optional<String>>() {
                         @Override
                         public Optional<String> call() throws Exception {
                             return resourceBuilder.describe(resource, dCO);
@@ -86,14 +86,12 @@ public class GccConnector implements CloudPlatformConnector {
         ResourceBuilderInit resourceBuilderInit = resourceBuilderInits.get(stack.getTemplate().cloudPlatform());
         try {
             final DeleteContextObject dCO = resourceBuilderInit.deleteInit(stack);
-
-            ExecutorService executor = Executors.newFixedThreadPool(stack.getNodeCount());
             for (int i = instanceResourceBuilders.get(CloudPlatform.GCC).size() - 1; i >= 0; i--) {
                 List<Future<Boolean>> futures = new ArrayList<>();
                 final int index = i;
                 for (final Resource resource : resourceSet) {
                     if (resource.getResourceType().equals(instanceResourceBuilders.get(CloudPlatform.GCC).get(i).resourceType())) {
-                        Future<Boolean> submit = executor.submit(new Callable<Boolean>() {
+                        Future<Boolean> submit = resourceBuilderExecutor.submit(new Callable<Boolean>() {
                             @Override
                             public Boolean call() throws Exception {
                                 return instanceResourceBuilders.get(CloudPlatform.GCC).get(index).delete(resource, dCO);
