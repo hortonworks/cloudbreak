@@ -239,7 +239,9 @@ You can do this on the management console, or - if you have aws-cli configured -
 ####Create IAM role on the console
 
 1. Log in to the AWS management console with the user account you'd like to use with Cloudbreak
-2. Go to IAM and select Roles
+2. Go to IAM, select "Roles", click Create New Role
+3. Give your role a name.
+4. Setup your role access:
   * Select Role for Cross-Account access
     *  Allows IAM users from a 3rd party AWS account to access this account.
 
@@ -254,9 +256,10 @@ You can do this on the management console, or - if you have aws-cli configured -
 ####Create IAM role with the create script
 
 1. Download the contents of [this folder](https://github.com/sequenceiq/cloudbreak/tree/master/docs/aws) in a directory.
-2. Enter the directory
-3. Run `./create-iam-role`
-4. Copy the resulting role ARN
+2. Make sure you have the [AWS CLI](http://aws.amazon.com/cli/) installed and on your path.
+3. Enter the directory
+4. Run `./create-iam-role`
+5. Copy the resulting role ARN
 
 Once this is configured, Cloudbreak is ready to launch Hadoop clusters on your behalf. The only thing Cloudbreak requires is the `Role ARN` (Role for Cross-Account access).
 
