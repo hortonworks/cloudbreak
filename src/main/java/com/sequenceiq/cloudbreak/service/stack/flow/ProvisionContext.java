@@ -31,7 +31,6 @@ import com.sequenceiq.cloudbreak.service.stack.event.StackOperationFailure;
 import com.sequenceiq.cloudbreak.service.stack.resource.ProvisionContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
-import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
@@ -62,7 +61,10 @@ public class ProvisionContext {
     private UserDataBuilder userDataBuilder;
 
     @javax.annotation.Resource
-    private Map<CloudPlatform, Map<ResourceBuilderType, List<ResourceBuilder>>> resourceBuilders;
+    private Map<CloudPlatform, List<ResourceBuilder>> instanceResourceBuilders;
+
+    @javax.annotation.Resource
+    private Map<CloudPlatform, List<ResourceBuilder>> networkResourceBuilders;
 
     @javax.annotation.Resource
     private Map<CloudPlatform, ResourceBuilderInit> resourceBuilderInits;
@@ -78,18 +80,15 @@ public class ProvisionContext {
                 if (!cloudPlatform.isWithTemplate()) {
                     stackUpdater.updateStackStatus(stack.getId(), Status.REQUESTED);
                     Set<com.sequenceiq.cloudbreak.domain.Resource> resourceSet = new HashSet<>();
-                    Map<ResourceBuilderType, List<ResourceBuilder>> resourceBuilderTypeListMap = resourceBuilders.get(cloudPlatform);
                     ResourceBuilderInit resourceBuilderInit = resourceBuilderInits.get(cloudPlatform);
                     final ProvisionContextObject pCO =
                             resourceBuilderInit.provisionInit(stack, userDataBuilder.build(cloudPlatform, stack.getHash(), userDataParams));
-                    List<ResourceBuilder> networkResourceBuilders = resourceBuilderTypeListMap.get(ResourceBuilderType.NETWORK_RESOURCE);
-                    for (ResourceBuilder resourceBuilder : networkResourceBuilders) {
+                    for (ResourceBuilder resourceBuilder : networkResourceBuilders.get(cloudPlatform)) {
                         resourceSet.addAll(resourceBuilder.create(pCO));
                     }
-                    List<ResourceBuilder> instanceResourceBuilders = resourceBuilderTypeListMap.get(ResourceBuilderType.INSTANCE_RESOURCE);
                     ExecutorService executor = Executors.newFixedThreadPool(stack.getNodeCount());
 
-                    for (final ResourceBuilder resourceBuilder : instanceResourceBuilders) {
+                    for (final ResourceBuilder resourceBuilder : instanceResourceBuilders.get(cloudPlatform)) {
                         List<Future<List<Resource>>> futures = new ArrayList<>();
                         for (int i = 0; i < stack.getNodeCount(); i++) {
                             final int index = i;

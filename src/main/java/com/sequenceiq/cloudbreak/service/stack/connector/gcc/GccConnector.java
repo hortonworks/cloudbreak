@@ -25,7 +25,6 @@ import com.sequenceiq.cloudbreak.service.stack.resource.DeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.DescribeContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
-import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
 
 @Service
 public class GccConnector implements CloudPlatformConnector {
@@ -33,7 +32,10 @@ public class GccConnector implements CloudPlatformConnector {
     private static final Logger LOGGER = LoggerFactory.getLogger(GccConnector.class);
 
     @javax.annotation.Resource
-    private Map<CloudPlatform, Map<ResourceBuilderType, List<ResourceBuilder>>> resourceBuilders;
+    private Map<CloudPlatform, List<ResourceBuilder>> instanceResourceBuilders;
+
+    @javax.annotation.Resource
+    private Map<CloudPlatform, List<ResourceBuilder>> networkResourceBuilders;
 
     @javax.annotation.Resource
     private Map<CloudPlatform, ResourceBuilderInit> resourceBuilderInits;
@@ -41,13 +43,11 @@ public class GccConnector implements CloudPlatformConnector {
     @Override
     public StackDescription describeStackWithResources(Stack stack, Credential credential) {
         DetailedGccStackDescription detailedGccStackDescription = new DetailedGccStackDescription();
-        Map<ResourceBuilderType, List<ResourceBuilder>> resourceBuilderTypeListMap = resourceBuilders.get(CloudPlatform.GCC);
         ResourceBuilderInit resourceBuilderInit = resourceBuilderInits.get(CloudPlatform.GCC);
 
         try {
             final DescribeContextObject dCO = resourceBuilderInit.describeInit(stack);
-            List<ResourceBuilder> networkResourceBuilders = resourceBuilderTypeListMap.get(ResourceBuilderType.NETWORK_RESOURCE);
-            for (ResourceBuilder resourceBuilder : networkResourceBuilders) {
+            for (ResourceBuilder resourceBuilder : networkResourceBuilders.get(CloudPlatform.GCC)) {
                 List<Resource> resourceByType = stack.getResourcesByType(resourceBuilder.resourceType());
                 for (Resource resource : resourceByType) {
                     Optional<String> describe = resourceBuilder.describe(resource, dCO);
@@ -56,10 +56,9 @@ public class GccConnector implements CloudPlatformConnector {
                     }
                 }
             }
-            List<ResourceBuilder> instanceResourceBuilders = resourceBuilderTypeListMap.get(ResourceBuilderType.INSTANCE_RESOURCE);
             ExecutorService executor = Executors.newFixedThreadPool(stack.getNodeCount());
 
-            for (final ResourceBuilder resourceBuilder : instanceResourceBuilders) {
+            for (final ResourceBuilder resourceBuilder : instanceResourceBuilders.get(CloudPlatform.GCC)) {
                 List<Resource> resourceByType = stack.getResourcesByType(resourceBuilder.resourceType());
                 List<Future<Optional<String>>> futures = new ArrayList<>();
                 for (final Resource resource : resourceByType) {
@@ -84,22 +83,20 @@ public class GccConnector implements CloudPlatformConnector {
     }
 
     public void rollback(Stack stack, Credential credential, Set<Resource> resourceSet) {
-        Map<ResourceBuilderType, List<ResourceBuilder>> resourceBuilderTypeListMap = resourceBuilders.get(stack.getTemplate().cloudPlatform());
         ResourceBuilderInit resourceBuilderInit = resourceBuilderInits.get(stack.getTemplate().cloudPlatform());
         try {
             final DeleteContextObject dCO = resourceBuilderInit.deleteInit(stack);
 
-            final List<ResourceBuilder> instanceResourceBuilders = resourceBuilderTypeListMap.get(ResourceBuilderType.INSTANCE_RESOURCE);
             ExecutorService executor = Executors.newFixedThreadPool(stack.getNodeCount());
-            for (int i = instanceResourceBuilders.size() - 1; i >= 0; i--) {
+            for (int i = instanceResourceBuilders.get(CloudPlatform.GCC).size() - 1; i >= 0; i--) {
                 List<Future<Boolean>> futures = new ArrayList<>();
                 final int index = i;
                 for (final Resource resource : resourceSet) {
-                    if (resource.getResourceType().equals(instanceResourceBuilders.get(i).resourceType())) {
+                    if (resource.getResourceType().equals(instanceResourceBuilders.get(CloudPlatform.GCC).get(i).resourceType())) {
                         Future<Boolean> submit = executor.submit(new Callable<Boolean>() {
                             @Override
                             public Boolean call() throws Exception {
-                                return instanceResourceBuilders.get(index).delete(resource, dCO);
+                                return instanceResourceBuilders.get(CloudPlatform.GCC).get(index).delete(resource, dCO);
                             }
                         });
                         futures.add(submit);
@@ -109,11 +106,10 @@ public class GccConnector implements CloudPlatformConnector {
                     future.get();
                 }
             }
-            List<ResourceBuilder> networkResourceBuilders = resourceBuilderTypeListMap.get(ResourceBuilderType.NETWORK_RESOURCE);
-            for (int i = instanceResourceBuilders.size() - 1; i >= 0; i--) {
+            for (int i = instanceResourceBuilders.get(CloudPlatform.GCC).size() - 1; i >= 0; i--) {
                 for (Resource resource : resourceSet) {
-                    if (resource.getResourceType().equals(instanceResourceBuilders.get(i).resourceType())) {
-                        networkResourceBuilders.get(i).delete(resource, dCO);
+                    if (resource.getResourceType().equals(instanceResourceBuilders.get(CloudPlatform.GCC).get(i).resourceType())) {
+                        networkResourceBuilders.get(CloudPlatform.GCC).get(i).delete(resource, dCO);
                     }
                 }
             }

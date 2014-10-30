@@ -12,14 +12,15 @@ import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.domain.GccTemplate;
-import com.sequenceiq.cloudbreak.service.stack.resource.SimpleNetworkResourceBuilder;
+import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
+import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDescribeContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccProvisionContextObject;
 
-public abstract class GccSimpleNetworkResourceBuilder extends
-        SimpleNetworkResourceBuilder<GccProvisionContextObject, GccDeleteContextObject, GccDescribeContextObject>  {
-    protected static final Logger LOGGER = LoggerFactory.getLogger(GccSimpleInstanceResourceBuilder.class);
+public abstract class GccSimpleNetworkResourceBuilder implements
+        ResourceBuilder<GccProvisionContextObject, GccDeleteContextObject, GccDescribeContextObject> {
+    protected static final Logger LOGGER = LoggerFactory.getLogger(GccSimpleNetworkResourceBuilder.class);
     protected static final int MAX_POLLING_ATTEMPTS = 60;
     protected static final int POLLING_INTERVAL = 5000;
     private static final int NOT_FOUND = 404;
@@ -44,5 +45,10 @@ public abstract class GccSimpleNetworkResourceBuilder extends
         } else {
             throw new InternalServerException(ex.getMessage());
         }
+    }
+
+    @Override
+    public ResourceBuilderType resourceBuilderType() {
+        return ResourceBuilderType.NETWORK_RESOURCE;
     }
 }

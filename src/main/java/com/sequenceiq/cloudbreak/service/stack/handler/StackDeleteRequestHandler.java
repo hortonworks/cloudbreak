@@ -26,7 +26,6 @@ import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
 import com.sequenceiq.cloudbreak.service.stack.resource.DeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
-import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
 
 import reactor.core.Reactor;
 import reactor.event.Event;
@@ -47,7 +46,10 @@ public class StackDeleteRequestHandler implements Consumer<Event<StackDeleteRequ
     private RetryingStackUpdater retryingStackUpdater;
 
     @javax.annotation.Resource
-    private Map<CloudPlatform, Map<ResourceBuilderType, List<ResourceBuilder>>> resourceBuilders;
+    private Map<CloudPlatform, List<ResourceBuilder>> instanceResourceBuilders;
+
+    @javax.annotation.Resource
+    private Map<CloudPlatform, List<ResourceBuilder>> networkResourceBuilders;
 
     @javax.annotation.Resource
     private Map<CloudPlatform, ResourceBuilderInit> resourceBuilderInits;
@@ -57,27 +59,25 @@ public class StackDeleteRequestHandler implements Consumer<Event<StackDeleteRequ
 
     @Override
     public void accept(Event<StackDeleteRequest> stackDeleteRequest) {
-        StackDeleteRequest data = stackDeleteRequest.getData();
+        final StackDeleteRequest data = stackDeleteRequest.getData();
         LOGGER.info("Accepted {} event.", ReactorConfig.DELETE_REQUEST_EVENT, data.getStackId());
         retryingStackUpdater.updateStackStatus(data.getStackId(), Status.DELETE_IN_PROGRESS);
         Stack stack = stackRepository.findOneWithLists(data.getStackId());
         try {
             if (!data.getCloudPlatform().isWithTemplate()) {
-                Map<ResourceBuilderType, List<ResourceBuilder>> resourceBuilderTypeListMap = resourceBuilders.get(data.getCloudPlatform());
                 ResourceBuilderInit resourceBuilderInit = resourceBuilderInits.get(data.getCloudPlatform());
                 final DeleteContextObject dCO = resourceBuilderInit.deleteInit(stack);
 
-                final List<ResourceBuilder> instanceResourceBuilders = resourceBuilderTypeListMap.get(ResourceBuilderType.INSTANCE_RESOURCE);
                 ExecutorService executor = Executors.newFixedThreadPool(stack.getNodeCount());
-                for (int i = instanceResourceBuilders.size() - 1; i >= 0; i--) {
+                for (int i = instanceResourceBuilders.get(data.getCloudPlatform()).size() - 1; i >= 0; i--) {
                     List<Future<Boolean>> futures = new ArrayList<>();
                     final int index = i;
-                    List<Resource> resourceByType = stack.getResourcesByType(instanceResourceBuilders.get(i).resourceType());
+                    List<Resource> resourceByType = stack.getResourcesByType(instanceResourceBuilders.get(data.getCloudPlatform()).get(i).resourceType());
                     for (final Resource resource : resourceByType) {
                         Future<Boolean> submit = executor.submit(new Callable<Boolean>() {
                             @Override
                             public Boolean call() throws Exception {
-                                return instanceResourceBuilders.get(index).delete(resource, dCO);
+                                return instanceResourceBuilders.get(data.getCloudPlatform()).get(index).delete(resource, dCO);
                             }
                         });
                         futures.add(submit);
@@ -86,10 +86,9 @@ public class StackDeleteRequestHandler implements Consumer<Event<StackDeleteRequ
                         future.get();
                     }
                 }
-                List<ResourceBuilder> networkResourceBuilders = resourceBuilderTypeListMap.get(ResourceBuilderType.NETWORK_RESOURCE);
                 for (int i = instanceResourceBuilders.size() - 1; i >= 0; i--) {
-                    for (Resource resource : stack.getResourcesByType(networkResourceBuilders.get(i).resourceType())) {
-                        networkResourceBuilders.get(i).delete(resource, dCO);
+                    for (Resource resource : stack.getResourcesByType(networkResourceBuilders.get(data.getCloudPlatform()).get(i).resourceType())) {
+                        networkResourceBuilders.get(data.getCloudPlatform()).get(i).delete(resource, dCO);
                     }
                 }
                 reactor.notify(ReactorConfig.DELETE_COMPLETE_EVENT, Event.wrap(new StackDeleteComplete(dCO.getStackId())));

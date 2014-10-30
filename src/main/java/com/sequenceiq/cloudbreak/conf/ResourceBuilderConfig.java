@@ -10,8 +10,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
-import com.sequenceiq.cloudbreak.service.stack.resource.InstanceResourceBuilder;
-import com.sequenceiq.cloudbreak.service.stack.resource.NetworkResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
@@ -20,10 +18,7 @@ import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
 public class ResourceBuilderConfig {
 
     @Autowired
-    private List<InstanceResourceBuilder> instanceResourceBuilders;
-
-    @Autowired
-    private List<NetworkResourceBuilder> networkResourceBuilders;
+    private List<ResourceBuilder> resourceBuilders;
 
     @Autowired
     private List<ResourceBuilderInit> resourceBuilderInits;
@@ -38,29 +33,40 @@ public class ResourceBuilderConfig {
     }
 
     @Bean
-    Map<CloudPlatform, Map<ResourceBuilderType, List<ResourceBuilder>>> resourceBuilders() {
-        Map<CloudPlatform, Map<ResourceBuilderType, List<ResourceBuilder>>> resourceBuilders = new HashMap<>();
+    Map<CloudPlatform, List<ResourceBuilder>> instanceResourceBuilders() {
+        Map<CloudPlatform, List<ResourceBuilder>> returnResourceBuilders = new HashMap<>();
         for (CloudPlatform cloudPlatform : CloudPlatform.values()) {
             if (!cloudPlatform.isWithTemplate()) {
-                Map<ResourceBuilderType, List<ResourceBuilder>> mainResourceBuilders = new HashMap<>();
                 List<ResourceBuilder> mainInstanceResourceBuilders = new ArrayList<>();
-                for (InstanceResourceBuilder instanceResourceBuilder : instanceResourceBuilders) {
-                    if (cloudPlatform.equals(instanceResourceBuilder.cloudPlatform())) {
-                        mainInstanceResourceBuilders.add(instanceResourceBuilder);
+                for (ResourceBuilder networkResourceBuilder : resourceBuilders) {
+                    if (ResourceBuilderType.INSTANCE_RESOURCE.equals(networkResourceBuilder.resourceBuilderType())) {
+                        if (cloudPlatform.equals(networkResourceBuilder.cloudPlatform())) {
+                            mainInstanceResourceBuilders.add(networkResourceBuilder);
+                        }
                     }
                 }
-                List<ResourceBuilder> mainNetworkResourceBuilders = new ArrayList<>();
-                for (NetworkResourceBuilder networkResourceBuilder : networkResourceBuilders) {
-                    if (cloudPlatform.equals(networkResourceBuilder.cloudPlatform())) {
-                        mainNetworkResourceBuilders.add(networkResourceBuilder);
-                    }
-                }
-
-                mainResourceBuilders.put(ResourceBuilderType.INSTANCE_RESOURCE, mainInstanceResourceBuilders);
-                mainResourceBuilders.put(ResourceBuilderType.NETWORK_RESOURCE, mainNetworkResourceBuilders);
-                resourceBuilders.put(cloudPlatform, mainResourceBuilders);
+                returnResourceBuilders.put(cloudPlatform, mainInstanceResourceBuilders);
             }
         }
-        return resourceBuilders;
+        return returnResourceBuilders;
+    }
+
+    @Bean
+    Map<CloudPlatform, List<ResourceBuilder>> networkResourceBuilders() {
+        Map<CloudPlatform, List<ResourceBuilder>> returnResourceBuilders = new HashMap<>();
+        for (CloudPlatform cloudPlatform : CloudPlatform.values()) {
+            if (!cloudPlatform.isWithTemplate()) {
+                List<ResourceBuilder> mainNetworkResourceBuilders = new ArrayList<>();
+                for (ResourceBuilder networkResourceBuilder : resourceBuilders) {
+                    if (ResourceBuilderType.NETWORK_RESOURCE.equals(networkResourceBuilder.resourceBuilderType())) {
+                        if (cloudPlatform.equals(networkResourceBuilder.cloudPlatform())) {
+                            mainNetworkResourceBuilders.add(networkResourceBuilder);
+                        }
+                    }
+                }
+                returnResourceBuilders.put(cloudPlatform, mainNetworkResourceBuilders);
+            }
+        }
+        return returnResourceBuilders;
     }
 }
