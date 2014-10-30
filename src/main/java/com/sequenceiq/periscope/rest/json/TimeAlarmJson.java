@@ -1,13 +1,9 @@
 package com.sequenceiq.periscope.rest.json;
 
-import com.sequenceiq.periscope.domain.Recurrence;
-
 public class TimeAlarmJson extends AbstractAlarmJson {
 
     private String timeZone;
-    private String startTime;
-    private String endTime;
-    private Recurrence recurrence;
+    private String cron;
 
     public String getTimeZone() {
         return timeZone;
@@ -17,27 +13,12 @@ public class TimeAlarmJson extends AbstractAlarmJson {
         this.timeZone = timeZone;
     }
 
-    public String getStartTime() {
-        return startTime;
+    public String getCron() {
+        return cron;
     }
 
-    public void setStartTime(String startTime) {
-        this.startTime = startTime;
+    public void setCron(String cron) {
+        this.cron = cron;
     }
 
-    public String getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(String endTime) {
-        this.endTime = endTime;
-    }
-
-    public Recurrence getRecurrence() {
-        return recurrence;
-    }
-
-    public void setRecurrence(Recurrence recurrence) {
-        this.recurrence = recurrence;
-    }
 }

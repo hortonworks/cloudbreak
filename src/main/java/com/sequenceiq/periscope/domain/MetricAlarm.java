@@ -48,17 +48,18 @@ public class MetricAlarm extends BaseAlarm {
         this.alarmHitsSince = alarmHitsSince;
     }
 
-    public void reset() {
-        setAlarmHitsSince(0);
-        setNotificationSent(false);
-    }
-
     public ComparisonOperator getComparisonOperator() {
         return comparisonOperator;
     }
 
     public void setComparisonOperator(ComparisonOperator comparisonOperator) {
         this.comparisonOperator = comparisonOperator;
+    }
+
+    @Override
+    public void reset() {
+        setAlarmHitsSince(0);
+        setNotificationSent(false);
     }
 
     @Override

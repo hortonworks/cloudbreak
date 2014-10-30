@@ -6,37 +6,10 @@ import javax.persistence.Entity;
 public class TimeAlarm extends BaseAlarm {
 
     private String timeZone;
-    private String startTime;
-    private String endTime;
-    private Recurrence recurrence;
+    private String cron;
 
     @Override
     public void reset() {
-        throw new UnsupportedOperationException();
-    }
-
-    public String getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(String startTime) {
-        this.startTime = startTime;
-    }
-
-    public String getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(String endTime) {
-        this.endTime = endTime;
-    }
-
-    public Recurrence getRecurrence() {
-        return recurrence;
-    }
-
-    public void setRecurrence(Recurrence recurrence) {
-        this.recurrence = recurrence;
     }
 
     public String getTimeZone() {
@@ -45,5 +18,13 @@ public class TimeAlarm extends BaseAlarm {
 
     public void setTimeZone(String timeZone) {
         this.timeZone = timeZone;
+    }
+
+    public String getCron() {
+        return cron;
+    }
+
+    public void setCron(String cron) {
+        this.cron = cron;
     }
 }

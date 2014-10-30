@@ -1,32 +1,50 @@
 package com.sequenceiq.periscope.utils;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.TimeZone;
+
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.quartz.CronExpression;
+
+import com.sequenceiq.periscope.log.Logger;
+import com.sequenceiq.periscope.log.PeriscopeLoggerFactory;
 
 public final class DateUtils {
 
-    private static final ThreadLocal<SimpleDateFormat> DATE_FORMAT = new ThreadLocal<SimpleDateFormat>() {
-        @Override
-        protected SimpleDateFormat initialValue() {
-            return new SimpleDateFormat("yyyy-MM-dd HH:mm");
-        }
-    };
+    private static final Logger LOGGER = PeriscopeLoggerFactory.getLogger(DateUtils.class);
 
     private DateUtils() {
         throw new IllegalStateException();
     }
 
-    public static Date toDate(String date, String timeZone) {
-        SimpleDateFormat dateFormat = DATE_FORMAT.get();
-        dateFormat.setTimeZone(TimeZone.getTimeZone(timeZone));
+    public static boolean isTrigger(long clusterId, String cron, String timeZone, long monitorUpdateRate) {
         try {
-            return dateFormat.parse(date);
+            CronExpression cronExpression = new CronExpression(cron);
+            Date currentTime = getCurrentDate(timeZone);
+            Date nextTime = cronExpression.getNextValidTimeAfter(currentTime);
+            DateTime nextDateTime = getDateTime(nextTime, timeZone).minus(monitorUpdateRate);
+            return nextDateTime.toDate().getTime() - currentTime.getTime() < monitorUpdateRate;
         } catch (ParseException e) {
-            return null;
+            LOGGER.warn(clusterId, "Invalid cron expression, {}", e.getMessage());
+            return false;
         }
     }
 
+    private static DateTime getDateTime(Date date, String timeZone) {
+        return new DateTime(date).withZone(getTimeZone(timeZone));
+    }
+
+    private static Date getCurrentDate(String timeZone) {
+        return getCurrentDateTime(timeZone).toLocalDateTime().toDate();
+    }
+
+    private static DateTime getCurrentDateTime(String timeZone) {
+        return DateTime.now(getTimeZone(timeZone));
+    }
+
+    private static DateTimeZone getTimeZone(String timeZone) {
+        return DateTimeZone.forID(timeZone);
+    }
 
 }

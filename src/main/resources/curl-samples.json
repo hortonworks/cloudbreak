@@ -29,10 +29,15 @@ curl -X GET localhost:8081/clusters/1/alarms | jq .
 curl -X DELETE localhost:8081/clusters/1/alarms/100 | jq .
 
 # set time alarms
-curl -X POST -H "Content-Type: application/json" -d '{"alarms":[{"alarmName":"worktime","description":"Number of nodes during worktime","timeZone":"Europe/Budapest","startTime":"2014-10-29 21:00","endTime":"2014-10-29 22:00","recurrence":"ON_WEEKENDS"}]}' localhost:8081/clusters/1/alarms/time | jq .
+curl -X POST -H "Content-Type: application/json" -d '{"alarms":[{"alarmName":"cron_worktime","description":"Number of nodes during worktime","timeZone":"Europe/Budapest","cron":"0 42 18 ? * MON-FRI"}]}' localhost:8081/clusters/1/alarms/time | jq .
+curl -X GET localhost:8081/clusters/1/alarms/time | jq .
+curl -X DELETE localhost:8081/clusters/1/alarms/time/102 | jq .
 
-# set scaling policy
-curl -X POST -H "Content-Type: application/json" -d '{"minSize":2,"maxSize":10,"cooldown":30,"scalingPolicies":[{"name":"downScaleWhenHighResource","adjustmentType":"NODE_COUNT","scalingAdjustment":2,"hostGroup":"slave_1","alarmId":"101"},{"name":"upScaleWhenHighPendingContainers","adjustmentType":"PERCENTAGE","scalingAdjustment":40,"hostGroup":"slave_1","alarmId":"100"}]}' localhost:8081/clusters/1/policies | jq .
+# set scaling policy for metric alarms
+curl -X POST -H "Content-Type: application/json" -d '{"minSize":1,"maxSize":10,"cooldown":30,"scalingPolicies":[{"name":"downScaleWhenHighResource","adjustmentType":"EXACT","scalingAdjustment":5,"hostGroup":"slave_1","alarmId":"101"},{"name":"upScaleWhenHighPendingContainers","adjustmentType":"PERCENTAGE","scalingAdjustment":40,"hostGroup":"slave_1","alarmId":"100"}]}' localhost:8081/clusters/1/policies | jq .
 curl -X PUT -H "Content-Type: application/json" -d '{"name":"upScaleWhenHighUnhealthyNodes","adjustmentType":"NODE_COUNT","scalingAdjustment":5,"hostGroup":"slave_1","alarmId":"102"}' localhost:8081/clusters/1/policies | jq .
 curl -X GET localhost:8081/clusters/1/policies | jq .
 curl -X DELETE localhost:8081/clusters/1/policies/150 | jq .
+
+# set scaling policy for time alarms
+curl -X POST -H "Content-Type: application/json" -d '{"minSize":1,"maxSize":10,"cooldown":30,"scalingPolicies":[{"name":"downScaleOnEvenings","adjustmentType":"EXACT","scalingAdjustment":2,"hostGroup":"slave_1","alarmId":"101"},{"name":"upscaleWhenWorkHour","adjustmentType":"EXACT","scalingAdjustment":1,"hostGroup":"slave_1","alarmId":"100"},{"name":"downScaleOnWeekend","adjustmentType":"EXACT","scalingAdjustment":2,"hostGroup":"slave_1","alarmId":"102"}]}' localhost:8081/clusters/1/policies | jq .

@@ -23,10 +23,8 @@ public class TimeAlarmConverter extends AbstractConverter<TimeAlarmJson, TimeAla
         TimeAlarm alarm = new TimeAlarm();
         alarm.setName(source.getAlarmName());
         alarm.setDescription(source.getDescription());
-        alarm.setStartTime(source.getStartTime());
-        alarm.setEndTime(source.getEndTime());
+        alarm.setCron(source.getCron());
         alarm.setTimeZone(source.getTimeZone());
-        alarm.setRecurrence(source.getRecurrence());
         List<NotificationJson> notifications = source.getNotifications();
         if (notifications != null && !notifications.isEmpty()) {
             alarm.setNotifications(notificationConverter.convertAllFromJson(notifications));
@@ -41,10 +39,8 @@ public class TimeAlarmConverter extends AbstractConverter<TimeAlarmJson, TimeAla
         ScalingPolicy scalingPolicy = source.getScalingPolicy();
         json.setScalingPolicyId(scalingPolicy == null ? null : scalingPolicy.getId());
         json.setAlarmName(source.getName());
-        json.setStartTime(source.getStartTime());
-        json.setEndTime(source.getEndTime());
+        json.setCron(source.getCron());
         json.setTimeZone(source.getTimeZone());
-        json.setRecurrence(source.getRecurrence());
         json.setDescription(source.getDescription());
         List<Notification> notifications = source.getNotifications();
         notifications = notifications == null ? Collections.<Notification>emptyList() : notifications;

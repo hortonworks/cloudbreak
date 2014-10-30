@@ -1,15 +1,13 @@
 package com.sequenceiq.periscope.monitor.event.handler;
 
-import static com.sequenceiq.periscope.utils.DateUtils.toDate;
-
 import java.text.DecimalFormat;
-import java.util.List;
 
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.ClusterMetricsInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.periscope.domain.BaseAlarm;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ComparisonOperator;
 import com.sequenceiq.periscope.domain.MetricAlarm;
@@ -18,12 +16,14 @@ import com.sequenceiq.periscope.domain.ScalingPolicy;
 import com.sequenceiq.periscope.domain.TimeAlarm;
 import com.sequenceiq.periscope.log.Logger;
 import com.sequenceiq.periscope.log.PeriscopeLoggerFactory;
+import com.sequenceiq.periscope.monitor.MonitorUpdateRate;
 import com.sequenceiq.periscope.monitor.event.ClusterMetricsUpdateEvent;
 import com.sequenceiq.periscope.service.ClusterNotFoundException;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.NotificationService;
 import com.sequenceiq.periscope.service.ScalingService;
 import com.sequenceiq.periscope.utils.ClusterUtils;
+import com.sequenceiq.periscope.utils.DateUtils;
 
 @Component
 public class ClusterWatcher implements ApplicationListener<ClusterMetricsUpdateEvent> {
@@ -45,31 +45,35 @@ public class ClusterWatcher implements ApplicationListener<ClusterMetricsUpdateE
             Cluster cluster = clusterService.get(clusterId);
             ClusterMetricsInfo metrics = event.getClusterMetricsInfo();
             cluster.updateMetrics(metrics);
-
-            List<TimeAlarm> timeAlarms = cluster.getTimeAlarms();
-            for (TimeAlarm timeAlarm : timeAlarms) {
-                checkTimeAlarms(cluster, timeAlarm);
-            }
-
-            if (timeAlarms.isEmpty()) {
-                checkMetricAlarms(cluster, metrics);
-            }
+            checkTimeAlarms(cluster);
+            checkMetricAlarms(cluster, metrics);
         } catch (ClusterNotFoundException e) {
             LOGGER.error(clusterId, "Cluster not found", e);
         }
     }
 
-    private void checkTimeAlarms(Cluster cluster, TimeAlarm alarm) {
-        long clusterId = cluster.getId();
-        LOGGER.info(clusterId, "Checking time based alarm: {}", alarm.getName());
-        LOGGER.info(clusterId, "Alarm start time: {} end time: {}",
-                toDate(alarm.getStartTime(), alarm.getTimeZone()), toDate(alarm.getEndTime(), alarm.getTimeZone()));
+    private void checkTimeAlarms(Cluster cluster) {
+        for (TimeAlarm alarm : cluster.getTimeAlarms()) {
+            long clusterId = cluster.getId();
+            String alarmName = alarm.getName();
+            LOGGER.info(clusterId, "Checking time based alarm: '{}'", alarmName);
+            if (isTrigger(alarm, clusterId)) {
+                LOGGER.info(clusterId, "Alarm: '{}' triggers", alarmName);
+                handleNotifications(cluster, alarm);
+                handleScaling(cluster, alarm);
+                break;
+            }
+        }
+    }
+
+    private boolean isTrigger(TimeAlarm alarm, long clusterId) {
+        return DateUtils.isTrigger(clusterId, alarm.getCron(), alarm.getTimeZone(), MonitorUpdateRate.CLUSTER_UPDATE_RATE);
     }
 
     private void checkMetricAlarms(Cluster cluster, ClusterMetricsInfo metrics) {
         for (MetricAlarm metricAlarm : cluster.getMetricAlarms()) {
             long clusterId = cluster.getId();
-            LOGGER.info(clusterId, "Checking metric based alarm: {}", metricAlarm.getName());
+            LOGGER.info(clusterId, "Checking metric based alarm: '{}'", metricAlarm.getName());
             double value = getMetricValue(metrics, metricAlarm);
             if (alarmHit(value, metricAlarm, clusterId)) {
                 handleNotifications(cluster, metricAlarm);
@@ -136,10 +140,10 @@ public class ClusterWatcher implements ApplicationListener<ClusterMetricsUpdateE
         boolean result = false;
         String alarmName = metricAlarm.getName();
         if (valueHit) {
-            LOGGER.info(clusterId, "{} comparison hit for alarm: {}", operator, alarmName);
+            LOGGER.info(clusterId, "{} comparison hit for alarm: '{}'", operator, alarmName);
             result = setAndCheckTime(metricAlarm, clusterId);
         } else {
-            LOGGER.info(clusterId, "{} comparison failed for alarm: {}", operator, alarmName);
+            LOGGER.info(clusterId, "{} comparison failed for alarm: '{}'", operator, alarmName);
             reset(metricAlarm);
         }
         return result;
@@ -150,15 +154,15 @@ public class ClusterWatcher implements ApplicationListener<ClusterMetricsUpdateE
         String alarmName = metricAlarm.getName();
         long hitsSince = metricAlarm.getAlarmHitsSince();
         if (hitsSince == 0) {
-            LOGGER.info(clusterId, "Counter starts until hit for alarm: {}", alarmName);
+            LOGGER.info(clusterId, "Counter starts until hit for alarm: '{}'", alarmName);
             setCurrentTime(metricAlarm);
         } else {
             long elapsedTime = System.currentTimeMillis() - hitsSince;
             result = elapsedTime > (metricAlarm.getPeriod() * ClusterUtils.MIN_IN_MS);
-            LOGGER.info(clusterId, "Alarm: {} stands since {} minutes", alarmName,
+            LOGGER.info(clusterId, "Alarm: '{}' stands since {} minutes", alarmName,
                     TIME_FORMAT.format((double) elapsedTime / ClusterUtils.MIN_IN_MS));
             if (result) {
-                LOGGER.info(clusterId, "Alarm: {} HIT", alarmName);
+                LOGGER.info(clusterId, "Alarm: '{}' HIT", alarmName);
             }
         }
         return result;
@@ -172,19 +176,19 @@ public class ClusterWatcher implements ApplicationListener<ClusterMetricsUpdateE
         metricAlarm.setAlarmHitsSince(System.currentTimeMillis());
     }
 
-    private void handleScaling(Cluster cluster, MetricAlarm metricAlarm) {
-        ScalingPolicy scalingPolicy = metricAlarm.getScalingPolicy();
+    private void handleScaling(Cluster cluster, BaseAlarm alarm) {
+        ScalingPolicy scalingPolicy = alarm.getScalingPolicy();
         if (scalingPolicy != null) {
             scalingService.scale(cluster, scalingPolicy);
         }
     }
 
-    private void handleNotifications(Cluster cluster, MetricAlarm metricAlarm) {
-        if (!metricAlarm.isNotificationSent()) {
-            for (Notification notification : metricAlarm.getNotifications()) {
-                notificationService.sendNotification(cluster, metricAlarm, notification);
+    private void handleNotifications(Cluster cluster, BaseAlarm alarm) {
+        if (!alarm.isNotificationSent()) {
+            for (Notification notification : alarm.getNotifications()) {
+                notificationService.sendNotification(cluster, alarm, notification);
             }
-            metricAlarm.setNotificationSent(true);
+            alarm.setNotificationSent(true);
         }
     }
 
