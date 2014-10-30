@@ -114,7 +114,8 @@ public class SecurityConfig {
                     .antMatchers("/events").access("#oauth2.hasScope('cloudbreak.events')")
                     .antMatchers("/usages/**").access("#oauth2.hasScope('cloudbreak.usages.global')")
                     .antMatchers("/account/usages/**").access("#oauth2.hasScope('cloudbreak.usages.account')")
-                    .antMatchers("/user/usages/**").access("#oauth2.hasScope('cloudbreak.usages.user')");
+                    .antMatchers("/user/usages/**").access("#oauth2.hasScope('cloudbreak.usages.user')")
+                    .antMatchers("/subscription").access("#oauth2.hasScope('cloudbreak.subscribe')");
         }
     }
 
