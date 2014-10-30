@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
+import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.StackOperationFailure;
 
 import reactor.core.Reactor;
@@ -53,6 +54,8 @@ public class SnsMessageHandler {
                 handleCfStackCreateComplete(cfMessage);
             } else if (isStackFailedMessage(cfMessage)) {
                 handleCfStackCreateFailed(cfMessage);
+            } else if (isStackDeleteCompleteMessage(cfMessage)) {
+                handleCfStackDeleteComplete(cfMessage);
             }
         } else if (isSubscriptionConfirmationMessage(snsRequest)) {
             snsTopicManager.confirmSubscription(snsRequest);
@@ -74,6 +77,10 @@ public class SnsMessageHandler {
     private boolean isStackFailedMessage(Map<String, String> cfMessage) {
         return ("AWS::CloudFormation::Stack".equals(cfMessage.get("ResourceType")) && "ROLLBACK_IN_PROGRESS".equals(cfMessage.get("ResourceStatus")))
                 || "CREATE_FAILED".equals(cfMessage.get("ResourceStatus"));
+    }
+
+    private boolean isStackDeleteCompleteMessage(Map<String, String> cfMessage) {
+        return "AWS::CloudFormation::Stack".equals(cfMessage.get("ResourceType")) && "DELETE_COMPLETE".equals(cfMessage.get("ResourceStatus"));
     }
 
     private synchronized void handleCfStackCreateComplete(Map<String, String> cfMessage) {
@@ -106,6 +113,18 @@ public class SnsMessageHandler {
         } else {
             LOGGER.info("Got message that CloudFormation stack creation failed, but its status is already FAILED [CFStackId: '{}']. Ignoring message.",
                     cfMessage.get("StackId"));
+        }
+    }
+
+    private synchronized void handleCfStackDeleteComplete(Map<String, String> cfMessage) {
+        Stack stack = stackRepository.findByStackResourceName(cfMessage.get("StackName"));
+        if (stack == null) {
+            LOGGER.info("Got message that CloudFormation stack creation failed, but no matching stack found in the db. [CFStackId: '{}']. Ignoring message.",
+                    cfMessage.get("StackId"));
+        } else {
+            LOGGER.info("CloudFormation stack delete completed. [Id: '{}']", stack.getId());
+            LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.DELETE_COMPLETE_EVENT, stack.getId());
+            reactor.notify(ReactorConfig.DELETE_COMPLETE_EVENT, Event.wrap(new StackDeleteComplete(stack.getId())));
         }
     }
 }
