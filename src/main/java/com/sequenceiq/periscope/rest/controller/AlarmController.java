@@ -65,6 +65,24 @@ public class AlarmController {
         return createTimeAlarmsResponse(alarmService.setTimeAlarms(clusterId, alarms), HttpStatus.CREATED);
     }
 
+    @RequestMapping(value = "/time", method = RequestMethod.GET)
+    public ResponseEntity<TimeAlarmsJson> getTimeAlarms(@PathVariable long clusterId) throws ClusterNotFoundException {
+        return createTimeAlarmsResponse(alarmService.getTimeAlarms(clusterId));
+    }
+
+    @RequestMapping(value = "/time/{alarmId}", method = RequestMethod.DELETE)
+    public ResponseEntity<TimeAlarmsJson> deleteTimeAlarm(@PathVariable long clusterId, @PathVariable long alarmId)
+            throws ClusterNotFoundException {
+        return createTimeAlarmsResponse(alarmService.deleteTimeAlarm(clusterId, alarmId));
+    }
+
+    @RequestMapping(value = "/time", method = RequestMethod.PUT)
+    public ResponseEntity<TimeAlarmsJson> addTimeAlarm(@PathVariable long clusterId, @RequestBody TimeAlarmJson json)
+            throws ClusterNotFoundException {
+        TimeAlarm timeAlarm = timeAlarmConverter.convert(json);
+        return createTimeAlarmsResponse(alarmService.addTimeAlarm(clusterId, timeAlarm), HttpStatus.CREATED);
+    }
+
     private ResponseEntity<MetricAlarmsJson> createAlarmsResponse(List<MetricAlarm> metricAlarms) {
         return createAlarmsResponse(metricAlarms, HttpStatus.OK);
     }
