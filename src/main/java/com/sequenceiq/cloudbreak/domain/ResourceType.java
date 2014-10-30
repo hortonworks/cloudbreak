@@ -13,9 +13,11 @@ public enum ResourceType {
     CLOUDFORMATION_STACK,
 
     // GCC
-    DISK,
-    ATTACHED_DISK,
-    NETWORK_INTERFACE,
-    FIREWALL,
-    ROUTE
+    GCC_DISK,
+    GCC_ATTACHED_DISK,
+    GCC_NETWORK,
+    GCC_FIREWALL_IN,
+    GCC_FIREWALL_OUT,
+    GCC_ROUTE,
+    GCC_INSTANCE,
 }

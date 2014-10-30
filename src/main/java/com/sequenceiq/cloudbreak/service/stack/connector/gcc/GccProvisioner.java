@@ -65,17 +65,17 @@ public class GccProvisioner implements Provisioner {
             Compute compute = gccStackUtil.buildCompute(credential, stack.getName());
             List<NetworkInterface> networkInterfaces = gccStackUtil.buildNetworkInterfaces(compute, credential.getProjectId(), stack.getName());
             resourceSet.add(new Resource(ResourceType.NETWORK, stack.getName(), stack));
-            resourceSet.add(new Resource(ResourceType.NETWORK_INTERFACE, stack.getName(), stack));
-            resourceSet.add(new Resource(ResourceType.FIREWALL, stack.getName() + "in", stack));
-            resourceSet.add(new Resource(ResourceType.FIREWALL, stack.getName() + "out", stack));
+            resourceSet.add(new Resource(ResourceType.GCC_NETWORK, stack.getName(), stack));
+            resourceSet.add(new Resource(ResourceType.GCC_FIREWALL_IN, stack.getName() + "in", stack));
+            resourceSet.add(new Resource(ResourceType.GCC_FIREWALL_OUT, stack.getName() + "out", stack));
             for (int i = 0; i < stack.getNodeCount(); i++) {
                 String forName = gccStackUtil.getVmName(stack.getName(), i);
                 Disk disk = gccStackUtil.buildDisk(compute, stack, credential.getProjectId(), gccTemplate.getGccZone(), forName, SIZE);
-                resourceSet.add(new Resource(ResourceType.DISK, forName, stack));
+                resourceSet.add(new Resource(ResourceType.GCC_DISK, forName, stack));
                 List<AttachedDisk> attachedDisks = gccStackUtil.buildAttachedDisks(forName, disk, compute, stack);
                 for (AttachedDisk attachedDisk : attachedDisks) {
                     if (!attachedDisk.getDeviceName().equals(forName)) {
-                        resourceSet.add(new Resource(ResourceType.ATTACHED_DISK, attachedDisk.getDeviceName(), stack));
+                        resourceSet.add(new Resource(ResourceType.GCC_ATTACHED_DISK, attachedDisk.getDeviceName(), stack));
                     }
                 }
                 Instance instance = gccStackUtil.buildInstance(compute, stack, networkInterfaces, attachedDisks, forName, userData);
@@ -85,7 +85,7 @@ public class GccProvisioner implements Provisioner {
             if (gccTemplate.getContainerCount() > 0) {
                 for (Resource vm : vms) {
                     gccStackUtil.buildRoute(compute, credential.getProjectId(), stack.getName(), stack, gccStackUtil.getVmIdByName(vm.getResourceName()), vm);
-                    resourceSet.add(new Resource(ResourceType.ROUTE, String.format("route-%s", vm.getResourceName()), stack));
+                    resourceSet.add(new Resource(ResourceType.GCC_ROUTE, String.format("route-%s", vm.getResourceName()), stack));
                 }
 
             }
@@ -98,7 +98,7 @@ public class GccProvisioner implements Provisioner {
 
     @Override
     public void addInstances(Stack stack, String userData, Integer instanceCount) {
-        Resource network = stack.getResourceByType(ResourceType.NETWORK_INTERFACE);
+        Resource network = stack.getResourceByType(ResourceType.GCC_NETWORK);
         List<Resource> resourceByType = stack.getResourcesByType(ResourceType.VIRTUAL_MACHINE);
         GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
         GccCredential credential = (GccCredential) stack.getCredential();
@@ -114,10 +114,10 @@ public class GccProvisioner implements Provisioner {
                 Disk disk = gccStackUtil.buildDisk(compute, stack, credential.getProjectId(), gccTemplate.getGccZone(), forName, SIZE);
                 List<AttachedDisk> attachedDisks = gccStackUtil.buildAttachedDisks(forName, disk, compute, stack);
                 Instance instance = gccStackUtil.buildInstance(compute, stack, networkInterfaces, attachedDisks, forName, userData);
-                resourceSet.add(new Resource(ResourceType.DISK, forName, stack));
+                resourceSet.add(new Resource(ResourceType.GCC_DISK, forName, stack));
                 for (AttachedDisk attachedDisk : attachedDisks) {
                     if (!attachedDisk.getDeviceName().equals(forName)) {
-                        resourceSet.add(new Resource(ResourceType.ATTACHED_DISK, attachedDisk.getDeviceName(), stack));
+                        resourceSet.add(new Resource(ResourceType.GCC_ATTACHED_DISK, attachedDisk.getDeviceName(), stack));
                     }
                 }
                 resourceSet.add(new Resource(ResourceType.VIRTUAL_MACHINE, forName, stack));
@@ -138,7 +138,7 @@ public class GccProvisioner implements Provisioner {
         for (String instanceId : instanceIds) {
             try {
                 gccStackUtil.removeInstance(compute, stack, instanceId);
-                for (Resource resource : stack.getResourcesByType(ResourceType.ATTACHED_DISK)) {
+                for (Resource resource : stack.getResourcesByType(ResourceType.GCC_ATTACHED_DISK)) {
                     if (resource.getResourceName().startsWith(instanceId)) {
                         gccStackUtil.removeDisk(compute, stack, resource.getResourceName());
                     }

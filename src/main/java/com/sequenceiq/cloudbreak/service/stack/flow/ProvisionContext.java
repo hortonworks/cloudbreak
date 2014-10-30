@@ -1,8 +1,14 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-
-import javax.annotation.Resource;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +18,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.BuildStackFailureException;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
@@ -19,7 +26,12 @@ import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.connector.Provisioner;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
+import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.StackOperationFailure;
+import com.sequenceiq.cloudbreak.service.stack.resource.ProvisionContextObject;
+import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
+import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
+import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
@@ -40,7 +52,7 @@ public class ProvisionContext {
     @Autowired
     private WebsocketService websocketService;
 
-    @Resource
+    @javax.annotation.Resource
     private Map<CloudPlatform, Provisioner> provisioners;
 
     @Autowired
@@ -48,6 +60,12 @@ public class ProvisionContext {
 
     @Autowired
     private UserDataBuilder userDataBuilder;
+
+    @javax.annotation.Resource
+    private Map<CloudPlatform, Map<ResourceBuilderType, List<ResourceBuilder>>> resourceBuilders;
+
+    @javax.annotation.Resource
+    private Map<CloudPlatform, ResourceBuilderInit> resourceBuilderInits;
 
     public void buildStack(CloudPlatform cloudPlatform, Long stackId, Map<String, Object> setupProperties, Map<String, String> userDataParams) {
         try {
@@ -57,8 +75,43 @@ public class ProvisionContext {
                 websocketService.sendToTopicUser(stack.getOwner(), WebsocketEndPoint.STACK, new StatusMessage(stack.getId(), stack.getName(), stack
                         .getStatus().name()));
                 stackUpdater.updateStackStatusReason(stack.getId(), stack.getStatus().name());
-                Provisioner provisioner = provisioners.get(cloudPlatform);
-                provisioner.buildStack(stack, userDataBuilder.build(cloudPlatform, stack.getHash(), userDataParams), setupProperties);
+                if (!cloudPlatform.isWithTemplate()) {
+                    stackUpdater.updateStackStatus(stack.getId(), Status.REQUESTED);
+                    Set<com.sequenceiq.cloudbreak.domain.Resource> list = new HashSet<>();
+                    Map<ResourceBuilderType, List<ResourceBuilder>> resourceBuilderTypeListMap = resourceBuilders.get(cloudPlatform);
+                    ResourceBuilderInit resourceBuilderInit = resourceBuilderInits.get(cloudPlatform);
+                    final ProvisionContextObject pCO =
+                            resourceBuilderInit.provisionInit(stack, userDataBuilder.build(cloudPlatform, stack.getHash(), userDataParams));
+                    List<ResourceBuilder> resourceBuilders1 = resourceBuilderTypeListMap.get(ResourceBuilderType.NETWORK_RESOURCE);
+                    for (ResourceBuilder resourceBuilder : resourceBuilders1) {
+                        list.addAll(resourceBuilder.create(pCO));
+                    }
+                    List<ResourceBuilder> resourceBuilders2 = resourceBuilderTypeListMap.get(ResourceBuilderType.INSTANCE_RESOURCE);
+                    ExecutorService executor = Executors.newFixedThreadPool(stack.getNodeCount());
+
+                    for (final ResourceBuilder resourceBuilder : resourceBuilders2) {
+                        List<Future<List<Resource>>> futures = new ArrayList<>();
+                        for (int i = 0; i < stack.getNodeCount(); i++) {
+                            final int index = i;
+                            Future<List<Resource>> submit = executor.submit(new Callable<List<Resource>>() {
+                                @Override
+                                public List<Resource> call() throws Exception {
+                                    return resourceBuilder.create(pCO, index);
+                                }
+                            });
+                            futures.add(submit);
+                        }
+                        for (Future<List<Resource>> future : futures) {
+                            list.addAll(future.get());
+                        }
+                    }
+
+                    LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_COMPLETE_EVENT, stack.getId());
+                    reactor.notify(ReactorConfig.PROVISION_COMPLETE_EVENT, Event.wrap(new ProvisionComplete(CloudPlatform.GCC, stack.getId(), list)));
+                } else {
+                    Provisioner provisioner = provisioners.get(cloudPlatform);
+                    provisioner.buildStack(stack, userDataBuilder.build(cloudPlatform, stack.getHash(), userDataParams), setupProperties);
+                }
             } else {
                 LOGGER.info("CloudFormation stack creation was requested for a stack, that is not in REQUESTED status anymore. [stackId: '{}', status: '{}']",
                         stack.getId(), stack.getStatus());

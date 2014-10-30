@@ -40,7 +40,7 @@ public class GccMetadataSetup implements MetadataSetup {
     @Override
     public void setupMetadata(Stack stack) {
         Set<CoreInstanceMetaData> instanceMetaDatas = new HashSet<>();
-        List<Resource> resourcesByType = stack.getResourcesByType(ResourceType.VIRTUAL_MACHINE);
+        List<Resource> resourcesByType = stack.getResourcesByType(ResourceType.GCC_INSTANCE);
         GccTemplate template = (GccTemplate) stack.getTemplate();
         instanceMetaDatas = collectMetaData(stack, template, resourcesByType);
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.METADATA_SETUP_COMPLETE_EVENT, stack.getId());
