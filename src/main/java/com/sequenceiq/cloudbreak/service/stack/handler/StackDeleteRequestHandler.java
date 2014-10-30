@@ -67,17 +67,17 @@ public class StackDeleteRequestHandler implements Consumer<Event<StackDeleteRequ
                 ResourceBuilderInit resourceBuilderInit = resourceBuilderInits.get(data.getCloudPlatform());
                 final DeleteContextObject dCO = resourceBuilderInit.deleteInit(stack);
 
-                final List<ResourceBuilder> resourceBuilders2 = resourceBuilderTypeListMap.get(ResourceBuilderType.INSTANCE_RESOURCE);
+                final List<ResourceBuilder> instanceResourceBuilders = resourceBuilderTypeListMap.get(ResourceBuilderType.INSTANCE_RESOURCE);
                 ExecutorService executor = Executors.newFixedThreadPool(stack.getNodeCount());
-                for (int i = resourceBuilders2.size() - 1; i >= 0; i--) {
+                for (int i = instanceResourceBuilders.size() - 1; i >= 0; i--) {
                     List<Future<Boolean>> futures = new ArrayList<>();
                     final int index = i;
-                    List<Resource> resourceByType = stack.getResourcesByType(resourceBuilders2.get(i).resourceType());
+                    List<Resource> resourceByType = stack.getResourcesByType(instanceResourceBuilders.get(i).resourceType());
                     for (final Resource resource : resourceByType) {
                         Future<Boolean> submit = executor.submit(new Callable<Boolean>() {
                             @Override
                             public Boolean call() throws Exception {
-                                return resourceBuilders2.get(index).delete(resource, dCO);
+                                return instanceResourceBuilders.get(index).delete(resource, dCO);
                             }
                         });
                         futures.add(submit);
@@ -86,10 +86,10 @@ public class StackDeleteRequestHandler implements Consumer<Event<StackDeleteRequ
                         future.get();
                     }
                 }
-                List<ResourceBuilder> resourceBuilders1 = resourceBuilderTypeListMap.get(ResourceBuilderType.NETWORK_RESOURCE);
-                for (int i = resourceBuilders2.size() - 1; i >= 0; i--) {
-                    for (Resource resource : stack.getResourcesByType(resourceBuilders1.get(i).resourceType())) {
-                        resourceBuilders1.get(i).delete(resource, dCO);
+                List<ResourceBuilder> networkResourceBuilders = resourceBuilderTypeListMap.get(ResourceBuilderType.NETWORK_RESOURCE);
+                for (int i = instanceResourceBuilders.size() - 1; i >= 0; i--) {
+                    for (Resource resource : stack.getResourcesByType(networkResourceBuilders.get(i).resourceType())) {
+                        networkResourceBuilders.get(i).delete(resource, dCO);
                     }
                 }
                 reactor.notify(ReactorConfig.DELETE_COMPLETE_EVENT, Event.wrap(new StackDeleteComplete(dCO.getStackId())));

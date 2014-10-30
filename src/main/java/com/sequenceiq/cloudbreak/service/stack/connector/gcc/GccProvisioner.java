@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.gcc;
 
-import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.CREDENTIAL;
-
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -20,7 +18,6 @@ import com.google.api.services.compute.model.Disk;
 import com.google.api.services.compute.model.Instance;
 import com.google.api.services.compute.model.NetworkInterface;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
-import com.sequenceiq.cloudbreak.controller.BuildStackFailureException;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.StackCreationFailureException;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
@@ -29,11 +26,9 @@ import com.sequenceiq.cloudbreak.domain.GccTemplate;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.stack.connector.Provisioner;
 import com.sequenceiq.cloudbreak.service.stack.event.AddInstancesComplete;
-import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.StackUpdateSuccess;
 
 import reactor.core.Reactor;
@@ -56,44 +51,6 @@ public class GccProvisioner implements Provisioner {
 
     @Override
     public void buildStack(Stack stack, String userData, Map<String, Object> setupProperties) {
-        retryingStackUpdater.updateStackStatus(stack.getId(), Status.REQUESTED);
-        GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
-        Set<Resource> resourceSet = new HashSet<>();
-        GccCredential credential = (GccCredential) setupProperties.get(CREDENTIAL);
-        Set<Resource> vms = new HashSet<>();
-        try {
-            Compute compute = gccStackUtil.buildCompute(credential, stack.getName());
-            List<NetworkInterface> networkInterfaces = gccStackUtil.buildNetworkInterfaces(compute, credential.getProjectId(), stack.getName());
-            resourceSet.add(new Resource(ResourceType.NETWORK, stack.getName(), stack));
-            resourceSet.add(new Resource(ResourceType.GCC_NETWORK, stack.getName(), stack));
-            resourceSet.add(new Resource(ResourceType.GCC_FIREWALL_IN, stack.getName() + "in", stack));
-            resourceSet.add(new Resource(ResourceType.GCC_FIREWALL_OUT, stack.getName() + "out", stack));
-            for (int i = 0; i < stack.getNodeCount(); i++) {
-                String forName = gccStackUtil.getVmName(stack.getName(), i);
-                Disk disk = gccStackUtil.buildDisk(compute, stack, credential.getProjectId(), gccTemplate.getGccZone(), forName, SIZE);
-                resourceSet.add(new Resource(ResourceType.GCC_DISK, forName, stack));
-                List<AttachedDisk> attachedDisks = gccStackUtil.buildAttachedDisks(forName, disk, compute, stack);
-                for (AttachedDisk attachedDisk : attachedDisks) {
-                    if (!attachedDisk.getDeviceName().equals(forName)) {
-                        resourceSet.add(new Resource(ResourceType.GCC_ATTACHED_DISK, attachedDisk.getDeviceName(), stack));
-                    }
-                }
-                Instance instance = gccStackUtil.buildInstance(compute, stack, networkInterfaces, attachedDisks, forName, userData);
-                resourceSet.add(new Resource(ResourceType.VIRTUAL_MACHINE, forName, stack));
-                vms.add(new Resource(ResourceType.VIRTUAL_MACHINE, forName, stack));
-            }
-            if (gccTemplate.getContainerCount() > 0) {
-                for (Resource vm : vms) {
-                    gccStackUtil.buildRoute(compute, credential.getProjectId(), stack.getName(), stack, gccStackUtil.getVmIdByName(vm.getResourceName()), vm);
-                    resourceSet.add(new Resource(ResourceType.GCC_ROUTE, String.format("route-%s", vm.getResourceName()), stack));
-                }
-
-            }
-        } catch (Exception e) {
-            throw new BuildStackFailureException(e.getMessage(), e, resourceSet);
-        }
-        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_COMPLETE_EVENT, stack.getId());
-        reactor.notify(ReactorConfig.PROVISION_COMPLETE_EVENT, Event.wrap(new ProvisionComplete(CloudPlatform.GCC, stack.getId(), resourceSet)));
     }
 
     @Override

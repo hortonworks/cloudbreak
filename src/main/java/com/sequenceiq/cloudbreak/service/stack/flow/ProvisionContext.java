@@ -77,19 +77,19 @@ public class ProvisionContext {
                 stackUpdater.updateStackStatusReason(stack.getId(), stack.getStatus().name());
                 if (!cloudPlatform.isWithTemplate()) {
                     stackUpdater.updateStackStatus(stack.getId(), Status.REQUESTED);
-                    Set<com.sequenceiq.cloudbreak.domain.Resource> list = new HashSet<>();
+                    Set<com.sequenceiq.cloudbreak.domain.Resource> resourceSet = new HashSet<>();
                     Map<ResourceBuilderType, List<ResourceBuilder>> resourceBuilderTypeListMap = resourceBuilders.get(cloudPlatform);
                     ResourceBuilderInit resourceBuilderInit = resourceBuilderInits.get(cloudPlatform);
                     final ProvisionContextObject pCO =
                             resourceBuilderInit.provisionInit(stack, userDataBuilder.build(cloudPlatform, stack.getHash(), userDataParams));
-                    List<ResourceBuilder> resourceBuilders1 = resourceBuilderTypeListMap.get(ResourceBuilderType.NETWORK_RESOURCE);
-                    for (ResourceBuilder resourceBuilder : resourceBuilders1) {
-                        list.addAll(resourceBuilder.create(pCO));
+                    List<ResourceBuilder> networkResourceBuilders = resourceBuilderTypeListMap.get(ResourceBuilderType.NETWORK_RESOURCE);
+                    for (ResourceBuilder resourceBuilder : networkResourceBuilders) {
+                        resourceSet.addAll(resourceBuilder.create(pCO));
                     }
-                    List<ResourceBuilder> resourceBuilders2 = resourceBuilderTypeListMap.get(ResourceBuilderType.INSTANCE_RESOURCE);
+                    List<ResourceBuilder> instanceResourceBuilders = resourceBuilderTypeListMap.get(ResourceBuilderType.INSTANCE_RESOURCE);
                     ExecutorService executor = Executors.newFixedThreadPool(stack.getNodeCount());
 
-                    for (final ResourceBuilder resourceBuilder : resourceBuilders2) {
+                    for (final ResourceBuilder resourceBuilder : instanceResourceBuilders) {
                         List<Future<List<Resource>>> futures = new ArrayList<>();
                         for (int i = 0; i < stack.getNodeCount(); i++) {
                             final int index = i;
@@ -102,12 +102,12 @@ public class ProvisionContext {
                             futures.add(submit);
                         }
                         for (Future<List<Resource>> future : futures) {
-                            list.addAll(future.get());
+                            resourceSet.addAll(future.get());
                         }
                     }
 
                     LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_COMPLETE_EVENT, stack.getId());
-                    reactor.notify(ReactorConfig.PROVISION_COMPLETE_EVENT, Event.wrap(new ProvisionComplete(CloudPlatform.GCC, stack.getId(), list)));
+                    reactor.notify(ReactorConfig.PROVISION_COMPLETE_EVENT, Event.wrap(new ProvisionComplete(CloudPlatform.GCC, stack.getId(), resourceSet)));
                 } else {
                     Provisioner provisioner = provisioners.get(cloudPlatform);
                     provisioner.buildStack(stack, userDataBuilder.build(cloudPlatform, stack.getHash(), userDataParams), setupProperties);

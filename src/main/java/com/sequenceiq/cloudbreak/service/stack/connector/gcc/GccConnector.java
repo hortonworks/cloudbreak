@@ -46,8 +46,8 @@ public class GccConnector implements CloudPlatformConnector {
 
         try {
             final DescribeContextObject dCO = resourceBuilderInit.describeInit(stack);
-            List<ResourceBuilder> resourceBuilders1 = resourceBuilderTypeListMap.get(ResourceBuilderType.NETWORK_RESOURCE);
-            for (ResourceBuilder resourceBuilder : resourceBuilders1) {
+            List<ResourceBuilder> networkResourceBuilders = resourceBuilderTypeListMap.get(ResourceBuilderType.NETWORK_RESOURCE);
+            for (ResourceBuilder resourceBuilder : networkResourceBuilders) {
                 List<Resource> resourceByType = stack.getResourcesByType(resourceBuilder.resourceType());
                 for (Resource resource : resourceByType) {
                     Optional<String> describe = resourceBuilder.describe(resource, dCO);
@@ -56,10 +56,10 @@ public class GccConnector implements CloudPlatformConnector {
                     }
                 }
             }
-            List<ResourceBuilder> resourceBuilders2 = resourceBuilderTypeListMap.get(ResourceBuilderType.INSTANCE_RESOURCE);
+            List<ResourceBuilder> instanceResourceBuilders = resourceBuilderTypeListMap.get(ResourceBuilderType.INSTANCE_RESOURCE);
             ExecutorService executor = Executors.newFixedThreadPool(stack.getNodeCount());
 
-            for (final ResourceBuilder resourceBuilder : resourceBuilders2) {
+            for (final ResourceBuilder resourceBuilder : instanceResourceBuilders) {
                 List<Resource> resourceByType = stack.getResourcesByType(resourceBuilder.resourceType());
                 List<Future<Optional<String>>> futures = new ArrayList<>();
                 for (final Resource resource : resourceByType) {
@@ -89,17 +89,17 @@ public class GccConnector implements CloudPlatformConnector {
         try {
             final DeleteContextObject dCO = resourceBuilderInit.deleteInit(stack);
 
-            final List<ResourceBuilder> resourceBuilders2 = resourceBuilderTypeListMap.get(ResourceBuilderType.INSTANCE_RESOURCE);
+            final List<ResourceBuilder> instanceResourceBuilders = resourceBuilderTypeListMap.get(ResourceBuilderType.INSTANCE_RESOURCE);
             ExecutorService executor = Executors.newFixedThreadPool(stack.getNodeCount());
-            for (int i = resourceBuilders2.size() - 1; i >= 0; i--) {
+            for (int i = instanceResourceBuilders.size() - 1; i >= 0; i--) {
                 List<Future<Boolean>> futures = new ArrayList<>();
                 final int index = i;
                 for (final Resource resource : resourceSet) {
-                    if (resource.getResourceType().equals(resourceBuilders2.get(i).resourceType())) {
+                    if (resource.getResourceType().equals(instanceResourceBuilders.get(i).resourceType())) {
                         Future<Boolean> submit = executor.submit(new Callable<Boolean>() {
                             @Override
                             public Boolean call() throws Exception {
-                                return resourceBuilders2.get(index).delete(resource, dCO);
+                                return instanceResourceBuilders.get(index).delete(resource, dCO);
                             }
                         });
                         futures.add(submit);
@@ -109,11 +109,11 @@ public class GccConnector implements CloudPlatformConnector {
                     future.get();
                 }
             }
-            List<ResourceBuilder> resourceBuilders1 = resourceBuilderTypeListMap.get(ResourceBuilderType.NETWORK_RESOURCE);
-            for (int i = resourceBuilders2.size() - 1; i >= 0; i--) {
+            List<ResourceBuilder> networkResourceBuilders = resourceBuilderTypeListMap.get(ResourceBuilderType.NETWORK_RESOURCE);
+            for (int i = instanceResourceBuilders.size() - 1; i >= 0; i--) {
                 for (Resource resource : resourceSet) {
-                    if (resource.getResourceType().equals(resourceBuilders2.get(i).resourceType())) {
-                        resourceBuilders1.get(i).delete(resource, dCO);
+                    if (resource.getResourceType().equals(instanceResourceBuilders.get(i).resourceType())) {
+                        networkResourceBuilders.get(i).delete(resource, dCO);
                     }
                 }
             }
