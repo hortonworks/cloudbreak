@@ -86,7 +86,7 @@ public class ProvisionContext {
                     final ProvisionContextObject pCO =
                             resourceBuilderInit.provisionInit(stack, userDataBuilder.build(cloudPlatform, stack.getHash(), userDataParams));
                     for (ResourceBuilder resourceBuilder : networkResourceBuilders.get(cloudPlatform)) {
-                        List<Resource> resourceList = resourceBuilder.create(pCO);
+                        List<Resource> resourceList = resourceBuilder.create(pCO, 0, new ArrayList<Resource>());
                         resourceSet.addAll(resourceList);
                         pCO.getNetworkResources().addAll(resourceList);
                     }

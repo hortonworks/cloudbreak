@@ -60,18 +60,10 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
     private JsonHelper jsonHelper;
 
     @Override
-    public List<Resource> create(GccProvisionContextObject po) throws Exception {
-        return create(po, 0, new ArrayList<Resource>());
-    }
-
-    @Override
     public List<Resource> create(GccProvisionContextObject po, int index, List<Resource> resources) throws Exception {
         Stack stack = stackRepository.findById(po.getStackId());
         GccCredential gccCredential = (GccCredential) stack.getCredential();
         GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
-
-        List<NetworkInterface> networkInterfaces = new ArrayList<>();
-        networkInterfaces.add(buildNetworkInterface(po.getProjectId(), stack.getName()));
 
         List<AttachedDisk> listOfDisks = new ArrayList<>();
         listOfDisks.addAll(getBootDiskList(resources, gccCredential, gccTemplate));
@@ -83,21 +75,21 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
                 po.getProjectId(), gccTemplate.getGccZone().getValue(), gccTemplate.getGccInstanceType().getValue()));
         instance.setName(name);
         instance.setCanIpForward(Boolean.TRUE);
-        instance.setNetworkInterfaces(networkInterfaces);
+        instance.setNetworkInterfaces(getNetworkInterface(po.getProjectId(), stack.getName()));
         instance.setDisks(listOfDisks);
         Metadata metadata = new Metadata();
         metadata.setItems(Lists.<Metadata.Items>newArrayList());
 
-        Metadata.Items item1 = new Metadata.Items();
-        item1.setKey("sshKeys");
-        item1.setValue("ubuntu:" + gccCredential.getPublicKey());
+        Metadata.Items sshMetaData = new Metadata.Items();
+        sshMetaData.setKey("sshKeys");
+        sshMetaData.setValue("ubuntu:" + gccCredential.getPublicKey());
 
-        Metadata.Items item2 = new Metadata.Items();
-        item2.setKey("startup-script");
-        item2.setValue(po.getUserData());
+        Metadata.Items startupScript = new Metadata.Items();
+        startupScript.setKey("startup-script");
+        startupScript.setValue(po.getUserData());
 
-        metadata.getItems().add(item1);
-        metadata.getItems().add(item2);
+        metadata.getItems().add(sshMetaData);
+        metadata.getItems().add(startupScript);
         instance.setMetadata(metadata);
         Compute.Instances.Insert ins =
                 po.getCompute().instances().insert(gccCredential.getProjectId(), gccTemplate.getGccZone().getValue(), instance);
@@ -112,14 +104,14 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
     private List<AttachedDisk> getAttachedDisks(List<Resource> resources, GccCredential gccCredential, GccTemplate gccTemplate) {
         List<AttachedDisk> listOfDisks = new ArrayList<>();
         for (Resource resource : filterResourcesByType(resources, ResourceType.GCC_ATTACHED_DISK)) {
-            AttachedDisk diskToInsert1 = new AttachedDisk();
-            diskToInsert1.setBoot(false);
-            diskToInsert1.setType(GccDiskType.PERSISTENT.getValue());
-            diskToInsert1.setMode(GccDiskMode.READ_WRITE.getValue());
-            diskToInsert1.setDeviceName(resource.getResourceName());
-            diskToInsert1.setSource(String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/disks/%s",
+            AttachedDisk attachedDisk = new AttachedDisk();
+            attachedDisk.setBoot(false);
+            attachedDisk.setType(GccDiskType.PERSISTENT.getValue());
+            attachedDisk.setMode(GccDiskMode.READ_WRITE.getValue());
+            attachedDisk.setDeviceName(resource.getResourceName());
+            attachedDisk.setSource(String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/disks/%s",
                     gccCredential.getProjectId(), gccTemplate.getGccZone().getValue(), resource.getResourceName()));
-            listOfDisks.add(diskToInsert1);
+            listOfDisks.add(attachedDisk);
         }
         return listOfDisks;
     }
@@ -127,14 +119,14 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
     private List<AttachedDisk> getBootDiskList(List<Resource> resources, GccCredential gccCredential, GccTemplate gccTemplate) {
         List<AttachedDisk> listOfDisks = new ArrayList<>();
         for (Resource resource : filterResourcesByType(resources, ResourceType.GCC_DISK)) {
-            AttachedDisk diskToInsert1 = new AttachedDisk();
-            diskToInsert1.setBoot(true);
-            diskToInsert1.setType(GccDiskType.PERSISTENT.getValue());
-            diskToInsert1.setMode(GccDiskMode.READ_WRITE.getValue());
-            diskToInsert1.setDeviceName(resource.getResourceName());
-            diskToInsert1.setSource(String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/disks/%s",
+            AttachedDisk attachedDisk = new AttachedDisk();
+            attachedDisk.setBoot(true);
+            attachedDisk.setType(GccDiskType.PERSISTENT.getValue());
+            attachedDisk.setMode(GccDiskMode.READ_WRITE.getValue());
+            attachedDisk.setDeviceName(resource.getResourceName());
+            attachedDisk.setSource(String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/disks/%s",
                     gccCredential.getProjectId(), gccTemplate.getGccZone().getValue(), resource.getResourceName()));
-            listOfDisks.add(diskToInsert1);
+            listOfDisks.add(attachedDisk);
         }
         return listOfDisks;
     }
@@ -174,7 +166,7 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
         }
     }
 
-    private NetworkInterface buildNetworkInterface(String projectId, String name) {
+    private List<NetworkInterface> getNetworkInterface(String projectId, String name) {
         NetworkInterface iface = new NetworkInterface();
         iface.setName(name);
         AccessConfig accessConfig = new AccessConfig();
@@ -182,7 +174,7 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
         accessConfig.setType("ONE_TO_ONE_NAT");
         iface.setAccessConfigs(ImmutableList.of(accessConfig));
         iface.setNetwork(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s", projectId, name));
-        return iface;
+        return Arrays.asList(iface);
     }
 
     @Override

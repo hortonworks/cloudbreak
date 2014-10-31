@@ -56,11 +56,6 @@ public class GccAttachedDiskResourceBuilder extends GccSimpleInstanceResourceBui
     private ConcurrentTaskExecutor resourceBuilderExecutor;
 
     @Override
-    public List<Resource> create(GccProvisionContextObject po) throws Exception {
-        return create(po, 0, new ArrayList<Resource>());
-    }
-
-    @Override
     public List<Resource> create(final GccProvisionContextObject po, int index, List<Resource> resources) throws Exception {
         final Stack stack = stackRepository.findById(po.getStackId());
         final GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();

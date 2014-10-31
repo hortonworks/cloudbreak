@@ -44,7 +44,7 @@ public class GccFireWallInResourceBuilder extends GccSimpleNetworkResourceBuilde
     private JsonHelper jsonHelper;
 
     @Override
-    public List<Resource> create(GccProvisionContextObject pO) throws Exception {
+    public List<Resource> create(GccProvisionContextObject pO, int index, List<Resource> resources) throws Exception {
         Stack stack = stackRepository.findById(pO.getStackId());
 
         Firewall firewall = new Firewall();
@@ -67,11 +67,6 @@ public class GccFireWallInResourceBuilder extends GccSimpleNetworkResourceBuilde
         Compute.Firewalls.Insert firewallInsert = pO.getCompute().firewalls().insert(pO.getProjectId(), firewall);
         firewallInsert.execute();
         return Arrays.asList(new Resource(resourceType(), stack.getName() + "in", stack));
-    }
-
-    @Override
-    public List<Resource> create(GccProvisionContextObject po, int index, List<Resource> resources) throws Exception {
-        return create(po);
     }
 
     @Override

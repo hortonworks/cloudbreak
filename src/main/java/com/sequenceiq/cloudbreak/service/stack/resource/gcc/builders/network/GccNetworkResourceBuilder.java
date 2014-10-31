@@ -45,7 +45,7 @@ public class GccNetworkResourceBuilder extends GccSimpleNetworkResourceBuilder {
     private JsonHelper jsonHelper;
 
     @Override
-    public List<Resource> create(GccProvisionContextObject contextObject) throws Exception {
+    public List<Resource> create(GccProvisionContextObject contextObject, int index, List<Resource> resources) throws Exception {
         Stack stack = stackRepository.findById(contextObject.getStackId());
         Network network = new Network();
         network.setName(stack.getName());
@@ -53,11 +53,6 @@ public class GccNetworkResourceBuilder extends GccSimpleNetworkResourceBuilder {
         Compute.Networks.Insert networkInsert = contextObject.getCompute().networks().insert(contextObject.getProjectId(), network);
         networkInsert.execute();
         return Arrays.asList(new Resource(resourceType(), stack.getName(), stack));
-    }
-
-    @Override
-    public List<Resource> create(GccProvisionContextObject po, int index, List<Resource> resources) throws Exception {
-        return create(po);
     }
 
     @Override

@@ -9,8 +9,6 @@ import com.sequenceiq.cloudbreak.domain.ResourceType;
 
 public interface ResourceBuilder<P extends ProvisionContextObject, D extends DeleteContextObject, DCO extends DescribeContextObject> {
 
-    List<Resource> create(P po) throws Exception;
-
     List<Resource> create(P po, int index, List<Resource> resources) throws Exception;
 
     Boolean delete(Resource resource, D d) throws Exception;

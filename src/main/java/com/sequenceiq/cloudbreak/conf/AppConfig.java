@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
@@ -24,9 +25,12 @@ import com.sequenceiq.cloudbreak.service.stack.connector.aws.TemplateReader;
 @Configuration
 public class AppConfig {
 
-    private static final int CORE_POOL_SIZE = 7;
-    private static final int MAX_POOL_SIZE = 100;
-    private static final int QUEUE_CAPACITY = 11;
+    @Value("${cb.threadpool.core.size:10}")
+    private int corePoolSize;
+    @Value("${cb.threadpool.max.size:100}")
+    private int maxPoolSize;
+    @Value("${cb.threadpool.capacity.size:11}")
+    private int queueCapacity;
 
     @Autowired
     private TemplateReader templateReader;
@@ -98,9 +102,9 @@ public class AppConfig {
 
     public Executor getAsyncExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(CORE_POOL_SIZE);
-        executor.setMaxPoolSize(MAX_POOL_SIZE);
-        executor.setQueueCapacity(QUEUE_CAPACITY);
+        executor.setCorePoolSize(corePoolSize);
+        executor.setMaxPoolSize(maxPoolSize);
+        executor.setQueueCapacity(queueCapacity);
         executor.setThreadNamePrefix("MyExecutor-");
         executor.initialize();
         return executor;
