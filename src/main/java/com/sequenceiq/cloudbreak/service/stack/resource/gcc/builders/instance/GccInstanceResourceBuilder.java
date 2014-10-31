@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.stack.resource.gcc.builders.instance;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.ERROR;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -12,10 +13,14 @@ import org.springframework.stereotype.Component;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
+import com.google.api.services.compute.model.AccessConfig;
+import com.google.api.services.compute.model.AttachedDisk;
 import com.google.api.services.compute.model.Instance;
 import com.google.api.services.compute.model.Metadata;
+import com.google.api.services.compute.model.NetworkInterface;
 import com.google.api.services.compute.model.Operation;
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
@@ -26,6 +31,8 @@ import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccDiskMode;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccDiskType;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccInstanceCheckerStatus;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccInstanceReadyPollerObject;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveCheckerStatus;
@@ -54,28 +61,36 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
 
     @Override
     public List<Resource> create(GccProvisionContextObject po) throws Exception {
-        return create(po, 0);
+        return create(po, 0, new ArrayList<Resource>());
     }
 
     @Override
-    public List<Resource> create(GccProvisionContextObject po, int index) throws Exception {
+    public List<Resource> create(GccProvisionContextObject po, int index, List<Resource> resources) throws Exception {
         Stack stack = stackRepository.findById(po.getStackId());
+        GccCredential gccCredential = (GccCredential) stack.getCredential();
         GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
-        GccCredential credential = (GccCredential) stack.getCredential();
+
+        List<NetworkInterface> networkInterfaces = new ArrayList<>();
+        networkInterfaces.add(buildNetworkInterface(po.getProjectId(), stack.getName()));
+
+        List<AttachedDisk> listOfDisks = new ArrayList<>();
+        listOfDisks.addAll(getBootDiskList(resources, gccCredential, gccTemplate));
+        listOfDisks.addAll(getAttachedDisks(resources, gccCredential, gccTemplate));
+
         String name = String.format("%s-%s", stack.getName(), index);
         Instance instance = new Instance();
         instance.setMachineType(String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/machineTypes/%s",
                 po.getProjectId(), gccTemplate.getGccZone().getValue(), gccTemplate.getGccInstanceType().getValue()));
         instance.setName(name);
         instance.setCanIpForward(Boolean.TRUE);
-        instance.setNetworkInterfaces(po.getNetworkInterfaces());
-        instance.setDisks(po.getDiskMap().get(name));
+        instance.setNetworkInterfaces(networkInterfaces);
+        instance.setDisks(listOfDisks);
         Metadata metadata = new Metadata();
         metadata.setItems(Lists.<Metadata.Items>newArrayList());
 
         Metadata.Items item1 = new Metadata.Items();
         item1.setKey("sshKeys");
-        item1.setValue("ubuntu:" + credential.getPublicKey());
+        item1.setValue("ubuntu:" + gccCredential.getPublicKey());
 
         Metadata.Items item2 = new Metadata.Items();
         item2.setKey("startup-script");
@@ -85,13 +100,43 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
         metadata.getItems().add(item2);
         instance.setMetadata(metadata);
         Compute.Instances.Insert ins =
-                po.getCompute().instances().insert(credential.getProjectId(), gccTemplate.getGccZone().getValue(), instance);
+                po.getCompute().instances().insert(gccCredential.getProjectId(), gccTemplate.getGccZone().getValue(), instance);
 
         ins.setPrettyPrint(Boolean.TRUE);
         ins.execute();
         GccInstanceReadyPollerObject gccInstanceReady = new GccInstanceReadyPollerObject(po.getCompute(), stack, name);
         gccInstanceReadyPollerObjectPollingService.pollWithTimeout(gccInstanceReadyCheckerStatus, gccInstanceReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
         return Arrays.asList(new Resource(resourceType(), name, stack));
+    }
+
+    private List<AttachedDisk> getAttachedDisks(List<Resource> resources, GccCredential gccCredential, GccTemplate gccTemplate) {
+        List<AttachedDisk> listOfDisks = new ArrayList<>();
+        for (Resource resource : filterResourcesByType(resources, ResourceType.GCC_ATTACHED_DISK)) {
+            AttachedDisk diskToInsert1 = new AttachedDisk();
+            diskToInsert1.setBoot(false);
+            diskToInsert1.setType(GccDiskType.PERSISTENT.getValue());
+            diskToInsert1.setMode(GccDiskMode.READ_WRITE.getValue());
+            diskToInsert1.setDeviceName(resource.getResourceName());
+            diskToInsert1.setSource(String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/disks/%s",
+                    gccCredential.getProjectId(), gccTemplate.getGccZone().getValue(), resource.getResourceName()));
+            listOfDisks.add(diskToInsert1);
+        }
+        return listOfDisks;
+    }
+
+    private List<AttachedDisk> getBootDiskList(List<Resource> resources, GccCredential gccCredential, GccTemplate gccTemplate) {
+        List<AttachedDisk> listOfDisks = new ArrayList<>();
+        for (Resource resource : filterResourcesByType(resources, ResourceType.GCC_DISK)) {
+            AttachedDisk diskToInsert1 = new AttachedDisk();
+            diskToInsert1.setBoot(true);
+            diskToInsert1.setType(GccDiskType.PERSISTENT.getValue());
+            diskToInsert1.setMode(GccDiskMode.READ_WRITE.getValue());
+            diskToInsert1.setDeviceName(resource.getResourceName());
+            diskToInsert1.setSource(String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/disks/%s",
+                    gccCredential.getProjectId(), gccTemplate.getGccZone().getValue(), resource.getResourceName()));
+            listOfDisks.add(diskToInsert1);
+        }
+        return listOfDisks;
     }
 
     @Override
@@ -127,6 +172,17 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
         } catch (IOException e) {
             return Optional.fromNullable(jsonHelper.createJsonFromString(String.format("{\"VirtualMachine\": {%s}}", ERROR)).toString());
         }
+    }
+
+    private NetworkInterface buildNetworkInterface(String projectId, String name) {
+        NetworkInterface iface = new NetworkInterface();
+        iface.setName(name);
+        AccessConfig accessConfig = new AccessConfig();
+        accessConfig.setName(name);
+        accessConfig.setType("ONE_TO_ONE_NAT");
+        iface.setAccessConfigs(ImmutableList.of(accessConfig));
+        iface.setNetwork(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s", projectId, name));
+        return iface;
     }
 
     @Override

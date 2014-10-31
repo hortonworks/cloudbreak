@@ -11,7 +11,7 @@ public interface ResourceBuilder<P extends ProvisionContextObject, D extends Del
 
     List<Resource> create(P po) throws Exception;
 
-    List<Resource> create(P po, int index) throws Exception;
+    List<Resource> create(P po, int index, List<Resource> resources) throws Exception;
 
     Boolean delete(Resource resource, D d) throws Exception;
 

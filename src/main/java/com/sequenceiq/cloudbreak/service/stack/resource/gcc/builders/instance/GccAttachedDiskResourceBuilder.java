@@ -5,14 +5,16 @@ import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStack
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
+import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
-import com.google.api.services.compute.model.AttachedDisk;
 import com.google.api.services.compute.model.Disk;
 import com.google.api.services.compute.model.Operation;
 import com.google.common.base.Optional;
@@ -26,12 +28,9 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccDiskCheckerStatus;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccDiskMode;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccDiskReadyPollerObject;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccDiskType;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveCheckerStatus;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveReadyPollerObject;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccZone;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.GccSimpleInstanceResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDescribeContextObject;
@@ -53,58 +52,45 @@ public class GccAttachedDiskResourceBuilder extends GccSimpleInstanceResourceBui
     private PollingService<GccRemoveReadyPollerObject> gccRemoveReadyPollerObjectPollingService;
     @Autowired
     private JsonHelper jsonHelper;
+    @javax.annotation.Resource
+    private ConcurrentTaskExecutor resourceBuilderExecutor;
+
     @Override
     public List<Resource> create(GccProvisionContextObject po) throws Exception {
-        return create(po, 0);
+        return create(po, 0, new ArrayList<Resource>());
     }
 
     @Override
-    public List<Resource> create(GccProvisionContextObject po, int index) throws Exception {
-        Stack stack = stackRepository.findById(po.getStackId());
-        GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
-        GccCredential gccCredential = (GccCredential) stack.getCredential();
-        List<Resource> resources = new ArrayList<>();
-        List<AttachedDisk> listOfDisks = new ArrayList<>();
-        String name = String.format("%s-%s", stack.getName(), index);
-        AttachedDisk diskToInsert = new AttachedDisk();
-        diskToInsert.setBoot(true);
-        diskToInsert.setType(GccDiskType.PERSISTENT.getValue());
-        diskToInsert.setMode(GccDiskMode.READ_WRITE.getValue());
-        diskToInsert.setDeviceName(name);
-        diskToInsert.setSource(String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/disks/%s?sourceImage=%s",
-                gccCredential.getProjectId(), gccTemplate.getGccZone().getValue(), name, gccTemplate.getGccZone()));
-        listOfDisks.add(diskToInsert);
+    public List<Resource> create(final GccProvisionContextObject po, int index, List<Resource> resources) throws Exception {
+        final Stack stack = stackRepository.findById(po.getStackId());
+        final GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
+        final List<Resource> resourcesListTemp = new ArrayList<>();
+        final String name = String.format("%s-%s", stack.getName(), index);
 
+        List<Future<Resource>> futures = new ArrayList<>();
         for (int i = 0; i < gccTemplate.getVolumeCount(); i++) {
-            String value = name + "-" + i;
-            resources.add(new Resource(resourceType(), value, stack));
-            Disk disk1 = buildRawDisk(po.getCompute(), stack, gccCredential.getProjectId(),
-                    gccTemplate.getGccZone(), value, Long.parseLong(gccTemplate.getVolumeSize().toString()));
-            AttachedDisk diskToInsert1 = new AttachedDisk();
-            diskToInsert1.setBoot(false);
-            diskToInsert1.setType(GccDiskType.PERSISTENT.getValue());
-            diskToInsert1.setMode(GccDiskMode.READ_WRITE.getValue());
-            diskToInsert1.setDeviceName(value);
-            diskToInsert1.setSource(String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/disks/%s",
-                    gccCredential.getProjectId(), gccTemplate.getGccZone().getValue(), disk1.getName()));
-            listOfDisks.add(diskToInsert1);
+            final int indexVolume = i;
+            Future<Resource> submit = resourceBuilderExecutor.submit(new Callable<Resource>() {
+                @Override
+                public Resource call() throws Exception {
+                    String value = name + "-" + indexVolume;
+                    Disk disk = new Disk();
+                    disk.setSizeGb(gccTemplate.getVolumeSize().longValue());
+                    disk.setName(value);
+                    disk.setKind(((GccTemplate) stack.getTemplate()).getGccRawDiskType().getUrl(po.getProjectId(), gccTemplate.getGccZone()));
+                    Compute.Disks.Insert insDisk = po.getCompute().disks().insert(po.getProjectId(), gccTemplate.getGccZone().getValue(), disk);
+                    insDisk.execute();
+                    GccDiskReadyPollerObject gccDiskReady = new GccDiskReadyPollerObject(po.getCompute(), stack, name);
+                    gccDiskReadyPollerObjectPollingService.pollWithTimeout(gccDiskCheckerStatus, gccDiskReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+                    return new Resource(resourceType(), value, stack);
+                }
+            });
+            futures.add(submit);
         }
-        List<AttachedDisk> diskList = po.getDiskList(name);
-        diskList.addAll(listOfDisks);
-        po.withDiskList(name, diskList);
-        return resources;
-    }
-
-    private Disk buildRawDisk(Compute compute, Stack stack, String projectId, GccZone zone, String name, Long size) throws IOException {
-        Disk disk = new Disk();
-        disk.setSizeGb(size.longValue());
-        disk.setName(name);
-        disk.setKind(((GccTemplate) stack.getTemplate()).getGccRawDiskType().getUrl(projectId, zone));
-        Compute.Disks.Insert insDisk = compute.disks().insert(projectId, zone.getValue(), disk);
-        insDisk.execute();
-        GccDiskReadyPollerObject gccDiskReady = new GccDiskReadyPollerObject(compute, stack, name);
-        gccDiskReadyPollerObjectPollingService.pollWithTimeout(gccDiskCheckerStatus, gccDiskReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
-        return disk;
+        for (Future<Resource> future : futures) {
+            resourcesListTemp.add(future.get());
+        }
+        return resourcesListTemp;
     }
 
     @Override

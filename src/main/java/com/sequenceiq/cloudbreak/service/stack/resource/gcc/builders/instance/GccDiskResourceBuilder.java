@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.stack.resource.gcc.builders.instance;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.ERROR;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -54,11 +55,11 @@ public class GccDiskResourceBuilder extends GccSimpleInstanceResourceBuilder {
 
     @Override
     public List<Resource> create(GccProvisionContextObject po) throws Exception {
-        return create(po, 0);
+        return create(po, 0, new ArrayList<Resource>());
     }
 
     @Override
-    public List<Resource> create(GccProvisionContextObject po, int index) throws Exception {
+    public List<Resource> create(GccProvisionContextObject po, int index, List<Resource> resources) throws Exception {
         Stack stack = stackRepository.findById(po.getStackId());
         GccTemplate template = (GccTemplate) stack.getTemplate();
         String name = String.format("%s-%s", stack.getName(), index);

@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.service.stack.resource.gcc;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +14,8 @@ import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.domain.GccTemplate;
+import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDeleteContextObject;
@@ -45,6 +49,16 @@ public abstract class GccSimpleInstanceResourceBuilder implements
         } else {
             throw new InternalServerException(ex.getMessage());
         }
+    }
+
+    protected List<Resource> filterResourcesByType(List<Resource> resources, ResourceType resourceType) {
+        List<Resource> resourcesTemp = new ArrayList<>();
+        for (Resource resource : resources) {
+            if (resourceType.equals(resource.getResourceType())) {
+                resourcesTemp.add(resource);
+            }
+        }
+        return resourcesTemp;
     }
 
     @Override

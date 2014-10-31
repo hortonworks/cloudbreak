@@ -86,7 +86,9 @@ public class ProvisionContext {
                     final ProvisionContextObject pCO =
                             resourceBuilderInit.provisionInit(stack, userDataBuilder.build(cloudPlatform, stack.getHash(), userDataParams));
                     for (ResourceBuilder resourceBuilder : networkResourceBuilders.get(cloudPlatform)) {
-                        resourceSet.addAll(resourceBuilder.create(pCO));
+                        List<Resource> resourceList = resourceBuilder.create(pCO);
+                        resourceSet.addAll(resourceList);
+                        pCO.getNetworkResources().addAll(resourceList);
                     }
                     List<Future<List<Resource>>> futures = new ArrayList<>();
                     for (int i = 0; i < stack.getNodeCount(); i++) {
@@ -96,7 +98,8 @@ public class ProvisionContext {
                             public List<Resource> call() throws Exception {
                                 List<Resource> resources = new ArrayList<>();
                                 for (final ResourceBuilder resourceBuilder : instanceResourceBuilders.get(cloudPlatform)) {
-                                    resources.addAll(resourceBuilder.create(pCO, index));
+                                    List<Resource> resourceList = resourceBuilder.create(pCO, index, resources);
+                                    resources.addAll(resourceList);
                                 }
                                 return resources;
                             }
@@ -104,7 +107,11 @@ public class ProvisionContext {
                         futures.add(submit);
                     }
                     for (Future<List<Resource>> future : futures) {
-                        resourceSet.addAll(future.get());
+                        try {
+                            resourceSet.addAll(future.get());
+                        } catch (Exception e) {
+                            throw new BuildStackFailureException(e.getMessage(), e, resourceSet);
+                        }
                     }
 
                     LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_COMPLETE_EVENT, stack.getId());

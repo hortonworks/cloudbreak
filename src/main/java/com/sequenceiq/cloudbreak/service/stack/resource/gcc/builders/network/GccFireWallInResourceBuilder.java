@@ -44,8 +44,8 @@ public class GccFireWallInResourceBuilder extends GccSimpleNetworkResourceBuilde
     private JsonHelper jsonHelper;
 
     @Override
-    public List<Resource> create(GccProvisionContextObject provisionContextObject) throws Exception {
-        Stack stack = stackRepository.findById(provisionContextObject.getStackId());
+    public List<Resource> create(GccProvisionContextObject pO) throws Exception {
+        Stack stack = stackRepository.findById(pO.getStackId());
 
         Firewall firewall = new Firewall();
         Firewall.Allowed allowed1 = new Firewall.Allowed();
@@ -63,15 +63,15 @@ public class GccFireWallInResourceBuilder extends GccSimpleNetworkResourceBuilde
         firewall.setName(stack.getName() + "in");
         firewall.setSourceRanges(ImmutableList.of("10.0.0.0/16"));
         firewall.setNetwork(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s",
-                provisionContextObject.getProjectId(), stack.getName()));
-        Compute.Firewalls.Insert firewallInsert = provisionContextObject.getCompute().firewalls().insert(provisionContextObject.getProjectId(), firewall);
+                pO.getProjectId(), pO.filterResourcesByType(ResourceType.GCC_NETWORK).get(0).getResourceName()));
+        Compute.Firewalls.Insert firewallInsert = pO.getCompute().firewalls().insert(pO.getProjectId(), firewall);
         firewallInsert.execute();
         return Arrays.asList(new Resource(resourceType(), stack.getName() + "in", stack));
     }
 
     @Override
-    public List<Resource> create(GccProvisionContextObject po, int index) throws Exception {
-        return create(po, 0);
+    public List<Resource> create(GccProvisionContextObject po, int index, List<Resource> resources) throws Exception {
+        return create(po);
     }
 
     @Override
