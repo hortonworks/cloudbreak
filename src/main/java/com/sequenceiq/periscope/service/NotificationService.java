@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.periscope.domain.BaseAlarm;
 import com.sequenceiq.periscope.domain.Cluster;
-import com.sequenceiq.periscope.domain.MetricAlarm;
 import com.sequenceiq.periscope.domain.Notification;
 import com.sequenceiq.periscope.log.Logger;
 import com.sequenceiq.periscope.log.PeriscopeLoggerFactory;
@@ -45,11 +44,6 @@ public class NotificationService {
         Map<String, String> model = new HashMap<>();
         model.put("alarmName", alarm.getName());
         model.put("description", alarm.getDescription());
-        if (alarm instanceof MetricAlarm) {
-            model.put("metric", ((MetricAlarm) alarm).getMetric().getName());
-            model.put("threshold", "" + ((MetricAlarm) alarm).getThreshold());
-            model.put("period", "" + ((MetricAlarm) alarm).getPeriod());
-        }
         try {
             emailService.sendMail(recipients, SUBJECT, ALARM_TEMPLATE, model);
         } catch (IOException | TemplateException e) {
