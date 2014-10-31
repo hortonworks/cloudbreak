@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.controller.json.ExceptionResult;
 import com.sequenceiq.cloudbreak.controller.json.ValidationResult;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
+import com.sequenceiq.cloudbreak.service.subscription.SubscriptionAlreadyExistException;
 
 @ControllerAdvice
 public class ExceptionControllerAdvice {
@@ -68,7 +69,13 @@ public class ExceptionControllerAdvice {
     public ResponseEntity<ExceptionResult> httpRequestMethodNotSupportedExceptionError(Exception e) {
         MDCBuilder.buildMdcContext();
         LOGGER.error(e.getMessage(), e);
-        return new ResponseEntity<>(new ExceptionResult("The requested http method not supported on the resource"), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(new ExceptionResult("The requested http method is not supported on the resource."), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler({ SubscriptionAlreadyExistException.class })
+    public ResponseEntity<ExceptionResult> subscriptionExists(Exception e) {
+        LOGGER.info(e.getMessage());
+        return new ResponseEntity<>(new ExceptionResult(e.getMessage()), HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler({ Exception.class, RuntimeException.class })
