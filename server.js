@@ -1,9 +1,14 @@
 var express  = require('express');
 var app = express();
+var uid = require('uid2');
+var sessionSecret = uid(30);
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
-var uid = require('uid2');
 var session = require('express-session');
+var sessionStore = new session.MemoryStore();
+var cookieParser = require('cookie-parser')(sessionSecret)
+var sessionSocketIo = require('session.socket.io');
+var sessionSockets = new sessionSocketIo(io, sessionStore, cookieParser);
 var morgan = require('morgan');
 var bodyParser = require('body-parser');
 var methodOverride = require('method-override');
@@ -22,15 +27,16 @@ app.engine('html', cons.underscore);
 app.set('views', './app')
 app.set('view engine', 'html')
 app.use(express.static(path.join(__dirname, 'app/static')));
-
+app.use(cookieParser);
 app.use(session({
   genid: function(req) {
     return uid(30);
   },
-  secret: uid(30),
+  secret: sessionSecret,
   resave: true,
   saveUninitialized: true,
-  cookie: {}
+  cookie: {},
+  store: sessionStore
 }))
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({'extended':'true'}));
@@ -152,15 +158,21 @@ app.get('/logout', function(req, res){
 })
 
 app.get('/user', function(req,res) {
-  var requestArgs = {
-    headers:{
-      "Authorization": "Bearer " + req.session.token,
-    }
-  }
-  identityServerClient.get(identityServerAddress + "userinfo", requestArgs, function(data,response){
+  retrieveUserByToken(req.session.token, function(data){
     res.json(data);
   });
 });
+
+function retrieveUserByToken(token, success){
+  var requestArgs = {
+    headers: {
+      "Authorization": "Bearer " + token,
+    }
+  }
+  identityServerClient.get(identityServerAddress + "userinfo", requestArgs, function(data,response){
+    success(data);
+  });
+}
 
 // wildcards should be proxied =================================================
 
@@ -220,8 +232,15 @@ function proxySultansRequest(req, res, method){
 }
 // socket ======================================================================
 
-io.on('connection', function(socket){
-  console.log('a user connected:' + socket.handshake.query.user)
+sessionSockets.on('connection', function (err, socket, session) {
+  if (session){
+    retrieveUserByToken(session.token, function(data){
+      socket.join(data.user_id)
+      io.to(data.user_id).emit('message', 'for your eyes only');
+    });
+  } else {
+    console.log("No session found, websocket notifications won't work [socket ID: " + socket.id + "] " + err)
+  }
 });
 
 // errors  =====================================================================

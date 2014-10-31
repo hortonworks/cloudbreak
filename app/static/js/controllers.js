@@ -13,11 +13,11 @@ var uluwatuControllers = angular.module('uluwatuControllers', []);
 uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '$rootScope', '$filter',
     function ($scope, $http, User, $rootScope, $filter) {
         var orderBy = $filter('orderBy');
-        $scope.user = User.get(function(success){
-          var socket = io('', { query: "user=" + $scope.user.user_id });
-          socket.on('message', function (data) {
-            console.log("Message arrived on websocket: " + data);
-          });
+        $scope.user = User.get();
+
+        var socket = io();
+        socket.on('message', function (data) {
+          console.log("Message arrived on websocket: " + data);
         });
 
         $scope.errormessage = "";
