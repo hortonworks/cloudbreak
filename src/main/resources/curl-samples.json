@@ -23,10 +23,10 @@ curl -X POST localhost:8081/clusters/1/configurations | jq .
 curl -X POST -H "Content-Type: application/json" -d '{"setup":[{"name":"default", "capacity":55}, {"name":"high", "capacity":45}]}' localhost:8081/clusters/1/configurations/queue | jq .
 
 # set metric alarms
-curl -X POST -H "Content-Type: application/json" -d '{"alarms":[{"alarmName":"pendingContainerHigh","description":"Number of pending containers is high","metric":"PENDING_CONTAINERS","threshold":10,"comparisonOperator":"GREATER_THAN","period":1},{"alarmName":"freeGlobalResourcesRateLow","description":"Low free global resource rate","metric":"GLOBAL_RESOURCES","threshold":1,"comparisonOperator":"EQUALS","period":1,"notifications":[{"target":["krisztian.horvath@sequenceiq.com"],"notificationType":"EMAIL"}]}]}' localhost:8081/clusters/1/alarms | jq .
-curl -X PUT -H "Content-Type: application/json" -d '{"alarmName":"unhealthyNodesHigh","description":"Number of unhealthy nodes is high","metric":"UNHEALTHY_NODES","threshold":5,"comparisonOperator":"GREATER_OR_EQUAL_THAN","period":5}' localhost:8081/clusters/1/alarms | jq .
-curl -X GET localhost:8081/clusters/1/alarms | jq .
-curl -X DELETE localhost:8081/clusters/1/alarms/100 | jq .
+curl -X POST -H "Content-Type: application/json" -d '{"alarms":[{"alarmName":"pendingContainerHigh","description":"Number of pending containers is high","metric":"PENDING_CONTAINERS","threshold":10,"comparisonOperator":"GREATER_THAN","period":1},{"alarmName":"freeGlobalResourcesRateLow","description":"Low free global resource rate","metric":"GLOBAL_RESOURCES","threshold":1,"comparisonOperator":"EQUALS","period":1,"notifications":[{"target":["krisztian.horvath@sequenceiq.com"],"notificationType":"EMAIL"}]}]}' localhost:8081/clusters/1/alarms/metric | jq .
+curl -X PUT -H "Content-Type: application/json" -d '{"alarmName":"unhealthyNodesHigh","description":"Number of unhealthy nodes is high","metric":"UNHEALTHY_NODES","threshold":5,"comparisonOperator":"GREATER_OR_EQUAL_THAN","period":5}' localhost:8081/clusters/1/alarms/metric | jq .
+curl -X GET localhost:8081/clusters/1/alarms/metric | jq .
+curl -X DELETE localhost:8081/clusters/1/alarms/metric/100 | jq .
 
 # set time alarms
 curl -X POST -H "Content-Type: application/json" -d '{"alarms":[{"alarmName":"cron_worktime","description":"Number of nodes during worktime","timeZone":"Europe/Budapest","cron":"0 42 18 ? * MON-FRI"}]}' localhost:8081/clusters/1/alarms/time | jq .

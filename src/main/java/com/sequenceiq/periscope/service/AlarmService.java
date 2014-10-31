@@ -25,12 +25,12 @@ public class AlarmService {
     @Autowired
     private ClusterService clusterService;
 
-    public List<MetricAlarm> setAlarms(long clusterId, List<MetricAlarm> metricAlarms) throws ClusterNotFoundException {
-        return addAlarms(clusterId, metricAlarms, true);
+    public List<MetricAlarm> setMetricAlarms(long clusterId, List<MetricAlarm> metricAlarms) throws ClusterNotFoundException {
+        return addMetricAlarms(clusterId, metricAlarms, true);
     }
 
-    public List<MetricAlarm> addAlarm(long clusterId, MetricAlarm metricAlarm) throws ClusterNotFoundException {
-        return addAlarms(clusterId, Arrays.asList(metricAlarm), false);
+    public List<MetricAlarm> addMetricAlarm(long clusterId, MetricAlarm metricAlarm) throws ClusterNotFoundException {
+        return addMetricAlarms(clusterId, Arrays.asList(metricAlarm), false);
     }
 
     public List<TimeAlarm> setTimeAlarms(long clusterId, List<TimeAlarm> alarms) throws ClusterNotFoundException {
@@ -41,7 +41,7 @@ public class AlarmService {
         return addTimeAlarms(clusterId, Arrays.asList(alarm), false);
     }
 
-    public List<MetricAlarm> getAlarms(long clusterId) throws ClusterNotFoundException {
+    public List<MetricAlarm> getMetricAlarms(long clusterId) throws ClusterNotFoundException {
         return clusterService.get(clusterId).getMetricAlarms();
     }
 
@@ -49,7 +49,7 @@ public class AlarmService {
         return clusterService.get(clusterId).getTimeAlarms();
     }
 
-    public List<MetricAlarm> deleteAlarm(long clusterId, long alarmId) throws ClusterNotFoundException {
+    public List<MetricAlarm> deleteMetricAlarm(long clusterId, long alarmId) throws ClusterNotFoundException {
         Cluster runningCluster = clusterService.get(clusterId);
         Cluster savedCluster = clusterRepository.findOne(clusterId);
         MetricAlarm metricAlarm = metricAlarmRepository.findOne(alarmId);
@@ -77,7 +77,7 @@ public class AlarmService {
         return alarms;
     }
 
-    private List<MetricAlarm> addAlarms(long clusterId, List<MetricAlarm> metricAlarms, boolean override) throws ClusterNotFoundException {
+    private List<MetricAlarm> addMetricAlarms(long clusterId, List<MetricAlarm> metricAlarms, boolean override) throws ClusterNotFoundException {
         Cluster runningCluster = clusterService.get(clusterId);
         Cluster savedCluster = clusterRepository.findOne(clusterId);
         List<MetricAlarm> metricAlarmList = savedCluster.getMetricAlarms();
