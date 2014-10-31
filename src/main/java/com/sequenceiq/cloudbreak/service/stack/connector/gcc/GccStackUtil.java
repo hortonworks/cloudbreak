@@ -43,10 +43,6 @@ import com.google.api.services.compute.model.Network;
 import com.google.api.services.compute.model.NetworkInterface;
 import com.google.api.services.compute.model.Operation;
 import com.google.api.services.compute.model.Route;
-import com.google.api.services.dns.Dns;
-import com.google.api.services.dns.model.Change;
-import com.google.api.services.dns.model.ManagedZone;
-import com.google.api.services.dns.model.ManagedZonesListResponse;
 import com.google.api.services.dns.model.ResourceRecordSet;
 import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.StorageScopes;
@@ -117,68 +113,6 @@ public class GccStackUtil {
             LOGGER.info("Problem with the Google cloud stack generation: " + e.getMessage());
         }
         return null;
-    }
-
-    public Dns buildDns(GccCredential gccCredential, Stack stack) {
-        try {
-            HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-            BufferedReader br = new BufferedReader(new StringReader(gccCredential.getServiceAccountPrivateKey()));
-            Security.addProvider(new BouncyCastleProvider());
-            KeyPair kp = (KeyPair) new PEMReader(br).readObject();
-            GoogleCredential credential = new GoogleCredential.Builder().setTransport(httpTransport)
-                    .setJsonFactory(JSON_FACTORY)
-                    .setServiceAccountId(gccCredential.getServiceAccountId())
-                    .setServiceAccountScopes(SCOPES)
-                    .setServiceAccountPrivateKey(kp.getPrivate())
-                    .build();
-
-            Dns dns = new Dns.Builder(httpTransport, JSON_FACTORY, null).setApplicationName(stack.getName())
-                    .setHttpRequestInitializer(credential)
-                    .build();
-
-            return dns;
-        } catch (GeneralSecurityException e) {
-            LOGGER.info("Problem with the Google cloud stack generation: " + e.getMessage());
-        } catch (IOException e) {
-            LOGGER.info("Problem with the Google cloud stack generation: " + e.getMessage());
-        } catch (Exception e) {
-            LOGGER.info("Problem with the Google cloud stack generation: " + e.getMessage());
-        }
-        return null;
-    }
-
-    public ManagedZone buildManagedZone(Dns dns, Stack stack) throws IOException {
-        GccCredential credential = (GccCredential) stack.getCredential();
-        ManagedZonesListResponse execute1 = dns.managedZones().list(credential.getProjectId()).execute();
-        ManagedZone original = null;
-        for (ManagedZone managedZone : execute1.getManagedZones()) {
-            if (managedZone.getName().equals(credential.getProjectId())) {
-                original = managedZone;
-                break;
-            }
-        }
-        if (original == null) {
-            ManagedZone managedZone = new ManagedZone();
-            managedZone.setName(credential.getProjectId());
-            managedZone.setDnsName(String.format("%s.%s", credential.getProjectId(), "com"));
-            ManagedZone execute = dns.managedZones().create(credential.getProjectId(), managedZone).execute();
-            return execute;
-        }
-        return original;
-    }
-
-    public Change buildChanges(Dns dns, Stack stack, ManagedZone managedZone, List<String> ips) throws IOException {
-        GccCredential credential = (GccCredential) stack.getCredential();
-        Change originalChange = dns.changes().get(credential.getProjectId(), credential.getProjectId(), credential.getProjectId()).execute();
-        if (originalChange != null) {
-            originalChange.getAdditions().add(buildResourceRecordSet(stack, ips));
-        } else {
-            originalChange = new Change();
-            originalChange.setAdditions(Arrays.asList(buildResourceRecordSet(stack, ips)));
-            originalChange.setId(credential.getProjectId());
-        }
-        Change execute = dns.changes().create(credential.getProjectId(), managedZone.getName(), originalChange).execute();
-        return execute;
     }
 
     public ResourceRecordSet buildResourceRecordSet(Stack stack, List<String> ips) throws IOException {
@@ -260,37 +194,6 @@ public class GccStackUtil {
         gccRemoveReadyPollerObjectPollingService.pollWithTimeout(gccRemoveCheckerStatus, gccRemoveReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
     }
 
-    public void removeNetwork(Compute compute, Stack stack, String name) throws IOException {
-        GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
-        GccCredential gccCredential = (GccCredential) stack.getCredential();
-        Operation execute = compute.networks().delete(gccCredential.getProjectId(), name).execute();
-        Compute.ZoneOperations.Get zoneOperations = createZoneOperations(compute, gccCredential, gccTemplate, execute);
-        Compute.GlobalOperations.Get globalOperations = createGlobalOperations(compute, gccCredential, gccTemplate, execute);
-        GccRemoveReadyPollerObject gccRemoveReady = new GccRemoveReadyPollerObject(zoneOperations, globalOperations, stack.getId(), name);
-        gccRemoveReadyPollerObjectPollingService.pollWithTimeout(gccRemoveCheckerStatus, gccRemoveReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
-    }
-
-
-    public void removeFireWall(Compute compute, Stack stack, String name) throws IOException {
-        GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
-        GccCredential gccCredential = (GccCredential) stack.getCredential();
-        Operation execute = compute.firewalls().delete(gccCredential.getProjectId(), name).execute();
-        Compute.ZoneOperations.Get zoneOperations = createZoneOperations(compute, gccCredential, gccTemplate, execute);
-        Compute.GlobalOperations.Get globalOperations = createGlobalOperations(compute, gccCredential, gccTemplate, execute);
-        GccRemoveReadyPollerObject gccRemoveReady = new GccRemoveReadyPollerObject(zoneOperations, globalOperations, stack.getId(), name);
-        gccRemoveReadyPollerObjectPollingService.pollWithTimeout(gccRemoveCheckerStatus, gccRemoveReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
-    }
-
-    public void removeRoute(Compute compute, Stack stack, String name) throws IOException {
-        GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
-        GccCredential gccCredential = (GccCredential) stack.getCredential();
-        Operation execute = compute.routes().delete(gccCredential.getProjectId(), name).execute();
-        Compute.ZoneOperations.Get zoneOperations = createZoneOperations(compute, gccCredential, gccTemplate, execute);
-        Compute.GlobalOperations.Get globalOperations = createGlobalOperations(compute, gccCredential, gccTemplate, execute);
-        GccRemoveReadyPollerObject gccRemoveReady = new GccRemoveReadyPollerObject(zoneOperations, globalOperations, stack.getId(), name);
-        gccRemoveReadyPollerObjectPollingService.pollWithTimeout(gccRemoveCheckerStatus, gccRemoveReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
-    }
-
     private Compute.ZoneOperations.Get createZoneOperations(Compute compute, GccCredential gccCredential, GccTemplate gccTemplate, Operation operation)
             throws IOException {
         return compute.zoneOperations().get(gccCredential.getProjectId(), gccTemplate.getGccZone().getValue(), operation.getName());
@@ -328,53 +231,9 @@ public class GccStackUtil {
         return null;
     }
 
-    private Credential authorize(GccCredential gccCredential, HttpTransport httpTransport) throws Exception {
-        GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY,
-                new StringReader(
-                        String.format("{\"installed\": {\"client_id\": \"%s\",\"client_secret\": \"%s\"}}\n",
-                                gccCredential.getServiceAccountId(),
-                                gccCredential.getServiceAccountPrivateKey())
-                )
-        );
-        MemoryDataStoreFactory dataStoreFactory = new MemoryDataStoreFactory();
-        GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, JSON_FACTORY, clientSecrets, SCOPES)
-                .setDataStoreFactory(dataStoreFactory)
-                .build();
-
-        return new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver())
-                .authorize(gccCredential.getOwner());
-    }
-
     public String buildMachineType(String projectId, GccZone gccZone, GccInstanceType instanceType) {
         return String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/machineTypes/%s",
                 projectId, gccZone.getValue(), instanceType.getValue());
-    }
-
-    public List<NetworkInterface> buildNetworkInterfaces(Compute compute, String projectId, String name) throws IOException {
-        Network network = new Network();
-        network.setName(name);
-        network.setIPv4Range("10.0.0.0/24");
-        Compute.Networks.Insert networkInsert = compute.networks().insert(projectId, network);
-        networkInsert.execute();
-        buildFireWallOut(compute, projectId, name);
-        buildFireWallIn(compute, projectId, name);
-        List<NetworkInterface> networkInterfaces = new ArrayList<>();
-        networkInterfaces.add(buildNetworkInterface(projectId, name));
-        return networkInterfaces;
-    }
-
-    public Route buildRoute(Compute compute, String projectId, String networkName, Stack stack, int node, Resource machineResource) throws IOException {
-        Route route = new Route();
-        route.setNetwork(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s", projectId, networkName));
-        route.setName(String.format("route-%s", machineResource.getResourceName()));
-        route.setPriority(PRIORITY);
-        CoreInstanceMetaData metadata = getMetadata(stack, compute, machineResource.getResourceName());
-        route.setNextHopIp(metadata.getPrivateIp());
-        route.setDestRange(String.format("172.18.%s.0/24", metadata.getPrivateIp().split("\\.")[
-                LAST]));
-        Compute.Routes.Insert routeInsert = compute.routes().insert(projectId, route);
-        routeInsert.execute();
-        return route;
     }
 
     public NetworkInterface buildNetworkInterface(String projectId, String name) {
@@ -386,14 +245,6 @@ public class GccStackUtil {
         iface.setAccessConfigs(ImmutableList.of(accessConfig));
         iface.setNetwork(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s", projectId, name));
         return iface;
-    }
-
-    public void buildAddress(Compute compute, String projectId, GccZone gccZone, String name) throws IOException {
-        Address address = new Address();
-        address.setName(name);
-        Compute.Addresses.Insert addressInsert = compute.addresses().insert(projectId, gccZone.getValue(), address);
-        addressInsert.execute();
-        Compute.Addresses.Get addressInsert1 = compute.addresses().get(projectId, gccZone.getValue(), name);
     }
 
     public void buildFireWallOut(Compute compute, String projectId, String name) throws IOException {
@@ -494,14 +345,6 @@ public class GccStackUtil {
         return disk;
     }
 
-    public void exceptionHandler(GoogleJsonResponseException ex, String name) {
-        if (ex.getDetails().get("code").equals(NOT_FOUND)) {
-            LOGGER.info(String.format("Resource was delete with name: %s", name));
-        } else {
-            throw new InternalServerException(ex.getMessage());
-        }
-    }
-
     public CoreInstanceMetaData getMetadata(Stack stack, Compute compute, String resource) {
         try {
             GccCredential credential = (GccCredential) stack.getCredential();
@@ -530,10 +373,6 @@ public class GccStackUtil {
 
     public String getVmName(String stackName, int i) {
         return String.format("%s-%s", stackName, i);
-    }
-
-    public Integer getVmIdByName(String name) {
-        return Integer.valueOf(name.split("-")[name.split("-").length - 1]);
     }
 
 }
