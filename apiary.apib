@@ -1347,10 +1347,10 @@ Periscope was designed around the idea of `autoscaling` clusters - without any n
 
 ##How it works
 
-Periscope monitors the application progress, the number of YARN containers/resources and their allocation, queue depths, the number of available cluster nodes and their health. 
+Periscope monitors the application progress, the number of YARN containers/resources and their allocation, queue depths, the number of available cluster nodes and their health.
 Since we have switched to YARN a while ago (been among the first adopters) we have run an open source [monitoring project](https://github.com/sequenceiq/yarn-monitoring), based on R.
 We have been collecting metrics from the YARN Timeline server, Hadoop Metrics2 and Ambari's Nagios/Ganglia - and profiling the applications and correlating with these metrics.
-One of the key findings was that while low level metrics are good to understand the cluster health - they might not necessarily help on making decisions when applying different SLA policies on a multi-tenant cluster. 
+One of the key findings was that while low level metrics are good to understand the cluster health - they might not necessarily help on making decisions when applying different SLA policies on a multi-tenant cluster.
 Focusing on higher level building blocks as queue depth, YARN containers, etc actually brings in the same quality of service, while not being lost in low level details.
 
 Periscope works with two types of Hadoop clusters: `static` and `dynamic`. Periscope does not require any pre-installation - the only thing it requires is to be `attached` to an Ambari server's REST API.
@@ -1368,7 +1368,7 @@ Periscope introspects the job submission process, monitors the applications and 
   4. *Attempts* to enforce guaranteed cluster capacity requests ( x % of the resources)
   5. Support for distributed (but not YARN ready) applications using Apache Slider
   6. Attach priorities to SLAs
-  
+
 _Note: not all of the features above are supported in the first `public beta` version. There are dependencies we contributed to Hadoop, YARN and Ambari and they will be included in the next releases (2.6 and 1.7)_
 
 
@@ -1410,16 +1410,20 @@ _Note: not all of the features above are supported in the first `public beta` ve
 
 #Group Clusters
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> 2a42905... PERI-2 update apiary
 Clusters related resources of the **Periscope API**.
 =======
 >>>>>>> 88c3743... PERI-2 minor fix
 A Hadoop cluster is a set of components and services launched in order to store, analyze and process unstructured data. 
+=======
+A Hadoop cluster is a set of components and services launched in order to store, analyze and process unstructured data.
+>>>>>>> cd4ddb5... PERI-7 update apiary
 Periscope can work with any Hadoop 2/ YARN cluster provisioned with Apache Ambari, and supports any YARN application.
 
 ##Add [/clusters]
 ###Add a cluster [POST]
-Add a Hadoop cluster to be monitored by Periscope. Note that Periscope does not require any pre-installation of components on cluster nodes. 
+Add a Hadoop cluster to be monitored by Periscope. Note that Periscope does not require any pre-installation of components on cluster nodes.
 To link a Hadoop cluster with Periscope the only required this is the Apache Ambari REST API endpoint.
 
 + Request (application/json)
@@ -1505,7 +1509,7 @@ To link a Hadoop cluster with Periscope the only required this is the Apache Amb
             "id": "1"
           }
         ]
-        
+
 
 ##State [/clusters/{clusterId}/state]
 ###Set state [POST]
@@ -1531,7 +1535,7 @@ To link a Hadoop cluster with Periscope the only required this is the Apache Amb
 
 ##Movements [/clusters/{clusterId}/movement]
 ###Configure application movements [POST]
-Configure whether moveing the submitted applications between different queues to set a priority among them is allowed or not. 
+Configure whether moveing the submitted applications between different queues to set a priority among them is allowed or not.
 Based on our contribution to the CapacityScheduler [YARN-2248](https://issues.apache.org/jira/browse/YARN-2248) we made available to move running applications between queues.
 
 + Parameters
@@ -1540,7 +1544,7 @@ Based on our contribution to the CapacityScheduler [YARN-2248](https://issues.ap
 + Request (application/json)
 
         {
-          "allowed": "false" 
+          "allowed": "false"
         }
 
 +  Response 200 (application/json)
@@ -1554,7 +1558,7 @@ Based on our contribution to the CapacityScheduler [YARN-2248](https://issues.ap
         }
 
 #Group Alarms
-An alarm watches a `metric` over a specified time period, and used by one or more action or scaling policy based on the value of the metric relative to a given threshold over a number of time periods. In case Periscope raises an alarm an action (e.g. sending an email) or a scaling policy is triggered. Alarms are based on metrics. The current supported `metrics` are: 
+An alarm watches a `metric` over a specified time period or a configured time-slot, and used by one or more action or scaling policy based on the value of the metric relative to a given threshold over a number of time periods. In case Periscope raises an alarm an action (e.g. sending an email) or a scaling policy is triggered. Alarms are based on metrics or time. The current supported `metrics` are:
 *`PENDING_CONTAINERS`- pending YARN containers
 
 *`PENDING_APPLICATIONS` - pending/queued YARN applications
@@ -1563,15 +1567,15 @@ An alarm watches a `metric` over a specified time period, and used by one or mor
 
 *`UNHEALTHY_NODES` - unhealthy cluster nodes
 
-*`GLOBAL_RESOURCES` - global resources 
+*`GLOBAL_RESOURCES` - global resources
 
 Measured `metrics` are compared with pre-configured values using operators. The `comparison operators` are: `LESS_THAN`, `GREATER_THAN`, `LESS_OR_EQUAL_THAN`, `GREATER_OR_EQUAL_THAN`, `EQUALS`.
-In order to avoid reacting for sudden spikes in the system and apply policies only in case of a sustained system stress, `alarms` have to be sustained over a `period` of time.  The `period` specifies the time period in minutes during the alarm has to be sustained. 
+In order to avoid reacting for sudden spikes in the system and apply policies only in case of a sustained system stress, `alarms` have to be sustained over a `period` of time.  The `period` specifies the time period in minutes during the alarm has to be sustained.
 
 Also a `threshold` can be configured, which specifies the variance applied by the operator for the selected `metric`.
 
 
-##Add, remove and show [/clusters/{clusterId}/alarms]
+##Add, remove and show [/clusters/{clusterId}/alarms/metric]
 ###Set the alarms [POST]
 
 + Parameters
@@ -1749,7 +1753,7 @@ Also a `threshold` can be configured, which specifies the variance applied by th
           ]
         }
 
-##Delete [/clusters/{clusterId}/alarms/{alarmId}]
+##Delete [/clusters/{clusterId}/alarms/metric/{alarmId}]
 ###Delete an alarm [DELETE]
 
 + Parameters
@@ -1757,7 +1761,7 @@ Also a `threshold` can be configured, which specifies the variance applied by th
     + alarmId (required String `alarmId`) ... The id of the alarm.
 
 + Request (application/json)
-        
+
         {
 
         }
@@ -1780,11 +1784,152 @@ Also a `threshold` can be configured, which specifies the variance applied by th
           ]
         }
 
+##Time based alarms
+
+##Add, remove and show [/clusters/{clusterId}/alarms/time]
+###Set the alarms [POST]
+
++ Parameters
+    + clusterId (required String `clusterID`) ... The id of the cluster.
+
++ Request (application/json)
+
+        {
+          "alarms": [
+            {
+              "alarmName": "cron_worktime",
+              "description": "Number of nodes during worktime",
+              "timeZone": "Europe/Budapest",
+              "cron": "0 00 09 ? * MON-FRI"
+            }
+          ]
+        }
+
++ Response 201 (application/json)
+
+      {
+        "alarms": [
+          {
+            "cron": "0 00 09 ? * MON-FRI",
+            "timeZone": "Europe/Budapest",
+            "notifications": [],
+            "scalingPolicyId": null,
+            "description": "Number of nodes during worktime",
+            "alarmName": "cron_worktime",
+            "id": 100
+          }
+        ]
+      }
+
+###Add an alarm [PUT]
+
++ Parameters
+    + clusterId (required String `clusterID`) ... The id of the cluster.
+
++ Request (application/json)
+
+      {
+        "alarmName": "cron_worktime",
+        "description": "Number of nodes during worktime",
+        "timeZone": "Europe/Budapest",
+        "cron": "0 00 09 ? * MON-FRI"
+      }
+
++ Response 201 (application/json)
+
+      {
+        "alarms": [
+          {
+            "cron": "0 00 09 ? * MON-FRI",
+            "timeZone": "Europe/Budapest",
+            "notifications": [],
+            "scalingPolicyId": null,
+            "description": "Number of nodes during worktime",
+            "alarmName": "cron_worktime",
+            "id": 100
+          },
+          {
+            "cron": "0 00 09 ? * MON-FRI",
+            "timeZone": "Europe/Budapest",
+            "notifications": [],
+            "scalingPolicyId": null,
+            "description": "Number of nodes during worktime",
+            "alarmName": "cron_worktime",
+            "id": 101
+          }
+        ]
+      }
+
+###Retrieve configured alarms [GET]
+
++ Parameters
+    + clusterId (required String `clusterID`) ... The id of the cluster.
+
++ Request (application/json)
+
+        {
+
+        }
+
++ Response 201 (application/json)
+
+      {
+        "alarms": [
+          {
+            "cron": "0 00 09 ? * MON-FRI",
+            "timeZone": "Europe/Budapest",
+            "notifications": [],
+            "scalingPolicyId": null,
+            "description": "Number of nodes during worktime",
+            "alarmName": "cron_worktime",
+            "id": 100
+          },
+          {
+            "cron": "0 00 09 ? * MON-FRI",
+            "timeZone": "Europe/Budapest",
+            "notifications": [],
+            "scalingPolicyId": null,
+            "description": "Number of nodes during worktime",
+            "alarmName": "cron_worktime",
+            "id": 101
+          }
+        ]
+      }
+
+##Delete [/clusters/{clusterId}/alarms/time/{alarmId}]
+###Delete an alarm [DELETE]
+
++ Parameters
+    + clusterId (required String `clusterID`) ... The id of the cluster.
+    + alarmId (required String `alarmId`) ... The id of the alarm.
+
++ Request (application/json)
+
+        {
+
+        }
+
++ Response 200 (application/json)
+
+        {
+          "alarms": [
+            {
+              "cron": "0 00 09 ? * MON-FRI",
+              "timeZone": "Europe/Budapest",
+              "notifications": [],
+              "scalingPolicyId": null,
+              "description": "Number of nodes during worktime",
+              "alarmName": "cron_worktime",
+              "id": 100
+            }
+          ]
+        }
+
 #Group Scaling Policy
-Scaling is the ability to increase or decrease the capacity of the Hadoop cluster or application. 
+Scaling is the ability to increase or decrease the capacity of the Hadoop cluster or application.
 When scaling policies are used, the capacity is automatically increased or decreased according to the conditions defined.
 Periscope will do the heavy lifting and based on the alarms and the scaling policy linked to them it executes the associated policy.
-By default a fully configured and running [Cloudbreak](https://cloudbreak.sequenceiq.com/) cluster contains no SLA policies. 
+By default a fully configured and running [Cloudbreak](https://cloudbreak.sequenceiq.com/) cluster contains no SLA policies.
 An SLA scaling policy can contain multiple alarms. As an alarm is triggered a `scalingAdjustment` is applied, however to keep the cluster size within boundaries a `minSize` and `maxSize` is attached to the cluster - thus a scaling policy can never over or undersize a cluster. Also in order to avoid stressing the cluster we have introduced a `cooldown` period (minutes) - though an alarm is raised and there is an associated scaling policy, the system will not apply the policy within the configured timeframe. In an SLA scaling policy the triggered rules are applied in order.
 Hosts can be added or removed from specific `hostgroups` - Ambari host groups are a set of machines with the same Hadoop “components” installed.
 
@@ -1810,7 +1955,7 @@ Hosts can be added or removed from specific `hostgroups` - Ambari host groups ar
             },
             {
               "name": "upScaleWhenHighPendingContainers",
-              "adjustmentType": "PERCENTAGE",
+              "adjustmentType": "EXACT",
               "scalingAdjustment": 40,
               "hostGroup": "slave_1",
               "alarmId": "50"
@@ -1827,7 +1972,7 @@ Hosts can be added or removed from specific `hostgroups` - Ambari host groups ar
               "alarmId": 50,
               "scalingAdjustment": 40,
               "hostGroup": "slave_1",
-              "adjustmentType": "PERCENTAGE",
+              "adjustmentType": "EXACT",
               "name": "upScaleWhenHighPendingContainers",
               "id": 101
             },
@@ -1963,8 +2108,8 @@ Hosts can be added or removed from specific `hostgroups` - Ambari host groups ar
 
 #Group Applications
 A Hadoop YARN application is a packaged workload submitted to a cluster. An application requests resources from YARN Resource Manager. The resources are allocated as YARN containers. By default Periscope works with the Hadoop YARN Capacity Scheduler. Using the Capacity Scheduler applications are submitted in different priority queues. The queue configurations, their depth, associated resources, etc have to be designed ahead - and adapted in case of new tenants, applications or workloads are using the cluster.
-At SequenceIQ, through our contributions to Apache YARN we facilitate moving applications between queues - and thus use the SLA policies attached to these queues. Even more, those SLA policies which were previously attached to Capacity Scheduler queues now can be attached to submitted jobs/applications. 
-Also we facilitate changing the resources allocated to a running application - even though they were submitted and already running. 
+At SequenceIQ, through our contributions to Apache YARN we facilitate moving applications between queues - and thus use the SLA policies attached to these queues. Even more, those SLA policies which were previously attached to Capacity Scheduler queues now can be attached to submitted jobs/applications.
+Also we facilitate changing the resources allocated to a running application - even though they were submitted and already running.
 _Note: not all of the features above are supported in the first `public beta` version. There are dependencies we contributed to Hadoop, Ambari and YARN and they will be included in the next releases (1.7 and 2.6)_
 
 ##List [/clusters/{clusterId}/applications]
@@ -2002,7 +2147,7 @@ _Note: not all of the features above are supported in the first `public beta` ve
 =======
 
 #Group Configuration
-Periscope brings in the capability to reconfigure a running cluster - in particular resource properties heavily used. 
+Periscope brings in the capability to reconfigure a running cluster - in particular resource properties heavily used.
 These properties currently are mostly related to the Capacity Scheduler configurations, but as we add functionality to Periscope this set of properties will constantly increase.
 
 ##Update [/clusters/{clusterId}/configurations]
