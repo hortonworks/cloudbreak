@@ -81,6 +81,7 @@ uluwatuServices.factory('UluwatuCluster', ['UserStack', 'Cluster', 'GlobalStack'
                         clusters[i] = stacks[i];
                         clusters[i].hoursUp = stacks[i].cluster.hoursUp;
                         clusters[i].minutesUp = stacks[i].cluster.minutesUp;
+                        clusters[i].blueprintId = stacks[i].cluster.blueprintId;
                     }
                     successHandler(clusters);
                 });
