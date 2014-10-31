@@ -77,7 +77,7 @@ public class GccProvisioner implements Provisioner {
                         resourceSet.add(new Resource(ResourceType.GCC_ATTACHED_DISK, attachedDisk.getDeviceName(), stack));
                     }
                 }
-                resourceSet.add(new Resource(ResourceType.VIRTUAL_MACHINE, forName, stack));
+                resourceSet.add(new Resource(ResourceType.GCC_INSTANCE, forName, stack));
             }
         } catch (IOException e) {
             LOGGER.info("Problem with the Google cloud stack update: " + e.getMessage());
