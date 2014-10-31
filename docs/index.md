@@ -384,7 +384,7 @@ Using manage credentials you can link your cloud account with the Cloudbreak acc
 
 `Role ARN:` the role string - you can find it at the summary tab of the IAM role
 
-`SSH public key:` if you specify an SSH public key you can use your private key later to log into your launched instances
+`SSH public key:` an SSH public key in OpenSSH format that's private keypair can be used to log into the launched instances later
 
 **Azure**
 
@@ -396,7 +396,7 @@ Using manage credentials you can link your cloud account with the Cloudbreak acc
 
 `File password:` your generated JKS file password - see Accounts
 
-`SSH public key:` if you specify an SSH public key you can use your private key later to log into your launched instances (The key generation process is described in the Configuring the Microsoft Azure account section)
+`SSH public key:` the SSH public key in OpenSSH format that's private keypair can be used to log into the launched instances later (The key generation process is described in the Configuring the Microsoft Azure account section)
 
 
 **Google Cloud**
@@ -411,7 +411,7 @@ Using manage credentials you can link your cloud account with the Cloudbreak acc
 
 `Service Account private key:` your GCC service account generated private key - see Accounts
 
-`SSH public key:` if you specify an SSH public key you can use your private key later to log into your launched instances 
+`SSH public key:` the SSH public key in OpenSSH format that's private keypair can be used to log into the launched instances later 
 
 
 ###Manage templates
