@@ -23,10 +23,10 @@ public class SubscriptionController {
     @Autowired
     private SubscriptionService subscriptionService;
 
-    @RequestMapping(value = "subscription", method = RequestMethod.POST)
+    @RequestMapping(value = "subscriptions", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<IdJson> subscribeClient(@RequestBody @Valid SubscribeRequest subscribeRequest, @AuthenticationPrincipal String client) {
         Subscription subscription = new Subscription(client, subscribeRequest.getEndpointUrl());
-        return new ResponseEntity<IdJson>(new IdJson(subscriptionService.subscribe(subscription)), HttpStatus.OK);
+        return new ResponseEntity<IdJson>(new IdJson(subscriptionService.subscribe(subscription)), HttpStatus.CREATED);
     }
 }
