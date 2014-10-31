@@ -16,10 +16,6 @@ var restClient = require('node-rest-client');
 var path = require('path');
 var cons = require('consolidate');
 
-var cloudbreakClient = new restClient.Client();
-var sultansClient = new restClient.Client();
-
-
 // general config ==============================================================
 
 app.engine('html', cons.underscore);
@@ -49,19 +45,19 @@ app.use(methodOverride());
 var environmentSet = true;
 var clientId = process.env.ULU_OAUTH_CLIENT_ID;
 var clientSecret = process.env.ULU_OAUTH_CLIENT_SECRET;
-var redirectUri = process.env.ULU_OAUTH_REDIRECT_URI;
+var identityServerAddress = process.env.ULU_IDENTITY_ADDRESS
+var sultansAddress = process.env.ULU_SULTANS_ADDRESS
+var cloudbreakAddress = process.env.ULU_CLOUDBREAK_ADDRESS
+var hostAddress = process.env.ULU_HOST_ADDRESS;
 var clientScopes = 'openid' +
     '+cloudbreak.templates' +
     '+cloudbreak.credentials' +
     '+cloudbreak.blueprints' +
     '+cloudbreak.stacks' +
     '+cloudbreak.events+cloudbreak.usages.account+cloudbreak.usages.user';
-var identityServerAddress = process.env.ULU_IDENTITY_ADDRESS
-var sultansAddress = process.env.ULU_SULTANS_ADDRESS
-var cloudbreakAddress = process.env.ULU_CLOUDBREAK_ADDRESS
 
-if (!clientSecret || !redirectUri || !clientId) {
-  console.log("ULU_CLIENT_SECRET and ULU_OAUTH_REDIRECT_URI and ULU_OAUTH_CLIENT_ID must be specified!");
+if (!clientSecret || !hostAddress || !clientId) {
+  console.log("ULU_HOST_ADDRESS, ULU_OAUTH_CLIENT_ID and ULU_OAUTH_CLIENT_SECRET must be specified!");
   environmentSet = false;
 }
 
@@ -84,6 +80,10 @@ if (!environmentSet) {
   process.exit(1);
 }
 
+if (hostAddress.slice(-1) !== '/') {
+  hostAddress += '/';
+}
+
 if (identityServerAddress.slice(-1) !== '/') {
   identityServerAddress += '/';
 }
@@ -96,9 +96,16 @@ if (sultansAddress.slice(-1) !== '/') {
   sultansAddress += '/';
 }
 
+var redirectUri = hostAddress + 'authorize';
+
 var optionsAuth={user: clientId, password: clientSecret};
 var identityServerClient = new restClient.Client(optionsAuth);
 identityServerClient.registerMethod("retrieveToken", identityServerAddress + "oauth/token", "POST");
+
+var cloudbreakClient = new restClient.Client();
+cloudbreakClient.registerMethod("subscribe", cloudbreakAddress + "subscriptions", "POST");
+
+var sultansClient = new restClient.Client();
 
 // cloudbreak config ===========================================================
 
@@ -131,6 +138,11 @@ app.get('/authorize', function(req, res, next){
     req.session.token=data.access_token;
     res.redirect('/');
   });
+});
+
+// cloudbreak notifications ====================================================
+app.post('/notifications', function(req, res, next){
+  console.log(req)
 });
 
 // main page ===================================================================
@@ -166,7 +178,7 @@ app.get('/user', function(req,res) {
 function retrieveUserByToken(token, success){
   var requestArgs = {
     headers: {
-      "Authorization": "Bearer " + token,
+      "Authorization": "Bearer " + token
     }
   }
   identityServerClient.get(identityServerAddress + "userinfo", requestArgs, function(data,response){
@@ -255,3 +267,32 @@ app.use(function(err, req, res, next){
 serverPort = process.env.ULU_SERVER_PORT ? process.env.ULU_SERVER_PORT : 3000;
 server.listen(serverPort);
 console.log("App listening on port " + serverPort);
+
+console.log("Subscribing client to Cloudbreak notifications");
+var getClientTokenArgs = {
+  headers: { "Content-Type": "application/x-www-form-urlencoded" },
+  data: 'grant_type=client_credentials'
+}
+identityServerClient.methods.retrieveToken(getClientTokenArgs, function(data, response){
+  if (response.statusCode != 200 || !data.access_token){
+    console.log("Couldn't retrieve access token for Uluwatu, couldn't subscribe to Cloudbreak notifications.")
+  } else {
+    var subscribeArgs = {
+      headers: {
+         "Authorization": "Bearer " + data.access_token,
+         "Content-Type": "application/json"
+      },
+      data: { "endpointUrl": hostAddress + "notifications" }
+    }
+    cloudbreakClient.methods.subscribe(subscribeArgs, function(data, response){
+      if (response.statusCode === 201 && data.id){
+        console.log("Subscribed to Cloudbreak notifications. Subscription id: [" + data.id + "]");
+      } else if (response.statusCode === 409){
+        console.log("Subscription already exist.");
+      } else {
+        console.log("Something unexpected happened. Couldn't subscribe to Cloudbreak notifications.")
+        console.log(data)
+      }
+    })
+  }
+});
