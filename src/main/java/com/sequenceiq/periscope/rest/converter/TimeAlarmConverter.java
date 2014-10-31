@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.periscope.domain.Notification;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
 import com.sequenceiq.periscope.domain.TimeAlarm;
+import com.sequenceiq.periscope.repository.ScalingPolicyRepository;
 import com.sequenceiq.periscope.rest.json.NotificationJson;
 import com.sequenceiq.periscope.rest.json.TimeAlarmJson;
 
@@ -17,6 +18,8 @@ public class TimeAlarmConverter extends AbstractConverter<TimeAlarmJson, TimeAla
 
     @Autowired
     private NotificationConverter notificationConverter;
+    @Autowired
+    private ScalingPolicyRepository policyRepository;
 
     @Override
     public TimeAlarm convert(TimeAlarmJson source) {
@@ -25,6 +28,14 @@ public class TimeAlarmConverter extends AbstractConverter<TimeAlarmJson, TimeAla
         alarm.setDescription(source.getDescription());
         alarm.setCron(source.getCron());
         alarm.setTimeZone(source.getTimeZone());
+        Long policyId = source.getScalingPolicyId();
+        if (policyId != null) {
+            ScalingPolicy policy = policyRepository.findOne(policyId);
+            if (policy != null) {
+                alarm.setScalingPolicy(policy);
+                policy.setAlarm(alarm);
+            }
+        }
         List<NotificationJson> notifications = source.getNotifications();
         if (notifications != null && !notifications.isEmpty()) {
             alarm.setNotifications(notificationConverter.convertAllFromJson(notifications));
