@@ -1,4 +1,7 @@
 var express  = require('express');
+var app = express();
+var server = require('http').Server(app);
+var io = require('socket.io')(server);
 var uid = require('uid2');
 var session = require('express-session');
 var morgan = require('morgan');
@@ -8,7 +11,6 @@ var restClient = require('node-rest-client');
 var path = require('path');
 var cons = require('consolidate');
 
-var app = express();
 var cloudbreakClient = new restClient.Client();
 var sultansClient = new restClient.Client();
 
@@ -216,6 +218,11 @@ function proxySultansRequest(req, res, method){
         res.status(response.statusCode).send(data);
     });
 }
+// socket ======================================================================
+
+io.on('connection', function(socket){
+  console.log('a user connected:' + socket.handshake.query.user)
+});
 
 // errors  =====================================================================
 
@@ -227,5 +234,5 @@ app.use(function(err, req, res, next){
 // listen ======================================================================
 
 serverPort = process.env.ULU_SERVER_PORT ? process.env.ULU_SERVER_PORT : 3000;
-app.listen(serverPort);
+server.listen(serverPort);
 console.log("App listening on port " + serverPort);
