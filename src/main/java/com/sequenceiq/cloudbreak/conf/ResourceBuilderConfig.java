@@ -38,10 +38,10 @@ public class ResourceBuilderConfig {
         for (CloudPlatform cloudPlatform : CloudPlatform.values()) {
             if (!cloudPlatform.isWithTemplate()) {
                 List<ResourceBuilder> mainInstanceResourceBuilders = new ArrayList<>();
-                for (ResourceBuilder networkResourceBuilder : resourceBuilders) {
-                    if (ResourceBuilderType.INSTANCE_RESOURCE.equals(networkResourceBuilder.resourceBuilderType())) {
-                        if (cloudPlatform.equals(networkResourceBuilder.cloudPlatform())) {
-                            mainInstanceResourceBuilders.add(networkResourceBuilder);
+                for (ResourceBuilder instanceResourceBuilder : resourceBuilders) {
+                    if (ResourceBuilderType.INSTANCE_RESOURCE.equals(instanceResourceBuilder.resourceBuilderType())) {
+                        if (cloudPlatform.equals(instanceResourceBuilder.cloudPlatform())) {
+                            mainInstanceResourceBuilders.add(instanceResourceBuilder);
                         }
                     }
                 }
