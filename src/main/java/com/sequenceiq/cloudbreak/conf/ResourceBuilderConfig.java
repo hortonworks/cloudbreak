@@ -38,10 +38,10 @@ public class ResourceBuilderConfig {
         for (CloudPlatform cloudPlatform : CloudPlatform.values()) {
             if (!cloudPlatform.isWithTemplate()) {
                 List<ResourceBuilder> mainInstanceResourceBuilders = new ArrayList<>();
-                for (ResourceBuilder instanceResourceBuilder : resourceBuilders) {
-                    if (ResourceBuilderType.INSTANCE_RESOURCE.equals(instanceResourceBuilder.resourceBuilderType())) {
-                        if (cloudPlatform.equals(instanceResourceBuilder.cloudPlatform())) {
-                            mainInstanceResourceBuilders.add(instanceResourceBuilder);
+                for (ResourceBuilder instanceResourceBuilderElement : resourceBuilders) {
+                    if (ResourceBuilderType.INSTANCE_RESOURCE.equals(instanceResourceBuilderElement.resourceBuilderType())) {
+                        if (cloudPlatform.equals(instanceResourceBuilderElement.cloudPlatform())) {
+                            mainInstanceResourceBuilders.add(instanceResourceBuilderElement);
                         }
                     }
                 }
@@ -57,10 +57,10 @@ public class ResourceBuilderConfig {
         for (CloudPlatform cloudPlatform : CloudPlatform.values()) {
             if (!cloudPlatform.isWithTemplate()) {
                 List<ResourceBuilder> mainNetworkResourceBuilders = new ArrayList<>();
-                for (ResourceBuilder networkResourceBuilder : resourceBuilders) {
-                    if (ResourceBuilderType.NETWORK_RESOURCE.equals(networkResourceBuilder.resourceBuilderType())) {
-                        if (cloudPlatform.equals(networkResourceBuilder.cloudPlatform())) {
-                            mainNetworkResourceBuilders.add(networkResourceBuilder);
+                for (ResourceBuilder networkResourceBuilderElement : resourceBuilders) {
+                    if (ResourceBuilderType.NETWORK_RESOURCE.equals(networkResourceBuilderElement.resourceBuilderType())) {
+                        if (cloudPlatform.equals(networkResourceBuilderElement.cloudPlatform())) {
+                            mainNetworkResourceBuilders.add(networkResourceBuilderElement);
                         }
                     }
                 }
