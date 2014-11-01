@@ -1,173 +1,124 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.gcc;
 
-import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.ERROR;
-
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.stereotype.Service;
 
-import com.google.api.client.googleapis.json.GoogleJsonResponseException;
-import com.google.api.services.compute.Compute;
-import com.sequenceiq.cloudbreak.conf.ReactorConfig;
-import com.sequenceiq.cloudbreak.controller.InternalServerException;
-import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
+import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.DetailedGccStackDescription;
-import com.sequenceiq.cloudbreak.domain.GccCredential;
-import com.sequenceiq.cloudbreak.domain.GccTemplate;
 import com.sequenceiq.cloudbreak.domain.Resource;
-import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackDescription;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
-import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteComplete;
-
-import reactor.core.Reactor;
-import reactor.event.Event;
+import com.sequenceiq.cloudbreak.service.stack.resource.DeleteContextObject;
+import com.sequenceiq.cloudbreak.service.stack.resource.DescribeContextObject;
+import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
+import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
 
 @Service
 public class GccConnector implements CloudPlatformConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GccConnector.class);
 
-    @Autowired
-    private JsonHelper jsonHelper;
+    @javax.annotation.Resource
+    private Map<CloudPlatform, List<ResourceBuilder>> instanceResourceBuilders;
 
-    @Autowired
-    private Reactor reactor;
+    @javax.annotation.Resource
+    private Map<CloudPlatform, List<ResourceBuilder>> networkResourceBuilders;
 
-    @Autowired
-    private GccStackUtil gccStackUtil;
+    @javax.annotation.Resource
+    private Map<CloudPlatform, ResourceBuilderInit> resourceBuilderInits;
+
+    @javax.annotation.Resource
+    private ConcurrentTaskExecutor resourceBuilderExecutor;
 
     @Override
     public StackDescription describeStackWithResources(Stack stack, Credential credential) {
         DetailedGccStackDescription detailedGccStackDescription = new DetailedGccStackDescription();
-        Compute compute = gccStackUtil.buildCompute((GccCredential) credential, stack.getName());
-        GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
-        GccCredential gccCredential = (GccCredential) stack.getCredential();
-        for (Resource resource : stack.getResourcesByType(ResourceType.VIRTUAL_MACHINE)) {
-            try {
-                Compute.Instances.Get getVm = compute.instances().get(gccCredential.getProjectId(), gccTemplate.getGccZone().getValue(),
-                        resource.getResourceName());
-                detailedGccStackDescription.getVirtualMachines().add(getVm.execute().toPrettyString());
-            } catch (IOException e) {
-                detailedGccStackDescription.getVirtualMachines().add(jsonHelper.createJsonFromString(String.format("{\"VirtualMachine\": {%s}}", ERROR))
-                        .toString());
+        ResourceBuilderInit resourceBuilderInit = resourceBuilderInits.get(CloudPlatform.GCC);
+
+        try {
+            final DescribeContextObject dCO = resourceBuilderInit.describeInit(stack);
+            for (ResourceBuilder resourceBuilder : networkResourceBuilders.get(CloudPlatform.GCC)) {
+                List<Resource> resourceByType = stack.getResourcesByType(resourceBuilder.resourceType());
+                for (Resource resource : resourceByType) {
+                    Optional<String> describe = resourceBuilder.describe(resource, dCO);
+                    if (describe.isPresent()) {
+                        detailedGccStackDescription.getResources().add(describe.get());
+                    }
+                }
             }
-        }
-        for (Resource resource : stack.getResourcesByType(ResourceType.VIRTUAL_MACHINE)) {
-            try {
-                Compute.Disks.Get getDisk = compute.disks().get(gccCredential.getProjectId(), gccTemplate.getGccZone().getValue(), resource.getResourceName());
-                detailedGccStackDescription.getDisks().add(getDisk.execute().toPrettyString());
-            } catch (IOException e) {
-                detailedGccStackDescription.getVirtualMachines().add(jsonHelper.createJsonFromString(String.format("{\"Disk\": {%s}}", ERROR)).toString());
+            for (final ResourceBuilder resourceBuilder : instanceResourceBuilders.get(CloudPlatform.GCC)) {
+                List<Resource> resourceByType = stack.getResourcesByType(resourceBuilder.resourceType());
+                List<Future<Optional<String>>> futures = new ArrayList<>();
+                for (final Resource resource : resourceByType) {
+                    Future<Optional<String>> submit = resourceBuilderExecutor.submit(new Callable<Optional<String>>() {
+                        @Override
+                        public Optional<String> call() throws Exception {
+                            return resourceBuilder.describe(resource, dCO);
+                        }
+                    });
+                    futures.add(submit);
+                }
+                for (Future<Optional<String>> future : futures) {
+                    if (future.get().isPresent()) {
+                        detailedGccStackDescription.getResources().add(future.get().get());
+                    }
+                }
             }
-        }
-        for (Resource resource : stack.getResourcesByType(ResourceType.NETWORK)) {
-            try {
-                Compute.Networks.Get getNetwork = compute.networks().get(gccCredential.getProjectId(), resource.getResourceName());
-                detailedGccStackDescription.setNetwork(jsonHelper.createJsonFromString(getNetwork.execute().toPrettyString()));
-            } catch (IOException e) {
-                detailedGccStackDescription.getVirtualMachines().add(jsonHelper.createJsonFromString(String.format("{\"Network\": {%s}}", ERROR)).toString());
-            }
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
         }
         return detailedGccStackDescription;
     }
 
     public void rollback(Stack stack, Credential credential, Set<Resource> resourceSet) {
-        GccCredential gccCredential = (GccCredential) credential;
-        Compute compute = gccStackUtil.buildCompute(gccCredential, stack.getName());
-        deleteVirtualMachines(stack, compute);
-        deleteDisks(stack, compute);
-        deleteAttachedDisks(stack, compute);
-        deleteRoutes(stack, compute);
-        deleteNetwork(stack, compute);
+        ResourceBuilderInit resourceBuilderInit = resourceBuilderInits.get(stack.getTemplate().cloudPlatform());
+        try {
+            final DeleteContextObject dCO = resourceBuilderInit.deleteInit(stack);
+            for (int i = instanceResourceBuilders.get(CloudPlatform.GCC).size() - 1; i >= 0; i--) {
+                List<Future<Boolean>> futures = new ArrayList<>();
+                final int index = i;
+                for (final Resource resource : resourceSet) {
+                    if (resource.getResourceType().equals(instanceResourceBuilders.get(CloudPlatform.GCC).get(i).resourceType())) {
+                        Future<Boolean> submit = resourceBuilderExecutor.submit(new Callable<Boolean>() {
+                            @Override
+                            public Boolean call() throws Exception {
+                                return instanceResourceBuilders.get(CloudPlatform.GCC).get(index).delete(resource, dCO);
+                            }
+                        });
+                        futures.add(submit);
+                    }
+                }
+                for (Future<Boolean> future : futures) {
+                    future.get();
+                }
+            }
+            for (int i = instanceResourceBuilders.get(CloudPlatform.GCC).size() - 1; i >= 0; i--) {
+                for (Resource resource : resourceSet) {
+                    if (resource.getResourceType().equals(instanceResourceBuilders.get(CloudPlatform.GCC).get(i).resourceType())) {
+                        networkResourceBuilders.get(CloudPlatform.GCC).get(i).delete(resource, dCO);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+        }
     }
 
     @Override
     public void deleteStack(Stack stack, Credential credential) {
-        Compute compute = gccStackUtil.buildCompute((GccCredential) credential, stack.getName());
-        deleteVirtualMachines(stack, compute);
-        deleteDisks(stack, compute);
-        deleteAttachedDisks(stack, compute);
-        deleteRoutes(stack, compute);
-        deleteNetwork(stack, compute);
-        reactor.notify(ReactorConfig.DELETE_COMPLETE_EVENT, Event.wrap(new StackDeleteComplete(stack.getId())));
-    }
 
-    private void deleteRoutes(Stack stack, Compute compute) {
-        for (Resource resource : stack.getResourcesByType(ResourceType.ROUTE)) {
-            try {
-                gccStackUtil.removeRoute(compute, stack, resource.getResourceName());
-            } catch (GoogleJsonResponseException ex) {
-                gccStackUtil.exceptionHandler(ex, resource.getResourceName());
-            } catch (IOException e) {
-                throw new InternalServerException(e.getMessage());
-            }
-        }
-    }
-
-    private void deleteNetwork(Stack stack, Compute compute) {
-        for (Resource resource : stack.getResourcesByType(ResourceType.FIREWALL)) {
-            try {
-                gccStackUtil.removeFireWall(compute, stack, resource.getResourceName());
-            } catch (GoogleJsonResponseException ex) {
-                gccStackUtil.exceptionHandler(ex, resource.getResourceName());
-            } catch (IOException e) {
-                throw new InternalServerException(e.getMessage());
-            }
-        }
-
-        for (Resource resource : stack.getResourcesByType(ResourceType.NETWORK)) {
-            try {
-                gccStackUtil.removeNetwork(compute, stack, resource.getResourceName());
-            } catch (GoogleJsonResponseException ex) {
-                gccStackUtil.exceptionHandler(ex, resource.getResourceName());
-            } catch (IOException e) {
-                throw new InternalServerException(e.getMessage());
-            }
-        }
-    }
-
-    private void deleteAttachedDisks(Stack stack, Compute compute) {
-        for (Resource resource : stack.getResourcesByType(ResourceType.ATTACHED_DISK)) {
-            try {
-                gccStackUtil.removeDisk(compute, stack, resource.getResourceName());
-            } catch (GoogleJsonResponseException ex) {
-                gccStackUtil.exceptionHandler(ex, resource.getResourceName());
-            } catch (IOException e) {
-                throw new InternalServerException(e.getMessage());
-            }
-        }
-    }
-
-    private void deleteDisks(Stack stack, Compute compute) {
-        for (Resource resource : stack.getResourcesByType(ResourceType.DISK)) {
-            try {
-                gccStackUtil.removeDisk(compute, stack, resource.getResourceName());
-            } catch (GoogleJsonResponseException ex) {
-                gccStackUtil.exceptionHandler(ex, resource.getResourceName());
-            } catch (IOException e) {
-                throw new InternalServerException(e.getMessage());
-            }
-        }
-    }
-
-    private void deleteVirtualMachines(Stack stack, Compute compute) {
-        for (Resource resource : stack.getResourcesByType(ResourceType.VIRTUAL_MACHINE)) {
-            try {
-                gccStackUtil.removeInstance(compute, stack, resource.getResourceName());
-            } catch (GoogleJsonResponseException ex) {
-                gccStackUtil.exceptionHandler(ex, resource.getResourceName());
-            } catch (IOException e) {
-                throw new InternalServerException(e.getMessage());
-            }
-        }
     }
 
     @Override
