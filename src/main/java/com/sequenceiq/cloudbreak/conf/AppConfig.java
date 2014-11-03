@@ -16,10 +16,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
-import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformRollbackHandler;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
-import com.sequenceiq.cloudbreak.service.stack.connector.Provisioner;
 import com.sequenceiq.cloudbreak.service.stack.connector.aws.TemplateReader;
 
 @Configuration
@@ -42,12 +40,6 @@ public class AppConfig {
     private List<ProvisionSetup> provisionSetups;
 
     @Autowired
-    private List<CloudPlatformRollbackHandler> rollbackHandlers;
-
-    @Autowired
-    private List<Provisioner> provisioners;
-
-    @Autowired
     private List<MetadataSetup> metadataSetups;
 
     @Bean
@@ -65,28 +57,10 @@ public class AppConfig {
     }
 
     @Bean
-    public Map<CloudPlatform, CloudPlatformRollbackHandler> cloudPlatformRollbackHandlers() {
-        Map<CloudPlatform, CloudPlatformRollbackHandler> map = new HashMap<>();
-        for (CloudPlatformRollbackHandler cloudPlatformRollbackHandler : rollbackHandlers) {
-            map.put(cloudPlatformRollbackHandler.getCloudPlatform(), cloudPlatformRollbackHandler);
-        }
-        return map;
-    }
-
-    @Bean
     public Map<CloudPlatform, ProvisionSetup> provisionSetups() {
         Map<CloudPlatform, ProvisionSetup> map = new HashMap<>();
         for (ProvisionSetup provisionSetup : provisionSetups) {
             map.put(provisionSetup.getCloudPlatform(), provisionSetup);
-        }
-        return map;
-    }
-
-    @Bean
-    public Map<CloudPlatform, Provisioner> provisioners() {
-        Map<CloudPlatform, Provisioner> map = new HashMap<>();
-        for (Provisioner provisioner : provisioners) {
-            map.put(provisioner.getCloudPlatform(), provisioner);
         }
         return map;
     }

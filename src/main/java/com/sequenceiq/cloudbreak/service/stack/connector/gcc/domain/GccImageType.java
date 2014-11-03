@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.stack.connector.gcc;
+package com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain;
 
 public enum GccImageType {
 

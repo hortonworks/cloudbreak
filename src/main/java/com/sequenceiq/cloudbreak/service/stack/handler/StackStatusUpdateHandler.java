@@ -1,18 +1,22 @@
 package com.sequenceiq.cloudbreak.service.stack.handler;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-
-import javax.annotation.Resource;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.StatusRequest;
@@ -27,6 +31,9 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariHosts;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariHostsJoinStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.event.StackStatusUpdateRequest;
+import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
+import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
+import com.sequenceiq.cloudbreak.service.stack.resource.StartStopContextObject;
 
 import reactor.core.Reactor;
 import reactor.event.Event;
@@ -37,7 +44,7 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackStatusUpdateHandler.class);
 
-    @Resource
+    @javax.annotation.Resource
     private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
 
     @Autowired
@@ -58,16 +65,63 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
     @Autowired
     private PollingService<AmbariClient> ambariHealthChecker;
 
+    @javax.annotation.Resource
+    private Map<CloudPlatform, List<ResourceBuilder>> instanceResourceBuilders;
+
+    @javax.annotation.Resource
+    private Map<CloudPlatform, List<ResourceBuilder>> networkResourceBuilders;
+
+    @javax.annotation.Resource
+    private ConcurrentTaskExecutor resourceBuilderExecutor;
+
+    @javax.annotation.Resource
+    private Map<CloudPlatform, ResourceBuilderInit> resourceBuilderInits;
+
     @Override
     public void accept(Event<StackStatusUpdateRequest> event) {
         StackStatusUpdateRequest statusUpdateRequest = event.getData();
-        CloudPlatform cloudPlatform = statusUpdateRequest.getCloudPlatform();
-        CloudPlatformConnector connector = cloudPlatformConnectors.get(cloudPlatform);
+        final CloudPlatform cloudPlatform = statusUpdateRequest.getCloudPlatform();
+
         StatusRequest statusRequest = statusUpdateRequest.getStatusRequest();
         long stackId = statusUpdateRequest.getStackId();
         Stack stack = stackRepository.findOneWithLists(stackId);
         if (StatusRequest.STOPPED.equals(statusRequest)) {
-            boolean stopped = connector.stopAll(stack);
+            boolean stopped = true;
+            if (cloudPlatform.isWithTemplate()) {
+                CloudPlatformConnector connector = cloudPlatformConnectors.get(cloudPlatform);
+                stopped = connector.stopAll(stack);
+            } else {
+                try {
+                    ResourceBuilderInit resourceBuilderInit = resourceBuilderInits.get(cloudPlatform);
+                    final StartStopContextObject sSCO = resourceBuilderInit.startStopInit(stack);
+
+                    for (ResourceBuilder resourceBuilder : networkResourceBuilders.get(cloudPlatform)) {
+                        for (Resource resource : stack.getResourcesByType(resourceBuilder.resourceType())) {
+                            resourceBuilder.stop(sSCO, resource);
+                        }
+                    }
+                    List<Future<Boolean>> futures = new ArrayList<>();
+                    for (final ResourceBuilder resourceBuilder : instanceResourceBuilders.get(cloudPlatform)) {
+                        List<Resource> resourceByType = stack.getResourcesByType(resourceBuilder.resourceType());
+                        for (final Resource resource : resourceByType) {
+                            Future<Boolean> submit = resourceBuilderExecutor.submit(new Callable<Boolean>() {
+                                @Override
+                                public Boolean call() throws Exception {
+                                    return resourceBuilder.stop(sSCO, resource);
+                                }
+                            });
+                            futures.add(submit);
+                        }
+                    }
+                    for (Future<Boolean> future : futures) {
+                        if (!future.get()) {
+                            stopped = false;
+                        }
+                    }
+                } catch (Exception ex) {
+                    stopped = false;
+                }
+            }
             if (stopped) {
                 LOGGER.info("Update stack {} state to: {}", stackId, Status.STOPPED);
                 stackUpdater.updateStackStatus(stackId, Status.STOPPED);
@@ -76,7 +130,42 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
                 stackUpdater.updateStackStatus(stackId, Status.STOP_FAILED);
             }
         } else {
-            boolean started = connector.startAll(stack);
+            boolean started = true;
+            if (cloudPlatform.isWithTemplate()) {
+                CloudPlatformConnector connector = cloudPlatformConnectors.get(cloudPlatform);
+                started = connector.startAll(stack);
+            } else {
+                try {
+                    ResourceBuilderInit resourceBuilderInit = resourceBuilderInits.get(cloudPlatform);
+                    final StartStopContextObject sSCO = resourceBuilderInit.startStopInit(stack);
+
+                    for (ResourceBuilder resourceBuilder : networkResourceBuilders.get(cloudPlatform)) {
+                        for (Resource resource : stack.getResourcesByType(resourceBuilder.resourceType())) {
+                            resourceBuilder.start(sSCO, resource);
+                        }
+                    }
+                    List<Future<Boolean>> futures = new ArrayList<>();
+                    for (final ResourceBuilder resourceBuilder : instanceResourceBuilders.get(cloudPlatform)) {
+                        List<Resource> resourceByType = stack.getResourcesByType(resourceBuilder.resourceType());
+                        for (final Resource resource : resourceByType) {
+                            Future<Boolean> submit = resourceBuilderExecutor.submit(new Callable<Boolean>() {
+                                @Override
+                                public Boolean call() throws Exception {
+                                    return resourceBuilder.start(sSCO, resource);
+                                }
+                            });
+                            futures.add(submit);
+                        }
+                    }
+                    for (Future<Boolean> future : futures) {
+                        if (!future.get()) {
+                            started = false;
+                        }
+                    }
+                } catch (Exception ex) {
+                    started = false;
+                }
+            }
             if (started) {
                 waitForAmbariToStart(stack);
                 Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());

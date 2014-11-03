@@ -1,24 +1,31 @@
 package com.sequenceiq.cloudbreak.service.stack.handler;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-
-import javax.annotation.Resource;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterInstallerMailSenderService;
-import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformRollbackHandler;
+import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.event.StackOperationFailure;
+import com.sequenceiq.cloudbreak.service.stack.resource.DeleteContextObject;
+import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
+import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
@@ -42,8 +49,20 @@ public class StackCreationFailureHandler implements Consumer<Event<StackOperatio
     @Autowired
     private StackRepository stackRepository;
 
-    @Resource
-    private Map<CloudPlatform, CloudPlatformRollbackHandler> cloudPlatformRollbackHandlers;
+    @javax.annotation.Resource
+    private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
+
+    @javax.annotation.Resource
+    private Map<CloudPlatform, List<ResourceBuilder>> instanceResourceBuilders;
+
+    @javax.annotation.Resource
+    private Map<CloudPlatform, List<ResourceBuilder>> networkResourceBuilders;
+
+    @javax.annotation.Resource
+    private Map<CloudPlatform, ResourceBuilderInit> resourceBuilderInits;
+
+    @javax.annotation.Resource
+    private ConcurrentTaskExecutor resourceBuilderExecutor;
 
     @Override
     public void accept(Event<StackOperationFailure> event) {
@@ -51,11 +70,46 @@ public class StackCreationFailureHandler implements Consumer<Event<StackOperatio
         Long stackId = stackCreationFailure.getStackId();
         LOGGER.info("Accepted {} event.", ReactorConfig.STACK_CREATE_FAILED_EVENT, stackId);
         String detailedMessage = stackCreationFailure.getDetailedMessage();
-        Stack stack = stackUpdater.updateStackStatus(stackId, Status.CREATE_FAILED, detailedMessage);
+        stackUpdater.updateStackStatus(stackId, Status.CREATE_FAILED, detailedMessage);
+        Stack stack = stackRepository.findOneWithLists(stackId);
         if (stack.getCluster().getEmailNeeded()) {
             ambariClusterInstallerMailSenderService.sendFailEmail(stack.getOwner());
         }
-        cloudPlatformRollbackHandlers.get(stack.getTemplate().cloudPlatform()).rollback(stackRepository.findOneWithLists(stackId), stack.getResources());
+        final CloudPlatform cloudPlatform = stack.getTemplate().cloudPlatform();
+        try {
+            if (cloudPlatform.isWithTemplate()) {
+                cloudPlatformConnectors.get(cloudPlatform).rollback(stackRepository.findOneWithLists(stackId), stack.getResources());
+            } else {
+                ResourceBuilderInit resourceBuilderInit = resourceBuilderInits.get(cloudPlatform);
+                final DeleteContextObject dCO = resourceBuilderInit.deleteInit(stack);
+                for (int i = instanceResourceBuilders.get(cloudPlatform).size() - 1; i >= 0; i--) {
+                    List<Future<Boolean>> futures = new ArrayList<>();
+                    final int index = i;
+                    List<Resource> resourceByType =
+                            stack.getResourcesByType(instanceResourceBuilders.get(cloudPlatform).get(i).resourceType());
+                    for (final Resource resource : resourceByType) {
+                        Future<Boolean> submit = resourceBuilderExecutor.submit(new Callable<Boolean>() {
+                            @Override
+                            public Boolean call() throws Exception {
+                                return instanceResourceBuilders.get(cloudPlatform).get(index).rollback(resource, dCO);
+                            }
+                        });
+                        futures.add(submit);
+                    }
+                    for (Future<Boolean> future : futures) {
+                        future.get();
+                    }
+                }
+                for (int i = instanceResourceBuilders.get(cloudPlatform).size() - 1; i >= 0; i--) {
+                    for (Resource resource
+                            : stack.getResourcesByType(networkResourceBuilders.get(cloudPlatform).get(i).resourceType())) {
+                        networkResourceBuilders.get(cloudPlatform).get(i).rollback(resource, dCO);
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            LOGGER.error(String.format("Stack rollback failed on {} stack: ", stack.getId()), ex);
+        }
         websocketService.sendToTopicUser(stack.getOwner(), WebsocketEndPoint.STACK,
                 new StatusMessage(stackId, stack.getName(), Status.CREATE_FAILED.name(), detailedMessage));
         stackUpdater.updateStackStatusReason(stackId, detailedMessage);

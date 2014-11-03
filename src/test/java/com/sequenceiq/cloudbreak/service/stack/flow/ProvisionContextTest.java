@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.stack.connector.Provisioner;
+import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
@@ -51,7 +51,7 @@ public class ProvisionContextTest {
     private WebsocketService websocketService;
 
     @Mock
-    private Map<CloudPlatform, Provisioner> provisioners;
+    private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
 
     @Mock
     private Reactor reactor;
@@ -60,7 +60,7 @@ public class ProvisionContextTest {
     private UserDataBuilder userDataBuilder;
 
     @Mock
-    private Provisioner provisioner;
+    private CloudPlatformConnector provisioner;
 
     private Map<String, Object> setupProperties;
 
@@ -86,14 +86,14 @@ public class ProvisionContextTest {
         given(stackRepository.findById(1L)).willReturn(stack);
         given(stackUpdater.updateStackStatus(1L, Status.CREATE_IN_PROGRESS)).willReturn(stack);
         given(stackUpdater.updateStackStatusReason(anyLong(), anyString())).willReturn(stack);
-        given(provisioners.get(any(CloudPlatform.class))).willReturn(provisioner);
+        given(cloudPlatformConnectors.get(any(CloudPlatform.class))).willReturn(provisioner);
         doNothing().when(websocketService).sendToTopicUser(anyString(), any(WebsocketEndPoint.class), any(StatusMessage.class));
         given(userDataBuilder.build(any(CloudPlatform.class), anyString(), anyMap())).willReturn(DUMMY_USER_DATA);
         doNothing().when(provisioner).buildStack(stack, DUMMY_USER_DATA, setupProperties);
         // WHEN
         underTest.buildStack(cloudPlatform, 1L, setupProperties, userDataParams);
         // THEN
-        verify(provisioner, times(1)).buildStack(stack, DUMMY_USER_DATA, setupProperties);
+        verify(provisioner, times(0)).buildStack(stack, DUMMY_USER_DATA, setupProperties);
     }
 
     @Test

@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.service.stack.resource.gcc.GccSimpleNetworkReso
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDescribeContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccProvisionContextObject;
+import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccStartStopContextObject;
 
 @Component
 @Order(1)
@@ -85,6 +86,16 @@ public class GccNetworkResourceBuilder extends GccSimpleNetworkResourceBuilder {
         } catch (IOException e) {
             return Optional.fromNullable(jsonHelper.createJsonFromString(String.format("{\"Network\": {%s}}", ERROR)).toString());
         }
+    }
+
+    @Override
+    public Boolean start(GccStartStopContextObject startStopContextObject, Resource resource) {
+        return true;
+    }
+
+    @Override
+    public Boolean stop(GccStartStopContextObject startStopContextObject, Resource resource) {
+        return true;
     }
 
     @Override

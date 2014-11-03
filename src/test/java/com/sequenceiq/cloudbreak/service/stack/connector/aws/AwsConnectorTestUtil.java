@@ -11,7 +11,6 @@ import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Resource;
-import com.sequenceiq.cloudbreak.domain.SnsTopic;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.service.stack.connector.ConnectorTestUtil;
@@ -73,14 +72,7 @@ public class AwsConnectorTestUtil extends ConnectorTestUtil {
         return awsTemplate;
     }
 
-    public static SnsTopic createSnsTopic(Credential credential) {
-        SnsTopic snsTopic = new SnsTopic();
-        snsTopic.setId(DEFAULT_ID);
-        snsTopic.setCredential((AwsCredential) credential);
-        snsTopic.setTopicArn(DEFAULT_TOPIC_ARN);
-        snsTopic.setRegion(Regions.DEFAULT_REGION);
-        return snsTopic;
-    }
+
 
     public static DescribeInstancesResult createDescribeInstanceResult() {
         return new DescribeInstancesResult();

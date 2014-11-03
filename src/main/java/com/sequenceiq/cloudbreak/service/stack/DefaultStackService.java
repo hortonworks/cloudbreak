@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -29,11 +28,11 @@ import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
-import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackStatusUpdateRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.UpdateInstancesRequest;
+import com.sequenceiq.cloudbreak.service.stack.flow.DescribeContext;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataIncompleteException;
 
 import reactor.core.Reactor;
@@ -50,9 +49,6 @@ public class DefaultStackService implements StackService {
     @Autowired
     private TemplateRepository templateRepository;
 
-    @javax.annotation.Resource
-    private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
-
     @Autowired
     private RetryingStackUpdater stackUpdater;
 
@@ -61,6 +57,9 @@ public class DefaultStackService implements StackService {
 
     @Autowired
     private ClusterRepository clusterRepository;
+
+    @Autowired
+    private DescribeContext describeContext;
 
     @Override
     public Set<Stack> retrievePrivateStacks(CbUser user) {
@@ -187,7 +186,7 @@ public class DefaultStackService implements StackService {
     public StackDescription getStackDescription(Stack stack) {
         CloudPlatform cp = stack.getTemplate().cloudPlatform();
         LOGGER.debug("Getting stack description for cloud platform: {} ...", cp);
-        StackDescription description = cloudPlatformConnectors.get(cp).describeStackWithResources(stack, stack.getCredential());
+        StackDescription description = describeContext.describeStackWithResources(stack);
         LOGGER.debug("Found stack description {}", description.getClass());
         return description;
     }

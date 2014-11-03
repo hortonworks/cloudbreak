@@ -2,12 +2,13 @@ package com.sequenceiq.cloudbreak.domain;
 
 public enum ResourceType {
     // AZURE
-    VIRTUAL_MACHINE,
-    CLOUD_SERVICE,
-    BLOB,
-    STORAGE,
-    NETWORK,
-    AFFINITY_GROUP,
+    AZURE_VIRTUAL_MACHINE,
+    AZURE_CLOUD_SERVICE,
+    AZURE_BLOB,
+    AZURE_STORAGE,
+    AZURE_NETWORK,
+    AZURE_AFFINITY_GROUP,
+    AZURE_SERVICE_CERTIFICATE,
 
     // AWS
     CLOUDFORMATION_STACK,

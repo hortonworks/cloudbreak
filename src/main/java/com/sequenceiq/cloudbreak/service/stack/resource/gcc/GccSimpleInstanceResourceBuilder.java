@@ -21,9 +21,10 @@ import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDescribeContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccProvisionContextObject;
+import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccStartStopContextObject;
 
 public abstract class GccSimpleInstanceResourceBuilder implements
-        ResourceBuilder<GccProvisionContextObject, GccDeleteContextObject, GccDescribeContextObject> {
+        ResourceBuilder<GccProvisionContextObject, GccDeleteContextObject, GccDescribeContextObject, GccStartStopContextObject> {
     protected static final Logger LOGGER = LoggerFactory.getLogger(GccSimpleInstanceResourceBuilder.class);
     protected static final int MAX_POLLING_ATTEMPTS = 60;
     protected static final int POLLING_INTERVAL = 5000;
@@ -59,6 +60,21 @@ public abstract class GccSimpleInstanceResourceBuilder implements
             }
         }
         return resourcesTemp;
+    }
+
+    @Override
+    public Boolean start(GccStartStopContextObject ssco, Resource resource) {
+        return true;
+    }
+
+    @Override
+    public Boolean stop(GccStartStopContextObject ssco, Resource resource) {
+        return true;
+    }
+
+    @Override
+    public Boolean rollback(Resource resource, GccDeleteContextObject gDCO) throws Exception {
+        return delete(resource, gDCO);
     }
 
     @Override

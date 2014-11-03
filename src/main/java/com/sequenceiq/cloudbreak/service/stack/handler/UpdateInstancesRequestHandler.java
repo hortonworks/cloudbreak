@@ -1,29 +1,42 @@
 package com.sequenceiq.cloudbreak.service.stack.handler;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import javax.annotation.Resource;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
+import com.sequenceiq.cloudbreak.controller.BuildStackFailureException;
+import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.AddInstancesFailedException;
-import com.sequenceiq.cloudbreak.service.stack.connector.Provisioner;
+import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
+import com.sequenceiq.cloudbreak.service.stack.event.AddInstancesComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.StackOperationFailure;
+import com.sequenceiq.cloudbreak.service.stack.event.StackUpdateSuccess;
 import com.sequenceiq.cloudbreak.service.stack.event.UpdateInstancesRequest;
+import com.sequenceiq.cloudbreak.service.stack.resource.DeleteContextObject;
+import com.sequenceiq.cloudbreak.service.stack.resource.ProvisionContextObject;
+import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
+import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
 
+import groovyx.net.http.HttpResponseException;
 import reactor.core.Reactor;
 import reactor.event.Event;
 import reactor.function.Consumer;
@@ -39,8 +52,17 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
     @Autowired
     private RetryingStackUpdater stackUpdater;
 
-    @Resource
-    private Map<CloudPlatform, Provisioner> provisioners;
+    @javax.annotation.Resource
+    private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
+
+    @javax.annotation.Resource
+    private Map<CloudPlatform, List<ResourceBuilder>> instanceResourceBuilders;
+
+    @javax.annotation.Resource
+    private Map<CloudPlatform, List<ResourceBuilder>> networkResourceBuilders;
+
+    @javax.annotation.Resource
+    private Map<CloudPlatform, ResourceBuilderInit> resourceBuilderInits;
 
     @Autowired
     private UserDataBuilder userDataBuilder;
@@ -48,19 +70,58 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
     @Autowired
     private Reactor reactor;
 
+    @javax.annotation.Resource
+    private ConcurrentTaskExecutor resourceBuilderExecutor;
+
     @Override
     public void accept(Event<UpdateInstancesRequest> event) {
         UpdateInstancesRequest request = event.getData();
-        CloudPlatform cloudPlatform = request.getCloudPlatform();
+        final CloudPlatform cloudPlatform = request.getCloudPlatform();
         Long stackId = request.getStackId();
         Integer scalingAdjustment = request.getScalingAdjustment();
         try {
-            Stack stack = stackRepository.findOneWithLists(stackId);
+            final Stack stack = stackRepository.findOneWithLists(stackId);
             LOGGER.info("Accepted {} event on stack: '{}'", ReactorConfig.UPDATE_INSTANCES_REQUEST_EVENT, stackId);
             stackUpdater.updateMetadataReady(stackId, false);
             if (scalingAdjustment > 0) {
-                provisioners.get(cloudPlatform)
-                        .addInstances(stack, userDataBuilder.build(cloudPlatform, stack.getHash(), new HashMap<String, String>()), scalingAdjustment);
+                if (cloudPlatform.isWithTemplate()) {
+                    cloudPlatformConnectors.get(cloudPlatform)
+                            .addInstances(stack, userDataBuilder.build(cloudPlatform, stack.getHash(), new HashMap<String, String>()), scalingAdjustment);
+                } else {
+                    ResourceBuilderInit resourceBuilderInit = resourceBuilderInits.get(cloudPlatform);
+                    final ProvisionContextObject pCO =
+                            resourceBuilderInit.provisionInit(stack, userDataBuilder.build(cloudPlatform, stack.getHash(), new HashMap<String, String>()));
+                    for (ResourceBuilder resourceBuilder : networkResourceBuilders.get(cloudPlatform)) {
+                        pCO.getNetworkResources().addAll(stack.getResourcesByType(resourceBuilder.resourceType()));
+                    }
+                    List<Future<List<Resource>>> futures = new ArrayList<>();
+                    Set<Resource> resourceSet = new HashSet<>();
+                    for (int i = stack.getNodeCount(); i < stack.getNodeCount() + scalingAdjustment; i++) {
+                        final int index = i;
+                        Future<List<Resource>> submit = resourceBuilderExecutor.submit(new Callable<List<Resource>>() {
+                            @Override
+                            public List<Resource> call() throws Exception {
+                                List<Resource> resources = new ArrayList<>();
+                                for (final ResourceBuilder resourceBuilder : instanceResourceBuilders.get(cloudPlatform)) {
+                                    List<Resource> resourceList = resourceBuilder.create(pCO, index, resources);
+                                    resources.addAll(resourceList);
+                                }
+                                return resources;
+                            }
+                        });
+                        futures.add(submit);
+                    }
+                    for (Future<List<Resource>> future : futures) {
+                        try {
+                            resourceSet.addAll(future.get());
+                        } catch (Exception e) {
+                            throw new BuildStackFailureException(e.getMessage(), e, resourceSet);
+                        }
+                    }
+                    LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT, stack.getId());
+                    reactor.notify(ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT,
+                            Event.wrap(new AddInstancesComplete(cloudPlatform, stack.getId(), resourceSet)));
+                }
             } else {
                 Set<String> instanceIds = new HashSet<>();
                 int i = 0;
@@ -72,7 +133,51 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
                         }
                     }
                 }
-                provisioners.get(cloudPlatform).removeInstances(stack, instanceIds);
+                if (cloudPlatform.isWithTemplate()) {
+                    cloudPlatformConnectors.get(cloudPlatform).removeInstances(stack, instanceIds);
+                } else {
+                    ResourceBuilderInit resourceBuilderInit = resourceBuilderInits.get(cloudPlatform);
+                    final DeleteContextObject dCO = resourceBuilderInit.deleteInit(stack);
+
+                    for (int j = instanceResourceBuilders.get(cloudPlatform).size() - 1; j >= 0; j--) {
+                        List<Future<Boolean>> futures = new ArrayList<>();
+                        final int index = j;
+                        for (final String instanceId : instanceIds) {
+                            Future<Boolean> submit = resourceBuilderExecutor.submit(new Callable<Boolean>() {
+                                @Override
+                                public Boolean call() throws Exception {
+                                    Resource resource =
+                                            new Resource(instanceResourceBuilders.get(cloudPlatform).get(index).resourceType(), instanceId, stack);
+                                    Boolean delete = false;
+                                    try {
+                                        delete = instanceResourceBuilders.get(cloudPlatform).get(index).delete(resource, dCO);
+                                    } catch (HttpResponseException ex) {
+                                        LOGGER.error(String.format("Error occurs on %s stack under the instance remove", stack.getId()), ex);
+                                        throw new InternalServerException(
+                                                String.format("Error occurred while removing instance '%s' on stack '%s'. Message: '%s'",
+                                                instanceId, stack.getId(), ex.getResponse().toString()), ex);
+                                    } catch (Exception ex) {
+                                        throw new InternalServerException(
+                                                String.format("Error occurred while removing instance '%s' on stack '%s'. Message: '%s'",
+                                                instanceId, stack.getId(), ex.getMessage()), ex);
+                                    }
+                                    return delete;
+                                }
+                            });
+                            futures.add(submit);
+                        }
+                        for (Future<Boolean> future : futures) {
+                            try {
+                                future.get();
+                            } catch (Exception ex) {
+                                throw ex;
+                            }
+                        }
+                    }
+                    LOGGER.info("Terminated instances in stack '{}': '{}'", stack.getId(), instanceIds);
+                    LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, stack.getId());
+                    reactor.notify(ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, Event.wrap(new StackUpdateSuccess(stack.getId(), true, instanceIds)));
+                }
             }
         } catch (AddInstancesFailedException e) {
             LOGGER.error(e.getMessage(), e);
