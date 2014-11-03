@@ -5,6 +5,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.domain.PeriscopeUser;
 import com.sequenceiq.periscope.registry.ConnectionException;
 import com.sequenceiq.periscope.registry.QueueSetupException;
 import com.sequenceiq.periscope.rest.converter.ClusterConverter;
@@ -33,16 +35,16 @@ public class ConfigurationController {
     private QueueSetupConverter queueSetupConverter;
 
     @RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity<ClusterJson> refreshConfiguration(@PathVariable long clusterId)
-            throws ConnectionException, ClusterNotFoundException {
-        Cluster cluster = clusterService.refreshConfiguration(clusterId);
+    public ResponseEntity<ClusterJson> refreshConfiguration(@ModelAttribute("user") PeriscopeUser user,
+            @PathVariable long clusterId) throws ConnectionException, ClusterNotFoundException {
+        Cluster cluster = clusterService.refreshConfiguration(user, clusterId);
         return new ResponseEntity<>(clusterConverter.convert(cluster), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/queue", method = RequestMethod.POST)
-    public ResponseEntity<QueueSetupJson> setQueueConfig(@PathVariable long clusterId, @RequestBody QueueSetupJson queueSetup)
-            throws ClusterNotFoundException, QueueSetupException {
-        Map<String, String> newSetup = clusterService.setQueueSetup(clusterId, queueSetupConverter.convert(queueSetup));
+    public ResponseEntity<QueueSetupJson> setQueueConfig(@ModelAttribute("user") PeriscopeUser user,
+            @PathVariable long clusterId, @RequestBody QueueSetupJson queueSetup) throws ClusterNotFoundException, QueueSetupException {
+        Map<String, String> newSetup = clusterService.setQueueSetup(user, clusterId, queueSetupConverter.convert(queueSetup));
         QueueSetupJson responseJson = new QueueSetupJson(queueSetup.getSetup(), newSetup);
         return new ResponseEntity<>(responseJson, HttpStatus.OK);
     }

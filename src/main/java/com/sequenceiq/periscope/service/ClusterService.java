@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.periscope.domain.Ambari;
 import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.domain.PeriscopeUser;
 import com.sequenceiq.periscope.model.Queue;
 import com.sequenceiq.periscope.model.QueueSetup;
 import com.sequenceiq.periscope.registry.ClusterRegistry;
@@ -22,6 +23,7 @@ import com.sequenceiq.periscope.registry.ClusterState;
 import com.sequenceiq.periscope.registry.ConnectionException;
 import com.sequenceiq.periscope.registry.QueueSetupException;
 import com.sequenceiq.periscope.repository.ClusterRepository;
+import com.sequenceiq.periscope.repository.UserRepository;
 import com.sequenceiq.periscope.utils.ClusterUtils;
 
 @Service
@@ -36,11 +38,25 @@ public class ClusterService {
     private ClusterRegistry clusterRegistry;
     @Autowired
     private ClusterRepository clusterRepository;
+    @Autowired
+    private UserRepository userRepository;
 
-    public Cluster add(Ambari ambari) throws ConnectionException {
-        Cluster cluster = new Cluster(ambari);
+    public Cluster add(PeriscopeUser user, Ambari ambari) throws ConnectionException {
+        PeriscopeUser periscopeUser = userRepository.findOne(user.getId());
+        if (periscopeUser == null) {
+            periscopeUser = userRepository.save(user);
+        }
+        Cluster cluster = new Cluster(periscopeUser, ambari);
         clusterRepository.save(cluster);
-        return clusterRegistry.add(cluster);
+        return clusterRegistry.add(user, cluster);
+    }
+
+    public Cluster get(PeriscopeUser user, long clusterId) throws ClusterNotFoundException {
+        Cluster cluster = clusterRegistry.get(user, clusterId);
+        if (cluster == null) {
+            throw new ClusterNotFoundException(clusterId);
+        }
+        return cluster;
     }
 
     public Cluster get(long clusterId) throws ClusterNotFoundException {
@@ -55,8 +71,8 @@ public class ClusterService {
         return clusterRegistry.getAll();
     }
 
-    public Cluster remove(long clusterId) throws ClusterNotFoundException {
-        Cluster cluster = clusterRegistry.remove(clusterId);
+    public Cluster remove(PeriscopeUser user, long clusterId) throws ClusterNotFoundException {
+        Cluster cluster = clusterRegistry.remove(user, clusterId);
         if (cluster == null) {
             throw new ClusterNotFoundException(clusterId);
         }
@@ -65,22 +81,22 @@ public class ClusterService {
         return cluster;
     }
 
-    public Cluster setState(long clusterId, ClusterState state) throws ClusterNotFoundException {
-        Cluster cluster = get(clusterId);
+    public Cluster setState(PeriscopeUser user, long clusterId, ClusterState state) throws ClusterNotFoundException {
+        Cluster cluster = get(user, clusterId);
         cluster.setState(state);
         clusterRepository.save(cluster);
         return cluster;
     }
 
-    public Cluster refreshConfiguration(long clusterId) throws ConnectionException, ClusterNotFoundException {
-        Cluster cluster = get(clusterId);
+    public Cluster refreshConfiguration(PeriscopeUser user, long clusterId) throws ConnectionException, ClusterNotFoundException {
+        Cluster cluster = get(user, clusterId);
         cluster.refreshConfiguration();
         return cluster;
     }
 
-    public Map<String, String> setQueueSetup(long clusterId, QueueSetup queueSetup)
+    public Map<String, String> setQueueSetup(PeriscopeUser user, long clusterId, QueueSetup queueSetup)
             throws QueueSetupException, ClusterNotFoundException {
-        return setQueueSetup(get(clusterId), queueSetup);
+        return setQueueSetup(get(user, clusterId), queueSetup);
     }
 
     public Map<String, String> setQueueSetup(Cluster cluster, QueueSetup queueSetup) throws QueueSetupException {

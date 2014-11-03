@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sequenceiq.periscope.domain.MetricAlarm;
+import com.sequenceiq.periscope.domain.PeriscopeUser;
 import com.sequenceiq.periscope.domain.TimeAlarm;
 import com.sequenceiq.periscope.rest.converter.MetricAlarmConverter;
 import com.sequenceiq.periscope.rest.converter.TimeAlarmConverter;
@@ -34,53 +36,55 @@ public class AlarmController {
     private TimeAlarmConverter timeAlarmConverter;
 
     @RequestMapping(value = "/metric", method = RequestMethod.POST)
-    public ResponseEntity<MetricAlarmsJson> createAlarms(@PathVariable long clusterId, @RequestBody MetricAlarmsJson json)
-            throws ClusterNotFoundException {
+    public ResponseEntity<MetricAlarmsJson> createAlarms(@ModelAttribute("user") PeriscopeUser user,
+            @PathVariable long clusterId, @RequestBody MetricAlarmsJson json) throws ClusterNotFoundException {
         List<MetricAlarm> metricAlarms = metricAlarmConverter.convertAllFromJson(json.getAlarms());
-        return createAlarmsResponse(alarmService.setMetricAlarms(clusterId, metricAlarms), HttpStatus.CREATED);
+        return createAlarmsResponse(alarmService.setMetricAlarms(user, clusterId, metricAlarms), HttpStatus.CREATED);
     }
 
     @RequestMapping(value = "/metric", method = RequestMethod.PUT)
-    public ResponseEntity<MetricAlarmsJson> addAlarm(@PathVariable long clusterId, @RequestBody MetricAlarmJson json)
-            throws ClusterNotFoundException {
+    public ResponseEntity<MetricAlarmsJson> addAlarm(@ModelAttribute("user") PeriscopeUser user,
+            @PathVariable long clusterId, @RequestBody MetricAlarmJson json) throws ClusterNotFoundException {
         MetricAlarm metricAlarm = metricAlarmConverter.convert(json);
-        return createAlarmsResponse(alarmService.addMetricAlarm(clusterId, metricAlarm), HttpStatus.CREATED);
+        return createAlarmsResponse(alarmService.addMetricAlarm(user, clusterId, metricAlarm), HttpStatus.CREATED);
     }
 
     @RequestMapping(value = "/metric", method = RequestMethod.GET)
-    public ResponseEntity<MetricAlarmsJson> getAlarms(@PathVariable long clusterId) throws ClusterNotFoundException {
-        return createAlarmsResponse(alarmService.getMetricAlarms(clusterId));
+    public ResponseEntity<MetricAlarmsJson> getAlarms(@ModelAttribute("user") PeriscopeUser user,
+            @PathVariable long clusterId) throws ClusterNotFoundException {
+        return createAlarmsResponse(alarmService.getMetricAlarms(user, clusterId));
     }
 
     @RequestMapping(value = "/metric/{alarmId}", method = RequestMethod.DELETE)
-    public ResponseEntity<MetricAlarmsJson> deleteAlarm(@PathVariable long clusterId, @PathVariable long alarmId)
-            throws ClusterNotFoundException {
-        return createAlarmsResponse(alarmService.deleteMetricAlarm(clusterId, alarmId));
+    public ResponseEntity<MetricAlarmsJson> deleteAlarm(@ModelAttribute("user") PeriscopeUser user,
+            @PathVariable long clusterId, @PathVariable long alarmId) throws ClusterNotFoundException {
+        return createAlarmsResponse(alarmService.deleteMetricAlarm(user, clusterId, alarmId));
     }
 
     @RequestMapping(value = "/time", method = RequestMethod.POST)
-    public ResponseEntity<TimeAlarmsJson> createTimeAlarms(@PathVariable long clusterId, @RequestBody TimeAlarmsJson json)
-            throws ClusterNotFoundException {
+    public ResponseEntity<TimeAlarmsJson> createTimeAlarms(@ModelAttribute("user") PeriscopeUser user,
+            @PathVariable long clusterId, @RequestBody TimeAlarmsJson json) throws ClusterNotFoundException {
         List<TimeAlarm> alarms = timeAlarmConverter.convertAllFromJson(json.getAlarms());
-        return createTimeAlarmsResponse(alarmService.setTimeAlarms(clusterId, alarms), HttpStatus.CREATED);
+        return createTimeAlarmsResponse(alarmService.setTimeAlarms(user, clusterId, alarms), HttpStatus.CREATED);
     }
 
     @RequestMapping(value = "/time", method = RequestMethod.PUT)
-    public ResponseEntity<TimeAlarmsJson> addTimeAlarm(@PathVariable long clusterId, @RequestBody TimeAlarmJson json)
-            throws ClusterNotFoundException {
+    public ResponseEntity<TimeAlarmsJson> addTimeAlarm(@ModelAttribute("user") PeriscopeUser user,
+            @PathVariable long clusterId, @RequestBody TimeAlarmJson json) throws ClusterNotFoundException {
         TimeAlarm timeAlarm = timeAlarmConverter.convert(json);
-        return createTimeAlarmsResponse(alarmService.addTimeAlarm(clusterId, timeAlarm), HttpStatus.CREATED);
+        return createTimeAlarmsResponse(alarmService.addTimeAlarm(user, clusterId, timeAlarm), HttpStatus.CREATED);
     }
 
     @RequestMapping(value = "/time", method = RequestMethod.GET)
-    public ResponseEntity<TimeAlarmsJson> getTimeAlarms(@PathVariable long clusterId) throws ClusterNotFoundException {
-        return createTimeAlarmsResponse(alarmService.getTimeAlarms(clusterId));
+    public ResponseEntity<TimeAlarmsJson> getTimeAlarms(@ModelAttribute("user") PeriscopeUser user,
+            @PathVariable long clusterId) throws ClusterNotFoundException {
+        return createTimeAlarmsResponse(alarmService.getTimeAlarms(user, clusterId));
     }
 
     @RequestMapping(value = "/time/{alarmId}", method = RequestMethod.DELETE)
-    public ResponseEntity<TimeAlarmsJson> deleteTimeAlarm(@PathVariable long clusterId, @PathVariable long alarmId)
-            throws ClusterNotFoundException {
-        return createTimeAlarmsResponse(alarmService.deleteTimeAlarm(clusterId, alarmId));
+    public ResponseEntity<TimeAlarmsJson> deleteTimeAlarm(@ModelAttribute("user") PeriscopeUser user,
+            @PathVariable long clusterId, @PathVariable long alarmId) throws ClusterNotFoundException {
+        return createTimeAlarmsResponse(alarmService.deleteTimeAlarm(user, clusterId, alarmId));
     }
 
     private ResponseEntity<MetricAlarmsJson> createAlarmsResponse(List<MetricAlarm> metricAlarms) {

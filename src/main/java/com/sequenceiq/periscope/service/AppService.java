@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.domain.PeriscopeUser;
 import com.sequenceiq.periscope.model.Priority;
 import com.sequenceiq.periscope.model.SchedulerApplication;
 
@@ -21,14 +22,15 @@ public class AppService {
     @Autowired
     private ClusterService clusterService;
 
-    public List<ApplicationReport> getApplicationReports(long clusterId) throws IOException, YarnException, ClusterNotFoundException {
-        Cluster cluster = clusterService.get(clusterId);
+    public List<ApplicationReport> getApplicationReports(PeriscopeUser user, long clusterId)
+            throws IOException, YarnException, ClusterNotFoundException {
+        Cluster cluster = clusterService.get(user, clusterId);
         YarnClient yarnClient = cluster.getYarnClient();
         return yarnClient.getApplications();
     }
 
-    public void setPriorityToHighRandomly(long clusterId) throws ClusterNotFoundException {
-        Cluster cluster = clusterService.get(clusterId);
+    public void setPriorityToHighRandomly(PeriscopeUser user, long clusterId) throws ClusterNotFoundException {
+        Cluster cluster = clusterService.get(user, clusterId);
         Map<ApplicationId, SchedulerApplication> applications = cluster.getApplications(Priority.NORMAL);
         int i = 0;
         for (ApplicationId applicationId : applications.keySet()) {
@@ -36,12 +38,6 @@ public class AppService {
                 cluster.setApplicationPriority(applicationId, Priority.HIGH);
             }
         }
-    }
-
-    public Cluster allowAppMovement(long clusterId, boolean allow) throws ClusterNotFoundException {
-        Cluster cluster = clusterService.get(clusterId);
-        cluster.allowAppMovement(allow);
-        return cluster;
     }
 
 }

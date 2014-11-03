@@ -12,6 +12,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
@@ -44,6 +45,8 @@ public class Cluster {
     private long id;
     @OneToOne(cascade = CascadeType.ALL)
     private Ambari ambari;
+    @ManyToOne
+    private PeriscopeUser user;
     private boolean appMovementAllowed;
     private ClusterState state = ClusterState.RUNNING;
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
@@ -53,6 +56,7 @@ public class Cluster {
     private int minSize = -1;
     private int maxSize = -1;
     private int coolDown = -1;
+
     @Transient
     private Map<Priority, Map<ApplicationId, SchedulerApplication>> applications;
     @Transient
@@ -69,7 +73,8 @@ public class Cluster {
     public Cluster() {
     }
 
-    public Cluster(Ambari ambari) throws ConnectionException {
+    public Cluster(PeriscopeUser user, Ambari ambari) throws ConnectionException {
+        this.user = user;
         this.ambari = ambari;
         this.applications = new ConcurrentHashMap<>();
         initConfiguration();
