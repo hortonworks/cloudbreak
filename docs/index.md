@@ -176,25 +176,25 @@ We provide a list of default Hadoop cluster Blueprints for your convenience, how
 
 1. Simple single node - Apache Ambari blueprint
 
-This is a simple [Blueprint](https://raw.githubusercontent.com/sequenceiq/ambari-rest-client/master/src/main/resources/blueprints/single-node-hdfs-yarn) which allows you to launch a single node, pseudo-distributed Hadoop Cluster in the cloud.
+This is a simple [Blueprint](https://raw.githubusercontent.com/sequenceiq/ambari-rest-client/1.6.0/src/main/resources/blueprints/single-node-hdfs-yarn) which allows you to launch a single node, pseudo-distributed Hadoop Cluster in the cloud.
 
 It allows you to use the following services: HDFS, YARN, MAPREDUCE2.
 
 2. Full stack single node - HDP 2.1 blueprint
 
-This is a complex [Blueprint](https://raw.githubusercontent.com/sequenceiq/ambari-rest-client/master/src/main/resources/blueprints/hdp-singlenode-default) which allows you to launch a single node, pseudo-distributed Hadoop Cluster in the cloud.
+This is a complex [Blueprint](https://raw.githubusercontent.com/sequenceiq/ambari-rest-client/1.6.0/src/main/resources/blueprints/hdp-singlenode-default) which allows you to launch a single node, pseudo-distributed Hadoop Cluster in the cloud.
 
 It allows you to use the following services: HDFS, YARN, MAPREDUCE2, GANGLIA, HBASE, HIVE, HCATALOG, WEBHCAT, NAGIOS, OOZIE, PIG, SQOOP, STORM, TEZ, FALCON, ZOOKEEPER.
 
 3. Simple multi node - Apache Ambari blueprint
 
-This is a simple [Blueprint](https://raw.githubusercontent.com/sequenceiq/ambari-rest-client/master/src/main/resources/blueprints/multi-node-hdfs-yarn) which allows you to launch a multi node, fully distributed Hadoop Cluster in the cloud.
+This is a simple [Blueprint](https://raw.githubusercontent.com/sequenceiq/ambari-rest-client/1.6.0/src/main/resources/blueprints/multi-node-hdfs-yarn) which allows you to launch a multi node, fully distributed Hadoop Cluster in the cloud.
 
 It allows you to use the following services: HDFS, YARN, MAPREDUCE2.
 
 4. Full stack multi node - HDP 2.1 blueprint
 
-This is a complex [Blueprint](https://raw.githubusercontent.com/sequenceiq/ambari-rest-client/master/src/main/resources/blueprints/hdp-multinode-default) which allows you to launch a multi node, fully distributed Hadoop Cluster in the cloud.
+This is a complex [Blueprint](https://raw.githubusercontent.com/sequenceiq/ambari-rest-client/1.6.0/src/main/resources/blueprints/hdp-multinode-default) which allows you to launch a multi node, fully distributed Hadoop Cluster in the cloud.
 
 It allows you to use the following services: HDFS, YARN, MAPREDUCE2, GANGLIA, HBASE, HIVE, HCATALOG, WEBHCAT, NAGIOS, OOZIE, PIG, SQOOP, STORM, TEZ, FALCON, ZOOKEEPER.
 
@@ -311,9 +311,9 @@ Make sure that at API level (**APIs and auth** menu) you have enabled:
 * Google Compute Engine
 * Google Compute Engine Instance Group Manager API
 * Google Compute Engine Instance Groups API
-* BigQuery API 
-* Google Cloud Deployment Manager API 
-* Google Cloud DNS API 
+* BigQuery API
+* Google Cloud Deployment Manager API
+* Google Cloud DNS API
 * Google Cloud SQL
 * Google Cloud Storage
 * Google Cloud Storage JSON API
@@ -349,7 +349,7 @@ Cloudbreak defines three distinct roles:
 This is the `master` role - the user which is created during the deployment process will have this role.
 
 ###Account admin
-We have introduced the notion of accounts - and with that comes an administrator role. Upon registration a user will become an account administrator. 
+We have introduced the notion of accounts - and with that comes an administrator role. Upon registration a user will become an account administrator.
 
 The extra rights associated with the account admin role are:
 
@@ -357,10 +357,10 @@ The extra rights associated with the account admin role are:
 * Share account wide resources (credential, blueprints, templates)
 * See resources created by account users
 * Monitor clusters started by account users
-* Management and reporting tool available 
+* Management and reporting tool available
 
 ###Account user
-An account user is a user who has been invited to join Cloudbreak by an account administrator. Account users activity will show up in the management and reporting tool for account wide statistics - accessible by the account administrator. Apart from common account wide resources, the account users can manage their own private resources. 
+An account user is a user who has been invited to join Cloudbreak by an account administrator. Account users activity will show up in the management and reporting tool for account wide statistics - accessible by the account administrator. Apart from common account wide resources, the account users can manage their own private resources.
 
 <!--ui.md-->
 
@@ -374,7 +374,7 @@ The goal of the UI is to ease to process and allow you to create a Hadoop cluste
 The UI is built on the foundation of the Cloudbreak REST API. You can access the UI [here](https://cloudbreak.sequenceiq.com/).
 
 ###User registration
-While we consider the registration process quite simple, we'd like to explain the notion of **companies**. When a user registers as a `company admin` it means that he will be the administrator of that company - further colleagues will have the opportunity to join the **company** upon being invited by the admin user. 
+While we consider the registration process quite simple, we'd like to explain the notion of **companies**. When a user registers as a `company admin` it means that he will be the administrator of that company - further colleagues will have the opportunity to join the **company** upon being invited by the admin user.
 
 ###Manage credentials
 Using manage credentials you can link your cloud account with the Cloudbreak account.
@@ -414,7 +414,7 @@ Using manage credentials you can link your cloud account with the Cloudbreak acc
 
 `Service Account private key:` your GCC service account generated private key - see Accounts
 
-`SSH public key:` the SSH public key in OpenSSH format that's private keypair can be used to log into the launched instances later 
+`SSH public key:` the SSH public key in OpenSSH format that's private keypair can be used to log into the launched instances later
 
 
 ###Manage templates
@@ -485,7 +485,7 @@ Blueprints are your declarative definition of a Hadoop cluster.
 
 `Description:` short description of your blueprint
 
-`Source URL:` you can add a blueprint by pointing to a URL. As an example you can use this [blueprint](https://raw.githubusercontent.com/sequenceiq/ambari-rest-client/master/src/main/resources/blueprints/multi-node-hdfs-yarn).
+`Source URL:` you can add a blueprint by pointing to a URL. As an example you can use this [blueprint](https://github.com/sequenceiq/ambari-rest-client/raw/1.6.0/src/main/resources/blueprints/multi-node-hdfs-yarn).
 
 `Manual copy:` you can copy paste your blueprint in this text area
 
