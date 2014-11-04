@@ -28,8 +28,8 @@ public abstract class AzureSimpleInstanceResourceBuilder implements
         ResourceBuilder<AzureProvisionContextObject, AzureDeleteContextObject, AzureDescribeContextObject, AzureStartStopContextObject> {
     protected static final Logger LOGGER = LoggerFactory.getLogger(AzureSimpleInstanceResourceBuilder.class);
     protected static final int POLLING_INTERVAL = 5000;
+    protected static final int MAX_POLLING_ATTEMPTS = 60;
     protected static final int MAX_ATTEMPTS_FOR_AMBARI_OPS = -1;
-    protected static final int MAX_ATTEMPTS_FOR_HOSTS = 240;
     protected static final int NOT_FOUND = 404;
     protected static final int VALID_IP_RANGE_START = 4;
     protected static final String DESCRIPTION = "description";

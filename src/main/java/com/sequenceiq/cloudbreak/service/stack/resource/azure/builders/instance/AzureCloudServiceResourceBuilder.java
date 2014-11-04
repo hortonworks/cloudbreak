@@ -24,23 +24,36 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.PollingService;
+import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureCloudServiceRemoveCheckerStatus;
+import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureCloudServiceRemoveReadyPollerObject;
+import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureDiskRemoveCheckerStatus;
+import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureDiskRemoveReadyPollerObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureSimpleInstanceResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDescribeContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureProvisionContextObject;
 
 import groovyx.net.http.HttpResponseDecorator;
-import groovyx.net.http.HttpResponseException;
 
 @Component
 @Order(1)
 public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourceBuilder {
     private static final ObjectMapper MAPPER = new ObjectMapper();
-    private static final int MAX_RETRIES = 20;
-    private static final int MILLIS = 1000;
 
     @Autowired
     private StackRepository stackRepository;
+
+    @Autowired
+    private AzureDiskRemoveCheckerStatus azureDiskRemoveCheckerStatus;
+    @Autowired
+    private PollingService<AzureDiskRemoveReadyPollerObject> azureDiskRemoveReadyPollerObjectPollingService;
+    @Autowired
+    private AzureCloudServiceRemoveCheckerStatus azureCloudServiceRemoveCheckerStatus;
+    @Autowired
+    private PollingService<AzureCloudServiceRemoveReadyPollerObject> azureCloudServiceRemoveReadyPollerObjectPollingService;
+
+
 
     @Override
     public List<Resource> create(AzureProvisionContextObject po, int index, List<Resource> resources) throws Exception {
@@ -64,58 +77,21 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
     public Boolean delete(Resource resource, AzureDeleteContextObject aDCO) throws Exception {
         Stack stack = stackRepository.findById(aDCO.getStackId());
         AzureCredential credential = (AzureCredential) stack.getCredential();
-        int retries = 0;
-        while (retries < MAX_RETRIES) {
-            try {
-                Map<String, String> props = new HashMap<>();
-                props.put(SERVICENAME, aDCO.getCommonName());
-                props.put(NAME, resource.getResourceName());
-                AzureClient azureClient = aDCO.getNewAzureClient(credential);
-                HttpResponseDecorator deleteCloudServiceResult = (HttpResponseDecorator) azureClient.deleteCloudService(props);
-                String requestId = (String) azureClient.getRequestId(deleteCloudServiceResult);
-                azureClient.waitUntilComplete(requestId);
-                break;
-            } catch (HttpResponseException ex) {
-                if (ex.getStatusCode() != NOT_FOUND) {
-                    retries++;
-                    Thread.sleep(MILLIS);
-                } else {
-                    LOGGER.error(String.format("Azure resource not found with %s name for %s user.", resource.getResourceName(), stack.getOwner()));
-                    break;
-                }
-            } catch (Exception ex) {
-                retries++;
-                Thread.sleep(MILLIS);
-            }
-        }
+        AzureCloudServiceRemoveReadyPollerObject azureCloudServiceRemoveReadyPollerObject =
+                new AzureCloudServiceRemoveReadyPollerObject(aDCO.getCommonName(), resource.getResourceName(),
+                        aDCO.getStackId(), aDCO.getNewAzureClient(credential));
+        azureCloudServiceRemoveReadyPollerObjectPollingService
+                .pollWithTimeout(azureCloudServiceRemoveCheckerStatus, azureCloudServiceRemoveReadyPollerObject, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
 
         AzureClient azureClient = aDCO.getNewAzureClient(credential);
         JsonNode actualObj = MAPPER.readValue((String) azureClient.getDisks(), JsonNode.class);
         List<String> disks = (List<String>) actualObj.get("Disks").findValues("Disk").get(0).findValuesAsText("Name");
         for (String jsonNode : disks) {
             if (jsonNode.startsWith(String.format("%s-%s-0", resource.getResourceName(), resource.getResourceName()))) {
-                retries = 0;
-                while (retries < MAX_RETRIES) {
-                    try {
-                        Map<String, String> props = new HashMap<>();
-                        props.put(NAME, jsonNode);
-                        HttpResponseDecorator deleteDisk = (HttpResponseDecorator) azureClient.deleteDisk(props);
-                        String requestId = (String) azureClient.getRequestId(deleteDisk);
-                        azureClient.waitUntilComplete(requestId);
-                        break;
-                    } catch (HttpResponseException ex) {
-                        if (ex.getStatusCode() != NOT_FOUND) {
-                            retries++;
-                            Thread.sleep(MILLIS);
-                        } else {
-                            LOGGER.error(String.format("Azure resource not found with %s name for %s user.", jsonNode, stack.getOwner()));
-                            break;
-                        }
-                    } catch (Exception ex) {
-                        retries++;
-                        Thread.sleep(MILLIS);
-                    }
-                }
+                AzureDiskRemoveReadyPollerObject azureDiskRemoveReadyPollerObject = new AzureDiskRemoveReadyPollerObject(aDCO.getCommonName(), jsonNode,
+                        aDCO.getStackId(), aDCO.getNewAzureClient(credential));
+                azureDiskRemoveReadyPollerObjectPollingService
+                        .pollWithTimeout(azureDiskRemoveCheckerStatus, azureDiskRemoveReadyPollerObject, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
             }
         }
         return true;
