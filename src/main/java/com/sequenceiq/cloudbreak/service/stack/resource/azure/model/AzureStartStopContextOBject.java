@@ -7,12 +7,12 @@ import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
 import com.sequenceiq.cloudbreak.service.stack.resource.StartStopContextObject;
 
-public class AzureStartStopContextObject extends StartStopContextObject {
+public class AzureStartStopContextOBject extends StartStopContextObject {
 
     private AzureClient azureClient;
     private String emailAsFolder;
 
-    public AzureStartStopContextObject(Long stackId, AzureClient azureClient, String emailAsFolder) {
+    public AzureStartStopContextOBject(Long stackId, AzureClient azureClient, String emailAsFolder) {
         super(stackId);
         this.azureClient = azureClient;
         this.emailAsFolder = emailAsFolder;

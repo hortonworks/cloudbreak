@@ -16,13 +16,13 @@ import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDescribeContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureProvisionContextObject;
-import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureStartStopContextObject;
+import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureStartStopContextOBject;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 import com.sequenceiq.cloudbreak.service.user.UserFilterField;
 
 @Component
 public class AzureResourceBuilderInit implements
-        ResourceBuilderInit<AzureProvisionContextObject, AzureDeleteContextObject, AzureDescribeContextObject, AzureStartStopContextObject> {
+        ResourceBuilderInit<AzureProvisionContextObject, AzureDeleteContextObject, AzureDescribeContextObject, AzureStartStopContextOBject> {
 
     private static final String IMAGE_NAME = "ambari-docker-v1";
 
@@ -49,10 +49,10 @@ public class AzureResourceBuilderInit implements
     }
 
     @Override
-    public AzureStartStopContextObject startStopInit(Stack stack) throws Exception {
+    public AzureStartStopContextOBject startStopInit(Stack stack) throws Exception {
         AzureCredential credential = (AzureCredential) stack.getCredential();
         AzureClient azureClient = createAzureClient(credential, AzureCertificateService.getUserJksFileName(credential, emailAsFolder(stack.getOwner())));
-        return new AzureStartStopContextObject(stack.getId(), azureClient, emailAsFolder(stack.getOwner()));
+        return new AzureStartStopContextOBject(stack.getId(), azureClient, emailAsFolder(stack.getOwner()));
     }
 
     @Override
