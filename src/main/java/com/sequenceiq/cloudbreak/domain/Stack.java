@@ -24,7 +24,7 @@ import javax.persistence.Version;
 
 @Entity
 @Table(name = "Stack", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "account", "name" })
+        @UniqueConstraint(columnNames = {"account", "name"})
 })
 @NamedQueries({
         @NamedQuery(
@@ -72,7 +72,12 @@ import javax.persistence.Version;
         @NamedQuery(
                 name = "Stack.findAllInAccount",
                 query = "SELECT s FROM Stack s "
-                        + "WHERE s.account= :account ")
+                        + "WHERE s.account= :account "),
+        @NamedQuery(
+                name = "Stack.findByAmbari",
+                query = "SELECT s from Stack s "
+                        + "WHERE s.ambariIp= :ambariIp"
+        )
 })
 public class Stack implements ProvisionEntity {
 

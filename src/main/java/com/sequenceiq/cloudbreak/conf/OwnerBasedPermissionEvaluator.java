@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 
@@ -16,12 +17,17 @@ import com.sequenceiq.cloudbreak.service.user.UserFilterField;
 @Component
 public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
 
+    private static final String PERISCOPE_CLIENT = "periscope";
     private UserDetailsService userDetailsService;
 
     @Override
     public boolean hasPermission(Authentication authentication, final Object targetDomainObject, Object permission) {
         if (targetDomainObject == null) {
             return false;
+        }
+        OAuth2Authentication oauth = (OAuth2Authentication) authentication;
+        if (oauth.getUserAuthentication() == null && oauth.getOAuth2Request().getClientId().equals(PERISCOPE_CLIENT)) {
+            return true;
         }
         try {
             CbUser user = userDetailsService.getDetails((String) authentication.getPrincipal(), UserFilterField.USERNAME);

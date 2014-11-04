@@ -16,10 +16,12 @@ import org.springframework.security.access.expression.method.MethodSecurityExpre
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.RemoteTokenServices;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -106,6 +108,7 @@ public class SecurityConfig {
                     .antMatchers("/credentials/**").access("#oauth2.hasScope('cloudbreak.credentials')")
                     .antMatchers("/user/stacks/**").access("#oauth2.hasScope('cloudbreak.stacks')")
                     .antMatchers("/account/stacks/**").access("#oauth2.hasScope('cloudbreak.stacks')")
+                    .antMatchers("/stacks/ambari").access("#oauth2.hasScope('cloudbreak.autoscale')")
                     .antMatchers("/stacks/*").access("#oauth2.hasScope('cloudbreak.stacks')")
                     .antMatchers("/stacks/*/cluster/**").access("#oauth2.hasScope('cloudbreak.stacks')")
                     .antMatchers("/events").access("#oauth2.hasScope('cloudbreak.events')")
@@ -127,10 +130,14 @@ public class SecurityConfig {
         @Override
         protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException,
                 IOException {
-            if (SecurityContextHolder.getContext().getAuthentication() != null) {
-                String username = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-                CbUser user = userDetailsService.getDetails(username, UserFilterField.USERNAME);
-                request.setAttribute("user", user);
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication != null) {
+                OAuth2Authentication oauth = (OAuth2Authentication) authentication;
+                if (oauth.getUserAuthentication() != null) {
+                    String username = (String) authentication.getPrincipal();
+                    CbUser user = userDetailsService.getDetails(username, UserFilterField.USERNAME);
+                    request.setAttribute("user", user);
+                }
             }
             filterChain.doFilter(request, response);
         }

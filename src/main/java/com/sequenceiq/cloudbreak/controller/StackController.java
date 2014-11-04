@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.sequenceiq.cloudbreak.controller.json.AmbariAddressJson;
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
 import com.sequenceiq.cloudbreak.controller.json.InstanceMetaDataJson;
 import com.sequenceiq.cloudbreak.controller.json.StackJson;
@@ -111,6 +112,13 @@ public class StackController {
         } catch (MetadataIncompleteException e) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
+    }
+
+    @RequestMapping(value = "stacks/ambari", method = RequestMethod.POST)
+    @ResponseBody
+    public ResponseEntity<StackJson> getStackForAmbari(@RequestBody AmbariAddressJson json) {
+        Stack stack = stackService.get(json.getAmbariAddress());
+        return new ResponseEntity<>(stackConverter.convert(stack), HttpStatus.OK);
     }
 
     private ResponseEntity<IdJson> createStack(CbUser user, StackJson stackRequest, Boolean publicInAccount) {
