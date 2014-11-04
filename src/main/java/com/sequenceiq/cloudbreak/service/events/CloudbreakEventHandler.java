@@ -19,9 +19,9 @@ public class CloudbreakEventHandler implements Consumer<Event<CloudbreakEventDat
     @Override
     public void accept(Event<CloudbreakEventData> cloudbreakEvent) {
         CloudbreakEventData event = cloudbreakEvent.getData();
-        LOGGER.info("Cloudbreak event received {}", cloudbreakEvent);
+        //LOGGER.info("Cloudbreak event received {}", cloudbreakEvent);
         com.sequenceiq.cloudbreak.domain.CloudbreakEvent registeredEvent =
                 eventService.createStackEvent(event.getEntityId(), event.getEventType(), event.getEventMessage());
-        LOGGER.info("Event registered: {}", registeredEvent);
+        //LOGGER.info("Event registered: {}", registeredEvent);
     }
 }

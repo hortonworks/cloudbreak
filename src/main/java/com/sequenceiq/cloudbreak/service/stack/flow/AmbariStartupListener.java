@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariHostsUnavailableException;
 import com.sequenceiq.cloudbreak.service.stack.connector.aws.AwsStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.event.StackCreationSuccess;
@@ -32,6 +34,9 @@ public class AmbariStartupListener {
     @Autowired
     private AwsStackUtil awsStackUtil;
 
+    @Autowired
+    private StackRepository stackRepository;
+
     public void waitForAmbariServer(Long stackId, String ambariIp) {
         try {
             boolean ambariRunning = false;
@@ -48,7 +53,8 @@ public class AmbariStartupListener {
                 } catch (Exception e) {
                     LOGGER.info("Ambari health check failed. {} Trying again in next polling interval. [stack: '{}']", e.getMessage(), stackId);
                 }
-                awsStackUtil.sleep(POLLING_INTERVAL);
+                Stack stack = stackRepository.findById(stackId);
+                awsStackUtil.sleep(stack, POLLING_INTERVAL);
                 pollingAttempt++;
             }
             if (pollingAttempt >= MAX_POLLING_ATTEMPTS) {

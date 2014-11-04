@@ -10,6 +10,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -26,6 +27,8 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
+import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
+import com.sequenceiq.cloudbreak.logger.LoggerResourceType;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
@@ -71,6 +74,9 @@ public class AzureProvisionSetup implements ProvisionSetup {
 
     @Override
     public void setupProvisioning(Stack stack) {
+        MDC.put(LoggerContextKey.OWNER_ID.toString(), stack.getOwner());
+        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), stack.getId().toString());
+        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.STACK_ID.toString());
         Credential credential = stack.getCredential();
         String emailAsFolder = azureStackUtil.emailAsFolder(stack.getOwner());
 

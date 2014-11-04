@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import java.util.Date;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -36,7 +35,6 @@ public class CloudbreakUsageController {
             @RequestParam(value = "zone", required = false) String zone,
             @RequestParam(value = "vmtype", required = false) String vmtype,
             @RequestParam(value = "hours", required = false) String hours) {
-        LOGGER.info("Retrieving events for user {}, since {}", user.getUsername(), since == null ? null : new Date(since));
         List<CloudbreakUsageJson> usages = cloudbreakUsagesFacade.getUsagesForDeployer(user, since, userId, accountId, cloud, zone, vmtype, hours);
         return new ResponseEntity<>(HttpStatus.OK);
     }

@@ -9,6 +9,7 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -29,13 +30,15 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.StatusRequest;
+import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
+import com.sequenceiq.cloudbreak.logger.LoggerResourceType;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.cluster.event.ClusterStatusUpdateRequest;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
+import com.sequenceiq.cloudbreak.service.cluster.event.ClusterStatusUpdateRequest;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
 
 import groovyx.net.http.HttpResponseException;
@@ -70,6 +73,9 @@ public class AmbariClusterService implements ClusterService {
     @Override
     public void create(CbUser user, Long stackId, Cluster cluster) {
         Stack stack = stackRepository.findOne(stackId);
+        MDC.put(LoggerContextKey.OWNER_ID.toString(), stack.getOwner());
+        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), stackId.toString());
+        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.STACK_ID.toString());
         LOGGER.info("Cluster requested for stack '{}' [BlueprintId: {}]", stackId, cluster.getBlueprint().getId());
         if (stack.getCluster() != null) {
             throw new BadRequestException(String.format("A cluster is already created on this stack! [stack: '%s', cluster: '%s']", stackId, stack.getCluster()
@@ -95,6 +101,10 @@ public class AmbariClusterService implements ClusterService {
 
     @Override
     public String getClusterJson(String ambariIp, Long stackId) {
+        Stack stack = stackRepository.findOne(stackId);
+        MDC.put(LoggerContextKey.OWNER_ID.toString(), stack.getOwner());
+        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), stackId.toString());
+        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.STACK_ID.toString());
         AmbariClient ambariClient = createAmbariClient(ambariIp);
         try {
             String clusterJson = ambariClient.getClusterAsJson();
@@ -115,6 +125,9 @@ public class AmbariClusterService implements ClusterService {
     @Override
     public void updateHosts(Long stackId, Set<HostGroupAdjustmentJson> hostGroupAdjustments) {
         Stack stack = stackRepository.findOneWithLists(stackId);
+        MDC.put(LoggerContextKey.OWNER_ID.toString(), stack.getOwner());
+        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), stack.getCluster().getId().toString());
+        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.CLUSTER_ID.toString());
         boolean decommisionRequest = validateRequest(stack, hostGroupAdjustments);
         LOGGER.info("Cluster update requested for stack '{}' [BlueprintId: {}]", stackId, stack.getCluster().getBlueprint().getId());
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.UPDATE_AMBARI_HOSTS_REQUEST_EVENT, stack.getId());
@@ -126,6 +139,9 @@ public class AmbariClusterService implements ClusterService {
     public void updateStatus(Long stackId, StatusRequest statusRequest) {
         Stack stack = stackRepository.findOne(stackId);
         Cluster cluster = stack.getCluster();
+        MDC.put(LoggerContextKey.OWNER_ID.toString(), stack.getOwner());
+        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), stack.getCluster().getId().toString());
+        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.CLUSTER_ID.toString());
         long clusterId = cluster.getId();
         Status clusterStatus = cluster.getStatus();
         Status stackStatus = stack.getStatus();
@@ -172,6 +188,9 @@ public class AmbariClusterService implements ClusterService {
     }
 
     private boolean validateRequest(Stack stack, Set<HostGroupAdjustmentJson> hostGroupAdjustments) {
+        MDC.put(LoggerContextKey.OWNER_ID.toString(), stack.getOwner());
+        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), stack.getCluster().getId().toString());
+        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.CLUSTER_ID.toString());
         int sumScalingAdjustments = 0;
         boolean positive = false;
         boolean negative = false;

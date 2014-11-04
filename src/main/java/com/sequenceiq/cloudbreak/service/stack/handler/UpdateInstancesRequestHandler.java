@@ -11,6 +11,7 @@ import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.stereotype.Component;
@@ -22,6 +23,8 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
+import com.sequenceiq.cloudbreak.logger.LoggerResourceType;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.AddInstancesFailedException;
@@ -79,8 +82,11 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
         final CloudPlatform cloudPlatform = request.getCloudPlatform();
         Long stackId = request.getStackId();
         Integer scalingAdjustment = request.getScalingAdjustment();
+        final Stack stack = stackRepository.findOneWithLists(stackId);
+        MDC.put(LoggerContextKey.OWNER_ID.toString(), stack.getOwner());
+        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), stack.getId().toString());
+        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.STACK_ID.toString());
         try {
-            final Stack stack = stackRepository.findOneWithLists(stackId);
             LOGGER.info("Accepted {} event on stack: '{}'", ReactorConfig.UPDATE_INSTANCES_REQUEST_EVENT, stackId);
             stackUpdater.updateMetadataReady(stackId, false);
             if (scalingAdjustment > 0) {
@@ -181,16 +187,19 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
             }
         } catch (AddInstancesFailedException e) {
             LOGGER.error(e.getMessage(), e);
-            notifyUpdateFailed(stackId, e.getMessage());
+            notifyUpdateFailed(stack, e.getMessage());
         } catch (Exception e) {
             String errMessage = "Unhandled exception occurred while updating stack.";
             LOGGER.error(errMessage, e);
-            notifyUpdateFailed(stackId, errMessage);
+            notifyUpdateFailed(stack, errMessage);
         }
     }
 
-    private void notifyUpdateFailed(Long stackId, String detailedMessage) {
-        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_UPDATE_FAILED_EVENT, stackId);
-        reactor.notify(ReactorConfig.STACK_UPDATE_FAILED_EVENT, Event.wrap(new StackOperationFailure(stackId, detailedMessage)));
+    private void notifyUpdateFailed(Stack stack, String detailedMessage) {
+        MDC.put(LoggerContextKey.OWNER_ID.toString(), stack.getOwner());
+        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), stack.getId().toString());
+        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.STACK_ID.toString());
+        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_UPDATE_FAILED_EVENT, stack.getId());
+        reactor.notify(ReactorConfig.STACK_UPDATE_FAILED_EVENT, Event.wrap(new StackOperationFailure(stack.getId(), detailedMessage)));
     }
 }

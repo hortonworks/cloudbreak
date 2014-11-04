@@ -13,6 +13,7 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -26,6 +27,8 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
+import com.sequenceiq.cloudbreak.logger.LoggerResourceType;
 import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataSetupComplete;
@@ -49,6 +52,9 @@ public class AzureMetadataSetup implements MetadataSetup {
 
     @Override
     public void setupMetadata(Stack stack) {
+        MDC.put(LoggerContextKey.OWNER_ID.toString(), stack.getOwner());
+        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), stack.getId().toString());
+        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.STACK_ID.toString());
         AzureCredential azureCredential = (AzureCredential) stack.getCredential();
         String filePath = AzureCertificateService.getUserJksFileName(azureCredential, azureStackUtil.emailAsFolder(stack.getOwner()));
         AzureClient azureClient = azureStackUtil.createAzureClient(azureCredential, filePath);
@@ -60,6 +66,9 @@ public class AzureMetadataSetup implements MetadataSetup {
 
     @Override
     public void addNewNodesToMetadata(Stack stack, Set<Resource> resourceList) {
+        MDC.put(LoggerContextKey.OWNER_ID.toString(), stack.getOwner());
+        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), stack.getId().toString());
+        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.STACK_ID.toString());
         AzureCredential azureCredential = (AzureCredential) stack.getCredential();
         String filePath = AzureCertificateService.getUserJksFileName(azureCredential, azureStackUtil.emailAsFolder(stack.getOwner()));
         AzureClient azureClient = azureStackUtil.createAzureClient(azureCredential, filePath);
@@ -88,6 +97,9 @@ public class AzureMetadataSetup implements MetadataSetup {
     }
 
     private CoreInstanceMetaData getMetadata(Stack stack, AzureClient azureClient, Resource resource) {
+        MDC.put(LoggerContextKey.OWNER_ID.toString(), stack.getOwner());
+        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), stack.getId().toString());
+        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.STACK_ID.toString());
         Map<String, Object> props = new HashMap<>();
         props.put(NAME, resource.getResourceName());
         props.put(SERVICENAME, resource.getResourceName());

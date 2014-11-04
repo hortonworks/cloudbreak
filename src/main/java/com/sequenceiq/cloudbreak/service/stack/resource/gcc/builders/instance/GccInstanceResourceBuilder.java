@@ -133,8 +133,8 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
 
     @Override
     public Boolean delete(Resource resource, GccDeleteContextObject d) throws Exception {
+        Stack stack = stackRepository.findById(d.getStackId());
         try {
-            Stack stack = stackRepository.findById(d.getStackId());
             GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
             GccCredential gccCredential = (GccCredential) stack.getCredential();
             Operation execute = d.getCompute().instances()
@@ -145,7 +145,7 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
                     new GccRemoveReadyPollerObject(zoneOperations, globalOperations, stack.getId(), resource.getResourceName());
             gccRemoveReadyPollerObjectPollingService.pollWithTimeout(gccRemoveCheckerStatus, gccRemoveReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
         } catch (GoogleJsonResponseException ex) {
-            exceptionHandler(ex, resource.getResourceName());
+            exceptionHandler(ex, resource.getResourceName(), stack);
         } catch (IOException e) {
             throw new InternalServerException(e.getMessage());
         }

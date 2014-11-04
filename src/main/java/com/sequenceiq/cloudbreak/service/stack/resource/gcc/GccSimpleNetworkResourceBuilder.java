@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
@@ -13,6 +14,9 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.domain.GccTemplate;
 import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
+import com.sequenceiq.cloudbreak.logger.LoggerResourceType;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDeleteContextObject;
@@ -41,7 +45,10 @@ public abstract class GccSimpleNetworkResourceBuilder implements
         return compute.globalOperations().get(gccCredential.getProjectId(), operation.getName());
     }
 
-    protected void exceptionHandler(GoogleJsonResponseException ex, String name) {
+    protected void exceptionHandler(GoogleJsonResponseException ex, String name, Stack stack) {
+        MDC.put(LoggerContextKey.OWNER_ID.toString(), stack.getOwner());
+        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), stack.getId().toString());
+        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.STACK_ID.toString());
         if (ex.getDetails().get("code").equals(NOT_FOUND)) {
             LOGGER.info(String.format("Resource was delete with name: %s", name));
         } else {

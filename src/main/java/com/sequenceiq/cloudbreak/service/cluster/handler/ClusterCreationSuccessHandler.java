@@ -4,6 +4,7 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailSender;
@@ -15,6 +16,8 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
+import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
+import com.sequenceiq.cloudbreak.logger.LoggerResourceType;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -60,8 +63,11 @@ public class ClusterCreationSuccessHandler implements Consumer<Event<ClusterCrea
     public void accept(Event<ClusterCreationSuccess> event) {
         ClusterCreationSuccess clusterCreationSuccess = event.getData();
         Long clusterId = clusterCreationSuccess.getClusterId();
-        LOGGER.info("Accepted {} event.", ReactorConfig.CLUSTER_CREATE_SUCCESS_EVENT, clusterId);
         Cluster cluster = clusterRepository.findById(clusterId);
+        MDC.put(LoggerContextKey.OWNER_ID.toString(), cluster.getOwner());
+        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), cluster.getId().toString());
+        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.CLUSTER_ID.toString());
+        LOGGER.info("Accepted {} event.", ReactorConfig.CLUSTER_CREATE_SUCCESS_EVENT, clusterId);
         cluster.setStatus(Status.AVAILABLE);
         cluster.setStatusReason("");
         cluster.setCreationFinished(clusterCreationSuccess.getCreationFinished());

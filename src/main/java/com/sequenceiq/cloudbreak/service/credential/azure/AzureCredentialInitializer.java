@@ -8,10 +8,13 @@ import java.security.cert.X509Certificate;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
+import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
+import com.sequenceiq.cloudbreak.logger.LoggerResourceType;
 
 @Component
 public class AzureCredentialInitializer {
@@ -24,6 +27,9 @@ public class AzureCredentialInitializer {
     }
 
     private void validateCertificateFile(AzureCredential azureCredential) {
+        MDC.put(LoggerContextKey.OWNER_ID.toString(), azureCredential.getOwner());
+        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), azureCredential.getId().toString());
+        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.CREDENTIAL_ID.toString());
         try {
             InputStream is = new ByteArrayInputStream(azureCredential.getPublicKey().getBytes(StandardCharsets.UTF_8));
             CertificateFactory cf = CertificateFactory.getInstance("X.509");

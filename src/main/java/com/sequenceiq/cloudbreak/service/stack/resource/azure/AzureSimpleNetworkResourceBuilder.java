@@ -2,11 +2,15 @@ package com.sequenceiq.cloudbreak.service.stack.resource.azure;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
+import com.sequenceiq.cloudbreak.logger.LoggerResourceType;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDeleteContextObject;
@@ -36,7 +40,10 @@ public abstract class AzureSimpleNetworkResourceBuilder implements
         return ResourceBuilderType.NETWORK_RESOURCE;
     }
 
-    protected void httpResponseExceptionHandler(HttpResponseException ex, String resourceName, String user) {
+    protected void httpResponseExceptionHandler(HttpResponseException ex, String resourceName, String user, Stack stack) {
+        MDC.put(LoggerContextKey.OWNER_ID.toString(), stack.getOwner());
+        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), stack.getId().toString());
+        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.STACK_ID.toString());
         if (ex.getStatusCode() != NOT_FOUND) {
             throw new InternalServerException(ex.getMessage());
         } else {

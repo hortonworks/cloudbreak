@@ -141,7 +141,7 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
             String requestId = (String) azureClient.getRequestId(deleteVirtualMachineResult);
             waitUntilComplete(azureClient, requestId);
         } catch (HttpResponseException ex) {
-            httpResponseExceptionHandler(ex, resource.getResourceName(), stack.getOwner());
+            httpResponseExceptionHandler(ex, resource.getResourceName(), stack.getOwner(), stack);
         } catch (Exception ex) {
             throw new InternalServerException(ex.getMessage());
         }

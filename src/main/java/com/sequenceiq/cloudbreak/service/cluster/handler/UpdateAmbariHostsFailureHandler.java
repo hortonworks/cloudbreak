@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.cluster.handler;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,6 +11,8 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
+import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
+import com.sequenceiq.cloudbreak.logger.LoggerResourceType;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -41,6 +44,9 @@ public class UpdateAmbariHostsFailureHandler implements Consumer<Event<UpdateAmb
     public void accept(Event<UpdateAmbariHostsFailure> event) {
         UpdateAmbariHostsFailure data = event.getData();
         Cluster cluster = clusterRepository.findById(data.getClusterId());
+        MDC.put(LoggerContextKey.OWNER_ID.toString(), cluster.getOwner());
+        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), cluster.getId().toString());
+        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.CLUSTER_ID.toString());
         LOGGER.info("Accepted {} event.", ReactorConfig.UPDATE_AMBARI_HOSTS_FAILED_EVENT);
         cluster.setStatus(Status.AVAILABLE);
         cluster.setStatusReason(data.getDetailedMessage());

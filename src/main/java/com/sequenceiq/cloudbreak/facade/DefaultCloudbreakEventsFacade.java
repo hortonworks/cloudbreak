@@ -3,8 +3,6 @@ package com.sequenceiq.cloudbreak.facade;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +13,6 @@ import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 
 @Service
 public class DefaultCloudbreakEventsFacade implements CloudbreakEventsFacade {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCloudbreakEventsFacade.class);
 
     @Autowired
     private CloudbreakEventService cloudbreakEventService;

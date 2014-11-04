@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.stack.connector.aws;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +15,9 @@ import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.sns.AmazonSNSClient;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
+import com.sequenceiq.cloudbreak.logger.LoggerResourceType;
 import com.sequenceiq.cloudbreak.service.credential.aws.CrossAccountCredentialsProvider;
 
 @Component
@@ -25,6 +29,9 @@ public class AwsStackUtil {
     private CrossAccountCredentialsProvider credentialsProvider;
 
     public AmazonCloudFormationClient createCloudFormationClient(Regions regions, AwsCredential credential) {
+        MDC.put(LoggerContextKey.OWNER_ID.toString(), credential.getOwner());
+        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), credential.getId().toString());
+        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.CREDENTIAL_ID.toString());
         BasicSessionCredentials basicSessionCredentials = credentialsProvider
                 .retrieveSessionCredentials(CrossAccountCredentialsProvider.DEFAULT_SESSION_CREDENTIALS_DURATION,
                         CrossAccountCredentialsProvider.DEFAULT_EXTERNAL_ID, credential);
@@ -35,6 +42,9 @@ public class AwsStackUtil {
     }
 
     public AmazonEC2Client createEC2Client(Regions regions, AwsCredential credential) {
+        MDC.put(LoggerContextKey.OWNER_ID.toString(), credential.getOwner());
+        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), credential.getId().toString());
+        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.CREDENTIAL_ID.toString());
         BasicSessionCredentials basicSessionCredentials = credentialsProvider
                 .retrieveSessionCredentials(CrossAccountCredentialsProvider.DEFAULT_SESSION_CREDENTIALS_DURATION,
                         CrossAccountCredentialsProvider.DEFAULT_EXTERNAL_ID, credential);
@@ -45,6 +55,9 @@ public class AwsStackUtil {
     }
 
     public AmazonAutoScalingClient createAutoScalingClient(Regions regions, AwsCredential credential) {
+        MDC.put(LoggerContextKey.OWNER_ID.toString(), credential.getOwner());
+        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), credential.getId().toString());
+        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.CREDENTIAL_ID.toString());
         BasicSessionCredentials basicSessionCredentials = credentialsProvider
                 .retrieveSessionCredentials(CrossAccountCredentialsProvider.DEFAULT_SESSION_CREDENTIALS_DURATION,
                         CrossAccountCredentialsProvider.DEFAULT_EXTERNAL_ID, credential);
@@ -55,6 +68,9 @@ public class AwsStackUtil {
     }
 
     public AmazonSNSClient createSnsClient(Regions region, AwsCredential credential) {
+        MDC.put(LoggerContextKey.OWNER_ID.toString(), credential.getOwner());
+        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), credential.getId().toString());
+        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.CREDENTIAL_ID.toString());
         BasicSessionCredentials basicSessionCredentials = credentialsProvider
                 .retrieveSessionCredentials(CrossAccountCredentialsProvider.DEFAULT_SESSION_CREDENTIALS_DURATION,
                         CrossAccountCredentialsProvider.DEFAULT_EXTERNAL_ID, credential);
@@ -69,7 +85,10 @@ public class AwsStackUtil {
         return new String(encoded);
     }
 
-    public void sleep(int duration) {
+    public void sleep(Stack stack, int duration) {
+        MDC.put(LoggerContextKey.OWNER_ID.toString(), stack.getOwner());
+        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), stack.getId().toString());
+        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.STACK_ID.toString());
         try {
             Thread.sleep(duration);
         } catch (InterruptedException e) {

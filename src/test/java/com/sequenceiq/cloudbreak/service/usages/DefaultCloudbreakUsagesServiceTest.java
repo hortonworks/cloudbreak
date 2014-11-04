@@ -15,8 +15,6 @@ import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
@@ -25,7 +23,6 @@ import com.sequenceiq.cloudbreak.repository.CloudbreakUsageRepository;
 import com.sequenceiq.cloudbreak.service.ServiceTestUtils;
 
 public class DefaultCloudbreakUsagesServiceTest {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCloudbreakUsagesServiceTest.class);
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
     @InjectMocks
@@ -40,14 +37,10 @@ public class DefaultCloudbreakUsagesServiceTest {
     private Calendar referenceCalendar;
 
     @Before
-    public void before() {
+    public void before() throws ParseException {
         String referenceDateStr = "2014-09-24";
-        try {
-            referenceCalendar = Calendar.getInstance();
-            referenceCalendar.setTime(DATE_FORMAT.parse(referenceDateStr));
-        } catch (ParseException e) {
-            LOGGER.error("invalid reference date str: {}, ex: {}", referenceDateStr, e);
-        }
+        referenceCalendar = Calendar.getInstance();
+        referenceCalendar.setTime(DATE_FORMAT.parse(referenceDateStr));
     }
 
     @Before

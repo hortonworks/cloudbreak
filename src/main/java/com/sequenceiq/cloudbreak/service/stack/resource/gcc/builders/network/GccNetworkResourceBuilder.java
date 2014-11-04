@@ -58,8 +58,8 @@ public class GccNetworkResourceBuilder extends GccSimpleNetworkResourceBuilder {
 
     @Override
     public Boolean delete(Resource resource, GccDeleteContextObject d) throws Exception {
+        Stack stack = stackRepository.findById(d.getStackId());
         try {
-            Stack stack = stackRepository.findById(d.getStackId());
             GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
             GccCredential gccCredential = (GccCredential) stack.getCredential();
             Operation execute = d.getCompute().networks().delete(gccCredential.getProjectId(), resource.getResourceName()).execute();
@@ -69,7 +69,7 @@ public class GccNetworkResourceBuilder extends GccSimpleNetworkResourceBuilder {
                     new GccRemoveReadyPollerObject(zoneOperations, globalOperations, stack.getId(), resource.getResourceName());
             gccRemoveReadyPollerObjectPollingService.pollWithTimeout(gccRemoveCheckerStatus, gccRemoveReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
         } catch (GoogleJsonResponseException ex) {
-            exceptionHandler(ex, resource.getResourceName());
+            exceptionHandler(ex, resource.getResourceName(), stack);
         } catch (IOException e) {
             throw new InternalServerException(e.getMessage());
         }

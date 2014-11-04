@@ -13,6 +13,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +22,8 @@ import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
+import com.sequenceiq.cloudbreak.logger.LoggerResourceType;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.KeyGeneratorService;
@@ -88,6 +91,9 @@ public class AzureCertificateService {
     }
 
     public void generateCertificate(CbUser user, AzureCredential azureCredential) {
+        MDC.put(LoggerContextKey.OWNER_ID.toString(), azureCredential.getOwner());
+        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), azureCredential.getId().toString());
+        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.CREDENTIAL_ID.toString());
         try {
             String emailAsFolder = azureStackUtil.emailAsFolder(user);
             File sourceFolder = new File(DATADIR);
@@ -128,6 +134,9 @@ public class AzureCertificateService {
     }
 
     public void generateSshCertificate(CbUser user, AzureCredential azureCredential, String sshKey) {
+        MDC.put(LoggerContextKey.OWNER_ID.toString(), azureCredential.getOwner());
+        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), azureCredential.getId().toString());
+        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.CREDENTIAL_ID.toString());
         try {
             String emailAsFolder = azureStackUtil.emailAsFolder(user);
             File userFolder = new File(getSimpleUserFolder(emailAsFolder));
