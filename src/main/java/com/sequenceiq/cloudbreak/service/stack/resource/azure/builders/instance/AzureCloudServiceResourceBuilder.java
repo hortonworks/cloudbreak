@@ -18,7 +18,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
 import com.sequenceiq.cloud.azure.client.AzureClient;
-import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -37,6 +36,8 @@ import groovyx.net.http.HttpResponseException;
 @Order(1)
 public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourceBuilder {
     private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final int MAX_RETRIES = 20;
+    private static final int MILLIS = 1000;
 
     @Autowired
     private StackRepository stackRepository;
@@ -63,37 +64,59 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
     public Boolean delete(Resource resource, AzureDeleteContextObject aDCO) throws Exception {
         Stack stack = stackRepository.findById(aDCO.getStackId());
         AzureCredential credential = (AzureCredential) stack.getCredential();
-        try {
-            Map<String, String> props = new HashMap<>();
-            props.put(SERVICENAME, aDCO.getCommonName());
-            props.put(NAME, resource.getResourceName());
-            AzureClient azureClient = aDCO.getNewAzureClient(credential);
-            HttpResponseDecorator deleteCloudServiceResult = (HttpResponseDecorator) azureClient.deleteCloudService(props);
-            String requestId = (String) azureClient.getRequestId(deleteCloudServiceResult);
-            azureClient.waitUntilComplete(requestId);
-
-        } catch (HttpResponseException ex) {
-            httpResponseExceptionHandler(ex, resource.getResourceName(), stack.getOwner());
-        } catch (Exception ex) {
-            throw new InternalServerException(ex.getMessage());
+        int retries = 0;
+        while (retries < MAX_RETRIES) {
+            try {
+                Map<String, String> props = new HashMap<>();
+                props.put(SERVICENAME, aDCO.getCommonName());
+                props.put(NAME, resource.getResourceName());
+                AzureClient azureClient = aDCO.getNewAzureClient(credential);
+                HttpResponseDecorator deleteCloudServiceResult = (HttpResponseDecorator) azureClient.deleteCloudService(props);
+                String requestId = (String) azureClient.getRequestId(deleteCloudServiceResult);
+                azureClient.waitUntilComplete(requestId);
+                break;
+            } catch (HttpResponseException ex) {
+                if (ex.getStatusCode() != NOT_FOUND) {
+                    retries++;
+                    Thread.sleep(MILLIS);
+                } else {
+                    LOGGER.error(String.format("Azure resource not found with %s name for %s user.", resource.getResourceName(), stack.getOwner()));
+                    break;
+                }
+            } catch (Exception ex) {
+                retries++;
+                Thread.sleep(MILLIS);
+            }
         }
-        try {
-            AzureClient azureClient = aDCO.getNewAzureClient(credential);
-            JsonNode actualObj = MAPPER.readValue((String) azureClient.getDisks(), JsonNode.class);
-            List<String> disks = (List<String>) actualObj.get("Disks").findValues("Disk").get(0).findValuesAsText("Name");
-            for (String jsonNode : disks) {
-                if (jsonNode.startsWith(String.format("%s-%s-0", resource.getResourceName(), resource.getResourceName()))) {
-                    Map<String, String> props = new HashMap<>();
-                    props.put(NAME, jsonNode);
-                    HttpResponseDecorator deleteDisk = (HttpResponseDecorator) azureClient.deleteDisk(props);
-                    String requestId = (String) azureClient.getRequestId(deleteDisk);
-                    azureClient.waitUntilComplete(requestId);
+
+        AzureClient azureClient = aDCO.getNewAzureClient(credential);
+        JsonNode actualObj = MAPPER.readValue((String) azureClient.getDisks(), JsonNode.class);
+        List<String> disks = (List<String>) actualObj.get("Disks").findValues("Disk").get(0).findValuesAsText("Name");
+        for (String jsonNode : disks) {
+            if (jsonNode.startsWith(String.format("%s-%s-0", resource.getResourceName(), resource.getResourceName()))) {
+                retries = 0;
+                while (retries < MAX_RETRIES) {
+                    try {
+                        Map<String, String> props = new HashMap<>();
+                        props.put(NAME, jsonNode);
+                        HttpResponseDecorator deleteDisk = (HttpResponseDecorator) azureClient.deleteDisk(props);
+                        String requestId = (String) azureClient.getRequestId(deleteDisk);
+                        azureClient.waitUntilComplete(requestId);
+                        break;
+                    } catch (HttpResponseException ex) {
+                        if (ex.getStatusCode() != NOT_FOUND) {
+                            retries++;
+                            Thread.sleep(MILLIS);
+                        } else {
+                            LOGGER.error(String.format("Azure resource not found with %s name for %s user.", jsonNode, stack.getOwner()));
+                            break;
+                        }
+                    } catch (Exception ex) {
+                        retries++;
+                        Thread.sleep(MILLIS);
+                    }
                 }
             }
-        } catch (HttpResponseException ex) {
-            httpResponseExceptionHandler(ex, resource.getResourceName(), stack.getOwner());
-        } catch (Exception ex) {
-            throw new InternalServerException(ex.getMessage());
         }
         return true;
     }

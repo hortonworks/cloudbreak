@@ -10,6 +10,7 @@
     <suppress checks="ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="test|Dummy|Mock" />
     <suppress checks="ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="UpdateInstancesRequestHandler.java" />
     <suppress checks="ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="StackStatusUpdateHandler.java" />
+    <suppress checks="ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="AzureCloudServiceResourceBuilder.java" />
     <suppress checks="MagicNumberCheck" files="test|Dummy|Mock|simulator" />
     <suppress id="IllegalTypeImpl" files="test" />
     <suppress checks="IllegalCatch" files="test" />

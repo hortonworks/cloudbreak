@@ -56,8 +56,22 @@ EOF
 chmod +x /etc/init.d/update_resolvconf
 update-rc.d update_resolvconf defaults
 
-service docker restart
-sleep 5
+docker-runing() {
+    if docker info &> /dev/null ; then
+        echo UP;
+    else
+        echo DOWN;
+    fi;
+}
+: ${DOCKER_MAX_RETRIES:=60}
+local docker_retries
+docker_retries=0
+while [[ "$(docker-runing)" == "DOWN" ]] && [ $docker_retries -ne $DOCKER_MAX_RETRIES ];
+do
+	service docker restart
+	sleep 8
+	((docker_retries++))
+done
 
 # determines if this instance is the Ambari server or not and sets the tags accordingly
 AMBARI_SERVER=$(echo $METADATA_RESULT | jq "$INSTANCE_SELECTOR" | jq '.[].ambariServer' | sed s/\"//g)

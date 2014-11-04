@@ -244,7 +244,7 @@ public class AmbariClusterConnector {
 
     private void addBlueprint(Stack stack, AmbariClient ambariClient, Blueprint blueprint) {
         try {
-            ambariClient.addBlueprint(blueprint.getBlueprintText(), hadoopConfigurationService.getConfiguration(stack));
+            String json = ambariClient.addBlueprint(blueprint.getBlueprintText(), hadoopConfigurationService.getConfiguration(stack));
             LOGGER.info("Blueprint added [Stack: {}, blueprint: '{}']", stack.getId(), blueprint.getId());
         } catch (HttpResponseException e) {
             if ("Conflict".equals(e.getMessage())) {

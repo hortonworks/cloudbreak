@@ -39,8 +39,22 @@ for (( i=1; i<=VOLUME_COUNT; i++ )); do
   DOCKER_VOLUME_PARAMS="${DOCKER_VOLUME_PARAMS} -v /mnt/fs${i}:/mnt/fs${i}"
 done
 
-service docker restart
-sleep 8
+docker-runing() {
+    if docker info &> /dev/null ; then
+        echo UP;
+    else
+        echo DOWN;
+    fi;
+}
+: ${DOCKER_MAX_RETRIES:=60}
+local docker_retries
+docker_retries=0
+while [[ "$(docker-runing)" == "DOWN" ]] && [ $docker_retries -ne $DOCKER_MAX_RETRIES ];
+do
+	service docker restart
+	sleep 8
+	((docker_retries++))
+done
 
  # determines if this instance is the Ambari server or not and sets the tags accordingly
 AMBARI_SERVER=$(echo $METADATA_RESULT | jq "$INSTANCE_SELECTOR" | jq '.[].ambariServer' | sed s/\"//g)
