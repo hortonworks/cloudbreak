@@ -11,12 +11,12 @@ import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDescribeContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureProvisionContextObject;
-import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureStartStopContextOBject;
+import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureStartStopContextObject;
 
 import groovyx.net.http.HttpResponseException;
 
 public abstract class AzureSimpleNetworkResourceBuilder implements
-        ResourceBuilder<AzureProvisionContextObject, AzureDeleteContextObject, AzureDescribeContextObject, AzureStartStopContextOBject> {
+        ResourceBuilder<AzureProvisionContextObject, AzureDeleteContextObject, AzureDescribeContextObject, AzureStartStopContextObject> {
     protected static final Logger LOGGER = LoggerFactory.getLogger(AzureSimpleInstanceResourceBuilder.class);
     protected static final int NOT_FOUND = 404;
     protected static final String LOCATION = "location";
@@ -44,12 +44,12 @@ public abstract class AzureSimpleNetworkResourceBuilder implements
     }
 
     @Override
-    public Boolean start(AzureStartStopContextOBject aSSCO, Resource resource) {
+    public Boolean start(AzureStartStopContextObject aSSCO, Resource resource) {
         return true;
     }
 
     @Override
-    public Boolean stop(AzureStartStopContextOBject aSSCO, Resource resource) {
+    public Boolean stop(AzureStartStopContextObject aSSCO, Resource resource) {
         return true;
     }
 
