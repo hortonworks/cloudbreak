@@ -4,7 +4,6 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -12,8 +11,7 @@ import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
-import com.sequenceiq.cloudbreak.logger.LoggerResourceType;
+import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
@@ -42,9 +40,7 @@ public class ProvisionCompleteHandler implements Consumer<Event<ProvisionComplet
         CloudPlatform cloudPlatform = stackCreateComplete.getCloudPlatform();
         Long stackId = stackCreateComplete.getStackId();
         Stack stack = stackRepository.findById(stackId);
-        MDC.put(LoggerContextKey.OWNER_ID.toString(), stack.getOwner());
-        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), stack.getId().toString());
-        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.STACK_ID.toString());
+        CbLoggerFactory.buildMdvContext(stack);
         LOGGER.info("Accepted {} event on stack '{}'.", ReactorConfig.PROVISION_COMPLETE_EVENT, stackId);
         Set<Resource> resourcesSet = event.getData().getResources();
         retryingStackUpdater.updateStackResources(stackId, resourcesSet);

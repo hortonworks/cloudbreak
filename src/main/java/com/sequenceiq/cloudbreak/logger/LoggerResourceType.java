@@ -2,11 +2,11 @@ package com.sequenceiq.cloudbreak.logger;
 
 public enum LoggerResourceType {
 
-    STACK_ID("stackId"),
-    CLUSTER_ID("clusterId"),
-    TEMPLATE_ID("templateId"),
-    BLUEPRINT_ID("blueprintId"),
-    CREDENTIAL_ID("credentialId"),
+    STACK("stack"),
+    CLUSTER("cluster"),
+    TEMPLATE("template"),
+    BLUEPRINT("blueprint"),
+    CREDENTIAL("credential"),
     CLOUDBREAK("cloudbreak");
 
     private final String value;

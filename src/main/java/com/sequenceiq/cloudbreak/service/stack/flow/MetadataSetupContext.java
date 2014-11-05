@@ -5,7 +5,6 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,8 +12,7 @@ import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
-import com.sequenceiq.cloudbreak.logger.LoggerResourceType;
+import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.StackOperationFailure;
@@ -38,9 +36,7 @@ public class MetadataSetupContext {
 
     public void setupMetadata(CloudPlatform cloudPlatform, Long stackId) {
         Stack stack = stackRepository.findOneWithLists(stackId);
-        MDC.put(LoggerContextKey.OWNER_ID.toString(), stack.getOwner());
-        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), stack.getId().toString());
-        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.STACK_ID.toString());
+        CbLoggerFactory.buildMdvContext(stack);
         try {
             MetadataSetup metadataSetup = metadataSetups.get(cloudPlatform);
             metadataSetup.setupMetadata(stack);
@@ -54,9 +50,7 @@ public class MetadataSetupContext {
 
     public void updateMetadata(CloudPlatform cloudPlatform, Long stackId, Set<Resource> resourceSet) {
         Stack stack = stackRepository.findOneWithLists(stackId);
-        MDC.put(LoggerContextKey.OWNER_ID.toString(), stack.getOwner());
-        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), stack.getId().toString());
-        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.STACK_ID.toString());
+        CbLoggerFactory.buildMdvContext(stack);
         try {
             metadataSetups.get(cloudPlatform).addNewNodesToMetadata(stack, resourceSet);
         } catch (Exception e) {

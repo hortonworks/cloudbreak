@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.cluster.handler;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,8 +10,7 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.StatusRequest;
-import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
-import com.sequenceiq.cloudbreak.logger.LoggerResourceType;
+import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -51,9 +49,7 @@ public class ClusterStatusUpdateHandler implements Consumer<Event<ClusterStatusU
         long stackId = statusUpdateRequest.getStackId();
         Stack stack = stackRepository.findOneWithLists(stackId);
         Cluster cluster = stack.getCluster();
-        MDC.put(LoggerContextKey.OWNER_ID.toString(), cluster.getOwner());
-        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), cluster.getId().toString());
-        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.CLUSTER_ID.toString());
+        CbLoggerFactory.buildMdvContext(cluster);
         if (StatusRequest.STOPPED.equals(statusRequest)) {
             ambariClusterConnector.stopCluster(stack);
             cluster.setStatus(Status.STOPPED);

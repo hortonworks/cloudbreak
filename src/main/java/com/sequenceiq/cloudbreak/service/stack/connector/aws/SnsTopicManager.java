@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -20,8 +19,7 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.SnsRequest;
 import com.sequenceiq.cloudbreak.domain.SnsTopic;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
-import com.sequenceiq.cloudbreak.logger.LoggerResourceType;
+import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
 import com.sequenceiq.cloudbreak.repository.SnsTopicRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.credential.aws.CrossAccountCredentialsProvider;
@@ -61,9 +59,7 @@ public class SnsTopicManager {
     private Reactor reactor;
 
     public void createTopicAndSubscribe(AwsCredential awsCredential, Regions region) {
-        MDC.put(LoggerContextKey.OWNER_ID.toString(), awsCredential.getOwner());
-        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), awsCredential.getId().toString());
-        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.CREDENTIAL_ID.toString());
+        CbLoggerFactory.buildMdvContext(awsCredential);
         AmazonSNSClient amazonSNSClient = awsStackUtil.createSnsClient(region, awsCredential);
         LOGGER.info("Amazon SNS client successfully created.");
 
@@ -102,9 +98,7 @@ public class SnsTopicManager {
 
     private void notifyRequestedStacks(SnsTopic snsTopic) {
         AwsCredential awsCredential = snsTopic.getCredential();
-        MDC.put(LoggerContextKey.OWNER_ID.toString(), awsCredential.getOwner());
-        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), awsCredential.getId().toString());
-        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.CREDENTIAL_ID.toString());
+        CbLoggerFactory.buildMdvContext(awsCredential);
         List<Stack> requestedStacks = stackRepository.findRequestedStacksWithCredential(awsCredential.getId());
         for (Stack stack : requestedStacks) {
             LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT, stack.getId());

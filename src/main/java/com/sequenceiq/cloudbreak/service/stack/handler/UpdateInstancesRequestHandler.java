@@ -11,7 +11,6 @@ import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.stereotype.Component;
@@ -23,8 +22,7 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
-import com.sequenceiq.cloudbreak.logger.LoggerResourceType;
+import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.AddInstancesFailedException;
@@ -83,9 +81,7 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
         Long stackId = request.getStackId();
         Integer scalingAdjustment = request.getScalingAdjustment();
         final Stack stack = stackRepository.findOneWithLists(stackId);
-        MDC.put(LoggerContextKey.OWNER_ID.toString(), stack.getOwner());
-        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), stack.getId().toString());
-        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.STACK_ID.toString());
+        CbLoggerFactory.buildMdvContext(stack);
         try {
             LOGGER.info("Accepted {} event on stack: '{}'", ReactorConfig.UPDATE_INSTANCES_REQUEST_EVENT, stackId);
             stackUpdater.updateMetadataReady(stackId, false);
@@ -196,9 +192,7 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
     }
 
     private void notifyUpdateFailed(Stack stack, String detailedMessage) {
-        MDC.put(LoggerContextKey.OWNER_ID.toString(), stack.getOwner());
-        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), stack.getId().toString());
-        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.STACK_ID.toString());
+        CbLoggerFactory.buildMdvContext(stack);
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_UPDATE_FAILED_EVENT, stack.getId());
         reactor.notify(ReactorConfig.STACK_UPDATE_FAILED_EVENT, Event.wrap(new StackOperationFailure(stack.getId(), detailedMessage)));
     }

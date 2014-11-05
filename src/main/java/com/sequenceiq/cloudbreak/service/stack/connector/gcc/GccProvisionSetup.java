@@ -9,7 +9,6 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -26,8 +25,7 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.domain.GccTemplate;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
-import com.sequenceiq.cloudbreak.logger.LoggerResourceType;
+import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccImageType;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
@@ -53,9 +51,7 @@ public class GccProvisionSetup implements ProvisionSetup {
 
     @Override
     public void setupProvisioning(Stack stack) {
-        MDC.put(LoggerContextKey.OWNER_ID.toString(), stack.getOwner());
-        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), stack.getId().toString());
-        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.STACK_ID.toString());
+        CbLoggerFactory.buildMdvContext(stack);
         try {
             Storage storage = gccStackUtil.buildStorage((GccCredential) stack.getCredential(), stack);
             Compute compute = gccStackUtil.buildCompute((GccCredential) stack.getCredential(), stack.getName());
@@ -72,7 +68,7 @@ public class GccProvisionSetup implements ProvisionSetup {
                     ins.execute();
                 } catch (GoogleJsonResponseException ex) {
                     if (ex.getStatusCode() != CONFLICT) {
-                        throw  ex;
+                        throw ex;
                     }
                 }
                 Storage.Objects.Copy copy = storage.objects().copy(BUCKET_NAME, TAR_NAME, credential.getProjectId() + time, TAR_NAME,
@@ -122,7 +118,8 @@ public class GccProvisionSetup implements ProvisionSetup {
     public Map<String, Object> getSetupProperties(Stack stack) {
         Map<String, Object> properties = new HashMap<>();
         properties.put(CREDENTIAL, stack.getCredential());
-        return properties;    }
+        return properties;
+    }
 
     @Override
     public Map<String, String> getUserDataProperties(Stack stack) {

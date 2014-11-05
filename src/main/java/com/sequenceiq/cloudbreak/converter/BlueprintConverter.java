@@ -10,7 +10,6 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,8 +24,7 @@ import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.BlueprintJson;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
-import com.sequenceiq.cloudbreak.logger.LoggerResourceType;
+import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
 
 @Component
 public class BlueprintConverter extends AbstractConverter<BlueprintJson, Blueprint> {
@@ -38,9 +36,7 @@ public class BlueprintConverter extends AbstractConverter<BlueprintJson, Bluepri
 
     @Override
     public BlueprintJson convert(Blueprint entity) {
-        MDC.put(LoggerContextKey.OWNER_ID.toString(), entity.getOwner());
-        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), entity.getId().toString());
-        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.BLUEPRINT_ID.toString());
+        CbLoggerFactory.buildMdvContext(entity);
         BlueprintJson blueprintJson = new BlueprintJson();
         blueprintJson.setId(String.valueOf(entity.getId()));
         blueprintJson.setBlueprintName(entity.getBlueprintName());

@@ -2,15 +2,13 @@ package com.sequenceiq.cloudbreak.service.stack.handler;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
-import com.sequenceiq.cloudbreak.logger.LoggerResourceType;
+import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
 import com.sequenceiq.cloudbreak.service.stack.flow.ProvisionSetupContext;
@@ -35,9 +33,7 @@ public class ProvisionRequestHandler implements Consumer<Event<ProvisionRequest>
         CloudPlatform cloudPlatform = provisionRequest.getCloudPlatform();
         Long stackId = provisionRequest.getStackId();
         Stack stack = stackRepository.findById(stackId);
-        MDC.put(LoggerContextKey.OWNER_ID.toString(), stack.getOwner());
-        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), stack.getId().toString());
-        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.STACK_ID.toString());
+        CbLoggerFactory.buildMdvContext(stack);
         LOGGER.info("Accepted {} event.", ReactorConfig.PROVISION_REQUEST_EVENT, stackId);
         provisionSetupContext.setupProvisioning(cloudPlatform, stackId);
     }

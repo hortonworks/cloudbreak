@@ -7,7 +7,6 @@ import javax.mail.internet.MimeMessage;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -19,9 +18,7 @@ import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.CbUser;
-import com.sequenceiq.cloudbreak.logger.ApplicationOwner;
-import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
-import com.sequenceiq.cloudbreak.logger.LoggerResourceType;
+import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 import com.sequenceiq.cloudbreak.service.user.UserFilterField;
 
@@ -84,18 +81,14 @@ public class AmbariClusterInstallerMailSenderService {
     }
 
     private void sendInstallationEmail(final MimeMessagePreparator preparator) {
-        MDC.put(LoggerContextKey.OWNER_ID.toString(), ApplicationOwner.CLOUDBREAK.toString());
-        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), "cloudbreak");
-        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.CLOUDBREAK.toString());
+        CbLoggerFactory.buildMdvContext();
         LOGGER.info("Sending cluster installation email ...");
         ((JavaMailSender) mailSender).send(preparator);
         LOGGER.info("Cluster installation email sent");
     }
 
     private String getEmailBody(String name, String status, String server, String template) {
-        MDC.put(LoggerContextKey.OWNER_ID.toString(), ApplicationOwner.CLOUDBREAK.toString());
-        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), "cloudbreak");
-        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.CLOUDBREAK.toString());
+        CbLoggerFactory.buildMdvContext();
         String text = null;
         try {
             Map<String, Object> model = new HashMap<>();

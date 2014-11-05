@@ -6,7 +6,6 @@ import javax.persistence.OptimisticLockException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Component;
@@ -17,8 +16,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
-import com.sequenceiq.cloudbreak.logger.LoggerResourceType;
+import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 
 @Component
@@ -40,9 +38,7 @@ public class RetryingStackUpdater {
 
     public Stack updateStackStatus(Long stackId, Status status, String statusReason) {
         Stack stack = stackRepository.findById(stackId);
-        MDC.put(LoggerContextKey.OWNER_ID.toString(), stack.getOwner());
-        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), stack.getId().toString());
-        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.STACK_ID.toString());
+        CbLoggerFactory.buildMdvContext(stack);
         int attempt = 1;
         try {
             return doUpdateStackStatus(stackId, status, statusReason);
@@ -59,9 +55,7 @@ public class RetryingStackUpdater {
 
     public Stack updateStackStatusReason(Long stackId, String statusReason) {
         Stack stack = stackRepository.findById(stackId);
-        MDC.put(LoggerContextKey.OWNER_ID.toString(), stack.getOwner());
-        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), stack.getId().toString());
-        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.STACK_ID.toString());
+        CbLoggerFactory.buildMdvContext(stack);
         int attempt = 1;
         try {
             return doUpdateStackStatusReason(stackId, statusReason);
@@ -78,9 +72,7 @@ public class RetryingStackUpdater {
 
     public Stack updateStackMetaData(Long stackId, Set<InstanceMetaData> instanceMetaData) {
         Stack stack = stackRepository.findById(stackId);
-        MDC.put(LoggerContextKey.OWNER_ID.toString(), stack.getOwner());
-        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), stack.getId().toString());
-        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.STACK_ID.toString());
+        CbLoggerFactory.buildMdvContext(stack);
         int attempt = 1;
         try {
             return doUpdateMetaData(stackId, instanceMetaData);
@@ -97,9 +89,7 @@ public class RetryingStackUpdater {
 
     public Stack updateStackResources(Long stackId, Set<Resource> resources) {
         Stack stack = stackRepository.findById(stackId);
-        MDC.put(LoggerContextKey.OWNER_ID.toString(), stack.getOwner());
-        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), stack.getId().toString());
-        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.STACK_ID.toString());
+        CbLoggerFactory.buildMdvContext(stack);
         int attempt = 1;
         try {
             return doUpdateResources(stackId, resources);
@@ -116,9 +106,7 @@ public class RetryingStackUpdater {
 
     public Stack updateAmbariIp(Long stackId, String ambariIp) {
         Stack stack = stackRepository.findById(stackId);
-        MDC.put(LoggerContextKey.OWNER_ID.toString(), stack.getOwner());
-        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), stack.getId().toString());
-        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.STACK_ID.toString());
+        CbLoggerFactory.buildMdvContext(stack);
         int attempt = 1;
         try {
             return doUpdateAmbariIp(stackId, ambariIp);
@@ -135,9 +123,7 @@ public class RetryingStackUpdater {
 
     public Stack updateStackCluster(Long stackId, Cluster cluster) {
         Stack stack = stackRepository.findById(stackId);
-        MDC.put(LoggerContextKey.OWNER_ID.toString(), stack.getOwner());
-        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), stack.getId().toString());
-        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.STACK_ID.toString());
+        CbLoggerFactory.buildMdvContext(stack);
         int attempt = 1;
         try {
             return doUpdateStackCluster(stackId, cluster);
@@ -154,9 +140,7 @@ public class RetryingStackUpdater {
 
     public Stack updateStackCreateComplete(Long stackId) {
         Stack stack = stackRepository.findById(stackId);
-        MDC.put(LoggerContextKey.OWNER_ID.toString(), stack.getOwner());
-        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), stack.getId().toString());
-        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.STACK_ID.toString());
+        CbLoggerFactory.buildMdvContext(stack);
         int attempt = 1;
         try {
             return doUpdateStackCreateComplete(stackId);
@@ -174,9 +158,7 @@ public class RetryingStackUpdater {
 
     public Stack updateMetadataReady(Long stackId, boolean ready) {
         Stack stack = stackRepository.findById(stackId);
-        MDC.put(LoggerContextKey.OWNER_ID.toString(), stack.getOwner());
-        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), stack.getId().toString());
-        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.STACK_ID.toString());
+        CbLoggerFactory.buildMdvContext(stack);
         int attempt = 1;
         try {
             return doUpdateMetadataReady(stackId, ready);
@@ -194,9 +176,7 @@ public class RetryingStackUpdater {
 
     public Stack updateNodeCount(Long stackId, Integer nodeCount) {
         Stack stack = stackRepository.findById(stackId);
-        MDC.put(LoggerContextKey.OWNER_ID.toString(), stack.getOwner());
-        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), stack.getId().toString());
-        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.STACK_ID.toString());
+        CbLoggerFactory.buildMdvContext(stack);
         int attempt = 1;
         try {
             return doUpdateNodeCount(stackId, nodeCount);
@@ -214,9 +194,7 @@ public class RetryingStackUpdater {
 
     private Stack doUpdateStackStatus(Long stackId, Status status, String statusReason) {
         Stack stack = stackRepository.findById(stackId);
-        MDC.put(LoggerContextKey.OWNER_ID.toString(), stack.getOwner());
-        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), stack.getId().toString());
-        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.STACK_ID.toString());
+        CbLoggerFactory.buildMdvContext(stack);
         if (status != null) {
             stack.setStatus(status);
         }
@@ -232,9 +210,7 @@ public class RetryingStackUpdater {
 
     private Stack doUpdateStackStatusReason(Long stackId, String statusReason) {
         Stack stack = stackRepository.findById(stackId);
-        MDC.put(LoggerContextKey.OWNER_ID.toString(), stack.getOwner());
-        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), stack.getId().toString());
-        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.STACK_ID.toString());
+        CbLoggerFactory.buildMdvContext(stack);
         if (statusReason != null) {
             stack.setStatusReason(statusReason);
         }
@@ -245,9 +221,7 @@ public class RetryingStackUpdater {
 
     private Stack doUpdateMetaData(Long stackId, Set<InstanceMetaData> instanceMetaData) {
         Stack stack = stackRepository.findById(stackId);
-        MDC.put(LoggerContextKey.OWNER_ID.toString(), stack.getOwner());
-        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), stack.getId().toString());
-        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.STACK_ID.toString());
+        CbLoggerFactory.buildMdvContext(stack);
         stack.setInstanceMetaData(instanceMetaData);
         stack = stackRepository.save(stack);
         LOGGER.info("Updated stack metadata: [stack: '{}'].", stackId);
@@ -256,9 +230,7 @@ public class RetryingStackUpdater {
 
     private Stack doUpdateAmbariIp(Long stackId, String ambariIp) {
         Stack stack = stackRepository.findById(stackId);
-        MDC.put(LoggerContextKey.OWNER_ID.toString(), stack.getOwner());
-        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), stack.getId().toString());
-        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.STACK_ID.toString());
+        CbLoggerFactory.buildMdvContext(stack);
         stack.setAmbariIp(ambariIp);
         stack = stackRepository.save(stack);
         LOGGER.info("Updated stack: [stack: '{}' ambariIp: '{}'].", stackId, ambariIp);
@@ -267,9 +239,7 @@ public class RetryingStackUpdater {
 
     private Stack doUpdateNodeCount(Long stackId, Integer nodeCount) {
         Stack stack = stackRepository.findById(stackId);
-        MDC.put(LoggerContextKey.OWNER_ID.toString(), stack.getOwner());
-        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), stack.getId().toString());
-        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.STACK_ID.toString());
+        CbLoggerFactory.buildMdvContext(stack);
         stack.setNodeCount(nodeCount);
         stack = stackRepository.save(stack);
         LOGGER.info("Updated stack: [stack: '{}' nodeCount: '{}'].", stackId, nodeCount);
@@ -278,9 +248,7 @@ public class RetryingStackUpdater {
 
     private Stack doUpdateStackCluster(Long stackId, Cluster cluster) {
         Stack stack = stackRepository.findById(stackId);
-        MDC.put(LoggerContextKey.OWNER_ID.toString(), stack.getOwner());
-        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), stack.getId().toString());
-        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.STACK_ID.toString());
+        CbLoggerFactory.buildMdvContext(stack);
         stack.setCluster(cluster);
         stack = stackRepository.save(stack);
         LOGGER.info("Saved cluster '{}' for stack '{}'.", cluster.getId(), stackId);
@@ -289,9 +257,7 @@ public class RetryingStackUpdater {
 
     private Stack doUpdateStackCreateComplete(Long stackId) {
         Stack stack = stackRepository.findById(stackId);
-        MDC.put(LoggerContextKey.OWNER_ID.toString(), stack.getOwner());
-        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), stack.getId().toString());
-        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.STACK_ID.toString());
+        CbLoggerFactory.buildMdvContext(stack);
         stack.setStackCompleted(true);
         stack = stackRepository.save(stack);
         LOGGER.info("Updated stack: [stack: '{}' cfStackCompleted: 'true'].", stackId);
@@ -300,9 +266,7 @@ public class RetryingStackUpdater {
 
     private Stack doUpdateMetadataReady(Long stackId, boolean ready) {
         Stack stack = stackRepository.findById(stackId);
-        MDC.put(LoggerContextKey.OWNER_ID.toString(), stack.getOwner());
-        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), stack.getId().toString());
-        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.STACK_ID.toString());
+        CbLoggerFactory.buildMdvContext(stack);
         stack.setMetadataReady(ready);
         stack = stackRepository.save(stack);
         LOGGER.info("Updated stack: [stack: '{}' metadataReady: 'true'].", stackId);
@@ -311,9 +275,7 @@ public class RetryingStackUpdater {
 
     private Stack doUpdateResources(Long stackId, Set<Resource> resources) {
         Stack stack = stackRepository.findById(stackId);
-        MDC.put(LoggerContextKey.OWNER_ID.toString(), stack.getOwner());
-        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), stack.getId().toString());
-        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.STACK_ID.toString());
+        CbLoggerFactory.buildMdvContext(stack);
         stack.setResources(resources);
         stack = stackRepository.save(stack);
         LOGGER.info("Updated stack resources: [stack: '{}', status: '{}', statusReason: '{}'].", stackId);

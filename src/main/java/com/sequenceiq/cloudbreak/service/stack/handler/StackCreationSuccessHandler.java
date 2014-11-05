@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.stack.handler;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,8 +9,7 @@ import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
-import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
-import com.sequenceiq.cloudbreak.logger.LoggerResourceType;
+import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.stack.event.StackCreationSuccess;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
@@ -41,9 +39,7 @@ public class StackCreationSuccessHandler implements Consumer<Event<StackCreation
         Long stackId = stackCreationSuccess.getStackId();
         String ambariIp = stackCreationSuccess.getAmbariIp();
         Stack stack = stackUpdater.updateAmbariIp(stackId, ambariIp);
-        MDC.put(LoggerContextKey.OWNER_ID.toString(), stack.getOwner());
-        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), stack.getId().toString());
-        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.STACK_ID.toString());
+        CbLoggerFactory.buildMdvContext(stack);
         LOGGER.info("Accepted {} event.", ReactorConfig.STACK_CREATE_SUCCESS_EVENT, stackId);
         stack = stackUpdater.updateStackStatus(stackId, Status.AVAILABLE);
         websocketService.sendToTopicUser(stack.getOwner(), WebsocketEndPoint.STACK,

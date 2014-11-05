@@ -6,7 +6,6 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -17,8 +16,7 @@ import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CbUserRole;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Template;
-import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
-import com.sequenceiq.cloudbreak.logger.LoggerResourceType;
+import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
@@ -55,6 +53,7 @@ public class SimpleTemplateService implements TemplateService {
     @Override
     public Template get(Long id) {
         Template template = templateRepository.findOne(id);
+        CbLoggerFactory.buildMdvContext(template);
         if (template == null) {
             throw new NotFoundException(String.format(TEMPLATE_NOT_FOUND_MSG, id));
         } else {
@@ -64,9 +63,7 @@ public class SimpleTemplateService implements TemplateService {
 
     @Override
     public Template create(CbUser user, Template template) {
-        MDC.put(LoggerContextKey.OWNER_ID.toString(), template.getOwner());
-        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), template.getId().toString());
-        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.TEMPLATE_ID.toString());
+        CbLoggerFactory.buildMdvContext(template);
         LOGGER.debug("Creating template: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         Template savedTemplate = null;
         template.setOwner(user.getUserId());
@@ -82,9 +79,7 @@ public class SimpleTemplateService implements TemplateService {
     @Override
     public void delete(Long templateId) {
         Template template = templateRepository.findOne(templateId);
-        MDC.put(LoggerContextKey.OWNER_ID.toString(), template.getOwner());
-        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), template.getId().toString());
-        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.TEMPLATE_ID.toString());
+        CbLoggerFactory.buildMdvContext(template);
         LOGGER.debug("Deleting template : [{}]", templateId);
         if (template == null) {
             throw new NotFoundException(String.format(TEMPLATE_NOT_FOUND_MSG, templateId));

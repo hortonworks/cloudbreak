@@ -4,7 +4,6 @@ import java.util.Random;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -13,8 +12,7 @@ import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.ImportKeyPairRequest;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
-import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
-import com.sequenceiq.cloudbreak.logger.LoggerResourceType;
+import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
 import com.sequenceiq.cloudbreak.service.credential.RsaPublicKeyValidator;
 import com.sequenceiq.cloudbreak.service.stack.connector.aws.AwsStackUtil;
 
@@ -43,9 +41,7 @@ public class AwsCredentialInitializer {
     }
 
     private AwsCredential importKeyPairs(AwsCredential awsCredential) {
-        MDC.put(LoggerContextKey.OWNER_ID.toString(), awsCredential.getOwner());
-        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), awsCredential.getId().toString());
-        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.CREDENTIAL_ID.toString());
+        CbLoggerFactory.buildMdvContext(awsCredential);
         try {
             Random rnd = new Random();
             String keyPairName = CLOUDBREAK_KEY_NAME + "-" + rnd.nextInt(SUFFIX_RND);
@@ -67,9 +63,7 @@ public class AwsCredentialInitializer {
     }
 
     private void validateIamRole(AwsCredential awsCredential) {
-        MDC.put(LoggerContextKey.OWNER_ID.toString(), awsCredential.getOwner());
-        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), awsCredential.getId().toString());
-        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.CREDENTIAL_ID.toString());
+        CbLoggerFactory.buildMdvContext(awsCredential);
         try {
             crossAccountCredentialsProvider.retrieveSessionCredentials(CrossAccountCredentialsProvider.DEFAULT_SESSION_CREDENTIALS_DURATION,
                     CrossAccountCredentialsProvider.DEFAULT_EXTERNAL_ID, awsCredential);

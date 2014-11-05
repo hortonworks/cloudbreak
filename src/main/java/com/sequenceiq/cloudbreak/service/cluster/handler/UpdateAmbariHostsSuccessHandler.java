@@ -4,7 +4,6 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,8 +13,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
-import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
-import com.sequenceiq.cloudbreak.logger.LoggerResourceType;
+import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
@@ -52,9 +50,7 @@ public class UpdateAmbariHostsSuccessHandler implements Consumer<Event<UpdateAmb
         UpdateAmbariHostsSuccess data = event.getData();
         Cluster cluster = clusterRepository.findById(data.getClusterId());
         Set<String> hostNames = data.getHostNames();
-        MDC.put(LoggerContextKey.OWNER_ID.toString(), cluster.getOwner());
-        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), cluster.getId().toString());
-        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.CLUSTER_ID.toString());
+        CbLoggerFactory.buildMdvContext(cluster);
         LOGGER.info("Accepted {} event.", ReactorConfig.UPDATE_AMBARI_HOSTS_SUCCESS_EVENT);
         Stack stack = stackRepository.findStackWithListsForCluster(data.getClusterId());
         for (String hostName : hostNames) {
