@@ -41,9 +41,9 @@ public class AmbariRoleAllocator {
     private GccStackUtil gccStackUtil;
 
     public void allocateRoles(Long stackId, Set<CoreInstanceMetaData> coreInstanceMetaData) {
-        Stack stack = stackRepository.findById(stackId);
-        CbLoggerFactory.buildMdcContext(stack);
         try {
+            Stack stack = stackRepository.findById(stackId);
+            CbLoggerFactory.buildMdcContext(stack);
             if (!stack.isMetadataReady()) {
                 if (coreInstanceMetaData.size() != stack.getNodeCount()) {
                     throw new WrongMetadataException(String.format(
@@ -60,10 +60,10 @@ public class AmbariRoleAllocator {
             }
         } catch (WrongMetadataException e) {
             LOGGER.error(e.getMessage(), e);
-            notifyStackCreateFailed(stack, e.getMessage());
+            notifyStackCreateFailed(stackId, e.getMessage());
         } catch (Exception e) {
             LOGGER.error("Unhandled exception occured while creating stack.", e);
-            notifyStackCreateFailed(stack, "Unhandled exception occured while creating stack.");
+            notifyStackCreateFailed(stackId, "Unhandled exception occured while creating stack.");
         }
     }
 
@@ -136,10 +136,10 @@ public class AmbariRoleAllocator {
         return instanceMetaData;
     }
 
-    private void notifyStackCreateFailed(Stack stack, String cause) {
-        CbLoggerFactory.buildMdcContext(stack);
-        LOGGER.info("Publishing {} event ", ReactorConfig.STACK_CREATE_FAILED_EVENT, stack.getId());
-        StackOperationFailure stackCreationFailure = new StackOperationFailure(stack.getId(), cause);
+    private void notifyStackCreateFailed(Long stackId, String cause) {
+        CbLoggerFactory.buildMdcContext();
+        LOGGER.info("Publishing {} event ", ReactorConfig.STACK_CREATE_FAILED_EVENT, stackId);
+        StackOperationFailure stackCreationFailure = new StackOperationFailure(stackId, cause);
         reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(stackCreationFailure));
     }
 

@@ -17,7 +17,9 @@ public class StackLoggerFactory {
             MDC.put(LoggerContextKey.OWNER_ID.toString(), stack.getOwner());
         }
         MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.STACK.toString());
-        MDC.put(LoggerContextKey.RESOURCE_NAME.toString(), stack.getName());
+        if (stack.getName() != null) {
+            MDC.put(LoggerContextKey.RESOURCE_NAME.toString(), stack.getName());
+        }
         if (stack.getId() == null) {
             MDC.put(LoggerContextKey.RESOURCE_ID.toString(), "undefined");
         } else {

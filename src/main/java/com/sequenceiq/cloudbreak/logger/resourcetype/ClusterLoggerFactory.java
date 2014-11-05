@@ -17,7 +17,9 @@ public class ClusterLoggerFactory {
             MDC.put(LoggerContextKey.OWNER_ID.toString(), cluster.getOwner());
         }
         MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.CLUSTER.toString());
-        MDC.put(LoggerContextKey.RESOURCE_NAME.toString(), cluster.getName());
+        if (cluster.getName() != null) {
+            MDC.put(LoggerContextKey.RESOURCE_NAME.toString(), cluster.getName());
+        }
         if (cluster.getId() == null) {
             MDC.put(LoggerContextKey.RESOURCE_ID.toString(), "undefined");
         } else {

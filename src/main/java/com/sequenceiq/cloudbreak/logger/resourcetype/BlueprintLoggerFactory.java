@@ -17,7 +17,9 @@ public class BlueprintLoggerFactory {
             MDC.put(LoggerContextKey.OWNER_ID.toString(), blueprint.getOwner());
         }
         MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.BLUEPRINT.toString());
-        MDC.put(LoggerContextKey.RESOURCE_NAME.toString(), blueprint.getName());
+        if (blueprint.getName() != null) {
+            MDC.put(LoggerContextKey.RESOURCE_NAME.toString(), blueprint.getName());
+        }
         if (blueprint.getId() == null) {
             MDC.put(LoggerContextKey.RESOURCE_ID.toString(), "undefined");
         } else {

@@ -17,7 +17,9 @@ public class CredentialLoggerFactory {
             MDC.put(LoggerContextKey.OWNER_ID.toString(), credential.getOwner());
         }
         MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.CREDENTIAL.toString());
-        MDC.put(LoggerContextKey.RESOURCE_NAME.toString(), credential.getName());
+        if (credential.getName() != null) {
+            MDC.put(LoggerContextKey.RESOURCE_NAME.toString(), credential.getName());
+        }
         if (credential.getId() == null) {
             MDC.put(LoggerContextKey.RESOURCE_ID.toString(), "undefined");
         } else {

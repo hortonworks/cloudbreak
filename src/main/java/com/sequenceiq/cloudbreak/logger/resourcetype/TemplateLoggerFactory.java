@@ -17,7 +17,9 @@ public class TemplateLoggerFactory {
             MDC.put(LoggerContextKey.OWNER_ID.toString(), template.getOwner());
         }
         MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.TEMPLATE.toString());
-        MDC.put(LoggerContextKey.RESOURCE_NAME.toString(), template.getName());
+        if (template.getName() != null) {
+            MDC.put(LoggerContextKey.RESOURCE_NAME.toString(), template.getName());
+        }
         if (template.getId() == null) {
             MDC.put(LoggerContextKey.RESOURCE_ID.toString(), "undefined");
         } else {

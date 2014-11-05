@@ -12,7 +12,9 @@ public class AutoScalingGroupReady {
     private Integer requiredInstances;
     private Stack stack;
 
-    public AutoScalingGroupReady(Stack stack, AmazonEC2Client amazonEC2Client, AmazonAutoScalingClient amazonASClient, String asGroupName, Integer requiredInstances) {
+    public AutoScalingGroupReady(Stack stack, AmazonEC2Client amazonEC2Client, AmazonAutoScalingClient amazonASClient,
+            String asGroupName, Integer requiredInstances) {
+        this.stack = stack;
         this.amazonEC2Client = amazonEC2Client;
         this.amazonASClient = amazonASClient;
         this.autoScalingGroupName = asGroupName;
