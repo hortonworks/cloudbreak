@@ -48,7 +48,7 @@ public class DefaultBlueprintLoaderService {
                 bp.setOwner(user.getUserId());
                 blueprints.add(bp);
             } catch (IOException e) {
-                LOGGER.error(blueprintName + " blueprint is not available.", e);
+                LOGGER.error(blueprintName + " blueprint is not available for '{}' user.", e, user);
             }
         }
         return blueprints;

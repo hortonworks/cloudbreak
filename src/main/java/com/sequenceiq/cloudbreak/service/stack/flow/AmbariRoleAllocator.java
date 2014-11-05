@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccStackUtil;
@@ -23,8 +24,6 @@ import reactor.event.Event;
 
 @Service
 public class AmbariRoleAllocator {
-
-    private static final String DOCKER_SUBNET_PREFIX = "172.17.%s.0";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariRoleAllocator.class);
     private static final int LAST = 3;
@@ -42,8 +41,9 @@ public class AmbariRoleAllocator {
     private GccStackUtil gccStackUtil;
 
     public void allocateRoles(Long stackId, Set<CoreInstanceMetaData> coreInstanceMetaData) {
+        Stack stack = stackRepository.findById(stackId);
+        CbLoggerFactory.buildMdcContext(stack);
         try {
-            Stack stack = stackRepository.findById(stackId);
             if (!stack.isMetadataReady()) {
                 if (coreInstanceMetaData.size() != stack.getNodeCount()) {
                     throw new WrongMetadataException(String.format(
@@ -52,24 +52,25 @@ public class AmbariRoleAllocator {
                 Set<InstanceMetaData> instanceMetaData = prepareInstanceMetaData(stack, coreInstanceMetaData);
                 stackUpdater.updateStackMetaData(stackId, instanceMetaData);
                 stackUpdater.updateMetadataReady(stackId, true);
-                LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.AMBARI_ROLE_ALLOCATION_COMPLETE_EVENT, stackId);
-                reactor.notify(ReactorConfig.AMBARI_ROLE_ALLOCATION_COMPLETE_EVENT, Event.wrap(new AmbariRoleAllocationComplete(stackId,
+                LOGGER.info("Publishing {} event", ReactorConfig.AMBARI_ROLE_ALLOCATION_COMPLETE_EVENT);
+                reactor.notify(ReactorConfig.AMBARI_ROLE_ALLOCATION_COMPLETE_EVENT, Event.wrap(new AmbariRoleAllocationComplete(stack,
                         getAmbariIp(instanceMetaData))));
             } else {
-                LOGGER.info("Metadata of stack '{}' is already created, ignoring '{}' event.", stackId, ReactorConfig.METADATA_SETUP_COMPLETE_EVENT);
+                LOGGER.info("Metadata is already created, ignoring '{}' event.", ReactorConfig.METADATA_SETUP_COMPLETE_EVENT);
             }
         } catch (WrongMetadataException e) {
             LOGGER.error(e.getMessage(), e);
-            notifyStackCreateFailed(stackId, e.getMessage());
+            notifyStackCreateFailed(stack, e.getMessage());
         } catch (Exception e) {
             LOGGER.error("Unhandled exception occured while creating stack.", e);
-            notifyStackCreateFailed(stackId, "Unhandled exception occured while creating stack.");
+            notifyStackCreateFailed(stack, "Unhandled exception occured while creating stack.");
         }
     }
 
     public void updateInstanceMetadata(Long stackId, Set<CoreInstanceMetaData> coreInstanceMetaData) {
+        Stack stack = stackRepository.findOneWithLists(stackId);
+        CbLoggerFactory.buildMdcContext(stack);
         try {
-            Stack stack = stackRepository.findOneWithLists(stackId);
             Set<InstanceMetaData> originalMetadata = stack.getInstanceMetaData();
             Set<InstanceMetaData> instanceMetaData = prepareInstanceMetaData(stack, coreInstanceMetaData, stack.getInstanceMetaData().size() + 1);
             originalMetadata.addAll(instanceMetaData);
@@ -79,12 +80,12 @@ public class AmbariRoleAllocator {
             for (InstanceMetaData metadataEntry : instanceMetaData) {
                 instanceIds.add(metadataEntry.getInstanceId());
             }
-            LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, stackId);
+            LOGGER.info("Publishing {} event.", ReactorConfig.STACK_UPDATE_SUCCESS_EVENT);
             reactor.notify(ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, Event.wrap(new StackUpdateSuccess(stackId, false, instanceIds)));
         } catch (Exception e) {
             String errMessage = "Unhandled exception occurred while updating stack metadata.";
             LOGGER.error(errMessage, e);
-            LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_UPDATE_FAILED_EVENT, stackId);
+            LOGGER.info("Publishing {} event.", ReactorConfig.STACK_UPDATE_FAILED_EVENT);
             reactor.notify(ReactorConfig.STACK_UPDATE_FAILED_EVENT, Event.wrap(new StackOperationFailure(stackId, errMessage)));
         }
     }
@@ -135,9 +136,10 @@ public class AmbariRoleAllocator {
         return instanceMetaData;
     }
 
-    private void notifyStackCreateFailed(Long stackId, String cause) {
-        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_CREATE_FAILED_EVENT, stackId);
-        StackOperationFailure stackCreationFailure = new StackOperationFailure(stackId, cause);
+    private void notifyStackCreateFailed(Stack stack, String cause) {
+        CbLoggerFactory.buildMdcContext(stack);
+        LOGGER.info("Publishing {} event ", ReactorConfig.STACK_CREATE_FAILED_EVENT, stack.getId());
+        StackOperationFailure stackCreationFailure = new StackOperationFailure(stack.getId(), cause);
         reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(stackCreationFailure));
     }
 

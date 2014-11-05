@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.credential;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -46,13 +45,11 @@ public class SimpleCredentialService implements CredentialService {
 
     @Override
     public Set<Credential> retrieveAccountCredentials(CbUser user) {
-        Set<Credential> credentials = new HashSet<>();
         if (user.getRoles().contains(CbUserRole.ADMIN)) {
-            credentials = credentialRepository.findAllInAccount(user.getAccount());
+            return credentialRepository.findAllInAccount(user.getAccount());
         } else {
-            credentials = credentialRepository.findPublicsInAccount(user.getAccount());
+            return credentialRepository.findPublicsInAccount(user.getAccount());
         }
-        return credentials;
     }
 
     @Override
@@ -67,7 +64,7 @@ public class SimpleCredentialService implements CredentialService {
 
     @Override
     public Credential create(CbUser user, Credential credential) {
-        CbLoggerFactory.buildMdvContext(credential);
+        CbLoggerFactory.buildMdcContext(credential);
         LOGGER.debug("Creating credential: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         Credential savedCredential = null;
         credential.setOwner(user.getUserId());

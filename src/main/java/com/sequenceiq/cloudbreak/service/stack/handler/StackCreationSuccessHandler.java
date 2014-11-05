@@ -39,13 +39,13 @@ public class StackCreationSuccessHandler implements Consumer<Event<StackCreation
         Long stackId = stackCreationSuccess.getStackId();
         String ambariIp = stackCreationSuccess.getAmbariIp();
         Stack stack = stackUpdater.updateAmbariIp(stackId, ambariIp);
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         LOGGER.info("Accepted {} event.", ReactorConfig.STACK_CREATE_SUCCESS_EVENT, stackId);
         stack = stackUpdater.updateStackStatus(stackId, Status.AVAILABLE);
         websocketService.sendToTopicUser(stack.getOwner(), WebsocketEndPoint.STACK,
                 new StatusMessage(stackId, stack.getName(), Status.AVAILABLE.name()));
         stackUpdater.updateStackStatusReason(stack.getId(), "");
-        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.AMBARI_STARTED_EVENT, stackId);
+        LOGGER.info("Publishing {} event.", ReactorConfig.AMBARI_STARTED_EVENT);
         reactor.notify(ReactorConfig.AMBARI_STARTED_EVENT, Event.wrap(stack));
     }
 

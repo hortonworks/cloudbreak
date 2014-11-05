@@ -89,7 +89,7 @@ public class AzureCertificateService {
     }
 
     public void generateCertificate(CbUser user, AzureCredential azureCredential) {
-        CbLoggerFactory.buildMdvContext(azureCredential);
+        CbLoggerFactory.buildMdcContext(azureCredential);
         try {
             String emailAsFolder = azureStackUtil.emailAsFolder(user);
             File sourceFolder = new File(DATADIR);
@@ -130,7 +130,7 @@ public class AzureCertificateService {
     }
 
     public void generateSshCertificate(CbUser user, AzureCredential azureCredential, String sshKey) {
-        CbLoggerFactory.buildMdvContext(azureCredential);
+        CbLoggerFactory.buildMdcContext(azureCredential);
         try {
             String emailAsFolder = azureStackUtil.emailAsFolder(user);
             File userFolder = new File(getSimpleUserFolder(emailAsFolder));

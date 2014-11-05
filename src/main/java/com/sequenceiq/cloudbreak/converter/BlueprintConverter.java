@@ -36,7 +36,7 @@ public class BlueprintConverter extends AbstractConverter<BlueprintJson, Bluepri
 
     @Override
     public BlueprintJson convert(Blueprint entity) {
-        CbLoggerFactory.buildMdvContext(entity);
+        CbLoggerFactory.buildMdcContext(entity);
         BlueprintJson blueprintJson = new BlueprintJson();
         blueprintJson.setId(String.valueOf(entity.getId()));
         blueprintJson.setBlueprintName(entity.getBlueprintName());

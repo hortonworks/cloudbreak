@@ -20,9 +20,7 @@ import com.sequenceiq.cloudbreak.service.stack.connector.aws.AwsStackUtil;
 public class AwsCredentialInitializer {
 
     public static final String CLOUDBREAK_KEY_NAME = "cloudbreak-key";
-
     private static final int SUFFIX_RND = 999999;
-
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsCredentialInitializer.class);
 
     @Autowired
@@ -41,7 +39,7 @@ public class AwsCredentialInitializer {
     }
 
     private AwsCredential importKeyPairs(AwsCredential awsCredential) {
-        CbLoggerFactory.buildMdvContext(awsCredential);
+        CbLoggerFactory.buildMdcContext(awsCredential);
         try {
             Random rnd = new Random();
             String keyPairName = CLOUDBREAK_KEY_NAME + "-" + rnd.nextInt(SUFFIX_RND);
@@ -54,8 +52,7 @@ public class AwsCredentialInitializer {
             }
             awsCredential.setKeyPairName(keyPairName);
         } catch (Exception e) {
-            String errorMessage = String.format("Failed to import public key [credential: '%s', roleArn: '%s'], detailed message: %s", awsCredential.getId(),
-                    awsCredential.getRoleArn(), e.getMessage());
+            String errorMessage = String.format("Failed to import public key [roleArn:'%s'], detailed message: %s", awsCredential.getRoleArn(), e.getMessage());
             LOGGER.error(errorMessage, e);
             throw new BadRequestException(errorMessage, e);
         }
@@ -63,13 +60,12 @@ public class AwsCredentialInitializer {
     }
 
     private void validateIamRole(AwsCredential awsCredential) {
-        CbLoggerFactory.buildMdvContext(awsCredential);
+        CbLoggerFactory.buildMdcContext(awsCredential);
         try {
             crossAccountCredentialsProvider.retrieveSessionCredentials(CrossAccountCredentialsProvider.DEFAULT_SESSION_CREDENTIALS_DURATION,
                     CrossAccountCredentialsProvider.DEFAULT_EXTERNAL_ID, awsCredential);
         } catch (Exception e) {
-            String errorMessage = String.format("Could not assume role [credential: '%s', roleArn: '%s'], detailed message: %s", awsCredential.getId(),
-                    awsCredential.getRoleArn(), e.getMessage());
+            String errorMessage = String.format("Could not assume role [roleArn:'%s'], detailed message: %s", awsCredential.getRoleArn(), e.getMessage());
             LOGGER.error(errorMessage, e);
             throw new BadRequestException(errorMessage, e);
         }

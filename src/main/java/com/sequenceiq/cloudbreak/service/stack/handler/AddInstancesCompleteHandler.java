@@ -41,8 +41,8 @@ public class AddInstancesCompleteHandler implements Consumer<Event<AddInstancesC
         Long stackId = data.getStackId();
         Stack stack = stackRepository.findOneWithLists(stackId);
         Set<Resource> resourcesSet = event.getData().getResources();
-        CbLoggerFactory.buildMdvContext(stack);
-        LOGGER.info("Accepted {} event on stack '{}'.", ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT, stackId);
+        CbLoggerFactory.buildMdcContext(stack);
+        LOGGER.info("Accepted {} event.", ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT);
         if (resourcesSet != null) {
             Set<Resource> resources = stack.getResources();
             resources.addAll(resourcesSet);

@@ -81,14 +81,14 @@ public class AmbariClusterInstallerMailSenderService {
     }
 
     private void sendInstallationEmail(final MimeMessagePreparator preparator) {
-        CbLoggerFactory.buildMdvContext();
+        CbLoggerFactory.buildMdcContext();
         LOGGER.info("Sending cluster installation email ...");
         ((JavaMailSender) mailSender).send(preparator);
         LOGGER.info("Cluster installation email sent");
     }
 
     private String getEmailBody(String name, String status, String server, String template) {
-        CbLoggerFactory.buildMdvContext();
+        CbLoggerFactory.buildMdcContext();
         String text = null;
         try {
             Map<String, Object> model = new HashMap<>();

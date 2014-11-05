@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.template;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -41,19 +40,17 @@ public class SimpleTemplateService implements TemplateService {
 
     @Override
     public Set<Template> retrieveAccountTemplates(CbUser user) {
-        Set<Template> templates = new HashSet<>();
         if (user.getRoles().contains(CbUserRole.ADMIN)) {
-            templates = templateRepository.findAllInAccount(user.getAccount());
+            return templateRepository.findAllInAccount(user.getAccount());
         } else {
-            templates = templateRepository.findPublicsInAccount(user.getAccount());
+            return templateRepository.findPublicsInAccount(user.getAccount());
         }
-        return templates;
     }
 
     @Override
     public Template get(Long id) {
         Template template = templateRepository.findOne(id);
-        CbLoggerFactory.buildMdvContext(template);
+        CbLoggerFactory.buildMdcContext(template);
         if (template == null) {
             throw new NotFoundException(String.format(TEMPLATE_NOT_FOUND_MSG, id));
         } else {
@@ -63,7 +60,7 @@ public class SimpleTemplateService implements TemplateService {
 
     @Override
     public Template create(CbUser user, Template template) {
-        CbLoggerFactory.buildMdvContext(template);
+        CbLoggerFactory.buildMdcContext(template);
         LOGGER.debug("Creating template: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         Template savedTemplate = null;
         template.setOwner(user.getUserId());
@@ -79,8 +76,8 @@ public class SimpleTemplateService implements TemplateService {
     @Override
     public void delete(Long templateId) {
         Template template = templateRepository.findOne(templateId);
-        CbLoggerFactory.buildMdvContext(template);
-        LOGGER.debug("Deleting template : [{}]", templateId);
+        CbLoggerFactory.buildMdcContext(template);
+        LOGGER.debug("Deleting template.", templateId);
         if (template == null) {
             throw new NotFoundException(String.format(TEMPLATE_NOT_FOUND_MSG, templateId));
         }

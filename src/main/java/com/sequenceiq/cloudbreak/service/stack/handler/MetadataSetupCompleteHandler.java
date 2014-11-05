@@ -34,7 +34,7 @@ public class MetadataSetupCompleteHandler implements Consumer<Event<MetadataSetu
         MetadataSetupComplete metadataSetupComplete = event.getData();
         Long stackId = metadataSetupComplete.getStackId();
         Stack stack = stackRepository.findById(stackId);
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         Set<CoreInstanceMetaData> coreInstanceMetaData = metadataSetupComplete.getCoreInstanceMetaData();
         LOGGER.info("Accepted {} event.", ReactorConfig.METADATA_SETUP_COMPLETE_EVENT, stackId);
         ambariRoleAllocator.allocateRoles(stackId, coreInstanceMetaData);

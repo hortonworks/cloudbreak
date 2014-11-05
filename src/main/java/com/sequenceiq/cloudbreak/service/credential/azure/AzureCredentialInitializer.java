@@ -25,7 +25,7 @@ public class AzureCredentialInitializer {
     }
 
     private void validateCertificateFile(AzureCredential azureCredential) {
-        CbLoggerFactory.buildMdvContext(azureCredential);
+        CbLoggerFactory.buildMdcContext(azureCredential);
         try {
             InputStream is = new ByteArrayInputStream(azureCredential.getPublicKey().getBytes(StandardCharsets.UTF_8));
             CertificateFactory cf = CertificateFactory.getInstance("X.509");

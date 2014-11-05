@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -69,18 +68,17 @@ public class DefaultStackService implements StackService {
 
     @Override
     public Set<Stack> retrieveAccountStacks(CbUser user) {
-        Set<Stack> stacks = new HashSet<>();
         if (user.getRoles().contains(CbUserRole.ADMIN)) {
-            stacks = stackRepository.findAllInAccount(user.getAccount());
+            return stackRepository.findAllInAccount(user.getAccount());
         } else {
-            stacks = stackRepository.findPublicsInAccount(user.getAccount());
+            return stackRepository.findPublicsInAccount(user.getAccount());
         }
-        return stacks;
     }
 
     @Override
     public Stack get(Long id) {
         Stack stack = stackRepository.findOne(id);
+        CbLoggerFactory.buildMdcContext(stack);
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", id));
         }
@@ -89,7 +87,7 @@ public class DefaultStackService implements StackService {
 
     @Override
     public Stack create(CbUser user, Stack stack) {
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         Stack savedStack = null;
         Template template = templateRepository.findOne(stack.getTemplate().getId());
         stack.setOwner(user.getUserId());
@@ -108,7 +106,7 @@ public class DefaultStackService implements StackService {
     @Override
     public void delete(Long id) {
         Stack stack = stackRepository.findOne(id);
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         LOGGER.info("Stack delete requested. [StackId: {}]", id);
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", id));
@@ -120,7 +118,7 @@ public class DefaultStackService implements StackService {
     @Override
     public void updateStatus(Long stackId, StatusRequest status) {
         Stack stack = stackRepository.findOne(stackId);
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         Status stackStatus = stack.getStatus();
         if (status.equals(StatusRequest.STARTED)) {
             if (!Status.STOPPED.equals(stackStatus)) {
@@ -128,7 +126,7 @@ public class DefaultStackService implements StackService {
             }
             stack.setStatus(Status.START_IN_PROGRESS);
             stackRepository.save(stack);
-            LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_STATUS_UPDATE_EVENT, stack.getId());
+            LOGGER.info("Publishing {} event", ReactorConfig.STACK_STATUS_UPDATE_EVENT);
             reactor.notify(ReactorConfig.STACK_STATUS_UPDATE_EVENT,
                     Event.wrap(new StackStatusUpdateRequest(stack.getTemplate().cloudPlatform(), stack.getId(), status)));
         } else {
@@ -145,7 +143,7 @@ public class DefaultStackService implements StackService {
                     throw new BadRequestException(
                             String.format("Cannot update the status of stack '%s' to STOPPED, because the cluster is not in STOPPED state.", stackId));
                 }
-                LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_STATUS_UPDATE_EVENT, stack.getId());
+                LOGGER.info("Publishing {} event.", ReactorConfig.STACK_STATUS_UPDATE_EVENT);
                 reactor.notify(ReactorConfig.STACK_STATUS_UPDATE_EVENT,
                         Event.wrap(new StackStatusUpdateRequest(stack.getTemplate().cloudPlatform(), stack.getId(), status)));
             }
@@ -155,7 +153,7 @@ public class DefaultStackService implements StackService {
     @Override
     public void updateNodeCount(Long stackId, Integer scalingAdjustment) {
         Stack stack = stackRepository.findOne(stackId);
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         if (!Status.AVAILABLE.equals(stack.getStatus())) {
             throw new BadRequestException(String.format("Stack '%s' is currently in '%s' state. Node count can only be updated if it's running.", stackId,
                     stack.getStatus()));
@@ -181,15 +179,14 @@ public class DefaultStackService implements StackService {
             }
         }
         stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS);
-        LOGGER.info("Publishing {} event [stackId: '{}', scalingAdjustment: '{}']", ReactorConfig.UPDATE_INSTANCES_REQUEST_EVENT, stack.getId(),
-                scalingAdjustment);
+        LOGGER.info("Publishing {} event [scalingAdjustment: '{}']", ReactorConfig.UPDATE_INSTANCES_REQUEST_EVENT, scalingAdjustment);
         reactor.notify(ReactorConfig.UPDATE_INSTANCES_REQUEST_EVENT,
                 Event.wrap(new UpdateInstancesRequest(stack.getTemplate().cloudPlatform(), stack.getId(), scalingAdjustment)));
     }
 
     @Override
     public StackDescription getStackDescription(Stack stack) {
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         CloudPlatform cp = stack.getTemplate().cloudPlatform();
         LOGGER.debug("Getting stack description for cloud platform: {} ...", cp);
         StackDescription description = describeContext.describeStackWithResources(stack);

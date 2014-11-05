@@ -36,8 +36,8 @@ public class StackUpdateSuccessHandler implements Consumer<Event<StackUpdateSucc
         StackUpdateSuccess updateSuccess = t.getData();
         Long stackId = updateSuccess.getStackId();
         Stack stack = stackRepository.findOneWithLists(stackId);
-        CbLoggerFactory.buildMdvContext(stack);
-        LOGGER.info("Accepted {} event.", ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, stackId);
+        CbLoggerFactory.buildMdcContext(stack);
+        LOGGER.info("Accepted {} event.", ReactorConfig.STACK_UPDATE_SUCCESS_EVENT);
         Set<String> instanceIds = updateSuccess.getInstanceIds();
         if (updateSuccess.isRemoveInstances()) {
             stackUpdater.updateNodeCount(stackId, stack.getNodeCount() - instanceIds.size());
@@ -51,7 +51,7 @@ public class StackUpdateSuccessHandler implements Consumer<Event<StackUpdateSucc
             }
             stack.getInstanceMetaData().removeAll(metadataToRemove);
             stackUpdater.updateStackMetaData(stackId, stack.getInstanceMetaData());
-            LOGGER.info("Successfully removed metadata of instances '{}' in stack '{}'", instanceIds, stackId);
+            LOGGER.info("Successfully removed metadata of instances '{}' in stack.", instanceIds);
         } else {
             stackUpdater.updateNodeCount(stackId, stack.getNodeCount() + instanceIds.size());
         }

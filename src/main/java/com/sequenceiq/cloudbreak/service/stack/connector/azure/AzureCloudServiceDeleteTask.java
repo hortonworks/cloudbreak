@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
+import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.AddInstancesFailedException;
 
@@ -26,7 +27,8 @@ public class AzureCloudServiceDeleteTask implements StatusCheckerTask<AzureCloud
 
     @Override
     public boolean checkStatus(AzureCloudServiceDeleteTaskContext aRRPO) {
-        LOGGER.info("Checking status of remove cloud service '{}' on '{}' stack.", aRRPO.getName(), aRRPO.getStackId());
+        CbLoggerFactory.buildMdcContext(aRRPO.getStack());
+        LOGGER.info("Checking status of remove cloud service '{}'.", aRRPO.getName());
         try {
             Map<String, String> props = new HashMap<>();
             props.put(SERVICENAME, aRRPO.getCommonName());
@@ -56,12 +58,13 @@ public class AzureCloudServiceDeleteTask implements StatusCheckerTask<AzureCloud
     public void handleTimeout(AzureCloudServiceDeleteTaskContext azureDiskRemoveReadyPollerObject) {
         throw new AddInstancesFailedException(String.format(
                 "Something went wrong. Remove of '%s' resource unsuccess in a reasonable timeframe on '%s' stack.",
-                azureDiskRemoveReadyPollerObject.getName(), azureDiskRemoveReadyPollerObject.getStackId()));
+                azureDiskRemoveReadyPollerObject.getName(), azureDiskRemoveReadyPollerObject.getStack().getId()));
     }
 
     @Override
     public String successMessage(AzureCloudServiceDeleteTaskContext azureDiskRemoveReadyPollerObject) {
+        CbLoggerFactory.buildMdcContext(azureDiskRemoveReadyPollerObject.getStack());
         return String.format("Azure resource '%s' is removed success on '%s' stack",
-                azureDiskRemoveReadyPollerObject.getName(), azureDiskRemoveReadyPollerObject.getStackId());
+                azureDiskRemoveReadyPollerObject.getName(), azureDiskRemoveReadyPollerObject.getStack().getId());
     }
 }

@@ -50,7 +50,7 @@ public class AzureMetadataSetup implements MetadataSetup {
 
     @Override
     public void setupMetadata(Stack stack) {
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         AzureCredential azureCredential = (AzureCredential) stack.getCredential();
         String filePath = AzureCertificateService.getUserJksFileName(azureCredential, azureStackUtil.emailAsFolder(stack.getOwner()));
         AzureClient azureClient = azureStackUtil.createAzureClient(azureCredential, filePath);
@@ -62,7 +62,7 @@ public class AzureMetadataSetup implements MetadataSetup {
 
     @Override
     public void addNewNodesToMetadata(Stack stack, Set<Resource> resourceList) {
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         AzureCredential azureCredential = (AzureCredential) stack.getCredential();
         String filePath = AzureCertificateService.getUserJksFileName(azureCredential, azureStackUtil.emailAsFolder(stack.getOwner()));
         AzureClient azureClient = azureStackUtil.createAzureClient(azureCredential, filePath);
@@ -91,7 +91,7 @@ public class AzureMetadataSetup implements MetadataSetup {
     }
 
     private CoreInstanceMetaData getMetadata(Stack stack, AzureClient azureClient, Resource resource) {
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         Map<String, Object> props = new HashMap<>();
         props.put(NAME, resource.getResourceName());
         props.put(SERVICENAME, resource.getResourceName());

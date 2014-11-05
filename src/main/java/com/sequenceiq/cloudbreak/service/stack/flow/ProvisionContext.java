@@ -74,7 +74,7 @@ public class ProvisionContext {
 
     public void buildStack(final CloudPlatform cloudPlatform, Long stackId, Map<String, Object> setupProperties, Map<String, String> userDataParams) {
         Stack stack = stackRepository.findById(stackId);
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         try {
             if (stack.getStatus().equals(Status.REQUESTED)) {
                 stack = stackUpdater.updateStackStatus(stack.getId(), Status.CREATE_IN_PROGRESS);
@@ -133,12 +133,12 @@ public class ProvisionContext {
         } catch (BuildStackFailureException e) {
             stackUpdater.updateStackResources(stackId, e.getResourceSet());
             LOGGER.error("Unhandled exception occured while creating stack.", e);
-            LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_CREATE_FAILED_EVENT, stackId);
+            LOGGER.info("Publishing {} event.", ReactorConfig.STACK_CREATE_FAILED_EVENT);
             StackOperationFailure stackCreationFailure = new StackOperationFailure(stackId, "Internal server error occured while creating stack.");
             reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(stackCreationFailure));
         } catch (Exception e) {
             LOGGER.error("Unhandled exception occured while creating stack.", e);
-            LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_CREATE_FAILED_EVENT, stackId);
+            LOGGER.info("Publishing {} event.", ReactorConfig.STACK_CREATE_FAILED_EVENT);
             StackOperationFailure stackCreationFailure = new StackOperationFailure(stackId, "Internal server error occured while creating stack.");
             reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(stackCreationFailure));
         }

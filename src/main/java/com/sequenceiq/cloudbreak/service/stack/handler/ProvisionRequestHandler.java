@@ -33,7 +33,7 @@ public class ProvisionRequestHandler implements Consumer<Event<ProvisionRequest>
         CloudPlatform cloudPlatform = provisionRequest.getCloudPlatform();
         Long stackId = provisionRequest.getStackId();
         Stack stack = stackRepository.findById(stackId);
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         LOGGER.info("Accepted {} event.", ReactorConfig.PROVISION_REQUEST_EVENT, stackId);
         provisionSetupContext.setupProvisioning(cloudPlatform, stackId);
     }

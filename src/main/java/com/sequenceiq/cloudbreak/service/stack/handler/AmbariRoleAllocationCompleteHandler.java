@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
+import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
 import com.sequenceiq.cloudbreak.service.stack.event.AmbariRoleAllocationComplete;
 import com.sequenceiq.cloudbreak.service.stack.flow.AmbariStartupListener;
 
@@ -23,9 +24,10 @@ public class AmbariRoleAllocationCompleteHandler implements Consumer<Event<Ambar
     @Override
     public void accept(Event<AmbariRoleAllocationComplete> event) {
         AmbariRoleAllocationComplete provisionSuccess = event.getData();
-        Long stackId = provisionSuccess.getStackId();
+        CbLoggerFactory.buildMdcContext(provisionSuccess.getStack());
+        Long stackId = provisionSuccess.getStack().getId();
         String ambariIp = provisionSuccess.getAmbariIp();
-        LOGGER.info("Accepted {} event.", ReactorConfig.AMBARI_ROLE_ALLOCATION_COMPLETE_EVENT, stackId);
+        LOGGER.info("Accepted {} event.", ReactorConfig.AMBARI_ROLE_ALLOCATION_COMPLETE_EVENT);
         ambariStartupListener.waitForAmbariServer(stackId, ambariIp);
     }
 }

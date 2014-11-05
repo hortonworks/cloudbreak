@@ -43,7 +43,7 @@ public class GccStackUtil {
     private static final List<String> SCOPES = Arrays.asList(ComputeScopes.COMPUTE, StorageScopes.DEVSTORAGE_FULL_CONTROL);
 
     public Compute buildCompute(GccCredential gccCredential, String appName) {
-        CbLoggerFactory.buildMdvContext(gccCredential);
+        CbLoggerFactory.buildMdcContext(gccCredential);
         try {
             HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
             BufferedReader br = new BufferedReader(new StringReader(gccCredential.getServiceAccountPrivateKey()));
@@ -85,7 +85,7 @@ public class GccStackUtil {
     }
 
     public Storage buildStorage(GccCredential gccCredential, Stack stack) {
-        CbLoggerFactory.buildMdvContext(gccCredential);
+        CbLoggerFactory.buildMdcContext(stack);
         try {
             HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
             BufferedReader br = new BufferedReader(new StringReader(gccCredential.getServiceAccountPrivateKey()));
@@ -113,7 +113,7 @@ public class GccStackUtil {
     }
 
     public CoreInstanceMetaData getMetadata(Stack stack, Compute compute, String resource) {
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         try {
             GccCredential credential = (GccCredential) stack.getCredential();
             GccTemplate template = (GccTemplate) stack.getTemplate();

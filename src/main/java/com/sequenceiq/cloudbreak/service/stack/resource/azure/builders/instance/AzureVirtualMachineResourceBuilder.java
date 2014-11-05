@@ -163,13 +163,13 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
 
     @Override
     public Boolean start(AzureStartStopContextObject aSSCO, Resource resource) {
-        Stack stack = stackRepository.findById(aSSCO.getStackId());
+        Stack stack = stackRepository.findById(aSSCO.getStack().getId());
         AzureCredential credential = (AzureCredential) stack.getCredential();
-        boolean started = setStackState(aSSCO.getStackId(), resource, aSSCO.getNewAzureClient(credential), false);
+        boolean started = setStackState(aSSCO.getStack().getId(), resource, aSSCO.getNewAzureClient(credential), false);
         if (started) {
             azurePollingService.pollWithTimeout(
                     new AzureInstanceStatusCheckerTask(),
-                    new AzureInstances(aSSCO.getStackId(), aSSCO.getNewAzureClient(credential), Arrays.asList(resource.getResourceName()), "Running"),
+                    new AzureInstances(aSSCO.getStack(), aSSCO.getNewAzureClient(credential), Arrays.asList(resource.getResourceName()), "Running"),
                     POLLING_INTERVAL,
                     MAX_ATTEMPTS_FOR_AMBARI_OPS);
             return true;
@@ -179,9 +179,9 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
 
     @Override
     public Boolean stop(AzureStartStopContextObject aSSCO, Resource resource) {
-        Stack stack = stackRepository.findById(aSSCO.getStackId());
+        Stack stack = stackRepository.findById(aSSCO.getStack().getId());
         AzureCredential credential = (AzureCredential) stack.getCredential();
-        return setStackState(aSSCO.getStackId(), resource, aSSCO.getNewAzureClient(credential), true);
+        return setStackState(aSSCO.getStack().getId(), resource, aSSCO.getNewAzureClient(credential), true);
     }
 
     private boolean setStackState(Long stackId, Resource resource, AzureClient azureClient, boolean stopped) {

@@ -65,8 +65,8 @@ public class StackDeleteRequestHandler implements Consumer<Event<StackDeleteRequ
         final StackDeleteRequest data = stackDeleteRequest.getData();
         retryingStackUpdater.updateStackStatus(data.getStackId(), Status.DELETE_IN_PROGRESS);
         Stack stack = stackRepository.findOneWithLists(data.getStackId());
-        CbLoggerFactory.buildMdvContext(stack);
-        LOGGER.info("Accepted {} event.", ReactorConfig.DELETE_REQUEST_EVENT, data.getStackId());
+        CbLoggerFactory.buildMdcContext(stack);
+        LOGGER.info("Accepted {} event.", ReactorConfig.DELETE_REQUEST_EVENT);
         try {
             if (!data.getCloudPlatform().isWithTemplate()) {
                 ResourceBuilderInit resourceBuilderInit = resourceBuilderInits.get(data.getCloudPlatform());

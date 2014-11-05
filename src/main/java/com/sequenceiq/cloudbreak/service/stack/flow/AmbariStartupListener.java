@@ -9,6 +9,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariHostsUnavailableException;
 import com.sequenceiq.cloudbreak.service.stack.connector.aws.AwsStackUtil;
@@ -38,22 +39,23 @@ public class AmbariStartupListener {
     private StackRepository stackRepository;
 
     public void waitForAmbariServer(Long stackId, String ambariIp) {
+        Stack stack = stackRepository.findById(stackId);
+        CbLoggerFactory.buildMdcContext(stack);
         try {
             boolean ambariRunning = false;
             AmbariClient ambariClient = createAmbariClient(ambariIp);
             int pollingAttempt = 0;
-            LOGGER.info("Starting polling of Ambari server's status [stack: '{}', Ambari server IP: '{}'].", stackId, ambariIp);
+            LOGGER.info("Starting polling of Ambari server's status [Ambari server IP: '{}'].", ambariIp);
             while (!ambariRunning && !(pollingAttempt >= MAX_POLLING_ATTEMPTS)) {
                 try {
                     String ambariHealth = ambariClient.healthCheck();
-                    LOGGER.info("Ambari health check returned: {} [stack: '{}', Ambari server IP: '{}']", ambariHealth, stackId, ambariIp);
+                    LOGGER.info("Ambari health check returned: {} [Ambari server IP: '{}']", ambariHealth, ambariIp);
                     if ("RUNNING".equals(ambariHealth)) {
                         ambariRunning = true;
                     }
                 } catch (Exception e) {
-                    LOGGER.info("Ambari health check failed. {} Trying again in next polling interval. [stack: '{}']", e.getMessage(), stackId);
+                    LOGGER.info("Ambari health check failed. {} Trying again in next polling interval.", e.getMessage());
                 }
-                Stack stack = stackRepository.findById(stackId);
                 awsStackUtil.sleep(stack, POLLING_INTERVAL);
                 pollingAttempt++;
             }
@@ -61,11 +63,11 @@ public class AmbariStartupListener {
                 throw new AmbariHostsUnavailableException(String.format("Operation timed out. Failed to start Ambari server in %s seconds.",
                         MAX_POLLING_ATTEMPTS * POLLING_INTERVAL / MS_PER_SEC));
             }
-            LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_CREATE_SUCCESS_EVENT, stackId);
+            LOGGER.info("Publishing {} event.", ReactorConfig.STACK_CREATE_SUCCESS_EVENT);
             reactor.notify(ReactorConfig.STACK_CREATE_SUCCESS_EVENT, Event.wrap(new StackCreationSuccess(stackId, ambariIp)));
         } catch (Exception e) {
             LOGGER.error("Unhandled exception occured while trying to reach initializing Ambari server.", e);
-            LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_CREATE_FAILED_EVENT, stackId);
+            LOGGER.info("Publishing {} event.", ReactorConfig.STACK_CREATE_FAILED_EVENT);
             StackOperationFailure stackCreationFailure = new StackOperationFailure(stackId,
                     "Unhandled exception occured while trying to reach initializing Ambari server.");
             reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(stackCreationFailure));

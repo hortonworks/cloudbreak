@@ -72,7 +72,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
 
     @Override
     public void setupProvisioning(Stack stack) {
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         Credential credential = stack.getCredential();
         String emailAsFolder = azureStackUtil.emailAsFolder(stack.getOwner());
 
@@ -142,6 +142,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
     }
 
     private void createStorage(Stack stack, AzureClient azureClient, String affinityGroupName) {
+        CbLoggerFactory.buildMdcContext(stack);
         try {
             azureClient.getStorageAccount(affinityGroupName);
         } catch (Exception ex) {
@@ -168,6 +169,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
     }
 
     private void createAffinityGroup(Stack stack, AzureClient azureClient, String affinityGroupName) {
+        CbLoggerFactory.buildMdcContext(stack);
         try {
             azureClient.getAffinityGroup(affinityGroupName);
         } catch (Exception ex) {

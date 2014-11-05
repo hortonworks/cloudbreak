@@ -17,13 +17,13 @@ public class RsaPublicKeyValidator {
     private static final Logger LOGGER = LoggerFactory.getLogger(RsaPublicKeyValidator.class);
 
     public void validate(Credential credential) {
-        CbLoggerFactory.buildMdvContext(credential);
+        CbLoggerFactory.buildMdcContext(credential);
         try {
             SshRsaCrypto rsa = new SshRsaCrypto();
             PublicKey publicKey = rsa.readPublicKey(rsa.slurpPublicKey(credential.getPublicKey()));
         } catch (Exception e) {
-            String errorMessage = String.format("Could not validate publickey certificate [credential: '%s', certificate: '%s'], detailed message: %s",
-                    credential.getId(), credential.getPublicKey(), e.getMessage());
+            String errorMessage = String.format("Could not validate publickey certificate [certificate: '%s'], detailed message: %s",
+                    credential.getPublicKey(), e.getMessage());
             LOGGER.error(errorMessage, e);
             throw new BadRequestException(errorMessage, e);
         }

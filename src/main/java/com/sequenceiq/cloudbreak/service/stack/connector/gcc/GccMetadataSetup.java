@@ -40,7 +40,7 @@ public class GccMetadataSetup implements MetadataSetup {
 
     @Override
     public void setupMetadata(Stack stack) {
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         Set<CoreInstanceMetaData> instanceMetaDatas = new HashSet<>();
         List<Resource> resourcesByType = stack.getResourcesByType(ResourceType.GCC_INSTANCE);
         GccTemplate template = (GccTemplate) stack.getTemplate();
@@ -61,7 +61,7 @@ public class GccMetadataSetup implements MetadataSetup {
 
     @Override
     public void addNewNodesToMetadata(Stack stack, Set<Resource> resourceList) {
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         List<Resource> resources = new ArrayList<>();
         for (Resource resource : resourceList) {
             if (ResourceType.GCC_INSTANCE.equals(resource.getResourceType())) {

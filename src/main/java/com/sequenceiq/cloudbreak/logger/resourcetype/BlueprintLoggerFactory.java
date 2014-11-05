@@ -12,13 +12,14 @@ public class BlueprintLoggerFactory {
 
     }
 
-    public static void buildMdvContext(Blueprint blueprint) {
+    public static void buildMdcContext(Blueprint blueprint) {
         if (blueprint.getOwner() != null) {
             MDC.put(LoggerContextKey.OWNER_ID.toString(), blueprint.getOwner());
         }
         MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.BLUEPRINT.toString());
+        MDC.put(LoggerContextKey.RESOURCE_NAME.toString(), blueprint.getName());
         if (blueprint.getId() == null) {
-            MDC.put(LoggerContextKey.RESOURCE_NAME.toString(), blueprint.getName().toString());
+            MDC.put(LoggerContextKey.RESOURCE_ID.toString(), "undefined");
         } else {
             MDC.put(LoggerContextKey.RESOURCE_ID.toString(), blueprint.getId().toString());
         }

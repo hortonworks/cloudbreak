@@ -12,13 +12,14 @@ public class ClusterLoggerFactory {
 
     }
 
-    public static void buildMdvContext(Cluster cluster) {
+    public static void buildMdcContext(Cluster cluster) {
         if (cluster.getOwner() != null) {
             MDC.put(LoggerContextKey.OWNER_ID.toString(), cluster.getOwner());
         }
         MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.CLUSTER.toString());
+        MDC.put(LoggerContextKey.RESOURCE_NAME.toString(), cluster.getName());
         if (cluster.getId() == null) {
-            MDC.put(LoggerContextKey.RESOURCE_NAME.toString(), cluster.getName().toString());
+            MDC.put(LoggerContextKey.RESOURCE_ID.toString(), "undefined");
         } else {
             MDC.put(LoggerContextKey.RESOURCE_ID.toString(), cluster.getId().toString());
         }

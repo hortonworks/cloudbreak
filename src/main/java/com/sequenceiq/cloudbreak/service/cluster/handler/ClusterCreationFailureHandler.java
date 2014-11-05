@@ -38,7 +38,7 @@ public class ClusterCreationFailureHandler implements Consumer<Event<ClusterCrea
         ClusterCreationFailure clusterCreationFailure = event.getData();
         Long clusterId = clusterCreationFailure.getClusterId();
         Cluster cluster = clusterRepository.findById(clusterId);
-        CbLoggerFactory.buildMdvContext(cluster);
+        CbLoggerFactory.buildMdcContext(cluster);
         LOGGER.info("Accepted {} event.", ReactorConfig.CLUSTER_CREATE_FAILED_EVENT, clusterId);
         String detailedMessage = clusterCreationFailure.getDetailedMessage();
         cluster.setStatus(Status.CREATE_FAILED);

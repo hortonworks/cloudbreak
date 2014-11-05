@@ -38,8 +38,8 @@ public class StackDeleteCompleteHandler implements Consumer<Event<StackDeleteCom
         StackDeleteComplete data = stackDeleteComplete.getData();
         retryingStackUpdater.updateStackStatus(data.getStackId(), Status.DELETE_COMPLETED);
         Stack oneWithLists = stackRepository.findOneWithLists(data.getStackId());
-        CbLoggerFactory.buildMdvContext(oneWithLists);
-        LOGGER.info("Accepted {} event.", ReactorConfig.DELETE_COMPLETE_EVENT, data.getStackId());
+        CbLoggerFactory.buildMdcContext(oneWithLists);
+        LOGGER.info("Accepted {} event.", ReactorConfig.DELETE_COMPLETE_EVENT);
         stackRepository.delete(oneWithLists);
         websocketService.sendToTopicUser(oneWithLists.getOwner(), WebsocketEndPoint.TERMINATE,
                 new StatusMessage(oneWithLists.getId(), oneWithLists.getName(), Status.DELETE_COMPLETED.name(), String.format("Stack delete complated")));

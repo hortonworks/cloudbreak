@@ -38,8 +38,8 @@ public class StackUpdateFailureHandler implements Consumer<Event<StackOperationF
         StackOperationFailure stackOperationFailure = event.getData();
         Long stackId = stackOperationFailure.getStackId();
         Stack byId = stackRepository.findById(stackId);
-        CbLoggerFactory.buildMdvContext(byId);
-        LOGGER.info("Accepted {} event.", ReactorConfig.STACK_UPDATE_FAILED_EVENT, stackId);
+        CbLoggerFactory.buildMdcContext(byId);
+        LOGGER.info("Accepted {} event.", ReactorConfig.STACK_UPDATE_FAILED_EVENT);
         String detailedMessage = stackOperationFailure.getDetailedMessage();
         stackUpdater.updateMetadataReady(stackId, true);
         Stack stack = stackUpdater.updateStackStatus(stackId, Status.AVAILABLE, "Stack update failed. " + detailedMessage);

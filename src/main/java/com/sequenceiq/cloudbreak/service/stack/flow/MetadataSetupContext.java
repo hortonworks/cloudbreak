@@ -36,7 +36,7 @@ public class MetadataSetupContext {
 
     public void setupMetadata(CloudPlatform cloudPlatform, Long stackId) {
         Stack stack = stackRepository.findOneWithLists(stackId);
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         try {
             MetadataSetup metadataSetup = metadataSetups.get(cloudPlatform);
             metadataSetup.setupMetadata(stack);
@@ -50,7 +50,7 @@ public class MetadataSetupContext {
 
     public void updateMetadata(CloudPlatform cloudPlatform, Long stackId, Set<Resource> resourceSet) {
         Stack stack = stackRepository.findOneWithLists(stackId);
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         try {
             metadataSetups.get(cloudPlatform).addNewNodesToMetadata(stack, resourceSet);
         } catch (Exception e) {

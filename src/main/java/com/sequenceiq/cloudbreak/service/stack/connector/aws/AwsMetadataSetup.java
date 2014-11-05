@@ -51,7 +51,7 @@ public class AwsMetadataSetup implements MetadataSetup {
 
     @Override
     public void setupMetadata(Stack stack) {
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
 
         Set<CoreInstanceMetaData> coreInstanceMetadata = new HashSet<>();
 
@@ -96,7 +96,7 @@ public class AwsMetadataSetup implements MetadataSetup {
 
     @Override
     public void addNewNodesToMetadata(Stack stack, Set<Resource> resourceList) {
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         Set<CoreInstanceMetaData> coreInstanceMetadata = new HashSet<>();
         LOGGER.info("Adding new instances to metadata: [stack: '{}']", stack.getId());
         AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(

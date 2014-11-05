@@ -38,7 +38,7 @@ public class AwsProvisionSetup implements ProvisionSetup {
 
     @Override
     public void setupProvisioning(Stack stack) {
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         AwsTemplate awsTemplate = (AwsTemplate) stack.getTemplate();
         AwsCredential awsCredential = (AwsCredential) stack.getCredential();
 

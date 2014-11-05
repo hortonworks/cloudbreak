@@ -26,20 +26,19 @@ public class ClusterRequestHandler implements Consumer<Event<Stack>> {
     public void accept(Event<Stack> event) {
         String eventKey = (String) event.getKey();
         Stack stack = event.getData();
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         LOGGER.info("Accepted {} event.", eventKey);
         if (ReactorConfig.AMBARI_STARTED_EVENT.equals(eventKey)) {
             if (stack.getCluster() != null && stack.getCluster().getStatus().equals(Status.REQUESTED)) {
                 ambariClusterInstaller.installAmbariCluster(stack);
             } else {
-                LOGGER.info("Ambari has started but there were no cluster request to this stack yet. Won't install cluster now. [stack: {}]", stack.getId());
+                LOGGER.info("Ambari has started but there were no cluster request to this stack yet. Won't install cluster now.");
             }
         } else if (ReactorConfig.CLUSTER_REQUESTED_EVENT.equals(eventKey)) {
             if (stack.getStatus().equals(Status.AVAILABLE)) {
                 ambariClusterInstaller.installAmbariCluster(stack);
             } else {
-                LOGGER.info("Cluster install requested but the stack is not completed yet. Installation will start after the stack is ready. [stack: {}]",
-                        stack.getId());
+                LOGGER.info("Cluster install requested but the stack is not completed yet. Installation will start after the stack is ready.");
             }
         }
     }

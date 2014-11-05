@@ -50,7 +50,7 @@ public class UpdateAmbariHostsSuccessHandler implements Consumer<Event<UpdateAmb
         UpdateAmbariHostsSuccess data = event.getData();
         Cluster cluster = clusterRepository.findById(data.getClusterId());
         Set<String> hostNames = data.getHostNames();
-        CbLoggerFactory.buildMdvContext(cluster);
+        CbLoggerFactory.buildMdcContext(cluster);
         LOGGER.info("Accepted {} event.", ReactorConfig.UPDATE_AMBARI_HOSTS_SUCCESS_EVENT);
         Stack stack = stackRepository.findStackWithListsForCluster(data.getClusterId());
         for (String hostName : hostNames) {

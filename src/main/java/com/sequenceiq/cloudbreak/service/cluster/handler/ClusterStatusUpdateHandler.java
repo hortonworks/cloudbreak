@@ -49,22 +49,22 @@ public class ClusterStatusUpdateHandler implements Consumer<Event<ClusterStatusU
         long stackId = statusUpdateRequest.getStackId();
         Stack stack = stackRepository.findOneWithLists(stackId);
         Cluster cluster = stack.getCluster();
-        CbLoggerFactory.buildMdvContext(cluster);
+        CbLoggerFactory.buildMdcContext(cluster);
         if (StatusRequest.STOPPED.equals(statusRequest)) {
             ambariClusterConnector.stopCluster(stack);
             cluster.setStatus(Status.STOPPED);
             if (Status.STOP_REQUESTED.equals(stackRepository.findOneWithLists(stackId).getStatus())) {
-                LOGGER.info("Hadoop services stopped, stopping stack: {}", stackId);
+                LOGGER.info("Hadoop services stopped, stopping.");
                 reactor.notify(ReactorConfig.STACK_STATUS_UPDATE_EVENT,
                         Event.wrap(new StackStatusUpdateRequest(stack.getTemplate().cloudPlatform(), stackId, statusRequest)));
             }
         } else {
             boolean started = ambariClusterConnector.startCluster(stack);
             if (started) {
-                LOGGER.info("Successfully started Hadoop services on stack: {}, setting cluster state to: {}", stackId, Status.AVAILABLE);
+                LOGGER.info("Successfully started Hadoop services, setting cluster state to: {}", Status.AVAILABLE);
                 cluster.setStatus(Status.AVAILABLE);
             } else {
-                LOGGER.info("Failed to start Hadoop services on stack: {}, setting cluster state to: {}", stackId, Status.STOPPED);
+                LOGGER.info("Failed to start Hadoop services, setting cluster state to: {}", Status.STOPPED);
                 cluster.setStatus(Status.STOPPED);
             }
         }

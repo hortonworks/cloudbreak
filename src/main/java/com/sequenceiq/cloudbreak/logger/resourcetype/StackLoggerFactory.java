@@ -12,13 +12,14 @@ public class StackLoggerFactory {
 
     }
 
-    public static void buildMdvContext(Stack stack) {
+    public static void buildMdcContext(Stack stack) {
         if (stack.getOwner() != null) {
             MDC.put(LoggerContextKey.OWNER_ID.toString(), stack.getOwner());
         }
         MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.STACK.toString());
+        MDC.put(LoggerContextKey.RESOURCE_NAME.toString(), stack.getName());
         if (stack.getId() == null) {
-            MDC.put(LoggerContextKey.RESOURCE_NAME.toString(), stack.getName().toString());
+            MDC.put(LoggerContextKey.RESOURCE_ID.toString(), "undefined");
         } else {
             MDC.put(LoggerContextKey.RESOURCE_ID.toString(), stack.getId().toString());
         }

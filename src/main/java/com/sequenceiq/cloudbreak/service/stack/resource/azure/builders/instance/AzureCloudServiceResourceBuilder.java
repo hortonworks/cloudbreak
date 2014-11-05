@@ -53,8 +53,6 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
     @Autowired
     private PollingService<AzureCloudServiceDeleteTaskContext> azureCloudServiceRemoveReadyPollerObjectPollingService;
 
-
-
     @Override
     public List<Resource> create(AzureProvisionContextObject po, int index, List<Resource> resources) throws Exception {
         Stack stack = stackRepository.findById(po.getStackId());
@@ -80,6 +78,9 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
         AzureCloudServiceDeleteTaskContext azureCloudServiceDeleteTaskContext =
                 new AzureCloudServiceDeleteTaskContext(aDCO.getCommonName(), resource.getResourceName(),
                         aDCO.getStackId(), aDCO.getNewAzureClient(credential));
+        AzureCloudServiceDeleteTaskContext azureCloudServiceRemoveReadyPollerObject =
+                new AzureCloudServiceDeleteTaskContext(aDCO.getCommonName(), resource.getResourceName(),
+                        stack.getId(), aDCO.getNewAzureClient(credential));
         azureCloudServiceRemoveReadyPollerObjectPollingService
                 .pollWithTimeout(azureCloudServiceDeleteTask, azureCloudServiceDeleteTaskContext, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
 
@@ -88,10 +89,10 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
         List<String> disks = (List<String>) actualObj.get("Disks").findValues("Disk").get(0).findValuesAsText("Name");
         for (String jsonNode : disks) {
             if (jsonNode.startsWith(String.format("%s-%s-0", resource.getResourceName(), resource.getResourceName()))) {
-                AzureDiskRemoveDeleteTaskContext azureDiskRemoveDeleteTaskContext = new AzureDiskRemoveDeleteTaskContext(aDCO.getCommonName(), jsonNode,
-                        aDCO.getStackId(), aDCO.getNewAzureClient(credential));
+                AzureDiskRemoveDeleteTaskContext azureDiskRemoveReadyPollerObject = new AzureDiskRemoveDeleteTaskContext(aDCO.getCommonName(), jsonNode,
+                        stack.getId(), aDCO.getNewAzureClient(credential));
                 azureDiskRemoveReadyPollerObjectPollingService
-                        .pollWithTimeout(azureDiskDeleteTask, azureDiskRemoveDeleteTaskContext, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+                        .pollWithTimeout(azureDiskDeleteTask, azureDiskRemoveReadyPollerObject, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
             }
         }
         return true;

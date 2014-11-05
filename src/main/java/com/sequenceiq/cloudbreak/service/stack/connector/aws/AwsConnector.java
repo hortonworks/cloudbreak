@@ -110,7 +110,7 @@ public class AwsConnector implements CloudPlatformConnector {
 
     @Override
     public StackDescription describeStackWithResources(Stack stack, Credential credential) {
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         AwsTemplate awsInfra = (AwsTemplate) stack.getTemplate();
         AwsCredential awsCredential = (AwsCredential) credential;
         DescribeStacksResult stackResult = null;
@@ -156,7 +156,7 @@ public class AwsConnector implements CloudPlatformConnector {
 
     @Override
     public void deleteStack(Stack stack, Credential credential) {
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         LOGGER.info("Deleting stack: {}", stack.getId());
         AwsTemplate template = (AwsTemplate) stack.getTemplate();
         AwsCredential awsCredential = (AwsCredential) credential;
@@ -178,7 +178,7 @@ public class AwsConnector implements CloudPlatformConnector {
 
     @Override
     public void buildStack(Stack stack, String userData, Map<String, Object> setupProperties) {
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         AwsTemplate awsTemplate = (AwsTemplate) stack.getTemplate();
         AwsCredential awsCredential = (AwsCredential) stack.getCredential();
         AmazonCloudFormationClient client = awsStackUtil.createCloudFormationClient(awsTemplate.getRegion(), awsCredential);
@@ -212,7 +212,7 @@ public class AwsConnector implements CloudPlatformConnector {
 
     @Override
     public boolean addInstances(Stack stack, String userData, Integer instanceCount) {
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         Integer requiredInstances = stack.getNodeCount() + instanceCount;
         Regions region = ((AwsTemplate) stack.getTemplate()).getRegion();
         AwsCredential credential = (AwsCredential) stack.getCredential();
@@ -225,7 +225,7 @@ public class AwsConnector implements CloudPlatformConnector {
                 .withDesiredCapacity(requiredInstances));
         LOGGER.info("Updated AutoScaling group's desiredCapacity: [stack: '{}', from: '{}', to: '{}']", stack.getId(), stack.getNodeCount(),
                 stack.getNodeCount() + instanceCount);
-        AutoScalingGroupReady asGroupReady = new AutoScalingGroupReady(amazonEC2Client, amazonASClient, asGroupName, requiredInstances);
+        AutoScalingGroupReady asGroupReady = new AutoScalingGroupReady(stack, amazonEC2Client, amazonASClient, asGroupName, requiredInstances);
         LOGGER.info("Polling autoscaling group until new instances are ready. [stack: {}, asGroup: {}]", stack.getId(), asGroupName);
         pollingService.pollWithTimeout(asGroupStatusCheckerTask, asGroupReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT, stack.getId());
@@ -235,7 +235,7 @@ public class AwsConnector implements CloudPlatformConnector {
 
     @Override
     public boolean removeInstances(Stack stack, Set<String> instanceIds) {
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         Regions region = ((AwsTemplate) stack.getTemplate()).getRegion();
         AwsCredential credential = (AwsCredential) stack.getCredential();
         AmazonAutoScalingClient amazonASClient = awsStackUtil.createAutoScalingClient(region, credential);
@@ -267,7 +267,7 @@ public class AwsConnector implements CloudPlatformConnector {
     }
 
     private boolean setStackState(Stack stack, boolean stopped) {
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         boolean result = true;
         Regions region = ((AwsTemplate) stack.getTemplate()).getRegion();
         AwsCredential credential = (AwsCredential) stack.getCredential();
@@ -288,7 +288,7 @@ public class AwsConnector implements CloudPlatformConnector {
                 amazonEC2Client.startInstances(new StartInstancesRequest().withInstanceIds(instances));
                 awsPollingService.pollWithTimeout(
                         new AwsInstanceStatusCheckerTask(),
-                        new AwsInstances(stack.getId(), amazonEC2Client, new ArrayList(instances), "Running"),
+                        new AwsInstances(stack, amazonEC2Client, new ArrayList(instances), "Running"),
                         AmbariClusterConnector.POLLING_INTERVAL,
                         AmbariClusterConnector.MAX_ATTEMPTS_FOR_AMBARI_OPS);
                 updateInstanceMetadata(stack, amazonEC2Client, instanceMetaData, instances);
@@ -301,7 +301,7 @@ public class AwsConnector implements CloudPlatformConnector {
     }
 
     private void updateInstanceMetadata(Stack stack, AmazonEC2Client amazonEC2Client, Set<InstanceMetaData> instanceMetaData, Collection<String> instances) {
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         DescribeInstancesResult describeResult = amazonEC2Client.describeInstances(new DescribeInstancesRequest().withInstanceIds(instances));
         for (Reservation reservation : describeResult.getReservations()) {
             for (Instance instance : reservation.getInstances()) {

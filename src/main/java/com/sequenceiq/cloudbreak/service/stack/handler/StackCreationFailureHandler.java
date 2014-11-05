@@ -72,7 +72,7 @@ public class StackCreationFailureHandler implements Consumer<Event<StackOperatio
         String detailedMessage = stackCreationFailure.getDetailedMessage();
         stackUpdater.updateStackStatus(stackId, Status.CREATE_FAILED, detailedMessage);
         Stack stack = stackRepository.findOneWithLists(stackId);
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         LOGGER.info("Accepted {} event.", ReactorConfig.STACK_CREATE_FAILED_EVENT, stackId);
         if (stack.getCluster().getEmailNeeded()) {
             ambariClusterInstallerMailSenderService.sendFailEmail(stack.getOwner());

@@ -85,7 +85,7 @@ public abstract class AzureSimpleInstanceResourceBuilder implements
     }
 
     protected void httpResponseExceptionHandler(HttpResponseException ex, String resourceName, String user, Stack stack) {
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         if (ex.getStatusCode() != NOT_FOUND) {
             throw new InternalServerException(ex.getMessage());
         } else {

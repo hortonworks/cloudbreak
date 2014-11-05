@@ -51,7 +51,7 @@ public class GccProvisionSetup implements ProvisionSetup {
 
     @Override
     public void setupProvisioning(Stack stack) {
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         try {
             Storage storage = gccStackUtil.buildStorage((GccCredential) stack.getCredential(), stack);
             Compute compute = gccStackUtil.buildCompute((GccCredential) stack.getCredential(), stack.getName());

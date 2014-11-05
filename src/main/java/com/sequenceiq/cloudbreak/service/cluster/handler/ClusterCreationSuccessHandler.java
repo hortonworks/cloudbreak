@@ -62,7 +62,7 @@ public class ClusterCreationSuccessHandler implements Consumer<Event<ClusterCrea
         ClusterCreationSuccess clusterCreationSuccess = event.getData();
         Long clusterId = clusterCreationSuccess.getClusterId();
         Cluster cluster = clusterRepository.findById(clusterId);
-        CbLoggerFactory.buildMdvContext(cluster);
+        CbLoggerFactory.buildMdcContext(cluster);
         LOGGER.info("Accepted {} event.", ReactorConfig.CLUSTER_CREATE_SUCCESS_EVENT, clusterId);
         cluster.setStatus(Status.AVAILABLE);
         cluster.setStatusReason("");

@@ -1,18 +1,20 @@
 package com.sequenceiq.cloudbreak.service.stack.resource;
 
+import com.sequenceiq.cloudbreak.domain.Stack;
+
 public abstract class StartStopContextObject {
 
-    private Long stackId;
+    private Stack stack;
 
-    protected StartStopContextObject(Long stackId) {
-        this.stackId = stackId;
+    protected StartStopContextObject(Stack stack) {
+        this.stack = stack;
     }
 
-    public Long getStackId() {
-        return stackId;
+    public Stack getStack() {
+        return stack;
     }
 
-    public void setStackId(Long stackId) {
-        this.stackId = stackId;
+    public void setStack(Stack stack) {
+        this.stack = stack;
     }
 }

@@ -27,7 +27,7 @@ public class AwsStackUtil {
     private CrossAccountCredentialsProvider credentialsProvider;
 
     public AmazonCloudFormationClient createCloudFormationClient(Regions regions, AwsCredential credential) {
-        CbLoggerFactory.buildMdvContext(credential);
+        CbLoggerFactory.buildMdcContext(credential);
         BasicSessionCredentials basicSessionCredentials = credentialsProvider
                 .retrieveSessionCredentials(CrossAccountCredentialsProvider.DEFAULT_SESSION_CREDENTIALS_DURATION,
                         CrossAccountCredentialsProvider.DEFAULT_EXTERNAL_ID, credential);
@@ -38,7 +38,7 @@ public class AwsStackUtil {
     }
 
     public AmazonEC2Client createEC2Client(Regions regions, AwsCredential credential) {
-        CbLoggerFactory.buildMdvContext(credential);
+        CbLoggerFactory.buildMdcContext(credential);
         BasicSessionCredentials basicSessionCredentials = credentialsProvider
                 .retrieveSessionCredentials(CrossAccountCredentialsProvider.DEFAULT_SESSION_CREDENTIALS_DURATION,
                         CrossAccountCredentialsProvider.DEFAULT_EXTERNAL_ID, credential);
@@ -49,7 +49,7 @@ public class AwsStackUtil {
     }
 
     public AmazonAutoScalingClient createAutoScalingClient(Regions regions, AwsCredential credential) {
-        CbLoggerFactory.buildMdvContext(credential);
+        CbLoggerFactory.buildMdcContext(credential);
         BasicSessionCredentials basicSessionCredentials = credentialsProvider
                 .retrieveSessionCredentials(CrossAccountCredentialsProvider.DEFAULT_SESSION_CREDENTIALS_DURATION,
                         CrossAccountCredentialsProvider.DEFAULT_EXTERNAL_ID, credential);
@@ -60,7 +60,7 @@ public class AwsStackUtil {
     }
 
     public AmazonSNSClient createSnsClient(Regions region, AwsCredential credential) {
-        CbLoggerFactory.buildMdvContext(credential);
+        CbLoggerFactory.buildMdcContext(credential);
         BasicSessionCredentials basicSessionCredentials = credentialsProvider
                 .retrieveSessionCredentials(CrossAccountCredentialsProvider.DEFAULT_SESSION_CREDENTIALS_DURATION,
                         CrossAccountCredentialsProvider.DEFAULT_EXTERNAL_ID, credential);
@@ -76,7 +76,7 @@ public class AwsStackUtil {
     }
 
     public void sleep(Stack stack, int duration) {
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         try {
             Thread.sleep(duration);
         } catch (InterruptedException e) {

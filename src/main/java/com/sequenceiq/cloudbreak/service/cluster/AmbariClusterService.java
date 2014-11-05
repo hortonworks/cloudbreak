@@ -71,10 +71,10 @@ public class AmbariClusterService implements ClusterService {
     @Override
     public void create(CbUser user, Long stackId, Cluster cluster) {
         Stack stack = stackRepository.findOne(stackId);
-        CbLoggerFactory.buildMdvContext(stack);
-        LOGGER.info("Cluster requested for stack '{}' [BlueprintId: {}]", stackId, cluster.getBlueprint().getId());
+        CbLoggerFactory.buildMdcContext(stack);
+        LOGGER.info("Cluster requested [BlueprintId: {}]", cluster.getBlueprint().getId());
         if (stack.getCluster() != null) {
-            throw new BadRequestException(String.format("A cluster is already created on this stack! [stack: '%s', cluster: '%s']", stackId, stack.getCluster()
+            throw new BadRequestException(String.format("A cluster is already created on this stack! [cluster: '%s']", stack.getCluster()
                     .getName()));
         }
         cluster.setOwner(user.getUserId());
@@ -85,7 +85,7 @@ public class AmbariClusterService implements ClusterService {
             throw new DuplicateKeyValueException(cluster.getName(), ex);
         }
         stack = stackUpdater.updateStackCluster(stack.getId(), cluster);
-        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.CLUSTER_REQUESTED_EVENT, stack.getId());
+        LOGGER.info("Publishing {} event", ReactorConfig.CLUSTER_REQUESTED_EVENT);
         reactor.notify(ReactorConfig.CLUSTER_REQUESTED_EVENT, Event.wrap(stack));
     }
 
@@ -98,13 +98,12 @@ public class AmbariClusterService implements ClusterService {
     @Override
     public String getClusterJson(String ambariIp, Long stackId) {
         Stack stack = stackRepository.findOne(stackId);
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         AmbariClient ambariClient = createAmbariClient(ambariIp);
         try {
             String clusterJson = ambariClient.getClusterAsJson();
             if (clusterJson == null) {
-                throw new InternalServerException(String.format("Cluster response coming from Ambari server was null. [Stack: '%s', Ambari Server IP: '%s']",
-                        stackId, ambariIp));
+                throw new InternalServerException(String.format("Cluster response coming from Ambari server was null. [Ambari Server IP: '%s']", ambariIp));
             }
             return clusterJson;
         } catch (HttpResponseException e) {
@@ -119,10 +118,10 @@ public class AmbariClusterService implements ClusterService {
     @Override
     public void updateHosts(Long stackId, Set<HostGroupAdjustmentJson> hostGroupAdjustments) {
         Stack stack = stackRepository.findOneWithLists(stackId);
-        CbLoggerFactory.buildMdvContext(stack.getCluster());
+        CbLoggerFactory.buildMdcContext(stack.getCluster());
         boolean decommisionRequest = validateRequest(stack, hostGroupAdjustments);
-        LOGGER.info("Cluster update requested for stack '{}' [BlueprintId: {}]", stackId, stack.getCluster().getBlueprint().getId());
-        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.UPDATE_AMBARI_HOSTS_REQUEST_EVENT, stack.getId());
+        LOGGER.info("Cluster update requested [BlueprintId: {}]", stack.getCluster().getBlueprint().getId());
+        LOGGER.info("Publishing {} event", ReactorConfig.UPDATE_AMBARI_HOSTS_REQUEST_EVENT);
         reactor.notify(ReactorConfig.UPDATE_AMBARI_HOSTS_REQUEST_EVENT, Event.wrap(
                 new UpdateAmbariHostsRequest(stackId, hostGroupAdjustments, decommisionRequest)));
     }
@@ -131,7 +130,7 @@ public class AmbariClusterService implements ClusterService {
     public void updateStatus(Long stackId, StatusRequest statusRequest) {
         Stack stack = stackRepository.findOne(stackId);
         Cluster cluster = stack.getCluster();
-        CbLoggerFactory.buildMdvContext(stack.getCluster());
+        CbLoggerFactory.buildMdcContext(stack.getCluster());
         long clusterId = cluster.getId();
         Status clusterStatus = cluster.getStatus();
         Status stackStatus = stack.getStatus();
@@ -151,7 +150,7 @@ public class AmbariClusterService implements ClusterService {
                 }
                 cluster.setStatus(Status.START_IN_PROGRESS);
                 clusterRepository.save(cluster);
-                LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.CLUSTER_STATUS_UPDATE_EVENT, stack.getId());
+                LOGGER.info("Publishing {} event", ReactorConfig.CLUSTER_STATUS_UPDATE_EVENT);
                 reactor.notify(ReactorConfig.CLUSTER_STATUS_UPDATE_EVENT,
                         Event.wrap(new ClusterStatusUpdateRequest(stack.getId(), statusRequest)));
             }
@@ -166,7 +165,7 @@ public class AmbariClusterService implements ClusterService {
             }
             cluster.setStatus(Status.STOP_IN_PROGRESS);
             clusterRepository.save(cluster);
-            LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.CLUSTER_STATUS_UPDATE_EVENT, stack.getId());
+            LOGGER.info("Publishing {} event", ReactorConfig.CLUSTER_STATUS_UPDATE_EVENT);
             reactor.notify(ReactorConfig.CLUSTER_STATUS_UPDATE_EVENT,
                     Event.wrap(new ClusterStatusUpdateRequest(stack.getId(), statusRequest)));
         }
@@ -178,7 +177,7 @@ public class AmbariClusterService implements ClusterService {
     }
 
     private boolean validateRequest(Stack stack, Set<HostGroupAdjustmentJson> hostGroupAdjustments) {
-        CbLoggerFactory.buildMdvContext(stack.getCluster());
+        CbLoggerFactory.buildMdcContext(stack.getCluster());
         int sumScalingAdjustments = 0;
         boolean positive = false;
         boolean negative = false;

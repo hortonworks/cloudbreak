@@ -10,9 +10,10 @@ public class CloudBreakLoggerFactory {
 
     }
 
-    public static void buildMdvContext() {
+    public static void buildMdcContext() {
         MDC.put(LoggerContextKey.OWNER_ID.toString(), "cloudbreak");
         MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), "cloudbreakLog");
+        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), "undefined");
         MDC.put(LoggerContextKey.RESOURCE_NAME.toString(), "cb");
     }
 }

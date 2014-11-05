@@ -42,7 +42,7 @@ public class UpdateAmbariHostsFailureHandler implements Consumer<Event<UpdateAmb
     public void accept(Event<UpdateAmbariHostsFailure> event) {
         UpdateAmbariHostsFailure data = event.getData();
         Cluster cluster = clusterRepository.findById(data.getClusterId());
-        CbLoggerFactory.buildMdvContext(cluster);
+        CbLoggerFactory.buildMdcContext(cluster);
         LOGGER.info("Accepted {} event.", ReactorConfig.UPDATE_AMBARI_HOSTS_FAILED_EVENT);
         cluster.setStatus(Status.AVAILABLE);
         cluster.setStatusReason(data.getDetailedMessage());

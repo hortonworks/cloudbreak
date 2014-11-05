@@ -22,7 +22,7 @@ public class AwsInstanceStatusCheckerTask implements StatusCheckerTask<AwsInstan
         for (Reservation reservation : result.getReservations()) {
             for (Instance instance : reservation.getInstances()) {
                 if (!instancesStatus.equalsIgnoreCase(instance.getState().getName())) {
-                    LOGGER.info("AWS instance is not in {} state, polling stack: {}", instancesStatus, instances.getStackId());
+                    LOGGER.info("AWS instance is not in {} state, polling stack: {}", instancesStatus, instances.getStack().getId());
                     return false;
                 }
             }
@@ -32,12 +32,12 @@ public class AwsInstanceStatusCheckerTask implements StatusCheckerTask<AwsInstan
 
     @Override
     public void handleTimeout(AwsInstances t) {
-        throw new InternalServerException(String.format("AWS instances could not reach the desired status: %s on stack: %s", t, t.getStackId()));
+        throw new InternalServerException(String.format("AWS instances could not reach the desired status: %s on stack: %s", t, t.getStack().getId()));
     }
 
     @Override
     public String successMessage(AwsInstances t) {
-        return String.format("AWS instances successfully reached status: %s on stack: %s", t.getStatus(), t.getStackId());
+        return String.format("AWS instances successfully reached status: %s on stack: %s", t.getStatus(), t.getStack().getId());
     }
 
 }

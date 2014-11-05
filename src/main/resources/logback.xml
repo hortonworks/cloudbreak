@@ -4,7 +4,7 @@
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{5} - [%X{owner:-spring}] [type:%X{resourceType:-springLog}] [id:%X{resourceId:-0}] [name:%X{resourceName:-}] %msg%n</pattern>
+            <pattern>%date{ISO8601} [%thread] %method:%line %-5level %logger{5} - [owner:%X{owner:-spring}] [type:%X{resourceType:-springLog}] [id:%X{resourceId:-}] [name:%X{resourceName:-}] %msg%n</pattern>
         </encoder>
     </appender>
 

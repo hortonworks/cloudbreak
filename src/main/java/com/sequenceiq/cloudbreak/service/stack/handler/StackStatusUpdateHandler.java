@@ -86,7 +86,7 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
         StatusRequest statusRequest = statusUpdateRequest.getStatusRequest();
         long stackId = statusUpdateRequest.getStackId();
         Stack stack = stackRepository.findOneWithLists(stackId);
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         if (StatusRequest.STOPPED.equals(statusRequest)) {
             boolean stopped = true;
             if (cloudPlatform.isWithTemplate()) {
@@ -125,10 +125,10 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
                 }
             }
             if (stopped) {
-                LOGGER.info("Update stack {} state to: {}", stackId, Status.STOPPED);
+                LOGGER.info("Update stack state to: {}", Status.STOPPED);
                 stackUpdater.updateStackStatus(stackId, Status.STOPPED);
             } else {
-                LOGGER.info("Update stack {} state to: {}", stackId, Status.STOP_FAILED);
+                LOGGER.info("Update stack state to: {}", Status.STOP_FAILED);
                 stackUpdater.updateStackStatus(stackId, Status.STOP_FAILED);
             }
         } else {
@@ -171,7 +171,7 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
             if (started) {
                 waitForAmbariToStart(stack);
                 Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
-                LOGGER.info("Update stack {} state to: {}", stackId, Status.AVAILABLE);
+                LOGGER.info("Update stack state to: {}", Status.AVAILABLE);
                 stackUpdater.updateStackStatus(stackId, Status.AVAILABLE);
                 if (cluster != null && Status.START_REQUESTED.equals(cluster.getStatus())) {
                     boolean hostsJoined = waitForHostsToJoin(stack);
@@ -185,7 +185,7 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
                     }
                 }
             } else {
-                LOGGER.info("Update stack {} state to: {}", stackId, Status.START_FAILED);
+                LOGGER.info("Update stack state to: {}", Status.START_FAILED);
                 stackUpdater.updateStackStatus(stackId, Status.START_FAILED);
             }
         }
@@ -202,7 +202,7 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
     private boolean waitForHostsToJoin(Stack stack) {
         AmbariHostsJoinStatusCheckerTask ambariHostsJoinStatusCheckerTask = new AmbariHostsJoinStatusCheckerTask();
         AmbariHosts ambariHosts =
-                new AmbariHosts(stack.getId(), new AmbariClient(stack.getAmbariIp()), stack.getNodeCount() * stack.getMultiplier());
+                new AmbariHosts(stack, new AmbariClient(stack.getAmbariIp()), stack.getNodeCount() * stack.getMultiplier());
         ambariHostJoin.pollWithTimeout(
                 ambariHostsJoinStatusCheckerTask,
                 ambariHosts,

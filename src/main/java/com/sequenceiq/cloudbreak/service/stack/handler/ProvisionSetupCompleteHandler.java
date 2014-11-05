@@ -33,7 +33,7 @@ public class ProvisionSetupCompleteHandler implements Consumer<Event<ProvisionSe
         CloudPlatform cloudPlatform = provisionSetupComplete.getCloudPlatform();
         Long stackId = provisionSetupComplete.getStackId();
         Stack stack = stackRepository.findById(stackId);
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         LOGGER.info("Accepted {} event.", ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT, stackId);
         provisionContext.buildStack(cloudPlatform, stackId, provisionSetupComplete.getSetupProperties(), provisionSetupComplete.getUserDataParams());
     }

@@ -36,13 +36,13 @@ public class ProvisionSetupContext {
 
     public void setupProvisioning(CloudPlatform cloudPlatform, Long stackId) {
         Stack stack = stackRepository.findById(stackId);
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         try {
             ProvisionSetup provisionSetup = provisionSetups.get(cloudPlatform);
             provisionSetup.setupProvisioning(stackRepository.findById(stackId));
         } catch (Exception e) {
             LOGGER.error("Unhandled exception occured while setting up provisioning.", e);
-            LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_CREATE_FAILED_EVENT, stackId);
+            LOGGER.info("Publishing {} event", ReactorConfig.STACK_CREATE_FAILED_EVENT);
             reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(new StackOperationFailure(stackId,
                     "Internal server error occured while setting up provisioning.")));
         }

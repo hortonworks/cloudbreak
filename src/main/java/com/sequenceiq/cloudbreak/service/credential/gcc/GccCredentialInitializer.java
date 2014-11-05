@@ -22,13 +22,14 @@ public class GccCredentialInitializer {
     private GccStackUtil gccStackUtil;
 
     public GccCredential init(GccCredential gccCredential) {
+        CbLoggerFactory.buildMdcContext(gccCredential);
         rsaPublicKeyValidator.validate(gccCredential);
         validateCredential(gccCredential);
         return gccCredential;
     }
 
     private void validateCredential(GccCredential gccCredential) {
-        CbLoggerFactory.buildMdvContext(gccCredential);
+        CbLoggerFactory.buildMdcContext(gccCredential);
         try {
             Compute compute = gccStackUtil.buildCompute(gccCredential, "myapp");
             if (compute == null) {

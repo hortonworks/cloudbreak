@@ -18,25 +18,25 @@ public class CbLoggerFactory {
 
     }
 
-    public static void buildMdvContext() {
-        buildMdvContext(null);
+    public static void buildMdcContext() {
+        buildMdcContext(null);
     }
 
-    public static void buildMdvContext(Object object) {
+    public static void buildMdcContext(Object object) {
         if (object == null) {
-            CloudBreakLoggerFactory.buildMdvContext();
+            CloudBreakLoggerFactory.buildMdcContext();
             return;
         }
         if (object instanceof Credential) {
-            CredentialLoggerFactory.buildMdvContext((Credential) object);
+            CredentialLoggerFactory.buildMdcContext((Credential) object);
         } else if (object instanceof Stack) {
-            StackLoggerFactory.buildMdvContext((Stack) object);
+            StackLoggerFactory.buildMdcContext((Stack) object);
         } else if (object instanceof Cluster) {
-            ClusterLoggerFactory.buildMdvContext((Cluster) object);
+            ClusterLoggerFactory.buildMdcContext((Cluster) object);
         } else if (object instanceof Template) {
-            TemplateLoggerFactory.buildMdvContext((Template) object);
+            TemplateLoggerFactory.buildMdcContext((Template) object);
         } else if (object instanceof Blueprint) {
-            BlueprintLoggerFactory.buildMdvContext((Blueprint) object);
+            BlueprintLoggerFactory.buildMdcContext((Blueprint) object);
         } else {
             throw new UnsupportedOperationException(String.format("%s class not supported for logging.", object.getClass()));
         }

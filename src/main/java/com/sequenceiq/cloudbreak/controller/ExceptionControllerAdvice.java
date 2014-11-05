@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.sequenceiq.cloudbreak.controller.json.ExceptionResult;
 import com.sequenceiq.cloudbreak.controller.json.ValidationResult;
+import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 
 @ControllerAdvice

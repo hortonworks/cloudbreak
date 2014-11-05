@@ -38,13 +38,12 @@ public class RetryingStackUpdater {
 
     public Stack updateStackStatus(Long stackId, Status status, String statusReason) {
         Stack stack = stackRepository.findById(stackId);
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         int attempt = 1;
         try {
             return doUpdateStackStatus(stackId, status, statusReason);
         } catch (OptimisticLockException | OptimisticLockingFailureException e) {
-            LOGGER.info("Failed to update stack status. [id: '{}', attempt: '{}', Cause: {}]. Trying to save it again.",
-                    stackId, attempt++, e.getClass().getSimpleName());
+            LOGGER.info("Failed to update stack status. [attempt: '{}', Cause: {}]. Trying to save it again.", attempt++, e.getClass().getSimpleName());
             if (attempt <= MAX_RETRIES) {
                 return doUpdateStackStatus(stackId, status, statusReason);
             } else {
@@ -55,13 +54,12 @@ public class RetryingStackUpdater {
 
     public Stack updateStackStatusReason(Long stackId, String statusReason) {
         Stack stack = stackRepository.findById(stackId);
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         int attempt = 1;
         try {
             return doUpdateStackStatusReason(stackId, statusReason);
         } catch (OptimisticLockException | OptimisticLockingFailureException e) {
-            LOGGER.info("Failed to update stack status. [id: '{}', attempt: '{}', Cause: {}]. Trying to save it again.",
-                    stackId, attempt++, e.getClass().getSimpleName());
+            LOGGER.info("Failed to update stack status. [attempt: '{}', Cause: {}]. Trying to save it again.", attempt++, e.getClass().getSimpleName());
             if (attempt <= MAX_RETRIES) {
                 return doUpdateStackStatusReason(stackId, statusReason);
             } else {
@@ -72,13 +70,12 @@ public class RetryingStackUpdater {
 
     public Stack updateStackMetaData(Long stackId, Set<InstanceMetaData> instanceMetaData) {
         Stack stack = stackRepository.findById(stackId);
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         int attempt = 1;
         try {
             return doUpdateMetaData(stackId, instanceMetaData);
         } catch (OptimisticLockException | OptimisticLockingFailureException e) {
-            LOGGER.info("Failed to update stack status. [id: '{}', attempt: '{}', Cause: {}]. Trying to save it again.",
-                    stackId, attempt++, e.getClass().getSimpleName());
+            LOGGER.info("Failed to update stack status. [attempt: '{}', Cause: {}]. Trying to save it again.", attempt++, e.getClass().getSimpleName());
             if (attempt <= MAX_RETRIES) {
                 return doUpdateMetaData(stackId, instanceMetaData);
             } else {
@@ -89,13 +86,12 @@ public class RetryingStackUpdater {
 
     public Stack updateStackResources(Long stackId, Set<Resource> resources) {
         Stack stack = stackRepository.findById(stackId);
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         int attempt = 1;
         try {
             return doUpdateResources(stackId, resources);
         } catch (OptimisticLockException | OptimisticLockingFailureException e) {
-            LOGGER.info("Failed to update stack resources. [id: '{}', attempt: '{}', Cause: {}]. Trying to save it again.",
-                    stackId, attempt++, e.getClass().getSimpleName());
+            LOGGER.info("Failed to update stack resources. [attempt: '{}', Cause: {}]. Trying to save it again.", attempt++, e.getClass().getSimpleName());
             if (attempt <= MAX_RETRIES) {
                 return doUpdateResources(stackId, resources);
             } else {
@@ -106,13 +102,12 @@ public class RetryingStackUpdater {
 
     public Stack updateAmbariIp(Long stackId, String ambariIp) {
         Stack stack = stackRepository.findById(stackId);
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         int attempt = 1;
         try {
             return doUpdateAmbariIp(stackId, ambariIp);
         } catch (OptimisticLockException | OptimisticLockingFailureException e) {
-            LOGGER.info("Failed to update stack's Ambari IP. [id: '{}', attempt: '{}', Cause: {}]. Trying to save it again.",
-                    stackId, attempt++, e.getClass().getSimpleName());
+            LOGGER.info("Failed to update stack's Ambari IP. [attempt: '{}', Cause: {}]. Trying to save it again.", attempt++, e.getClass().getSimpleName());
             if (attempt <= MAX_RETRIES) {
                 return doUpdateAmbariIp(stackId, ambariIp);
             } else {
@@ -123,14 +118,14 @@ public class RetryingStackUpdater {
 
     public Stack updateStackCluster(Long stackId, Cluster cluster) {
         Stack stack = stackRepository.findById(stackId);
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         int attempt = 1;
         try {
             return doUpdateStackCluster(stackId, cluster);
         } catch (OptimisticLockException | OptimisticLockingFailureException e) {
             if (attempt <= MAX_RETRIES) {
-                LOGGER.info("Failed to update stack while creating corresponding cluster. [id: '{}', attempt: '{}', Cause: {}]. Trying to save it again.",
-                        stackId, attempt++, e.getClass().getSimpleName());
+                LOGGER.info("Failed to update stack while creating corresponding cluster. [attempt: '{}', Cause: {}]. Trying to save it again.",
+                        attempt++, e.getClass().getSimpleName());
                 return doUpdateStackCluster(stackId, cluster);
             } else {
                 throw new InternalServerException(String.format("Failed to update stack '%s' in 5 attempts. (while trying to add cluster)", stackId), e);
@@ -140,14 +135,14 @@ public class RetryingStackUpdater {
 
     public Stack updateStackCreateComplete(Long stackId) {
         Stack stack = stackRepository.findById(stackId);
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         int attempt = 1;
         try {
             return doUpdateStackCreateComplete(stackId);
         } catch (OptimisticLockException | OptimisticLockingFailureException e) {
             if (attempt <= MAX_RETRIES) {
-                LOGGER.info("Failed to update stack while trying to set 'CF stack completed'. [id: '{}', attempt: '{}', Cause: {}]. Trying to save it again.",
-                        stackId, attempt++, e.getClass().getSimpleName());
+                LOGGER.info("Failed to update stack while trying to set 'CF stack completed'. [attempt: '{}', Cause: {}]. Trying to save it again.",
+                        attempt++, e.getClass().getSimpleName());
                 return doUpdateStackCreateComplete(stackId);
             } else {
                 throw new InternalServerException(String.format("Failed to update stack '%s' in 5 attempts. (while trying to set 'CF stack completed')",
@@ -158,14 +153,14 @@ public class RetryingStackUpdater {
 
     public Stack updateMetadataReady(Long stackId, boolean ready) {
         Stack stack = stackRepository.findById(stackId);
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         int attempt = 1;
         try {
             return doUpdateMetadataReady(stackId, ready);
         } catch (OptimisticLockException | OptimisticLockingFailureException e) {
             if (attempt <= MAX_RETRIES) {
-                LOGGER.info("Failed to update stack while trying to set 'metadataReady'. [id: '{}', attempt: '{}', Cause: {}]. Trying to save it again.",
-                        stackId, attempt++, e.getClass().getSimpleName());
+                LOGGER.info("Failed to update stack while trying to set 'metadataReady'. [attempt: '{}', Cause: {}]. Trying to save it again.",
+                        attempt++, e.getClass().getSimpleName());
                 return doUpdateMetadataReady(stackId, ready);
             } else {
                 throw new InternalServerException(String.format("Failed to update stack '%s' in 5 attempts. (while trying to set 'metadataReady')",
@@ -176,14 +171,14 @@ public class RetryingStackUpdater {
 
     public Stack updateNodeCount(Long stackId, Integer nodeCount) {
         Stack stack = stackRepository.findById(stackId);
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         int attempt = 1;
         try {
             return doUpdateNodeCount(stackId, nodeCount);
         } catch (OptimisticLockException | OptimisticLockingFailureException e) {
             if (attempt <= MAX_RETRIES) {
-                LOGGER.info("Failed to update stack while trying to set 'nodecount'. [id: '{}', attempt: '{}', Cause: {}]. Trying to save it again.",
-                        stackId, attempt++, e.getClass().getSimpleName());
+                LOGGER.info("Failed to update stack while trying to set 'nodecount'. [attempt: '{}', Cause: {}]. Trying to save it again.",
+                        attempt++, e.getClass().getSimpleName());
                 return doUpdateStackCreateComplete(stackId);
             } else {
                 throw new InternalServerException(String.format("Failed to update stack '%s' in 5 attempts. (while trying to set 'nodecount')",
@@ -194,7 +189,7 @@ public class RetryingStackUpdater {
 
     private Stack doUpdateStackStatus(Long stackId, Status status, String statusReason) {
         Stack stack = stackRepository.findById(stackId);
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         if (status != null) {
             stack.setStatus(status);
         }
@@ -202,7 +197,7 @@ public class RetryingStackUpdater {
             stack.setStatusReason(statusReason);
         }
         stack = stackRepository.save(stack);
-        LOGGER.info("Updated stack: [stack: '{}', status: '{}', statusReason: '{}'].", stackId, status.name(), statusReason);
+        LOGGER.info("Updated stack: [status: '{}', statusReason: '{}'].", status.name(), statusReason);
 
         cloudbreakEventService.fireCloudbreakEvent(stackId, status.name(), statusReason);
         return stack;
@@ -210,75 +205,75 @@ public class RetryingStackUpdater {
 
     private Stack doUpdateStackStatusReason(Long stackId, String statusReason) {
         Stack stack = stackRepository.findById(stackId);
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         if (statusReason != null) {
             stack.setStatusReason(statusReason);
         }
         stack = stackRepository.save(stack);
-        LOGGER.info("Updated stack: [stack: '{}', statusReason: '{}'].", stackId, statusReason);
+        LOGGER.info("Updated stack: [statusReason: '{}'].", statusReason);
         return stack;
     }
 
     private Stack doUpdateMetaData(Long stackId, Set<InstanceMetaData> instanceMetaData) {
         Stack stack = stackRepository.findById(stackId);
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         stack.setInstanceMetaData(instanceMetaData);
         stack = stackRepository.save(stack);
-        LOGGER.info("Updated stack metadata: [stack: '{}'].", stackId);
+        LOGGER.info("Updated stack metadata.");
         return stack;
     }
 
     private Stack doUpdateAmbariIp(Long stackId, String ambariIp) {
         Stack stack = stackRepository.findById(stackId);
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         stack.setAmbariIp(ambariIp);
         stack = stackRepository.save(stack);
-        LOGGER.info("Updated stack: [stack: '{}' ambariIp: '{}'].", stackId, ambariIp);
+        LOGGER.info("Updated stack: [ambariIp: '{}'].", ambariIp);
         return stack;
     }
 
     private Stack doUpdateNodeCount(Long stackId, Integer nodeCount) {
         Stack stack = stackRepository.findById(stackId);
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         stack.setNodeCount(nodeCount);
         stack = stackRepository.save(stack);
-        LOGGER.info("Updated stack: [stack: '{}' nodeCount: '{}'].", stackId, nodeCount);
+        LOGGER.info("Updated stack: [nodeCount: '{}'].", nodeCount);
         return stack;
     }
 
     private Stack doUpdateStackCluster(Long stackId, Cluster cluster) {
         Stack stack = stackRepository.findById(stackId);
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(cluster);
         stack.setCluster(cluster);
         stack = stackRepository.save(stack);
-        LOGGER.info("Saved cluster '{}' for stack '{}'.", cluster.getId(), stackId);
+        LOGGER.info("Saved cluster '{}' for stack.", cluster.getId());
         return stack;
     }
 
     private Stack doUpdateStackCreateComplete(Long stackId) {
         Stack stack = stackRepository.findById(stackId);
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         stack.setStackCompleted(true);
         stack = stackRepository.save(stack);
-        LOGGER.info("Updated stack: [stack: '{}' cfStackCompleted: 'true'].", stackId);
+        LOGGER.info("Updated stack: [cfStackCompleted: 'true'].");
         return stack;
     }
 
     private Stack doUpdateMetadataReady(Long stackId, boolean ready) {
         Stack stack = stackRepository.findById(stackId);
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         stack.setMetadataReady(ready);
         stack = stackRepository.save(stack);
-        LOGGER.info("Updated stack: [stack: '{}' metadataReady: 'true'].", stackId);
+        LOGGER.info("Updated stack: [metadataReady: 'true'].");
         return stack;
     }
 
     private Stack doUpdateResources(Long stackId, Set<Resource> resources) {
         Stack stack = stackRepository.findById(stackId);
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         stack.setResources(resources);
         stack = stackRepository.save(stack);
-        LOGGER.info("Updated stack resources: [stack: '{}', status: '{}', statusReason: '{}'].", stackId);
+        LOGGER.info("Updated stack resources: [status: '{}', statusReason: '{}'].");
         return stack;
     }
 

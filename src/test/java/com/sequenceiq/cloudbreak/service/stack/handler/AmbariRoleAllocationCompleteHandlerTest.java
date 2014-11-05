@@ -1,7 +1,8 @@
 package com.sequenceiq.cloudbreak.service.stack.handler;
 
-import com.sequenceiq.cloudbreak.service.stack.event.AmbariRoleAllocationComplete;
-import com.sequenceiq.cloudbreak.service.stack.flow.AmbariStartupListener;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -9,10 +10,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.service.stack.event.AmbariRoleAllocationComplete;
+import com.sequenceiq.cloudbreak.service.stack.flow.AmbariStartupListener;
+
 import reactor.event.Event;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.times;
 
 public class AmbariRoleAllocationCompleteHandlerTest {
     public static final long STACK_ID = 1L;
@@ -44,6 +46,6 @@ public class AmbariRoleAllocationCompleteHandlerTest {
     }
 
     private Event<AmbariRoleAllocationComplete> createEvent() {
-        return new Event<AmbariRoleAllocationComplete>(new AmbariRoleAllocationComplete(STACK_ID, DUMMY_IP));
+        return new Event<AmbariRoleAllocationComplete>(new AmbariRoleAllocationComplete(new Stack(), DUMMY_IP));
     }
 }

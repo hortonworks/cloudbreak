@@ -44,7 +44,7 @@ public abstract class GccSimpleNetworkResourceBuilder implements
     }
 
     protected void exceptionHandler(GoogleJsonResponseException ex, String name, Stack stack) {
-        CbLoggerFactory.buildMdvContext(stack);
+        CbLoggerFactory.buildMdcContext(stack);
         if (ex.getDetails().get("code").equals(NOT_FOUND)) {
             LOGGER.info(String.format("Resource was delete with name: %s", name));
         } else {

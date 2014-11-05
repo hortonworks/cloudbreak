@@ -30,8 +30,8 @@ public class UpdateAmbariHostsRequestHandler implements Consumer<Event<UpdateAmb
     public void accept(Event<UpdateAmbariHostsRequest> event) {
         UpdateAmbariHostsRequest request = event.getData();
         Stack stack = stackRepository.findById(request.getStackId());
-        CbLoggerFactory.buildMdvContext(stack);
-        LOGGER.info("Accepted {} event.", ReactorConfig.UPDATE_AMBARI_HOSTS_REQUEST_EVENT, request.getStackId());
+        CbLoggerFactory.buildMdcContext(stack);
+        LOGGER.info("Accepted {} event.", ReactorConfig.UPDATE_AMBARI_HOSTS_REQUEST_EVENT);
         if (request.isDecommision()) {
             ambariClusterConnector.decommisionAmbariNodes(request.getStackId(), request.getHosts());
         } else {

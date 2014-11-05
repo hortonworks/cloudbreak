@@ -12,13 +12,14 @@ public class TemplateLoggerFactory {
 
     }
 
-    public static void buildMdvContext(Template template) {
+    public static void buildMdcContext(Template template) {
         if (template.getOwner() != null) {
             MDC.put(LoggerContextKey.OWNER_ID.toString(), template.getOwner());
         }
         MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), LoggerResourceType.TEMPLATE.toString());
+        MDC.put(LoggerContextKey.RESOURCE_NAME.toString(), template.getName());
         if (template.getId() == null) {
-            MDC.put(LoggerContextKey.RESOURCE_NAME.toString(), template.getName().toString());
+            MDC.put(LoggerContextKey.RESOURCE_ID.toString(), "undefined");
         } else {
             MDC.put(LoggerContextKey.RESOURCE_ID.toString(), template.getId().toString());
         }
