@@ -7,6 +7,9 @@ public enum LoggerResourceType {
     TEMPLATE("TEMPLATE"),
     BLUEPRINT("BLUEPRINT"),
     CREDENTIAL("CREDENTIAL"),
+    EVENT("EVENT"),
+    EVENT_DATA("EVENT_DATA"),
+    USAGE("USAGE"),
     CLOUDBREAK_APPLICATION("CLOUDBREAK_APPLICATION");
 
     private final String value;

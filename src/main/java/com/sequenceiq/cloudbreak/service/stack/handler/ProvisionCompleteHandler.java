@@ -8,12 +8,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
+import com.sequenceiq.cloudbreak.domain.BillingStatus;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupContext;
 
@@ -34,6 +36,9 @@ public class ProvisionCompleteHandler implements Consumer<Event<ProvisionComplet
     @Autowired
     private StackRepository stackRepository;
 
+    @Autowired
+    private CloudbreakEventService cloudbreakEventService;
+
     @Override
     public void accept(Event<ProvisionComplete> event) {
         ProvisionComplete stackCreateComplete = event.getData();
@@ -45,6 +50,7 @@ public class ProvisionCompleteHandler implements Consumer<Event<ProvisionComplet
         Set<Resource> resourcesSet = event.getData().getResources();
         retryingStackUpdater.updateStackResources(stackId, resourcesSet);
         metadataSetupContext.setupMetadata(cloudPlatform, stackId);
+        cloudbreakEventService.fireCloudbreakEvent(stackId, BillingStatus.BILLING_STARTED.name(), "Provision of stack is successfully finished");
     }
 
 }

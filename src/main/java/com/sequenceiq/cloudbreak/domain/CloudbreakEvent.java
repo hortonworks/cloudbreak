@@ -14,11 +14,12 @@ import javax.persistence.Table;
         @NamedQuery(
                 name = "CloudbreakEvent.cloudbreakEvents",
                 query = "SELECT cbe FROM CloudbreakEvent cbe "
-                        + "WHERE cbe.userName= :user"),
+                        + "WHERE cbe.owner= :owner ORDER BY cbe.eventTimestamp ASC"),
         @NamedQuery(
                 name = "CloudbreakEvent.cloudbreakEventsSince",
                 query = "SELECT cbe FROM CloudbreakEvent cbe "
-                        + "WHERE cbe.userName= :user AND cbe.eventTimestamp > :since")
+                        + "WHERE cbe.owner= :owner AND cbe.eventTimestamp > :since "
+                        + "ORDER BY cbe.eventTimestamp ASC")
 })
 @Table(name = "cloudbreakevent")
 public class CloudbreakEvent implements ProvisionEntity {
@@ -30,10 +31,8 @@ public class CloudbreakEvent implements ProvisionEntity {
     private String eventType;
     private Date eventTimestamp;
     private String eventMessage;
-    private String userName;
-    private long userId;
-    private String accountName;
-    private long accountId;
+    private String owner;
+    private String account;
     private String cloud;
     private String region;
     private String vmType;
@@ -73,36 +72,20 @@ public class CloudbreakEvent implements ProvisionEntity {
         this.eventMessage = eventMessage;
     }
 
-    public String getUserName() {
-        return userName;
+    public String getOwner() {
+        return owner;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setOwner(String owner) {
+        this.owner = owner;
     }
 
-    public long getUserId() {
-        return userId;
+    public String getAccount() {
+        return account;
     }
 
-    public void setUserId(long userId) {
-        this.userId = userId;
-    }
-
-    public String getAccountName() {
-        return accountName;
-    }
-
-    public void setAccountName(String accountName) {
-        this.accountName = accountName;
-    }
-
-    public long getAccountId() {
-        return accountId;
-    }
-
-    public void setAccountId(long accountId) {
-        this.accountId = accountId;
+    public void setAccount(String account) {
+        this.account = account;
     }
 
     public String getCloud() {
@@ -160,10 +143,8 @@ public class CloudbreakEvent implements ProvisionEntity {
         sb.append(", eventType='").append(eventType).append('\'');
         sb.append(", eventTimestamp=").append(eventTimestamp);
         sb.append(", eventMessage='").append(eventMessage).append('\'');
-        sb.append(", userName='").append(userName).append('\'');
-        sb.append(", userId=").append(userId);
-        sb.append(", accountName='").append(accountName).append('\'');
-        sb.append(", accountId=").append(accountId);
+        sb.append(", owner='").append(owner).append('\'');
+        sb.append(", account='").append(account).append('\'');
         sb.append(", cloud='").append(cloud).append('\'');
         sb.append(", region='").append(region).append('\'');
         sb.append(", vmType='").append(vmType).append('\'');

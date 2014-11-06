@@ -5,10 +5,8 @@ public class CloudbreakEventsJson implements JsonEntity {
     private String eventType;
     private long eventTimestamp;
     private String eventMessage;
-    private String userName;
-    private long userId;
-    private String accountName;
-    private long accountId;
+    private String owner;
+    private String account;
     private String cloud;
     private String region;
     private String vmType;
@@ -39,36 +37,20 @@ public class CloudbreakEventsJson implements JsonEntity {
         this.eventMessage = eventMessage;
     }
 
-    public String getUserName() {
-        return userName;
+    public String getOwner() {
+        return owner;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setOwner(String owner) {
+        this.owner = owner;
     }
 
-    public long getUserId() {
-        return userId;
+    public String getAccount() {
+        return account;
     }
 
-    public void setUserId(long userId) {
-        this.userId = userId;
-    }
-
-    public String getAccountName() {
-        return accountName;
-    }
-
-    public void setAccountName(String accountName) {
-        this.accountName = accountName;
-    }
-
-    public long getAccountId() {
-        return accountId;
-    }
-
-    public void setAccountId(long accountId) {
-        this.accountId = accountId;
+    public void setAccount(String account) {
+        this.account = account;
     }
 
     public String getCloud() {
@@ -109,24 +91,5 @@ public class CloudbreakEventsJson implements JsonEntity {
 
     public void setBlueprintId(long blueprintId) {
         this.blueprintId = blueprintId;
-    }
-
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("CloudbreakEventsJson{");
-        sb.append("eventType='").append(eventType).append('\'');
-        sb.append(", eventTimestamp=").append(eventTimestamp);
-        sb.append(", eventMessage='").append(eventMessage).append('\'');
-        sb.append(", userName='").append(userName).append('\'');
-        sb.append(", userId=").append(userId);
-        sb.append(", accountName='").append(accountName).append('\'');
-        sb.append(", accountId=").append(accountId);
-        sb.append(", cloud='").append(cloud).append('\'');
-        sb.append(", region='").append(region).append('\'');
-        sb.append(", vmType='").append(vmType).append('\'');
-        sb.append(", blueprintName='").append(blueprintName).append('\'');
-        sb.append(", blueprintId=").append(blueprintId);
-        sb.append('}');
-        return sb.toString();
     }
 }

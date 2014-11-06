@@ -32,21 +32,20 @@ public class CloudbreakUsageController {
             @RequestParam(value = "zone", required = false) String zone,
             @RequestParam(value = "vmtype", required = false) String vmtype,
             @RequestParam(value = "hours", required = false) String hours) {
-        List<CloudbreakUsageJson> usages = cloudbreakUsagesFacade.getUsagesForDeployer(user, since, userId, accountId, cloud, zone, vmtype, hours);
-        return new ResponseEntity<>(HttpStatus.OK);
+        List<CloudbreakUsageJson> usages = cloudbreakUsagesFacade.getUsagesFor(accountId, userId, since, cloud, zone, vmtype, hours);
+        return new ResponseEntity<>(usages, HttpStatus.OK);
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/accounts/usages")
+    @RequestMapping(method = RequestMethod.GET, value = "/account/usages")
     @ResponseBody
     public ResponseEntity<List<CloudbreakUsageJson>> accountUsages(@ModelAttribute("user") CbUser user,
             @RequestParam(value = "since", required = false) Long since,
             @RequestParam(value = "user", required = false) String userId,
-            @RequestParam(value = "account", required = false) String accountId,
             @RequestParam(value = "cloud", required = false) String cloud,
             @RequestParam(value = "zone", required = false) String zone,
             @RequestParam(value = "vmtype", required = false) String vmtype,
             @RequestParam(value = "hours", required = false) String hours) {
-        List<CloudbreakUsageJson> usages = cloudbreakUsagesFacade.getUsagesForAccount(user.getAccount(), since, userId, cloud, zone, vmtype, hours);
+        List<CloudbreakUsageJson> usages = cloudbreakUsagesFacade.getUsagesFor(user.getAccount(), userId, since, cloud, zone, vmtype, hours);
         return new ResponseEntity<>(usages, HttpStatus.OK);
     }
 
@@ -54,20 +53,18 @@ public class CloudbreakUsageController {
     @ResponseBody
     public ResponseEntity<List<CloudbreakUsageJson>> userUsages(@ModelAttribute("user") CbUser user,
             @RequestParam(value = "since", required = false) Long since,
-            @RequestParam(value = "user", required = false) String userId,
-            @RequestParam(value = "account", required = false) String accountId,
             @RequestParam(value = "cloud", required = false) String cloud,
             @RequestParam(value = "zone", required = false) String zone,
             @RequestParam(value = "vmtype", required = false) String vmtype,
             @RequestParam(value = "hours", required = false) String hours) {
-        List<CloudbreakUsageJson> usages = cloudbreakUsagesFacade.getUsagesForUser(user, since, userId, accountId, cloud, zone, vmtype, hours);
+        List<CloudbreakUsageJson> usages = cloudbreakUsagesFacade.getUsagesFor(user.getAccount(), user.getUserId(), since, cloud, zone, vmtype, hours);
         return new ResponseEntity<>(usages, HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/usages/generate")
     @ResponseBody
     public ResponseEntity<List<CloudbreakUsageJson>> generateUsages(@ModelAttribute("user") CbUser user) {
-        cloudbreakUsagesFacade.generateUserUsages(user);
+        cloudbreakUsagesFacade.generateUserUsages();
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

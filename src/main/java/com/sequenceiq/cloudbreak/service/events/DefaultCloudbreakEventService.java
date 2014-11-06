@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.events;
 
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -15,7 +14,9 @@ import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
+import com.sequenceiq.cloudbreak.domain.GccTemplate;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.CloudbreakEventRepository;
 import com.sequenceiq.cloudbreak.repository.CloudbreakEventSpecifications;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -39,6 +40,7 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     @Override
     public void fireCloudbreakEvent(Long stackId, String eventType, String eventMessage) {
         CloudbreakEventData eventData = new CloudbreakEventData(stackId, eventType, eventMessage);
+        MDCBuilder.buildMdcContext(eventData);
         LOGGER.info("Fireing cloudbreak event: {}", eventData);
         Event reactorEvent = Event.wrap(eventData);
         reactor.notify(ReactorConfig.CLOUDBREAK_EVENT, reactorEvent);
@@ -46,23 +48,24 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
 
     @Override
     public CloudbreakEvent createStackEvent(Long stackId, String eventType, String eventMessage) {
-        LOGGER.debug("Create stack event for stackId {}, eventType {}, eventMessage {}", stackId, eventType, eventMessage);
         Stack stack = stackRepository.findById(stackId);
+        MDCBuilder.buildMdcContext(stack);
+        LOGGER.debug("Create stack event for stackId {}, eventType {}, eventMessage {}", stackId, eventType, eventMessage);
         CloudbreakEvent stackEvent = createStackEvent(stack, eventType, eventMessage);
+        MDCBuilder.buildMdcContext(stackEvent);
         stackEvent = eventRepository.save(stackEvent);
         LOGGER.debug("Stack event saved: {}", stackEvent);
         return stackEvent;
     }
 
     @Override
-    public List<CloudbreakEvent> cloudbreakEvents(String user, Long since) {
+    public List<CloudbreakEvent> cloudbreakEvents(String owner, Long since) {
         List<CloudbreakEvent> events = null;
         if (null == since) {
-            events = eventRepository.findAll(CloudbreakEventSpecifications.eventsForUser(user));
+            events = eventRepository.findAll(CloudbreakEventSpecifications.eventsForUser(owner));
         } else {
-            Date sinceDate = new Date(since);
             events = eventRepository.findAll(Specifications
-                    .where(CloudbreakEventSpecifications.eventsForUser(user))
+                    .where(CloudbreakEventSpecifications.eventsForUser(owner))
                     .and(CloudbreakEventSpecifications.eventsSince(since)));
         }
         return null != events ? events : Collections.EMPTY_LIST;
@@ -76,12 +79,8 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
         stackEvent.setEventTimestamp(Calendar.getInstance().getTime());
         stackEvent.setEventMessage(eventMessage);
         stackEvent.setEventType(eventType);
-
-        stackEvent.setUserId(1L);
-        stackEvent.setUserName(stack.getOwner());
-
-        stackEvent.setAccountId(1L);
-        stackEvent.setAccountName(stack.getAccount());
+        stackEvent.setOwner(stack.getOwner());
+        stackEvent.setAccount(stack.getAccount());
 
         populateClusterData(stackEvent, stack);
         populateTemplateData(stackEvent, stack);
@@ -90,6 +89,7 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     }
 
     private void populateClusterData(CloudbreakEvent stackEvent, Stack stack) {
+        MDCBuilder.buildMdcContext(stackEvent);
         if (null != stack.getCluster()) {
             stackEvent.setBlueprintId(stack.getCluster().getBlueprint().getId());
             stackEvent.setBlueprintName(stack.getCluster().getBlueprint().getBlueprintName());
@@ -99,6 +99,7 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     }
 
     private void populateTemplateData(CloudbreakEvent stackEvent, Stack stack) {
+        MDCBuilder.buildMdcContext(stackEvent);
         String vmType = null;
         String region = null;
         switch (stack.getTemplate().cloudPlatform()) {
@@ -109,6 +110,10 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
             case AZURE:
                 vmType = ((AzureTemplate) stack.getTemplate()).getVmType();
                 region = ((AzureTemplate) stack.getTemplate()).getLocation().location();
+                break;
+            case GCC:
+                vmType = ((GccTemplate) stack.getTemplate()).getGccInstanceType().getValue();
+                region = ((GccTemplate) stack.getTemplate()).getGccZone().getValue();
                 break;
             default:
                 throw new IllegalStateException("Unsupported cloud platform :" + stack.getTemplate().cloudPlatform());

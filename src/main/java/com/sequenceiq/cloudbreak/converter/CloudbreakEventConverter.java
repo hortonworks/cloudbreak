@@ -13,8 +13,7 @@ public class CloudbreakEventConverter extends AbstractConverter<CloudbreakEvents
     @Override
     public CloudbreakEventsJson convert(CloudbreakEvent entity) {
         CloudbreakEventsJson json = new CloudbreakEventsJson();
-        json.setAccountId(entity.getAccountId());
-        json.setAccountName(entity.getAccountName());
+        json.setAccount(entity.getAccount());
         json.setBlueprintId(entity.getBlueprintId());
         json.setBlueprintName(entity.getBlueprintName());
         json.setCloud(entity.getCloud());
@@ -23,16 +22,14 @@ public class CloudbreakEventConverter extends AbstractConverter<CloudbreakEvents
         json.setEventTimestamp(entity.getEventTimestamp().getTime());
         json.setRegion(entity.getRegion());
         json.setVmType(entity.getVmType());
-        json.setUserName(entity.getUserName());
-        json.setUserId(entity.getUserId());
+        json.setOwner(entity.getOwner());
         return json;
     }
 
     @Override
     public CloudbreakEvent convert(CloudbreakEventsJson json) {
         CloudbreakEvent entity = new CloudbreakEvent();
-        entity.setAccountId(json.getAccountId());
-        entity.setAccountName(json.getAccountName());
+        entity.setAccount(json.getAccount());
         entity.setBlueprintId(json.getBlueprintId());
         entity.setBlueprintName(json.getBlueprintName());
         entity.setCloud(json.getCloud());
@@ -41,8 +38,7 @@ public class CloudbreakEventConverter extends AbstractConverter<CloudbreakEvents
         entity.setEventTimestamp(new Date(json.getEventTimestamp()));
         entity.setRegion(json.getRegion());
         entity.setVmType(json.getVmType());
-        entity.setUserName(json.getUserName());
-        entity.setUserId(json.getUserId());
+        entity.setOwner(json.getOwner());
         return entity;
     }
 }

@@ -21,7 +21,7 @@ public class CloudbreakEventSpecifications {
             @Override
             public Predicate toPredicate(final Root<CloudbreakEvent> cloudbreakEventRoot, final CriteriaQuery<?> query,
                     final CriteriaBuilder cb) {
-                return cb.equal(cloudbreakEventRoot.get("userId"), user);
+                return cb.equal(cloudbreakEventRoot.get("owner"), user);
             }
         };
     }

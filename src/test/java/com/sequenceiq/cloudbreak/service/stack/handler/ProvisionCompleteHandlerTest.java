@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.stack.handler;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.anySet;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.doNothing;
@@ -24,6 +25,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.ServiceTestUtils;
+import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupContext;
 
@@ -41,6 +43,9 @@ public class ProvisionCompleteHandlerTest {
 
     @Mock
     private StackRepository stackRepository;
+
+    @Mock
+    private CloudbreakEventService cloudbreakEventService;
 
     private Event<ProvisionComplete> event;
 
@@ -65,6 +70,7 @@ public class ProvisionCompleteHandlerTest {
         underTest.accept(event);
         // THEN
         verify(metadataSetupContext, times(1)).setupMetadata(any(CloudPlatform.class), anyLong());
+        verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(anyLong(), anyString(), anyString());
     }
 
 

@@ -1,11 +1,9 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
 public class CloudbreakUsageJson implements JsonEntity {
-    private String userName;
-    private Long userId;
+    private String owner;
 
-    private String accountName;
-    private Long accountId;
+    private String account;
 
     private String blueprintName;
     private Long blueprintId;
@@ -20,36 +18,20 @@ public class CloudbreakUsageJson implements JsonEntity {
 
     private String runningHours;
 
-    public String getUserName() {
-        return userName;
+    public String getOwner() {
+        return owner;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setOwner(String owner) {
+        this.owner = owner;
     }
 
-    public Long getUserId() {
-        return userId;
+    public String getAccount() {
+        return account;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public String getAccountName() {
-        return accountName;
-    }
-
-    public void setAccountName(String accountName) {
-        this.accountName = accountName;
-    }
-
-    public Long getAccountId() {
-        return accountId;
-    }
-
-    public void setAccountId(Long accountId) {
-        this.accountId = accountId;
+    public void setAccount(String account) {
+        this.account = account;
     }
 
     public String getBlueprintName() {
@@ -106,23 +88,5 @@ public class CloudbreakUsageJson implements JsonEntity {
 
     public void setRunningHours(String runningHours) {
         this.runningHours = runningHours;
-    }
-
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("CloudbreakUsageJson{");
-        sb.append("userName='").append(userName).append('\'');
-        sb.append(", userId=").append(userId);
-        sb.append(", accountName='").append(accountName).append('\'');
-        sb.append(", accountId=").append(accountId);
-        sb.append(", blueprintName='").append(blueprintName).append('\'');
-        sb.append(", blueprintId=").append(blueprintId);
-        sb.append(", day='").append(day).append('\'');
-        sb.append(", cloud='").append(cloud).append('\'');
-        sb.append(", zone='").append(zone).append('\'');
-        sb.append(", machineType='").append(machineType).append('\'');
-        sb.append(", runningHours='").append(runningHours).append('\'');
-        sb.append('}');
-        return sb.toString();
     }
 }
