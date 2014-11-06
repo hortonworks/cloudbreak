@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.CloudbreakEventRepository;
 import com.sequenceiq.cloudbreak.repository.CloudbreakEventSpecifications;
 import com.sequenceiq.cloudbreak.repository.CloudbreakUsageRepository;
@@ -44,6 +45,7 @@ public class DefaultCloudbreakUsageGeneratorService implements CloudbreakUsageGe
         Map<Long, List<CloudbreakEvent>> stackEvents = splitCloudbreakEventsByStack(cloudbreakEvents);
         // iterate over events by stacks and generate usages
         for (Map.Entry<Long, List<CloudbreakEvent>> stackEventEntry : stackEvents.entrySet()) {
+            MDCBuilder.buildMdcContext();
             LOGGER.debug("Processing stackId {} for userid {}", stackEventEntry.getKey());
             List<CloudbreakUsage> stackDailyUsages = stackUsageGenerator.generate(stackEventEntry.getValue());
             usageList.addAll(stackDailyUsages);
@@ -55,6 +57,7 @@ public class DefaultCloudbreakUsageGeneratorService implements CloudbreakUsageGe
         Iterable<CloudbreakEvent> cloudbreakEvents;
         Long usagesCount = usageRepository.count();
         Sort sortByTimestamp = new Sort("eventTimestamp");
+        MDCBuilder.buildMdcContext();
         if (usagesCount > 0) {
             Long startOfPreviousDay = getStartOfPreviousDay();
             LOGGER.info("Select events from '{}'.", new Date(startOfPreviousDay));
@@ -80,6 +83,7 @@ public class DefaultCloudbreakUsageGeneratorService implements CloudbreakUsageGe
     private Map<Long, List<CloudbreakEvent>> splitCloudbreakEventsByStack(Iterable<CloudbreakEvent> userStackEvents) {
         Map<Long, List<CloudbreakEvent>> stackIdToCbEventMap = new HashMap<>();
         for (CloudbreakEvent cbEvent : userStackEvents) {
+            MDCBuilder.buildMdcContext(cbEvent);
             LOGGER.debug("Processing stack {} for user {}", cbEvent.getStackId(), cbEvent.getOwner());
             if (!stackIdToCbEventMap.containsKey(cbEvent.getStackId())) {
                 stackIdToCbEventMap.put(cbEvent.getStackId(), new ArrayList<CloudbreakEvent>());

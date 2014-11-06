@@ -26,6 +26,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.domain.BillingStatus;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.CloudbreakEventRepository;
 
 @Component
@@ -44,6 +45,7 @@ public class StackUsageGenerator {
         try {
             CloudbreakEvent start = null;
             for (CloudbreakEvent cbEvent : stackEvents) {
+                MDCBuilder.buildMdcContext(cbEvent);
                 actEvent = cbEvent;
                 if (isStartEvent(cbEvent) && start == null) {
                     start = cbEvent;
@@ -58,6 +60,7 @@ public class StackUsageGenerator {
                 generateRunningStackUsage(dailyCbUsages, start);
             }
         } catch (ParseException e) {
+            MDCBuilder.buildMdcContext(actEvent);
             LOGGER.error("Usage generation is failed for stack(id:{})! Invalid date in event(id:{})! Ex: {}", actEvent.getStackId(), actEvent.getId(), e);
             throw new IllegalStateException(e);
         }
