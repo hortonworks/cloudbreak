@@ -92,21 +92,4 @@ public class CloudbreakEventsJson implements JsonEntity {
     public void setBlueprintId(long blueprintId) {
         this.blueprintId = blueprintId;
     }
-
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("CloudbreakEventsJson{");
-        sb.append("eventType='").append(eventType).append('\'');
-        sb.append(", eventTimestamp=").append(eventTimestamp);
-        sb.append(", eventMessage='").append(eventMessage).append('\'');
-        sb.append(", owner='").append(owner).append('\'');
-        sb.append(", account='").append(account).append('\'');
-        sb.append(", cloud='").append(cloud).append('\'');
-        sb.append(", region='").append(region).append('\'');
-        sb.append(", vmType='").append(vmType).append('\'');
-        sb.append(", blueprintName='").append(blueprintName).append('\'');
-        sb.append(", blueprintId=").append(blueprintId);
-        sb.append('}');
-        return sb.toString();
-    }
 }

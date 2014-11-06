@@ -40,9 +40,11 @@ public class StackUsageGenerator {
 
     public List<CloudbreakUsage> generate(List<CloudbreakEvent> stackEvents) {
         List<CloudbreakUsage> dailyCbUsages = new LinkedList<>();
+        CloudbreakEvent actEvent = null;
         try {
             CloudbreakEvent start = null;
             for (CloudbreakEvent cbEvent : stackEvents) {
+                actEvent = cbEvent;
                 if (isStartEvent(cbEvent) && start == null) {
                     start = cbEvent;
                 } else if (isStopEvent(cbEvent) && start != null && start.getEventTimestamp().before(cbEvent.getEventTimestamp())) {
@@ -56,7 +58,7 @@ public class StackUsageGenerator {
                 generateRunningStackUsage(dailyCbUsages, start);
             }
         } catch (ParseException e) {
-            LOGGER.error("Invalid date in event! Ex: {}", e);
+            LOGGER.error("Usage generation is failed for stack(id:{})! Invalid date in event(id:{})! Ex: {}", actEvent.getStackId(), actEvent.getId(), e);
             throw new IllegalStateException(e);
         }
         return dailyCbUsages;

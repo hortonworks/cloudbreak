@@ -89,20 +89,4 @@ public class CloudbreakUsageJson implements JsonEntity {
     public void setRunningHours(String runningHours) {
         this.runningHours = runningHours;
     }
-
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("CloudbreakUsageJson{");
-        sb.append("owner='").append(owner).append('\'');
-        sb.append(", account='").append(account).append('\'');
-        sb.append(", blueprintName='").append(blueprintName).append('\'');
-        sb.append(", blueprintId=").append(blueprintId);
-        sb.append(", day='").append(day).append('\'');
-        sb.append(", cloud='").append(cloud).append('\'');
-        sb.append(", zone='").append(zone).append('\'');
-        sb.append(", machineType='").append(machineType).append('\'');
-        sb.append(", runningHours='").append(runningHours).append('\'');
-        sb.append('}');
-        return sb.toString();
-    }
 }

@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.events;
 
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -61,7 +60,6 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
         if (null == since) {
             events = eventRepository.findAll(CloudbreakEventSpecifications.eventsForUser(owner));
         } else {
-            Date sinceDate = new Date(since);
             events = eventRepository.findAll(Specifications
                     .where(CloudbreakEventSpecifications.eventsForUser(owner))
                     .and(CloudbreakEventSpecifications.eventsSince(since)));
