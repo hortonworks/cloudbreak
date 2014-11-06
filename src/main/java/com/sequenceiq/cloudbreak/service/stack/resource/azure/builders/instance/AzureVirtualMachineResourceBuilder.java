@@ -120,7 +120,7 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
         AzureClient azureClient = po.getNewAzureClient(azureCredential);
         HttpResponseDecorator virtualMachineResponse = (HttpResponseDecorator) azureClient.createVirtualMachine(props);
         String requestId = (String) azureClient.getRequestId(virtualMachineResponse);
-        waitForFinishing(azureClient, requestId);
+        waitUntilComplete(azureClient, requestId);
         return Arrays.asList(new Resource(resourceType(), vmName, stack));
     }
 
@@ -139,7 +139,7 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
             AzureClient azureClient = aDCO.getNewAzureClient(credential);
             HttpResponseDecorator deleteVirtualMachineResult = (HttpResponseDecorator) azureClient.deleteVirtualMachine(props);
             String requestId = (String) azureClient.getRequestId(deleteVirtualMachineResult);
-            waitForFinishing(azureClient, requestId);
+            waitUntilComplete(azureClient, requestId);
         } catch (HttpResponseException ex) {
             httpResponseExceptionHandler(ex, resource.getResourceName(), stack.getOwner());
         } catch (Exception ex) {

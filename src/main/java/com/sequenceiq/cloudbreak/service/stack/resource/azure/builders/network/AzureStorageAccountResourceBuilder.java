@@ -49,7 +49,7 @@ public class AzureStorageAccountResourceBuilder extends AzureSimpleNetworkResour
                 props.put(AFFINITYGROUP, po.getCommonName());
                 HttpResponseDecorator storageResponse = (HttpResponseDecorator) po.getAzureClient().createStorageAccount(props);
                 String requestId = (String) po.getAzureClient().getRequestId(storageResponse);
-                waitForFinishing(po.getAzureClient(), requestId);
+                waitUntilComplete(po.getAzureClient(), requestId);
             } else if (ex instanceof HttpResponseException) {
                 LOGGER.error(String.format("Error occurs on %s stack under the storage creation", stack.getId()), ex);
                 throw new InternalServerException(((HttpResponseException) ex).getResponse().toString());

@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.azure;
 
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.NAME;
-import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.SERVICENAME;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,22 +18,20 @@ import groovyx.net.http.HttpResponseDecorator;
 import groovyx.net.http.HttpResponseException;
 
 @Component
-public class AzureCloudServiceRemoveCheckerStatus implements StatusCheckerTask<AzureCloudServiceRemoveReadyPollerObject> {
+public class AzureDiskDeleteTask implements StatusCheckerTask<AzureDiskRemoveDeleteTaskContext> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AzureCloudServiceRemoveCheckerStatus.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AzureDiskDeleteTask.class);
     private static final int NOT_FOUND = 404;
 
     @Override
-    public boolean checkStatus(AzureCloudServiceRemoveReadyPollerObject aRRPO) {
-        LOGGER.info("Checking status of remove cloud service '{}' on '{}' stack.", aRRPO.getName(), aRRPO.getStackId());
+    public boolean checkStatus(AzureDiskRemoveDeleteTaskContext aRRPO) {
+        LOGGER.info("Checking status of remove disk '{}' on '{}' stack.", aRRPO.getName(), aRRPO.getStackId());
         try {
             Map<String, String> props = new HashMap<>();
-            props.put(SERVICENAME, aRRPO.getCommonName());
             props.put(NAME, aRRPO.getName());
-            AzureClient azureClient = aRRPO.getAzureClient();
-            HttpResponseDecorator deleteCloudServiceResult = (HttpResponseDecorator) azureClient.deleteCloudService(props);
-            String requestId = (String) azureClient.getRequestId(deleteCloudServiceResult);
-            waitForFinishing(azureClient, requestId);
+            HttpResponseDecorator deleteDisk = (HttpResponseDecorator) aRRPO.getAzureClient().deleteDisk(props);
+            String requestId = (String) aRRPO.getAzureClient().getRequestId(deleteDisk);
+            waitForFinishing(aRRPO.getAzureClient(), requestId);
         } catch (HttpResponseException ex) {
             if (ex.getStatusCode() != NOT_FOUND) {
                 return false;
@@ -53,15 +50,15 @@ public class AzureCloudServiceRemoveCheckerStatus implements StatusCheckerTask<A
     }
 
     @Override
-    public void handleTimeout(AzureCloudServiceRemoveReadyPollerObject azureDiskRemoveReadyPollerObject) {
+    public void handleTimeout(AzureDiskRemoveDeleteTaskContext azureDiskRemoveDeleteTaskContext) {
         throw new AddInstancesFailedException(String.format(
                 "Something went wrong. Remove of '%s' resource unsuccess in a reasonable timeframe on '%s' stack.",
-                azureDiskRemoveReadyPollerObject.getName(), azureDiskRemoveReadyPollerObject.getStackId()));
+                azureDiskRemoveDeleteTaskContext.getName(), azureDiskRemoveDeleteTaskContext.getStackId()));
     }
 
     @Override
-    public String successMessage(AzureCloudServiceRemoveReadyPollerObject azureDiskRemoveReadyPollerObject) {
+    public String successMessage(AzureDiskRemoveDeleteTaskContext azureDiskRemoveDeleteTaskContext) {
         return String.format("Azure resource '%s' is removed success on '%s' stack",
-                azureDiskRemoveReadyPollerObject.getName(), azureDiskRemoveReadyPollerObject.getStackId());
+                azureDiskRemoveDeleteTaskContext.getName(), azureDiskRemoveDeleteTaskContext.getStackId());
     }
 }

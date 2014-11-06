@@ -2,14 +2,14 @@ package com.sequenceiq.cloudbreak.service.stack.connector.azure;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
 
-public class AzureCloudServiceRemoveReadyPollerObject {
+public class AzureDiskRemoveDeleteTaskContext {
 
     private String commonName;
     private String name;
     private AzureClient azureClient;
     private Long stackId;
 
-    public AzureCloudServiceRemoveReadyPollerObject(String commonName, String name, Long stackId, AzureClient azureClient) {
+    public AzureDiskRemoveDeleteTaskContext(String commonName, String name, Long stackId, AzureClient azureClient) {
         this.commonName = commonName;
         this.name = name;
         this.azureClient = azureClient;

@@ -44,7 +44,7 @@ public abstract class AzureSimpleNetworkResourceBuilder implements
         }
     }
 
-    protected void waitForFinishing(AzureClient azureClient, String requestId) {
+    protected void waitUntilComplete(AzureClient azureClient, String requestId) {
         boolean finished = azureClient.waitUntilComplete(requestId);
         if (!finished) {
             throw new InternalServerException("Azure resource timeout");

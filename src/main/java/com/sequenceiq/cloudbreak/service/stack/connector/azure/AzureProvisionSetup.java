@@ -150,7 +150,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
                 params.put(AFFINITYGROUP, affinityGroupName);
                 HttpResponseDecorator response = (HttpResponseDecorator) azureClient.createStorageAccount(params);
                 String requestId = (String) azureClient.getRequestId(response);
-                waitForFinishing(azureClient, requestId);
+                waitUntilComplete(azureClient, requestId);
             } else {
                 LOGGER.error(String.format("Error occurs on %s stack under the storage creation", stack.getId()), ex);
                 throw new InternalServerException(ex.getMessage());
@@ -158,7 +158,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
         }
     }
 
-    private void waitForFinishing(AzureClient azureClient, String requestId) {
+    private void waitUntilComplete(AzureClient azureClient, String requestId) {
         boolean finished = azureClient.waitUntilComplete(requestId);
         if (!finished) {
             throw new InternalServerException("Azure resource timeout");

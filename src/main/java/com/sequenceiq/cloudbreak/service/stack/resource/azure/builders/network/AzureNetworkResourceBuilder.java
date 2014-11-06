@@ -48,7 +48,7 @@ public class AzureNetworkResourceBuilder extends AzureSimpleNetworkResourceBuild
             props.put(SUBNETADDRESSPREFIX, "172.16.0.0/24");
             HttpResponseDecorator virtualNetworkResponse = (HttpResponseDecorator) po.getAzureClient().createVirtualNetwork(props);
             String requestId = (String) po.getAzureClient().getRequestId(virtualNetworkResponse);
-            waitForFinishing(po.getAzureClient(), requestId);
+            waitUntilComplete(po.getAzureClient(), requestId);
         }
         return Arrays.asList(new Resource(ResourceType.AZURE_NETWORK, name, stack));
     }
