@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.StackOperationFailure;
@@ -33,12 +35,14 @@ public class ProvisionSetupContext {
     private Reactor reactor;
 
     public void setupProvisioning(CloudPlatform cloudPlatform, Long stackId) {
+        Stack stack = stackRepository.findById(stackId);
+        MDCBuilder.buildMdcContext(stack);
         try {
             ProvisionSetup provisionSetup = provisionSetups.get(cloudPlatform);
             provisionSetup.setupProvisioning(stackRepository.findById(stackId));
         } catch (Exception e) {
             LOGGER.error("Unhandled exception occured while setting up provisioning.", e);
-            LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_CREATE_FAILED_EVENT, stackId);
+            LOGGER.info("Publishing {} event", ReactorConfig.STACK_CREATE_FAILED_EVENT);
             reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(new StackOperationFailure(stackId,
                     "Internal server error occured while setting up provisioning.")));
         }

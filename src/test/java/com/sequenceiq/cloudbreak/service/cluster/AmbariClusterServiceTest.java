@@ -1,10 +1,9 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
-
-import groovyx.net.http.HttpResponseException;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -16,8 +15,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
-import reactor.core.Reactor;
-
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
@@ -25,11 +22,15 @@ import com.sequenceiq.cloudbreak.controller.json.ClusterRequest;
 import com.sequenceiq.cloudbreak.controller.json.ClusterResponse;
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.converter.ClusterConverter;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+
+import groovyx.net.http.HttpResponseException;
+import reactor.core.Reactor;
 
 public class AmbariClusterServiceTest {
 
@@ -77,6 +78,8 @@ public class AmbariClusterServiceTest {
         stack = createStack(cluster);
         clusterRequest = new ClusterRequest();
         clusterResponse = new ClusterResponse();
+        given(stackRepository.findById(anyLong())).willReturn(stack);
+        given(stackRepository.findOneWithLists(anyLong())).willReturn(stack);
     }
 
     @Test(expected = InternalServerException.class)
@@ -157,6 +160,9 @@ public class AmbariClusterServiceTest {
         Cluster cluster = new Cluster();
         cluster.setId(1L);
         cluster.setName("dummyCluster");
+        Blueprint blueprint = new Blueprint();
+        blueprint.setId(1L);
+        cluster.setBlueprint(blueprint);
         return cluster;
     }
 }

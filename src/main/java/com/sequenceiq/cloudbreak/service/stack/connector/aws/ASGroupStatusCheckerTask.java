@@ -11,6 +11,7 @@ import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusRequest;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusResult;
 import com.amazonaws.services.ec2.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.AddInstancesFailedException;
 
@@ -26,6 +27,7 @@ public class ASGroupStatusCheckerTask implements StatusCheckerTask<AutoScalingGr
 
     @Override
     public boolean checkStatus(AutoScalingGroupReady asGroupReady) {
+        MDCBuilder.buildMdcContext(asGroupReady.getStack());
         LOGGER.info("Checking status of autoscaling group '{}'", asGroupReady.getAutoScalingGroupName());
         AmazonEC2Client amazonEC2Client = asGroupReady.getAmazonEC2Client();
         List<String> instanceIds = cfStackUtil.getInstanceIds(asGroupReady.getAutoScalingGroupName(), asGroupReady.getAmazonASClient());
@@ -53,6 +55,7 @@ public class ASGroupStatusCheckerTask implements StatusCheckerTask<AutoScalingGr
 
     @Override
     public String successMessage(AutoScalingGroupReady t) {
+        MDCBuilder.buildMdcContext(t.getStack());
         return String.format("AutoScaling group '%s' is ready. All %s instances are running.", t.getAutoScalingGroupName(), t.getRequiredInstances());
     }
 }

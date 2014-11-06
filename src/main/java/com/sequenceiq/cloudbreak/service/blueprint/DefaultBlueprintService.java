@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.blueprint;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -16,6 +15,7 @@ import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CbUserRole;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
@@ -43,13 +43,11 @@ public class DefaultBlueprintService implements BlueprintService {
 
     @Override
     public Set<Blueprint> retrieveAccountBlueprints(CbUser user) {
-        Set<Blueprint> blueprints = new HashSet<>();
         if (user.getRoles().contains(CbUserRole.ADMIN)) {
-            blueprints = blueprintRepository.findAllInAccount(user.getAccount());
+            return blueprintRepository.findAllInAccount(user.getAccount());
         } else {
-            blueprints = blueprintRepository.findPublicsInAccount(user.getAccount());
+            return blueprintRepository.findPublicsInAccount(user.getAccount());
         }
-        return blueprints;
     }
 
     @Override
@@ -63,6 +61,7 @@ public class DefaultBlueprintService implements BlueprintService {
 
     @Override
     public Blueprint create(CbUser user, Blueprint blueprint) {
+        MDCBuilder.buildMdcContext(blueprint);
         LOGGER.debug("Creating blueprint: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         Blueprint savedBlueprint = null;
         blueprint.setOwner(user.getUserId());
@@ -80,6 +79,7 @@ public class DefaultBlueprintService implements BlueprintService {
     @Override
     public void delete(Long id) {
         Blueprint blueprint = blueprintRepository.findOne(id);
+        MDCBuilder.buildMdcContext(blueprint);
         if (blueprint == null) {
             throw new NotFoundException(String.format("Blueprint '%s' not found.", id));
         }

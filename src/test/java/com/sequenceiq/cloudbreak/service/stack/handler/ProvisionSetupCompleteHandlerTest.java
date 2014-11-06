@@ -19,6 +19,8 @@ import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.ServiceTestUtils;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
 import com.sequenceiq.cloudbreak.service.stack.flow.ProvisionContext;
 
@@ -35,12 +37,16 @@ public class ProvisionSetupCompleteHandlerTest {
     @Mock
     private RetryingStackUpdater retryingStackUpdater;
 
+    @Mock
+    private StackRepository stackRepository;
+
     private Event<ProvisionSetupComplete> event;
 
     @Before
     public void setUp() {
         underTest = new ProvisionSetupCompleteHandler();
         MockitoAnnotations.initMocks(this);
+        given(stackRepository.findById(anyLong())).willReturn(ServiceTestUtils.createStack());
         event = createEvent();
     }
 

@@ -22,6 +22,8 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.ServiceTestUtils;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupContext;
 
@@ -36,6 +38,9 @@ public class ProvisionCompleteHandlerTest {
 
     @Mock
     private RetryingStackUpdater retryingStackUpdater;
+
+    @Mock
+    private StackRepository stackRepository;
 
     private Event<ProvisionComplete> event;
 
@@ -53,6 +58,7 @@ public class ProvisionCompleteHandlerTest {
     @Test
     public void testAcceptProvisionCompleteEvent() {
         // GIVEN
+        given(stackRepository.findById(anyLong())).willReturn(ServiceTestUtils.createStack());
         doNothing().when(metadataSetupContext).setupMetadata(any(CloudPlatform.class), anyLong());
         given(retryingStackUpdater.updateStackResources(any(Long.class), anySet())).willReturn(null);
         // WHEN

@@ -66,7 +66,7 @@ public class AzureNetworkResourceBuilder extends AzureSimpleNetworkResourceBuild
             String requestId = (String) azureClient.getRequestId(deleteVirtualNetworkResult);
             boolean finished = azureClient.waitUntilComplete(requestId);
         } catch (HttpResponseException ex) {
-            httpResponseExceptionHandler(ex, resource.getResourceName(), stack.getOwner());
+            httpResponseExceptionHandler(ex, resource.getResourceName(), stack.getOwner(), stack);
         } catch (Exception ex) {
             throw new InternalServerException(ex.getMessage());
         }

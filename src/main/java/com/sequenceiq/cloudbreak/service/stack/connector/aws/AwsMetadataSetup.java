@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataSetupComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataUpdateComplete;
@@ -50,6 +51,8 @@ public class AwsMetadataSetup implements MetadataSetup {
 
     @Override
     public void setupMetadata(Stack stack) {
+        MDCBuilder.buildMdcContext(stack);
+
         Set<CoreInstanceMetaData> coreInstanceMetadata = new HashSet<>();
 
         AwsTemplate awsTemplate = (AwsTemplate) stack.getTemplate();
@@ -67,7 +70,7 @@ public class AwsMetadataSetup implements MetadataSetup {
         if (awsTemplate.getSpotPrice() != null) {
             while (instanceIds.size() < stack.getNodeCount()) {
                 LOGGER.info("Spot requests for stack '{}' are not fulfilled yet. Trying to reach instances in the next polling interval.", stack.getId());
-                awsStackUtil.sleep(POLLING_INTERVAL);
+                awsStackUtil.sleep(stack, POLLING_INTERVAL);
                 instanceIds = cfStackUtil.getInstanceIds(stack, amazonASClient, amazonCFClient);
             }
         }
@@ -93,6 +96,7 @@ public class AwsMetadataSetup implements MetadataSetup {
 
     @Override
     public void addNewNodesToMetadata(Stack stack, Set<Resource> resourceList) {
+        MDCBuilder.buildMdcContext(stack);
         Set<CoreInstanceMetaData> coreInstanceMetadata = new HashSet<>();
         LOGGER.info("Adding new instances to metadata: [stack: '{}']", stack.getId());
         AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(

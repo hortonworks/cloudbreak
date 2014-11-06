@@ -9,7 +9,9 @@ import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.event.StackOperationFailure;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
@@ -26,13 +28,18 @@ public class StackUpdateFailureHandler implements Consumer<Event<StackOperationF
     private RetryingStackUpdater stackUpdater;
 
     @Autowired
+    private StackRepository stackRepository;
+
+    @Autowired
     private WebsocketService websocketService;
 
     @Override
     public void accept(Event<StackOperationFailure> event) {
         StackOperationFailure stackOperationFailure = event.getData();
         Long stackId = stackOperationFailure.getStackId();
-        LOGGER.info("Accepted {} event.", ReactorConfig.STACK_UPDATE_FAILED_EVENT, stackId);
+        Stack byId = stackRepository.findById(stackId);
+        MDCBuilder.buildMdcContext(byId);
+        LOGGER.info("Accepted {} event.", ReactorConfig.STACK_UPDATE_FAILED_EVENT);
         String detailedMessage = stackOperationFailure.getDetailedMessage();
         stackUpdater.updateMetadataReady(stackId, true);
         Stack stack = stackUpdater.updateStackStatus(stackId, Status.AVAILABLE, "Stack update failed. " + detailedMessage);

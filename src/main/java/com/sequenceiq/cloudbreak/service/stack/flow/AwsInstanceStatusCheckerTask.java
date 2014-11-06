@@ -8,6 +8,7 @@ import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.Reservation;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 
 public class AwsInstanceStatusCheckerTask implements StatusCheckerTask<AwsInstances> {
@@ -22,7 +23,8 @@ public class AwsInstanceStatusCheckerTask implements StatusCheckerTask<AwsInstan
         for (Reservation reservation : result.getReservations()) {
             for (Instance instance : reservation.getInstances()) {
                 if (!instancesStatus.equalsIgnoreCase(instance.getState().getName())) {
-                    LOGGER.info("AWS instance is not in {} state, polling stack: {}", instancesStatus, instances.getStackId());
+                    MDCBuilder.buildMdcContext(instances.getStack());
+                    LOGGER.info("AWS instance is not in {} state, polling stack.", instancesStatus);
                     return false;
                 }
             }
@@ -32,12 +34,12 @@ public class AwsInstanceStatusCheckerTask implements StatusCheckerTask<AwsInstan
 
     @Override
     public void handleTimeout(AwsInstances t) {
-        throw new InternalServerException(String.format("AWS instances could not reach the desired status: %s on stack: %s", t, t.getStackId()));
+        throw new InternalServerException(String.format("AWS instances could not reach the desired status: %s on stack: %s", t, t.getStack().getId()));
     }
 
     @Override
     public String successMessage(AwsInstances t) {
-        return String.format("AWS instances successfully reached status: %s on stack: %s", t.getStatus(), t.getStackId());
+        return String.format("AWS instances successfully reached status: %s on stack: %s", t.getStatus(), t.getStack().getId());
     }
 
 }

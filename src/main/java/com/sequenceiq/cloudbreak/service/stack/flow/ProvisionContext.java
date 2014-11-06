@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
@@ -72,8 +73,9 @@ public class ProvisionContext {
     private Map<CloudPlatform, ResourceBuilderInit> resourceBuilderInits;
 
     public void buildStack(final CloudPlatform cloudPlatform, Long stackId, Map<String, Object> setupProperties, Map<String, String> userDataParams) {
+        Stack stack = stackRepository.findById(stackId);
+        MDCBuilder.buildMdcContext(stack);
         try {
-            Stack stack = stackRepository.findById(stackId);
             if (stack.getStatus().equals(Status.REQUESTED)) {
                 stack = stackUpdater.updateStackStatus(stack.getId(), Status.CREATE_IN_PROGRESS);
                 websocketService.sendToTopicUser(stack.getOwner(), WebsocketEndPoint.STACK, new StatusMessage(stack.getId(), stack.getName(), stack
@@ -131,12 +133,12 @@ public class ProvisionContext {
         } catch (BuildStackFailureException e) {
             stackUpdater.updateStackResources(stackId, e.getResourceSet());
             LOGGER.error("Unhandled exception occured while creating stack.", e);
-            LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_CREATE_FAILED_EVENT, stackId);
+            LOGGER.info("Publishing {} event.", ReactorConfig.STACK_CREATE_FAILED_EVENT);
             StackOperationFailure stackCreationFailure = new StackOperationFailure(stackId, "Internal server error occured while creating stack.");
             reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(stackCreationFailure));
         } catch (Exception e) {
             LOGGER.error("Unhandled exception occured while creating stack.", e);
-            LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_CREATE_FAILED_EVENT, stackId);
+            LOGGER.info("Publishing {} event.", ReactorConfig.STACK_CREATE_FAILED_EVENT);
             StackOperationFailure stackCreationFailure = new StackOperationFailure(stackId, "Internal server error occured while creating stack.");
             reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(stackCreationFailure));
         }

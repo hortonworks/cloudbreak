@@ -15,6 +15,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+
 import freemarker.template.Configuration;
 
 @Service
@@ -29,6 +31,7 @@ public class DefaultEmailService implements EmailService {
 
     @Override
     public String messageText(Map<String, Object> model, String template) {
+        MDCBuilder.buildMdcContext();
         String emailBody = null;
         try {
             emailBody = FreeMarkerTemplateUtils.processTemplateIntoString(freemarkerConfiguration.getTemplate(template, "UTF-8"), model);
@@ -54,6 +57,7 @@ public class DefaultEmailService implements EmailService {
     @Override
     @Async
     public void sendEmail(final MimeMessagePreparator preparator) {
+        MDCBuilder.buildMdcContext();
         LOGGER.info("Sending confirmation email ...");
         ((JavaMailSender) mailSender).send(preparator);
         LOGGER.info("Confirmation email sent");

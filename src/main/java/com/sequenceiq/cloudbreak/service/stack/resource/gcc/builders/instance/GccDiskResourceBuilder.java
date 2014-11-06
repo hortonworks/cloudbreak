@@ -71,8 +71,8 @@ public class GccDiskResourceBuilder extends GccSimpleInstanceResourceBuilder {
 
     @Override
     public Boolean delete(Resource resource, GccDeleteContextObject d) throws Exception {
+        Stack stack = stackRepository.findById(d.getStackId());
         try {
-            Stack stack = stackRepository.findById(d.getStackId());
             GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
             GccCredential gccCredential = (GccCredential) stack.getCredential();
             Operation execute = d.getCompute().disks()
@@ -80,10 +80,10 @@ public class GccDiskResourceBuilder extends GccSimpleInstanceResourceBuilder {
             Compute.ZoneOperations.Get zoneOperations = createZoneOperations(d.getCompute(), gccCredential, gccTemplate, execute);
             Compute.GlobalOperations.Get globalOperations = createGlobalOperations(d.getCompute(), gccCredential, gccTemplate, execute);
             GccRemoveReadyPollerObject gccRemoveReady =
-                    new GccRemoveReadyPollerObject(zoneOperations, globalOperations, stack.getId(), resource.getResourceName());
+                    new GccRemoveReadyPollerObject(zoneOperations, globalOperations, stack, resource.getResourceName());
             gccRemoveReadyPollerObjectPollingService.pollWithTimeout(gccRemoveCheckerStatus, gccRemoveReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
         } catch (GoogleJsonResponseException ex) {
-            exceptionHandler(ex, resource.getResourceName());
+            exceptionHandler(ex, resource.getResourceName(), stack);
         } catch (IOException e) {
             throw new InternalServerException(e.getMessage());
         }

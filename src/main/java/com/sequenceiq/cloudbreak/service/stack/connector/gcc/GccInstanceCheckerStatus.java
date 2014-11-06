@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import com.google.api.services.compute.Compute;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.domain.GccTemplate;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.AddInstancesFailedException;
 
@@ -20,9 +21,8 @@ public class GccInstanceCheckerStatus implements StatusCheckerTask<GccInstanceRe
 
     @Override
     public boolean checkStatus(GccInstanceReadyPollerObject gccInstanceReadyPollerObject) {
-        LOGGER.info("Checking status of Gcc Instance '{}' on '{}' stack.",
-                gccInstanceReadyPollerObject.getName(),
-                gccInstanceReadyPollerObject.getStack().getId());
+        MDCBuilder.buildMdcContext(gccInstanceReadyPollerObject.getStack());
+        LOGGER.info("Checking status of Gcc Instance '{}'.", gccInstanceReadyPollerObject.getName());
         GccTemplate gccTemplate = (GccTemplate) gccInstanceReadyPollerObject.getStack().getTemplate();
         GccCredential gccCredential = (GccCredential) gccInstanceReadyPollerObject.getStack().getCredential();
         try {
@@ -46,7 +46,7 @@ public class GccInstanceCheckerStatus implements StatusCheckerTask<GccInstanceRe
 
     @Override
     public String successMessage(GccInstanceReadyPollerObject gccInstanceReadyPollerObject) {
-        return String.format("Gcc instance '%s' is ready on '%s' stack",
-                gccInstanceReadyPollerObject.getName(), gccInstanceReadyPollerObject.getStack().getId());
+        MDCBuilder.buildMdcContext(gccInstanceReadyPollerObject.getStack());
+        return String.format("Gcc instance '%s' is ready on stack", gccInstanceReadyPollerObject.getName());
     }
 }

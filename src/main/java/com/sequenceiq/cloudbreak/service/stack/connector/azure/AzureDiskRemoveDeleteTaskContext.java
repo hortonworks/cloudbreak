@@ -1,19 +1,20 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.azure;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.domain.Stack;
 
 public class AzureDiskRemoveDeleteTaskContext {
 
     private String commonName;
     private String name;
     private AzureClient azureClient;
-    private Long stackId;
+    private Stack stack;
 
-    public AzureDiskRemoveDeleteTaskContext(String commonName, String name, Long stackId, AzureClient azureClient) {
+    public AzureDiskRemoveDeleteTaskContext(String commonName, String name, Stack stack, AzureClient azureClient) {
         this.commonName = commonName;
         this.name = name;
         this.azureClient = azureClient;
-        this.stackId = stackId;
+        this.stack = stack;
     }
 
     public String getCommonName() {
@@ -28,7 +29,7 @@ public class AzureDiskRemoveDeleteTaskContext {
         return azureClient;
     }
 
-    public Long getStackId() {
-        return stackId;
+    public Stack getStack() {
+        return stack;
     }
 }

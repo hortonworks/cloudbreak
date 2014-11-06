@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
@@ -49,6 +50,7 @@ public class UpdateAmbariHostsSuccessHandler implements Consumer<Event<UpdateAmb
         UpdateAmbariHostsSuccess data = event.getData();
         Cluster cluster = clusterRepository.findById(data.getClusterId());
         Set<String> hostNames = data.getHostNames();
+        MDCBuilder.buildMdcContext(cluster);
         LOGGER.info("Accepted {} event.", ReactorConfig.UPDATE_AMBARI_HOSTS_SUCCESS_EVENT);
         Stack stack = stackRepository.findStackWithListsForCluster(data.getClusterId());
         for (String hostName : hostNames) {

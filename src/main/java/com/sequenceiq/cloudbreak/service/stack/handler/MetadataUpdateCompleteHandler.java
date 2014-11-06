@@ -8,6 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataUpdateComplete;
 import com.sequenceiq.cloudbreak.service.stack.flow.AmbariRoleAllocator;
 import com.sequenceiq.cloudbreak.service.stack.flow.CoreInstanceMetaData;
@@ -23,11 +26,16 @@ public class MetadataUpdateCompleteHandler implements Consumer<Event<MetadataUpd
     @Autowired
     private AmbariRoleAllocator ambariRoleAllocator;
 
+    @Autowired
+    private StackRepository stackRepository;
+
     @Override
     public void accept(Event<MetadataUpdateComplete> event) {
         MetadataUpdateComplete data = event.getData();
         Long stackId = data.getStackId();
         Set<CoreInstanceMetaData> coreInstanceMetaData = data.getCoreInstanceMetaData();
+        Stack stack = stackRepository.findById(stackId);
+        MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Accepted {} event.", ReactorConfig.METADATA_UPDATE_COMPLETE_EVENT, stackId);
         ambariRoleAllocator.updateInstanceMetadata(stackId, coreInstanceMetaData);
     }

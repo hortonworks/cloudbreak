@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.SnsRequest;
 import com.sequenceiq.cloudbreak.domain.SnsTopic;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.SnsTopicRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.credential.aws.CrossAccountCredentialsProvider;
@@ -58,6 +59,7 @@ public class SnsTopicManager {
     private Reactor reactor;
 
     public void createTopicAndSubscribe(AwsCredential awsCredential, Regions region) {
+        MDCBuilder.buildMdcContext(awsCredential);
         AmazonSNSClient amazonSNSClient = awsStackUtil.createSnsClient(region, awsCredential);
         LOGGER.info("Amazon SNS client successfully created.");
 
@@ -82,6 +84,7 @@ public class SnsTopicManager {
     public synchronized void confirmSubscription(SnsRequest snsRequest) {
         List<SnsTopic> snsTopics = snsTopicRepository.findByTopicArn(snsRequest.getTopicArn());
         for (SnsTopic snsTopic : snsTopics) {
+            MDCBuilder.buildMdcContext(snsTopic.getCredential());
             if (!snsTopic.isConfirmed()) {
                 AmazonSNSClient amazonSNSClient = awsStackUtil.createSnsClient(snsTopic.getRegion(), snsTopic.getCredential());
                 ConfirmSubscriptionResult result = amazonSNSClient.confirmSubscription(snsTopic.getTopicArn(), snsRequest.getToken());
@@ -96,6 +99,7 @@ public class SnsTopicManager {
 
     private void notifyRequestedStacks(SnsTopic snsTopic) {
         AwsCredential awsCredential = snsTopic.getCredential();
+        MDCBuilder.buildMdcContext(awsCredential);
         List<Stack> requestedStacks = stackRepository.findRequestedStacksWithCredential(awsCredential.getId());
         for (Stack stack : requestedStacks) {
             LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT, stack.getId());

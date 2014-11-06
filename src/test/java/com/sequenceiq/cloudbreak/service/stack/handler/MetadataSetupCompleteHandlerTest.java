@@ -1,9 +1,13 @@
 package com.sequenceiq.cloudbreak.service.stack.handler;
 
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
-import com.sequenceiq.cloudbreak.service.stack.event.MetadataSetupComplete;
-import com.sequenceiq.cloudbreak.service.stack.flow.AmbariRoleAllocator;
-import com.sequenceiq.cloudbreak.service.stack.flow.CoreInstanceMetaData;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.anySetOf;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+import java.util.HashSet;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -11,15 +15,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.ServiceTestUtils;
+import com.sequenceiq.cloudbreak.service.stack.event.MetadataSetupComplete;
+import com.sequenceiq.cloudbreak.service.stack.flow.AmbariRoleAllocator;
+import com.sequenceiq.cloudbreak.service.stack.flow.CoreInstanceMetaData;
+
 import reactor.event.Event;
-
-import java.util.HashSet;
-
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.anySetOf;
 
 public class MetadataSetupCompleteHandlerTest {
     @InjectMocks
@@ -27,6 +30,9 @@ public class MetadataSetupCompleteHandlerTest {
 
     @Mock
     private AmbariRoleAllocator ambariRoleAllocator;
+
+    @Mock
+    private StackRepository stackRepository;
 
     private Event<MetadataSetupComplete> event;
 
@@ -40,6 +46,7 @@ public class MetadataSetupCompleteHandlerTest {
     @Test
     public void testAcceptMetadataSetupCompleteEvent() {
         // GIVEN
+        given(stackRepository.findById(anyLong())).willReturn(ServiceTestUtils.createStack());
         doNothing().when(ambariRoleAllocator).allocateRoles(anyLong(), anySetOf(CoreInstanceMetaData.class));
         // WHEN
         underTest.accept(event);

@@ -52,7 +52,7 @@ public class AzureResourceBuilderInit implements
     public AzureStartStopContextObject startStopInit(Stack stack) throws Exception {
         AzureCredential credential = (AzureCredential) stack.getCredential();
         AzureClient azureClient = createAzureClient(credential, AzureCertificateService.getUserJksFileName(credential, emailAsFolder(stack.getOwner())));
-        return new AzureStartStopContextObject(stack.getId(), azureClient, emailAsFolder(stack.getOwner()));
+        return new AzureStartStopContextObject(stack, azureClient, emailAsFolder(stack.getOwner()));
     }
 
     @Override

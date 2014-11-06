@@ -2,24 +2,26 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import java.util.List;
 
+import com.sequenceiq.cloudbreak.domain.Stack;
+
 public abstract class AbstractInstances {
 
-    private long stackId;
+    private Stack stack;
     private List<String> instances;
     private String status;
 
-    protected AbstractInstances(long stackId, List<String> instances, String status) {
-        this.stackId = stackId;
+    protected AbstractInstances(Stack stack, List<String> instances, String status) {
+        this.stack = stack;
         this.instances = instances;
         this.status = status;
     }
 
-    public long getStackId() {
-        return stackId;
+    public Stack getStack() {
+        return stack;
     }
 
-    public void setStackId(long stackId) {
-        this.stackId = stackId;
+    public void setStack(Stack stack) {
+        this.stack = stack;
     }
 
     public List<String> getInstances() {

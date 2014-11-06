@@ -1,10 +1,7 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import java.util.Date;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +18,6 @@ import com.sequenceiq.cloudbreak.facade.CloudbreakUsagesFacade;
 
 @Controller
 public class CloudbreakUsageController {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakUsageController.class);
 
     @Autowired
     private CloudbreakUsagesFacade cloudbreakUsagesFacade;
@@ -36,7 +32,6 @@ public class CloudbreakUsageController {
             @RequestParam(value = "zone", required = false) String zone,
             @RequestParam(value = "vmtype", required = false) String vmtype,
             @RequestParam(value = "hours", required = false) String hours) {
-        LOGGER.info("Retrieving events for user {}, since {}", user.getUsername(), since == null ? null : new Date(since));
         List<CloudbreakUsageJson> usages = cloudbreakUsagesFacade.getUsagesForDeployer(user, since, userId, accountId, cloud, zone, vmtype, hours);
         return new ResponseEntity<>(HttpStatus.OK);
     }

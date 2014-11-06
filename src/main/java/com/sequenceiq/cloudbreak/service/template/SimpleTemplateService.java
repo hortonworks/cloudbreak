@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.template;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -16,6 +15,7 @@ import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CbUserRole;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
@@ -40,18 +40,17 @@ public class SimpleTemplateService implements TemplateService {
 
     @Override
     public Set<Template> retrieveAccountTemplates(CbUser user) {
-        Set<Template> templates = new HashSet<>();
         if (user.getRoles().contains(CbUserRole.ADMIN)) {
-            templates = templateRepository.findAllInAccount(user.getAccount());
+            return templateRepository.findAllInAccount(user.getAccount());
         } else {
-            templates = templateRepository.findPublicsInAccount(user.getAccount());
+            return templateRepository.findPublicsInAccount(user.getAccount());
         }
-        return templates;
     }
 
     @Override
     public Template get(Long id) {
         Template template = templateRepository.findOne(id);
+        MDCBuilder.buildMdcContext(template);
         if (template == null) {
             throw new NotFoundException(String.format(TEMPLATE_NOT_FOUND_MSG, id));
         } else {
@@ -61,6 +60,7 @@ public class SimpleTemplateService implements TemplateService {
 
     @Override
     public Template create(CbUser user, Template template) {
+        MDCBuilder.buildMdcContext(template);
         LOGGER.debug("Creating template: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         Template savedTemplate = null;
         template.setOwner(user.getUserId());
@@ -75,8 +75,9 @@ public class SimpleTemplateService implements TemplateService {
 
     @Override
     public void delete(Long templateId) {
-        LOGGER.debug("Deleting template : [{}]", templateId);
         Template template = templateRepository.findOne(templateId);
+        MDCBuilder.buildMdcContext(template);
+        LOGGER.debug("Deleting template.", templateId);
         if (template == null) {
             throw new NotFoundException(String.format(TEMPLATE_NOT_FOUND_MSG, templateId));
         }

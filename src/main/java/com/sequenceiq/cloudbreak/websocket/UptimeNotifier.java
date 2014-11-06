@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -21,8 +19,6 @@ import com.sequenceiq.cloudbreak.websocket.message.UptimeMessage;
 
 @Component
 public class UptimeNotifier {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(UptimeNotifier.class);
 
     @Autowired
     private WebsocketService websocketService;
@@ -50,7 +46,6 @@ public class UptimeNotifier {
                 }
             }
         }
-        LOGGER.debug("uptimes: " + uptimes);
         if (!uptimes.isEmpty()) {
             for (Map.Entry<String, List<UptimeMessage>> longListEntry : uptimes.entrySet()) {
                 websocketService.sendToTopicUser(longListEntry.getKey(), WebsocketEndPoint.UPTIME, longListEntry.getValue());

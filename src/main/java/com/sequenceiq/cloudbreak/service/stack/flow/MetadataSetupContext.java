@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.StackOperationFailure;
@@ -34,8 +35,9 @@ public class MetadataSetupContext {
     private Reactor reactor;
 
     public void setupMetadata(CloudPlatform cloudPlatform, Long stackId) {
+        Stack stack = stackRepository.findOneWithLists(stackId);
+        MDCBuilder.buildMdcContext(stack);
         try {
-            Stack stack = stackRepository.findOneWithLists(stackId);
             MetadataSetup metadataSetup = metadataSetups.get(cloudPlatform);
             metadataSetup.setupMetadata(stack);
         } catch (Exception e) {
@@ -47,8 +49,9 @@ public class MetadataSetupContext {
     }
 
     public void updateMetadata(CloudPlatform cloudPlatform, Long stackId, Set<Resource> resourceSet) {
+        Stack stack = stackRepository.findOneWithLists(stackId);
+        MDCBuilder.buildMdcContext(stack);
         try {
-            Stack stack = stackRepository.findOneWithLists(stackId);
             metadataSetups.get(cloudPlatform).addNewNodesToMetadata(stack, resourceSet);
         } catch (Exception e) {
             String errMessage = "Unhandled exception occurred while updating stack metadata.";

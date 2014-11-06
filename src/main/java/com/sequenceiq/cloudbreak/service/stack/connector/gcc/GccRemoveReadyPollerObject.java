@@ -1,16 +1,17 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.gcc;
 
 import com.google.api.services.compute.Compute;
+import com.sequenceiq.cloudbreak.domain.Stack;
 
 public class GccRemoveReadyPollerObject {
 
     private Compute.ZoneOperations.Get zoneOperations;
     private Compute.GlobalOperations.Get globalOperations;
-    private Long stackId;
+    private Stack stack;
     private String name;
 
-    public GccRemoveReadyPollerObject(Compute.ZoneOperations.Get zoneOperations, Compute.GlobalOperations.Get globalOperations, Long stackId, String name) {
-        this.stackId = stackId;
+    public GccRemoveReadyPollerObject(Compute.ZoneOperations.Get zoneOperations, Compute.GlobalOperations.Get globalOperations, Stack stack, String name) {
+        this.stack = stack;
         this.name = name;
         this.zoneOperations = zoneOperations;
         this.globalOperations = globalOperations;
@@ -40,11 +41,11 @@ public class GccRemoveReadyPollerObject {
         this.name = name;
     }
 
-    public Long getStackId() {
-        return stackId;
+    public Stack getStack() {
+        return stack;
     }
 
-    public void setStackId(Long stackId) {
-        this.stackId = stackId;
+    public void setStack(Stack stack) {
+        this.stack = stack;
     }
 }

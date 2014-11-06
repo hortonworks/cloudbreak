@@ -1,21 +1,23 @@
 package com.sequenceiq.cloudbreak.service.stack.event;
 
+import com.sequenceiq.cloudbreak.domain.Stack;
+
 public class AmbariRoleAllocationComplete {
 
-    private Long stackId;
+    private Stack stack;
     private String ambariIp;
 
-    public AmbariRoleAllocationComplete(Long stackId, String ambariIp) {
-        this.stackId = stackId;
+    public AmbariRoleAllocationComplete(Stack stack, String ambariIp) {
+        this.stack = stack;
         this.ambariIp = ambariIp;
     }
 
-    public Long getStackId() {
-        return stackId;
+    public Stack getStack() {
+        return stack;
     }
 
-    public void setStackId(Long stackId) {
-        this.stackId = stackId;
+    public void setStack(Stack stack) {
+        this.stack = stack;
     }
 
     public String getAmbariIp() {

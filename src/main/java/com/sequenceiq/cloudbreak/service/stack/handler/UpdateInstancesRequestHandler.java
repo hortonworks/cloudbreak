@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.AddInstancesFailedException;
@@ -79,9 +80,10 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
         final CloudPlatform cloudPlatform = request.getCloudPlatform();
         Long stackId = request.getStackId();
         Integer scalingAdjustment = request.getScalingAdjustment();
+        final Stack stack = stackRepository.findOneWithLists(stackId);
+        MDCBuilder.buildMdcContext(stack);
         try {
-            final Stack stack = stackRepository.findOneWithLists(stackId);
-            LOGGER.info("Accepted {} event on stack: '{}'", ReactorConfig.UPDATE_INSTANCES_REQUEST_EVENT, stackId);
+            LOGGER.info("Accepted {} event on stack.", ReactorConfig.UPDATE_INSTANCES_REQUEST_EVENT);
             stackUpdater.updateMetadataReady(stackId, false);
             if (scalingAdjustment > 0) {
                 if (cloudPlatform.isWithTemplate()) {
@@ -118,7 +120,7 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
                             throw new BuildStackFailureException(e.getMessage(), e, resourceSet);
                         }
                     }
-                    LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT, stack.getId());
+                    LOGGER.info("Publishing {} event.", ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT);
                     reactor.notify(ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT,
                             Event.wrap(new AddInstancesComplete(cloudPlatform, stack.getId(), resourceSet)));
                 }
@@ -152,14 +154,14 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
                                     try {
                                         delete = instanceResourceBuilders.get(cloudPlatform).get(index).delete(resource, dCO);
                                     } catch (HttpResponseException ex) {
-                                        LOGGER.error(String.format("Error occurs on %s stack under the instance remove", stack.getId()), ex);
+                                        LOGGER.error(String.format("Error occurred on stack under the instance remove"), ex);
                                         throw new InternalServerException(
-                                                String.format("Error occurred while removing instance '%s' on stack '%s'. Message: '%s'",
-                                                instanceId, stack.getId(), ex.getResponse().toString()), ex);
+                                                String.format("Error occurred while removing instance '%s' on stack. Message: '%s'",
+                                                instanceId, ex.getResponse().toString()), ex);
                                     } catch (Exception ex) {
                                         throw new InternalServerException(
-                                                String.format("Error occurred while removing instance '%s' on stack '%s'. Message: '%s'",
-                                                instanceId, stack.getId(), ex.getMessage()), ex);
+                                                String.format("Error occurred while removing instance '%s' on stack. Message: '%s'",
+                                                instanceId, ex.getMessage()), ex);
                                     }
                                     return delete;
                                 }
@@ -174,23 +176,24 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
                             }
                         }
                     }
-                    LOGGER.info("Terminated instances in stack '{}': '{}'", stack.getId(), instanceIds);
-                    LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, stack.getId());
+                    LOGGER.info("Terminated instances in stack: '{}'", instanceIds);
+                    LOGGER.info("Publishing {} event.", ReactorConfig.STACK_UPDATE_SUCCESS_EVENT);
                     reactor.notify(ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, Event.wrap(new StackUpdateSuccess(stack.getId(), true, instanceIds)));
                 }
             }
         } catch (AddInstancesFailedException e) {
             LOGGER.error(e.getMessage(), e);
-            notifyUpdateFailed(stackId, e.getMessage());
+            notifyUpdateFailed(stack, e.getMessage());
         } catch (Exception e) {
             String errMessage = "Unhandled exception occurred while updating stack.";
             LOGGER.error(errMessage, e);
-            notifyUpdateFailed(stackId, errMessage);
+            notifyUpdateFailed(stack, errMessage);
         }
     }
 
-    private void notifyUpdateFailed(Long stackId, String detailedMessage) {
-        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_UPDATE_FAILED_EVENT, stackId);
-        reactor.notify(ReactorConfig.STACK_UPDATE_FAILED_EVENT, Event.wrap(new StackOperationFailure(stackId, detailedMessage)));
+    private void notifyUpdateFailed(Stack stack, String detailedMessage) {
+        MDCBuilder.buildMdcContext(stack);
+        LOGGER.info("Publishing {} event.", ReactorConfig.STACK_UPDATE_FAILED_EVENT);
+        reactor.notify(ReactorConfig.STACK_UPDATE_FAILED_EVENT, Event.wrap(new StackOperationFailure(stack.getId(), detailedMessage)));
     }
 }

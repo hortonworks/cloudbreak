@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
@@ -71,6 +72,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
 
     @Override
     public void setupProvisioning(Stack stack) {
+        MDCBuilder.buildMdcContext(stack);
         Credential credential = stack.getCredential();
         String emailAsFolder = azureStackUtil.emailAsFolder(stack.getOwner());
 
@@ -140,6 +142,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
     }
 
     private void createStorage(Stack stack, AzureClient azureClient, String affinityGroupName) {
+        MDCBuilder.buildMdcContext(stack);
         try {
             azureClient.getStorageAccount(affinityGroupName);
         } catch (Exception ex) {
@@ -166,6 +169,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
     }
 
     private void createAffinityGroup(Stack stack, AzureClient azureClient, String affinityGroupName) {
+        MDCBuilder.buildMdcContext(stack);
         try {
             azureClient.getAffinityGroup(affinityGroupName);
         } catch (Exception ex) {

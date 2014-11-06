@@ -18,6 +18,7 @@ import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 import com.sequenceiq.cloudbreak.service.user.UserFilterField;
 
@@ -80,12 +81,14 @@ public class AmbariClusterInstallerMailSenderService {
     }
 
     private void sendInstallationEmail(final MimeMessagePreparator preparator) {
+        MDCBuilder.buildMdcContext();
         LOGGER.info("Sending cluster installation email ...");
         ((JavaMailSender) mailSender).send(preparator);
         LOGGER.info("Cluster installation email sent");
     }
 
     private String getEmailBody(String name, String status, String server, String template) {
+        MDCBuilder.buildMdcContext();
         String text = null;
         try {
             Map<String, Object> model = new HashMap<>();

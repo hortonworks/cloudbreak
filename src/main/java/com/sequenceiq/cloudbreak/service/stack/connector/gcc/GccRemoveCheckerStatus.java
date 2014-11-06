@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.AddInstancesFailedException;
 
@@ -19,7 +20,8 @@ public class GccRemoveCheckerStatus implements StatusCheckerTask<GccRemoveReadyP
 
     @Override
     public boolean checkStatus(GccRemoveReadyPollerObject gccRemoveReadyPollerObject) {
-        LOGGER.info("Checking status of remove '{}' on '{}' stack.", gccRemoveReadyPollerObject.getName(), gccRemoveReadyPollerObject.getStackId());
+        MDCBuilder.buildMdcContext(gccRemoveReadyPollerObject.getStack());
+        LOGGER.info("Checking status of remove '{}' on '{}' stack.", gccRemoveReadyPollerObject.getName(), gccRemoveReadyPollerObject.getStack().getId());
         try {
             Integer progress = gccRemoveReadyPollerObject.getZoneOperations().execute().getProgress();
             return (progress.intValue() != FINISHED) ? false : true;
@@ -47,12 +49,13 @@ public class GccRemoveCheckerStatus implements StatusCheckerTask<GccRemoveReadyP
     public void handleTimeout(GccRemoveReadyPollerObject gccRemoveReadyPollerObject) {
         throw new AddInstancesFailedException(String.format(
                 "Something went wrong. Remove of '%s' resource unsuccess in a reasonable timeframe on '%s' stack.",
-                gccRemoveReadyPollerObject.getName(), gccRemoveReadyPollerObject.getStackId()));
+                gccRemoveReadyPollerObject.getName(), gccRemoveReadyPollerObject.getStack().getId()));
     }
 
     @Override
     public String successMessage(GccRemoveReadyPollerObject gccRemoveReadyPollerObject) {
+        MDCBuilder.buildMdcContext(gccRemoveReadyPollerObject.getStack());
         return String.format("Gcc resource '%s' is removed success on '%s' stack",
-                gccRemoveReadyPollerObject.getName(), gccRemoveReadyPollerObject.getStackId());
+                gccRemoveReadyPollerObject.getName(), gccRemoveReadyPollerObject.getStack().getId());
     }
 }

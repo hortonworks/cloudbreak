@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -60,8 +61,9 @@ public class ClusterCreationSuccessHandler implements Consumer<Event<ClusterCrea
     public void accept(Event<ClusterCreationSuccess> event) {
         ClusterCreationSuccess clusterCreationSuccess = event.getData();
         Long clusterId = clusterCreationSuccess.getClusterId();
-        LOGGER.info("Accepted {} event.", ReactorConfig.CLUSTER_CREATE_SUCCESS_EVENT, clusterId);
         Cluster cluster = clusterRepository.findById(clusterId);
+        MDCBuilder.buildMdcContext(cluster);
+        LOGGER.info("Accepted {} event.", ReactorConfig.CLUSTER_CREATE_SUCCESS_EVENT, clusterId);
         cluster.setStatus(Status.AVAILABLE);
         cluster.setStatusReason("");
         cluster.setCreationFinished(clusterCreationSuccess.getCreationFinished());

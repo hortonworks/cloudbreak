@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariHostsUnavailableException;
 
@@ -15,6 +16,7 @@ public class AmbariHostsJoinStatusCheckerTask implements StatusCheckerTask<Ambar
 
     @Override
     public boolean checkStatus(AmbariHosts hosts) {
+        MDCBuilder.buildMdcContext(hosts.getStack());
         try {
             AmbariClient ambariClient = hosts.getAmbariClient();
             List<String> hostNames = ambariClient.getClusterHosts();
@@ -34,12 +36,12 @@ public class AmbariHostsJoinStatusCheckerTask implements StatusCheckerTask<Ambar
     @Override
     public void handleTimeout(AmbariHosts t) {
         throw new AmbariHostsUnavailableException(String.format("Operation timed out. Failed to find all '%s' Ambari hosts. Stack: '%s'",
-                t.getHostCount(), t.getStackId()));
+                t.getHostCount(), t.getStack().getId()));
     }
 
     @Override
     public String successMessage(AmbariHosts t) {
-        return String.format("Ambari client found all %s hosts for stack '%s'", t.getHostCount(), t.getStackId());
+        return String.format("Ambari client found all %s hosts for stack '%s'", t.getHostCount(), t.getStack().getId());
     }
 
 }

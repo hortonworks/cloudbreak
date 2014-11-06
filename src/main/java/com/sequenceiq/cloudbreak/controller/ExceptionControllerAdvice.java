@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.sequenceiq.cloudbreak.controller.json.ExceptionResult;
 import com.sequenceiq.cloudbreak.controller.json.ValidationResult;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 
 @ControllerAdvice
@@ -27,12 +28,14 @@ public class ExceptionControllerAdvice {
 
     @ExceptionHandler({ AuthenticationCredentialsNotFoundException.class })
     public ResponseEntity<ExceptionResult> unauthorized(Exception e) {
+        MDCBuilder.buildMdcContext();
         LOGGER.error(e.getMessage(), e);
         return new ResponseEntity<>(new ExceptionResult(e.getMessage()), HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler({ HttpMessageNotReadableException.class, BadRequestException.class })
     public ResponseEntity<ExceptionResult> badRequest(Exception e) {
+        MDCBuilder.buildMdcContext();
         LOGGER.error(e.getMessage(), e);
         return new ResponseEntity<>(new ExceptionResult(e.getMessage()), HttpStatus.BAD_REQUEST);
     }
@@ -45,12 +48,14 @@ public class ExceptionControllerAdvice {
 
     @ExceptionHandler({ NotFoundException.class, EntityNotFoundException.class })
     public ResponseEntity<ExceptionResult> notFound(Exception e) {
+        MDCBuilder.buildMdcContext();
         LOGGER.error(e.getMessage(), e);
         return new ResponseEntity<>(new ExceptionResult(e.getMessage()), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler({ MethodArgumentNotValidException.class })
     public ResponseEntity<ValidationResult> validationFailed(MethodArgumentNotValidException e) {
+        MDCBuilder.buildMdcContext();
         LOGGER.error(e.getMessage(), e);
         ValidationResult result = new ValidationResult();
         for (FieldError err : e.getBindingResult().getFieldErrors()) {
@@ -61,18 +66,21 @@ public class ExceptionControllerAdvice {
 
     @ExceptionHandler({ HttpRequestMethodNotSupportedException.class })
     public ResponseEntity<ExceptionResult> httpRequestMethodNotSupportedExceptionError(Exception e) {
+        MDCBuilder.buildMdcContext();
         LOGGER.error(e.getMessage(), e);
         return new ResponseEntity<>(new ExceptionResult("The requested http method not supported on the resource"), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler({ Exception.class, RuntimeException.class })
     public ResponseEntity<ExceptionResult> serverError(Exception e) {
+        MDCBuilder.buildMdcContext();
         LOGGER.error(e.getMessage(), e);
         return new ResponseEntity<>(new ExceptionResult("Internal server error"), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler({ DuplicateKeyValueException.class })
     public ResponseEntity<ExceptionResult> duplicatedName(DuplicateKeyValueException e) {
+        MDCBuilder.buildMdcContext();
         LOGGER.error(e.getMessage(), e);
         return new ResponseEntity<>(
                 new ExceptionResult("The name '" + e.getValue() + "' is already taken, please choose a different one"), HttpStatus.BAD_REQUEST);

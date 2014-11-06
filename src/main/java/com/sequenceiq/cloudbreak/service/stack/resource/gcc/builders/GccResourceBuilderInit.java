@@ -29,6 +29,7 @@ import com.google.api.services.storage.StorageScopes;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDeleteContextObject;
@@ -48,7 +49,7 @@ public class GccResourceBuilderInit implements
     public GccProvisionContextObject provisionInit(Stack stack, String userData) throws Exception {
         GccCredential credential = (GccCredential) stack.getCredential();
         GccProvisionContextObject gccProvisionContextObject = new GccProvisionContextObject(stack.getId(), credential.getProjectId(),
-                buildCompute(credential, stack.getName()));
+                buildCompute(stack, credential, stack.getName()));
         gccProvisionContextObject.setUserData(userData);
         return gccProvisionContextObject;
     }
@@ -57,24 +58,25 @@ public class GccResourceBuilderInit implements
     public GccDeleteContextObject deleteInit(Stack stack) throws Exception {
         GccCredential credential = (GccCredential) stack.getCredential();
         GccDeleteContextObject gccDeleteContextObject = new GccDeleteContextObject(stack.getId(), credential.getProjectId(),
-                buildCompute(credential, stack.getName()));
+                buildCompute(stack, credential, stack.getName()));
         return gccDeleteContextObject;
     }
 
     @Override
     public GccStartStopContextObject startStopInit(Stack stack) throws Exception {
-        return new GccStartStopContextObject(stack.getId());
+        return new GccStartStopContextObject(stack);
     }
 
     @Override
     public GccDescribeContextObject describeInit(Stack stack) throws Exception {
         GccCredential credential = (GccCredential) stack.getCredential();
         GccDescribeContextObject gccDescribeContextObject = new GccDescribeContextObject(stack.getId(), credential.getProjectId(),
-                buildCompute(credential, stack.getName()));
+                buildCompute(stack, credential, stack.getName()));
         return gccDescribeContextObject;
     }
 
-    private Compute buildCompute(GccCredential gccCredential, String appName) {
+    private Compute buildCompute(Stack stack, GccCredential gccCredential, String appName) {
+        MDCBuilder.buildMdcContext(stack);
         try {
             HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
             BufferedReader br = new BufferedReader(new StringReader(gccCredential.getServiceAccountPrivateKey()));
@@ -102,6 +104,7 @@ public class GccResourceBuilderInit implements
     }
 
     private Dns buildDns(GccCredential gccCredential, Stack stack) {
+        MDCBuilder.buildMdcContext(stack);
         try {
             HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
             BufferedReader br = new BufferedReader(new StringReader(gccCredential.getServiceAccountPrivateKey()));
@@ -130,6 +133,7 @@ public class GccResourceBuilderInit implements
     }
 
     private ManagedZone buildManagedZone(Dns dns, Stack stack) throws IOException {
+        MDCBuilder.buildMdcContext(stack);
         GccCredential credential = (GccCredential) stack.getCredential();
         ManagedZonesListResponse execute1 = dns.managedZones().list(credential.getProjectId()).execute();
         ManagedZone original = null;
