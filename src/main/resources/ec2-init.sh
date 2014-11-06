@@ -38,7 +38,7 @@ for (( i=1; i<=VOLUME_COUNT; i++ )); do
   DOCKER_VOLUME_PARAMS="${DOCKER_VOLUME_PARAMS} -v /mnt/fs${i}:/mnt/fs${i}"
 done
 
-docker-runing() {
+docker-running() {
     if docker info &> /dev/null ; then
         echo UP;
     else
@@ -48,7 +48,7 @@ docker-runing() {
 : ${DOCKER_MAX_RETRIES:=60}
 local docker_retries
 docker_retries=0
-while [[ "$(docker-runing)" == "DOWN" ]] && [ $docker_retries -ne $DOCKER_MAX_RETRIES ];
+while [[ "$(docker-running)" == "DOWN" ]] && [ $docker_retries -ne $DOCKER_MAX_RETRIES ];
 do
 	service docker restart
 	sleep 8

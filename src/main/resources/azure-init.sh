@@ -56,7 +56,7 @@ EOF
 chmod +x /etc/init.d/update_resolvconf
 update-rc.d update_resolvconf defaults
 
-docker-runing() {
+docker-running() {
     if docker info &> /dev/null ; then
         echo UP;
     else
@@ -66,7 +66,7 @@ docker-runing() {
 : ${DOCKER_MAX_RETRIES:=60}
 local docker_retries
 docker_retries=0
-while [[ "$(docker-runing)" == "DOWN" ]] && [ $docker_retries -ne $DOCKER_MAX_RETRIES ];
+while [[ "$(docker-running)" == "DOWN" ]] && [ $docker_retries -ne $DOCKER_MAX_RETRIES ];
 do
 	service docker restart
 	sleep 8
