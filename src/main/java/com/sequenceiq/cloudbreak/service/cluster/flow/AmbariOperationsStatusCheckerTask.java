@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
@@ -17,6 +18,7 @@ public class AmbariOperationsStatusCheckerTask implements StatusCheckerTask<Amba
 
     private static final BigDecimal COMPLETED = new BigDecimal(100.0);
     private static final BigDecimal FAILED = new BigDecimal(-1.0);
+    private static final int MAX_RETRY = 3;
 
     @Override
     public boolean checkStatus(AmbariOperations t) {
@@ -24,12 +26,22 @@ public class AmbariOperationsStatusCheckerTask implements StatusCheckerTask<Amba
         Map<String, Integer> installRequests = t.getRequests();
         boolean allFinished = true;
         for (Entry<String, Integer> request : installRequests.entrySet()) {
-            BigDecimal installProgress = t.getAmbariClient().getRequestProgress(request.getValue());
+            AmbariClient ambariClient = t.getAmbariClient();
+            BigDecimal installProgress = ambariClient.getRequestProgress(request.getValue());
             LOGGER.info("Ambari operation: '{}', Progress: {}", request.getKey(), installProgress);
             allFinished = allFinished && installProgress.compareTo(COMPLETED) == 0;
             if (installProgress.compareTo(FAILED) == 0) {
-                throw new AmbariOperationFailedException(String.format("Ambari operation failed: [component: '%s', requestID: '%s']", request.getKey(),
-                        request.getValue()));
+                boolean failed = true;
+                for (int i = 0; i < MAX_RETRY; i++) {
+                    if (ambariClient.getRequestProgress(request.getValue()).compareTo(FAILED) != 0) {
+                        failed = false;
+                        break;
+                    }
+                }
+                if (failed) {
+                    throw new AmbariOperationFailedException(String.format("Ambari operation failed: [component: '%s', requestID: '%s']", request.getKey(),
+                            request.getValue()));
+                }
             }
         }
         return allFinished;

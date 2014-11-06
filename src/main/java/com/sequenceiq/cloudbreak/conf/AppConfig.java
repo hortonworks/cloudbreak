@@ -23,11 +23,11 @@ import com.sequenceiq.cloudbreak.service.stack.connector.aws.TemplateReader;
 @Configuration
 public class AppConfig {
 
-    @Value("${cb.threadpool.core.size:10}")
+    @Value("${cb.threadpool.core.size:40}")
     private int corePoolSize;
-    @Value("${cb.threadpool.max.size:100}")
+    @Value("${cb.threadpool.max.size:500}")
     private int maxPoolSize;
-    @Value("${cb.threadpool.capacity.size:11}")
+    @Value("${cb.threadpool.capacity.size:4000}")
     private int queueCapacity;
 
     @Autowired
