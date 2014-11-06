@@ -154,7 +154,7 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
                                     try {
                                         delete = instanceResourceBuilders.get(cloudPlatform).get(index).delete(resource, dCO);
                                     } catch (HttpResponseException ex) {
-                                        LOGGER.error(String.format("Error occurs on stack under the instance remove"), ex);
+                                        LOGGER.error(String.format("Error occurred on stack under the instance remove"), ex);
                                         throw new InternalServerException(
                                                 String.format("Error occurred while removing instance '%s' on stack. Message: '%s'",
                                                 instanceId, ex.getResponse().toString()), ex);
