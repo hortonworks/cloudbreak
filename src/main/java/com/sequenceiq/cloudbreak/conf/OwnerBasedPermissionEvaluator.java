@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.service.user.UserFilterField;
 @Component
 public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
 
-    private static final String PERISCOPE_CLIENT = "periscope";
+    private static final String AUTO_SCALE_SCOPE = "cloudbreak.autoscale";
     private UserDetailsService userDetailsService;
 
     @Override
@@ -26,7 +26,7 @@ public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
             return false;
         }
         OAuth2Authentication oauth = (OAuth2Authentication) authentication;
-        if (oauth.getUserAuthentication() == null && oauth.getOAuth2Request().getClientId().equals(PERISCOPE_CLIENT)) {
+        if (oauth.getUserAuthentication() == null && oauth.getOAuth2Request().getScope().contains(AUTO_SCALE_SCOPE)) {
             return true;
         }
         try {
