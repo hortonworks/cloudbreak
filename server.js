@@ -135,6 +135,7 @@ app.get('/authorize', function(req, res, next){
       error.status = 500;
       return next(error);
     }
+    console.log(data)
     req.session.token=data.access_token;
     res.redirect('/');
   });
@@ -142,7 +143,12 @@ app.get('/authorize', function(req, res, next){
 
 // cloudbreak notifications ====================================================
 app.post('/notifications', function(req, res, next){
-  console.log(req)
+  if (req.body.userName){
+    io.to(req.body.userName).emit('message', 'stack uptime is: ' + req.body.eventMessage);
+    res.send();
+  } else {
+    console.log('No username in request body, nothing to do.')
+  }
 });
 
 // main page ===================================================================
