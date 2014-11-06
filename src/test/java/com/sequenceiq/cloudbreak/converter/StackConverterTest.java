@@ -1,7 +1,10 @@
 package com.sequenceiq.cloudbreak.converter;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
@@ -102,6 +105,9 @@ public class StackConverterTest {
         assertEquals(result.getId(), stack.getId());
         assertEquals(result.getCloudPlatform(), CloudPlatform.AWS);
         assertNotNull(result.getMetadata());
+        assertEquals(result.getAccount(), DUMMY_NAME);
+        assertEquals(result.getOwner(), DUMMY_NAME);
+        assertTrue(result.isPublicInAccount());
         verify(clusterConverter, times(1)).convert(any(Cluster.class), anyString());
     }
 
@@ -163,6 +169,9 @@ public class StackConverterTest {
         assertEquals(result.getCredential().getId(), stackJson.getCredentialId());
         assertEquals(result.getTemplate().getId(), stackJson.getTemplateId());
         assertEquals(result.getStatus(), Status.REQUESTED);
+        assertNull(result.getAccount());
+        assertNull(result.getOwner());
+        assertFalse(result.isPublicInAccount());
         verify(credentialRepository, times(1)).findOne(anyLong());
         verify(templateRepository, times(1)).findOne(anyLong());
     }
@@ -202,6 +211,8 @@ public class StackConverterTest {
         stack.setStatusReason(DUMMY_STATUS_REASON);
         stack.setVersion(VERSION);
         stack.setPublicInAccount(true);
+        stack.setAccount(DUMMY_NAME);
+        stack.setOwner(DUMMY_NAME);
         return stack;
     }
 
@@ -213,6 +224,9 @@ public class StackConverterTest {
         stackJson.setCluster(new ClusterResponse());
         stackJson.setCredentialId(DUMMY_ID);
         stackJson.setHash(DUMMY_HASH);
+        stackJson.setPublicInAccount(false);
+        stackJson.setAccount(DUMMY_HASH);
+        stackJson.setOwner(DUMMY_HASH);
         stackJson.setMetadata(new HashSet<InstanceMetaDataJson>());
         stackJson.setName(DUMMY_NAME);
         stackJson.setNodeCount(NODE_COUNT);
