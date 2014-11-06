@@ -77,10 +77,7 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
         AzureCredential credential = (AzureCredential) stack.getCredential();
         AzureCloudServiceDeleteTaskContext azureCloudServiceDeleteTaskContext =
                 new AzureCloudServiceDeleteTaskContext(aDCO.getCommonName(), resource.getResourceName(),
-                        aDCO.getStackId(), aDCO.getNewAzureClient(credential));
-        AzureCloudServiceDeleteTaskContext azureCloudServiceRemoveReadyPollerObject =
-                new AzureCloudServiceDeleteTaskContext(aDCO.getCommonName(), resource.getResourceName(),
-                        stack.getId(), aDCO.getNewAzureClient(credential));
+                        stack, aDCO.getNewAzureClient(credential));
         azureCloudServiceRemoveReadyPollerObjectPollingService
                 .pollWithTimeout(azureCloudServiceDeleteTask, azureCloudServiceDeleteTaskContext, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
 
@@ -90,7 +87,7 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
         for (String jsonNode : disks) {
             if (jsonNode.startsWith(String.format("%s-%s-0", resource.getResourceName(), resource.getResourceName()))) {
                 AzureDiskRemoveDeleteTaskContext azureDiskRemoveReadyPollerObject = new AzureDiskRemoveDeleteTaskContext(aDCO.getCommonName(), jsonNode,
-                        stack.getId(), aDCO.getNewAzureClient(credential));
+                        stack, aDCO.getNewAzureClient(credential));
                 azureDiskRemoveReadyPollerObjectPollingService
                         .pollWithTimeout(azureDiskDeleteTask, azureDiskRemoveReadyPollerObject, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
             }

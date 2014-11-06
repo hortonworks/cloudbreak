@@ -62,6 +62,6 @@ public class AzureDiskDeleteTask implements StatusCheckerTask<AzureDiskRemoveDel
     public String successMessage(AzureDiskRemoveDeleteTaskContext azureDiskRemoveDeleteTaskContext) {
         CbLoggerFactory.buildMdcContext(azureDiskRemoveDeleteTaskContext.getStack());
         return String.format("Azure resource '%s' is removed success on '%s' stack",
-                azureDiskRemoveDeleteTaskContext.getName(), azureDiskRemoveDeleteTaskContext.getStack().getId()));
+                azureDiskRemoveDeleteTaskContext.getName(), azureDiskRemoveDeleteTaskContext.getStack().getId());
     }
 }
