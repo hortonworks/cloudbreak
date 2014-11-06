@@ -27,6 +27,9 @@ public class StackJson implements JsonEntity {
             message = "Must contain only alphanumeric characters (case sensitive) and hyphens and start with an alpha character.")
     private String name;
     private Long templateId;
+    private String owner;
+    private String account;
+    private boolean publicInAccount;
     private CloudPlatform cloudPlatform;
     private StackDescription description;
     private Long credentialId;
@@ -162,4 +165,33 @@ public class StackJson implements JsonEntity {
         this.cluster = cluster;
     }
 
+    @JsonProperty("owner")
+    public String getOwner() {
+        return owner;
+    }
+
+    @JsonIgnore
+    public void setOwner(String owner) {
+        this.owner = owner;
+    }
+
+    @JsonProperty("account")
+    public String getAccount() {
+        return account;
+    }
+
+    @JsonIgnore
+    public void setAccount(String account) {
+        this.account = account;
+    }
+
+    @JsonProperty("public")
+    public boolean isPublicInAccount() {
+        return publicInAccount;
+    }
+
+    @JsonIgnore
+    public void setPublicInAccount(boolean publicInAccount) {
+        this.publicInAccount = publicInAccount;
+    }
 }

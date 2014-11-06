@@ -86,6 +86,15 @@ public class DefaultStackService implements StackService {
     }
 
     @Override
+    public Stack get(String ambariAddress) {
+        Stack stack = stackRepository.findByAmbari(ambariAddress);
+        if (stack == null) {
+            throw new NotFoundException(String.format("Stack not found by Ambari address: '%s' not found", ambariAddress));
+        }
+        return stack;
+    }
+
+    @Override
     public Stack create(CbUser user, Stack stack) {
         MDCBuilder.buildMdcContext(stack);
         Stack savedStack = null;

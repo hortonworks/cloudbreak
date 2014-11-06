@@ -18,6 +18,8 @@ public interface StackRepository extends CrudRepository<Stack, Long> {
 
     Stack findByName(@Param("name") String name);
 
+    Stack findByAmbari(@Param("ambariIp") String ambariIp);
+
     Set<Stack> findForUser(@Param("user") String user);
 
     Set<Stack> findPublicsInAccount(@Param("account") String account);
