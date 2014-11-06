@@ -71,7 +71,7 @@ public class StackController {
 
     @RequestMapping(value = "stacks/{id}", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<StackJson> getStack(@ModelAttribute("user") CbUser user, @PathVariable Long id) {
+    public ResponseEntity<StackJson> getStack(@PathVariable Long id) {
         Stack stack = stackService.get(id);
         StackDescription stackDescription = stackService.getStackDescription(stack);
         StackJson stackJson = stackConverter.convert(stack, stackDescription);
@@ -80,20 +80,20 @@ public class StackController {
 
     @RequestMapping(value = "stacks/{id}/status", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> getStackStatus(@ModelAttribute("user") CbUser user, @PathVariable Long id) {
+    public ResponseEntity<Map<String, Object>> getStackStatus(@PathVariable Long id) {
         return new ResponseEntity<>(stackConverter.convertStackStatus(stackService.get(id)), HttpStatus.OK);
     }
 
     @RequestMapping(value = "stacks/{id}", method = RequestMethod.DELETE)
     @ResponseBody
-    public ResponseEntity<TemplateJson> deleteStack(@ModelAttribute("user") CbUser user, @PathVariable Long id) {
+    public ResponseEntity<TemplateJson> deleteStack(@PathVariable Long id) {
         stackService.delete(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @RequestMapping(value = "stacks/{id}", method = RequestMethod.PUT)
     @ResponseBody
-    public ResponseEntity<String> updateStack(@ModelAttribute("user") CbUser user, @PathVariable Long id, @Valid @RequestBody UpdateStackJson updateRequest) {
+    public ResponseEntity<String> updateStack(@PathVariable Long id, @Valid @RequestBody UpdateStackJson updateRequest) {
         if (updateRequest.getStatus() != null) {
             stackService.updateStatus(id, updateRequest.getStatus());
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
