@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.AddInstancesFailedException;
 
@@ -33,7 +34,7 @@ public class AzureCloudServiceRemoveCheckerStatus implements StatusCheckerTask<A
             AzureClient azureClient = aRRPO.getAzureClient();
             HttpResponseDecorator deleteCloudServiceResult = (HttpResponseDecorator) azureClient.deleteCloudService(props);
             String requestId = (String) azureClient.getRequestId(deleteCloudServiceResult);
-            azureClient.waitUntilComplete(requestId);
+            waitForFinishing(azureClient, requestId);
         } catch (HttpResponseException ex) {
             if (ex.getStatusCode() != NOT_FOUND) {
                 return false;
@@ -42,6 +43,13 @@ public class AzureCloudServiceRemoveCheckerStatus implements StatusCheckerTask<A
             return false;
         }
         return true;
+    }
+
+    private void waitForFinishing(AzureClient azureClient, String requestId) {
+        boolean finished = azureClient.waitUntilComplete(requestId);
+        if (!finished) {
+            throw new InternalServerException("Azure resource timeout");
+        }
     }
 
     @Override

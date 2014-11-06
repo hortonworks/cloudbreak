@@ -8,6 +8,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
@@ -86,6 +87,13 @@ public abstract class AzureSimpleInstanceResourceBuilder implements
             throw new InternalServerException(ex.getMessage());
         } else {
             LOGGER.error(String.format("Azure resource not found with %s name for %s user.", resourceName, user));
+        }
+    }
+
+    protected void waitForFinishing(AzureClient azureClient, String requestId) {
+        boolean finished = azureClient.waitUntilComplete(requestId);
+        if (!finished) {
+            throw new InternalServerException("Azure resource timeout");
         }
     }
 

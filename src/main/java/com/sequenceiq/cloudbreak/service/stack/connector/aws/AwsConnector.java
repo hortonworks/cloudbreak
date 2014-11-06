@@ -174,7 +174,7 @@ public class AwsConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public synchronized void buildStack(Stack stack, String userData, Map<String, Object> setupProperties) {
+    public void buildStack(Stack stack, String userData, Map<String, Object> setupProperties) {
         AwsTemplate awsTemplate = (AwsTemplate) stack.getTemplate();
         AwsCredential awsCredential = (AwsCredential) stack.getCredential();
         AmazonCloudFormationClient client = awsStackUtil.createCloudFormationClient(awsTemplate.getRegion(), awsCredential);

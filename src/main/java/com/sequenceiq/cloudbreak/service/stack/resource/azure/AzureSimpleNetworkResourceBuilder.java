@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.stack.resource.azure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -40,6 +41,13 @@ public abstract class AzureSimpleNetworkResourceBuilder implements
             throw new InternalServerException(ex.getMessage());
         } else {
             LOGGER.error(String.format("Azure resource not found with %s name for %s user.", resourceName, user));
+        }
+    }
+
+    protected void waitForFinishing(AzureClient azureClient, String requestId) {
+        boolean finished = azureClient.waitUntilComplete(requestId);
+        if (!finished) {
+            throw new InternalServerException("Azure resource timeout");
         }
     }
 

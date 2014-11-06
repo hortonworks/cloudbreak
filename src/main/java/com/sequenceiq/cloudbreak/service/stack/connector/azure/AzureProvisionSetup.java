@@ -149,11 +149,19 @@ public class AzureProvisionSetup implements ProvisionSetup {
                 params.put(DESCRIPTION, VM_COMMON_NAME);
                 params.put(AFFINITYGROUP, affinityGroupName);
                 HttpResponseDecorator response = (HttpResponseDecorator) azureClient.createStorageAccount(params);
-                azureClient.waitUntilComplete((String) azureClient.getRequestId(response));
+                String requestId = (String) azureClient.getRequestId(response);
+                waitForFinishing(azureClient, requestId);
             } else {
                 LOGGER.error(String.format("Error occurs on %s stack under the storage creation", stack.getId()), ex);
                 throw new InternalServerException(ex.getMessage());
             }
+        }
+    }
+
+    private void waitForFinishing(AzureClient azureClient, String requestId) {
+        boolean finished = azureClient.waitUntilComplete(requestId);
+        if (!finished) {
+            throw new InternalServerException("Azure resource timeout");
         }
     }
 

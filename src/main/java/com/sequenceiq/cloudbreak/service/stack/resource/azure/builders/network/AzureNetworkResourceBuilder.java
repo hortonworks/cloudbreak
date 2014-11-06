@@ -48,7 +48,7 @@ public class AzureNetworkResourceBuilder extends AzureSimpleNetworkResourceBuild
             props.put(SUBNETADDRESSPREFIX, "172.16.0.0/24");
             HttpResponseDecorator virtualNetworkResponse = (HttpResponseDecorator) po.getAzureClient().createVirtualNetwork(props);
             String requestId = (String) po.getAzureClient().getRequestId(virtualNetworkResponse);
-            po.getAzureClient().waitUntilComplete(requestId);
+            waitForFinishing(po.getAzureClient(), requestId);
         }
         return Arrays.asList(new Resource(ResourceType.AZURE_NETWORK, name, stack));
     }
@@ -64,7 +64,7 @@ public class AzureNetworkResourceBuilder extends AzureSimpleNetworkResourceBuild
             AzureClient azureClient = aDCO.getNewAzureClient(credential);
             HttpResponseDecorator deleteVirtualNetworkResult = (HttpResponseDecorator) azureClient.deleteVirtualNetwork(props);
             String requestId = (String) azureClient.getRequestId(deleteVirtualNetworkResult);
-            azureClient.waitUntilComplete(requestId);
+            boolean finished = azureClient.waitUntilComplete(requestId);
         } catch (HttpResponseException ex) {
             httpResponseExceptionHandler(ex, resource.getResourceName(), stack.getOwner());
         } catch (Exception ex) {

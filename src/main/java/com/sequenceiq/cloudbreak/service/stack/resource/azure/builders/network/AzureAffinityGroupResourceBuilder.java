@@ -49,7 +49,7 @@ public class AzureAffinityGroupResourceBuilder extends AzureSimpleNetworkResourc
                 props.put(DESCRIPTION, template.getDescription());
                 HttpResponseDecorator affinityResponse = (HttpResponseDecorator) po.getAzureClient().createAffinityGroup(props);
                 String requestId = (String) po.getAzureClient().getRequestId(affinityResponse);
-                po.getAzureClient().waitUntilComplete(requestId);
+                waitForFinishing(po.getAzureClient(), requestId);
             } else if (ex instanceof HttpResponseException) {
                 LOGGER.error(String.format("Error occurs on %s stack under the affinity group creation", stack.getId()), ex);
                 throw new InternalServerException(((HttpResponseException) ex).getResponse().toString());

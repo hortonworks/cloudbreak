@@ -61,7 +61,7 @@ public class AzureServiceCertificateResourceBuilder extends AzureSimpleInstanceR
         AzureClient azureClient = po.getNewAzureClient(azureCredential);
         HttpResponseDecorator serviceCertificate = (HttpResponseDecorator) azureClient.createServiceCertificate(props);
         String requestId = (String) azureClient.getRequestId(serviceCertificate);
-        azureClient.waitUntilComplete(requestId);
+        waitForFinishing(azureClient, requestId);
         return Arrays.asList(new Resource(resourceType(), name, stack));
     }
 

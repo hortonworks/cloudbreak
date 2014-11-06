@@ -9,6 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.AddInstancesFailedException;
 
@@ -29,7 +31,7 @@ public class AzureDiskRemoveCheckerStatus implements StatusCheckerTask<AzureDisk
             props.put(NAME, aRRPO.getName());
             HttpResponseDecorator deleteDisk = (HttpResponseDecorator) aRRPO.getAzureClient().deleteDisk(props);
             String requestId = (String) aRRPO.getAzureClient().getRequestId(deleteDisk);
-            aRRPO.getAzureClient().waitUntilComplete(requestId);
+            waitForFinishing(aRRPO.getAzureClient(), requestId);
         } catch (HttpResponseException ex) {
             if (ex.getStatusCode() != NOT_FOUND) {
                 return false;
@@ -38,6 +40,13 @@ public class AzureDiskRemoveCheckerStatus implements StatusCheckerTask<AzureDisk
             return false;
         }
         return true;
+    }
+
+    private void waitForFinishing(AzureClient azureClient, String requestId) {
+        boolean finished = azureClient.waitUntilComplete(requestId);
+        if (!finished) {
+            throw new InternalServerException("Azure resource timeout");
+        }
     }
 
     @Override

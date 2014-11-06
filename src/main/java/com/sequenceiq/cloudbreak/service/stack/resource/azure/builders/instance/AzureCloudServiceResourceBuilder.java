@@ -69,7 +69,7 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
         AzureClient azureClient = po.getNewAzureClient(azureCredential);
         HttpResponseDecorator cloudServiceResponse = (HttpResponseDecorator) azureClient.createCloudService(props);
         String requestId = (String) azureClient.getRequestId(cloudServiceResponse);
-        azureClient.waitUntilComplete(requestId);
+        waitForFinishing(azureClient, requestId);
         return Arrays.asList(new Resource(ResourceType.AZURE_CLOUD_SERVICE, vmName, stack));
     }
 
