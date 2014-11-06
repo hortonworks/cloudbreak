@@ -17,7 +17,7 @@ public class WebsocketService {
     private SimpMessageSendingOperations messageSendingOperations;
 
     public void sendToTopicUser(String userEmail, WebsocketEndPoint websocketEndPoint, Object message) {
-        LOGGER.info("Sending message {} to {}{}", message, "topic", websocketEndPoint.getValue());
+        //LOGGER.info("Sending message {} to {}{}", message, "topic", websocketEndPoint.getValue());
         messageSendingOperations.convertAndSendToUser(userEmail, String.format("/%s/%s", "topic", websocketEndPoint.getValue()), message);
     }
 }

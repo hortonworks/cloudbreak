@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.controller.validation;
 
 import com.google.common.base.Optional;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccImageType;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccInstanceType;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccZone;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccImageType;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccInstanceType;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccZone;
 
 public enum GccTemplateParam implements TemplateParam {
 

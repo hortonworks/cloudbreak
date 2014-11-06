@@ -52,7 +52,6 @@ public class AzureMetadataSetup implements MetadataSetup {
         AzureCredential azureCredential = (AzureCredential) stack.getCredential();
         String filePath = AzureCertificateService.getUserJksFileName(azureCredential, azureStackUtil.emailAsFolder(stack.getOwner()));
         AzureClient azureClient = azureStackUtil.createAzureClient(azureCredential, filePath);
-        String name = stack.getName().replaceAll("\\s+", "");
         Set<CoreInstanceMetaData> instanceMetaDatas = collectMetaData(stack, azureClient);
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.METADATA_SETUP_COMPLETE_EVENT, stack.getId());
         reactor.notify(ReactorConfig.METADATA_SETUP_COMPLETE_EVENT,
@@ -66,7 +65,7 @@ public class AzureMetadataSetup implements MetadataSetup {
         AzureClient azureClient = azureStackUtil.createAzureClient(azureCredential, filePath);
         List<Resource> resources = new ArrayList<>();
         for (Resource resource : resourceList) {
-            if (ResourceType.VIRTUAL_MACHINE.equals(resource.getResourceType())) {
+            if (ResourceType.AZURE_VIRTUAL_MACHINE.equals(resource.getResourceType())) {
                 resources.add(resource);
             }
         }
@@ -85,7 +84,7 @@ public class AzureMetadataSetup implements MetadataSetup {
     }
 
     private Set<CoreInstanceMetaData> collectMetaData(Stack stack, AzureClient azureClient) {
-        return collectMetaData(stack, azureClient, stack.getResourcesByType(ResourceType.VIRTUAL_MACHINE));
+        return collectMetaData(stack, azureClient, stack.getResourcesByType(ResourceType.AZURE_VIRTUAL_MACHINE));
     }
 
     private CoreInstanceMetaData getMetadata(Stack stack, AzureClient azureClient, Resource resource) {

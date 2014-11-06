@@ -19,21 +19,18 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
-import com.sequenceiq.cloudbreak.domain.AzureCredential;
-import com.sequenceiq.cloudbreak.domain.AzureTemplate;
+import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.service.ServiceTestUtils;
 
 import reactor.core.Reactor;
 
 public class AzureMetadataSetupTest {
 
-    private static final String DUMMY_PRIVATE_IP = "dummyPrivateIP";
-    private static final String DUMMY_VIRTUAL_IP = "dummyVirtualIP";
-    private static final String DUMMY_VIRTUAL_MACHINE = "dummyVirtualMachine";
     private static final String DUMMY_VM_NAME = "dummyVmName";
 
     @InjectMocks
@@ -51,23 +48,23 @@ public class AzureMetadataSetupTest {
 
     private Stack stack;
 
-    private AzureCredential credential;
+    private Credential credential;
 
-    private AzureTemplate template;
+    private Template template;
 
     @Before
     public void setUp() {
         underTest = new AzureMetadataSetup();
         MockitoAnnotations.initMocks(this);
-        credential = AzureConnectorTestUtil.createAzureCredential();
-        template = AzureConnectorTestUtil.createAzureTemplate(ServiceTestUtils.DUMMY_OWNER, ServiceTestUtils.DUMMY_ACCOUNT);
-        stack = AzureConnectorTestUtil.createStack(ServiceTestUtils.DUMMY_OWNER, ServiceTestUtils.DUMMY_ACCOUNT, credential, template, getDefaultResourceSet());
+        credential = ServiceTestUtils.createCredential(CloudPlatform.AZURE);
+        template = ServiceTestUtils.createTemplate(CloudPlatform.AZURE);
+        stack = ServiceTestUtils.createStack(template, credential, getDefaultResourceSet());
     }
 
     public Set<Resource> getDefaultResourceSet() {
         Set<Resource> resources = new HashSet<>();
-        resources.add(new com.sequenceiq.cloudbreak.domain.Resource(ResourceType.CLOUD_SERVICE, DUMMY_VM_NAME, stack));
-        resources.add(new com.sequenceiq.cloudbreak.domain.Resource(ResourceType.VIRTUAL_MACHINE, DUMMY_VM_NAME, stack));
+        resources.add(new Resource(ResourceType.AZURE_CLOUD_SERVICE, DUMMY_VM_NAME, stack));
+        resources.add(new Resource(ResourceType.AZURE_VIRTUAL_MACHINE, DUMMY_VM_NAME, stack));
         return resources;
     }
 

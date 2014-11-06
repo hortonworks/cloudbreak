@@ -9,10 +9,10 @@ import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
 import com.sequenceiq.cloudbreak.controller.validation.GccTemplateParam;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.GccTemplate;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccImageType;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccInstanceType;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRawDiskType;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccZone;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccImageType;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccInstanceType;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccRawDiskType;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccZone;
 
 @Component
 public class GccTemplateConverter extends AbstractConverter<TemplateJson, GccTemplate> {

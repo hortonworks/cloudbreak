@@ -1,8 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.azure;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.security.cert.CertificateException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,7 +11,6 @@ import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 import com.sequenceiq.cloudbreak.service.user.UserFilterField;
 
@@ -31,10 +28,6 @@ public class AzureStackUtil {
     @Autowired
     private UserDetailsService userDetailsService;
 
-    public String getVmName(String azureTemplate, int i) {
-        return String.format("%s-%s", azureTemplate, i);
-    }
-
     public String getOsImageName(Credential credential) {
         return String.format("%s-%s", ((AzureCredential) credential).getCommonName(), IMAGE_NAME);
     }
@@ -50,10 +43,6 @@ public class AzureStackUtil {
         context.put(SERVICENAME, vmName);
         context.put(NAME, vmName);
         return context;
-    }
-
-    public X509Certificate createX509Certificate(AzureCredential azureCredential, String emailAsFolder) throws FileNotFoundException, CertificateException {
-        return new X509Certificate(AzureCertificateService.getCerFile(emailAsFolder, azureCredential.getId()));
     }
 
     public String emailAsFolder(String userId) {

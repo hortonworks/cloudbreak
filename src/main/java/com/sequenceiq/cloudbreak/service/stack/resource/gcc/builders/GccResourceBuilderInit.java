@@ -34,10 +34,11 @@ import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDescribeContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccProvisionContextObject;
+import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccStartStopContextObject;
 
 @Component
 public class GccResourceBuilderInit implements
-        ResourceBuilderInit<GccProvisionContextObject, GccDeleteContextObject, GccDescribeContextObject> {
+        ResourceBuilderInit<GccProvisionContextObject, GccDeleteContextObject, GccDescribeContextObject, GccStartStopContextObject> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GccResourceBuilderInit.class);
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
@@ -58,6 +59,11 @@ public class GccResourceBuilderInit implements
         GccDeleteContextObject gccDeleteContextObject = new GccDeleteContextObject(stack.getId(), credential.getProjectId(),
                 buildCompute(credential, stack.getName()));
         return gccDeleteContextObject;
+    }
+
+    @Override
+    public GccStartStopContextObject startStopInit(Stack stack) throws Exception {
+        return new GccStartStopContextObject(stack.getId());
     }
 
     @Override

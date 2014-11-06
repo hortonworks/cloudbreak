@@ -61,7 +61,7 @@ public class GccMetadataSetup implements MetadataSetup {
     public void addNewNodesToMetadata(Stack stack, Set<Resource> resourceList) {
         List<Resource> resources = new ArrayList<>();
         for (Resource resource : resourceList) {
-            if (ResourceType.VIRTUAL_MACHINE.equals(resource.getResourceType())) {
+            if (ResourceType.GCC_INSTANCE.equals(resource.getResourceType())) {
                 resources.add(resource);
             }
         }

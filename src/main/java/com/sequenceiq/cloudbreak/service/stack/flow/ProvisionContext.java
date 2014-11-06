@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.stack.connector.Provisioner;
+import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.StackOperationFailure;
@@ -51,7 +51,7 @@ public class ProvisionContext {
     private WebsocketService websocketService;
 
     @javax.annotation.Resource
-    private Map<CloudPlatform, Provisioner> provisioners;
+    private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
 
     @Autowired
     private Reactor reactor;
@@ -81,7 +81,7 @@ public class ProvisionContext {
                 stackUpdater.updateStackStatusReason(stack.getId(), stack.getStatus().name());
                 if (!cloudPlatform.isWithTemplate()) {
                     stackUpdater.updateStackStatus(stack.getId(), Status.REQUESTED);
-                    Set<com.sequenceiq.cloudbreak.domain.Resource> resourceSet = new HashSet<>();
+                    Set<Resource> resourceSet = new HashSet<>();
                     ResourceBuilderInit resourceBuilderInit = resourceBuilderInits.get(cloudPlatform);
                     final ProvisionContextObject pCO =
                             resourceBuilderInit.provisionInit(stack, userDataBuilder.build(cloudPlatform, stack.getHash(), userDataParams));
@@ -106,19 +106,23 @@ public class ProvisionContext {
                         });
                         futures.add(submit);
                     }
+                    Exception exception = null;
                     for (Future<List<Resource>> future : futures) {
                         try {
                             resourceSet.addAll(future.get());
                         } catch (Exception e) {
-                            throw new BuildStackFailureException(e.getMessage(), e, resourceSet);
+                            exception = e;
                         }
+                    }
+                    if (exception != null) {
+                        throw new BuildStackFailureException(exception.getMessage(), exception, resourceSet);
                     }
 
                     LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_COMPLETE_EVENT, stack.getId());
-                    reactor.notify(ReactorConfig.PROVISION_COMPLETE_EVENT, Event.wrap(new ProvisionComplete(CloudPlatform.GCC, stack.getId(), resourceSet)));
+                    reactor.notify(ReactorConfig.PROVISION_COMPLETE_EVENT, Event.wrap(new ProvisionComplete(cloudPlatform, stack.getId(), resourceSet)));
                 } else {
-                    Provisioner provisioner = provisioners.get(cloudPlatform);
-                    provisioner.buildStack(stack, userDataBuilder.build(cloudPlatform, stack.getHash(), userDataParams), setupProperties);
+                    CloudPlatformConnector cloudPlatformConnector = cloudPlatformConnectors.get(cloudPlatform);
+                    cloudPlatformConnector.buildStack(stack, userDataBuilder.build(cloudPlatform, stack.getHash(), userDataParams), setupProperties);
                 }
             } else {
                 LOGGER.info("CloudFormation stack creation was requested for a stack, that is not in REQUESTED status anymore. [stackId: '{}', status: '{}']",

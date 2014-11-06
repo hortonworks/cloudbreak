@@ -42,6 +42,11 @@ import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.domain.GccTemplate;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.PollingService;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccDiskMode;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccDiskType;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccImageType;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccInstanceType;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccZone;
 import com.sequenceiq.cloudbreak.service.stack.flow.CoreInstanceMetaData;
 
 @Component
