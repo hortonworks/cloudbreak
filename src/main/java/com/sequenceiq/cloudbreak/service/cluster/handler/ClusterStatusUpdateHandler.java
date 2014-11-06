@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.StatusRequest;
-import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -49,7 +49,7 @@ public class ClusterStatusUpdateHandler implements Consumer<Event<ClusterStatusU
         long stackId = statusUpdateRequest.getStackId();
         Stack stack = stackRepository.findOneWithLists(stackId);
         Cluster cluster = stack.getCluster();
-        CbLoggerFactory.buildMdcContext(cluster);
+        MDCBuilder.buildMdcContext(cluster);
         if (StatusRequest.STOPPED.equals(statusRequest)) {
             ambariClusterConnector.stopCluster(stack);
             cluster.setStatus(Status.STOPPED);

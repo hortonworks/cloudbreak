@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
-import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 @Component
 public class AzureCredentialInitializer {
@@ -25,7 +25,7 @@ public class AzureCredentialInitializer {
     }
 
     private void validateCertificateFile(AzureCredential azureCredential) {
-        CbLoggerFactory.buildMdcContext(azureCredential);
+        MDCBuilder.buildMdcContext(azureCredential);
         try {
             InputStream is = new ByteArrayInputStream(azureCredential.getPublicKey().getBytes(StandardCharsets.UTF_8));
             CertificateFactory cf = CertificateFactory.getInstance("X.509");

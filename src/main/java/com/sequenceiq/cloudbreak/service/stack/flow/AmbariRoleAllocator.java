@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccStackUtil;
@@ -43,7 +43,7 @@ public class AmbariRoleAllocator {
     public void allocateRoles(Long stackId, Set<CoreInstanceMetaData> coreInstanceMetaData) {
         try {
             Stack stack = stackRepository.findById(stackId);
-            CbLoggerFactory.buildMdcContext(stack);
+            MDCBuilder.buildMdcContext(stack);
             if (!stack.isMetadataReady()) {
                 if (coreInstanceMetaData.size() != stack.getNodeCount()) {
                     throw new WrongMetadataException(String.format(
@@ -69,7 +69,7 @@ public class AmbariRoleAllocator {
 
     public void updateInstanceMetadata(Long stackId, Set<CoreInstanceMetaData> coreInstanceMetaData) {
         Stack stack = stackRepository.findOneWithLists(stackId);
-        CbLoggerFactory.buildMdcContext(stack);
+        MDCBuilder.buildMdcContext(stack);
         try {
             Set<InstanceMetaData> originalMetadata = stack.getInstanceMetaData();
             Set<InstanceMetaData> instanceMetaData = prepareInstanceMetaData(stack, coreInstanceMetaData, stack.getInstanceMetaData().size() + 1);
@@ -137,7 +137,7 @@ public class AmbariRoleAllocator {
     }
 
     private void notifyStackCreateFailed(Long stackId, String cause) {
-        CbLoggerFactory.buildMdcContext();
+        MDCBuilder.buildMdcContext();
         LOGGER.info("Publishing {} event ", ReactorConfig.STACK_CREATE_FAILED_EVENT, stackId);
         StackOperationFailure stackCreationFailure = new StackOperationFailure(stackId, cause);
         reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(stackCreationFailure));

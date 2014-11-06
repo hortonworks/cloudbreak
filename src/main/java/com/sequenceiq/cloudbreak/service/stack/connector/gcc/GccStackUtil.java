@@ -31,7 +31,7 @@ import com.google.api.services.storage.StorageScopes;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.domain.GccTemplate;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccZone;
 import com.sequenceiq.cloudbreak.service.stack.flow.CoreInstanceMetaData;
 
@@ -43,7 +43,7 @@ public class GccStackUtil {
     private static final List<String> SCOPES = Arrays.asList(ComputeScopes.COMPUTE, StorageScopes.DEVSTORAGE_FULL_CONTROL);
 
     public Compute buildCompute(GccCredential gccCredential, String appName) {
-        CbLoggerFactory.buildMdcContext(gccCredential);
+        MDCBuilder.buildMdcContext(gccCredential);
         try {
             HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
             BufferedReader br = new BufferedReader(new StringReader(gccCredential.getServiceAccountPrivateKey()));
@@ -85,7 +85,7 @@ public class GccStackUtil {
     }
 
     public Storage buildStorage(GccCredential gccCredential, Stack stack) {
-        CbLoggerFactory.buildMdcContext(stack);
+        MDCBuilder.buildMdcContext(stack);
         try {
             HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
             BufferedReader br = new BufferedReader(new StringReader(gccCredential.getServiceAccountPrivateKey()));
@@ -113,7 +113,7 @@ public class GccStackUtil {
     }
 
     public CoreInstanceMetaData getMetadata(Stack stack, Compute compute, String resource) {
-        CbLoggerFactory.buildMdcContext(stack);
+        MDCBuilder.buildMdcContext(stack);
         try {
             GccCredential credential = (GccCredential) stack.getCredential();
             GccTemplate template = (GccTemplate) stack.getTemplate();

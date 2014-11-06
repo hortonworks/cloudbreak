@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
-import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.AddInstancesFailedException;
 
@@ -20,7 +20,7 @@ public class GccRemoveCheckerStatus implements StatusCheckerTask<GccRemoveReadyP
 
     @Override
     public boolean checkStatus(GccRemoveReadyPollerObject gccRemoveReadyPollerObject) {
-        CbLoggerFactory.buildMdcContext(gccRemoveReadyPollerObject.getStack());
+        MDCBuilder.buildMdcContext(gccRemoveReadyPollerObject.getStack());
         LOGGER.info("Checking status of remove '{}' on '{}' stack.", gccRemoveReadyPollerObject.getName(), gccRemoveReadyPollerObject.getStack().getId());
         try {
             Integer progress = gccRemoveReadyPollerObject.getZoneOperations().execute().getProgress();
@@ -54,7 +54,7 @@ public class GccRemoveCheckerStatus implements StatusCheckerTask<GccRemoveReadyP
 
     @Override
     public String successMessage(GccRemoveReadyPollerObject gccRemoveReadyPollerObject) {
-        CbLoggerFactory.buildMdcContext(gccRemoveReadyPollerObject.getStack());
+        MDCBuilder.buildMdcContext(gccRemoveReadyPollerObject.getStack());
         return String.format("Gcc resource '%s' is removed success on '%s' stack",
                 gccRemoveReadyPollerObject.getName(), gccRemoveReadyPollerObject.getStack().getId());
     }

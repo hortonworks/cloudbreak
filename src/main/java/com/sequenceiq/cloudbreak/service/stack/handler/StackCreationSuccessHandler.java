@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
-import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.stack.event.StackCreationSuccess;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
@@ -39,7 +39,7 @@ public class StackCreationSuccessHandler implements Consumer<Event<StackCreation
         Long stackId = stackCreationSuccess.getStackId();
         String ambariIp = stackCreationSuccess.getAmbariIp();
         Stack stack = stackUpdater.updateAmbariIp(stackId, ambariIp);
-        CbLoggerFactory.buildMdcContext(stack);
+        MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Accepted {} event.", ReactorConfig.STACK_CREATE_SUCCESS_EVENT, stackId);
         stack = stackUpdater.updateStackStatus(stackId, Status.AVAILABLE);
         websocketService.sendToTopicUser(stack.getOwner(), WebsocketEndPoint.STACK,

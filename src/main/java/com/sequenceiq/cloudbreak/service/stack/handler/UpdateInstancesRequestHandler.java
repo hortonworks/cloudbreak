@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.AddInstancesFailedException;
@@ -81,7 +81,7 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
         Long stackId = request.getStackId();
         Integer scalingAdjustment = request.getScalingAdjustment();
         final Stack stack = stackRepository.findOneWithLists(stackId);
-        CbLoggerFactory.buildMdcContext(stack);
+        MDCBuilder.buildMdcContext(stack);
         try {
             LOGGER.info("Accepted {} event on stack.", ReactorConfig.UPDATE_INSTANCES_REQUEST_EVENT);
             stackUpdater.updateMetadataReady(stackId, false);
@@ -192,7 +192,7 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
     }
 
     private void notifyUpdateFailed(Stack stack, String detailedMessage) {
-        CbLoggerFactory.buildMdcContext(stack);
+        MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Publishing {} event.", ReactorConfig.STACK_UPDATE_FAILED_EVENT);
         reactor.notify(ReactorConfig.STACK_UPDATE_FAILED_EVENT, Event.wrap(new StackOperationFailure(stack.getId(), detailedMessage)));
     }

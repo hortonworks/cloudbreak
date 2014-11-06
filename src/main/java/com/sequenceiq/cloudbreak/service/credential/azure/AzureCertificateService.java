@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.KeyGeneratorService;
@@ -89,7 +89,7 @@ public class AzureCertificateService {
     }
 
     public void generateCertificate(CbUser user, AzureCredential azureCredential) {
-        CbLoggerFactory.buildMdcContext(azureCredential);
+        MDCBuilder.buildMdcContext(azureCredential);
         try {
             String emailAsFolder = azureStackUtil.emailAsFolder(user);
             File sourceFolder = new File(DATADIR);
@@ -130,7 +130,7 @@ public class AzureCertificateService {
     }
 
     public void generateSshCertificate(CbUser user, AzureCredential azureCredential, String sshKey) {
-        CbLoggerFactory.buildMdcContext(azureCredential);
+        MDCBuilder.buildMdcContext(azureCredential);
         try {
             String emailAsFolder = azureStackUtil.emailAsFolder(user);
             File userFolder = new File(getSimpleUserFolder(emailAsFolder));

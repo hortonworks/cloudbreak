@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
-import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.AddInstancesFailedException;
 
@@ -27,7 +27,7 @@ public class AzureCloudServiceDeleteTask implements StatusCheckerTask<AzureCloud
 
     @Override
     public boolean checkStatus(AzureCloudServiceDeleteTaskContext aRRPO) {
-        CbLoggerFactory.buildMdcContext(aRRPO.getStack());
+        MDCBuilder.buildMdcContext(aRRPO.getStack());
         LOGGER.info("Checking status of remove cloud service '{}'.", aRRPO.getName());
         try {
             Map<String, String> props = new HashMap<>();
@@ -63,7 +63,7 @@ public class AzureCloudServiceDeleteTask implements StatusCheckerTask<AzureCloud
 
     @Override
     public String successMessage(AzureCloudServiceDeleteTaskContext azureDiskRemoveReadyPollerObject) {
-        CbLoggerFactory.buildMdcContext(azureDiskRemoveReadyPollerObject.getStack());
+        MDCBuilder.buildMdcContext(azureDiskRemoveReadyPollerObject.getStack());
         return String.format("Azure resource '%s' is removed success on '%s' stack",
                 azureDiskRemoveReadyPollerObject.getName(), azureDiskRemoveReadyPollerObject.getStack().getId());
     }

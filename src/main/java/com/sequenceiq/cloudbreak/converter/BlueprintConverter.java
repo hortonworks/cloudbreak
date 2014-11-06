@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.BlueprintJson;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 @Component
 public class BlueprintConverter extends AbstractConverter<BlueprintJson, Blueprint> {
@@ -36,7 +36,7 @@ public class BlueprintConverter extends AbstractConverter<BlueprintJson, Bluepri
 
     @Override
     public BlueprintJson convert(Blueprint entity) {
-        CbLoggerFactory.buildMdcContext(entity);
+        MDCBuilder.buildMdcContext(entity);
         BlueprintJson blueprintJson = new BlueprintJson();
         blueprintJson.setId(String.valueOf(entity.getId()));
         blueprintJson.setBlueprintName(entity.getBlueprintName());

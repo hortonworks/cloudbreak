@@ -12,7 +12,7 @@ import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.event.StackUpdateSuccess;
@@ -36,7 +36,7 @@ public class StackUpdateSuccessHandler implements Consumer<Event<StackUpdateSucc
         StackUpdateSuccess updateSuccess = t.getData();
         Long stackId = updateSuccess.getStackId();
         Stack stack = stackRepository.findOneWithLists(stackId);
-        CbLoggerFactory.buildMdcContext(stack);
+        MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Accepted {} event.", ReactorConfig.STACK_UPDATE_SUCCESS_EVENT);
         Set<String> instanceIds = updateSuccess.getInstanceIds();
         if (updateSuccess.isRemoveInstances()) {

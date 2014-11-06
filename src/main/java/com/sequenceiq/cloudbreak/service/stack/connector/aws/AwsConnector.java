@@ -49,7 +49,7 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackDescription;
-import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
@@ -110,7 +110,7 @@ public class AwsConnector implements CloudPlatformConnector {
 
     @Override
     public StackDescription describeStackWithResources(Stack stack, Credential credential) {
-        CbLoggerFactory.buildMdcContext(stack);
+        MDCBuilder.buildMdcContext(stack);
         AwsTemplate awsInfra = (AwsTemplate) stack.getTemplate();
         AwsCredential awsCredential = (AwsCredential) credential;
         DescribeStacksResult stackResult = null;
@@ -156,7 +156,7 @@ public class AwsConnector implements CloudPlatformConnector {
 
     @Override
     public void deleteStack(Stack stack, Credential credential) {
-        CbLoggerFactory.buildMdcContext(stack);
+        MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Deleting stack: {}", stack.getId());
         AwsTemplate template = (AwsTemplate) stack.getTemplate();
         AwsCredential awsCredential = (AwsCredential) credential;
@@ -178,7 +178,7 @@ public class AwsConnector implements CloudPlatformConnector {
 
     @Override
     public void buildStack(Stack stack, String userData, Map<String, Object> setupProperties) {
-        CbLoggerFactory.buildMdcContext(stack);
+        MDCBuilder.buildMdcContext(stack);
         AwsTemplate awsTemplate = (AwsTemplate) stack.getTemplate();
         AwsCredential awsCredential = (AwsCredential) stack.getCredential();
         AmazonCloudFormationClient client = awsStackUtil.createCloudFormationClient(awsTemplate.getRegion(), awsCredential);
@@ -212,7 +212,7 @@ public class AwsConnector implements CloudPlatformConnector {
 
     @Override
     public boolean addInstances(Stack stack, String userData, Integer instanceCount) {
-        CbLoggerFactory.buildMdcContext(stack);
+        MDCBuilder.buildMdcContext(stack);
         Integer requiredInstances = stack.getNodeCount() + instanceCount;
         Regions region = ((AwsTemplate) stack.getTemplate()).getRegion();
         AwsCredential credential = (AwsCredential) stack.getCredential();
@@ -235,7 +235,7 @@ public class AwsConnector implements CloudPlatformConnector {
 
     @Override
     public boolean removeInstances(Stack stack, Set<String> instanceIds) {
-        CbLoggerFactory.buildMdcContext(stack);
+        MDCBuilder.buildMdcContext(stack);
         Regions region = ((AwsTemplate) stack.getTemplate()).getRegion();
         AwsCredential credential = (AwsCredential) stack.getCredential();
         AmazonAutoScalingClient amazonASClient = awsStackUtil.createAutoScalingClient(region, credential);
@@ -267,7 +267,7 @@ public class AwsConnector implements CloudPlatformConnector {
     }
 
     private boolean setStackState(Stack stack, boolean stopped) {
-        CbLoggerFactory.buildMdcContext(stack);
+        MDCBuilder.buildMdcContext(stack);
         boolean result = true;
         Regions region = ((AwsTemplate) stack.getTemplate()).getRegion();
         AwsCredential credential = (AwsCredential) stack.getCredential();
@@ -301,7 +301,7 @@ public class AwsConnector implements CloudPlatformConnector {
     }
 
     private void updateInstanceMetadata(Stack stack, AmazonEC2Client amazonEC2Client, Set<InstanceMetaData> instanceMetaData, Collection<String> instances) {
-        CbLoggerFactory.buildMdcContext(stack);
+        MDCBuilder.buildMdcContext(stack);
         DescribeInstancesResult describeResult = amazonEC2Client.describeInstances(new DescribeInstancesRequest().withInstanceIds(instances));
         for (Reservation reservation : describeResult.getReservations()) {
             for (Instance instance : reservation.getInstances()) {

@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.SnsTopic;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.SnsTopicRepository;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
@@ -38,7 +38,7 @@ public class AwsProvisionSetup implements ProvisionSetup {
 
     @Override
     public void setupProvisioning(Stack stack) {
-        CbLoggerFactory.buildMdcContext(stack);
+        MDCBuilder.buildMdcContext(stack);
         AwsTemplate awsTemplate = (AwsTemplate) stack.getTemplate();
         AwsCredential awsCredential = (AwsCredential) stack.getCredential();
 

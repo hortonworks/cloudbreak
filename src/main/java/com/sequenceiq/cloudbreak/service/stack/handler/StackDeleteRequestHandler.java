@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
@@ -65,7 +65,7 @@ public class StackDeleteRequestHandler implements Consumer<Event<StackDeleteRequ
         final StackDeleteRequest data = stackDeleteRequest.getData();
         retryingStackUpdater.updateStackStatus(data.getStackId(), Status.DELETE_IN_PROGRESS);
         Stack stack = stackRepository.findOneWithLists(data.getStackId());
-        CbLoggerFactory.buildMdcContext(stack);
+        MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Accepted {} event.", ReactorConfig.DELETE_REQUEST_EVENT);
         try {
             if (!data.getCloudPlatform().isWithTemplate()) {

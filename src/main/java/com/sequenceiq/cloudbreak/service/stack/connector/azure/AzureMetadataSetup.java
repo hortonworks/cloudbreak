@@ -26,7 +26,7 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataSetupComplete;
@@ -50,7 +50,7 @@ public class AzureMetadataSetup implements MetadataSetup {
 
     @Override
     public void setupMetadata(Stack stack) {
-        CbLoggerFactory.buildMdcContext(stack);
+        MDCBuilder.buildMdcContext(stack);
         AzureCredential azureCredential = (AzureCredential) stack.getCredential();
         String filePath = AzureCertificateService.getUserJksFileName(azureCredential, azureStackUtil.emailAsFolder(stack.getOwner()));
         AzureClient azureClient = azureStackUtil.createAzureClient(azureCredential, filePath);
@@ -62,7 +62,7 @@ public class AzureMetadataSetup implements MetadataSetup {
 
     @Override
     public void addNewNodesToMetadata(Stack stack, Set<Resource> resourceList) {
-        CbLoggerFactory.buildMdcContext(stack);
+        MDCBuilder.buildMdcContext(stack);
         AzureCredential azureCredential = (AzureCredential) stack.getCredential();
         String filePath = AzureCertificateService.getUserJksFileName(azureCredential, azureStackUtil.emailAsFolder(stack.getOwner()));
         AzureClient azureClient = azureStackUtil.createAzureClient(azureCredential, filePath);
@@ -91,7 +91,7 @@ public class AzureMetadataSetup implements MetadataSetup {
     }
 
     private CoreInstanceMetaData getMetadata(Stack stack, AzureClient azureClient, Resource resource) {
-        CbLoggerFactory.buildMdcContext(stack);
+        MDCBuilder.buildMdcContext(stack);
         Map<String, Object> props = new HashMap<>();
         props.put(NAME, resource.getResourceName());
         props.put(SERVICENAME, resource.getResourceName());

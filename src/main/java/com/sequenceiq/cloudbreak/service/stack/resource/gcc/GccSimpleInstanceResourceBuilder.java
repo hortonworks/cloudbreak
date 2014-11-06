@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.domain.GccTemplate;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDeleteContextObject;
@@ -47,7 +47,7 @@ public abstract class GccSimpleInstanceResourceBuilder implements
     }
 
     protected void exceptionHandler(GoogleJsonResponseException ex, String name, Stack stack) {
-        CbLoggerFactory.buildMdcContext(stack);
+        MDCBuilder.buildMdcContext(stack);
         if (ex.getDetails().get("code").equals(NOT_FOUND)) {
             LOGGER.info(String.format("Resource was delete with name: %s", name));
         } else {

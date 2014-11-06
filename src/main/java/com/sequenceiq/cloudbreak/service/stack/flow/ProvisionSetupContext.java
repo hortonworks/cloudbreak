@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.StackOperationFailure;
@@ -36,7 +36,7 @@ public class ProvisionSetupContext {
 
     public void setupProvisioning(CloudPlatform cloudPlatform, Long stackId) {
         Stack stack = stackRepository.findById(stackId);
-        CbLoggerFactory.buildMdcContext(stack);
+        MDCBuilder.buildMdcContext(stack);
         try {
             ProvisionSetup provisionSetup = provisionSetups.get(cloudPlatform);
             provisionSetup.setupProvisioning(stackRepository.findById(stackId));

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataUpdateComplete;
 import com.sequenceiq.cloudbreak.service.stack.flow.AmbariRoleAllocator;
@@ -35,7 +35,7 @@ public class MetadataUpdateCompleteHandler implements Consumer<Event<MetadataUpd
         Long stackId = data.getStackId();
         Set<CoreInstanceMetaData> coreInstanceMetaData = data.getCoreInstanceMetaData();
         Stack stack = stackRepository.findById(stackId);
-        CbLoggerFactory.buildMdcContext(stack);
+        MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Accepted {} event.", ReactorConfig.METADATA_UPDATE_COMPLETE_EVENT, stackId);
         ambariRoleAllocator.updateInstanceMetadata(stackId, coreInstanceMetaData);
     }

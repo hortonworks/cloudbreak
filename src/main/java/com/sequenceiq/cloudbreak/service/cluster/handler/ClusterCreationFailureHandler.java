@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
-import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterCreationFailure;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterInstallerMailSenderService;
@@ -38,7 +38,7 @@ public class ClusterCreationFailureHandler implements Consumer<Event<ClusterCrea
         ClusterCreationFailure clusterCreationFailure = event.getData();
         Long clusterId = clusterCreationFailure.getClusterId();
         Cluster cluster = clusterRepository.findById(clusterId);
-        CbLoggerFactory.buildMdcContext(cluster);
+        MDCBuilder.buildMdcContext(cluster);
         LOGGER.info("Accepted {} event.", ReactorConfig.CLUSTER_CREATE_FAILED_EVENT, clusterId);
         String detailedMessage = clusterCreationFailure.getDetailedMessage();
         cluster.setStatus(Status.CREATE_FAILED);

@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CbUserRole;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
-import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
@@ -61,7 +61,7 @@ public class DefaultBlueprintService implements BlueprintService {
 
     @Override
     public Blueprint create(CbUser user, Blueprint blueprint) {
-        CbLoggerFactory.buildMdcContext(blueprint);
+        MDCBuilder.buildMdcContext(blueprint);
         LOGGER.debug("Creating blueprint: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         Blueprint savedBlueprint = null;
         blueprint.setOwner(user.getUserId());
@@ -79,7 +79,7 @@ public class DefaultBlueprintService implements BlueprintService {
     @Override
     public void delete(Long id) {
         Blueprint blueprint = blueprintRepository.findOne(id);
-        CbLoggerFactory.buildMdcContext(blueprint);
+        MDCBuilder.buildMdcContext(blueprint);
         if (blueprint == null) {
             throw new NotFoundException(String.format("Blueprint '%s' not found.", id));
         }

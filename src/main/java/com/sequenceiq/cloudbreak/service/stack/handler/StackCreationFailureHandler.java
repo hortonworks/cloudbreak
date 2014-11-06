@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
-import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterInstallerMailSenderService;
@@ -72,7 +72,7 @@ public class StackCreationFailureHandler implements Consumer<Event<StackOperatio
         String detailedMessage = stackCreationFailure.getDetailedMessage();
         stackUpdater.updateStackStatus(stackId, Status.CREATE_FAILED, detailedMessage);
         Stack stack = stackRepository.findOneWithLists(stackId);
-        CbLoggerFactory.buildMdcContext(stack);
+        MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Accepted {} event.", ReactorConfig.STACK_CREATE_FAILED_EVENT, stackId);
         if (stack.getCluster().getEmailNeeded()) {
             ambariClusterInstallerMailSenderService.sendFailEmail(stack.getOwner());

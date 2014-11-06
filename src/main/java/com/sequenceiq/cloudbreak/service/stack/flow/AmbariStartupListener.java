@@ -9,7 +9,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariHostsUnavailableException;
 import com.sequenceiq.cloudbreak.service.stack.connector.aws.AwsStackUtil;
@@ -40,7 +40,7 @@ public class AmbariStartupListener {
 
     public void waitForAmbariServer(Long stackId, String ambariIp) {
         Stack stack = stackRepository.findById(stackId);
-        CbLoggerFactory.buildMdcContext(stack);
+        MDCBuilder.buildMdcContext(stack);
         try {
             boolean ambariRunning = false;
             AmbariClient ambariClient = createAmbariClient(ambariIp);

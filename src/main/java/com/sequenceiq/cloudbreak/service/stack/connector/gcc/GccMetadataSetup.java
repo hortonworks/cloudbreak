@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.domain.GccTemplate;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataSetupComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataUpdateComplete;
@@ -40,7 +40,7 @@ public class GccMetadataSetup implements MetadataSetup {
 
     @Override
     public void setupMetadata(Stack stack) {
-        CbLoggerFactory.buildMdcContext(stack);
+        MDCBuilder.buildMdcContext(stack);
         Set<CoreInstanceMetaData> instanceMetaDatas = new HashSet<>();
         List<Resource> resourcesByType = stack.getResourcesByType(ResourceType.GCC_INSTANCE);
         GccTemplate template = (GccTemplate) stack.getTemplate();
@@ -61,7 +61,7 @@ public class GccMetadataSetup implements MetadataSetup {
 
     @Override
     public void addNewNodesToMetadata(Stack stack, Set<Resource> resourceList) {
-        CbLoggerFactory.buildMdcContext(stack);
+        MDCBuilder.buildMdcContext(stack);
         List<Resource> resources = new ArrayList<>();
         for (Resource resource : resourceList) {
             if (ResourceType.GCC_INSTANCE.equals(resource.getResourceType())) {

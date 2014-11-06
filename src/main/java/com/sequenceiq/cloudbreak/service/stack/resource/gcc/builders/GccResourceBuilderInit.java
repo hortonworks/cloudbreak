@@ -29,7 +29,7 @@ import com.google.api.services.storage.StorageScopes;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDeleteContextObject;
@@ -76,7 +76,7 @@ public class GccResourceBuilderInit implements
     }
 
     private Compute buildCompute(Stack stack, GccCredential gccCredential, String appName) {
-        CbLoggerFactory.buildMdcContext(stack);
+        MDCBuilder.buildMdcContext(stack);
         try {
             HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
             BufferedReader br = new BufferedReader(new StringReader(gccCredential.getServiceAccountPrivateKey()));
@@ -104,7 +104,7 @@ public class GccResourceBuilderInit implements
     }
 
     private Dns buildDns(GccCredential gccCredential, Stack stack) {
-        CbLoggerFactory.buildMdcContext(stack);
+        MDCBuilder.buildMdcContext(stack);
         try {
             HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
             BufferedReader br = new BufferedReader(new StringReader(gccCredential.getServiceAccountPrivateKey()));
@@ -133,7 +133,7 @@ public class GccResourceBuilderInit implements
     }
 
     private ManagedZone buildManagedZone(Dns dns, Stack stack) throws IOException {
-        CbLoggerFactory.buildMdcContext(stack);
+        MDCBuilder.buildMdcContext(stack);
         GccCredential credential = (GccCredential) stack.getCredential();
         ManagedZonesListResponse execute1 = dns.managedZones().list(credential.getProjectId()).execute();
         ManagedZone original = null;

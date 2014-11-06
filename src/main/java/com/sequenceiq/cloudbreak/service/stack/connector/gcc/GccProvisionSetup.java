@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.domain.GccTemplate;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccImageType;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
@@ -51,7 +51,7 @@ public class GccProvisionSetup implements ProvisionSetup {
 
     @Override
     public void setupProvisioning(Stack stack) {
-        CbLoggerFactory.buildMdcContext(stack);
+        MDCBuilder.buildMdcContext(stack);
         try {
             Storage storage = gccStackUtil.buildStorage((GccCredential) stack.getCredential(), stack);
             Compute compute = gccStackUtil.buildCompute((GccCredential) stack.getCredential(), stack.getName());

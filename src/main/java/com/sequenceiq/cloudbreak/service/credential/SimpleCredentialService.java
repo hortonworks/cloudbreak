@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
-import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
@@ -64,7 +64,7 @@ public class SimpleCredentialService implements CredentialService {
 
     @Override
     public Credential create(CbUser user, Credential credential) {
-        CbLoggerFactory.buildMdcContext(credential);
+        MDCBuilder.buildMdcContext(credential);
         LOGGER.debug("Creating credential: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         Credential savedCredential = null;
         credential.setOwner(user.getUserId());

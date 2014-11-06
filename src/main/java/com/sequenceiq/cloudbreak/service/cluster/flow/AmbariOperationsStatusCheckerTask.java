@@ -7,7 +7,7 @@ import java.util.Map.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
 
@@ -20,7 +20,7 @@ public class AmbariOperationsStatusCheckerTask implements StatusCheckerTask<Amba
 
     @Override
     public boolean checkStatus(AmbariOperations t) {
-        CbLoggerFactory.buildMdcContext(t.getStack());
+        MDCBuilder.buildMdcContext(t.getStack());
         Map<String, Integer> installRequests = t.getRequests();
         boolean allFinished = true;
         for (Entry<String, Integer> request : installRequests.entrySet()) {

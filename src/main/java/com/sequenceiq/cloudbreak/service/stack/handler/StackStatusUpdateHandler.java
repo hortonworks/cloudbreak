@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.StatusRequest;
-import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -86,7 +86,7 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
         StatusRequest statusRequest = statusUpdateRequest.getStatusRequest();
         long stackId = statusUpdateRequest.getStackId();
         Stack stack = stackRepository.findOneWithLists(stackId);
-        CbLoggerFactory.buildMdcContext(stack);
+        MDCBuilder.buildMdcContext(stack);
         if (StatusRequest.STOPPED.equals(statusRequest)) {
             boolean stopped = true;
             if (cloudPlatform.isWithTemplate()) {

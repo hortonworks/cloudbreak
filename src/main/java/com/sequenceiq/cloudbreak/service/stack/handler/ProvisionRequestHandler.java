@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
 import com.sequenceiq.cloudbreak.service.stack.flow.ProvisionSetupContext;
@@ -33,7 +33,7 @@ public class ProvisionRequestHandler implements Consumer<Event<ProvisionRequest>
         CloudPlatform cloudPlatform = provisionRequest.getCloudPlatform();
         Long stackId = provisionRequest.getStackId();
         Stack stack = stackRepository.findById(stackId);
-        CbLoggerFactory.buildMdcContext(stack);
+        MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Accepted {} event.", ReactorConfig.PROVISION_REQUEST_EVENT, stackId);
         provisionSetupContext.setupProvisioning(cloudPlatform, stackId);
     }

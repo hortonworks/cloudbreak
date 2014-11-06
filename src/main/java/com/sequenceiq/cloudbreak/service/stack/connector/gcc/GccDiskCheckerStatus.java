@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import com.google.api.services.compute.Compute;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.domain.GccTemplate;
-import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.AddInstancesFailedException;
 
@@ -21,7 +21,7 @@ public class GccDiskCheckerStatus implements StatusCheckerTask<GccDiskReadyPolle
 
     @Override
     public boolean checkStatus(GccDiskReadyPollerObject gccDiskReadyPollerObject) {
-        CbLoggerFactory.buildMdcContext(gccDiskReadyPollerObject.getStack());
+        MDCBuilder.buildMdcContext(gccDiskReadyPollerObject.getStack());
         LOGGER.info("Checking status of Gcc Disk '{}'.", gccDiskReadyPollerObject.getName());
         GccTemplate gccTemplate = (GccTemplate) gccDiskReadyPollerObject.getStack().getTemplate();
         GccCredential credential = (GccCredential) gccDiskReadyPollerObject.getStack().getCredential();
@@ -46,7 +46,7 @@ public class GccDiskCheckerStatus implements StatusCheckerTask<GccDiskReadyPolle
 
     @Override
     public String successMessage(GccDiskReadyPollerObject gccDiskReadyPollerObject) {
-        CbLoggerFactory.buildMdcContext(gccDiskReadyPollerObject.getStack());
+        MDCBuilder.buildMdcContext(gccDiskReadyPollerObject.getStack());
         return String.format("Gcc disk '%s' is ready on '%s' stack",
                 gccDiskReadyPollerObject.getName(), gccDiskReadyPollerObject.getStack().getId());
     }

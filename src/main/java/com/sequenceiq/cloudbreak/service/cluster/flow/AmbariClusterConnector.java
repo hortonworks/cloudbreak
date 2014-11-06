@@ -30,7 +30,7 @@ import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
@@ -89,7 +89,7 @@ public class AmbariClusterConnector {
 
     public void installAmbariCluster(Stack stack) {
         Cluster cluster = stack.getCluster();
-        CbLoggerFactory.buildMdcContext(cluster);
+        MDCBuilder.buildMdcContext(cluster);
         try {
             LOGGER.info("Starting Ambari cluster installation [Ambari server address: {}]", stack.getAmbariIp());
             stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS);
@@ -116,7 +116,7 @@ public class AmbariClusterConnector {
     public void installAmbariNode(Long stackId, Set<HostGroupAdjustmentJson> hostGroupAdjustments) {
         Stack stack = stackRepository.findOneWithLists(stackId);
         Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
-        CbLoggerFactory.buildMdcContext(cluster);
+        MDCBuilder.buildMdcContext(cluster);
         try {
             stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS);
             AmbariClient ambariClient = createAmbariClient(stack.getAmbariIp());
@@ -142,7 +142,7 @@ public class AmbariClusterConnector {
     public void decommisionAmbariNodes(Long stackId, Set<HostGroupAdjustmentJson> hosts) {
         Stack stack = stackRepository.findOneWithLists(stackId);
         Cluster cluster = stack.getCluster();
-        CbLoggerFactory.buildMdcContext(cluster);
+        MDCBuilder.buildMdcContext(cluster);
         LOGGER.info("Decommision requested");
         try {
             stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS);
@@ -220,7 +220,7 @@ public class AmbariClusterConnector {
     }
 
     private boolean setClusterState(Stack stack, boolean stopped) {
-        CbLoggerFactory.buildMdcContext(stack);
+        MDCBuilder.buildMdcContext(stack);
         boolean result = true;
         AmbariClient ambariClient = new AmbariClient(stack.getAmbariIp(), AmbariClusterService.PORT);
         long stackId = stack.getId();
@@ -248,7 +248,7 @@ public class AmbariClusterConnector {
     }
 
     private void addBlueprint(Stack stack, AmbariClient ambariClient, Blueprint blueprint) {
-        CbLoggerFactory.buildMdcContext(stack);
+        MDCBuilder.buildMdcContext(stack);
         try {
             ambariClient.addBlueprint(blueprint.getBlueprintText(), hadoopConfigurationService.getConfiguration(stack));
             LOGGER.info("Blueprint added [Stack: {}, blueprint: '{}']", stack.getId(), blueprint.getId());
@@ -264,7 +264,7 @@ public class AmbariClusterConnector {
     }
 
     private void waitForHosts(Stack stack, AmbariClient ambariClient) {
-        CbLoggerFactory.buildMdcContext(stack);
+        MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Waiting for hosts to connect.[Ambari server address: {}]", stack.getAmbariIp());
         hostsPollingService.pollWithTimeout(
                 new AmbariHostsStatusCheckerTask(),
@@ -274,7 +274,7 @@ public class AmbariClusterConnector {
     }
 
     private Map<String, List<String>> recommend(Stack stack, AmbariClient ambariClient, String blueprintName) throws InvalidHostGroupHostAssociation {
-        CbLoggerFactory.buildMdcContext(stack);
+        MDCBuilder.buildMdcContext(stack);
         waitForHosts(stack, ambariClient);
         LOGGER.info("Asking Ambari client to recommend host-hostGroup mapping [Ambari server address: {}]", stack.getAmbariIp());
         Map<String, List<String>> hostGroupMappings = ambariClient.recommendAssignments(blueprintName);
@@ -345,7 +345,7 @@ public class AmbariClusterConnector {
     }
 
     private void waitForAmbariOperations(Stack stack, AmbariClient ambariClient, Map<String, Integer> operationRequests) {
-        CbLoggerFactory.buildMdcContext(stack);
+        MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Waiting for Ambari operations to finish. [Operation requests: {}]", operationRequests);
         operationsPollingService.pollWithTimeout(
                 new AmbariOperationsStatusCheckerTask(),
@@ -356,7 +356,7 @@ public class AmbariClusterConnector {
 
     private Map<String, Integer> prepareHost(AmbariClient ambariClient, Stack stack, String host, String hostgroup) {
         String ambariIp = stack.getAmbariIp();
-        CbLoggerFactory.buildMdcContext(stack);
+        MDCBuilder.buildMdcContext(stack);
         try {
             ambariClient.addHost(host);
             Map<String, Integer> installRequests = ambariClient.installComponentsToHost(host, stack.getCluster().getBlueprint().getBlueprintName(), hostgroup);
@@ -374,25 +374,25 @@ public class AmbariClusterConnector {
     }
 
     private void clusterCreateSuccess(Cluster cluster, long creationFinished, String ambariIp) {
-        CbLoggerFactory.buildMdcContext(cluster);
+        MDCBuilder.buildMdcContext(cluster);
         LOGGER.info("Publishing {} event", ReactorConfig.CLUSTER_CREATE_SUCCESS_EVENT);
         reactor.notify(ReactorConfig.CLUSTER_CREATE_SUCCESS_EVENT, Event.wrap(new ClusterCreationSuccess(cluster.getId(), creationFinished, ambariIp)));
     }
 
     private void clusterCreateFailed(Cluster cluster, String message) {
-        CbLoggerFactory.buildMdcContext(cluster);
+        MDCBuilder.buildMdcContext(cluster);
         LOGGER.info("Publishing {} event", ReactorConfig.CLUSTER_CREATE_FAILED_EVENT);
         reactor.notify(ReactorConfig.CLUSTER_CREATE_FAILED_EVENT, Event.wrap(new ClusterCreationFailure(cluster.getId(), message)));
     }
 
     private void updateHostSuccessful(Cluster cluster, Set<String> hostNames, boolean decommision) {
-        CbLoggerFactory.buildMdcContext(cluster);
+        MDCBuilder.buildMdcContext(cluster);
         LOGGER.info("Publishing {} event", ReactorConfig.UPDATE_AMBARI_HOSTS_SUCCESS_EVENT);
         reactor.notify(ReactorConfig.UPDATE_AMBARI_HOSTS_SUCCESS_EVENT, Event.wrap(new UpdateAmbariHostsSuccess(cluster.getId(), hostNames, decommision)));
     }
 
     private void updateHostFailed(Cluster cluster, String message) {
-        CbLoggerFactory.buildMdcContext(cluster);
+        MDCBuilder.buildMdcContext(cluster);
         LOGGER.info("Publishing {} event", ReactorConfig.UPDATE_AMBARI_HOSTS_FAILED_EVENT);
         reactor.notify(ReactorConfig.UPDATE_AMBARI_HOSTS_FAILED_EVENT, Event.wrap(new UpdateAmbariHostsFailure(cluster.getId(), message)));
     }

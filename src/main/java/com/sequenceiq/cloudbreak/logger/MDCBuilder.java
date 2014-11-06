@@ -12,9 +12,9 @@ import com.sequenceiq.cloudbreak.logger.resourcetype.CredentialLoggerFactory;
 import com.sequenceiq.cloudbreak.logger.resourcetype.StackLoggerFactory;
 import com.sequenceiq.cloudbreak.logger.resourcetype.TemplateLoggerFactory;
 
-public class CbLoggerFactory {
+public class MDCBuilder {
 
-    private CbLoggerFactory() {
+    private MDCBuilder() {
 
     }
 

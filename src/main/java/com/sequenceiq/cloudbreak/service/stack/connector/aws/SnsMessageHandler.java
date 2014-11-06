@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.SnsRequest;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
@@ -86,7 +86,7 @@ public class SnsMessageHandler {
 
     private synchronized void handleCfStackCreateComplete(Map<String, String> cfMessage) {
         Stack stack = stackRepository.findByStackResourceName(cfMessage.get("StackName"));
-        CbLoggerFactory.buildMdcContext(stack);
+        MDCBuilder.buildMdcContext(stack);
         if (stack == null) {
             LOGGER.info(
                     "Got message that CloudFormation stack created, but no matching stack found in the database [CFStackId: '{}']. Ignoring message.",
@@ -103,7 +103,7 @@ public class SnsMessageHandler {
 
     private synchronized void handleCfStackCreateFailed(Map<String, String> cfMessage) {
         Stack stack = stackRepository.findByStackResourceName(cfMessage.get("StackName"));
-        CbLoggerFactory.buildMdcContext(stack);
+        MDCBuilder.buildMdcContext(stack);
         if (stack == null) {
             LOGGER.info("Got message that CloudFormation stack creation failed, but no matching stack found in the db. [CFStackId: '{}']. Ignoring message.",
                     cfMessage.get("StackId"));
@@ -121,7 +121,7 @@ public class SnsMessageHandler {
 
     private synchronized void handleCfStackDeleteComplete(Map<String, String> cfMessage) {
         Stack stack = stackRepository.findByStackResourceName(cfMessage.get("StackName"));
-        CbLoggerFactory.buildMdcContext(stack);
+        MDCBuilder.buildMdcContext(stack);
         if (stack == null) {
             LOGGER.info("Got message that CloudFormation stack creation failed, but no matching stack found in the db. [CFStackId: '{}']. Ignoring message.",
                     cfMessage.get("StackId"));

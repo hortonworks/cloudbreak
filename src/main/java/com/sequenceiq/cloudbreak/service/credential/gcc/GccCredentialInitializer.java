@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import com.google.api.services.compute.Compute;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
-import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.credential.RsaPublicKeyValidator;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccStackUtil;
 
@@ -22,14 +22,14 @@ public class GccCredentialInitializer {
     private GccStackUtil gccStackUtil;
 
     public GccCredential init(GccCredential gccCredential) {
-        CbLoggerFactory.buildMdcContext(gccCredential);
+        MDCBuilder.buildMdcContext(gccCredential);
         rsaPublicKeyValidator.validate(gccCredential);
         validateCredential(gccCredential);
         return gccCredential;
     }
 
     private void validateCredential(GccCredential gccCredential) {
-        CbLoggerFactory.buildMdcContext(gccCredential);
+        MDCBuilder.buildMdcContext(gccCredential);
         try {
             Compute compute = gccStackUtil.buildCompute(gccCredential, "myapp");
             if (compute == null) {

@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 @Component
 public class PollingService<T> {
@@ -25,7 +25,7 @@ public class PollingService<T> {
         boolean success = false;
         boolean timeout = false;
         int attempts = 0;
-        CbLoggerFactory.buildMdcContext();
+        MDCBuilder.buildMdcContext();
         while (!success && !timeout) {
             LOGGER.info("Polling attempt {}.", attempts);
             success = statusCheckerTask.checkStatus(t);

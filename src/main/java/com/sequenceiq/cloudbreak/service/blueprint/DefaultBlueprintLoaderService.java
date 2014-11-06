@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.converter.BlueprintConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @Component
@@ -34,6 +35,7 @@ public class DefaultBlueprintLoaderService {
     public Set<Blueprint> loadBlueprints(CbUser user) {
         Set<Blueprint> blueprints = new HashSet<>();
         for (String blueprintName : blueprintArray) {
+            MDCBuilder.buildMdcContext();
             LOGGER.info("Adding default blueprint '{}' for user '{}'", blueprintName, user.getUsername());
             try {
                 BlueprintJson blueprintJson = new BlueprintJson();
@@ -41,14 +43,15 @@ public class DefaultBlueprintLoaderService {
                 blueprintJson.setName(blueprintName);
                 blueprintJson.setDescription(blueprintName);
                 blueprintJson.setAmbariBlueprint(
-                        jsonHelper.createJsonFromString(FileReaderUtils.readFileFromClasspath(String.format("blueprints/%s.bp", blueprintName)))
-                        );
+                        jsonHelper.createJsonFromString(FileReaderUtils.readFileFromClasspath(String.format("blueprints/%s.bp", blueprintName))));
 
                 Blueprint bp = blueprintConverter.convert(blueprintJson);
+                MDCBuilder.buildMdcContext(bp);
                 bp.setOwner(user.getUserId());
                 blueprints.add(bp);
             } catch (IOException e) {
-                LOGGER.error(blueprintName + " blueprint is not available for '{}' user.", e, user);
+                MDCBuilder.buildMdcContext();
+                LOGGER.error("Blueprint is not available for '{}' user.", e, user);
             }
         }
         return blueprints;

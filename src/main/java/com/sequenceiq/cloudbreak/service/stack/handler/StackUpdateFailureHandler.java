@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
-import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.event.StackOperationFailure;
@@ -38,7 +38,7 @@ public class StackUpdateFailureHandler implements Consumer<Event<StackOperationF
         StackOperationFailure stackOperationFailure = event.getData();
         Long stackId = stackOperationFailure.getStackId();
         Stack byId = stackRepository.findById(stackId);
-        CbLoggerFactory.buildMdcContext(byId);
+        MDCBuilder.buildMdcContext(byId);
         LOGGER.info("Accepted {} event.", ReactorConfig.STACK_UPDATE_FAILED_EVENT);
         String detailedMessage = stackOperationFailure.getDetailedMessage();
         stackUpdater.updateMetadataReady(stackId, true);

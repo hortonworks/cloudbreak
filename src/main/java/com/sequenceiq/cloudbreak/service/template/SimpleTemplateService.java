@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CbUserRole;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Template;
-import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
@@ -50,7 +50,7 @@ public class SimpleTemplateService implements TemplateService {
     @Override
     public Template get(Long id) {
         Template template = templateRepository.findOne(id);
-        CbLoggerFactory.buildMdcContext(template);
+        MDCBuilder.buildMdcContext(template);
         if (template == null) {
             throw new NotFoundException(String.format(TEMPLATE_NOT_FOUND_MSG, id));
         } else {
@@ -60,7 +60,7 @@ public class SimpleTemplateService implements TemplateService {
 
     @Override
     public Template create(CbUser user, Template template) {
-        CbLoggerFactory.buildMdcContext(template);
+        MDCBuilder.buildMdcContext(template);
         LOGGER.debug("Creating template: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         Template savedTemplate = null;
         template.setOwner(user.getUserId());
@@ -76,7 +76,7 @@ public class SimpleTemplateService implements TemplateService {
     @Override
     public void delete(Long templateId) {
         Template template = templateRepository.findOne(templateId);
-        CbLoggerFactory.buildMdcContext(template);
+        MDCBuilder.buildMdcContext(template);
         LOGGER.debug("Deleting template.", templateId);
         if (template == null) {
             throw new NotFoundException(String.format(TEMPLATE_NOT_FOUND_MSG, templateId));

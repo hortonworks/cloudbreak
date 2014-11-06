@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.X509Certificate;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
@@ -85,7 +85,7 @@ public abstract class AzureSimpleInstanceResourceBuilder implements
     }
 
     protected void httpResponseExceptionHandler(HttpResponseException ex, String resourceName, String user, Stack stack) {
-        CbLoggerFactory.buildMdcContext(stack);
+        MDCBuilder.buildMdcContext(stack);
         if (ex.getStatusCode() != NOT_FOUND) {
             throw new InternalServerException(ex.getMessage());
         } else {

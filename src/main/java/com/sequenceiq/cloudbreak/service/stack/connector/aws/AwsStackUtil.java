@@ -15,7 +15,7 @@ import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.sns.AmazonSNSClient;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.credential.aws.CrossAccountCredentialsProvider;
 
 @Component
@@ -27,7 +27,7 @@ public class AwsStackUtil {
     private CrossAccountCredentialsProvider credentialsProvider;
 
     public AmazonCloudFormationClient createCloudFormationClient(Regions regions, AwsCredential credential) {
-        CbLoggerFactory.buildMdcContext(credential);
+        MDCBuilder.buildMdcContext(credential);
         BasicSessionCredentials basicSessionCredentials = credentialsProvider
                 .retrieveSessionCredentials(CrossAccountCredentialsProvider.DEFAULT_SESSION_CREDENTIALS_DURATION,
                         CrossAccountCredentialsProvider.DEFAULT_EXTERNAL_ID, credential);
@@ -38,7 +38,7 @@ public class AwsStackUtil {
     }
 
     public AmazonEC2Client createEC2Client(Regions regions, AwsCredential credential) {
-        CbLoggerFactory.buildMdcContext(credential);
+        MDCBuilder.buildMdcContext(credential);
         BasicSessionCredentials basicSessionCredentials = credentialsProvider
                 .retrieveSessionCredentials(CrossAccountCredentialsProvider.DEFAULT_SESSION_CREDENTIALS_DURATION,
                         CrossAccountCredentialsProvider.DEFAULT_EXTERNAL_ID, credential);
@@ -49,7 +49,7 @@ public class AwsStackUtil {
     }
 
     public AmazonAutoScalingClient createAutoScalingClient(Regions regions, AwsCredential credential) {
-        CbLoggerFactory.buildMdcContext(credential);
+        MDCBuilder.buildMdcContext(credential);
         BasicSessionCredentials basicSessionCredentials = credentialsProvider
                 .retrieveSessionCredentials(CrossAccountCredentialsProvider.DEFAULT_SESSION_CREDENTIALS_DURATION,
                         CrossAccountCredentialsProvider.DEFAULT_EXTERNAL_ID, credential);
@@ -60,7 +60,7 @@ public class AwsStackUtil {
     }
 
     public AmazonSNSClient createSnsClient(Regions region, AwsCredential credential) {
-        CbLoggerFactory.buildMdcContext(credential);
+        MDCBuilder.buildMdcContext(credential);
         BasicSessionCredentials basicSessionCredentials = credentialsProvider
                 .retrieveSessionCredentials(CrossAccountCredentialsProvider.DEFAULT_SESSION_CREDENTIALS_DURATION,
                         CrossAccountCredentialsProvider.DEFAULT_EXTERNAL_ID, credential);
@@ -76,7 +76,7 @@ public class AwsStackUtil {
     }
 
     public void sleep(Stack stack, int duration) {
-        CbLoggerFactory.buildMdcContext(stack);
+        MDCBuilder.buildMdcContext(stack);
         try {
             Thread.sleep(duration);
         } catch (InterruptedException e) {

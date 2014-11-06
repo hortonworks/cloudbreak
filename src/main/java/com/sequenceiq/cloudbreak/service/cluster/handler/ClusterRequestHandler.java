@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
 
 import reactor.event.Event;
@@ -26,7 +26,7 @@ public class ClusterRequestHandler implements Consumer<Event<Stack>> {
     public void accept(Event<Stack> event) {
         String eventKey = (String) event.getKey();
         Stack stack = event.getData();
-        CbLoggerFactory.buildMdcContext(stack);
+        MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Accepted {} event.", eventKey);
         if (ReactorConfig.AMBARI_STARTED_EVENT.equals(eventKey)) {
             if (stack.getCluster() != null && stack.getCluster().getStatus().equals(Status.REQUESTED)) {

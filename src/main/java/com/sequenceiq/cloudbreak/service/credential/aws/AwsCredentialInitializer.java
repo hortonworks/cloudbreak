@@ -12,7 +12,7 @@ import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.ImportKeyPairRequest;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
-import com.sequenceiq.cloudbreak.logger.CbLoggerFactory;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.credential.RsaPublicKeyValidator;
 import com.sequenceiq.cloudbreak.service.stack.connector.aws.AwsStackUtil;
 
@@ -39,7 +39,7 @@ public class AwsCredentialInitializer {
     }
 
     private AwsCredential importKeyPairs(AwsCredential awsCredential) {
-        CbLoggerFactory.buildMdcContext(awsCredential);
+        MDCBuilder.buildMdcContext(awsCredential);
         try {
             Random rnd = new Random();
             String keyPairName = CLOUDBREAK_KEY_NAME + "-" + rnd.nextInt(SUFFIX_RND);
@@ -60,7 +60,7 @@ public class AwsCredentialInitializer {
     }
 
     private void validateIamRole(AwsCredential awsCredential) {
-        CbLoggerFactory.buildMdcContext(awsCredential);
+        MDCBuilder.buildMdcContext(awsCredential);
         try {
             crossAccountCredentialsProvider.retrieveSessionCredentials(CrossAccountCredentialsProvider.DEFAULT_SESSION_CREDENTIALS_DURATION,
                     CrossAccountCredentialsProvider.DEFAULT_EXTERNAL_ID, awsCredential);
