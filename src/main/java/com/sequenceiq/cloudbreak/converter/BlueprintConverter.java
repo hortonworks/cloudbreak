@@ -4,9 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.Collection;
 import java.util.Iterator;
-import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,14 +14,13 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.TextNode;
-import com.google.common.base.Function;
-import com.google.common.collect.FluentIterable;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.ambari.client.InvalidBlueprintException;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.BlueprintJson;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.BlueprintVersion;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 @Component
@@ -40,6 +37,7 @@ public class BlueprintConverter extends AbstractConverter<BlueprintJson, Bluepri
         BlueprintJson blueprintJson = new BlueprintJson();
         blueprintJson.setId(String.valueOf(entity.getId()));
         blueprintJson.setBlueprintName(entity.getBlueprintName());
+        blueprintJson.setBlueprintVersion((entity.getBlueprintVersion() == null) ? BlueprintVersion.AMBARI16 : entity.getBlueprintVersion());
         blueprintJson.setName(entity.getName());
         blueprintJson.setDescription(entity.getDescription() == null ? "" : entity.getDescription());
         blueprintJson.setHostGroupCount(entity.getHostGroupCount());
@@ -69,7 +67,7 @@ public class BlueprintConverter extends AbstractConverter<BlueprintJson, Bluepri
         }
 
         validateBlueprint(blueprint.getBlueprintText());
-
+        blueprint.setBlueprintVersion(BlueprintVersion.AMBARI16);
         blueprint.setName(json.getName());
         blueprint.setDescription(json.getDescription());
         ObjectMapper mapper = new ObjectMapper();
@@ -88,19 +86,6 @@ public class BlueprintConverter extends AbstractConverter<BlueprintJson, Bluepri
         }
 
         return blueprint;
-    }
-
-    public Set<BlueprintJson> convertAllToIdList(Collection<Blueprint> entityList) {
-        return FluentIterable.from(entityList).transform(new Function<Blueprint, BlueprintJson>() {
-            @Override
-            public BlueprintJson apply(Blueprint e) {
-                BlueprintJson blueprintJson = new BlueprintJson();
-                blueprintJson.setName(e.getName());
-                blueprintJson.setBlueprintName(e.getBlueprintName());
-                blueprintJson.setId(String.valueOf(e.getId()));
-                return convert(e);
-            }
-        }).toSet();
     }
 
     private String readUrl(String url) throws IOException {
@@ -129,6 +114,13 @@ public class BlueprintConverter extends AbstractConverter<BlueprintJson, Bluepri
             }
             if (root.path("host_groups").isMissingNode() || !root.path("host_groups").isArray()) {
                 throw new BadRequestException("Invalid blueprint: 'host_groups' node is missing from JSON or is not an array.");
+            }
+            Iterator<JsonNode> configurationsIterator = root.path("configurations").elements();
+            while (configurationsIterator.hasNext()) {
+                JsonNode configuration = configurationsIterator.next();
+                if (configuration.path("global").isMissingNode()) {
+                    throw new BadRequestException("Invalid blueprint: Currently we supporting just the ambari 1.6.");
+                }
             }
             Iterator<JsonNode> hostGroupsIterator = root.path("host_groups").elements();
             while (hostGroupsIterator.hasNext()) {
