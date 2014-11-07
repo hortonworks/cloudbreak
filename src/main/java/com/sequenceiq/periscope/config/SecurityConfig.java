@@ -54,7 +54,7 @@ public class SecurityConfig {
 
         @Override
         public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
-            resources.resourceId("cloudbreak");
+            resources.resourceId("periscope");
             resources.tokenServices(remoteTokenServices());
         }
 
@@ -67,7 +67,7 @@ public class SecurityConfig {
                     .and()
                     .addFilterAfter(new ScimAccountGroupReaderFilter(userDetailsService), AbstractPreAuthenticatedProcessingFilter.class)
                     .authorizeRequests()
-                    .antMatchers("/clusters/**").access("#oauth2.hasScope('cloudbreak.stacks')");
+                    .antMatchers("/clusters/**").access("#oauth2.hasScope('cloudbreak.stacks') and #oauth2.hasScope('periscope.cluster')");
         }
     }
 
