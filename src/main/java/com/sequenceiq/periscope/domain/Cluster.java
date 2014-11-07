@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -50,11 +51,11 @@ public class Cluster {
     private PeriscopeUser user;
     private boolean appMovementAllowed;
     private ClusterState state = ClusterState.RUNNING;
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(nullable = true)
     private List<MetricAlarm> metricAlarms = new ArrayList<>();
     @JoinColumn(nullable = true)
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<TimeAlarm> timeAlarms = new ArrayList<>();
     private int minSize = -1;
     private int maxSize = -1;
@@ -74,13 +75,27 @@ public class Cluster {
     private ClusterMetricsInfo metrics;
 
     public Cluster() {
+        this.applications = new ConcurrentHashMap<>();
     }
 
     public Cluster(PeriscopeUser user, Ambari ambari) throws ConnectionException {
         this.user = user;
         this.ambari = ambari;
         this.applications = new ConcurrentHashMap<>();
-        initConfiguration();
+    }
+
+    public void start() throws ConnectionException {
+        try {
+            configuration = AmbariConfigurationService.getConfiguration(id, newAmbariClient());
+            if (yarnClient != null) {
+                yarnClient.stop();
+            }
+            yarnClient = YarnClient.createYarnClient();
+            yarnClient.init(configuration);
+            yarnClient.start();
+        } catch (Exception e) {
+            throw new ConnectionException(getHost());
+        }
     }
 
     public long getId() {
@@ -181,12 +196,20 @@ public class Cluster {
         return ambari.getPort();
     }
 
-    public String getUser() {
+    public String getAmbariUser() {
         return ambari.getUser();
     }
 
-    public String getPass() {
+    public String getAmbariPass() {
         return ambari.getPass();
+    }
+
+    public PeriscopeUser getUser() {
+        return user;
+    }
+
+    public void setUser(PeriscopeUser user) {
+        this.user = user;
     }
 
     public boolean isRunning() {
@@ -227,7 +250,7 @@ public class Cluster {
     }
 
     public void refreshConfiguration() throws ConnectionException {
-        initConfiguration();
+        start();
     }
 
     public synchronized SchedulerApplication addApplication(ApplicationReport appReport) {
@@ -307,21 +330,7 @@ public class Cluster {
     }
 
     public AmbariClient newAmbariClient() {
-        return new AmbariClient(getHost(), getPort(), getUser(), getPass());
-    }
-
-    private void initConfiguration() throws ConnectionException {
-        try {
-            configuration = AmbariConfigurationService.getConfiguration(id, newAmbariClient());
-            if (yarnClient != null) {
-                yarnClient.stop();
-            }
-            yarnClient = YarnClient.createYarnClient();
-            yarnClient.init(configuration);
-            yarnClient.start();
-        } catch (Exception e) {
-            throw new ConnectionException(getHost());
-        }
+        return new AmbariClient(getHost(), getPort(), getAmbariUser(), getAmbariPass());
     }
 
 }

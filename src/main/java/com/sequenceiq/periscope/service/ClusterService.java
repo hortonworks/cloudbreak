@@ -47,6 +47,7 @@ public class ClusterService {
             periscopeUser = userRepository.save(user);
         }
         Cluster cluster = new Cluster(periscopeUser, ambari);
+        cluster.start();
         clusterRepository.save(cluster);
         return clusterRegistry.add(user, cluster);
     }
