@@ -2,6 +2,7 @@ package com.sequenceiq.periscope.service.security;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.codehaus.jackson.JsonNode;
@@ -20,6 +21,8 @@ import com.sequenceiq.periscope.domain.PeriscopeUser;
 @Service
 public class RemoteUserDetailsService implements UserDetailsService {
 
+    private static final int ACCOUNT_PART = 2;
+
     @Value("${periscope.client.id}")
     private String clientId;
 
@@ -31,6 +34,7 @@ public class RemoteUserDetailsService implements UserDetailsService {
 
     @Override
     @Cacheable("userCache")
+    @SuppressWarnings("unchecked")
     public PeriscopeUser getDetails(String filterValue, UserFilterField filterField) {
 
         RestTemplate restTemplate = new RestTemplate();
@@ -75,9 +79,21 @@ public class RemoteUserDetailsService implements UserDetailsService {
             if (UserFilterField.USERNAME.equals(filterField)) {
                 userNode = root.get("resources").get(0);
             }
+            String account = null;
+            for (Iterator<JsonNode> iterator = userNode.get("groups").getElements(); iterator.hasNext(); ) {
+                JsonNode node = iterator.next();
+                String group = node.get("display").asText();
+                if (group.startsWith("sequenceiq.account")) {
+                    String[] parts = group.split("\\.");
+                    if (account != null && !account.equals(parts[ACCOUNT_PART])) {
+                        throw new IllegalStateException("A user can belong to only one account.");
+                    }
+                    account = parts[ACCOUNT_PART];
+                }
+            }
             String userId = userNode.get("id").asText();
             String email = userNode.get("userName").asText();
-            return new PeriscopeUser(userId, email);
+            return new PeriscopeUser(userId, email, account);
         } catch (IOException e) {
             throw new UserDetailsUnavailableException("User details cannot be retrieved from identity server.", e);
         }

@@ -4,6 +4,7 @@ import java.util.NoSuchElementException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -43,6 +44,11 @@ public class ExceptionController {
     @ExceptionHandler(NoScalingGroupException.class)
     public ResponseEntity<IdExceptionMessageJson> handleNoScalingGroupException(NoScalingGroupException e) {
         return createIdExceptionMessage(e.getId(), e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<IdExceptionMessageJson> handleNoScalingGroupException(AccessDeniedException e) {
+        return createIdExceptionMessage(0, e.getMessage(), HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(AlarmNotFoundException.class)

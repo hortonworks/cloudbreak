@@ -12,13 +12,15 @@ public class PeriscopeUser {
     @Id
     private String id;
     private String email;
+    private String account;
 
     public PeriscopeUser() {
     }
 
-    public PeriscopeUser(String id, String email) {
+    public PeriscopeUser(String id, String email, String account) {
         this.id = id;
         this.email = email;
+        this.account = account;
     }
 
     public String getId() {
@@ -35,6 +37,14 @@ public class PeriscopeUser {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getAccount() {
+        return account;
+    }
+
+    public void setAccount(String account) {
+        this.account = account;
     }
 
     @Override

@@ -67,7 +67,7 @@ public class SecurityConfig {
                     .and()
                     .addFilterAfter(new ScimAccountGroupReaderFilter(userDetailsService), AbstractPreAuthenticatedProcessingFilter.class)
                     .authorizeRequests()
-                    .antMatchers("/clusters").access("#oauth2.hasScope('cloudbreak.blueprints')");
+                    .antMatchers("/clusters/**").access("#oauth2.hasScope('cloudbreak.stacks')");
         }
     }
 

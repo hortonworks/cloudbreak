@@ -3,7 +3,6 @@ package com.sequenceiq.periscope.service;
 import static java.util.Collections.singletonMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -26,13 +25,8 @@ public class ScalingRequest implements Runnable {
     private final Cluster cluster;
     private final ScalingPolicy policy;
 
-    @Value("${periscope.cloudbreak.host}")
-    private String host;
-    @Value("${periscope.cloudbreak.port}")
-    private int port;
-
     @Autowired
-    private TokenService tokenService;
+    private CloudbreakService cloudbreakService;
 
     public ScalingRequest(Cluster cluster, ScalingPolicy policy, int totalNodes, int desiredNodeCount) {
         this.cluster = cluster;
@@ -44,7 +38,7 @@ public class ScalingRequest implements Runnable {
     @Override
     public void run() {
         try {
-            CloudbreakClient client = new CloudbreakClient(host, port, tokenService.getToken());
+            CloudbreakClient client = cloudbreakService.getClient();
             int scalingAdjustment = desiredNodeCount - totalNodes;
             if (scalingAdjustment > 0) {
                 scaleUp(client, scalingAdjustment);
@@ -62,11 +56,12 @@ public class ScalingRequest implements Runnable {
         long clusterId = cluster.getId();
         try {
             LOGGER.info(clusterId, "Sending request to add {} instance(s)", scalingAdjustment);
-            int stackId = client.putStack(ambari, scalingAdjustment);
+            int stackId = client.resolveToStackId(ambari);
+            client.putStack(stackId, scalingAdjustment);
             boolean ready = waitForReadyState(clusterId, stackId, client);
             if (ready) {
                 LOGGER.info(clusterId, "Sending request to install components to the host(s)");
-                client.putCluster(ambari, singletonMap(hostGroup, scalingAdjustment));
+                client.putCluster(stackId, singletonMap(hostGroup, scalingAdjustment));
             } else {
                 LOGGER.info(clusterId, "Instance(s) didn't start in time, skipping scaling");
                 // TODO should we terminate the launched instances?
@@ -82,11 +77,12 @@ public class ScalingRequest implements Runnable {
         long clusterId = cluster.getId();
         try {
             LOGGER.info(clusterId, "Sending request to remove {} node(s) from host group '{}'", scalingAdjustment, hostGroup);
-            int stackId = client.putCluster(ambari, singletonMap(hostGroup, scalingAdjustment));
+            int stackId = client.resolveToStackId(ambari);
+            client.putCluster(stackId, singletonMap(hostGroup, scalingAdjustment));
             boolean ready = waitForReadyState(clusterId, stackId, client);
             if (ready) {
                 LOGGER.info(clusterId, "Sending request to terminate {} instance(s)", scalingAdjustment);
-                client.putStack(ambari, scalingAdjustment);
+                client.putStack(stackId, scalingAdjustment);
             } else {
                 LOGGER.info(clusterId, "Instance(s) didn't stop in time, skipping scaling");
                 // TODO should we force instance termination?
