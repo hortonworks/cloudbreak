@@ -55,7 +55,7 @@ public class Blueprint implements ProvisionEntity {
     private String account;
 
     @Enumerated(EnumType.STRING)
-    private BlueprintVersion blueprintVersion;
+    private BlueprintVersion blueprintVersion = BlueprintVersion.AMBARI16;
 
     private boolean publicInAccount;
 
