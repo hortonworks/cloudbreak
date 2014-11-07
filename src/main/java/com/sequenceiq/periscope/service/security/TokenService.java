@@ -5,6 +5,7 @@ import java.util.Map;
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -30,6 +31,7 @@ public class TokenService {
     private String secret;
 
     @SuppressWarnings("unchecked")
+    @Cacheable("clientCache")
     public String getToken() {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Accept", "application/json");

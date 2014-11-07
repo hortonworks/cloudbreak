@@ -81,7 +81,7 @@ public class RemoteUserDetailsService implements UserDetailsService {
                 userNode = root.get("resources").get(0);
             }
             String account = null;
-            for (Iterator<JsonNode> iterator = userNode.get("groups").getElements(); iterator.hasNext(); ) {
+            for (Iterator<JsonNode> iterator = userNode.get("groups").getElements(); iterator.hasNext();) {
                 JsonNode node = iterator.next();
                 String group = node.get("display").asText();
                 if (group.startsWith("sequenceiq.account")) {

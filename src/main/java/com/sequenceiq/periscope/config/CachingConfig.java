@@ -18,15 +18,13 @@ import net.sf.ehcache.config.CacheConfiguration;
 public class CachingConfig implements CachingConfigurer {
 
     private static final int MAX_ENTRIES = 1000;
+    private static final int LIVE_IN_SEC = 10 * 60;
 
     @Bean
     public net.sf.ehcache.CacheManager ehCacheManager() {
-        CacheConfiguration cacheConfiguration = new CacheConfiguration();
-        cacheConfiguration.setName("userCache");
-        cacheConfiguration.setMemoryStoreEvictionPolicy("LRU");
-        cacheConfiguration.setMaxEntriesLocalHeap(MAX_ENTRIES);
         net.sf.ehcache.config.Configuration config = new net.sf.ehcache.config.Configuration();
-        config.addCache(cacheConfiguration);
+        config.addCache(createUserCache());
+        config.addCache(createClientCache());
         return net.sf.ehcache.CacheManager.newInstance(config);
     }
 
@@ -40,6 +38,23 @@ public class CachingConfig implements CachingConfigurer {
     @Override
     public KeyGenerator keyGenerator() {
         return new SimpleKeyGenerator();
+    }
+
+    private CacheConfiguration createClientCache() {
+        CacheConfiguration cacheConfiguration = new CacheConfiguration();
+        cacheConfiguration.setName("clientCache");
+        cacheConfiguration.setMemoryStoreEvictionPolicy("LRU");
+        cacheConfiguration.setTimeToLiveSeconds(LIVE_IN_SEC);
+        cacheConfiguration.setMaxEntriesLocalHeap(1);
+        return cacheConfiguration;
+    }
+
+    private CacheConfiguration createUserCache() {
+        CacheConfiguration cacheConfiguration = new CacheConfiguration();
+        cacheConfiguration.setName("userCache");
+        cacheConfiguration.setMemoryStoreEvictionPolicy("LRU");
+        cacheConfiguration.setMaxEntriesLocalHeap(MAX_ENTRIES);
+        return cacheConfiguration;
     }
 
 }

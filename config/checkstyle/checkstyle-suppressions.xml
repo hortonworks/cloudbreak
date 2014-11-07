@@ -48,6 +48,7 @@
     <suppress checks="EmptyBlock" files="test" />
     <suppress checks="HideUtilityClassConstructor" files="PeriscopeApplication.java" />
     <suppress id="string-instantiation" files="AmbariConfigurationService.java"/>
+    <suppress id="string-instantiation" files="RemoteUserDetailsService.java"/>
     <suppress checks="InnerAssignment" files="ScalingPolicyConverter.java" />
     <!-- -->
 
