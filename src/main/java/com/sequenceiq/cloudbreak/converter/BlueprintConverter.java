@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Iterator;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,8 +67,8 @@ public class BlueprintConverter extends AbstractConverter<BlueprintJson, Bluepri
             blueprint.setBlueprintText(json.getAmbariBlueprint());
         }
 
-        validateBlueprint(blueprint.getBlueprintText());
         blueprint.setBlueprintVersion(BlueprintVersion.AMBARI16);
+        validateBlueprint(blueprint.getBlueprintText(), blueprint.getBlueprintVersion());
         blueprint.setName(json.getName());
         blueprint.setDescription(json.getDescription());
         ObjectMapper mapper = new ObjectMapper();
@@ -102,38 +103,58 @@ public class BlueprintConverter extends AbstractConverter<BlueprintJson, Bluepri
         return sb.toString();
     }
 
-    private void validateBlueprint(String blueprintText) {
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode root = mapper.readTree(blueprintText);
-            if (root.path("Blueprints").isMissingNode()) {
-                throw new BadRequestException("Invalid blueprint: 'Blueprints' node is missing from JSON.");
-            }
-            if (root.path("Blueprints").path("blueprint_name").isMissingNode()) {
-                throw new BadRequestException("Invalid blueprint: 'blueprint_name' under 'Blueprints' is missing from JSON.");
-            }
-            if (root.path("host_groups").isMissingNode() || !root.path("host_groups").isArray()) {
-                throw new BadRequestException("Invalid blueprint: 'host_groups' node is missing from JSON or is not an array.");
-            }
-            Iterator<JsonNode> configurationsIterator = root.path("configurations").elements();
-            while (configurationsIterator.hasNext()) {
-                JsonNode configuration = configurationsIterator.next();
-                if (configuration.path("global").isMissingNode()) {
-                    throw new BadRequestException("Invalid blueprint: Currently we supporting just the ambari 1.6.");
+    private void validateBlueprint(String blueprintText, BlueprintVersion bpVersion) {
+        if (BlueprintVersion.AMBARI16.equals(bpVersion)) {
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode root = mapper.readTree(blueprintText);
+                if (root.path("Blueprints").isMissingNode()) {
+                    throw new BadRequestException("Invalid blueprint: 'Blueprints' node is missing from JSON.");
                 }
-            }
-            Iterator<JsonNode> hostGroupsIterator = root.path("host_groups").elements();
-            while (hostGroupsIterator.hasNext()) {
-                JsonNode hostGroup = hostGroupsIterator.next();
-                if (hostGroup.path("name").isMissingNode()) {
-                    throw new BadRequestException("Invalid blueprint: every 'host_group' must have a 'name' attribute.");
+                if (root.path("Blueprints").path("blueprint_name").isMissingNode()) {
+                    throw new BadRequestException("Invalid blueprint: 'blueprint_name' under 'Blueprints' is missing from JSON.");
                 }
+                if (root.path("host_groups").isMissingNode() || !root.path("host_groups").isArray()) {
+                    throw new BadRequestException("Invalid blueprint: 'host_groups' node is missing from JSON or is not an array.");
+                }
+                Iterator<JsonNode> hostGroupsIterator = root.path("host_groups").elements();
+                boolean nagiosPresented = false;
+                while (hostGroupsIterator.hasNext()) {
+                    JsonNode hostGroup = hostGroupsIterator.next();
+                    if (hostGroup.path("name").isMissingNode()) {
+                        throw new BadRequestException("Invalid blueprint: every 'host_group' must have a 'name' attribute.");
+                    }
+                    if (!hostGroup.path("components").isNull()) {
+                        List<JsonNode> componentsIterator = hostGroup.path("components").findValues("name");
+                        for (JsonNode jsonNode : componentsIterator) {
+                            if ("NAGIOS_SERVER".equals(jsonNode.asText())) {
+                                nagiosPresented = true;
+                            }
+                        }
+                    }
+                }
+                if (nagiosPresented) {
+                    Iterator<JsonNode> configurationsIterator = root.path("configurations").elements();
+                    if (root.path("configurations").findValues("global").isEmpty()) {
+                        throw new BadRequestException("Invalid blueprint: Currently we supporting just the ambari 1.6.");
+                    }
+                    while (configurationsIterator.hasNext()) {
+                        JsonNode configuration = configurationsIterator.next();
+                        if (!configuration.path("global").isMissingNode()) {
+                            if (configuration.path("global").findValues("nagios_contact").isEmpty()) {
+                                throw new BadRequestException("Invalid blueprint: Currently we supporting just the ambari 1.6.");
+                            }
+                        }
+                    }
+                }
+                new AmbariClient().validateBlueprint(blueprintText);
+            } catch (InvalidBlueprintException e) {
+                throw new BadRequestException("Invalid Blueprint: At least one host group with 'slave_' prefix is required in the blueprint.", e);
+            } catch (IOException e) {
+                throw new BadRequestException("Invalid Blueprint: Failed to parse JSON.", e);
             }
-            new AmbariClient().validateBlueprint(blueprintText);
-        } catch (InvalidBlueprintException e) {
-            throw new BadRequestException("Invalid Blueprint: At least one host group with 'slave_' prefix is required in the blueprint.", e);
-        } catch (IOException e) {
-            throw new BadRequestException("Invalid Blueprint: Failed to parse JSON.", e);
+        } else {
+            throw new BadRequestException(String.format("Invalid blueprint verion: Blueprint version not supported whish is ", bpVersion));
         }
     }
 }

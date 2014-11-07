@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.BlueprintJson;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.BlueprintVersion;
 
 public class BlueprintConverterTest {
 
@@ -57,6 +58,13 @@ public class BlueprintConverterTest {
             + "{\"name\":\"ZOOKEEPER_CLIENT\"}],\"cardinality\":\"2\"}],\"Blueprints\":{\"blueprint_name\":\"multi-node-hdfs-yarn\",\"stack_name\":"
             + "\"HDP\",\"stack_version\":\"2.1\"}}";
 
+    public static final String DUMMY_BLUEPRINT_WITHOUT_GLOBAL_NAGIOS_CONFIG=
+            "{\"configurations\":[{\"global\":{},\"nagios-env\":{\"nagios_contact\":\"admin@localhost\"}}],\"host_groups\":["
+            + "{\"name\":\"master\",\"components\":[{\"name\":\"NAMENODE\"},{\"name\":\"SECONDARY_NAMENODE\"},{\"name\":\"RESOURCEMANAGER\"},"
+            + "{\"name\":\"HISTORYSERVER\"},{\"name\":\"NAGIOS_SERVER\"},{\"name\":\"APP_TIMELINE_SERVER\"},{\"name\":\"ZOOKEEPER_SERVER\"}],"
+            + "\"cardinality\":\"1\"},{\"name\":\"slave_1\",\"components\":[{\"name\":\"DATANODE\"},{\"name\":\"HDFS_CLIENT\"},"
+            + "{\"name\":\"NODEMANAGER\"},{\"name\":\"YARN_CLIENT\"},{\"name\":\"MAPREDUCE2_CLIENT\"},{\"name\":\"ZOOKEEPER_CLIENT\"}],"
+            + "\"cardinality\":\"2\"}],\"Blueprints\":{\"blueprint_name\":\"multi-node-hdfs-yarn\",\"stack_name\":\"HDP\",\"stack_version\":\"2.1\"}}";
 
     public static final String ERROR_MSG = "msg";
     @InjectMocks
@@ -138,6 +146,18 @@ public class BlueprintConverterTest {
     }
 
     @Test(expected = BadRequestException.class)
+    public void testConvertBlueprintJsonToEntityShouldThrowBadRequestWhenBlueprintHasNoNagiosConfigInGlobal() {
+        // GIVEN
+        given(jsonNode.toString()).willReturn(DUMMY_BLUEPRINT_WITHOUT_GLOBAL_NAGIOS_CONFIG);
+        blueprintJson.setAmbariBlueprint(jsonNode);
+        blueprintJson.setUrl(null);
+        // WHEN
+        Blueprint result = underTest.convert(blueprintJson);
+        // THEN
+        assertEquals(result.getBlueprintText(), blueprintJson.getAmbariBlueprint());
+    }
+
+    @Test(expected = BadRequestException.class)
     public void testConvertBlueprintJsonToEntityShouldThrowBadRequestWhenBlueprintNameIsNotInJson() {
         // GIVEN
         given(jsonNode.toString()).willReturn(DUMMY_BLUEPRINT_TEXT_WO_BLUEPRINT_NAME);
@@ -201,6 +221,7 @@ public class BlueprintConverterTest {
         blueprint.setDescription(DUMMY_DESCRIPTION);
         blueprint.setId(Long.parseLong(DUMMY_ID));
         blueprint.setBlueprintText(DUMMY_BLUEPRINT_TEXT);
+        blueprint.setBlueprintVersion(BlueprintVersion.AMBARI16);
         blueprint.setPublicInAccount(true);
         return blueprint;
     }
