@@ -48,23 +48,23 @@ public class BlueprintConverterTest {
             "{\"Blueprints\":{\"blueprint_name\":\"asd\"},\"host_groups\":[{\"name\":\"group1\"},{\"name\":\"group2\"}]}";
 
     public static final String DUMMY_BLUEPRINT_FOR_AMBARI_1_7 =
-            "{\"configurations\":[{\"global\":{\"nagios_contact\":\"admin@localhost\"}},{\"hdfs-site\":{\"dfs.datanode.data.dir\":\""
-            + "/mnt/fs1/,/mnt/fs2/\"}},{\"yarn-site\":{\"yarn.nodemanager.local-dirs\":\"/mnt/fs1/,/mnt/fs2/\"}}],\"host_groups\":[{\"name\":"
-            + "\"master\",\"components\":[{\"name\":\"NAMENODE\"},{\"name\":\"GANGLIA_SERVER\"},{\"name\":\"HISTORYSERVER\"},{\"name\":"
-            + "\"SECONDARY_NAMENODE\"},{\"name\":\"RESOURCEMANAGER\"},{\"name\":\"HISTORYSERVER\"},{\"name\":\"NAGIOS_SERVER\"},{\"name\":\""
-            + "ZOOKEEPER_SERVER\"}],\"cardinality\":\"1\"},{\"name\":\"slave_1\",\"components\":[{\"name\":\"DATANODE\"},"
-            + "{\"name\":\"GANGLIA_MONITOR\"},"
-            + "{\"name\":\"HDFS_CLIENT\"},{\"name\":\"NODEMANAGER\"},{\"name\":\"YARN_CLIENT\"},{\"name\":\"MAPREDUCE2_CLIENT\"},"
-            + "{\"name\":\"ZOOKEEPER_CLIENT\"}],\"cardinality\":\"2\"}],\"Blueprints\":{\"blueprint_name\":\"multi-node-hdfs-yarn\",\"stack_name\":"
-            + "\"HDP\",\"stack_version\":\"2.1\"}}";
+            "{\"configurations\":[{\"nagios-env\":{\"nagios_contact\":\"admin@localhost\"}},{\"hdfs-site\":{\"dfs.datanode.data.dir\":\""
+                    + "/mnt/fs1/,/mnt/fs2/\"}},{\"yarn-site\":{\"yarn.nodemanager.local-dirs\":\"/mnt/fs1/,/mnt/fs2/\"}}],\"host_groups\":[{\"name\":"
+                    + "\"master\",\"components\":[{\"name\":\"NAMENODE\"},{\"name\":\"GANGLIA_SERVER\"},{\"name\":\"HISTORYSERVER\"},{\"name\":"
+                    + "\"SECONDARY_NAMENODE\"},{\"name\":\"RESOURCEMANAGER\"},{\"name\":\"HISTORYSERVER\"},{\"name\":\"NAGIOS_SERVER\"},{\"name\":\""
+                    + "ZOOKEEPER_SERVER\"}],\"cardinality\":\"1\"},{\"name\":\"slave_1\",\"components\":[{\"name\":\"DATANODE\"},"
+                    + "{\"name\":\"GANGLIA_MONITOR\"},"
+                    + "{\"name\":\"HDFS_CLIENT\"},{\"name\":\"NODEMANAGER\"},{\"name\":\"YARN_CLIENT\"},{\"name\":\"MAPREDUCE2_CLIENT\"},"
+                    + "{\"name\":\"ZOOKEEPER_CLIENT\"}],\"cardinality\":\"2\"}],\"Blueprints\":{\"blueprint_name\":\"multi-node-hdfs-yarn\",\"stack_name\":"
+                    + "\"HDP\",\"stack_version\":\"2.1\"}}";
 
-    public static final String DUMMY_BLUEPRINT_WITHOUT_GLOBAL_NAGIOS_CONFIG=
+    public static final String DUMMY_BLUEPRINT_WITHOUT_GLOBAL_NAGIOS_CONFIG =
             "{\"configurations\":[{\"global\":{},\"nagios-env\":{\"nagios_contact\":\"admin@localhost\"}}],\"host_groups\":["
-            + "{\"name\":\"master\",\"components\":[{\"name\":\"NAMENODE\"},{\"name\":\"SECONDARY_NAMENODE\"},{\"name\":\"RESOURCEMANAGER\"},"
-            + "{\"name\":\"HISTORYSERVER\"},{\"name\":\"NAGIOS_SERVER\"},{\"name\":\"APP_TIMELINE_SERVER\"},{\"name\":\"ZOOKEEPER_SERVER\"}],"
-            + "\"cardinality\":\"1\"},{\"name\":\"slave_1\",\"components\":[{\"name\":\"DATANODE\"},{\"name\":\"HDFS_CLIENT\"},"
-            + "{\"name\":\"NODEMANAGER\"},{\"name\":\"YARN_CLIENT\"},{\"name\":\"MAPREDUCE2_CLIENT\"},{\"name\":\"ZOOKEEPER_CLIENT\"}],"
-            + "\"cardinality\":\"2\"}],\"Blueprints\":{\"blueprint_name\":\"multi-node-hdfs-yarn\",\"stack_name\":\"HDP\",\"stack_version\":\"2.1\"}}";
+                    + "{\"name\":\"master\",\"components\":[{\"name\":\"NAMENODE\"},{\"name\":\"SECONDARY_NAMENODE\"},{\"name\":\"RESOURCEMANAGER\"},"
+                    + "{\"name\":\"HISTORYSERVER\"},{\"name\":\"NAGIOS_SERVER\"},{\"name\":\"APP_TIMELINE_SERVER\"},{\"name\":\"ZOOKEEPER_SERVER\"}],"
+                    + "\"cardinality\":\"1\"},{\"name\":\"slave_1\",\"components\":[{\"name\":\"DATANODE\"},{\"name\":\"HDFS_CLIENT\"},"
+                    + "{\"name\":\"NODEMANAGER\"},{\"name\":\"YARN_CLIENT\"},{\"name\":\"MAPREDUCE2_CLIENT\"},{\"name\":\"ZOOKEEPER_CLIENT\"}],"
+                    + "\"cardinality\":\"2\"}],\"Blueprints\":{\"blueprint_name\":\"multi-node-hdfs-yarn\",\"stack_name\":\"HDP\",\"stack_version\":\"2.1\"}}";
 
     public static final String ERROR_MSG = "msg";
     @InjectMocks
