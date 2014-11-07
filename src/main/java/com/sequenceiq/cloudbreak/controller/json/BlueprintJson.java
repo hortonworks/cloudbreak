@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRawValue;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.sequenceiq.cloudbreak.domain.BlueprintVersion;
 
 public class BlueprintJson implements JsonEntity {
 
@@ -17,6 +18,7 @@ public class BlueprintJson implements JsonEntity {
     private String blueprintName;
     private String url;
     private String ambariBlueprint;
+    private BlueprintVersion blueprintVersion;
     @Size(max = 50)
     private String description;
     private Integer hostGroupCount;
@@ -74,6 +76,16 @@ public class BlueprintJson implements JsonEntity {
     @JsonIgnore
     public void setId(String id) {
         this.id = id;
+    }
+
+
+    public BlueprintVersion getBlueprintVersion() {
+        return blueprintVersion;
+    }
+
+    @JsonIgnore
+    public void setBlueprintVersion(BlueprintVersion blueprintVersion) {
+        this.blueprintVersion = blueprintVersion;
     }
 
     public Integer getHostGroupCount() {

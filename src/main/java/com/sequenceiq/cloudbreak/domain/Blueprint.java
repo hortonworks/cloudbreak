@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.domain;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -51,6 +53,9 @@ public class Blueprint implements ProvisionEntity {
 
     private String owner;
     private String account;
+
+    @Enumerated(EnumType.STRING)
+    private BlueprintVersion blueprintVersion;
 
     private boolean publicInAccount;
 
@@ -120,6 +125,14 @@ public class Blueprint implements ProvisionEntity {
 
     public void setAccount(String account) {
         this.account = account;
+    }
+
+    public BlueprintVersion getBlueprintVersion() {
+        return blueprintVersion;
+    }
+
+    public void setBlueprintVersion(BlueprintVersion blueprintVersion) {
+        this.blueprintVersion = blueprintVersion;
     }
 
     public boolean isPublicInAccount() {

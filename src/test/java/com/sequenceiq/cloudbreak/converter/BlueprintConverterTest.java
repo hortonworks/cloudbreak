@@ -46,6 +46,18 @@ public class BlueprintConverterTest {
     public static final String DUMMY_BLUEPRINT_TEXT_HOSTGROUPS_DONT_HAVE_SLAVE =
             "{\"Blueprints\":{\"blueprint_name\":\"asd\"},\"host_groups\":[{\"name\":\"group1\"},{\"name\":\"group2\"}]}";
 
+    public static final String DUMMY_BLUEPRINT_FOR_AMBARI_1_7 =
+            "{\"configurations\":[{\"global\":{\"nagios_contact\":\"admin@localhost\"}},{\"hdfs-site\":{\"dfs.datanode.data.dir\":\"" +
+                    "/mnt/fs1/,/mnt/fs2/\"}},{\"yarn-site\":{\"yarn.nodemanager.local-dirs\":\"/mnt/fs1/,/mnt/fs2/\"}}],\"host_groups\":[{\"name\":" +
+                    "\"master\",\"components\":[{\"name\":\"NAMENODE\"},{\"name\":\"GANGLIA_SERVER\"},{\"name\":\"HISTORYSERVER\"},{\"name\":" +
+                    "\"SECONDARY_NAMENODE\"},{\"name\":\"RESOURCEMANAGER\"},{\"name\":\"HISTORYSERVER\"},{\"name\":\"NAGIOS_SERVER\"},{\"name\":\"" +
+                    "ZOOKEEPER_SERVER\"}],\"cardinality\":\"1\"},{\"name\":\"slave_1\",\"components\":[{\"name\":\"DATANODE\"}," +
+                    "{\"name\":\"GANGLIA_MONITOR\"}," +
+                    "{\"name\":\"HDFS_CLIENT\"},{\"name\":\"NODEMANAGER\"},{\"name\":\"YARN_CLIENT\"},{\"name\":\"MAPREDUCE2_CLIENT\"}," +
+                    "{\"name\":\"ZOOKEEPER_CLIENT\"}],\"cardinality\":\"2\"}],\"Blueprints\":{\"blueprint_name\":\"multi-node-hdfs-yarn\",\"stack_name\":" +
+                    "\"HDP\",\"stack_version\":\"2.1\"}}";
+
+
     public static final String ERROR_MSG = "msg";
     @InjectMocks
     private BlueprintConverter underTest;
@@ -105,6 +117,18 @@ public class BlueprintConverterTest {
     public void testConvertBlueprintJsonToEntityShouldThrowBadRequestWhenBlueprintsIsNotInJson() {
         // GIVEN
         given(jsonNode.toString()).willReturn(DUMMY_BLUEPRINT_TEXT_WO_BLUEPRINTS);
+        blueprintJson.setAmbariBlueprint(jsonNode);
+        blueprintJson.setUrl(null);
+        // WHEN
+        Blueprint result = underTest.convert(blueprintJson);
+        // THEN
+        assertEquals(result.getBlueprintText(), blueprintJson.getAmbariBlueprint());
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testConvertBlueprintJsonToEntityShouldThrowBadRequestWhenBlueprintForAmbari17() {
+        // GIVEN
+        given(jsonNode.toString()).willReturn(DUMMY_BLUEPRINT_FOR_AMBARI_1_7);
         blueprintJson.setAmbariBlueprint(jsonNode);
         blueprintJson.setUrl(null);
         // WHEN
