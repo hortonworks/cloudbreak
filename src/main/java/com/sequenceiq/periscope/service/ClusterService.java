@@ -67,8 +67,8 @@ public class ClusterService {
         return cluster;
     }
 
-    public List<Cluster> getAll() {
-        return clusterRegistry.getAll();
+    public List<Cluster> getAll(PeriscopeUser user) {
+        return clusterRegistry.getAll(user);
     }
 
     public Cluster remove(PeriscopeUser user, long clusterId) throws ClusterNotFoundException {

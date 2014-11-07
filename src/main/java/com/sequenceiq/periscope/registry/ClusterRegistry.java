@@ -39,6 +39,13 @@ public interface ClusterRegistry {
     Cluster get(long id);
 
     /**
+     * Returns all the registered clusters of a user.
+     *
+     * @return collection of clusters
+     */
+    List<Cluster> getAll(PeriscopeUser user);
+
+    /**
      * Returns all the registered clusters.
      *
      * @return collection of clusters

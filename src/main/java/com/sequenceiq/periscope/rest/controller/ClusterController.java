@@ -1,5 +1,7 @@
 package com.sequenceiq.periscope.rest.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -55,6 +57,12 @@ public class ClusterController {
             throw new AccessDeniedException(String.format("Accessing Ambari cluster '%s' is not allowed", host));
         }
         return createClusterJsonResponse(clusterService.add(user, ambari), HttpStatus.CREATED);
+    }
+
+    @RequestMapping(method = RequestMethod.GET)
+    public ResponseEntity<List<ClusterJson>> getClusters(@ModelAttribute("user") PeriscopeUser user) {
+        List<Cluster> clusters = clusterService.getAll(user);
+        return new ResponseEntity<>(clusterConverter.convertAllToJson(clusters), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/{clusterId}", method = RequestMethod.GET)
