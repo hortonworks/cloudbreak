@@ -21,8 +21,8 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 @Entity
-@DiscriminatorColumn(name="alarm_type")
-@Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
+@DiscriminatorColumn(name = "alarm_type")
+@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public abstract class BaseAlarm {
 
     @Id
