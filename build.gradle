@@ -327,6 +327,7 @@ dependencies {
     compile("org.apache.httpcomponents:httpclient:4.3.5")
     compile("org.quartz-scheduler:quartz:2.2.1")
     compile("joda-time:joda-time:2.5")
+    compile("net.sf.ehcache:ehcache:2.8.3")
     testCompile("junit:junit:4.11")
     testCompile("org.mockito:mockito-all:1.9.5")
     testCompile("org.springframework:spring-test:4.0.2.RELEASE")

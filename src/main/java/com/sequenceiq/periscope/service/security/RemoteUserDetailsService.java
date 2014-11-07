@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpEntity;
@@ -14,7 +15,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.crypto.codec.Base64;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestOperations;
 
 import com.sequenceiq.periscope.domain.PeriscopeUser;
 
@@ -22,6 +23,9 @@ import com.sequenceiq.periscope.domain.PeriscopeUser;
 public class RemoteUserDetailsService implements UserDetailsService {
 
     private static final int ACCOUNT_PART = 2;
+
+    @Autowired
+    private RestOperations restTemplate;
 
     @Value("${periscope.client.id}")
     private String clientId;
@@ -36,9 +40,6 @@ public class RemoteUserDetailsService implements UserDetailsService {
     @Cacheable("userCache")
     @SuppressWarnings("unchecked")
     public PeriscopeUser getDetails(String filterValue, UserFilterField filterField) {
-
-        RestTemplate restTemplate = new RestTemplate();
-
         HttpHeaders tokenRequestHeaders = new HttpHeaders();
         tokenRequestHeaders.set("Authorization", getAuthorizationHeader(clientId, clientSecret));
 
