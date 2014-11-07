@@ -1,8 +1,10 @@
 package com.sequenceiq.periscope.domain;
 
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
 @Entity
+@DiscriminatorValue("TIME")
 public class TimeAlarm extends BaseAlarm {
 
     private String timeZone;

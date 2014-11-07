@@ -12,6 +12,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
@@ -50,7 +51,9 @@ public class Cluster {
     private boolean appMovementAllowed;
     private ClusterState state = ClusterState.RUNNING;
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(nullable = true)
     private List<MetricAlarm> metricAlarms = new ArrayList<>();
+    @JoinColumn(nullable = true)
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TimeAlarm> timeAlarms = new ArrayList<>();
     private int minSize = -1;

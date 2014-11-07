@@ -1,5 +1,6 @@
 package com.sequenceiq.periscope.domain;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -15,7 +16,9 @@ public class Ambari {
     private long id;
     private String host;
     private String port;
+    @Column(name = "ambariUser")
     private String user;
+    @Column(name = "ambariPass")
     private String pass;
 
     public Ambari() {
