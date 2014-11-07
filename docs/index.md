@@ -185,7 +185,7 @@ Periscope brings in the capability to reconfigure a running cluster - in particu
 Periscope requires an Apache Ambari endpoint of your Hadoop cluster to start to apply your SLA policies. We suggest to start with [Cloudbreak](http://sequenceiq.com/cloudbreak/#quickstart-and-installation). Create a hosted free [Cloudbreak](https://cloudbreak.sequenceiq.com/) account and start experimenting.
 
 ###Build and run
-The Periscope code is available at our [GitHub repository](https://github.com/sequenceiq/periscope.git). 
+The Periscope code is available at our [GitHub repository](https://github.com/sequenceiq/periscope.git).
 ```
 git clone https://github.com/sequenceiq/periscope.git
 cd periscope
@@ -199,17 +199,21 @@ In order to build Periscope you will need [Gradle](http://www.gradle.org/).
 You are almost done. In order to start using Periscope you will need to set or pass the following environment variables.
 
 ```
-periscope.cloudbreak.host - Cloudbreak host 
-periscope.cloudbreak.port - Cloudbreak port
-periscope.cloudbreak.user - Cloudbreak user name
-periscope.cloudbreak.pass - Cloudbreak password
-periscope.identity.host - Oauth identity server host
-periscope.identity.port - Oauth identity server port
+periscope.cloudbreak.url - URL of Cloudbreak, e.g: http://cloudbreak.sequenceiq.com:80
+periscope.db.port.5432.tcp.addr - Address of the Database, e.g: 172.17.0.2
+periscope.db.port.5432.tcp.port - Port of the Database, e.g: 5432
+periscope.db.env.user - Username to the Database, default: postgres
+periscope.db.env.pass - Password to the Database, default: <no_password>
+periscope.db.env.db - Name of the Database, default: postgres
+periscope.hbm2ddl.strategy - Strategy whether to create or update the DB scheme on start, default: update
 periscope.smtp.host - SMTP host for sending emails
-periscope.smtp.port - SMTP port 
-periscope.smtp.username - SMTP username 
-periscope.smtp.password - SMTP password 
+periscope.smtp.port - SMTP port
+periscope.smtp.username - SMTP username
+periscope.smtp.password - SMTP password
 periscope.smtp.from - SMTP from address, e.g. no-reply@somedomain.com
+periscope.identity.server.url - URL of the UAA identity server, e.g: http://uaa.sequenceiq.com:80
+periscope.client.id - ID of the registered application in UAA
+periscope.client.secret - Secret key of the registered application in UAA
 ```
 
 Monitoring requests and actions are async which means they run in a different thread under a thread pool. You can configure
@@ -227,7 +231,7 @@ Periscope is a [Spring Boot](http://projects.spring.io/spring-boot/) based appli
 java -jar periscope.jar
 ```
 
-##Monitoring 
+##Monitoring
 
 Part of Periscope we have a Hadoop cluster monitoring solution called [Baywatch](http://blog.sequenceiq.com/blog/2014/10/07/hadoop-monitoring/).
 
@@ -252,7 +256,7 @@ Based on the requirements above our choice were the followings:
 
 In our monitoring solution one of the design goal was to provide a **generic, pluggable and isolated monitoring component** to existing Hadoop deployments. We also wanted to make it non-invasive and avoid adding any monitoring related dependency to our Ambari, Hadoop or other Docker images. For that reason we have packaged the monitoring client component into its own Docker image which can be launched alongside with a Hadoop running in another container or even alongside a Hadoop which is not even containerized.
 
-![](https://raw.githubusercontent.com/sequenceiq/sequenceiq-samples/master/hadoop-monitoring/hadoop-monitoring-arch.png) 
+![](https://raw.githubusercontent.com/sequenceiq/sequenceiq-samples/master/hadoop-monitoring/hadoop-monitoring-arch.png)
 
 In a nutshell the monitoring solution consist of client and server containers. The `server` contains the Elasticsearch and the Kibana module. The server container is horizontally scalable and it can be clustered trough the clustering capabilities of Elasticsearch.
 
