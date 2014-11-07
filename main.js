@@ -414,6 +414,7 @@ updateCloudbreakGroups = function (token, userId) {
     updateGroup(token, userId, 'cloudbreak.stacks')
     updateGroup(token, userId, 'cloudbreak.blueprints')
     updateGroup(token, userId, 'cloudbreak.credentials')
+    updateGroup(token, userId, 'periscope.cluster')
 }
 
 updateGroup = function(token, userId, displayName) {
