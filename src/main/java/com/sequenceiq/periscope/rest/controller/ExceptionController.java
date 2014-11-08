@@ -1,5 +1,6 @@
 package com.sequenceiq.periscope.rest.controller;
 
+import java.text.ParseException;
 import java.util.NoSuchElementException;
 
 import org.springframework.http.HttpStatus;
@@ -46,9 +47,14 @@ public class ExceptionController {
         return createIdExceptionMessage(e.getId(), e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(ParseException.class)
+    public ResponseEntity<ExceptionMessageJson> handleCronExpressionException(ParseException e) {
+        return createExceptionMessage(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<IdExceptionMessageJson> handleNoScalingGroupException(AccessDeniedException e) {
-        return createIdExceptionMessage(0, e.getMessage(), HttpStatus.FORBIDDEN);
+    public ResponseEntity<ExceptionMessageJson> handleNoScalingGroupException(AccessDeniedException e) {
+        return createExceptionMessage(e.getMessage(), HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(AlarmNotFoundException.class)

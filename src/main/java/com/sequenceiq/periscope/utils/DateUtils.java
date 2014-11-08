@@ -20,7 +20,7 @@ public final class DateUtils {
 
     public static boolean isTrigger(long clusterId, String cron, String timeZone, long monitorUpdateRate) {
         try {
-            CronExpression cronExpression = new CronExpression(cron);
+            CronExpression cronExpression = getCronExpression(cron);
             Date currentTime = getCurrentDate(timeZone);
             Date nextTime = cronExpression.getNextValidTimeAfter(currentTime);
             DateTime nextDateTime = getDateTime(nextTime, timeZone).minus(monitorUpdateRate);
@@ -29,6 +29,10 @@ public final class DateUtils {
             LOGGER.warn(clusterId, "Invalid cron expression, {}", e.getMessage());
             return false;
         }
+    }
+
+    public static CronExpression getCronExpression(String cron) throws ParseException {
+        return new CronExpression(cron);
     }
 
     private static DateTime getDateTime(Date date, String timeZone) {

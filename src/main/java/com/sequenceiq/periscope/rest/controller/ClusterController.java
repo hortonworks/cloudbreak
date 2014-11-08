@@ -78,8 +78,8 @@ public class ClusterController {
     }
 
     @RequestMapping(value = "/{clusterId}/state", method = RequestMethod.POST)
-    public ResponseEntity<ClusterJson> setState(@ModelAttribute("user") PeriscopeUser user,
-            @PathVariable long clusterId, @RequestBody StateJson stateJson) throws ClusterNotFoundException {
+    public ResponseEntity<ClusterJson> setState(@ModelAttribute("user") PeriscopeUser user, @PathVariable long clusterId,
+            @RequestBody StateJson stateJson) throws ClusterNotFoundException, ConnectionException {
         return createClusterJsonResponse(clusterService.setState(user, clusterId, stateJson.getState()));
     }
 
