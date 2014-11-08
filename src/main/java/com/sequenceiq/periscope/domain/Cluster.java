@@ -98,6 +98,13 @@ public class Cluster {
         }
     }
 
+    public void stop() {
+        if (yarnClient != null) {
+            yarnClient.stop();
+            yarnClient = null;
+        }
+    }
+
     public long getId() {
         return id;
     }

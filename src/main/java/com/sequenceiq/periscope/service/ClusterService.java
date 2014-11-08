@@ -82,9 +82,21 @@ public class ClusterService {
         return cluster;
     }
 
-    public Cluster setState(PeriscopeUser user, long clusterId, ClusterState state) throws ClusterNotFoundException {
+    public Cluster setState(PeriscopeUser user, long clusterId, ClusterState state)
+            throws ClusterNotFoundException, ConnectionException {
         Cluster cluster = get(user, clusterId);
         cluster.setState(state);
+        if (ClusterState.RUNNING == state) {
+            try {
+                cluster.start();
+            } catch (ConnectionException e) {
+                cluster.setState(ClusterState.SUSPENDED);
+                cluster.stop();
+                throw e;
+            }
+        } else {
+            cluster.stop();
+        }
         clusterRepository.save(cluster);
         return cluster;
     }
