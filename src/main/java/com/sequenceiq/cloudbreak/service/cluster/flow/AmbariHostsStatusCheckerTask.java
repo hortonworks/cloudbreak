@@ -5,7 +5,6 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariHostsUnavailableException;
@@ -17,10 +16,8 @@ public class AmbariHostsStatusCheckerTask implements StatusCheckerTask<AmbariHos
     @Override
     public boolean checkStatus(AmbariHosts t) {
         MDCBuilder.buildMdcContext(t.getStack());
-        AmbariClient ambariClient = t.getAmbariClient();
-        Map<String, String> healthyNames = ambariClient.getHostNamesByState("HEALTHY");
-        Map<String, String> unknownNames = ambariClient.getHostNamesByState("UNKNOWN");
-        int hostsFound = healthyNames.size() + unknownNames.size();
+        Map<String, String> hostNames = t.getAmbariClient().getHostNamesByState("HEALTHY");
+        int hostsFound = hostNames.size();
         LOGGER.info("Ambari client found {} hosts ({} needed). [Stack: '{}']", hostsFound, t.getHostCount(), t.getStack().getId());
         if (hostsFound >= t.getHostCount()) {
             return true;
