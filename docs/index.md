@@ -200,12 +200,12 @@ You are almost done. In order to start using Periscope you will need to set or p
 
 ```
 periscope.cloudbreak.url - URL of Cloudbreak, e.g: http://cloudbreak.sequenceiq.com:80
-periscope.db.port.5432.tcp.addr - Address of the Database, e.g: 172.17.0.2
-periscope.db.port.5432.tcp.port - Port of the Database, e.g: 5432
-periscope.db.env.user - Username to the Database, default: postgres
-periscope.db.env.pass - Password to the Database, default: <no_password>
-periscope.db.env.db - Name of the Database, default: postgres
-periscope.hbm2ddl.strategy - Strategy whether to create or update the DB scheme on start, default: update
+periscope.db.tcp.addr - Address of the Database, e.g: 172.17.0.2
+periscope.db.tcp.port - Port of the Database, e.g: 5432
+periscope.db.user - Username to the Database, default: postgres
+periscope.db.pass - Password to the Database, default: <no_password>
+periscope.db.name - Name of the Database, default: postgres
+periscope.db.hbm2ddl.strategy - Strategy whether to create or update the DB scheme on start, default: update
 periscope.smtp.host - SMTP host for sending emails
 periscope.smtp.port - SMTP port
 periscope.smtp.username - SMTP username
