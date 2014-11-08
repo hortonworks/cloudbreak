@@ -23,22 +23,22 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 public class DatabaseConfig {
 
-    @Value("${periscope.db.env.user:postgres}")
+    @Value("${periscope.db.user:postgres}")
     private String dbUser;
 
-    @Value("${periscope.db.env.pass:}")
+    @Value("${periscope.db.pass:}")
     private String dbPassword;
 
-    @Value("${periscope.db.env.db:postgres}")
+    @Value("${periscope.db.name:postgres}")
     private String dbName;
 
-    @Value("${periscope.db.port.5432.tcp.addr}")
+    @Value("${periscope.db.tcp.addr}")
     private String dbHost;
 
-    @Value("${periscope.db.port.5432.tcp.port}")
+    @Value("${periscope.db.tcp.port}")
     private String dbPort;
 
-    @Value("${periscope.hbm2ddl.strategy:update}")
+    @Value("${periscope.db.hbm2ddl.strategy:update}")
     private String hbm2ddlStrategy;
 
     @Bean
