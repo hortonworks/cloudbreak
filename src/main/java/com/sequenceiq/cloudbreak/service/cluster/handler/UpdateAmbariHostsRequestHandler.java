@@ -33,7 +33,7 @@ public class UpdateAmbariHostsRequestHandler implements Consumer<Event<UpdateAmb
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Accepted {} event.", ReactorConfig.UPDATE_AMBARI_HOSTS_REQUEST_EVENT);
         if (request.isDecommision()) {
-            ambariClusterConnector.decommisionAmbariNodes(request.getStackId(), request.getHosts());
+            ambariClusterConnector.decommissionAmbariNodes(request.getStackId(), request.getHosts());
         } else {
             ambariClusterConnector.installAmbariNode(request.getStackId(), request.getHosts());
         }
