@@ -139,7 +139,7 @@ public class AmbariClusterConnector {
         }
     }
 
-    public void decommisionAmbariNodes(Long stackId, Set<HostGroupAdjustmentJson> hosts) {
+    public void decommissionAmbariNodes(Long stackId, Set<HostGroupAdjustmentJson> hosts) {
         Stack stack = stackRepository.findOneWithLists(stackId);
         Cluster cluster = stack.getCluster();
         MDCBuilder.buildMdcContext(cluster);
@@ -176,6 +176,7 @@ public class AmbariClusterConnector {
                             waitForAmbariOperations(stack, ambariClient, installRequests);
                             ambariClient.deleteHostComponents(hostName, componentsList);
                             ambariClient.deleteHost(hostName);
+                            ambariClient.unregisterHost(hostName);
 
                             installRequests = new HashMap<>();
                             Integer zookeeperRequestId = ambariClient.restartServiceComponents("ZOOKEEPER", Arrays.asList("ZOOKEEPER_SERVER"));
