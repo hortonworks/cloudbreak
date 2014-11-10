@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStack
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
@@ -60,7 +61,7 @@ public class GccAttachedDiskResourceBuilder extends GccSimpleInstanceResourceBui
         final Stack stack = stackRepository.findById(po.getStackId());
         final GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
         final List<Resource> resourcesListTemp = new ArrayList<>();
-        final String name = String.format("%s-%s", stack.getName(), index);
+        final String name = String.format("%s-%s-%s", stack.getName(), index, new Date().getTime());
 
         List<Future<Resource>> futures = new ArrayList<>();
         for (int i = 0; i < gccTemplate.getVolumeCount(); i++) {

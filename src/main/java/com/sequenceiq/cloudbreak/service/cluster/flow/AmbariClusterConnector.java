@@ -177,15 +177,6 @@ public class AmbariClusterConnector {
                             ambariClient.deleteHostComponents(hostName, componentsList);
                             ambariClient.deleteHost(hostName);
                             ambariClient.unregisterHost(hostName);
-
-                            installRequests = new HashMap<>();
-                            Integer zookeeperRequestId = ambariClient.restartServiceComponents("ZOOKEEPER", Arrays.asList("ZOOKEEPER_SERVER"));
-                            installRequests.put("ZOOKEEPER", zookeeperRequestId);
-                            if (ambariClient.getServiceComponentsMap().containsKey("NAGIOS")) {
-                                Integer nagiosRequestId = ambariClient.restartServiceComponents("NAGIOS", Arrays.asList("NAGIOS_SERVER"));
-                                installRequests.put("NAGIOS", nagiosRequestId);
-                            }
-                            waitForAmbariOperations(stack, ambariClient, installRequests);
                         } else {
                             break;
                         }
@@ -193,6 +184,16 @@ public class AmbariClusterConnector {
                     }
                 }
             }
+            Map<String, Integer> installRequests = new HashMap<>();
+            Integer zookeeperRequestId = ambariClient.restartServiceComponents("ZOOKEEPER", Arrays.asList("ZOOKEEPER_SERVER"));
+            installRequests.put("ZOOKEEPER", zookeeperRequestId);
+            if (ambariClient.getServiceComponentsMap().containsKey("NAGIOS")) {
+                Integer nagiosRequestId = ambariClient.restartServiceComponents("NAGIOS", Arrays.asList("NAGIOS_SERVER"));
+                installRequests.put("NAGIOS", nagiosRequestId);
+            }
+            waitForAmbariOperations(stack, ambariClient, installRequests);
+
+
             cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
             cluster.getHostMetadata().removeAll(metadataToRemove);
             clusterRepository.save(cluster);

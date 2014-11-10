@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStack
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +57,7 @@ public class GccDiskResourceBuilder extends GccSimpleInstanceResourceBuilder {
     public List<Resource> create(GccProvisionContextObject po, int index, List<Resource> resources) throws Exception {
         Stack stack = stackRepository.findById(po.getStackId());
         GccTemplate template = (GccTemplate) stack.getTemplate();
-        String name = String.format("%s-%s", stack.getName(), index);
+        String name = String.format("%s-%s-%s", stack.getName(), index, new Date().getTime());
         Disk disk = new Disk();
         disk.setSizeGb(SIZE);
         disk.setName(name);
