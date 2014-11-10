@@ -21,7 +21,6 @@ import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.BlueprintJson;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.BlueprintVersion;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 @Component
@@ -38,7 +37,6 @@ public class BlueprintConverter extends AbstractConverter<BlueprintJson, Bluepri
         BlueprintJson blueprintJson = new BlueprintJson();
         blueprintJson.setId(String.valueOf(entity.getId()));
         blueprintJson.setBlueprintName(entity.getBlueprintName());
-        blueprintJson.setBlueprintVersion((entity.getBlueprintVersion() == null) ? BlueprintVersion.AMBARI16 : entity.getBlueprintVersion());
         blueprintJson.setName(entity.getName());
         blueprintJson.setDescription(entity.getDescription() == null ? "" : entity.getDescription());
         blueprintJson.setHostGroupCount(entity.getHostGroupCount());
@@ -67,8 +65,7 @@ public class BlueprintConverter extends AbstractConverter<BlueprintJson, Bluepri
             blueprint.setBlueprintText(json.getAmbariBlueprint());
         }
 
-        blueprint.setBlueprintVersion(BlueprintVersion.AMBARI16);
-        validateBlueprint(blueprint.getBlueprintText(), blueprint.getBlueprintVersion());
+        validateBlueprint(blueprint.getBlueprintText());
         blueprint.setName(json.getName());
         blueprint.setDescription(json.getDescription());
         ObjectMapper mapper = new ObjectMapper();
@@ -103,58 +100,71 @@ public class BlueprintConverter extends AbstractConverter<BlueprintJson, Bluepri
         return sb.toString();
     }
 
-    private void validateBlueprint(String blueprintText, BlueprintVersion bpVersion) {
-        if (BlueprintVersion.AMBARI16.equals(bpVersion)) {
-            try {
-                ObjectMapper mapper = new ObjectMapper();
-                JsonNode root = mapper.readTree(blueprintText);
-                if (root.path("Blueprints").isMissingNode()) {
-                    throw new BadRequestException("Invalid blueprint: 'Blueprints' node is missing from JSON.");
+    private void validateBlueprint(String blueprintText) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode root = mapper.readTree(blueprintText);
+            blueprintPresentedInBlueprint(root);
+            blueprintNameIsPresentedInBlueprint(root);
+            hostGroupIsPresentedInBlueprint(root);
+            Iterator<JsonNode> hostGroupsIterator = root.path("host_groups").elements();
+            boolean nagiosPresented = false;
+            nagiosPresented = nagiosIsPresentedInBlueprint(hostGroupsIterator, nagiosPresented);
+            if (nagiosPresented) {
+                Iterator<JsonNode> configurationsIterator = root.path("configurations").elements();
+                if (root.path("configurations").findValues("global").isEmpty()) {
+                    throw new BadRequestException("Invalid blueprint: Currently we supporting just the ambari 1.6.");
                 }
-                if (root.path("Blueprints").path("blueprint_name").isMissingNode()) {
-                    throw new BadRequestException("Invalid blueprint: 'blueprint_name' under 'Blueprints' is missing from JSON.");
-                }
-                if (root.path("host_groups").isMissingNode() || !root.path("host_groups").isArray()) {
-                    throw new BadRequestException("Invalid blueprint: 'host_groups' node is missing from JSON or is not an array.");
-                }
-                Iterator<JsonNode> hostGroupsIterator = root.path("host_groups").elements();
-                boolean nagiosPresented = false;
-                while (hostGroupsIterator.hasNext()) {
-                    JsonNode hostGroup = hostGroupsIterator.next();
-                    if (hostGroup.path("name").isMissingNode()) {
-                        throw new BadRequestException("Invalid blueprint: every 'host_group' must have a 'name' attribute.");
-                    }
-                    if (!hostGroup.path("components").isNull()) {
-                        List<JsonNode> componentsIterator = hostGroup.path("components").findValues("name");
-                        for (JsonNode jsonNode : componentsIterator) {
-                            if ("NAGIOS_SERVER".equals(jsonNode.asText())) {
-                                nagiosPresented = true;
-                            }
+                while (configurationsIterator.hasNext()) {
+                    JsonNode configuration = configurationsIterator.next();
+                    if (!configuration.path("global").isMissingNode()) {
+                        if (configuration.path("global").findValues("nagios_contact").isEmpty()) {
+                            throw new BadRequestException("Invalid blueprint: Currently we supporting just the ambari 1.6.");
                         }
                     }
                 }
-                if (nagiosPresented) {
-                    Iterator<JsonNode> configurationsIterator = root.path("configurations").elements();
-                    if (root.path("configurations").findValues("global").isEmpty()) {
-                        throw new BadRequestException("Invalid blueprint: Currently we supporting just the ambari 1.6.");
-                    }
-                    while (configurationsIterator.hasNext()) {
-                        JsonNode configuration = configurationsIterator.next();
-                        if (!configuration.path("global").isMissingNode()) {
-                            if (configuration.path("global").findValues("nagios_contact").isEmpty()) {
-                                throw new BadRequestException("Invalid blueprint: Currently we supporting just the ambari 1.6.");
-                            }
-                        }
-                    }
-                }
-                new AmbariClient().validateBlueprint(blueprintText);
-            } catch (InvalidBlueprintException e) {
-                throw new BadRequestException("Invalid Blueprint: At least one host group with 'slave_' prefix is required in the blueprint.", e);
-            } catch (IOException e) {
-                throw new BadRequestException("Invalid Blueprint: Failed to parse JSON.", e);
             }
-        } else {
-            throw new BadRequestException(String.format("Invalid blueprint verion: Blueprint version not supported whish is ", bpVersion));
+            new AmbariClient().validateBlueprint(blueprintText);
+        } catch (InvalidBlueprintException e) {
+            throw new BadRequestException("Invalid Blueprint: At least one host group with 'slave_' prefix is required in the blueprint.", e);
+        } catch (IOException e) {
+            throw new BadRequestException("Invalid Blueprint: Failed to parse JSON.", e);
+        }
+    }
+
+    private boolean nagiosIsPresentedInBlueprint(Iterator<JsonNode> hostGroupsIterator, boolean nagiosPresented) {
+        while (hostGroupsIterator.hasNext()) {
+            JsonNode hostGroup = hostGroupsIterator.next();
+            if (hostGroup.path("name").isMissingNode()) {
+                throw new BadRequestException("Invalid blueprint: every 'host_group' must have a 'name' attribute.");
+            }
+            if (!hostGroup.path("components").isNull()) {
+                List<JsonNode> componentsIterator = hostGroup.path("components").findValues("name");
+                for (JsonNode jsonNode : componentsIterator) {
+                    if ("NAGIOS_SERVER".equals(jsonNode.asText())) {
+                        nagiosPresented = true;
+                    }
+                }
+            }
+        }
+        return nagiosPresented;
+    }
+
+    private void hostGroupIsPresentedInBlueprint(JsonNode root) {
+        if (root.path("host_groups").isMissingNode() || !root.path("host_groups").isArray()) {
+            throw new BadRequestException("Invalid blueprint: 'host_groups' node is missing from JSON or is not an array.");
+        }
+    }
+
+    private void blueprintNameIsPresentedInBlueprint(JsonNode root) {
+        if (root.path("Blueprints").path("blueprint_name").isMissingNode()) {
+            throw new BadRequestException("Invalid blueprint: 'blueprint_name' under 'Blueprints' is missing from JSON.");
+        }
+    }
+
+    private void blueprintPresentedInBlueprint(JsonNode root) {
+        if (root.path("Blueprints").isMissingNode()) {
+            throw new BadRequestException("Invalid blueprint: 'Blueprints' node is missing from JSON.");
         }
     }
 }

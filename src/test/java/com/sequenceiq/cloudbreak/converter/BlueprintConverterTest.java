@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.BlueprintJson;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.BlueprintVersion;
 
 public class BlueprintConverterTest {
 
@@ -221,7 +220,6 @@ public class BlueprintConverterTest {
         blueprint.setDescription(DUMMY_DESCRIPTION);
         blueprint.setId(Long.parseLong(DUMMY_ID));
         blueprint.setBlueprintText(DUMMY_BLUEPRINT_TEXT);
-        blueprint.setBlueprintVersion(BlueprintVersion.AMBARI16);
         blueprint.setPublicInAccount(true);
         return blueprint;
     }
