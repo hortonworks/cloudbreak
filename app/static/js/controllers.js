@@ -18,6 +18,7 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
         var socket = io();
         socket.on('message', function (data) {
           console.log("Message arrived on websocket: " + data);
+          console.log(data)
         });
 
         $scope.errormessage = "";

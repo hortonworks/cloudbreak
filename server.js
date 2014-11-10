@@ -143,8 +143,9 @@ app.get('/authorize', function(req, res, next){
 
 // cloudbreak notifications ====================================================
 app.post('/notifications', function(req, res, next){
-  if (req.body.userName){
-    io.to(req.body.userName).emit('message', 'stack uptime is: ' + req.body.eventMessage);
+  // console.log(req.body)
+  if (req.body.owner){
+    io.to(req.body.owner).emit('message', req.body);
     res.send();
   } else {
     console.log('No username in request body, nothing to do.')
@@ -282,6 +283,7 @@ var getClientTokenArgs = {
 identityServerClient.methods.retrieveToken(getClientTokenArgs, function(data, response){
   if (response.statusCode != 200 || !data.access_token){
     console.log("Couldn't retrieve access token for Uluwatu, couldn't subscribe to Cloudbreak notifications.")
+    console.log(data)
   } else {
     var subscribeArgs = {
       headers: {

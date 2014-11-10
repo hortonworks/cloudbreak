@@ -161,11 +161,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             };
         }
 
-        var refresher = $interval(getUluwatuClusters, 10000);
-        $scope.$on('$destroy', function() {
-            $interval.cancel(refresher);
-        });
-
         $scope.showDetails = function () {
             $scope.detailsShow = true;
             $scope.periscopeShow = false;
@@ -214,7 +209,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         $scope.loadEvents = function () {
             $rootScope.events = UserEvents.query(function(success) {
                 angular.forEach(success, function(item) {
-                    item.eventTimestamp =  new Date(item.eventTimestamp).toISOString();
                     item.customTimeStamp =  new Date(item.eventTimestamp).toLocaleDateString() + " " + new Date(item.eventTimestamp).toLocaleTimeString();
                 });
             });
