@@ -32,14 +32,17 @@ public class ASGroupStatusCheckerTask implements StatusCheckerTask<AutoScalingGr
         AmazonEC2Client amazonEC2Client = asGroupReady.getAmazonEC2Client();
         List<String> instanceIds = cfStackUtil.getInstanceIds(asGroupReady.getAutoScalingGroupName(), asGroupReady.getAmazonASClient());
         if (instanceIds.size() < asGroupReady.getRequiredInstances()) {
+            LOGGER.debug("Instances in AS group: {}, needed: {}",  instanceIds.size(), asGroupReady.getRequiredInstances());
             return false;
         }
         DescribeInstanceStatusResult describeResult = amazonEC2Client.describeInstanceStatus(new DescribeInstanceStatusRequest().withInstanceIds(instanceIds));
         if (describeResult.getInstanceStatuses().size() < asGroupReady.getRequiredInstances()) {
+            LOGGER.debug("Instances up: {}, needed: {}",  describeResult.getInstanceStatuses().size(), asGroupReady.getRequiredInstances());
             return false;
         }
         for (InstanceStatus status : describeResult.getInstanceStatuses()) {
             if (INSTANCE_RUNNING != status.getInstanceState().getCode()) {
+                LOGGER.debug("Instances are up but not all of them are in running state.");
                 return false;
             }
         }
