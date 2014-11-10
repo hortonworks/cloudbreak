@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataSetupComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataUpdateComplete;
@@ -38,6 +39,8 @@ public class AwsMetadataSetup implements MetadataSetup {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsMetadataSetup.class);
 
+    private static final int MAX_POLLING_ATTEMPTS = 60;
+    private static final int MAX_SPOT_POLLING_ATTEMPTS = 600;
     private static final int POLLING_INTERVAL = 5000;
 
     @Autowired
@@ -48,6 +51,13 @@ public class AwsMetadataSetup implements MetadataSetup {
 
     @Autowired
     private CloudFormationStackUtil cfStackUtil;
+
+    @Autowired
+    private PollingService<AutoScalingGroupReady> pollingService;
+
+    @Autowired
+    private ASGroupStatusCheckerTask asGroupStatusCheckerTask;
+
 
     @Override
     public void setupMetadata(Stack stack) {
@@ -62,23 +72,22 @@ public class AwsMetadataSetup implements MetadataSetup {
         AmazonAutoScalingClient amazonASClient = awsStackUtil.createAutoScalingClient(awsTemplate.getRegion(), awsCredential);
         AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(awsTemplate.getRegion(), awsCredential);
 
-        List<String> instanceIds = cfStackUtil.getInstanceIds(stack, amazonASClient, amazonCFClient);
-        // If spot priced instances are used, CloudFormation signals completion
-        // when the spot requests are made but the instances are not running
-        // yet, so we will have to wait until the spot requests are fulfilled
-        // (there are as many instances in the ASG as needed)
-        if (awsTemplate.getSpotPrice() != null) {
-            while (instanceIds.size() < stack.getNodeCount()) {
-                LOGGER.info("Spot requests for stack '{}' are not fulfilled yet. Trying to reach instances in the next polling interval.", stack.getId());
-                awsStackUtil.sleep(stack, POLLING_INTERVAL);
-                instanceIds = cfStackUtil.getInstanceIds(stack, amazonASClient, amazonCFClient);
-            }
+        // wait until all instances are up
+        String asGroupName = cfStackUtil.getAutoscalingGroupName(stack);
+        AutoScalingGroupReady asGroupReady = new AutoScalingGroupReady(stack, amazonEC2Client, amazonASClient, asGroupName, stack.getNodeCount());
+        LOGGER.info("Polling autoscaling group until new instances are ready. [stack: {}, asGroup: {}]", stack.getId(), asGroupName);
+        if (awsTemplate.getSpotPrice() == null) {
+            pollingService.pollWithTimeout(asGroupStatusCheckerTask, asGroupReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+        } else {
+            pollingService.pollWithTimeout(asGroupStatusCheckerTask, asGroupReady, POLLING_INTERVAL, MAX_SPOT_POLLING_ATTEMPTS);
         }
+
+        List<String> instanceIds = cfStackUtil.getInstanceIds(stack, amazonASClient, amazonCFClient);
 
         DescribeInstancesRequest instancesRequest = new DescribeInstancesRequest().withInstanceIds(instanceIds);
         DescribeInstancesResult instancesResult = amazonEC2Client.describeInstances(instancesRequest);
         for (Reservation reservation : instancesResult.getReservations()) {
-            LOGGER.info("Number of instances found in provisioned stack: %s", instancesResult.getReservations().size());
+            LOGGER.info("Number of instances found in reservation: {}", reservation.getInstances().size());
             for (com.amazonaws.services.ec2.model.Instance instance : reservation.getInstances()) {
                 coreInstanceMetadata.add(new CoreInstanceMetaData(
                         instance.getInstanceId(),
