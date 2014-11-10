@@ -78,6 +78,7 @@ public class AwsMetadataSetup implements MetadataSetup {
         DescribeInstancesRequest instancesRequest = new DescribeInstancesRequest().withInstanceIds(instanceIds);
         DescribeInstancesResult instancesResult = amazonEC2Client.describeInstances(instancesRequest);
         for (Reservation reservation : instancesResult.getReservations()) {
+            LOGGER.info("Number of instances found in provisioned stack: %s", instancesResult.getReservations().size());
             for (com.amazonaws.services.ec2.model.Instance instance : reservation.getInstances()) {
                 coreInstanceMetadata.add(new CoreInstanceMetaData(
                         instance.getInstanceId(),
