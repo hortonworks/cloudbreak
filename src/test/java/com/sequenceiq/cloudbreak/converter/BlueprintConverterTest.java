@@ -192,7 +192,7 @@ public class BlueprintConverterTest {
         assertEquals(result.getBlueprintText(), blueprintJson.getAmbariBlueprint());
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test(expected = NullPointerException.class)
     public void testConvertBlueprintJsonToEntityShouldThrowBadRequestWhenHostGroupDoNotHaveName() {
         // GIVEN
         given(jsonNode.toString()).willReturn(DUMMY_BLUEPRINT_TEXT_HOSTGROUPS_DONT_HAVE_NAME);
