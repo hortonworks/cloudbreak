@@ -38,6 +38,9 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
 
         $rootScope.activeCluster = {};
         $scope.cluster = {};
+        $scope.detailsShow = true;
+        $scope.periscopeShow = false;
+        $scope.metricsShow = false;
         getUluwatuClusters();
 
         $scope.createCluster = function () {
@@ -153,5 +156,24 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         $scope.$on('$destroy', function() {
             $interval.cancel(refresher);
         });
+
+        $scope.showDetails = function () {
+            $scope.detailsShow = true;
+            $scope.periscopeShow = false;
+            $scope.metricsShow = false;
+        }
+
+        $scope.showPeriscope = function () {
+            $scope.detailsShow = false;
+            $scope.periscopeShow = true;
+            $scope.metricsShow = false;
+        }
+
+        $scope.showMetrics = function () {
+            $scope.detailsShow = false;
+            $scope.periscopeShow = false;
+            $scope.metricsShow = true;
+        }
+
 
     }]);

@@ -6,110 +6,124 @@
         </div>
         <div id="cluster-details-panel-collapse">
             <div class="panel-body">
-                <p class="text-right">
-                    <a href="" class="btn btn-success" role="button" ng-show="activeCluster.cloudPlatform != 'GCC' && activeCluster.status == 'STOPPED'" data-toggle="modal" data-target="#modal-start-cluster">
-                        <i class="fa fa-play fa-fw"></i><span> start</span>
-                    </a>
-                    <a href="" class="btn btn-warning" role="button" ng-show="activeCluster.cloudPlatform != 'GCC' && activeCluster.status == 'AVAILABLE'" data-toggle="modal" data-target="#modal-stop-cluster">
-                        <i class="fa fa-pause fa-fw"></i><span> stop</span>
-                    </a>
-                    <a href="" id="terminate-btn" class="btn btn-danger" role="button" data-toggle="modal" data-target="#modal-terminate">
-                        <i class="fa fa-times fa-fw"></i><span> terminate</span>
-                    </a>
-                </p>
-                <form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label" for="sl_ambariServerIp">Ambari server adress</label>
-                        <div class="col-sm-9">
-                            <p id="sl_ambariServerIp" class="form-control-static">
-                                <div ng-if="activeCluster.ambariServerIp != null">
-                                    <a ng-show="activeCluster.ambariServerIp != null" target="_blank" href="http://{{activeCluster.ambariServerIp}}:8080">http://{{activeCluster.ambariServerIp}}:8080</a>
+                <ul class="nav nav-pills nav-justified" role="tablist">
+                    <li class="active"><a ng-click="showDetails()" role="tab" data-toggle="tab">details</a></li>
+                    <li><a role="tab" ng-click="showPeriscope()" role="tab" data-toggle="tab">autoscaling SLA policies</a></li>
+                    <li><a role="tab" target="_blank" href="http://130.211.135.184/index.html#/dashboard/elasticsearch/Hadoop%20Metrics">monitoring</a></li>
+                </ul>
+                <div class="tab-content">
+                    <section id="cluster-details-pane" ng-class="{ 'active': detailsShow }" ng-show="detailsShow" class="tab-pane fade in">
+                        <p class="text-right">
+                            <a href="" class="btn btn-success" role="button" ng-show="activeCluster.cloudPlatform != 'GCC' && activeCluster.status == 'STOPPED'" data-toggle="modal" data-target="#modal-start-cluster">
+                                <i class="fa fa-play fa-fw"></i><span> start</span>
+                            </a>
+                            <a href="" class="btn btn-warning" role="button" ng-show="activeCluster.cloudPlatform != 'GCC' && activeCluster.status == 'AVAILABLE'" data-toggle="modal" data-target="#modal-stop-cluster">
+                                <i class="fa fa-pause fa-fw"></i><span> stop</span>
+                            </a>
+                            <a href="" id="terminate-btn" class="btn btn-danger" role="button" data-toggle="modal" data-target="#modal-terminate">
+                                <i class="fa fa-times fa-fw"></i><span> terminate</span>
+                            </a>
+                        </p>
+                        <form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label" for="sl_ambariServerIp">Ambari server adress</label>
+                                <div class="col-sm-9">
+                                    <p id="sl_ambariServerIp" class="form-control-static">
+                                        <div ng-if="activeCluster.ambariServerIp != null">
+                                            <a ng-show="activeCluster.ambariServerIp != null" target="_blank" href="http://{{activeCluster.ambariServerIp}}:8080">http://{{activeCluster.ambariServerIp}}:8080</a>
+                                        </div>
+                                        <div ng-if="activeCluster.ambariServerIp == null">
+                                            <a ng-show="activeCluster.ambariServerIp == null" target="_blank" href="">Not Available</a>
+                                        </div>
+                                    </p>
                                 </div>
-                                <div ng-if="activeCluster.ambariServerIp == null">
-                                    <a ng-show="activeCluster.ambariServerIp == null" target="_blank" href="">Not Available</a>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label" for="sl_cloudPlatform">Platform</label>
+                                <div class="col-sm-9">
+                                    <p id="sl_cloudPlatform" class="form-control-static">{{activeCluster.cloudPlatform}}</p>
                                 </div>
-                            </p>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label" for="sl_nodeCount">Number of nodes</label>
+                                <div class="col-sm-9">
+                                    <p id="sl_nodeCount" class="form-control-static">{{activeCluster.nodeCount}}</p>
+                                </div>
+                            </div>
+                            <div class="form-group" ng-if="activeCluster.cluster.statusReason === null && (activeCluster.statusReason != null && activeCluster.statusReason != '')">
+                                <label class="col-sm-3 control-label" for="sl_cloudStatus">Cluster status</label>
+                                <div class="col-sm-9">
+                                    <p id="sl_cloudStatus" class="form-control-static">{{activeCluster.statusReason}}</p>
+                                </div>
+                                <div class="col-sm-9" ng-if="activeCluster.cluster.statusReason != null && activeCluster.cluster.statusReason != ''">
+                                    <p id="sl_cloudStatus" class="form-control-static">{{activeCluster.cluster.statusReason}}</p>
+                                </div>
+                            </div>
+                            <div class="form-group" ng-if="activeCluster.cluster.statusReason != null && activeCluster.cluster.statusReason != ''">
+                                <label class="col-sm-3 control-label" for="sl_cloudStatus">Cluster status</label>
+                                <div class="col-sm-9">
+                                    <p id="sl_cloudStatus" class="form-control-static">{{activeCluster.cluster.statusReason}}2</p>
+                                </div>
+                            </div>
+                        </form>
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h5><a href="" data-toggle="collapse" data-target="#panel-collapse0002"><i class="fa fa-align-justify fa-fw"></i>Cloud stack description: {{activeCluster.name}}</a></h5>
+                            </div>
+                            <div id="panel-collapse0002" class="panel-collapse collapse">
+                                <div class="panel-body">
+                                    <pre id="sl_description" class="form-control-static">{{activeCluster.description | json}}</pre>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label" for="sl_cloudPlatform">Platform</label>
-                        <div class="col-sm-9">
-                            <p id="sl_cloudPlatform" class="form-control-static">{{activeCluster.cloudPlatform}}</p>
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h5><a href="" data-toggle="collapse" data-target='#panel-collapse01'><i class="fa fa-file-o fa-fw"></i>Template: {{activeClusterTemplate.name}}</a></h5>
+                            </div>
+                            <div id="panel-collapse01" class="panel-collapse collapse">
+                                <div class="panel-body" ng-if="activeClusterTemplate.cloudPlatform == 'AWS' ">
+                                    <div ng-include="'tags/template/awslist.tag'" ng-repeat="template in [activeClusterTemplate]"></div>
+                                </div>
+                                <div class="panel-body" ng-if="activeClusterTemplate.cloudPlatform == 'AZURE' ">
+                                    <div ng-include="'tags/template/azurelist.tag'" ng-repeat="template in [activeClusterTemplate]"></div>
+                                </div>
+                                <div class="panel-body" ng-if="activeClusterTemplate.cloudPlatform == 'GCC' ">
+                                    <div ng-include="'tags/template/gcclist.tag'" ng-repeat="template in [activeClusterTemplate]"></div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label" for="sl_nodeCount">Number of nodes</label>
-                        <div class="col-sm-9">
-                            <p id="sl_nodeCount" class="form-control-static">{{activeCluster.nodeCount}}</p>
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h5><a href="" data-toggle="collapse" data-target="#panel-collapse02"><i class="fa fa-th fa-fw"></i>Blueprint: {{activeClusterBlueprint.name}}</a></h5>
+                            </div>
+                            <div id="panel-collapse02" class="panel-collapse collapse">
+                                <div class="panel-body">
+                                    <div class="row" ng-repeat="blueprint in [activeClusterBlueprint]" ng-include="'tags/blueprint/bplist.tag'" ></div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="form-group" ng-if="activeCluster.cluster.statusReason === null && (activeCluster.statusReason != null && activeCluster.statusReason != '')">
-                        <label class="col-sm-3 control-label" for="sl_cloudStatus">Cluster status</label>
-                        <div class="col-sm-9">
-                            <p id="sl_cloudStatus" class="form-control-static">{{activeCluster.statusReason}}</p>
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h5><a href="" data-toggle="collapse" data-target="#panel-collapse001"><i class="fa fa-tag fa-fw"></i>Credential: {{activeClusterCredential.name}}</a></h5>
+                            </div>
+                            <div id="panel-collapse001" class="panel-collapse collapse">
+                                <div class="panel-body" ng-if="activeClusterCredential.cloudPlatform == 'AWS' ">
+                                    <div ng-include="'tags/credential/awslist.tag'" ng-repeat="credential in [activeClusterCredential]"></div>
+                                </div>
+                                <div class="panel-body" ng-if="activeClusterCredential.cloudPlatform == 'AZURE' ">
+                                    <div ng-include="'tags/credential/azurelist.tag'" ng-repeat="credential in [activeClusterCredential]"></div>
+                                </div>
+                                <div class="panel-body" ng-if="activeClusterCredential.cloudPlatform == 'GCC' ">
+                                    <div ng-include="'tags/credential/gcclist.tag'" ng-repeat="credential in [activeClusterCredential]"></div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-sm-9" ng-if="activeCluster.cluster.statusReason != null && activeCluster.cluster.statusReason != ''">
-                            <p id="sl_cloudStatus" class="form-control-static">{{activeCluster.cluster.statusReason}}</p>
-                        </div>
-                    </div>
-                    <div class="form-group" ng-if="activeCluster.cluster.statusReason != null && activeCluster.cluster.statusReason != ''">
-                        <label class="col-sm-3 control-label" for="sl_cloudStatus">Cluster status</label>
-                        <div class="col-sm-9">
-                            <p id="sl_cloudStatus" class="form-control-static">{{activeCluster.cluster.statusReason}}2</p>
-                        </div>
-                    </div>
-                </form>
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h5><a href="" data-toggle="collapse" data-target="#panel-collapse0002"><i class="fa fa-align-justify fa-fw"></i>Cloud stack description: {{activeCluster.name}}</a></h5>
-                    </div>
-                    <div id="panel-collapse0002" class="panel-collapse collapse">
-                        <div class="panel-body">
-                            <pre id="sl_description" class="form-control-static">{{activeCluster.description | json}}</pre>
-                        </div>
-                    </div>
-                </div>
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h5><a href="" data-toggle="collapse" data-target='#panel-collapse01'><i class="fa fa-file-o fa-fw"></i>Template: {{activeClusterTemplate.name}}</a></h5>
-                    </div>
-                    <div id="panel-collapse01" class="panel-collapse collapse">
-                        <div class="panel-body" ng-if="activeClusterTemplate.cloudPlatform == 'AWS' ">
-                            <div ng-include="'tags/template/awslist.tag'" ng-repeat="template in [activeClusterTemplate]"></div>
-                        </div>
-                        <div class="panel-body" ng-if="activeClusterTemplate.cloudPlatform == 'AZURE' ">
-                            <div ng-include="'tags/template/azurelist.tag'" ng-repeat="template in [activeClusterTemplate]"></div>
-                        </div>
-                        <div class="panel-body" ng-if="activeClusterTemplate.cloudPlatform == 'GCC' ">
-                            <div ng-include="'tags/template/gcclist.tag'" ng-repeat="template in [activeClusterTemplate]"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h5><a href="" data-toggle="collapse" data-target="#panel-collapse02"><i class="fa fa-th fa-fw"></i>Blueprint: {{activeClusterBlueprint.name}}</a></h5>
-                    </div>
-                    <div id="panel-collapse02" class="panel-collapse collapse">
-                        <div class="panel-body">
-                            <div class="row" ng-repeat="blueprint in [activeClusterBlueprint]" ng-include="'tags/blueprint/bplist.tag'" ></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h5><a href="" data-toggle="collapse" data-target="#panel-collapse001"><i class="fa fa-tag fa-fw"></i>Credential: {{activeClusterCredential.name}}</a></h5>
-                    </div>
-                    <div id="panel-collapse001" class="panel-collapse collapse">
-                        <div class="panel-body" ng-if="activeClusterCredential.cloudPlatform == 'AWS' ">
-                            <div ng-include="'tags/credential/awslist.tag'" ng-repeat="credential in [activeClusterCredential]"></div>
-                        </div>
-                        <div class="panel-body" ng-if="activeClusterCredential.cloudPlatform == 'AZURE' ">
-                            <div ng-include="'tags/credential/azurelist.tag'" ng-repeat="credential in [activeClusterCredential]"></div>
-                        </div>
-                        <div class="panel-body" ng-if="activeClusterCredential.cloudPlatform == 'GCC' ">
-                            <div ng-include="'tags/credential/gcclist.tag'" ng-repeat="credential in [activeClusterCredential]"></div>
-                        </div>
-                    </div>
+                    </section>
+                    <section id="periscope-pane" ng-class="{ 'active': periscopeShow }" ng-show="periscopeShow" class="tab-pane fade in">
+                        <div ng-include="'tags/stack/periscope.tag'"></div>
+                    </section>
+                    <section id="metrics-pane" ng-class="{ 'active': metricsShow }" ng-show="metricsShow" targe class="tab-pane fade in">
+                    </section>
                 </div>
             </div>
         </div>
