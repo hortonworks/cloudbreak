@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStack
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,7 +70,7 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
         listOfDisks.addAll(getBootDiskList(resources, gccCredential, gccTemplate));
         listOfDisks.addAll(getAttachedDisks(resources, gccCredential, gccTemplate));
 
-        String name = String.format("%s-%s", stack.getName(), index);
+        String name = String.format("%s-%s-%s", stack.getName(), index, new Date().getTime());
         Instance instance = new Instance();
         instance.setMachineType(String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/machineTypes/%s",
                 po.getProjectId(), gccTemplate.getGccZone().getValue(), gccTemplate.getGccInstanceType().getValue()));
