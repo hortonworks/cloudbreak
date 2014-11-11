@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
+import java.util.Map;
 import java.util.Set;
+
+import javax.annotation.Resource;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
@@ -10,6 +13,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
+import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
@@ -28,6 +32,7 @@ import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
+import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackStatusUpdateRequest;
@@ -60,6 +65,9 @@ public class DefaultStackService implements StackService {
 
     @Autowired
     private DescribeContext describeContext;
+
+    @Resource
+    private Map<CloudPlatform, ProvisionSetup> provisionSetups;
 
     @Override
     public Set<Stack> retrievePrivateStacks(CbUser user) {
@@ -102,14 +110,19 @@ public class DefaultStackService implements StackService {
         stack.setOwner(user.getUserId());
         stack.setAccount(user.getAccount());
         stack.setHash(generateHash(stack));
-        try {
-            savedStack = stackRepository.save(stack);
-            LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_REQUEST_EVENT, stack.getId());
-            reactor.notify(ReactorConfig.PROVISION_REQUEST_EVENT, Event.wrap(new ProvisionRequest(template.cloudPlatform(), stack.getId())));
-        } catch (DataIntegrityViolationException ex) {
-            throw new DuplicateKeyValueException(stack.getName(), ex);
+        Optional<String> result = provisionSetups.get(stack.getTemplate().cloudPlatform()).preProvisionCheck(stack);
+        if (result.isPresent()) {
+            throw new BadRequestException(result.orNull());
+        } else {
+            try {
+                savedStack = stackRepository.save(stack);
+                LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_REQUEST_EVENT, stack.getId());
+                reactor.notify(ReactorConfig.PROVISION_REQUEST_EVENT, Event.wrap(new ProvisionRequest(template.cloudPlatform(), stack.getId())));
+            } catch (DataIntegrityViolationException ex) {
+                throw new DuplicateKeyValueException(stack.getName(), ex);
+            }
+            return savedStack;
         }
-        return savedStack;
     }
 
     @Override

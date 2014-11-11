@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
@@ -62,6 +63,11 @@ public class AwsProvisionSetup implements ProvisionSetup {
                 )
             );
         }
+    }
+
+    @Override
+    public Optional<String> preProvisionCheck(Stack stack) {
+        return Optional.absent();
     }
 
     public Map<String, Object> getSetupProperties(Stack stack) {

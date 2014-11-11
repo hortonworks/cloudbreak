@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Optional;
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloud.azure.client.AzureClientUtil;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
@@ -139,6 +140,26 @@ public class AzureProvisionSetup implements ProvisionSetup {
                                 .withSetupProperty(EMAILASFOLDER, emailAsFolder)
                 )
         );
+    }
+
+    @Override
+    public Optional<String> preProvisionCheck(Stack stack) {
+        MDCBuilder.buildMdcContext(stack);
+        Credential credential = stack.getCredential();
+        String emailAsFolder = azureStackUtil.emailAsFolder(stack.getOwner());
+
+        String filePath = AzureCertificateService.getUserJksFileName(credential, emailAsFolder);
+        AzureClient azureClient = azureStackUtil.createAzureClient(credential, filePath);
+        try {
+            Object osImages = azureClient.getOsImages();
+        } catch (Exception ex) {
+            if ("Forbidden".equals(ex.getMessage())) {
+                return Optional.of("Please upload your credential file to Azure portal.");
+            } else {
+                return Optional.of(ex.getMessage());
+            }
+        }
+        return Optional.absent();
     }
 
     private void createStorage(Stack stack, AzureClient azureClient, String affinityGroupName) {
