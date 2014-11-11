@@ -31,7 +31,6 @@ import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
-import com.sequenceiq.cloudbreak.service.stack.event.StackOperationFailure;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
@@ -79,18 +78,6 @@ public class AzureProvisionSetup implements ProvisionSetup {
 
         String filePath = AzureCertificateService.getUserJksFileName(credential, emailAsFolder);
         AzureClient azureClient = azureStackUtil.createAzureClient(credential, filePath);
-
-        try {
-            Object osImages = azureClient.getOsImages();
-        } catch (Exception ex) {
-            if ("Forbidden".equals(ex.getMessage())) {
-                LOGGER.info("Certificate not upload to Azure portal.", ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT, stack.getId());
-                StackOperationFailure stackCreationFailure = new StackOperationFailure(stack.getId(), "Certificate not upload to Azure portal.");
-                reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(stackCreationFailure));
-                return;
-            }
-        }
-
         if (!azureClient.isImageAvailable(azureStackUtil.getOsImageName(credential))) {
             String affinityGroupName = ((AzureCredential) credential).getCommonName();
             createAffinityGroup(stack, azureClient, affinityGroupName);
@@ -152,6 +139,22 @@ public class AzureProvisionSetup implements ProvisionSetup {
                                 .withSetupProperty(EMAILASFOLDER, emailAsFolder)
                 )
         );
+    }
+
+    @Override
+    public boolean preProvisionCheck(Stack stack) {
+        MDCBuilder.buildMdcContext(stack);
+        Credential credential = stack.getCredential();
+        String emailAsFolder = azureStackUtil.emailAsFolder(stack.getOwner());
+
+        String filePath = AzureCertificateService.getUserJksFileName(credential, emailAsFolder);
+        AzureClient azureClient = azureStackUtil.createAzureClient(credential, filePath);
+        try {
+            Object osImages = azureClient.getOsImages();
+        } catch (Exception ex) {
+            return false;
+        }
+        return true;
     }
 
     private void createStorage(Stack stack, AzureClient azureClient, String affinityGroupName) {

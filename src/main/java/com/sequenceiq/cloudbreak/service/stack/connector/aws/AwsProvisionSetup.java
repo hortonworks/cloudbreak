@@ -64,6 +64,11 @@ public class AwsProvisionSetup implements ProvisionSetup {
         }
     }
 
+    @Override
+    public boolean preProvisionCheck(Stack stack) {
+        return true;
+    }
+
     public Map<String, Object> getSetupProperties(Stack stack) {
         AwsTemplate awsTemplate = (AwsTemplate) stack.getTemplate();
         AwsCredential awsCredential = (AwsCredential) stack.getCredential();

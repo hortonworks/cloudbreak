@@ -96,6 +96,11 @@ public class GccProvisionSetup implements ProvisionSetup {
         );
     }
 
+    @Override
+    public boolean preProvisionCheck(Stack stack) {
+        return true;
+    }
+
     private boolean containsSpecificImage(ImageList imageList) {
         try {
             for (Image image : imageList.getItems()) {

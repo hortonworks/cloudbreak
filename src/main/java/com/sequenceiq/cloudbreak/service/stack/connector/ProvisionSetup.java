@@ -9,6 +9,8 @@ public interface ProvisionSetup {
 
     void setupProvisioning(Stack stack);
 
+    boolean preProvisionCheck(Stack stack);
+
     CloudPlatform getCloudPlatform();
 
     Map<String, Object> getSetupProperties(Stack stack);
