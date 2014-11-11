@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
@@ -25,11 +26,16 @@ public class AzureStackUtil {
     public static final String EMAILASFOLDER = "emailAsFolder";
     public static final String IMAGE_NAME = "ambari-docker-v1";
 
+    @Value("${cb.azure.image.uri}")
+    private String baseImageUri;
+
     @Autowired
     private UserDetailsService userDetailsService;
 
     public String getOsImageName(Credential credential) {
-        return String.format("%s-%s", ((AzureCredential) credential).getCommonName(), IMAGE_NAME);
+        String[] split = baseImageUri.split("/");
+        return String.format("%s-%s-%s", ((AzureCredential) credential).getCommonName(), IMAGE_NAME,
+                split[split.length - 1].replaceAll(".vhd", ""));
     }
 
     public AzureClient createAzureClient(Credential credential, String filePath) {

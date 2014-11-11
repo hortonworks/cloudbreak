@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
+import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDeleteContextObject;
@@ -28,6 +29,9 @@ public class AzureResourceBuilderInit implements
 
     @Autowired
     private UserDetailsService userDetailsService;
+
+    @Autowired
+    private AzureStackUtil azureStackUtil;
 
     @Override
     public AzureProvisionContextObject provisionInit(Stack stack, String userData) throws Exception {
@@ -86,7 +90,7 @@ public class AzureResourceBuilderInit implements
     }
 
     public String getOsImageName(Credential credential) {
-        return String.format("%s-%s", ((AzureCredential) credential).getCommonName(), IMAGE_NAME);
+        return  azureStackUtil.getOsImageName(credential);
     }
 
 }
