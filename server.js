@@ -145,7 +145,7 @@ app.get('/authorize', function(req, res, next){
 app.post('/notifications', function(req, res, next){
   // console.log(req.body)
   if (req.body.owner){
-    io.to(req.body.owner).emit('message', req.body);
+    io.to(req.body.owner).emit('notification', req.body);
     res.send();
   } else {
     console.log('No username in request body, nothing to do.')
@@ -255,7 +255,7 @@ sessionSockets.on('connection', function (err, socket, session) {
   if (session){
     retrieveUserByToken(session.token, function(data){
       socket.join(data.user_id)
-      io.to(data.user_id).emit('message', 'for your eyes only');
+      io.to(data.user_id).emit('notification', 'successfully joined to topic --- for your eyes only');
     });
   } else {
     console.log("No session found, websocket notifications won't work [socket ID: " + socket.id + "] " + err)

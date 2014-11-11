@@ -16,10 +16,7 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
         $scope.user = User.get();
 
         var socket = io();
-        socket.on('message', function (data) {
-          console.log("Message arrived on websocket: " + data);
-          console.log(data)
-        });
+        socket.on('notification', handleNotification);
 
         $scope.errormessage = "";
         $scope.statusclass = "";
@@ -46,50 +43,6 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
 
         $scope.modifyStatusClass = function(status) {
             $scope.statusclass = status;
-        }
-
-        function logStackInfo(body) {
-            if(body.status === 'AVAILABLE') {
-                $scope.modifyStatusMessage($rootScope.error_msg.stack_create_completed, body.name);
-                $scope.modifyStatusClass("has-success");
-            } else if(body.status === 'CREATE_IN_PROGRESS')  {
-                $scope.modifyStatusMessage($rootScope.error_msg.stack_create_in_progress, body.name);
-                $scope.modifyStatusClass("has-success");
-            } else if(body.status === 'UPDATE_IN_PROGRESS')  {
-                $scope.modifyStatusMessage($rootScope.error_msg.stack_update_in_progress, body.name);
-                $scope.modifyStatusClass("has-success");
-            }  else if(body.status === 'CREATE_FAILED')  {
-                $scope.modifyStatusMessage($rootScope.error_msg.stack_create_failed, body.name);
-                $scope.modifyStatusClass("has-error");
-            }  else if(body.status === 'DELETE_IN_PROGRESS')  {
-                $scope.modifyStatusMessage($rootScope.error_msg.stack_delete_in_progress, body.name);
-                $scope.modifyStatusClass("has-success");
-            }  else if(body.status === 'DELETE_COMPLETED')  {
-                $scope.modifyStatusMessage($rootScope.error_msg.stack_delete_completed, body.name);
-                $scope.modifyStatusClass("has-success");
-            } else {
-                $scope.modifyStatusMessage($rootScope.error_msg.stack_else, body.name);
-                $scope.modifyStatusClass("has-error");
-            }
-        }
-
-        function logClusterInfo(body) {
-            if(body.status === 'AVAILABLE') {
-                $scope.modifyStatusMessage($rootScope.error_msg.cluster_create_completed, body.name);
-                $scope.modifyStatusClass("has-success");
-            } else if(body.status === 'CREATE_IN_PROGRESS')  {
-                $scope.modifyStatusMessage($rootScope.error_msg.cluster_create_inprogress, body.name);
-                $scope.modifyStatusClass("has-success");
-            } else if(body.status === 'UPDATE_IN_PROGRESS')  {
-                $scope.modifyStatusMessage($rootScope.error_msg.cluster_update_inprogress, body.name);
-                $scope.modifyStatusClass("has-success");
-            }  else if(body.status === 'CREATE_FAILED') {
-                $scope.modifyStatusMessage($rootScope.error_msg.cluster_create_failed, body.name);
-                $scope.modifyStatusClass("has-error");
-            } else {
-                $scope.modifyStatusMessage($rootScope.error_msg.cluster_else, body.name);
-                $scope.modifyStatusClass("has-error");
-            }
         }
 
         $scope.addPanelJQueryEventListeners = function(panel) {
@@ -137,5 +90,84 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
                 $scope.order($scope.lastOrderPredicate, false);
             }
         };
+
+        function handleNotification(data) {
+          console.log(data)
+          var eventType = data.eventType;
+          switch(eventType) {
+            case "REQUESTED":
+              handleStatusChange(data, eventType, "has-success");
+              break;
+            case "CREATE_IN_PROGRESS":
+              handleStatusChange(data, $rootScope.error_msg.cluster_create_inprogress, "has-success");
+              break;
+            case "UPDATE_IN_PROGRESS":
+              handleStatusChange(data, $rootScope.error_msg.cluster_update_inprogress, "has-success");
+              break;
+            case "CREATE_FAILED":
+              handleStatusChange(data, $rootScope.error_msg.stack_create_failed, "has-error");
+              break;
+            case "DELETE_IN_PROGRESS":
+              handleStatusChange(data, $rootScope.error_msg.stack_delete_in_progress, "has-success");
+              break;
+            case "STOPPED":
+              handleStatusChange(data, eventType, "has-success");
+              break;
+            case "START_REQUESTED":
+              handleStatusChange(data, eventType, "has-success");
+              break;
+            case "START_IN_PROGRESS":
+              handleStatusChange(data, eventType, "has-success");
+              break;
+            case "STOP_REQUESTED":
+              handleStatusChange(data, eventType, "has-success");
+              break;
+            case "STOP_IN_PROGRESS":
+              handleStatusChange(data, eventType, "has-success");
+              break;
+            case "DELETE_COMPLETED":
+              handleStatusChange(data, $rootScope.error_msg.stack_delete_completed, "has-success");
+              $rootScope.clusters = $filter('filter')($rootScope.clusters, function(value, index) { return value.id != data.stackId;});
+              break;
+            case "AVAILABLE":
+              handleAvailableNotification(data);
+              break;
+            case "UPTIME_NOTIFICATION":
+              handleUptimeNotification(data);
+              break;
+            // default:
+            //   console.log('default case.....')
+          }
+          $scope.$apply();
+
+          function handleStatusChange(notification, message, statusClass){
+            var actCluster = $filter('filter')($rootScope.clusters, { id: notification.stackId })[0];
+            actCluster.status = notification.eventType;
+            $scope.modifyStatusMessage(message, actCluster.name);
+            $scope.modifyStatusClass(statusClass);
+          }
+
+          function handleAvailableNotification(notification) {
+            var actCluster = $filter('filter')($rootScope.clusters, { id: notification.stackId })[0];
+            var msg = notification.eventMessage;
+            if (msg != null && msg != undefined) {
+              actCluster.ambariServerIp = msg;
+            }
+            actCluster.status = notification.eventType;
+            $scope.modifyStatusMessage($rootScope.error_msg.cluster_create_completed, actCluster.name);
+            $scope.modifyStatusClass("has-success");
+          }
+
+          function handleUptimeNotification(notification) {
+            var SECONDS_PER_MINUTE = 60;
+            var MILLIS_PER_SECOND = 1000;
+            var runningInMs = parseInt(notification.eventMessage);
+            var minutes = ((runningInMs/ (MILLIS_PER_SECOND * SECONDS_PER_MINUTE)) % SECONDS_PER_MINUTE);
+            var hours = (runningInMs / (MILLIS_PER_SECOND * SECONDS_PER_MINUTE * SECONDS_PER_MINUTE));
+            var actCluster = $filter('filter')($rootScope.clusters, { id: notification.stackId })[0];
+            actCluster.minutesUp = parseInt(minutes);
+            actCluster.hoursUp = parseInt(hours);
+          }
+        }
     }
 ]);
