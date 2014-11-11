@@ -13,6 +13,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
+import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
@@ -109,7 +110,10 @@ public class DefaultStackService implements StackService {
         stack.setOwner(user.getUserId());
         stack.setAccount(user.getAccount());
         stack.setHash(generateHash(stack));
-        if (provisionSetups.get(stack.getTemplate().cloudPlatform()).preProvisionCheck(stack)) {
+        Optional<String> result = provisionSetups.get(stack.getTemplate().cloudPlatform()).preProvisionCheck(stack);
+        if (result.isPresent()) {
+            throw new BadRequestException(result.orNull());
+        } else {
             try {
                 savedStack = stackRepository.save(stack);
                 LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_REQUEST_EVENT, stack.getId());
@@ -118,8 +122,6 @@ public class DefaultStackService implements StackService {
                 throw new DuplicateKeyValueException(stack.getName(), ex);
             }
             return savedStack;
-        } else {
-            throw new BadRequestException("Your Stack dependencies are not valid please prepare everything before you starting a stack.");
         }
     }
 

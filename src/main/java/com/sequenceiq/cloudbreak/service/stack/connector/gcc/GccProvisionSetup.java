@@ -19,6 +19,7 @@ import com.google.api.services.compute.model.ImageList;
 import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.model.Bucket;
 import com.google.api.services.storage.model.StorageObject;
+import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
@@ -97,8 +98,8 @@ public class GccProvisionSetup implements ProvisionSetup {
     }
 
     @Override
-    public boolean preProvisionCheck(Stack stack) {
-        return true;
+    public Optional<String> preProvisionCheck(Stack stack) {
+        return Optional.absent();
     }
 
     private boolean containsSpecificImage(ImageList imageList) {
