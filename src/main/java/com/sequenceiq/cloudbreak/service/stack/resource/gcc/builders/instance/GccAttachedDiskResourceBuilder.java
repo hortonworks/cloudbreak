@@ -10,8 +10,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.annotation.Order;
-import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
@@ -53,8 +54,9 @@ public class GccAttachedDiskResourceBuilder extends GccSimpleInstanceResourceBui
     private PollingService<GccRemoveReadyPollerObject> gccRemoveReadyPollerObjectPollingService;
     @Autowired
     private JsonHelper jsonHelper;
-    @javax.annotation.Resource
-    private ConcurrentTaskExecutor resourceBuilderExecutor;
+    @Autowired
+    @Qualifier("intermediateBuilderExecutor")
+    private AsyncTaskExecutor intermediateBuilderExecutor;
 
     @Override
     public List<Resource> create(final GccProvisionContextObject po, int index, List<Resource> resources) throws Exception {
@@ -66,7 +68,7 @@ public class GccAttachedDiskResourceBuilder extends GccSimpleInstanceResourceBui
         List<Future<Resource>> futures = new ArrayList<>();
         for (int i = 0; i < gccTemplate.getVolumeCount(); i++) {
             final int indexVolume = i;
-            Future<Resource> submit = resourceBuilderExecutor.submit(new Callable<Resource>() {
+            Future<Resource> submit = intermediateBuilderExecutor.submit(new Callable<Resource>() {
                 @Override
                 public Resource call() throws Exception {
                     String value = name + "-" + indexVolume;

@@ -9,7 +9,7 @@ import java.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
@@ -64,8 +64,8 @@ public class StackCreationFailureHandler implements Consumer<Event<StackOperatio
     @javax.annotation.Resource
     private Map<CloudPlatform, ResourceBuilderInit> resourceBuilderInits;
 
-    @javax.annotation.Resource
-    private ConcurrentTaskExecutor resourceBuilderExecutor;
+    @Autowired
+    private AsyncTaskExecutor resourceBuilderExecutor;
 
     @Autowired
     private CloudbreakEventService cloudbreakEventService;

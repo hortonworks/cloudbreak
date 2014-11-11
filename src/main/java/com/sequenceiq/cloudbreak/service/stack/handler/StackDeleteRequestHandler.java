@@ -9,7 +9,7 @@ import java.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
@@ -57,8 +57,8 @@ public class StackDeleteRequestHandler implements Consumer<Event<StackDeleteRequ
     @Autowired
     private Reactor reactor;
 
-    @javax.annotation.Resource
-    private ConcurrentTaskExecutor resourceBuilderExecutor;
+    @Autowired
+    private AsyncTaskExecutor resourceBuilderExecutor;
 
     @Override
     public void accept(Event<StackDeleteRequest> stackDeleteRequest) {

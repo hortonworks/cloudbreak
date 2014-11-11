@@ -9,7 +9,7 @@ import java.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
@@ -74,8 +74,8 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
     @javax.annotation.Resource
     private Map<CloudPlatform, List<ResourceBuilder>> networkResourceBuilders;
 
-    @javax.annotation.Resource
-    private ConcurrentTaskExecutor resourceBuilderExecutor;
+    @Autowired
+    private AsyncTaskExecutor resourceBuilderExecutor;
 
     @javax.annotation.Resource
     private Map<CloudPlatform, ResourceBuilderInit> resourceBuilderInits;

@@ -22,15 +22,15 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
-import reactor.core.Reactor;
-import reactor.event.Event;
-
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
+
+import reactor.core.Reactor;
+import reactor.event.Event;
 
 public class AmbariClusterInstallerTest {
 

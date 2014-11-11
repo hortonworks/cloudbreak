@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.controller;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.validation.Valid;
@@ -20,7 +22,9 @@ import com.sequenceiq.cloudbreak.controller.json.IdJson;
 import com.sequenceiq.cloudbreak.converter.BlueprintConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.blueprint.DefaultBlueprintLoaderService;
 
 @Controller
 public class BlueprintController {
@@ -29,7 +33,13 @@ public class BlueprintController {
     private BlueprintService blueprintService;
 
     @Autowired
+    private BlueprintRepository blueprintRepository;
+
+    @Autowired
     private BlueprintConverter blueprintConverter;
+
+    @Autowired
+    private DefaultBlueprintLoaderService defaultBlueprintLoaderService;
 
     @RequestMapping(value = "user/blueprints", method = RequestMethod.POST)
     @ResponseBody
@@ -47,6 +57,10 @@ public class BlueprintController {
     @ResponseBody
     public ResponseEntity<Set<BlueprintJson>> getPrivateBlueprints(@ModelAttribute("user") CbUser user) {
         Set<Blueprint> blueprints = blueprintService.retrievePrivateBlueprints(user);
+        if (blueprints.isEmpty()) {
+            Set<Blueprint> blueprintsList = defaultBlueprintLoaderService.loadBlueprints(user);
+            blueprints = new HashSet<>((ArrayList<Blueprint>) blueprintRepository.save(blueprintsList));
+        }
         return new ResponseEntity<>(blueprintConverter.convertAllEntityToJson(blueprints), HttpStatus.OK);
     }
 
@@ -54,6 +68,10 @@ public class BlueprintController {
     @ResponseBody
     public ResponseEntity<Set<BlueprintJson>> getAccountBlueprints(@ModelAttribute("user") CbUser user) {
         Set<Blueprint> blueprints = blueprintService.retrieveAccountBlueprints(user);
+        if (blueprints.isEmpty()) {
+            Set<Blueprint> blueprintsList = defaultBlueprintLoaderService.loadBlueprints(user);
+            blueprints = new HashSet<>((ArrayList<Blueprint>) blueprintRepository.save(blueprintsList));
+        }
         return new ResponseEntity<>(blueprintConverter.convertAllEntityToJson(blueprints), HttpStatus.OK);
     }
 

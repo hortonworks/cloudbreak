@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.blueprint;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -49,7 +48,7 @@ public class DefaultBlueprintLoaderService {
                 MDCBuilder.buildMdcContext(bp);
                 bp.setOwner(user.getUserId());
                 blueprints.add(bp);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 MDCBuilder.buildMdcContext();
                 LOGGER.error("Blueprint is not available for '{}' user.", e, user);
             }

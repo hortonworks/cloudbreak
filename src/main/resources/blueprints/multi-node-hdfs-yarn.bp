@@ -2,7 +2,7 @@
   "configurations": [
     {
       "global": {
-        "nagios_contact": ""
+        "nagios_contact": "admin@localhost"
       }
     }
   ],
