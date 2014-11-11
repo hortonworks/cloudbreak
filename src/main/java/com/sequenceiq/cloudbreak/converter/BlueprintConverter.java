@@ -103,9 +103,9 @@ public class BlueprintConverter extends AbstractConverter<BlueprintJson, Bluepri
         try {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode root = mapper.readTree(blueprintText);
-            blueprintPresentedInBlueprint(root);
-            blueprintNameIsPresentedInBlueprint(root);
-            hostGroupIsPresentedInBlueprint(root);
+            hasBlueprintInBlueprint(root);
+            hasBlueprintNameInBlueprint(root);
+            hasHostGroupInBlueprint(root);
             new AmbariClient().validateBlueprint(blueprintText);
         } catch (InvalidBlueprintException e) {
             throw new BadRequestException("Invalid Blueprint: At least one host group with 'slave_' prefix is required in the blueprint.", e);
@@ -114,19 +114,19 @@ public class BlueprintConverter extends AbstractConverter<BlueprintJson, Bluepri
         }
     }
 
-    private void hostGroupIsPresentedInBlueprint(JsonNode root) {
+    private void hasHostGroupInBlueprint(JsonNode root) {
         if (root.path("host_groups").isMissingNode() || !root.path("host_groups").isArray()) {
             throw new BadRequestException("Invalid blueprint: 'host_groups' node is missing from JSON or is not an array.");
         }
     }
 
-    private void blueprintNameIsPresentedInBlueprint(JsonNode root) {
+    private void hasBlueprintNameInBlueprint(JsonNode root) {
         if (root.path("Blueprints").path("blueprint_name").isMissingNode()) {
             throw new BadRequestException("Invalid blueprint: 'blueprint_name' under 'Blueprints' is missing from JSON.");
         }
     }
 
-    private void blueprintPresentedInBlueprint(JsonNode root) {
+    private void hasBlueprintInBlueprint(JsonNode root) {
         if (root.path("Blueprints").isMissingNode()) {
             throw new BadRequestException("Invalid blueprint: 'Blueprints' node is missing from JSON.");
         }
