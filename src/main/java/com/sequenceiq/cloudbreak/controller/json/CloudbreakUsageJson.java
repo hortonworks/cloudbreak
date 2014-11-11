@@ -8,6 +8,8 @@ public class CloudbreakUsageJson implements JsonEntity {
     private String blueprintName;
     private Long blueprintId;
 
+    private Long stackId;
+
     private String day;
 
     private String cloud;
@@ -88,5 +90,13 @@ public class CloudbreakUsageJson implements JsonEntity {
 
     public void setRunningHours(String runningHours) {
         this.runningHours = runningHours;
+    }
+
+    public Long getStackId() {
+        return stackId;
+    }
+
+    public void setStackId(Long stackId) {
+        this.stackId = stackId;
     }
 }
