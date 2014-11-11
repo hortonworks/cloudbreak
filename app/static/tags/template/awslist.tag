@@ -7,7 +7,7 @@
         </div>
         <!-- .col-sm-9 -->
     </div>
-    <div class="form-group">
+    <div class="form-group" ng-show="template.description">
         <label class="col-sm-3 control-label" for="awsclusterDesc">Description</label>
 
         <div class="col-sm-9">
