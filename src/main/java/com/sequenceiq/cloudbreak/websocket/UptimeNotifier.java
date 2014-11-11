@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
 
 @Component
 public class UptimeNotifier {
+    private static final String UPTIME_NOTIFICATION = "UPTIME_NOTIFICATION";
 
     @Autowired
     private WebsocketService websocketService;
@@ -37,12 +38,22 @@ public class UptimeNotifier {
             Stack stack = stackRepository.findStackForCluster(cluster.getId());
             if (stack != null) {
                 Long uptime = cluster.getCreationFinished() == null ? 0L : now - cluster.getCreationFinished();
-                Notification notification = new Notification();
-                notification.setUserName(stack.getOwner());
-                notification.setStackId(stack.getId());
-                notification.setEventMessage(String.valueOf(uptime));
+                Notification notification = createUptimeNotification(stack, uptime);
                 notificationSender.send(notification);
             }
         }
+    }
+
+    private Notification createUptimeNotification(Stack stack, Long uptime) {
+        Notification notification = new Notification();
+        notification.setOwner(stack.getOwner());
+        notification.setAccount(stack.getAccount());
+        notification.setStackId(stack.getId());
+        notification.setEventType(UPTIME_NOTIFICATION);
+        notification.setEventMessage(String.valueOf(uptime));
+        notification.setCloud(stack.getCredential().getCloudPlatform().toString());
+        notification.setBlueprintId(stack.getCluster().getBlueprint().getId());
+        notification.setBlueprintName(stack.getCluster().getBlueprint().getBlueprintName());
+        return notification;
     }
 }
