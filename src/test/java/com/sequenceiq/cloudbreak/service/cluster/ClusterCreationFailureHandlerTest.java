@@ -16,6 +16,7 @@ import org.mockito.MockitoAnnotations;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
+import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterCreationFailure;
 import com.sequenceiq.cloudbreak.service.cluster.handler.ClusterCreationFailureHandler;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
@@ -34,6 +35,9 @@ public class ClusterCreationFailureHandlerTest {
     @Mock
     private ClusterRepository clusterRepository;
 
+    @Mock
+    private RetryingStackUpdater stackUpdater;
+
     private ClusterCreationFailure clusterCreationFailure;
 
     private Event<ClusterCreationFailure> event;
@@ -44,7 +48,7 @@ public class ClusterCreationFailureHandlerTest {
     public void setUp() {
         underTest = new ClusterCreationFailureHandler();
         MockitoAnnotations.initMocks(this);
-        clusterCreationFailure = new ClusterCreationFailure(1L, "dummyMessage");
+        clusterCreationFailure = new ClusterCreationFailure(1L, 1L, "dummyMessage");
         event = new Event<>(clusterCreationFailure);
         cluster = new Cluster();
         cluster.setEmailNeeded(false);

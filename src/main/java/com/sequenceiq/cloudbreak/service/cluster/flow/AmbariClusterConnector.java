@@ -106,10 +106,10 @@ public class AmbariClusterConnector {
             clusterCreateSuccess(cluster, new Date().getTime(), stack.getAmbariIp());
         } catch (AmbariHostsUnavailableException | AmbariOperationFailedException | InvalidHostGroupHostAssociation e) {
             LOGGER.error(e.getMessage(), e);
-            clusterCreateFailed(cluster, e.getMessage());
+            clusterCreateFailed(stack, cluster, e.getMessage());
         } catch (Exception e) {
             LOGGER.error(UNHANDLED_EXCEPTION_MSG, e);
-            clusterCreateFailed(cluster, UNHANDLED_EXCEPTION_MSG);
+            clusterCreateFailed(stack, cluster, UNHANDLED_EXCEPTION_MSG);
         }
     }
 
@@ -381,10 +381,10 @@ public class AmbariClusterConnector {
         reactor.notify(ReactorConfig.CLUSTER_CREATE_SUCCESS_EVENT, Event.wrap(new ClusterCreationSuccess(cluster.getId(), creationFinished, ambariIp)));
     }
 
-    private void clusterCreateFailed(Cluster cluster, String message) {
+    private void clusterCreateFailed(Stack stack, Cluster cluster, String message) {
         MDCBuilder.buildMdcContext(cluster);
         LOGGER.info("Publishing {} event", ReactorConfig.CLUSTER_CREATE_FAILED_EVENT);
-        reactor.notify(ReactorConfig.CLUSTER_CREATE_FAILED_EVENT, Event.wrap(new ClusterCreationFailure(cluster.getId(), message)));
+        reactor.notify(ReactorConfig.CLUSTER_CREATE_FAILED_EVENT, Event.wrap(new ClusterCreationFailure(stack.getId(), cluster.getId(), message)));
     }
 
     private void updateHostSuccessful(Cluster cluster, Set<String> hostNames, boolean decommision) {
