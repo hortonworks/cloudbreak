@@ -2,13 +2,13 @@
   "configurations": [
     {
       "global": {
-        "nagios_contact": ""
+        "nagios_contact": "admin@localhost"
       }
     }
   ],
   "host_groups": [
     {
-      "name": "master_1",
+      "name": "master",
       "components": [
         {
           "name": "ZOOKEEPER_SERVER"

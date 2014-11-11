@@ -11,7 +11,7 @@ import java.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
@@ -66,8 +66,8 @@ public class ProvisionContext {
     @javax.annotation.Resource
     private Map<CloudPlatform, List<ResourceBuilder>> networkResourceBuilders;
 
-    @javax.annotation.Resource
-    private ConcurrentTaskExecutor resourceBuilderExecutor;
+    @Autowired
+    private AsyncTaskExecutor resourceBuilderExecutor;
 
     @javax.annotation.Resource
     private Map<CloudPlatform, ResourceBuilderInit> resourceBuilderInits;
@@ -98,10 +98,12 @@ public class ProvisionContext {
                         Future<List<Resource>> submit = resourceBuilderExecutor.submit(new Callable<List<Resource>>() {
                             @Override
                             public List<Resource> call() throws Exception {
+                                LOGGER.info("Node {}. creation starting", index);
                                 List<Resource> resources = new ArrayList<>();
                                 for (final ResourceBuilder resourceBuilder : instanceResourceBuilders.get(cloudPlatform)) {
                                     List<Resource> resourceList = resourceBuilder.create(pCO, index, resources);
                                     resources.addAll(resourceList);
+                                    LOGGER.info("Node {}. creation in progress resource {} creation finished.", index, resourceBuilder.resourceBuilderType());
                                 }
                                 return resources;
                             }

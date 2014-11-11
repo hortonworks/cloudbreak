@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.controller;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.validation.Valid;
@@ -56,9 +58,8 @@ public class BlueprintController {
     public ResponseEntity<Set<BlueprintJson>> getPrivateBlueprints(@ModelAttribute("user") CbUser user) {
         Set<Blueprint> blueprints = blueprintService.retrievePrivateBlueprints(user);
         if (blueprints.isEmpty()) {
-            Set<Blueprint> defaultBps = defaultBlueprintLoaderService.loadBlueprints(user);
-            blueprintRepository.save(defaultBps);
-            blueprints = blueprintService.retrievePrivateBlueprints(user);
+            Set<Blueprint> blueprintsList = defaultBlueprintLoaderService.loadBlueprints(user);
+            blueprints = new HashSet<>((ArrayList<Blueprint>) blueprintRepository.save(blueprintsList));
         }
         return new ResponseEntity<>(blueprintConverter.convertAllEntityToJson(blueprints), HttpStatus.OK);
     }
@@ -68,8 +69,8 @@ public class BlueprintController {
     public ResponseEntity<Set<BlueprintJson>> getAccountBlueprints(@ModelAttribute("user") CbUser user) {
         Set<Blueprint> blueprints = blueprintService.retrieveAccountBlueprints(user);
         if (blueprints.isEmpty()) {
-            defaultBlueprintLoaderService.loadBlueprints(user);
-            blueprints = blueprintService.retrieveAccountBlueprints(user);
+            Set<Blueprint> blueprintsList = defaultBlueprintLoaderService.loadBlueprints(user);
+            blueprints = new HashSet<>((ArrayList<Blueprint>) blueprintRepository.save(blueprintsList));
         }
         return new ResponseEntity<>(blueprintConverter.convertAllEntityToJson(blueprints), HttpStatus.OK);
     }
