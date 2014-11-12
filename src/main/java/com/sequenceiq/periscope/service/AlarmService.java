@@ -63,7 +63,6 @@ public class AlarmService {
         List<MetricAlarm> alarms = cluster.getMetricAlarms();
         alarms.remove(metricAlarm);
         metricAlarmRepository.delete(metricAlarm);
-        clusterRepository.save(cluster);
         cluster.setMetricAlarms(alarms);
         return alarms;
     }
@@ -77,7 +76,6 @@ public class AlarmService {
         List<TimeAlarm> alarms = cluster.getTimeAlarms();
         alarms.remove(alarm);
         timeAlarmRepository.delete(alarm);
-        clusterRepository.save(cluster);
         cluster.setTimeAlarms(alarms);
         return alarms;
     }
@@ -87,10 +85,13 @@ public class AlarmService {
         Cluster cluster = clusterService.get(user, clusterId);
         List<MetricAlarm> alarmList = cluster.getMetricAlarms();
         if (override) {
+            metricAlarmRepository.delete(alarmList);
             alarmList.clear();
         }
-        metricAlarmRepository.save(alarms);
-        alarmList.addAll(alarms);
+        for (MetricAlarm alarm : alarms) {
+            metricAlarmRepository.save(alarm);
+            alarmList.add(alarm);
+        }
         clusterRepository.save(cluster);
         cluster.setMetricAlarms(alarmList);
         return alarmList;
@@ -101,10 +102,13 @@ public class AlarmService {
         Cluster cluster = clusterService.get(user, clusterId);
         List<TimeAlarm> alarmList = cluster.getTimeAlarms();
         if (override) {
+            timeAlarmRepository.delete(alarmList);
             alarmList.clear();
         }
-        timeAlarmRepository.save(alarms);
-        alarmList.addAll(alarms);
+        for (TimeAlarm alarm : alarms) {
+            timeAlarmRepository.save(alarm);
+            alarmList.add(alarm);
+        }
         clusterRepository.save(cluster);
         cluster.setTimeAlarms(alarmList);
         return alarmList;
