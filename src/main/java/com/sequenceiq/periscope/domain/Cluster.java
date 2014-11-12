@@ -29,6 +29,7 @@ import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.ClusterMetricsIn
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.periscope.log.Logger;
 import com.sequenceiq.periscope.log.PeriscopeLoggerFactory;
+import com.sequenceiq.periscope.model.HostResolution;
 import com.sequenceiq.periscope.model.Priority;
 import com.sequenceiq.periscope.model.SchedulerApplication;
 import com.sequenceiq.periscope.registry.ClusterState;
@@ -73,20 +74,23 @@ public class Cluster {
     private YarnClient yarnClient;
     @Transient
     private ClusterMetricsInfo metrics;
+    @Transient
+    private HostResolution resolution;
 
     public Cluster() {
         this.applications = new ConcurrentHashMap<>();
     }
 
-    public Cluster(PeriscopeUser user, Ambari ambari) throws ConnectionException {
+    public Cluster(PeriscopeUser user, Ambari ambari, HostResolution resolution) throws ConnectionException {
         this.user = user;
         this.ambari = ambari;
         this.applications = new ConcurrentHashMap<>();
+        this.resolution = resolution;
     }
 
     public void start() throws ConnectionException {
         try {
-            configuration = AmbariConfigurationService.getConfiguration(id, newAmbariClient());
+            configuration = AmbariConfigurationService.getConfiguration(id, newAmbariClient(), resolution);
             if (yarnClient != null) {
                 yarnClient.stop();
             }
@@ -111,6 +115,14 @@ public class Cluster {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public HostResolution getResolution() {
+        return resolution;
+    }
+
+    public void setResolution(HostResolution resolution) {
+        this.resolution = resolution;
     }
 
     public boolean isAppMovementAllowed() {

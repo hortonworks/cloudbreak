@@ -10,12 +10,14 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.periscope.domain.Ambari;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.PeriscopeUser;
+import com.sequenceiq.periscope.model.HostResolution;
 import com.sequenceiq.periscope.model.Queue;
 import com.sequenceiq.periscope.model.QueueSetup;
 import com.sequenceiq.periscope.registry.ClusterRegistry;
@@ -41,12 +43,15 @@ public class ClusterService {
     @Autowired
     private UserRepository userRepository;
 
+    @Value("${periscope.hostname.resolution:public}")
+    private String hostNameResolution;
+
     public Cluster add(PeriscopeUser user, Ambari ambari) throws ConnectionException {
         PeriscopeUser periscopeUser = userRepository.findOne(user.getId());
         if (periscopeUser == null) {
             periscopeUser = userRepository.save(user);
         }
-        Cluster cluster = new Cluster(periscopeUser, ambari);
+        Cluster cluster = new Cluster(periscopeUser, ambari, HostResolution.valueOf(hostNameResolution.toUpperCase()));
         cluster.start();
         clusterRepository.save(cluster);
         return clusterRegistry.add(user, cluster);

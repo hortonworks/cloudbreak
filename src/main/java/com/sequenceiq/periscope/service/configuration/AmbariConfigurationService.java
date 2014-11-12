@@ -11,6 +11,7 @@ import org.apache.hadoop.conf.Configuration;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.periscope.log.Logger;
 import com.sequenceiq.periscope.log.PeriscopeLoggerFactory;
+import com.sequenceiq.periscope.model.HostResolution;
 
 public class AmbariConfigurationService {
 
@@ -28,14 +29,18 @@ public class AmbariConfigurationService {
     private AmbariConfigurationService() {
     }
 
-    public static Configuration getConfiguration(long id, AmbariClient ambariClient) throws ConnectException {
+    public static Configuration getConfiguration(long id, AmbariClient ambariClient, HostResolution resolution) throws ConnectException {
         Configuration configuration = new Configuration(false);
         Set<Map.Entry<String, Map<String, String>>> serviceConfigs = ambariClient.getServiceConfigMap().entrySet();
         for (Map.Entry<String, Map<String, String>> serviceEntry : serviceConfigs) {
             LOGGER.debug(id, "Processing service: {}", serviceEntry.getKey());
             for (Map.Entry<String, String> configEntry : serviceEntry.getValue().entrySet()) {
                 if (CONFIG_LIST.contains(configEntry.getKey())) {
-                    configuration.set(configEntry.getKey(), replaceHostName(ambariClient, configEntry));
+                    if (resolution == HostResolution.PUBLIC) {
+                        configuration.set(configEntry.getKey(), replaceHostName(ambariClient, configEntry));
+                    } else {
+                        configuration.set(configEntry.getKey(), configEntry.getValue());
+                    }
                     LOGGER.debug(id, "Adding entry: {}", configEntry);
                 }
             }

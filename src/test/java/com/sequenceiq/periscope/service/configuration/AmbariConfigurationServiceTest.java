@@ -15,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.periscope.model.HostResolution;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AmbariConfigurationServiceTest {
@@ -30,7 +31,7 @@ public class AmbariConfigurationServiceTest {
         when(ambariClient.getServiceConfigMap()).thenReturn(serviceConfig);
         when(ambariClient.resolveInternalHostName("ec2.internal.address")).thenReturn("ec2.public.address");
 
-        Configuration configuration = AmbariConfigurationService.getConfiguration(1, ambariClient);
+        Configuration configuration = AmbariConfigurationService.getConfiguration(1, ambariClient, HostResolution.PUBLIC);
 
         assertEquals(configuration.get(rm), "ec2.public.address:8050");
     }
@@ -44,7 +45,7 @@ public class AmbariConfigurationServiceTest {
         when(ambariClient.resolveInternalHostName("azure-address.internal.cloudapp.net"))
                 .thenReturn("azure-address.internal.cloudapp.net");
 
-        Configuration configuration = AmbariConfigurationService.getConfiguration(1, ambariClient);
+        Configuration configuration = AmbariConfigurationService.getConfiguration(1, ambariClient, HostResolution.PUBLIC);
 
         assertEquals(configuration.get(rm), "azure-address.cloudapp.net:8050");
     }
