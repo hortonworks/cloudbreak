@@ -66,6 +66,11 @@
                 <option value="M3Large">M3Large</option>
                 <option value="M3Xlarge">M3Xlarge</option>
                 <option value="M32xlarge">M32xlarge</option>
+                <option value="C3large">C3large</option>
+                <option value="C3xlarge">C3xlarge</option>
+                <option value="C32xlarge">C32xlarge</option>
+                <option value="C34xlarge">C34xlarge</option>
+                <option value="C38xlarge">C38xlarge</option>
             </select>
         </div>
         <!-- .col-sm-9 -->
