@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.periscope.domain.MetricAlarm;
 import com.sequenceiq.periscope.domain.Notification;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
-import com.sequenceiq.periscope.repository.ScalingPolicyRepository;
 import com.sequenceiq.periscope.rest.json.MetricAlarmJson;
 import com.sequenceiq.periscope.rest.json.NotificationJson;
 
@@ -18,8 +17,6 @@ public class MetricAlarmConverter extends AbstractConverter<MetricAlarmJson, Met
 
     @Autowired
     private NotificationConverter notificationConverter;
-    @Autowired
-    private ScalingPolicyRepository policyRepository;
 
     @Override
     public MetricAlarm convert(MetricAlarmJson source) {
@@ -30,14 +27,6 @@ public class MetricAlarmConverter extends AbstractConverter<MetricAlarmJson, Met
         metricAlarm.setMetric(source.getMetric());
         metricAlarm.setPeriod(source.getPeriod());
         metricAlarm.setThreshold(source.getThreshold());
-        Long policyId = source.getScalingPolicyId();
-        if (policyId != null) {
-            ScalingPolicy policy = policyRepository.findOne(policyId);
-            if (policy != null) {
-                metricAlarm.setScalingPolicy(policy);
-                policy.setAlarm(metricAlarm);
-            }
-        }
         List<NotificationJson> notifications = source.getNotifications();
         if (notifications != null && !notifications.isEmpty()) {
             metricAlarm.setNotifications(notificationConverter.convertAllFromJson(notifications));

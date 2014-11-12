@@ -90,11 +90,11 @@ public abstract class BaseAlarm {
 
     @Override
     public boolean equals(Object o) {
-        return EqualsBuilder.reflectionEquals(this, o, "scalingPolicy");
+        return EqualsBuilder.reflectionEquals(this, o, "notificationSent", "notifications", "scalingPolicy");
     }
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this, "scalingPolicy");
+        return HashCodeBuilder.reflectionHashCode(this, "notificationSent", "notifications", "scalingPolicy");
     }
 }

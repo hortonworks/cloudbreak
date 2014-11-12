@@ -8,7 +8,7 @@ HOST=localhost:8080
 curl -X POST -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"host":"127.0.0.1", "port":"8080", "user":"admin", "pass":"admin"}' $HOST/clusters | jq .
 curl -X GET -H "Authorization: Bearer $TOKEN" $HOST/clusters/50 | jq .
 curl -X GET -H "Authorization: Bearer $TOKEN" $HOST/clusters | jq .
-curl -X DELETE "Authorization: Bearer $TOKEN" $HOST/clusters/50 | jq .
+curl -X DELETE -H "Authorization: Bearer $TOKEN" $HOST/clusters/50 | jq .
 
 # set cluster state
 curl -X POST -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"state":"SUSPENDED"}' $HOST/clusters/50/state | jq .

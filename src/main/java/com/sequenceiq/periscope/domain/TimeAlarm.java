@@ -3,6 +3,9 @@ package com.sequenceiq.periscope.domain;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 @Entity
 @DiscriminatorValue("TIME")
 public class TimeAlarm extends BaseAlarm {
@@ -28,5 +31,15 @@ public class TimeAlarm extends BaseAlarm {
 
     public void setCron(String cron) {
         this.cron = cron;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return EqualsBuilder.reflectionEquals(this, o, "notificationSent", "notifications", "scalingPolicy");
+    }
+
+    @Override
+    public int hashCode() {
+        return HashCodeBuilder.reflectionHashCode(this, "notificationSent", "notifications", "scalingPolicy");
     }
 }

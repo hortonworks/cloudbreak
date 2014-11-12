@@ -55,60 +55,58 @@ public class AlarmService {
     }
 
     public List<MetricAlarm> deleteMetricAlarm(PeriscopeUser user, long clusterId, long alarmId) throws ClusterNotFoundException {
-        Cluster runningCluster = clusterService.get(user, clusterId);
-        Cluster savedCluster = clusterRepository.findOne(clusterId);
+        Cluster cluster = clusterService.get(user, clusterId);
         MetricAlarm metricAlarm = metricAlarmRepository.findOne(alarmId);
         if (metricAlarm == null) {
             throw new AlarmNotFoundException(alarmId);
         }
-        List<MetricAlarm> metricAlarms = savedCluster.getMetricAlarms();
-        metricAlarms.remove(metricAlarm);
-        clusterRepository.save(savedCluster);
-        runningCluster.setMetricAlarms(metricAlarms);
-        return metricAlarms;
+        List<MetricAlarm> alarms = cluster.getMetricAlarms();
+        alarms.remove(metricAlarm);
+        metricAlarmRepository.delete(metricAlarm);
+        clusterRepository.save(cluster);
+        cluster.setMetricAlarms(alarms);
+        return alarms;
     }
 
     public List<TimeAlarm> deleteTimeAlarm(PeriscopeUser user, long clusterId, long alarmId) throws ClusterNotFoundException {
-        Cluster runningCluster = clusterService.get(user, clusterId);
-        Cluster savedCluster = clusterRepository.findOne(clusterId);
+        Cluster cluster = clusterService.get(user, clusterId);
         TimeAlarm alarm = timeAlarmRepository.findOne(alarmId);
         if (alarm == null) {
             throw new AlarmNotFoundException(alarmId);
         }
-        List<TimeAlarm> alarms = savedCluster.getTimeAlarms();
+        List<TimeAlarm> alarms = cluster.getTimeAlarms();
         alarms.remove(alarm);
-        clusterRepository.save(savedCluster);
-        runningCluster.setTimeAlarms(alarms);
+        timeAlarmRepository.delete(alarm);
+        clusterRepository.save(cluster);
+        cluster.setTimeAlarms(alarms);
         return alarms;
     }
 
-    private List<MetricAlarm> addMetricAlarms(PeriscopeUser user, long clusterId, List<MetricAlarm> metricAlarms, boolean override)
+    private List<MetricAlarm> addMetricAlarms(PeriscopeUser user, long clusterId, List<MetricAlarm> alarms, boolean override)
             throws ClusterNotFoundException {
-        Cluster runningCluster = clusterService.get(user, clusterId);
-        Cluster savedCluster = clusterRepository.findOne(clusterId);
-        List<MetricAlarm> metricAlarmList = savedCluster.getMetricAlarms();
+        Cluster cluster = clusterService.get(user, clusterId);
+        List<MetricAlarm> alarmList = cluster.getMetricAlarms();
         if (override) {
-            metricAlarmList.clear();
+            alarmList.clear();
         }
-        metricAlarmList.addAll(metricAlarms);
-        metricAlarmRepository.save(metricAlarmList);
-        clusterRepository.save(savedCluster);
-        runningCluster.setMetricAlarms(metricAlarmList);
-        return metricAlarmList;
+        metricAlarmRepository.save(alarms);
+        alarmList.addAll(alarms);
+        clusterRepository.save(cluster);
+        cluster.setMetricAlarms(alarmList);
+        return alarmList;
     }
 
     private List<TimeAlarm> addTimeAlarms(PeriscopeUser user, long clusterId, List<TimeAlarm> alarms, boolean override)
             throws ClusterNotFoundException {
-        Cluster runningCluster = clusterService.get(user, clusterId);
-        Cluster savedCluster = clusterRepository.findOne(clusterId);
-        List<TimeAlarm> alarmList = savedCluster.getTimeAlarms();
+        Cluster cluster = clusterService.get(user, clusterId);
+        List<TimeAlarm> alarmList = cluster.getTimeAlarms();
         if (override) {
             alarmList.clear();
         }
+        timeAlarmRepository.save(alarms);
         alarmList.addAll(alarms);
-        timeAlarmRepository.save(alarmList);
-        clusterRepository.save(savedCluster);
-        runningCluster.setTimeAlarms(alarmList);
+        clusterRepository.save(cluster);
+        cluster.setTimeAlarms(alarmList);
         return alarmList;
     }
 

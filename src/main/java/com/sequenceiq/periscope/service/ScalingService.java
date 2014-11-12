@@ -12,12 +12,17 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.periscope.domain.BaseAlarm;
 import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.domain.MetricAlarm;
 import com.sequenceiq.periscope.domain.PeriscopeUser;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
+import com.sequenceiq.periscope.domain.TimeAlarm;
 import com.sequenceiq.periscope.log.Logger;
 import com.sequenceiq.periscope.log.PeriscopeLoggerFactory;
 import com.sequenceiq.periscope.model.ScalingPolicies;
 import com.sequenceiq.periscope.repository.ClusterRepository;
+import com.sequenceiq.periscope.repository.MetricAlarmRepository;
+import com.sequenceiq.periscope.repository.ScalingPolicyRepository;
+import com.sequenceiq.periscope.repository.TimeAlarmRepository;
 import com.sequenceiq.periscope.utils.ClusterUtils;
 
 @Service
@@ -33,6 +38,12 @@ public class ScalingService {
     private ExecutorService executorService;
     @Autowired
     private ApplicationContext applicationContext;
+    @Autowired
+    private TimeAlarmRepository timeAlarmRepository;
+    @Autowired
+    private MetricAlarmRepository metricAlarmRepository;
+    @Autowired
+    private ScalingPolicyRepository policyRepository;
 
     public void scale(Cluster cluster, ScalingPolicy policy) {
         long clusterId = cluster.getId();
@@ -62,11 +73,27 @@ public class ScalingService {
         cluster.setMinSize(scalingPolicies.getMinSize());
         cluster.setMaxSize(scalingPolicies.getMaxSize());
         List<ScalingPolicy> policies = scalingPolicies.getScalingPolicies();
-        Cluster savedCluster = clusterRepository.findOne(clusterId);
-        List<BaseAlarm> alarms = savedCluster.getAlarms();
+        List<BaseAlarm> alarms = cluster.getAlarms();
+        // remove all policies
         for (BaseAlarm alarm : alarms) {
-            if (!policies.contains(alarm.getScalingPolicy())) {
-                alarm.setScalingPolicy(null);
+            ScalingPolicy policy = alarm.getScalingPolicy();
+            alarm.setScalingPolicy(null);
+            saveAlarm(alarm);
+            if (policy != null) {
+                policy.setAlarm(null);
+                policyRepository.delete(policy);
+            }
+        }
+        // add new policies
+        for (ScalingPolicy policy : policies) {
+            long alarmId = policy.getAlarm().getId();
+            for (BaseAlarm alarm : alarms) {
+                if (alarm.getId() == alarmId) {
+                    alarm.setScalingPolicy(policy);
+                    policyRepository.save(policy);
+                    saveAlarm(alarm);
+                    break;
+                }
             }
         }
         cluster.setAlarms(alarms);
@@ -74,31 +101,41 @@ public class ScalingService {
         return getScalingPolicies(cluster);
     }
 
-    public ScalingPolicies addScalingPolicy(PeriscopeUser user, long clusterId)
+    public ScalingPolicies addScalingPolicy(PeriscopeUser user, long clusterId, ScalingPolicy policy)
             throws ClusterNotFoundException, NoScalingGroupException {
         Cluster cluster = clusterService.get(user, clusterId);
         if (cluster.getCoolDown() == -1 || cluster.getMinSize() == -1 || cluster.getMaxSize() == -1) {
             throw new NoScalingGroupException(clusterId,
                     "Scaling parameters are not provided (cooldown, minSize, maxSize). Use POST first.");
         }
-        cluster.setAlarms(clusterRepository.findOne(clusterId).getAlarms());
+        long alarmId = policy.getAlarm().getId();
+        List<BaseAlarm> alarms = cluster.getAlarms();
+        for (BaseAlarm baseAlarm : alarms) {
+            if (baseAlarm.getId() == alarmId) {
+                baseAlarm.setScalingPolicy(policy);
+                policyRepository.save(policy);
+                saveAlarm(baseAlarm);
+                break;
+            }
+        }
+        cluster.setAlarms(alarms);
         clusterRepository.save(cluster);
         return getScalingPolicies(cluster);
     }
 
     public ScalingPolicies deletePolicy(PeriscopeUser user, long clusterId, long policyId) throws ClusterNotFoundException {
-        Cluster runningCluster = clusterService.get(user, clusterId);
-        Cluster savedCluster = clusterRepository.findOne(clusterId);
-        List<BaseAlarm> alarms = savedCluster.getAlarms();
+        Cluster cluster = clusterService.get(user, clusterId);
+        List<BaseAlarm> alarms = cluster.getAlarms();
         for (BaseAlarm alarm : alarms) {
             ScalingPolicy scalingPolicy = alarm.getScalingPolicy();
             if (scalingPolicy != null && scalingPolicy.getId() == policyId) {
                 alarm.setScalingPolicy(null);
+                saveAlarm(alarm);
                 break;
             }
         }
-        clusterRepository.save(savedCluster);
-        runningCluster.setAlarms(alarms);
+        clusterRepository.save(cluster);
+        cluster.setAlarms(alarms);
         return getScalingPolicies(user, clusterId);
     }
 
@@ -120,6 +157,14 @@ public class ScalingService {
         }
         group.setScalingPolicies(policies);
         return group;
+    }
+
+    private void saveAlarm(BaseAlarm alarm) {
+        if (alarm instanceof TimeAlarm) {
+            timeAlarmRepository.save((TimeAlarm) alarm);
+        } else {
+            metricAlarmRepository.save((MetricAlarm) alarm);
+        }
     }
 
     private boolean canScale(Cluster cluster) {

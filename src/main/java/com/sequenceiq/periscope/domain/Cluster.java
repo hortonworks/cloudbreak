@@ -155,12 +155,12 @@ public class Cluster {
         for (BaseAlarm alarm : alarms) {
             if (alarm instanceof TimeAlarm) {
                 timeAlarms.add((TimeAlarm) alarm);
+                setTimeAlarms(timeAlarms);
             } else {
                 metricAlarms.add((MetricAlarm) alarm);
+                setMetricAlarms(metricAlarms);
             }
         }
-        setTimeAlarms(timeAlarms);
-        setMetricAlarms(metricAlarms);
     }
 
     public List<MetricAlarm> getMetricAlarms() {

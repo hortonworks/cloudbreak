@@ -41,8 +41,8 @@ public class PolicyController {
     @RequestMapping(method = RequestMethod.PUT)
     public ResponseEntity<ScalingPoliciesJson> addScaling(@ModelAttribute("user") PeriscopeUser user, @PathVariable long clusterId,
             @RequestBody ScalingPolicyJson scalingPolicy) throws ClusterNotFoundException, NoScalingGroupException {
-        policyConverter.convert(scalingPolicy);
-        return createScalingPoliciesJsonResponse(scalingService.addScalingPolicy(user, clusterId), HttpStatus.CREATED);
+        return createScalingPoliciesJsonResponse(scalingService.addScalingPolicy(user, clusterId,
+                policyConverter.convert(scalingPolicy)), HttpStatus.CREATED);
     }
 
     @RequestMapping(method = RequestMethod.GET)

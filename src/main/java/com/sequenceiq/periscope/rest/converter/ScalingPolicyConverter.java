@@ -31,7 +31,6 @@ public class ScalingPolicyConverter extends AbstractConverter<ScalingPolicyJson,
             throw new AlarmNotFoundException(alarmId);
         }
         policy.setAlarm(alarm);
-        alarm.setScalingPolicy(policy);
         return policy;
     }
 

@@ -66,11 +66,11 @@ public class MetricAlarm extends BaseAlarm {
 
     @Override
     public boolean equals(Object o) {
-        return EqualsBuilder.reflectionEquals(this, o, "alarmHitsSince");
+        return EqualsBuilder.reflectionEquals(this, o, "notificationSent", "notifications", "scalingPolicy", "alarmHitsSince");
     }
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this, "alarmHitsSince");
+        return HashCodeBuilder.reflectionHashCode(this, "notificationSent", "notifications", "scalingPolicy", "alarmHitsSince");
     }
 }
