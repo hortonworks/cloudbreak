@@ -56,7 +56,7 @@
       "Description" : "EC2 instance type of nodes to start",
       "Type" : "String",
       "Default" : "t2.small",
-      "AllowedValues" : [ "t2.micro","t2.small","t2.medium","m3.medium","m3.large","m3.xlarge","m3.2xlarge"],
+      "AllowedValues" : [ "t2.micro","t2.small","t2.medium","m3.medium","m3.large","m3.xlarge","m3.2xlarge","c3.large","c3.xlarge","c3.2xlarge","c3.4xlarge","c3.8xlarge"],
       "ConstraintDescription" : "must be a valid EC2 instance type."
     },
     
