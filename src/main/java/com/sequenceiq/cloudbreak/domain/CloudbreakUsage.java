@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.domain;
 import java.util.Date;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
@@ -30,6 +32,9 @@ public class CloudbreakUsage implements ProvisionEntity {
     private String runningHours;
 
     private Long stackId;
+
+    @Enumerated(EnumType.STRING)
+    private Status stackStatus;
 
     public Long getId() {
         return id;
@@ -119,6 +124,14 @@ public class CloudbreakUsage implements ProvisionEntity {
         this.stackId = stackId;
     }
 
+    public Status getStackStatus() {
+        return stackStatus;
+    }
+
+    public void setStackStatus(Status stackStatus) {
+        this.stackStatus = stackStatus;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("CloudbreakUsage{");
@@ -136,4 +149,5 @@ public class CloudbreakUsage implements ProvisionEntity {
         sb.append('}');
         return sb.toString();
     }
+
 }

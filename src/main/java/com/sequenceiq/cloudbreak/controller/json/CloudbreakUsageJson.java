@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
+import com.sequenceiq.cloudbreak.domain.Status;
+
 public class CloudbreakUsageJson implements JsonEntity {
     private String owner;
 
@@ -19,6 +21,8 @@ public class CloudbreakUsageJson implements JsonEntity {
     private String machineType;
 
     private String runningHours;
+
+    private Status stackStatus;
 
     public String getOwner() {
         return owner;
@@ -98,5 +102,13 @@ public class CloudbreakUsageJson implements JsonEntity {
 
     public void setStackId(Long stackId) {
         this.stackId = stackId;
+    }
+
+    public Status getStackStatus() {
+        return stackStatus;
+    }
+
+    public void setStackStatus(Status stackStatus) {
+        this.stackStatus = stackStatus;
     }
 }
