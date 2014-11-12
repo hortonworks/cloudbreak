@@ -43,7 +43,7 @@ public class ClusterService {
     @Autowired
     private UserRepository userRepository;
 
-    @Value("${periscope.hostname.resolution:public}")
+    @Value("${periscope.hostname.resolution:private}")
     private String hostNameResolution;
 
     public Cluster add(PeriscopeUser user, Ambari ambari) throws ConnectionException {

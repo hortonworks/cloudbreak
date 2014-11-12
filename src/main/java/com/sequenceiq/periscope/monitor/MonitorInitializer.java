@@ -24,7 +24,7 @@ public class MonitorInitializer implements InitializingBean {
     @Autowired
     private ClusterRegistry clusterRegistry;
 
-    @Value("${periscope.hostname.resolution:public}")
+    @Value("${periscope.hostname.resolution:private}")
     private String hostNameResolution;
 
     @Override
