@@ -20,6 +20,7 @@ public class CloudbreakUsageConverter extends AbstractConverter<CloudbreakUsageJ
         json.setMachineType(entity.getMachineType());
         json.setDay(entity.getDay().toString());
         json.setStackId(entity.getStackId());
+        json.setStackStatus(entity.getStackStatus());
         return json;
     }
 
@@ -35,6 +36,7 @@ public class CloudbreakUsageConverter extends AbstractConverter<CloudbreakUsageJ
         entity.setRunningHours(json.getRunningHours());
         entity.setMachineType(json.getMachineType());
         entity.setStackId(json.getStackId());
+        entity.setStackStatus(json.getStackStatus());
         return entity;
 
     }

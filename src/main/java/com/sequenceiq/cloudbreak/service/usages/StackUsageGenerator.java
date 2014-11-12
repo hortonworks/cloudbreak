@@ -188,6 +188,7 @@ public class StackUsageGenerator {
         usage.setMachineType(event.getVmType());
         usage.setRunningHours(String.valueOf(runningHours));
         usage.setDay(day);
+        usage.setStackStatus(event.getStackStatus());
         return usage;
     }
 
