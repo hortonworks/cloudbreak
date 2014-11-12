@@ -25,6 +25,8 @@ import com.sequenceiq.periscope.registry.ClusterState;
 import com.sequenceiq.periscope.registry.ConnectionException;
 import com.sequenceiq.periscope.registry.QueueSetupException;
 import com.sequenceiq.periscope.repository.ClusterRepository;
+import com.sequenceiq.periscope.repository.MetricAlarmRepository;
+import com.sequenceiq.periscope.repository.TimeAlarmRepository;
 import com.sequenceiq.periscope.repository.UserRepository;
 import com.sequenceiq.periscope.utils.ClusterUtils;
 
@@ -42,6 +44,10 @@ public class ClusterService {
     private ClusterRepository clusterRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private MetricAlarmRepository metricAlarmRepository;
+    @Autowired
+    private TimeAlarmRepository timeAlarmRepository;
 
     @Value("${periscope.hostname.resolution:private}")
     private String hostNameResolution;
@@ -82,7 +88,8 @@ public class ClusterService {
         if (cluster == null) {
             throw new ClusterNotFoundException(clusterId);
         }
-        cluster.deleteAlarms();
+        metricAlarmRepository.delete(cluster.getMetricAlarms());
+        timeAlarmRepository.delete(cluster.getTimeAlarms());
         clusterRepository.delete(cluster);
         return cluster;
     }
