@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterCreationFailure;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterInstallerMailSenderService;
+import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
@@ -37,6 +38,9 @@ public class ClusterCreationFailureHandler implements Consumer<Event<ClusterCrea
     @Autowired
     private AmbariClusterInstallerMailSenderService ambariClusterInstallerMailSenderService;
 
+    @Autowired
+    private CloudbreakEventService eventService;
+
     @Override
     public void accept(Event<ClusterCreationFailure> event) {
         ClusterCreationFailure clusterCreationFailure = event.getData();
@@ -51,6 +55,7 @@ public class ClusterCreationFailureHandler implements Consumer<Event<ClusterCrea
         clusterRepository.save(cluster);
         Long stackId = clusterCreationFailure.getStackId();
         stackUpdater.updateStackStatus(stackId, Status.AVAILABLE, "Stack update finished - Cluster create failed.");
+        eventService.fireCloudbreakEvent(stackId, "CLUSTER_CREATION_FAILED", detailedMessage);
         if (cluster.getEmailNeeded()) {
             ambariClusterInstallerMailSenderService.sendFailEmail(cluster.getOwner());
         }

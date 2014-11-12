@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.cluster;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
@@ -19,6 +20,7 @@ import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterCreationFailure;
 import com.sequenceiq.cloudbreak.service.cluster.handler.ClusterCreationFailureHandler;
+import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
@@ -37,6 +39,9 @@ public class ClusterCreationFailureHandlerTest {
 
     @Mock
     private RetryingStackUpdater stackUpdater;
+
+    @Mock
+    private CloudbreakEventService eventService;
 
     private ClusterCreationFailure clusterCreationFailure;
 
@@ -65,5 +70,6 @@ public class ClusterCreationFailureHandlerTest {
         underTest.accept(event);
         //THEN
         verify(websocketService, times(1)).sendToTopicUser(anyString(), any(WebsocketEndPoint.class), any(StatusMessage.class));
+        verify(eventService, times(1)).fireCloudbreakEvent(anyLong(), anyString(), anyString());
     }
 }
