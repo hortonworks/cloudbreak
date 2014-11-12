@@ -71,7 +71,7 @@ public class StackCreationSuccessHandlerTest {
         // GIVEN
         given(stackUpdater.updateAmbariIp(anyLong(), anyString())).willReturn(stack);
         given(clientService.createDefault(anyString())).willReturn(ambariClient);
-        given(stackUpdater.updateStackStatus(anyLong(), any(Status.class))).willReturn(stack);
+        given(stackUpdater.updateStackStatus(anyLong(), any(Status.class), anyString())).willReturn(stack);
         given(stackUpdater.updateStackStatusReason(anyLong(), anyString())).willReturn(stack);
         doNothing().when(websocketService).sendToTopicUser(anyString(), any(WebsocketEndPoint.class), any());
         // WHEN

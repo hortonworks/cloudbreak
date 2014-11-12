@@ -47,7 +47,7 @@ public class StackCreationSuccessHandler implements Consumer<Event<StackCreation
         Stack stack = stackUpdater.updateAmbariIp(stackId, ambariIp);
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Accepted {} event.", ReactorConfig.STACK_CREATE_SUCCESS_EVENT, stackId);
-        stack = stackUpdater.updateStackStatus(stackId, Status.AVAILABLE);
+        stack = stackUpdater.updateStackStatus(stackId, Status.AVAILABLE, "AMBARI_IP:" + stack.getAmbariIp());
         websocketService.sendToTopicUser(stack.getOwner(), WebsocketEndPoint.STACK,
                 new StatusMessage(stackId, stack.getName(), Status.AVAILABLE.name()));
         stackUpdater.updateStackStatusReason(stack.getId(), "");
