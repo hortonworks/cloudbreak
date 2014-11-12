@@ -18,7 +18,7 @@ public class DefaultCloudbreakUsagesRetrievalService implements CloudbreakUsages
 
     @Override
     public List<CloudbreakUsage> findUsagesFor(String account, String owner, Long since, String cloud,
-            String zone, String vmtype, String hours) {
+            String zone, String vmtype, String hours, String bpName, Long bpId) {
 
         List<CloudbreakUsage> usages = usageRepository.findAll(
                 Specifications.where(CloudbreakUsageSpecifications.usagesWithStringFields("account", account))
@@ -27,7 +27,9 @@ public class DefaultCloudbreakUsagesRetrievalService implements CloudbreakUsages
                 .and(CloudbreakUsageSpecifications.usagesWithStringFields("cloud", cloud))
                 .and(CloudbreakUsageSpecifications.usagesWithStringFields("zone", zone))
                 .and(CloudbreakUsageSpecifications.usagesWithStringFields("machineType", vmtype))
-                .and(CloudbreakUsageSpecifications.usagesWithStringFields("runningHours", hours)));
+                .and(CloudbreakUsageSpecifications.usagesWithStringFields("runningHours", hours))
+                .and(CloudbreakUsageSpecifications.usagesWithStringFields("blueprintName", bpName))
+                .and(CloudbreakUsageSpecifications.usagesWithLongField("blueprintId", bpId)));
         return usages;
     }
 }

@@ -23,7 +23,7 @@
     <suppress id="string-instantiation" files="RemoteUserDetailsService.java"/>
     <suppress id="string-instantiation" files="AzureServiceCertificateResourceBuilder.java"/>
     <suppress id="string-instantiation" files="AzureVirtualMachineResourceBuilder.java"/>
-    <suppress checks="ParameterNumber" files="AzureProvisioner.java"/>
+    <suppress checks="ParameterNumber" files="AzureProvisioner.java|CloudbreakUsagesRetrievalService.java|DefaultCloudbreakUsagesRetrievalService.java"/>
     <suppress checks="ParameterNumber" files="CloudbreakUsageController.java|CloudbreakUsagesFacade.java|DefaultCloudbreakUsagesFacade.java"/>
     <suppress checks="IllegalCatch" files="CredentialController.java"/>
     <suppress checks="IllegalCatch" files="GccDiskCheckerStatus.java"/>

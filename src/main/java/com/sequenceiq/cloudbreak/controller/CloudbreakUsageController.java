@@ -31,8 +31,11 @@ public class CloudbreakUsageController {
             @RequestParam(value = "cloud", required = false) String cloud,
             @RequestParam(value = "zone", required = false) String zone,
             @RequestParam(value = "vmtype", required = false) String vmtype,
-            @RequestParam(value = "hours", required = false) String hours) {
-        List<CloudbreakUsageJson> usages = cloudbreakUsagesFacade.getUsagesFor(accountId, userId, since, cloud, zone, vmtype, hours);
+            @RequestParam(value = "hours", required = false) String hours,
+            @RequestParam(value = "blueprintname", required = false) String bpName,
+            @RequestParam(value = "blueprintid", required = false) Long bpId) {
+        List<CloudbreakUsageJson> usages = cloudbreakUsagesFacade
+                    .getUsagesFor(accountId, userId, since, cloud, zone, vmtype, hours, bpName, bpId);
         return new ResponseEntity<>(usages, HttpStatus.OK);
     }
 
@@ -44,8 +47,11 @@ public class CloudbreakUsageController {
             @RequestParam(value = "cloud", required = false) String cloud,
             @RequestParam(value = "zone", required = false) String zone,
             @RequestParam(value = "vmtype", required = false) String vmtype,
-            @RequestParam(value = "hours", required = false) String hours) {
-        List<CloudbreakUsageJson> usages = cloudbreakUsagesFacade.getUsagesFor(user.getAccount(), userId, since, cloud, zone, vmtype, hours);
+            @RequestParam(value = "hours", required = false) String hours,
+            @RequestParam(value = "blueprintname", required = false) String bpName,
+            @RequestParam(value = "blueprintid", required = false) Long bpId) {
+        List<CloudbreakUsageJson> usages = cloudbreakUsagesFacade
+                .getUsagesFor(user.getAccount(), userId, since, cloud, zone, vmtype, hours, bpName, bpId);
         return new ResponseEntity<>(usages, HttpStatus.OK);
     }
 
@@ -56,8 +62,11 @@ public class CloudbreakUsageController {
             @RequestParam(value = "cloud", required = false) String cloud,
             @RequestParam(value = "zone", required = false) String zone,
             @RequestParam(value = "vmtype", required = false) String vmtype,
-            @RequestParam(value = "hours", required = false) String hours) {
-        List<CloudbreakUsageJson> usages = cloudbreakUsagesFacade.getUsagesFor(user.getAccount(), user.getUserId(), since, cloud, zone, vmtype, hours);
+            @RequestParam(value = "hours", required = false) String hours,
+            @RequestParam(value = "blueprintname", required = false) String bpName,
+            @RequestParam(value = "blueprintid", required = false) Long bpId) {
+        List<CloudbreakUsageJson> usages = cloudbreakUsagesFacade
+                .getUsagesFor(user.getAccount(), user.getUserId(), since, cloud, zone, vmtype, hours, bpName, bpId);
         return new ResponseEntity<>(usages, HttpStatus.OK);
     }
 

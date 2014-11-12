@@ -26,9 +26,9 @@ public class DefaultCloudbreakUsagesFacade implements CloudbreakUsagesFacade {
 
     @Override
     public List<CloudbreakUsageJson> getUsagesFor(String account, String owner, Long since, String cloud,
-            String zone, String vmtype, String hours) {
+            String zone, String vmtype, String hours, String bpName, Long bpId) {
 
-        List<CloudbreakUsage> usages = cloudbreakUsagesService.findUsagesFor(account, owner, since, cloud, zone, vmtype, hours);
+        List<CloudbreakUsage> usages = cloudbreakUsagesService.findUsagesFor(account, owner, since, cloud, zone, vmtype, hours, bpName, bpId);
         return new ArrayList<>(cloudbreakUsageConverter.convertAllEntityToJson(usages));
     }
 
