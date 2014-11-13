@@ -182,20 +182,20 @@ public class StackUsageGenerator {
         usage.setAccount(event.getAccount());
         usage.setBlueprintId(event.getBlueprintId());
         usage.setBlueprintName(event.getBlueprintName());
-        usage.setStackId(event.getStackId());
         usage.setCloud(event.getCloud());
         usage.setZone(event.getRegion());
         usage.setMachineType(event.getVmType());
         usage.setRunningHours(String.valueOf(runningHours));
         usage.setDay(day);
+        usage.setStackId(event.getStackId());
         usage.setStackStatus(event.getStackStatus());
+        usage.setStackName(event.getStackName());
         return usage;
     }
 
     private CloudbreakEvent createBillingStarterCloudbreakEvent(CloudbreakEvent startEvent, Calendar cal) {
         CloudbreakEvent event = new CloudbreakEvent();
         event.setEventType(BillingStatus.BILLING_STARTED.name());
-        event.setStackId(startEvent.getStackId());
         event.setAccount(startEvent.getAccount());
         event.setOwner(startEvent.getOwner());
         event.setEventMessage(startEvent.getEventMessage());
@@ -205,6 +205,9 @@ public class StackUsageGenerator {
         event.setVmType(startEvent.getVmType());
         event.setCloud(startEvent.getCloud());
         event.setRegion(startEvent.getRegion());
+        event.setStackId(startEvent.getStackId());
+        event.setStackStatus(startEvent.getStackStatus());
+        event.setStackName(startEvent.getStackName());
         return event;
     }
 }

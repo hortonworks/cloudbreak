@@ -41,6 +41,7 @@ public class CloudbreakEvent implements ProvisionEntity {
     private String blueprintName;
     private long blueprintId;
     private Long stackId;
+    private String stackName;
 
     @Enumerated(EnumType.STRING)
     private Status stackStatus;
@@ -149,6 +150,14 @@ public class CloudbreakEvent implements ProvisionEntity {
         this.stackStatus = stackStatus;
     }
 
+    public String getStackName() {
+        return stackName;
+    }
+
+    public void setStackName(String stackName) {
+        this.stackName = stackName;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("CloudbreakEvent{");
@@ -167,5 +176,4 @@ public class CloudbreakEvent implements ProvisionEntity {
         sb.append('}');
         return sb.toString();
     }
-
 }

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import java.util.Date;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -29,6 +31,7 @@ public class CloudbreakUsageConverter extends AbstractConverter<CloudbreakUsageJ
         json.setDay(entity.getDay().toString());
         json.setStackId(entity.getStackId());
         json.setStackStatus(entity.getStackStatus());
+        json.setStackName(entity.getStackName());
 
         CbUser cbUser = userDetailsService.getDetails(entity.getOwner(), UserFilterField.USERID);
         json.setUsername(cbUser.getUsername());
@@ -47,7 +50,9 @@ public class CloudbreakUsageConverter extends AbstractConverter<CloudbreakUsageJ
         entity.setRunningHours(json.getRunningHours());
         entity.setMachineType(json.getMachineType());
         entity.setStackId(json.getStackId());
+        entity.setDay(new Date(Long.valueOf(json.getDay())));
         entity.setStackStatus(json.getStackStatus());
+        entity.setStackName(json.getStackName());
         return entity;
 
     }
