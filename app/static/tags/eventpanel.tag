@@ -14,6 +14,44 @@
                     filters</h5>
 
                 <form class="row row-filter">
+                    <div class="col-xs-6 col-sm-3 col-md-3">
+                        <label for="cloudProvider">cloud provider</label>
+
+                        <div>
+                            <select class="form-control input-sm" id="cloudProvider" ng-model="localFilter.cloud">
+                                <option>all</option>
+                                <option value="AWS">Amazon EC2</option>
+                                <option value="AZURE">Microsoft Azure</option>
+                                <option value="GCC">Google Cloud Compute</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-xs-6 col-sm-3 col-md-3">
+                        <label for="user">user</label>
+
+                        <div>
+                            <div class="input-group">
+                                        <span class="input-group-addon">
+                                            <i class="fa fa-search"></i>
+                                        </span>
+                                <input class="form-control input-sm" type="text" ng-model="localFilter.user" id="user">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xs-6 col-sm-3 col-md-3">
+                        <label for="user">eventType</label>
+
+                        <div>
+                            <div class="input-group">
+                                        <span class="input-group-addon">
+                                            <i class="fa fa-search"></i>
+                                        </span>
+                                <input class="form-control input-sm" type="text" ng-model="localFilter.eventType" id="eventType">
+                            </div>
+                        </div>
+                    </div>
+
+
 
                     <div class="col-xs-6 col-sm-3 col-md-3">
                         <a id="btnClearFilters" class="btn btn-default btn-block" ng-click="clearFilter()" role="button">
@@ -27,37 +65,24 @@
                 </form>
                 <!-- .row -->
 
-                <div class="table-responsive" ng-show="($root.usages.length != 0) && $root.usages">
+                <div class="table-responsive" ng-show="(events.length != 0) && events">
                     <table class="table table-report table-sortable-cols table-with-pagination ">
                         <thead>
                         <tr>
-                            <!-- <th></th> -->
                             <th>cloud</th>
                             <th>user</th>
-                            <th>state</th>
-                            <th>region</th>
-                            <th>instance type</th>
-                            <th class="text-right">
-                                <a title="sort by">running time
-                                    <i class="fa fa-sort"></i>
-                                </a>
-                            </th>
-                            <th class="text-right">
-                                <a title="sort by" class="active">estimated costs
-                                    <i class="fa fa-sort-down"></i>
-                                </a>
-                            </th>
+                            <th>type</th>
+                            <th>timestamp</th>
+                            <th style="width: 25%;">message</th>
                         </tr>
                         </thead>
                         <tbody>
-                            <tr ng-repeat="event in events">
-                                <td ng-if="$index == 0" rowspan="{{azureresults.length}}">{{usage.cloud}}</td>
-                                <td>{{usage.owner}}</td>
-                                <td>terminated</td>
-                                <td>{{usage.zone}}</td>
-                                <td>{{usage.machineType}}</td>
-                                <td class="text-right">{{usage.runningHours}} hrs</td>
-                                <td class="text-right">{{usage.money}} $</td>
+                            <tr ng-repeat="event in events| filter:eventFilterFunction">
+                                <td>{{event.cloud}}</td>
+                                <td>{{event.owner}}</td>
+                                <td>{{event.eventType}}</td>
+                                <td>{{event.eventTimestamp}}</td>
+                                <td style="width: 25%;">{{event.eventMessage}}</td>
                             </tr>
                         </tbody>
                     </table>

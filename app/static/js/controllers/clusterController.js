@@ -80,7 +80,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
 
         $scope.deleteCluster = function (cluster) {
             UluwatuCluster.delete(cluster, function (result) {
-                var actCluster = $filter('filter')($rootScope.clusters, { id: cluster.id })[0];
+                var actCluster = $filter('filter')($rootScope.clusters, { id: cluster.id }, true)[0];
                 actCluster.status = "DELETE_IN_PROGRESS";
                 $scope.modifyStatusMessage($rootScope.error_msg.cluster_delete_success1 + cluster.id + $rootScope.error_msg.cluster_delete_success2);
                 $scope.modifyStatusClass("has-success");
@@ -92,9 +92,9 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
 
         $scope.changeActiveCluster = function (clusterId) {
             $rootScope.activeCluster = $filter('filter')($rootScope.clusters, { id: clusterId })[0];
-            $rootScope.activeClusterBlueprint = $filter('filter')($rootScope.blueprints, { id: $rootScope.activeCluster.blueprintId })[0];
-            $rootScope.activeClusterTemplate = $filter('filter')($rootScope.templates, {id: $rootScope.activeCluster.templateId })[0];
-            $rootScope.activeClusterCredential = $filter('filter')($rootScope.credentials, {id: $rootScope.activeCluster.credentialId })[0];
+            $rootScope.activeClusterBlueprint = $filter('filter')($rootScope.blueprints, { id: $rootScope.activeCluster.blueprintId}, true)[0];
+            $rootScope.activeClusterTemplate = $filter('filter')($rootScope.templates, {id: $rootScope.activeCluster.templateId}, true)[0];
+            $rootScope.activeClusterCredential = $filter('filter')($rootScope.credentials, {id: $rootScope.activeCluster.credentialId}, true)[0];
             $rootScope.activeCluster.cloudPlatform =  $rootScope.activeClusterCredential.cloudPlatform;
             GlobalStack.get({ id: clusterId }, function(success) {
                     $rootScope.activeCluster.description = success.description;
@@ -174,5 +174,12 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             $scope.metricsShow = true;
         }
 
+        $scope.gccFilterFunction = function(element) {
+            return element.kind.match("compute#instance") ? true : false;
+        }
+
+        $scope.azureFilterFunction = function(element) {
+            return element.Deployment === undefined ? false : true;
+        }
 
     }]);
