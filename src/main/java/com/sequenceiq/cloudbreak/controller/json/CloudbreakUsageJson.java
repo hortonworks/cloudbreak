@@ -5,6 +5,8 @@ import com.sequenceiq.cloudbreak.domain.Status;
 public class CloudbreakUsageJson implements JsonEntity {
     private String owner;
 
+    private String username;
+
     private String account;
 
     private String blueprintName;
@@ -110,5 +112,13 @@ public class CloudbreakUsageJson implements JsonEntity {
 
     public void setStackStatus(Status stackStatus) {
         this.stackStatus = stackStatus;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 }

@@ -1,12 +1,20 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.json.CloudbreakUsageJson;
+import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
+import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
+import com.sequenceiq.cloudbreak.service.user.UserFilterField;
 
 @Component
 public class CloudbreakUsageConverter extends AbstractConverter<CloudbreakUsageJson, CloudbreakUsage> {
+
+    @Autowired
+    private UserDetailsService userDetailsService;
+
     @Override
     public CloudbreakUsageJson convert(CloudbreakUsage entity) {
         CloudbreakUsageJson json = new CloudbreakUsageJson();
@@ -21,6 +29,9 @@ public class CloudbreakUsageConverter extends AbstractConverter<CloudbreakUsageJ
         json.setDay(entity.getDay().toString());
         json.setStackId(entity.getStackId());
         json.setStackStatus(entity.getStackStatus());
+
+        CbUser cbUser = userDetailsService.getDetails(entity.getOwner(), UserFilterField.USERID);
+        json.setUsername(cbUser.getUsername());
         return json;
     }
 
