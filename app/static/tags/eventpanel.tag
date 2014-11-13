@@ -14,7 +14,7 @@
                     filters</h5>
 
                 <form class="row row-filter">
-                    <div class="col-xs-6 col-sm-3 col-md-3">
+                    <div class="col-xs-6 col-sm-3 col-md-2">
                         <label for="cloudProvider">cloud provider</label>
 
                         <div>
@@ -26,7 +26,7 @@
                             </select>
                         </div>
                     </div>
-                    <div class="col-xs-6 col-sm-3 col-md-3">
+                    <div class="col-xs-6 col-sm-3 col-md-4">
                         <label for="user">user</label>
 
                         <div>
@@ -38,28 +38,40 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-xs-6 col-sm-3 col-md-3">
+                    <div class="col-xs-6 col-sm-3 col-md-4">
                         <label for="user">eventType</label>
 
                         <div>
-                            <div class="input-group">
-                                        <span class="input-group-addon">
-                                            <i class="fa fa-search"></i>
-                                        </span>
-                                <input class="form-control input-sm" type="text" ng-model="localFilter.eventType" id="eventType">
-                            </div>
+                            <select class="form-control input-sm" id="eventType" ng-model="localFilter.eventType">
+                                <option>all</option>
+                                <option value="REQUESTED">REQUESTED</option>
+                                <option value="CREATE_IN_PROGRESS">CREATE_IN_PROGRESS</option>
+                                <option value="AVAILABLE">AVAILABLE</option>
+                                <option value="UPDATE_IN_PROGRESS">UPDATE_IN_PROGRESS</option>
+                                <option value="CREATE_FAILED">CREATE_FAILED</option>
+                                <option value="DELETE_IN_PROGRESS">DELETE_IN_PROGRESS</option>
+                                <option value="DELETE_FAILED">DELETE_FAILED</option>
+                                <option value="DELETE_COMPLETED">DELETE_COMPLETED</option>
+                                <option value="STOPPED">STOPPED</option>
+                                <option value="STOP_REQUESTED">STOP_REQUESTED</option>
+                                <option value="START_REQUESTED">START_REQUESTED</option>
+                                <option value="STOP_IN_PROGRESS">STOP_IN_PROGRESS</option>
+                                <option value="START_IN_PROGRESS">START_IN_PROGRESS</option>
+                                <option value="START_IN_PROGRESS">START_IN_PROGRESS</option>
+                                <option value="START_FAILED">START_FAILED</option>
+                                <option value="STOP_FAILED">STOP_FAILED</option>
+                                <option value="BILLING_STARTED">BILLING_STARTED</option>
+                                <option value="BILLING_STOPPED">BILLING_STOPPED</option>
+                            </select>
                         </div>
                     </div>
 
 
 
-                    <div class="col-xs-6 col-sm-3 col-md-3">
-                        <a id="btnClearFilters" class="btn btn-default btn-block" ng-click="clearFilter()" role="button">
-                            <i class="fa fa-times fa-fw"></i>
-                            clear filters</a>
+                    <div class="col-xs-6 col-sm-3 col-md-2">
                         <a id="btnGenReport" ng-click="loadEvents()" class="btn btn-success btn-block" role="button">
-                            <i class="fa fa-table fa-fw"></i>
-                            <!-- <i class="fa fa-circle-o-notch fa-spin fa-fw"></i> --> generate report</a>
+                            <i class="fa fa-fw fa-refresh"></i>
+                            <!-- <i class="fa fa-circle-o-notch fa-spin fa-fw"></i> --> </a>
                     </div>
 
                 </form>

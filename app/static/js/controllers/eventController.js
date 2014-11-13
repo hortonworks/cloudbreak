@@ -7,13 +7,17 @@ angular.module('uluwatuControllers').controller('eventController', ['$scope', '$
 
         initFilter();
 
+
         $scope.loadEvents = function () {
+            initFilter();
             $scope.events = UserEvents.query(function(success) {
                 angular.forEach(success, function(item) {
                     item.eventTimestamp =  new Date(item.eventTimestamp).toISOString();
                 });
             });
         }
+
+        $scope.loadEvents();
 
         $scope.eventFilterFunction = function(element) {
             var isListedElement = true;
@@ -27,8 +31,8 @@ angular.module('uluwatuControllers').controller('eventController', ['$scope', '$
                     isListedElement = false;
                 }
             }
-            if ($scope.localFilter.eventType !== "") {
-                if (element.eventType.toLowerCase().indexOf($scope.localFilter.eventType.toLowerCase()) == -1) {
+            if ($scope.localFilter.eventType !== "all") {
+                if (element.eventType.toLowerCase() != ($scope.localFilter.eventType.toLowerCase())) {
                     isListedElement = false;
                 }
             }
@@ -43,7 +47,7 @@ angular.module('uluwatuControllers').controller('eventController', ['$scope', '$
             $scope.localFilter = {
                 user: "",
                 cloud: "all",
-                eventType: ""
+                eventType: "all"
             };
         }
 
