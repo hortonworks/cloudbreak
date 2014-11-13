@@ -79,7 +79,6 @@
                                                 <th>name</th>
                                                 <th>status</th>
                                                 <th>private IP</th>
-                                                <th>public IP</th>
                                             </tr>
                                             </thead>
                                             <tbody>
