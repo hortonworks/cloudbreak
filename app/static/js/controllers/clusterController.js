@@ -65,7 +65,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 $scope.modifyStatusMessage($rootScope.error_msg.cluster_success1 + result.name + $rootScope.error_msg.cluster_success2);
                 $scope.modifyStatusClass("has-success");
 
-                // HEKK - back to clusters list
                 $jq('.carousel').carousel(0);
                 // enable toolbar buttons
                 $jq('#toggle-cluster-block-btn').removeClass('disabled');
