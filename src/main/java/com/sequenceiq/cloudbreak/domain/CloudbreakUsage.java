@@ -36,6 +36,8 @@ public class CloudbreakUsage implements ProvisionEntity {
     @Enumerated(EnumType.STRING)
     private Status stackStatus;
 
+    private String stackName;
+
     public Long getId() {
         return id;
     }
@@ -130,6 +132,14 @@ public class CloudbreakUsage implements ProvisionEntity {
 
     public void setStackStatus(Status stackStatus) {
         this.stackStatus = stackStatus;
+    }
+
+    public String getStackName() {
+        return stackName;
+    }
+
+    public void setStackName(String stackName) {
+        this.stackName = stackName;
     }
 
     @Override

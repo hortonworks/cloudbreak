@@ -26,6 +26,8 @@ public class CloudbreakUsageJson implements JsonEntity {
 
     private Status stackStatus;
 
+    private String stackName;
+
     public String getOwner() {
         return owner;
     }
@@ -120,5 +122,13 @@ public class CloudbreakUsageJson implements JsonEntity {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getStackName() {
+        return stackName;
+    }
+
+    public void setStackName(String stackName) {
+        this.stackName = stackName;
     }
 }
