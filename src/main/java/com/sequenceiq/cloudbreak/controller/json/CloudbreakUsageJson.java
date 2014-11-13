@@ -22,7 +22,7 @@ public class CloudbreakUsageJson implements JsonEntity {
 
     private String machineType;
 
-    private String instanceHours;
+    private Long instanceHours;
 
     private Status stackStatus;
 
@@ -92,11 +92,11 @@ public class CloudbreakUsageJson implements JsonEntity {
         this.machineType = machineType;
     }
 
-    public String getInstanceHours() {
+    public Long getInstanceHours() {
         return instanceHours;
     }
 
-    public void setInstanceHours(String instanceHours) {
+    public void setInstanceHours(Long instanceHours) {
         this.instanceHours = instanceHours;
     }
 
