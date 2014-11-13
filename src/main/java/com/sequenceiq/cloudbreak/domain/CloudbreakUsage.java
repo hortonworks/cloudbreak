@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.domain;
 
 import java.util.Date;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -29,7 +30,8 @@ public class CloudbreakUsage implements ProvisionEntity {
 
     private String machineType;
 
-    private String runningHours;
+    @Column(name = "runninghours")
+    private String instanceHours;
 
     private Long stackId;
 
@@ -102,12 +104,12 @@ public class CloudbreakUsage implements ProvisionEntity {
         this.machineType = machineType;
     }
 
-    public String getRunningHours() {
-        return runningHours;
+    public String getInstanceHours() {
+        return instanceHours;
     }
 
-    public void setRunningHours(String runningHours) {
-        this.runningHours = runningHours;
+    public void setInstanceHours(String instanceHours) {
+        this.instanceHours = instanceHours;
     }
 
     public Date getDay() {
@@ -154,7 +156,7 @@ public class CloudbreakUsage implements ProvisionEntity {
         sb.append(", cloud='").append(cloud).append('\'');
         sb.append(", zone='").append(zone).append('\'');
         sb.append(", machineType='").append(machineType).append('\'');
-        sb.append(", runningHours='").append(runningHours).append('\'');
+        sb.append(", instanceHours='").append(instanceHours).append('\'');
         sb.append(", stackId='").append(stackId).append('\'');
         sb.append('}');
         return sb.toString();
