@@ -143,13 +143,15 @@ public class AmbariClusterConnector {
         Stack stack = stackRepository.findOneWithLists(stackId);
         Cluster cluster = stack.getCluster();
         MDCBuilder.buildMdcContext(cluster);
-        LOGGER.info("Decommision requested");
+        LOGGER.info("Decommission requested");
         try {
             stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS);
             AmbariClient ambariClient = createAmbariClient(stack.getAmbariIp());
             Set<HostMetadata> metadataToRemove = new HashSet<>();
+            Map<String, Integer> decommissionRequests = new HashMap<>();
+            Map<String, List<String>> hostsWithComponents = new HashMap<>();
             for (HostGroupAdjustmentJson hostGroupAdjustment : hosts) {
-                LOGGER.info("Decommisioning {} hosts", -1 * hostGroupAdjustment.getScalingAdjustment());
+                LOGGER.info("Decommissioning {} hosts", -1 * hostGroupAdjustment.getScalingAdjustment());
                 Set<HostMetadata> hostsInHostGroup = hostMetadataRepository.findHostsInHostgroup(hostGroupAdjustment.getHostGroup(), cluster.getId());
                 int i = 0;
                 for (HostMetadata hostMetadata : hostsInHostGroup) {
@@ -160,23 +162,15 @@ public class AmbariClusterConnector {
                             LOGGER.info("Host '{}' will be removed from Ambari cluster", hostName);
                             metadataToRemove.add(hostMetadata);
                             Set<String> components = ambariClient.getHostComponentsMap(hostName).keySet();
-                            Map<String, Integer> installRequests = new HashMap<>();
                             if (components.contains("NODEMANAGER")) {
                                 Integer requestId = ambariClient.decommissionNodeManager(hostName);
-                                installRequests.put("NODEMANAGER_DECOMMISION", requestId);
+                                decommissionRequests.put("NODEMANAGER_DECOMMISION " + hostName, requestId);
                             }
                             if (components.contains("DATANODE")) {
                                 Integer requestId = ambariClient.decommissionDataNode(hostName);
-                                installRequests.put("DATANODE_DECOMMISION", requestId);
+                                decommissionRequests.put("DATANODE_DECOMMISION " + hostName, requestId);
                             }
-                            List<String> componentsList = new ArrayList<>();
-                            componentsList.addAll(components);
-                            Map<String, Integer> stopRequests = ambariClient.stopComponentsOnHost(hostName, componentsList);
-                            installRequests.putAll(stopRequests);
-                            waitForAmbariOperations(stack, ambariClient, installRequests);
-                            ambariClient.deleteHostComponents(hostName, componentsList);
-                            ambariClient.deleteHost(hostName);
-                            ambariClient.unregisterHost(hostName);
+                            hostsWithComponents.put(hostName, new ArrayList<>(components));
                         } else {
                             break;
                         }
@@ -184,16 +178,10 @@ public class AmbariClusterConnector {
                     }
                 }
             }
-            Map<String, Integer> installRequests = new HashMap<>();
-            Integer zookeeperRequestId = ambariClient.restartServiceComponents("ZOOKEEPER", Arrays.asList("ZOOKEEPER_SERVER"));
-            installRequests.put("ZOOKEEPER", zookeeperRequestId);
-            if (ambariClient.getServiceComponentsMap().containsKey("NAGIOS")) {
-                Integer nagiosRequestId = ambariClient.restartServiceComponents("NAGIOS", Arrays.asList("NAGIOS_SERVER"));
-                installRequests.put("NAGIOS", nagiosRequestId);
-            }
-            waitForAmbariOperations(stack, ambariClient, installRequests);
-
-
+            waitForAmbariOperations(stack, ambariClient, decommissionRequests);
+            stopHadoopComponents(stack, ambariClient, hostsWithComponents);
+            deleteHostsFromAmbari(ambariClient, hostsWithComponents);
+            restartHadoopServices(stack, ambariClient);
             cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
             cluster.getHostMetadata().removeAll(metadataToRemove);
             clusterRepository.save(cluster);
@@ -221,11 +209,40 @@ public class AmbariClusterConnector {
         return setClusterState(stack, false);
     }
 
+    private void stopHadoopComponents(Stack stack, AmbariClient ambariClient, Map<String, List<String>> hostsWithComponents) throws HttpResponseException {
+        Map<String, Integer> stopRequests = new HashMap<>();
+        for (String host : hostsWithComponents.keySet()) {
+            Map<String, Integer> resp = ambariClient.stopComponentsOnHost(host, hostsWithComponents.get(host));
+            for (String component : resp.keySet()) {
+                stopRequests.put(host + " " + component, resp.get(component));
+            }
+        }
+        waitForAmbariOperations(stack, ambariClient, stopRequests);
+    }
+
+    private void deleteHostsFromAmbari(AmbariClient ambariClient, Map<String, List<String>> hostsWithComponents) {
+        for (String hostName : hostsWithComponents.keySet()) {
+            ambariClient.deleteHostComponents(hostName, hostsWithComponents.get(hostName));
+            ambariClient.deleteHost(hostName);
+            ambariClient.unregisterHost(hostName);
+        }
+    }
+
+    private void restartHadoopServices(Stack stack, AmbariClient ambariClient) {
+        Map<String, Integer> restartRequests = new HashMap<>();
+        Integer zookeeperRequestId = ambariClient.restartServiceComponents("ZOOKEEPER", Arrays.asList("ZOOKEEPER_SERVER"));
+        restartRequests.put("ZOOKEEPER", zookeeperRequestId);
+        if (ambariClient.getServiceComponentsMap().containsKey("NAGIOS")) {
+            Integer nagiosRequestId = ambariClient.restartServiceComponents("NAGIOS", Arrays.asList("NAGIOS_SERVER"));
+            restartRequests.put("NAGIOS", nagiosRequestId);
+        }
+        waitForAmbariOperations(stack, ambariClient, restartRequests);
+    }
+
     private boolean setClusterState(Stack stack, boolean stopped) {
         MDCBuilder.buildMdcContext(stack);
         boolean result = true;
         AmbariClient ambariClient = new AmbariClient(stack.getAmbariIp(), AmbariClusterService.PORT);
-        long stackId = stack.getId();
         String action = stopped ? "stop" : "start";
         int requestId = -1;
         try {
@@ -387,10 +404,10 @@ public class AmbariClusterConnector {
         reactor.notify(ReactorConfig.CLUSTER_CREATE_FAILED_EVENT, Event.wrap(new ClusterCreationFailure(stack.getId(), cluster.getId(), message)));
     }
 
-    private void updateHostSuccessful(Cluster cluster, Set<String> hostNames, boolean decommision) {
+    private void updateHostSuccessful(Cluster cluster, Set<String> hostNames, boolean decommission) {
         MDCBuilder.buildMdcContext(cluster);
         LOGGER.info("Publishing {} event", ReactorConfig.UPDATE_AMBARI_HOSTS_SUCCESS_EVENT);
-        reactor.notify(ReactorConfig.UPDATE_AMBARI_HOSTS_SUCCESS_EVENT, Event.wrap(new UpdateAmbariHostsSuccess(cluster.getId(), hostNames, decommision)));
+        reactor.notify(ReactorConfig.UPDATE_AMBARI_HOSTS_SUCCESS_EVENT, Event.wrap(new UpdateAmbariHostsSuccess(cluster.getId(), hostNames, decommission)));
     }
 
     private void updateHostFailed(Cluster cluster, String message) {
