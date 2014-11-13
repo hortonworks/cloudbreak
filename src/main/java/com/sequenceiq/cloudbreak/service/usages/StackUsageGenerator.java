@@ -185,7 +185,7 @@ public class StackUsageGenerator {
         usage.setCloud(event.getCloud());
         usage.setZone(event.getRegion());
         usage.setMachineType(event.getVmType());
-        usage.setRunningHours(String.valueOf(runningHours));
+        usage.setInstanceHours(String.valueOf(runningHours));
         usage.setDay(day);
         usage.setStackId(event.getStackId());
         usage.setStackStatus(event.getStackStatus());
