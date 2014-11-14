@@ -163,12 +163,16 @@ public class AmbariClusterConnector {
                             metadataToRemove.add(hostMetadata);
                             Set<String> components = ambariClient.getHostComponentsMap(hostName).keySet();
                             if (components.contains("NODEMANAGER")) {
-                                Integer requestId = ambariClient.decommissionNodeManager(hostName);
-                                decommissionRequests.put("NODEMANAGER_DECOMMISION " + hostName, requestId);
+                                int requestId = ambariClient.decommissionNodeManager(hostName);
+                                decommissionRequests.put("NODEMANAGER_DECOMMISSION " + hostName, requestId);
                             }
                             if (components.contains("DATANODE")) {
-                                Integer requestId = ambariClient.decommissionDataNode(hostName);
-                                decommissionRequests.put("DATANODE_DECOMMISION " + hostName, requestId);
+                                int requestId = ambariClient.decommissionDataNode(hostName);
+                                decommissionRequests.put("DATANODE_DECOMMISSION " + hostName, requestId);
+                            }
+                            if (components.contains("HBASE_REGIONSERVER")) {
+                                int requestId = ambariClient.decommissionHBaseRegionServer(hostName);
+                                decommissionRequests.put("HBASE_REGIONSERVER_DECOMMISSION " + hostName, requestId);
                             }
                             hostsWithComponents.put(hostName, new ArrayList<>(components));
                         } else {
