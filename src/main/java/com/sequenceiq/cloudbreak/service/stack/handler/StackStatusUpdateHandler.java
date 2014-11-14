@@ -140,7 +140,7 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
         }
     }
 
-    private boolean startStopResources(CloudPlatform cloudPlatform, Stack stack,final boolean start) {
+    private boolean startStopResources(CloudPlatform cloudPlatform, Stack stack, final boolean start) {
         boolean finished = true;
         try {
             ResourceBuilderInit resourceBuilderInit = resourceBuilderInits.get(cloudPlatform);
@@ -148,7 +148,7 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
 
             for (ResourceBuilder resourceBuilder : networkResourceBuilders.get(cloudPlatform)) {
                 for (Resource resource : stack.getResourcesByType(resourceBuilder.resourceType())) {
-                    if(start) {
+                    if (start) {
                         resourceBuilder.start(sSCO, resource);
                     } else {
                         resourceBuilder.stop(sSCO, resource);
@@ -162,7 +162,7 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
                     Future<Boolean> submit = resourceBuilderExecutor.submit(new Callable<Boolean>() {
                         @Override
                         public Boolean call() throws Exception {
-                            if(start) {
+                            if (start) {
                                 return resourceBuilder.start(sSCO, resource);
                             } else {
                                 return resourceBuilder.stop(sSCO, resource);
