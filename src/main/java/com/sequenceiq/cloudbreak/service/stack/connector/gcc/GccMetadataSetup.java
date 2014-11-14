@@ -52,7 +52,7 @@ public class GccMetadataSetup implements MetadataSetup {
 
     private Set<CoreInstanceMetaData> collectMetaData(Stack stack, GccTemplate template, List<Resource> resources) {
         Set<CoreInstanceMetaData> instanceMetaDatas = new HashSet<>();
-        Compute compute = gccStackUtil.buildCompute((GccCredential) stack.getCredential(), stack.getName());
+        Compute compute = gccStackUtil.buildCompute((GccCredential) stack.getCredential(), stack);
         for (Resource resource : resources) {
             instanceMetaDatas.add(getMetadata(stack, compute, resource));
         }

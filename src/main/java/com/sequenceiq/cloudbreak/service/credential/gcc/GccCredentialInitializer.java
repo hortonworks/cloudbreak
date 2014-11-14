@@ -31,7 +31,7 @@ public class GccCredentialInitializer {
     private void validateCredential(GccCredential gccCredential) {
         MDCBuilder.buildMdcContext(gccCredential);
         try {
-            Compute compute = gccStackUtil.buildCompute(gccCredential, "myapp");
+            Compute compute = gccStackUtil.buildCompute(gccCredential);
             if (compute == null) {
                 throw new BadRequestException("Problem with your credential key please use the correct format.");
             }
