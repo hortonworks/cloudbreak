@@ -146,16 +146,14 @@ public class DefaultStackService implements StackService {
             if (!Status.STOPPED.equals(stackStatus)) {
                 throw new BadRequestException(String.format("Cannot update the status of stack '%s' to STARTED, because it isn't in STOPPED state.", stackId));
             }
-            stack.setStatus(Status.START_IN_PROGRESS);
-            stackRepository.save(stack);
+            stackUpdater.updateStackStatus(stackId, Status.START_IN_PROGRESS);
             LOGGER.info("Publishing {} event", ReactorConfig.STACK_STATUS_UPDATE_EVENT);
             reactor.notify(ReactorConfig.STACK_STATUS_UPDATE_EVENT,
                     Event.wrap(new StackStatusUpdateRequest(stack.getTemplate().cloudPlatform(), stack.getId(), status)));
         } else {
             Status clusterStatus = clusterRepository.findOneWithLists(stack.getCluster().getId()).getStatus();
             if (Status.STOP_IN_PROGRESS.equals(clusterStatus)) {
-                stack.setStatus(Status.STOP_REQUESTED);
-                stackRepository.save(stack);
+                stackUpdater.updateStackStatus(stackId, Status.STOP_REQUESTED);
             } else {
                 if (!Status.AVAILABLE.equals(stackStatus)) {
                     throw new BadRequestException(
