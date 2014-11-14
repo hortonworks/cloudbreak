@@ -108,7 +108,7 @@ public class BlueprintConverter extends AbstractConverter<BlueprintJson, Bluepri
             hasHostGroupInBlueprint(root);
             new AmbariClient().validateBlueprint(blueprintText);
         } catch (InvalidBlueprintException e) {
-            throw new BadRequestException("Invalid Blueprint: At least one host group with 'slave_' prefix is required in the blueprint.", e);
+            throw new BadRequestException("Invalid Blueprint: " + e.getMessage(), e);
         } catch (IOException e) {
             throw new BadRequestException("Invalid Blueprint: Failed to parse JSON.", e);
         }
