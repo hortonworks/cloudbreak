@@ -19,7 +19,7 @@ public class ScalingRequest implements Runnable {
     private static final Logger LOGGER = PeriscopeLoggerFactory.getLogger(ScalingRequest.class);
     private static final String AVAILABLE = "AVAILABLE";
     private static final int RETRY_COUNT = 100;
-    private static final int SLEEP = 10000;
+    private static final int SLEEP = 20000;
     private final int desiredNodeCount;
     private final int totalNodes;
     private final Cluster cluster;
