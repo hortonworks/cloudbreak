@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.repository;
 
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.OptimisticLockException;
@@ -94,6 +95,23 @@ public class RetryingStackUpdater {
             LOGGER.info("Failed to update stack resources. [attempt: '{}', Cause: {}]. Trying to save it again.", attempt++, e.getClass().getSimpleName());
             if (attempt <= MAX_RETRIES) {
                 return doUpdateResources(stackId, resources);
+            } else {
+                throw new InternalServerException(String.format("Failed to update stack '%s' in 5 attempts. (while trying to update resources)", stackId), e);
+            }
+        }
+    }
+
+
+    public synchronized Stack addStackResources(Long stackId, List<Resource> resources) {
+        Stack stack = stackRepository.findById(stackId);
+        MDCBuilder.buildMdcContext(stack);
+        int attempt = 1;
+        try {
+            return doAddResources(stackId, resources);
+        } catch (OptimisticLockException | OptimisticLockingFailureException e) {
+            LOGGER.info("Failed to update stack resources. [attempt: '{}', Cause: {}]. Trying to save it again.", attempt++, e.getClass().getSimpleName());
+            if (attempt <= MAX_RETRIES) {
+                return doAddResources(stackId, resources);
             } else {
                 throw new InternalServerException(String.format("Failed to update stack '%s' in 5 attempts. (while trying to update resources)", stackId), e);
             }
@@ -273,7 +291,15 @@ public class RetryingStackUpdater {
         MDCBuilder.buildMdcContext(stack);
         stack.setResources(resources);
         stack = stackRepository.save(stack);
-        LOGGER.info("Updated stack resources: [status: '{}', statusReason: '{}'].");
+        LOGGER.info("Updated stack resources.");
+        return stack;
+    }
+
+    private Stack doAddResources(Long stackId, List<Resource> resources) {
+        Stack stack = stackRepository.findOneWithLists(stackId);
+        stack.getResources().addAll(resources);
+        stack = stackRepository.save(stack);
+        LOGGER.info("Updated stack resources.");
         return stack;
     }
 

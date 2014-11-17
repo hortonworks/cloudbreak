@@ -101,6 +101,7 @@ public class ProvisionContextTest {
         // GIVEN
         stack.setStatus(Status.CREATE_FAILED);
         given(stackRepository.findById(1L)).willReturn(stack);
+        given(stackRepository.findOneWithLists(1L)).willReturn(stack);
         // WHEN
         underTest.buildStack(cloudPlatform, 1L, setupProperties, userDataParams);
         // THEN

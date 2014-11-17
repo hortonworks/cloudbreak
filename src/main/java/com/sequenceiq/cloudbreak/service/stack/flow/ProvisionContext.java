@@ -73,7 +73,7 @@ public class ProvisionContext {
     private Map<CloudPlatform, ResourceBuilderInit> resourceBuilderInits;
 
     public void buildStack(final CloudPlatform cloudPlatform, Long stackId, Map<String, Object> setupProperties, Map<String, String> userDataParams) {
-        Stack stack = stackRepository.findById(stackId);
+        Stack stack = stackRepository.findOneWithLists(stackId);
         MDCBuilder.buildMdcContext(stack);
         try {
             if (stack.getStatus().equals(Status.REQUESTED)) {
@@ -89,12 +89,14 @@ public class ProvisionContext {
                             resourceBuilderInit.provisionInit(stack, userDataBuilder.build(cloudPlatform, stack.getHash(), userDataParams));
                     for (ResourceBuilder resourceBuilder : networkResourceBuilders.get(cloudPlatform)) {
                         List<Resource> resourceList = resourceBuilder.create(pCO, 0, new ArrayList<Resource>());
+                        stackUpdater.addStackResources(stack.getId(), resourceList);
                         resourceSet.addAll(resourceList);
                         pCO.getNetworkResources().addAll(resourceList);
                     }
                     List<Future<List<Resource>>> futures = new ArrayList<>();
                     for (int i = 0; i < stack.getNodeCount(); i++) {
                         final int index = i;
+                        final Stack finalStack = stack;
                         Future<List<Resource>> submit = resourceBuilderExecutor.submit(new Callable<List<Resource>>() {
                             @Override
                             public List<Resource> call() throws Exception {
@@ -102,6 +104,7 @@ public class ProvisionContext {
                                 List<Resource> resources = new ArrayList<>();
                                 for (final ResourceBuilder resourceBuilder : instanceResourceBuilders.get(cloudPlatform)) {
                                     List<Resource> resourceList = resourceBuilder.create(pCO, index, resources);
+                                    stackUpdater.addStackResources(finalStack.getId(), resourceList);
                                     resources.addAll(resourceList);
                                     LOGGER.info("Node {}. creation in progress resource {} creation finished.", index, resourceBuilder.resourceBuilderType());
                                 }
