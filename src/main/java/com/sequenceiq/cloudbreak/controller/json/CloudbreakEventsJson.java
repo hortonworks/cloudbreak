@@ -15,6 +15,15 @@ public class CloudbreakEventsJson implements JsonEntity {
     private String blueprintName;
     private long blueprintId;
     private Status stackStatus;
+    private Integer nodeCount;
+
+    public Integer getNodeCount() {
+        return nodeCount;
+    }
+
+    public void setNodeCount(Integer nodeCount) {
+        this.nodeCount = nodeCount;
+    }
 
     public String getEventType() {
         return eventType;

@@ -45,6 +45,7 @@ public class CloudbreakEvent implements ProvisionEntity {
 
     @Enumerated(EnumType.STRING)
     private Status stackStatus;
+    private Integer nodeCount;
 
     public Long getId() {
         return id;
@@ -156,6 +157,14 @@ public class CloudbreakEvent implements ProvisionEntity {
 
     public void setStackName(String stackName) {
         this.stackName = stackName;
+    }
+
+    public void setNodeCount(Integer nodeCount) {
+        this.nodeCount = nodeCount;
+    }
+
+    public Integer getNodeCount() {
+        return nodeCount;
     }
 
     @Override
