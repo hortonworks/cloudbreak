@@ -46,7 +46,7 @@ public class AmbariStartupListener {
         MDCBuilder.buildMdcContext(stack);
         try {
             boolean ambariRunning = false;
-            AmbariClient ambariClient = clientService.create(stack);
+            AmbariClient ambariClient = clientService.create(ambariIp);
             int pollingAttempt = 0;
             LOGGER.info("Starting polling of Ambari server's status [Ambari server IP: '{}'].", ambariIp);
             while (!ambariRunning && !(pollingAttempt >= MAX_POLLING_ATTEMPTS)) {
