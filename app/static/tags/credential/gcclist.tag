@@ -19,7 +19,7 @@
     </div>
 
     <div class="form-group">
-        <label class="col-sm-3 control-label" for="gccclsubscriptionId">Service Account ID</label>
+        <label class="col-sm-3 control-label" for="gccclsubscriptionId">Service Account Email Address</label>
 
         <div class="col-sm-9">
             <p id="gccclsubscriptionId" class="form-control-static">{{credential.parameters.serviceAccountId}}</p>
@@ -34,14 +34,4 @@
         </div>
         <!-- .col-sm-9 -->
     </div>
-
-    <div class="form-group">
-        <label class="col-sm-3 control-label" for="gccclserviceAccountPrivateKey">service Account Private Key</label>
-
-        <div class="col-sm-9">
-            <p id="gccclserviceAccountPrivateKey" class="form-control-static">{{credential.parameters.serviceAccountPrivateKey}}</p>
-        </div>
-        <!-- .col-sm-9 -->
-    </div>
-
 </form>

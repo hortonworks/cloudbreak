@@ -2,8 +2,8 @@
 
 var log = log4javascript.getLogger("credentialController-logger");
 
-angular.module('uluwatuControllers').controller('credentialController', ['$scope', '$rootScope', 'UserCredential', 'GlobalCredential', 'GlobalCredentialCertificate',
-    function ($scope, $rootScope, UserCredential, GlobalCredential, GlobalCredentialCertificate) {
+angular.module('uluwatuControllers').controller('credentialController', ['$scope', '$rootScope', '$base64', 'UserCredential', 'GlobalCredential', 'GlobalCredentialCertificate',
+    function ($scope, $rootScope, $base64, UserCredential, GlobalCredential, GlobalCredentialCertificate) {
         $rootScope.credentials = UserCredential.query();
         $rootScope.credentialInCreation = false;
         $scope.credentialAws = {};
@@ -15,6 +15,8 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
         $scope.awsCredentialForm = {};
         $scope.gccCredentialForm = {};
         $scope.azureCredentialForm = {};
+        $scope.gcc = {};
+        $scope.gcc.p12 = "";
 
         $scope.createAwsCredentialRequest = function() {
             $scope.azureCredential = false;
@@ -74,22 +76,34 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
 
         $scope.createGccCredential = function() {
             $scope.credentialGcc.cloudPlatform = "GCC";
-            $rootScope.credentialInCreation = true;
+            $rootScope.credentialInCreation = true
 
-            UserCredential.save($scope.credentialGcc, function(result){
-                $scope.credentialGcc.id = result.id;
-                $rootScope.credentials.push($scope.credentialGcc);
-                $scope.credentialGcc = {};
-                $scope.modifyStatusMessage($rootScope.error_msg.gcc_credential_success1 + result.id + $rootScope.error_msg.gcc_credential_success2);
-                $scope.modifyStatusClass("has-success");
-                $rootScope.credentialInCreation = false;
-                $scope.gccCredentialForm.$setPristine();
-                collapseCreateCredentialFormPanel();
-            }, function (error) {
-                $scope.modifyStatusMessage($rootScope.error_msg.gcc_credential_failed + error.data.message);
-                $scope.modifyStatusClass("has-error");
-                $rootScope.credentialInCreation = false;
-            });
+            var p12File = $scope.gcc.p12
+            var reader = new FileReader();
+
+            reader.onloadend = function(evt) {
+                if (evt.target.readyState == FileReader.DONE) {
+                  $scope.credentialGcc.parameters.serviceAccountPrivateKey = $base64.encode(evt.target.result);
+                  UserCredential.save($scope.credentialGcc, function(result){
+                      $scope.credentialGcc.id = result.id;
+                      $rootScope.credentials.push($scope.credentialGcc);
+                      $scope.credentialGcc = {};
+                      $scope.modifyStatusMessage($rootScope.error_msg.gcc_credential_success1 + result.id + $rootScope.error_msg.gcc_credential_success2);
+                      $scope.modifyStatusClass("has-success");
+                      $rootScope.credentialInCreation = false;
+                      $scope.gccCredentialForm.$setPristine();
+                      collapseCreateCredentialFormPanel();
+                  }, function (error) {
+                      $scope.modifyStatusMessage($rootScope.error_msg.gcc_credential_failed + error.data.message);
+                      $scope.modifyStatusClass("has-error");
+                      $rootScope.credentialInCreation = false;
+                  });
+                }
+            };
+
+            var blob = p12File.slice(0, p12File.size);
+            reader.readAsBinaryString(blob);
+
         }
 
         $scope.getAzureCertification = function(credentialId) {

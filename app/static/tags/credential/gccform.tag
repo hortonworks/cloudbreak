@@ -28,9 +28,9 @@
     </div>
 </div>
 <div class="form-group" ng-class="{ 'has-error': gccCredentialForm.gcccsubscriptionId.$dirty && gccCredentialForm.gcccsubscriptionId.$invalid }">
-    <label class="col-sm-3 control-label" for="gcccsubscriptionId">Service Account Id</label>
+    <label class="col-sm-3 control-label" for="gcccsubscriptionId">Service Account Email Address</label>
     <div class="col-sm-9">
-        <input type="text" class="form-control" ng-model="credentialGcc.parameters.serviceAccountId" id="gcccsubscriptionId" name="gcccsubscriptionId" required  placeholder="your subscription id">
+        <input type="text" class="form-control" ng-model="credentialGcc.parameters.serviceAccountId" id="gcccsubscriptionId" name="gcccsubscriptionId" required  placeholder="the email address of your Google service account">
         <div class="help-block" ng-show="gccCredentialForm.gcccsubscriptionId.$dirty && gccCredentialForm.gcccsubscriptionId.$invalid">
             <i class="fa fa-warning"></i> {{error_msg.credential_subscription_invalid}}
         </div>
@@ -40,13 +40,8 @@
 <div class="form-group" ng-class="{ 'has-error': gccCredentialForm.gcc_caccPrivateKey.$dirty && gccCredentialForm.gcc_caccPrivateKey.$invalid }">
     <label class="col-sm-3 control-label" for="gcc_caccPrivateKey">Service account private key:</label>
     <div class="col-sm-9">
-        <textarea rows="4" type="text" placeholder="-----BEGIN RSA PRIVATE KEY-----
-MIICXAIBAAKBgQ...
------END RSA PRIVATE KEY-----" class="form-control" name="gcc_caccPrivateKey" id="gcc_caccPrivateKey" ng-model="credentialGcc.parameters.serviceAccountPrivateKey"  required></textarea>
-            <div class="help-block" ng-show="gccCredentialForm.gcc_caccPrivateKey.$dirty && gccCredentialForm.gcc_caccPrivateKey.$invalid">
-                <i class="fa fa-warning"></i> {{error_msg.account_private_key_invalid}}
-            </div>
-        </div>
+        <input type="file" data-file="gcc.p12"/>
+    </div>
 </div>
 <div class="form-group" ng-class="{ 'has-error': gccCredentialForm.gcc_sshPublicKey.$dirty && gccCredentialForm.gcc_sshPublicKey.$invalid }">
     <label class="col-sm-3 control-label" for="gcc_sshPublicKey">SSH public key:</label>
@@ -59,6 +54,6 @@ MIICXAIBAAKBgQ...
 </div>
 <div class="row btn-row">
     <div class="col-sm-9 col-sm-offset-3">
-        <a id="createGccCredential" ng-disabled="gccCredentialForm.$invalid" ng-click="createGccCredential()" class="btn btn-success btn-block" role="button"><i class="fa fa-plus fa-fw"></i> create credential</a>
+        <a id="createGccCredential" ng-disabled="gccCredentialForm.$invalid || !gcc.p12" ng-click="createGccCredential()" class="btn btn-success btn-block" role="button"><i class="fa fa-plus fa-fw"></i> create credential</a>
     </div>
 </div>
