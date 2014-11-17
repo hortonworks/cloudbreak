@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
+import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
@@ -65,6 +66,9 @@ public class DefaultStackService implements StackService {
 
     @Autowired
     private DescribeContext describeContext;
+
+    @Autowired
+    private AmbariClusterConnector ambariClusterConnector;
 
     @Resource
     private Map<CloudPlatform, ProvisionSetup> provisionSetups;
@@ -209,6 +213,7 @@ public class DefaultStackService implements StackService {
     @Override
     public StackDescription getStackDescription(Stack stack) {
         MDCBuilder.buildMdcContext(stack);
+        ambariClusterConnector.checkClusterState(stack);
         CloudPlatform cp = stack.getTemplate().cloudPlatform();
         LOGGER.debug("Getting stack description for cloud platform: {} ...", cp);
         StackDescription description = describeContext.describeStackWithResources(stack);

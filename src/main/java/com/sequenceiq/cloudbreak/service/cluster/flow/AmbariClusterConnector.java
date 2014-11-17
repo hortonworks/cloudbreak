@@ -419,4 +419,41 @@ public class AmbariClusterConnector {
         LOGGER.info("Publishing {} event", ReactorConfig.UPDATE_AMBARI_HOSTS_FAILED_EVENT);
         reactor.notify(ReactorConfig.UPDATE_AMBARI_HOSTS_FAILED_EVENT, Event.wrap(new UpdateAmbariHostsFailure(cluster.getId(), message)));
     }
+
+    public void checkClusterState(Stack stack) {
+        MDCBuilder.buildMdcContext(stack.getCluster());
+        try {
+            if (clusterIsFailedState(stack)) {
+                AmbariClient ambariClient = createAmbariClient(stack.getAmbariIp());
+                Map<String, Map<String, String>> serviceComponentsMap = ambariClient.getServiceComponentsMap();
+                boolean available = true;
+                for (Entry<String, Map<String, String>> stringMapEntry : serviceComponentsMap.entrySet()) {
+                    for (Entry<String, String> stringStringEntry : stringMapEntry.getValue().entrySet()) {
+                        if (!"STARTED".equals(stringStringEntry.getValue()) && !stringStringEntry.getKey().endsWith("_CLIENT")) {
+                            available = false;
+                        }
+                    }
+                }
+                if (available) {
+                    Cluster cluster = clusterRepository.findById(stack.getCluster().getId());
+                    cluster.setStatus(Status.AVAILABLE);
+                    cluster.setStatusReason("");
+                    clusterRepository.save(cluster);
+                    stackUpdater.updateStackStatus(stack.getId(), Status.AVAILABLE, "");
+                }
+            }
+        } catch (Exception ex) {
+            LOGGER.error("There was a problem with the ambari.");
+        }
+
+    }
+
+    private boolean clusterIsFailedState(Stack stack) {
+        return (Status.CREATE_FAILED.equals(stack.getCluster().getStatus()) || Status.START_FAILED.equals(stack.getCluster().getStatus())
+                || Status.STOP_FAILED.equals(stack.getCluster().getStatus()) || Status.CREATE_IN_PROGRESS.equals(stack.getCluster().getStatus())
+                || Status.UPDATE_IN_PROGRESS.equals(stack.getCluster().getStatus()))
+                && (Status.CREATE_FAILED.equals(stack.getStatus()) || Status.START_FAILED.equals(stack.getStatus())
+                || Status.STOP_FAILED.equals(stack.getStatus()) || Status.CREATE_IN_PROGRESS.equals(stack.getStatus())
+                || Status.UPDATE_IN_PROGRESS.equals(stack.getStatus()));
+    }
 }
