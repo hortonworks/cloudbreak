@@ -124,12 +124,16 @@ public class GccStackUtil {
             FileOutputStream output = new FileOutputStream(p12file);
             IOUtils.write(Base64.decodeBase64(gccCredential.getServiceAccountPrivateKey()), output);
         }
-        return new GoogleCredential.Builder().setTransport(httpTransport)
+        GoogleCredential credential = new GoogleCredential.Builder().setTransport(httpTransport)
                 .setJsonFactory(JSON_FACTORY)
                 .setServiceAccountId(gccCredential.getServiceAccountId())
                 .setServiceAccountScopes(SCOPES)
                 .setServiceAccountPrivateKeyFromP12File(p12file)
                 .build();
+        if (gccCredential.getId() == null) {
+            p12file.delete();
+        }
+        return credential;
     }
 
     private String longName(String resourceName, String projectId) {

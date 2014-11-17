@@ -26,7 +26,6 @@ public class GccCredentialConverter extends AbstractConverter<CredentialJson, Gc
         credentialJson.setName(entity.getName());
         Map<String, Object> params = new HashMap<>();
         params.put(GccCredentialParam.SERVICE_ACCOUNT_ID.getName(), entity.getServiceAccountId());
-        params.put(GccCredentialParam.SERVICE_ACCOUNT_PRIVATE_KEY.getName(), entity.getServiceAccountPrivateKey());
         params.put(GccCredentialParam.PROJECTID.getName(), entity.getProjectId());
         credentialJson.setParameters(params);
         credentialJson.setDescription(entity.getDescription() == null ? "" : entity.getDescription());
