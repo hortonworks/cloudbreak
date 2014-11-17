@@ -291,7 +291,7 @@ public class RetryingStackUpdater {
         MDCBuilder.buildMdcContext(stack);
         stack.setResources(resources);
         stack = stackRepository.save(stack);
-        LOGGER.info("Updated stack resources: [status: '{}', statusReason: '{}'].");
+        LOGGER.info("Updated stack resources.");
         return stack;
     }
 
@@ -299,7 +299,7 @@ public class RetryingStackUpdater {
         Stack stack = stackRepository.findOneWithLists(stackId);
         stack.getResources().addAll(resources);
         stack = stackRepository.save(stack);
-        LOGGER.info("Updated stack resources: [status: '{}', statusReason: '{}'].");
+        LOGGER.info("Updated stack resources.");
         return stack;
     }
 
