@@ -297,7 +297,6 @@ public class RetryingStackUpdater {
 
     private Stack doAddResources(Long stackId, List<Resource> resources) {
         Stack stack = stackRepository.findOneWithLists(stackId);
-        MDCBuilder.buildMdcContext(stack);
         stack.getResources().addAll(resources);
         stack = stackRepository.save(stack);
         LOGGER.info("Updated stack resources: [status: '{}', statusReason: '{}'].");
