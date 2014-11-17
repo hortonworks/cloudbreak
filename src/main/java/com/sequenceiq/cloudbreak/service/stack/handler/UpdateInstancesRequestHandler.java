@@ -180,6 +180,7 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
                     LOGGER.info("Publishing {} event.", ReactorConfig.STACK_UPDATE_SUCCESS_EVENT);
                     reactor.notify(ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, Event.wrap(new StackUpdateSuccess(stack.getId(), true, instanceIds)));
                 }
+                //ADD BILLING CHANGED AT DOWNSCALE
             }
         } catch (AddInstancesFailedException e) {
             LOGGER.error(e.getMessage(), e);
