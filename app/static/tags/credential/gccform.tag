@@ -28,7 +28,7 @@
     </div>
 </div>
 <div class="form-group" ng-class="{ 'has-error': gccCredentialForm.gcccsubscriptionId.$dirty && gccCredentialForm.gcccsubscriptionId.$invalid }">
-    <label class="col-sm-3 control-label" for="gcccsubscriptionId">Service Account Id</label>
+    <label class="col-sm-3 control-label" for="gcccsubscriptionId">Service Account Email Address</label>
     <div class="col-sm-9">
         <input type="text" class="form-control" ng-model="credentialGcc.parameters.serviceAccountId" id="gcccsubscriptionId" name="gcccsubscriptionId" required  placeholder="your subscription id">
         <div class="help-block" ng-show="gccCredentialForm.gcccsubscriptionId.$dirty && gccCredentialForm.gcccsubscriptionId.$invalid">
