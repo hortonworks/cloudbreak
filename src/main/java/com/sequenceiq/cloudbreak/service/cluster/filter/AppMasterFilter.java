@@ -34,7 +34,7 @@ public class AppMasterFilter implements AmbariHostFilter {
         try {
             String resourceManagerAddress = config.get(ConfigParam.YARN_RM_WEB_ADDRESS.key());
             String appResponse = restTemplate.exchange(
-                    String.format("http://%s", resourceManagerAddress + AmbariHostFilterService.RM_WS_URL + "/apps?state=RUNNING"),
+                    String.format("http://%s", resourceManagerAddress + AmbariHostFilterService.RM_WS_PATH + "/apps?state=RUNNING"),
                     HttpMethod.GET, null, String.class).getBody();
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode jsonNode = objectMapper.readTree(appResponse);

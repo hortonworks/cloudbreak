@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
 @Service
 public class AmbariHostFilterService {
 
-    public static final String RM_WS_URL = "/ws/v1/cluster";
+    public static final String RM_WS_PATH = "/ws/v1/cluster";
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariClusterConnector.class);
 
     @Autowired

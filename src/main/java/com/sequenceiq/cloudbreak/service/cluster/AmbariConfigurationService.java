@@ -15,7 +15,7 @@ import com.sequenceiq.ambari.client.AmbariClient;
 public class AmbariConfigurationService {
 
     private static final List<String> CONFIG_LIST = new ArrayList<>(ConfigParam.values().length);
-    private static final String AZURE_ADDRESS = "cloudapp.net";
+    private static final String AZURE_ADDRESS_SUFFIX = "cloudapp.net";
 
     static {
         for (ConfigParam param : ConfigParam.values()) {
@@ -43,8 +43,8 @@ public class AmbariConfigurationService {
             String internalAddress = result.substring(0, portStartIndex);
             String publicAddress = ambariClient.resolveInternalHostName(internalAddress);
             if (internalAddress.equals(publicAddress)) {
-                if (internalAddress.contains(AZURE_ADDRESS)) {
-                    publicAddress = internalAddress.substring(0, internalAddress.indexOf(".") + 1) + AZURE_ADDRESS;
+                if (internalAddress.contains(AZURE_ADDRESS_SUFFIX)) {
+                    publicAddress = internalAddress.substring(0, internalAddress.indexOf(".") + 1) + AZURE_ADDRESS_SUFFIX;
                 }
             }
             result = publicAddress + result.substring(portStartIndex);
