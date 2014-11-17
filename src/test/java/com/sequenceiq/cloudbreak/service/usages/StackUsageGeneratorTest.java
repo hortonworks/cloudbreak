@@ -90,9 +90,9 @@ public class StackUsageGeneratorTest {
         Assert.assertTrue("The number of the generated usages is not the expected", usageList.size() == 11);
         Assert.assertEquals("The start day is wrong", DATE_FORMAT.format(startDate), DATE_FORMAT.format(usageList.get(0).getDay()));
         Assert.assertEquals("The stop day is wrong", DATE_FORMAT.format(stopDate), DATE_FORMAT.format(usageList.get(usageList.size() - 1).getDay()));
-        Assert.assertEquals("The calculated hours of the last day is invalid", "24", usageList.get(4).getRunningHours());
-        Assert.assertEquals("The calculated hours of the last day is invalid", "2", usageList.get(usageList.size() - 1).getRunningHours());
-        Assert.assertEquals("The calculated hours of the first day is invalid", "1", usageList.get(0).getRunningHours());
+        Assert.assertEquals("The calculated hours of the last day is invalid", Long.valueOf(24), usageList.get(4).getInstanceHours());
+        Assert.assertEquals("The calculated hours of the last day is invalid", Long.valueOf(2), usageList.get(usageList.size() - 1).getInstanceHours());
+        Assert.assertEquals("The calculated hours of the first day is invalid", Long.valueOf(1), usageList.get(0).getInstanceHours());
     }
 
     @Test
@@ -125,9 +125,9 @@ public class StackUsageGeneratorTest {
         Assert.assertEquals("The start day is wrong", DATE_FORMAT.format(startDate), DATE_FORMAT.format(usageList.get(0).getDay()));
         Assert.assertEquals("The stop day is wrong",
                 DATE_FORMAT.format(DATE_FORMAT.parse("2014-10-03")), DATE_FORMAT.format(usageList.get(usageList.size() - 1).getDay()));
-        Assert.assertEquals("The calculated hours of the last day is invalid", "24", usageList.get(4).getRunningHours());
-        Assert.assertEquals("The calculated hours of the last day is invalid", "24", usageList.get(usageList.size() - 1).getRunningHours());
-        Assert.assertEquals("The calculated hours of the first day is invalid", "1", usageList.get(0).getRunningHours());
+        Assert.assertEquals("The calculated hours of the last day is invalid", Long.valueOf(24), usageList.get(4).getInstanceHours());
+        Assert.assertEquals("The calculated hours of the last day is invalid", Long.valueOf(24), usageList.get(usageList.size() - 1).getInstanceHours());
+        Assert.assertEquals("The calculated hours of the first day is invalid", Long.valueOf(1), usageList.get(0).getInstanceHours());
     }
 
     @Test
@@ -157,9 +157,9 @@ public class StackUsageGeneratorTest {
         Assert.assertTrue("The number of the generated usages is not the expected", usageList.size() == 11);
         Assert.assertEquals("The start day is wrong", DATE_FORMAT.format(startDate), DATE_FORMAT.format(usageList.get(0).getDay()));
         Assert.assertEquals("The stop day is wrong", DATE_FORMAT.format(stopDate), DATE_FORMAT.format(usageList.get(usageList.size() - 1).getDay()));
-        Assert.assertEquals("The calculated hours of the last day is invalid", "24", usageList.get(4).getRunningHours());
-        Assert.assertEquals("The calculated hours of the last day is invalid", "2", usageList.get(usageList.size() - 1).getRunningHours());
-        Assert.assertEquals("The calculated hours of the first day is invalid", "1", usageList.get(0).getRunningHours());
+        Assert.assertEquals("The calculated hours of the last day is invalid", Long.valueOf(24), usageList.get(4).getInstanceHours());
+        Assert.assertEquals("The calculated hours of the last day is invalid", Long.valueOf(2), usageList.get(usageList.size() - 1).getInstanceHours());
+        Assert.assertEquals("The calculated hours of the first day is invalid", Long.valueOf(1), usageList.get(0).getInstanceHours());
     }
 
     @Test
@@ -181,7 +181,7 @@ public class StackUsageGeneratorTest {
 
         //THEN
         Assert.assertTrue("The number of the generated usages is not the expected", usageList.size() == 1);
-        Assert.assertEquals("The start day is wrong", "1", usageList.get(0).getRunningHours());
+        Assert.assertEquals("The start day is wrong", Long.valueOf(1), usageList.get(0).getInstanceHours());
     }
 
     @Test
@@ -207,7 +207,7 @@ public class StackUsageGeneratorTest {
 
         //THEN
         Assert.assertTrue("The number of the generated usages is not the expected", usageList.size() == 1);
-        Assert.assertEquals("The start day is wrong", "10", usageList.get(0).getRunningHours());
+        Assert.assertEquals("The start day is wrong", Long.valueOf(10), usageList.get(0).getInstanceHours());
     }
 
     @Test
@@ -232,8 +232,8 @@ public class StackUsageGeneratorTest {
 
         //THEN
         Assert.assertEquals("The number of the generated usages is not the expected", 2, usageList.size());
-        Assert.assertEquals("The start day is wrong", "10", usageList.get(0).getRunningHours());
-        Assert.assertEquals("The start day is wrong", "6", usageList.get(1).getRunningHours());
+        Assert.assertEquals("The start day is wrong", Long.valueOf(10), usageList.get(0).getInstanceHours());
+        Assert.assertEquals("The start day is wrong", Long.valueOf(6), usageList.get(1).getInstanceHours());
     }
 
     @Test
@@ -266,8 +266,8 @@ public class StackUsageGeneratorTest {
 
         //THEN
         Assert.assertTrue("The number of the generated usages is not the expected", usageList.size() == 2);
-        Assert.assertEquals("The start day is wrong", "4", usageList.get(0).getRunningHours());
-        Assert.assertEquals("The start day is wrong", "3", usageList.get(1).getRunningHours());
+        Assert.assertEquals("The start day is wrong", Long.valueOf(4), usageList.get(0).getInstanceHours());
+        Assert.assertEquals("The start day is wrong", Long.valueOf(3), usageList.get(1).getInstanceHours());
     }
 
     @Test
@@ -298,7 +298,7 @@ public class StackUsageGeneratorTest {
 
         // THEN
         Assert.assertTrue("The number of the generated usages is not the expected", usageList.size() == 1);
-        Assert.assertEquals("The start day is wrong", "3", usageList.get(0).getRunningHours());
+        Assert.assertEquals("The start day is wrong", Long.valueOf(3), usageList.get(0).getInstanceHours());
     }
 
     @Test
@@ -333,10 +333,10 @@ public class StackUsageGeneratorTest {
         // THEN
         sortByUsagesDate(usageList);
         Assert.assertEquals("The number of the generated usages is not the expected", 4, usageList.size());
-        Assert.assertEquals("The number of the running hours is not the expected", "23", usageList.get(0).getRunningHours());
-        Assert.assertEquals("The number of the running hours is not the expected", "24", usageList.get(1).getRunningHours());
-        Assert.assertEquals("The number of the running hours is not the expected", "1", usageList.get(2).getRunningHours());
-        Assert.assertEquals("The number of the running hours is not the expected", "1", usageList.get(3).getRunningHours());
+        Assert.assertEquals("The number of the running hours is not the expected", Long.valueOf(23), usageList.get(0).getInstanceHours());
+        Assert.assertEquals("The number of the running hours is not the expected", Long.valueOf(24), usageList.get(1).getInstanceHours());
+        Assert.assertEquals("The number of the running hours is not the expected", Long.valueOf(1), usageList.get(2).getInstanceHours());
+        Assert.assertEquals("The number of the running hours is not the expected", Long.valueOf(1), usageList.get(3).getInstanceHours());
     }
 
     @Test
@@ -368,8 +368,8 @@ public class StackUsageGeneratorTest {
 
         // THEN
         Assert.assertEquals("The number of the generated usages is not the expected", 2, usageList.size());
-        Assert.assertEquals("The number of the running hours is not the expected", "1", usageList.get(0).getRunningHours());
-        Assert.assertEquals("The number of the running hours is not the expected", "1", usageList.get(1).getRunningHours());
+        Assert.assertEquals("The number of the running hours is not the expected", Long.valueOf(1), usageList.get(0).getInstanceHours());
+        Assert.assertEquals("The number of the running hours is not the expected", Long.valueOf(1), usageList.get(1).getInstanceHours());
     }
 
     @Test
@@ -391,7 +391,7 @@ public class StackUsageGeneratorTest {
         // THEN
         verify(eventRepository).save(any(CloudbreakEvent.class));
         Assert.assertEquals("The number of the generated usages is not the expected", 1, usageList.size());
-        Assert.assertEquals("The number of the running hours is not the expected", "14", usageList.get(0).getRunningHours());
+        Assert.assertEquals("The number of the running hours is not the expected", Long.valueOf(14), usageList.get(0).getInstanceHours());
     }
 
     @Test
@@ -417,9 +417,9 @@ public class StackUsageGeneratorTest {
         verify(eventRepository).save(any(CloudbreakEvent.class));
         sortByUsagesDate(usageList);
         Assert.assertEquals("The number of the generated usages is not the expected", 3, usageList.size());
-        Assert.assertEquals("The number of the running hours is not the expected", "14", usageList.get(0).getRunningHours());
-        Assert.assertEquals("The number of the running hours is not the expected", "24", usageList.get(1).getRunningHours());
-        Assert.assertEquals("The number of the running hours is not the expected", "24", usageList.get(2).getRunningHours());
+        Assert.assertEquals("The number of the running hours is not the expected", Long.valueOf(14), usageList.get(0).getInstanceHours());
+        Assert.assertEquals("The number of the running hours is not the expected", Long.valueOf(24), usageList.get(1).getInstanceHours());
+        Assert.assertEquals("The number of the running hours is not the expected", Long.valueOf(24), usageList.get(2).getInstanceHours());
     }
 
     @Test
@@ -445,9 +445,9 @@ public class StackUsageGeneratorTest {
         verify(eventRepository).save(any(CloudbreakEvent.class));
         sortByUsagesDate(usageList);
         Assert.assertEquals("The number of the generated usages is not the expected", 3, usageList.size());
-        Assert.assertEquals("The number of the running hours is not the expected", "14", usageList.get(0).getRunningHours());
-        Assert.assertEquals("The number of the running hours is not the expected", "24", usageList.get(1).getRunningHours());
-        Assert.assertEquals("The number of the running hours is not the expected", "24", usageList.get(2).getRunningHours());
+        Assert.assertEquals("The number of the running hours is not the expected", Long.valueOf(14), usageList.get(0).getInstanceHours());
+        Assert.assertEquals("The number of the running hours is not the expected", Long.valueOf(24), usageList.get(1).getInstanceHours());
+        Assert.assertEquals("The number of the running hours is not the expected", Long.valueOf(24), usageList.get(2).getInstanceHours());
     }
 
     @Test
@@ -473,9 +473,9 @@ public class StackUsageGeneratorTest {
         verify(eventRepository).save(any(CloudbreakEvent.class));
         sortByUsagesDate(usageList);
         Assert.assertEquals("The number of the generated usages is not the expected", 3, usageList.size());
-        Assert.assertEquals("The number of the running hours is not the expected", "14", usageList.get(0).getRunningHours());
-        Assert.assertEquals("The number of the running hours is not the expected", "24", usageList.get(1).getRunningHours());
-        Assert.assertEquals("The number of the running hours is not the expected", "24", usageList.get(2).getRunningHours());
+        Assert.assertEquals("The number of the running hours is not the expected", Long.valueOf(14), usageList.get(0).getInstanceHours());
+        Assert.assertEquals("The number of the running hours is not the expected", Long.valueOf(24), usageList.get(1).getInstanceHours());
+        Assert.assertEquals("The number of the running hours is not the expected", Long.valueOf(24), usageList.get(2).getInstanceHours());
     }
 
     private void sortByUsagesDate(List<CloudbreakUsage> usageList) {

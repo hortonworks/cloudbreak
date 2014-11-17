@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.domain.CbUsageFilterParameters;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.repository.CloudbreakUsageRepository;
 import com.sequenceiq.cloudbreak.repository.CloudbreakUsageSpecifications;
@@ -17,17 +18,19 @@ public class DefaultCloudbreakUsagesRetrievalService implements CloudbreakUsages
     private CloudbreakUsageRepository usageRepository;
 
     @Override
-    public List<CloudbreakUsage> findUsagesFor(String account, String owner, Long since, String cloud,
-            String zone, String vmtype, String hours) {
+    public List<CloudbreakUsage> findUsagesFor(CbUsageFilterParameters params) {
+        String instanceHours = String.valueOf(params.getInstanceHours());
 
         List<CloudbreakUsage> usages = usageRepository.findAll(
-                Specifications.where(CloudbreakUsageSpecifications.usagesWithStringFields("account", account))
-                .and(CloudbreakUsageSpecifications.usagesWithStringFields("owner", owner))
-                .and(CloudbreakUsageSpecifications.usagesSince(since))
-                .and(CloudbreakUsageSpecifications.usagesWithStringFields("cloud", cloud))
-                .and(CloudbreakUsageSpecifications.usagesWithStringFields("zone", zone))
-                .and(CloudbreakUsageSpecifications.usagesWithStringFields("machineType", vmtype))
-                .and(CloudbreakUsageSpecifications.usagesWithStringFields("runningHours", hours)));
+                Specifications.where(CloudbreakUsageSpecifications.usagesWithStringFields("account", params.getAccount()))
+                .and(CloudbreakUsageSpecifications.usagesWithStringFields("owner", params.getOwner()))
+                .and(CloudbreakUsageSpecifications.usagesSince(params.getSince()))
+                .and(CloudbreakUsageSpecifications.usagesWithStringFields("cloud", params.getCloud()))
+                .and(CloudbreakUsageSpecifications.usagesWithStringFields("zone", params.getRegion()))
+                .and(CloudbreakUsageSpecifications.usagesWithStringFields("machineType", params.getVmType()))
+                .and(CloudbreakUsageSpecifications.usagesWithStringFields("blueprintName", params.getBpName()))
+                .and(CloudbreakUsageSpecifications.usagesWithLongField("instanceHours", params.getInstanceHours()))
+                .and(CloudbreakUsageSpecifications.usagesWithLongField("blueprintId", params.getBpId())));
         return usages;
     }
 }

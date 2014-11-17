@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.domain;
 import java.util.Date;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
@@ -39,6 +41,10 @@ public class CloudbreakEvent implements ProvisionEntity {
     private String blueprintName;
     private long blueprintId;
     private Long stackId;
+    private String stackName;
+
+    @Enumerated(EnumType.STRING)
+    private Status stackStatus;
 
     public Long getId() {
         return id;
@@ -134,6 +140,22 @@ public class CloudbreakEvent implements ProvisionEntity {
 
     public void setStackId(Long stackId) {
         this.stackId = stackId;
+    }
+
+    public Status getStackStatus() {
+        return stackStatus;
+    }
+
+    public void setStackStatus(Status stackStatus) {
+        this.stackStatus = stackStatus;
+    }
+
+    public String getStackName() {
+        return stackName;
+    }
+
+    public void setStackName(String stackName) {
+        this.stackName = stackName;
     }
 
     @Override

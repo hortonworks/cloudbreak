@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sequenceiq.cloudbreak.controller.json.CloudbreakUsageJson;
+import com.sequenceiq.cloudbreak.domain.CbUsageFilterParameters;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.facade.CloudbreakUsagesFacade;
 
@@ -31,8 +32,12 @@ public class CloudbreakUsageController {
             @RequestParam(value = "cloud", required = false) String cloud,
             @RequestParam(value = "zone", required = false) String zone,
             @RequestParam(value = "vmtype", required = false) String vmtype,
-            @RequestParam(value = "hours", required = false) String hours) {
-        List<CloudbreakUsageJson> usages = cloudbreakUsagesFacade.getUsagesFor(accountId, userId, since, cloud, zone, vmtype, hours);
+            @RequestParam(value = "hours", required = false) Long hours,
+            @RequestParam(value = "blueprintname", required = false) String bpName,
+            @RequestParam(value = "blueprintid", required = false) Long bpId) {
+        CbUsageFilterParameters params = new CbUsageFilterParameters.Builder().setAccount(accountId).setOwner(userId).setSince(since).setCloud(cloud)
+                .setRegion(zone).setVmType(vmtype).setInstanceHours(hours).setBpId(bpId).setBpName(bpName).build();
+        List<CloudbreakUsageJson> usages = cloudbreakUsagesFacade.getUsagesFor(params);
         return new ResponseEntity<>(usages, HttpStatus.OK);
     }
 
@@ -44,8 +49,12 @@ public class CloudbreakUsageController {
             @RequestParam(value = "cloud", required = false) String cloud,
             @RequestParam(value = "zone", required = false) String zone,
             @RequestParam(value = "vmtype", required = false) String vmtype,
-            @RequestParam(value = "hours", required = false) String hours) {
-        List<CloudbreakUsageJson> usages = cloudbreakUsagesFacade.getUsagesFor(user.getAccount(), userId, since, cloud, zone, vmtype, hours);
+            @RequestParam(value = "hours", required = false) Long hours,
+            @RequestParam(value = "blueprintname", required = false) String bpName,
+            @RequestParam(value = "blueprintid", required = false) Long bpId) {
+        CbUsageFilterParameters params = new CbUsageFilterParameters.Builder().setAccount(user.getAccount()).setOwner(userId).setSince(since)
+                .setCloud(cloud).setRegion(zone).setVmType(vmtype).setInstanceHours(hours).setBpId(bpId).setBpName(bpName).build();
+        List<CloudbreakUsageJson> usages = cloudbreakUsagesFacade.getUsagesFor(params);
         return new ResponseEntity<>(usages, HttpStatus.OK);
     }
 
@@ -56,8 +65,12 @@ public class CloudbreakUsageController {
             @RequestParam(value = "cloud", required = false) String cloud,
             @RequestParam(value = "zone", required = false) String zone,
             @RequestParam(value = "vmtype", required = false) String vmtype,
-            @RequestParam(value = "hours", required = false) String hours) {
-        List<CloudbreakUsageJson> usages = cloudbreakUsagesFacade.getUsagesFor(user.getAccount(), user.getUserId(), since, cloud, zone, vmtype, hours);
+            @RequestParam(value = "hours", required = false) Long hours,
+            @RequestParam(value = "blueprintname", required = false) String bpName,
+            @RequestParam(value = "blueprintid", required = false) Long bpId) {
+        CbUsageFilterParameters params = new CbUsageFilterParameters.Builder().setAccount(user.getAccount()).setOwner(user.getUserId()).setSince(since)
+                .setCloud(cloud).setRegion(zone).setVmType(vmtype).setInstanceHours(hours).setBpId(bpId).setBpName(bpName).build();
+        List<CloudbreakUsageJson> usages = cloudbreakUsagesFacade.getUsagesFor(params);
         return new ResponseEntity<>(usages, HttpStatus.OK);
     }
 
