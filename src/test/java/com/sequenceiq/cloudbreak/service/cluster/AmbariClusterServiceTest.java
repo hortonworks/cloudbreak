@@ -62,6 +62,9 @@ public class AmbariClusterServiceTest {
     @Mock
     private HttpResponseException mockedException;
 
+    @Mock
+    private AmbariClientService clientService;
+
     private Stack stack;
 
     private ClusterRequest clusterRequest;
@@ -85,7 +88,7 @@ public class AmbariClusterServiceTest {
     @Test(expected = InternalServerException.class)
     public void testRetrieveClusterJsonWhenClusterJsonIsNull() throws HttpResponseException {
         // GIVEN
-        doReturn(ambariClient).when(underTest).createAmbariClient(anyString());
+        doReturn(ambariClient).when(clientService).create(anyString());
         given(ambariClient.getClusterAsJson()).willReturn(null);
         // WHEN
         underTest.getClusterJson("123.12.3.4", 1L);
@@ -94,7 +97,7 @@ public class AmbariClusterServiceTest {
     @Test(expected = InternalServerException.class)
     public void testRetrieveClusterJsonThrowsHttpResponseException() throws HttpResponseException {
         // GIVEN
-        doReturn(ambariClient).when(underTest).createAmbariClient(anyString());
+        doReturn(ambariClient).when(clientService).create(anyString());
         given(ambariClient.getClusterAsJson()).willThrow(mockedException);
         given(mockedException.getMessage()).willReturn(null);
         // WHEN

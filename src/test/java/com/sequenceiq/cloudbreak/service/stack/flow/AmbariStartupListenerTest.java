@@ -19,6 +19,7 @@ import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.cluster.AmbariClientService;
 import com.sequenceiq.cloudbreak.service.stack.connector.aws.AwsStackUtil;
 
 import reactor.core.Reactor;
@@ -44,6 +45,9 @@ public class AmbariStartupListenerTest {
     @Mock
     private StackRepository stackRepository;
 
+    @Mock
+    private AmbariClientService clientService;
+
     private Stack stack;
 
     @Before
@@ -57,7 +61,7 @@ public class AmbariStartupListenerTest {
     @Ignore
     public void testWaitForAmbariServer() {
         // GIVEN
-        doReturn(ambariClient).when(underTest).createAmbariClient(anyString());
+        doReturn(ambariClient).when(clientService).create(anyString());
         given(ambariClient.healthCheck()).willReturn("RUNNING");
         given(stackRepository.findOneWithLists(1L)).willReturn(stack);
         // doNothing().when(awsStackUtil).sleep(anyInt());
@@ -71,7 +75,7 @@ public class AmbariStartupListenerTest {
     @Ignore
     public void testWaitForAmbariServerWhenOperationTimedOut() {
         // GIVEN
-        doReturn(ambariClient).when(underTest).createAmbariClient(anyString());
+        doReturn(ambariClient).when(clientService).create(anyString());
         given(ambariClient.healthCheck()).willReturn("dummyState");
         given(stackRepository.findOneWithLists(1L)).willReturn(stack);
         //doNothing().when(awsStackUtil).sleep(anyInt());
@@ -85,7 +89,7 @@ public class AmbariStartupListenerTest {
     @Ignore
     public void testWaitForAmbariServerWhenAmbariHealthCheckFailed() {
         // GIVEN
-        doReturn(ambariClient).when(underTest).createAmbariClient(anyString());
+        doReturn(ambariClient).when(clientService).create(anyString());
         given(ambariClient.healthCheck()).willThrow(new IllegalStateException());
         given(stackRepository.findOneWithLists(1L)).willReturn(stack);
         // doNothing().when(awsStackUtil).sleep(anyInt());

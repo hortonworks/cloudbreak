@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.ambari.client.InvalidHostGroupHostAssociation;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
@@ -37,7 +36,7 @@ import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
-import com.sequenceiq.cloudbreak.service.cluster.AmbariClusterService;
+import com.sequenceiq.cloudbreak.service.cluster.AmbariClientService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariHostsUnavailableException;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
 import com.sequenceiq.cloudbreak.service.cluster.HadoopConfigurationService;
@@ -87,6 +86,9 @@ public class AmbariClusterConnector {
     @Autowired
     private HadoopConfigurationService hadoopConfigurationService;
 
+    @Autowired
+    private AmbariClientService clientService;
+
     public void installAmbariCluster(Stack stack) {
         Cluster cluster = stack.getCluster();
         MDCBuilder.buildMdcContext(cluster);
@@ -96,7 +98,7 @@ public class AmbariClusterConnector {
             cluster.setCreationStarted(new Date().getTime());
             cluster = clusterRepository.save(cluster);
             Blueprint blueprint = cluster.getBlueprint();
-            AmbariClient ambariClient = createAmbariClient(stack.getAmbariIp());
+            AmbariClient ambariClient = clientService.create(stack);
 
             addBlueprint(stack, ambariClient, blueprint);
             Map<String, List<String>> hostGroupMappings = recommend(stack, ambariClient, blueprint.getBlueprintName());
@@ -119,7 +121,7 @@ public class AmbariClusterConnector {
         MDCBuilder.buildMdcContext(cluster);
         try {
             stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS);
-            AmbariClient ambariClient = createAmbariClient(stack.getAmbariIp());
+            AmbariClient ambariClient = clientService.create(stack);
             waitForHosts(stack, ambariClient);
             Map<String, String> hosts = findHosts(stack.getId(), hostGroupAdjustments);
             addHostMetadata(cluster, hosts);
@@ -146,7 +148,7 @@ public class AmbariClusterConnector {
         LOGGER.info("Decommission requested");
         try {
             stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS);
-            AmbariClient ambariClient = createAmbariClient(stack.getAmbariIp());
+            AmbariClient ambariClient = clientService.create(stack);
             Set<HostMetadata> metadataToRemove = new HashSet<>();
             Map<String, Integer> decommissionRequests = new HashMap<>();
             Map<String, List<String>> hostsWithComponents = new HashMap<>();
@@ -200,11 +202,6 @@ public class AmbariClusterConnector {
         }
     }
 
-    @VisibleForTesting
-    protected AmbariClient createAmbariClient(String ambariIp) {
-        return new AmbariClient(ambariIp, AmbariClusterService.PORT);
-    }
-
     public boolean stopCluster(Stack stack) {
         return setClusterState(stack, true);
     }
@@ -246,7 +243,7 @@ public class AmbariClusterConnector {
     private boolean setClusterState(Stack stack, boolean stopped) {
         MDCBuilder.buildMdcContext(stack);
         boolean result = true;
-        AmbariClient ambariClient = new AmbariClient(stack.getAmbariIp(), AmbariClusterService.PORT);
+        AmbariClient ambariClient = clientService.create(stack);
         String action = stopped ? "stop" : "start";
         int requestId = -1;
         try {
@@ -424,7 +421,7 @@ public class AmbariClusterConnector {
         MDCBuilder.buildMdcContext(stack.getCluster());
         try {
             if (clusterIsFailedState(stack)) {
-                AmbariClient ambariClient = createAmbariClient(stack.getAmbariIp());
+                AmbariClient ambariClient = clientService.create(stack);
                 Map<String, Map<String, String>> serviceComponentsMap = ambariClient.getServiceComponentsMap();
                 boolean available = true;
                 for (Entry<String, Map<String, String>> stringMapEntry : serviceComponentsMap.entrySet()) {

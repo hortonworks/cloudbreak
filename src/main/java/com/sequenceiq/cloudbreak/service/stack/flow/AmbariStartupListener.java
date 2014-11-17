@@ -5,12 +5,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.cluster.AmbariClientService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariHostsUnavailableException;
 import com.sequenceiq.cloudbreak.service.stack.connector.aws.AwsStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.event.StackCreationSuccess;
@@ -38,12 +38,15 @@ public class AmbariStartupListener {
     @Autowired
     private StackRepository stackRepository;
 
+    @Autowired
+    private AmbariClientService clientService;
+
     public void waitForAmbariServer(Long stackId, String ambariIp) {
         Stack stack = stackRepository.findById(stackId);
         MDCBuilder.buildMdcContext(stack);
         try {
             boolean ambariRunning = false;
-            AmbariClient ambariClient = createAmbariClient(ambariIp);
+            AmbariClient ambariClient = clientService.create(stack);
             int pollingAttempt = 0;
             LOGGER.info("Starting polling of Ambari server's status [Ambari server IP: '{}'].", ambariIp);
             while (!ambariRunning && !(pollingAttempt >= MAX_POLLING_ATTEMPTS)) {
@@ -74,8 +77,4 @@ public class AmbariStartupListener {
         }
     }
 
-    @VisibleForTesting
-    protected AmbariClient createAmbariClient(String ambariIp) {
-        return new AmbariClient(ambariIp);
-    }
 }
