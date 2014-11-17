@@ -39,7 +39,7 @@
         <label class="col-sm-3 control-label" for="vmType">VM type</label>
 
         <div class="col-sm-9">
-            <p id="vmType" class="form-control-static">{{azureVmTypes[template.parameters.vmType]}}</p>
+            <p id="vmType" class="form-control-static" ng-repeat="item in $root.config.AZURE.azureVmTypes | filter:{key: template.parameters.vmType}">{{item.value}}</p>
         </div>
         <!-- .col-sm-9 -->
     </div>
@@ -57,7 +57,7 @@
         <label class="col-sm-3 control-label" for="location">Location</label>
 
         <div class="col-sm-9">
-            <p id="location" class="form-control-static">{{azureRegions[template.parameters.location]}}</p>
+            <p id="location" class="form-control-static" ng-repeat="item in $root.config.AZURE.azureRegions | filter:{key: template.parameters.location}">{{item.value}}</p>
         </div>
         <!-- .col-sm-9 -->
     </div>

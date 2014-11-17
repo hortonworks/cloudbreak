@@ -18,15 +18,10 @@
     </div>
 </div>
 <div class="form-group">
-    <label class="col-sm-3 control-label" for="gcc_tregion">VolumeType</label>
+    <label class="col-sm-3 control-label" for="gcc_tregion">Region</label>
     <div class="col-sm-9">
         <select class="form-control" id="gcc_tregion" ng-model="gccTemp.parameters.gccZone">
-            <option value="ASIA_EAST1_A">asia-east1-a</option>
-            <option value="ASIA_EAST1_B">asia-east1-b</option>
-            <option value="EUROPE_WEST1_B">europe-west1-b</option>
-            <option value="US_CENTRAL1_A">us-central1-a</option>
-            <option value="US_CENTRAL1_B">us-central1-b</option>
-            <option value="US_CENTRAL1_F">us-central1-f</option>
+            <option ng-repeat="region in $root.config.GCC.gccRegions" value="{{region.key}}">{{region.value}}</option>
         </select>
     </div>
 </div>
@@ -34,19 +29,7 @@
     <label class="col-sm-3 control-label" for="gcc_tinstanceType">Instance type</label>
     <div class="col-sm-9">
         <select class="form-control" id="gcc_tinstanceType" ng-model="gccTemp.parameters.gccInstanceType">
-            <option value="N1_STANDARD_1">n1-standard-1</option>
-            <option value="N1_STANDARD_2">n1-standard-2</option>
-            <option value="N1_STANDARD_4">n1-standard-4</option>
-            <option value="N1_STANDARD_8">n1-standard-8</option>
-            <option value="N1_STANDARD_16">n1-standard-16</option>
-            <option value="N1_HIGHCPU_2">n1-highcpu-2</option>
-            <option value="N1_HIGHCPU_4">n1-highcpu-4</option>
-            <option value="N1_HIGHCPU_8">n1-highcpu-8</option>
-            <option value="N1_HIGHCPU_16">n1-highcpu-16</option>
-            <option value="N1_HIGHMEM_2">n1-highmem-2</option>
-            <option value="N1_HIGHMEM_4">n1-highmem-4</option>
-            <option value="N1_HIGHMEM_8">n1-highmem-8</option>
-            <option value="N1_HIGHMEM_16">n1-highmem-16</option>
+            <option ng-repeat="instanceType in $root.config.GCC.gccInstanceTypes" value="{{instanceType.key}}">{{instanceType.value}}</option>
         </select>
     </div>
 </div>
@@ -73,8 +56,7 @@
     <label class="col-sm-3 control-label" for="gcc_tvolumetype">Volume type</label>
     <div class="col-sm-9">
         <select class="form-control" id="gcc_tvolumetype" ng-model="gccTemp.parameters.volumeType">
-            <option value="HDD">Magnetic</option>
-            <option value="SSD">SSD</option>
+            <option ng-repeat="diskType in $root.config.GCC.gccDiskTypes" value="{{diskType.key}}">{{diskType.value}}</option>
         </select>
     </div>
 </div>

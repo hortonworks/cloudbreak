@@ -83,25 +83,9 @@
             <div>
                 <select class="form-control input-sm" id="region" ng-model="localFilter.zone">
                     <option>all</option>
-                    <option value="US_EAST_1">US East(N. Virginia)</option>
-                    <option value="US_WEST_1">US West (N. California)</option>
-                    <option value="US_WEST_2">US West (Oregon)</option>
-                    <option value="EU_WEST_1">EU (Ireland)</option>
-                    <option value="AP_SOUTHEAST_1">Asia Pacific (Singapore)</option>
-                    <option value="AP_SOUTHEAST_2">Asia Pacific (Sydney)</option>
-                    <option value="AP_NORTHEAST_1">Asia Pacific (Tokyo)</option>
-                    <option value="SA_EAST_1">South America (São Paulo)</option>
-                    <option value="BRAZIL_SOUTH">Brazil South</option>
-                    <option value="EAST_ASIA">East Asia</option>
-                    <option value="EAST_US">East US</option>
-                    <option value="NORTH_EUROPE">North Europe</option>
-                    <option value="WEST_US">West US</option>
-                    <option value="US_CENTRAL1_A">us-central1-a</option>
-                    <option value="US_CENTRAL1_B">us-central1-b</option>
-                    <option value="US_CENTRAL1_F">us-central1-f</option>
-                    <option value="EUROPE_WEST1_B">europe-west1-b</option>
-                    <option value="ASIA_EAST1_A">asia-east1-a</option>
-                    <option value="ASIA_EAST1_B">asia-east1-b</option>
+                    <option ng-repeat="region in $root.config.AWS.awsRegions" value="{{region.key}}">{{region.value}}</option>
+                    <option ng-repeat="region in $root.config.AZURE.azureRegions" value="{{region.key}}">{{region.value}}</option>
+                    <option ng-repeat="region in $root.config.GCC.gccRegions" value="{{region.key}}">{{region.value}}</option>
                 </select>
             </div>
         </div>
@@ -111,30 +95,9 @@
             <div>
                 <select class="form-control input-sm" id="instanceType" ng-model="localFilter.vmtype">
                     <option>any</option>
-                    <option>n1-standard-1</option>
-                    <option>n1-standard-2</option>
-                    <option>n1-standard-4</option>
-                    <option>n1-standard-8</option>
-                    <option>n1-standard-16</option>
-                    <option>n1-highmem-2</option>
-                    <option>n1-highmem-4</option>
-                    <option>n1-highmem-8</option>
-                    <option>n1-highmem-16</option>
-                    <option>n1-highcpu-2</option>
-                    <option>n1-highcpu-4</option>
-                    <option>n1-highcpu-8</option>
-                    <option>n1-highcpu-16</option>
-                    <option>SMALL</option>
-                    <option>MEDIUM</option>
-                    <option>LARGE</option>
-                    <option>EXTRA_LARGE</option>
-                    <option>T2Micro</option>
-                    <option>T2Small</option>
-                    <option>T2Medium</option>
-                    <option>M3Medium</option>
-                    <option>M3Large</option>
-                    <option>M3Xlarge</option>
-                    <option>M32xlarge</option>
+                    <option ng-repeat="instanceType in $root.config.AWS.instanceType" value="{{instanceType.key}}">{{instanceType.value}}</option>
+                    <option ng-repeat="vmType in $root.config.AZURE.azureVmTypes" value="{{vmType.key}}">{{vmType.value}}</option>
+                    <option ng-repeat="instanceType in $root.config.GCC.gccInstanceTypes" value="{{instanceType.key}}">{{instanceType.value}}</option>
                 </select>
             </div>
         </div>
