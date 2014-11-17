@@ -60,6 +60,16 @@ uluwatuServices.factory('UserStack', ['$resource',
         return $resource('user/stacks');
     }]);
 
+uluwatuServices.factory('UserUsages', ['$resource',
+    function ($resource) {
+        return $resource('user/usages?:param');
+    }]);
+
+uluwatuServices.factory('UserEvents', ['$resource',
+    function ($resource) {
+        return $resource('events');
+    }]);
+
 uluwatuServices.factory('Cluster', ['$resource',
     function ($resource) {
         return $resource('stacks/:id/cluster', null, { 'update': { method:'PUT' } });

@@ -21,7 +21,7 @@
         <label class="col-sm-3 control-label" for="gcclgccZone">Zone</label>
 
         <div class="col-sm-9">
-            <p id="gcclgccZone" class="form-control-static">{{gccRegions[template.parameters.gccZone]}}</p>
+            <p id="gcclgccZone" class="form-control-static" ng-repeat="item in $root.config.GCC.gccRegions | filter:{key: template.parameters.gccZone}">{{item.value}}</p>
         </div>
         <!-- .col-sm-9 -->
     </div>
@@ -31,7 +31,7 @@
         <label class="col-sm-3 control-label" for="gcclgccInstanceType">Instance Type</label>
 
         <div class="col-sm-9">
-            <p id="gcclgccInstanceType" class="form-control-static">{{gccInstanceTypes[template.parameters.gccInstanceType]}}</p>
+            <p id="gcclgccInstanceType" class="form-control-static" ng-repeat="item in $root.config.GCC.gccInstanceTypes | filter:{key: template.parameters.gccInstanceType}">{{item.value}}</p>
         </div>
         <!-- .col-sm-9 -->
     </div>
@@ -56,7 +56,7 @@
         <label class="col-sm-3 control-label" for="gcclgccVolumeType">VolumeType</label>
 
         <div class="col-sm-9">
-            <p id="gcclgccVolumeType" class="form-control-static">{{gccDiskTypes[template.parameters.volumeType]}}</p>
+            <p id="gcclgccVolumeType" class="form-control-static" ng-repeat="item in $root.config.GCC.gccDiskTypes | filter:{key: template.parameters.volumeType}">{{item.value}}</p>
         </div>
         <!-- .col-sm-9 -->
     </div>

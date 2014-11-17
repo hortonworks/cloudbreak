@@ -102,6 +102,10 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
            addClusterListPanelJQEventListeners();
         }
 
+        $scope.addDatePickerPanelJQueryEventListeners = function() {
+            addDatePickerPanelJQueryEventListeners();
+        }
+
         $scope.addCrudControls = function() {
           addCrudControls();
         }

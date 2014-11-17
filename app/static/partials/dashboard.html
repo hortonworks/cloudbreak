@@ -1,4 +1,4 @@
-<div data-spy="scroll" data-target="#notification-controls" jquery-event-listener-registrar>
+<div data-spy="scroll" data-target="#notification-controls" jquery-event-listener-registrar ng-controller="mainController">
 
 <!-- NAVBAR ............................................................... -->
 
@@ -24,6 +24,8 @@
 
                 <!-- ........ USER DROPDOWN ................................................ -->
 
+                <li><a data-value="cred-002" ng-click="showManagement()" ng-disabled="managementShow"><i class="fa fa-cloud fa-fw"></i> dashboard</a></li>
+                <li><a data-value="cred-003" ng-click="showEvents()" ng-disabled="eventShow"><i class="fa fa-table fa-fw"></i> account management</a></li>
                 <li class="dropdown">
                     <a href="" class="dropdown-toggle" data-toggle="dropdown">
                         <i class="fa fa-user fa-fw"></i> {{user.email}} <b class="caret"></b>
@@ -32,6 +34,7 @@
                         <li><a href="/logout" data-value="cred-001"><i class="fa fa-sign-out fa-fw"></i> logout</a></li>
                     </ul>
                 </li>
+
 
                 <!-- ........ CREDENTIALS DROPDOWN ......................................... -->
 
@@ -141,23 +144,30 @@
 </section>
 
 
-<section class="management-panels">
-<div class="container-fluid">
-<div class="row">
-    <div ng-include onload="addPanelJQueryEventListeners('templates')" src="'tags/templatepanel.tag'"></div>
-</div>
-<div class="row">
-    <div ng-include onload="addPanelJQueryEventListeners('blueprints')" src="'tags/blueprintpanel.tag'"></div>
-</div>
-<!-- .row -->
-<div class="row">
+<section class="management-panels" ng-show="managementShow" >
+    <div class="container-fluid">
+        <div class="row">
+            <div ng-include onload="addPanelJQueryEventListeners('templates')" src="'tags/templatepanel.tag'"></div>
+        </div>
+        <div class="row">
+            <div ng-include onload="addPanelJQueryEventListeners('blueprints')" src="'tags/blueprintpanel.tag'"></div>
+        </div>
+        <div class="row">
+            <div ng-include onload="addPanelJQueryEventListeners('credentials')" src="'tags/credentialpanel.tag'"></div>
+        </div>
+    </div>
+</section>
 
-    <div ng-include onload="addPanelJQueryEventListeners('credentials')" src="'tags/credentialpanel.tag'"></div>
-
-</div>
-<!-- .row -->
-</div>
-<!-- .container-fluid -->
+<section class="management-panels" ng-show="eventShow">
+    <link href="css/Admin.min.css" rel="stylesheet">
+    <div class="container-fluid">
+        <div class="row">
+            <div ng-include onload="addPanelJQueryEventListeners('usages'); addDatePickerPanelJQueryEventListeners()" src="'tags/usagepanel.tag'"></div>
+        </div>
+        <div class="row">
+            <div ng-include onload="addPanelJQueryEventListeners('events')" src="'tags/eventpanel.tag'"></div>
+        </div>
+    </div>
 </section>
 
 

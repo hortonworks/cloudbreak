@@ -40,7 +40,12 @@ var environmentSet = true;
 var clientId = process.env.ULU_OAUTH_CLIENT_ID;
 var clientSecret = process.env.ULU_OAUTH_CLIENT_SECRET;
 var redirectUri = process.env.ULU_OAUTH_REDIRECT_URI;
-var clientScopes = 'openid+cloudbreak.templates+cloudbreak.credentials+cloudbreak.blueprints+cloudbreak.stacks';
+var clientScopes = 'openid' +
+    '+cloudbreak.templates' +
+    '+cloudbreak.credentials' +
+    '+cloudbreak.blueprints' +
+    '+cloudbreak.stacks' +
+    '+cloudbreak.usages.global+cloudbreak.events+cloudbreak.usages.account+cloudbreak.usages.user';
 var identityServerAddress = process.env.ULU_IDENTITY_ADDRESS
 var sultansAddress = process.env.ULU_SULTANS_ADDRESS
 var cloudbreakAddress = process.env.ULU_CLOUDBREAK_ADDRESS
@@ -89,7 +94,7 @@ identityServerClient.registerMethod("retrieveToken", identityServerAddress + "oa
 
 var cbRequestArgs = {
   headers:{
-    "Content-Type": "application/json",
+    "Content-Type": "application/json"
   }
 }
 

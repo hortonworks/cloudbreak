@@ -75,7 +75,7 @@ cloudbreakApp.config([ '$routeProvider', '$locationProvider', '$httpProvider', f
         }
     }];
 
-    $httpProvider.responseInterceptors.push(authInterceptor);
+    $httpProvider.interceptors.push(authInterceptor);
 
 } ]);
 

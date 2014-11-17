@@ -28,11 +28,7 @@
 
     <div class="col-sm-9">
         <select class="form-control" id="azure_tlocation" ng-model="azureTemp.parameters.location" required>
-            <option value="BRAZIL_SOUTH">Brazil South</option>
-            <option value="EAST_ASIA">East Asia</option>
-            <option value="EAST_US">East US</option>
-            <option value="NORTH_EUROPE">North Europe</option>
-            <option value="WEST_US">West US</option>
+            <option ng-repeat="region in $root.config.AZURE.azureRegions" value="{{region.key}}">{{region.value}}</option>
         </select>
     </div>
     <!-- .col-sm-9 -->
@@ -42,10 +38,7 @@
     <label class="col-sm-3 control-label" for="azure_tvmType">Instance type</label>
     <div class="col-sm-9">
         <select class="form-control" id="azure_tvmType" ng-model="azureTemp.parameters.vmType" required>
-            <option value="SMALL">Small</option>
-            <option value="MEDIUM">Medium</option>
-            <option value="LARGE">Large</option>
-            <option value="EXTRA_LARGE">Extra Large</option>
+            <option ng-repeat="vmType in $root.config.AZURE.azureVmTypes" value="{{vmType.key}}">{{vmType.value}}</option>
         </select>
     </div>
     <!-- .col-sm-9 -->
