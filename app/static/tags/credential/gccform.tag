@@ -30,7 +30,7 @@
 <div class="form-group" ng-class="{ 'has-error': gccCredentialForm.gcccsubscriptionId.$dirty && gccCredentialForm.gcccsubscriptionId.$invalid }">
     <label class="col-sm-3 control-label" for="gcccsubscriptionId">Service Account Email Address</label>
     <div class="col-sm-9">
-        <input type="text" class="form-control" ng-model="credentialGcc.parameters.serviceAccountId" id="gcccsubscriptionId" name="gcccsubscriptionId" required  placeholder="your subscription id">
+        <input type="text" class="form-control" ng-model="credentialGcc.parameters.serviceAccountId" id="gcccsubscriptionId" name="gcccsubscriptionId" required  placeholder="the email address of your Google service account">
         <div class="help-block" ng-show="gccCredentialForm.gcccsubscriptionId.$dirty && gccCredentialForm.gcccsubscriptionId.$invalid">
             <i class="fa fa-warning"></i> {{error_msg.credential_subscription_invalid}}
         </div>
@@ -54,6 +54,6 @@
 </div>
 <div class="row btn-row">
     <div class="col-sm-9 col-sm-offset-3">
-        <a id="createGccCredential" ng-disabled="gccCredentialForm.$invalid" ng-click="createGccCredential()" class="btn btn-success btn-block" role="button"><i class="fa fa-plus fa-fw"></i> create credential</a>
+        <a id="createGccCredential" ng-disabled="gccCredentialForm.$invalid || !gcc.p12" ng-click="createGccCredential()" class="btn btn-success btn-block" role="button"><i class="fa fa-plus fa-fw"></i> create credential</a>
     </div>
 </div>
