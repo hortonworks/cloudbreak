@@ -2,7 +2,7 @@
 
 /* App Module */
 
-var cloudbreakApp = angular.module('cloudbreakApp', ['ngRoute', 'uluwatuControllers', 'uluwatuServices']);
+var cloudbreakApp = angular.module('cloudbreakApp', ['ngRoute', 'base64', 'uluwatuControllers', 'uluwatuServices']);
 
 
 cloudbreakApp.directive('match', function($parse) {
@@ -31,6 +31,20 @@ cloudbreakApp.directive('validjson', function($parse) {
                 } catch (err){}
                 ctrl.$setValidity('validjson', valid);
                 return valid ? json : undefined;
+            });
+        }
+    };
+});
+
+cloudbreakApp.directive('file', function(){
+    return {
+        scope: {
+            file: '='
+        },
+        link: function(scope, el, attrs){
+             el.bind('change', function(event){
+                scope.file = event.target.files[0];
+                scope.$apply();
             });
         }
     };

@@ -40,13 +40,8 @@
 <div class="form-group" ng-class="{ 'has-error': gccCredentialForm.gcc_caccPrivateKey.$dirty && gccCredentialForm.gcc_caccPrivateKey.$invalid }">
     <label class="col-sm-3 control-label" for="gcc_caccPrivateKey">Service account private key:</label>
     <div class="col-sm-9">
-        <textarea rows="4" type="text" placeholder="-----BEGIN RSA PRIVATE KEY-----
-MIICXAIBAAKBgQ...
------END RSA PRIVATE KEY-----" class="form-control" name="gcc_caccPrivateKey" id="gcc_caccPrivateKey" ng-model="credentialGcc.parameters.serviceAccountPrivateKey"  required></textarea>
-            <div class="help-block" ng-show="gccCredentialForm.gcc_caccPrivateKey.$dirty && gccCredentialForm.gcc_caccPrivateKey.$invalid">
-                <i class="fa fa-warning"></i> {{error_msg.account_private_key_invalid}}
-            </div>
-        </div>
+        <input type="file" data-file="gcc.p12"/>
+    </div>
 </div>
 <div class="form-group" ng-class="{ 'has-error': gccCredentialForm.gcc_sshPublicKey.$dirty && gccCredentialForm.gcc_sshPublicKey.$invalid }">
     <label class="col-sm-3 control-label" for="gcc_sshPublicKey">SSH public key:</label>
