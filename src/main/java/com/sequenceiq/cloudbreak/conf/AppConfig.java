@@ -12,6 +12,8 @@ import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.client.RestOperations;
+import org.springframework.web.client.RestTemplate;
 
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
@@ -94,6 +96,11 @@ public class AppConfig {
         executor.setThreadNamePrefix("resourceBuilderExecutor-");
         executor.initialize();
         return executor;
+    }
+
+    @Bean
+    public RestOperations createRestTemplate() {
+        return new RestTemplate();
     }
 
 }

@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
@@ -68,6 +67,9 @@ public class AmbariClusterService implements ClusterService {
     @Autowired
     private Reactor reactor;
 
+    @Autowired
+    private AmbariClientService clientService;
+
     @Override
     public void create(CbUser user, Long stackId, Cluster cluster) {
         Stack stack = stackRepository.findOne(stackId);
@@ -99,7 +101,7 @@ public class AmbariClusterService implements ClusterService {
     public String getClusterJson(String ambariIp, Long stackId) {
         Stack stack = stackRepository.findOne(stackId);
         MDCBuilder.buildMdcContext(stack);
-        AmbariClient ambariClient = createAmbariClient(ambariIp);
+        AmbariClient ambariClient = clientService.create(ambariIp);
         try {
             String clusterJson = ambariClient.getClusterAsJson();
             if (clusterJson == null) {
@@ -169,11 +171,6 @@ public class AmbariClusterService implements ClusterService {
             reactor.notify(ReactorConfig.CLUSTER_STATUS_UPDATE_EVENT,
                     Event.wrap(new ClusterStatusUpdateRequest(stack.getId(), statusRequest)));
         }
-    }
-
-    @VisibleForTesting
-    protected AmbariClient createAmbariClient(String ambariIp) {
-        return new AmbariClient(ambariIp, PORT);
     }
 
     private boolean validateRequest(Stack stack, Set<HostGroupAdjustmentJson> hostGroupAdjustments) {

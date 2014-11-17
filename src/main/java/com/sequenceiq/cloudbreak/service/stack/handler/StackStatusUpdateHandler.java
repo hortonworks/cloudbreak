@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
+import com.sequenceiq.cloudbreak.service.cluster.AmbariClientService;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterStatusUpdateRequest;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariHealthCheckerTask;
@@ -82,6 +83,9 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
 
     @Autowired
     private CloudbreakEventService cloudbreakEventService;
+
+    @Autowired
+    private AmbariClientService clientService;
 
     @Override
     public void accept(Event<StackStatusUpdateRequest> event) {
@@ -201,7 +205,7 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
     private void waitForAmbariToStart(Stack stack) {
         ambariHealthChecker.pollWithTimeout(
                 new AmbariHealthCheckerTask(),
-                new AmbariClient(stack.getAmbariIp()),
+                clientService.create(stack),
                 AmbariClusterConnector.POLLING_INTERVAL,
                 AmbariClusterConnector.MAX_ATTEMPTS_FOR_HOSTS);
     }
