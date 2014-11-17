@@ -55,7 +55,7 @@ public class GccProvisionSetup implements ProvisionSetup {
         MDCBuilder.buildMdcContext(stack);
         try {
             Storage storage = gccStackUtil.buildStorage((GccCredential) stack.getCredential(), stack);
-            Compute compute = gccStackUtil.buildCompute((GccCredential) stack.getCredential(), stack.getName());
+            Compute compute = gccStackUtil.buildCompute((GccCredential) stack.getCredential(), stack);
             GccTemplate template = (GccTemplate) stack.getTemplate();
             GccCredential credential = (GccCredential) stack.getCredential();
             ImageList list = compute.images().list(credential.getProjectId()).execute();

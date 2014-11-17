@@ -1,17 +1,16 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.gcc;
 
-import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.StringReader;
 import java.security.GeneralSecurityException;
-import java.security.KeyPair;
-import java.security.Security;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.openssl.PEMReader;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -42,30 +41,27 @@ public class GccStackUtil {
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
     private static final List<String> SCOPES = Arrays.asList(ComputeScopes.COMPUTE, StorageScopes.DEVSTORAGE_FULL_CONTROL);
 
-    public Compute buildCompute(GccCredential gccCredential, String appName) {
+    public Compute buildCompute(GccCredential gccCredential) {
         MDCBuilder.buildMdcContext(gccCredential);
+        return buildCompute(gccCredential, gccCredential.getName());
+    }
+
+    public Compute buildCompute(GccCredential gccCredential, Stack stack) {
+        MDCBuilder.buildMdcContext(stack);
+        return buildCompute(gccCredential, stack.getName());
+    }
+
+    public Storage buildStorage(GccCredential gccCredential, Stack stack) {
+        MDCBuilder.buildMdcContext(stack);
         try {
             HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-            BufferedReader br = new BufferedReader(new StringReader(gccCredential.getServiceAccountPrivateKey()));
-            Security.addProvider(new BouncyCastleProvider());
-            KeyPair kp = (KeyPair) new PEMReader(br).readObject();
-            GoogleCredential credential = new GoogleCredential.Builder().setTransport(httpTransport)
-                    .setJsonFactory(JSON_FACTORY)
-                    .setServiceAccountId(gccCredential.getServiceAccountId())
-                    .setServiceAccountScopes(SCOPES)
-                    .setServiceAccountPrivateKey(kp.getPrivate())
-                    .build();
-            Compute compute = new Compute.Builder(
-                    httpTransport, JSON_FACTORY, null).setApplicationName(appName)
+            GoogleCredential credential = buildGoogleCredential(gccCredential, httpTransport);
+            return new Storage.Builder(
+                    httpTransport, JSON_FACTORY, null).setApplicationName(stack.getName())
                     .setHttpRequestInitializer(credential)
                     .build();
-            return compute;
-        } catch (GeneralSecurityException e) {
-            LOGGER.info("Problem with the Google cloud stack generation: " + e.getMessage());
-        } catch (IOException e) {
-            LOGGER.info("Problem with the Google cloud stack generation: " + e.getMessage());
         } catch (Exception e) {
-            LOGGER.info("Problem with the Google cloud stack generation: " + e.getMessage());
+            LOGGER.error("Something unexpected happened while building Google Storage access.", e);
         }
         return null;
     }
@@ -82,34 +78,6 @@ public class GccStackUtil {
             }
         }
         return disks;
-    }
-
-    public Storage buildStorage(GccCredential gccCredential, Stack stack) {
-        MDCBuilder.buildMdcContext(stack);
-        try {
-            HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-            BufferedReader br = new BufferedReader(new StringReader(gccCredential.getServiceAccountPrivateKey()));
-            Security.addProvider(new BouncyCastleProvider());
-            KeyPair kp = (KeyPair) new PEMReader(br).readObject();
-            GoogleCredential credential = new GoogleCredential.Builder().setTransport(httpTransport)
-                    .setJsonFactory(JSON_FACTORY)
-                    .setServiceAccountId(gccCredential.getServiceAccountId())
-                    .setServiceAccountScopes(SCOPES)
-                    .setServiceAccountPrivateKey(kp.getPrivate())
-                    .build();
-            Storage storage = new Storage.Builder(
-                    httpTransport, JSON_FACTORY, null).setApplicationName(stack.getName())
-                    .setHttpRequestInitializer(credential)
-                    .build();
-            return storage;
-        } catch (GeneralSecurityException e) {
-            LOGGER.info("Problem with the Google cloud stack generation: " + e.getMessage());
-        } catch (IOException e) {
-            LOGGER.info("Problem with the Google cloud stack generation: " + e.getMessage());
-        } catch (Exception e) {
-            LOGGER.info("Problem with the Google cloud stack generation: " + e.getMessage());
-        }
-        return null;
     }
 
     public CoreInstanceMetaData getMetadata(Stack stack, Compute compute, String resource) {
@@ -133,6 +101,39 @@ public class GccStackUtil {
             LOGGER.error(String.format("Instance %s is not reachable: %s", resource, e.getMessage()), e);
         }
         return null;
+    }
+
+    private Compute buildCompute(GccCredential gccCredential, String appName) {
+        try {
+            HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+            GoogleCredential credential = buildGoogleCredential(gccCredential, httpTransport);
+            return new Compute.Builder(
+                    httpTransport, JSON_FACTORY, null).setApplicationName(appName)
+                    .setHttpRequestInitializer(credential)
+                    .build();
+        } catch (Exception e) {
+            LOGGER.error("Something unexpected happened while building Google Compute access.", e);
+        }
+        return null;
+    }
+
+    private GoogleCredential buildGoogleCredential(GccCredential gccCredential, HttpTransport httpTransport) throws IOException, GeneralSecurityException {
+        String p12path = gccCredential.getId() == null ? "/tmp/" + new Date().getTime() + ".p12" : "/tmp/" + gccCredential.getId() + ".p12";
+        File p12file = new File(p12path);
+        if (!p12file.exists()) {
+            FileOutputStream output = new FileOutputStream(p12file);
+            IOUtils.write(Base64.decodeBase64(gccCredential.getServiceAccountPrivateKey()), output);
+        }
+        GoogleCredential credential = new GoogleCredential.Builder().setTransport(httpTransport)
+                .setJsonFactory(JSON_FACTORY)
+                .setServiceAccountId(gccCredential.getServiceAccountId())
+                .setServiceAccountScopes(SCOPES)
+                .setServiceAccountPrivateKeyFromP12File(p12file)
+                .build();
+        if (gccCredential.getId() == null) {
+            p12file.delete();
+        }
+        return credential;
     }
 
     private String longName(String resourceName, String projectId) {
