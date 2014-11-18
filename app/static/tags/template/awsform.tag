@@ -3,7 +3,7 @@
         <label class="col-sm-3 control-label" for="aws_tclusterName">Name</label>
 
         <div class="col-sm-9">
-            <input type="text" class="form-control" ng-pattern="/^[a-zA-Z][-a-zA-Z0-9]*$/" name="aws_tclusterName" ng-model="awsTemp.name" ng-minlength="5" ng-maxlength="20" required id="aws_tclusterName" placeholder="min. 5 max. 20 char">
+            <input type="text" class="form-control" ng-pattern="/^[a-zA-Z][-a-zA-Z0-9]*$/" name="aws_tclusterName" ng-model="awsTemp.name" ng-minlength="5" ng-maxlength="100" required id="aws_tclusterName" placeholder="min. 5 max. 100 char">
             <div class="help-block" ng-show="awsTemplateForm.aws_tclusterName.$dirty && awsTemplateForm.aws_tclusterName.$invalid">
                 <i class="fa fa-warning"></i> {{error_msg.template_name_invalid}}
             </div>
@@ -16,7 +16,7 @@
         <label class="col-sm-3 control-label" for="aws_tdescription">Description</label>
 
         <div class="col-sm-9">
-            <input type="text" class="form-control" name="aws_tdescription" ng-model="awsTemp.description" ng-maxlength="50" id="aws_tdescription" placeholder="max. 50 char">
+            <input type="text" class="form-control" name="aws_tdescription" ng-model="awsTemp.description" ng-maxlength="1000" id="aws_tdescription" placeholder="max. 1000 char">
             <div class="help-block" ng-show="awsTemplateForm.aws_tdescription.$dirty && awsTemplateForm.aws_tdescription.$invalid">
                 <i class="fa fa-warning"></i> {{error_msg.template_description_invalid}}
             </div>

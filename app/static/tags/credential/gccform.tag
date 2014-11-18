@@ -1,7 +1,7 @@
 <div class="form-group" ng-class="{ 'has-error': gccCredentialForm.gcccname.$dirty && gccCredentialForm.gcccname.$invalid }">
     <label class="col-sm-3 control-label" for="gcccname">Name</label>
     <div class="col-sm-9">
-        <input type="text" ng-pattern="/^[a-zA-Z][-a-zA-Z0-9]*$/" class="form-control" ng-model="credentialGcc.name" id="gcccname" name="gcccname" ng-minlength="5"  ng-model="credentialGcc.name"  ng-maxlength="20" required placeholder="min. 5 max. 20 char">
+        <input type="text" ng-pattern="/^[a-zA-Z][-a-zA-Z0-9]*$/" class="form-control" ng-model="credentialGcc.name" id="gcccname" name="gcccname" ng-minlength="5"  ng-model="credentialGcc.name"  ng-maxlength="100" required placeholder="min. 5 max. 100 char">
 
         <div class="help-block" ng-show="gccCredentialForm.gcccname.$dirty && gccCredentialForm.gcccname.$invalid">
             <i class="fa fa-warning"></i> {{error_msg.credential_name_invalid}}
@@ -11,7 +11,7 @@
 <div class="form-group" ng-class="{ 'has-error': gccCredentialForm.gcccdescription.$dirty && gccCredentialForm.gcccdescription.$invalid }">
     <label class="col-sm-3 control-label" for="gcccdescription">Description</label>
     <div class="col-sm-9">
-        <input type="text" class="form-control" id="gcccdescription" ng-model="credentialGcc.description" name="gcccdescription" ng-maxlength="50"  placeholder="max. 50 char">
+        <input type="text" class="form-control" id="gcccdescription" ng-model="credentialGcc.description" name="gcccdescription" ng-maxlength="1000"  placeholder="max. 1000 char">
         <div class="help-block" ng-show="gccCredentialForm.gcccdescription.$dirty && gccCredentialForm.gcccdescription.$invalid">
             <i class="fa fa-warning"></i> {{error_msg.credential_description_invalid}}
         </div>

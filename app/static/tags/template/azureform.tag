@@ -2,7 +2,7 @@
     <label class="col-sm-3 control-label" for="azure_tclusterName">Name</label>
 
     <div class="col-sm-9">
-        <input type="text" ng-pattern="/^[a-zA-Z][-a-zA-Z0-9]*$/" class="form-control" id="azure_tclusterName" name="azure_tclusterName" ng-model="azureTemp.name" ng-minlength="5" ng-maxlength="20" required placeholder="min. 5 max. 20 char">
+        <input type="text" ng-pattern="/^[a-zA-Z][-a-zA-Z0-9]*$/" class="form-control" id="azure_tclusterName" name="azure_tclusterName" ng-model="azureTemp.name" ng-minlength="5" ng-maxlength="100" required placeholder="min. 5 max. 100 char">
         <div class="help-block" ng-show="azureTemplateForm.azure_tclusterName.$dirty && azureTemplateForm.azure_tclusterName.$invalid">
             <i class="fa fa-warning"></i> {{error_msg.template_name_invalid}}
         </div>
@@ -14,7 +14,7 @@
     <label class="col-sm-3 control-label" for="azure_tdescription">Description</label>
 
     <div class="col-sm-9">
-        <input type="text" class="form-control" id="azure_tdescription" name="azure_tdescription" ng-model="azureTemp.description" ng-maxlength="50" placeholder="max. 50 char">
+        <input type="text" class="form-control" id="azure_tdescription" name="azure_tdescription" ng-model="azureTemp.description" ng-maxlength="1000" placeholder="max. 1000 char">
         <div class="help-block" ng-show="azureTemplateForm.azure_tdescription.$dirty && azureTemplateForm.azure_tdescription.$invalid">
             <i class="fa fa-warning"></i> {{error_msg.template_description_invalid}}
         </div>
