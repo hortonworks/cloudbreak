@@ -63,9 +63,9 @@ public class AwsCredentialInitializer {
         MDCBuilder.buildMdcContext(awsCredential);
         try {
             crossAccountCredentialsProvider.retrieveSessionCredentials(CrossAccountCredentialsProvider.DEFAULT_SESSION_CREDENTIALS_DURATION,
-                    CrossAccountCredentialsProvider.DEFAULT_EXTERNAL_ID, awsCredential);
+                    crossAccountCredentialsProvider.getExternalId(), awsCredential);
         } catch (Exception e) {
-            String errorMessage = String.format("Could not assume role [roleArn:'%s'], detailed message: %s", awsCredential.getRoleArn(), e.getMessage());
+            String errorMessage = String.format("Could not assume role '%s': check if the role exists and if it's created with the correct external ID: '%s' ", awsCredential.getRoleArn(), crossAccountCredentialsProvider.getExternalId());
             LOGGER.error(errorMessage, e);
             throw new BadRequestException(errorMessage, e);
         }

@@ -30,7 +30,7 @@ public class AwsStackUtil {
         MDCBuilder.buildMdcContext(credential);
         BasicSessionCredentials basicSessionCredentials = credentialsProvider
                 .retrieveSessionCredentials(CrossAccountCredentialsProvider.DEFAULT_SESSION_CREDENTIALS_DURATION,
-                        CrossAccountCredentialsProvider.DEFAULT_EXTERNAL_ID, credential);
+                        credentialsProvider.getExternalId(), credential);
         AmazonCloudFormationClient amazonCloudFormationClient = new AmazonCloudFormationClient(basicSessionCredentials);
         amazonCloudFormationClient.setRegion(Region.getRegion(regions));
         LOGGER.info("Amazon CloudFormation client successfully created.");
@@ -41,7 +41,7 @@ public class AwsStackUtil {
         MDCBuilder.buildMdcContext(credential);
         BasicSessionCredentials basicSessionCredentials = credentialsProvider
                 .retrieveSessionCredentials(CrossAccountCredentialsProvider.DEFAULT_SESSION_CREDENTIALS_DURATION,
-                        CrossAccountCredentialsProvider.DEFAULT_EXTERNAL_ID, credential);
+                        credentialsProvider.getExternalId(), credential);
         AmazonEC2Client amazonEC2Client = new AmazonEC2Client(basicSessionCredentials);
         amazonEC2Client.setRegion(Region.getRegion(regions));
         LOGGER.info("Amazon EC2 client successfully created.");
@@ -52,7 +52,7 @@ public class AwsStackUtil {
         MDCBuilder.buildMdcContext(credential);
         BasicSessionCredentials basicSessionCredentials = credentialsProvider
                 .retrieveSessionCredentials(CrossAccountCredentialsProvider.DEFAULT_SESSION_CREDENTIALS_DURATION,
-                        CrossAccountCredentialsProvider.DEFAULT_EXTERNAL_ID, credential);
+                        credentialsProvider.getExternalId(), credential);
         AmazonAutoScalingClient amazonAutoScalingClient = new AmazonAutoScalingClient(basicSessionCredentials);
         amazonAutoScalingClient.setRegion(Region.getRegion(regions));
         LOGGER.info("Amazon Autoscaling client successfully created.");
@@ -63,7 +63,7 @@ public class AwsStackUtil {
         MDCBuilder.buildMdcContext(credential);
         BasicSessionCredentials basicSessionCredentials = credentialsProvider
                 .retrieveSessionCredentials(CrossAccountCredentialsProvider.DEFAULT_SESSION_CREDENTIALS_DURATION,
-                        CrossAccountCredentialsProvider.DEFAULT_EXTERNAL_ID, credential);
+                        credentialsProvider.getExternalId(), credential);
         AmazonSNSClient amazonSNSClient = new AmazonSNSClient(basicSessionCredentials);
         amazonSNSClient.setRegion(Region.getRegion(region));
         LOGGER.info("Amazon SNS client successfully created.");

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.credential.aws;
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.auth.BasicSessionCredentials;
@@ -27,9 +28,11 @@ import com.sequenceiq.cloudbreak.repository.TemporaryAwsCredentialsRepository;
 public class CrossAccountCredentialsProvider {
 
     public static final int DEFAULT_SESSION_CREDENTIALS_DURATION = 3600;
-    public static final String DEFAULT_EXTERNAL_ID = "provision-ambari";
     private static final int MILLISECONDS = 1000;
     private static final int FIVE_MINUTES = 300000;
+
+    @Value("${cb.aws.external.id:sequenceiq-cb}")
+    private String externalId;
 
     @Autowired
     private TemporaryAwsCredentialsRepository credentialsRepository;
@@ -87,6 +90,9 @@ public class CrossAccountCredentialsProvider {
         credentialsRepository.save(temporaryAwsCredentials);
         awsCredential.setTemporaryAwsCredentials(temporaryAwsCredentials);
         credentialRepository.save(awsCredential);
+    }
 
+    public String getExternalId() {
+        return externalId;
     }
 }
