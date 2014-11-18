@@ -5,7 +5,7 @@ import javax.validation.constraints.Size;
 
 public class ClusterRequest {
 
-    @Size(max = 100, min = 5, message = "Name has to be min 5 letter maximum 50 length")
+    @Size(max = 40, min = 5, message = "Name has to be min 5 letter maximum 40 length")
     @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
             message = "Must contain only alphanumeric characters (case sensitive) and hyphens and start with an alpha character.")
     private String name;

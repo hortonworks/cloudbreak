@@ -22,7 +22,7 @@ public class StackJson implements JsonEntity {
     @Max(value = 100000, message = "Count of nodes has to be max 100000")
     @Digits(fraction = 0, integer = 10, message = "Node count has to be a number")
     private int nodeCount;
-    @Size(max = 40, min = 5, message = "Name has to be min 5 letter maximum 50 length")
+    @Size(max = 40, min = 5, message = "Name has to be min 5 letter maximum 40 length")
     @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
             message = "Must contain only alphanumeric characters (case sensitive) and hyphens and start with an alpha character.")
     private String name;
