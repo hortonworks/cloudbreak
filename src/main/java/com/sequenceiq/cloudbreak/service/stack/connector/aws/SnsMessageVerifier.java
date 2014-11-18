@@ -50,41 +50,41 @@ public class SnsMessageVerifier {
     }
 
     private static String buildNotificationStringToSign(SnsRequest msg) {
-        String stringToSign = null;
-        stringToSign = "Message\n";
-        stringToSign += msg.getMessage() + "\n";
-        stringToSign += "MessageId\n";
-        stringToSign += msg.getMessageId() + "\n";
+        StringBuilder stringBuilder = new StringBuilder()
+                .append("Message\n")
+                .append(msg.getMessage() + "\n")
+                .append("MessageId\n")
+                .append(msg.getMessageId() + "\n");
         if (msg.getSubject() != null) {
-            stringToSign += "Subject\n";
-            stringToSign += msg.getSubject() + "\n";
+            stringBuilder.append("Subject\n")
+                    .append(msg.getSubject() + "\n");
         }
-        stringToSign += "Timestamp\n";
-        stringToSign += msg.getTimestamp() + "\n";
-        stringToSign += "TopicArn\n";
-        stringToSign += msg.getTopicArn() + "\n";
-        stringToSign += "Type\n";
-        stringToSign += msg.getType() + "\n";
-        return stringToSign;
+        stringBuilder.append("Timestamp\n")
+                .append(msg.getTimestamp() + "\n")
+                .append("TopicArn\n")
+                .append(msg.getTopicArn() + "\n")
+                .append("Type\n")
+                .append(msg.getType() + "\n");
+        return stringBuilder.toString();
     }
 
     private static String buildSubscriptionStringToSign(SnsRequest msg) {
-        String stringToSign = null;
-        stringToSign = "Message\n";
-        stringToSign += msg.getMessage() + "\n";
-        stringToSign += "MessageId\n";
-        stringToSign += msg.getMessageId() + "\n";
-        stringToSign += "SubscribeURL\n";
-        stringToSign += msg.getSubscribeURL() + "\n";
-        stringToSign += "Timestamp\n";
-        stringToSign += msg.getTimestamp() + "\n";
-        stringToSign += "Token\n";
-        stringToSign += msg.getToken() + "\n";
-        stringToSign += "TopicArn\n";
-        stringToSign += msg.getTopicArn() + "\n";
-        stringToSign += "Type\n";
-        stringToSign += msg.getType() + "\n";
-        return stringToSign;
+        StringBuilder stringBuilder = new StringBuilder()
+                .append("Message\n")
+                .append(msg.getMessage() + "\n")
+                .append("MessageId\n")
+                .append(msg.getMessageId() + "\n")
+                .append("SubscribeURL\n")
+                .append(msg.getSubscribeURL() + "\n")
+                .append("Timestamp\n")
+                .append(msg.getTimestamp() + "\n")
+                .append("Token\n")
+                .append(msg.getToken() + "\n")
+                .append("TopicArn\n")
+                .append(msg.getTopicArn() + "\n")
+                .append("Type\n")
+                .append(msg.getType() + "\n");
+        return stringBuilder.toString();
     }
 
 }
