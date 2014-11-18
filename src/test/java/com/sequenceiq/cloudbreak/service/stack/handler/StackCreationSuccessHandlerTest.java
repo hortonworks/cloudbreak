@@ -14,11 +14,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
+import com.sequenceiq.cloudbreak.service.cluster.AmbariClientService;
 import com.sequenceiq.cloudbreak.service.stack.event.StackCreationSuccess;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 
@@ -43,6 +45,12 @@ public class StackCreationSuccessHandlerTest {
     @Mock
     private Reactor reactor;
 
+    @Mock
+    private AmbariClientService clientService;
+
+    @Mock
+    private AmbariClient ambariClient;
+
     private Event<StackCreationSuccess> event;
 
     private Stack stack;
@@ -59,12 +67,14 @@ public class StackCreationSuccessHandlerTest {
     public void testAcceptStackCreationSuccessEvent() {
         // GIVEN
         given(stackUpdater.updateAmbariIp(anyLong(), anyString())).willReturn(stack);
+        given(clientService.createDefault(anyString())).willReturn(ambariClient);
         given(stackUpdater.updateStackStatus(anyLong(), any(Status.class))).willReturn(stack);
         given(stackUpdater.updateStackStatusReason(anyLong(), anyString())).willReturn(stack);
         doNothing().when(websocketService).sendToTopicUser(anyString(), any(WebsocketEndPoint.class), any());
         // WHEN
         underTest.accept(event);
         // THEN
+        verify(ambariClient).changePassword("admin", "admin", stack.getPassword(), true);
         verify(websocketService, times(1)).sendToTopicUser(anyString(), any(WebsocketEndPoint.class), any());
         verify(reactor, times(1)).notify(any(ReactorConfig.class), any(Event.class));
     }
@@ -78,6 +88,7 @@ public class StackCreationSuccessHandlerTest {
         Stack stack = new Stack();
         stack.setName(STACK_NAME);
         stack.setOwner(DUMMY_EMAIL);
+        stack.setPassword("pass");
         return stack;
     }
 }

@@ -104,6 +104,8 @@ public class Stack implements ProvisionEntity {
     private boolean stackCompleted;
 
     private String ambariIp;
+    private String userName = "admin";
+    private String password;
 
     @Column(columnDefinition = "TEXT")
     private String statusReason;
@@ -228,6 +230,22 @@ public class Stack implements ProvisionEntity {
 
     public String getAmbariIp() {
         return ambariIp;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public void setAmbariIp(String ambariIp) {

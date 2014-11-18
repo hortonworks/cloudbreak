@@ -35,6 +35,8 @@ public class StackJson implements JsonEntity {
     private Long credentialId;
     private Status status;
     private String ambariServerIp;
+    private String userName;
+    private String password;
     private String hash;
     private ClusterResponse cluster;
     private String statusReason;
@@ -67,6 +69,22 @@ public class StackJson implements JsonEntity {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public Long getTemplateId() {

@@ -11,11 +11,11 @@ public class AmbariClientService {
     private static final String PORT = "8080";
 
     public AmbariClient create(Stack stack) {
-        return create(stack.getAmbariIp());
+        return new AmbariClient(stack.getAmbariIp(), PORT, stack.getUserName(), stack.getPassword());
     }
 
-    public AmbariClient create(String ambariAddress) {
-        return new AmbariClient(ambariAddress, PORT);
+    public AmbariClient createDefault(String ambariAddress) {
+        return new AmbariClient(ambariAddress);
     }
 
 }

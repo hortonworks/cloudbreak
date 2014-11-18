@@ -101,7 +101,7 @@ public class AmbariClusterService implements ClusterService {
     public String getClusterJson(String ambariIp, Long stackId) {
         Stack stack = stackRepository.findOne(stackId);
         MDCBuilder.buildMdcContext(stack);
-        AmbariClient ambariClient = clientService.create(ambariIp);
+        AmbariClient ambariClient = clientService.create(stack);
         try {
             String clusterJson = ambariClient.getClusterAsJson();
             if (clusterJson == null) {
