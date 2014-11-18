@@ -65,7 +65,8 @@ public class AwsCredentialInitializer {
             crossAccountCredentialsProvider.retrieveSessionCredentials(CrossAccountCredentialsProvider.DEFAULT_SESSION_CREDENTIALS_DURATION,
                     crossAccountCredentialsProvider.getExternalId(), awsCredential);
         } catch (Exception e) {
-            String errorMessage = String.format("Could not assume role '%s': check if the role exists and if it's created with the correct external ID: '%s' ", awsCredential.getRoleArn(), crossAccountCredentialsProvider.getExternalId());
+            String errorMessage = String.format("Could not assume role '%s': check if the role exists and if it's created with the correct external ID: '%s' ",
+                    awsCredential.getRoleArn(), crossAccountCredentialsProvider.getExternalId());
             LOGGER.error(errorMessage, e);
             throw new BadRequestException(errorMessage, e);
         }
