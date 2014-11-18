@@ -39,6 +39,7 @@ public abstract class Template {
 
     @Column(nullable = false)
     private String name;
+    @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
 
     private String owner;

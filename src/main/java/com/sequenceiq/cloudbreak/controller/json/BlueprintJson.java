@@ -17,7 +17,7 @@ public class BlueprintJson implements JsonEntity {
     private String blueprintName;
     private String url;
     private String ambariBlueprint;
-    @Size(max = 50)
+    @Size(max = 1000)
     private String description;
     private Integer hostGroupCount;
 

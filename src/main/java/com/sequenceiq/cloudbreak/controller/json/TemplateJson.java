@@ -19,10 +19,10 @@ public class TemplateJson implements JsonEntity {
     private Long id;
     private CloudPlatform cloudPlatform;
     @NotNull
-    @Size(max = 20, min = 5)
+    @Size(max = 100, min = 5)
     private String name;
     private Map<String, Object> parameters = new HashMap<>();
-    @Size(max = 50)
+    @Size(max = 1000)
     private String description;
     private Integer volumeCount;
     @Min(value = 0, message = "Volume size must be greater than or equal to 0")

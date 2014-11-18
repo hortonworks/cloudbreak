@@ -16,11 +16,11 @@ public class CredentialJson implements JsonEntity {
 
     private Long id;
     @NotNull
-    @Size(max = 20, min = 5)
+    @Size(max = 100, min = 5)
     private String name;
     private CloudPlatform cloudPlatform;
     private Map<String, Object> parameters = new HashMap<>();
-    @Size(max = 50)
+    @Size(max = 1000)
     private String description;
     @NotNull
     private String publicKey;
