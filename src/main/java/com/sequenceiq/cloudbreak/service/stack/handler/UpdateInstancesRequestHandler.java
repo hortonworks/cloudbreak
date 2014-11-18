@@ -18,7 +18,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.BuildStackFailureException;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
-import com.sequenceiq.cloudbreak.domain.BillingStatus;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -26,7 +25,6 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.AddInstancesFailedException;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
@@ -75,9 +73,6 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
 
     @Autowired
     private AsyncTaskExecutor resourceBuilderExecutor;
-
-    @Autowired
-    private CloudbreakEventService eventService;
 
     @Override
     public void accept(Event<UpdateInstancesRequest> event) {
@@ -185,7 +180,6 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
                     LOGGER.info("Publishing {} event.", ReactorConfig.STACK_UPDATE_SUCCESS_EVENT);
                     reactor.notify(ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, Event.wrap(new StackUpdateSuccess(stack.getId(), true, instanceIds)));
                 }
-                eventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_CHANGED.name(), "Termination of instances finished.");
             }
         } catch (AddInstancesFailedException e) {
             LOGGER.error(e.getMessage(), e);

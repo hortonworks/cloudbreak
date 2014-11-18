@@ -9,13 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
-import com.sequenceiq.cloudbreak.domain.BillingStatus;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.event.AmbariRoleAllocationComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.StackOperationFailure;
@@ -41,9 +39,6 @@ public class AmbariRoleAllocator {
 
     @Autowired
     private GccStackUtil gccStackUtil;
-
-    @Autowired
-    private CloudbreakEventService eventService;
 
     public void allocateRoles(Long stackId, Set<CoreInstanceMetaData> coreInstanceMetaData) {
         try {
@@ -87,7 +82,6 @@ public class AmbariRoleAllocator {
                 instanceIds.add(metadataEntry.getInstanceId());
             }
             LOGGER.info("Publishing {} event.", ReactorConfig.STACK_UPDATE_SUCCESS_EVENT);
-            eventService.fireCloudbreakEvent(stackId, BillingStatus.BILLING_CHANGED.name(), "Creation of new instances finished.");
             reactor.notify(ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, Event.wrap(new StackUpdateSuccess(stackId, false, instanceIds)));
         } catch (Exception e) {
             String errMessage = "Unhandled exception occurred while updating stack metadata.";
