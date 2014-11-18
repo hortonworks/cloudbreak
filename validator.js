@@ -34,6 +34,10 @@ exports.validateReset = function(email, password) {
     return result;
 };
 
+exports.validateEmail = function(email) {
+    return checkEmail(email, validator)
+};
+
 checkEmail = function(email, validator) {
     return (validator.isNull(email) || !validator.isEmail(email) || !validator.isLowercase(email))
 }
