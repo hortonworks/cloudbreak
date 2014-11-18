@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.sequenceiq.cloudbreak.domain.SnsRequest;
 import com.sequenceiq.cloudbreak.service.stack.connector.aws.SnsMessageHandler;
 import com.sequenceiq.cloudbreak.service.stack.connector.aws.SnsMessageParser;
+import com.sequenceiq.cloudbreak.service.stack.connector.aws.SnsMessageVerifier;
 
 @Controller
 @RequestMapping("sns")
@@ -23,6 +24,9 @@ public class AmazonSnsController {
     private SnsMessageParser snsMessageParser;
 
     @Autowired
+    private SnsMessageVerifier snsMessageVerifier;
+
+    @Autowired
     private SnsMessageHandler snsMessageHandler;
 
     @RequestMapping(method = RequestMethod.POST)
@@ -30,6 +34,7 @@ public class AmazonSnsController {
     public ResponseEntity<String> receiveSnsMessage(@RequestBody String request) {
         try {
             SnsRequest snsRequest = snsMessageParser.parseRequest(request);
+            snsMessageVerifier.verifyMessageSignature(snsRequest);
             snsMessageHandler.handleMessage(snsRequest);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (IOException e) {
