@@ -31,7 +31,7 @@ public class CrossAccountCredentialsProvider {
     private static final int MILLISECONDS = 1000;
     private static final int FIVE_MINUTES = 300000;
 
-    @Value("${cb.aws.external.id:sequenceiq-cb}")
+    @Value("${cb.aws.external.id:provision-ambari}")
     private String externalId;
 
     @Autowired

@@ -1,6 +1,6 @@
 #! /bin/bash
 
-: ${EXTERNAL_ID=sequenceiq-cb}
+: ${EXTERNAL_ID=provision-ambari}
 : ${ROLE_NAME=cb-access}
 
 cat > cb-assume-role-policy.json << EOF
