@@ -60,11 +60,11 @@ public class DefaultCloudbreakUsageGeneratorService implements CloudbreakUsageGe
         MDCBuilder.buildMdcContext();
         if (usagesCount > 0) {
             Long startOfPreviousDay = getStartOfPreviousDay();
-            LOGGER.info("Select events from '{}'.", new Date(startOfPreviousDay));
+            LOGGER.info("Generate usages from events since '{}'.", new Date(startOfPreviousDay));
             Specification<CloudbreakEvent> sinceSpecification = CloudbreakEventSpecifications.eventsSince(startOfPreviousDay);
             cloudbreakEvents = eventRepository.findAll(Specifications.where(sinceSpecification), sortByTimestamp);
         } else {
-            LOGGER.info("Select all events....");
+            LOGGER.info("Generate usages from all events....");
             cloudbreakEvents = eventRepository.findAll(sortByTimestamp);
         }
         return cloudbreakEvents;
