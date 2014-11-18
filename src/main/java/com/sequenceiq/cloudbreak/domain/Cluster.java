@@ -44,7 +44,7 @@ public class Cluster implements ProvisionEntity {
 
     private String owner;
     private String account;
-
+    @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
 
     private Status status;

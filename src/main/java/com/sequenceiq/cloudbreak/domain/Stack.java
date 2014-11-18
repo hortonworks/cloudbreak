@@ -95,7 +95,7 @@ public class Stack implements ProvisionEntity {
     private boolean publicInAccount;
 
     private Integer nodeCount;
-
+    @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
 
     @Enumerated(EnumType.STRING)

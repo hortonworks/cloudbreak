@@ -45,6 +45,7 @@ public abstract class Credential {
     @Enumerated(EnumType.STRING)
     private CloudPlatform cloudPlatform;
 
+    @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
 
     private String owner;
