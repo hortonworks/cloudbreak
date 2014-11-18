@@ -44,6 +44,15 @@
                             </select>
                         </div>
                     </div>
+                    <div class="form-group" ng-class="{ 'has-error': clusterCreationForm.cl_clusterPass.$dirty && clusterCreationForm.cl_clusterPass.$invalid }">
+                        <label class="col-sm-3 control-label" for="cl_clusterPass">Cluster name</label>
+                        <div class="col-sm-9">
+                            <input type="text" name="cl_clusterPass" class="form-control" id="cl_clusterPass" name="cl_clusterPass" placeholder="min. 5 max. 15 char" ng-model="cluster.password"  ng-pattern="/^[a-z][-a-z0-9]*[a-z0-9]$/" ng-minlength="5" ng-maxlength="15" required>
+                            <div class="help-block"
+                                 ng-show="clusterCreationForm.cl_clusterPass.$dirty && clusterCreationForm.cl_clusterPass.$invalid"><i class="fa fa-warning"></i> {{error_msg.cluster_name_invalid}}
+                            </div>
+                        </div>
+                    </div>
                     <div class="form-group" >
                         <label class="col-sm-3 control-label" for="emailneeded">Email notification when cluster is provisioned</label>
                         <div class="col-sm-9">
