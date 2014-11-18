@@ -47,6 +47,7 @@ public class StackUsageGeneratorTest {
     private CloudbreakEventRepository eventRepository;
 
     private Calendar referenceCalendar;
+    private IntervalStackUsageGenerator iSUG;
 
     @Before
     public void before() {
@@ -59,6 +60,8 @@ public class StackUsageGeneratorTest {
         }
         underTest = new StackUsageGenerator();
         MockitoAnnotations.initMocks(this);
+        iSUG = new IntervalStackUsageGenerator();
+        underTest.setiSUG(iSUG);
     }
 
     @Test
@@ -78,8 +81,8 @@ public class StackUsageGeneratorTest {
         LOGGER.info("Start date: {}", startDate);
         LOGGER.info("Stop date: {}", stopDate);
 
-        CloudbreakEvent startEvent = ServiceTestUtils.createEvent(1L, 1L, BillingStatus.BILLING_STARTED.name(), startDate);
-        CloudbreakEvent stopEvent = ServiceTestUtils.createEvent(1L, 1L, BillingStatus.BILLING_STOPPED.name(), stopDate);
+        CloudbreakEvent startEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STARTED.name(), startDate);
+        CloudbreakEvent stopEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STOPPED.name(), stopDate);
         given(usageRepository.count()).willReturn(0L);
 
         //WHEN
@@ -112,8 +115,8 @@ public class StackUsageGeneratorTest {
         LOGGER.info("Start date: {}", startDate);
         LOGGER.info("Stop date: {}", stopDate);
 
-        CloudbreakEvent startEvent = ServiceTestUtils.createEvent(1L, 1L, BillingStatus.BILLING_STARTED.name(), startDate);
-        CloudbreakEvent stopEvent = ServiceTestUtils.createEvent(1L, 1L, BillingStatus.BILLING_STOPPED.name(), stopDate);
+        CloudbreakEvent startEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STARTED.name(), startDate);
+        CloudbreakEvent stopEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STOPPED.name(), stopDate);
         given(usageRepository.count()).willReturn(0L);
 
         //WHEN
@@ -145,8 +148,8 @@ public class StackUsageGeneratorTest {
         LOGGER.info("Start date: {}", startDate);
         LOGGER.info("Stop date: {}", stopDate);
 
-        CloudbreakEvent startEvent = ServiceTestUtils.createEvent(1L, 1L, BillingStatus.BILLING_STARTED.name(), startDate);
-        CloudbreakEvent stopEvent = ServiceTestUtils.createEvent(1L, 1L, BillingStatus.BILLING_STOPPED.name(), stopDate);
+        CloudbreakEvent startEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STARTED.name(), startDate);
+        CloudbreakEvent stopEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STOPPED.name(), stopDate);
         given(usageRepository.count()).willReturn(0L);
 
         //WHEN
@@ -172,8 +175,8 @@ public class StackUsageGeneratorTest {
         Date stopDate = referenceCalendar.getTime();
 
 
-        CloudbreakEvent startEvent = ServiceTestUtils.createEvent(1L, 1L, BillingStatus.BILLING_STARTED.name(), startDate);
-        CloudbreakEvent stopEvent = ServiceTestUtils.createEvent(1L, 1L, BillingStatus.BILLING_STOPPED.name(), stopDate);
+        CloudbreakEvent startEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STARTED.name(), startDate);
+        CloudbreakEvent stopEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STOPPED.name(), stopDate);
         given(usageRepository.count()).willReturn(0L);
 
         //WHEN
@@ -198,8 +201,8 @@ public class StackUsageGeneratorTest {
         Date stopDate = referenceCalendar.getTime();
 
 
-        CloudbreakEvent startEvent = ServiceTestUtils.createEvent(1L, 1L, BillingStatus.BILLING_STARTED.name(), startDate);
-        CloudbreakEvent stopEvent = ServiceTestUtils.createEvent(1L, 1L, BillingStatus.BILLING_STOPPED.name(), stopDate);
+        CloudbreakEvent startEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STARTED.name(), startDate);
+        CloudbreakEvent stopEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STOPPED.name(), stopDate);
         given(usageRepository.count()).willReturn(0L);
 
         //WHEN
@@ -223,8 +226,8 @@ public class StackUsageGeneratorTest {
         Date stopDate = referenceCalendar.getTime();
 
 
-        CloudbreakEvent startEvent = ServiceTestUtils.createEvent(1L, 1L, BillingStatus.BILLING_STARTED.name(), startDate);
-        CloudbreakEvent stopEvent = ServiceTestUtils.createEvent(1L, 1L, BillingStatus.BILLING_STOPPED.name(), stopDate);
+        CloudbreakEvent startEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STARTED.name(), startDate);
+        CloudbreakEvent stopEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STOPPED.name(), stopDate);
         given(usageRepository.count()).willReturn(0L);
 
         //WHEN
@@ -255,23 +258,22 @@ public class StackUsageGeneratorTest {
         referenceCalendar.set(MINUTE, 20);
         Date roundDownStop = referenceCalendar.getTime();
 
-        CloudbreakEvent startEvent = ServiceTestUtils.createEvent(1L, 1L, BillingStatus.BILLING_STARTED.name(), roundUpStart);
-        CloudbreakEvent stopEvent = ServiceTestUtils.createEvent(1L, 1L, BillingStatus.BILLING_STOPPED.name(), roundUpStop);
-        CloudbreakEvent startRoundDownEvent = ServiceTestUtils.createEvent(1L, 1L, BillingStatus.BILLING_STARTED.name(), roundDownStart);
-        CloudbreakEvent stopRoundDownEvent = ServiceTestUtils.createEvent(1L, 1L, BillingStatus.BILLING_STOPPED.name(), roundDownStop);
+        CloudbreakEvent startEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STARTED.name(), roundUpStart);
+        CloudbreakEvent stopEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STOPPED.name(), roundUpStop);
+        CloudbreakEvent startRoundDownEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STARTED.name(), roundDownStart);
+        CloudbreakEvent stopRoundDownEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STOPPED.name(), roundDownStop);
         given(usageRepository.count()).willReturn(0L);
 
         //WHEN
         List<CloudbreakUsage> usageList = underTest.generate(Arrays.asList(startEvent, stopEvent, startRoundDownEvent, stopRoundDownEvent));
 
         //THEN
-        Assert.assertTrue("The number of the generated usages is not the expected", usageList.size() == 2);
-        Assert.assertEquals("The start day is wrong", Long.valueOf(4), usageList.get(0).getInstanceHours());
-        Assert.assertEquals("The start day is wrong", Long.valueOf(3), usageList.get(1).getInstanceHours());
+        Assert.assertTrue("The number of the generated usages is not the expected", usageList.size() == 1);
+        Assert.assertEquals("The start day is wrong", Long.valueOf(7), usageList.get(0).getInstanceHours());
     }
 
     @Test
-    public void testGenerateShouldCreateExactUsageForBillingPeriodWhenMultipleStartEventsExistOnTheSameDay() {
+    public void testGenerateShouldCreateExactUsageForBillingPeriodWhenMultipleEventsExistOnTheSameDay() {
         // GIVEN
         referenceCalendar.roll(HOUR_OF_DAY, 1);
         Date startDate = referenceCalendar.getTime();
@@ -285,11 +287,11 @@ public class StackUsageGeneratorTest {
         referenceCalendar.roll(HOUR_OF_DAY, 1);
         Date stopDate = referenceCalendar.getTime();
 
-        CloudbreakEvent startEvent = ServiceTestUtils.createEvent(1L, 1L, BillingStatus.BILLING_STARTED.name(), startDate);
-        CloudbreakEvent updateEvent = ServiceTestUtils.createEvent(1L, 1L, "UPDATE_IN_PROGRESS", updateDate);
-        CloudbreakEvent availableEvent = ServiceTestUtils.createEvent(1L, 1L, "AVAILABLE", availableDate);
-        CloudbreakEvent secondStartEvent = ServiceTestUtils.createEvent(1L, 1L, BillingStatus.BILLING_STARTED.name(), availableDate);
-        CloudbreakEvent stopEvent = ServiceTestUtils.createEvent(1L, 1L, BillingStatus.BILLING_STOPPED.name(), stopDate);
+        CloudbreakEvent startEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STARTED.name(), startDate);
+        CloudbreakEvent updateEvent = ServiceTestUtils.createEvent(1L, 1, "UPDATE_IN_PROGRESS", updateDate);
+        CloudbreakEvent availableEvent = ServiceTestUtils.createEvent(1L, 1, "AVAILABLE", availableDate);
+        CloudbreakEvent secondStartEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STARTED.name(), availableDate);
+        CloudbreakEvent stopEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STOPPED.name(), stopDate);
         given(usageRepository.count()).willReturn(0L);
         List<CloudbreakEvent> events = Arrays.asList(startEvent, availableEvent, updateEvent, secondStartEvent, stopEvent);
 
@@ -302,7 +304,7 @@ public class StackUsageGeneratorTest {
     }
 
     @Test
-    public void testGenerateShouldCreateUsageForMultipleBillingPeriod() throws Exception {
+    public void testGenerateShouldCreateUsageForMultipleBillingPeriodInOneItem() throws Exception {
         // GIVEN
         //2014-09-24 1:20
         referenceCalendar.roll(HOUR_OF_DAY, 1);
@@ -320,10 +322,10 @@ public class StackUsageGeneratorTest {
         referenceCalendar.set(MINUTE, 10);
         Date terminateDate = referenceCalendar.getTime();
 
-        CloudbreakEvent startedEvent = ServiceTestUtils.createEvent(1L, 1L, BillingStatus.BILLING_STARTED.name(), startDate);
-        CloudbreakEvent stoppedEvent = ServiceTestUtils.createEvent(1L, 1L, BillingStatus.BILLING_STOPPED.name(), stopDate);
-        CloudbreakEvent restartedEvent = ServiceTestUtils.createEvent(1L, 1L, BillingStatus.BILLING_STARTED.name(), restartDate);
-        CloudbreakEvent terminatedEvent = ServiceTestUtils.createEvent(1L, 1L, BillingStatus.BILLING_STOPPED.name(), terminateDate);
+        CloudbreakEvent startedEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STARTED.name(), startDate);
+        CloudbreakEvent stoppedEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STOPPED.name(), stopDate);
+        CloudbreakEvent restartedEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STARTED.name(), restartDate);
+        CloudbreakEvent terminatedEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STOPPED.name(), terminateDate);
         given(usageRepository.count()).willReturn(0L);
         List<CloudbreakEvent> events = Arrays.asList(startedEvent, stoppedEvent, restartedEvent, terminatedEvent);
 
@@ -332,11 +334,10 @@ public class StackUsageGeneratorTest {
 
         // THEN
         sortByUsagesDate(usageList);
-        Assert.assertEquals("The number of the generated usages is not the expected", 4, usageList.size());
+        Assert.assertEquals("The number of the generated usages is not the expected", 3, usageList.size());
         Assert.assertEquals("The number of the running hours is not the expected", Long.valueOf(23), usageList.get(0).getInstanceHours());
         Assert.assertEquals("The number of the running hours is not the expected", Long.valueOf(24), usageList.get(1).getInstanceHours());
-        Assert.assertEquals("The number of the running hours is not the expected", Long.valueOf(1), usageList.get(2).getInstanceHours());
-        Assert.assertEquals("The number of the running hours is not the expected", Long.valueOf(1), usageList.get(3).getInstanceHours());
+        Assert.assertEquals("The number of the running hours is not the expected", Long.valueOf(2), usageList.get(2).getInstanceHours());
     }
 
     @Test
@@ -356,10 +357,10 @@ public class StackUsageGeneratorTest {
         referenceCalendar.set(MINUTE, 10);
         Date terminateDate = referenceCalendar.getTime();
 
-        CloudbreakEvent startedEvent = ServiceTestUtils.createEvent(1L, 1L, BillingStatus.BILLING_STARTED.name(), startDate);
-        CloudbreakEvent stoppedEvent = ServiceTestUtils.createEvent(1L, 1L, BillingStatus.BILLING_STOPPED.name(), stopDate);
-        CloudbreakEvent restartedEvent = ServiceTestUtils.createEvent(1L, 1L, BillingStatus.BILLING_STARTED.name(), restartDate);
-        CloudbreakEvent terminatedEvent = ServiceTestUtils.createEvent(1L, 1L, BillingStatus.BILLING_STOPPED.name(), terminateDate);
+        CloudbreakEvent startedEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STARTED.name(), startDate);
+        CloudbreakEvent stoppedEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STOPPED.name(), stopDate);
+        CloudbreakEvent restartedEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STARTED.name(), restartDate);
+        CloudbreakEvent terminatedEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STOPPED.name(), terminateDate);
         given(usageRepository.count()).willReturn(0L);
         List<CloudbreakEvent> events = Arrays.asList(startedEvent, stoppedEvent, restartedEvent, terminatedEvent);
 
@@ -367,9 +368,8 @@ public class StackUsageGeneratorTest {
         List<CloudbreakUsage> usageList = underTest.generate(events);
 
         // THEN
-        Assert.assertEquals("The number of the generated usages is not the expected", 2, usageList.size());
-        Assert.assertEquals("The number of the running hours is not the expected", Long.valueOf(1), usageList.get(0).getInstanceHours());
-        Assert.assertEquals("The number of the running hours is not the expected", Long.valueOf(1), usageList.get(1).getInstanceHours());
+        Assert.assertEquals("The number of the generated usages is not the expected", 1, usageList.size());
+        Assert.assertEquals("The number of the running hours is not the expected", Long.valueOf(2), usageList.get(0).getInstanceHours());
     }
 
     @Test
@@ -381,7 +381,7 @@ public class StackUsageGeneratorTest {
         Date startDate = start.getTime();
 
 
-        CloudbreakEvent startedEvent = ServiceTestUtils.createEvent(1L, 1L, BillingStatus.BILLING_STARTED.name(), startDate);
+        CloudbreakEvent startedEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STARTED.name(), startDate);
         List<CloudbreakEvent> events = Arrays.asList(startedEvent);
         given(usageRepository.count()).willReturn(1L);
 
@@ -406,7 +406,7 @@ public class StackUsageGeneratorTest {
         Date startDate = start.getTime();
 
 
-        CloudbreakEvent startedEvent = ServiceTestUtils.createEvent(1L, 1L, BillingStatus.BILLING_STARTED.name(), startDate);
+        CloudbreakEvent startedEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STARTED.name(), startDate);
         List<CloudbreakEvent> events = Arrays.asList(startedEvent);
         given(usageRepository.count()).willReturn(0L);
 
@@ -434,7 +434,7 @@ public class StackUsageGeneratorTest {
         Date startDate = start.getTime();
 
 
-        CloudbreakEvent startedEvent = ServiceTestUtils.createEvent(1L, 1L, BillingStatus.BILLING_STARTED.name(), startDate);
+        CloudbreakEvent startedEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STARTED.name(), startDate);
         List<CloudbreakEvent> events = Arrays.asList(startedEvent);
         given(usageRepository.count()).willReturn(0L);
 
@@ -462,7 +462,7 @@ public class StackUsageGeneratorTest {
         Date startDate = start.getTime();
 
 
-        CloudbreakEvent startedEvent = ServiceTestUtils.createEvent(1L, 1L, BillingStatus.BILLING_STARTED.name(), startDate);
+        CloudbreakEvent startedEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STARTED.name(), startDate);
         List<CloudbreakEvent> events = Arrays.asList(startedEvent);
         given(usageRepository.count()).willReturn(0L);
 
@@ -476,6 +476,137 @@ public class StackUsageGeneratorTest {
         Assert.assertEquals("The number of the running hours is not the expected", Long.valueOf(14), usageList.get(0).getInstanceHours());
         Assert.assertEquals("The number of the running hours is not the expected", Long.valueOf(24), usageList.get(1).getInstanceHours());
         Assert.assertEquals("The number of the running hours is not the expected", Long.valueOf(24), usageList.get(2).getInstanceHours());
+    }
+
+    @Test
+    public void testGenerateShouldCreateUsageWhenUpscaleOccursOnOneDay() throws Exception {
+        // GIVEN
+        referenceCalendar.roll(HOUR_OF_DAY, 1);
+        referenceCalendar.roll(MINUTE, 20);
+        Date startDate = referenceCalendar.getTime();
+
+        referenceCalendar.roll(HOUR_OF_DAY, 1);
+        Date billingChangedDate = referenceCalendar.getTime();
+
+        referenceCalendar.roll(HOUR_OF_DAY, 1);
+        referenceCalendar.set(MINUTE, 10);
+        Date terminateDate = referenceCalendar.getTime();
+
+        CloudbreakEvent startedEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STARTED.name(), startDate);
+        CloudbreakEvent billingChangedEvent = ServiceTestUtils.createEvent(1L, 3, BillingStatus.BILLING_CHANGED.name(), billingChangedDate);
+        CloudbreakEvent terminatedEvent = ServiceTestUtils.createEvent(1L, 3, BillingStatus.BILLING_STOPPED.name(), terminateDate);
+        given(usageRepository.count()).willReturn(0L);
+        List<CloudbreakEvent> events = Arrays.asList(startedEvent, billingChangedEvent, terminatedEvent);
+
+        // WHEN
+        List<CloudbreakUsage> usageList = underTest.generate(events);
+
+        // THEN
+        Assert.assertEquals("The number of the generated usages is not the expected", 1, usageList.size());
+        Assert.assertEquals("The number of the running hours is not the expected", Long.valueOf(4), usageList.get(0).getInstanceHours());
+    }
+
+    @Test
+    public void testGenerateShouldCreateUsageWhenDownscaleOccursOnOneDay() throws Exception {
+        // GIVEN
+        referenceCalendar.roll(HOUR_OF_DAY, 1);
+        referenceCalendar.roll(MINUTE, 20);
+        Date startDate = referenceCalendar.getTime();
+
+        referenceCalendar.roll(HOUR_OF_DAY, 1);
+        Date billingChangedDate = referenceCalendar.getTime();
+
+        referenceCalendar.roll(HOUR_OF_DAY, 1);
+        referenceCalendar.set(MINUTE, 10);
+        Date terminateDate = referenceCalendar.getTime();
+
+        CloudbreakEvent startedEvent = ServiceTestUtils.createEvent(1L, 5, BillingStatus.BILLING_STARTED.name(), startDate);
+        CloudbreakEvent billingChangedEvent = ServiceTestUtils.createEvent(1L, 3, BillingStatus.BILLING_CHANGED.name(), billingChangedDate);
+        CloudbreakEvent terminatedEvent = ServiceTestUtils.createEvent(1L, 3, BillingStatus.BILLING_STOPPED.name(), terminateDate);
+        given(usageRepository.count()).willReturn(0L);
+        List<CloudbreakEvent> events = Arrays.asList(startedEvent, billingChangedEvent, terminatedEvent);
+
+        // WHEN
+        List<CloudbreakUsage> usageList = underTest.generate(events);
+
+        // THEN
+        Assert.assertEquals("The number of the generated usages is not the expected", 1, usageList.size());
+        Assert.assertEquals("The number of the running hours is not the expected", Long.valueOf(8), usageList.get(0).getInstanceHours());
+    }
+
+    @Test
+    public void testGenerateShouldCreateUsageWhenMultipleScaleEventOccurOnOneDay() throws Exception {
+        // GIVEN
+        referenceCalendar.roll(HOUR_OF_DAY, 1);
+        referenceCalendar.roll(MINUTE, 20);
+        Date startDate = referenceCalendar.getTime();
+
+        referenceCalendar.roll(HOUR_OF_DAY, 1);
+        Date upScaleDate = referenceCalendar.getTime();
+
+        referenceCalendar.roll(HOUR_OF_DAY, 2);
+        Date downScaleDate = referenceCalendar.getTime();
+
+        referenceCalendar.roll(HOUR_OF_DAY, 2);
+        Date reUpScaleDate = referenceCalendar.getTime();
+
+        referenceCalendar.roll(HOUR_OF_DAY, 1);
+        referenceCalendar.set(MINUTE, 10);
+        Date terminateDate = referenceCalendar.getTime();
+
+        CloudbreakEvent startedEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STARTED.name(), startDate);
+        CloudbreakEvent upScaleEvent = ServiceTestUtils.createEvent(1L, 5, BillingStatus.BILLING_CHANGED.name(), upScaleDate);
+        CloudbreakEvent downScaleEvent = ServiceTestUtils.createEvent(1L, 2, BillingStatus.BILLING_CHANGED.name(), downScaleDate);
+        CloudbreakEvent reUpScaleEvent = ServiceTestUtils.createEvent(1L, 6, BillingStatus.BILLING_CHANGED.name(), reUpScaleDate);
+        CloudbreakEvent terminatedEvent = ServiceTestUtils.createEvent(1L, 6, BillingStatus.BILLING_STOPPED.name(), terminateDate);
+        given(usageRepository.count()).willReturn(0L);
+        List<CloudbreakEvent> events = Arrays.asList(startedEvent, upScaleEvent, downScaleEvent, reUpScaleEvent, terminatedEvent);
+
+        // WHEN
+        List<CloudbreakUsage> usageList = underTest.generate(events);
+
+        // THEN
+        Assert.assertEquals("The number of the generated usages is not the expected", 1, usageList.size());
+        Assert.assertEquals("The number of the running hours is not the expected", Long.valueOf(21), usageList.get(0).getInstanceHours());
+    }
+
+    @Test
+    public void testGenerateShouldCreateUsageWhenMultipleScaleEventOccurOnDifferentDays() throws Exception {
+        // GIVEN
+        referenceCalendar.roll(HOUR_OF_DAY, 1);
+        referenceCalendar.roll(MINUTE, 50);
+        Date startDate = referenceCalendar.getTime();
+
+        referenceCalendar.roll(HOUR_OF_DAY, 1);
+        Date upScaleDate = referenceCalendar.getTime();
+
+        referenceCalendar.roll(DATE, 1);
+        Date downScaleDate = referenceCalendar.getTime();
+
+        referenceCalendar.roll(DATE, 1);
+        Date reUpScaleDate = referenceCalendar.getTime();
+
+        referenceCalendar.roll(HOUR_OF_DAY, 1);
+        referenceCalendar.set(MINUTE, 10);
+        Date terminateDate = referenceCalendar.getTime();
+
+        CloudbreakEvent startedEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STARTED.name(), startDate);
+        CloudbreakEvent upScaleEvent = ServiceTestUtils.createEvent(1L, 5, BillingStatus.BILLING_CHANGED.name(), upScaleDate);
+        CloudbreakEvent downScaleEvent = ServiceTestUtils.createEvent(1L, 2, BillingStatus.BILLING_CHANGED.name(), downScaleDate);
+        CloudbreakEvent reUpScaleEvent = ServiceTestUtils.createEvent(1L, 6, BillingStatus.BILLING_CHANGED.name(), reUpScaleDate);
+        CloudbreakEvent terminatedEvent = ServiceTestUtils.createEvent(1L, 6, BillingStatus.BILLING_STOPPED.name(), terminateDate);
+        given(usageRepository.count()).willReturn(0L);
+        List<CloudbreakEvent> events = Arrays.asList(startedEvent, upScaleEvent, downScaleEvent, reUpScaleEvent, terminatedEvent);
+
+        // WHEN
+        List<CloudbreakUsage> usageList = underTest.generate(events);
+
+        // THEN
+        sortByUsagesDate(usageList);
+        Assert.assertEquals("The number of the generated usages is not the expected", 3, usageList.size());
+        Assert.assertEquals("The number of the running hours is not the expected", Long.valueOf(111), usageList.get(0).getInstanceHours());
+        Assert.assertEquals("The number of the running hours is not the expected", Long.valueOf(54), usageList.get(1).getInstanceHours());
+        Assert.assertEquals("The number of the running hours is not the expected", Long.valueOf(10), usageList.get(2).getInstanceHours());
     }
 
     private void sortByUsagesDate(List<CloudbreakUsage> usageList) {
