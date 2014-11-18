@@ -2,7 +2,7 @@
     <label class="col-sm-3 control-label" for="gcc_tclusterName">Name</label>
 
     <div class="col-sm-9">
-        <input type="text" class="form-control" ng-pattern="/^[a-zA-Z][-a-zA-Z0-9]*$/" name="gcc_tclusterName" ng-model="gccTemp.name" ng-minlength="5" ng-maxlength="20" required id="gcc_tclusterName" placeholder="min. 5 max. 20 char">
+        <input type="text" class="form-control" ng-pattern="/^[a-zA-Z][-a-zA-Z0-9]*$/" name="gcc_tclusterName" ng-model="gccTemp.name" ng-minlength="5" ng-maxlength="100" required id="gcc_tclusterName" placeholder="min. 5 max. 100 char">
         <div class="help-block" ng-show="gccTemplateForm.gcc_tclusterName.$dirty && gccTemplateForm.gcc_tclusterName.$invalid">
             <i class="fa fa-warning"></i> {{error_msg.template_name_invalid}}
         </div>
@@ -11,7 +11,7 @@
 <div class="form-group" ng-class="{ 'has-error': gccTemplateForm.gcc_tdescription.$dirty && gccTemplateForm.gcc_tdescription.$invalid }">
     <label class="col-sm-3 control-label" for="gcc_tdescription">Description</label>
     <div class="col-sm-9">
-        <input type="text" class="form-control" name="gcc_tdescription" ng-model="gccTemp.description" ng-maxlength="50" id="gcc_tdescription" placeholder="max. 50 char">
+        <input type="text" class="form-control" name="gcc_tdescription" ng-model="gccTemp.description" ng-maxlength="1000" id="gcc_tdescription" placeholder="max. 1000 char">
         <div class="help-block" ng-show="gccTemplateForm.gcc_tdescription.$dirty && gccTemplateForm.gcc_tdescription.$invalid">
             <i class="fa fa-warning"></i> {{error_msg.template_description_invalid}}
         </div>

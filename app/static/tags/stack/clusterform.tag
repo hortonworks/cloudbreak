@@ -10,7 +10,7 @@
                     <div class="form-group" ng-class="{ 'has-error': clusterCreationForm.cl_clusterName.$dirty && clusterCreationForm.cl_clusterName.$invalid }">
                         <label class="col-sm-3 control-label" for="cl_clusterName">Cluster name</label>
                         <div class="col-sm-9">
-                            <input type="text" name="cl_clusterName" class="form-control" id="cl_clusterName" name="cl_clusterName" placeholder="min. 5 max. 20 char" ng-model="cluster.name"  ng-pattern="/^[a-z][-a-z0-9]*[a-z0-9]$/" ng-minlength="5" ng-maxlength="20" required>
+                            <input type="text" name="cl_clusterName" class="form-control" id="cl_clusterName" name="cl_clusterName" placeholder="min. 5 max. 40 char" ng-model="cluster.name"  ng-pattern="/^[a-z][-a-z0-9]*[a-z0-9]$/" ng-minlength="5" ng-maxlength="40" required>
                             <div class="help-block"
                                  ng-show="clusterCreationForm.cl_clusterName.$dirty && clusterCreationForm.cl_clusterName.$invalid"><i class="fa fa-warning"></i> {{error_msg.cluster_name_invalid}}
                             </div>
@@ -19,7 +19,7 @@
                     <div class="form-group" ng-class="{ 'has-error': clusterCreationForm.cl_clusterSize.$dirty && clusterCreationForm.cl_clusterSize.$invalid }">
                         <label class="col-sm-3 control-label" for="cl_clusterSize">Cluster size</label>
                         <div class="col-sm-9">
-                            <input type="number" name="cl_clusterSize" class="form-control" ng-model="cluster.nodeCount" id="cl_clusterSize" min="1"   max="99" placeholder="1 - 99" required>
+                            <input type="number" name="cl_clusterSize" class="form-control" ng-model="cluster.nodeCount" id="cl_clusterSize" min="1"   max="100000" placeholder="1 - 100000" required>
                             <div class="help-block"
                                  ng-show="clusterCreationForm.cl_clusterSize.$dirty && clusterCreationForm.cl_clusterSize.$invalid"><i class="fa fa-warning"></i>
                                 {{error_msg.cluster_size_invalid}}
