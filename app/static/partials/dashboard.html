@@ -26,14 +26,7 @@
 
                 <li><a data-value="cred-002" ng-click="showManagement()" ng-disabled="managementShow"><i class="fa fa-cloud fa-fw"></i> dashboard</a></li>
                 <li><a data-value="cred-003" ng-click="showEvents()" ng-disabled="eventShow"><i class="fa fa-table fa-fw"></i> account management</a></li>
-                <li class="dropdown">
-                    <a href="" class="dropdown-toggle" data-toggle="dropdown">
-                        <i class="fa fa-user fa-fw"></i> {{user.email}} <b class="caret"></b>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a href="/logout" data-value="cred-001"><i class="fa fa-sign-out fa-fw"></i> logout</a></li>
-                    </ul>
-                </li>
+
 
 
                 <!-- ........ CREDENTIALS DROPDOWN ......................................... -->
@@ -54,6 +47,15 @@
                             <a href="" class="not-option" data-toggle="collapse" data-target="#panel-credentials-collapse"><i class="fa fa-edit fa-fw"></i>
                                 manage credentials</a>
                         </li>
+                    </ul>
+                </li>
+
+                <li class="dropdown">
+                    <a href="" class="dropdown-toggle" data-toggle="dropdown">
+                        <i class="fa fa-user fa-fw"></i> {{user.email}} <b class="caret"></b>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/logout" data-value="cred-001"><i class="fa fa-sign-out fa-fw"></i> logout</a></li>
                     </ul>
                 </li>
             </ul>
