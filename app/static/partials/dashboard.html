@@ -24,8 +24,8 @@
 
                 <!-- ........ USER DROPDOWN ................................................ -->
 
-                <li><a data-value="cred-002" ng-click="showManagement()" ng-disabled="managementShow"><i class="fa fa-cloud fa-fw"></i> dashboard</a></li>
-                <li><a data-value="cred-003" ng-click="showEvents()" ng-disabled="eventShow"><i class="fa fa-table fa-fw"></i> account management</a></li>
+                <li ng-class="managementShow == true ? 'active' : ''" ng-disabled="managementShow"><a data-value="cred-002" ng-click="showManagement()" ><i class="fa fa-cloud fa-fw"></i> dashboard</a></li>
+                <li ng-class="eventShow == true ? 'active' : ''" ng-disabled="eventShow"><a data-value="cred-003" ng-click="showEvents()" ><i class="fa fa-table fa-fw"></i> account management</a></li>
 
 
 
