@@ -25,7 +25,7 @@ import reactor.function.Consumer;
 public class StackCreationSuccessHandler implements Consumer<Event<StackCreationSuccess>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackCreationSuccessHandler.class);
-    private static final String ADMIN = "admin";
+    private static final String DEFAULT_USER = "admin";
 
     @Autowired
     private RetryingStackUpdater stackUpdater;
@@ -52,7 +52,8 @@ public class StackCreationSuccessHandler implements Consumer<Event<StackCreation
                 new StatusMessage(stackId, stack.getName(), Status.AVAILABLE.name()));
         stackUpdater.updateStackStatusReason(stack.getId(), "");
         AmbariClient ambariClient = clientService.createDefault(ambariIp);
-        ambariClient.changePassword(ADMIN, ADMIN, stack.getPassword(), true);
+        ambariClient.createUser(stack.getUserName(), stack.getPassword(), true);
+        ambariClient.deleteUser(DEFAULT_USER);
         LOGGER.info("Publishing {} event.", ReactorConfig.AMBARI_STARTED_EVENT);
         reactor.notify(ReactorConfig.AMBARI_STARTED_EVENT, Event.wrap(stack));
     }

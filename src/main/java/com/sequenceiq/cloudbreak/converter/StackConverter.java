@@ -92,6 +92,7 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
         Stack stack = new Stack();
         stack.setNodeCount(json.getNodeCount());
         stack.setName(json.getName());
+        stack.setUserName(json.getUserName());
         stack.setPassword(json.getPassword());
         try {
             stack.setCredential(credentialRepository.findOne(json.getCredentialId()));

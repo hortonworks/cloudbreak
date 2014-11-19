@@ -104,7 +104,7 @@ public class Stack implements ProvisionEntity {
     private boolean stackCompleted;
 
     private String ambariIp;
-    private String userName = "admin";
+    private String userName;
     private String password;
 
     @Column(columnDefinition = "TEXT")

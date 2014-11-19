@@ -116,7 +116,7 @@ dependencies {
     compile('com.sequenceiq:azure-rest-client:0.1.18') {
         exclude group: 'log4j';
     }
-    compile('com.sequenceiq:ambari-client16:1.6.11') {
+    compile('com.sequenceiq:ambari-client16:1.6.12') {
         exclude group: 'org.slf4j';
     }
     compile 'org.apache.commons:commons-lang3:3.3.2'
