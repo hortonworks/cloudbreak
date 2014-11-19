@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.domain;
 import java.util.Date;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
@@ -27,9 +29,14 @@ public class CloudbreakUsage implements ProvisionEntity {
 
     private String machineType;
 
-    private String runningHours;
+    private Long instanceHours;
 
     private Long stackId;
+
+    @Enumerated(EnumType.STRING)
+    private Status stackStatus;
+
+    private String stackName;
 
     public Long getId() {
         return id;
@@ -95,12 +102,12 @@ public class CloudbreakUsage implements ProvisionEntity {
         this.machineType = machineType;
     }
 
-    public String getRunningHours() {
-        return runningHours;
+    public Long getInstanceHours() {
+        return instanceHours;
     }
 
-    public void setRunningHours(String runningHours) {
-        this.runningHours = runningHours;
+    public void setInstanceHours(Long instanceHours) {
+        this.instanceHours = instanceHours;
     }
 
     public Date getDay() {
@@ -119,6 +126,22 @@ public class CloudbreakUsage implements ProvisionEntity {
         this.stackId = stackId;
     }
 
+    public Status getStackStatus() {
+        return stackStatus;
+    }
+
+    public void setStackStatus(Status stackStatus) {
+        this.stackStatus = stackStatus;
+    }
+
+    public String getStackName() {
+        return stackName;
+    }
+
+    public void setStackName(String stackName) {
+        this.stackName = stackName;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("CloudbreakUsage{");
@@ -131,9 +154,10 @@ public class CloudbreakUsage implements ProvisionEntity {
         sb.append(", cloud='").append(cloud).append('\'');
         sb.append(", zone='").append(zone).append('\'');
         sb.append(", machineType='").append(machineType).append('\'');
-        sb.append(", runningHours='").append(runningHours).append('\'');
+        sb.append(", instanceHours='").append(instanceHours).append('\'');
         sb.append(", stackId='").append(stackId).append('\'');
         sb.append('}');
         return sb.toString();
     }
+
 }

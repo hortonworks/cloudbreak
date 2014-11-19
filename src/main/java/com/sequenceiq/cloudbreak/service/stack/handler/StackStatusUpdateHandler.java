@@ -97,41 +97,12 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
         Stack stack = stackRepository.findOneWithLists(stackId);
         MDCBuilder.buildMdcContext(stack);
         if (StatusRequest.STOPPED.equals(statusRequest)) {
-            boolean stopped = true;
+            boolean stopped;
             if (cloudPlatform.isWithTemplate()) {
                 CloudPlatformConnector connector = cloudPlatformConnectors.get(cloudPlatform);
                 stopped = connector.stopAll(stack);
             } else {
-                try {
-                    ResourceBuilderInit resourceBuilderInit = resourceBuilderInits.get(cloudPlatform);
-                    final StartStopContextObject sSCO = resourceBuilderInit.startStopInit(stack);
-
-                    for (ResourceBuilder resourceBuilder : networkResourceBuilders.get(cloudPlatform)) {
-                        for (Resource resource : stack.getResourcesByType(resourceBuilder.resourceType())) {
-                            resourceBuilder.stop(sSCO, resource);
-                        }
-                    }
-                    List<Future<Boolean>> futures = new ArrayList<>();
-                    for (final ResourceBuilder resourceBuilder : instanceResourceBuilders.get(cloudPlatform)) {
-                        List<Resource> resourceByType = stack.getResourcesByType(resourceBuilder.resourceType());
-                        for (final Resource resource : resourceByType) {
-                            Future<Boolean> submit = resourceBuilderExecutor.submit(new Callable<Boolean>() {
-                                @Override
-                                public Boolean call() throws Exception {
-                                    return resourceBuilder.stop(sSCO, resource);
-                                }
-                            });
-                            futures.add(submit);
-                        }
-                    }
-                    for (Future<Boolean> future : futures) {
-                        if (!future.get()) {
-                            stopped = false;
-                        }
-                    }
-                } catch (Exception ex) {
-                    stopped = false;
-                }
+                stopped = startStopResources(cloudPlatform, stack, false);
             }
             if (stopped) {
                 LOGGER.info("Update stack state to: {}", Status.STOPPED);
@@ -142,41 +113,12 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
                 stackUpdater.updateStackStatus(stackId, Status.STOP_FAILED);
             }
         } else {
-            boolean started = true;
+            boolean started;
             if (cloudPlatform.isWithTemplate()) {
                 CloudPlatformConnector connector = cloudPlatformConnectors.get(cloudPlatform);
                 started = connector.startAll(stack);
             } else {
-                try {
-                    ResourceBuilderInit resourceBuilderInit = resourceBuilderInits.get(cloudPlatform);
-                    final StartStopContextObject sSCO = resourceBuilderInit.startStopInit(stack);
-
-                    for (ResourceBuilder resourceBuilder : networkResourceBuilders.get(cloudPlatform)) {
-                        for (Resource resource : stack.getResourcesByType(resourceBuilder.resourceType())) {
-                            resourceBuilder.start(sSCO, resource);
-                        }
-                    }
-                    List<Future<Boolean>> futures = new ArrayList<>();
-                    for (final ResourceBuilder resourceBuilder : instanceResourceBuilders.get(cloudPlatform)) {
-                        List<Resource> resourceByType = stack.getResourcesByType(resourceBuilder.resourceType());
-                        for (final Resource resource : resourceByType) {
-                            Future<Boolean> submit = resourceBuilderExecutor.submit(new Callable<Boolean>() {
-                                @Override
-                                public Boolean call() throws Exception {
-                                    return resourceBuilder.start(sSCO, resource);
-                                }
-                            });
-                            futures.add(submit);
-                        }
-                    }
-                    for (Future<Boolean> future : futures) {
-                        if (!future.get()) {
-                            started = false;
-                        }
-                    }
-                } catch (Exception ex) {
-                    started = false;
-                }
+                started = startStopResources(cloudPlatform, stack, true);
             }
             if (started) {
                 cloudbreakEventService.fireCloudbreakEvent(stackId, BillingStatus.BILLING_STARTED.name(), "Stack started.");
@@ -200,6 +142,49 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
                 stackUpdater.updateStackStatus(stackId, Status.START_FAILED);
             }
         }
+    }
+
+    private boolean startStopResources(CloudPlatform cloudPlatform, Stack stack, final boolean start) {
+        boolean finished = true;
+        try {
+            ResourceBuilderInit resourceBuilderInit = resourceBuilderInits.get(cloudPlatform);
+            final StartStopContextObject sSCO = resourceBuilderInit.startStopInit(stack);
+
+            for (ResourceBuilder resourceBuilder : networkResourceBuilders.get(cloudPlatform)) {
+                for (Resource resource : stack.getResourcesByType(resourceBuilder.resourceType())) {
+                    if (start) {
+                        resourceBuilder.start(sSCO, resource);
+                    } else {
+                        resourceBuilder.stop(sSCO, resource);
+                    }
+                }
+            }
+            List<Future<Boolean>> futures = new ArrayList<>();
+            for (final ResourceBuilder resourceBuilder : instanceResourceBuilders.get(cloudPlatform)) {
+                List<Resource> resourceByType = stack.getResourcesByType(resourceBuilder.resourceType());
+                for (final Resource resource : resourceByType) {
+                    Future<Boolean> submit = resourceBuilderExecutor.submit(new Callable<Boolean>() {
+                        @Override
+                        public Boolean call() throws Exception {
+                            if (start) {
+                                return resourceBuilder.start(sSCO, resource);
+                            } else {
+                                return resourceBuilder.stop(sSCO, resource);
+                            }
+                        }
+                    });
+                    futures.add(submit);
+                }
+            }
+            for (Future<Boolean> future : futures) {
+                if (!future.get()) {
+                    finished = false;
+                }
+            }
+        } catch (Exception ex) {
+            finished = false;
+        }
+        return finished;
     }
 
     private void waitForAmbariToStart(Stack stack) {

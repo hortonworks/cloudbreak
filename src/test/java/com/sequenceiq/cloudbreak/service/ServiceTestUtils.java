@@ -236,11 +236,12 @@ public final class ServiceTestUtils {
         }
     }
 
-    public static CloudbreakEvent createEvent(Long stackId, Long userId, String eventStatus, Date eventTimestamp) {
+    public static CloudbreakEvent createEvent(Long stackId, int nodeCount, String eventStatus, Date eventTimestamp) {
         CloudbreakEvent event = new CloudbreakEvent();
         event.setStackId(stackId);
         event.setEventType(eventStatus);
         event.setEventTimestamp(eventTimestamp);
+        event.setNodeCount(nodeCount);
         return event;
     }
 

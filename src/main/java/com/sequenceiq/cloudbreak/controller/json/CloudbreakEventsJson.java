@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
+import com.sequenceiq.cloudbreak.domain.Status;
+
 public class CloudbreakEventsJson implements JsonEntity {
 
     private String eventType;
@@ -12,6 +14,16 @@ public class CloudbreakEventsJson implements JsonEntity {
     private String vmType;
     private String blueprintName;
     private long blueprintId;
+    private Status stackStatus;
+    private Integer nodeCount;
+
+    public Integer getNodeCount() {
+        return nodeCount;
+    }
+
+    public void setNodeCount(Integer nodeCount) {
+        this.nodeCount = nodeCount;
+    }
 
     public String getEventType() {
         return eventType;
@@ -91,5 +103,13 @@ public class CloudbreakEventsJson implements JsonEntity {
 
     public void setBlueprintId(long blueprintId) {
         this.blueprintId = blueprintId;
+    }
+
+    public Status getStackStatus() {
+        return stackStatus;
+    }
+
+    public void setStackStatus(Status stackStatus) {
+        this.stackStatus = stackStatus;
     }
 }

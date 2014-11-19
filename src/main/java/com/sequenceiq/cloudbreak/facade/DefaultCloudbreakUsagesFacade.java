@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.controller.json.CloudbreakUsageJson;
 import com.sequenceiq.cloudbreak.converter.CloudbreakUsageConverter;
+import com.sequenceiq.cloudbreak.domain.CbUsageFilterParameters;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.service.usages.CloudbreakUsageGeneratorService;
 import com.sequenceiq.cloudbreak.service.usages.CloudbreakUsagesRetrievalService;
@@ -25,10 +26,9 @@ public class DefaultCloudbreakUsagesFacade implements CloudbreakUsagesFacade {
     private CloudbreakUsageConverter cloudbreakUsageConverter;
 
     @Override
-    public List<CloudbreakUsageJson> getUsagesFor(String account, String owner, Long since, String cloud,
-            String zone, String vmtype, String hours) {
+    public List<CloudbreakUsageJson> getUsagesFor(CbUsageFilterParameters params) {
 
-        List<CloudbreakUsage> usages = cloudbreakUsagesService.findUsagesFor(account, owner, since, cloud, zone, vmtype, hours);
+        List<CloudbreakUsage> usages = cloudbreakUsagesService.findUsagesFor(params);
         return new ArrayList<>(cloudbreakUsageConverter.convertAllEntityToJson(usages));
     }
 

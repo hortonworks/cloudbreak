@@ -23,6 +23,8 @@ public class CloudbreakEventConverter extends AbstractConverter<CloudbreakEvents
         json.setRegion(entity.getRegion());
         json.setVmType(entity.getVmType());
         json.setOwner(entity.getOwner());
+        json.setStackStatus(entity.getStackStatus());
+        json.setNodeCount(entity.getNodeCount());
         return json;
     }
 
@@ -39,6 +41,8 @@ public class CloudbreakEventConverter extends AbstractConverter<CloudbreakEvents
         entity.setRegion(json.getRegion());
         entity.setVmType(json.getVmType());
         entity.setOwner(json.getOwner());
+        entity.setStackStatus(json.getStackStatus());
+        entity.setNodeCount(json.getNodeCount());
         return entity;
     }
 }

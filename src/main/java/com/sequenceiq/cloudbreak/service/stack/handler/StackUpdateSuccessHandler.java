@@ -9,12 +9,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
+import com.sequenceiq.cloudbreak.domain.BillingStatus;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.event.StackUpdateSuccess;
 
 import reactor.event.Event;
@@ -30,6 +32,9 @@ public class StackUpdateSuccessHandler implements Consumer<Event<StackUpdateSucc
 
     @Autowired
     private RetryingStackUpdater stackUpdater;
+
+    @Autowired
+    private CloudbreakEventService eventService;
 
     @Override
     public void accept(Event<StackUpdateSuccess> t) {
@@ -52,8 +57,10 @@ public class StackUpdateSuccessHandler implements Consumer<Event<StackUpdateSucc
             stack.getInstanceMetaData().removeAll(metadataToRemove);
             stackUpdater.updateStackMetaData(stackId, stack.getInstanceMetaData());
             LOGGER.info("Successfully removed metadata of instances '{}' in stack.", instanceIds);
+            eventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_CHANGED.name(), "Termination of instances finished.");
         } else {
             stackUpdater.updateNodeCount(stackId, stack.getNodeCount() + instanceIds.size());
+            eventService.fireCloudbreakEvent(stackId, BillingStatus.BILLING_CHANGED.name(), "Creation of new instances finished.");
         }
         stackUpdater.updateMetadataReady(stackId, true);
         stackUpdater.updateStackStatus(stackId, Status.AVAILABLE);

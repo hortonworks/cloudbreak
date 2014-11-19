@@ -71,7 +71,7 @@ public class GccMetadataSetup implements MetadataSetup {
         Set<CoreInstanceMetaData> instanceMetaDatas = collectMetaData(stack, (GccTemplate) stack.getTemplate(), resources);
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.METADATA_UPDATE_COMPLETE_EVENT, stack.getId());
         reactor.notify(ReactorConfig.METADATA_UPDATE_COMPLETE_EVENT,
-                Event.wrap(new MetadataUpdateComplete(CloudPlatform.AZURE, stack.getId(), instanceMetaDatas)));
+                Event.wrap(new MetadataUpdateComplete(CloudPlatform.GCC, stack.getId(), instanceMetaDatas)));
     }
 
     private CoreInstanceMetaData getMetadata(Stack stack, Compute compute, Resource resource) {
