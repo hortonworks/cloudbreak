@@ -60,6 +60,15 @@ public class DefaultBlueprintService implements BlueprintService {
     }
 
     @Override
+    public Blueprint get(String name) {
+        Blueprint blueprint = blueprintRepository.findByName(name);
+        if (blueprint == null) {
+            throw new NotFoundException(String.format("Blueprint '%s' not found.", name));
+        }
+        return blueprint;
+    }
+
+    @Override
     public Blueprint create(CbUser user, Blueprint blueprint) {
         MDCBuilder.buildMdcContext(blueprint);
         LOGGER.debug("Creating blueprint: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
@@ -92,5 +101,15 @@ public class DefaultBlueprintService implements BlueprintService {
             throw new BadRequestException(String.format(
                     "There are stacks associated with blueprint '%s'. Please remove these before the deleting the blueprint.", id));
         }
+    }
+
+    @Override
+    public void delete(String name) {
+        Blueprint blueprint = blueprintRepository.findByName(name);
+        MDCBuilder.buildMdcContext(blueprint);
+        if (blueprint == null) {
+            throw new NotFoundException(String.format("Blueprint '%s' not found.", name));
+        }
+        delete(blueprint.getId());
     }
 }

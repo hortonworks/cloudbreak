@@ -16,11 +16,15 @@ public interface StackService {
 
     Stack get(Long id);
 
-    Stack get(String ambariAddress);
+    Stack get(String name);
+
+    Stack getByAmbariAdress(String ambariAddress);
 
     Stack create(CbUser user, Stack stack);
 
     void delete(Long id);
+
+    void delete(String name);
 
     Set<InstanceMetaData> getMetaData(String hash);
 
@@ -28,5 +32,9 @@ public interface StackService {
 
     void updateStatus(Long stackId, StatusRequest status);
 
+    void updateStatus(String name, StatusRequest status);
+
     void updateNodeCount(Long stackId, Integer nodeCount);
+
+    void updateNodeCount(String name, Integer nodeCount);
 }

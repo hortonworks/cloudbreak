@@ -83,17 +83,26 @@ public class CredentialController {
         return new ResponseEntity<>(convertCredentials(credentials), HttpStatus.OK);
     }
 
-    @RequestMapping(value = "credentials/{credentialId}", method = RequestMethod.GET)
+    @RequestMapping(value = "credentials/{parameter}", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<CredentialJson> getCredential(@ModelAttribute("user") CbUser user, @PathVariable Long credentialId) {
-        Credential credential = credentialService.get(credentialId);
+    public ResponseEntity<CredentialJson> getCredential(@ModelAttribute("user") CbUser user, @PathVariable String parameter) {
+        Credential credential = null;
+        try {
+            credential = credentialService.get(Long.parseLong(parameter));
+        } catch (NumberFormatException e) {
+            credential = credentialService.get(parameter);
+        }
         return new ResponseEntity<>(convert(credential), HttpStatus.OK);
     }
 
-    @RequestMapping(value = "credentials/{credentialId}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "credentials/{parameter}", method = RequestMethod.DELETE)
     @ResponseBody
-    public ResponseEntity<CredentialJson> deleteCredential(@ModelAttribute("user") CbUser user, @PathVariable Long credentialId) {
-        credentialService.delete(credentialId);
+    public ResponseEntity<CredentialJson> deleteCredential(@ModelAttribute("user") CbUser user, @PathVariable String parameter) {
+        try {
+            credentialService.delete(Long.parseLong(parameter));
+        } catch (NumberFormatException e) {
+            credentialService.delete(parameter);
+        }
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

@@ -44,32 +44,45 @@ public class ClusterController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @RequestMapping(value = "/stacks/{stackId}/cluster", method = RequestMethod.GET)
+    @RequestMapping(value = "/stacks/{parameter}/cluster", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<ClusterResponse> retrieveCluster(@PathVariable Long stackId) {
-        Stack stack = stackService.get(stackId);
-        Cluster cluster = clusterService.retrieveCluster(stackId);
-        String clusterJson = clusterService.getClusterJson(stack.getAmbariIp(), stackId);
-        ClusterResponse response = clusterConverter.convert(cluster, clusterJson);
+    public ResponseEntity<ClusterResponse> retrieveCluster(@PathVariable String parameter) {
+        ClusterResponse response = null;
+        try {
+            Stack stack = stackService.get(Long.parseLong(parameter));
+            Cluster cluster = clusterService.retrieveCluster(Long.parseLong(parameter));
+            String clusterJson = clusterService.getClusterJson(stack.getAmbariIp(), Long.parseLong(parameter));
+            response = clusterConverter.convert(cluster, clusterJson);
+        } catch (NumberFormatException e) {
+            Stack stack = stackService.get(parameter);
+            Cluster cluster = clusterService.retrieveCluster(parameter);
+            String clusterJson = clusterService.getClusterJson(stack.getAmbariIp(), parameter);
+            response = clusterConverter.convert(cluster, clusterJson);
+        }
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/stacks/{stackId}/cluster", method = RequestMethod.PUT)
+    @RequestMapping(value = "/stacks/{parameter}/cluster", method = RequestMethod.PUT)
     @ResponseBody
-    public ResponseEntity<String> updateCluster(@PathVariable Long stackId, @RequestBody UpdateClusterJson updateJson) {
-        Stack stack = stackService.get(stackId);
+    public ResponseEntity<String> updateCluster(@PathVariable String parameter, @RequestBody UpdateClusterJson updateJson) {
+        Stack stack = null;
+        try {
+            stack = stackService.get(Long.parseLong(parameter));
+        } catch (NumberFormatException e) {
+            stack = stackService.get(parameter);
+        }
         Status stackStatus = stack.getStatus();
 
         if (updateJson.getStatus() != null) {
-            clusterService.updateStatus(stackId, updateJson.getStatus());
+            clusterService.updateStatus(stack.getId(), updateJson.getStatus());
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         if (!stackStatus.equals(Status.AVAILABLE)) {
             throw new BadRequestException(String.format(
-                    "Stack '%s' is currently in '%s' state. PUT requests to a cluster can only be made if the underlying stack is 'AVAILABLE'.", stackId,
+                    "Stack '%s' is currently in '%s' state. PUT requests to a cluster can only be made if the underlying stack is 'AVAILABLE'.", parameter,
                     stackStatus));
         }
-        clusterService.updateHosts(stackId, updateJson.getHostGroupAdjustments());
+        clusterService.updateHosts(stack.getId(), updateJson.getHostGroupAdjustments());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

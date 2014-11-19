@@ -71,6 +71,13 @@ public class AmbariClusterService implements ClusterService {
     private AmbariClientService clientService;
 
     @Override
+    public void create(CbUser user, String name, Cluster cluster) {
+        Stack stack = stackRepository.findByName(name);
+        create(user, stack.getId(), cluster);
+
+    }
+
+    @Override
     public void create(CbUser user, Long stackId, Cluster cluster) {
         Stack stack = stackRepository.findOne(stackId);
         MDCBuilder.buildMdcContext(stack);
@@ -98,6 +105,12 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
+    public Cluster retrieveCluster(String stackName) {
+        Stack stack = stackRepository.findByName(stackName);
+        return stack.getCluster();
+    }
+
+    @Override
     public String getClusterJson(String ambariIp, Long stackId) {
         Stack stack = stackRepository.findOne(stackId);
         MDCBuilder.buildMdcContext(stack);
@@ -115,6 +128,11 @@ public class AmbariClusterService implements ClusterService {
                 throw new InternalServerException("Something went wrong", e);
             }
         }
+    }
+
+    @Override
+    public String getClusterJson(String ambariIp, String stackName) {
+        return null;
     }
 
     @Override

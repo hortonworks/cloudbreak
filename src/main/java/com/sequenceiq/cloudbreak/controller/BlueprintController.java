@@ -75,17 +75,26 @@ public class BlueprintController {
         return new ResponseEntity<>(blueprintConverter.convertAllEntityToJson(blueprints), HttpStatus.OK);
     }
 
-    @RequestMapping(value = "blueprints/{id}", method = RequestMethod.GET)
+    @RequestMapping(value = "blueprints/{parameter}", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<BlueprintJson> getBlueprint(@ModelAttribute("user") CbUser user, @PathVariable Long id) {
-        Blueprint blueprint = blueprintService.get(id);
+    public ResponseEntity<BlueprintJson> getBlueprint(@ModelAttribute("user") CbUser user, @PathVariable String parameter) {
+        Blueprint blueprint = null;
+        try {
+            blueprint = blueprintService.get(Long.parseLong(parameter));
+        } catch (NumberFormatException e) {
+            blueprint = blueprintService.get(parameter);
+        }
         return new ResponseEntity<>(blueprintConverter.convert(blueprint), HttpStatus.OK);
     }
 
-    @RequestMapping(value = "blueprints/{id}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "blueprints/{parameter}", method = RequestMethod.DELETE)
     @ResponseBody
-    public ResponseEntity<BlueprintJson> deleteBlueprint(@ModelAttribute("user") CbUser user, @PathVariable Long id) {
-        blueprintService.delete(id);
+    public ResponseEntity<BlueprintJson> deleteBlueprint(@ModelAttribute("user") CbUser user, @PathVariable String parameter) {
+        try {
+            blueprintService.delete(Long.parseLong(parameter));
+        } catch (NumberFormatException e) {
+            blueprintService.delete(parameter);
+        }
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 

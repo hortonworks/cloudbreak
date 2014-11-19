@@ -24,8 +24,8 @@ import com.sequenceiq.cloudbreak.converter.AzureTemplateConverter;
 import com.sequenceiq.cloudbreak.converter.GccTemplateConverter;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
-import com.sequenceiq.cloudbreak.domain.GccTemplate;
 import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.domain.GccTemplate;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
 
@@ -70,18 +70,27 @@ public class TemplateController {
         return new ResponseEntity<>(convert(templates), HttpStatus.OK);
     }
 
-    @RequestMapping(value = "templates/{id}", method = RequestMethod.GET)
+    @RequestMapping(value = "templates/{parameter}", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<TemplateJson> getTemplate(@ModelAttribute("user") CbUser user, @PathVariable Long id) {
-        Template template = templateService.get(id);
+    public ResponseEntity<TemplateJson> getTemplate(@ModelAttribute("user") CbUser user, @PathVariable String parameter) {
+        Template template = null;
+        try {
+            template = templateService.get(Long.parseLong(parameter));
+        } catch (NumberFormatException e) {
+            template = templateService.get(parameter);
+        }
         TemplateJson templateJson = convert(template);
         return new ResponseEntity<>(templateJson, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "templates/{id}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "templates/{parameter}", method = RequestMethod.DELETE)
     @ResponseBody
-    public ResponseEntity<TemplateJson> deleteTemplate(@ModelAttribute("user") CbUser user, @PathVariable Long id) {
-        templateService.delete(id);
+    public ResponseEntity<TemplateJson> deleteTemplate(@ModelAttribute("user") CbUser user, @PathVariable String parameter) {
+        try {
+            templateService.delete(Long.parseLong(parameter));
+        } catch (NumberFormatException e) {
+            templateService.delete(parameter);
+        }
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

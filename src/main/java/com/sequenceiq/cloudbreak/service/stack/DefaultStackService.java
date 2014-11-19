@@ -98,7 +98,17 @@ public class DefaultStackService implements StackService {
     }
 
     @Override
-    public Stack get(String ambariAddress) {
+    public Stack get(String name) {
+        Stack stack = stackRepository.findByName(name);
+        MDCBuilder.buildMdcContext(stack);
+        if (stack == null) {
+            throw new NotFoundException(String.format("Stack '%s' not found", name));
+        }
+        return stack;
+    }
+
+    @Override
+    public Stack getByAmbariAdress(String ambariAddress) {
         Stack stack = stackRepository.findByAmbari(ambariAddress);
         if (stack == null) {
             throw new NotFoundException(String.format("Stack not found by Ambari address: '%s' not found", ambariAddress));
@@ -142,6 +152,24 @@ public class DefaultStackService implements StackService {
     }
 
     @Override
+    public void delete(String name) {
+        Stack stack = stackRepository.findByName(name);
+        MDCBuilder.buildMdcContext(stack);
+        LOGGER.info("Stack delete requested.");
+        if (stack == null) {
+            throw new NotFoundException(String.format("Stack '%s' not found", name));
+        }
+        delete(name);
+    }
+
+    @Override
+    public void updateStatus(String name, StatusRequest status) {
+        Stack stack = stackRepository.findByName(name);
+        MDCBuilder.buildMdcContext(stack);
+        updateStatus(stack.getName(), status);
+    }
+
+    @Override
     public void updateStatus(Long stackId, StatusRequest status) {
         Stack stack = stackRepository.findOne(stackId);
         MDCBuilder.buildMdcContext(stack);
@@ -172,6 +200,12 @@ public class DefaultStackService implements StackService {
                         Event.wrap(new StackStatusUpdateRequest(stack.getTemplate().cloudPlatform(), stack.getId(), status)));
             }
         }
+    }
+
+    @Override
+    public void updateNodeCount(String name, Integer scalingAdjustment) {
+        Stack stack = stackRepository.findByName(name);
+        updateNodeCount(stack.getId(), scalingAdjustment);
     }
 
     @Override
