@@ -122,7 +122,7 @@ public class ProvisionContext {
                         }
                     }
                     if (exception != null) {
-                        throw new BuildStackFailureException(exception.getMessage(), exception, resourceSet);
+                        throw new BuildStackFailureException(exception.getMessage(), exception, stack.getResources());
                     }
 
                     LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_COMPLETE_EVENT, stack.getId());

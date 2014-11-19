@@ -55,6 +55,9 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
     @Autowired
     private PollingService<AzureInstances> azurePollingService;
 
+    @Autowired
+    private AzureStackUtil azureStackUtil;
+
     @Override
     public List<Resource> create(AzureProvisionContextObject po, int index, List<Resource> resources) throws Exception {
         Stack stack = stackRepository.findById(po.getStackId());
@@ -87,7 +90,7 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
         props.put(USERNAME, DEFAULT_USER_NAME);
         X509Certificate sshCert = null;
         try {
-            sshCert = createX509Certificate(azureCredential, po.getEmailAsFolder());
+            sshCert = azureStackUtil.createX509Certificate(azureCredential);
         } catch (FileNotFoundException e) {
             throw new StackCreationFailureException(e);
         } catch (CertificateException e) {

@@ -9,17 +9,14 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CbUserRole;
-import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
-import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
@@ -32,11 +29,7 @@ public class SimpleCredentialService implements CredentialService {
     private CredentialRepository credentialRepository;
 
     @Autowired
-    private AzureCertificateService azureCertificateService;
-
-    @Autowired
     private WebsocketService websocketService;
-
 
     @Override
     public Set<Credential> retrievePrivateCredentials(CbUser user) {
@@ -74,7 +67,7 @@ public class SimpleCredentialService implements CredentialService {
         } catch (DataIntegrityViolationException ex) {
             throw new DuplicateKeyValueException(credential.getName(), ex);
         }
-        createAzureCertificates(user, savedCredential);
+        //createAzureCertificates(user, savedCredential);
         websocketService.sendToTopicUser(user.getUsername(), WebsocketEndPoint.CREDENTIAL,
                 new StatusMessage(credential.getId(), credential.getName(), Status.AVAILABLE.name()));
 
@@ -92,7 +85,7 @@ public class SimpleCredentialService implements CredentialService {
                 new StatusMessage(credential.getId(), credential.getName(), Status.DELETE_COMPLETED.name()));
     }
 
-    private void createAzureCertificates(CbUser user, Credential credential) {
+   /* private void createAzureCertificates(CbUser user, Credential credential) {
         if (CloudPlatform.AZURE.equals(credential.cloudPlatform())) {
             AzureCredential azureCredential = (AzureCredential) credential;
             if (azureCredential.getPublicKey() != null) {
@@ -100,5 +93,5 @@ public class SimpleCredentialService implements CredentialService {
             }
             azureCertificateService.generateCertificate(user, azureCredential);
         }
-    }
+    }*/
 }

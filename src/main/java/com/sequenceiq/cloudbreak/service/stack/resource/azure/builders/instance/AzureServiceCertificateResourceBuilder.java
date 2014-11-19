@@ -18,11 +18,11 @@ import com.google.common.base.Optional;
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.controller.StackCreationFailureException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
-import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.X509Certificate;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureSimpleInstanceResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDeleteContextObject;
@@ -37,17 +37,19 @@ public class AzureServiceCertificateResourceBuilder extends AzureSimpleInstanceR
     @Autowired
     private StackRepository stackRepository;
 
+    @Autowired
+    private AzureStackUtil azureStackUtil;
+
     @Override
     public List<Resource> create(AzureProvisionContextObject po, int index, List<Resource> resources) throws Exception {
         Stack stack = stackRepository.findById(po.getStackId());
-        AzureTemplate azureTemplate = (AzureTemplate) stack.getTemplate();
         AzureCredential azureCredential = (AzureCredential) stack.getCredential();
         Map<String, String> props = new HashMap<>();
         String name = filterResourcesByType(resources, ResourceType.AZURE_CLOUD_SERVICE).get(0).getResourceName();
         props.put(NAME, name);
         X509Certificate sshCert = null;
         try {
-            sshCert = createX509Certificate(azureCredential, po.getEmailAsFolder());
+            sshCert = azureStackUtil.createX509Certificate(azureCredential);
         } catch (FileNotFoundException e) {
             throw new StackCreationFailureException(e);
         } catch (CertificateException e) {

@@ -19,6 +19,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -71,7 +72,7 @@ public class AzureMetadataSetupTest {
     @Test
     public void testSetupMetadataWhenIOExceptionOccurs() throws IOException {
         // GIVEN
-        given(azureStackUtil.createAzureClient(any(Credential.class), anyString())).willReturn(azureClient);
+        given(azureStackUtil.createAzureClient(any(AzureCredential.class))).willReturn(azureClient);
         doThrow(new IOException()).when(underTest).getPrivateIP(anyString());
         // WHEN
         underTest.setupMetadata(stack);
