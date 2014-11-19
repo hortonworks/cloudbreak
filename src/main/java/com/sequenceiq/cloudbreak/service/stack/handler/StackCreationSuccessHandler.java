@@ -25,7 +25,7 @@ import reactor.function.Consumer;
 public class StackCreationSuccessHandler implements Consumer<Event<StackCreationSuccess>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackCreationSuccessHandler.class);
-    private static final String DEFAULT_USER = "admin";
+    private static final String ADMIN = "admin";
 
     @Autowired
     private RetryingStackUpdater stackUpdater;
@@ -51,11 +51,23 @@ public class StackCreationSuccessHandler implements Consumer<Event<StackCreation
         websocketService.sendToTopicUser(stack.getOwner(), WebsocketEndPoint.STACK,
                 new StatusMessage(stackId, stack.getName(), Status.AVAILABLE.name()));
         stackUpdater.updateStackStatusReason(stack.getId(), "");
-        AmbariClient ambariClient = clientService.createDefault(ambariIp);
-        ambariClient.createUser(stack.getUserName(), stack.getPassword(), true);
-        ambariClient.deleteUser(DEFAULT_USER);
+        changeAmbariCredentials(ambariIp, stack);
         LOGGER.info("Publishing {} event.", ReactorConfig.AMBARI_STARTED_EVENT);
         reactor.notify(ReactorConfig.AMBARI_STARTED_EVENT, Event.wrap(stack));
+    }
+
+    private void changeAmbariCredentials(String ambariIp, Stack stack) {
+        String userName = stack.getUserName();
+        String password = stack.getPassword();
+        AmbariClient ambariClient = clientService.createDefault(ambariIp);
+        if (ADMIN.equals(userName)) {
+            if (!ADMIN.equals(password)) {
+                ambariClient.changePassword(ADMIN, ADMIN, password, true);
+            }
+        } else {
+            ambariClient.createUser(userName, password, true);
+            ambariClient.deleteUser(ADMIN);
+        }
     }
 
 }
