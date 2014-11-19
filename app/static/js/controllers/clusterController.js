@@ -37,11 +37,12 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         }
 
         $rootScope.activeCluster = {};
-        $scope.cluster = {};
+
         $scope.detailsShow = true;
         $scope.periscopeShow = false;
         $scope.metricsShow = false;
         getUluwatuClusters();
+        initCluster();
 
         $scope.createCluster = function () {
             var blueprint = $filter('filter')($rootScope.blueprints, {id: $scope.cluster.blueprintId}, true)[0];
@@ -60,7 +61,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             $scope.cluster.credentialId = $rootScope.activeCredential.id;
             UluwatuCluster.save($scope.cluster, function (result) {
                 $rootScope.clusters.push(result);
-                $scope.cluster = {};
+                initCluster();
 
                 $scope.modifyStatusMessage($rootScope.error_msg.cluster_success1 + result.name + $rootScope.error_msg.cluster_success2);
                 $scope.modifyStatusClass("has-success");
@@ -149,6 +150,13 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
               $rootScope.clusters = clusters;
               $scope.$parent.orderClusters();
           });
+        }
+
+        function initCluster(){
+            $scope.cluster = {
+                password: "admin",
+                userName: "admin"
+            };
         }
 
         var refresher = $interval(getUluwatuClusters, 10000);

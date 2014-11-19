@@ -102,7 +102,9 @@ uluwatuServices.factory('UluwatuCluster', ['UserStack', 'Cluster', 'GlobalStack'
                     nodeCount: cluster.nodeCount,
                     name: cluster.name,
                     templateId: cluster.templateId,
-                    credentialId: cluster.credentialId
+                    credentialId: cluster.credentialId,
+                    password: cluster.password,
+                    userName: cluster.userName
                 }
                 UserStack.save(stack, function (result) {
                     cluster.id = result.id;
