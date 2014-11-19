@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.notification;
 import java.util.Date;
 
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
+import com.sequenceiq.cloudbreak.domain.Status;
 
 public class Notification {
 
@@ -17,6 +18,9 @@ public class Notification {
     private String blueprintName;
     private long blueprintId;
     private Long stackId;
+    private String stackName;
+    private Status stackStatus;
+    private Integer nodeCount;
 
     public Notification() {
     }
@@ -33,6 +37,9 @@ public class Notification {
         this.blueprintName = event.getBlueprintName();
         this.blueprintId = event.getBlueprintId();
         this.stackId = event.getStackId();
+        this.stackName = event.getStackName();
+        this.stackStatus = event.getStackStatus();
+        this.nodeCount = event.getNodeCount();
     }
 
     public String getEventType() {
@@ -121,5 +128,29 @@ public class Notification {
 
     public void setStackId(Long stackId) {
         this.stackId = stackId;
+    }
+
+    public String getStackName() {
+        return stackName;
+    }
+
+    public void setStackName(String stackName) {
+        this.stackName = stackName;
+    }
+
+    public Status getStackStatus() {
+        return stackStatus;
+    }
+
+    public void setStackStatus(Status stackStatus) {
+        this.stackStatus = stackStatus;
+    }
+
+    public Integer getNodeCount() {
+        return nodeCount;
+    }
+
+    public void setNodeCount(Integer nodeCount) {
+        this.nodeCount = nodeCount;
     }
 }
