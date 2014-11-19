@@ -31,7 +31,7 @@
                         <div class="col-sm-9">
                             <input type="text" name="cl_clusterUserName" class="form-control" id="cl_clusterUserName" name="cl_clusterUserName" placeholder="min. 5 max. 15 char" ng-model="cluster.userName"  ng-pattern="/^[a-z][-a-z0-9]*[a-z0-9]$/" ng-minlength="5" ng-maxlength="15" required>
                             <div class="help-block"
-                                 ng-show="clusterCreationForm.cl_clusterUserName.$dirty && clusterCreationForm.cl_clusterUserName.$invalid"><i class="fa fa-warning"></i> {{error_msg.cluster_name_invalid}}
+                                 ng-show="clusterCreationForm.cl_clusterUserName.$dirty && clusterCreationForm.cl_clusterUserName.$invalid"><i class="fa fa-warning"></i> {{error_msg.ambari_user_name_invalid}}
                             </div>
                         </div>
                     </div>
@@ -40,7 +40,7 @@
                         <div class="col-sm-9">
                             <input type="text" name="cl_clusterPass" class="form-control" id="cl_clusterPass" name="cl_clusterPass" placeholder="min. 5 max. 15 char" ng-model="cluster.password"  ng-pattern="/^[a-z][-a-z0-9]*[a-z0-9]$/" ng-minlength="5" ng-maxlength="15" required>
                             <div class="help-block"
-                                 ng-show="clusterCreationForm.cl_clusterPass.$dirty && clusterCreationForm.cl_clusterPass.$invalid"><i class="fa fa-warning"></i> {{error_msg.cluster_name_invalid}}
+                                 ng-show="clusterCreationForm.cl_clusterPass.$dirty && clusterCreationForm.cl_clusterPass.$invalid"><i class="fa fa-warning"></i> {{error_msg.ambari_password_invalid}}
                             </div>
                         </div>
                     </div>
