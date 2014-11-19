@@ -91,61 +91,61 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
             }
         };
 
-        function handleNotification(data) {
-          console.log(data)
-          var eventType = data.eventType;
+        function handleNotification(notification) {
+          console.log(notification)
+          var eventType = notification.eventType;
           switch(eventType) {
             case "CLUSTER_CREATION_FAILED":
-              handleStatusChange(data, $rootScope.error_msg.cluster_create_failed, "has-error");
+              handleStatusChange(notification, $rootScope.error_msg.cluster_create_failed, "has-error");
               break;
             case "REQUESTED":
-              handleStatusChange(data, $rootScope.error_msg.stack_create_requested, "has-success");
+              handleStatusChange(notification, $rootScope.error_msg.stack_create_requested, "has-success");
               break;
             case "CREATE_IN_PROGRESS":
-              handleStatusChange(data, $rootScope.error_msg.stack_create_in_progress, "has-success");
+              handleStatusChange(notification, $rootScope.error_msg.stack_create_in_progress, "has-success");
               break;
             case "UPDATE_IN_PROGRESS":
-              handleStatusChange(data, $rootScope.error_msg.cluster_update_inprogress, "has-success");
+              handleStatusChange(notification, $rootScope.error_msg.cluster_update_inprogress, "has-success");
               break;
             case "CREATE_FAILED":
-              handleStatusChange(data, $rootScope.error_msg.stack_create_failed, "has-error");
+              handleStatusChange(notification, $rootScope.error_msg.stack_create_failed, "has-error");
               break;
             case "START_REQUESTED":
-              handleStatusChange(data, $rootScope.error_msg.cluster_start_requested, "has-success");
+              handleStatusChange(notification, $rootScope.error_msg.cluster_start_requested, "has-success");
               break;
             case "START_IN_PROGRESS":
-              handleStatusChange(data, $rootScope.error_msg.cluster_start_in_progress, "has-success");
+              handleStatusChange(notification, $rootScope.error_msg.cluster_start_in_progress, "has-success");
               break;
             case "START_FAILED":
-              handleStatusChange(data, $rootScope.error_msg.cluster_start_failed, "has-error");
+              handleStatusChange(notification, $rootScope.error_msg.cluster_start_failed, "has-error");
               break;
             case "STOPPED":
-              handleStatusChange(data, $rootScope.error_msg.cluster_stopped, "has-success");
+              handleStatusChange(notification, $rootScope.error_msg.cluster_stopped, "has-success");
               break;
             case "STOP_REQUESTED":
-              handleStatusChange(data, $rootScope.error_msg.cluster_stop_requested, "has-success");
+              handleStatusChange(notification, $rootScope.error_msg.cluster_stop_requested, "has-success");
               break;
             case "STOP_IN_PROGRESS":
-              handleStatusChange(data, $rootScope.error_msg.cluster_stop_in_progress, "has-success");
+              handleStatusChange(notification, $rootScope.error_msg.cluster_stop_in_progress, "has-success");
               break;
             case "STOP_FAILED":
-              handleStatusChange(data, $rootScope.error_msg.cluster_stop_failed, "has-error");
+              handleStatusChange(notification, $rootScope.error_msg.cluster_stop_failed, "has-error");
               break;
             case "DELETE_FAILED":
-              handleStatusChange(data, $rootScope.error_msg.stack_delete_failed, "has-success");
+              handleStatusChange(notification, $rootScope.error_msg.stack_delete_failed, "has-success");
               break;
             case "DELETE_IN_PROGRESS":
-              handleStatusChange(data, $rootScope.error_msg.stack_delete_in_progress, "has-success");
+              handleStatusChange(notification, $rootScope.error_msg.stack_delete_in_progress, "has-success");
               break;
             case "DELETE_COMPLETED":
-              handleStatusChange(data, $rootScope.error_msg.stack_delete_completed, "has-success");
-              $rootScope.clusters = $filter('filter')($rootScope.clusters, function(value, index) { return value.id != data.stackId;});
+              handleStatusChange(notification, $rootScope.error_msg.stack_delete_completed, "has-success");
+              $rootScope.clusters = $filter('filter')($rootScope.clusters, function(value, index) { return value.id != notification.stackId;});
               break;
             case "AVAILABLE":
-              handleAvailableNotification(data);
+              handleAvailableNotification(notification);
               break;
             case "UPTIME_NOTIFICATION":
-              handleUptimeNotification(data);
+              handleUptimeNotification(notification);
               break;
           }
           $scope.$apply();
@@ -162,6 +162,10 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
             var msg = notification.eventMessage;
             if (msg != null && msg != undefined && msg.indexOf("AMBARI_IP:") > -1) {
               actCluster.ambariServerIp = msg.split(':')[1];
+            }
+            var nodeCount = notification.nodeCount;
+            if (nodeCount != null && nodeCount != undefined) {
+              actCluster.nodeCount = nodeCount;
             }
             actCluster.status = notification.eventType;
             $scope.modifyStatusMessage($rootScope.error_msg.cluster_create_completed, actCluster.name);
