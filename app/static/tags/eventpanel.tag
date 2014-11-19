@@ -44,24 +44,8 @@
                         <div>
                             <select class="form-control input-sm" id="eventType" ng-model="localFilter.eventType">
                                 <option>all</option>
-                                <option value="REQUESTED">REQUESTED</option>
-                                <option value="CREATE_IN_PROGRESS">CREATE_IN_PROGRESS</option>
-                                <option value="AVAILABLE">AVAILABLE</option>
-                                <option value="UPDATE_IN_PROGRESS">UPDATE_IN_PROGRESS</option>
-                                <option value="CREATE_FAILED">CREATE_FAILED</option>
-                                <option value="DELETE_IN_PROGRESS">DELETE_IN_PROGRESS</option>
-                                <option value="DELETE_FAILED">DELETE_FAILED</option>
-                                <option value="DELETE_COMPLETED">DELETE_COMPLETED</option>
-                                <option value="STOPPED">STOPPED</option>
-                                <option value="STOP_REQUESTED">STOP_REQUESTED</option>
-                                <option value="START_REQUESTED">START_REQUESTED</option>
-                                <option value="STOP_IN_PROGRESS">STOP_IN_PROGRESS</option>
-                                <option value="START_IN_PROGRESS">START_IN_PROGRESS</option>
-                                <option value="START_IN_PROGRESS">START_IN_PROGRESS</option>
-                                <option value="START_FAILED">START_FAILED</option>
-                                <option value="STOP_FAILED">STOP_FAILED</option>
-                                <option value="BILLING_STARTED">BILLING_STARTED</option>
-                                <option value="BILLING_STOPPED">BILLING_STOPPED</option>
+
+                                <option ng-repeat="(key, value) in $root.config.EVENT_TYPE"  value="{{key}}">{{value}}</option>
                             </select>
                         </div>
                     </div>
@@ -92,7 +76,7 @@
                             <tr ng-repeat="event in events| filter:eventFilterFunction">
                                 <td>{{event.cloud}}</td>
                                 <td>{{event.owner}}</td>
-                                <td>{{event.eventType}}</td>
+                                <td>{{$root.config.EVENT_TYPE[event.eventType]}}</td>
                                 <td>{{event.eventTimestamp}}</td>
                                 <td style="width: 25%;">{{event.eventMessage}}</td>
                             </tr>

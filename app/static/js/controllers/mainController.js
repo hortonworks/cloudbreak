@@ -105,6 +105,25 @@ angular.module('uluwatuControllers').controller('mainController', ['$scope', '$r
                     {key: 'C38xlarge', value: 'C38xlarge'}
                 ]
 
+            },
+            'EVENT_TYPE': {
+                "REQUESTED": "requested",
+                "CREATE_IN_PROGRESS": "create in progress",
+                "AVAILABLE": "available",
+                "UPDATE_IN_PROGRESS": "update in progress",
+                "CREATE_FAILED": "create failed",
+                "DELETE_IN_PROGRESS": "delete in progress",
+                "DELETE_FAILED": "delete failed",
+                "DELETE_COMPLETED": "delete completed",
+                "STOPPED": "stopped",
+                "STOP_REQUESTED": "stop requested",
+                "START_REQUESTED": "start requested",
+                "STOP_IN_PROGRESS": "stop in progress",
+                "START_IN_PROGRESS": "start in progress",
+                "START_FAILED": "start failed",
+                "STOP_FAILED": "stop failed",
+                "BILLING_STARTED": "billing started",
+                "BILLING_STOPPED": "billing stopped"
             }
         }
 

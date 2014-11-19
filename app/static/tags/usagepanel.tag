@@ -47,6 +47,7 @@
             <div>
                 <select class="form-control input-sm" id="clusterState">
                     <option>any</option>
+                    <option ng-repeat="(key, value) in $root.config.EVENT_TYPE"  value="{{key}}">{{value}}</option>
                 </select>
             </div>
         </div>
@@ -140,7 +141,7 @@
                 <td ng-if="$index == 0" rowspan="{{gccresults.length}}">{{usage.cloud}}</td>
                 <td>{{usage.username}}</td>
                 <td>{{usage.stackName}}</td>
-                <td>{{usage.stackStatus}}</td>
+                <td>{{$root.config.EVENT_TYPE[usage.stackStatus]}}</td>
                 <td class="text-right">{{usage.instanceHours}} hrs</td>
                 <td class="text-right">{{usage.money}} $</td>
             </tr>
@@ -157,7 +158,7 @@
                 <td ng-if="$index == 0" rowspan="{{awsresults.length}}">{{usage.cloud}}</td>
                 <td>{{usage.username}}</td>
                 <td>{{usage.stackName}}</td>
-                <td>{{usage.stackStatus}}</td>
+                <td>{{$root.config.EVENT_TYPE[usage.stackStatus]}}</td>
                 <td class="text-right">{{usage.instanceHours}} hrs</td>
                 <td class="text-right">{{usage.money}} $</td>
             </tr>
@@ -175,7 +176,7 @@
                 <td ng-if="$index == 0" rowspan="{{azureresults.length}}">{{usage.cloud}}</td>
                 <td>{{usage.username}}</td>
                 <td>{{usage.stackName}}</td>
-                <td>{{usage.stackStatus}}</td>
+                <td>{{$root.config.EVENT_TYPE[usage.stackStatus]}}</td>
                 <td class="text-right">{{usage.instanceHours}} hrs</td>
                 <td class="text-right">{{usage.money}} $</td>
             </tr>
