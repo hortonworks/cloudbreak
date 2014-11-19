@@ -32,6 +32,9 @@ public class StackCreationSuccessHandlerTest {
     private static final String STACK_NAME = "stackName";
     private static final String DUMMY_EMAIL = "gipszjakab@myemail.com";
     private static final String DETAILED_MESSAGE = "message";
+    private static final String USER_NAME = "apple";
+    private static final String PASSWORD = "red";
+    private static final String ADMIN = "admin";
 
     @InjectMocks
     private StackCreationSuccessHandler underTest;
@@ -74,7 +77,8 @@ public class StackCreationSuccessHandlerTest {
         // WHEN
         underTest.accept(event);
         // THEN
-        verify(ambariClient).changePassword("admin", "admin", stack.getPassword(), true);
+        verify(ambariClient).createUser(USER_NAME, PASSWORD, true);
+        verify(ambariClient).deleteUser(ADMIN);
         verify(websocketService, times(1)).sendToTopicUser(anyString(), any(WebsocketEndPoint.class), any());
         verify(reactor, times(1)).notify(any(ReactorConfig.class), any(Event.class));
     }
@@ -88,7 +92,8 @@ public class StackCreationSuccessHandlerTest {
         Stack stack = new Stack();
         stack.setName(STACK_NAME);
         stack.setOwner(DUMMY_EMAIL);
-        stack.setPassword("pass");
+        stack.setUserName(USER_NAME);
+        stack.setPassword(PASSWORD);
         return stack;
     }
 }
