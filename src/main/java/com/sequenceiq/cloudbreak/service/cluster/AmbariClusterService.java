@@ -132,7 +132,8 @@ public class AmbariClusterService implements ClusterService {
 
     @Override
     public String getClusterJson(String ambariIp, String stackName) {
-        return null;
+        Stack stack = stackRepository.findByName(stackName);
+        return getClusterJson(ambariIp, stack.getId());
     }
 
     @Override
