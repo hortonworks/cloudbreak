@@ -24,6 +24,9 @@ import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.repository.CredentialRepository;
+import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
+import com.sequenceiq.cloudbreak.service.user.UserFilterField;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @Component
@@ -34,7 +37,6 @@ public class AzureStackUtil {
     public static final String SERVICENAME = "serviceName";
     public static final String ERROR = "\"error\":\"Could not fetch data from azure\"";
     public static final String CREDENTIAL = "credential";
-    public static final String EMAILASFOLDER = "emailAsFolder";
     public static final String IMAGE_NAME = "ambari-docker-v1";
     public static final Logger LOGGER = LoggerFactory.getLogger(AzureStackUtil.class);
 
@@ -43,6 +45,12 @@ public class AzureStackUtil {
 
     @Autowired
     private KeyGeneratorService keyGeneratorService;
+
+    @Autowired
+    private CredentialRepository credentialRepository;
+
+    @Autowired
+    private UserDetailsService userDetailsService;
 
     public String getOsImageName(Credential credential) {
         String[] split = baseImageUri.split("/");
@@ -132,7 +140,7 @@ public class AzureStackUtil {
         }
         try {
             keyGeneratorService.generateSshKey(sshPemPathWithoutExtension);
-            azureCredential.setSshCerFile(FileReaderUtils.readFileFromPath(sshPemPathWithoutExtension + ".cer"));
+            azureCredential.setSshCerFile(FileReaderUtils.readBinaryFileFromPath(sshPemPathWithoutExtension + ".cer"));
         } catch (InterruptedException e) {
             LOGGER.error("An error occured under the ssh generation for {} template. The error was: {} {}", azureCredential.getId(), e.getMessage(), e);
             throw new InternalServerException(e.getMessage());
@@ -145,4 +153,33 @@ public class AzureStackUtil {
         return new X509Certificate(buildAzureSshCerFile(azureCredential).getAbsolutePath());
     }
 
+    public void migrateFilesIfNeeded(AzureCredential credential) {
+        MDCBuilder.buildMdcContext(credential);
+        String email = userDetailsService.getDetails(credential.getOwner(), UserFilterField.USERID).getUsername();
+        String replace = email.replaceAll("@", "_").replace(".", "_");
+        String sshFile = "userdatas/" + replace + "/ssh/" + credential.getId() + "/" + replace + ".cer";
+        String cerFile = "userdatas/" + replace + "/certificate/" + credential.getId() + "/" + replace + ".cer";
+        String jksFile = "userdatas/" + replace + "/certificate/" + credential.getId() + "/" + replace + ".jks";
+
+        try {
+            if (credential.getSshCerFile() == null) {
+                if (new File(sshFile).exists()) {
+                    credential.setSshCerFile(FileReaderUtils.readBinaryFileFromPath(sshFile));
+                    credentialRepository.save(credential);
+                }
+            }
+            if (credential.getCerFile() == null && credential.getJksFile() == null) {
+                if (new File(cerFile).exists()) {
+                    credential.setCerFile(FileReaderUtils.readFileFromPath(cerFile));
+                    credentialRepository.save(credential);
+                }
+                if (new File(jksFile).exists()) {
+                    credential.setJksFile(FileReaderUtils.readBinaryFileFromPath(jksFile));
+                    credentialRepository.save(credential);
+                }
+            }
+        } catch (Exception ex) {
+            LOGGER.error("Credential migration unsuccess.", ex.getMessage());
+        }
+    }
 }

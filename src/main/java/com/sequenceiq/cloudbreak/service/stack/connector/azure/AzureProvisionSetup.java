@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
@@ -68,6 +69,9 @@ public class AzureProvisionSetup implements ProvisionSetup {
 
     @Autowired
     private RetryingStackUpdater retryingStackUpdater;
+
+    @Autowired
+    private CredentialRepository credentialRepository;
 
     @Override
     public void setupProvisioning(Stack stack) {
@@ -140,6 +144,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
     public Optional<String> preProvisionCheck(Stack stack) {
         MDCBuilder.buildMdcContext(stack);
         Credential credential = stack.getCredential();
+        azureStackUtil.migrateFilesIfNeeded((AzureCredential) credential);
         try {
             AzureClient azureClient = AzureStackUtil.createAzureClient((AzureCredential) credential);
             Object osImages = azureClient.getOsImages();
@@ -207,7 +212,6 @@ public class AzureProvisionSetup implements ProvisionSetup {
     public Map<String, Object> getSetupProperties(Stack stack) {
         Map<String, Object> properties = new HashMap<>();
         properties.put(CREDENTIAL, stack.getCredential());
-       // properties.put(EMAILASFOLDER, azureStackUtil.emailAsFolder(stack.getOwner()));
         return properties;
     }
 
