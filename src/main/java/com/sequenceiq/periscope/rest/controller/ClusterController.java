@@ -55,8 +55,10 @@ public class ClusterController {
             String host = ambari.getHost();
             LOGGER.info(-1, "Illegal access to Ambari cluster '{}' from user '{}'", host, user.getEmail());
             throw new AccessDeniedException(String.format("Accessing Ambari cluster '%s' is not allowed", host));
+        } else {
+            Ambari resolvedAmbari = clusterSecurityService.tryResolve(ambari);
+            return createClusterJsonResponse(clusterService.add(user, resolvedAmbari), HttpStatus.CREATED);
         }
-        return createClusterJsonResponse(clusterService.add(user, ambari), HttpStatus.CREATED);
     }
 
     @RequestMapping(method = RequestMethod.GET)

@@ -1,5 +1,7 @@
 package com.sequenceiq.periscope.service.security;
 
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +26,18 @@ public class ClusterSecurityService {
             // if the cluster is unknown for cloudbreak
             // it should allow it to monitor
             return true;
+        }
+    }
+
+    public Ambari tryResolve(Ambari ambari) {
+        CloudbreakClient client = cloudbreakService.getClient();
+        try {
+            String host = ambari.getHost();
+            int id = client.resolveToStackId(host);
+            Map<String, String> stack = (Map<String, String>) client.getStack("" + id);
+            return new Ambari(host, ambari.getPort(), stack.get("userName"), stack.get("password"));
+        } catch (Exception e) {
+            return ambari;
         }
     }
 
