@@ -60,7 +60,7 @@ public class StackUsageGenerator {
             }
 
             generateRunningStackUsage(stackUsages, start);
-            stackUsages = summeraziUsagesByDay(stackUsages);
+            stackUsages = sumUsagesByDay(stackUsages);
         } catch (ParseException e) {
             LOGGER.error("Usage generation is failed for stack(id:{})! Invalid date in event(id:{})! Ex: {}", actEvent.getStackId(), actEvent.getId(), e);
             throw new IllegalStateException(e);
@@ -105,7 +105,7 @@ public class StackUsageGenerator {
         }
     }
 
-    private List<CloudbreakUsage> summeraziUsagesByDay(List<CloudbreakUsage> usages) {
+    private List<CloudbreakUsage> sumUsagesByDay(List<CloudbreakUsage> usages) {
         sortUsagesByDate(usages);
         Map<String, CloudbreakUsage> usagesByDay = new HashMap<>();
 
