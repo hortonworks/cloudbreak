@@ -35,6 +35,14 @@ public class StackJson implements JsonEntity {
     private Long credentialId;
     private Status status;
     private String ambariServerIp;
+    @Size(max = 15, min = 5, message = "Name has to be min 5 letter maximum 15 length")
+    @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
+            message = "Must contain only alphanumeric characters (case sensitive) and hyphens and start with an alpha character.")
+    private String userName;
+    @Size(max = 15, min = 5, message = "Password has to be min 5 letter maximum 15 length")
+    @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
+            message = "Must contain only alphanumeric characters (case sensitive) and hyphens and start with an alpha character.")
+    private String password;
     private String hash;
     private ClusterResponse cluster;
     private String statusReason;
@@ -67,6 +75,22 @@ public class StackJson implements JsonEntity {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public Long getTemplateId() {

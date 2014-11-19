@@ -48,6 +48,8 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
         stackJson.setStatus(entity.getStatus());
         stackJson.setStatusReason(entity.getStatusReason());
         stackJson.setAmbariServerIp(entity.getAmbariIp());
+        stackJson.setUserName(entity.getUserName());
+        stackJson.setPassword(entity.getPassword());
         stackJson.setHash(entity.getHash());
         stackJson.setMetadata(metaDataConverter.convertAllEntityToJson(entity.getInstanceMetaData()));
         if (entity.getCluster() != null) {
@@ -75,6 +77,8 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
         stackJson.setStatusReason(entity.getStatusReason());
         stackJson.setMetadata(metaDataConverter.convertAllEntityToJson(entity.getInstanceMetaData()));
         stackJson.setAmbariServerIp(entity.getAmbariIp());
+        stackJson.setUserName(entity.getUserName());
+        stackJson.setPassword(entity.getPassword());
         if (entity.getCluster() != null) {
             stackJson.setCluster(clusterConverter.convert(entity.getCluster(), "{}"));
         } else {
@@ -88,6 +92,8 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
         Stack stack = new Stack();
         stack.setNodeCount(json.getNodeCount());
         stack.setName(json.getName());
+        stack.setUserName(json.getUserName());
+        stack.setPassword(json.getPassword());
         try {
             stack.setCredential(credentialRepository.findOne(json.getCredentialId()));
         } catch (AccessDeniedException e) {

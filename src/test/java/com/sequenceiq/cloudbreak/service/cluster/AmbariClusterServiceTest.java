@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 
 import java.util.HashSet;
@@ -88,7 +88,7 @@ public class AmbariClusterServiceTest {
     @Test(expected = InternalServerException.class)
     public void testRetrieveClusterJsonWhenClusterJsonIsNull() throws HttpResponseException {
         // GIVEN
-        doReturn(ambariClient).when(clientService).create(anyString());
+        doReturn(ambariClient).when(clientService).create(any(Stack.class));
         given(ambariClient.getClusterAsJson()).willReturn(null);
         // WHEN
         underTest.getClusterJson("123.12.3.4", 1L);
@@ -97,7 +97,7 @@ public class AmbariClusterServiceTest {
     @Test(expected = InternalServerException.class)
     public void testRetrieveClusterJsonThrowsHttpResponseException() throws HttpResponseException {
         // GIVEN
-        doReturn(ambariClient).when(clientService).create(anyString());
+        doReturn(ambariClient).when(clientService).create(any(Stack.class));
         given(ambariClient.getClusterAsJson()).willThrow(mockedException);
         given(mockedException.getMessage()).willReturn(null);
         // WHEN
