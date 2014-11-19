@@ -60,7 +60,9 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
         AzureCredential azureCredential = (AzureCredential) stack.getCredential();
         String vmName = getVmName(po.filterResourcesByType(ResourceType.AZURE_NETWORK).get(0).getResourceName(), index)
                 + String.valueOf(new Date().getTime());
-        vmName = vmName.substring(vmName.length() - MAX_NAME_LENGTH, vmName.length());
+        if (vmName.length() > MAX_NAME_LENGTH) {
+            vmName = vmName.substring(vmName.length() - MAX_NAME_LENGTH, vmName.length());
+        }
         Map<String, String> props = new HashMap<>();
         props.put(NAME, vmName);
         props.put(DESCRIPTION, azureTemplate.getDescription());
