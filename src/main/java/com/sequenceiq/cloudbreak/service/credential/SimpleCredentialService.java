@@ -67,7 +67,6 @@ public class SimpleCredentialService implements CredentialService {
         } catch (DataIntegrityViolationException ex) {
             throw new DuplicateKeyValueException(credential.getName(), ex);
         }
-        //createAzureCertificates(user, savedCredential);
         websocketService.sendToTopicUser(user.getUsername(), WebsocketEndPoint.CREDENTIAL,
                 new StatusMessage(credential.getId(), credential.getName(), Status.AVAILABLE.name()));
 
@@ -84,14 +83,4 @@ public class SimpleCredentialService implements CredentialService {
         websocketService.sendToTopicUser(credential.getOwner(), WebsocketEndPoint.CREDENTIAL,
                 new StatusMessage(credential.getId(), credential.getName(), Status.DELETE_COMPLETED.name()));
     }
-
-   /* private void createAzureCertificates(CbUser user, Credential credential) {
-        if (CloudPlatform.AZURE.equals(credential.cloudPlatform())) {
-            AzureCredential azureCredential = (AzureCredential) credential;
-            if (azureCredential.getPublicKey() != null) {
-                azureCertificateService.generateSshCertificate(user, azureCredential, azureCredential.getPublicKey());
-            }
-            azureCertificateService.generateCertificate(user, azureCredential);
-        }
-    }*/
 }
