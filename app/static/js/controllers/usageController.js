@@ -64,17 +64,17 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
                 initSums();
                 angular.forEach(success, function(item) {
                     if ($scope.gccFilterFunction(item)) {
-                        $scope.gccSum.fullMoney += parseFloat(item.runningHours) * parseFloat($scope.gccPrice[item.machineType]);
-                        $scope.gccSum.fullHours += parseFloat(item.runningHours);
-                        item.money = (parseFloat(item.runningHours) * parseFloat($scope.gccPrice[item.machineType])).toFixed(2);
+                        $scope.gccSum.fullMoney += parseFloat(item.instanceHours) * parseFloat($scope.gccPrice[item.machineType]);
+                        $scope.gccSum.fullHours += parseFloat(item.instanceHours);
+                        item.money = (parseFloat(item.instanceHours) * parseFloat($scope.gccPrice[item.machineType])).toFixed(2);
                     } else if($scope.azureFilterFunction(item)) {
-                        $scope.azureSum.fullMoney += parseFloat(item.runningHours) * parseFloat($scope.azurePrice[item.machineType]);
-                        $scope.azureSum.fullHours += parseFloat(item.runningHours);
-                        item.money = (parseFloat(item.runningHours) * parseFloat($scope.azurePrice[item.machineType])).toFixed(2);
+                        $scope.azureSum.fullMoney += parseFloat(item.instanceHours) * parseFloat($scope.azurePrice[item.machineType]);
+                        $scope.azureSum.fullHours += parseFloat(item.instanceHours);
+                        item.money = (parseFloat(item.instanceHours) * parseFloat($scope.azurePrice[item.machineType])).toFixed(2);
                     } else if($scope.awsFilterFunction(item)) {
-                        $scope.awsSum.fullMoney += parseFloat(item.runningHours) * parseFloat($scope.awsPrice[item.machineType]);
-                        $scope.awsSum.fullHours += parseFloat(item.runningHours);
-                        item.money = (parseFloat(item.runningHours) * parseFloat($scope.awsPrice[item.machineType])).toFixed(2);
+                        $scope.awsSum.fullMoney += parseFloat(item.instanceHours) * parseFloat($scope.awsPrice[item.machineType]);
+                        $scope.awsSum.fullHours += parseFloat(item.instanceHours);
+                        item.money = (parseFloat(item.instanceHours) * parseFloat($scope.awsPrice[item.machineType])).toFixed(2);
                     }
                 });
                 $scope.gccSum.fullMoney = $scope.gccSum.fullMoney.toFixed(2);
