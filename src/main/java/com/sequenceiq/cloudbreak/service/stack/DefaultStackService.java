@@ -159,14 +159,14 @@ public class DefaultStackService implements StackService {
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", name));
         }
-        delete(name);
+        delete(stack.getId());
     }
 
     @Override
     public void updateStatus(String name, StatusRequest status) {
         Stack stack = stackRepository.findByName(name);
         MDCBuilder.buildMdcContext(stack);
-        updateStatus(stack.getName(), status);
+        updateStatus(stack.getId(), status);
     }
 
     @Override
