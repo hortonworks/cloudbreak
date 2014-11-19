@@ -149,7 +149,6 @@
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
-                <td>&nbsp;</td>
                 <td class="text-right">{{gccSum.fullHours}} hrs</td>
                 <td class="text-right">$ {{gccSum.fullMoney}}</td>
             </tr>
@@ -168,7 +167,6 @@
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
-                <td>&nbsp;</td>
                 <td class="text-right">{{awsSum.fullHours}} hrs</td>
                 <td class="text-right">$ {{awsSum.fullMoney}}</td>
             </tr>
@@ -183,7 +181,6 @@
             </tr>
 
             <tr class="row-summa" ng-show="usages && (usages | filter:azureFilterFunction).length != 0">
-                <td>&nbsp;</td>
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
