@@ -33,9 +33,15 @@ public class ClusterSecurityService {
         CloudbreakClient client = cloudbreakService.getClient();
         try {
             String host = ambari.getHost();
-            int id = client.resolveToStackId(host);
-            Map<String, String> stack = (Map<String, String>) client.getStack("" + id);
-            return new Ambari(host, ambari.getPort(), stack.get("userName"), stack.get("password"));
+            String user = ambari.getUser();
+            String pass = ambari.getPass();
+            if (user == null && pass == null) {
+                int id = client.resolveToStackId(host);
+                Map<String, String> stack = (Map<String, String>) client.getStack("" + id);
+                return new Ambari(host, ambari.getPort(), stack.get("userName"), stack.get("password"));
+            } else {
+                return ambari;
+            }
         } catch (Exception e) {
             return ambari;
         }
