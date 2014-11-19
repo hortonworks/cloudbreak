@@ -154,7 +154,8 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
 
         function initCluster(){
             $scope.cluster = {
-                password: "admin"
+                password: "admin",
+                userName: "admin"
             };
         }
 
