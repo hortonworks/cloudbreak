@@ -95,11 +95,14 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
           console.log(data)
           var eventType = data.eventType;
           switch(eventType) {
+            case "CLUSTER_CREATION_FAILED":
+              handleStatusChange(data, $rootScope.error_msg.cluster_create_failed, "has-error");
+              break;
             case "REQUESTED":
-              handleStatusChange(data, eventType, "has-success");
+              handleStatusChange(data, $rootScope.error_msg.stack_create_requested, "has-success");
               break;
             case "CREATE_IN_PROGRESS":
-              handleStatusChange(data, $rootScope.error_msg.cluster_create_inprogress, "has-success");
+              handleStatusChange(data, $rootScope.error_msg.stack_create_in_progress, "has-success");
               break;
             case "UPDATE_IN_PROGRESS":
               handleStatusChange(data, $rootScope.error_msg.cluster_update_inprogress, "has-success");
@@ -107,23 +110,32 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
             case "CREATE_FAILED":
               handleStatusChange(data, $rootScope.error_msg.stack_create_failed, "has-error");
               break;
-            case "DELETE_IN_PROGRESS":
-              handleStatusChange(data, $rootScope.error_msg.stack_delete_in_progress, "has-success");
-              break;
-            case "STOPPED":
-              handleStatusChange(data, eventType, "has-success");
-              break;
             case "START_REQUESTED":
-              handleStatusChange(data, eventType, "has-success");
+              handleStatusChange(data, $rootScope.error_msg.cluster_start_requested, "has-success");
               break;
             case "START_IN_PROGRESS":
-              handleStatusChange(data, eventType, "has-success");
+              handleStatusChange(data, $rootScope.error_msg.cluster_start_in_progress, "has-success");
+              break;
+            case "START_FAILED":
+              handleStatusChange(data, $rootScope.error_msg.cluster_start_failed, "has-error");
+              break;
+            case "STOPPED":
+              handleStatusChange(data, $rootScope.error_msg.cluster_stopped, "has-success");
               break;
             case "STOP_REQUESTED":
-              handleStatusChange(data, eventType, "has-success");
+              handleStatusChange(data, $rootScope.error_msg.cluster_stop_requested, "has-success");
               break;
             case "STOP_IN_PROGRESS":
-              handleStatusChange(data, eventType, "has-success");
+              handleStatusChange(data, $rootScope.error_msg.cluster_stop_in_progress, "has-success");
+              break;
+            case "STOP_FAILED":
+              handleStatusChange(data, $rootScope.error_msg.cluster_stop_failed, "has-error");
+              break;
+            case "DELETE_FAILED":
+              handleStatusChange(data, $rootScope.error_msg.stack_delete_failed, "has-success");
+              break;
+            case "DELETE_IN_PROGRESS":
+              handleStatusChange(data, $rootScope.error_msg.stack_delete_in_progress, "has-success");
               break;
             case "DELETE_COMPLETED":
               handleStatusChange(data, $rootScope.error_msg.stack_delete_completed, "has-success");
@@ -135,8 +147,6 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
             case "UPTIME_NOTIFICATION":
               handleUptimeNotification(data);
               break;
-            // default:
-            //   console.log('default case.....')
           }
           $scope.$apply();
 
@@ -150,8 +160,8 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
           function handleAvailableNotification(notification) {
             var actCluster = $filter('filter')($rootScope.clusters, { id: notification.stackId })[0];
             var msg = notification.eventMessage;
-            if (msg != null && msg != undefined) {
-              actCluster.ambariServerIp = msg;
+            if (msg != null && msg != undefined && msg.indexOf("AMBARI_IP:") > -1) {
+              actCluster.ambariServerIp = msg.split(':')[1];
             }
             actCluster.status = notification.eventType;
             $scope.modifyStatusMessage($rootScope.error_msg.cluster_create_completed, actCluster.name);
