@@ -139,8 +139,8 @@
             <tr ng-repeat="usage in usages| filter:gccFilterFunction as gccresults">
                 <td ng-if="$index == 0" rowspan="{{gccresults.length}}">{{usage.cloud}}</td>
                 <td>{{usage.username}}</td>
-                <td>{{usage.stackStatus}}</td>
                 <td>{{usage.stackName}}</td>
+                <td>{{usage.stackStatus}}</td>
                 <td class="text-right">{{usage.instanceHours}} hrs</td>
                 <td class="text-right">{{usage.money}} $</td>
             </tr>
@@ -157,8 +157,8 @@
             <tr ng-repeat="usage in usages| filter:awsFilterFunction as awsresults">
                 <td ng-if="$index == 0" rowspan="{{awsresults.length}}">{{usage.cloud}}</td>
                 <td>{{usage.username}}</td>
-                <td>{{usage.stackStatus}}</td>
                 <td>{{usage.stackName}}</td>
+                <td>{{usage.stackStatus}}</td>
                 <td class="text-right">{{usage.instanceHours}} hrs</td>
                 <td class="text-right">{{usage.money}} $</td>
             </tr>
@@ -176,8 +176,8 @@
             <tr ng-repeat="usage in usages| filter:azureFilterFunction as azureresults">
                 <td ng-if="$index == 0" rowspan="{{azureresults.length}}">{{usage.cloud}}</td>
                 <td>{{usage.username}}</td>
-                <td>{{usage.stackStatus}}</td>
                 <td>{{usage.stackName}}</td>
+                <td>{{usage.stackStatus}}</td>
                 <td class="text-right">{{usage.instanceHours}} hrs</td>
                 <td class="text-right">{{usage.money}} $</td>
             </tr>
