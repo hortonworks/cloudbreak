@@ -3,13 +3,14 @@ package com.sequenceiq.cloudbreak.controller.json;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
-import com.sequenceiq.cloudbreak.conf.EnvironmentValidator;
-
 public class SubscribeRequest {
 
+    static final String SIMPLE_URL_PATTERN = "^(https?:\\/\\/)((([\\da-z\\.-]+)\\.([a-z]{2,6}))|localhost|[1-9][0-9]{0,2}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3})"
+            + "(:[1-9][0-9]{1,4})?\\/([\\/\\w\\.-]*)\\/?$";
+
     @NotNull
-    @Pattern(regexp = EnvironmentValidator.URL_PATTERN,
-            message = "Must be a proper URL!")
+    @Pattern(regexp = SIMPLE_URL_PATTERN,
+            message = "The notification hook URL must be proper and valid!")
     private String endpointUrl;
 
     public String getEndpointUrl() {
