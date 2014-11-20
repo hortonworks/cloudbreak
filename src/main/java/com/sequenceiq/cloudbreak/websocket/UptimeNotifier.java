@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.notification.Notification;
@@ -30,6 +31,7 @@ public class UptimeNotifier {
     @Autowired
     private NotificationSender notificationSender;
 
+
     @Scheduled(fixedDelay = 60000)
     public void sendUptime() {
         List<Cluster> clusters = (List<Cluster>) clusterRepository.findAll();
@@ -37,7 +39,7 @@ public class UptimeNotifier {
         for (Cluster cluster : clusters) {
             Stack stack = stackRepository.findStackForCluster(cluster.getId());
             if (stack != null) {
-                Long uptime = cluster.getCreationFinished() == null ? 0L : now - cluster.getCreationFinished();
+                Long uptime = cluster.getUpSince() == null || !Status.AVAILABLE.equals(cluster.getStatus()) ? 0L : now - cluster.getUpSince();
                 Notification notification = createUptimeNotification(stack, uptime);
                 notificationSender.send(notification);
             }
