@@ -48,7 +48,7 @@ public class ClusterCreationFailureHandler implements Consumer<Event<ClusterCrea
         cluster.setStatusReason(detailedMessage);
         clusterRepository.save(cluster);
         Long stackId = clusterCreationFailure.getStackId();
-        stackUpdater.updateStackStatus(stackId, Status.AVAILABLE, "Stack update finished - Cluster create failed.");
+        stackUpdater.updateStackStatus(stackId, Status.AVAILABLE, "Cluster installation failed. Error: " + detailedMessage);
         eventService.fireCloudbreakEvent(stackId, "CLUSTER_CREATION_FAILED", detailedMessage);
         if (cluster.getEmailNeeded()) {
             ambariClusterInstallerMailSenderService.sendFailEmail(cluster.getOwner());
