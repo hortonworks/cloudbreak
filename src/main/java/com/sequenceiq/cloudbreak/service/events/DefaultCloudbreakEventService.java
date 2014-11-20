@@ -54,15 +54,14 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     @Override
     public CloudbreakEvent createStackEvent(Long stackId, String eventType, String eventMessage) {
         Stack stack = stackRepository.findById(stackId);
-        MDCBuilder.buildMdcContext(stack);
-        LOGGER.debug("Create stack event for stackId {}, eventType {}, eventMessage {}", stackId, eventType, eventMessage);
         CloudbreakEvent stackEvent = createStackEvent(stack, eventType, eventMessage);
-        MDCBuilder.buildMdcContext(stackEvent);
         stackEvent = eventRepository.save(stackEvent);
-        LOGGER.info("Stack event saved: {}", stackEvent);
 
         Notification notification = new Notification(stackEvent);
         notificationSender.send(notification);
+
+        MDCBuilder.buildMdcContext(stackEvent);
+        LOGGER.info("Event and notification from the event were created: {}", stackEvent);
         return stackEvent;
     }
 
