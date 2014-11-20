@@ -69,7 +69,7 @@ public class ClusterCreationSuccessHandler implements Consumer<Event<ClusterCrea
             instanceMetaData.setRemovable(false);
         }
         stackUpdater.updateStackMetaData(stack.getId(), instances);
-        stackUpdater.updateStackStatus(stack.getId(), Status.AVAILABLE, "AMBARI_IP:" + stack.getAmbariIp());
+        stackUpdater.updateStackStatus(stack.getId(), Status.AVAILABLE, "Cluster installation successfully finished. AMBARI_IP:" + stack.getAmbariIp());
 
         if (cluster.getEmailNeeded()) {
             ambariClusterInstallerMailSenderService.sendSuccessEmail(cluster.getOwner(), event.getData().getAmbariIp());

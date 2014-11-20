@@ -41,7 +41,8 @@ public class StackCreationSuccessHandler implements Consumer<Event<StackCreation
         Stack stack = stackUpdater.updateAmbariIp(stackId, ambariIp);
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Accepted {} event.", ReactorConfig.STACK_CREATE_SUCCESS_EVENT, stackId);
-        stack = stackUpdater.updateStackStatus(stackId, Status.AVAILABLE, "AMBARI_IP:" + stack.getAmbariIp());
+        String statusReason = "Cluster infrastructure and ambari are available on the cloud. AMBARI_IP:" + stack.getAmbariIp();
+        stack = stackUpdater.updateStackStatus(stackId, Status.AVAILABLE, statusReason);
         stackUpdater.updateStackStatusReason(stack.getId(), "");
         changeAmbariCredentials(ambariIp, stack);
         LOGGER.info("Publishing {} event.", ReactorConfig.AMBARI_STARTED_EVENT);

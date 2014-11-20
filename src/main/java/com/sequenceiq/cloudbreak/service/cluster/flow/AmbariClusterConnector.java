@@ -456,7 +456,7 @@ public class AmbariClusterConnector {
                     cluster.setStatus(Status.AVAILABLE);
                     cluster.setStatusReason("");
                     clusterRepository.save(cluster);
-                    stackUpdater.updateStackStatus(stack.getId(), Status.AVAILABLE, "");
+                    stackUpdater.updateStackStatus(stack.getId(), Status.AVAILABLE, "The cluster installation failed.");
                 }
             }
         } catch (Exception ex) {
