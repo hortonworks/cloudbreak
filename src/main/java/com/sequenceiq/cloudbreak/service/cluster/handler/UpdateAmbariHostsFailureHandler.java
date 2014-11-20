@@ -9,14 +9,11 @@ import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsFailure;
-import com.sequenceiq.cloudbreak.websocket.WebsocketService;
-import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
 import reactor.event.Event;
 import reactor.function.Consumer;
@@ -25,9 +22,6 @@ import reactor.function.Consumer;
 public class UpdateAmbariHostsFailureHandler implements Consumer<Event<UpdateAmbariHostsFailure>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UpdateAmbariHostsFailureHandler.class);
-
-    @Autowired
-    private WebsocketService websocketService;
 
     @Autowired
     private ClusterRepository clusterRepository;
@@ -50,8 +44,6 @@ public class UpdateAmbariHostsFailureHandler implements Consumer<Event<UpdateAmb
         Stack stack = stackRepository.findStackForCluster(cluster.getId());
         String statusMessage = failure.isAddingNodes() ? "new node(s) could not be added." : "node(s) could not be removed.";
         stackUpdater.updateStackStatus(stack.getId(), Status.AVAILABLE, "Failed to update cluster because " + statusMessage);
-        websocketService.sendToTopicUser(cluster.getOwner(), WebsocketEndPoint.CLUSTER, new StatusMessage(failure.getClusterId(), cluster.getName(),
-                "UPDATE_FAILED"));
     }
 
 }

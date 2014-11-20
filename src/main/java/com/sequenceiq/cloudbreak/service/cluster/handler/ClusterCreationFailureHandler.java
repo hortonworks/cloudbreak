@@ -8,15 +8,12 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterCreationFailure;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterInstallerMailSenderService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
-import com.sequenceiq.cloudbreak.websocket.WebsocketService;
-import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
 import reactor.event.Event;
 import reactor.function.Consumer;
@@ -25,9 +22,6 @@ import reactor.function.Consumer;
 public class ClusterCreationFailureHandler implements Consumer<Event<ClusterCreationFailure>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterCreationFailureHandler.class);
-
-    @Autowired
-    private WebsocketService websocketService;
 
     @Autowired
     private ClusterRepository clusterRepository;
@@ -59,8 +53,6 @@ public class ClusterCreationFailureHandler implements Consumer<Event<ClusterCrea
         if (cluster.getEmailNeeded()) {
             ambariClusterInstallerMailSenderService.sendFailEmail(cluster.getOwner());
         }
-        websocketService.sendToTopicUser(cluster.getOwner(), WebsocketEndPoint.CLUSTER,
-                new StatusMessage(clusterId, cluster.getName(), Status.CREATE_FAILED.name(), detailedMessage));
     }
 
 }

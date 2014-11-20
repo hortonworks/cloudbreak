@@ -4,7 +4,6 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -18,11 +17,9 @@ import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientService;
 import com.sequenceiq.cloudbreak.service.stack.event.StackCreationSuccess;
-import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 
 import reactor.core.Reactor;
 import reactor.event.Event;
@@ -41,9 +38,6 @@ public class StackCreationSuccessHandlerTest {
 
     @Mock
     private RetryingStackUpdater stackUpdater;
-
-    @Mock
-    private WebsocketService websocketService;
 
     @Mock
     private Reactor reactor;
@@ -73,13 +67,11 @@ public class StackCreationSuccessHandlerTest {
         given(clientService.createDefault(anyString())).willReturn(ambariClient);
         given(stackUpdater.updateStackStatus(anyLong(), any(Status.class), anyString())).willReturn(stack);
         given(stackUpdater.updateStackStatusReason(anyLong(), anyString())).willReturn(stack);
-        doNothing().when(websocketService).sendToTopicUser(anyString(), any(WebsocketEndPoint.class), any());
         // WHEN
         underTest.accept(event);
         // THEN
         verify(ambariClient).createUser(USER_NAME, PASSWORD, true);
         verify(ambariClient).deleteUser(ADMIN);
-        verify(websocketService, times(1)).sendToTopicUser(anyString(), any(WebsocketEndPoint.class), any());
         verify(reactor, times(1)).notify(any(ReactorConfig.class), any(Event.class));
     }
 

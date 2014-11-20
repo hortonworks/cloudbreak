@@ -1,11 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -19,14 +14,11 @@ import org.mockito.MockitoAnnotations;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterCreationSuccess;
 import com.sequenceiq.cloudbreak.service.cluster.handler.ClusterCreationSuccessHandler;
-import com.sequenceiq.cloudbreak.websocket.WebsocketService;
-import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
 import reactor.event.Event;
 
@@ -34,9 +26,6 @@ public class ClusterCreationSuccessHandlerTest {
 
     @InjectMocks
     private ClusterCreationSuccessHandler underTest;
-
-    @Mock
-    private WebsocketService websocketService;
 
     @Mock
     private ClusterRepository clusterRepository;
@@ -75,10 +64,7 @@ public class ClusterCreationSuccessHandlerTest {
         // GIVEN
         given(clusterRepository.findById(1L)).willReturn(cluster);
         given(stackRepository.findStackWithListsForCluster(1L)).willReturn(stack);
-        doNothing().when(websocketService).sendToTopicUser(anyString(), any(WebsocketEndPoint.class), any(StatusMessage.class));
         // WHEN
         underTest.accept(event);
-        // THEN
-        verify(websocketService, times(1)).sendToTopicUser(anyString(), any(WebsocketEndPoint.class), any(StatusMessage.class));
     }
 }

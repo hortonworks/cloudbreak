@@ -9,13 +9,10 @@ import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientService;
 import com.sequenceiq.cloudbreak.service.stack.event.StackCreationSuccess;
-import com.sequenceiq.cloudbreak.websocket.WebsocketService;
-import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
 import reactor.core.Reactor;
 import reactor.event.Event;
@@ -29,9 +26,6 @@ public class StackCreationSuccessHandler implements Consumer<Event<StackCreation
 
     @Autowired
     private RetryingStackUpdater stackUpdater;
-
-    @Autowired
-    private WebsocketService websocketService;
 
     @Autowired
     private Reactor reactor;
@@ -48,8 +42,6 @@ public class StackCreationSuccessHandler implements Consumer<Event<StackCreation
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Accepted {} event.", ReactorConfig.STACK_CREATE_SUCCESS_EVENT, stackId);
         stack = stackUpdater.updateStackStatus(stackId, Status.AVAILABLE, "AMBARI_IP:" + stack.getAmbariIp());
-        websocketService.sendToTopicUser(stack.getOwner(), WebsocketEndPoint.STACK,
-                new StatusMessage(stackId, stack.getName(), Status.AVAILABLE.name()));
         stackUpdater.updateStackStatusReason(stack.getId(), "");
         changeAmbariCredentials(ambariIp, stack);
         LOGGER.info("Publishing {} event.", ReactorConfig.AMBARI_STARTED_EVENT);

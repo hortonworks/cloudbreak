@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -31,8 +30,6 @@ import com.sequenceiq.cloudbreak.service.stack.event.StackOperationFailure;
 import com.sequenceiq.cloudbreak.service.stack.resource.ProvisionContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
-import com.sequenceiq.cloudbreak.websocket.WebsocketService;
-import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
 import reactor.core.Reactor;
 import reactor.event.Event;
@@ -47,9 +44,6 @@ public class ProvisionContext {
 
     @Autowired
     private RetryingStackUpdater stackUpdater;
-
-    @Autowired
-    private WebsocketService websocketService;
 
     @javax.annotation.Resource
     private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
@@ -79,8 +73,6 @@ public class ProvisionContext {
             if (stack.getStatus().equals(Status.REQUESTED)) {
                 String statusReason = "Creation of cluster infrastructure has started on the cloud provider.";
                 stack = stackUpdater.updateStackStatus(stack.getId(), Status.CREATE_IN_PROGRESS, statusReason);
-                websocketService.sendToTopicUser(stack.getOwner(), WebsocketEndPoint.STACK, new StatusMessage(stack.getId(), stack.getName(), stack
-                        .getStatus().name()));
                 stackUpdater.updateStackStatusReason(stack.getId(), stack.getStatus().name());
                 if (!cloudPlatform.isWithTemplate()) {
                     stackUpdater.updateStackStatus(stack.getId(), Status.REQUESTED, "Creation of cluster infrastructure has requested.");
