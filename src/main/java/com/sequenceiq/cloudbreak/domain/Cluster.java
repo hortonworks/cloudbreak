@@ -56,6 +56,8 @@ public class Cluster implements ProvisionEntity {
 
     private Long creationFinished;
 
+    private Long upSince;
+
     private String statusReason;
 
     private Boolean emailNeeded;
@@ -133,6 +135,14 @@ public class Cluster implements ProvisionEntity {
 
     public void setCreationFinished(Long creationFinished) {
         this.creationFinished = creationFinished;
+    }
+
+    public Long getUpSince() {
+        return upSince;
+    }
+
+    public void setUpSince(Long upSince) {
+        this.upSince = upSince;
     }
 
     public String getStatusReason() {
