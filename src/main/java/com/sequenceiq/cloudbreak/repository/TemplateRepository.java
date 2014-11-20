@@ -13,7 +13,8 @@ public interface TemplateRepository extends CrudRepository<Template, Long> {
     @PostAuthorize("hasPermission(returnObject,'read')")
     Template findOne(@Param("id") Long id);
 
-    Template findByName(@Param("name") String name);
+    @PostAuthorize("hasPermission(returnObject,'read')")
+    Template findByNameInAccount(@Param("name") String name, @Param("account") String account);
 
     Set<Template> findForUser(@Param("user") String user);
 

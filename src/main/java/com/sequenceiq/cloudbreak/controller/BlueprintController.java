@@ -82,7 +82,7 @@ public class BlueprintController {
         try {
             blueprint = blueprintService.get(Long.parseLong(parameter));
         } catch (NumberFormatException e) {
-            blueprint = blueprintService.get(parameter);
+            blueprint = blueprintService.get(parameter, user);
         }
         return new ResponseEntity<>(blueprintConverter.convert(blueprint), HttpStatus.OK);
     }
@@ -93,7 +93,7 @@ public class BlueprintController {
         try {
             blueprintService.delete(Long.parseLong(parameter));
         } catch (NumberFormatException e) {
-            blueprintService.delete(parameter);
+            blueprintService.delete(parameter, user);
         }
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

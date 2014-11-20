@@ -16,7 +16,8 @@ public interface StackRepository extends CrudRepository<Stack, Long> {
 
     Stack findById(@Param("id") Long id);
 
-    Stack findByName(@Param("name") String name);
+    @PostAuthorize("hasPermission(returnObject,'read')")
+    Stack findByNameInAccount(@Param("name") String name, @Param("account") String account);
 
     Stack findByAmbari(@Param("ambariIp") String ambariIp);
 

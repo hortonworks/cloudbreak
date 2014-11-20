@@ -46,7 +46,7 @@ public class ClusterController {
 
     @RequestMapping(value = "/stacks/{parameter}/cluster", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<ClusterResponse> retrieveCluster(@PathVariable String parameter) {
+    public ResponseEntity<ClusterResponse> retrieveCluster(@ModelAttribute("user") CbUser user, @PathVariable String parameter) {
         ClusterResponse response = null;
         try {
             Stack stack = stackService.get(Long.parseLong(parameter));
@@ -54,9 +54,9 @@ public class ClusterController {
             String clusterJson = clusterService.getClusterJson(stack.getAmbariIp(), Long.parseLong(parameter));
             response = clusterConverter.convert(cluster, clusterJson);
         } catch (NumberFormatException e) {
-            Stack stack = stackService.get(parameter);
-            Cluster cluster = clusterService.retrieveCluster(parameter);
-            String clusterJson = clusterService.getClusterJson(stack.getAmbariIp(), parameter);
+            Stack stack = stackService.get(parameter, user);
+            Cluster cluster = clusterService.retrieveCluster(parameter, user);
+            String clusterJson = clusterService.getClusterJson(stack.getAmbariIp(), parameter, user);
             response = clusterConverter.convert(cluster, clusterJson);
         }
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -64,12 +64,12 @@ public class ClusterController {
 
     @RequestMapping(value = "/stacks/{parameter}/cluster", method = RequestMethod.PUT)
     @ResponseBody
-    public ResponseEntity<String> updateCluster(@PathVariable String parameter, @RequestBody UpdateClusterJson updateJson) {
+    public ResponseEntity<String> updateCluster(@ModelAttribute("user") CbUser user, @PathVariable String parameter, @RequestBody UpdateClusterJson updateJson) {
         Stack stack = null;
         try {
             stack = stackService.get(Long.parseLong(parameter));
         } catch (NumberFormatException e) {
-            stack = stackService.get(parameter);
+            stack = stackService.get(parameter, user);
         }
         Status stackStatus = stack.getStatus();
 

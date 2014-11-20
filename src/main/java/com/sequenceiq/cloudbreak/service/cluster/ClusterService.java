@@ -14,11 +14,11 @@ public interface ClusterService {
 
     Cluster retrieveCluster(Long stackId);
 
-    Cluster retrieveCluster(String stackName);
+    Cluster retrieveCluster(String stackName, CbUser user);
 
     String getClusterJson(String ambariIp, Long stackId);
 
-    String getClusterJson(String ambariIp, String stackName);
+    String getClusterJson(String ambariIp, String stackName, CbUser user);
 
     void updateHosts(Long stackId, Set<HostGroupAdjustmentJson> hostGroupAdjustments);
 

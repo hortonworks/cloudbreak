@@ -13,7 +13,8 @@ public interface BlueprintRepository extends CrudRepository<Blueprint, Long> {
     @PostAuthorize("hasPermission(returnObject,'read')")
     Blueprint findOne(@Param("id") Long id);
 
-    Blueprint findByName(@Param("name") String name);
+    @PostAuthorize("hasPermission(returnObject,'read')")
+    Blueprint findByNameInAccount(@Param("name") String name, @Param("account") String account);
 
     Set<Blueprint> findForUser(@Param("user") String user);
 

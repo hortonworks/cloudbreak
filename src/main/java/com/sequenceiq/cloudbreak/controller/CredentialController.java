@@ -90,7 +90,7 @@ public class CredentialController {
         try {
             credential = credentialService.get(Long.parseLong(parameter));
         } catch (NumberFormatException e) {
-            credential = credentialService.get(parameter);
+            credential = credentialService.get(parameter, user);
         }
         return new ResponseEntity<>(convert(credential), HttpStatus.OK);
     }
@@ -101,7 +101,7 @@ public class CredentialController {
         try {
             credentialService.delete(Long.parseLong(parameter));
         } catch (NumberFormatException e) {
-            credentialService.delete(parameter);
+            credentialService.delete(parameter, user);
         }
         return new ResponseEntity<>(HttpStatus.OK);
     }

@@ -72,14 +72,14 @@ public class StackController {
 
     @RequestMapping(value = "stacks/{parameter}", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<StackJson> getStack(@PathVariable String parameter) {
+    public ResponseEntity<StackJson> getStack(@ModelAttribute("user") CbUser user, @PathVariable String parameter) {
         StackJson stackJson = null;
         try {
             Stack stack = stackService.get(Long.parseLong(parameter));
             StackDescription stackDescription = stackService.getStackDescription(stack);
             stackJson = stackConverter.convert(stack, stackDescription);
         } catch (NumberFormatException e) {
-            Stack stack = stackService.get(parameter);
+            Stack stack = stackService.get(parameter, user);
             StackDescription stackDescription = stackService.getStackDescription(stack);
             stackJson = stackConverter.convert(stack, stackDescription);
         }
@@ -88,42 +88,43 @@ public class StackController {
 
     @RequestMapping(value = "stacks/{parameter}/status", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> getStackStatus(@PathVariable String parameter) {
+    public ResponseEntity<Map<String, Object>> getStackStatus(@ModelAttribute("user") CbUser user, @PathVariable String parameter) {
         Map<String, Object> stringObjectMap = new HashMap<>();
         try {
             stringObjectMap = stackConverter.convertStackStatus(stackService.get(Long.parseLong(parameter)));
         } catch (NumberFormatException e) {
-            stringObjectMap = stackConverter.convertStackStatus(stackService.get(parameter));
+            stringObjectMap = stackConverter.convertStackStatus(stackService.get(parameter, user));
         }
         return new ResponseEntity<>(stringObjectMap, HttpStatus.OK);
     }
 
     @RequestMapping(value = "stacks/{parameter}", method = RequestMethod.DELETE)
     @ResponseBody
-    public ResponseEntity<TemplateJson> deleteStack(@PathVariable String parameter) {
+    public ResponseEntity<TemplateJson> deleteStack(@ModelAttribute("user") CbUser user, @PathVariable String parameter) {
         try {
             stackService.delete(Long.parseLong(parameter));
         } catch (NumberFormatException e) {
-            stackService.delete(parameter);
+            stackService.delete(parameter, user);
         }
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @RequestMapping(value = "stacks/{parameter}", method = RequestMethod.PUT)
     @ResponseBody
-    public ResponseEntity<String> updateStack(@PathVariable String parameter, @Valid @RequestBody UpdateStackJson updateRequest) {
+    public ResponseEntity<String> updateStack(@ModelAttribute("user") CbUser user, @PathVariable String parameter,
+            @Valid @RequestBody UpdateStackJson updateRequest) {
         if (updateRequest.getStatus() != null) {
             try {
                 stackService.updateStatus(Long.parseLong(parameter), updateRequest.getStatus());
             } catch (NumberFormatException e) {
-                stackService.updateStatus(parameter, updateRequest.getStatus());
+                stackService.updateStatus(parameter, updateRequest.getStatus(), user);
             }
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
             try {
                 stackService.updateNodeCount(Long.parseLong(parameter), updateRequest.getScalingAdjustment());
             } catch (NumberFormatException e) {
-                stackService.updateNodeCount(parameter, updateRequest.getScalingAdjustment());
+                stackService.updateNodeCount(parameter, updateRequest.getScalingAdjustment(), user);
             }
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }

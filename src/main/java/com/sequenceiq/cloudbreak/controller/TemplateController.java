@@ -77,7 +77,7 @@ public class TemplateController {
         try {
             template = templateService.get(Long.parseLong(parameter));
         } catch (NumberFormatException e) {
-            template = templateService.get(parameter);
+            template = templateService.get(parameter, user);
         }
         TemplateJson templateJson = convert(template);
         return new ResponseEntity<>(templateJson, HttpStatus.OK);
@@ -89,7 +89,7 @@ public class TemplateController {
         try {
             templateService.delete(Long.parseLong(parameter));
         } catch (NumberFormatException e) {
-            templateService.delete(parameter);
+            templateService.delete(parameter, user);
         }
         return new ResponseEntity<>(HttpStatus.OK);
     }

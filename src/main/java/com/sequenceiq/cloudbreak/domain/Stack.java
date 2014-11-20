@@ -76,8 +76,12 @@ import javax.persistence.Version;
         @NamedQuery(
                 name = "Stack.findByAmbari",
                 query = "SELECT s from Stack s "
-                        + "WHERE s.ambariIp= :ambariIp"
-        )
+                        + "WHERE s.ambariIp= :ambariIp"),
+        @NamedQuery(
+                name = "Stack.findByNameInAccount",
+                query = "SELECT s FROM Stack s "
+                        + "WHERE s.name= :name and s.account= :account")
+
 })
 public class Stack implements ProvisionEntity {
 

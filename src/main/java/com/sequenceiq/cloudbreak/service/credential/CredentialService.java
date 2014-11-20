@@ -13,12 +13,12 @@ public interface CredentialService {
 
     Credential get(Long id);
 
-    Credential get(String name);
+    Credential get(String name, CbUser user);
 
     Credential create(CbUser user, Credential credential);
 
     void delete(Long id);
 
-    void delete(String name);
+    void delete(String name, CbUser user);
 
 }

@@ -63,8 +63,8 @@ public class SimpleCredentialService implements CredentialService {
     }
 
     @Override
-    public Credential get(String name) {
-        Credential credential = credentialRepository.findByName(name);
+    public Credential get(String name, CbUser user) {
+        Credential credential = credentialRepository.findByNameInAccount(name, user.getAccount());
         if (credential == null) {
             throw new NotFoundException(String.format("Credential '%s' not found.", name));
         } else {
@@ -103,12 +103,14 @@ public class SimpleCredentialService implements CredentialService {
     }
 
     @Override
-    public void delete(String name) {
-        Credential credential = credentialRepository.findByName(name);
+    public void delete(String name, CbUser user) {
+        Credential credential = credentialRepository.findByNameInAccount(name, user.getAccount());
         if (credential == null) {
             throw new NotFoundException(String.format("Credential '%s' not found.", name));
         }
-        delete(credential.getId());
+        credentialRepository.delete(credential);
+        websocketService.sendToTopicUser(credential.getOwner(), WebsocketEndPoint.CREDENTIAL,
+                new StatusMessage(credential.getId(), credential.getName(), Status.DELETE_COMPLETED.name()));
     }
 
     private void createAzureCertificates(CbUser user, Credential credential) {

@@ -13,11 +13,11 @@ public interface TemplateService {
 
     Template get(Long id);
 
-    Template get(String name);
+    Template get(String name, CbUser user);
 
     Template create(CbUser user, Template templateRequest);
 
     void delete(Long id);
 
-    void delete(String templateName);
+    void delete(String templateName, CbUser user);
 }

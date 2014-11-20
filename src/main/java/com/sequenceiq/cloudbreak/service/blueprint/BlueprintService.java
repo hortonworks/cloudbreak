@@ -11,7 +11,7 @@ public interface BlueprintService {
 
     Set<Blueprint> retrieveAccountBlueprints(CbUser user);
 
-    Blueprint get(String name);
+    Blueprint get(String name, CbUser user);
 
     Blueprint get(Long id);
 
@@ -19,5 +19,5 @@ public interface BlueprintService {
 
     void delete(Long id);
 
-    void delete(String name);
+    void delete(String name, CbUser user);
 }
