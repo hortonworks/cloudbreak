@@ -20,9 +20,6 @@ public class UptimeNotifier {
     private static final String UPTIME_NOTIFICATION = "UPTIME_NOTIFICATION";
 
     @Autowired
-    private WebsocketService websocketService;
-
-    @Autowired
     private ClusterRepository clusterRepository;
 
     @Autowired

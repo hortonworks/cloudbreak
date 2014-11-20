@@ -25,14 +25,11 @@ import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
-import com.sequenceiq.cloudbreak.websocket.WebsocketService;
-import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
 import groovyx.net.http.HttpResponseDecorator;
 import groovyx.net.http.HttpResponseException;
@@ -63,9 +60,6 @@ public class AzureProvisionSetup implements ProvisionSetup {
 
     @Autowired
     private AzureStackUtil azureStackUtil;
-
-    @Autowired
-    private WebsocketService websocketService;
 
     @Autowired
     private RetryingStackUpdater retryingStackUpdater;
@@ -113,8 +107,6 @@ public class AzureProvisionSetup implements ProvisionSetup {
                         copyStatusFromServer.get("totalBytes"),
                         copyPercentage));
 
-                websocketService.sendToTopicUser(stack.getOwner(), WebsocketEndPoint.COPY_IMAGE,
-                        new StatusMessage(stack.getId(), stack.getName(), PENDING, String.format("The copy status is: %s%%.", copyPercentage)));
                 retryingStackUpdater.updateStackStatusReason(stack.getId(), String.format("The copy status is: %s%%.", copyPercentage));
                 try {
                     Thread.sleep(MILLIS);

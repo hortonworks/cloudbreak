@@ -14,15 +14,12 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterCreationSuccess;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterInstallerMailSenderService;
-import com.sequenceiq.cloudbreak.websocket.WebsocketService;
-import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
 import freemarker.template.Configuration;
 import reactor.event.Event;
@@ -32,9 +29,6 @@ import reactor.function.Consumer;
 public class ClusterCreationSuccessHandler implements Consumer<Event<ClusterCreationSuccess>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterCreationSuccessHandler.class);
-
-    @Autowired
-    private WebsocketService websocketService;
 
     @Autowired
     private ClusterRepository clusterRepository;
@@ -80,8 +74,6 @@ public class ClusterCreationSuccessHandler implements Consumer<Event<ClusterCrea
         if (cluster.getEmailNeeded()) {
             ambariClusterInstallerMailSenderService.sendSuccessEmail(cluster.getOwner(), event.getData().getAmbariIp());
         }
-        websocketService.sendToTopicUser(cluster.getOwner(), WebsocketEndPoint.CLUSTER,
-                new StatusMessage(clusterId, cluster.getName(), Status.AVAILABLE.name()));
     }
 
 }

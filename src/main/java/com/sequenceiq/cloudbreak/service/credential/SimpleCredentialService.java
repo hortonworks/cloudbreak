@@ -12,13 +12,8 @@ import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CbUserRole;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
-import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
-import com.sequenceiq.cloudbreak.websocket.WebsocketService;
-import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
 @Service
 public class SimpleCredentialService implements CredentialService {
@@ -29,7 +24,7 @@ public class SimpleCredentialService implements CredentialService {
     private CredentialRepository credentialRepository;
 
     @Autowired
-    private WebsocketService websocketService;
+    private AzureCertificateService azureCertificateService;
 
     @Override
     public Set<Credential> retrievePrivateCredentials(CbUser user) {
@@ -67,8 +62,7 @@ public class SimpleCredentialService implements CredentialService {
         } catch (DataIntegrityViolationException ex) {
             throw new DuplicateKeyValueException(credential.getName(), ex);
         }
-        websocketService.sendToTopicUser(user.getUsername(), WebsocketEndPoint.CREDENTIAL,
-                new StatusMessage(credential.getId(), credential.getName(), Status.AVAILABLE.name()));
+        createAzureCertificates(user, savedCredential);
 
         return savedCredential;
     }
@@ -80,7 +74,5 @@ public class SimpleCredentialService implements CredentialService {
             throw new NotFoundException(String.format("Credential '%s' not found.", id));
         }
         credentialRepository.delete(credential);
-        websocketService.sendToTopicUser(credential.getOwner(), WebsocketEndPoint.CREDENTIAL,
-                new StatusMessage(credential.getId(), credential.getName(), Status.DELETE_COMPLETED.name()));
     }
 }

@@ -22,13 +22,10 @@ import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
-import com.sequenceiq.cloudbreak.websocket.WebsocketService;
-import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
 import reactor.core.Reactor;
 import reactor.event.Event;
@@ -46,9 +43,6 @@ public class ProvisionContextTest {
 
     @Mock
     private RetryingStackUpdater stackUpdater;
-
-    @Mock
-    private WebsocketService websocketService;
 
     @Mock
     private Map<CloudPlatform, CloudPlatformConnector> cloudPlatformConnectors;
@@ -87,7 +81,6 @@ public class ProvisionContextTest {
         given(stackUpdater.updateStackStatus(anyLong(), any(Status.class), anyString())).willReturn(stack);
         given(stackUpdater.updateStackStatusReason(anyLong(), anyString())).willReturn(stack);
         given(cloudPlatformConnectors.get(any(CloudPlatform.class))).willReturn(provisioner);
-        doNothing().when(websocketService).sendToTopicUser(anyString(), any(WebsocketEndPoint.class), any(StatusMessage.class));
         given(userDataBuilder.build(any(CloudPlatform.class), anyString(), anyMap())).willReturn(DUMMY_USER_DATA);
         doNothing().when(provisioner).buildStack(stack, DUMMY_USER_DATA, setupProperties);
         // WHEN
@@ -106,7 +99,6 @@ public class ProvisionContextTest {
         underTest.buildStack(cloudPlatform, 1L, setupProperties, userDataParams);
         // THEN
         verify(reactor, times(0)).notify(any(ReactorConfig.class), any(Event.class));
-        verify(websocketService, times(0)).sendToTopicUser(anyString(), any(WebsocketEndPoint.class), any(StatusMessage.class));
     }
 
     @Test
