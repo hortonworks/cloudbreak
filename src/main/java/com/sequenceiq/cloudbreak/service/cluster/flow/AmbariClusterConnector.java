@@ -207,6 +207,9 @@ public class AmbariClusterConnector {
                 hostsRemoved.add(hostMetadata.getHostName());
             }
             updateHostSuccessful(cluster, hostsRemoved, true);
+        } catch (BadRequestException be) {
+            LOGGER.error("Decommission cannot be executed", be);
+            updateHostFailed(cluster, be.getMessage());
         } catch (Exception e) {
             LOGGER.error(UNHANDLED_EXCEPTION_MSG, e);
             updateHostFailed(cluster, UNHANDLED_EXCEPTION_MSG);
