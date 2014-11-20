@@ -6,6 +6,7 @@ import java.util.Map;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -18,15 +19,17 @@ public class TemplateJson implements JsonEntity {
 
     private Long id;
     private CloudPlatform cloudPlatform;
+    @Size(max = 100, min = 5, message = "The length of the template's name has to be in range of 5 to 100")
+    @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
+            message = "The name of the template can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
     @NotNull
-    @Size(max = 100, min = 5)
     private String name;
     private Map<String, Object> parameters = new HashMap<>();
     @Size(max = 1000)
     private String description;
     private Integer volumeCount;
-    @Min(value = 0, message = "Volume size must be greater than or equal to 0")
-    @Max(value = 1024, message = "Volume size must be lesser than or equal to 1024")
+    @Min(value = 0, message = "The size of the volume has to be greater than or equal to 0")
+    @Max(value = 1024, message = "The size of the volume has to be lesser than or equal to 1024")
     private Integer volumeSize;
 
     @JsonProperty("id")

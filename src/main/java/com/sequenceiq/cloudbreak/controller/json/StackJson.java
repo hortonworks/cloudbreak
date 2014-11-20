@@ -19,13 +19,13 @@ import com.sequenceiq.cloudbreak.domain.Status;
 public class StackJson implements JsonEntity {
 
     private Long id;
-    @Min(value = 1, message = "Count of nodes has to be min 1")
-    @Max(value = 100000, message = "Count of nodes has to be max 100000")
-    @Digits(fraction = 0, integer = 10, message = "Node count has to be a number")
+    @Min(value = 1, message = "The node count has to be greater than 0")
+    @Max(value = 100000, message = "The node count has to be less than 100000")
+    @Digits(fraction = 0, integer = 10, message = "The node count has to be a number")
     private int nodeCount;
-    @Size(max = 40, min = 5, message = "Name has to be min 5 letter maximum 40 length")
+    @Size(max = 40, min = 5, message = "The length of the name has to be in range of 5 to 40")
     @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
-            message = "Must contain only alphanumeric characters (case sensitive) and hyphens and start with an alpha character.")
+            message = "The name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
     @NotNull
     private String name;
     private Long templateId;
@@ -37,14 +37,14 @@ public class StackJson implements JsonEntity {
     private Long credentialId;
     private Status status;
     private String ambariServerIp;
-    @Size(max = 15, min = 5, message = "Name has to be min 5 letter maximum 15 length")
+    @Size(max = 15, min = 5, message = "The length of the username has to be in range of 5 to 15")
     @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
-            message = "Must contain only alphanumeric characters (case sensitive) and hyphens and start with an alpha character.")
+            message = "The username can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
     @NotNull
     private String userName;
-    @Size(max = 15, min = 5, message = "Password has to be min 5 letter maximum 15 length")
+    @Size(max = 15, min = 5, message = "The length of the password has to be in range of 5 to 15")
     @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
-            message = "Must contain only alphanumeric characters (case sensitive) and hyphens and start with an alpha character.")
+            message = "The password can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
     @NotNull
     private String password;
     private String hash;
