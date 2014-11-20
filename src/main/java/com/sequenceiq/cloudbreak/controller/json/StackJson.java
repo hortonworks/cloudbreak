@@ -28,12 +28,14 @@ public class StackJson implements JsonEntity {
             message = "The name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
     @NotNull
     private String name;
+    @NotNull
     private Long templateId;
     private String owner;
     private String account;
     private boolean publicInAccount;
     private CloudPlatform cloudPlatform;
     private StackDescription description;
+    @NotNull
     private Long credentialId;
     private Status status;
     private String ambariServerIp;

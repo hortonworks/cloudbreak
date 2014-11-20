@@ -27,9 +27,13 @@ public class TemplateJson implements JsonEntity {
     private Map<String, Object> parameters = new HashMap<>();
     @Size(max = 1000)
     private String description;
+    @Min(value = 1, message = "The number of volumes has to be greater than 0")
+    @Max(value = 15, message = "The number of volumes has to be less than 15")
+    @NotNull
     private Integer volumeCount;
     @Min(value = 0, message = "The size of the volume has to be greater than or equal to 0")
     @Max(value = 1024, message = "The size of the volume has to be lesser than or equal to 1024")
+    @NotNull
     private Integer volumeSize;
 
     @JsonProperty("id")
