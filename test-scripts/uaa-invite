@@ -1,0 +1,4 @@
+#!/bin/bash
+UAA_REG_URL=http://localhost:5000
+
+curl -sX POST -H "Content-Type: application/json" -d '{"admin": "admin@sequenceiq.com", "invite_email" : "user@sequenceiq.com"}' $UAA_REG_URL/invite

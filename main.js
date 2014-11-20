@@ -62,16 +62,22 @@ app.get('/dashboard', function(req, res) {
     })
 });
 
+var emailErrorMsg = 'invalid email address'
+var passwordErrorMsg = 'password is invalid (6 to 200 char)'
+var confirmPasswordErrorMsg = 'passwords do not match!'
+var firstNameErrorMsg = 'first name is empty'
+var lastNameErrorMsg = 'last name is empty'
+var companyErrorMsg = 'company name is empty'
 // register.html
 app.get('/register', function(req, res) {
   res.render('register',
   {
-   emailErrorMsg: 'invalid email address',
-   passwordErrorMsg: 'password is invalid (6 to 200 char)',
-   confirmPasswordErrorMsg: 'passwords do not match!',
-   firstNameErrorMsg: 'first name is empty',
-   lastNameErrorMsg: 'last name is empty',
-   companyErrorMsg: 'company name is empty'
+   emailErrorMsg: emailErrorMsg,
+   passwordErrorMsg: passwordErrorMsg,
+   confirmPasswordErrorMsg: confirmPasswordErrorMsg,
+   firstNameErrorMsg: firstNameErrorMsg,
+   lastNameErrorMsg: lastNameErrorMsg,
+   companyErrorMsg: companyErrorMsg
    })
 });
 
@@ -534,6 +540,422 @@ app.get('/confirm/:confirm_token', function(req, res){
         }
    });
 
+});
+
+app.post('/invite', function (req, res){
+    var inviteEmail = req.body.invite_email
+    var authHeader = req.headers['authorization']
+    if (validator.validateEmail(inviteEmail)){
+    var options = {
+        headers: { 'Authorization': authHeader }
+    }
+    if (authHeader != null && authHeader.split(' ').length > 1) {
+         var token = authHeader.split(' ')[1];
+         var checkTokenRespOption = {
+            headers : {
+                'Content-Type' : 'application/x-www-form-urlencoded',
+                'Authorization' : 'Basic ' + new Buffer(clientId + ':'+ clientSecret).toString('base64')
+            }
+         }
+         needle.post(uaaAddress + "/check_token", 'token=' + token, checkTokenRespOption, function(err, checkTokenResp){
+            if (checkTokenResp.statusCode == 200){
+                var adminUserName = checkTokenResp.body.user_name
+
+                    var sultansOptions = {
+                            headers: { 'Authorization': 'Basic ' + new Buffer(clientId + ':'+ clientSecret).toString('base64') }
+                    }
+                    // use sultans client for this -> user management part
+                    needle.post(uaaAddress + '/oauth/token', 'grant_type=client_credentials',
+                               sultansOptions, function(err, sultanTokenResp) {
+                           console.log(sultanTokenResp)
+                           if (sultanTokenResp.statusCode == 200){
+                             var sultanToken = sultanTokenResp.body.access_token;
+                             var usrOptions = {
+                               headers: {
+                                 'Accept' : 'application/json',
+                                 'Authorization' : 'Bearer ' + sultanToken,
+                                 'Content-Type' : 'application/json' }
+                             }
+
+                    needle.get(uaaAddress + '/Users/?attributes=id,userName,groups&filter=userName eq "' + adminUserName + '"', usrOptions , function(err, usrResp){
+                    if (usrResp.statusCode == 200){
+                        if (usrResp.body.resources.length == 1){
+                            var groups = usrResp.body.resources[0].groups
+                            var isAdmin = false
+                            var companyId = null
+                            for (var i = 0; i < groups.length; i++ ){
+                                if (groups[i].display.lastIndexOf('sequenceiq.cloudbreak.admin', 0) === 0){
+                                    isAdmin = true
+                                }
+                                if (groups[i].display.lastIndexOf('sequenceiq.account', 0) === 0) {
+                                    companyId = groups[i].display
+                                }
+                            }
+                            if (isAdmin){
+                            var userTempToken = Math.random().toString(20)
+                            var tempRegOptions = {
+                              headers: {
+                                    'Accept' : 'application/json',
+                                    'Authorization' : 'Bearer ' + sultanToken,
+                                    'Content-Type' : 'application/json' }
+                              }
+                            var tempUserData = {
+                                  'userName' : inviteEmail,
+                                  'active' : false,
+                                  'name' : {
+                                     'familyName': userTempToken,
+                                     'givenName' : userTempToken
+                                  },
+                                  'password' : userTempToken,
+                                  'emails':[
+                                     {
+                                      'value': inviteEmail
+                                     }
+                                  ]
+                             }
+
+                            needle.post(uaaAddress + '/Users', JSON.stringify(tempUserData), tempRegOptions, function(err, createResp) {
+                            if (createResp.statusCode == 201) {
+                                 console.log('User created with ' + createResp.body.id + '(id) and name: ' + inviteEmail)
+
+                                 updateGroup(token, createResp.body.id, 'sequenceiq.cloudbreak.user')
+                                 updateGroup(token, createResp.body.id, companyId)
+                                 updateCloudbreakGroups(token, createResp.body.id)
+
+                                 var templateFile = path.join(__dirname,'templates','invite-email.jade')
+                                 mailer.sendMail(req.body.invite_email, 'Cloudbreak invite' , templateFile, {user: adminUserName,
+                                 invite: process.env.SL_ADDRESS + '/registerForAccount?token=' + userTempToken + '&email=' + inviteEmail + '&inviter=' + adminUserName})
+                                 res.end('SUCCESS')
+                            } else {
+                                 res.end('Temporary registration failed. ' + createResp.body.message)
+                            }
+                            });
+                            } else {
+                                console.log('User is not an admin.')
+                                res.end('User is not admin.')
+                            }
+
+                        } else {
+                            console.log('Invite - Could not find admin user.')
+                            res.end('Could not find admin user.');
+                        }
+                    } else {
+                        console.log('Cannot retrieve user name from token.')
+                        res.end('Cannot retrieve user name from token.')
+                    }
+                 });
+                 } else {
+                    console.log('Cannot retrieve token.')
+                    res.end('Cannot retrieve token.')
+                 }
+                });
+             } else {
+                 console.log('Cannot retrieve user name from token.')
+                 res.end('Cannot retrieve user name from token.')
+             }
+             });
+          } else {
+            console.log('Authorization token not found')
+            res.end('Authorization token not found')
+          }
+    } else {
+      res.end('Email is not valid')
+    }
+});
+
+app.get('/registerForAccount', function(req, res){
+    req.session.acc_token = req.param('token')
+    req.session.acc_email = req.param('email')
+    var inviter = req.param('inviter')
+    var options = {
+            headers: { 'Authorization': 'Basic ' + new Buffer(clientId + ':'+ clientSecret).toString('base64') }
+    }
+    needle.post(uaaAddress + '/oauth/token', 'grant_type=client_credentials',
+               options, function(err, tokenResp) {
+           if (tokenResp.statusCode == 200){
+             var token = tokenResp.body.access_token;
+             var usrOptions = {
+               headers: {
+                 'Accept' : 'application/json',
+                 'Authorization' : 'Bearer ' + token,
+                 'Content-Type' : 'application/json' }
+             }
+
+             needle.get(uaaAddress + '/Users/?attributes=id,userName,groups&filter=userName eq "' + inviter + '"', usrOptions , function(err, usrResp){
+                 if (usrResp.statusCode == 200){
+                    if (usrResp.body.resources.length == 1){
+                        var groups = usrResp.body.resources[0].groups
+                        var isAdmin = false
+                        var companyId = null
+                        for (var i = 0; i < groups.length; i++ ){
+                            if (groups[i].display.lastIndexOf('sequenceiq.cloudbreak.admin', 0) === 0){
+                                isAdmin = true
+                            }
+                            if (groups[i].display.lastIndexOf('sequenceiq.account', 0) === 0) {
+                                companyId = groups[i].display
+                           }
+                        }
+                        if (isAdmin && companyId != null) {
+                            var company = companyId.split(".")[3]
+                            res.render('regacc',
+                             {
+                                       token: req.session.acc_token,
+                                       email: req.session.acc_email,
+                                       inviter: inviter,
+                                       company: company,
+                                       passwordErrorMsg: passwordErrorMsg,
+                                       confirmPasswordErrorMsg: confirmPasswordErrorMsg,
+                                       firstNameErrorMsg: firstNameErrorMsg,
+                                       lastNameErrorMsg: lastNameErrorMsg
+                             })
+                        } else {
+                            res.end('Inviter is not an admin.')
+                        }
+                    } else {
+                        res.end('More resources found with the same id.')
+                    }
+                 } else {
+                    res.end('Could not get user.')
+                 }
+             });
+           } else {
+                res.end('Cannot retrieve token.')
+           }
+    });
+});
+
+app.post('/registerForAccount', function(req, res){
+    var regToken = req.session.acc_token
+    var email = req.session.acc_email
+    if (regToken == null || email == null){
+        res.end('Session has expired.')
+    } else {
+        var errorResult = validator.validateRegister(req.body.email, req.body.password, req.body.firstName, req.body.lastName, req.body.company)
+        if (errorResult == null) {
+            var options = {
+                    headers: { 'Authorization': 'Basic ' + new Buffer(clientId + ':'+ clientSecret).toString('base64') }
+            }
+            needle.post(uaaAddress + '/oauth/token', 'grant_type=client_credentials',
+                           options, function(err, tokenResp) {
+                       if (tokenResp.statusCode == 200){
+                         var token = tokenResp.body.access_token;
+                         var usrOptions = {
+                           headers: {
+                             'Accept' : 'application/json',
+                             'Authorization' : 'Bearer ' + token,
+                             'Content-Type' : 'application/json' }
+                         }
+                         needle.get(uaaAddress + '/Users/?attributes=id,userName,familyName,givenName,version,emails,active&filter=userName eq "' + email + '"', usrOptions , function(err, usrResp){
+                                      if (usrResp.statusCode == 200) {
+                                         if (usrResp.body.resources.length == 1) {
+                                            if (usrResp.body.resources[0].userName == regToken && usrResp.body.resources[0].active == false) {
+                                                var userId = usrResp.body.resources[0].id
+                                                var updateOptions = {
+                                                    headers: {
+                                                       'Accept' : 'application/json',
+                                                       'Authorization' : 'Bearer ' + token,
+                                                       'Content-Type' : 'application/json',
+                                                       'If-Match': usrResp.body.resources[0].version}
+                                                }
+                                                var userData = {
+                                                     'userName' : req.body.email,
+                                                     'active' : false,
+                                                     'name' : {
+                                                     'familyName': req.body.lastName,
+                                                     'givenName' : usrResp.body.resources[0].givenName
+                                                      },
+                                                     'emails':[
+                                                        {
+                                                         'value': req.body.email
+                                                        }
+                                                     ]
+                                                }
+                                                needle.put(uaaAddress + '/Users/' + userId, JSON.stringify(userData),
+                                                       updateOptions, function(err, updateResp){
+                                                       if (updateResp.statusCode == 200) {
+                                                            var passwordUpdateOptions = {
+                                                                headers: {
+                                                                    'Accept' : 'application/json',
+                                                                    'Authorization' : 'Bearer ' + token,
+                                                                    'Content-Type' : 'application/json' }
+                                                            }
+                                                            var newPasswordData = {'password' : req.body.password}
+                                                            needle.put(uaaAddress + '/Users/' + userId + '/password', JSON.stringify(newPasswordData),
+                                                                passwordUpdateOptions, function(err, resetResp) {
+                                                                if (resetResp.statusCode = 200){
+                                                                    var templateFile = path.join(__dirname,'templates','confirmation-email.jade')
+                                                                    mailer.sendMail(req.body.email, 'Registration' , templateFile, {user: req.body.firstName,
+                                                                    confirm: process.env.SL_ADDRESS + '/confirm/' + userId})
+                                                                    res.end('SUCCESS');
+                                                                } else {
+                                                                    res.end('Password update failed.')
+                                                                }
+                                                            });
+                                                       } else {
+                                                            console.log('User update failed.')
+                                                            res.end('User update failed.')
+                                                       }
+                                                });
+
+                                            } else {
+                                                console.log('User already created.')
+                                                res.end('User already created.')
+                                            }
+                                         } else {
+                                            console.log('User not found.')
+                                            res.end('User not found.')
+                                         }
+                                      } else {
+                                        console.log('Cannot retrieve user.')
+                                        res.end('Cannot retrieve user.')
+                                      }
+                         });
+                       } else {
+                            console.log('Cannot retrieve token.')
+                            res.end('Cannot retrieve token.')
+                       }
+            });
+
+        } else {
+           res.end('Invalid input data.')
+        }
+    }
+});
+
+app.post('/activate', function(req, res){
+    var activate = req.body.activate;
+    var email = req.body.email
+
+    if (activate != null && (activate == 'true' || activate == 'false') && validator.validateEmail(email)) {
+        var authHeader = req.headers['authorization']
+        if (authHeader != null && authHeader.split(' ').length > 1) {
+         var token = authHeader.split(' ')[1];
+         var checkTokenRespOption = {
+            headers : {
+                'Content-Type' : 'application/x-www-form-urlencoded',
+                'Authorization' : 'Basic ' + new Buffer(clientId + ':'+ clientSecret).toString('base64')
+            }
+         }
+         needle.post(uaaAddress + "/check_token", 'token=' + token, checkTokenRespOption, function(err, checkTokenResp){
+            if (checkTokenResp.statusCode == 200) {
+                 var adminUserName = checkTokenResp.body.user_name
+
+                 var sultansOptions = {
+                     headers: { 'Authorization': 'Basic ' + new Buffer(clientId + ':'+ clientSecret).toString('base64') }
+                 }
+                 needle.post(uaaAddress + '/oauth/token', 'grant_type=client_credentials',
+                                               sultansOptions, function(err, sultanTokenResp) {
+                             if (sultanTokenResp.statusCode == 200){
+                                        var sultanToken = sultanTokenResp.body.access_token;
+                                        var usrOptions = {
+                                            headers: {
+                                                 'Accept' : 'application/json',
+                                                 'Authorization' : 'Bearer ' + sultanToken,
+                                                 'Content-Type' : 'application/json' }
+                                            }
+
+                                    needle.get(uaaAddress + '/Users/?attributes=id,userName,groups&filter=userName eq "' + adminUserName + '"', usrOptions , function(err, usrResp){
+                                    if (usrResp.statusCode == 200){
+                                        if (usrResp.body.resources.length == 1){
+                                            var groups = usrResp.body.resources[0].groups
+                                            var isAdmin = false
+                                            var companyId = null
+                                            for (var i = 0; i < groups.length; i++ ){
+                                                if (groups[i].display.lastIndexOf('sequenceiq.cloudbreak.admin', 0) === 0){
+                                                    isAdmin = true
+                                                }
+                                                if (groups[i].display.lastIndexOf('sequenceiq.account', 0) === 0) {
+                                                    companyId = groups[i].display
+                                                }
+                                            }
+                                            if (isAdmin){
+                                            needle.get(uaaAddress + '/Users/?attributes=id,userName,familyName,givenName,version,groups&filter=userName eq "' + email + '"', usrOptions , function(err, usrGetResp){
+                                                if (usrGetResp.statusCode == 200) {
+                                                    if (usrGetResp.body.resources.length == 1){
+                                                        var userCompanyId = null
+                                                        var groups = usrGetResp.body.resources[0].groups
+                                                        for (var i = 0; i < groups.length; i++ ){
+                                                            if (groups[i].display.lastIndexOf('sequenceiq.account', 0) === 0) {
+                                                                userCompanyId = groups[i].display
+                                                            }
+                                                        }
+                                                        if (userCompanyId != null && userCompanyId == companyId) {
+                                                            var userToActivateId = usrGetResp.body.resources[0].id
+                                                            var userActivateOptions = {
+                                                                   headers: {
+                                                                     'Accept' : 'application/json',
+                                                                     'Authorization' : 'Bearer ' + sultanToken,
+                                                                     'Content-Type' : 'application/json',
+                                                                     'If-Match': usrGetResp.body.resources[0].version
+                                                                   }
+                                                            }
+                                                            var userActivateData = {
+                                                                'userName' : email,
+                                                                'active' : activate,
+                                                                'name' : {
+                                                                   'familyName': usrGetResp.body.resources[0].familyName,
+                                                                   'givenName' : usrGetResp.body.resources[0].givenName
+                                                                },
+                                                                'emails':[
+                                                                   {
+                                                                    'value': email
+                                                                   }
+                                                                ]
+                                                             }
+                                                             needle.put(uaaAddress + '/Users/' + userToActivateId, JSON.stringify(userActivateData),
+                                                                 userActivateOptions, function(err, updateResp){
+                                                               console.log(updateResp)
+                                                               if (updateResp.statusCode == 200) {
+                                                                console.log('User activation/deactivation successful on user with id: ' + userToActivateId)
+                                                                res.end('SUCCESS')
+                                                               } else {
+                                                                console.log('User activation/deactivation failed')
+                                                                res.end('User activation/deactivation failed')
+                                                               }
+                                                             });
+                                                        } else {
+                                                            console.log('User and admin company id is not the same.')
+                                                            res.end('User and admin company id is not the same.')
+                                                        }
+                                                    } else {
+                                                        console.log('User not found.')
+                                                        res.end('User not found.')
+                                                    }
+                                                }
+                                                else {
+                                                    console.log('Cannot retrieve user. (activate)')
+                                                    res.end('Cannot retrieve user. (activate)')
+                                                }
+                                            });
+                                            } else {
+                                                console.log('Caller is not an admin.')
+                                                res.end('Caller is not an admin.')
+                                            }
+                                            }
+                                       } else {
+                                            console.log('Cannot retrieve user (admin).')
+                                            res.end('Cannot retrieve user (admin).')
+                                       }
+                                     });
+                             } else {
+                                console.log('Cannot retrieve token.')
+                                res.end('Cannot retrieve token.')
+                             }
+                 });
+            } else {
+                console.log('Token is invalid for admin.')
+                res.end('Token is invalid for admin.')
+            }
+         });
+         }
+         else {
+            console.log('Authorization token is missing.')
+            res.end('Authorization token is missing.')
+         }
+    } else {
+        console.log('Invalid activate or email parameter.')
+        res.end('Invalid activate or email parameter.')
+    }
 });
 
 // errors

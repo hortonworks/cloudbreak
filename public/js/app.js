@@ -91,6 +91,28 @@ regApp.controller("loginController", ['$scope', '$http', '$rootScope',
     }
 ]);
 
+regApp.controller("regForAccController", ['$scope', '$http',
+    function ($scope, $http) {
+            $scope.signUpByInvite = function() {
+                $http({method: 'POST',dataType: 'json',url:  "/registerForAccount",
+                       data: {email: email.value, firstName: firstName.value, lastName: lastName.value, password: password.value,
+                              company: company.value}
+                      }).success(function(responseData){
+                        if (responseData == 'SUCCESS'){
+                            $scope.email = email.value;
+                            $jq('.carousel').carousel(1);
+                        } else {
+                            $scope.message = responseData
+                            $jq("#msgDialog").modal('show');
+                        }
+                      }).error(function (data, status, headers, config){
+                            $scope.message = data + " error code: "+ status
+                            $jq("#msgDialog").modal('show');
+                      });
+            }
+}
+]);
+
 
 regApp.directive('match', function($parse) {
   return {
