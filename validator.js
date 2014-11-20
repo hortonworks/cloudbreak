@@ -2,7 +2,7 @@ var validator = require('validator');
 
 exports.validateRegister = function(email, password, firstName, lastName, company) {
     var result = null
-    if (checkEmail(email, validator)) {
+    if (!checkEmail(email, validator)) {
         result = 'email field is invalid'
     } else if (validator.isNull(password) || !validator.isLength(password, 6)) {
         result = 'password field is invalid. (min length.: 6)'
@@ -18,7 +18,7 @@ exports.validateRegister = function(email, password, firstName, lastName, compan
 
 exports.validateForget = function(email) {
     var result = null;
-    if (checkEmail(email, validator)) {
+    if (!checkEmail(email, validator)) {
         result = 'email field is invalid'
     }
     return result;
@@ -26,7 +26,7 @@ exports.validateForget = function(email) {
 
 exports.validateReset = function(email, password) {
     var result = null;
-    if (checkEmail(email, validator)) {
+    if (!checkEmail(email, validator)) {
         result = 'email field is invalid'
     } else if (validator.isNull(password) || !validator.isLength(password, 6)) {
         result = 'password field is invalid. (min length.: 6)'
@@ -39,5 +39,5 @@ exports.validateEmail = function(email) {
 };
 
 checkEmail = function(email, validator) {
-    return (validator.isNull(email) || !validator.isEmail(email) || !validator.isLowercase(email))
+    return !(validator.isNull(email) || !validator.isEmail(email) || !validator.isLowercase(email))
 }
