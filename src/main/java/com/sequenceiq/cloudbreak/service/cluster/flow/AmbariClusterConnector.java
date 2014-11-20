@@ -4,6 +4,7 @@ import static java.util.Collections.singletonMap;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -109,6 +110,7 @@ public class AmbariClusterConnector {
             saveHostMetadata(cluster, hostGroupMappings);
             ambariClient.createCluster(cluster.getName(), blueprint.getBlueprintName(), hostGroupMappings);
             waitForClusterInstall(stack, ambariClient);
+            runSmokeTest(stack, ambariClient);
             clusterCreateSuccess(cluster, new Date().getTime(), stack.getAmbariIp());
         } catch (AmbariHostsUnavailableException | AmbariOperationFailedException | InvalidHostGroupHostAssociation e) {
             LOGGER.error(e.getMessage(), e);
@@ -215,6 +217,11 @@ public class AmbariClusterConnector {
 
     public boolean startCluster(Stack stack) {
         return setClusterState(stack, false);
+    }
+
+    private void runSmokeTest(Stack stack, AmbariClient ambariClient) {
+        int id = ambariClient.runMRServiceCheck();
+        waitForAmbariOperations(stack, ambariClient, Collections.singletonMap("MR_SMOKE_TEST", id));
     }
 
     private void verifyNodeCount(int scalingAdjustment, List<HostMetadata> filteredHostList) {
