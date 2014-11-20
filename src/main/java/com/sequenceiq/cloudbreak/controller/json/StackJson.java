@@ -6,6 +6,7 @@ import java.util.Set;
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
@@ -25,6 +26,7 @@ public class StackJson implements JsonEntity {
     @Size(max = 40, min = 5, message = "Name has to be min 5 letter maximum 40 length")
     @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
             message = "Must contain only alphanumeric characters (case sensitive) and hyphens and start with an alpha character.")
+    @NotNull
     private String name;
     private Long templateId;
     private String owner;
@@ -38,10 +40,12 @@ public class StackJson implements JsonEntity {
     @Size(max = 15, min = 5, message = "Name has to be min 5 letter maximum 15 length")
     @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
             message = "Must contain only alphanumeric characters (case sensitive) and hyphens and start with an alpha character.")
+    @NotNull
     private String userName;
     @Size(max = 15, min = 5, message = "Password has to be min 5 letter maximum 15 length")
     @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
             message = "Must contain only alphanumeric characters (case sensitive) and hyphens and start with an alpha character.")
+    @NotNull
     private String password;
     private String hash;
     private ClusterResponse cluster;
