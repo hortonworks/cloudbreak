@@ -77,12 +77,13 @@ public class ProvisionContext {
         MDCBuilder.buildMdcContext(stack);
         try {
             if (stack.getStatus().equals(Status.REQUESTED)) {
-                stack = stackUpdater.updateStackStatus(stack.getId(), Status.CREATE_IN_PROGRESS);
+                String statusReason = "Creation of cluster infrastructure has started on the cloud provider.";
+                stack = stackUpdater.updateStackStatus(stack.getId(), Status.CREATE_IN_PROGRESS, statusReason);
                 websocketService.sendToTopicUser(stack.getOwner(), WebsocketEndPoint.STACK, new StatusMessage(stack.getId(), stack.getName(), stack
                         .getStatus().name()));
                 stackUpdater.updateStackStatusReason(stack.getId(), stack.getStatus().name());
                 if (!cloudPlatform.isWithTemplate()) {
-                    stackUpdater.updateStackStatus(stack.getId(), Status.REQUESTED);
+                    stackUpdater.updateStackStatus(stack.getId(), Status.REQUESTED, "Creation of cluster infrastructure has requested.");
                     Set<Resource> resourceSet = new HashSet<>();
                     ResourceBuilderInit resourceBuilderInit = resourceBuilderInits.get(cloudPlatform);
                     final ProvisionContextObject pCO =

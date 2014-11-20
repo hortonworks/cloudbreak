@@ -63,7 +63,7 @@ public class StackDeleteRequestHandler implements Consumer<Event<StackDeleteRequ
     @Override
     public void accept(Event<StackDeleteRequest> stackDeleteRequest) {
         final StackDeleteRequest data = stackDeleteRequest.getData();
-        retryingStackUpdater.updateStackStatus(data.getStackId(), Status.DELETE_IN_PROGRESS);
+        retryingStackUpdater.updateStackStatus(data.getStackId(), Status.DELETE_IN_PROGRESS, "Deletion of cluster infrastructure has started.");
         Stack stack = stackRepository.findOneWithLists(data.getStackId());
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Accepted {} event.", ReactorConfig.DELETE_REQUEST_EVENT);
@@ -100,7 +100,7 @@ public class StackDeleteRequestHandler implements Consumer<Event<StackDeleteRequ
             }
         } catch (Exception ex) {
             LOGGER.error(String.format("Stack delete failed on {} stack: ", stack.getId()), ex);
-            retryingStackUpdater.updateStackStatus(data.getStackId(), Status.DELETE_FAILED);
+            retryingStackUpdater.updateStackStatus(data.getStackId(), Status.DELETE_FAILED, "Deletion of cluster infrastructure failed.");
         }
     }
 }
