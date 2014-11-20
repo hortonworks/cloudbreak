@@ -9,6 +9,7 @@ import java.util.UnknownFormatConversionException;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -87,9 +88,9 @@ public class CredentialController {
     @ResponseBody
     public ResponseEntity<CredentialJson> getCredential(@ModelAttribute("user") CbUser user, @PathVariable String parameter) {
         Credential credential = null;
-        try {
+        if (StringUtils.isNumeric(parameter)) {
             credential = credentialService.get(Long.parseLong(parameter));
-        } catch (NumberFormatException e) {
+        } else {
             credential = credentialService.get(parameter, user);
         }
         return new ResponseEntity<>(convert(credential), HttpStatus.OK);
@@ -98,9 +99,9 @@ public class CredentialController {
     @RequestMapping(value = "credentials/{parameter}", method = RequestMethod.DELETE)
     @ResponseBody
     public ResponseEntity<CredentialJson> deleteCredential(@ModelAttribute("user") CbUser user, @PathVariable String parameter) {
-        try {
+        if (StringUtils.isNumeric(parameter)) {
             credentialService.delete(Long.parseLong(parameter));
-        } catch (NumberFormatException e) {
+        } else {
             credentialService.delete(parameter, user);
         }
         return new ResponseEntity<>(HttpStatus.OK);

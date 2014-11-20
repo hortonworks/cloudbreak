@@ -6,6 +6,7 @@ import java.util.UnknownFormatConversionException;
 
 import javax.validation.Valid;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -74,9 +75,9 @@ public class TemplateController {
     @ResponseBody
     public ResponseEntity<TemplateJson> getTemplate(@ModelAttribute("user") CbUser user, @PathVariable String parameter) {
         Template template = null;
-        try {
+        if (StringUtils.isNumeric(parameter)) {
             template = templateService.get(Long.parseLong(parameter));
-        } catch (NumberFormatException e) {
+        } else {
             template = templateService.get(parameter, user);
         }
         TemplateJson templateJson = convert(template);
@@ -86,9 +87,9 @@ public class TemplateController {
     @RequestMapping(value = "templates/{parameter}", method = RequestMethod.DELETE)
     @ResponseBody
     public ResponseEntity<TemplateJson> deleteTemplate(@ModelAttribute("user") CbUser user, @PathVariable String parameter) {
-        try {
+        if (StringUtils.isNumeric(parameter)) {
             templateService.delete(Long.parseLong(parameter));
-        } catch (NumberFormatException e) {
+        } else {
             templateService.delete(parameter, user);
         }
         return new ResponseEntity<>(HttpStatus.OK);

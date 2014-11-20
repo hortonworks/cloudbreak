@@ -6,6 +6,7 @@ import java.util.Set;
 
 import javax.validation.Valid;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -79,9 +80,9 @@ public class BlueprintController {
     @ResponseBody
     public ResponseEntity<BlueprintJson> getBlueprint(@ModelAttribute("user") CbUser user, @PathVariable String parameter) {
         Blueprint blueprint = null;
-        try {
+        if (StringUtils.isNumeric(parameter)) {
             blueprint = blueprintService.get(Long.parseLong(parameter));
-        } catch (NumberFormatException e) {
+        } else {
             blueprint = blueprintService.get(parameter, user);
         }
         return new ResponseEntity<>(blueprintConverter.convert(blueprint), HttpStatus.OK);
@@ -90,9 +91,9 @@ public class BlueprintController {
     @RequestMapping(value = "blueprints/{parameter}", method = RequestMethod.DELETE)
     @ResponseBody
     public ResponseEntity<BlueprintJson> deleteBlueprint(@ModelAttribute("user") CbUser user, @PathVariable String parameter) {
-        try {
+        if (StringUtils.isNumeric(parameter)) {
             blueprintService.delete(Long.parseLong(parameter));
-        } catch (NumberFormatException e) {
+        } else {
             blueprintService.delete(parameter, user);
         }
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

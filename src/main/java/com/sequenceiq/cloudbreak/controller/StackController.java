@@ -6,6 +6,7 @@ import java.util.Set;
 
 import javax.validation.Valid;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -74,11 +75,11 @@ public class StackController {
     @ResponseBody
     public ResponseEntity<StackJson> getStack(@ModelAttribute("user") CbUser user, @PathVariable String parameter) {
         StackJson stackJson = null;
-        try {
+        if (StringUtils.isNumeric(parameter)) {
             Stack stack = stackService.get(Long.parseLong(parameter));
             StackDescription stackDescription = stackService.getStackDescription(stack);
             stackJson = stackConverter.convert(stack, stackDescription);
-        } catch (NumberFormatException e) {
+        } else {
             Stack stack = stackService.get(parameter, user);
             StackDescription stackDescription = stackService.getStackDescription(stack);
             stackJson = stackConverter.convert(stack, stackDescription);
@@ -90,9 +91,9 @@ public class StackController {
     @ResponseBody
     public ResponseEntity<Map<String, Object>> getStackStatus(@ModelAttribute("user") CbUser user, @PathVariable String parameter) {
         Map<String, Object> stringObjectMap = new HashMap<>();
-        try {
+        if (StringUtils.isNumeric(parameter)) {
             stringObjectMap = stackConverter.convertStackStatus(stackService.get(Long.parseLong(parameter)));
-        } catch (NumberFormatException e) {
+        } else {
             stringObjectMap = stackConverter.convertStackStatus(stackService.get(parameter, user));
         }
         return new ResponseEntity<>(stringObjectMap, HttpStatus.OK);
@@ -101,9 +102,9 @@ public class StackController {
     @RequestMapping(value = "stacks/{parameter}", method = RequestMethod.DELETE)
     @ResponseBody
     public ResponseEntity<TemplateJson> deleteStack(@ModelAttribute("user") CbUser user, @PathVariable String parameter) {
-        try {
+        if (StringUtils.isNumeric(parameter)) {
             stackService.delete(Long.parseLong(parameter));
-        } catch (NumberFormatException e) {
+        } else {
             stackService.delete(parameter, user);
         }
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -114,16 +115,16 @@ public class StackController {
     public ResponseEntity<String> updateStack(@ModelAttribute("user") CbUser user, @PathVariable String parameter,
             @Valid @RequestBody UpdateStackJson updateRequest) {
         if (updateRequest.getStatus() != null) {
-            try {
+            if (StringUtils.isNumeric(parameter)) {
                 stackService.updateStatus(Long.parseLong(parameter), updateRequest.getStatus());
-            } catch (NumberFormatException e) {
+            } else {
                 stackService.updateStatus(parameter, updateRequest.getStatus(), user);
             }
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
-            try {
+            if (StringUtils.isNumeric(parameter)) {
                 stackService.updateNodeCount(Long.parseLong(parameter), updateRequest.getScalingAdjustment());
-            } catch (NumberFormatException e) {
+            } else {
                 stackService.updateNodeCount(parameter, updateRequest.getScalingAdjustment(), user);
             }
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);

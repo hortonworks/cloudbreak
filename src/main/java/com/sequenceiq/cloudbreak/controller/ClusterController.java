@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.controller;
 
 import javax.validation.Valid;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -48,12 +49,12 @@ public class ClusterController {
     @ResponseBody
     public ResponseEntity<ClusterResponse> retrieveCluster(@ModelAttribute("user") CbUser user, @PathVariable String parameter) {
         ClusterResponse response = null;
-        try {
+        if (StringUtils.isNumeric(parameter)) {
             Stack stack = stackService.get(Long.parseLong(parameter));
             Cluster cluster = clusterService.retrieveCluster(Long.parseLong(parameter));
             String clusterJson = clusterService.getClusterJson(stack.getAmbariIp(), Long.parseLong(parameter));
             response = clusterConverter.convert(cluster, clusterJson);
-        } catch (NumberFormatException e) {
+        } else {
             Stack stack = stackService.get(parameter, user);
             Cluster cluster = clusterService.retrieveCluster(parameter, user);
             String clusterJson = clusterService.getClusterJson(stack.getAmbariIp(), parameter, user);
@@ -66,9 +67,9 @@ public class ClusterController {
     @ResponseBody
     public ResponseEntity<String> updateCluster(@ModelAttribute("user") CbUser user, @PathVariable String parameter, @RequestBody UpdateClusterJson updateJson) {
         Stack stack = null;
-        try {
+        if (StringUtils.isNumeric(parameter)) {
             stack = stackService.get(Long.parseLong(parameter));
-        } catch (NumberFormatException e) {
+        } else {
             stack = stackService.get(parameter, user);
         }
         Status stackStatus = stack.getStatus();
