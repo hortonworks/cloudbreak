@@ -60,6 +60,7 @@ public class AmbariClusterConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariClusterConnector.class);
     private static final String UNHANDLED_EXCEPTION_MSG = "Unhandled exception occurred while installing Ambari services.";
+    private static final String MASTER_CATEGORY = "MASTER";
 
     @Autowired
     private StackRepository stackRepository;
@@ -153,8 +154,9 @@ public class AmbariClusterConnector {
         MDCBuilder.buildMdcContext(cluster);
         LOGGER.info("Decommission requested");
         try {
-            stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS);
             AmbariClient ambariClient = clientService.create(stack);
+            verifyComponentsCategory(hosts, ambariClient, cluster);
+            stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS);
             Set<HostMetadata> metadataToRemove = new HashSet<>();
             Map<String, Integer> decommissionRequests = new HashMap<>();
             Map<String, List<String>> hostsWithComponents = new HashMap<>();
@@ -217,6 +219,19 @@ public class AmbariClusterConnector {
 
     public boolean startCluster(Stack stack) {
         return setClusterState(stack, false);
+    }
+
+    private void verifyComponentsCategory(Set<HostGroupAdjustmentJson> hosts, AmbariClient ambariClient, Cluster cluster) {
+        for (HostGroupAdjustmentJson host : hosts) {
+            String hostGroup = host.getHostGroup();
+            Map<String, String> categories = ambariClient.getComponentsCategory(cluster.getBlueprint().getName(), hostGroup);
+            for (String component : categories.keySet()) {
+                if (categories.get(component).equalsIgnoreCase(MASTER_CATEGORY)) {
+                    throw new BadRequestException(
+                            String.format("Cannot downscale the %s host group, because it contains a %s component", hostGroup, component));
+                }
+            }
+        }
     }
 
     private void runSmokeTest(Stack stack, AmbariClient ambariClient) {

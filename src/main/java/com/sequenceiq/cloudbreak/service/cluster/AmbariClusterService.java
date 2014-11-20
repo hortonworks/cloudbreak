@@ -45,8 +45,6 @@ import reactor.event.Event;
 @Service
 public class AmbariClusterService implements ClusterService {
 
-    public static final String PORT = "8080";
-
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariClusterService.class);
 
     @Autowired
