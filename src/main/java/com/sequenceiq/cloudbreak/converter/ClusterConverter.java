@@ -44,11 +44,11 @@ public class ClusterConverter {
         clusterResponse.setCluster(jsonHelper.createJsonFromString(clusterJson));
         clusterResponse.setId(cluster.getId());
         clusterResponse.setStatus(cluster.getStatus().name());
-        if (cluster.getCreationFinished() != null) {
+        if (cluster.getUpSince() != null && Status.AVAILABLE.equals(cluster.getStatus())) {
             long now = new Date().getTime();
-            long createFinished = now - cluster.getCreationFinished();
-            int minutes = (int) ((createFinished / (MILLIS_PER_SECOND * SECONDS_PER_MINUTE)) % SECONDS_PER_MINUTE);
-            int hours = (int) (createFinished / (MILLIS_PER_SECOND * SECONDS_PER_MINUTE * SECONDS_PER_MINUTE));
+            long uptime = now - cluster.getUpSince();
+            int minutes = (int) ((uptime / (MILLIS_PER_SECOND * SECONDS_PER_MINUTE)) % SECONDS_PER_MINUTE);
+            int hours = (int) (uptime / (MILLIS_PER_SECOND * SECONDS_PER_MINUTE * SECONDS_PER_MINUTE));
             clusterResponse.setHoursUp(hours);
             clusterResponse.setMinutesUp(minutes);
         } else {
