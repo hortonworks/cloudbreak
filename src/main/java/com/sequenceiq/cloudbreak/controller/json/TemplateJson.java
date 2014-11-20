@@ -31,8 +31,8 @@ public class TemplateJson implements JsonEntity {
     @Max(value = 15, message = "The number of volumes has to be less than 15")
     @NotNull
     private Integer volumeCount;
-    @Min(value = 0, message = "The size of the volume has to be greater than or equal to 0")
-    @Max(value = 1024, message = "The size of the volume has to be lesser than or equal to 1024")
+    @Min(value = 10, message = "The size of the volume has to be greater than or equal to 10 GB")
+    @Max(value = 1024, message = "The size of the volume has to be less than or equal to 1024 GB")
     @NotNull
     private Integer volumeSize;
 
