@@ -49,7 +49,7 @@ public class ExceptionControllerAdvice {
     @ExceptionHandler({ NotFoundException.class, EntityNotFoundException.class })
     public ResponseEntity<ExceptionResult> notFound(Exception e) {
         MDCBuilder.buildMdcContext();
-        LOGGER.error(e.getMessage(), e);
+        LOGGER.error(e.getMessage());
         return new ResponseEntity<>(new ExceptionResult(e.getMessage()), HttpStatus.NOT_FOUND);
     }
 

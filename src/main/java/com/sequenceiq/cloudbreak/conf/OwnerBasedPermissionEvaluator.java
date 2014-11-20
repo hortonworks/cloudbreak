@@ -9,6 +9,7 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 
+import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CbUserRole;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
@@ -23,7 +24,7 @@ public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
     @Override
     public boolean hasPermission(Authentication authentication, final Object targetDomainObject, Object permission) {
         if (targetDomainObject == null) {
-            return false;
+            throw new NotFoundException("Resource not found.");
         }
         OAuth2Authentication oauth = (OAuth2Authentication) authentication;
         if (oauth.getUserAuthentication() == null && oauth.getOAuth2Request().getScope().contains(AUTO_SCALE_SCOPE)) {
