@@ -10,7 +10,7 @@ public class UpdateStackJson implements JsonEntity {
 
     private StatusRequest status;
 
-    @Digits(fraction = 0, integer = 10, message = "Node count has to be a number")
+    @Digits(fraction = 0, integer = 10, message = "The node count has to be a number")
     private Integer scalingAdjustment;
 
     public UpdateStackJson() {

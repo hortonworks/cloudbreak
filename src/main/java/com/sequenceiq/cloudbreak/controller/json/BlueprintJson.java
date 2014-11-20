@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
-
-import org.hibernate.validator.constraints.NotBlank;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -12,7 +12,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 public class BlueprintJson implements JsonEntity {
 
     private String id;
-    @NotBlank
+    @Size(max = 100, min = 1, message = "The length of the blueprint's name has to be in range of 1 to 100")
+    @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
+            message = "The blueprint's name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
+    @NotNull
     private String name;
     private String blueprintName;
     private String url;

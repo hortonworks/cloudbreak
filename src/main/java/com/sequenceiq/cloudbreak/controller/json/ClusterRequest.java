@@ -1,15 +1,19 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 public class ClusterRequest {
 
-    @Size(max = 40, min = 5, message = "Name has to be min 5 letter maximum 40 length")
+    @Size(max = 40, min = 5, message = "The length of the cluster's name has to be in range of 5 to 40")
     @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
-            message = "Must contain only alphanumeric characters (case sensitive) and hyphens and start with an alpha character.")
+            message = "The name of the cluster can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
+    @NotNull
     private String name;
+    @NotNull
     private Long blueprintId;
+    @Size(max = 1000)
     private String description;
     private Boolean emailNeeded = Boolean.FALSE;
 
