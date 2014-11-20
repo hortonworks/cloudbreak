@@ -95,7 +95,7 @@ public class AmbariClusterConnector {
         MDCBuilder.buildMdcContext(cluster);
         try {
             LOGGER.info("Starting Ambari cluster installation [Ambari server address: {}]", stack.getAmbariIp());
-            stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS);
+            stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS, "Installation of cluster has been started.");
             cluster.setCreationStarted(new Date().getTime());
             cluster = clusterRepository.save(cluster);
             Blueprint blueprint = cluster.getBlueprint();
@@ -122,7 +122,7 @@ public class AmbariClusterConnector {
         Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
         MDCBuilder.buildMdcContext(cluster);
         try {
-            stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS);
+            stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS, "Adding new node(s) to the cluster.");
             AmbariClient ambariClient = clientService.create(stack);
             waitForHosts(stack, ambariClient);
             Map<String, String> hosts = findHosts(stack.getId(), hostGroupAdjustment);
@@ -136,10 +136,10 @@ public class AmbariClusterConnector {
             updateHostSuccessful(cluster, hosts.keySet(), false);
         } catch (AmbariHostsUnavailableException | AmbariOperationFailedException e) {
             LOGGER.error(e.getMessage(), e);
-            updateHostFailed(cluster, e.getMessage());
+            updateHostFailed(cluster, e.getMessage(), true);
         } catch (Exception e) {
             LOGGER.error(UNHANDLED_EXCEPTION_MSG, e);
-            updateHostFailed(cluster, UNHANDLED_EXCEPTION_MSG);
+            updateHostFailed(cluster, UNHANDLED_EXCEPTION_MSG, true);
         }
     }
 
@@ -149,8 +149,8 @@ public class AmbariClusterConnector {
         MDCBuilder.buildMdcContext(cluster);
         LOGGER.info("Decommission requested");
         try {
+            stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS, "Removing node(s) from the cluster.");
             AmbariClient ambariClient = clientService.create(stack);
-            stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS);
             Set<HostMetadata> metadataToRemove = new HashSet<>();
             Map<String, Integer> decommissionRequests = new HashMap<>();
             Map<String, List<String>> hostsWithComponents = new HashMap<>();
@@ -195,7 +195,7 @@ public class AmbariClusterConnector {
             updateHostSuccessful(cluster, hostsRemoved, true);
         } catch (Exception e) {
             LOGGER.error(UNHANDLED_EXCEPTION_MSG, e);
-            updateHostFailed(cluster, UNHANDLED_EXCEPTION_MSG);
+            updateHostFailed(cluster, UNHANDLED_EXCEPTION_MSG, false);
         }
     }
 
@@ -419,10 +419,10 @@ public class AmbariClusterConnector {
         reactor.notify(ReactorConfig.UPDATE_AMBARI_HOSTS_SUCCESS_EVENT, Event.wrap(new UpdateAmbariHostsSuccess(cluster.getId(), hostNames, decommission)));
     }
 
-    private void updateHostFailed(Cluster cluster, String message) {
+    private void updateHostFailed(Cluster cluster, String message, boolean addingNodes) {
         MDCBuilder.buildMdcContext(cluster);
         LOGGER.info("Publishing {} event", ReactorConfig.UPDATE_AMBARI_HOSTS_FAILED_EVENT);
-        reactor.notify(ReactorConfig.UPDATE_AMBARI_HOSTS_FAILED_EVENT, Event.wrap(new UpdateAmbariHostsFailure(cluster.getId(), message)));
+        reactor.notify(ReactorConfig.UPDATE_AMBARI_HOSTS_FAILED_EVENT, Event.wrap(new UpdateAmbariHostsFailure(cluster.getId(), message, addingNodes)));
     }
 
     public void checkClusterState(Stack stack) {

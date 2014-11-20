@@ -84,7 +84,7 @@ public class ProvisionContextTest {
     public void testBuildStack() {
         // GIVEN
         given(stackRepository.findById(1L)).willReturn(stack);
-        given(stackUpdater.updateStackStatus(1L, Status.CREATE_IN_PROGRESS)).willReturn(stack);
+        given(stackUpdater.updateStackStatus(anyLong(), any(Status.class), anyString())).willReturn(stack);
         given(stackUpdater.updateStackStatusReason(anyLong(), anyString())).willReturn(stack);
         given(cloudPlatformConnectors.get(any(CloudPlatform.class))).willReturn(provisioner);
         doNothing().when(websocketService).sendToTopicUser(anyString(), any(WebsocketEndPoint.class), any(StatusMessage.class));
@@ -114,7 +114,7 @@ public class ProvisionContextTest {
         // GIVEN
         given(stackRepository.findById(1L)).willReturn(stack);
         given(stackRepository.findOneWithLists(1L)).willReturn(stack);
-        given(stackUpdater.updateStackStatus(1L, Status.CREATE_IN_PROGRESS)).willThrow(new IllegalStateException());
+        given(stackUpdater.updateStackStatus(anyLong(), any(Status.class), anyString())).willReturn(stack);
         // WHEN
         underTest.buildStack(cloudPlatform, 1L, setupProperties, userDataParams);
         // THEN

@@ -33,10 +33,6 @@ public class RetryingStackUpdater {
     @Autowired
     private CloudbreakEventService cloudbreakEventService;
 
-    public Stack updateStackStatus(Long stackId, Status status) {
-        return updateStackStatus(stackId, status, null);
-    }
-
     public Stack updateStackStatus(Long stackId, Status status, String statusReason) {
         Stack stack = stackRepository.findById(stackId);
         MDCBuilder.buildMdcContext(stack);

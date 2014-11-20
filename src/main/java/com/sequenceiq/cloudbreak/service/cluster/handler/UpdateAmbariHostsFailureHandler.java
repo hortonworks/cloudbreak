@@ -40,16 +40,17 @@ public class UpdateAmbariHostsFailureHandler implements Consumer<Event<UpdateAmb
 
     @Override
     public void accept(Event<UpdateAmbariHostsFailure> event) {
-        UpdateAmbariHostsFailure data = event.getData();
-        Cluster cluster = clusterRepository.findById(data.getClusterId());
+        UpdateAmbariHostsFailure failure = event.getData();
+        Cluster cluster = clusterRepository.findById(failure.getClusterId());
         MDCBuilder.buildMdcContext(cluster);
         LOGGER.info("Accepted {} event.", ReactorConfig.UPDATE_AMBARI_HOSTS_FAILED_EVENT);
-        cluster.setStatus(Status.AVAILABLE);
-        cluster.setStatusReason(data.getDetailedMessage());
+        cluster.setStatus(Status.UPDATE_FAILED);
+        cluster.setStatusReason(failure.getDetailedMessage());
         clusterRepository.save(cluster);
         Stack stack = stackRepository.findStackForCluster(cluster.getId());
-        stackUpdater.updateStackStatus(stack.getId(), Status.AVAILABLE);
-        websocketService.sendToTopicUser(cluster.getOwner(), WebsocketEndPoint.CLUSTER, new StatusMessage(data.getClusterId(), cluster.getName(),
+        String statusMessage = failure.isAddingNodes() ? "new node(s) could not be added." : "node(s) could not be removed.";
+        stackUpdater.updateStackStatus(stack.getId(), Status.AVAILABLE, "Failed to update cluster because " + statusMessage);
+        websocketService.sendToTopicUser(cluster.getOwner(), WebsocketEndPoint.CLUSTER, new StatusMessage(failure.getClusterId(), cluster.getName(),
                 "UPDATE_FAILED"));
     }
 
