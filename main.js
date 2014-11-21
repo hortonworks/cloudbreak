@@ -412,6 +412,7 @@ postGroup = function(token, userId, displayName){
 updateAndPostSequenceIqGroups = function (token, userId, company){
     updateGroup(token, userId, 'sequenceiq.cloudbreak.user')
     updateGroup(token, userId, 'sequenceiq.cloudbreak.admin')
+    updateGroup(token, userId, 'cloudbreak.usages.account')
     postGroup(token, userId, 'sequenceiq.account.' + userId + '.' + company)
 }
 
@@ -420,6 +421,8 @@ updateCloudbreakGroups = function (token, userId) {
     updateGroup(token, userId, 'cloudbreak.stacks')
     updateGroup(token, userId, 'cloudbreak.blueprints')
     updateGroup(token, userId, 'cloudbreak.credentials')
+    updateGroup(token, userId, 'cloudbreak.events')
+    updateGroup(token, userId, 'cloudbreak.usages.user')
     updateGroup(token, userId, 'periscope.cluster')
 }
 
