@@ -1,7 +1,5 @@
 package com.sequenceiq.periscope.service;
 
-import static java.util.Collections.singletonMap;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -61,7 +59,7 @@ public class ScalingRequest implements Runnable {
             boolean ready = waitForReadyState(clusterId, stackId, client);
             if (ready) {
                 LOGGER.info(clusterId, "Sending request to install components to the host(s)");
-                client.putCluster(stackId, singletonMap(hostGroup, scalingAdjustment));
+                client.putCluster(stackId, hostGroup, scalingAdjustment);
             } else {
                 LOGGER.info(clusterId, "Instance(s) didn't start in time, skipping scaling");
                 // TODO should we terminate the launched instances?
@@ -78,7 +76,7 @@ public class ScalingRequest implements Runnable {
         try {
             LOGGER.info(clusterId, "Sending request to remove {} node(s) from host group '{}'", scalingAdjustment, hostGroup);
             int stackId = client.resolveToStackId(ambari);
-            client.putCluster(stackId, singletonMap(hostGroup, scalingAdjustment));
+            client.putCluster(stackId, hostGroup, scalingAdjustment);
             boolean ready = waitForReadyState(clusterId, stackId, client);
             if (ready) {
                 LOGGER.info(clusterId, "Sending request to terminate {} instance(s)", scalingAdjustment);
