@@ -34,7 +34,7 @@ public class StackDeleteCompleteHandler implements Consumer<Event<StackDeleteCom
 
     @Override
     public void accept(Event<StackDeleteComplete> stackDeleteComplete) {
-        String msg = "Cluster and it's infrastructure were successfully deleted.";
+        String msg = "Cluster and its infrastructure were successfully deleted.";
         StackDeleteComplete data = stackDeleteComplete.getData();
         retryingStackUpdater.updateStackStatus(data.getStackId(), Status.DELETE_COMPLETED, msg);
         String statusReason = "Billing stopped because the deletion of cluster and its infrastructure.";
