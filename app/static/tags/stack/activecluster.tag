@@ -79,7 +79,7 @@
                                         <div class="form-group">
                                             <div class="col-sm-12">
 												<pre class="form-control-static event-history">
-<span ng-repeat="actual in activeClusterEvents |orderBy:eventTimestamp"><span class="{{$root.config.EVENT_CLASS[actual .eventType]}}" >{{actual.eventTimestamp}} {{actual.stackName}} is {{$root.config.EVENT_TYPE[actual .eventType]}}: {{actual.eventMessage}}</span><br/></span>
+<span ng-repeat="actual in activeClusterEvents |orderBy:eventTimestamp"><span class="{{$root.config.EVENT_CLASS[actual .eventType]}}" >{{actual.customTimeStamp}} {{actual.stackName}} is {{$root.config.EVENT_TYPE[actual .eventType]}}: {{actual.eventMessage}}</span><br/></span>
                                                 </pre>
                                             </div><!-- .col-sm-12  -->
                                         </div><!-- .form-group -->

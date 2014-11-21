@@ -13,6 +13,7 @@ angular.module('uluwatuControllers').controller('eventController', ['$scope', '$
             $rootScope.events = UserEvents.query(function(success) {
                 angular.forEach(success, function(item) {
                     item.eventTimestamp =  new Date(item.eventTimestamp).toISOString();
+                    item.customTimeStamp =  new Date(item.eventTimestamp).toLocaleDateString() + " " + new Date(item.eventTimestamp).toLocaleTimeString();
                 });
             });
         }
