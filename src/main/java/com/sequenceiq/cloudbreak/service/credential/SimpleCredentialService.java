@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.domain.CbUserRole;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
+import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 
 @Service
 public class SimpleCredentialService implements CredentialService {
@@ -22,9 +23,6 @@ public class SimpleCredentialService implements CredentialService {
 
     @Autowired
     private CredentialRepository credentialRepository;
-
-    @Autowired
-    private AzureCertificateService azureCertificateService;
 
     @Override
     public Set<Credential> retrievePrivateCredentials(CbUser user) {
@@ -62,7 +60,6 @@ public class SimpleCredentialService implements CredentialService {
         } catch (DataIntegrityViolationException ex) {
             throw new DuplicateKeyValueException(credential.getName(), ex);
         }
-        createAzureCertificates(user, savedCredential);
 
         return savedCredential;
     }
