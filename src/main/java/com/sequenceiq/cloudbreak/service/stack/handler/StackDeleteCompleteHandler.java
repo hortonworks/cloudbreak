@@ -34,10 +34,10 @@ public class StackDeleteCompleteHandler implements Consumer<Event<StackDeleteCom
 
     @Override
     public void accept(Event<StackDeleteComplete> stackDeleteComplete) {
-        String msg = "Cluster and its infrastructure were successfully deleted.";
+        String msg = "Cluster and its infrastructure were successfully terminated.";
         StackDeleteComplete data = stackDeleteComplete.getData();
         retryingStackUpdater.updateStackStatus(data.getStackId(), Status.DELETE_COMPLETED, msg);
-        String statusReason = "Billing stopped because the deletion of cluster and its infrastructure.";
+        String statusReason = "Billing stopped because the termination of the cluster and its infrastructure.";
         cloudbreakEventService.fireCloudbreakEvent(data.getStackId(), BillingStatus.BILLING_STOPPED.name(), statusReason);
         Stack oneWithLists = stackRepository.findOneWithLists(data.getStackId());
         MDCBuilder.buildMdcContext(oneWithLists);
