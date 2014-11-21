@@ -7,9 +7,7 @@
         <div id="cluster-details-panel-collapse">
             <div class="panel-body">
                 <ul class="nav nav-pills nav-justified" role="tablist">
-                    <li class="active"><a ng-click="showDetails()" role="tab" data-toggle="tab">details</a></li>
-                    <li><a role="tab" ng-click="showPeriscope()" role="tab" data-toggle="tab">autoscaling SLA policies</a></li>
-                    <li><a role="tab" target="_blank" href="http://130.211.135.184/index.html#/dashboard/elasticsearch/Hadoop%20Metrics">monitoring</a></li>
+
                 </ul>
                 <div class="tab-content">
                     <section id="cluster-details-pane" ng-class="{ 'active': detailsShow }" ng-show="detailsShow" class="tab-pane fade in">
@@ -66,6 +64,31 @@
                                 </div>
                             </div>
                         </form>
+
+                        <div class="panel panel-default panel-cluster-history">
+                            <div class="panel-heading">
+                                <h5><a data-toggle="collapse" data-target="#cluster-history-collapse01"><i class="fa fa-clock-o fa-fw"></i>Event history</a></h5>
+                            </div>
+
+                            <div id="cluster-history-collapse01" class="panel-collapse collapse in" style="height: auto;">
+
+                                <div class="panel-body">
+
+                                    <form class="form-horizontal" role="document">
+
+                                        <div class="form-group">
+                                            <div class="col-sm-12">
+												<pre class="form-control-static event-history">
+<span ng-repeat="actual in activeClusterEvents |orderBy:eventTimestamp"><span class="{{$root.config.EVENT_CLASS[actual .eventType]}}" >{{actual.eventTimestamp}} {{actual.stackName}} is {{$root.config.EVENT_TYPE[actual .eventType]}}: {{actual.eventMessage}}</span><br/></span>
+                                                </pre>
+                                            </div><!-- .col-sm-12  -->
+                                        </div><!-- .form-group -->
+
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="panel panel-default">
                             <div class="panel-heading">
                                 <h5><a href="" data-toggle="collapse" data-target="#panel-collapse0002"><i class="fa fa-align-justify fa-fw"></i>Cloud stack description: {{activeCluster.name}}</a></h5>

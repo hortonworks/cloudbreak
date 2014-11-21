@@ -6,11 +6,11 @@ angular.module('uluwatuControllers').controller('eventController', ['$scope', '$
     function ($scope, $rootScope, $filter, UserEvents) {
 
         initFilter();
-
+        $rootScope.events = {};
 
         $scope.loadEvents = function () {
             initFilter();
-            $scope.events = UserEvents.query(function(success) {
+            $rootScope.events = UserEvents.query(function(success) {
                 angular.forEach(success, function(item) {
                     item.eventTimestamp =  new Date(item.eventTimestamp).toISOString();
                 });

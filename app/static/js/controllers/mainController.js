@@ -124,6 +124,25 @@ angular.module('uluwatuControllers').controller('mainController', ['$scope', '$r
                 "STOP_FAILED": "stop failed",
                 "BILLING_STARTED": "billing started",
                 "BILLING_STOPPED": "billing stopped"
+            },
+            'EVENT_CLASS': {
+                "REQUESTED": "has-warning",
+                "CREATE_IN_PROGRESS": "has-warning",
+                "AVAILABLE": "has-success",
+                "UPDATE_IN_PROGRESS": "has-warning",
+                "CREATE_FAILED": "has-error",
+                "DELETE_IN_PROGRESS": "has-warning",
+                "DELETE_FAILED": "has-error",
+                "DELETE_COMPLETED": "has-success",
+                "STOPPED": "has-success",
+                "STOP_REQUESTED": "has-warning",
+                "START_REQUESTED": "has-warning",
+                "STOP_IN_PROGRESS": "has-warning",
+                "START_IN_PROGRESS": "has-warning",
+                "START_FAILED": "has-error",
+                "STOP_FAILED": "has-error",
+                "BILLING_STARTED": "has-success",
+                "BILLING_STOPPED": "has-success"
             }
         }
 
