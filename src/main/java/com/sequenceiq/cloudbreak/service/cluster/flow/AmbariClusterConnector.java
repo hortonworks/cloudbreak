@@ -60,7 +60,6 @@ public class AmbariClusterConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariClusterConnector.class);
     private static final String UNHANDLED_EXCEPTION_MSG = "Unhandled exception occurred while installing Ambari services.";
-    private static final String MASTER_CATEGORY = "MASTER";
 
     @Autowired
     private StackRepository stackRepository;
@@ -155,7 +154,6 @@ public class AmbariClusterConnector {
         LOGGER.info("Decommission requested");
         try {
             AmbariClient ambariClient = clientService.create(stack);
-            verifyComponentsCategory(hosts, ambariClient, cluster);
             stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS);
             Set<HostMetadata> metadataToRemove = new HashSet<>();
             Map<String, Integer> decommissionRequests = new HashMap<>();
@@ -202,10 +200,7 @@ public class AmbariClusterConnector {
             cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
             cluster.getHostMetadata().removeAll(metadataToRemove);
             clusterRepository.save(cluster);
-            Set<String> hostsRemoved = new HashSet<>();
-            for (HostMetadata hostMetadata : metadataToRemove) {
-                hostsRemoved.add(hostMetadata.getHostName());
-            }
+            Set<String> hostsRemoved = getRemovedHostNames(metadataToRemove);
             updateHostSuccessful(cluster, hostsRemoved, true);
         } catch (BadRequestException be) {
             LOGGER.error("Decommission cannot be executed", be);
@@ -224,17 +219,12 @@ public class AmbariClusterConnector {
         return setClusterState(stack, false);
     }
 
-    private void verifyComponentsCategory(Set<HostGroupAdjustmentJson> hosts, AmbariClient ambariClient, Cluster cluster) {
-        for (HostGroupAdjustmentJson host : hosts) {
-            String hostGroup = host.getHostGroup();
-            Map<String, String> categories = ambariClient.getComponentsCategory(cluster.getBlueprint().getName(), hostGroup);
-            for (String component : categories.keySet()) {
-                if (categories.get(component).equalsIgnoreCase(MASTER_CATEGORY)) {
-                    throw new BadRequestException(
-                            String.format("Cannot downscale the %s host group, because it contains a %s component", hostGroup, component));
-                }
-            }
+    private Set<String> getRemovedHostNames(Set<HostMetadata> metadataToRemove) {
+        Set<String> hostsRemoved = new HashSet<>();
+        for (HostMetadata hostMetadata : metadataToRemove) {
+            hostsRemoved.add(hostMetadata.getHostName());
         }
+        return hostsRemoved;
     }
 
     private void runSmokeTest(Stack stack, AmbariClient ambariClient) {

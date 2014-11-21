@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -46,6 +47,7 @@ import reactor.event.Event;
 public class AmbariClusterService implements ClusterService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariClusterService.class);
+    private static final String MASTER_CATEGORY = "MASTER";
 
     @Autowired
     private StackRepository stackRepository;
@@ -119,11 +121,11 @@ public class AmbariClusterService implements ClusterService {
     public void updateHosts(Long stackId, Set<HostGroupAdjustmentJson> hostGroupAdjustments) {
         Stack stack = stackRepository.findOneWithLists(stackId);
         MDCBuilder.buildMdcContext(stack.getCluster());
-        boolean decommisionRequest = validateRequest(stack, hostGroupAdjustments);
+        boolean decommissionRequest = validateRequest(stack, hostGroupAdjustments);
         LOGGER.info("Cluster update requested [BlueprintId: {}]", stack.getCluster().getBlueprint().getId());
         LOGGER.info("Publishing {} event", ReactorConfig.UPDATE_AMBARI_HOSTS_REQUEST_EVENT);
         reactor.notify(ReactorConfig.UPDATE_AMBARI_HOSTS_REQUEST_EVENT, Event.wrap(
-                new UpdateAmbariHostsRequest(stackId, hostGroupAdjustments, decommisionRequest)));
+                new UpdateAmbariHostsRequest(stackId, hostGroupAdjustments, decommissionRequest)));
     }
 
     @Override
@@ -180,7 +182,7 @@ public class AmbariClusterService implements ClusterService {
         for (HostGroupAdjustmentJson hostGroupAdjustment : hostGroupAdjustments) {
             if (hostGroupNames.contains(hostGroupAdjustment.getHostGroup())) {
                 throw new BadRequestException(String.format(
-                        "Hostgroups cannot be listed more than once in an update request, but '%s' is listed multiple times.",
+                        "Host groups cannot be listed more than once in an update request, but '%s' is listed multiple times.",
                         hostGroupAdjustment.getHostGroup()));
             }
             hostGroupNames.add(hostGroupAdjustment.getHostGroup());
@@ -191,7 +193,7 @@ public class AmbariClusterService implements ClusterService {
                 positive = true;
             }
             if (positive && negative) {
-                throw new BadRequestException("An update request must contain only decomissions or only additions.");
+                throw new BadRequestException("An update request must contain only decommissions or only additions.");
             }
             sumScalingAdjustments += scalingAdjustment;
         }
@@ -200,9 +202,25 @@ public class AmbariClusterService implements ClusterService {
             validateUnregisteredHosts(stack, sumScalingAdjustments);
         } else {
             validateRegisteredHosts(stack, hostGroupAdjustments);
+            validateComponentsCategory(stack, hostGroupAdjustments);
         }
         validateHostGroups(stack, hostGroupAdjustments);
         return negative;
+    }
+
+    private void validateComponentsCategory(Stack stack, Set<HostGroupAdjustmentJson> hosts) {
+        AmbariClient ambariClient = clientService.create(stack);
+        Cluster cluster = stack.getCluster();
+        for (HostGroupAdjustmentJson host : hosts) {
+            String hostGroup = host.getHostGroup();
+            Map<String, String> categories = ambariClient.getComponentsCategory(cluster.getBlueprint().getName(), hostGroup);
+            for (String component : categories.keySet()) {
+                if (categories.get(component).equalsIgnoreCase(MASTER_CATEGORY)) {
+                    throw new BadRequestException(
+                            String.format("Cannot downscale the '%s' host group, because it contains a '%s' component", hostGroup, component));
+                }
+            }
+        }
     }
 
     private void validateZeroScalingAdjustments(int sumScalingAdjustments) {
@@ -229,41 +247,41 @@ public class AmbariClusterService implements ClusterService {
         for (HostGroupAdjustmentJson hostGroupAdjustment : hostGroupAdjustments) {
             Set<HostMetadata> hostMetadata = hostMetadataRepository.findHostsInHostgroup(hostGroupAdjustment.getHostGroup(), stack.getCluster().getId());
             if (hostMetadata.size() <= -1 * hostGroupAdjustment.getScalingAdjustment()) {
-                validationErrors.add(String.format("[hostGroup: '%s', current hosts: %s, decommisions requested: %s]",
+                validationErrors.add(String.format("[hostGroup: '%s', current hosts: %s, decommissions requested: %s]",
                         hostGroupAdjustment.getHostGroup(), hostMetadata.size(), -1 * hostGroupAdjustment.getScalingAdjustment()));
             }
         }
         if (validationErrors.size() > 0) {
             throw new BadRequestException(String.format(
-                    "Every host group must contain at least 1 host after the decommision: %s",
+                    "Every host group must contain at least 1 host after the decommission: %s",
                     validationErrors));
         }
     }
 
     private void validateHostGroups(Stack stack, Set<HostGroupAdjustmentJson> hostGroupAdjustments) {
         for (HostGroupAdjustmentJson hostGroupAdjustment : hostGroupAdjustments) {
-            if (!assignableHostgroup(stack.getCluster(), hostGroupAdjustment.getHostGroup())) {
+            if (!assignableHostGroup(stack.getCluster(), hostGroupAdjustment.getHostGroup())) {
                 throw new BadRequestException(String.format(
-                        "Invalid hostgroup: blueprint '%s' that was used to create the cluster does not contain a hostgroup with this name.",
+                        "Invalid host group: blueprint '%s' that was used to create the cluster does not contain a host group with this name.",
                         stack.getCluster().getBlueprint().getId(), hostGroupAdjustment.getHostGroup()));
             }
         }
     }
 
-    private Boolean assignableHostgroup(Cluster cluster, String hostgroup) {
+    private Boolean assignableHostGroup(Cluster cluster, String hostGroup) {
         try {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode root;
             root = mapper.readTree(cluster.getBlueprint().getBlueprintText());
             Iterator<JsonNode> hostGroupsIterator = root.path("host_groups").elements();
             while (hostGroupsIterator.hasNext()) {
-                JsonNode hostGroup = hostGroupsIterator.next();
-                if (hostGroup.path("name").asText().equals(hostgroup)) {
+                JsonNode hostGroupNode = hostGroupsIterator.next();
+                if (hostGroupNode.path("name").asText().equals(hostGroup)) {
                     return true;
                 }
             }
         } catch (IOException e) {
-            throw new InternalServerException("Unhandled exception occured while reading blueprint: " + e.getMessage(), e);
+            throw new InternalServerException("Unhandled exception occurred while reading blueprint: " + e.getMessage(), e);
         }
         return false;
     }
