@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service.stack.resource.azure;
 
-import java.io.FileNotFoundException;
-import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,14 +8,11 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
-import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
-import com.sequenceiq.cloudbreak.service.stack.connector.azure.X509Certificate;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDeleteContextObject;
@@ -61,7 +56,6 @@ public abstract class AzureSimpleInstanceResourceBuilder implements
         return CloudPlatform.AZURE;
     }
 
-
     @Override
     public ResourceBuilderType resourceBuilderType() {
         return ResourceBuilderType.INSTANCE_RESOURCE;
@@ -71,9 +65,7 @@ public abstract class AzureSimpleInstanceResourceBuilder implements
         return String.format("%s-%s", azureTemplate, i);
     }
 
-    protected X509Certificate createX509Certificate(AzureCredential azureCredential, String emailAsFolder) throws FileNotFoundException, CertificateException {
-        return new X509Certificate(AzureCertificateService.getCerFile(emailAsFolder, azureCredential.getId()));
-    }
+
 
     protected List<Resource> filterResourcesByType(List<Resource> resources, ResourceType resourceType) {
         List<Resource> resourcesTemp = new ArrayList<>();

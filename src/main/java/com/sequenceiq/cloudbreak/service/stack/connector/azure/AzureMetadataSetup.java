@@ -27,7 +27,6 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataSetupComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataUpdateComplete;
@@ -45,15 +44,11 @@ public class AzureMetadataSetup implements MetadataSetup {
     @Autowired
     private Reactor reactor;
 
-    @Autowired
-    private AzureStackUtil azureStackUtil;
-
     @Override
     public void setupMetadata(Stack stack) {
         MDCBuilder.buildMdcContext(stack);
         AzureCredential azureCredential = (AzureCredential) stack.getCredential();
-        String filePath = AzureCertificateService.getUserJksFileName(azureCredential, azureStackUtil.emailAsFolder(stack.getOwner()));
-        AzureClient azureClient = azureStackUtil.createAzureClient(azureCredential, filePath);
+        AzureClient azureClient = AzureStackUtil.createAzureClient(azureCredential);
         Set<CoreInstanceMetaData> instanceMetaDatas = collectMetaData(stack, azureClient);
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.METADATA_SETUP_COMPLETE_EVENT, stack.getId());
         reactor.notify(ReactorConfig.METADATA_SETUP_COMPLETE_EVENT,
@@ -64,8 +59,7 @@ public class AzureMetadataSetup implements MetadataSetup {
     public void addNewNodesToMetadata(Stack stack, Set<Resource> resourceList) {
         MDCBuilder.buildMdcContext(stack);
         AzureCredential azureCredential = (AzureCredential) stack.getCredential();
-        String filePath = AzureCertificateService.getUserJksFileName(azureCredential, azureStackUtil.emailAsFolder(stack.getOwner()));
-        AzureClient azureClient = azureStackUtil.createAzureClient(azureCredential, filePath);
+        AzureClient azureClient = AzureStackUtil.createAzureClient(azureCredential);
         List<Resource> resources = new ArrayList<>();
         for (Resource resource : resourceList) {
             if (ResourceType.AZURE_VIRTUAL_MACHINE.equals(resource.getResourceType())) {

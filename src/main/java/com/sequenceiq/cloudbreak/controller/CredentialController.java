@@ -33,7 +33,6 @@ import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
-import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 
 @Controller
@@ -41,9 +40,6 @@ public class CredentialController {
 
     @Autowired
     private CredentialService credentialService;
-
-    @Autowired
-    private AzureCertificateService azureCertificateService;
 
     @Autowired
     private AwsCredentialConverter awsCredentialConverter;
@@ -100,9 +96,10 @@ public class CredentialController {
     @RequestMapping(value = "credentials/certificate/{credentialId}", method = RequestMethod.GET)
     @ResponseBody
     public ModelAndView getJksFile(@ModelAttribute("user") CbUser user, @PathVariable Long credentialId, HttpServletResponse response) throws Exception {
-        File cerFile = azureCertificateService.getCertificateFile(credentialId, user);
+        AzureCredential credential = (AzureCredential) credentialService.get(credentialId);
+        File cerFile = azureStackUtil.buildAzureCerFile(credential);
         response.setContentType("application/octet-stream");
-        response.setHeader("Content-Disposition", "attachment;filename=" + azureStackUtil.emailAsFolder(user) + ".cer");
+        response.setHeader("Content-Disposition", "attachment;filename=" + user.getUsername() + ".cer");
         FileCopyUtils.copy(Files.readAllBytes(cerFile.toPath()), response.getOutputStream());
         return null;
     }
@@ -110,7 +107,8 @@ public class CredentialController {
     @RequestMapping(value = "credentials/{credentialId}/sshkey", method = RequestMethod.GET)
     @ResponseBody
     public ModelAndView getSshFile(@ModelAttribute("user") CbUser user, @PathVariable Long credentialId, HttpServletResponse response) throws Exception {
-        File cerFile = azureCertificateService.getSshPublicKeyFile(user, credentialId);
+        AzureCredential credential = (AzureCredential) credentialService.get(credentialId);
+        File cerFile = azureStackUtil.buildAzureSshCerFile(credential);
         response.setContentType("application/octet-stream");
         response.setHeader("Content-Disposition", "attachment;filename=public_key.pem");
         FileCopyUtils.copy(Files.readAllBytes(cerFile.toPath()), response.getOutputStream());

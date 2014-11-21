@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.azure;
 
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.CREDENTIAL;
-import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.EMAILASFOLDER;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.NOT_FOUND;
 
 import java.io.IOException;
@@ -28,8 +27,8 @@ import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
-import com.sequenceiq.cloudbreak.service.credential.azure.AzureCertificateService;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
 import com.sequenceiq.cloudbreak.websocket.WebsocketService;
@@ -71,14 +70,14 @@ public class AzureProvisionSetup implements ProvisionSetup {
     @Autowired
     private RetryingStackUpdater retryingStackUpdater;
 
+    @Autowired
+    private CredentialRepository credentialRepository;
+
     @Override
     public void setupProvisioning(Stack stack) {
         MDCBuilder.buildMdcContext(stack);
         Credential credential = stack.getCredential();
-        String emailAsFolder = azureStackUtil.emailAsFolder(stack.getOwner());
-
-        String filePath = AzureCertificateService.getUserJksFileName(credential, emailAsFolder);
-        AzureClient azureClient = azureStackUtil.createAzureClient(credential, filePath);
+        AzureClient azureClient = AzureStackUtil.createAzureClient((AzureCredential) credential);
         if (!azureClient.isImageAvailable(azureStackUtil.getOsImageName(credential))) {
             String affinityGroupName = ((AzureCredential) credential).getCommonName();
             createAffinityGroup(stack, azureClient, affinityGroupName);
@@ -137,7 +136,6 @@ public class AzureProvisionSetup implements ProvisionSetup {
         reactor.notify(ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT,
                 Event.wrap(new ProvisionSetupComplete(getCloudPlatform(), stack.getId())
                                 .withSetupProperty(CREDENTIAL, stack.getCredential())
-                                .withSetupProperty(EMAILASFOLDER, emailAsFolder)
                 )
         );
     }
@@ -146,11 +144,9 @@ public class AzureProvisionSetup implements ProvisionSetup {
     public Optional<String> preProvisionCheck(Stack stack) {
         MDCBuilder.buildMdcContext(stack);
         Credential credential = stack.getCredential();
-        String emailAsFolder = azureStackUtil.emailAsFolder(stack.getOwner());
-
-        String filePath = AzureCertificateService.getUserJksFileName(credential, emailAsFolder);
-        AzureClient azureClient = azureStackUtil.createAzureClient(credential, filePath);
+        azureStackUtil.migrateFilesIfNeeded((AzureCredential) credential);
         try {
+            AzureClient azureClient = AzureStackUtil.createAzureClient((AzureCredential) credential);
             Object osImages = azureClient.getOsImages();
         } catch (Exception ex) {
             if ("Forbidden".equals(ex.getMessage())) {
@@ -216,7 +212,6 @@ public class AzureProvisionSetup implements ProvisionSetup {
     public Map<String, Object> getSetupProperties(Stack stack) {
         Map<String, Object> properties = new HashMap<>();
         properties.put(CREDENTIAL, stack.getCredential());
-        properties.put(EMAILASFOLDER, azureStackUtil.emailAsFolder(stack.getOwner()));
         return properties;
     }
 

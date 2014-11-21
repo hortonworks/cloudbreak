@@ -1,18 +1,9 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.azure;
 
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.times;
-import static org.mockito.BDDMockito.verify;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doThrow;
-
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.Before;
-import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -66,17 +57,6 @@ public class AzureMetadataSetupTest {
         resources.add(new Resource(ResourceType.AZURE_CLOUD_SERVICE, DUMMY_VM_NAME, stack));
         resources.add(new Resource(ResourceType.AZURE_VIRTUAL_MACHINE, DUMMY_VM_NAME, stack));
         return resources;
-    }
-
-    @Test
-    public void testSetupMetadataWhenIOExceptionOccurs() throws IOException {
-        // GIVEN
-        given(azureStackUtil.createAzureClient(any(Credential.class), anyString())).willReturn(azureClient);
-        doThrow(new IOException()).when(underTest).getPrivateIP(anyString());
-        // WHEN
-        underTest.setupMetadata(stack);
-        // THEN
-        verify(underTest, times(0)).getVirtualIP(anyString());
     }
 
 }

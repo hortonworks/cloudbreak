@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 
 @Entity
@@ -7,7 +8,12 @@ public class AzureCredential extends Credential implements ProvisionEntity {
 
     private static final int END_INDEX = 24;
     private String subscriptionId;
-
+    @Column(columnDefinition = "TEXT")
+    private String cerFile;
+    @Column(columnDefinition = "TEXT")
+    private String jksFile;
+    @Column(columnDefinition = "TEXT")
+    private String sshCerFile;
     private String jks;
 
     private String postFix;
@@ -39,6 +45,30 @@ public class AzureCredential extends Credential implements ProvisionEntity {
 
     public String getPostFix() {
         return postFix;
+    }
+
+    public String getCerFile() {
+        return cerFile;
+    }
+
+    public void setCerFile(String cerFile) {
+        this.cerFile = cerFile;
+    }
+
+    public String getJksFile() {
+        return jksFile;
+    }
+
+    public void setJksFile(String jksFile) {
+        this.jksFile = jksFile;
+    }
+
+    public String getSshCerFile() {
+        return sshCerFile;
+    }
+
+    public void setSshCerFile(String sshCerFile) {
+        this.sshCerFile = sshCerFile;
     }
 
     public void setPostFix(String postFix) {
