@@ -12,8 +12,10 @@ public class CloudbreakEventsJson implements JsonEntity {
     private String cloud;
     private String region;
     private String vmType;
-    private String blueprintName;
     private long blueprintId;
+    private String blueprintName;
+    private Long stackId;
+    private String stackName;
     private Status stackStatus;
     private Integer nodeCount;
 
@@ -111,5 +113,21 @@ public class CloudbreakEventsJson implements JsonEntity {
 
     public void setStackStatus(Status stackStatus) {
         this.stackStatus = stackStatus;
+    }
+
+    public Long getStackId() {
+        return stackId;
+    }
+
+    public void setStackId(Long stackId) {
+        this.stackId = stackId;
+    }
+
+    public String getStackName() {
+        return stackName;
+    }
+
+    public void setStackName(String stackName) {
+        this.stackName = stackName;
     }
 }
