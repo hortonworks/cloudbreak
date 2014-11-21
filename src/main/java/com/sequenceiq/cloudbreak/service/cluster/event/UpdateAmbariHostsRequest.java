@@ -1,42 +1,38 @@
 package com.sequenceiq.cloudbreak.service.cluster.event;
 
-import java.util.Set;
+import java.util.List;
 
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.domain.HostMetadata;
 
 public class UpdateAmbariHostsRequest {
 
     private Long stackId;
-    private Set<HostGroupAdjustmentJson> hosts;
-    private boolean decommision;
+    private HostGroupAdjustmentJson hostGroupAdjustment;
+    private List<HostMetadata> decommissionCandidates;
+    private boolean decommission;
 
-    public UpdateAmbariHostsRequest(Long stackId, Set<HostGroupAdjustmentJson> hosts, boolean decommision) {
+    public UpdateAmbariHostsRequest(Long stackId, HostGroupAdjustmentJson adjustmentJson,
+            List<HostMetadata> decommissionCandidates, boolean decommission) {
         this.stackId = stackId;
-        this.hosts = hosts;
-        this.decommision = decommision;
+        this.decommissionCandidates = decommissionCandidates;
+        this.hostGroupAdjustment = adjustmentJson;
+        this.decommission = decommission;
     }
 
     public Long getStackId() {
         return stackId;
     }
 
-    public void setStackId(Long stackId) {
-        this.stackId = stackId;
+    public HostGroupAdjustmentJson getHostGroupAdjustment() {
+        return hostGroupAdjustment;
     }
 
-    public Set<HostGroupAdjustmentJson> getHosts() {
-        return hosts;
+    public boolean isDecommission() {
+        return decommission;
     }
 
-    public void setHosts(Set<HostGroupAdjustmentJson> hosts) {
-        this.hosts = hosts;
-    }
-
-    public boolean isDecommision() {
-        return decommision;
-    }
-
-    public void setDecommision(boolean decommision) {
-        this.decommision = decommision;
+    public List<HostMetadata> getDecommissionCandidates() {
+        return decommissionCandidates;
     }
 }

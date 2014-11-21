@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
+import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -32,10 +33,11 @@ public class UpdateAmbariHostsRequestHandler implements Consumer<Event<UpdateAmb
         Stack stack = stackRepository.findById(request.getStackId());
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Accepted {} event.", ReactorConfig.UPDATE_AMBARI_HOSTS_REQUEST_EVENT);
-        if (request.isDecommision()) {
-            ambariClusterConnector.decommissionAmbariNodes(request.getStackId(), request.getHosts());
+        HostGroupAdjustmentJson adjustment = request.getHostGroupAdjustment();
+        if (request.isDecommission()) {
+            ambariClusterConnector.decommissionAmbariNodes(request.getStackId(), adjustment.getScalingAdjustment(), request.getDecommissionCandidates());
         } else {
-            ambariClusterConnector.installAmbariNode(request.getStackId(), request.getHosts());
+            ambariClusterConnector.installAmbariNode(request.getStackId(), adjustment);
         }
     }
 }
