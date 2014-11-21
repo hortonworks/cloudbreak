@@ -13,7 +13,6 @@ import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.service.ServiceTestUtils;
-import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 
 public class SimpleCredentialServiceTest {
 
@@ -31,9 +30,6 @@ public class SimpleCredentialServiceTest {
 
     @Mock
     private CredentialJson credentialJson;
-
-    @Mock
-    private WebsocketService websocketService;
 
     private AwsCredential awsCredential;
 

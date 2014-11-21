@@ -8,14 +8,12 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterCreationFailure;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterInstallerMailSenderService;
-import com.sequenceiq.cloudbreak.websocket.WebsocketService;
-import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
+import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 
 import reactor.event.Event;
 import reactor.function.Consumer;
@@ -26,9 +24,6 @@ public class ClusterCreationFailureHandler implements Consumer<Event<ClusterCrea
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterCreationFailureHandler.class);
 
     @Autowired
-    private WebsocketService websocketService;
-
-    @Autowired
     private ClusterRepository clusterRepository;
 
     @Autowired
@@ -36,6 +31,9 @@ public class ClusterCreationFailureHandler implements Consumer<Event<ClusterCrea
 
     @Autowired
     private AmbariClusterInstallerMailSenderService ambariClusterInstallerMailSenderService;
+
+    @Autowired
+    private CloudbreakEventService eventService;
 
     @Override
     public void accept(Event<ClusterCreationFailure> event) {
@@ -50,12 +48,11 @@ public class ClusterCreationFailureHandler implements Consumer<Event<ClusterCrea
         cluster.setStatusReason(detailedMessage);
         clusterRepository.save(cluster);
         Long stackId = clusterCreationFailure.getStackId();
-        stackUpdater.updateStackStatus(stackId, Status.AVAILABLE, "Stack update finished - Cluster create failed.");
+        stackUpdater.updateStackStatus(stackId, Status.AVAILABLE, "Cluster installation failed. Error: " + detailedMessage);
+        eventService.fireCloudbreakEvent(stackId, "CLUSTER_CREATION_FAILED", detailedMessage);
         if (cluster.getEmailNeeded()) {
             ambariClusterInstallerMailSenderService.sendFailEmail(cluster.getOwner());
         }
-        websocketService.sendToTopicUser(cluster.getOwner(), WebsocketEndPoint.CLUSTER,
-                new StatusMessage(clusterId, cluster.getName(), Status.CREATE_FAILED.name(), detailedMessage));
     }
 
 }

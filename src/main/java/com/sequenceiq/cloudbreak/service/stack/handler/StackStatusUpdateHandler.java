@@ -106,11 +106,11 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
             }
             if (stopped) {
                 LOGGER.info("Update stack state to: {}", Status.STOPPED);
-                stackUpdater.updateStackStatus(stackId, Status.STOPPED);
+                stackUpdater.updateStackStatus(stackId, Status.STOPPED, "Cluster infrastructure stopped successfully.");
                 cloudbreakEventService.fireCloudbreakEvent(stackId, BillingStatus.BILLING_STOPPED.name(), "Stack stopped.");
             } else {
                 LOGGER.info("Update stack state to: {}", Status.STOP_FAILED);
-                stackUpdater.updateStackStatus(stackId, Status.STOP_FAILED);
+                stackUpdater.updateStackStatus(stackId, Status.STOP_FAILED, "Unfortunately the cluster infrastructure could not stop.");
             }
         } else {
             boolean started;
@@ -121,11 +121,12 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
                 started = startStopResources(cloudPlatform, stack, true);
             }
             if (started) {
-                cloudbreakEventService.fireCloudbreakEvent(stackId, BillingStatus.BILLING_STARTED.name(), "Stack started.");
+                cloudbreakEventService.fireCloudbreakEvent(stackId, BillingStatus.BILLING_STARTED.name(), "Cluster infrastructure was created on the cloud.");
                 waitForAmbariToStart(stack);
                 Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
                 LOGGER.info("Update stack state to: {}", Status.AVAILABLE);
-                stackUpdater.updateStackStatus(stackId, Status.AVAILABLE);
+                String statusReason = "Cluster infrastructure and ambari are available on the cloud. AMBARI_IP:" + stack.getAmbariIp();
+                stackUpdater.updateStackStatus(stackId, Status.AVAILABLE, statusReason);
                 if (cluster != null && Status.START_REQUESTED.equals(cluster.getStatus())) {
                     boolean hostsJoined = waitForHostsToJoin(stack);
                     if (hostsJoined) {
@@ -139,7 +140,7 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
                 }
             } else {
                 LOGGER.info("Update stack state to: {}", Status.START_FAILED);
-                stackUpdater.updateStackStatus(stackId, Status.START_FAILED);
+                stackUpdater.updateStackStatus(stackId, Status.START_FAILED, "Unfortunately the cluster infrastructure could not start.");
             }
         }
     }

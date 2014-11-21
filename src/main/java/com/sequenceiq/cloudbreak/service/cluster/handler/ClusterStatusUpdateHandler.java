@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster.handler;
 
+import java.util.Date;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +64,7 @@ public class ClusterStatusUpdateHandler implements Consumer<Event<ClusterStatusU
             boolean started = ambariClusterConnector.startCluster(stack);
             if (started) {
                 LOGGER.info("Successfully started Hadoop services, setting cluster state to: {}", Status.AVAILABLE);
+                cluster.setUpSince(new Date().getTime());
                 cluster.setStatus(Status.AVAILABLE);
             } else {
                 LOGGER.info("Failed to start Hadoop services, setting cluster state to: {}", Status.STOPPED);

@@ -9,14 +9,11 @@ import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.BillingStatus;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteComplete;
-import com.sequenceiq.cloudbreak.websocket.WebsocketService;
-import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
 import reactor.event.Event;
 import reactor.function.Consumer;
@@ -33,22 +30,19 @@ public class StackDeleteCompleteHandler implements Consumer<Event<StackDeleteCom
     private RetryingStackUpdater retryingStackUpdater;
 
     @Autowired
-    private WebsocketService websocketService;
-
-    @Autowired
     private CloudbreakEventService cloudbreakEventService;
 
     @Override
     public void accept(Event<StackDeleteComplete> stackDeleteComplete) {
+        String msg = "Cluster and its infrastructure were successfully deleted.";
         StackDeleteComplete data = stackDeleteComplete.getData();
-        retryingStackUpdater.updateStackStatus(data.getStackId(), Status.DELETE_COMPLETED);
-        cloudbreakEventService.fireCloudbreakEvent(data.getStackId(), BillingStatus.BILLING_STOPPED.name(), "Stack delete completed");
+        retryingStackUpdater.updateStackStatus(data.getStackId(), Status.DELETE_COMPLETED, msg);
+        String statusReason = "Billing stopped because the deletion of cluster and its infrastructure.";
+        cloudbreakEventService.fireCloudbreakEvent(data.getStackId(), BillingStatus.BILLING_STOPPED.name(), statusReason);
         Stack oneWithLists = stackRepository.findOneWithLists(data.getStackId());
         MDCBuilder.buildMdcContext(oneWithLists);
         LOGGER.info("Accepted {} event.", ReactorConfig.DELETE_COMPLETE_EVENT);
         stackRepository.delete(oneWithLists);
-        websocketService.sendToTopicUser(oneWithLists.getOwner(), WebsocketEndPoint.TERMINATE,
-                new StatusMessage(oneWithLists.getId(), oneWithLists.getName(), Status.DELETE_COMPLETED.name(), String.format("Stack delete completed")));
-        retryingStackUpdater.updateStackStatusReason(oneWithLists.getId(), String.format("Stack delete completed"));
+        retryingStackUpdater.updateStackStatusReason(oneWithLists.getId(), String.format(msg));
     }
 }
