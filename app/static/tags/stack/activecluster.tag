@@ -70,7 +70,7 @@
                                 <h5><a data-toggle="collapse" data-target="#cluster-history-collapse01"><i class="fa fa-clock-o fa-fw"></i>Event history</a></h5>
                             </div>
 
-                            <div id="cluster-history-collapse01" class="panel-collapse collapse in" style="height: auto;">
+                            <div id="cluster-history-collapse01" class="panel-collapse collapse" style="height: auto;">
 
                                 <div class="panel-body">
 
