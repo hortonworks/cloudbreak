@@ -6,6 +6,7 @@ import java.util.Set;
 
 import javax.validation.Valid;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -75,17 +76,26 @@ public class BlueprintController {
         return new ResponseEntity<>(blueprintConverter.convertAllEntityToJson(blueprints), HttpStatus.OK);
     }
 
-    @RequestMapping(value = "blueprints/{id}", method = RequestMethod.GET)
+    @RequestMapping(value = "blueprints/{parameter}", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<BlueprintJson> getBlueprint(@ModelAttribute("user") CbUser user, @PathVariable Long id) {
-        Blueprint blueprint = blueprintService.get(id);
+    public ResponseEntity<BlueprintJson> getBlueprint(@ModelAttribute("user") CbUser user, @PathVariable String parameter) {
+        Blueprint blueprint = null;
+        if (StringUtils.isNumeric(parameter)) {
+            blueprint = blueprintService.get(Long.parseLong(parameter));
+        } else {
+            blueprint = blueprintService.get(parameter, user);
+        }
         return new ResponseEntity<>(blueprintConverter.convert(blueprint), HttpStatus.OK);
     }
 
-    @RequestMapping(value = "blueprints/{id}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "blueprints/{parameter}", method = RequestMethod.DELETE)
     @ResponseBody
-    public ResponseEntity<BlueprintJson> deleteBlueprint(@ModelAttribute("user") CbUser user, @PathVariable Long id) {
-        blueprintService.delete(id);
+    public ResponseEntity<BlueprintJson> deleteBlueprint(@ModelAttribute("user") CbUser user, @PathVariable String parameter) {
+        if (StringUtils.isNumeric(parameter)) {
+            blueprintService.delete(Long.parseLong(parameter));
+        } else {
+            blueprintService.delete(parameter, user);
+        }
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 

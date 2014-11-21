@@ -71,8 +71,13 @@ public class AmbariClusterService implements ClusterService {
     private AmbariClientService clientService;
 
     @Override
-    public void create(CbUser user, Long stackId, Cluster cluster) {
-        Stack stack = stackRepository.findOne(stackId);
+    public void create(CbUser user, String name, Cluster cluster) {
+        Stack stack = stackRepository.findByNameInAccount(name, user.getAccount());
+        create(stack, cluster, user);
+
+    }
+
+    private void create(Stack stack, Cluster cluster, CbUser user) {
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Cluster requested [BlueprintId: {}]", cluster.getBlueprint().getId());
         if (stack.getCluster() != null) {
@@ -92,14 +97,30 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
+    public void create(CbUser user, Long stackId, Cluster cluster) {
+        Stack stack = stackRepository.findOne(stackId);
+        create(stack, cluster, user);
+    }
+
+    @Override
     public Cluster retrieveCluster(Long stackId) {
         Stack stack = stackRepository.findOne(stackId);
         return stack.getCluster();
     }
 
     @Override
+    public Cluster retrieveCluster(String stackName, CbUser user) {
+        Stack stack = stackRepository.findByNameInAccount(stackName, user.getAccount());
+        return stack.getCluster();
+    }
+
+    @Override
     public String getClusterJson(String ambariIp, Long stackId) {
         Stack stack = stackRepository.findOne(stackId);
+        return getClusterJson(stack, ambariIp);
+    }
+
+    private String getClusterJson(Stack stack, String ambariIp) {
         MDCBuilder.buildMdcContext(stack);
         AmbariClient ambariClient = clientService.create(stack);
         try {
@@ -115,6 +136,12 @@ public class AmbariClusterService implements ClusterService {
                 throw new InternalServerException("Something went wrong", e);
             }
         }
+    }
+
+    @Override
+    public String getClusterJson(String ambariIp, String stackName, CbUser user) {
+        Stack stack = stackRepository.findByNameInAccount(stackName, user.getAccount());
+        return getClusterJson(stack, ambariIp);
     }
 
     @Override

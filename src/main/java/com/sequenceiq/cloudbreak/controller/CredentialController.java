@@ -9,6 +9,7 @@ import java.util.UnknownFormatConversionException;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -83,17 +84,26 @@ public class CredentialController {
         return new ResponseEntity<>(convertCredentials(credentials), HttpStatus.OK);
     }
 
-    @RequestMapping(value = "credentials/{credentialId}", method = RequestMethod.GET)
+    @RequestMapping(value = "credentials/{parameter}", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<CredentialJson> getCredential(@ModelAttribute("user") CbUser user, @PathVariable Long credentialId) {
-        Credential credential = credentialService.get(credentialId);
+    public ResponseEntity<CredentialJson> getCredential(@ModelAttribute("user") CbUser user, @PathVariable String parameter) {
+        Credential credential = null;
+        if (StringUtils.isNumeric(parameter)) {
+            credential = credentialService.get(Long.parseLong(parameter));
+        } else {
+            credential = credentialService.get(parameter, user);
+        }
         return new ResponseEntity<>(convert(credential), HttpStatus.OK);
     }
 
-    @RequestMapping(value = "credentials/{credentialId}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "credentials/{parameter}", method = RequestMethod.DELETE)
     @ResponseBody
-    public ResponseEntity<CredentialJson> deleteCredential(@ModelAttribute("user") CbUser user, @PathVariable Long credentialId) {
-        credentialService.delete(credentialId);
+    public ResponseEntity<CredentialJson> deleteCredential(@ModelAttribute("user") CbUser user, @PathVariable String parameter) {
+        if (StringUtils.isNumeric(parameter)) {
+            credentialService.delete(Long.parseLong(parameter));
+        } else {
+            credentialService.delete(parameter, user);
+        }
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

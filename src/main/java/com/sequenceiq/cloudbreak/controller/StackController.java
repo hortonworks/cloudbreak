@@ -1,10 +1,12 @@
 package com.sequenceiq.cloudbreak.controller;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 import javax.validation.Valid;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -69,36 +71,62 @@ public class StackController {
         return new ResponseEntity<>(stackConverter.convertAllEntityToJson(stacks), HttpStatus.OK);
     }
 
-    @RequestMapping(value = "stacks/{id}", method = RequestMethod.GET)
+    @RequestMapping(value = "stacks/{parameter}", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<StackJson> getStack(@PathVariable Long id) {
-        Stack stack = stackService.get(id);
-        StackDescription stackDescription = stackService.getStackDescription(stack);
-        StackJson stackJson = stackConverter.convert(stack, stackDescription);
+    public ResponseEntity<StackJson> getStack(@ModelAttribute("user") CbUser user, @PathVariable String parameter) {
+        StackJson stackJson = null;
+        if (StringUtils.isNumeric(parameter)) {
+            Stack stack = stackService.get(Long.parseLong(parameter));
+            StackDescription stackDescription = stackService.getStackDescription(stack);
+            stackJson = stackConverter.convert(stack, stackDescription);
+        } else {
+            Stack stack = stackService.get(parameter, user);
+            StackDescription stackDescription = stackService.getStackDescription(stack);
+            stackJson = stackConverter.convert(stack, stackDescription);
+        }
         return new ResponseEntity<>(stackJson, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "stacks/{id}/status", method = RequestMethod.GET)
+    @RequestMapping(value = "stacks/{parameter}/status", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> getStackStatus(@PathVariable Long id) {
-        return new ResponseEntity<>(stackConverter.convertStackStatus(stackService.get(id)), HttpStatus.OK);
+    public ResponseEntity<Map<String, Object>> getStackStatus(@ModelAttribute("user") CbUser user, @PathVariable String parameter) {
+        Map<String, Object> stringObjectMap = new HashMap<>();
+        if (StringUtils.isNumeric(parameter)) {
+            stringObjectMap = stackConverter.convertStackStatus(stackService.get(Long.parseLong(parameter)));
+        } else {
+            stringObjectMap = stackConverter.convertStackStatus(stackService.get(parameter, user));
+        }
+        return new ResponseEntity<>(stringObjectMap, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "stacks/{id}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "stacks/{parameter}", method = RequestMethod.DELETE)
     @ResponseBody
-    public ResponseEntity<TemplateJson> deleteStack(@PathVariable Long id) {
-        stackService.delete(id);
+    public ResponseEntity<TemplateJson> deleteStack(@ModelAttribute("user") CbUser user, @PathVariable String parameter) {
+        if (StringUtils.isNumeric(parameter)) {
+            stackService.delete(Long.parseLong(parameter));
+        } else {
+            stackService.delete(parameter, user);
+        }
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @RequestMapping(value = "stacks/{id}", method = RequestMethod.PUT)
+    @RequestMapping(value = "stacks/{parameter}", method = RequestMethod.PUT)
     @ResponseBody
-    public ResponseEntity<String> updateStack(@PathVariable Long id, @Valid @RequestBody UpdateStackJson updateRequest) {
+    public ResponseEntity<String> updateStack(@ModelAttribute("user") CbUser user, @PathVariable String parameter,
+            @Valid @RequestBody UpdateStackJson updateRequest) {
         if (updateRequest.getStatus() != null) {
-            stackService.updateStatus(id, updateRequest.getStatus());
+            if (StringUtils.isNumeric(parameter)) {
+                stackService.updateStatus(Long.parseLong(parameter), updateRequest.getStatus());
+            } else {
+                stackService.updateStatus(parameter, updateRequest.getStatus(), user);
+            }
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
-            stackService.updateNodeCount(id, updateRequest.getScalingAdjustment());
+            if (StringUtils.isNumeric(parameter)) {
+                stackService.updateNodeCount(Long.parseLong(parameter), updateRequest.getScalingAdjustment());
+            } else {
+                stackService.updateNodeCount(parameter, updateRequest.getScalingAdjustment(), user);
+            }
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
     }
@@ -117,7 +145,7 @@ public class StackController {
     @RequestMapping(value = "stacks/ambari", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<StackJson> getStackForAmbari(@RequestBody AmbariAddressJson json) {
-        Stack stack = stackService.get(json.getAmbariAddress());
+        Stack stack = stackService.getByAmbariAdress(json.getAmbariAddress());
         return new ResponseEntity<>(stackConverter.convert(stack), HttpStatus.OK);
     }
 

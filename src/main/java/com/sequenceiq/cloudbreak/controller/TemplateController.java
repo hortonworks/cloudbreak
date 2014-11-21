@@ -6,6 +6,7 @@ import java.util.UnknownFormatConversionException;
 
 import javax.validation.Valid;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,8 +25,8 @@ import com.sequenceiq.cloudbreak.converter.AzureTemplateConverter;
 import com.sequenceiq.cloudbreak.converter.GccTemplateConverter;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
-import com.sequenceiq.cloudbreak.domain.GccTemplate;
 import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.domain.GccTemplate;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
 
@@ -70,18 +71,27 @@ public class TemplateController {
         return new ResponseEntity<>(convert(templates), HttpStatus.OK);
     }
 
-    @RequestMapping(value = "templates/{id}", method = RequestMethod.GET)
+    @RequestMapping(value = "templates/{parameter}", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<TemplateJson> getTemplate(@ModelAttribute("user") CbUser user, @PathVariable Long id) {
-        Template template = templateService.get(id);
+    public ResponseEntity<TemplateJson> getTemplate(@ModelAttribute("user") CbUser user, @PathVariable String parameter) {
+        Template template = null;
+        if (StringUtils.isNumeric(parameter)) {
+            template = templateService.get(Long.parseLong(parameter));
+        } else {
+            template = templateService.get(parameter, user);
+        }
         TemplateJson templateJson = convert(template);
         return new ResponseEntity<>(templateJson, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "templates/{id}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "templates/{parameter}", method = RequestMethod.DELETE)
     @ResponseBody
-    public ResponseEntity<TemplateJson> deleteTemplate(@ModelAttribute("user") CbUser user, @PathVariable Long id) {
-        templateService.delete(id);
+    public ResponseEntity<TemplateJson> deleteTemplate(@ModelAttribute("user") CbUser user, @PathVariable String parameter) {
+        if (StringUtils.isNumeric(parameter)) {
+            templateService.delete(Long.parseLong(parameter));
+        } else {
+            templateService.delete(parameter, user);
+        }
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

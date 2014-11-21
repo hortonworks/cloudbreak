@@ -11,10 +11,13 @@ public interface BlueprintService {
 
     Set<Blueprint> retrieveAccountBlueprints(CbUser user);
 
+    Blueprint get(String name, CbUser user);
+
     Blueprint get(Long id);
 
     Blueprint create(CbUser user, Blueprint blueprintRequest);
 
     void delete(Long id);
 
+    void delete(String name, CbUser user);
 }

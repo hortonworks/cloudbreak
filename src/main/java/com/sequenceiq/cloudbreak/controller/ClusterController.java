@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.controller;
 
 import javax.validation.Valid;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,32 +45,45 @@ public class ClusterController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @RequestMapping(value = "/stacks/{stackId}/cluster", method = RequestMethod.GET)
+    @RequestMapping(value = "/stacks/{parameter}/cluster", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<ClusterResponse> retrieveCluster(@PathVariable Long stackId) {
-        Stack stack = stackService.get(stackId);
-        Cluster cluster = clusterService.retrieveCluster(stackId);
-        String clusterJson = clusterService.getClusterJson(stack.getAmbariIp(), stackId);
-        ClusterResponse response = clusterConverter.convert(cluster, clusterJson);
+    public ResponseEntity<ClusterResponse> retrieveCluster(@ModelAttribute("user") CbUser user, @PathVariable String parameter) {
+        ClusterResponse response = null;
+        if (StringUtils.isNumeric(parameter)) {
+            Stack stack = stackService.get(Long.parseLong(parameter));
+            Cluster cluster = clusterService.retrieveCluster(Long.parseLong(parameter));
+            String clusterJson = clusterService.getClusterJson(stack.getAmbariIp(), Long.parseLong(parameter));
+            response = clusterConverter.convert(cluster, clusterJson);
+        } else {
+            Stack stack = stackService.get(parameter, user);
+            Cluster cluster = clusterService.retrieveCluster(parameter, user);
+            String clusterJson = clusterService.getClusterJson(stack.getAmbariIp(), parameter, user);
+            response = clusterConverter.convert(cluster, clusterJson);
+        }
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/stacks/{stackId}/cluster", method = RequestMethod.PUT)
+    @RequestMapping(value = "/stacks/{parameter}/cluster", method = RequestMethod.PUT)
     @ResponseBody
-    public ResponseEntity<String> updateCluster(@PathVariable Long stackId, @RequestBody UpdateClusterJson updateJson) {
-        Stack stack = stackService.get(stackId);
+    public ResponseEntity<String> updateCluster(@ModelAttribute("user") CbUser user, @PathVariable String parameter, @RequestBody UpdateClusterJson updateJson) {
+        Stack stack = null;
+        if (StringUtils.isNumeric(parameter)) {
+            stack = stackService.get(Long.parseLong(parameter));
+        } else {
+            stack = stackService.get(parameter, user);
+        }
         Status stackStatus = stack.getStatus();
 
         if (updateJson.getStatus() != null) {
-            clusterService.updateStatus(stackId, updateJson.getStatus());
+            clusterService.updateStatus(stack.getId(), updateJson.getStatus());
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         if (!stackStatus.equals(Status.AVAILABLE)) {
             throw new BadRequestException(String.format(
-                    "Stack '%s' is currently in '%s' state. PUT requests to a cluster can only be made if the underlying stack is 'AVAILABLE'.", stackId,
+                    "Stack '%s' is currently in '%s' state. PUT requests to a cluster can only be made if the underlying stack is 'AVAILABLE'.", parameter,
                     stackStatus));
         }
-        clusterService.updateHosts(stackId, updateJson.getHostGroupAdjustments());
+        clusterService.updateHosts(stack.getId(), updateJson.getHostGroupAdjustments());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

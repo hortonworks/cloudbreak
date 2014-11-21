@@ -60,6 +60,15 @@ public class DefaultBlueprintService implements BlueprintService {
     }
 
     @Override
+    public Blueprint get(String name, CbUser user) {
+        Blueprint blueprint = blueprintRepository.findByNameInAccount(name, user.getAccount());
+        if (blueprint == null) {
+            throw new NotFoundException(String.format("Blueprint '%s' not found.", name));
+        }
+        return blueprint;
+    }
+
+    @Override
     public Blueprint create(CbUser user, Blueprint blueprint) {
         MDCBuilder.buildMdcContext(blueprint);
         LOGGER.debug("Creating blueprint: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
@@ -91,6 +100,25 @@ public class DefaultBlueprintService implements BlueprintService {
         } else {
             throw new BadRequestException(String.format(
                     "There are stacks associated with blueprint '%s'. Please remove these before the deleting the blueprint.", id));
+        }
+    }
+
+    @Override
+    public void delete(String name, CbUser user) {
+        Blueprint blueprint = blueprintRepository.findByNameInAccount(name, user.getAccount());
+        if (blueprint == null) {
+            throw new NotFoundException(String.format("Blueprint '%s' not found.", name));
+        }
+        MDCBuilder.buildMdcContext(blueprint);
+
+        if (clusterRepository.findAllClusterByBlueprint(blueprint.getId()).isEmpty()) {
+
+            blueprintRepository.delete(blueprint);
+            websocketService.sendToTopicUser(blueprint.getOwner(), WebsocketEndPoint.BLUEPRINT,
+                    new StatusMessage(blueprint.getId(), blueprint.getName(), Status.DELETE_COMPLETED.name()));
+        } else {
+            throw new BadRequestException(String.format(
+                    "There are stacks associated with blueprint '%s'. Please remove these before the deleting the blueprint.", name));
         }
     }
 }

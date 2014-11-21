@@ -59,6 +59,17 @@ public class SimpleTemplateService implements TemplateService {
     }
 
     @Override
+    public Template get(String name, CbUser user) {
+        Template template = templateRepository.findByNameInAccount(name, user.getAccount());
+        MDCBuilder.buildMdcContext(template);
+        if (template == null) {
+            throw new NotFoundException(String.format(TEMPLATE_NOT_FOUND_MSG, name));
+        } else {
+            return template;
+        }
+    }
+
+    @Override
     public Template create(CbUser user, Template template) {
         MDCBuilder.buildMdcContext(template);
         LOGGER.debug("Creating template: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
@@ -87,6 +98,24 @@ public class SimpleTemplateService implements TemplateService {
         } else {
             throw new BadRequestException(String.format(
                     "There are stacks associated with template '%s'. Please remove these before deleting the template.", templateId));
+        }
+    }
+
+    @Override
+    public void delete(String templateName, CbUser cbUser) {
+        Template template = templateRepository.findByNameInAccount(templateName, cbUser.getAccount());
+        if (template == null) {
+            MDCBuilder.buildMdcContext();
+            throw new NotFoundException(String.format(TEMPLATE_NOT_FOUND_MSG, templateName));
+        }
+        MDCBuilder.buildMdcContext(template);
+        LOGGER.debug("Deleting template.", templateName);
+        List<Stack> allStackForTemplate = stackRepository.findAllStackForTemplate(template.getId());
+        if (allStackForTemplate.isEmpty()) {
+            templateRepository.delete(template);
+        } else {
+            throw new BadRequestException(String.format(
+                    "There are stacks associated with template '%s'. Please remove these before deleting the template.", templateName));
         }
     }
 

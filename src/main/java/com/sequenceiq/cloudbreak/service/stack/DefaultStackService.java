@@ -98,7 +98,17 @@ public class DefaultStackService implements StackService {
     }
 
     @Override
-    public Stack get(String ambariAddress) {
+    public Stack get(String name, CbUser cbUser) {
+        Stack stack = stackRepository.findByNameInAccount(name, cbUser.getAccount());
+        if (stack == null) {
+            throw new NotFoundException(String.format("Stack '%s' not found", name));
+        }
+        MDCBuilder.buildMdcContext(stack);
+        return stack;
+    }
+
+    @Override
+    public Stack getByAmbariAdress(String ambariAddress) {
         Stack stack = stackRepository.findByAmbari(ambariAddress);
         if (stack == null) {
             throw new NotFoundException(String.format("Stack not found by Ambari address: '%s' not found", ambariAddress));
@@ -142,30 +152,52 @@ public class DefaultStackService implements StackService {
     }
 
     @Override
+    public void delete(String name, CbUser user) {
+        Stack stack = stackRepository.findByNameInAccount(name, user.getAccount());
+        MDCBuilder.buildMdcContext(stack);
+        LOGGER.info("Stack delete requested.");
+        if (stack == null) {
+            throw new NotFoundException(String.format("Stack '%s' not found", name));
+        }
+        delete(stack.getId());
+    }
+
+    @Override
+    public void updateStatus(String name, StatusRequest status, CbUser user) {
+        Stack stack = stackRepository.findByNameInAccount(name, user.getAccount());
+        updateStatus(stack, status);
+    }
+
+    @Override
     public void updateStatus(Long stackId, StatusRequest status) {
         Stack stack = stackRepository.findOne(stackId);
+        updateStatus(stack, status);
+    }
+
+    private void updateStatus(Stack stack,  StatusRequest status) {
         MDCBuilder.buildMdcContext(stack);
         Status stackStatus = stack.getStatus();
         if (status.equals(StatusRequest.STARTED)) {
             if (!Status.STOPPED.equals(stackStatus)) {
-                throw new BadRequestException(String.format("Cannot update the status of stack '%s' to STARTED, because it isn't in STOPPED state.", stackId));
+                throw new BadRequestException(String.format("Cannot update the status of stack '%s' to STARTED, because it isn't in STOPPED state.",
+                        stack.getId()));
             }
-            stackUpdater.updateStackStatus(stackId, Status.START_IN_PROGRESS);
+            stackUpdater.updateStackStatus(stack.getId(), Status.START_IN_PROGRESS);
             LOGGER.info("Publishing {} event", ReactorConfig.STACK_STATUS_UPDATE_EVENT);
             reactor.notify(ReactorConfig.STACK_STATUS_UPDATE_EVENT,
                     Event.wrap(new StackStatusUpdateRequest(stack.getTemplate().cloudPlatform(), stack.getId(), status)));
         } else {
             Status clusterStatus = clusterRepository.findOneWithLists(stack.getCluster().getId()).getStatus();
             if (Status.STOP_IN_PROGRESS.equals(clusterStatus)) {
-                stackUpdater.updateStackStatus(stackId, Status.STOP_REQUESTED);
+                stackUpdater.updateStackStatus(stack.getId(), Status.STOP_REQUESTED);
             } else {
                 if (!Status.AVAILABLE.equals(stackStatus)) {
                     throw new BadRequestException(
-                            String.format("Cannot update the status of stack '%s' to STOPPED, because it isn't in AVAILABLE state.", stackId));
+                            String.format("Cannot update the status of stack '%s' to STOPPED, because it isn't in AVAILABLE state.", stack.getId()));
                 }
                 if (!Status.STOPPED.equals(clusterStatus)) {
                     throw new BadRequestException(
-                            String.format("Cannot update the status of stack '%s' to STOPPED, because the cluster is not in STOPPED state.", stackId));
+                            String.format("Cannot update the status of stack '%s' to STOPPED, because the cluster is not in STOPPED state.", stack.getId()));
                 }
                 LOGGER.info("Publishing {} event.", ReactorConfig.STACK_STATUS_UPDATE_EVENT);
                 reactor.notify(ReactorConfig.STACK_STATUS_UPDATE_EVENT,
@@ -175,19 +207,30 @@ public class DefaultStackService implements StackService {
     }
 
     @Override
+    public void updateNodeCount(String name, Integer scalingAdjustment, CbUser user) {
+        Stack stack = stackRepository.findByNameInAccount(name, user.getAccount());
+        updateNodeCount(stack, scalingAdjustment);
+    }
+
+    @Override
     public void updateNodeCount(Long stackId, Integer scalingAdjustment) {
         Stack stack = stackRepository.findOne(stackId);
+        updateNodeCount(stack, scalingAdjustment);
+    }
+
+    private void updateNodeCount(Stack stack, Integer scalingAdjustment) {
         MDCBuilder.buildMdcContext(stack);
         if (!Status.AVAILABLE.equals(stack.getStatus())) {
-            throw new BadRequestException(String.format("Stack '%s' is currently in '%s' state. Node count can only be updated if it's running.", stackId,
+            throw new BadRequestException(String.format("Stack '%s' is currently in '%s' state. Node count can only be updated if it's running.", stack.getId(),
                     stack.getStatus()));
         }
         if (0 == scalingAdjustment) {
-            throw new BadRequestException(String.format("Requested scaling adjustment on stack '%s' is 0. Nothing to do.", stackId));
+            throw new BadRequestException(String.format("Requested scaling adjustment on stack '%s' is 0. Nothing to do.", stack.getId()));
         }
         if (0 > scalingAdjustment) {
             if (-1 * scalingAdjustment > stack.getNodeCount()) {
-                throw new BadRequestException(String.format("There are %s instances in stack '%s'. Cannot remove %s instances.", stack.getNodeCount(), stackId,
+                throw new BadRequestException(String.format("There are %s instances in stack '%s'. Cannot remove %s instances.", stack.getNodeCount(),
+                        stack.getId(),
                         -1 * scalingAdjustment));
             }
             int removeableHosts = 0;
@@ -199,7 +242,7 @@ public class DefaultStackService implements StackService {
             if (removeableHosts < -1 * scalingAdjustment) {
                 throw new BadRequestException(
                         String.format("There are %s removable hosts on stack '%s' but %s were requested. Decomission nodes from the cluster first!",
-                                removeableHosts, stackId, scalingAdjustment * -1));
+                                removeableHosts, stack.getId(), scalingAdjustment * -1));
             }
         }
         stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS);

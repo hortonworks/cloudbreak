@@ -63,6 +63,16 @@ public class SimpleCredentialService implements CredentialService {
     }
 
     @Override
+    public Credential get(String name, CbUser user) {
+        Credential credential = credentialRepository.findByNameInAccount(name, user.getAccount());
+        if (credential == null) {
+            throw new NotFoundException(String.format("Credential '%s' not found.", name));
+        } else {
+            return credential;
+        }
+    }
+
+    @Override
     public Credential create(CbUser user, Credential credential) {
         MDCBuilder.buildMdcContext(credential);
         LOGGER.debug("Creating credential: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
@@ -86,6 +96,17 @@ public class SimpleCredentialService implements CredentialService {
         Credential credential = credentialRepository.findOne(id);
         if (credential == null) {
             throw new NotFoundException(String.format("Credential '%s' not found.", id));
+        }
+        credentialRepository.delete(credential);
+        websocketService.sendToTopicUser(credential.getOwner(), WebsocketEndPoint.CREDENTIAL,
+                new StatusMessage(credential.getId(), credential.getName(), Status.DELETE_COMPLETED.name()));
+    }
+
+    @Override
+    public void delete(String name, CbUser user) {
+        Credential credential = credentialRepository.findByNameInAccount(name, user.getAccount());
+        if (credential == null) {
+            throw new NotFoundException(String.format("Credential '%s' not found.", name));
         }
         credentialRepository.delete(credential);
         websocketService.sendToTopicUser(credential.getOwner(), WebsocketEndPoint.CREDENTIAL,
