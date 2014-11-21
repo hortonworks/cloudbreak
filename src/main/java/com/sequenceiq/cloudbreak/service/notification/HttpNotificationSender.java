@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.repository.SubscriptionRepository;
 
 @Service
 public class HttpNotificationSender implements NotificationSender {
-    private final static Logger LOGGER = LoggerFactory.getLogger(HttpNotificationSender.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpNotificationSender.class);
 
     @Autowired
     private SubscriptionRepository subscriptionRepository;
