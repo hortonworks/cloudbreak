@@ -5,9 +5,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.doReturn;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -26,8 +23,10 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
+import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.cluster.filter.AmbariHostFilterService;
 
 import groovyx.net.http.HttpResponseException;
 import reactor.core.Reactor;
@@ -64,6 +63,12 @@ public class AmbariClusterServiceTest {
 
     @Mock
     private AmbariClientService clientService;
+
+    @Mock
+    private AmbariHostFilterService hostFilterService;
+
+    @Mock
+    private HostMetadataRepository hostMetadataRepository;
 
     private Stack stack;
 
@@ -105,51 +110,23 @@ public class AmbariClusterServiceTest {
     }
 
     @Test(expected = BadRequestException.class)
-    public void testUpdateHostsDoesntAcceptMultipleListingOfTheSameHostGroup() throws HttpResponseException {
-        // GIVEN
-        Set<HostGroupAdjustmentJson> hostGroupAdjustments = new HashSet<>();
-        HostGroupAdjustmentJson hga1 = new HostGroupAdjustmentJson();
-        hga1.setHostGroup("slave_1");
-        hga1.setScalingAdjustment(1);
-        HostGroupAdjustmentJson hga2 = new HostGroupAdjustmentJson();
-        hga2.setHostGroup("slave_1");
-        hga2.setScalingAdjustment(2);
-        hostGroupAdjustments.add(hga1);
-        hostGroupAdjustments.add(hga2);
-        // WHEN
-        underTest.updateHosts(stack.getId(), hostGroupAdjustments);
-    }
-
-    @Test(expected = BadRequestException.class)
     public void testUpdateHostsDoesntAcceptZeroScalingAdjustments() throws HttpResponseException {
         // GIVEN
-        Set<HostGroupAdjustmentJson> hostGroupAdjustments = new HashSet<>();
         HostGroupAdjustmentJson hga1 = new HostGroupAdjustmentJson();
         hga1.setHostGroup("slave_1");
         hga1.setScalingAdjustment(0);
-        HostGroupAdjustmentJson hga2 = new HostGroupAdjustmentJson();
-        hga2.setHostGroup("master");
-        hga2.setScalingAdjustment(0);
-        hostGroupAdjustments.add(hga1);
-        hostGroupAdjustments.add(hga2);
         // WHEN
-        underTest.updateHosts(stack.getId(), hostGroupAdjustments);
+        underTest.updateHosts(stack.getId(), hga1);
     }
 
     @Test(expected = BadRequestException.class)
     public void testUpdateHostsDoesntAcceptScalingAdjustmentsWithDifferentSigns() throws HttpResponseException {
         // GIVEN
-        Set<HostGroupAdjustmentJson> hostGroupAdjustments = new HashSet<>();
         HostGroupAdjustmentJson hga1 = new HostGroupAdjustmentJson();
         hga1.setHostGroup("slave_1");
         hga1.setScalingAdjustment(-2);
-        HostGroupAdjustmentJson hga2 = new HostGroupAdjustmentJson();
-        hga2.setHostGroup("master");
-        hga2.setScalingAdjustment(3);
-        hostGroupAdjustments.add(hga1);
-        hostGroupAdjustments.add(hga2);
         // WHEN
-        underTest.updateHosts(stack.getId(), hostGroupAdjustments);
+        underTest.updateHosts(stack.getId(), hga1);
     }
 
     private Stack createStack(Cluster cluster) {

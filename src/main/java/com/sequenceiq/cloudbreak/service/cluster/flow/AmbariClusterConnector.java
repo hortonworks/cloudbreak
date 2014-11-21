@@ -45,7 +45,6 @@ import com.sequenceiq.cloudbreak.service.cluster.event.ClusterCreationFailure;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterCreationSuccess;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsFailure;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsSuccess;
-import com.sequenceiq.cloudbreak.service.cluster.filter.AmbariHostFilterService;
 
 import groovyx.net.http.HttpResponseException;
 import reactor.core.Reactor;
@@ -91,9 +90,6 @@ public class AmbariClusterConnector {
     @Autowired
     private AmbariClientService clientService;
 
-    @Autowired
-    private AmbariHostFilterService hostFilterService;
-
     public void installAmbariCluster(Stack stack) {
         Cluster cluster = stack.getCluster();
         MDCBuilder.buildMdcContext(cluster);
@@ -121,7 +117,7 @@ public class AmbariClusterConnector {
         }
     }
 
-    public void installAmbariNode(Long stackId, Set<HostGroupAdjustmentJson> hostGroupAdjustments) {
+    public void installAmbariNode(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment) {
         Stack stack = stackRepository.findOneWithLists(stackId);
         Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
         MDCBuilder.buildMdcContext(cluster);
@@ -129,7 +125,7 @@ public class AmbariClusterConnector {
             stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS);
             AmbariClient ambariClient = clientService.create(stack);
             waitForHosts(stack, ambariClient);
-            Map<String, String> hosts = findHosts(stack.getId(), hostGroupAdjustments);
+            Map<String, String> hosts = findHosts(stack.getId(), hostGroupAdjustment);
             addHostMetadata(cluster, hosts);
             Map<String, Integer> installRequests = installServices(hosts, stack, ambariClient);
             waitForAmbariOperations(stack, ambariClient, installRequests);
@@ -147,7 +143,7 @@ public class AmbariClusterConnector {
         }
     }
 
-    public void decommissionAmbariNodes(Long stackId, Set<HostGroupAdjustmentJson> hosts) {
+    public void decommissionAmbariNodes(Long stackId, int scalingAdjustment, List<HostMetadata> decommissionCandidates) {
         Stack stack = stackRepository.findOneWithLists(stackId);
         Cluster cluster = stack.getCluster();
         MDCBuilder.buildMdcContext(cluster);
@@ -158,39 +154,34 @@ public class AmbariClusterConnector {
             Set<HostMetadata> metadataToRemove = new HashSet<>();
             Map<String, Integer> decommissionRequests = new HashMap<>();
             Map<String, List<String>> hostsWithComponents = new HashMap<>();
-            for (HostGroupAdjustmentJson hostGroupAdjustment : hosts) {
-                int scalingAdjustment = Math.abs(hostGroupAdjustment.getScalingAdjustment());
-                LOGGER.info("Decommissioning {} hosts", scalingAdjustment);
-                Set<HostMetadata> hostsInHostGroup = hostMetadataRepository.findHostsInHostgroup(hostGroupAdjustment.getHostGroup(), cluster.getId());
-                List<HostMetadata> filteredHostList = hostFilterService.filterHostsForDecommission(stack, hostsInHostGroup);
-                verifyNodeCount(scalingAdjustment, filteredHostList);
-                int i = 0;
-                for (HostMetadata hostMetadata : filteredHostList) {
-                    String hostName = hostMetadata.getHostName();
-                    InstanceMetaData instanceMetaData = instanceMetadataRepository.findHostInStack(stack.getId(), hostName);
-                    if (!instanceMetaData.getAmbariServer()) {
-                        if (i < scalingAdjustment) {
-                            LOGGER.info("Host '{}' will be removed from Ambari cluster", hostName);
-                            metadataToRemove.add(hostMetadata);
-                            Set<String> components = ambariClient.getHostComponentsMap(hostName).keySet();
-                            if (components.contains("NODEMANAGER")) {
-                                int requestId = ambariClient.decommissionNodeManager(hostName);
-                                decommissionRequests.put("NODEMANAGER_DECOMMISSION " + hostName, requestId);
-                            }
-                            if (components.contains("DATANODE")) {
-                                int requestId = ambariClient.decommissionDataNode(hostName);
-                                decommissionRequests.put("DATANODE_DECOMMISSION " + hostName, requestId);
-                            }
-                            if (components.contains("HBASE_REGIONSERVER")) {
-                                int requestId = ambariClient.decommissionHBaseRegionServer(hostName);
-                                decommissionRequests.put("HBASE_REGIONSERVER_DECOMMISSION " + hostName, requestId);
-                            }
-                            hostsWithComponents.put(hostName, new ArrayList<>(components));
-                        } else {
-                            break;
+            int adjustment = Math.abs(scalingAdjustment);
+            LOGGER.info("Decommissioning {} hosts", adjustment);
+            int i = 0;
+            for (HostMetadata hostMetadata : decommissionCandidates) {
+                String hostName = hostMetadata.getHostName();
+                InstanceMetaData instanceMetaData = instanceMetadataRepository.findHostInStack(stack.getId(), hostName);
+                if (!instanceMetaData.getAmbariServer()) {
+                    if (i < adjustment) {
+                        LOGGER.info("Host '{}' will be removed from Ambari cluster", hostName);
+                        metadataToRemove.add(hostMetadata);
+                        Set<String> components = ambariClient.getHostComponentsMap(hostName).keySet();
+                        if (components.contains("NODEMANAGER")) {
+                            int requestId = ambariClient.decommissionNodeManager(hostName);
+                            decommissionRequests.put("NODEMANAGER_DECOMMISSION " + hostName, requestId);
                         }
-                        i++;
+                        if (components.contains("DATANODE")) {
+                            int requestId = ambariClient.decommissionDataNode(hostName);
+                            decommissionRequests.put("DATANODE_DECOMMISSION " + hostName, requestId);
+                        }
+                        if (components.contains("HBASE_REGIONSERVER")) {
+                            int requestId = ambariClient.decommissionHBaseRegionServer(hostName);
+                            decommissionRequests.put("HBASE_REGIONSERVER_DECOMMISSION " + hostName, requestId);
+                        }
+                        hostsWithComponents.put(hostName, new ArrayList<>(components));
+                    } else {
+                        break;
                     }
+                    i++;
                 }
             }
             waitForAmbariOperations(stack, ambariClient, decommissionRequests);
@@ -202,9 +193,6 @@ public class AmbariClusterConnector {
             clusterRepository.save(cluster);
             Set<String> hostsRemoved = getRemovedHostNames(metadataToRemove);
             updateHostSuccessful(cluster, hostsRemoved, true);
-        } catch (BadRequestException be) {
-            LOGGER.error("Decommission cannot be executed", be);
-            updateHostFailed(cluster, be.getMessage());
         } catch (Exception e) {
             LOGGER.error(UNHANDLED_EXCEPTION_MSG, e);
             updateHostFailed(cluster, UNHANDLED_EXCEPTION_MSG);
@@ -230,12 +218,6 @@ public class AmbariClusterConnector {
     private void runSmokeTest(Stack stack, AmbariClient ambariClient) {
         int id = ambariClient.runMRServiceCheck();
         waitForAmbariOperations(stack, ambariClient, Collections.singletonMap("MR_SMOKE_TEST", id));
-    }
-
-    private void verifyNodeCount(int scalingAdjustment, List<HostMetadata> filteredHostList) {
-        if (filteredHostList.size() < scalingAdjustment) {
-            throw new BadRequestException("There is not enough node to downscale");
-        }
     }
 
     private void stopHadoopComponents(Stack stack, AmbariClient ambariClient, Map<String, List<String>> hostsWithComponents) throws HttpResponseException {
@@ -364,19 +346,17 @@ public class AmbariClusterConnector {
         waitForAmbariOperations(stack, ambariClient, clusterInstallRequest);
     }
 
-    private Map<String, String> findHosts(Long stackId, Set<HostGroupAdjustmentJson> hostGroupAdjustments) {
+    private Map<String, String> findHosts(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment) {
         List<String> unregisteredHostNames = new ArrayList<>();
         Set<InstanceMetaData> unregisteredHosts = instanceMetadataRepository.findUnregisteredHostsInStack(stackId);
         for (InstanceMetaData instanceMetaData : unregisteredHosts) {
             unregisteredHostNames.add(instanceMetaData.getLongName());
         }
         Map<String, String> hosts = new HashMap<>();
-        for (HostGroupAdjustmentJson entry : hostGroupAdjustments) {
-            for (int i = 0; i < entry.getScalingAdjustment(); i++) {
-                String host = unregisteredHostNames.get(0);
-                hosts.put(host, entry.getHostGroup());
-                unregisteredHostNames.remove(0);
-            }
+        for (int i = 0; i < hostGroupAdjustment.getScalingAdjustment(); i++) {
+            String host = unregisteredHostNames.get(0);
+            hosts.put(host, hostGroupAdjustment.getHostGroup());
+            unregisteredHostNames.remove(0);
         }
         return hosts;
     }
