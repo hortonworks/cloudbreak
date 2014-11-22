@@ -198,7 +198,7 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
     private boolean waitForHostsToJoin(Stack stack) {
         AmbariHostsJoinStatusCheckerTask ambariHostsJoinStatusCheckerTask = new AmbariHostsJoinStatusCheckerTask();
         AmbariHosts ambariHosts =
-                new AmbariHosts(stack, new AmbariClient(stack.getAmbariIp()), stack.getNodeCount() * stack.getMultiplier());
+                new AmbariHosts(stack, clientService.create(stack), stack.getNodeCount() * stack.getMultiplier());
         ambariHostJoin.pollWithTimeout(
                 ambariHostsJoinStatusCheckerTask,
                 ambariHosts,
