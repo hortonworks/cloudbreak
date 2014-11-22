@@ -45,7 +45,7 @@ var clientScopes = 'openid' +
     '+cloudbreak.credentials' +
     '+cloudbreak.blueprints' +
     '+cloudbreak.stacks' +
-    '+cloudbreak.usages.global+cloudbreak.events+cloudbreak.usages.account+cloudbreak.usages.user';
+    '+cloudbreak.events+cloudbreak.usages.account+cloudbreak.usages.user';
 var identityServerAddress = process.env.ULU_IDENTITY_ADDRESS
 var sultansAddress = process.env.ULU_SULTANS_ADDRESS
 var cloudbreakAddress = process.env.ULU_CLOUDBREAK_ADDRESS
