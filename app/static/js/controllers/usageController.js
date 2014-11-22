@@ -84,15 +84,27 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
         }
 
         $scope.gccFilterFunction = function(element) {
-            return element.cloud.match('GCC') ? true : false;
+            try {
+                return element.cloud.match('GCC') ? true : false;
+            } catch (err) {
+                return false;
+            }
         };
 
         $scope.awsFilterFunction = function(element) {
-            return element.cloud.match('AWS') ? true : false;
+            try {
+                return element.cloud.match('AWS') ? true : false;
+            }  catch (err) {
+                return false;
+            }
         };
 
         $scope.azureFilterFunction = function(element) {
-            return element.cloud.match('AZURE') ? true : false;
+            try {
+                return element.cloud.match('AZURE') ? true : false;
+            } catch (err) {
+                return false;
+            }
         };
 
         $scope.setDate = function(date) {
