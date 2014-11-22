@@ -185,15 +185,27 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
 
 
         $scope.logFilterFunction = function(element) {
-            return (!element.eventType.match('BILLING_STARTED') && !element.eventType.match('BILLING_STOPPED') && !element.eventType.match('BILLING_CHANGED')) ? true : false;
-        };
+            try {
+                return (!element.eventType.match('BILLING_STARTED') && !element.eventType.match('BILLING_STOPPED') && !element.eventType.match('BILLING_CHANGED')) ? true : false;
+            } catch (err) {
+                return false;
+            }
+        }
 
         $scope.gccFilterFunction = function(element) {
-            return element.kind.match("compute#instance") ? true : false;
+            try {
+                return element.kind.match("compute#instance") ? true : false;
+            } catch (err) {
+                return false;
+            }
         }
 
         $scope.azureFilterFunction = function(element) {
-            return element.Deployment === undefined ? false : true;
+            try {
+                return element.Deployment === undefined ? false : true;
+            } catch (err) {
+                return false;
+            }
         }
 
     }]);
