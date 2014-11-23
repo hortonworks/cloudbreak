@@ -45,6 +45,8 @@ import com.sequenceiq.cloudbreak.service.cluster.event.ClusterCreationFailure;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterCreationSuccess;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsFailure;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsSuccess;
+import com.sequenceiq.cloudbreak.service.cluster.filter.AmbariHostFilterService;
+import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 
 import groovyx.net.http.HttpResponseException;
 import reactor.core.Reactor;
@@ -89,6 +91,12 @@ public class AmbariClusterConnector {
 
     @Autowired
     private AmbariClientService clientService;
+
+    @Autowired
+    private AmbariHostFilterService hostFilterService;
+
+    @Autowired
+    private CloudbreakEventService eventService;
 
     public void installAmbariCluster(Stack stack) {
         Cluster cluster = stack.getCluster();
@@ -149,13 +157,14 @@ public class AmbariClusterConnector {
         MDCBuilder.buildMdcContext(cluster);
         LOGGER.info("Decommission requested");
         try {
-            stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS, "Removing node(s) from the cluster.");
+            int adjustment = Math.abs(scalingAdjustment);
+            LOGGER.info("Decommissioning {} hosts", adjustment);
+            String statusReason = String.format("Removing '%s' node(s) from the cluster.", scalingAdjustment);
+            stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS, statusReason);
             AmbariClient ambariClient = clientService.create(stack);
             Set<HostMetadata> metadataToRemove = new HashSet<>();
             Map<String, Integer> decommissionRequests = new HashMap<>();
             Map<String, List<String>> hostsWithComponents = new HashMap<>();
-            int adjustment = Math.abs(scalingAdjustment);
-            LOGGER.info("Decommissioning {} hosts", adjustment);
             int i = 0;
             for (HostMetadata hostMetadata : decommissionCandidates) {
                 String hostName = hostMetadata.getHostName();
@@ -353,9 +362,13 @@ public class AmbariClusterConnector {
             unregisteredHostNames.add(instanceMetaData.getLongName());
         }
         Map<String, String> hosts = new HashMap<>();
-        for (int i = 0; i < hostGroupAdjustment.getScalingAdjustment(); i++) {
+        Integer scalingAdjustment = hostGroupAdjustment.getScalingAdjustment();
+        String hostGroup = hostGroupAdjustment.getHostGroup();
+        String statusReason = String.format("Adding '%s' new node(s) to the '%s' hostgroup.", scalingAdjustment, hostGroup);
+        eventService.fireCloudbreakEvent(stackId, Status.UPDATE_IN_PROGRESS.name(), statusReason);
+        for (int i = 0; i < scalingAdjustment; i++) {
             String host = unregisteredHostNames.get(0);
-            hosts.put(host, hostGroupAdjustment.getHostGroup());
+            hosts.put(host, hostGroup);
             unregisteredHostNames.remove(0);
         }
         return hosts;
@@ -442,9 +455,9 @@ public class AmbariClusterConnector {
                 if (available) {
                     Cluster cluster = clusterRepository.findById(stack.getCluster().getId());
                     cluster.setStatus(Status.AVAILABLE);
-                    cluster.setStatusReason("");
+                    cluster.setStatusReason("The cluster and its services are available.");
                     clusterRepository.save(cluster);
-                    stackUpdater.updateStackStatus(stack.getId(), Status.AVAILABLE, "The cluster installation failed.");
+                    stackUpdater.updateStackStatus(stack.getId(), Status.AVAILABLE, "The cluster and its services are available.");
                 }
             }
         } catch (Exception ex) {

@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterStatusUpdateRequest;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
+import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.event.StackStatusUpdateRequest;
 
 import reactor.core.Reactor;
@@ -44,6 +45,9 @@ public class ClusterStatusUpdateHandler implements Consumer<Event<ClusterStatusU
     @Autowired
     private ClusterRepository clusterRepository;
 
+    @Autowired
+    private CloudbreakEventService cloudbreakEventService;
+
     @Override
     public void accept(Event<ClusterStatusUpdateRequest> event) {
         ClusterStatusUpdateRequest statusUpdateRequest = event.getData();
@@ -53,8 +57,10 @@ public class ClusterStatusUpdateHandler implements Consumer<Event<ClusterStatusU
         Cluster cluster = stack.getCluster();
         MDCBuilder.buildMdcContext(cluster);
         if (StatusRequest.STOPPED.equals(statusRequest)) {
+            cloudbreakEventService.fireCloudbreakEvent(stackId, Status.STOP_IN_PROGRESS.name(), "Cluster is stopping.");
             ambariClusterConnector.stopCluster(stack);
             cluster.setStatus(Status.STOPPED);
+            cloudbreakEventService.fireCloudbreakEvent(stackId, Status.AVAILABLE.name(), "Cluster has stopped successfully.");
             if (Status.STOP_REQUESTED.equals(stackRepository.findOneWithLists(stackId).getStatus())) {
                 LOGGER.info("Hadoop services stopped, stopping.");
                 reactor.notify(ReactorConfig.STACK_STATUS_UPDATE_EVENT,
@@ -66,9 +72,11 @@ public class ClusterStatusUpdateHandler implements Consumer<Event<ClusterStatusU
                 LOGGER.info("Successfully started Hadoop services, setting cluster state to: {}", Status.AVAILABLE);
                 cluster.setUpSince(new Date().getTime());
                 cluster.setStatus(Status.AVAILABLE);
+                cloudbreakEventService.fireCloudbreakEvent(stackId, Status.AVAILABLE.name(), "Cluster started successfully.");
             } else {
                 LOGGER.info("Failed to start Hadoop services, setting cluster state to: {}", Status.STOPPED);
                 cluster.setStatus(Status.STOPPED);
+                stackUpdater.updateStackStatus(stackId, Status.AVAILABLE, "Failed to start cluster, some of the services could not started.");
             }
         }
         clusterRepository.save(cluster);

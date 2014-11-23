@@ -56,7 +56,9 @@ public class UpdateAmbariHostsSuccessHandler implements Consumer<Event<UpdateAmb
             }
             metadataRepository.save(metadataEntry);
         }
-        stackUpdater.updateStackStatus(stack.getId(), Status.AVAILABLE, "Cluster installation successfully finished. AMBARI_IP:" + stack.getAmbariIp());
+        String cause = data.isDecommision() ? "Down" : "Up";
+        String statusReason =  String.format("%sscale of cluster finished successfully. AMBARI_IP:%s", cause, stack.getAmbariIp());
+        stackUpdater.updateStackStatus(stack.getId(), Status.AVAILABLE, statusReason);
     }
 
 }

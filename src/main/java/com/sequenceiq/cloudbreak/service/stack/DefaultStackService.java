@@ -204,7 +204,7 @@ public class DefaultStackService implements StackService {
         }
         String statusMessage = scalingAdjustment > 0 ? "Adding '%s' new node(s) to the cluster infrastructure."
                 : "Removing '%s' node(s) from the cluster infrastructure.";
-        stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS, String.format(statusMessage, scalingAdjustment));
+        stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS, String.format(statusMessage, Math.abs(scalingAdjustment)));
         LOGGER.info("Publishing {} event [scalingAdjustment: '{}']", ReactorConfig.UPDATE_INSTANCES_REQUEST_EVENT, scalingAdjustment);
         reactor.notify(ReactorConfig.UPDATE_INSTANCES_REQUEST_EVENT,
                 Event.wrap(new UpdateInstancesRequest(stack.getTemplate().cloudPlatform(), stack.getId(), scalingAdjustment)));

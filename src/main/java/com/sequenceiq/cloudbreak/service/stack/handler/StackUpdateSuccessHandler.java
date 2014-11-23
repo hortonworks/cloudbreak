@@ -64,7 +64,7 @@ public class StackUpdateSuccessHandler implements Consumer<Event<StackUpdateSucc
             eventService.fireCloudbreakEvent(stackId, BillingStatus.BILLING_CHANGED.name(), "Billing changed due to upscaling of cluster infrastructure.");
         }
         stackUpdater.updateMetadataReady(stackId, true);
-        String statusCause = String.format("'%s'scaling of cluster infrastructure was successfully.", updateSuccess.isRemoveInstances() ? "Down" : "Up");
+        String statusCause = String.format("%sscaling of cluster infrastructure was successfully.", updateSuccess.isRemoveInstances() ? "Down" : "Up");
         stackUpdater.updateStackStatus(stackId, Status.AVAILABLE, statusCause);
 
     }
