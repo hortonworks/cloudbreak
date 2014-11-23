@@ -255,7 +255,6 @@ sessionSockets.on('connection', function (err, socket, session) {
   if (session){
     retrieveUserByToken(session.token, function(data){
       socket.join(data.user_id)
-      io.to(data.user_id).emit('notification', 'successfully joined to topic --- for your eyes only');
     });
   } else {
     console.log("No session found, websocket notifications won't work [socket ID: " + socket.id + "] " + err)
