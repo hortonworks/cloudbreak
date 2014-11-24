@@ -1,7 +1,7 @@
 {
    "parameters":{
       "location":"NORTH_EUROPE",
-      "vmType":"SMALL",
+      "vmType":"MEDIUM",
       "imageName":"ambari-docker-v1"
    },
    "name":"ittemplate",

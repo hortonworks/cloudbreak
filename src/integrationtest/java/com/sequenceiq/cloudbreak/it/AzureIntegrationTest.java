@@ -62,6 +62,13 @@ public class AzureIntegrationTest extends AbstractCloudbreakIntegrationTest {
         // Create Stack
         createResource(ResourceType.STACK, "stackId");
 
+        // Create cluster
+        LOGGER.info("Creating cluster for integration testing...");
+        Response clusterCreationResponse = IntegrationTestUtil.createEntityRequest(getAccessToken(),
+                getJsonMessage(ResourceType.CLUSTER, getTestContext()))
+                .pathParam("stackId", getTestContext().get("stackId"))
+                .post("/stacks/{stackId}/cluster");
+
         LOGGER.info("Waiting for the cluster to become available ...");
         waitForStackStatus("AVAILABLE", getTestContext().get("stackId"));
 
