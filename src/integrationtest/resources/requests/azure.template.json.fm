@@ -1,0 +1,12 @@
+{
+   "parameters":{
+      "location":"NORTH_EUROPE",
+      "vmType":"SMALL",
+      "imageName":"ambari-docker-v1"
+   },
+   "name":"ittemplate",
+   "description":"integration test template",
+   "volumeCount":1,
+   "volumeSize":14,
+   "cloudPlatform":"AZURE"
+}
