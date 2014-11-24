@@ -15,9 +15,6 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
         var orderBy = $filter('orderBy');
         $scope.user = User.get();
 
-        var socket = io();
-        socket.on('notification', handleNotification);
-
         $scope.errormessage = "";
         $scope.statusclass = "";
         $http.defaults.headers.common['Content-Type'] = 'application/json';
@@ -90,74 +87,5 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
                 $scope.order($scope.lastOrderPredicate, false);
             }
         };
-
-        function handleNotification(notification) {
-          var successEvents = ["REQUESTED","CREATE_IN_PROGRESS","UPDATE_IN_PROGRESS","START_REQUESTED","START_IN_PROGRESS",
-              "STOPPED","STOP_REQUESTED","STOP_IN_PROGRESS","DELETE_IN_PROGRESS"]
-          var errorEvents = ["CLUSTER_CREATION_FAILED","CREATE_FAILED","START_FAILED","STOP_FAILED"]
-          var eventType = notification.eventType;
-
-          if (eventType!="UPTIME_NOTIFICATION") {
-            console.log(notification)
-          }
-
-          if (successEvents.indexOf(eventType) > -1) {
-            handleStatusChange(notification, "has-success");
-          } else if (errorEvents.indexOf(eventType) > -1) {
-            handleStatusChange(notification, "has-error");
-          } else {
-            switch(eventType) {
-              case "DELETE_COMPLETED":
-                handleStatusChange(notification, "has-success");
-                $rootScope.clusters = $filter('filter')($rootScope.clusters, function(value, index) { return value.id != notification.stackId;});
-                break;
-              case "AVAILABLE":
-                handleAvailableNotification(notification);
-                break;
-              case "UPTIME_NOTIFICATION":
-                handleUptimeNotification(notification);
-                break;
-            }
-          }
-
-          $scope.$apply();
-
-          function handleStatusChange(notification, statusClass){
-            var actCluster = $filter('filter')($rootScope.clusters, { id: notification.stackId })[0];
-            actCluster.status = notification.eventType;
-            $scope.modifyStatusMessage(notification.eventMessage, actCluster.name);
-            $scope.modifyStatusClass(statusClass);
-          }
-
-          function handleAvailableNotification(notification) {
-            var actCluster = $filter('filter')($rootScope.clusters, { id: notification.stackId })[0];
-            var msg = notification.eventMessage;
-            var indexOfAmbariIp = msg.indexOf("AMBARI_IP:");
-            if (msg != null && msg != undefined && indexOfAmbariIp > -1) {
-              actCluster.ambariServerIp = msg.split(':')[1];
-              msg = msg.substr(0, indexOfAmbariIp);
-            }
-            var nodeCount = notification.nodeCount;
-            if (nodeCount != null && nodeCount != undefined) {
-              actCluster.nodeCount = nodeCount;
-            }
-            actCluster.status = notification.eventType;
-            $scope.modifyStatusMessage(msg, actCluster.name);
-            $scope.modifyStatusClass("has-success");
-          }
-
-          function handleUptimeNotification(notification) {
-            var actCluster = $filter('filter')($rootScope.clusters, { id: notification.stackId })[0];
-            if (actCluster != undefined) {
-              var SECONDS_PER_MINUTE = 60;
-              var MILLIS_PER_SECOND = 1000;
-              var runningInMs = parseInt(notification.eventMessage);
-              var minutes = ((runningInMs/ (MILLIS_PER_SECOND * SECONDS_PER_MINUTE)) % SECONDS_PER_MINUTE);
-              var hours = (runningInMs / (MILLIS_PER_SECOND * SECONDS_PER_MINUTE * SECONDS_PER_MINUTE));
-              actCluster.minutesUp = parseInt(minutes);
-              actCluster.hoursUp = parseInt(hours);
-            }
-          }
-        }
     }
 ]);
