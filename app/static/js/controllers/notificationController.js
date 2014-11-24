@@ -27,10 +27,6 @@ function ($scope, $rootScope, $filter) {
     function handleNotification(notification) {
       var eventType = notification.eventType;
 
-      if (eventType!="UPTIME_NOTIFICATION") {
-        console.log(notification)
-      }
-
       if (successEvents.indexOf(eventType) > -1) {
         handleStatusChange(notification, "has-success");
       } else if (errorEvents.indexOf(eventType) > -1) {
@@ -93,7 +89,6 @@ function ($scope, $rootScope, $filter) {
     }
 
     function addNotificationToGlobalEvents(item) {
-      item.eventTimestamp =  new Date(item.eventTimestamp).toISOString();
       item.customTimeStamp =  new Date(item.eventTimestamp).toLocaleDateString() + " " + new Date(item.eventTimestamp).toLocaleTimeString();
       $rootScope.events.push(item);
     }

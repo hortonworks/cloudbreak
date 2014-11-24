@@ -87,5 +87,9 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
                 $scope.order($scope.lastOrderPredicate, false);
             }
         };
+
+        $scope.eventTimestampAsFloat = function(element) {
+          return parseFloat(element.eventTimestamp);
+        }
     }
 ]);
