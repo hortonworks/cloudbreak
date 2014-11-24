@@ -9,6 +9,6 @@
 : ${SL_SMTP_SENDER_USERNAME:?"Please set the SL_SMTP_SENDER_USERNAME environment variable!"}
 : ${SL_SMTP_SENDER_PASSWORD:?"Please set the SL_SMTP_SENDER_PASSWORD environment variable!"}
 : ${SL_SMTP_SENDER_FROM:?"Please set the SL_SMTP_SENDER_FROM environment variable!"}
-: ${SL_CB_ADDRESS:?"Please set the SL_ADDRESS environment variable!"}
+: ${SL_CB_ADDRESS:?"Please set the SL_CB_ADDRESS environment variable!"}
 
 npm install && node main
