@@ -157,7 +157,7 @@ public class DefaultStackService implements StackService {
         } else {
             Status clusterStatus = clusterRepository.findOneWithLists(stack.getCluster().getId()).getStatus();
             if (Status.STOP_IN_PROGRESS.equals(clusterStatus)) {
-                stackUpdater.updateStackStatus(stackId, Status.STOP_REQUESTED, "Stopping of cluster infrastructure has been requested.");
+                stackUpdater.updateStackStatus(stackId, Status.STOP_REQUESTED, "Cluster is stopping, stopping of cluster infrastructure has been requested.");
             } else {
                 if (!Status.AVAILABLE.equals(stackStatus)) {
                     throw new BadRequestException(

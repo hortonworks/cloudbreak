@@ -125,7 +125,7 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
                 waitForAmbariToStart(stack);
                 Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
                 LOGGER.info("Update stack state to: {}", Status.AVAILABLE);
-                String statusReason = "Cluster infrastructure is available, start of cluster has been requested. AMBARI_IP:" + stack.getAmbariIp();
+                String statusReason = "Cluster infrastructure is available, starting of cluster has been requested. AMBARI_IP:" + stack.getAmbariIp();
                 stackUpdater.updateStackStatus(stackId, Status.AVAILABLE, statusReason);
                 if (cluster != null && Status.START_REQUESTED.equals(cluster.getStatus())) {
                     boolean hostsJoined = waitForHostsToJoin(stack);
