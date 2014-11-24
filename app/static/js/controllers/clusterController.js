@@ -204,7 +204,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             }
         }
 
-        $rootScope.events = {};
+        $rootScope.events = [];
 
         $scope.loadEvents = function () {
             $rootScope.events = UserEvents.query(function(success) {

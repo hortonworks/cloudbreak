@@ -1,8 +1,8 @@
 'use strict';
 
-var log = log4javascript.getLogger("templateController-logger");
+var log = log4javascript.getLogger("notificationController-logger");
 
-angular.module('uluwatuControllers').controller('templateController', ['$scope', '$rootScope', '$filter',
+angular.module('uluwatuControllers').controller('notificationController', ['$scope', '$rootScope', '$filter',
 function ($scope, $rootScope, $filter) {
     var successEvents = [ "REQUESTED",
                           "CREATE_IN_PROGRESS",
@@ -58,6 +58,7 @@ function ($scope, $rootScope, $filter) {
       actCluster.status = notification.eventType;
       $scope.modifyStatusMessage(notification.eventMessage, actCluster.name);
       $scope.modifyStatusClass(statusClass);
+      addNotificationToGlobalEvents(notification);
     }
 
     function handleAvailableNotification(notification) {
@@ -75,6 +76,7 @@ function ($scope, $rootScope, $filter) {
       actCluster.status = notification.eventType;
       $scope.modifyStatusMessage(msg, actCluster.name);
       $scope.modifyStatusClass("has-success");
+      addNotificationToGlobalEvents(notification);
     }
 
     function handleUptimeNotification(notification) {
@@ -88,6 +90,12 @@ function ($scope, $rootScope, $filter) {
         actCluster.minutesUp = parseInt(minutes);
         actCluster.hoursUp = parseInt(hours);
       }
+    }
+
+    function addNotificationToGlobalEvents(item) {
+      item.eventTimestamp =  new Date(item.eventTimestamp).toISOString();
+      item.customTimeStamp =  new Date(item.eventTimestamp).toLocaleDateString() + " " + new Date(item.eventTimestamp).toLocaleTimeString();
+      $rootScope.events.push(item);
     }
   }
 ]);
