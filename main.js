@@ -8,6 +8,7 @@ var session = require('express-session');
 var bodyParser = require('body-parser');
 var needle = require('needle');
 var md5 = require('MD5');
+var request = require('request');
 
 var domain = require('domain'),
 d = domain.create();
@@ -975,6 +976,111 @@ app.post('/activate', function(req, res){
         console.log('Invalid activate or email parameter.')
         res.statusCode = 400
         res.json({status: 400, message: 'Invalid activate or email parameter.'})
+    }
+});
+
+app.get('/users', function(req, res){
+    var authHeader = req.headers['authorization']
+    if (authHeader != null && authHeader.split(' ').length > 1) {
+       var token = authHeader.split(' ')[1];
+       var checkTokenRespOption = {
+           headers : {
+              'Content-Type' : 'application/x-www-form-urlencoded',
+              'Authorization' : 'Basic ' + new Buffer(clientId + ':'+ clientSecret).toString('base64')
+           }
+       }
+       needle.post(uaaAddress + "/check_token", 'token=' + token, checkTokenRespOption, function(err, checkTokenResp){
+           if (checkTokenResp.statusCode == 200) {
+             var adminUserName = checkTokenResp.body.user_name
+
+             var sultansOptions = {
+                headers: { 'Authorization': 'Basic ' + new Buffer(clientId + ':'+ clientSecret).toString('base64') }
+             }
+             needle.post(uaaAddress + '/oauth/token', 'grant_type=client_credentials',
+                                                      sultansOptions, function(err, sultanTokenResp) {
+               if (sultanTokenResp.statusCode == 200){
+                  var sultanToken = sultanTokenResp.body.access_token;
+                     var usrOptions = {
+                          headers: {
+                             'Accept' : 'application/json',
+                             'Authorization' : 'Bearer ' + sultanToken,
+                             'Content-Type' : 'application/json'
+                          }
+                     }
+
+                  needle.get(uaaAddress + '/Users/?attributes=id,userName,groups&filter=userName eq "' + adminUserName + '"', usrOptions , function(err, usrResp){
+                      if (usrResp.statusCode == 200){
+                          if (usrResp.body.resources.length == 1){
+                             var groups = usrResp.body.resources[0].groups
+                             var isAdmin = false
+                             var companyId = null
+                             for (var i = 0; i < groups.length; i++ ){
+                               if (groups[i].display.lastIndexOf('sequenceiq.cloudbreak.admin', 0) === 0){
+                                    isAdmin = true
+                               }
+                               if (groups[i].display.lastIndexOf('sequenceiq.account', 0) === 0) {
+                                    companyId = groups[i].display
+                               }
+                             }
+                             if (isAdmin){
+                                needle.get(uaaAddress + '/Groups?attributes=members&filter=displayname eq "' + companyId + '"', usrOptions , function(err, groupResp){
+                                    var groupMemberIds = groupResp.body.resources[0].members
+                                    var completed_requests = 0;
+                                    var users = [];
+                                    if (groupMemberIds.length != 0) {
+                                    groupMemberIds.forEach(function(groupMember) {
+                                        request({
+                                                  method: 'GET',
+                                                  url: uaaAddress + '/Users?attributes=userName,active&filter=id eq  "' + groupMember.value + '"',
+                                                  headers: {'Accept' : 'application/json',
+                                                            'Authorization' : 'Bearer ' + sultanToken,
+                                                            'Content-Type' : 'application/json'
+                                                   }
+                                         }, function (error, response, body) {
+                                          if (response.statusCode == 200){
+                                            var resultResource = JSON.parse(body).resources[0]
+                                            users.push({username: resultResource.userName, active: resultResource.active})
+                                          }
+                                          completed_requests++;
+                                          if (completed_requests == groupMemberIds.length){
+                                            res.json({users: users})
+                                          }
+                                         });
+                                    });
+                                    } else {
+                                        console.log('No users found for this company.')
+                                        res.json({message: 'No users found for this company.'})
+                                    }
+                                });
+                             }
+                             else {
+                                console.log('User is not an admin.')
+                                res.json({message: 'User is not an admin.'})
+                             }
+                          } else {
+                            console.log('Cannot retrieve Admin user.')
+                            res.json({message: 'Cannot retrieve Admin user.'})
+                          }
+                      } else {
+                        console.log('Admin user not found.')
+                        res.json({message: 'Admin user not found.'})
+                      }
+                    });
+               }
+               else {
+                console.log('Cannot retrieve token.')
+                res.json({message: 'Cannot retrieve token.'})
+               }
+             });
+             } else {
+                console.log('Cannot retrieve token for Client.')
+                res.json(err)
+             }
+       });
+    }
+    else {
+      console.log('Authorization header is missing.')
+      res.json(err)
     }
 });
 
