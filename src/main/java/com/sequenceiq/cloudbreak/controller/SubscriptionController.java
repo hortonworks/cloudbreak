@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
-import com.sequenceiq.cloudbreak.controller.json.SubscribeRequest;
+import com.sequenceiq.cloudbreak.controller.json.SubscriptionRequest;
 import com.sequenceiq.cloudbreak.domain.Subscription;
 import com.sequenceiq.cloudbreak.service.subscription.SubscriptionService;
 
@@ -25,8 +25,8 @@ public class SubscriptionController {
 
     @RequestMapping(value = "subscriptions", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<IdJson> subscribeClient(@RequestBody @Valid SubscribeRequest subscribeRequest, @AuthenticationPrincipal String client) {
-        Subscription subscription = new Subscription(client, subscribeRequest.getEndpointUrl());
+    public ResponseEntity<IdJson> subscribeClient(@RequestBody @Valid SubscriptionRequest subscriptionRequest, @AuthenticationPrincipal String client) {
+        Subscription subscription = new Subscription(client, subscriptionRequest.getEndpointUrl());
         return new ResponseEntity<IdJson>(new IdJson(subscriptionService.subscribe(subscription)), HttpStatus.CREATED);
     }
 }
