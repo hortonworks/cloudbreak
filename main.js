@@ -1043,7 +1043,7 @@ app.get('/users', function(req, res){
                                           }
                                           completed_requests++;
                                           if (completed_requests == groupMemberIds.length){
-                                            res.json([users])
+                                            res.json(users)
                                           }
                                          });
                                     });
