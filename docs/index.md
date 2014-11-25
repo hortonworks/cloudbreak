@@ -300,10 +300,7 @@ _This process will take 20 minutes so be patient - but this step will have do be
 
 ###Configuring the Google Cloud account
 
-Follow the [instructions](https://cloud.google.com/storage/docs/authentication#service_accounts) fro, Google.
-Create a `Service account` and `Generate a new P12 key`. Once you have downloaded the key use `openssl` to convert it to PEM.
-
-`openssl pkcs12 -in path/to/key.p12 -nodes -nocerts > path/to/key.pem`
+Follow the [instructions](https://cloud.google.com/storage/docs/authentication#service_accounts) in Google Cloud's documentation to create a `Service account` and `Generate a new P12 key`.
 
 Make sure that at API level (**APIs and auth** menu) you have enabled:
 
@@ -317,22 +314,7 @@ Make sure that at API level (**APIs and auth** menu) you have enabled:
 * Google Cloud Storage
 * Google Cloud Storage JSON API
 
-After that you are ready to test whether the account is configured OK. get this tester JAR file.
-
-```
-curl -LO https://github.com/sequenceiq/gcc-credential-tester/releases/download/1.0/gcc-credential-tester.jar
-```
-
-Once you have downloaded you are ready to test:
-
-```
-java -jar gcc-credential-tester.jar <keyPEMFile> <serviceAccountEmailAddress> <projectId>
-```
-The expected result should be something like this:
-
-```
-Your credential is ok...
-```
+When creating GCC credentials in Cloudbreak you will have to provide the email address of the Service Account and the project ID (from Google Developers Console - Projects) where the service account is created. You'll also have to upload the generated P12 file and provide an OpenSSH formatted public key that will be used as an SSH key.
 
 <!--accounts.md-->
 
