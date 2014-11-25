@@ -75,6 +75,11 @@ uluwatuServices.factory('AccountUsers', ['$resource',
         return $resource('sultans/users');
     }]);
 
+uluwatuServices.factory('ActivateAccountUsers', ['$resource',
+    function ($resource) {
+        return $resource('sultans/activate');
+    }]);
+
 uluwatuServices.factory('UserEvents', ['$resource',
     function ($resource) {
         return $resource('events');

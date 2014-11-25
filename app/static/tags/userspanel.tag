@@ -2,7 +2,7 @@
     <div class="panel panel-default">
         <div class="panel-heading panel-heading-nav">
             <a id="users-btn" data-target="#panel-users-collapse" class="btn btn-info btn-fa-2x" role="button" data-toggle="collapse"><i class="fa fa-angle-down fa-2x fa-fw-forced"></i></a>
-            <h4><span class="badge pull-right">3</span> manage users</h4>
+            <h4><span style="margin-left: 4px"   class="badge pull-right">{{$root.accountUsers.length-1}}</span><span ng-click="getUsers()" class="badge pull-right"><i class="fa fa-refresh"></i> </span> manage users</h4>
         </div>
 
         <div id="panel-users-collapse" class="panel-btn-in-header-collapse collapse">
@@ -54,11 +54,9 @@
                         </div>
                         <div id="panel-user-collapse{{actualuser.idx}}" class="panel-collapse collapse">
 
-                            <p class="btn-row-over-panel"><a class="btn btn-danger" role="button"><i class="fa fa-circle-o fa-fw"></i><span> deactivate user</span></a></p>
+                            <p class="btn-row-over-panel"><a class="btn btn-danger" ng-click="activateUser('false', actualuser.username)" role="button"><i class="fa fa-circle-o fa-fw"></i><span> deactivate user</span></a></p>
 
                             <div class="panel-body">
-
-
                                 <form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
                                     <div class="form-group">
                                         <label class="col-sm-3 control-label" for="parameter">email address</label>
@@ -81,7 +79,7 @@
                         </div>
                         <div id="panel-user-collapse{{actualuser.idx}}" class="panel-collapse collapse">
 
-                            <p class="btn-row-over-panel"><a class="btn btn-danger" role="button"><i class="fa fa-circle-o fa-fw"></i><span> activate user</span></a></p>
+                            <p class="btn-row-over-panel"><a class="btn btn-danger" role="button" ng-click="activateUser('true', actualuser.username)"><i class="fa fa-circle-o fa-fw"></i><span> activate user</span></a></p>
 
                             <div class="panel-body">
 
