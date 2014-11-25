@@ -24,7 +24,8 @@ public final class DateUtils {
             Date currentTime = getCurrentDate(timeZone);
             Date nextTime = cronExpression.getNextValidTimeAfter(currentTime);
             DateTime nextDateTime = getDateTime(nextTime, timeZone).minus(monitorUpdateRate);
-            return nextDateTime.toDate().getTime() - currentTime.getTime() < monitorUpdateRate;
+            long interval = nextDateTime.toDate().getTime() - currentTime.getTime();
+            return interval > 0 && interval < monitorUpdateRate;
         } catch (ParseException e) {
             LOGGER.warn(clusterId, "Invalid cron expression, {}", e.getMessage());
             return false;
