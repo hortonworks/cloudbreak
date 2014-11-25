@@ -2,7 +2,7 @@
     <div class="panel panel-default">
         <div class="panel-heading panel-heading-nav">
             <a id="users-btn" data-target="#panel-users-collapse" class="btn btn-info btn-fa-2x" role="button" data-toggle="collapse"><i class="fa fa-angle-down fa-2x fa-fw-forced"></i></a>
-            <h4><span style="margin-left: 4px"   class="badge pull-right">{{$root.accountUsers.length-1}}</span><span ng-click="getUsers()" class="badge pull-right"><i class="fa fa-refresh"></i> </span> manage users</h4>
+            <h4><span style="margin-left: 4px"   class="badge pull-right">{{$root.accountUsers.length-1 == -1 ? 0 : $root.accountUsers.length-1}}</span><span ng-click="getUsers()" class="badge pull-right"><i class="fa fa-refresh"></i> </span> manage users</h4>
         </div>
 
         <div id="panel-users-collapse" class="panel-btn-in-header-collapse collapse">
