@@ -758,7 +758,7 @@ app.post('/registerForAccount', function(req, res){
                          needle.get(uaaAddress + '/Users/?attributes=id,userName,familyName,givenName,version,emails,active&filter=userName eq "' + email + '"', usrOptions , function(err, usrResp){
                                       if (usrResp.statusCode == 200) {
                                          if (usrResp.body.resources.length == 1) {
-                                            if (usrResp.body.resources[0].userName == regToken && usrResp.body.resources[0].active == false) {
+                                            if (usrResp.body.resources[0].givenName == regToken && usrResp.body.resources[0].active == false) {
                                                 var userId = usrResp.body.resources[0].id
                                                 var updateOptions = {
                                                     headers: {
@@ -917,54 +917,64 @@ app.post('/activate', function(req, res){
                                                                console.log(updateResp)
                                                                if (updateResp.statusCode == 200) {
                                                                 console.log('User activation/deactivation successful on user with id: ' + userToActivateId)
-                                                                res.end('SUCCESS')
+                                                                res.json({status: 200, message: 'SUCCESS'})
                                                                } else {
                                                                 console.log('User activation/deactivation failed')
-                                                                res.end('User activation/deactivation failed')
+                                                                res.statusCode = 400
+                                                                res.json({status: 400, message: 'User activation/deactivation failed'})
                                                                }
                                                              });
                                                         } else {
                                                             console.log('User and admin company id is not the same.')
-                                                            res.end('User and admin company id is not the same.')
+                                                            res.statusCode = 400
+                                                            res.json({status: 400, message: 'User and admin company id is not the same.'})
                                                         }
                                                     } else {
                                                         console.log('User not found.')
-                                                        res.end('User not found.')
+                                                        res.statusCode = 400
+                                                        res.json({status: 400, message: 'User not found.'})
                                                     }
                                                 }
                                                 else {
                                                     console.log('Cannot retrieve user. (activate)')
-                                                    res.end('Cannot retrieve user. (activate)')
+                                                    res.statusCode = 400
+                                                    res.json({status: 400, message: 'Cannot retrieve user. (activate)'})
                                                 }
                                             });
                                             } else {
                                                 console.log('Caller is not an admin.')
-                                                res.end('Caller is not an admin.')
+                                                res.statusCode = 400
+                                                res.json({status: 400, message: 'Caller is not an admin.'})
                                             }
                                             }
                                        } else {
                                             console.log('Cannot retrieve user (admin).')
-                                            res.end('Cannot retrieve user (admin).')
+                                            res.statusCode = 400
+                                            res.json({status: 400, message: 'Cannot retrieve user (admin).'})
                                        }
                                      });
                              } else {
                                 console.log('Cannot retrieve token.')
-                                res.end('Cannot retrieve token.')
+                                res.statusCode = 400
+                                res.json({status: 400, message: 'Cannot retrieve token.'})
                              }
                  });
             } else {
                 console.log('Token is invalid for admin.')
-                res.end('Token is invalid for admin.')
+                res.statusCode = 400
+                res.json({status: 400, message: 'Token is invalid for admin.'})
             }
          });
          }
          else {
             console.log('Authorization token is missing.')
-            res.end('Authorization token is missing.')
+            res.statusCode = 400
+            res.json({status: 400, message: 'Authorization token is missing.'})
          }
     } else {
         console.log('Invalid activate or email parameter.')
-        res.end('Invalid activate or email parameter.')
+        res.statusCode = 400
+        res.json({status: 400, message: 'Invalid activate or email parameter.'})
     }
 });
 
