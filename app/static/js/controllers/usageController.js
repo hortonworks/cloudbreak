@@ -107,6 +107,34 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
             }
         };
 
+        $scope.cloudShowFunction = function(cloud) {
+            try {
+                return ($scope.localFilter.cloud == cloud || $scope.localFilter.cloud == 'all');
+            } catch (err) {
+                return false;
+            }
+        };
+
+        $scope.selectedRegion =function() {
+            if($filter('filter')($rootScope.config.AWS.awsRegions, { key: $scope.localFilter.zone}).length === 1) {
+                $scope.localFilter.cloud = 'AWS';
+            } else if ($filter('filter')($rootScope.config.AZURE.azureRegions, { key: $scope.localFilter.zone}).length === 1) {
+                $scope.localFilter.cloud = 'AZURE';
+            } else if($filter('filter')($rootScope.config.GCC.gccRegions, { key: $scope.localFilter.zone}).length === 1) {
+                $scope.localFilter.cloud = 'GCC';
+            }
+        }
+
+        $scope.selectedInstance =function() {
+            if($filter('filter')($rootScope.config.AWS.instanceType, { key: $scope.localFilter.vmtype}).length === 1) {
+                $scope.localFilter.cloud = 'AWS';
+            } else if ($filter('filter')($rootScope.config.AZURE.azureVmTypes, { key: $scope.localFilter.vmtype}).length === 1) {
+                $scope.localFilter.cloud = 'AZURE';
+            } else if($filter('filter')($rootScope.config.GCC.gccInstanceTypes, { key: $scope.localFilter.vmtype}).length === 1) {
+                $scope.localFilter.cloud = 'GCC';
+            }
+        }
+
         $scope.setDate = function(date) {
             $scope.localFilter.since = new Date(date);
         }

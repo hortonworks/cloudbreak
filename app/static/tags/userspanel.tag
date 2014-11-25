@@ -1,4 +1,4 @@
-<div id="panel-users" class="col-md-12 col-lg-12">
+<div id="panel-users" class="col-md-12 col-lg-12" ng-controller="accountuserController">
     <div class="panel panel-default">
         <div class="panel-heading panel-heading-nav">
             <a id="users-btn" data-target="#panel-users-collapse" class="btn btn-info btn-fa-2x" role="button" data-toggle="collapse"><i class="fa fa-angle-down fa-2x fa-fw-forced"></i></a>
@@ -12,22 +12,26 @@
 
                 <!-- ............ CREATE FORM ............................................. -->
 
-                <div class="panel panel-default">
-                    <div id="panel-invite-user-collapse" class="panel-under-btn-collapse collapse">
+                <div class="panel panel-default" >
+                    <div  class="panel-under-btn-collapse" class="panel-under-btn-collapse collapse">
                         <div class="panel-body">
 
-                            <form class="form-horizontal" role="form">
+                            <form class="form-horizontal" role="form" id="inviteForm">
 
-                                <div class="form-group">
+                                <div class="form-group" >
                                     <label class="col-sm-3 control-label" for="emailNewUser">email address</label>
                                     <div class="col-sm-9">
-                                        <input type="text" class="form-control" id="emailNewUser" placeholder="">
-                                    </div><!-- .col-sm-9 -->
+                                        <input type="text" class="form-control" ng-model="invite.mail" id="emailNewUser" type="email" placeholder="" required>
+                                        <div class="help-block" ng-show="invite.mail.$dirty && invite.mail.$invalid">
+                                            <i class="fa fa-warning"></i> {{error_msg.credential_ssh_key_invalid}}
+                                        </div>
+                                    </div>
+
                                 </div><!-- .form-group -->
 
                                 <div class="row btn-row">
                                     <div class="col-sm-9 col-sm-offset-3">
-                                        <a id="inviteUser" class="btn btn-success btn-block" role="button"><i class="fa fa-plus fa-fw"></i> invite user</a>
+                                        <a id="inviteUser" class="btn btn-success btn-block" ng-click="inviteUser()" role="button"><i class="fa fa-plus fa-fw"></i> invite user</a>
                                     </div>
                                 </div>
 
