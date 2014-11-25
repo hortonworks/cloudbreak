@@ -570,7 +570,6 @@ app.post('/invite', function (req, res){
                     // use sultans client for this -> user management part
                     needle.post(uaaAddress + '/oauth/token', 'grant_type=client_credentials',
                                sultansOptions, function(err, sultanTokenResp) {
-                           console.log(sultanTokenResp)
                            if (sultanTokenResp.statusCode == 200){
                              var sultanToken = sultanTokenResp.body.access_token;
                              var usrOptions = {
@@ -970,7 +969,7 @@ app.post('/activate', function(req, res){
 });
 
 // errors
-/*
+
 app.use(function(err, req, res, next){
   res.status(err.status);
   res.json({ error: {status: err.status, message: err.message} });
@@ -978,7 +977,7 @@ app.use(function(err, req, res, next){
 
 d.on('error', function(err) {
   console.error(err);
-});*/
+});
 
 // listen
 var port = process.env.SL_PORT || 8080;
