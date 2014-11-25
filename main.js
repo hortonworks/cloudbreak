@@ -621,9 +621,9 @@ app.post('/invite', function (req, res){
                             if (createResp.statusCode == 201) {
                                  console.log('User created with ' + createResp.body.id + '(id) and name: ' + inviteEmail)
 
-                                 updateGroup(token, createResp.body.id, 'sequenceiq.cloudbreak.user')
-                                 updateGroup(token, createResp.body.id, companyId)
-                                 updateCloudbreakGroups(token, createResp.body.id)
+                                 updateGroup(sultanToken, createResp.body.id, 'sequenceiq.cloudbreak.user')
+                                 updateGroup(sultanToken, createResp.body.id, companyId)
+                                 updateCloudbreakGroups(sultanToken, createResp.body.id)
 
                                  var templateFile = path.join(__dirname,'templates','invite-email.jade')
                                  mailer.sendMail(req.body.invite_email, 'Cloudbreak invite' , templateFile, {user: adminUserName,
@@ -1043,7 +1043,7 @@ app.get('/users', function(req, res){
                                           }
                                           completed_requests++;
                                           if (completed_requests == groupMemberIds.length){
-                                            res.json({users: users})
+                                            res.json([users])
                                           }
                                          });
                                     });
