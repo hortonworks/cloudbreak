@@ -628,41 +628,41 @@ app.post('/invite', function (req, res){
                                  var templateFile = path.join(__dirname,'templates','invite-email.jade')
                                  mailer.sendMail(req.body.invite_email, 'Cloudbreak invite' , templateFile, {user: adminUserName,
                                  invite: process.env.SL_ADDRESS + '/registerForAccount?token=' + userTempToken + '&email=' + inviteEmail + '&inviter=' + adminUserName})
-                                 res.end('SUCCESS')
+                                 res.json({status: 200, message: 'SUCCESS'})
                             } else {
-                                 res.end('Temporary registration failed. ' + createResp.body.message)
+                                 res.json({status: 400, message: 'Temporary registration failed. ' + createResp.body.message})
                             }
                             });
                             } else {
                                 console.log('User is not an admin.')
-                                res.end('User is not admin.')
+                                res.json({status: 400, message: 'User is not admin.'})
                             }
 
                         } else {
                             console.log('Invite - Could not find admin user.')
-                            res.end('Could not find admin user.');
+                            res.json({status: 400, message: 'Could not find admin user.'});
                         }
                     } else {
                         console.log('Cannot retrieve user name from token.')
-                        res.end('Cannot retrieve user name from token.')
+                        res.json({status: 400, message: 'Cannot retrieve user name from token.'})
                     }
                  });
                  } else {
                     console.log('Cannot retrieve token.')
-                    res.end('Cannot retrieve token.')
+                    res.json({status: 400, message: 'Cannot retrieve token.'})
                  }
                 });
              } else {
                  console.log('Cannot retrieve user name from token.')
-                 res.end('Cannot retrieve user name from token.')
+                 res.json({status: 400, message: 'Cannot retrieve user name from token.'})
              }
              });
           } else {
             console.log('Authorization token not found')
-            res.end('Authorization token not found')
+            res.json({status: 400, message: 'Authorization token not found'})
           }
     } else {
-      res.end('Email is not valid')
+      res.json({status: 400, message: 'Email is not valid'})
     }
 });
 
