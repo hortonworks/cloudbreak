@@ -70,6 +70,11 @@ uluwatuServices.factory('UserInvite', ['$resource',
         return $resource('sultans/invite');
     }]);
 
+uluwatuServices.factory('AccountUsers', ['$resource',
+    function ($resource) {
+        return $resource('sultans/users');
+    }]);
+
 uluwatuServices.factory('UserEvents', ['$resource',
     function ($resource) {
         return $resource('events');

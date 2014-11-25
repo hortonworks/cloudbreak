@@ -113,7 +113,8 @@
                 <th>cloud</th>
                 <th>user</th>
                 <th>stack name</th>
-                <th>status</th>
+                <th>region</th>
+                <th>instance type</th>
                 <th class="text-right">
                     <a title="sort by">running time
                         <i class="fa fa-sort"></i>
@@ -131,11 +132,13 @@
                 <td ng-if="$index == 0" rowspan="{{gccresults.length}}">{{usage.cloud}}</td>
                 <td>{{usage.username}}</td>
                 <td>{{usage.stackName}}</td>
-                <td>{{$root.config.EVENT_TYPE[usage.stackStatus]}}</td>
+                <td>{{usage.zone}}</td>
+                <td>{{usage.machineType}}</td>
                 <td class="text-right">{{usage.instanceHours}} hrs</td>
                 <td class="text-right">{{usage.money}} $</td>
             </tr>
             <tr class="row-summa" ng-show="usages && (usages | filter:gccFilterFunction).length != 0">
+                <td>&nbsp;</td>
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
@@ -148,12 +151,14 @@
                 <td ng-if="$index == 0" rowspan="{{awsresults.length}}">{{usage.cloud}}</td>
                 <td>{{usage.username}}</td>
                 <td>{{usage.stackName}}</td>
-                <td>{{$root.config.EVENT_TYPE[usage.stackStatus]}}</td>
+                <td>{{usage.zone}}</td>
+                <td>{{usage.machineType}}</td>
                 <td class="text-right">{{usage.instanceHours}} hrs</td>
                 <td class="text-right">{{usage.money}} $</td>
             </tr>
 
             <tr class="row-summa" ng-show="usages && (usages | filter:awsFilterFunction).length != 0">
+                <td>&nbsp;</td>
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
@@ -166,12 +171,14 @@
                 <td ng-if="$index == 0" rowspan="{{azureresults.length}}">{{usage.cloud}}</td>
                 <td>{{usage.username}}</td>
                 <td>{{usage.stackName}}</td>
-                <td>{{$root.config.EVENT_TYPE[usage.stackStatus]}}</td>
+                <td>{{usage.zone}}</td>
+                <td>{{usage.machineType}}</td>
                 <td class="text-right">{{usage.instanceHours}} hrs</td>
                 <td class="text-right">{{usage.money}} $</td>
             </tr>
 
             <tr class="row-summa" ng-show="usages && (usages | filter:azureFilterFunction).length != 0">
+                <td>&nbsp;</td>
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>

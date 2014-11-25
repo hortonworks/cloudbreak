@@ -63,6 +63,8 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
             $scope.usages = UserUsages.query({ param: param }, function(success) {
                 initSums();
                 angular.forEach(success, function(item) {
+                    item.monthString = new Date(item.day).getFullYear() + "-" +  new Date(item.day).getMonth();
+                    item.monthDayString = new Date(item.day).toLocaleDateString();
                     if ($scope.gccFilterFunction(item)) {
                         $scope.gccSum.fullMoney += parseFloat(item.instanceHours) * parseFloat($scope.gccPrice[item.machineType]);
                         $scope.gccSum.fullHours += parseFloat(item.instanceHours);
