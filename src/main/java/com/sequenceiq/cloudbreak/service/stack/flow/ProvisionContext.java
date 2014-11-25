@@ -75,7 +75,7 @@ public class ProvisionContext {
                 stack = stackUpdater.updateStackStatus(stack.getId(), Status.CREATE_IN_PROGRESS, statusReason);
                 stackUpdater.updateStackStatusReason(stack.getId(), stack.getStatus().name());
                 if (!cloudPlatform.isWithTemplate()) {
-                    stackUpdater.updateStackStatus(stack.getId(), Status.REQUESTED, "Creation of cluster infrastructure has requested.");
+                    stackUpdater.updateStackStatus(stack.getId(), Status.REQUESTED, "Creation of cluster infrastructure has been requested.");
                     Set<Resource> resourceSet = new HashSet<>();
                     ResourceBuilderInit resourceBuilderInit = resourceBuilderInits.get(cloudPlatform);
                     final ProvisionContextObject pCO =

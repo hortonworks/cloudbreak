@@ -111,7 +111,7 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
                 cloudbreakEventService.fireCloudbreakEvent(stackId, BillingStatus.BILLING_STOPPED.name(), "Cluster infrastructure stopped.");
             } else {
                 LOGGER.info("Update stack state to: {}", Status.STOP_FAILED);
-                stackUpdater.updateStackStatus(stackId, Status.STOP_FAILED, "Unfortunately the cluster infrastructure could not stop.");
+                stackUpdater.updateStackStatus(stackId, Status.STOP_FAILED, "Unfortunately the cluster infrastructure could not be stopped.");
             }
         } else {
             boolean started;
@@ -125,19 +125,19 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
                 waitForAmbariToStart(stack);
                 Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
                 LOGGER.info("Update stack state to: {}", Status.AVAILABLE);
-                String statusReason = "Cluster infrastructure is available, starting of cluster has been requested. AMBARI_IP:" + stack.getAmbariIp();
+                String statusReason = "Cluster infrastructure is available, starting of services has been requested. AMBARI_IP:" + stack.getAmbariIp();
                 stackUpdater.updateStackStatus(stackId, Status.AVAILABLE, statusReason);
                 if (cluster != null && Status.START_REQUESTED.equals(cluster.getStatus())) {
                     boolean hostsJoined = waitForHostsToJoin(stack);
                     if (hostsJoined) {
-                        cloudbreakEventService.fireCloudbreakEvent(stackId, Status.START_IN_PROGRESS.name(), "Cluster is starting.");
+                        cloudbreakEventService.fireCloudbreakEvent(stackId, Status.START_IN_PROGRESS.name(), "Services are starting.");
                         reactor.notify(ReactorConfig.CLUSTER_STATUS_UPDATE_EVENT,
                                 Event.wrap(new ClusterStatusUpdateRequest(stack.getId(), statusRequest)));
                     } else {
                         cluster.setStatus(Status.START_FAILED);
                         stack.setCluster(cluster);
                         stackRepository.save(stack);
-                        stackUpdater.updateStackStatus(stackId, Status.AVAILABLE, "Cluster could not start because node(s) could not join.");
+                        stackUpdater.updateStackStatus(stackId, Status.AVAILABLE, "Services could not start because host(s) could not join.");
                     }
                 }
             } else {

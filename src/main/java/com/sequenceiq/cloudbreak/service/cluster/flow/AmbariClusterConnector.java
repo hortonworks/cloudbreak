@@ -130,7 +130,7 @@ public class AmbariClusterConnector {
         Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
         MDCBuilder.buildMdcContext(cluster);
         try {
-            stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS, "Adding new node(s) to the cluster.");
+            stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS, "Adding new host(s) to the cluster.");
             AmbariClient ambariClient = clientService.create(stack);
             waitForHosts(stack, ambariClient);
             Map<String, String> hosts = findHosts(stack.getId(), hostGroupAdjustment);
@@ -364,7 +364,7 @@ public class AmbariClusterConnector {
         Map<String, String> hosts = new HashMap<>();
         Integer scalingAdjustment = hostGroupAdjustment.getScalingAdjustment();
         String hostGroup = hostGroupAdjustment.getHostGroup();
-        String statusReason = String.format("Adding '%s' new node(s) to the '%s' hostgroup.", scalingAdjustment, hostGroup);
+        String statusReason = String.format("Adding '%s' new host(s) to the '%s' hostgroup.", scalingAdjustment, hostGroup);
         eventService.fireCloudbreakEvent(stackId, Status.UPDATE_IN_PROGRESS.name(), statusReason);
         for (int i = 0; i < scalingAdjustment; i++) {
             String host = unregisteredHostNames.get(0);

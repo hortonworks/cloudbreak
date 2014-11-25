@@ -20,7 +20,7 @@ public class SimpleSubscriptionService implements SubscriptionService {
         for (Subscription s : clientSubscriptions) {
             if (s.getEndpoint().equals(subscription.getEndpoint())) {
                 throw new SubscriptionAlreadyExistException(
-                        String.format("Subscription already exist for this client with the same endpoint [client: '%s', endpoint: '%s']",
+                        String.format("Subscription already exists for this client with the same endpoint [client: '%s', endpoint: '%s']",
                                 subscription.getClientId(),
                                 subscription.getEndpoint()));
             }

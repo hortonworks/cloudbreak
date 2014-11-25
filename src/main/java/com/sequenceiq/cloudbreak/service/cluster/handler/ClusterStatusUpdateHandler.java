@@ -27,7 +27,6 @@ import reactor.function.Consumer;
 
 @Service
 public class ClusterStatusUpdateHandler implements Consumer<Event<ClusterStatusUpdateRequest>> {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterStatusUpdateHandler.class);
 
     @Autowired
@@ -50,6 +49,14 @@ public class ClusterStatusUpdateHandler implements Consumer<Event<ClusterStatusU
 
     @Override
     public void accept(Event<ClusterStatusUpdateRequest> event) {
+        try {
+            handleStatusUpdate(event);
+        } catch (Exception ex) {
+            LOGGER.error("Status update event could not be handled.", ex);
+        }
+    }
+
+    private void handleStatusUpdate(Event<ClusterStatusUpdateRequest> event) {
         ClusterStatusUpdateRequest statusUpdateRequest = event.getData();
         StatusRequest statusRequest = statusUpdateRequest.getStatusRequest();
         long stackId = statusUpdateRequest.getStackId();
@@ -57,10 +64,10 @@ public class ClusterStatusUpdateHandler implements Consumer<Event<ClusterStatusU
         Cluster cluster = stack.getCluster();
         MDCBuilder.buildMdcContext(cluster);
         if (StatusRequest.STOPPED.equals(statusRequest)) {
-            cloudbreakEventService.fireCloudbreakEvent(stackId, Status.STOP_IN_PROGRESS.name(), "Cluster is stopping.");
+            cloudbreakEventService.fireCloudbreakEvent(stackId, Status.STOP_IN_PROGRESS.name(), "Services are stopping.");
             ambariClusterConnector.stopCluster(stack);
             cluster.setStatus(Status.STOPPED);
-            cloudbreakEventService.fireCloudbreakEvent(stackId, Status.AVAILABLE.name(), "Cluster has stopped successfully.");
+            cloudbreakEventService.fireCloudbreakEvent(stackId, Status.AVAILABLE.name(), "Services have been stopped successfully.");
             if (Status.STOP_REQUESTED.equals(stackRepository.findOneWithLists(stackId).getStatus())) {
                 LOGGER.info("Hadoop services stopped, stopping.");
                 reactor.notify(ReactorConfig.STACK_STATUS_UPDATE_EVENT,
