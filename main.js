@@ -570,7 +570,6 @@ app.post('/invite', function (req, res){
                     // use sultans client for this -> user management part
                     needle.post(uaaAddress + '/oauth/token', 'grant_type=client_credentials',
                                sultansOptions, function(err, sultanTokenResp) {
-                           console.log(sultanTokenResp)
                            if (sultanTokenResp.statusCode == 200){
                              var sultanToken = sultanTokenResp.body.access_token;
                              var usrOptions = {
@@ -630,38 +629,46 @@ app.post('/invite', function (req, res){
                                  invite: process.env.SL_ADDRESS + '/registerForAccount?token=' + userTempToken + '&email=' + inviteEmail + '&inviter=' + adminUserName})
                                  res.json({status: 200, message: 'SUCCESS'})
                             } else {
+                                 res.statusCode = 400
                                  res.json({status: 400, message: 'Temporary registration failed. ' + createResp.body.message})
                             }
                             });
                             } else {
                                 console.log('User is not an admin.')
+                                res.statusCode = 400
                                 res.json({status: 400, message: 'User is not admin.'})
                             }
 
                         } else {
                             console.log('Invite - Could not find admin user.')
+                            res.statusCode = 400
                             res.json({status: 400, message: 'Could not find admin user.'});
                         }
                     } else {
                         console.log('Cannot retrieve user name from token.')
+                        res.statusCode = 400
                         res.json({status: 400, message: 'Cannot retrieve user name from token.'})
                     }
                  });
                  } else {
                     console.log('Cannot retrieve token.')
+                    res.statusCode = 400
                     res.json({status: 400, message: 'Cannot retrieve token.'})
                  }
                 });
              } else {
                  console.log('Cannot retrieve user name from token.')
+                 res.statusCode = 400
                  res.json({status: 400, message: 'Cannot retrieve user name from token.'})
              }
              });
           } else {
             console.log('Authorization token not found')
+            res.statusCode = 400
             res.json({status: 400, message: 'Authorization token not found'})
           }
     } else {
+      res.statusCode = 400
       res.json({status: 400, message: 'Email is not valid'})
     }
 });
