@@ -6,19 +6,6 @@ angular.module('uluwatuControllers').controller('eventController', ['$scope', '$
     function ($scope, $rootScope, $filter, UserEvents) {
 
         initFilter();
-        $rootScope.events = {};
-
-        $scope.loadEvents = function () {
-            initFilter();
-            $rootScope.events = UserEvents.query(function(success) {
-                angular.forEach(success, function(item) {
-                    item.eventTimestamp =  new Date(item.eventTimestamp).toISOString();
-                    item.customTimeStamp =  new Date(item.eventTimestamp).toLocaleDateString() + " " + new Date(item.eventTimestamp).toLocaleTimeString();
-                });
-            });
-        }
-
-        $scope.loadEvents();
 
         $scope.eventFilterFunction = function(element) {
             var isListedElement = true;

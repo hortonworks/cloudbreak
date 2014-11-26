@@ -3,8 +3,8 @@
 var log = log4javascript.getLogger("clusterController-logger");
 var $jq = jQuery.noConflict();
 
-angular.module('uluwatuControllers').controller('clusterController', ['$scope', '$rootScope', '$filter', 'UluwatuCluster', 'GlobalStack', 'Cluster', '$interval',
-    function ($scope, $rootScope, $filter, UluwatuCluster, GlobalStack, Cluster, $interval) {
+angular.module('uluwatuControllers').controller('clusterController', ['$scope', '$rootScope', '$filter', 'UluwatuCluster', 'GlobalStack', 'Cluster', '$interval', 'UserEvents',
+    function ($scope, $rootScope, $filter, UluwatuCluster, GlobalStack, Cluster, $interval, UserEvents) {
 
         $rootScope.ledStyles = {
             "REQUESTED": "state2-run-blink",
@@ -92,6 +92,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         }
 
         $scope.changeActiveCluster = function (clusterId) {
+            $scope.loadEvents();
             $rootScope.activeCluster = $filter('filter')($rootScope.clusters, { id: clusterId })[0];
             $rootScope.activeClusterEvents = $filter('filter')($rootScope.events,  { stackId: clusterId});
             $rootScope.activeClusterBlueprint = $filter('filter')($rootScope.blueprints, { id: $rootScope.activeCluster.blueprintId})[0];
@@ -207,5 +208,18 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 return false;
             }
         }
+
+        $rootScope.events = {};
+
+        $scope.loadEvents = function () {
+            $rootScope.events = UserEvents.query(function(success) {
+                angular.forEach(success, function(item) {
+                    item.eventTimestamp =  new Date(item.eventTimestamp).toISOString();
+                    item.customTimeStamp =  new Date(item.eventTimestamp).toLocaleDateString() + " " + new Date(item.eventTimestamp).toLocaleTimeString();
+                });
+            });
+        }
+
+        $scope.loadEvents();
 
     }]);
