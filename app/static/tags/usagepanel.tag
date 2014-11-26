@@ -3,7 +3,7 @@
     <div class="panel-heading panel-heading-nav">
         <a href="" id="usages-btn" class="btn btn-info btn-fa-2x" role="button" data-toggle="collapse"
            data-target="#panel-usages-collapse"><i class="fa fa-angle-down fa-2x fa-fw-forced"></i></a>
-        <h4>usages report</h4>
+        <h4>cost explorer</h4>
     </div>
 
     <div id="panel-usages-collapse" class="panel-btn-in-header-collapse collapse">
@@ -14,7 +14,7 @@
         filters</h5>
 
     <form class="row row-filter">
-        <div class="col-xs-6 col-sm-3 col-md-3">
+        <div class="col-xs-6 col-sm-5 col-md-5">
             <label for="startDate">start date</label>
 
             <div>
@@ -29,7 +29,7 @@
             </div>
         </div>
 
-        <div class="col-xs-6 col-sm-3 col-md-3">
+        <div class="col-xs-6 col-sm-5 col-md-5">
             <label for="user">user</label>
 
             <div>
@@ -41,18 +41,8 @@
                 </div>
             </div>
         </div>
-        <div class="col-xs-6 col-sm-3 col-md-3">
-            <label for="clusterState">cluster state</label>
 
-            <div>
-                <select class="form-control input-sm" id="clusterState">
-                    <option>any</option>
-                    <option ng-repeat="(key, value) in $root.config.EVENT_TYPE"  value="{{key}}">{{value}}</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="col-xs-6 col-sm-3 col-md-3 form-inline">
+        <div class="col-xs-6 col-sm-2 col-md-2 form-inline">
             <label for="runningTime">running time</label>
 
             <div id="runningTime">
@@ -82,11 +72,11 @@
             <label for="region">region</label>
 
             <div>
-                <select class="form-control input-sm" id="region" ng-model="localFilter.zone">
+                <select class="form-control input-sm" id="region" ng-model="localFilter.zone" ng-change="selectedRegion()">
                     <option>all</option>
-                    <option ng-repeat="region in $root.config.AWS.awsRegions" value="{{region.key}}">{{region.value}}</option>
-                    <option ng-repeat="region in $root.config.AZURE.azureRegions" value="{{region.key}}">{{region.value}}</option>
-                    <option ng-repeat="region in $root.config.GCC.gccRegions" value="{{region.key}}">{{region.value}}</option>
+                    <option ng-repeat="region in $root.config.AWS.awsRegions" ng-show="cloudShowFunction('AWS')" value="{{region.key}}">{{region.value}}</option>
+                    <option ng-repeat="region in $root.config.AZURE.azureRegions" ng-show="cloudShowFunction('AZURE')" value="{{region.key}}">{{region.value}}</option>
+                    <option ng-repeat="region in $root.config.GCC.gccRegions" ng-show="cloudShowFunction('GCC')" value="{{region.key}}">{{region.value}}</option>
                 </select>
             </div>
         </div>
@@ -94,11 +84,11 @@
             <label for="instanceType">instance type</label>
 
             <div>
-                <select class="form-control input-sm" id="instanceType" ng-model="localFilter.vmtype">
+                <select class="form-control input-sm" id="instanceType" ng-model="localFilter.vmtype" ng-change="selectedInstance()">
                     <option>any</option>
-                    <option ng-repeat="instanceType in $root.config.AWS.instanceType" value="{{instanceType.key}}">{{instanceType.value}}</option>
-                    <option ng-repeat="vmType in $root.config.AZURE.azureVmTypes" value="{{vmType.key}}">{{vmType.value}}</option>
-                    <option ng-repeat="instanceType in $root.config.GCC.gccInstanceTypes" value="{{instanceType.key}}">{{instanceType.value}}</option>
+                    <option ng-repeat="instanceType in $root.config.AWS.instanceType" ng-show="cloudShowFunction('AWS')" value="{{instanceType.key}}">{{instanceType.value}}</option>
+                    <option ng-repeat="vmType in $root.config.AZURE.azureVmTypes" ng-show="cloudShowFunction('AZURE')" value="{{vmType.key}}">{{vmType.value}}</option>
+                    <option ng-repeat="instanceType in $root.config.GCC.gccInstanceTypes" ng-show="cloudShowFunction('GCC')" value="{{instanceType.key}}">{{instanceType.value}}</option>
                 </select>
             </div>
         </div>
@@ -123,7 +113,8 @@
                 <th>cloud</th>
                 <th>user</th>
                 <th>stack name</th>
-                <th>status</th>
+                <th>region</th>
+                <th>instance type</th>
                 <th class="text-right">
                     <a title="sort by">running time
                         <i class="fa fa-sort"></i>
@@ -141,11 +132,13 @@
                 <td ng-if="$index == 0" rowspan="{{gccresults.length}}">{{usage.cloud}}</td>
                 <td>{{usage.username}}</td>
                 <td>{{usage.stackName}}</td>
-                <td>{{$root.config.EVENT_TYPE[usage.stackStatus]}}</td>
+                <td>{{usage.zone}}</td>
+                <td>{{usage.machineType}}</td>
                 <td class="text-right">{{usage.instanceHours}} hrs</td>
                 <td class="text-right">{{usage.money}} $</td>
             </tr>
             <tr class="row-summa" ng-show="usages && (usages | filter:gccFilterFunction).length != 0">
+                <td>&nbsp;</td>
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
@@ -158,12 +151,14 @@
                 <td ng-if="$index == 0" rowspan="{{awsresults.length}}">{{usage.cloud}}</td>
                 <td>{{usage.username}}</td>
                 <td>{{usage.stackName}}</td>
-                <td>{{$root.config.EVENT_TYPE[usage.stackStatus]}}</td>
+                <td>{{usage.zone}}</td>
+                <td>{{usage.machineType}}</td>
                 <td class="text-right">{{usage.instanceHours}} hrs</td>
                 <td class="text-right">{{usage.money}} $</td>
             </tr>
 
             <tr class="row-summa" ng-show="usages && (usages | filter:awsFilterFunction).length != 0">
+                <td>&nbsp;</td>
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
@@ -176,12 +171,14 @@
                 <td ng-if="$index == 0" rowspan="{{azureresults.length}}">{{usage.cloud}}</td>
                 <td>{{usage.username}}</td>
                 <td>{{usage.stackName}}</td>
-                <td>{{$root.config.EVENT_TYPE[usage.stackStatus]}}</td>
+                <td>{{usage.zone}}</td>
+                <td>{{usage.machineType}}</td>
                 <td class="text-right">{{usage.instanceHours}} hrs</td>
                 <td class="text-right">{{usage.money}} $</td>
             </tr>
 
             <tr class="row-summa" ng-show="usages && (usages | filter:azureFilterFunction).length != 0">
+                <td>&nbsp;</td>
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>

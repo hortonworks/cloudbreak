@@ -10,6 +10,8 @@ var cons = require('consolidate');
 
 var app = express();
 var cloudbreakClient = new restClient.Client();
+var sultansClient = new restClient.Client();
+
 
 // general config ==============================================================
 
@@ -160,16 +162,32 @@ app.get('/user', function(req,res) {
 
 // wildcards should be proxied =================================================
 
+app.get('*/sultans/*', function(req,res){
+    proxySultansRequest(req, res, cloudbreakClient.get);
+});
+
 app.get('*', function(req,res){
   proxyCloudbreakRequest(req, res, cloudbreakClient.get);
+});
+
+app.post('*/sultans/*', function(req,res){
+    proxySultansRequest(req, res, cloudbreakClient.post);
 });
 
 app.post('*', function(req,res){
   proxyCloudbreakRequest(req, res, cloudbreakClient.post);
 });
 
+app.delete('*/sultans/*', function(req,res){
+    proxySultansRequest(req, res, cloudbreakClient.delete);
+});
+
 app.delete('*', function(req,res){
   proxyCloudbreakRequest(req, res, cloudbreakClient.delete);
+});
+
+app.put('*/sultans/*', function(req,res){
+    proxySultansRequest(req, res, cloudbreakClient.put);
 });
 
 app.put('*', function(req,res){
@@ -186,6 +204,17 @@ function proxyCloudbreakRequest(req, res, method){
   method(cloudbreakAddress + req.url, cbRequestArgs, function(data,response){
     res.status(response.statusCode).send(data);
   });
+}
+
+function proxySultansRequest(req, res, method){
+    if (req.body){
+        cbRequestArgs.data = req.body;
+    }
+    cbRequestArgs.headers.Authorization = "Bearer " + req.session.token;
+    var req_url = req.url.replace("/sultans/", "");
+    method(sultansAddress + req_url, cbRequestArgs, function(data, response){
+        res.status(response.statusCode).send(data);
+    });
 }
 
 // errors  =====================================================================
