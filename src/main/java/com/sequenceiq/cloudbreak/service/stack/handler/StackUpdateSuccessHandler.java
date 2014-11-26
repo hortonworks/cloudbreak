@@ -57,13 +57,15 @@ public class StackUpdateSuccessHandler implements Consumer<Event<StackUpdateSucc
             stack.getInstanceMetaData().removeAll(metadataToRemove);
             stackUpdater.updateStackMetaData(stackId, stack.getInstanceMetaData());
             LOGGER.info("Successfully removed metadata of instances '{}' in stack.", instanceIds);
-            eventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_CHANGED.name(), "Termination of instances finished.");
+            eventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_CHANGED.name(),
+                    "Billing changed due to downscaling of cluster infrastructure.");
         } else {
             stackUpdater.updateNodeCount(stackId, stack.getNodeCount() + instanceIds.size());
-            eventService.fireCloudbreakEvent(stackId, BillingStatus.BILLING_CHANGED.name(), "Creation of new instances finished.");
+            eventService.fireCloudbreakEvent(stackId, BillingStatus.BILLING_CHANGED.name(), "Billing changed due to upscaling of cluster infrastructure.");
         }
         stackUpdater.updateMetadataReady(stackId, true);
-        stackUpdater.updateStackStatus(stackId, Status.AVAILABLE);
+        String statusCause = String.format("%sscaling of cluster infrastructure was successfully.", updateSuccess.isRemoveInstances() ? "Down" : "Up");
+        stackUpdater.updateStackStatus(stackId, Status.AVAILABLE, statusCause);
 
     }
 

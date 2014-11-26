@@ -12,15 +12,12 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsSuccess;
-import com.sequenceiq.cloudbreak.websocket.WebsocketService;
-import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
 import reactor.event.Event;
 import reactor.function.Consumer;
@@ -29,9 +26,6 @@ import reactor.function.Consumer;
 public class UpdateAmbariHostsSuccessHandler implements Consumer<Event<UpdateAmbariHostsSuccess>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UpdateAmbariHostsSuccessHandler.class);
-
-    @Autowired
-    private WebsocketService websocketService;
 
     @Autowired
     private ClusterRepository clusterRepository;
@@ -62,9 +56,9 @@ public class UpdateAmbariHostsSuccessHandler implements Consumer<Event<UpdateAmb
             }
             metadataRepository.save(metadataEntry);
         }
-        stackUpdater.updateStackStatus(stack.getId(), Status.AVAILABLE, "");
-        websocketService.sendToTopicUser(cluster.getOwner(), WebsocketEndPoint.CLUSTER,
-                new StatusMessage(data.getClusterId(), cluster.getName(), Status.AVAILABLE.name()));
+        String cause = data.isDecommision() ? "Down" : "Up";
+        String statusReason =  String.format("%sscale of cluster finished successfully. AMBARI_IP:%s", cause, stack.getAmbariIp());
+        stackUpdater.updateStackStatus(stack.getId(), Status.AVAILABLE, statusReason);
     }
 
 }

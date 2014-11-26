@@ -18,7 +18,6 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -29,8 +28,6 @@ import com.sequenceiq.cloudbreak.service.stack.event.StackOperationFailure;
 import com.sequenceiq.cloudbreak.service.stack.resource.DeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
-import com.sequenceiq.cloudbreak.websocket.WebsocketService;
-import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
 import reactor.event.Event;
 import reactor.function.Consumer;
@@ -42,9 +39,6 @@ public class StackCreationFailureHandler implements Consumer<Event<StackOperatio
 
     @Autowired
     private RetryingStackUpdater stackUpdater;
-
-    @Autowired
-    private WebsocketService websocketService;
 
     @Autowired
     private AmbariClusterInstallerMailSenderService ambariClusterInstallerMailSenderService;
@@ -117,8 +111,6 @@ public class StackCreationFailureHandler implements Consumer<Event<StackOperatio
         } catch (Exception ex) {
             LOGGER.error(String.format("Stack rollback failed on {} stack: ", stack.getId()), ex);
         }
-        websocketService.sendToTopicUser(stack.getOwner(), WebsocketEndPoint.STACK,
-                new StatusMessage(stackId, stack.getName(), Status.CREATE_FAILED.name(), detailedMessage));
         stackUpdater.updateStackStatusReason(stackId, detailedMessage);
         cloudbreakEventService.fireCloudbreakEvent(stackId, BillingStatus.BILLING_STOPPED.name(), "Stack creation failed.");
     }

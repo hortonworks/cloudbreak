@@ -150,14 +150,14 @@ public class DefaultStackService implements StackService {
             if (!Status.STOPPED.equals(stackStatus)) {
                 throw new BadRequestException(String.format("Cannot update the status of stack '%s' to STARTED, because it isn't in STOPPED state.", stackId));
             }
-            stackUpdater.updateStackStatus(stackId, Status.START_IN_PROGRESS);
+            stackUpdater.updateStackStatus(stackId, Status.START_IN_PROGRESS, "Cluster infrastructure is now starting.");
             LOGGER.info("Publishing {} event", ReactorConfig.STACK_STATUS_UPDATE_EVENT);
             reactor.notify(ReactorConfig.STACK_STATUS_UPDATE_EVENT,
                     Event.wrap(new StackStatusUpdateRequest(stack.getTemplate().cloudPlatform(), stack.getId(), status)));
         } else {
             Status clusterStatus = clusterRepository.findOneWithLists(stack.getCluster().getId()).getStatus();
             if (Status.STOP_IN_PROGRESS.equals(clusterStatus)) {
-                stackUpdater.updateStackStatus(stackId, Status.STOP_REQUESTED);
+                stackUpdater.updateStackStatus(stackId, Status.STOP_REQUESTED, "Services are stopping, stopping of cluster infrastructure has been requested.");
             } else {
                 if (!Status.AVAILABLE.equals(stackStatus)) {
                     throw new BadRequestException(
@@ -198,11 +198,13 @@ public class DefaultStackService implements StackService {
             }
             if (removeableHosts < -1 * scalingAdjustment) {
                 throw new BadRequestException(
-                        String.format("There are %s removable hosts on stack '%s' but %s were requested. Decomission nodes from the cluster first!",
+                        String.format("There are %s removable hosts on stack '%s' but %s were requested. Decommission nodes from the cluster first!",
                                 removeableHosts, stackId, scalingAdjustment * -1));
             }
         }
-        stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS);
+        String statusMessage = scalingAdjustment > 0 ? "Adding '%s' new instance(s) to the cluster infrastructure."
+                : "Removing '%s' instance(s) from the cluster infrastructure.";
+        stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS, String.format(statusMessage, Math.abs(scalingAdjustment)));
         LOGGER.info("Publishing {} event [scalingAdjustment: '{}']", ReactorConfig.UPDATE_INSTANCES_REQUEST_EVENT, scalingAdjustment);
         reactor.notify(ReactorConfig.UPDATE_INSTANCES_REQUEST_EVENT,
                 Event.wrap(new UpdateInstancesRequest(stack.getTemplate().cloudPlatform(), stack.getId(), scalingAdjustment)));

@@ -8,13 +8,10 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.event.StackOperationFailure;
-import com.sequenceiq.cloudbreak.websocket.WebsocketService;
-import com.sequenceiq.cloudbreak.websocket.message.StatusMessage;
 
 import reactor.event.Event;
 import reactor.function.Consumer;
@@ -30,9 +27,6 @@ public class StackUpdateFailureHandler implements Consumer<Event<StackOperationF
     @Autowired
     private StackRepository stackRepository;
 
-    @Autowired
-    private WebsocketService websocketService;
-
     @Override
     public void accept(Event<StackOperationFailure> event) {
         StackOperationFailure stackOperationFailure = event.getData();
@@ -43,8 +37,6 @@ public class StackUpdateFailureHandler implements Consumer<Event<StackOperationF
         String detailedMessage = stackOperationFailure.getDetailedMessage();
         stackUpdater.updateMetadataReady(stackId, true);
         Stack stack = stackUpdater.updateStackStatus(stackId, Status.AVAILABLE, "Stack update failed. " + detailedMessage);
-        websocketService.sendToTopicUser(stack.getOwner(), WebsocketEndPoint.STACK,
-                new StatusMessage(stackId, stack.getName(), "UPDATE_FAILED", detailedMessage));
         stackUpdater.updateStackStatusReason(stack.getId(), detailedMessage);
     }
 

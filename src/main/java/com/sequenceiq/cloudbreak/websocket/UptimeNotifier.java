@@ -1,10 +1,7 @@
 package com.sequenceiq.cloudbreak.websocket;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -12,16 +9,15 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.WebsocketEndPoint;
+import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.websocket.message.UptimeMessage;
+import com.sequenceiq.cloudbreak.service.notification.Notification;
+import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
 
 @Component
 public class UptimeNotifier {
-
-    @Autowired
-    private WebsocketService websocketService;
+    private static final String UPTIME_NOTIFICATION = "UPTIME_NOTIFICATION";
 
     @Autowired
     private ClusterRepository clusterRepository;
@@ -29,27 +25,34 @@ public class UptimeNotifier {
     @Autowired
     private StackRepository stackRepository;
 
+    @Autowired
+    private NotificationSender notificationSender;
+
+
     @Scheduled(fixedDelay = 60000)
     public void sendUptime() {
-        Map<String, List<UptimeMessage>> uptimes = new HashMap<>();
         List<Cluster> clusters = (List<Cluster>) clusterRepository.findAll();
         long now = new Date().getTime();
         for (Cluster cluster : clusters) {
             Stack stack = stackRepository.findStackForCluster(cluster.getId());
             if (stack != null) {
-                Long uptime = cluster.getCreationFinished() == null ? 0L : now - cluster.getCreationFinished();
-                if (uptimes.containsKey(stack.getOwner())) {
-                    uptimes.get(stack.getOwner()).add(new UptimeMessage(stack.getId(), uptime));
-                } else {
-                    uptimes.put(stack.getOwner(), new ArrayList<UptimeMessage>());
-                    uptimes.get(stack.getOwner()).add(new UptimeMessage(stack.getId(), uptime));
-                }
+                Long uptime = cluster.getUpSince() == null || !Status.AVAILABLE.equals(cluster.getStatus()) ? 0L : now - cluster.getUpSince();
+                Notification notification = createUptimeNotification(stack, uptime);
+                notificationSender.send(notification);
             }
         }
-        if (!uptimes.isEmpty()) {
-            for (Map.Entry<String, List<UptimeMessage>> longListEntry : uptimes.entrySet()) {
-                websocketService.sendToTopicUser(longListEntry.getKey(), WebsocketEndPoint.UPTIME, longListEntry.getValue());
-            }
-        }
+    }
+
+    private Notification createUptimeNotification(Stack stack, Long uptime) {
+        Notification notification = new Notification();
+        notification.setOwner(stack.getOwner());
+        notification.setAccount(stack.getAccount());
+        notification.setStackId(stack.getId());
+        notification.setEventType(UPTIME_NOTIFICATION);
+        notification.setEventMessage(String.valueOf(uptime));
+        notification.setCloud(stack.getCredential().getCloudPlatform().toString());
+        notification.setBlueprintId(stack.getCluster().getBlueprint().getId());
+        notification.setBlueprintName(stack.getCluster().getBlueprint().getBlueprintName());
+        return notification;
     }
 }

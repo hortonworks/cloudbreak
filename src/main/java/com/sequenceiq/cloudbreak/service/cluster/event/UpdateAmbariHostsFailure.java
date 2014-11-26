@@ -4,25 +4,23 @@ public class UpdateAmbariHostsFailure {
 
     private Long clusterId;
     private String detailedMessage;
+    private boolean addingNodes;
 
-    public UpdateAmbariHostsFailure(Long clusterId, String detailedMessage) {
+    public UpdateAmbariHostsFailure(Long clusterId, String detailedMessage, boolean addingNodes) {
         this.clusterId = clusterId;
         this.detailedMessage = detailedMessage;
+        this.addingNodes = addingNodes;
     }
 
     public Long getClusterId() {
         return clusterId;
     }
 
-    public void setClusterId(Long clusterId) {
-        this.clusterId = clusterId;
-    }
-
     public String getDetailedMessage() {
         return detailedMessage;
     }
 
-    public void setDetailedMessage(String detailedMessage) {
-        this.detailedMessage = detailedMessage;
+    public boolean isAddingNodes() {
+        return addingNodes;
     }
 }

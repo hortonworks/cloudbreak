@@ -11,7 +11,6 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.service.ServiceTestUtils;
-import com.sequenceiq.cloudbreak.websocket.WebsocketService;
 
 public class BlueprintServiceTest {
     @InjectMocks
@@ -25,9 +24,6 @@ public class BlueprintServiceTest {
 
     @Mock
     private BlueprintConverter blueprintConverter;
-
-    @Mock
-    private WebsocketService websocketService;
 
     @Mock
     private BlueprintJson blueprintJson;

@@ -97,6 +97,7 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
         Stack stack = stackRepository.findOneWithLists(stackId);
         MDCBuilder.buildMdcContext(stack);
         if (StatusRequest.STOPPED.equals(statusRequest)) {
+            cloudbreakEventService.fireCloudbreakEvent(stackId, Status.STOP_IN_PROGRESS.name(), "Cluster infrastructure is stopping.");
             boolean stopped;
             if (cloudPlatform.isWithTemplate()) {
                 CloudPlatformConnector connector = cloudPlatformConnectors.get(cloudPlatform);
@@ -106,11 +107,11 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
             }
             if (stopped) {
                 LOGGER.info("Update stack state to: {}", Status.STOPPED);
-                stackUpdater.updateStackStatus(stackId, Status.STOPPED);
-                cloudbreakEventService.fireCloudbreakEvent(stackId, BillingStatus.BILLING_STOPPED.name(), "Stack stopped.");
+                stackUpdater.updateStackStatus(stackId, Status.STOPPED, "Cluster infrastructure stopped successfully.");
+                cloudbreakEventService.fireCloudbreakEvent(stackId, BillingStatus.BILLING_STOPPED.name(), "Cluster infrastructure stopped.");
             } else {
                 LOGGER.info("Update stack state to: {}", Status.STOP_FAILED);
-                stackUpdater.updateStackStatus(stackId, Status.STOP_FAILED);
+                stackUpdater.updateStackStatus(stackId, Status.STOP_FAILED, "Unfortunately the cluster infrastructure could not be stopped.");
             }
         } else {
             boolean started;
@@ -121,25 +122,27 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
                 started = startStopResources(cloudPlatform, stack, true);
             }
             if (started) {
-                cloudbreakEventService.fireCloudbreakEvent(stackId, BillingStatus.BILLING_STARTED.name(), "Stack started.");
                 waitForAmbariToStart(stack);
                 Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
                 LOGGER.info("Update stack state to: {}", Status.AVAILABLE);
-                stackUpdater.updateStackStatus(stackId, Status.AVAILABLE);
+                String statusReason = "Cluster infrastructure is available, starting of services has been requested. AMBARI_IP:" + stack.getAmbariIp();
+                stackUpdater.updateStackStatus(stackId, Status.AVAILABLE, statusReason);
                 if (cluster != null && Status.START_REQUESTED.equals(cluster.getStatus())) {
                     boolean hostsJoined = waitForHostsToJoin(stack);
                     if (hostsJoined) {
+                        cloudbreakEventService.fireCloudbreakEvent(stackId, Status.START_IN_PROGRESS.name(), "Services are starting.");
                         reactor.notify(ReactorConfig.CLUSTER_STATUS_UPDATE_EVENT,
                                 Event.wrap(new ClusterStatusUpdateRequest(stack.getId(), statusRequest)));
                     } else {
                         cluster.setStatus(Status.START_FAILED);
                         stack.setCluster(cluster);
                         stackRepository.save(stack);
+                        stackUpdater.updateStackStatus(stackId, Status.AVAILABLE, "Services could not start because host(s) could not join.");
                     }
                 }
             } else {
                 LOGGER.info("Update stack state to: {}", Status.START_FAILED);
-                stackUpdater.updateStackStatus(stackId, Status.START_FAILED);
+                stackUpdater.updateStackStatus(stackId, Status.START_FAILED, "Unfortunately the cluster infrastructure could not start.");
             }
         }
     }

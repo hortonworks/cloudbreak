@@ -20,6 +20,8 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.CloudbreakEventRepository;
 import com.sequenceiq.cloudbreak.repository.CloudbreakEventSpecifications;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.notification.Notification;
+import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
 
 import reactor.core.Reactor;
 import reactor.event.Event;
@@ -37,6 +39,9 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     @Autowired
     private Reactor reactor;
 
+    @Autowired
+    private NotificationSender notificationSender;
+
     @Override
     public void fireCloudbreakEvent(Long stackId, String eventType, String eventMessage) {
         CloudbreakEventData eventData = new CloudbreakEventData(stackId, eventType, eventMessage);
@@ -49,12 +54,14 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     @Override
     public CloudbreakEvent createStackEvent(Long stackId, String eventType, String eventMessage) {
         Stack stack = stackRepository.findById(stackId);
-        MDCBuilder.buildMdcContext(stack);
-        LOGGER.debug("Create stack event for stackId {}, eventType {}, eventMessage {}", stackId, eventType, eventMessage);
         CloudbreakEvent stackEvent = createStackEvent(stack, eventType, eventMessage);
-        MDCBuilder.buildMdcContext(stackEvent);
         stackEvent = eventRepository.save(stackEvent);
-        LOGGER.debug("Stack event saved: {}", stackEvent);
+
+        Notification notification = new Notification(stackEvent);
+        notificationSender.send(notification);
+
+        MDCBuilder.buildMdcContext(stackEvent);
+        LOGGER.info("Event and notification from the event were created: {}", stackEvent);
         return stackEvent;
     }
 
