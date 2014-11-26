@@ -11,14 +11,18 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             "CREATE_IN_PROGRESS": "state2-run-blink",
             "UPDATE_IN_PROGRESS": "state2-run-blink",
             "AVAILABLE": "state5-run",
-            "CREATE_FAILED": "state3-stop",
             "DELETE_IN_PROGRESS": "state0-stop-blink",
             "DELETE_COMPLETED": "state3-stop",
             "STOPPED": "state4-ready",
             "START_REQUESTED": "state1-ready-blink",
             "START_IN_PROGRESS": "state1-ready-blink",
             "STOP_REQUESTED": "state1-ready-blink",
-            "STOP_IN_PROGRESS": "state1-ready-blink"
+            "STOP_IN_PROGRESS": "state1-ready-blink",
+            "CREATE_FAILED": "state3-stop",
+            "START_FAILED": "state3-stop",
+            "DELETE_FAILED": "state3-stop",
+            "UPDATE_FAILED": "state3-stop",
+            "STOP_FAILED": "state3-stop"
         }
 
         $rootScope.buttonStyles = {
@@ -26,14 +30,18 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             "CREATE_IN_PROGRESS": "fa-pause",
             "UPDATE_IN_PROGRESS": "fa-pause",
             "AVAILABLE": "fa-stop",
-            "CREATE_FAILED": "fa-play",
             "DELETE_IN_PROGRESS": "fa-pause",
             "DELETE_COMPLETED": "fa-stop",
             "STOPPED": "fa-play",
             "START_REQUESTED": "fa-refresh",
             "START_IN_PROGRESS": "fa-refresh",
             "STOP_REQUESTED": "fa-refresh",
-            "STOP_IN_PROGRESS": "fa-refresh"
+            "STOP_IN_PROGRESS": "fa-refresh",
+            "CREATE_FAILED": "fa-play",
+            "START_FAILED": "fa-play",
+            "DELETE_FAILED": "fa-play",
+            "UPDATE_FAILED": "fa-play",
+            "STOP_FAILED": "fa-play"
         }
 
         $rootScope.activeCluster = {};
@@ -92,7 +100,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         }
 
         $scope.changeActiveCluster = function (clusterId) {
-            $scope.loadEvents();
             $rootScope.activeCluster = $filter('filter')($rootScope.clusters, { id: clusterId })[0];
             $rootScope.activeClusterEvents = $filter('filter')($rootScope.events,  { stackId: clusterId});
             $rootScope.activeClusterBlueprint = $filter('filter')($rootScope.blueprints, { id: $rootScope.activeCluster.blueprintId})[0];
@@ -161,11 +168,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             };
         }
 
-        var refresher = $interval(getUluwatuClusters, 10000);
-        $scope.$on('$destroy', function() {
-            $interval.cancel(refresher);
-        });
-
         $scope.showDetails = function () {
             $scope.detailsShow = true;
             $scope.periscopeShow = false;
@@ -209,12 +211,11 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             }
         }
 
-        $rootScope.events = {};
+        $rootScope.events = [];
 
         $scope.loadEvents = function () {
             $rootScope.events = UserEvents.query(function(success) {
                 angular.forEach(success, function(item) {
-                    item.eventTimestamp =  new Date(item.eventTimestamp).toISOString();
                     item.customTimeStamp =  new Date(item.eventTimestamp).toLocaleDateString() + " " + new Date(item.eventTimestamp).toLocaleTimeString();
                 });
             });
