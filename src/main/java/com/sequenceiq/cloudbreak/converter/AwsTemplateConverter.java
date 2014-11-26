@@ -27,7 +27,7 @@ public class AwsTemplateConverter extends AbstractConverter<TemplateJson, AwsTem
         templateJson.setVolumeSize(entity.getVolumeSize());
         Map<String, Object> props = new HashMap<>();
         props.put(AwsTemplateParam.REGION.getName(), entity.getRegion().toString());
-        props.put(AwsTemplateParam.AMI_ID.getName(), entity.getAmiId());
+        props.put(AwsTemplateParam.AMI_ID.getName(), "ami-a82d9bdf");
         props.put(AwsTemplateParam.INSTANCE_TYPE.getName(), entity.getInstanceType().name());
         props.put(AwsTemplateParam.SSH_LOCATION.getName(), entity.getSshLocation());
         props.put(AwsTemplateParam.VOLUME_TYPE.getName(), entity.getVolumeType());
@@ -45,7 +45,7 @@ public class AwsTemplateConverter extends AbstractConverter<TemplateJson, AwsTem
         AwsTemplate awsTemplate = new AwsTemplate();
         awsTemplate.setName(json.getName());
         awsTemplate.setRegion(Regions.valueOf(String.valueOf(json.getParameters().get(AwsTemplateParam.REGION.getName()))));
-        awsTemplate.setAmiId(String.valueOf(json.getParameters().get(AwsTemplateParam.AMI_ID.getName())));
+        awsTemplate.setAmiId("ami-a82d9bdf");
         awsTemplate.setInstanceType(InstanceType.valueOf(String.valueOf(json.getParameters().get(AwsTemplateParam.INSTANCE_TYPE.getName()))));
         String sshLocation = json.getParameters().containsKey(AwsTemplateParam.SSH_LOCATION.getName())
                 ? String.valueOf(json.getParameters().get(AwsTemplateParam.SSH_LOCATION.getName())) : DEFAULT_SSH_LOCATION;
