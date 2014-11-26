@@ -2,7 +2,7 @@
     <label class="col-sm-3 control-label" for="awscname">Name</label>
 
     <div class="col-sm-9">
-        <input type="text" ng-pattern="/^[a-zA-Z][-a-zA-Z0-9]*$/" class="form-control" ng-model="credentialAws.name" id="awscname" name="awscname" ng-minlength="5" ng-maxlength="100" required placeholder="min. 5 max. 100 char">
+        <input type="text" ng-pattern="/^[a-z][-a-z0-9]*$/" class="form-control" ng-model="credentialAws.name" id="awscname" name="awscname" ng-minlength="5" ng-maxlength="100" required placeholder="min. 5 max. 100 char">
         <div class="help-block" ng-show="awsCredentialForm.awscname.$dirty && awsCredentialForm.awscname.$invalid">
             <i class="fa fa-warning"></i> {{error_msg.credential_name_invalid}}
         </div>
