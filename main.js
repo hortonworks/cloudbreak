@@ -837,7 +837,7 @@ app.post('/activate', function(req, res){
     var activate = req.body.activate;
     var email = req.body.email
 
-    if (activate != null && (activate == 'true' || activate == 'false') && validator.validateEmail(email)) {
+    if (activate != null && (activate === true || activate === false) && validator.validateEmail(email)) {
         var authHeader = req.headers['authorization']
         if (authHeader != null && authHeader.split(' ').length > 1) {
          var token = authHeader.split(' ')[1];
