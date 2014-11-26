@@ -252,6 +252,7 @@
         "VpcId" : { "Ref" : "VPC" },
         "SecurityGroupIngress" : [
 		  { "IpProtocol" : "tcp", "FromPort" : "80", "ToPort" : "80", "CidrIp" : "0.0.0.0/0"} ,
+		  { "IpProtocol" : "tcp", "FromPort" : "8500", "ToPort" : "8500", "CidrIp" : "0.0.0.0/0"} ,
 		  { "IpProtocol" : "tcp", "FromPort" : "8080", "ToPort" : "8080", "CidrIp" : "0.0.0.0/0"} ,
 		  { "IpProtocol" : "tcp", "FromPort" : "8088", "ToPort" : "8088", "CidrIp" : "0.0.0.0/0"} ,
 		  { "IpProtocol" : "tcp", "FromPort" : "8050", "ToPort" : "8050", "CidrIp" : "0.0.0.0/0"} ,

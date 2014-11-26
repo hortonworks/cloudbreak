@@ -16,7 +16,6 @@ public class MetaDataConverter extends AbstractConverter<InstanceMetaDataJson, I
         metaDataJson.setVolumeCount(entity.getVolumeCount());
         metaDataJson.setAmbariServer(entity.getAmbariServer());
         metaDataJson.setInstanceId(entity.getInstanceId());
-        metaDataJson.setInstanceIndex(entity.getInstanceIndex());
         metaDataJson.setDockerSubnet(entity.getDockerSubnet());
         metaDataJson.setLongName(entity.getLongName());
         metaDataJson.setContainerCount(entity.getContainerCount());

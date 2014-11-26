@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -8,12 +9,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.ecwid.consul.v1.ConsulClient;
+import com.ecwid.consul.v1.QueryParams;
+import com.ecwid.consul.v1.catalog.model.CatalogService;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.event.AmbariRoleAllocationComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.StackOperationFailure;
@@ -27,6 +32,9 @@ public class AmbariRoleAllocator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariRoleAllocator.class);
     private static final int LAST = 3;
+    private static final String AMBARI_SERVICE = "ambari-8080";
+    private static final int POLLING_INTERVAL = 5000;
+    private static final int MAX_POLLING_ATTEMPTS = 10000;
 
     @Autowired
     private StackRepository stackRepository;
@@ -40,6 +48,9 @@ public class AmbariRoleAllocator {
     @Autowired
     private GccStackUtil gccStackUtil;
 
+    @Autowired
+    private PollingService<ConsulService> consulPollingService;
+
     public void allocateRoles(Long stackId, Set<CoreInstanceMetaData> coreInstanceMetaData) {
         try {
             Stack stack = stackRepository.findById(stackId);
@@ -50,12 +61,14 @@ public class AmbariRoleAllocator {
                             "Size of the collected metadata set does not equal the node count of the stack. [metadata size=%s] [nodecount=%s]",
                             coreInstanceMetaData.size(), stack.getNodeCount()));
                 }
-                Set<InstanceMetaData> instanceMetaData = prepareInstanceMetaData(stack, coreInstanceMetaData);
-                stackUpdater.updateStackMetaData(stackId, instanceMetaData);
+                Set<InstanceMetaData> instancesMetaData = prepareInstanceMetaData(stack, coreInstanceMetaData);
+                stackUpdater.updateStackMetaData(stackId, instancesMetaData);
                 stackUpdater.updateMetadataReady(stackId, true);
+                String privateAmbariAddress = getAmbariAddressFromConsul(instancesMetaData);
+                String publicAmbariAddress = updateAmbariInstanceMetadata(stackId, privateAmbariAddress, instancesMetaData);
                 LOGGER.info("Publishing {} event", ReactorConfig.AMBARI_ROLE_ALLOCATION_COMPLETE_EVENT);
                 reactor.notify(ReactorConfig.AMBARI_ROLE_ALLOCATION_COMPLETE_EVENT, Event.wrap(new AmbariRoleAllocationComplete(stack,
-                        getAmbariIp(instanceMetaData))));
+                        publicAmbariAddress)));
             } else {
                 LOGGER.info("Metadata is already created, ignoring '{}' event.", ReactorConfig.METADATA_SETUP_COMPLETE_EVENT);
             }
@@ -91,13 +104,28 @@ public class AmbariRoleAllocator {
         }
     }
 
-    private String getAmbariIp(Set<InstanceMetaData> instanceMetaDatas) {
-        for (InstanceMetaData instanceMetaData : instanceMetaDatas) {
-            if (instanceMetaData.getAmbariServer()) {
+    private String getAmbariAddressFromConsul(Set<InstanceMetaData> instancesMetaData) {
+        InstanceMetaData metaData = instancesMetaData.iterator().next();
+        ConsulClient consulClient = new ConsulClient(metaData.getPublicIp());
+        consulPollingService.pollWithTimeout(
+                new ConsulServiceCheckerTask(),
+                new ConsulService(consulClient, AMBARI_SERVICE),
+                POLLING_INTERVAL,
+                MAX_POLLING_ATTEMPTS);
+        List<CatalogService> catalog = consulClient.getCatalogService(AMBARI_SERVICE, QueryParams.DEFAULT).getValue();
+        return catalog.get(0).getAddress();
+    }
+
+    private String updateAmbariInstanceMetadata(long stackId, String ambariAddress, Set<InstanceMetaData> instancesMetaData) {
+        for (InstanceMetaData instanceMetaData : instancesMetaData) {
+            if (instanceMetaData.getPrivateIp().equalsIgnoreCase(ambariAddress)) {
+                instanceMetaData.setAmbariServer(true);
+                instanceMetaData.setRemovable(false);
+                stackUpdater.updateStackMetaData(stackId, instancesMetaData);
                 return instanceMetaData.getPublicIp();
             }
         }
-        return null;
+        throw new WrongMetadataException(String.format("Public IP of Ambari server cannot be null [stack: '%s']", stackId));
     }
 
     private Set<InstanceMetaData> prepareInstanceMetaData(Stack stack, Set<CoreInstanceMetaData> coreInstanceMetaData) {
@@ -106,8 +134,6 @@ public class AmbariRoleAllocator {
 
     private Set<InstanceMetaData> prepareInstanceMetaData(Stack stack, Set<CoreInstanceMetaData> coreInstanceMetaData, int startIndex) {
         Set<InstanceMetaData> instanceMetaData = new HashSet<>();
-        int instanceIndex = startIndex;
-        String ambariIp = null;
         for (CoreInstanceMetaData coreInstanceMetaDataEntry : coreInstanceMetaData) {
             InstanceMetaData instanceMetaDataEntry = new InstanceMetaData();
             instanceMetaDataEntry.setPrivateIp(coreInstanceMetaDataEntry.getPrivateIp());
@@ -115,22 +141,10 @@ public class AmbariRoleAllocator {
             instanceMetaDataEntry.setInstanceId(coreInstanceMetaDataEntry.getInstanceId());
             instanceMetaDataEntry.setVolumeCount(coreInstanceMetaDataEntry.getVolumeCount());
             instanceMetaDataEntry.setLongName(coreInstanceMetaDataEntry.getLongName());
-            instanceMetaDataEntry.setInstanceIndex(instanceIndex);
             instanceMetaDataEntry.setDockerSubnet(String.format("172.18.%s.1", coreInstanceMetaDataEntry.getPrivateIp().split("\\.")[LAST]));
             instanceMetaDataEntry.setContainerCount(coreInstanceMetaDataEntry.getContainerCount());
-            if (instanceIndex == 0) {
-                instanceMetaDataEntry.setAmbariServer(Boolean.TRUE);
-                instanceMetaDataEntry.setRemovable(false);
-                ambariIp = instanceMetaDataEntry.getPublicIp();
-                if (ambariIp == null) {
-                    throw new WrongMetadataException(String.format("Public IP of Ambari server cannot be null [stack: '%s', instanceId: '%s' ]",
-                            stack.getId(), coreInstanceMetaDataEntry.getInstanceId()));
-                }
-            } else {
-                instanceMetaDataEntry.setAmbariServer(Boolean.FALSE);
-                instanceMetaDataEntry.setRemovable(true);
-            }
-            instanceIndex++;
+            instanceMetaDataEntry.setAmbariServer(Boolean.FALSE);
+            instanceMetaDataEntry.setRemovable(true);
             instanceMetaDataEntry.setStack(stack);
             instanceMetaData.add(instanceMetaDataEntry);
         }

@@ -150,6 +150,7 @@ dependencies {
         exclude group: 'org.slf4j';
     }
     compile 'org.apache.commons:commons-lang3:3.3.2'
+    compile 'com.ecwid:consul:1.0'
     compile 'org.codehaus.jettison:jettison:1.3.5'
 
     compile 'commons-io:commons-io:2.4'
