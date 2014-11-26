@@ -5,10 +5,11 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestOperations;
 
 import com.sequenceiq.cloudbreak.domain.Subscription;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -21,10 +22,13 @@ public class HttpNotificationSender implements NotificationSender {
     @Autowired
     private SubscriptionRepository subscriptionRepository;
 
+    @Autowired
+    @Qualifier("autoSSLAcceptorRestTemplate")
+    private RestOperations restTemplate;
+
     @Override
     public void send(Notification notification) {
         List<Subscription> subscriptions = (List<Subscription>) subscriptionRepository.findAll();
-        RestTemplate restTemplate = new RestTemplate();
         HttpHeaders requestHeaders = new HttpHeaders();
 
         MDCBuilder.buildMdcContext();

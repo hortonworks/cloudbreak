@@ -10,6 +10,7 @@ import java.util.Map;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpEntity;
@@ -38,6 +39,7 @@ public class RemoteUserDetailsService implements UserDetailsService {
     private String identityServerUrl;
 
     @Autowired
+    @Qualifier("restTemplate")
     private RestOperations restTemplate;
 
     @Override

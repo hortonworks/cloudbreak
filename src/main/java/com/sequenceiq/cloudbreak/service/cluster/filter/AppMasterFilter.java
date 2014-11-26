@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestOperations;
@@ -25,6 +26,7 @@ public class AppMasterFilter implements AmbariHostFilter {
     private static final String APP_NODE = "app";
 
     @Autowired
+    @Qualifier("restTemplate")
     private RestOperations restTemplate;
 
     @Override
