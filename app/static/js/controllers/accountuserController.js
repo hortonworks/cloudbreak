@@ -6,11 +6,12 @@ angular.module('uluwatuControllers').controller('accountuserController', ['$scop
     function ($scope, $rootScope, $filter, UserInvite, AccountUsers, ActivateAccountUsers) {
 
         initInvite();
+        $rootScope.accountUsers = {}
 
         $scope.inviteUser = function() {
             UserInvite.save({ invite_email: $scope.invite.mail }, function (result) {
+                $scope.accountUsers.push({active: false, username: $scope.invite.mail, idx:  $scope.invite.mail.toString().replace('.', '').replace('@', '')});
                 initInvite();
-                $scope.getUsers();
             }, function (error) {
                 $scope.modifyStatusMessage(error.data.message);
                 $scope.modifyStatusClass("has-error");
@@ -27,7 +28,8 @@ angular.module('uluwatuControllers').controller('accountuserController', ['$scop
 
         $scope.activateUser = function(activate, email) {
             ActivateAccountUsers.save({ activate: activate, email: email },  function (result) {
-                $scope.getUsers();
+                $filter('filter')($scope.accountUsers, { username: email })[0].active = activate;
+                //$scope.getUsers();
             }, function (error) {
                 $scope.modifyStatusMessage(error.data.message);
                 $scope.modifyStatusClass("has-error");
