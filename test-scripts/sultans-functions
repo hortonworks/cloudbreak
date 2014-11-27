@@ -1,0 +1,96 @@
+#!/bin/bash
+
+##### Usage: . sultans-functions ######
+
+: ${SL_CLIENT_ID:=sultans}
+: ${SL_CLIENT_SECRET:=sultanssecret}
+: ${SL_UAA_ADDRESS:=http://localhost:8090}
+
+sl-oauth-login() {
+   local sl_username=${1:?"usage: <username> <password>"}
+   local sl_password=${2:?"usage: <username> <password>"}
+   SL_USER_TOKEN=$(curl -iX POST -H "accept: application/x-www-form-urlencoded" -d 'credentials={"username":"'$sl_username'","password":"'$sl_password'"}' "$SL_UAA_ADDRESS/oauth/authorize?response_type=token&client_id=cloudbreak_shell&scope.0=openid&source=login&redirect_uri=http://cloudbreak.shell" | grep Location | cut -d'=' -f 2 | cut -d'&' -f 1)
+   if [ -n "SL_USER_TOKEN" ]; then
+     echo "User TOKEN is set to:"
+     echo $SL_USER_TOKEN
+   fi
+}
+
+sl-token() {
+    : ${SL_LOCATION:?"Please set the SL_LOCATION with sl-location function!"}
+    local client=$SL_CLIENT_ID:$SL_CLIENT_SECRET
+    local client_base64=$(echo -n $client|base64)
+    SL_TOKEN=$(curl -sX POST -H "Authorization: Basic $client_base64" $SL_UAA_ADDRESS/oauth/token?grant_type=client_credentials | jq '.access_token' | sed -e 's/^"//'  -e 's/"$//')
+    if [ -n "SL_TOKEN" ]; then
+       echo "TOKEN is set to:"
+       echo $SL_TOKEN
+    fi
+}
+
+sl-settings() {
+  cat <<EOF
+  SL_CLIENT_ID=$SL_CLIENT_ID
+  SL_CLIENT_SECRET=$SL_CLIENT_SECRET
+  SL_UAA_ADDRESS=$SL_UAA_ADDRESS
+  SL_TOKEN=$SL_TOKEN
+  SL_USER_TOKEN=$SL_USER_TOKEN
+  SL_LOCATION=$SL_LOCATION
+EOF
+}
+
+sl-location() {
+    SL_LOCATION=${1:?"usage: <http://hostname:port>"}
+    SL_LOCATION=$1
+}
+
+sl-delete-user() {
+   : ${SL_TOKEN:?"Please set the SL_TOKEN with sl-token function!"}
+   local user_id=${1:?"usage: <user-id> -> get it from sl-get-user-id function"}
+   curl -X DELETE -H "Authorization: Bearer $SL_TOKEN" "$SL_UAA_ADDRESS/Users/$user_id"
+}
+
+sl-register() {
+    : ${SL_LOCATION:?"Please set the SL_LOCATION with sl-location function!"}
+    local username=${1:?"usage: <email> <password> <company>"}
+    local password=${2:?"usage: <email> <password> <company>"}
+    local company=${3:?"usage: <email> <password> <company>"}
+    curl -X POST -H "Content-Type: application/json" -d '{"email": "'$username'", "password":"'$password'", "firstName":"default", "lastName":"default", "company":"'$company'"}' $SL_LOCATION/register
+}
+
+sl-activate() {
+    : ${SL_LOCATION:?"Please set the SL_LOCATION with sl-location function!"}
+    : ${SL_USER_TOKEN:?"Please set the SL_USER_TOKEN with sl-oauth-login function!"}
+    local email=${1:?"usage: <email>"}
+    local activate=${2:?"usage: <activate-flag> (true/false)"}
+    curl -sX POST -H "Content-Type: application/json" -H "Authorization: Bearer $SL_USER_TOKEN" -d '{"email": "'$email'", "activate" : '$activate'}' $SL_LOCATION/activate | jq .
+}
+
+sl-invite() {
+    : ${SL_LOCATION:?"Please set the SL_LOCATION with sl-location function!"}
+    : ${SL_USER_TOKEN:?"Please set the SL_USER_TOKEN with sl-oauth-login function!"}
+    local email=${1:?"usage: <email>"}
+    curl -sX POST -H "Content-Type: application/json" -H "Authorization: Bearer $SL_USER_TOKEN" -d '{"invite_email" : "'$email'"}' $SL_LOCATION/invite | jq .
+}
+
+sl-users() {
+    : ${SL_TOKEN:?"Please set the SL_TOKEN with sl-token function!"}
+    curl -X GET -H "Authorization: Bearer $SL_TOKEN" "$SL_UAA_ADDRESS/Users?attributes=id,userName" | jq .
+}
+
+sl-users-for-admin() {
+    : ${SL_USER_TOKEN:?"Please set the SL_USER_TOKEN with sl-oauth-login function!"}
+    : ${SL_LOCATION:?"Please set the SL_LOCATION with sl-location function!"}
+    curl -X GET -H "Authorization: Bearer $SL_USER_TOKEN" $SL_LOCATION/users | jq .
+}
+
+sl-get-user-id() {
+    : ${SL_TOKEN:?"Please set the SL_TOKEN with sl-token function!"}
+    local username=${1:?"usage: <email>"}
+    curl -X GET -H "Authorization: Bearer $SL_TOKEN" "$SL_UAA_ADDRESS/Users?attributes=id&filter=userName%20eq%20%27$username%27" | jq .resources[0].id | sed -e 's/^"//'  -e 's/"$//'
+}
+
+sl-user-data() {
+    : ${SL_TOKEN:?"Please set the SL_TOKEN with sl-token function!"}
+    local username=${1:?"usage: <email>"}
+    curl -X GET -H "Authorization: Bearer $SL_TOKEN" "$SL_UAA_ADDRESS/Users?attributes=id,userName,active,meta,emails,familyName,givenName,groups&filter=userName%20eq%20%27$username%27" | jq .resources[0]
+}
