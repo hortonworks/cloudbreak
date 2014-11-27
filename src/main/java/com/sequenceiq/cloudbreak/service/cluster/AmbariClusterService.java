@@ -140,7 +140,7 @@ public class AmbariClusterService implements ClusterService {
             verifyNodeCount(hostGroupAdjustment.getScalingAdjustment(), filteredHostList);
             AmbariClient ambariClient = clientService.create(stack);
             if (doesHostGroupContainDataNode(ambariClient, cluster.getBlueprint().getBlueprintName(), hostGroup)) {
-                downScaleCandidates = checkAndSortByAvailableSpace(ambariClient, hostGroupAdjustment.getScalingAdjustment(), filteredHostList);
+                downScaleCandidates = checkAndSortByAvailableSpace(stack, ambariClient, hostGroupAdjustment.getScalingAdjustment(), filteredHostList);
             } else {
                 downScaleCandidates = filteredHostList;
             }
@@ -282,11 +282,11 @@ public class AmbariClusterService implements ClusterService {
         }
     }
 
-    private List<HostMetadata> checkAndSortByAvailableSpace(AmbariClient client, int nodeCount, List<HostMetadata> filteredHostList) {
+    private List<HostMetadata> checkAndSortByAvailableSpace(Stack stack, AmbariClient client, int nodeCount, List<HostMetadata> filteredHostList) {
         int removeCount = Math.abs(nodeCount);
         Map<String, Map<Long, Long>> dfsSpace = client.getDFSSpace();
         Map<String, Long> sortedAscending = sortByUsedSpace(dfsSpace, false);
-        Map<String, Long> selectedNodes = selectNodes(sortedAscending, filteredHostList, removeCount);
+        Map<String, Long> selectedNodes = selectNodes(stack, sortedAscending, filteredHostList, removeCount);
         Map<String, Long> remainingNodes = removeSelected(sortedAscending, selectedNodes);
         long usedSpace = getSelectedUsage(selectedNodes);
         long remainingSpace = getRemainingSpace(remainingNodes, dfsSpace);
@@ -355,15 +355,19 @@ public class AmbariClusterService implements ClusterService {
         return copy;
     }
 
-    private Map<String, Long> selectNodes(Map<String, Long> sortedAscending, List<HostMetadata> filteredHostList, int removeCount) {
+    private Map<String, Long> selectNodes(Stack stack, Map<String, Long> sortedAscending, List<HostMetadata> filteredHostList, int removeCount) {
         Map<String, Long> select = new HashMap<>();
         int i = 0;
+        long stackId = stack.getId();
         for (String host : sortedAscending.keySet()) {
             if (i < removeCount) {
                 for (HostMetadata hostMetadata : filteredHostList) {
                     if (hostMetadata.getHostName().equalsIgnoreCase(host)) {
-                        select.put(host, sortedAscending.get(host));
-                        i++;
+                        InstanceMetaData instanceMetaData = instanceMetadataRepository.findHostInStack(stackId, host);
+                        if (!instanceMetaData.getAmbariServer()) {
+                            select.put(host, sortedAscending.get(host));
+                            i++;
+                        }
                         break;
                     }
                 }
