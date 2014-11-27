@@ -52,6 +52,7 @@ public class AmbariClusterService implements ClusterService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariClusterService.class);
     private static final String MASTER_CATEGORY = "MASTER";
+    private static final String DATANODE = "DATANODE";
     private static final double SAFETY_PERCENTAGE = 1.5;
 
     @Autowired
@@ -139,7 +140,7 @@ public class AmbariClusterService implements ClusterService {
             verifyNodeCount(hostGroupAdjustment.getScalingAdjustment(), filteredHostList);
             AmbariClient ambariClient = clientService.create(stack);
             if (doesHostGroupContainDataNode(ambariClient, cluster.getBlueprint().getBlueprintName(), hostGroup)) {
-                downScaleCandidates = checkAndSortByAvailableSpace(ambariClient, stack, hostGroupAdjustment.getScalingAdjustment(), filteredHostList);
+                downScaleCandidates = checkAndSortByAvailableSpace(ambariClient, hostGroupAdjustment.getScalingAdjustment(), filteredHostList);
             } else {
                 downScaleCandidates = filteredHostList;
             }
@@ -281,7 +282,7 @@ public class AmbariClusterService implements ClusterService {
         }
     }
 
-    private List<HostMetadata> checkAndSortByAvailableSpace(AmbariClient client, Stack stack, int nodeCount, List<HostMetadata> filteredHostList) {
+    private List<HostMetadata> checkAndSortByAvailableSpace(AmbariClient client, int nodeCount, List<HostMetadata> filteredHostList) {
         int removeCount = Math.abs(nodeCount);
         Map<String, Map<Long, Long>> dfsSpace = client.getDFSSpace();
         Map<String, Long> sortedAscending = sortByUsedSpace(dfsSpace, false);
@@ -374,7 +375,7 @@ public class AmbariClusterService implements ClusterService {
     }
 
     private boolean doesHostGroupContainDataNode(AmbariClient client, String blueprint, String hostGroup) {
-        return client.getBlueprintMap(blueprint).get(hostGroup).contains("DATANODE");
+        return client.getBlueprintMap(blueprint).get(hostGroup).contains(DATANODE);
     }
 
 }
