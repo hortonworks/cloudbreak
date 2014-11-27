@@ -1,11 +1,15 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
+import static com.sequenceiq.cloudbreak.service.cluster.DataNodeUtils.sortByUsedSpace;
+
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +52,7 @@ public class AmbariClusterService implements ClusterService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariClusterService.class);
     private static final String MASTER_CATEGORY = "MASTER";
+    private static final double SAFETY_PERCENTAGE = 1.5;
 
     @Autowired
     private StackRepository stackRepository;
@@ -123,16 +128,23 @@ public class AmbariClusterService implements ClusterService {
     @Override
     public void updateHosts(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment) {
         Stack stack = stackRepository.findOneWithLists(stackId);
-        MDCBuilder.buildMdcContext(stack.getCluster());
+        Cluster cluster = stack.getCluster();
+        MDCBuilder.buildMdcContext(cluster);
         boolean decommissionRequest = validateRequest(stack, hostGroupAdjustment);
         List<HostMetadata> downScaleCandidates = new ArrayList<>();
         if (decommissionRequest) {
-            Set<HostMetadata> hostsInHostGroup = hostMetadataRepository.findHostsInHostgroup(hostGroupAdjustment.getHostGroup(), stack.getCluster().getId());
+            String hostGroup = hostGroupAdjustment.getHostGroup();
+            Set<HostMetadata> hostsInHostGroup = hostMetadataRepository.findHostsInHostgroup(hostGroup, cluster.getId());
             List<HostMetadata> filteredHostList = hostFilterService.filterHostsForDecommission(stack, hostsInHostGroup);
             verifyNodeCount(hostGroupAdjustment.getScalingAdjustment(), filteredHostList);
-            downScaleCandidates = filteredHostList;
+            AmbariClient ambariClient = clientService.create(stack);
+            if (doesHostGroupContainDataNode(ambariClient, cluster.getBlueprint().getBlueprintName(), hostGroup)) {
+                downScaleCandidates = checkAndSortByAvailableSpace(ambariClient, stack, hostGroupAdjustment.getScalingAdjustment(), filteredHostList);
+            } else {
+                downScaleCandidates = filteredHostList;
+            }
         }
-        LOGGER.info("Cluster update requested [BlueprintId: {}]", stack.getCluster().getBlueprint().getId());
+        LOGGER.info("Cluster update requested [BlueprintId: {}]", cluster.getBlueprint().getId());
         LOGGER.info("Publishing {} event", ReactorConfig.UPDATE_AMBARI_HOSTS_REQUEST_EVENT);
         reactor.notify(ReactorConfig.UPDATE_AMBARI_HOSTS_REQUEST_EVENT, Event.wrap(
                 new UpdateAmbariHostsRequest(stackId, hostGroupAdjustment, downScaleCandidates, decommissionRequest)));
@@ -268,4 +280,101 @@ public class AmbariClusterService implements ClusterService {
             throw new BadRequestException("There is not enough node to downscale due to ApplicationMaster occupation");
         }
     }
+
+    private List<HostMetadata> checkAndSortByAvailableSpace(AmbariClient client, Stack stack, int nodeCount, List<HostMetadata> filteredHostList) {
+        int removeCount = Math.abs(nodeCount);
+        Map<String, Map<Long, Long>> dfsSpace = client.getDFSSpace();
+        Map<String, Long> sortedAscending = sortByUsedSpace(dfsSpace, false);
+        Map<String, Long> selectedNodes = selectNodes(sortedAscending, filteredHostList, removeCount);
+        Map<String, Long> remainingNodes = removeSelected(sortedAscending, selectedNodes);
+        long usedSpace = getSelectedUsage(selectedNodes);
+        long remainingSpace = getRemainingSpace(remainingNodes, dfsSpace);
+        if (remainingSpace < usedSpace * SAFETY_PERCENTAGE) {
+            throw new BadRequestException(
+                    String.format("Trying to move '%s' bytes worth of data to nodes with '%s' bytes of capacity is not allowed", usedSpace, remainingSpace)
+            );
+        }
+        return convert(selectedNodes, filteredHostList);
+    }
+
+    private List<HostMetadata> convert(Map<String, Long> selectedNodes, List<HostMetadata> filteredHostList) {
+        List<HostMetadata> result = new ArrayList<>();
+        for (String host : selectedNodes.keySet()) {
+            for (HostMetadata hostMetadata : filteredHostList) {
+                if (hostMetadata.getHostName().equalsIgnoreCase(host)) {
+                    result.add(hostMetadata);
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+
+
+    private long getSelectedUsage(Map<String, Long> selected) {
+        long usage = 0;
+        for (String host : selected.keySet()) {
+            usage += selected.get(host);
+        }
+        return usage;
+    }
+
+    private long getRemainingSpace(Map<String, Long> remainingNodes, Map<String, Map<Long, Long>> dfsSpace) {
+        long remaining = 0;
+        for (String host : remainingNodes.keySet()) {
+            Map<Long, Long> space = dfsSpace.get(host);
+            remaining += space.keySet().iterator().next();
+        }
+        return remaining;
+    }
+
+    private Map<String, Long> removeSelected(Map<String, Long> all, Map<String, Long> selected) {
+        Map<String, Long> copy = new HashMap<>(all);
+        for (String host : selected.keySet()) {
+            Iterator<String> iterator = copy.keySet().iterator();
+            while (iterator.hasNext()) {
+                if (iterator.next().equalsIgnoreCase(host)) {
+                    iterator.remove();
+                    break;
+                }
+            }
+        }
+        return copy;
+    }
+
+    private Map<Long, List<String>> copy(Map<Long, List<String>> all) {
+        Map<Long, List<String>> copy = new TreeMap<>();
+        for (long key : all.keySet()) {
+            List<String> values = new ArrayList<>();
+            for (String value : all.get(key)) {
+                values.add(value);
+            }
+            copy.put(key, values);
+        }
+        return copy;
+    }
+
+    private Map<String, Long> selectNodes(Map<String, Long> sortedAscending, List<HostMetadata> filteredHostList, int removeCount) {
+        Map<String, Long> select = new HashMap<>();
+        int i = 0;
+        for (String host : sortedAscending.keySet()) {
+            if (i < removeCount) {
+                for (HostMetadata hostMetadata : filteredHostList) {
+                    if (hostMetadata.getHostName().equalsIgnoreCase(host)) {
+                        select.put(host, sortedAscending.get(host));
+                        i++;
+                        break;
+                    }
+                }
+            } else {
+                break;
+            }
+        }
+        return select;
+    }
+
+    private boolean doesHostGroupContainDataNode(AmbariClient client, String blueprint, String hostGroup) {
+        return client.getBlueprintMap(blueprint).get(hostGroup).contains("DATANODE");
+    }
+
 }
