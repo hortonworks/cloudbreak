@@ -1,22 +1,32 @@
 package com.sequenceiq.cloudbreak.service.stack.resource.gcc.builders;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.api.services.compute.Compute;
+import com.google.api.services.compute.model.AttachedDisk;
+import com.google.api.services.compute.model.Instance;
 import com.google.api.services.dns.Dns;
 import com.google.api.services.dns.model.ManagedZone;
 import com.google.api.services.dns.model.ManagedZonesListResponse;
+import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
+import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
+import com.sequenceiq.cloudbreak.service.stack.resource.gcc.builders.instance.GccInstanceResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDescribeContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccProvisionContextObject;
@@ -30,6 +40,12 @@ public class GccResourceBuilderInit implements
 
     @Autowired
     private GccStackUtil gccStackUtil;
+
+    @Autowired
+    private GccInstanceResourceBuilder gccInstanceResourceBuilder;
+
+    @Autowired
+    private JsonHelper jsonHelper;
 
     @Override
     public GccProvisionContextObject provisionInit(Stack stack, String userData) throws Exception {
@@ -45,6 +61,31 @@ public class GccResourceBuilderInit implements
         GccCredential credential = (GccCredential) stack.getCredential();
         GccDeleteContextObject gccDeleteContextObject = new GccDeleteContextObject(stack.getId(), credential.getProjectId(),
                 gccStackUtil.buildCompute(credential, stack));
+        return gccDeleteContextObject;
+    }
+
+    @Override
+    public GccDeleteContextObject decommisionInit(Stack stack, Set<String> decommisionSet) throws Exception {
+        GccCredential credential = (GccCredential) stack.getCredential();
+        Compute compute = gccStackUtil.buildCompute(credential, stack);
+        List<Resource> resourceList = new ArrayList<>();
+        for (String res : decommisionSet) {
+            resourceList.add(new Resource(ResourceType.GCC_INSTANCE, res, stack));
+        }
+        List<Resource> result = new ArrayList<>();
+        for (Resource resource : resourceList) {
+            try {
+                Instance instance = gccInstanceResourceBuilder.describe(stack, compute, resource);
+                for (AttachedDisk attachedDisk : instance.getDisks()) {
+                    result.add(new Resource(ResourceType.GCC_ATTACHED_DISK, attachedDisk.getDeviceName(), stack));
+                }
+            } catch (IOException ex) {
+                LOGGER.error("There was a problem with the describe instance on Google cloud");
+            }
+        }
+        result.addAll(resourceList);
+        GccDeleteContextObject gccDeleteContextObject = new GccDeleteContextObject(stack.getId(), credential.getProjectId(),
+                compute, result);
         return gccDeleteContextObject;
     }
 

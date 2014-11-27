@@ -157,14 +157,18 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
     public Optional<String> describe(Resource resource, GccDescribeContextObject dco) throws Exception {
         try {
             Stack stack = stackRepository.findById(dco.getStackId());
-            GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
-            GccCredential gccCredential = (GccCredential) stack.getCredential();
-            Compute.Instances.Get getVm = dco.getCompute().instances().get(gccCredential.getProjectId(), gccTemplate.getGccZone().getValue(),
-                    resource.getResourceName());
-            return Optional.fromNullable(getVm.execute().toPrettyString());
+            return Optional.fromNullable(describe(stack, dco.getCompute(), resource).toPrettyString());
         } catch (IOException e) {
             return Optional.fromNullable(jsonHelper.createJsonFromString(String.format("{\"VirtualMachine\": {%s}}", ERROR)).toString());
         }
+    }
+
+    public Instance describe(Stack stack, Compute compute, Resource resource) throws IOException {
+        GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
+        GccCredential gccCredential = (GccCredential) stack.getCredential();
+        Compute.Instances.Get getVm = compute.instances().get(gccCredential.getProjectId(), gccTemplate.getGccZone().getValue(),
+                resource.getResourceName());
+        return getVm.execute();
     }
 
     private List<NetworkInterface> getNetworkInterface(String projectId, String name) {

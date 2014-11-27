@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.resource;
 
+import java.util.Set;
+
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Stack;
 
@@ -9,6 +11,8 @@ public interface ResourceBuilderInit
     P provisionInit(Stack stack, String userData) throws Exception;
 
     D deleteInit(Stack stack) throws Exception;
+
+    D decommisionInit(Stack stack, Set<String> decommisionSet) throws Exception;
 
     SSCO startStopInit(Stack stack) throws Exception;
 

@@ -76,7 +76,7 @@ public class AzureCredential extends Credential implements ProvisionEntity {
     }
 
     public String getCommonName() {
-        String result = getName().replaceAll("\\s+", "") + postFix;
+        String result = subscriptionId.replaceAll("\\s+", "").replaceAll("-", "");
         if (result.length() > END_INDEX) {
             return result.substring(result.length() - END_INDEX, result.length());
         }
