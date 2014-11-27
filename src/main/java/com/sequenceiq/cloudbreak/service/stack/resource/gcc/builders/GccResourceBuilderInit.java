@@ -65,7 +65,7 @@ public class GccResourceBuilderInit implements
     }
 
     @Override
-    public GccDeleteContextObject decommisionInit(Stack stack, Set<String> decommisionSet) throws Exception {
+    public GccDeleteContextObject decommissionInit(Stack stack, Set<String> decommisionSet) throws Exception {
         GccCredential credential = (GccCredential) stack.getCredential();
         Compute compute = gccStackUtil.buildCompute(credential, stack);
         List<Resource> resourceList = new ArrayList<>();

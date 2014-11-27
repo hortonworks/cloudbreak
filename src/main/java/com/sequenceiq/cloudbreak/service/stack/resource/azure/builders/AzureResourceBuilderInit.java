@@ -49,7 +49,7 @@ public class AzureResourceBuilderInit implements
     }
 
     @Override
-    public AzureDeleteContextObject decommisionInit(Stack stack, Set<String> decommisionSet) throws Exception {
+    public AzureDeleteContextObject decommissionInit(Stack stack, Set<String> decommisionSet) throws Exception {
         AzureCredential credential = (AzureCredential) stack.getCredential();
         AzureClient azureClient =  AzureStackUtil.createAzureClient((AzureCredential) stack.getCredential());
         List<Resource> resourceList = new ArrayList<>();

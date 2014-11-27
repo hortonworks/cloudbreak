@@ -12,7 +12,7 @@ public interface ResourceBuilderInit
 
     D deleteInit(Stack stack) throws Exception;
 
-    D decommisionInit(Stack stack, Set<String> decommisionSet) throws Exception;
+    D decommissionInit(Stack stack, Set<String> decommisionSet) throws Exception;
 
     SSCO startStopInit(Stack stack) throws Exception;
 

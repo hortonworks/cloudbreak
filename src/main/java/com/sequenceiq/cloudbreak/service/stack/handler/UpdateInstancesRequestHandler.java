@@ -140,7 +140,7 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
                     cloudPlatformConnectors.get(cloudPlatform).removeInstances(stack, instanceIds);
                 } else {
                     ResourceBuilderInit resourceBuilderInit = resourceBuilderInits.get(cloudPlatform);
-                    final DeleteContextObject dCO = resourceBuilderInit.decommisionInit(stack, instanceIds);
+                    final DeleteContextObject dCO = resourceBuilderInit.decommissionInit(stack, instanceIds);
 
                     for (int j = instanceResourceBuilders.get(cloudPlatform).size() - 1; j >= 0; j--) {
                         List<Future<Boolean>> futures = new ArrayList<>();
