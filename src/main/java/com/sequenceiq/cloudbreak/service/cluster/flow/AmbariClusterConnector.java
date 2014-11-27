@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
+import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariHostsUnavailableException;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
@@ -194,6 +195,7 @@ public class AmbariClusterConnector {
                 }
             }
             waitForAmbariOperations(stack, ambariClient, decommissionRequests);
+            waitForDataNodeDecommission(stack, ambariClient);
             stopHadoopComponents(stack, ambariClient, hostsWithComponents);
             deleteHostsFromAmbari(ambariClient, hostsWithComponents);
             restartHadoopServices(stack, ambariClient);
@@ -388,11 +390,21 @@ public class AmbariClusterConnector {
     private void waitForAmbariOperations(Stack stack, AmbariClient ambariClient, Map<String, Integer> operationRequests) {
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Waiting for Ambari operations to finish. [Operation requests: {}]", operationRequests);
+        waitForAmbariOperations(stack, ambariClient, new AmbariOperationsStatusCheckerTask(), operationRequests);
+    }
+
+    private void waitForAmbariOperations(Stack stack, AmbariClient ambariClient, StatusCheckerTask task, Map<String, Integer> operationRequests) {
         operationsPollingService.pollWithTimeout(
-                new AmbariOperationsStatusCheckerTask(),
+                task,
                 new AmbariOperations(stack, ambariClient, operationRequests),
                 POLLING_INTERVAL,
                 MAX_ATTEMPTS_FOR_AMBARI_OPS);
+    }
+
+    private void waitForDataNodeDecommission(Stack stack, AmbariClient ambariClient) {
+        MDCBuilder.buildMdcContext(stack);
+        LOGGER.info("Waiting for DataNodes to move the blocks to other nodes");
+        waitForAmbariOperations(stack, ambariClient, new DNDecommissionStatusCheckerTask(), Collections.<String, Integer>emptyMap());
     }
 
     private Map<String, Integer> prepareHost(AmbariClient ambariClient, Stack stack, String host, String hostgroup) {
