@@ -1,5 +1,5 @@
 {  
-    "nodeCount":${nodeCount!1},
+    "nodeCount":${nodeCount!6},
     "name":"${stackName!"testing"}",
     "templateId":"${templateId}",
     "credentialId":"${credentialId}",
