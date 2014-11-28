@@ -49,7 +49,7 @@ public class AmbariOperationsStatusCheckerTask implements StatusCheckerTask<Amba
 
     @Override
     public void handleTimeout(AmbariOperations t) {
-        throw new IllegalStateException("Ambari progress cannot be timed out.");
+        throw new IllegalStateException(String.format("Ambari operations timed out: %s", t.getRequests()));
 
     }
 
