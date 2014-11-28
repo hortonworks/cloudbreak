@@ -10,7 +10,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -303,6 +302,10 @@ public class AmbariClusterService implements ClusterService {
         }
     }
 
+    private boolean doesHostGroupContainDataNode(AmbariClient client, String blueprint, String hostGroup) {
+        return client.getBlueprintMap(blueprint).get(hostGroup).contains(DATANODE);
+    }
+
     private List<HostMetadata> checkAndSortByAvailableSpace(Stack stack, AmbariClient client, int replication,
             int adjustment, List<HostMetadata> filteredHostList) {
         MDCBuilder.buildMdcContext(stack.getCluster());
@@ -324,63 +327,6 @@ public class AmbariClusterService implements ClusterService {
             );
         }
         return convert(selectedNodes, filteredHostList);
-    }
-
-    private List<HostMetadata> convert(Map<String, Long> selectedNodes, List<HostMetadata> filteredHostList) {
-        List<HostMetadata> result = new ArrayList<>();
-        for (String host : selectedNodes.keySet()) {
-            for (HostMetadata hostMetadata : filteredHostList) {
-                if (hostMetadata.getHostName().equalsIgnoreCase(host)) {
-                    result.add(hostMetadata);
-                    break;
-                }
-            }
-        }
-        return result;
-    }
-
-
-    private long getSelectedUsage(Map<String, Long> selected) {
-        long usage = 0;
-        for (String host : selected.keySet()) {
-            usage += selected.get(host);
-        }
-        return usage;
-    }
-
-    private long getRemainingSpace(Map<String, Long> remainingNodes, Map<String, Map<Long, Long>> dfsSpace) {
-        long remaining = 0;
-        for (String host : remainingNodes.keySet()) {
-            Map<Long, Long> space = dfsSpace.get(host);
-            remaining += space.keySet().iterator().next();
-        }
-        return remaining;
-    }
-
-    private Map<String, Long> removeSelected(Map<String, Long> all, Map<String, Long> selected) {
-        Map<String, Long> copy = new HashMap<>(all);
-        for (String host : selected.keySet()) {
-            Iterator<String> iterator = copy.keySet().iterator();
-            while (iterator.hasNext()) {
-                if (iterator.next().equalsIgnoreCase(host)) {
-                    iterator.remove();
-                    break;
-                }
-            }
-        }
-        return copy;
-    }
-
-    private Map<Long, List<String>> copy(Map<Long, List<String>> all) {
-        Map<Long, List<String>> copy = new TreeMap<>();
-        for (long key : all.keySet()) {
-            List<String> values = new ArrayList<>();
-            for (String value : all.get(key)) {
-                values.add(value);
-            }
-            copy.put(key, values);
-        }
-        return copy;
     }
 
     private Map<String, Long> selectNodes(Stack stack, Map<String, Long> sortedAscending, List<HostMetadata> filteredHostList, int removeCount) {
@@ -406,8 +352,48 @@ public class AmbariClusterService implements ClusterService {
         return select;
     }
 
-    private boolean doesHostGroupContainDataNode(AmbariClient client, String blueprint, String hostGroup) {
-        return client.getBlueprintMap(blueprint).get(hostGroup).contains(DATANODE);
+    private Map<String, Long> removeSelected(Map<String, Long> all, Map<String, Long> selected) {
+        Map<String, Long> copy = new HashMap<>(all);
+        for (String host : selected.keySet()) {
+            Iterator<String> iterator = copy.keySet().iterator();
+            while (iterator.hasNext()) {
+                if (iterator.next().equalsIgnoreCase(host)) {
+                    iterator.remove();
+                    break;
+                }
+            }
+        }
+        return copy;
+    }
+
+    private long getSelectedUsage(Map<String, Long> selected) {
+        long usage = 0;
+        for (String host : selected.keySet()) {
+            usage += selected.get(host);
+        }
+        return usage;
+    }
+
+    private long getRemainingSpace(Map<String, Long> remainingNodes, Map<String, Map<Long, Long>> dfsSpace) {
+        long remaining = 0;
+        for (String host : remainingNodes.keySet()) {
+            Map<Long, Long> space = dfsSpace.get(host);
+            remaining += space.keySet().iterator().next();
+        }
+        return remaining;
+    }
+
+    private List<HostMetadata> convert(Map<String, Long> selectedNodes, List<HostMetadata> filteredHostList) {
+        List<HostMetadata> result = new ArrayList<>();
+        for (String host : selectedNodes.keySet()) {
+            for (HostMetadata hostMetadata : filteredHostList) {
+                if (hostMetadata.getHostName().equalsIgnoreCase(host)) {
+                    result.add(hostMetadata);
+                    break;
+                }
+            }
+        }
+        return result;
     }
 
 }
