@@ -19,7 +19,7 @@
                 <div class="mod-LED">
                     <span ng-class="ledStyles[cluster.status]" title="titleStatus[cluster.status]"></span>
                 </div>
-                <a href="" class="mod-start-stop btn btn-cluster btn-block" role="button" ng-click="requestStatusChange(cluster)"><i class="fa fa-lg" ng-class="buttonStyles[cluster.status]"></i></a>
+                <a href="" ng-disabled="cluster.cloudPlatform === 'GCC'" class="mod-start-stop btn btn-cluster btn-block" role="button" ng-click="requestStatusChange(cluster)"><i class="fa fa-lg" ng-class="buttonStyles[cluster.status]"></i></a>
             </div>
 
         </div>

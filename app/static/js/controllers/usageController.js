@@ -66,17 +66,47 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
                     item.monthString = new Date(item.day).getFullYear() + "-" +  new Date(item.day).getMonth();
                     item.monthDayString = new Date(item.day).toLocaleDateString();
                     if ($scope.gccFilterFunction(item)) {
-                        $scope.gccSum.fullMoney += parseFloat(item.instanceHours) * parseFloat($scope.gccPrice[item.machineType]);
+                        var m = (parseFloat(item.instanceHours) * parseFloat($scope.gccPrice[item.machineType]));
+                        $scope.gccSum.fullMoney += parseFloat(m);
                         $scope.gccSum.fullHours += parseFloat(item.instanceHours);
-                        item.money = (parseFloat(item.instanceHours) * parseFloat($scope.gccPrice[item.machineType])).toFixed(2);
+                        item.money = parseFloat(m).toFixed(2);
+                        var result = $filter('filter')($scope.gccSum.items, {stackId: item.stackId}, true);
+                        if (result.length > 0) {
+                            var index = $scope.gccSum.items.indexOf(result[0]);
+                            $scope.gccSum.items[index].money = (parseFloat(result[0].money) + parseFloat(m)).toFixed(2);
+                        } else {
+                            var newItem = item;
+                            newItem.money = parseFloat(m).toFixed(2);
+                            $scope.gccSum.items.push(newItem);
+                        }
                     } else if($scope.azureFilterFunction(item)) {
-                        $scope.azureSum.fullMoney += parseFloat(item.instanceHours) * parseFloat($scope.azurePrice[item.machineType]);
+                        var m = (parseFloat(item.instanceHours) * parseFloat($scope.azurePrice[item.machineType]));
+                        $scope.azureSum.fullMoney += parseFloat(m);
                         $scope.azureSum.fullHours += parseFloat(item.instanceHours);
-                        item.money = (parseFloat(item.instanceHours) * parseFloat($scope.azurePrice[item.machineType])).toFixed(2);
+                        item.money = parseFloat(m).toFixed(2);
+                        var result = $filter('filter')($scope.azureSum.items, {stackId: item.stackId}, true);
+                        if (result.length > 0) {
+                            var index = $scope.azureSum.items.indexOf(result[0]);
+                            $scope.azureSum.items[index].money = (parseFloat(result[0].money) + parseFloat(m)).toFixed(2);
+                        } else {
+                            var newItem = item;
+                            newItem.money = parseFloat(m).toFixed(2);
+                            $scope.azureSum.items.push(newItem);
+                        }
                     } else if($scope.awsFilterFunction(item)) {
-                        $scope.awsSum.fullMoney += parseFloat(item.instanceHours) * parseFloat($scope.awsPrice[item.machineType]);
+                        var m = (parseFloat(item.instanceHours) * parseFloat($scope.awsPrice[item.machineType]));
+                        $scope.awsSum.fullMoney += parseFloat(m);
                         $scope.awsSum.fullHours += parseFloat(item.instanceHours);
-                        item.money = (parseFloat(item.instanceHours) * parseFloat($scope.awsPrice[item.machineType])).toFixed(2);
+                        item.money = parseFloat(m).toFixed(2);
+                        var result = $filter('filter')($scope.awsSum.items, {stackId: item.stackId}, true);
+                        if (result.length > 0) {
+                            var index = $scope.awsSum.items.indexOf(result[0]);
+                            $scope.awsSum.items[index].money = (parseFloat(result[0].money) + parseFloat(m)).toFixed(2);
+                        } else {
+                            var newItem = item;
+                            newItem.money = parseFloat(m).toFixed(2);
+                            $scope.awsSum.items.push(newItem);
+                        }
                     }
                 });
                 $scope.gccSum.fullMoney = $scope.gccSum.fullMoney.toFixed(2);
@@ -144,15 +174,18 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
         function initSums() {
             $scope.awsSum={
                 fullMoney: 0,
-                fullHours: 0
+                fullHours: 0,
+                items: []
             };
             $scope.gccSum={
                 fullMoney: 0,
-                fullHours: 0
+                fullHours: 0,
+                items: []
             };
             $scope.azureSum={
                 fullMoney: 0,
-                fullHours: 0
+                fullHours: 0,
+                items: []
             };
         }
 

@@ -128,8 +128,8 @@
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="usage in usages| filter:gccFilterFunction as gccresults">
-                <td ng-if="$index == 0" rowspan="{{gccresults.length}}">{{usage.cloud}}</td>
+            <tr ng-repeat="usage in gccSum.items">
+                <td ng-if="$index == 0" rowspan="{{gccSum.items.length}}">{{usage.cloud}}</td>
                 <td>{{usage.username}}</td>
                 <td>{{usage.stackName}}</td>
                 <td>{{usage.zone}}</td>
@@ -137,7 +137,7 @@
                 <td class="text-right">{{usage.instanceHours}} hrs</td>
                 <td class="text-right">{{usage.money}} $</td>
             </tr>
-            <tr class="row-summa" ng-show="usages && (usages | filter:gccFilterFunction).length != 0">
+            <tr class="row-summa" ng-show="usages && gccSum.items.length != 0">
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
@@ -147,8 +147,8 @@
                 <td class="text-right">$ {{gccSum.fullMoney}}</td>
             </tr>
 
-            <tr ng-repeat="usage in usages| filter:awsFilterFunction as awsresults">
-                <td ng-if="$index == 0" rowspan="{{awsresults.length}}">{{usage.cloud}}</td>
+            <tr ng-repeat="usage in awsSum.items">
+                <td ng-if="$index == 0" rowspan="{{awsSum.items.length}}">{{usage.cloud}}</td>
                 <td>{{usage.username}}</td>
                 <td>{{usage.stackName}}</td>
                 <td>{{usage.zone}}</td>
@@ -157,7 +157,7 @@
                 <td class="text-right">{{usage.money}} $</td>
             </tr>
 
-            <tr class="row-summa" ng-show="usages && (usages | filter:awsFilterFunction).length != 0">
+            <tr class="row-summa" ng-show="usages && awsSum.items.length != 0">
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
@@ -167,8 +167,8 @@
                 <td class="text-right">$ {{awsSum.fullMoney}}</td>
             </tr>
 
-            <tr ng-repeat="usage in usages| filter:azureFilterFunction as azureresults">
-                <td ng-if="$index == 0" rowspan="{{azureresults.length}}">{{usage.cloud}}</td>
+            <tr ng-repeat="usage in azureSum.items">
+                <td ng-if="$index == 0" rowspan="{{azureSum.items.length}}">{{usage.cloud}}</td>
                 <td>{{usage.username}}</td>
                 <td>{{usage.stackName}}</td>
                 <td>{{usage.zone}}</td>
@@ -177,7 +177,7 @@
                 <td class="text-right">{{usage.money}} $</td>
             </tr>
 
-            <tr class="row-summa" ng-show="usages && (usages | filter:azureFilterFunction).length != 0">
+            <tr class="row-summa" ng-show="usages && azureSum.items.length != 0">
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
