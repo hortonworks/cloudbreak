@@ -53,7 +53,7 @@ public class AmbariClusterService implements ClusterService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariClusterService.class);
     private static final String MASTER_CATEGORY = "MASTER";
     private static final String DATANODE = "DATANODE";
-    private static final double SAFETY_PERCENTAGE = 1.5;
+    private static final int SAFETY_PERCENTAGE = 3;
 
     @Autowired
     private StackRepository stackRepository;
@@ -290,7 +290,7 @@ public class AmbariClusterService implements ClusterService {
         Map<String, Long> remainingNodes = removeSelected(sortedAscending, selectedNodes);
         long usedSpace = getSelectedUsage(selectedNodes);
         long remainingSpace = getRemainingSpace(remainingNodes, dfsSpace);
-        if (remainingSpace < usedSpace * SAFETY_PERCENTAGE) {
+        if ((remainingSpace < usedSpace * SAFETY_PERCENTAGE) || (remainingNodes.size() <= selectedNodes.size())) {
             throw new BadRequestException(
                     String.format("Trying to move '%s' bytes worth of data to nodes with '%s' bytes of capacity is not allowed", usedSpace, remainingSpace)
             );
