@@ -278,7 +278,8 @@ public class AmbariClusterService implements ClusterService {
 
     private void verifyNodeCount(int scalingAdjustment, List<HostMetadata> filteredHostList) {
         if (filteredHostList.size() < Math.abs(scalingAdjustment)) {
-            throw new BadRequestException("There is not enough node to downscale due to ApplicationMaster occupation");
+            throw new BadRequestException("There is not enough node to downscale. " +
+                    "Check the replication factor and the ApplicationMaster occupation.");
         }
     }
 
@@ -290,7 +291,7 @@ public class AmbariClusterService implements ClusterService {
         Map<String, Long> remainingNodes = removeSelected(sortedAscending, selectedNodes);
         long usedSpace = getSelectedUsage(selectedNodes);
         long remainingSpace = getRemainingSpace(remainingNodes, dfsSpace);
-        if ((remainingSpace < usedSpace * SAFETY_PERCENTAGE) || (remainingNodes.size() <= selectedNodes.size())) {
+        if (remainingSpace < usedSpace * SAFETY_PERCENTAGE) {
             throw new BadRequestException(
                     String.format("Trying to move '%s' bytes worth of data to nodes with '%s' bytes of capacity is not allowed", usedSpace, remainingSpace)
             );
