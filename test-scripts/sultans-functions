@@ -46,7 +46,8 @@ sl-location() {
 sl-delete-user() {
    : ${SL_TOKEN:?"Please set the SL_TOKEN with sl-token function!"}
    local user_id=${1:?"usage: <user-id> -> get it from sl-get-user-id function"}
-   curl -X DELETE -H "Authorization: Bearer $SL_TOKEN" "$SL_UAA_ADDRESS/Users/$user_id"
+   local version=${2:?"usage: <version> -> get it from sl-user-data function"}
+   curl -X DELETE -H "Authorization: Bearer $SL_TOKEN" -H "If-Match: $version" "$SL_UAA_ADDRESS/Users/$user_id"
 }
 
 sl-register() {
@@ -57,11 +58,17 @@ sl-register() {
     curl -X POST -H "Content-Type: application/json" -d '{"email": "'$username'", "password":"'$password'", "firstName":"default", "lastName":"default", "company":"'$company'"}' $SL_LOCATION/register
 }
 
+sl-forget-password() {
+    : ${SL_LOCATION:?"Please set the SL_LOCATION with sl-location function!"}
+    local email=${1:?"usage: <email>"}
+    curl -sX POST -H "Content-Type: application/json" -d '{"email": "'$email'"}' $SL_LOCATION/forget
+}
+
 sl-activate() {
     : ${SL_LOCATION:?"Please set the SL_LOCATION with sl-location function!"}
     : ${SL_USER_TOKEN:?"Please set the SL_USER_TOKEN with sl-oauth-login function!"}
-    local email=${1:?"usage: <email>"}
-    local activate=${2:?"usage: <activate-flag> (true/false)"}
+    local email=${1:?"usage: <email> <activate-flag> (true/false)"}
+    local activate=${2:?"usage: <email> <activate-flag> (true/false)"}
     curl -sX POST -H "Content-Type: application/json" -H "Authorization: Bearer $SL_USER_TOKEN" -d '{"email": "'$email'", "activate" : '$activate'}' $SL_LOCATION/activate | jq .
 }
 

@@ -1,4 +1,0 @@
-#!/bin/bash
-UR_SERVER=http://localhost:5000
-
-curl -sX POST -H "Content-Type: application/json" -d '{"username":"oleewere@gmail.com", "password":"test123"}' $UR_SERVER/login
