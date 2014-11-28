@@ -143,7 +143,7 @@ public class AmbariClusterService implements ClusterService {
             String hostGroup = hostGroupAdjustment.getHostGroup();
             Set<HostMetadata> hostsInHostGroup = hostMetadataRepository.findHostsInHostgroup(hostGroup, cluster.getId());
             List<HostMetadata> filteredHostList = hostFilterService.filterHostsForDecommission(stack, hostsInHostGroup);
-            verifyNodeCount(replication, hostGroupAdjustment.getScalingAdjustment(), filteredHostList);
+            verifyNodeCount(cluster, replication, hostGroupAdjustment.getScalingAdjustment(), filteredHostList);
             if (doesHostGroupContainDataNode(ambariClient, cluster.getBlueprint().getBlueprintName(), hostGroup)) {
                 downScaleCandidates = checkAndSortByAvailableSpace(stack, ambariClient, replication,
                         hostGroupAdjustment.getScalingAdjustment(), filteredHostList);
@@ -205,7 +205,7 @@ public class AmbariClusterService implements ClusterService {
     private int getReplicationFactor(AmbariClient ambariClient) {
         try {
             Map<String, String> configuration = configurationService.getConfiguration(ambariClient);
-            return Integer.parseInt(configuration.get(ConfigParam.DFS_REPLICATION));
+            return Integer.parseInt(configuration.get(ConfigParam.DFS_REPLICATION.key()));
         } catch (ConnectException e) {
             LOGGER.error("Cannot connect to Ambari to get the configuration", e);
             throw new BadRequestException("Cannot connect to Ambari");
@@ -292,10 +292,12 @@ public class AmbariClusterService implements ClusterService {
         return false;
     }
 
-    private void verifyNodeCount(int replication, int scalingAdjustment, List<HostMetadata> filteredHostList) {
+    private void verifyNodeCount(Cluster cluster, int replication, int scalingAdjustment, List<HostMetadata> filteredHostList) {
+        MDCBuilder.buildMdcContext(cluster);
         int adjustment = Math.abs(scalingAdjustment);
         int hostSize = filteredHostList.size();
         if (hostSize - adjustment <= replication || hostSize < adjustment) {
+            LOGGER.info("Cannot downscale: replication: {}, adjustment: {}, filtered host size: {}", replication, scalingAdjustment, hostSize);
             throw new BadRequestException("There is not enough node to downscale. " +
                     "Check the replication factor and the ApplicationMaster occupation.");
         }
@@ -303,14 +305,20 @@ public class AmbariClusterService implements ClusterService {
 
     private List<HostMetadata> checkAndSortByAvailableSpace(Stack stack, AmbariClient client, int replication,
             int adjustment, List<HostMetadata> filteredHostList) {
+        MDCBuilder.buildMdcContext(stack.getCluster());
         int removeCount = Math.abs(adjustment);
         Map<String, Map<Long, Long>> dfsSpace = client.getDFSSpace();
         Map<String, Long> sortedAscending = sortByUsedSpace(dfsSpace, false);
         Map<String, Long> selectedNodes = selectNodes(stack, sortedAscending, filteredHostList, removeCount);
         Map<String, Long> remainingNodes = removeSelected(sortedAscending, selectedNodes);
+        LOGGER.info("Selected nodes for decommission: {}", selectedNodes);
+        LOGGER.info("Remaining nodes after decommission: {}", remainingNodes);
         long usedSpace = getSelectedUsage(selectedNodes);
         long remainingSpace = getRemainingSpace(remainingNodes, dfsSpace);
-        if (remainingSpace < usedSpace * replication * SAFETY_PERCENTAGE) {
+        long safetyUsedSpace = ((Double) (usedSpace * replication * SAFETY_PERCENTAGE)).longValue();
+        LOGGER.info("Checking DFS space for decommission, usedSpace: {}, remainingSpace: {}", usedSpace, remainingSpace);
+        LOGGER.info("Used space with replication: {} and safety space: {} is: {}", replication, SAFETY_PERCENTAGE, safetyUsedSpace);
+        if (remainingSpace < safetyUsedSpace) {
             throw new BadRequestException(
                     String.format("Trying to move '%s' bytes worth of data to nodes with '%s' bytes of capacity is not allowed", usedSpace, remainingSpace)
             );
