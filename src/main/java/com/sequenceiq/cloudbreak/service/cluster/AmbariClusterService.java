@@ -298,8 +298,8 @@ public class AmbariClusterService implements ClusterService {
         int hostSize = filteredHostList.size();
         if (hostSize - adjustment <= replication || hostSize < adjustment) {
             LOGGER.info("Cannot downscale: replication: {}, adjustment: {}, filtered host size: {}", replication, scalingAdjustment, hostSize);
-            throw new BadRequestException("There is not enough node to downscale. " +
-                    "Check the replication factor and the ApplicationMaster occupation.");
+            throw new BadRequestException("There is not enough node to downscale. "
+                    + "Check the replication factor and the ApplicationMaster occupation.");
         }
     }
 
