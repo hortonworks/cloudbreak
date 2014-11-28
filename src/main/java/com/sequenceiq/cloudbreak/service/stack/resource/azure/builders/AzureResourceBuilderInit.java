@@ -49,11 +49,11 @@ public class AzureResourceBuilderInit implements
     }
 
     @Override
-    public AzureDeleteContextObject decommissionInit(Stack stack, Set<String> decommisionSet) throws Exception {
+    public AzureDeleteContextObject decommissionInit(Stack stack, Set<String> decommissionSet) throws Exception {
         AzureCredential credential = (AzureCredential) stack.getCredential();
         AzureClient azureClient =  AzureStackUtil.createAzureClient((AzureCredential) stack.getCredential());
         List<Resource> resourceList = new ArrayList<>();
-        for (String res : decommisionSet) {
+        for (String res : decommissionSet) {
             resourceList.add(new Resource(ResourceType.AZURE_VIRTUAL_MACHINE, res, stack));
             resourceList.add(new Resource(ResourceType.AZURE_SERVICE_CERTIFICATE, res, stack));
             resourceList.add(new Resource(ResourceType.AZURE_CLOUD_SERVICE, res, stack));
