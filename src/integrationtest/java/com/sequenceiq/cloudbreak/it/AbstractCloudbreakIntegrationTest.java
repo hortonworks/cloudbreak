@@ -32,6 +32,7 @@ import freemarker.template.TemplateException;
 public abstract class AbstractCloudbreakIntegrationTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractCloudbreakIntegrationTest.class);
     private static final int STATUS_REQ_TIMEOUT = 10000;
+    private static Map<String, String> testContext;
 
     @Autowired
     private Configuration freemarkerConfiguration;
@@ -55,7 +56,6 @@ public abstract class AbstractCloudbreakIntegrationTest {
     private String ambariPassword;
 
     private String accessToken;
-    private static Map<String, String> testContext;
 
     protected abstract void decorateModel();
 
