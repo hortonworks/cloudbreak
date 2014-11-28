@@ -20,19 +20,11 @@ public class GccIntegrationTest extends AbstractCloudbreakIntegrationTest {
     @Value("${cb.it.gcc.public.key}")
     private String publicKey;
 
-    @Value("${cb.it.gcc.adjustment:2}")
-    private String adjustment;
-
-    @Value("${cb.it.gcc.hostgroup:slave_1}")
-    private String hostGroup;
-
     @Override protected void decorateModel() {
         getTestContext().put("projectId", projectid);
         getTestContext().put("serviceAccountId", serviceAccountId);
         getTestContext().put("serviceAccountPrivateKey", serviceAccountPrivateKey);
         getTestContext().put("publicKey", publicKey);
-        getTestContext().put("adjustment", adjustment);
-        getTestContext().put("hostgroup", hostGroup);
     }
 
     @Override protected CloudProvider provider() {

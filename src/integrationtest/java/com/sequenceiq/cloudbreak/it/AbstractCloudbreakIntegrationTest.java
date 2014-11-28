@@ -55,6 +55,12 @@ public abstract class AbstractCloudbreakIntegrationTest {
     @Value("${cb.it.ambari.password:admin}")
     private String ambariPassword;
 
+    @Value("${cb.it.adjustment:2}")
+    private String adjustment;
+
+    @Value("${cb.it.hostgroup:slave_1}")
+    private String hostGroup;
+
     private String accessToken;
 
     protected abstract void decorateModel();
@@ -78,6 +84,8 @@ public abstract class AbstractCloudbreakIntegrationTest {
 
         RestAssured.baseURI = baseUri;
 
+        getTestContext().put("adjustment", adjustment);
+        getTestContext().put("hostgroup", hostGroup);
         // populate the model with specialized entries
         decorateModel();
     }
