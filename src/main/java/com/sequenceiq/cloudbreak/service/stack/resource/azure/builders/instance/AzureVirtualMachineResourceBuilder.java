@@ -148,6 +148,7 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
         Map<String, Object> props = new HashMap<>();
         List<Port> ports = new ArrayList<>();
         ports.add(new Port("Ambari", "8080", "8080", "tcp"));
+        ports.add(new Port("Consul", "8500", "8500", "tcp"));
         ports.add(new Port("NameNode", "50070", "50070", "tcp"));
         ports.add(new Port("RM Web", "8088", "8088", "tcp"));
         ports.add(new Port("RM Scheduler", "8030", "8030", "tcp"));
