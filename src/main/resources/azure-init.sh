@@ -64,6 +64,7 @@ start_consul() {
   docker run -d \
     --name consul \
     --net=host \
+    --restart=always \
     $CONSUL_IMAGE $CONSUL_OPTIONS
 }
 
@@ -104,6 +105,7 @@ start_ambari_server() {
     docker run -d \
      --name ambari-server \
      --net=host \
+     --restart=always \
      sequenceiq/ambari:$DOCKER_TAG /start-server
 
     register_ambari
@@ -114,6 +116,7 @@ start_ambari_agent() {
   docker run -d \
     --name ambari-agent \
     --net=host \
+    --restart=always \
     sequenceiq/ambari:$DOCKER_TAG /start-agent
 }
 
