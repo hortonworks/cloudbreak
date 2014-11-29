@@ -3,15 +3,15 @@
 
 set -x
 
-get_meta() {
-  curl -s 169.254.169.254/latest/meta-data/$1
+get_ip() {
+  ifconfig eth0 | awk '/inet addr/{print substr($2,6)}'
 }
 
 fix_hostname_i() {
-  if grep -q $(get_meta local-ipv4) /etc/hosts ;then
+  if grep -q $(get_ip) /etc/hosts ;then
     echo OK
   else
-    echo $(get_meta local-ipv4) $(cat /etc/hostname) >> /etc/hosts
+    echo $(get_ip) $(cat /etc/hostname) >> /etc/hosts
   fi
 }
 
@@ -40,7 +40,7 @@ meta_order() {
 }
 
 my_order() {
-  local myip=$(get_meta local-ipv4)
+  local myip=$(get_ip)
   meta_order | grep ${myip} | cut -d" " -f 1
 }
 
@@ -50,7 +50,7 @@ consul_join_ip() {
 
 start_consul() {
 
-  CONSUL_OPTIONS="-advertise $(get_meta local-ipv4)"
+  CONSUL_OPTIONS="-advertise $(get_ip)"
 
   if [ $(my_order) -gt 1 ]; then
     CONSUL_OPTIONS="$CONSUL_OPTIONS -retry-join $(consul_join_ip)"
@@ -100,7 +100,7 @@ ENDOFJSON
 
 start_ambari_server() {
   docker rm -f ambari-server &>/dev/null
-  if [[ "$(consul_leader)" ==  "$(get_meta local-ipv4)" ]]; then
+  if [[ "$(consul_leader)" ==  "$(get_ip)" ]]; then
     docker run -d \
      --name ambari-server \
      --net=host \
