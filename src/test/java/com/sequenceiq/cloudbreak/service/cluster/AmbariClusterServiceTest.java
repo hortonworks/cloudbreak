@@ -1,12 +1,29 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonMap;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.net.ConnectException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -21,20 +38,22 @@ import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.converter.ClusterConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.HostMetadata;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
+import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsRequest;
 import com.sequenceiq.cloudbreak.service.cluster.filter.AmbariHostFilterService;
 
 import groovyx.net.http.HttpResponseException;
 import reactor.core.Reactor;
+import reactor.event.Event;
 
 public class AmbariClusterServiceTest {
-
-    public static final String DUMMY_CLUSTER_JSON = "dummyClusterJson";
-    public static final String NOT_FOUND = "Not Found";
 
     @InjectMocks
     @Spy
@@ -69,6 +88,18 @@ public class AmbariClusterServiceTest {
 
     @Mock
     private HostMetadataRepository hostMetadataRepository;
+
+    @Mock
+    private AmbariConfigurationService configurationService;
+
+    @Mock
+    private InstanceMetaDataRepository instanceMetadataRepository;
+
+    @Captor
+    private ArgumentCaptor<Event<UpdateAmbariHostsRequest>> eventCaptor;
+
+    @Captor
+    private ArgumentCaptor<String> eventTypeCaptor;
 
     private Stack stack;
 
@@ -129,6 +160,251 @@ public class AmbariClusterServiceTest {
         underTest.updateHosts(stack.getId(), hga1);
     }
 
+    @Test
+    public void testUpdateHostsForDownscaleFilterAllHosts() throws ConnectException {
+        HostGroupAdjustmentJson json = new HostGroupAdjustmentJson();
+        json.setHostGroup("slave_1");
+        json.setScalingAdjustment(-1);
+        AmbariClient ambariClient = mock(AmbariClient.class);
+        HostMetadata metadata1 = mock(HostMetadata.class);
+        HostMetadata metadata2 = mock(HostMetadata.class);
+        HostMetadata metadata3 = mock(HostMetadata.class);
+        Set<HostMetadata> hostsMetaData = new HashSet<>();
+        hostsMetaData.addAll(asList(metadata1, metadata2, metadata3));
+        when(hostMetadataRepository.findHostsInHostgroup("slave_1", cluster.getId())).thenReturn(hostsMetaData);
+        when(clientService.create(stack)).thenReturn(ambariClient);
+        when(ambariClient.getComponentsCategory("multi-node-yarn", "slave_1")).thenReturn(singletonMap("DATANODE", "SLAVE"));
+        when(configurationService.getConfiguration(ambariClient)).thenReturn(singletonMap(ConfigParam.DFS_REPLICATION.key(), "2"));
+        when(hostFilterService.filterHostsForDecommission(stack, hostsMetaData)).thenReturn(Collections.<HostMetadata>emptyList());
+
+        Exception result = null;
+        try {
+            underTest.updateHosts(stack.getId(), json);
+        } catch (BadRequestException e) {
+            result = e;
+        }
+
+        assertTrue(result.getMessage().startsWith("There is not enough node to downscale."));
+    }
+
+    @Test
+    public void testUpdateHostsForDownscaleCannotGoBelowReplication() throws ConnectException {
+        HostGroupAdjustmentJson json = new HostGroupAdjustmentJson();
+        json.setHostGroup("slave_1");
+        json.setScalingAdjustment(-1);
+        AmbariClient ambariClient = mock(AmbariClient.class);
+        HostMetadata metadata1 = mock(HostMetadata.class);
+        HostMetadata metadata2 = mock(HostMetadata.class);
+        HostMetadata metadata3 = mock(HostMetadata.class);
+        Set<HostMetadata> hostsMetaData = new HashSet<>();
+        List<HostMetadata> hostsMetadataList = asList(metadata1, metadata2, metadata3);
+        hostsMetaData.addAll(hostsMetadataList);
+        when(hostMetadataRepository.findHostsInHostgroup("slave_1", cluster.getId())).thenReturn(hostsMetaData);
+        when(clientService.create(stack)).thenReturn(ambariClient);
+        when(ambariClient.getComponentsCategory("multi-node-yarn", "slave_1")).thenReturn(singletonMap("DATANODE", "SLAVE"));
+        when(configurationService.getConfiguration(ambariClient)).thenReturn(singletonMap(ConfigParam.DFS_REPLICATION.key(), "1"));
+        when(hostFilterService.filterHostsForDecommission(stack, hostsMetaData)).thenReturn(asList(metadata2, metadata3));
+
+        Exception result = null;
+        try {
+            underTest.updateHosts(stack.getId(), json);
+        } catch (BadRequestException e) {
+            result = e;
+        }
+
+        assertTrue(result.getMessage().startsWith("There is not enough node to downscale."));
+    }
+
+    @Test
+    public void testUpdateHostsForDownscaleFilterOneHost() throws ConnectException {
+        HostGroupAdjustmentJson json = new HostGroupAdjustmentJson();
+        json.setHostGroup("slave_1");
+        json.setScalingAdjustment(-1);
+        AmbariClient ambariClient = mock(AmbariClient.class);
+        HostMetadata metadata1 = mock(HostMetadata.class);
+        InstanceMetaData instanceMetaData1 = mock(InstanceMetaData.class);
+        HostMetadata metadata2 = mock(HostMetadata.class);
+        InstanceMetaData instanceMetaData2 = mock(InstanceMetaData.class);
+        HostMetadata metadata3 = mock(HostMetadata.class);
+        InstanceMetaData instanceMetaData3 = mock(InstanceMetaData.class);
+        HostMetadata metadata4 = mock(HostMetadata.class);
+        InstanceMetaData instanceMetaData4 = mock(InstanceMetaData.class);
+        Set<HostMetadata> hostsMetaData = new HashSet<>(asList(metadata1, metadata2, metadata3, metadata4));
+        List<HostMetadata> hostsMetadataList = asList(metadata2, metadata3, metadata4);
+        Map<String, Map<Long, Long>> dfsSpace = new HashMap<>();
+        dfsSpace.put("node2", singletonMap(85_000L, 15_000L));
+        dfsSpace.put("node1", singletonMap(90_000L, 10_000L));
+        dfsSpace.put("node3", singletonMap(80_000L, 20_000L));
+        dfsSpace.put("node4", singletonMap(80_000L, 11_000L));
+        when(metadata1.getHostName()).thenReturn("node1");
+        when(metadata2.getHostName()).thenReturn("node2");
+        when(metadata3.getHostName()).thenReturn("node3");
+        when(metadata4.getHostName()).thenReturn("node4");
+        when(instanceMetaData1.getAmbariServer()).thenReturn(false);
+        when(instanceMetaData2.getAmbariServer()).thenReturn(false);
+        when(instanceMetaData3.getAmbariServer()).thenReturn(false);
+        when(instanceMetaData4.getAmbariServer()).thenReturn(false);
+        when(hostMetadataRepository.findHostsInHostgroup("slave_1", cluster.getId())).thenReturn(hostsMetaData);
+        when(clientService.create(stack)).thenReturn(ambariClient);
+        when(ambariClient.getComponentsCategory("multi-node-yarn", "slave_1")).thenReturn(singletonMap("DATANODE", "SLAVE"));
+        when(configurationService.getConfiguration(ambariClient)).thenReturn(singletonMap(ConfigParam.DFS_REPLICATION.key(), "1"));
+        when(hostFilterService.filterHostsForDecommission(stack, hostsMetaData)).thenReturn(hostsMetadataList);
+        when(ambariClient.getBlueprintMap(cluster.getBlueprint().getBlueprintName())).thenReturn(singletonMap("slave_1", asList("DATANODE")));
+        when(ambariClient.getDFSSpace()).thenReturn(dfsSpace);
+        when(instanceMetadataRepository.findHostInStack(stack.getId(), "node1")).thenReturn(instanceMetaData1);
+        when(instanceMetadataRepository.findHostInStack(stack.getId(), "node2")).thenReturn(instanceMetaData2);
+        when(instanceMetadataRepository.findHostInStack(stack.getId(), "node3")).thenReturn(instanceMetaData3);
+        when(instanceMetadataRepository.findHostInStack(stack.getId(), "node4")).thenReturn(instanceMetaData4);
+
+        underTest.updateHosts(stack.getId(), json);
+
+        verify(reactor).notify(eventCaptor.capture(), eventCaptor.capture());
+        List<HostMetadata> candidates = eventCaptor.getValue().getData().getDecommissionCandidates();
+        assertEquals(1, candidates.size());
+        assertEquals("node4", candidates.get(0).getHostName());
+    }
+
+    @Test
+    public void testUpdateHostsForDownscaleSelectNodesWithLessData() throws ConnectException {
+        HostGroupAdjustmentJson json = new HostGroupAdjustmentJson();
+        json.setHostGroup("slave_1");
+        json.setScalingAdjustment(-1);
+        AmbariClient ambariClient = mock(AmbariClient.class);
+        HostMetadata metadata1 = mock(HostMetadata.class);
+        InstanceMetaData instanceMetaData1 = mock(InstanceMetaData.class);
+        HostMetadata metadata2 = mock(HostMetadata.class);
+        InstanceMetaData instanceMetaData2 = mock(InstanceMetaData.class);
+        HostMetadata metadata3 = mock(HostMetadata.class);
+        InstanceMetaData instanceMetaData3 = mock(InstanceMetaData.class);
+        Set<HostMetadata> hostsMetaData = new HashSet<>();
+        List<HostMetadata> hostsMetadataList = asList(metadata1, metadata2, metadata3);
+        hostsMetaData.addAll(hostsMetadataList);
+        Map<String, Map<Long, Long>> dfsSpace = new HashMap<>();
+        dfsSpace.put("node2", singletonMap(85_000L, 15_000L));
+        dfsSpace.put("node1", singletonMap(90_000L, 10_000L));
+        dfsSpace.put("node3", singletonMap(80_000L, 20_000L));
+        when(metadata1.getHostName()).thenReturn("node1");
+        when(metadata2.getHostName()).thenReturn("node2");
+        when(metadata3.getHostName()).thenReturn("node3");
+        when(instanceMetaData1.getAmbariServer()).thenReturn(false);
+        when(instanceMetaData2.getAmbariServer()).thenReturn(false);
+        when(instanceMetaData3.getAmbariServer()).thenReturn(false);
+        when(hostMetadataRepository.findHostsInHostgroup("slave_1", cluster.getId())).thenReturn(hostsMetaData);
+        when(clientService.create(stack)).thenReturn(ambariClient);
+        when(ambariClient.getComponentsCategory("multi-node-yarn", "slave_1")).thenReturn(singletonMap("DATANODE", "SLAVE"));
+        when(configurationService.getConfiguration(ambariClient)).thenReturn(singletonMap(ConfigParam.DFS_REPLICATION.key(), "1"));
+        when(hostFilterService.filterHostsForDecommission(stack, hostsMetaData)).thenReturn(hostsMetadataList);
+        when(ambariClient.getBlueprintMap(cluster.getBlueprint().getBlueprintName())).thenReturn(singletonMap("slave_1", asList("DATANODE")));
+        when(ambariClient.getDFSSpace()).thenReturn(dfsSpace);
+        when(instanceMetadataRepository.findHostInStack(stack.getId(), "node1")).thenReturn(instanceMetaData1);
+        when(instanceMetadataRepository.findHostInStack(stack.getId(), "node2")).thenReturn(instanceMetaData2);
+        when(instanceMetadataRepository.findHostInStack(stack.getId(), "node3")).thenReturn(instanceMetaData3);
+
+        underTest.updateHosts(stack.getId(), json);
+
+        verify(reactor).notify(eventCaptor.capture(), eventCaptor.capture());
+        List<HostMetadata> candidates = eventCaptor.getValue().getData().getDecommissionCandidates();
+        assertEquals(1, candidates.size());
+        assertEquals("node1", candidates.get(0).getHostName());
+    }
+
+    @Test
+    public void testUpdateHostsForDownscaleSelectMultipleNodesWithLessData() throws ConnectException {
+        HostGroupAdjustmentJson json = new HostGroupAdjustmentJson();
+        json.setHostGroup("slave_1");
+        json.setScalingAdjustment(-2);
+        AmbariClient ambariClient = mock(AmbariClient.class);
+        HostMetadata metadata1 = mock(HostMetadata.class);
+        InstanceMetaData instanceMetaData1 = mock(InstanceMetaData.class);
+        HostMetadata metadata2 = mock(HostMetadata.class);
+        InstanceMetaData instanceMetaData2 = mock(InstanceMetaData.class);
+        HostMetadata metadata3 = mock(HostMetadata.class);
+        InstanceMetaData instanceMetaData3 = mock(InstanceMetaData.class);
+        HostMetadata metadata4 = mock(HostMetadata.class);
+        InstanceMetaData instanceMetaData4 = mock(InstanceMetaData.class);
+        Set<HostMetadata> hostsMetaData = new HashSet<>();
+        List<HostMetadata> hostsMetadataList = asList(metadata1, metadata2, metadata3, metadata4);
+        hostsMetaData.addAll(hostsMetadataList);
+        Map<String, Map<Long, Long>> dfsSpace = new HashMap<>();
+        dfsSpace.put("node2", singletonMap(85_000L, 15_000L));
+        dfsSpace.put("node1", singletonMap(90_000L, 10_000L));
+        dfsSpace.put("node3", singletonMap(80_000L, 20_000L));
+        dfsSpace.put("node4", singletonMap(90_000L, 10_000L));
+        when(metadata1.getHostName()).thenReturn("node1");
+        when(metadata2.getHostName()).thenReturn("node2");
+        when(metadata3.getHostName()).thenReturn("node3");
+        when(metadata3.getHostName()).thenReturn("node4");
+        when(instanceMetaData1.getAmbariServer()).thenReturn(false);
+        when(instanceMetaData2.getAmbariServer()).thenReturn(false);
+        when(instanceMetaData3.getAmbariServer()).thenReturn(false);
+        when(instanceMetaData4.getAmbariServer()).thenReturn(false);
+        when(hostMetadataRepository.findHostsInHostgroup("slave_1", cluster.getId())).thenReturn(hostsMetaData);
+        when(clientService.create(stack)).thenReturn(ambariClient);
+        when(ambariClient.getComponentsCategory("multi-node-yarn", "slave_1")).thenReturn(singletonMap("DATANODE", "SLAVE"));
+        when(configurationService.getConfiguration(ambariClient)).thenReturn(singletonMap(ConfigParam.DFS_REPLICATION.key(), "1"));
+        when(hostFilterService.filterHostsForDecommission(stack, hostsMetaData)).thenReturn(hostsMetadataList);
+        when(ambariClient.getBlueprintMap(cluster.getBlueprint().getBlueprintName())).thenReturn(singletonMap("slave_1", asList("DATANODE")));
+        when(ambariClient.getDFSSpace()).thenReturn(dfsSpace);
+        when(instanceMetadataRepository.findHostInStack(stack.getId(), "node1")).thenReturn(instanceMetaData1);
+        when(instanceMetadataRepository.findHostInStack(stack.getId(), "node2")).thenReturn(instanceMetaData2);
+        when(instanceMetadataRepository.findHostInStack(stack.getId(), "node3")).thenReturn(instanceMetaData3);
+        when(instanceMetadataRepository.findHostInStack(stack.getId(), "node4")).thenReturn(instanceMetaData3);
+
+        underTest.updateHosts(stack.getId(), json);
+
+        verify(reactor).notify(eventCaptor.capture(), eventCaptor.capture());
+        List<HostMetadata> candidates = eventCaptor.getValue().getData().getDecommissionCandidates();
+        assertEquals(2, candidates.size());
+        assertEquals("node1", candidates.get(0).getHostName());
+        assertEquals("node4", candidates.get(1).getHostName());
+    }
+
+    @Test
+    public void testUpdateHostsForDownscaleWhenRemainingSpaceIsNotEnough() throws ConnectException {
+        HostGroupAdjustmentJson json = new HostGroupAdjustmentJson();
+        json.setHostGroup("slave_1");
+        json.setScalingAdjustment(-1);
+        AmbariClient ambariClient = mock(AmbariClient.class);
+        HostMetadata metadata1 = mock(HostMetadata.class);
+        InstanceMetaData instanceMetaData1 = mock(InstanceMetaData.class);
+        HostMetadata metadata2 = mock(HostMetadata.class);
+        InstanceMetaData instanceMetaData2 = mock(InstanceMetaData.class);
+        HostMetadata metadata3 = mock(HostMetadata.class);
+        InstanceMetaData instanceMetaData3 = mock(InstanceMetaData.class);
+        Set<HostMetadata> hostsMetaData = new HashSet<>();
+        List<HostMetadata> hostsMetadataList = asList(metadata1, metadata2, metadata3);
+        hostsMetaData.addAll(hostsMetadataList);
+        Map<String, Map<Long, Long>> dfsSpace = new HashMap<>();
+        dfsSpace.put("node2", singletonMap(5_000L, 15_000L));
+        dfsSpace.put("node1", singletonMap(10_000L, 10_000L));
+        dfsSpace.put("node3", singletonMap(6_000L, 20_000L));
+        when(metadata1.getHostName()).thenReturn("node1");
+        when(metadata2.getHostName()).thenReturn("node2");
+        when(metadata3.getHostName()).thenReturn("node3");
+        when(instanceMetaData1.getAmbariServer()).thenReturn(false);
+        when(instanceMetaData2.getAmbariServer()).thenReturn(false);
+        when(instanceMetaData3.getAmbariServer()).thenReturn(false);
+        when(hostMetadataRepository.findHostsInHostgroup("slave_1", cluster.getId())).thenReturn(hostsMetaData);
+        when(clientService.create(stack)).thenReturn(ambariClient);
+        when(ambariClient.getComponentsCategory("multi-node-yarn", "slave_1")).thenReturn(singletonMap("DATANODE", "SLAVE"));
+        when(configurationService.getConfiguration(ambariClient)).thenReturn(singletonMap(ConfigParam.DFS_REPLICATION.key(), "1"));
+        when(hostFilterService.filterHostsForDecommission(stack, hostsMetaData)).thenReturn(hostsMetadataList);
+        when(ambariClient.getBlueprintMap(cluster.getBlueprint().getBlueprintName())).thenReturn(singletonMap("slave_1", asList("DATANODE")));
+        when(ambariClient.getDFSSpace()).thenReturn(dfsSpace);
+        when(instanceMetadataRepository.findHostInStack(stack.getId(), "node1")).thenReturn(instanceMetaData1);
+        when(instanceMetadataRepository.findHostInStack(stack.getId(), "node2")).thenReturn(instanceMetaData2);
+        when(instanceMetadataRepository.findHostInStack(stack.getId(), "node3")).thenReturn(instanceMetaData3);
+
+        Exception result = null;
+        try {
+            underTest.updateHosts(stack.getId(), json);
+        } catch (BadRequestException e) {
+            result = e;
+        }
+
+        assertEquals("Trying to move '10000' bytes worth of data to nodes with '11000' bytes of capacity is not allowed", result.getMessage());
+    }
+
     private Stack createStack(Cluster cluster) {
         Stack stack = new Stack();
         stack.setId(1L);
@@ -142,6 +418,8 @@ public class AmbariClusterServiceTest {
         cluster.setName("dummyCluster");
         Blueprint blueprint = new Blueprint();
         blueprint.setId(1L);
+        blueprint.setBlueprintText("{\"host_groups\":[{\"name\":\"slave_1\",\"components\":[{\"name\":\"DATANODE\"}]}]}");
+        blueprint.setName("multi-node-yarn");
         cluster.setBlueprint(blueprint);
         return cluster;
     }
