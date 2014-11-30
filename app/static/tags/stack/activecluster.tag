@@ -7,7 +7,8 @@
         <div id="cluster-details-panel-collapse">
             <div class="panel-body">
                 <ul class="nav nav-pills nav-justified" role="tablist">
-
+                  <li class="active"><a ng-click="showDetails()" role="tab" data-toggle="tab">details</a></li>
+                  <li><a role="tab" ng-click="showPeriscope()" role="tab" data-toggle="tab">autoscaling SLA policies</a></li>
                 </ul>
                 <div class="tab-content">
                     <section id="cluster-details-pane" ng-class="{ 'active': detailsShow }" ng-show="detailsShow" class="tab-pane fade in">

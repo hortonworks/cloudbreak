@@ -1,7 +1,7 @@
 
 <!-- ........... ALARMS ...................................................... -->
 
-<div class="panel panel-default">
+<div class="panel panel-default" ng-controller="periscopeController">
     <div class="panel-heading">
         <h5><i class="fa fa-bell-o fa-fw"></i> ALARMS</h5>
     </div><!-- .panel-heading -->
@@ -17,29 +17,29 @@
         <div class="panel panel-default">
             <div id="panel-create-alarm-collapse" class="panel-under-btn-collapse collapse">
                 <div class="panel-body">
+                  <ul class="nav nav-pills nav-justified" role="tablist" style="padding-bottom:10px">
+                    <li class="active"><a ng-click="activateMetricAlarmCreationForm(true)" role="tab" data-toggle="tab">metric based</a></li>
+                    <li><a role="tab" ng-click="activateMetricAlarmCreationForm(false)" role="tab" data-toggle="tab">time based</a></li>
+                  </ul>
 
+                  <div ng-show="metricBasedAlarm">
                     <form class="form-horizontal" role="form">
-
-
                         <div class="form-group">
                             <label class="col-sm-3 control-label" for="alarmName">alarm name</label>
                             <div class="col-sm-9">
                                 <input type="text" class="form-control" id="alarmName" placeholder="max. 20 char">
                             </div><!-- .col-sm-9 -->
                         </div><!-- .form-group -->
-
                         <div class="form-group">
                             <label class="col-sm-3 control-label" for="alarmDesc">description</label>
                             <div class="col-sm-9">
                                 <textarea class="form-control" id="alarmDesc" placeholder="" rows="2"></textarea>
                             </div><!-- .col-sm-9 -->
                         </div><!-- .form-group -->
-
                         <div class="form-group">
                             <label class="col-sm-3 control-label" for="metrics">metrics</label>
                             <div class="col-sm-5">
                                 <select class="form-control" id="metrics">
-                                    <option>– select metric –</option>
                                     <option>pending containers</option>
                                     <option>pending applications</option>
                                     <option>lost nodes</option>
@@ -60,34 +60,66 @@
                                 <input type="number" class="form-control" id="threshold" placeholder="threshold">
                             </div><!-- .col-sm-2 -->
                         </div><!-- .form-group -->
-
                         <div class="form-group">
                             <label class="col-sm-3 control-label" for="email">notification email (optional)</label>
                             <div class="col-sm-9">
                                 <input type="text" class="form-control" id="email" placeholder="">
                             </div><!-- .col-sm-9 -->
                         </div><!-- .form-group -->
-
-
-
                         <div class="row btn-row">
                             <div class="col-sm-9 col-sm-offset-3">
                                 <a id="createAlarm" class="btn btn-success btn-block" role="button"><i class="fa fa-plus fa-fw"></i> create alarm</a>
                             </div>
                         </div>
-
                     </form>
+                  </div>
+
+                  <div ng-show="timeBasedAlarm">
+                    <form class="form-horizontal" role="form">
+                      <div class="form-group">
+                        <label class="col-sm-3 control-label" for="alarmName">alarm name</label>
+                        <div class="col-sm-9">
+                          <input type="text" class="form-control" id="alarmName" placeholder="max. 20 char">
+                          </div><!-- .col-sm-9 -->
+                        </div><!-- .form-group -->
+                        <div class="form-group">
+                          <label class="col-sm-3 control-label" for="alarmDesc">description</label>
+                          <div class="col-sm-9">
+                            <textarea class="form-control" id="alarmDesc" placeholder="" rows="2"></textarea>
+                          </div><!-- .col-sm-9 -->
+                        </div><!-- .form-group -->
+                        <div class="form-group">
+                          <label class="col-sm-3 control-label" for="metrics">time zone</label>
+                          <div class="col-sm-9">
+                            <input type="text" class="form-control" id="email" placeholder="">
+                          </div><!-- .col-sm-5 -->
+                        </div><!-- .form-group -->
+                        <div class="form-group">
+                          <label class="col-sm-3 control-label" for="metrics">cron expression</label>
+                          <div class="col-sm-9">
+                            <input type="text" class="form-control" id="email" placeholder="">
+                          </div><!-- .col-sm-5 -->
+                        </div><!-- .form-group -->
+                        <div class="form-group">
+                          <label class="col-sm-3 control-label" for="email">notification email (optional)</label>
+                          <div class="col-sm-9">
+                            <input type="text" class="form-control" id="email" placeholder="">
+                          </div><!-- .col-sm-9 -->
+                        </div><!-- .form-group -->
+                        <div class="row btn-row">
+                          <div class="col-sm-9 col-sm-offset-3">
+                            <a id="createAlarm" class="btn btn-success btn-block" role="button"><i class="fa fa-plus fa-fw"></i> create alarm</a>
+                          </div>
+                        </div>
+                    </form>
+                  </div>
                 </div>
             </div>
         </div><!-- .panel -->
 
         <!-- ............ ALARM LIST .............................................. -->
-
         <div class="panel-group" id="alarm-list-accordion">
-
-
             <!-- .............. ALARM ................................................. -->
-
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h5><a data-toggle="collapse" data-parent="#alarm-list-accordion" data-target="#panel-alarm-collapse01"><i class="fa fa-bell fa-fw"></i>pendingContainerHigh</a></h5>
@@ -132,55 +164,6 @@
                     </div>
                 </div>
             </div><!-- .panel -->
-
-            <!-- .............. ALARM ................................................. -->
-
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h5><a data-toggle="collapse" data-parent="#alarm-list-accordion" data-target="#panel-alarm-collapse02"><i class="fa fa-bell fa-fw"></i>freeGlobalResourcesRateLow</a></h5>
-                </div>
-                <div id="panel-alarm-collapse02" class="panel-collapse collapse">
-
-                    <p class="btn-row-over-panel"><a class="btn btn-danger" role="button"><i class="fa fa-times fa-fw"></i><span> delete</span></a></p>
-
-                    <div class="panel-body">
-
-                        <form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
-
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label" for="description01">description</label>
-                                <div class="col-sm-9">
-                                    <p id="description01" class="form-control-static">Low free global resource rate</p>
-                                </div><!-- .col-sm-9 -->
-                            </div><!-- .form-group -->
-
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label" for="period01">period</label>
-                                <div class="col-sm-9">
-                                    <p id="period01" class="form-control-static">1 minute(s)</p>
-                                </div><!-- .col-sm-9 -->
-                            </div><!-- .form-group -->
-
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label" for="metric01">metric</label>
-                                <div class="col-sm-9">
-                                    <p id="metric01" class="form-control-static">global_resources = 1</p>
-                                </div><!-- .col-sm-9 -->
-                            </div><!-- .form-group -->
-
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label" for="email01">notification email</label>
-                                <div class="col-sm-9">
-                                    <p id="email01" class="form-control-static">krisztian.horvath@sequenceiq.com</p>
-                                </div><!-- .col-sm-9 -->
-                            </div><!-- .form-group -->
-
-                        </form>
-                    </div>
-                </div>
-            </div><!-- .panel -->
-
-
 
         </div><!-- #alarm-list-accordion -->
 
@@ -321,41 +304,6 @@
                     </div>
                 </div>
             </div><!-- .panel -->
-
-            <!-- .............. SCALING ACTION POLICY .............................................. -->
-
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h5><a data-toggle="collapse" data-parent="#scaling-list-accordion" data-target="#panel-scaling-collapse02"><i class="fa fa-expand fa-fw"></i>upScaleWhenHighPendingContainers</a></h5>
-                </div>
-                <div id="panel-scaling-collapse02" class="panel-collapse collapse">
-
-                    <p class="btn-row-over-panel"><a class="btn btn-danger" role="button"><i class="fa fa-times fa-fw"></i><span> delete</span></a></p>
-
-                    <div class="panel-body">
-
-                        <form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
-
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label" for="scalingAdjustment02">scaling adjustment</label>
-                                <div class="col-sm-9">
-                                    <p id="scalingAdjustment02" class="form-control-static">40 %</p>
-                                </div><!-- .col-sm-9 -->
-                            </div><!-- .form-group -->
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label" for="alarm02">alarm</label>
-                                <div class="col-sm-9">
-                                    <p id="alarm02" class="form-control-static">pendingContainerHigh</p>
-                                </div><!-- .col-sm-9 -->
-                            </div><!-- .form-group -->
-
-                        </form>
-                    </div>
-                </div>
-            </div><!-- .panel -->
-
-
-
         </div><!-- #scaling-list-accordion -->
 
     </div><!-- .panel-body -->
