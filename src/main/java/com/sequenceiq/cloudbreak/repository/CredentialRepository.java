@@ -21,4 +21,7 @@ public interface CredentialRepository extends CrudRepository<Credential, Long> {
 
     Set<Credential> findAllInAccount(@Param("account") String account);
 
+    @PostAuthorize("hasPermission(returnObject,'read')")
+    Credential findByNameInAccount(@Param("name") String name, @Param("account") String account);
+
 }
