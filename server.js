@@ -268,6 +268,15 @@ app.use(function(err, req, res, next){
   res.json({ error: {status: err.status, message: err.message} });
 });
 
+process.on('uncaughtException', function (err) {
+    if (err.code == 'ECONNREFUSED' || err.code == 'ECONNRESET') {
+        console.log('uncaughtException error occurred: ' + err.code)
+    } else {
+        console.log(err)
+        process.exit(1)
+    }
+});
+
 // listen ======================================================================
 
 serverPort = process.env.ULU_SERVER_PORT ? process.env.ULU_SERVER_PORT : 3000;
