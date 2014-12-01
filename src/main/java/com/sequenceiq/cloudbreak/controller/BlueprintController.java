@@ -103,6 +103,20 @@ public class BlueprintController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    @RequestMapping(value = "account/blueprints/{name}", method = RequestMethod.DELETE)
+    @ResponseBody
+    public ResponseEntity<BlueprintJson> deleteBlueprintInAccount(@ModelAttribute("user") CbUser user, @PathVariable String name) {
+        blueprintService.delete(name, user);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @RequestMapping(value = "user/blueprints/{name}", method = RequestMethod.DELETE)
+    @ResponseBody
+    public ResponseEntity<BlueprintJson> deleteBlueprintInPrivate(@ModelAttribute("user") CbUser user, @PathVariable String name) {
+        blueprintService.delete(name, user);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
     private ResponseEntity<IdJson> createBlueprint(CbUser user, BlueprintJson blueprintRequest, Boolean publicInAccount) {
         Blueprint blueprint = blueprintConverter.convert(blueprintRequest);
         blueprint.setPublicInAccount(publicInAccount);
