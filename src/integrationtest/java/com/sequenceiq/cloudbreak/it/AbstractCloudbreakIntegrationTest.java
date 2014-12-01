@@ -291,8 +291,8 @@ public abstract class AbstractCloudbreakIntegrationTest {
         Response stackResponse = IntegrationTestUtil.getRequest(getAccessToken()).pathParam("stackId", getTestContext().get("stackId"))
                 .get(RestResource.STACK_ADJUSTMENT.path());
 
-        Assert.assertEquals("[ " + flowStep + " ] The cluster hasn't been started!", stackResponse.jsonPath().get("cluster.status"), "AVAILABLE");
-        Assert.assertEquals("[ " + flowStep + " ] The stack hasn't been started!", stackResponse.jsonPath().get("status"), "AVAILABLE");
+        Assert.assertEquals("[ " + flowStep + " ] The cluster hasn't been started!", "AVAILABLE", stackResponse.jsonPath().get("cluster.status"));
+        Assert.assertEquals("[ " + flowStep + " ] The stack hasn't been started!", "AVAILABLE", stackResponse.jsonPath().get("status"));
 
         String ambariIp = stackResponse.jsonPath().get("ambariServerIp");
         Assert.assertNotNull("[ " + flowStep + " ] The Ambari IP is not available!", ambariIp);
