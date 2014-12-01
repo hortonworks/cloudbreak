@@ -49,7 +49,7 @@ public class BlueprintController {
 
     @RequestMapping(value = "account/blueprints", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<IdJson> createAccountBlueprints(@ModelAttribute("user") CbUser user, @RequestBody @Valid BlueprintJson blueprintRequest) {
+    public ResponseEntity<IdJson> createAccountBlueprint(@ModelAttribute("user") CbUser user, @RequestBody @Valid BlueprintJson blueprintRequest) {
         return createBlueprint(user, blueprintRequest, true);
     }
 
