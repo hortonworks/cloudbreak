@@ -21,4 +21,7 @@ public interface BlueprintRepository extends CrudRepository<Blueprint, Long> {
 
     Set<Blueprint> findAllInAccount(@Param("account") String account);
 
+    @PostAuthorize("hasPermission(returnObject,'read')")
+    Blueprint findByNameInAccount(@Param("name") String name, @Param("account") String account);
+
 }
