@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.it;
 
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,7 +24,6 @@ import com.jayway.restassured.response.Response;
 import com.sequenceiq.ambari.client.AmbariClient;
 
 import freemarker.template.Configuration;
-import freemarker.template.TemplateException;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = IntegrationTestConfiguration.class)
@@ -181,7 +179,7 @@ public abstract class AbstractCloudbreakIntegrationTest {
         }
     }
 
-    protected void integrationTest() {
+    protected void integrationTestFlow() {
 
         createCredential();
 
@@ -193,15 +191,15 @@ public abstract class AbstractCloudbreakIntegrationTest {
 
         createCluster();
 
-        clusterAssertions();
+        clusterAssertions("CLUSTER_CREATION");
 
         scaleUp();
 
-        clusterAssertions();
+        clusterAssertions("SCALE_UP");
 
         scaleDown();
 
-        clusterAssertions();
+        clusterAssertions("SCALE_DOWN");
 
     }
 
@@ -276,7 +274,6 @@ public abstract class AbstractCloudbreakIntegrationTest {
     }
 
     protected void scaleDown() {
-        //negate the adjustment
         String adjustment = getTestContext().get("adjustment");
         adjustment = String.valueOf(Integer.valueOf(adjustment).intValue() * -1);
         getTestContext().put("adjustment", adjustment);
@@ -290,20 +287,20 @@ public abstract class AbstractCloudbreakIntegrationTest {
         LOGGER.info("STACK scaled up");
     }
 
-    protected void clusterAssertions() {
+    protected void clusterAssertions(String flowStep) {
         Response stackResponse = IntegrationTestUtil.getRequest(getAccessToken()).pathParam("stackId", getTestContext().get("stackId"))
                 .get(RestResource.STACK_ADJUSTMENT.path());
 
-        Assert.assertEquals("The cluster hasn't been started!", stackResponse.jsonPath().get("cluster.status"), "AVAILABLE");
-        Assert.assertEquals("The stack hasn't been started!", stackResponse.jsonPath().get("status"), "AVAILABLE");
+        Assert.assertEquals("[ " + flowStep + " ] The cluster hasn't been started!", stackResponse.jsonPath().get("cluster.status"), "AVAILABLE");
+        Assert.assertEquals("[ " + flowStep + " ] The stack hasn't been started!", stackResponse.jsonPath().get("status"), "AVAILABLE");
 
         String ambariIp = stackResponse.jsonPath().get("ambariServerIp");
-        Assert.assertNotNull("The Ambari IP is not available!", ambariIp);
+        Assert.assertNotNull("[ " + flowStep + " ] The Ambari IP is not available!", ambariIp);
 
         AmbariClient ambariClient = new AmbariClient(ambariIp);
-        Assert.assertEquals("The Ambari server is not running!", "RUNNING", ambariClient.healthCheck());
+        Assert.assertEquals("[ " + flowStep + " ] The Ambari server is not running!", "RUNNING", ambariClient.healthCheck());
 
-        Assert.assertEquals("The number of cluster nodes in the stack differs from the number of nodes registered in ambari",
+        Assert.assertEquals("[ " + flowStep + " ] The number of cluster nodes in the stack differs from the number of nodes registered in ambari",
                 ambariClient.getClusterHosts().size(), stackResponse.jsonPath().get("nodeCount"));
     }
 
@@ -311,9 +308,7 @@ public abstract class AbstractCloudbreakIntegrationTest {
         String json = null;
         try {
             json = FreeMarkerTemplateUtils.processTemplateIntoString(freemarkerConfiguration.getTemplate(template, "UTF-8"), getTestContext());
-        } catch (IOException e) {
-            throw new IllegalStateException("Could not create json message", e.getCause());
-        } catch (TemplateException e) {
+        } catch (Exception e) {
             throw new IllegalStateException("Could not create json message", e.getCause());
         }
         return json;

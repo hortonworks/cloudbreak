@@ -52,7 +52,7 @@ public class AzureIntegrationTest extends AbstractCloudbreakIntegrationTest {
 
     @Test
     public void createAzureCluster() {
-        super.integrationTest();
+        super.integrationTestFlow();
     }
 
     @Override public void after() {

@@ -25,7 +25,7 @@ public class AwsIntegrationTest extends AbstractCloudbreakIntegrationTest {
 
     @Test
     public void createAwsCluster() {
-        super.integrationTest();
+        super.integrationTestFlow();
     }
 
 }

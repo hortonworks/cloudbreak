@@ -33,7 +33,7 @@ public class GccIntegrationTest extends AbstractCloudbreakIntegrationTest {
 
     @Test
     public void createGccCluster() {
-        super.integrationTest();
+        super.integrationTestFlow();
     }
 
 }
