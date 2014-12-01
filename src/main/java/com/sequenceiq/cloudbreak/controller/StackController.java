@@ -78,6 +78,24 @@ public class StackController {
         return new ResponseEntity<>(stackJson, HttpStatus.OK);
     }
 
+    @RequestMapping(value = "user/stacks/{name}", method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity<StackJson> getStackInPrivate(@ModelAttribute("user") CbUser user, @PathVariable String name) {
+        Stack stack = stackService.get(name, user);
+        StackDescription stackDescription = stackService.getStackDescription(stack);
+        StackJson stackJson = stackConverter.convert(stack, stackDescription);
+        return new ResponseEntity<>(stackJson, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "account/stacks/{name}", method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity<StackJson> getStackInPublic(@ModelAttribute("user") CbUser user, @PathVariable String name) {
+        Stack stack = stackService.get(name, user);
+        StackDescription stackDescription = stackService.getStackDescription(stack);
+        StackJson stackJson = stackConverter.convert(stack, stackDescription);
+        return new ResponseEntity<>(stackJson, HttpStatus.OK);
+    }
+
     @RequestMapping(value = "stacks/{id}/status", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<Map<String, Object>> getStackStatus(@PathVariable Long id) {
@@ -88,6 +106,20 @@ public class StackController {
     @ResponseBody
     public ResponseEntity<TemplateJson> deleteStack(@PathVariable Long id) {
         stackService.delete(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @RequestMapping(value = "user/stacks/{name}", method = RequestMethod.DELETE)
+    @ResponseBody
+    public ResponseEntity<TemplateJson> deletePrivateStack(@ModelAttribute("user") CbUser user, @PathVariable String name) {
+        stackService.delete(name, user);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @RequestMapping(value = "account/stacks/{name}", method = RequestMethod.DELETE)
+    @ResponseBody
+    public ResponseEntity<TemplateJson> deletePublicStack(@ModelAttribute("user") CbUser user, @PathVariable String name) {
+        stackService.delete(name, user);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 

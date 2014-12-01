@@ -29,4 +29,8 @@ public interface StackService {
     void updateStatus(Long stackId, StatusRequest status);
 
     void updateNodeCount(Long stackId, Integer nodeCount);
+
+    Stack get(String name, CbUser cbUser);
+
+    void delete(String name, CbUser cbUser);
 }

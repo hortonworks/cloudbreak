@@ -54,6 +54,26 @@ public class ClusterController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @RequestMapping(value = "user/stacks/{name}/cluster", method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity<ClusterResponse> retrievePrivateCluster(@ModelAttribute("user") CbUser user, @PathVariable String name) {
+        Stack stack = stackService.get(name, user);
+        Cluster cluster = clusterService.retrieveCluster(stack.getId());
+        String clusterJson = clusterService.getClusterJson(stack.getAmbariIp(), stack.getId());
+        ClusterResponse response = clusterConverter.convert(cluster, clusterJson);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "account/stacks/{name}/cluster", method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity<ClusterResponse> retrievePublicCluster(@ModelAttribute("user") CbUser user, @PathVariable String name) {
+        Stack stack = stackService.get(name, user);
+        Cluster cluster = clusterService.retrieveCluster(stack.getId());
+        String clusterJson = clusterService.getClusterJson(stack.getAmbariIp(), stack.getId());
+        ClusterResponse response = clusterConverter.convert(cluster, clusterJson);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
     @RequestMapping(value = "/stacks/{stackId}/cluster", method = RequestMethod.PUT)
     @ResponseBody
     public ResponseEntity<String> updateCluster(@PathVariable Long stackId, @RequestBody UpdateClusterJson updateJson) {
