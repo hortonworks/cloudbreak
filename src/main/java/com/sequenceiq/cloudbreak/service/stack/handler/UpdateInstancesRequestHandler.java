@@ -161,7 +161,7 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
                                     } catch (Exception ex) {
                                         throw new InternalServerException(
                                                 String.format("Error occurred while removing instance '%s' on stack. Message: '%s'",
-                                                resource.getResourceName(), ex.getMessage()), ex);
+                                                        resource.getResourceName(), ex.getMessage()), ex);
                                     }
                                     return delete;
                                 }
@@ -176,7 +176,7 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
                             }
                         }
                     }
-
+                    stackUpdater.removeStackResources(stackId, dCO.getDecommisionResources());
                     LOGGER.info("Terminated instances in stack: '{}'", instanceIds);
                     LOGGER.info("Publishing {} event.", ReactorConfig.STACK_UPDATE_SUCCESS_EVENT);
                     reactor.notify(ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, Event.wrap(new StackUpdateSuccess(stack.getId(), true, instanceIds)));

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.repository;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -108,6 +109,22 @@ public class RetryingStackUpdater {
             LOGGER.info("Failed to update stack resources. [attempt: '{}', Cause: {}]. Trying to save it again.", attempt++, e.getClass().getSimpleName());
             if (attempt <= MAX_RETRIES) {
                 return doAddResources(stackId, resources);
+            } else {
+                throw new InternalServerException(String.format("Failed to update stack '%s' in 5 attempts. (while trying to update resources)", stackId), e);
+            }
+        }
+    }
+
+    public synchronized Stack removeStackResources(Long stackId, List<Resource> resources) {
+        Stack stack = stackRepository.findById(stackId);
+        MDCBuilder.buildMdcContext(stack);
+        int attempt = 1;
+        try {
+            return doRemoveResources(stackId, resources);
+        } catch (OptimisticLockException | OptimisticLockingFailureException e) {
+            LOGGER.info("Failed to update stack resources. [attempt: '{}', Cause: {}]. Trying to save it again.", attempt++, e.getClass().getSimpleName());
+            if (attempt <= MAX_RETRIES) {
+                return doRemoveResources(stackId, resources);
             } else {
                 throw new InternalServerException(String.format("Failed to update stack '%s' in 5 attempts. (while trying to update resources)", stackId), e);
             }
@@ -294,6 +311,28 @@ public class RetryingStackUpdater {
     private Stack doAddResources(Long stackId, List<Resource> resources) {
         Stack stack = stackRepository.findOneWithLists(stackId);
         stack.getResources().addAll(resources);
+        stack = stackRepository.save(stack);
+        LOGGER.info("Updated stack resources.");
+        return stack;
+    }
+
+    private Stack doRemoveResources(Long stackId, List<Resource> resources) {
+        Stack stack = stackRepository.findOneWithLists(stackId);
+        Set<Resource> notRemovedResources = new HashSet<>();
+        for (Resource resource : stack.getResources()) {
+            boolean removable = false;
+            for (Resource resource1 : resources) {
+                if (resource1.getResourceName().equals(resource.getResourceName())) {
+                    removable = true;
+                    break;
+                }
+            }
+            if (!removable) {
+                notRemovedResources.add(resource);
+            }
+        }
+
+        stack.setResources(notRemovedResources);
         stack = stackRepository.save(stack);
         LOGGER.info("Updated stack resources.");
         return stack;

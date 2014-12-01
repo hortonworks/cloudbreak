@@ -319,6 +319,15 @@ public class Stack implements ProvisionEntity {
         return null;
     }
 
+    public Resource getResourceByName(String name) {
+        for (Resource resource : resources) {
+            if (name.equals(resource.getResourceName())) {
+                return resource;
+            }
+        }
+        return null;
+    }
+
     public Integer getMultiplier() {
         return template.getMultiplier();
     }
