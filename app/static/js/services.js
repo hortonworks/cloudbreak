@@ -119,7 +119,7 @@ uluwatuServices.factory('UluwatuCluster', ['UserStack', 'Cluster', 'GlobalStack'
                     templateId: cluster.templateId,
                     credentialId: cluster.credentialId,
                     password: cluster.password,
-                    userName: cluster.userName
+                    userName: cluster.userName,
                 }
                 UserStack.save(stack, function (result) {
                     cluster.id = result.id;
@@ -151,5 +151,9 @@ uluwatuServices.factory('UluwatuCluster', ['UserStack', 'Cluster', 'GlobalStack'
         }
 
         return new AggregateCluster(UserStack, Cluster);
-    }])
-;
+    }]);
+
+    uluwatuServices.factory('Alarm', ['$resource',
+    function ($resource) {
+      return $resource('clusters/:id/alarms/metric', null, { 'update': { method:'PUT' } });
+    }]);

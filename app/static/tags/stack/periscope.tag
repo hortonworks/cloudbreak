@@ -13,7 +13,7 @@
             </a>
         </p>
         <!-- ......... CREATE ALARM FORM ............................................. -->
-
+        {{alarm}}
         <div class="panel panel-default">
             <div id="panel-create-alarm-collapse" class="panel-under-btn-collapse collapse">
                 <div class="panel-body">
@@ -27,43 +27,43 @@
                         <div class="form-group">
                             <label class="col-sm-3 control-label" for="alarmName">alarm name</label>
                             <div class="col-sm-9">
-                                <input type="text" class="form-control" id="alarmName" placeholder="max. 20 char">
+                                <input type="text" class="form-control" id="alarmName" placeholder="max. 20 char" ng-model="alarm.alarmName">
                             </div><!-- .col-sm-9 -->
                         </div><!-- .form-group -->
                         <div class="form-group">
                             <label class="col-sm-3 control-label" for="alarmDesc">description</label>
                             <div class="col-sm-9">
-                                <textarea class="form-control" id="alarmDesc" placeholder="" rows="2"></textarea>
+                                <textarea class="form-control" id="alarmDesc" placeholder="" rows="2" ng-model="alarm.description"></textarea>
                             </div><!-- .col-sm-9 -->
                         </div><!-- .form-group -->
                         <div class="form-group">
                             <label class="col-sm-3 control-label" for="metrics">metrics</label>
                             <div class="col-sm-5">
-                                <select class="form-control" id="metrics">
-                                    <option>pending containers</option>
-                                    <option>pending applications</option>
-                                    <option>lost nodes</option>
-                                    <option>unhealthy nodes</option>
-                                    <option>global resources</option>
+                                <select class="form-control" id="metrics" ng-model="alarm.metric">
+                                    <option value="PENDING_CONTAINERS">pending containers</option>
+                                    <option value="PENDING_APPLICATIONS">pending applications</option>
+                                    <option value="LOST_NODES">lost nodes</option>
+                                    <option value="UNHEALTHY_NODES">unhealthy nodes</option>
+                                    <option value="GLOBAL_RESOURCES">global resources</option>
                                 </select>
                             </div><!-- .col-sm-5 -->
                             <div class="col-sm-2">
-                                <select class="form-control logic-ops" id="comparisonOperator">
-                                    <option>=</option>
-                                    <option>&gt;=</option>
-                                    <option>&gt;</option>
-                                    <option>&lt;=</option>
-                                    <option>&lt;</option>
+                                <select class="form-control logic-ops" id="comparisonOperator" ng-model="alarm.comparisonOperator">
+                                    <option value="EQUALS">=</option>
+                                    <option value="GREATER_OR_EQUAL_THAN">&gt;=</option>
+                                    <option value="GREATER_THAN">&gt;</option>
+                                    <option value="LESS_OR_EQUAL_THAN">&lt;=</option>
+                                    <option value="LESS_THAN">&lt;</option>
                                 </select>
                             </div><!-- .col-sm-2 -->
                             <div class="col-sm-2">
-                                <input type="number" class="form-control" id="threshold" placeholder="threshold">
+                                <input type="number" class="form-control" id="threshold" placeholder="threshold" ng-model="alarm.threshold">
                             </div><!-- .col-sm-2 -->
                         </div><!-- .form-group -->
                         <div class="form-group">
                             <label class="col-sm-3 control-label" for="email">notification email (optional)</label>
                             <div class="col-sm-9">
-                                <input type="text" class="form-control" id="email" placeholder="">
+                                <input type="text" class="form-control" id="email" placeholder="" ng-model="alarm.email">
                             </div><!-- .col-sm-9 -->
                         </div><!-- .form-group -->
                         <div class="row btn-row">
@@ -79,31 +79,31 @@
                       <div class="form-group">
                         <label class="col-sm-3 control-label" for="alarmName">alarm name</label>
                         <div class="col-sm-9">
-                          <input type="text" class="form-control" id="alarmName" placeholder="max. 20 char">
+                          <input type="text" class="form-control" id="alarmName" placeholder="max. 20 char" ng-model="alarm.alarmName">
                           </div><!-- .col-sm-9 -->
                         </div><!-- .form-group -->
                         <div class="form-group">
                           <label class="col-sm-3 control-label" for="alarmDesc">description</label>
                           <div class="col-sm-9">
-                            <textarea class="form-control" id="alarmDesc" placeholder="" rows="2"></textarea>
+                            <textarea class="form-control" id="alarmDesc" placeholder="" rows="2" ng-model="alarm.description"></textarea>
                           </div><!-- .col-sm-9 -->
                         </div><!-- .form-group -->
                         <div class="form-group">
-                          <label class="col-sm-3 control-label" for="metrics">time zone</label>
+                          <label class="col-sm-3 control-label" for="timezone">time zone</label>
                           <div class="col-sm-9">
-                            <input type="text" class="form-control" id="email" placeholder="">
+                            <input type="text" class="form-control" id="timezone" placeholder="" ng-model="alarm.timeZone">
                           </div><!-- .col-sm-5 -->
                         </div><!-- .form-group -->
                         <div class="form-group">
-                          <label class="col-sm-3 control-label" for="metrics">cron expression</label>
+                          <label class="col-sm-3 control-label" for="cronexpression">cron expression</label>
                           <div class="col-sm-9">
-                            <input type="text" class="form-control" id="email" placeholder="">
+                            <input type="text" class="form-control" id="cronexpression" placeholder="" ng-model="alarm.cron">
                           </div><!-- .col-sm-5 -->
                         </div><!-- .form-group -->
                         <div class="form-group">
                           <label class="col-sm-3 control-label" for="email">notification email (optional)</label>
                           <div class="col-sm-9">
-                            <input type="text" class="form-control" id="email" placeholder="">
+                            <input type="text" class="form-control" id="email" placeholder="" ng-model="alarm.email">
                           </div><!-- .col-sm-9 -->
                         </div><!-- .form-group -->
                         <div class="row btn-row">

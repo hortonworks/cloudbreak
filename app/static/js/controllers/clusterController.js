@@ -71,8 +71,8 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 $rootScope.clusters.push(result);
                 initCluster();
 
-                $scope.modifyStatusMessage($rootScope.error_msg.cluster_success1 + result.name + $rootScope.error_msg.cluster_success2);
-                $scope.modifyStatusClass("has-success");
+                //$scope.modifyStatusMessage($rootScope.error_msg.cluster_success1 + result.name + $rootScope.error_msg.cluster_success2);
+                //$scope.modifyStatusClass("has-success");
 
                 $jq('.carousel').carousel(0);
                 // enable toolbar buttons
