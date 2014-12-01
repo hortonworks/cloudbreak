@@ -103,6 +103,10 @@ public abstract class AbstractCloudbreakIntegrationTest {
             }
             stackStatus = IntegrationTestUtil.entityPathRequest(getAccessToken(), "stackId", stackId).
                     get("stacks/{stackId}/status").jsonPath().get("status");
+
+            if (stackStatus.contains("FAILED")) {
+                Assert.fail("The stack has failed");
+            }
         }
         LOGGER.debug("Stack {} is in desired status {}", stackId, stackStatus);
     }
@@ -123,10 +127,6 @@ public abstract class AbstractCloudbreakIntegrationTest {
         LOGGER.debug("Stack {} is terminated {}", stackId);
     }
 
-    protected Response getStack(String stackId) {
-        return IntegrationTestUtil.entityPathRequest(getAccessToken(), "stackId", stackId).get("stacks/{stackId}");
-    }
-
     protected void genericAssertions(Response entityCreationResponse) {
         entityCreationResponse.then()
                 .statusCode(HttpStatus.CREATED.value())
@@ -134,7 +134,7 @@ public abstract class AbstractCloudbreakIntegrationTest {
     }
 
     @After
-    public void after() throws URISyntaxException {
+    public void after() {
         LOGGER.info("Cleaning up resources ....");
         // deleting resources created by the test
         if (testContext.containsKey("stackId")) {
@@ -291,24 +291,20 @@ public abstract class AbstractCloudbreakIntegrationTest {
     }
 
     protected void clusterAssertions() {
-        // Do assertions
-        LOGGER.info("Validating the  cluster ...");
-        Response stackResponse = getStack(getTestContext().get("stackId"));
+        Response stackResponse = IntegrationTestUtil.getRequest(getAccessToken()).pathParam("stackId", getTestContext().get("stackId"))
+                .get(RestResource.STACK_ADJUSTMENT.path());
 
-        // retrieving ambari address
+        Assert.assertEquals("The cluster hasn't been started!", stackResponse.jsonPath().get("cluster.status"), "AVAILABLE");
+        Assert.assertEquals("The stack hasn't been started!", stackResponse.jsonPath().get("status"), "AVAILABLE");
+
         String ambariIp = stackResponse.jsonPath().get("ambariServerIp");
+        Assert.assertNotNull("The Ambari IP is not available!", ambariIp);
 
-        // connecting to ambari
         AmbariClient ambariClient = new AmbariClient(ambariIp);
-
-        LOGGER.info("Checking the ambari server ...");
         Assert.assertEquals("The Ambari server is not running!", "RUNNING", ambariClient.healthCheck());
 
-        LOGGER.info("Checking the number of nodes ...");
-        Integer ambariNodes = ambariClient.getClusterHosts().size();
-        Integer stackNodes = stackResponse.jsonPath().get("nodeCount");
-        Assert.assertEquals("The number of cluster nodes in the stack differs from the number of nodes registered in ambari", ambariNodes, stackNodes);
-
+        Assert.assertEquals("The number of cluster nodes in the stack differs from the number of nodes registered in ambari",
+                ambariClient.getClusterHosts().size(), stackResponse.jsonPath().get("nodeCount"));
     }
 
     private String getJson(String template) {

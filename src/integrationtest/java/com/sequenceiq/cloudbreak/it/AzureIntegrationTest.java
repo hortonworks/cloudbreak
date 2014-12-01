@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.it;
 
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 
@@ -56,7 +55,7 @@ public class AzureIntegrationTest extends AbstractCloudbreakIntegrationTest {
         super.integrationTest();
     }
 
-    @Override public void after() throws URISyntaxException {
+    @Override public void after() {
         // keep the credential!
         getTestContext().remove("credentialId");
         super.after();
