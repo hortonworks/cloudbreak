@@ -16,7 +16,7 @@ uluwatuServices.factory('UserTemplate', ['$resource',
     function ($resource) {
         return $resource('user/templates');
     }]);
-    
+
 uluwatuServices.factory('AccountTemplate', ['$resource',
     function ($resource) {
         return $resource('account/templates');
@@ -46,7 +46,7 @@ uluwatuServices.factory('UserCredential', ['$resource',
     function ($resource) {
         return $resource('user/credentials');
     }]);
-    
+
 uluwatuServices.factory('AccountCredential', ['$resource',
     function ($resource) {
         return $resource('account/credentials');
@@ -74,7 +74,7 @@ uluwatuServices.factory('UserStack', ['$resource',
     function ($resource) {
         return $resource('user/stacks');
     }]);
-    
+
 uluwatuServices.factory('AccountStack', ['$resource',
     function ($resource) {
         return $resource('account/stacks');
@@ -146,10 +146,11 @@ uluwatuServices.factory('UluwatuCluster', ['UserStack', 'AccountStack', 'Cluster
                 var stack = {
                     nodeCount: cluster.nodeCount,
                     name: cluster.name,
-                    templateId: cluster.templateId,
                     credentialId: cluster.credentialId,
                     password: cluster.password,
-                    userName: cluster.userName
+                    userName: cluster.userName,
+                    region: cluster.region,
+                    templateGroups: cluster.templateGroups
                 }
                 if (cluster.public) {
                     AccountStack.save(stack, function (result) {
@@ -164,7 +165,7 @@ uluwatuServices.factory('UluwatuCluster', ['UserStack', 'AccountStack', 'Cluster
                         failureHandler(failure);
                     });
                 }
-                
+
                 function stackSuccessHandler(result) {
                     cluster.id = result.id;
                     var cbCluster = {

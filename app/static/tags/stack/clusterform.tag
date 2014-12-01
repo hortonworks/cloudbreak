@@ -44,7 +44,20 @@
                             </div>
                         </div>
                     </div>
-
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="selectRegion">Region</label>
+                        <div class="col-sm-9">
+                            <select class="form-control" id="selectRegion" ng-model="cluster.region" required ng-show="activeCredential.cloudPlatform == 'AWS'">
+                                <option ng-repeat="region in $root.config.AWS.awsRegions" value="{{region.key}}">{{region.value}}</option>
+                            </select>
+                            <select class="form-control" id="selectRegion" ng-model="cluster.region" required ng-show="activeCredential.cloudPlatform == 'AZURE'">
+                                <option ng-repeat="region in $root.config.AZURE.azureRegions" value="{{region.key}}">{{region.value}}</option>
+                            </select>
+                            <select class="form-control" id="selectRegion" ng-model="cluster.region" ng-show="activeCredential.cloudPlatform == 'GCC'">
+                                <option ng-repeat="region in $root.config.GCC.gccRegions" value="{{region.key}}">{{region.value}}</option>
+                            </select>
+                        </div>
+                    </div>
                     <div class="form-group">
                         <label class="col-sm-3 control-label" for="selectTemplate">Template</label>
                         <div class="col-sm-9">
@@ -57,7 +70,7 @@
                     <div class="form-group">
                         <label class="col-sm-3 control-label" for="selectBlueprint">Blueprint</label>
                         <div class="col-sm-9">
-                            <select class="form-control" id="selectBlueprint" ng-model="cluster.blueprintId"  required >
+                            <select class="form-control" id="selectBlueprint" ng-model="cluster.blueprintId"  required ng-change="selectedBlueprintChange()">
                                 <option ng-repeat="blueprint in $root.blueprints | orderBy:'name'" data-value="{{blueprint.id}}" value="{{blueprint.id}}" id="{{blueprint.id}}">{{blueprint.name}}
                                 </option>
                             </select>
@@ -69,6 +82,35 @@
                              <input type="checkbox" name="cluster_publicInAccount" id="cluster_publicInAccount" ng-model="cluster.public">
                          </div>
                     </div>
+                    <div ng-repeat="templateGroup in cluster.templateGroups">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">{{templateGroup.group}}</h3>
+                            </div>
+                            <div class="panel-body">
+                                <div class="form-group" >
+                                    <label class="col-sm-3 control-label" for="templateNodeCount{{$index}}">Group size</label>
+                                    <div class="col-sm-9">
+                                        <input type="number" name="templateNodeCount{{$index}}" class="form-control" ng-model="templateGroup.nodeCount" id="templateNodeCount{{$index}}" min="1"   max="100000" placeholder="1 - 100000" required>
+                                        <div class="help-block"
+                                             ng-show="clusterCreationForm.templateNodeCount{{$index}}.$dirty && clusterCreationForm.templateNodeCount{{$index}}.$invalid"><i class="fa fa-warning"></i>
+                                            {{error_msg.cluster_size_invalid}}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group" >
+                                    <label class="col-sm-3 control-label" for="templateName{{$index}}">Template</label>
+                                    <div class="col-sm-9">
+                                        <select class="form-control" id="templateName{{$index}}" ng-model="templateGroup.templateId" required >
+                                            <option ng-repeat="template in $root.templates | orderBy:'name'" data-value="{{template.id}}" value="{{template.id}}" id="{{template.id}}" ng-if="template.cloudPlatform == activeCredential.cloudPlatform">{{template.name}}
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="form-group" >
                         <label class="col-sm-3 control-label" for="emailneeded">Email notification when cluster is provisioned</label>
                         <div class="col-sm-9">
