@@ -111,7 +111,7 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
         MDCBuilder.buildMdcContext(stackEvent);
         String vmType = null;
         String region = null;
-        switch (stack.getTemplate().cloudPlatform()) {
+        switch (stack.cloudPlatform()) {
             case AWS:
                 vmType = ((AwsTemplate) stack.getTemplate()).getInstanceType().name();
                 region = ((AwsTemplate) stack.getTemplate()).getRegion().getName();
@@ -125,10 +125,10 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
                 region = ((GccTemplate) stack.getTemplate()).getGccZone().getValue();
                 break;
             default:
-                throw new IllegalStateException("Unsupported cloud platform :" + stack.getTemplate().cloudPlatform());
+                throw new IllegalStateException("Unsupported cloud platform :" + stack.cloudPlatform());
         }
         stackEvent.setVmType(vmType);
         stackEvent.setRegion(region);
-        stackEvent.setCloud(stack.getTemplate().cloudPlatform().name());
+        stackEvent.setCloud(stack.cloudPlatform().name());
     }
 }

@@ -212,7 +212,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
                 Map<String, String> params = new HashMap<>();
                 params.put(AzureStackUtil.NAME, affinityGroupName);
                 params.put(DESCRIPTION, VM_COMMON_NAME);
-                params.put(LOCATION, ((AzureTemplate) stack.getTemplate()).getLocation().location());
+                params.put(LOCATION, AzureLocation.valueOf(stack.getRegion()).location());
                 azureClient.createAffinityGroup(params);
             } else {
                 LOGGER.error(String.format("Error occurs on %s stack under the affinity group creation", stack.getId()), ex);

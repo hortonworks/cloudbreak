@@ -76,7 +76,7 @@ public class StackCreationFailureHandler implements Consumer<Event<StackOperatio
         if (stack.getCluster().getEmailNeeded()) {
             ambariClusterInstallerMailSenderService.sendFailEmail(stack.getOwner());
         }
-        final CloudPlatform cloudPlatform = stack.getTemplate().cloudPlatform();
+        final CloudPlatform cloudPlatform = stack.cloudPlatform();
         try {
             if (cloudPlatform.isWithTemplate()) {
                 cloudPlatformConnectors.get(cloudPlatform).rollback(stackRepository.findOneWithLists(stackId), stack.getResources());

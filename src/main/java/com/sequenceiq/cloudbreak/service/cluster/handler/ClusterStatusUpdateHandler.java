@@ -71,7 +71,7 @@ public class ClusterStatusUpdateHandler implements Consumer<Event<ClusterStatusU
             if (Status.STOP_REQUESTED.equals(stackRepository.findOneWithLists(stackId).getStatus())) {
                 LOGGER.info("Hadoop services stopped, stopping.");
                 reactor.notify(ReactorConfig.STACK_STATUS_UPDATE_EVENT,
-                        Event.wrap(new StackStatusUpdateRequest(stack.getTemplate().cloudPlatform(), stackId, statusRequest)));
+                        Event.wrap(new StackStatusUpdateRequest(stack.cloudPlatform(), stackId, statusRequest)));
             }
         } else {
             boolean started = ambariClusterConnector.startCluster(stack);

@@ -374,6 +374,10 @@ public class Stack implements ProvisionEntity {
         return templateGroupsList;
     }
 
+    public CloudPlatform cloudPlatform() {
+        return credential.getCloudPlatform();
+    }
+
     public Integer getMultiplier() {
         return template.getMultiplier();
     }
