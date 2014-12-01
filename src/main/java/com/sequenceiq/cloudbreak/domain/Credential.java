@@ -34,7 +34,11 @@ import javax.persistence.UniqueConstraint;
         @NamedQuery(
                 name = "Credential.findByNameInAccount",
                 query = "SELECT c FROM Credential c "
-                        + "WHERE c.account= :account and c.name= :name")
+                        + "WHERE c.name= :name and ((c.publicInAccount=true and c.account= :account) or c.owner= :owner)"),
+        @NamedQuery(
+                name = "Credential.findByNameInUser",
+                query = "SELECT b FROM Credential b "
+                        + "WHERE b.owner= :owner and b.name= :name")
 })
 public abstract class Credential {
 

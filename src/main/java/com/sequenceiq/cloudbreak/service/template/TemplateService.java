@@ -17,7 +17,9 @@ public interface TemplateService {
 
     void delete(Long id);
 
-    Template get(String name, CbUser user);
+    Template getPrivateTemplate(String name, CbUser user);
+
+    Template getPublicTemplate(String name, CbUser user);
 
     void delete(String templateName, CbUser user);
 

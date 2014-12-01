@@ -81,7 +81,7 @@ public class TemplateController {
     @RequestMapping(value = "user/templates/{name}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<TemplateJson> getTemplateInPrivate(@ModelAttribute("user") CbUser user, @PathVariable String name) {
-        Template template = templateService.get(name, user);
+        Template template = templateService.getPrivateTemplate(name, user);
         TemplateJson templateJson = convert(template);
         return new ResponseEntity<>(templateJson, HttpStatus.OK);
     }
@@ -89,7 +89,7 @@ public class TemplateController {
     @RequestMapping(value = "account/templates/{name}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<TemplateJson> getTemplateInAccount(@ModelAttribute("user") CbUser user, @PathVariable String name) {
-        Template template = templateService.get(name, user);
+        Template template = templateService.getPublicTemplate(name, user);
         TemplateJson templateJson = convert(template);
         return new ResponseEntity<>(templateJson, HttpStatus.OK);
     }

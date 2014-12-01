@@ -83,8 +83,17 @@ public class DefaultBlueprintService implements BlueprintService {
     }
 
     @Override
-    public Blueprint get(String name, CbUser user) {
-        Blueprint blueprint = blueprintRepository.findByNameInAccount(name, user.getAccount());
+    public Blueprint getPublicBlueprint(String name, CbUser user) {
+        Blueprint blueprint = blueprintRepository.findByNameInAccount(name, user.getAccount(), user.getUserId());
+        if (blueprint == null) {
+            throw new NotFoundException(String.format("Blueprint '%s' not found.", name));
+        }
+        return blueprint;
+    }
+
+    @Override
+    public Blueprint getPrivateBlueprint(String name, CbUser user) {
+        Blueprint blueprint = blueprintRepository.findByNameInUser(name, user.getUserId());
         if (blueprint == null) {
             throw new NotFoundException(String.format("Blueprint '%s' not found.", name));
         }
@@ -93,7 +102,7 @@ public class DefaultBlueprintService implements BlueprintService {
 
     @Override
     public void delete(String name, CbUser user) {
-        Blueprint blueprint = blueprintRepository.findByNameInAccount(name, user.getAccount());
+        Blueprint blueprint = blueprintRepository.findByNameInAccount(name, user.getAccount(), user.getUserId());
         if (blueprint == null) {
             throw new NotFoundException(String.format("Blueprint '%s' not found.", name));
         }

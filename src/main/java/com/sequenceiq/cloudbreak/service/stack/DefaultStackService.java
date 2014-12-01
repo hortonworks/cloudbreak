@@ -106,8 +106,17 @@ public class DefaultStackService implements StackService {
         return stack;
     }
 
-    public Stack get(String name, CbUser cbUser) {
-        Stack stack = stackRepository.findByNameInAccount(name, cbUser.getAccount());
+    public Stack getPrivateStack(String name, CbUser cbUser) {
+        Stack stack = stackRepository.findByNameInUser(name, cbUser.getUserId());
+        if (stack == null) {
+            throw new NotFoundException(String.format("Stack '%s' not found", name));
+        }
+        MDCBuilder.buildMdcContext(stack);
+        return stack;
+    }
+
+    public Stack getPublicStack(String name, CbUser cbUser) {
+        Stack stack = stackRepository.findByNameInAccount(name, cbUser.getAccount(), cbUser.getUserId());
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", name));
         }
@@ -117,7 +126,7 @@ public class DefaultStackService implements StackService {
 
     @Override
     public void delete(String name, CbUser user) {
-        Stack stack = stackRepository.findByNameInAccount(name, user.getAccount());
+        Stack stack = stackRepository.findByNameInAccount(name, user.getAccount(), user.getUserId());
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Stack delete requested.");
         if (stack == null) {

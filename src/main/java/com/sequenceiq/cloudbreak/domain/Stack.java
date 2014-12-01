@@ -80,7 +80,11 @@ import javax.persistence.Version;
         @NamedQuery(
                 name = "Stack.findByNameInAccount",
                 query = "SELECT s FROM Stack s "
-                        + "WHERE s.name= :name and s.account= :account")
+                        + "WHERE s.name= :name and ((s.account= :account and s.publicInAccount=true) or s.owner= :owner)"),
+        @NamedQuery(
+                name = "Stack.findByNameInUser",
+                query = "SELECT t FROM Stack t "
+                        + "WHERE t.owner= :owner and t.name= :name")
 })
 public class Stack implements ProvisionEntity {
 

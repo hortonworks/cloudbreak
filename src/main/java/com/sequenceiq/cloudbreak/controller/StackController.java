@@ -81,7 +81,7 @@ public class StackController {
     @RequestMapping(value = "user/stacks/{name}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<StackJson> getStackInPrivate(@ModelAttribute("user") CbUser user, @PathVariable String name) {
-        Stack stack = stackService.get(name, user);
+        Stack stack = stackService.getPrivateStack(name, user);
         StackDescription stackDescription = stackService.getStackDescription(stack);
         StackJson stackJson = stackConverter.convert(stack, stackDescription);
         return new ResponseEntity<>(stackJson, HttpStatus.OK);
@@ -90,7 +90,7 @@ public class StackController {
     @RequestMapping(value = "account/stacks/{name}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<StackJson> getStackInPublic(@ModelAttribute("user") CbUser user, @PathVariable String name) {
-        Stack stack = stackService.get(name, user);
+        Stack stack = stackService.getPublicStack(name, user);
         StackDescription stackDescription = stackService.getStackDescription(stack);
         StackJson stackJson = stackConverter.convert(stack, stackDescription);
         return new ResponseEntity<>(stackJson, HttpStatus.OK);

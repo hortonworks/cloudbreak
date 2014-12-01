@@ -67,14 +67,14 @@ public class BlueprintController {
     @RequestMapping(value = "user/blueprints/{name}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<BlueprintJson> getPrivateBlueprint(@ModelAttribute("user") CbUser user, @PathVariable String name) {
-        Blueprint blueprint = blueprintService.get(name, user);
+        Blueprint blueprint = blueprintService.getPrivateBlueprint(name, user);
         return new ResponseEntity<>(blueprintConverter.convert(blueprint), HttpStatus.OK);
     }
 
     @RequestMapping(value = "account/blueprints/{name}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<BlueprintJson> createAccountBlueprint(@ModelAttribute("user") CbUser user, @PathVariable String name) {
-        Blueprint blueprint = blueprintService.get(name, user);
+        Blueprint blueprint = blueprintService.getPublicBlueprint(name, user);
         return new ResponseEntity<>(blueprintConverter.convert(blueprint), HttpStatus.OK);
     }
 

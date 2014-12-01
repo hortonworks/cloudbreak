@@ -64,8 +64,18 @@ public class SimpleCredentialService implements CredentialService {
     }
 
     @Override
-    public Credential get(String name, CbUser user) {
-        Credential credential = credentialRepository.findByNameInAccount(name, user.getAccount());
+    public Credential getPublicBlueprint(String name, CbUser user) {
+        Credential credential = credentialRepository.findByNameInAccount(name, user.getAccount(), user.getUserId());
+        if (credential == null) {
+            throw new NotFoundException(String.format("Credential '%s' not found.", name));
+        } else {
+            return credential;
+        }
+    }
+
+    @Override
+    public Credential getPrivateBlueprint(String name, CbUser user) {
+        Credential credential = credentialRepository.findByNameInUser(name, user.getUserId());
         if (credential == null) {
             throw new NotFoundException(String.format("Credential '%s' not found.", name));
         } else {
@@ -84,7 +94,7 @@ public class SimpleCredentialService implements CredentialService {
 
     @Override
     public void delete(String name, CbUser user) {
-        Credential credential = credentialRepository.findByNameInAccount(name, user.getAccount());
+        Credential credential = credentialRepository.findByNameInAccount(name, user.getAccount(), user.getUserId());
         if (credential == null) {
             throw new NotFoundException(String.format("Credential '%s' not found.", name));
         }

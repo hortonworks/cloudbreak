@@ -30,7 +30,9 @@ public interface StackService {
 
     void updateNodeCount(Long stackId, Integer nodeCount);
 
-    Stack get(String name, CbUser cbUser);
+    Stack getPrivateStack(String name, CbUser cbUser);
+
+    Stack getPublicStack(String name, CbUser cbUser);
 
     void delete(String name, CbUser cbUser);
 }

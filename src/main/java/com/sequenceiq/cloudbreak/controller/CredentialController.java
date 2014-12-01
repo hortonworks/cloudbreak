@@ -82,14 +82,14 @@ public class CredentialController {
     @RequestMapping(value = "user/credentials/{name}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<CredentialJson> getPrivateCredential(@ModelAttribute("user") CbUser user, @PathVariable String name) {
-        Credential credentials = credentialService.get(name, user);
+        Credential credentials = credentialService.getPrivateBlueprint(name, user);
         return new ResponseEntity<>(convert(credentials), HttpStatus.OK);
     }
 
     @RequestMapping(value = "account/credentials/{name}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<CredentialJson> getAccountCredential(@ModelAttribute("user") CbUser user, @PathVariable String name) {
-        Credential credentials = credentialService.get(name, user);
+        Credential credentials = credentialService.getPublicBlueprint(name, user);
         return new ResponseEntity<>(convert(credentials), HttpStatus.OK);
     }
 
