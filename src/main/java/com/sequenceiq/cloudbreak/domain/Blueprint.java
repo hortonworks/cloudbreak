@@ -13,7 +13,7 @@ import javax.persistence.UniqueConstraint;
 
 @Entity
 @Table(name = "Blueprint", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "account", "name" })
+        @UniqueConstraint(columnNames = {"account", "name"})
 })
 @NamedQueries({
         @NamedQuery(
@@ -28,8 +28,13 @@ import javax.persistence.UniqueConstraint;
         @NamedQuery(
                 name = "Blueprint.findAllInAccount",
                 query = "SELECT b FROM Blueprint b "
-                        + "WHERE b.account= :account ")
+                        + "WHERE b.account= :account "),
+        @NamedQuery(
+                name = "Blueprint.findByNameInAccount",
+                query = "SELECT b FROM Blueprint b "
+                        + "WHERE b.account= :account and b.name= :name")
 })
+
 public class Blueprint implements ProvisionEntity {
 
     @Id
