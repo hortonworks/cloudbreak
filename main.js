@@ -323,21 +323,21 @@ app.post('/reset/:resetToken', function(req, res) {
                     var newPasswordData = {'password' : req.body.password}
                     needle.put(uaaAddress + '/Users/' + userData.id + '/password', JSON.stringify(newPasswordData),
                          userOptions, function(err, resetResp) {
-                       if (resetResp.statusCode = 200){
+                       if (resetResp.statusCode == 200){
                             res.json({message: 'SUCCESS'})
                        } else {
-                            res.statusCode = 400
+                            res.statusCode = resetResp.statusCode
                             res.json({message: 'Password update failed.'})
                        }
                     });
                 } else {
-                    res.statusCode = 400
+                    res.statusCode = 401
                     res.json({message: 'Bad token for user.'})
                 }
             })
         })
    } else {
-    res.statusCode = 400
+    res.statusCode = 401
     res.json({message:'Failed to reset password. Check inputs'});
    }
 });
@@ -384,7 +384,7 @@ app.get('/confirm/:confirm_token', function(req, res){
                    res.render('login',{ errorMessage: "confirmation successful" });
                 })
             } else {
-                res.statusCode = 400
+                res.statusCode = 401
                 res.json({message: 'Cannot retrieve user by confirm token.'})
             }
         });
@@ -552,7 +552,7 @@ app.post('/activate', function(req, res){
                                 });
                             } else {
                                 console.log('User and admin company id is not the same.')
-                                res.statusCode = 400
+                                res.statusCode = 401
                                 res.json({message: 'User and admin company id is not the same.'})
                             }
                         });
@@ -620,7 +620,7 @@ getToken = function(req, res, callback) {
                 var token = tokenResp.body.access_token;
                 callback(token)
             } else {
-                res.statusCode = 400
+                res.statusCode = tokenResp.statusCode
                 res.json({message: 'Cannot retrieve token'})
             }
     });
@@ -692,7 +692,7 @@ updatePassword = function(req, res, token, userId, newPassword, callback) {
         var newPasswordData = {'password' : newPassword}
         needle.put(uaaAddress + '/Users/' + userId + '/password', JSON.stringify(newPasswordData),
              passwordUpdateOptions, function(err, resetResp) {
-                 if (resetResp.statusCode = 200){
+                 if (resetResp.statusCode == 200){
                    callback(resetResp)
                  } else {
                    console.log('Password update failed.')
@@ -759,7 +759,7 @@ getAdminName = function(req, res, callback) {
                callback(adminUserName)
             } else {
                 console.log('Cannot retrieve user name from token.')
-                res.statusCode = 400
+                res.statusCode = checkTokenResp.statusCode
                 res.json({message: 'Cannot retrieve user name from token.'})
             }
         })
@@ -783,7 +783,7 @@ isUserAdmin = function(req, res, userData, callback) {
        }
     }
     if (isAdmin == false) {
-      res.statusCode = 400
+      res.statusCode = 401
       res.json({message: 'User is not an admin.'})
     } else if (companyId == null){
       res.statusCode = 400
