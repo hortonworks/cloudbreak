@@ -13,7 +13,7 @@ import javax.persistence.UniqueConstraint;
 
 @Entity
 @Table(name = "Blueprint", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"account", "name"})
+        @UniqueConstraint(columnNames = { "account", "name" })
 })
 @NamedQueries({
         @NamedQuery(
