@@ -74,13 +74,9 @@ public class GccResourceBuilderInit implements
         }
         List<Resource> result = new ArrayList<>();
         for (Resource resource : resourceList) {
-            try {
-                Instance instance = gccInstanceResourceBuilder.describe(stack, compute, resource);
-                for (AttachedDisk attachedDisk : instance.getDisks()) {
-                    result.add(new Resource(ResourceType.GCC_ATTACHED_DISK, attachedDisk.getDeviceName(), stack));
-                }
-            } catch (IOException ex) {
-                LOGGER.error("There was a problem with the describe instance on Google cloud");
+            Instance instance = gccInstanceResourceBuilder.describe(stack, compute, resource);
+            for (AttachedDisk attachedDisk : instance.getDisks()) {
+                result.add(new Resource(ResourceType.GCC_ATTACHED_DISK, attachedDisk.getDeviceName(), stack));
             }
         }
         result.addAll(resourceList);

@@ -176,6 +176,7 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
                             }
                         }
                     }
+
                     LOGGER.info("Terminated instances in stack: '{}'", instanceIds);
                     LOGGER.info("Publishing {} event.", ReactorConfig.STACK_UPDATE_SUCCESS_EVENT);
                     reactor.notify(ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, Event.wrap(new StackUpdateSuccess(stack.getId(), true, instanceIds)));
