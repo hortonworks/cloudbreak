@@ -20,4 +20,7 @@ public interface TemplateRepository extends CrudRepository<Template, Long> {
     Set<Template> findPublicsInAccount(@Param("account") String account);
 
     Set<Template> findAllInAccount(@Param("account") String account);
+
+    @PostAuthorize("hasPermission(returnObject,'read')")
+    Template findByNameInAccount(@Param("name") String name, @Param("account") String account);
 }

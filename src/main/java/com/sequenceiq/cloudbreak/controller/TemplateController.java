@@ -78,10 +78,40 @@ public class TemplateController {
         return new ResponseEntity<>(templateJson, HttpStatus.OK);
     }
 
+    @RequestMapping(value = "user/templates/{name}", method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity<TemplateJson> getTemplateInPrivate(@ModelAttribute("user") CbUser user, @PathVariable String name) {
+        Template template = templateService.get(name, user);
+        TemplateJson templateJson = convert(template);
+        return new ResponseEntity<>(templateJson, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "account/templates/{name}", method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity<TemplateJson> getTemplateInAccount(@ModelAttribute("user") CbUser user, @PathVariable String name) {
+        Template template = templateService.get(name, user);
+        TemplateJson templateJson = convert(template);
+        return new ResponseEntity<>(templateJson, HttpStatus.OK);
+    }
+
     @RequestMapping(value = "templates/{id}", method = RequestMethod.DELETE)
     @ResponseBody
     public ResponseEntity<TemplateJson> deleteTemplate(@ModelAttribute("user") CbUser user, @PathVariable Long id) {
         templateService.delete(id);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "account/templates/{name}", method = RequestMethod.DELETE)
+    @ResponseBody
+    public ResponseEntity<TemplateJson> deletePublicTemplate(@ModelAttribute("user") CbUser user, @PathVariable String name) {
+        templateService.delete(name, user);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "user/templates/{name}", method = RequestMethod.DELETE)
+    @ResponseBody
+    public ResponseEntity<TemplateJson> deletePrivateTemplate(@ModelAttribute("user") CbUser user, @PathVariable String name) {
+        templateService.delete(name, user);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
