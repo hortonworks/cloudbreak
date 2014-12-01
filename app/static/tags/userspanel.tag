@@ -54,7 +54,7 @@
                         </div>
                         <div id="panel-user-collapse{{actualuser.idx}}" class="panel-collapse collapse">
 
-                            <p class="btn-row-over-panel"><a class="btn btn-danger" ng-click="activateUser('false', actualuser.username)" role="button"><i class="fa fa-circle-o fa-fw"></i><span> deactivate user</span></a></p>
+                            <p class="btn-row-over-panel"><a class="btn btn-danger" ng-click="activateUser(false, actualuser.username)" role="button"><i class="fa fa-circle-o fa-fw"></i><span> deactivate user</span></a></p>
 
                             <div class="panel-body">
                                 <form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
@@ -79,7 +79,7 @@
                         </div>
                         <div id="panel-user-collapse{{actualuser.idx}}" class="panel-collapse collapse">
 
-                            <p class="btn-row-over-panel"><a class="btn btn-danger" role="button" ng-click="activateUser('true', actualuser.username)"><i class="fa fa-circle-o fa-fw"></i><span> activate user</span></a></p>
+                            <p class="btn-row-over-panel"><a class="btn btn-danger" role="button" ng-click="activateUser(true, actualuser.username)"><i class="fa fa-circle-o fa-fw"></i><span> activate user</span></a></p>
 
                             <div class="panel-body">
 
