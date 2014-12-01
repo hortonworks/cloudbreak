@@ -10,7 +10,7 @@ angular.module('uluwatuControllers').controller('accountuserController', ['$scop
 
         $scope.inviteUser = function() {
             UserInvite.save({ invite_email: $scope.invite.mail }, function (result) {
-                $scope.accountUsers.push({active: false, username: $scope.invite.mail, idx:  $scope.invite.mail.toString().replace(/./g, '').replace(/@/g, '')});
+                $scope.accountUsers.push({active: false, username: $scope.invite.mail, idx:  $scope.invite.mail.toString().replace(/\./g, '').replace(/@/g, '')});
                 initInvite();
             }, function (error) {
                 $scope.modifyStatusMessage(error.data.message);
@@ -21,7 +21,7 @@ angular.module('uluwatuControllers').controller('accountuserController', ['$scop
         $scope.getUsers = function() {
             $rootScope.accountUsers =  AccountUsers.query(function (result) {
                 angular.forEach(result, function(item) {
-                    item.idx = item.username.toString().replace(/./g, '').replace(/@/g, '');
+                    item.idx = item.username.toString().replace(/\./g, '').replace(/@/g, '');
                 });
             });
         }
