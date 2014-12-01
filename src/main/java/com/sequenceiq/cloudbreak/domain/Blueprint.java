@@ -34,7 +34,6 @@ import javax.persistence.UniqueConstraint;
                 query = "SELECT b FROM Blueprint b "
                         + "WHERE b.account= :account and b.name= :name")
 })
-
 public class Blueprint implements ProvisionEntity {
 
     @Id

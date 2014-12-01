@@ -49,7 +49,7 @@ public class BlueprintController {
 
     @RequestMapping(value = "account/blueprints", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<IdJson> createAccountBlueprint(@ModelAttribute("user") CbUser user, @RequestBody @Valid BlueprintJson blueprintRequest) {
+    public ResponseEntity<IdJson> createAccountBlueprints(@ModelAttribute("user") CbUser user, @RequestBody @Valid BlueprintJson blueprintRequest) {
         return createBlueprint(user, blueprintRequest, true);
     }
 
@@ -62,6 +62,20 @@ public class BlueprintController {
             blueprints = new HashSet<>((ArrayList<Blueprint>) blueprintRepository.save(blueprintsList));
         }
         return new ResponseEntity<>(blueprintConverter.convertAllEntityToJson(blueprints), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "user/blueprints/{name}", method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity<BlueprintJson> getPrivateBlueprint(@ModelAttribute("user") CbUser user, @PathVariable String name) {
+        Blueprint blueprint = blueprintService.get(name, user);
+        return new ResponseEntity<>(blueprintConverter.convert(blueprint), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "account/blueprints/{name}", method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity<BlueprintJson> createAccountBlueprint(@ModelAttribute("user") CbUser user, @PathVariable String name) {
+        Blueprint blueprint = blueprintService.get(name, user);
+        return new ResponseEntity<>(blueprintConverter.convert(blueprint), HttpStatus.OK);
     }
 
     @RequestMapping(value = "account/blueprints", method = RequestMethod.GET)
