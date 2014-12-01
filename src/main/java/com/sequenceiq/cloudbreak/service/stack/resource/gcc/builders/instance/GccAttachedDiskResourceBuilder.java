@@ -27,6 +27,8 @@ import com.sequenceiq.cloudbreak.domain.GccTemplate;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.domain.TemplateGroup;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveCheckerStatus;
@@ -35,6 +37,9 @@ import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccResourceCheckerS
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccResourceCreationException;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccResourceReadyPollerObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveCheckerStatus;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveReadyPollerObject;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccZone;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.GccSimpleInstanceResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDescribeContextObject;
@@ -61,7 +66,7 @@ public class GccAttachedDiskResourceBuilder extends GccSimpleInstanceResourceBui
     private AsyncTaskExecutor intermediateBuilderExecutor;
 
     @Override
-    public Boolean create(final CreateResourceRequest createResourceRequest) throws Exception {
+    public Boolean create(final CreateResourceRequest createResourceRequest, final TemplateGroup templateGroup, final String region) throws Exception {
         final GccAttachedDiskCreateRequest gADCR = (GccAttachedDiskCreateRequest) createResourceRequest;
         final Stack stack = stackRepository.findById(gADCR.getStackId());
         List<Future<Boolean>> futures = new ArrayList<>();
@@ -74,7 +79,7 @@ public class GccAttachedDiskResourceBuilder extends GccSimpleInstanceResourceBui
                     Operation execute = insDisk.execute();
                     if (execute.getHttpErrorStatusCode() == null) {
                         Compute.ZoneOperations.Get zoneOperations =
-                                createZoneOperations(gADCR.getCompute(), gADCR.getGccCredential(), gADCR.getGccTemplate(), execute);
+                                createZoneOperations(gADCR.getCompute(), gADCR.getGccCredential(), execute, GccZone.valueOf(region));
                         GccResourceReadyPollerObject gccDiskReady = new GccResourceReadyPollerObject(zoneOperations, stack, disk.getName(), execute.getName());
                         gccDiskReadyPollerObjectPollingService.pollWithTimeout(gccResourceCheckerStatus, gccDiskReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
                         return true;
@@ -92,15 +97,14 @@ public class GccAttachedDiskResourceBuilder extends GccSimpleInstanceResourceBui
     }
 
     @Override
-    public Boolean delete(Resource resource, GccDeleteContextObject deleteContextObject) throws Exception {
+    public Boolean delete(Resource resource, GccDeleteContextObject deleteContextObject, String region) throws Exception {
         Stack stack = stackRepository.findById(deleteContextObject.getStackId());
         try {
-            GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
             GccCredential gccCredential = (GccCredential) stack.getCredential();
-            Operation operation = deleteContextObject.getCompute().disks()
-                    .delete(gccCredential.getProjectId(), gccTemplate.getGccZone().getValue(), resource.getResourceName()).execute();
-            Compute.ZoneOperations.Get zoneOperations = createZoneOperations(deleteContextObject.getCompute(), gccCredential, gccTemplate, operation);
-            Compute.GlobalOperations.Get globalOperations = createGlobalOperations(deleteContextObject.getCompute(), gccCredential, gccTemplate, operation);
+           Operation operation = deleteContextObject.getCompute().disks()
+                    .delete(gccCredential.getProjectId(), GccZone.valueOf(region).getValue(), resource.getResourceName()).execute();
+            Compute.ZoneOperations.Get zoneOperations = createZoneOperations(deleteContextObject.getCompute(), gccCredential, operation, GccZone.valueOf(region));
+            Compute.GlobalOperations.Get globalOperations = createGlobalOperations(deleteContextObject.getCompute(), gccCredential, operation);
             GccRemoveReadyPollerObject gccRemoveReady =
                     new GccRemoveReadyPollerObject(zoneOperations, globalOperations, stack, resource.getResourceName(), operation.getName());
             gccRemoveReadyPollerObjectPollingService.pollWithTimeout(gccRemoveCheckerStatus, gccRemoveReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
@@ -113,14 +117,12 @@ public class GccAttachedDiskResourceBuilder extends GccSimpleInstanceResourceBui
     }
 
     @Override
-    public Optional<String> describe(Resource resource, GccDescribeContextObject describeContextObject) throws Exception {
+    public Optional<String> describe(Resource resource, GccDescribeContextObject describeContextObject, String region) throws Exception {
         Stack stack = stackRepository.findById(describeContextObject.getStackId());
-        GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
         GccCredential gccCredential = (GccCredential) stack.getCredential();
         try {
             Compute.Disks.Get getDisk =
-                    describeContextObject.getCompute().disks().get(gccCredential.getProjectId(), gccTemplate.getGccZone().getValue(),
-                            resource.getResourceName());
+                    describeContextObject.getCompute().disks().get(gccCredential.getProjectId(), GccZone.valueOf(region).getValue(), resource.getResourceName());
             return Optional.fromNullable(getDisk.execute().toPrettyString());
         } catch (IOException e) {
             return Optional.fromNullable(jsonHelper.createJsonFromString(String.format("{\"Attached_Disk\": {%s}}", ERROR)).toString());

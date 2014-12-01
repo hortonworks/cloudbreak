@@ -24,7 +24,7 @@ import javax.persistence.Version;
 
 @Entity
 @Table(name = "Stack", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "account", "name" })
+        @UniqueConstraint(columnNames = {"account", "name"})
 })
 @NamedQueries({
         @NamedQuery(
@@ -44,6 +44,7 @@ import javax.persistence.Version;
                 query = "SELECT c FROM Stack c "
                         + "LEFT JOIN FETCH c.resources "
                         + "LEFT JOIN FETCH c.instanceMetaData "
+                        + "LEFT JOIN FETCH c.templateGroups "
                         + "WHERE c.cluster.id= :id"),
         @NamedQuery(
                 name = "Stack.findRequestedStacksWithCredential",
@@ -55,6 +56,7 @@ import javax.persistence.Version;
                 query = "SELECT c FROM Stack c "
                         + "LEFT JOIN FETCH c.resources "
                         + "LEFT JOIN FETCH c.instanceMetaData "
+                        + "LEFT JOIN FETCH c.templateGroups "
                         + "WHERE c.id= :id"),
         @NamedQuery(
                 name = "Stack.findByStackResourceName",
@@ -111,6 +113,7 @@ public class Stack implements ProvisionEntity {
     private String account;
 
     private boolean publicInAccount;
+    private String region;
 
     private Integer nodeCount;
     @Column(length = 1000000, columnDefinition = "TEXT")
@@ -149,6 +152,17 @@ public class Stack implements ProvisionEntity {
 
     @Version
     private Long version;
+
+    @OneToMany(mappedBy = "stack", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<TemplateGroup> templateGroups = new HashSet<>();
+
+    public Set<TemplateGroup> getTemplateGroups() {
+        return templateGroups;
+    }
+
+    public void setTemplateGroups(Set<TemplateGroup> templateGroups) {
+        this.templateGroups = templateGroups;
+    }
 
     public Long getId() {
         return id;
@@ -310,6 +324,14 @@ public class Stack implements ProvisionEntity {
         this.instanceMetaData = instanceMetaData;
     }
 
+    public String getRegion() {
+        return region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
+    }
+
     public Set<Resource> getResources() {
         return resources;
     }
@@ -337,13 +359,19 @@ public class Stack implements ProvisionEntity {
         return null;
     }
 
-    public Resource getResourceByName(String name) {
-        for (Resource resource : resources) {
-            if (name.equals(resource.getResourceName())) {
-                return resource;
+    public TemplateGroup getTemplateAsGroup(String group) {
+        for (TemplateGroup templateGroup : templateGroups) {
+            if (group.equals(templateGroup.getGroupName())) {
+                return templateGroup;
             }
         }
         return null;
+    }
+
+    public List<TemplateGroup> getTemplateSetAsList() {
+        List<TemplateGroup> templateGroupsList = new ArrayList();
+        templateGroupsList.addAll(templateGroups);
+        return templateGroupsList;
     }
 
     public Integer getMultiplier() {

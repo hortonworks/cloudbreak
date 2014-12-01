@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.TemplateGroup;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.X509Certificate;
@@ -42,22 +43,12 @@ public class AzureServiceCertificateResourceBuilder extends AzureSimpleInstanceR
     private AzureStackUtil azureStackUtil;
 
     @Override
-    public Boolean create(final CreateResourceRequest createResourceRequest) throws Exception {
+    public Boolean create(final CreateResourceRequest createResourceRequest, final TemplateGroup templateGroup, final String region) throws Exception {
         AzureServiceCertificateCreateRequest aCSCR = (AzureServiceCertificateCreateRequest) createResourceRequest;
         HttpResponseDecorator serviceCertificate = (HttpResponseDecorator) aCSCR.getAzureClient().createServiceCertificate(aCSCR.getProps());
         String requestId = (String) aCSCR.getAzureClient().getRequestId(serviceCertificate);
         waitUntilComplete(aCSCR.getAzureClient(), requestId);
         return true;
-    }
-
-    @Override
-    public Boolean delete(Resource resource, AzureDeleteContextObject deleteContextObject) throws Exception {
-        return true;
-    }
-
-    @Override
-    public Optional<String> describe(Resource resource, AzureDescribeContextObject describeContextObject) throws Exception {
-        return Optional.absent();
     }
 
     @Override
@@ -95,11 +86,20 @@ public class AzureServiceCertificateResourceBuilder extends AzureSimpleInstanceR
         return ResourceType.AZURE_SERVICE_CERTIFICATE;
     }
 
+    @Override
+    public Boolean delete(Resource resource, AzureDeleteContextObject azureDeleteContextObject, String region) throws Exception {
+        return true;
+    }
+
+    @Override
+    public Optional<String> describe(Resource resource, AzureDescribeContextObject azureDescribeContextObject, String region) throws Exception {
+        return Optional.absent();
+    }
+
     public class AzureServiceCertificateCreateRequest extends CreateResourceRequest {
         private Map<String, String> props = new HashMap<>();
         private AzureClient azureClient;
         private List<Resource> resources;
-
         public AzureServiceCertificateCreateRequest(Map<String, String> props, AzureClient azureClient, List<Resource> resources, List<Resource> buildNames) {
             super(buildNames);
             this.props = props;

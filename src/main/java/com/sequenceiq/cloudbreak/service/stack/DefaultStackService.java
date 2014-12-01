@@ -17,6 +17,7 @@ import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
+import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CbUserRole;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
@@ -194,20 +195,20 @@ public class DefaultStackService implements StackService {
     }
 
     @Override
-    public void updateNodeCount(Long stackId, Integer scalingAdjustment) {
+    public void updateNodeCount(Long stackId, HostGroupAdjustmentJson hostGroupAdjustmentJson) {
         Stack stack = stackRepository.findOne(stackId);
         MDCBuilder.buildMdcContext(stack);
         if (!Status.AVAILABLE.equals(stack.getStatus())) {
             throw new BadRequestException(String.format("Stack '%s' is currently in '%s' state. Node count can only be updated if it's running.", stackId,
                     stack.getStatus()));
         }
-        if (0 == scalingAdjustment) {
+        if (0 == hostGroupAdjustmentJson.getScalingAdjustment()) {
             throw new BadRequestException(String.format("Requested scaling adjustment on stack '%s' is 0. Nothing to do.", stackId));
         }
-        if (0 > scalingAdjustment) {
-            if (-1 * scalingAdjustment > stack.getNodeCount()) {
+        if (0 > hostGroupAdjustmentJson.getScalingAdjustment()) {
+            if (-1 * hostGroupAdjustmentJson.getScalingAdjustment() > stack.getNodeCount()) {
                 throw new BadRequestException(String.format("There are %s instances in stack '%s'. Cannot remove %s instances.", stack.getNodeCount(), stackId,
-                        -1 * scalingAdjustment));
+                        -1 * hostGroupAdjustmentJson.getScalingAdjustment()));
             }
             int removeableHosts = 0;
             for (InstanceMetaData metadataEntry : stack.getInstanceMetaData()) {
@@ -215,18 +216,20 @@ public class DefaultStackService implements StackService {
                     removeableHosts++;
                 }
             }
-            if (removeableHosts < -1 * scalingAdjustment) {
+            if (removeableHosts < -1 * hostGroupAdjustmentJson.getScalingAdjustment()) {
                 throw new BadRequestException(
                         String.format("There are %s removable hosts on stack '%s' but %s were requested. Decommission nodes from the cluster first!",
-                                removeableHosts, stackId, scalingAdjustment * -1));
+                                removeableHosts, stackId, hostGroupAdjustmentJson.getScalingAdjustment() * -1));
             }
         }
-        String statusMessage = scalingAdjustment > 0 ? "Adding '%s' new instance(s) to the cluster infrastructure."
+        String statusMessage = hostGroupAdjustmentJson.getScalingAdjustment() > 0 ? "Adding '%s' new instance(s) to the cluster infrastructure."
                 : "Removing '%s' instance(s) from the cluster infrastructure.";
-        stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS, String.format(statusMessage, Math.abs(scalingAdjustment)));
-        LOGGER.info("Publishing {} event [scalingAdjustment: '{}']", ReactorConfig.UPDATE_INSTANCES_REQUEST_EVENT, scalingAdjustment);
+        stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS, String.format(statusMessage,
+                Math.abs(hostGroupAdjustmentJson.getScalingAdjustment())));
+        LOGGER.info("Publishing {} event [scalingAdjustment: '{}']", ReactorConfig.UPDATE_INSTANCES_REQUEST_EVENT,
+                hostGroupAdjustmentJson.getScalingAdjustment());
         reactor.notify(ReactorConfig.UPDATE_INSTANCES_REQUEST_EVENT,
-                Event.wrap(new UpdateInstancesRequest(stack.getTemplate().cloudPlatform(), stack.getId(), scalingAdjustment)));
+                Event.wrap(new UpdateInstancesRequest(stack.getTemplate().cloudPlatform(), stack.getId(), hostGroupAdjustmentJson.getScalingAdjustment())));
     }
 
     @Override

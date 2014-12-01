@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.TemplateGroup;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
@@ -42,7 +43,7 @@ public class AzureAffinityGroupResourceBuilder extends AzureSimpleNetworkResourc
     private AzureStackUtil azureStackUtil;
 
     @Override
-    public Boolean create(CreateResourceRequest createResourceRequest) throws Exception {
+    public Boolean create(CreateResourceRequest createResourceRequest, TemplateGroup templateGroup, String region) throws Exception {
         AzureAffinityGroupCreateRequest aCSCR = (AzureAffinityGroupCreateRequest) createResourceRequest;
         try {
             aCSCR.getAzureClient().getAffinityGroup(aCSCR.getName());
@@ -63,12 +64,12 @@ public class AzureAffinityGroupResourceBuilder extends AzureSimpleNetworkResourc
     }
 
     @Override
-    public Boolean delete(Resource resource, AzureDeleteContextObject deleteContextObject) throws Exception {
+    public Boolean delete(Resource resource, AzureDeleteContextObject azureDeleteContextObject, String region) throws Exception {
         return true;
     }
 
     @Override
-    public Optional<String> describe(Resource resource, AzureDescribeContextObject describeContextObject) throws Exception {
+    public Optional<String> describe(Resource resource, AzureDescribeContextObject describeContextObject, String region) throws Exception {
         try {
             Object affinityGroup = describeContextObject.getAzureClient().getAffinityGroup(resource.getResourceName());
             return Optional.fromNullable(affinityGroup.toString());

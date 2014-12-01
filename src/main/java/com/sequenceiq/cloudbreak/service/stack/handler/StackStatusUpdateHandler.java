@@ -156,9 +156,9 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
             for (ResourceBuilder resourceBuilder : networkResourceBuilders.get(cloudPlatform)) {
                 for (Resource resource : stack.getResourcesByType(resourceBuilder.resourceType())) {
                     if (start) {
-                        resourceBuilder.start(sSCO, resource);
+                        resourceBuilder.start(sSCO, resource, stack.getRegion());
                     } else {
-                        resourceBuilder.stop(sSCO, resource);
+                        resourceBuilder.stop(sSCO, resource, stack.getRegion());
                     }
                 }
             }
@@ -166,13 +166,14 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
             for (final ResourceBuilder resourceBuilder : instanceResourceBuilders.get(cloudPlatform)) {
                 List<Resource> resourceByType = stack.getResourcesByType(resourceBuilder.resourceType());
                 for (final Resource resource : resourceByType) {
+                    final Stack finalStack = stack;
                     Future<Boolean> submit = resourceBuilderExecutor.submit(new Callable<Boolean>() {
                         @Override
                         public Boolean call() throws Exception {
                             if (start) {
-                                return resourceBuilder.start(sSCO, resource);
+                                return resourceBuilder.start(sSCO, resource, finalStack.getRegion());
                             } else {
-                                return resourceBuilder.stop(sSCO, resource);
+                                return resourceBuilder.stop(sSCO, resource, finalStack.getRegion());
                             }
                         }
                     });

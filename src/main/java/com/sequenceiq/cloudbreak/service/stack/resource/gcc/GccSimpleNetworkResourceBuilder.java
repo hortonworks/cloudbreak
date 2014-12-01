@@ -11,10 +11,10 @@ import com.google.api.services.compute.model.Operation;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
-import com.sequenceiq.cloudbreak.domain.GccTemplate;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccZone;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDeleteContextObject;
@@ -33,12 +33,12 @@ public abstract class GccSimpleNetworkResourceBuilder implements
         return CloudPlatform.GCC;
     }
 
-    protected Compute.ZoneOperations.Get createZoneOperations(Compute compute, GccCredential gccCredential, GccTemplate gccTemplate, Operation operation)
+    protected Compute.ZoneOperations.Get createZoneOperations(Compute compute, GccCredential gccCredential, Operation operation, GccZone region)
             throws IOException {
-        return compute.zoneOperations().get(gccCredential.getProjectId(), gccTemplate.getGccZone().getValue(), operation.getName());
+        return compute.zoneOperations().get(gccCredential.getProjectId(), region.getValue(), operation.getName());
     }
 
-    protected Compute.GlobalOperations.Get createGlobalOperations(Compute compute, GccCredential gccCredential, GccTemplate gccTemplate, Operation operation)
+    protected Compute.GlobalOperations.Get createGlobalOperations(Compute compute, GccCredential gccCredential, Operation operation)
             throws IOException {
         return compute.globalOperations().get(gccCredential.getProjectId(), operation.getName());
     }
@@ -53,18 +53,18 @@ public abstract class GccSimpleNetworkResourceBuilder implements
     }
 
     @Override
-    public Boolean start(GccStartStopContextObject startStopContextObject, Resource resource) {
+    public Boolean start(GccStartStopContextObject startStopContextObject, Resource resource, String region) {
         return true;
     }
 
     @Override
-    public Boolean stop(GccStartStopContextObject startStopContextObject, Resource resource) {
+    public Boolean stop(GccStartStopContextObject startStopContextObject, Resource resource, String region) {
         return true;
     }
 
     @Override
-    public Boolean rollback(Resource resource, GccDeleteContextObject deleteContextObject) throws Exception {
-        return delete(resource, deleteContextObject);
+    public Boolean rollback(Resource resource, GccDeleteContextObject deleteContextObject, String region) throws Exception {
+        return delete(resource, deleteContextObject, region);
     }
 
     @Override

@@ -92,17 +92,17 @@ public abstract class AzureSimpleInstanceResourceBuilder implements
     }
 
     @Override
-    public Boolean start(AzureStartStopContextObject startStopContextObject, Resource resource) {
+    public Boolean start(AzureStartStopContextObject startStopContextObject, Resource resource, String region) {
         return true;
     }
 
     @Override
-    public Boolean stop(AzureStartStopContextObject startStopContextObject, Resource resource) {
+    public Boolean stop(AzureStartStopContextObject startStopContextObject, Resource resource, String region) {
         return true;
     }
 
     @Override
-    public Boolean rollback(Resource resource, AzureDeleteContextObject deleteContextObject) throws Exception {
-        return delete(resource, deleteContextObject);
+    public Boolean rollback(Resource resource, AzureDeleteContextObject deleteContextObject, String region) throws Exception {
+        return delete(resource, deleteContextObject, region);
     }
 }

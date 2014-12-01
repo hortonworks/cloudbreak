@@ -6,23 +6,24 @@ import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
+import com.sequenceiq.cloudbreak.domain.TemplateGroup;
 
 public interface ResourceBuilder<P extends ProvisionContextObject, D extends DeleteContextObject, DCO extends DescribeContextObject,
         SSCO extends StartStopContextObject> {
 
-    Boolean create(CreateResourceRequest createResourceRequest) throws Exception;
+    Boolean create(CreateResourceRequest createResourceRequest, TemplateGroup templateGroup, String region) throws Exception;
 
-    Boolean delete(Resource resource, D deleteContextObject) throws Exception;
+    Boolean delete(Resource resource, D d, String region) throws Exception;
 
-    Boolean rollback(Resource resource, D deleteContextObject) throws Exception;
+    Boolean rollback(Resource resource, D d, String region) throws Exception;
 
-    Optional<String> describe(Resource resource, DCO describeContextObject) throws Exception;
+    Optional<String> describe(Resource resource, DCO describeContextObject, String region) throws Exception;
 
     ResourceBuilderType resourceBuilderType();
 
-    Boolean start(SSCO startStopContextObject, Resource resource);
+    Boolean start(SSCO startStopContextObject, Resource resource, String region);
 
-    Boolean stop(SSCO startStopContextObject, Resource resource);
+    Boolean stop(SSCO startStopContextObject, Resource resource, String region);
 
     List<Resource> buildResources(P provisionContextObject, int index, List<Resource> resources);
 

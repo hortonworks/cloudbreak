@@ -14,6 +14,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.plaf.synth.Region;
+
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
@@ -30,6 +32,7 @@ import com.sequenceiq.cloudbreak.domain.Port;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.TemplateGroup;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
@@ -60,73 +63,12 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
     private AzureStackUtil azureStackUtil;
 
     @Override
-    public Boolean create(final CreateResourceRequest createResourceRequest) throws Exception {
+    public Boolean create(final CreateResourceRequest createResourceRequest, final TemplateGroup templateGroup, final String region) throws Exception {
         AzureVirtualMachineCreateRequest aCSCR = (AzureVirtualMachineCreateRequest) createResourceRequest;
         HttpResponseDecorator virtualMachineResponse = (HttpResponseDecorator) aCSCR.getAzureClient().createVirtualMachine(aCSCR.getProps());
         String requestId = (String) aCSCR.getAzureClient().getRequestId(virtualMachineResponse);
         waitUntilComplete(aCSCR.getAzureClient(), requestId);
         return true;
-    }
-
-    private String buildimageStoreUri(String commonName, String vmName) {
-        return String.format("http://%s.blob.core.windows.net/vhd-store/%s.vhd", commonName, vmName);
-    }
-
-    @Override
-    public Boolean delete(Resource resource, AzureDeleteContextObject deleteContextObject) throws Exception {
-        Stack stack = stackRepository.findById(deleteContextObject.getStackId());
-        AzureCredential credential = (AzureCredential) stack.getCredential();
-        try {
-            Map<String, String> props = new HashMap<>();
-            props.put(SERVICENAME, resource.getResourceName());
-            props.put(NAME, resource.getResourceName());
-            AzureClient azureClient = azureStackUtil.createAzureClient(credential);
-            HttpResponseDecorator deleteVirtualMachineResult = (HttpResponseDecorator) azureClient.deleteVirtualMachine(props);
-            String requestId = (String) azureClient.getRequestId(deleteVirtualMachineResult);
-            waitUntilComplete(azureClient, requestId);
-        } catch (HttpResponseException ex) {
-            httpResponseExceptionHandler(ex, resource.getResourceName(), stack.getOwner(), stack);
-        } catch (Exception ex) {
-            throw new InternalServerException(ex.getMessage());
-        }
-        return true;
-    }
-
-    @Override
-    public Optional<String> describe(Resource resource, AzureDescribeContextObject describeContextObject) throws Exception {
-        Stack stack = stackRepository.findById(describeContextObject.getStackId());
-        AzureCredential credential = (AzureCredential) stack.getCredential();
-        try {
-            AzureClient azureClient = azureStackUtil.createAzureClient(credential);
-            Object cloudService = azureClient.getCloudService(resource.getResourceName());
-            return Optional.fromNullable(cloudService.toString());
-        } catch (Exception ex) {
-            return Optional.fromNullable(String.format("{\"HostedService\": {%s}}", ERROR));
-        }
-    }
-
-    @Override
-    public Boolean start(AzureStartStopContextObject startStopContextObject, Resource resource) {
-        Stack stack = stackRepository.findById(startStopContextObject.getStack().getId());
-        AzureCredential credential = (AzureCredential) stack.getCredential();
-        boolean started = setStackState(startStopContextObject.getStack().getId(), resource, azureStackUtil.createAzureClient(credential), false);
-        if (started) {
-            azurePollingService.pollWithTimeout(
-                    new AzureInstanceStatusCheckerTask(),
-                    new AzureInstances(startStopContextObject.getStack(), azureStackUtil.createAzureClient(credential),
-                            Arrays.asList(resource.getResourceName()), "Running"),
-                    POLLING_INTERVAL,
-                    MAX_ATTEMPTS_FOR_AMBARI_OPS);
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public Boolean stop(AzureStartStopContextObject startStopContextObject, Resource resource) {
-        Stack stack = stackRepository.findById(startStopContextObject.getStack().getId());
-        AzureCredential credential = (AzureCredential) stack.getCredential();
-        return setStackState(startStopContextObject.getStack().getId(), resource, azureStackUtil.createAzureClient(credential), true);
     }
 
     @Override
@@ -200,6 +142,66 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
         props.put(PORTS, ports);
         props.put(VMTYPE, AzureVmType.valueOf(azureTemplate.getVmType()).vmType().replaceAll(" ", ""));
         return new AzureVirtualMachineCreateRequest(props, azureStackUtil.createAzureClient(azureCredential), resources, buildResources);
+    }
+
+    private String buildimageStoreUri(String commonName, String vmName) {
+        return String.format("http://%s.blob.core.windows.net/vhd-store/%s.vhd", commonName, vmName);
+    }
+
+    @Override
+    public Boolean delete(Resource resource, AzureDeleteContextObject aDCO, String region) throws Exception {
+        Stack stack = stackRepository.findById(aDCO.getStackId());
+        AzureCredential credential = (AzureCredential) stack.getCredential();
+        try {
+            Map<String, String> props = new HashMap<>();
+            props.put(SERVICENAME, resource.getResourceName());
+            props.put(NAME, resource.getResourceName());
+            AzureClient azureClient = azureStackUtil.createAzureClient(credential);
+            HttpResponseDecorator deleteVirtualMachineResult = (HttpResponseDecorator) azureClient.deleteVirtualMachine(props);
+            String requestId = (String) azureClient.getRequestId(deleteVirtualMachineResult);
+            waitUntilComplete(azureClient, requestId);
+        } catch (HttpResponseException ex) {
+            httpResponseExceptionHandler(ex, resource.getResourceName(), stack.getOwner(), stack);
+        } catch (Exception ex) {
+            throw new InternalServerException(ex.getMessage());
+        }
+        return true;
+    }
+
+    @Override
+    public Optional<String> describe(Resource resource, AzureDescribeContextObject aDCO, String region) throws Exception {
+        Stack stack = stackRepository.findById(aDCO.getStackId());
+        AzureCredential credential = (AzureCredential) stack.getCredential();
+        try {
+            AzureClient azureClient = azureStackUtil.createAzureClient(credential);
+            Object cloudService = azureClient.getCloudService(resource.getResourceName());
+            return Optional.fromNullable(cloudService.toString());
+        } catch (Exception ex) {
+            return Optional.fromNullable(String.format("{\"HostedService\": {%s}}", ERROR));
+        }
+    }
+
+    @Override
+    public Boolean start(AzureStartStopContextObject aSSCO, Resource resource, String region) {
+        Stack stack = stackRepository.findById(aSSCO.getStack().getId());
+        AzureCredential credential = (AzureCredential) stack.getCredential();
+        boolean started = setStackState(aSSCO.getStack().getId(), resource, azureStackUtil.createAzureClient(credential), false);
+        if (started) {
+            azurePollingService.pollWithTimeout(
+                    new AzureInstanceStatusCheckerTask(),
+                    new AzureInstances(aSSCO.getStack(), azureStackUtil.createAzureClient(credential), Arrays.asList(resource.getResourceName()), "Running"),
+                    POLLING_INTERVAL,
+                    MAX_ATTEMPTS_FOR_AMBARI_OPS);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public Boolean stop(AzureStartStopContextObject aSSCO, Resource resource, String region) {
+        Stack stack = stackRepository.findById(aSSCO.getStack().getId());
+        AzureCredential credential = (AzureCredential) stack.getCredential();
+        return setStackState(aSSCO.getStack().getId(), resource, azureStackUtil.createAzureClient(credential), true);
     }
 
     private boolean setStackState(Long stackId, Resource resource, AzureClient azureClient, boolean stopped) {

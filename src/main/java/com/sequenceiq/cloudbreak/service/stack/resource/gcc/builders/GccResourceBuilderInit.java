@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccStackUtil;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccZone;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.builders.instance.GccInstanceResourceBuilder;
@@ -74,10 +75,15 @@ public class GccResourceBuilderInit implements
         }
         List<Resource> result = new ArrayList<>();
         for (Resource resource : resourceList) {
-            Instance instance = gccInstanceResourceBuilder.describe(stack, compute, resource);
-            for (AttachedDisk attachedDisk : instance.getDisks()) {
-                result.add(new Resource(ResourceType.GCC_ATTACHED_DISK, attachedDisk.getDeviceName(), stack));
+            try {
+                Instance instance = gccInstanceResourceBuilder.describe(stack, compute, resource, GccZone.valueOf(stack.getRegion()));
+                for (AttachedDisk attachedDisk : instance.getDisks()) {
+                    result.add(new Resource(ResourceType.GCC_ATTACHED_DISK, attachedDisk.getDeviceName(), stack));
+                }
+            } catch (IOException ex) {
+                LOGGER.error("There was a problem with the describe instance on Google cloud");
             }
+
         }
         result.addAll(resourceList);
         GccDeleteContextObject gccDeleteContextObject = new GccDeleteContextObject(stack.getId(), credential.getProjectId(),

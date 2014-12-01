@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccZone;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
 
 import reactor.core.Reactor;
@@ -92,7 +93,7 @@ public class GccProvisionSetup implements ProvisionSetup {
                 Compute.Images.Insert ins1 = compute.images().insert(credential.getProjectId(), image);
                 ins1.execute();
 
-                GccImageReadyPollerObject gccImageReadyPollerObject = new GccImageReadyPollerObject(image.getName(), stack, compute);
+                GccImageReadyPollerObject gccImageReadyPollerObject = new GccImageReadyPollerObject(compute, stack, image.getName(), GccZone.valueOf(stack.getRegion()));
                 gccImageReadyPollerObjectPollingService
                         .pollWithTimeout(gccImageCheckerStatus, gccImageReadyPollerObject, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
             }

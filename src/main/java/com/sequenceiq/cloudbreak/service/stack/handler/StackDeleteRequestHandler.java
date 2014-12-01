@@ -64,7 +64,7 @@ public class StackDeleteRequestHandler implements Consumer<Event<StackDeleteRequ
     public void accept(Event<StackDeleteRequest> stackDeleteRequest) {
         final StackDeleteRequest data = stackDeleteRequest.getData();
         retryingStackUpdater.updateStackStatus(data.getStackId(), Status.DELETE_IN_PROGRESS, "Termination of cluster infrastructure has started.");
-        Stack stack = stackRepository.findOneWithLists(data.getStackId());
+        final Stack stack = stackRepository.findOneWithLists(data.getStackId());
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Accepted {} event.", ReactorConfig.DELETE_REQUEST_EVENT);
         try {
@@ -80,7 +80,7 @@ public class StackDeleteRequestHandler implements Consumer<Event<StackDeleteRequ
                         Future<Boolean> submit = resourceBuilderExecutor.submit(new Callable<Boolean>() {
                             @Override
                             public Boolean call() throws Exception {
-                                return instanceResourceBuilders.get(data.getCloudPlatform()).get(index).delete(resource, dCO);
+                                return instanceResourceBuilders.get(data.getCloudPlatform()).get(index).delete(resource, dCO, stack.getRegion());
                             }
                         });
                         futures.add(submit);
@@ -91,7 +91,7 @@ public class StackDeleteRequestHandler implements Consumer<Event<StackDeleteRequ
                 }
                 for (int i = instanceResourceBuilders.get(data.getCloudPlatform()).size() - 1; i >= 0; i--) {
                     for (Resource resource : stack.getResourcesByType(networkResourceBuilders.get(data.getCloudPlatform()).get(i).resourceType())) {
-                        networkResourceBuilders.get(data.getCloudPlatform()).get(i).delete(resource, dCO);
+                        networkResourceBuilders.get(data.getCloudPlatform()).get(i).delete(resource, dCO, stack.getRegion());
                     }
                 }
                 reactor.notify(ReactorConfig.DELETE_COMPLETE_EVENT, Event.wrap(new StackDeleteComplete(dCO.getStackId())));

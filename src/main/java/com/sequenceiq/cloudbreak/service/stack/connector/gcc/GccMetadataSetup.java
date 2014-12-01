@@ -71,7 +71,7 @@ public class GccMetadataSetup implements MetadataSetup {
     }
 
     private CoreInstanceMetaData getMetadata(Stack stack, Compute compute, Resource resource) {
-        return gccStackUtil.getMetadata(stack, compute, resource.getResourceName());
+        return gccStackUtil.getMetadata(stack, compute, resource);
     }
 
     @Override

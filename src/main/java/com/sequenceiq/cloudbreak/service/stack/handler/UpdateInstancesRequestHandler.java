@@ -79,7 +79,7 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
 
     @Override
     public void accept(Event<UpdateInstancesRequest> event) {
-        UpdateInstancesRequest request = event.getData();
+        final UpdateInstancesRequest request = event.getData();
         final CloudPlatform cloudPlatform = request.getCloudPlatform();
         Long stackId = request.getStackId();
         Integer scalingAdjustment = request.getScalingAdjustment();
@@ -113,7 +113,8 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
                                     stackUpdater.addStackResources(stack.getId(), createResourceRequest.getBuildableResources());
                                     resources.addAll(createResourceRequest.getBuildableResources());
                                     resourceSet.addAll(createResourceRequest.getBuildableResources());
-                                    resourceBuilder.create(createResourceRequest);
+                                    resourceBuilder.create(createResourceRequest, stack.getTemplateSetAsList().get(0), stack.getRegion());
+                                    resources.addAll(new ArrayList<Resource>());
                                 }
                                 return true;
                             }
@@ -166,7 +167,7 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
                                 public Boolean call() throws Exception {
                                     Boolean delete = false;
                                     try {
-                                        delete = resourceBuilder.delete(resource, dCO);
+                                        delete = resourceBuilder.delete(resource, dCO, stack.getRegion());
                                     } catch (HttpResponseException ex) {
                                         LOGGER.error(String.format("Error occurred on stack under the instance remove"), ex);
                                         throw new InternalServerException(

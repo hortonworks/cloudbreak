@@ -9,6 +9,7 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.TemplateGroup;
 import com.sequenceiq.cloudbreak.service.stack.flow.dummy.DummyDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.flow.dummy.DummyDescribeContextObject;
 import com.sequenceiq.cloudbreak.service.stack.flow.dummy.DummyProvisionContextObject;
@@ -21,22 +22,22 @@ public class DummyNetworkResourceBuilder
         implements ResourceBuilder<DummyProvisionContextObject, DummyDeleteContextObject, DummyDescribeContextObject, DummyStartStopContextObject> {
 
     @Override
-    public Boolean create(CreateResourceRequest createResourceRequest) throws Exception {
+    public Boolean create(CreateResourceRequest createResourceRequest, TemplateGroup templateGroup, String region) throws Exception {
         return true;
     }
 
     @Override
-    public Boolean delete(Resource resource, DummyDeleteContextObject deleteContextObject) throws Exception {
+    public Boolean delete(Resource resource, DummyDeleteContextObject deleteContextObject, String region) throws Exception {
         return true;
     }
 
     @Override
-    public Boolean rollback(Resource resource, DummyDeleteContextObject deleteContextObject) throws Exception {
+    public Boolean rollback(Resource resource, DummyDeleteContextObject deleteContextObject, String region) throws Exception {
         return true;
     }
 
     @Override
-    public Optional<String> describe(Resource resource, DummyDescribeContextObject describeContextObject) throws Exception {
+    public Optional<String> describe(Resource resource, DummyDescribeContextObject describeContextObject, String region) throws Exception {
         return Optional.absent();
     }
 
@@ -46,12 +47,12 @@ public class DummyNetworkResourceBuilder
     }
 
     @Override
-    public Boolean start(DummyStartStopContextObject startStopContextObject, Resource resource) {
+    public Boolean start(DummyStartStopContextObject startStopContextObject, Resource resource, String region) {
         return true;
     }
 
     @Override
-    public Boolean stop(DummyStartStopContextObject startStopContextObject, Resource resource) {
+    public Boolean stop(DummyStartStopContextObject startStopContextObject, Resource resource, String region) {
         return true;
     }
 

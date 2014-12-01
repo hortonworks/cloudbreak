@@ -30,8 +30,10 @@ import com.sequenceiq.cloudbreak.domain.GccTemplate;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.TemplateGroup;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccInstanceReadyPollerObject;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveCheckerStatus;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveReadyPollerObject;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccResourceCheckerStatus;
@@ -40,6 +42,7 @@ import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccResourceReadyPol
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccDiskMode;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccDiskType;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccZone;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.GccSimpleInstanceResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDescribeContextObject;
@@ -63,7 +66,7 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
     private JsonHelper jsonHelper;
 
     @Override
-    public Boolean create(final CreateResourceRequest createResourceRequest) throws Exception {
+    public Boolean create(final CreateResourceRequest createResourceRequest, TemplateGroup templateGroup, String region) throws Exception {
         final GccInstanceCreateRequest gICR = (GccInstanceCreateRequest) createResourceRequest;
         Stack stack = stackRepository.findById(gICR.getStackId());
         Compute.Instances.Insert ins =
@@ -71,7 +74,7 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
         ins.setPrettyPrint(Boolean.TRUE);
         Operation execute = ins.execute();
         if (execute.getHttpErrorStatusCode() == null) {
-            Compute.ZoneOperations.Get zoneOperations = createZoneOperations(gICR.getCompute(), gICR.getGccCredential(), gICR.getGccTemplate(), execute);
+            Compute.ZoneOperations.Get zoneOperations = createZoneOperations(gICR.getCompute(), gICR.getGccCredential(), execute, GccZone.valueOf(region));
             GccResourceReadyPollerObject instReady = new GccResourceReadyPollerObject(zoneOperations, stack, gICR.getInstance().getName(), execute.getName());
             gccInstanceReadyPollerObjectPollingService.pollWithTimeout(gccResourceCheckerStatus, instReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
             return true;
@@ -80,7 +83,7 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
         }
     }
 
-    private List<AttachedDisk> getAttachedDisks(List<Resource> resources, GccCredential gccCredential, GccTemplate gccTemplate) {
+    private List<AttachedDisk> getAttachedDisks(List<Resource> resources, GccCredential gccCredential, GccZone zone) {
         List<AttachedDisk> listOfDisks = new ArrayList<>();
         for (Resource resource : filterResourcesByType(resources, ResourceType.GCC_ATTACHED_DISK)) {
             AttachedDisk attachedDisk = new AttachedDisk();
@@ -89,13 +92,13 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
             attachedDisk.setMode(GccDiskMode.READ_WRITE.getValue());
             attachedDisk.setDeviceName(resource.getResourceName());
             attachedDisk.setSource(String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/disks/%s",
-                    gccCredential.getProjectId(), gccTemplate.getGccZone().getValue(), resource.getResourceName()));
+                    gccCredential.getProjectId(), zone.getValue(), resource.getResourceName()));
             listOfDisks.add(attachedDisk);
         }
         return listOfDisks;
     }
 
-    private List<AttachedDisk> getBootDiskList(List<Resource> resources, GccCredential gccCredential, GccTemplate gccTemplate) {
+    private List<AttachedDisk> getBootDiskList(List<Resource> resources, GccCredential gccCredential, GccZone zone) {
         List<AttachedDisk> listOfDisks = new ArrayList<>();
         for (Resource resource : filterResourcesByType(resources, ResourceType.GCC_DISK)) {
             AttachedDisk attachedDisk = new AttachedDisk();
@@ -104,22 +107,22 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
             attachedDisk.setMode(GccDiskMode.READ_WRITE.getValue());
             attachedDisk.setDeviceName(resource.getResourceName());
             attachedDisk.setSource(String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/disks/%s",
-                    gccCredential.getProjectId(), gccTemplate.getGccZone().getValue(), resource.getResourceName()));
+                    gccCredential.getProjectId(), zone.getValue(), resource.getResourceName()));
             listOfDisks.add(attachedDisk);
         }
         return listOfDisks;
     }
 
     @Override
-    public Boolean delete(Resource resource, GccDeleteContextObject deleteContextObject) throws Exception {
+    public Boolean delete(Resource resource, GccDeleteContextObject deleteContextObject, String region) throws Exception {
         Stack stack = stackRepository.findById(deleteContextObject.getStackId());
         try {
             GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
             GccCredential gccCredential = (GccCredential) stack.getCredential();
             Operation operation = deleteContextObject.getCompute().instances()
-                    .delete(gccCredential.getProjectId(), gccTemplate.getGccZone().getValue(), resource.getResourceName()).execute();
-            Compute.ZoneOperations.Get zoneOperations = createZoneOperations(deleteContextObject.getCompute(), gccCredential, gccTemplate, operation);
-            Compute.GlobalOperations.Get globalOperations = createGlobalOperations(deleteContextObject.getCompute(), gccCredential, gccTemplate, operation);
+                    .delete(gccCredential.getProjectId(), GccZone.valueOf(region).getValue(), resource.getResourceName()).execute();
+            Compute.ZoneOperations.Get zoneOperations = createZoneOperations(deleteContextObject.getCompute(), gccCredential, operation, GccZone.valueOf(region));
+            Compute.GlobalOperations.Get globalOperations = createGlobalOperations(deleteContextObject.getCompute(), gccCredential, operation);
             GccRemoveReadyPollerObject gccRemoveReady =
                     new GccRemoveReadyPollerObject(zoneOperations, globalOperations, stack, resource.getResourceName(), operation.getName());
             gccRemoveReadyPollerObjectPollingService.pollWithTimeout(gccRemoveCheckerStatus, gccRemoveReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
@@ -132,10 +135,10 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
     }
 
     @Override
-    public Optional<String> describe(Resource resource, GccDescribeContextObject describeContextObject) throws Exception {
+    public Optional<String> describe(Resource resource, GccDescribeContextObject describeContextObject, String region) throws Exception {
         try {
             Stack stack = stackRepository.findById(describeContextObject.getStackId());
-            return Optional.fromNullable(describe(stack, describeContextObject.getCompute(), resource).toPrettyString());
+            return Optional.fromNullable(describe(stack, describeContextObject.getCompute(), resource,  GccZone.valueOf(region)).toPrettyString());
         } catch (IOException e) {
             return Optional.fromNullable(jsonHelper.createJsonFromString(String.format("{\"VirtualMachine\": {%s}}", ERROR)).toString());
         }
@@ -156,8 +159,8 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
         GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
 
         List<AttachedDisk> listOfDisks = new ArrayList<>();
-        listOfDisks.addAll(getBootDiskList(resources, gccCredential, gccTemplate));
-        listOfDisks.addAll(getAttachedDisks(resources, gccCredential, gccTemplate));
+        listOfDisks.addAll(getBootDiskList(resources, gccCredential, GccZone.valueOf(stack.getRegion())));
+        listOfDisks.addAll(getAttachedDisks(resources, gccCredential, GccZone.valueOf(stack.getRegion())));
 
         Instance instance = new Instance();
         instance.setMachineType(String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/machineTypes/%s",
@@ -185,10 +188,10 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
                 provisionContextObject.getCompute(), gccTemplate, gccCredential, buildResources);
     }
 
-    public Instance describe(Stack stack, Compute compute, Resource resource) throws IOException {
+    public Instance describe(Stack stack, Compute compute, Resource resource, GccZone region) throws IOException {
         GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
         GccCredential gccCredential = (GccCredential) stack.getCredential();
-        Compute.Instances.Get getVm = compute.instances().get(gccCredential.getProjectId(), gccTemplate.getGccZone().getValue(),
+        Compute.Instances.Get getVm = compute.instances().get(gccCredential.getProjectId(), region.getValue(),
                 resource.getResourceName());
         return getVm.execute();
     }
