@@ -8,6 +8,7 @@ import javax.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -21,6 +22,7 @@ import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 import com.sequenceiq.cloudbreak.service.user.UserFilterField;
+import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 import freemarker.template.Configuration;
 
@@ -29,8 +31,8 @@ public class AmbariClusterInstallerMailSenderService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariClusterInstallerMailSenderService.class);
 
-    // @Value("${cb.smtp.sender.from}")
-    private String msgFrom = "no-reply@sequenceiq.com";
+    @Value("${cb.smtp.sender.from: no-reply@sequenceiq.com}")
+    private String msgFrom;
 
     @Autowired
     private MailSender mailSender;
@@ -95,6 +97,7 @@ public class AmbariClusterInstallerMailSenderService {
             model.put("status", status);
             model.put("server", server);
             model.put("name", name);
+            model.put("style", FileReaderUtils.readFileFromClasspath("css/Cloudbreak.min.css"));
             text = FreeMarkerTemplateUtils.processTemplateIntoString(freemarkerConfiguration.getTemplate(template, "UTF-8"), model);
         } catch (Exception e) {
             LOGGER.error("Cluster installer email assembling failed. Exception: {}", e);
