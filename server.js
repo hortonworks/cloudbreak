@@ -193,6 +193,27 @@ function retrieveUserByToken(token, success){
   });
 }
 
+// file download
+
+app.get('*/credentials/certificate/*', function(req, res){
+  if (req.body){
+    cbRequestArgs.data = req.body;
+  }
+  cbRequestArgs.headers.Authorization = "Bearer " + req.session.token;
+  cloudbreakClient.get(cloudbreakAddress + req.url, cbRequestArgs, function(data,response){
+    if (data != null) {
+      res.setHeader('Content-disposition', 'attachment; filename=azure.cer');
+      res.setHeader('Content-type', 'application/x-x509-ca-cert');
+      res.charset = 'UTF-8';
+      res.write(data);
+      res.end();
+    } else {
+       res.statusCode = 404
+       res.json({ error: {status: 404, message: 'Cannot download azure certificate.'} })
+    }
+  });
+});
+
 // wildcards should be proxied =================================================
 
 app.get('*/sultans/*', function(req,res){
