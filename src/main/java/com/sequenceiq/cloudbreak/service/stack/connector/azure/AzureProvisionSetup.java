@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
 
 import groovyx.net.http.HttpResponseDecorator;
 import groovyx.net.http.HttpResponseException;
+import groovyx.net.http.ResponseParseException;
 import reactor.core.Reactor;
 import reactor.event.Event;
 
@@ -51,6 +52,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
     private static final String PENDING = "pending";
     private static final String SUCCESS = "success";
     private static final int ONE_HUNDRED = 100;
+    private static final int CONTAINER_EXISTS = 409;
 
     @Value("${cb.azure.image.uri}")
     private String baseImageUri;
@@ -82,7 +84,6 @@ public class AzureProvisionSetup implements ProvisionSetup {
             Map<String, String> params = new HashMap<>();
             params.put(AzureStackUtil.NAME, affinityGroupName);
             String keyJson = (String) azureClient.getStorageAccountKeys(params);
-
             JsonNode actualObj = null;
             try {
                 actualObj = MAPPER.readValue(keyJson, JsonNode.class);
@@ -92,37 +93,11 @@ public class AzureProvisionSetup implements ProvisionSetup {
             }
             String storageAccountKey = actualObj.get("StorageService").get("StorageServiceKeys").get("Primary").asText();
 
-            AzureClientUtil.createBlobContainer(storageAccountKey, targetBlobContainerUri);
+            createBlobContainer(targetBlobContainerUri, storageAccountKey);
             AzureClientUtil.copyOsImage(storageAccountKey, baseImageUri, targetImageUri);
 
-            String copyStatus = PENDING;
-            while (PENDING.equals(copyStatus)) {
-                Map<String, String> copyStatusFromServer = (Map<String, String>) AzureClientUtil.getCopyOsImageProgress(storageAccountKey, targetImageUri);
-                copyStatus = copyStatusFromServer.get("status");
-                Long copied = Long.valueOf(copyStatusFromServer.get("copiedBytes"));
-                Long total = Long.valueOf(copyStatusFromServer.get("totalBytes"));
-                double copyPercentage = (long) ((float) copied / total * ONE_HUNDRED);
-                LOGGER.info(String.format("copy progress=%s / %s percentage: %s%%.",
-                        copyStatusFromServer.get("copiedBytes"),
-                        copyStatusFromServer.get("totalBytes"),
-                        copyPercentage));
-
-                retryingStackUpdater.updateStackStatusReason(stack.getId(), String.format("The copy status is: %s%%.", copyPercentage));
-                try {
-                    Thread.sleep(MILLIS);
-                } catch (InterruptedException e) {
-                    LOGGER.info("Interrupted exception occured during sleep.", e);
-                    Thread.currentThread().interrupt();
-                }
-            }
-            if (!SUCCESS.equals(copyStatus)) {
-                throw new InternalServerException("Copy OS image failed with status: " + copyStatus);
-            }
-            params = new HashMap<>();
-            params.put(AzureStackUtil.NAME, azureStackUtil.getOsImageName(credential));
-            params.put(OS, "Linux");
-            params.put(MEDIALINK, targetImageUri);
-            azureClient.addOsImage(params);
+            checkCopyStatus(stack, targetImageUri, storageAccountKey);
+            createOsImageLink(credential, azureClient, targetImageUri);
         }
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT, stack.getId());
         reactor.notify(ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT,
@@ -130,6 +105,55 @@ public class AzureProvisionSetup implements ProvisionSetup {
                                 .withSetupProperty(CREDENTIAL, stack.getCredential())
                 )
         );
+    }
+
+    private void createOsImageLink(Credential credential, AzureClient azureClient, String targetImageUri) {
+        Map<String, String> params;
+        params = new HashMap<>();
+        params.put(AzureStackUtil.NAME, azureStackUtil.getOsImageName(credential));
+        params.put(OS, "Linux");
+        params.put(MEDIALINK, targetImageUri);
+        azureClient.addOsImage(params);
+    }
+
+    private void checkCopyStatus(Stack stack, String targetImageUri, String storageAccountKey) {
+        String copyStatus = PENDING;
+        while (PENDING.equals(copyStatus)) {
+            Map<String, String> copyStatusFromServer = (Map<String, String>) AzureClientUtil.getCopyOsImageProgress(storageAccountKey, targetImageUri);
+            copyStatus = copyStatusFromServer.get("status");
+            Long copied = Long.valueOf(copyStatusFromServer.get("copiedBytes"));
+            Long total = Long.valueOf(copyStatusFromServer.get("totalBytes"));
+            double copyPercentage = (long) ((float) copied / total * ONE_HUNDRED);
+            LOGGER.info(String.format("copy progress=%s / %s percentage: %s%%.",
+                    copyStatusFromServer.get("copiedBytes"),
+                    copyStatusFromServer.get("totalBytes"),
+                    copyPercentage));
+
+            retryingStackUpdater.updateStackStatusReason(stack.getId(), String.format("The copy status is: %s%%.", copyPercentage));
+            try {
+                Thread.sleep(MILLIS);
+            } catch (InterruptedException e) {
+                LOGGER.info("Interrupted exception occured during sleep.", e);
+                Thread.currentThread().interrupt();
+            }
+        }
+        if (!SUCCESS.equals(copyStatus)) {
+            throw new InternalServerException("Copy OS image failed with status: " + copyStatus);
+        }
+    }
+
+    private void createBlobContainer(String targetBlobContainerUri, String storageAccountKey) {
+        try {
+            AzureClientUtil.createBlobContainer(storageAccountKey, targetBlobContainerUri);
+        } catch (Exception ex) {
+            if (ex instanceof ResponseParseException) {
+                if (((ResponseParseException) ex).getStatusCode() != CONTAINER_EXISTS) {
+                    throw ex;
+                }
+            } else {
+                throw ex;
+            }
+        }
     }
 
     @Override

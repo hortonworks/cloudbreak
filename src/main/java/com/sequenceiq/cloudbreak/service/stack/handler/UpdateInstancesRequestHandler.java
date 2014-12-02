@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
@@ -139,29 +140,28 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
                     cloudPlatformConnectors.get(cloudPlatform).removeInstances(stack, instanceIds);
                 } else {
                     ResourceBuilderInit resourceBuilderInit = resourceBuilderInits.get(cloudPlatform);
-                    final DeleteContextObject dCO = resourceBuilderInit.deleteInit(stack);
+                    final DeleteContextObject dCO = resourceBuilderInit.decommissionInit(stack, instanceIds);
 
                     for (int j = instanceResourceBuilders.get(cloudPlatform).size() - 1; j >= 0; j--) {
                         List<Future<Boolean>> futures = new ArrayList<>();
                         final int index = j;
-                        for (final String instanceId : instanceIds) {
+                        final ResourceBuilder resourceBuilder = instanceResourceBuilders.get(cloudPlatform).get(index);
+                        for (final Resource resource : getResourcesByType(resourceBuilder.resourceType(), dCO.getDecommisionResources())) {
                             Future<Boolean> submit = resourceBuilderExecutor.submit(new Callable<Boolean>() {
                                 @Override
                                 public Boolean call() throws Exception {
-                                    Resource resource =
-                                            new Resource(instanceResourceBuilders.get(cloudPlatform).get(index).resourceType(), instanceId, stack);
                                     Boolean delete = false;
                                     try {
-                                        delete = instanceResourceBuilders.get(cloudPlatform).get(index).delete(resource, dCO);
+                                        delete = resourceBuilder.delete(resource, dCO);
                                     } catch (HttpResponseException ex) {
                                         LOGGER.error(String.format("Error occurred on stack under the instance remove"), ex);
                                         throw new InternalServerException(
                                                 String.format("Error occurred while removing instance '%s' on stack. Message: '%s'",
-                                                instanceId, ex.getResponse().toString()), ex);
+                                                        resource.getResourceName(), ex.getResponse().toString()), ex);
                                     } catch (Exception ex) {
                                         throw new InternalServerException(
                                                 String.format("Error occurred while removing instance '%s' on stack. Message: '%s'",
-                                                instanceId, ex.getMessage()), ex);
+                                                        resource.getResourceName(), ex.getMessage()), ex);
                                     }
                                     return delete;
                                 }
@@ -176,6 +176,7 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
                             }
                         }
                     }
+                    stackUpdater.removeStackResources(stackId, dCO.getDecommisionResources());
                     LOGGER.info("Terminated instances in stack: '{}'", instanceIds);
                     LOGGER.info("Publishing {} event.", ReactorConfig.STACK_UPDATE_SUCCESS_EVENT);
                     reactor.notify(ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, Event.wrap(new StackUpdateSuccess(stack.getId(), true, instanceIds)));
@@ -189,6 +190,16 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
             LOGGER.error(errMessage, e);
             notifyUpdateFailed(stack, errMessage);
         }
+    }
+
+    private List<Resource> getResourcesByType(ResourceType resourceType, List<Resource> resources) {
+        List<Resource> resourceList = new ArrayList<>();
+        for (Resource resource : resources) {
+            if (resourceType.equals(resource.getResourceType())) {
+                resourceList.add(resource);
+            }
+        }
+        return resourceList;
     }
 
     private void notifyUpdateFailed(Stack stack, String detailedMessage) {
