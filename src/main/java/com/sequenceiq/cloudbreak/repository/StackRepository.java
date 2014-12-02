@@ -43,6 +43,6 @@ public interface StackRepository extends CrudRepository<Stack, Long> {
     Stack findByNameInUser(@Param("name") String name, @Param("owner") String owner);
 
     @PostAuthorize("hasPermission(returnObject,'read')")
-    Stack findOneByName(@Param("name") String name);
+    Stack findOneByName(@Param("name") String name, @Param("account") String account);
 
 }

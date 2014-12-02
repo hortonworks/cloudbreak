@@ -64,8 +64,8 @@ public class SimpleCredentialService implements CredentialService {
     }
 
     @Override
-    public Credential getPublicBlueprint(String name, CbUser user) {
-        Credential credential = credentialRepository.findOneByName(name);
+    public Credential getPublicCredential(String name, CbUser user) {
+        Credential credential = credentialRepository.findOneByName(name, user.getAccount());
         if (credential == null) {
             throw new NotFoundException(String.format("Credential '%s' not found.", name));
         } else {
@@ -74,7 +74,7 @@ public class SimpleCredentialService implements CredentialService {
     }
 
     @Override
-    public Credential getPrivateBlueprint(String name, CbUser user) {
+    public Credential getPrivateCredential(String name, CbUser user) {
         Credential credential = credentialRepository.findByNameInUser(name, user.getUserId());
         if (credential == null) {
             throw new NotFoundException(String.format("Credential '%s' not found.", name));

@@ -32,7 +32,7 @@ import javax.persistence.UniqueConstraint;
         @NamedQuery(
                 name = "Blueprint.findOneByName",
                 query = "SELECT b FROM Blueprint b "
-                        + "WHERE b.name= :name "),
+                        + "WHERE b.name= :name and b.account= :account"),
         @NamedQuery(
                 name = "Blueprint.findByNameInAccount",
                 query = "SELECT b FROM Blueprint b "

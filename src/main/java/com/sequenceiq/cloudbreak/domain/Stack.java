@@ -80,7 +80,7 @@ import javax.persistence.Version;
         @NamedQuery(
                 name = "Stack.findOneByName",
                 query = "SELECT c FROM Stack c "
-                        + "WHERE c.name= :name"),
+                        + "WHERE c.name= :name and c.account= :account"),
         @NamedQuery(
                 name = "Stack.findByNameInAccount",
                 query = "SELECT s FROM Stack s "

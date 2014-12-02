@@ -84,7 +84,7 @@ public class DefaultBlueprintService implements BlueprintService {
 
     @Override
     public Blueprint getPublicBlueprint(String name, CbUser user) {
-        Blueprint blueprint = blueprintRepository.findOneByName(name);
+        Blueprint blueprint = blueprintRepository.findOneByName(name, user.getAccount());
         if (blueprint == null) {
             throw new NotFoundException(String.format("Blueprint '%s' not found.", name));
         }

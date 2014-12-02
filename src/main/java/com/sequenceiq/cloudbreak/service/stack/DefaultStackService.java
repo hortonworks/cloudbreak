@@ -116,7 +116,7 @@ public class DefaultStackService implements StackService {
     }
 
     public Stack getPublicStack(String name, CbUser cbUser) {
-        Stack stack = stackRepository.findOneByName(name);
+        Stack stack = stackRepository.findOneByName(name, cbUser.getAccount());
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", name));
         }

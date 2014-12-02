@@ -14,7 +14,7 @@ public interface CredentialRepository extends CrudRepository<Credential, Long> {
     Credential findOne(@Param("id") Long id);
 
     @PostAuthorize("hasPermission(returnObject,'read')")
-    Credential findOneByName(@Param("name") String name);
+    Credential findOneByName(@Param("name") String name, @Param("account") String account);
 
     Set<Credential> findForUser(@Param("user") String user);
 

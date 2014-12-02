@@ -32,7 +32,7 @@ import javax.persistence.UniqueConstraint;
         @NamedQuery(
                 name = "Template.findOneByName",
                 query = "SELECT t FROM Template t "
-                        + "WHERE t.name= :name"),
+                        + "WHERE t.name= :name and t.account= :account"),
         @NamedQuery(
                 name = "Template.findByNameInAccount",
                 query = "SELECT t FROM Template t "

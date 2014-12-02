@@ -17,9 +17,9 @@ public interface CredentialService {
 
     void delete(Long id);
 
-    Credential getPublicBlueprint(String name, CbUser user);
+    Credential getPublicCredential(String name, CbUser user);
 
-    Credential getPrivateBlueprint(String name, CbUser user);
+    Credential getPrivateCredential(String name, CbUser user);
 
     void delete(String name, CbUser user);
 

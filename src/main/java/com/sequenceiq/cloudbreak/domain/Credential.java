@@ -30,7 +30,7 @@ import javax.persistence.UniqueConstraint;
         @NamedQuery(
                 name = "Credential.findOneByName",
                 query = "SELECT b FROM Credential b "
-                        + "WHERE b.name= :name "),
+                        + "WHERE b.name= :name and b.account= :account"),
         @NamedQuery(
                 name = "Credential.findAllInAccount",
                 query = "SELECT c FROM Credential c "
