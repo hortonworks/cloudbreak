@@ -60,8 +60,27 @@ public class SimpleCredentialService implements CredentialService {
         } catch (DataIntegrityViolationException ex) {
             throw new DuplicateKeyValueException(credential.getName(), ex);
         }
-
         return savedCredential;
+    }
+
+    @Override
+    public Credential getPublicCredential(String name, CbUser user) {
+        Credential credential = credentialRepository.findOneByName(name, user.getAccount());
+        if (credential == null) {
+            throw new NotFoundException(String.format("Credential '%s' not found.", name));
+        } else {
+            return credential;
+        }
+    }
+
+    @Override
+    public Credential getPrivateCredential(String name, CbUser user) {
+        Credential credential = credentialRepository.findByNameInUser(name, user.getUserId());
+        if (credential == null) {
+            throw new NotFoundException(String.format("Credential '%s' not found.", name));
+        } else {
+            return credential;
+        }
     }
 
     @Override
@@ -72,4 +91,14 @@ public class SimpleCredentialService implements CredentialService {
         }
         credentialRepository.delete(credential);
     }
+
+    @Override
+    public void delete(String name, CbUser user) {
+        Credential credential = credentialRepository.findByNameInAccount(name, user.getAccount(), user.getUserId());
+        if (credential == null) {
+            throw new NotFoundException(String.format("Credential '%s' not found.", name));
+        }
+        credentialRepository.delete(credential);
+    }
+
 }

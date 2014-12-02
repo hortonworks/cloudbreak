@@ -17,4 +17,10 @@ public interface CredentialService {
 
     void delete(Long id);
 
+    Credential getPublicCredential(String name, CbUser user);
+
+    Credential getPrivateCredential(String name, CbUser user);
+
+    void delete(String name, CbUser user);
+
 }

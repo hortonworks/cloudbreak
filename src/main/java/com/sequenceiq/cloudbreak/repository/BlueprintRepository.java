@@ -13,6 +13,9 @@ public interface BlueprintRepository extends CrudRepository<Blueprint, Long> {
     @PostAuthorize("hasPermission(returnObject,'read')")
     Blueprint findOne(@Param("id") Long id);
 
+    @PostAuthorize("hasPermission(returnObject,'read')")
+    Blueprint findOneByName(@Param("name") String name, @Param("account") String account);
+
     Blueprint findByName(@Param("name") String name);
 
     Set<Blueprint> findForUser(@Param("user") String user);
@@ -20,5 +23,9 @@ public interface BlueprintRepository extends CrudRepository<Blueprint, Long> {
     Set<Blueprint> findPublicsInAccount(@Param("account") String account);
 
     Set<Blueprint> findAllInAccount(@Param("account") String account);
+
+    Blueprint findByNameInAccount(@Param("name") String name, @Param("account") String account, @Param("owner") String owner);
+
+    Blueprint findByNameInUser(@Param("name") String name, @Param("owner") String owner);
 
 }

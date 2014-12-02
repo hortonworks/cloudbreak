@@ -79,6 +79,20 @@ public class CredentialController {
         return new ResponseEntity<>(convertCredentials(credentials), HttpStatus.OK);
     }
 
+    @RequestMapping(value = "user/credentials/{name}", method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity<CredentialJson> getPrivateCredential(@ModelAttribute("user") CbUser user, @PathVariable String name) {
+        Credential credentials = credentialService.getPrivateCredential(name, user);
+        return new ResponseEntity<>(convert(credentials), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "account/credentials/{name}", method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity<CredentialJson> getAccountCredential(@ModelAttribute("user") CbUser user, @PathVariable String name) {
+        Credential credentials = credentialService.getPublicCredential(name, user);
+        return new ResponseEntity<>(convert(credentials), HttpStatus.OK);
+    }
+
     @RequestMapping(value = "credentials/{credentialId}", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<CredentialJson> getCredential(@ModelAttribute("user") CbUser user, @PathVariable Long credentialId) {
@@ -90,6 +104,20 @@ public class CredentialController {
     @ResponseBody
     public ResponseEntity<CredentialJson> deleteCredential(@ModelAttribute("user") CbUser user, @PathVariable Long credentialId) {
         credentialService.delete(credentialId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "account/credentials/{name}", method = RequestMethod.DELETE)
+    @ResponseBody
+    public ResponseEntity<CredentialJson> deletePublicCredential(@ModelAttribute("user") CbUser user, @PathVariable String name) {
+        credentialService.delete(name, user);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "user/credentials/{name}", method = RequestMethod.DELETE)
+    @ResponseBody
+    public ResponseEntity<CredentialJson> deletePrivateCredential(@ModelAttribute("user") CbUser user, @PathVariable String name) {
+        credentialService.delete(name, user);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

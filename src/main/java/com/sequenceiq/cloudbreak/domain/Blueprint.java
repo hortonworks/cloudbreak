@@ -28,7 +28,19 @@ import javax.persistence.UniqueConstraint;
         @NamedQuery(
                 name = "Blueprint.findAllInAccount",
                 query = "SELECT b FROM Blueprint b "
-                        + "WHERE b.account= :account ")
+                        + "WHERE b.account= :account "),
+        @NamedQuery(
+                name = "Blueprint.findOneByName",
+                query = "SELECT b FROM Blueprint b "
+                        + "WHERE b.name= :name and b.account= :account"),
+        @NamedQuery(
+                name = "Blueprint.findByNameInAccount",
+                query = "SELECT b FROM Blueprint b "
+                        + "WHERE  b.name= :name and ((b.publicInAccount=true and b.account= :account) or b.owner= :owner)"),
+        @NamedQuery(
+                name = "Blueprint.findByNameInUser",
+                query = "SELECT b FROM Blueprint b "
+                        + "WHERE b.owner= :owner and b.name= :name")
 })
 public class Blueprint implements ProvisionEntity {
 

@@ -75,11 +75,44 @@ public class DefaultBlueprintService implements BlueprintService {
             throw new NotFoundException(String.format("Blueprint '%s' not found.", id));
         }
         if (clusterRepository.findAllClusterByBlueprint(blueprint.getId()).isEmpty()) {
-
             blueprintRepository.delete(blueprint);
         } else {
             throw new BadRequestException(String.format(
                     "There are stacks associated with blueprint '%s'. Please remove these before the deleting the blueprint.", id));
+        }
+    }
+
+    @Override
+    public Blueprint getPublicBlueprint(String name, CbUser user) {
+        Blueprint blueprint = blueprintRepository.findOneByName(name, user.getAccount());
+        if (blueprint == null) {
+            throw new NotFoundException(String.format("Blueprint '%s' not found.", name));
+        }
+        return blueprint;
+    }
+
+    @Override
+    public Blueprint getPrivateBlueprint(String name, CbUser user) {
+        Blueprint blueprint = blueprintRepository.findByNameInUser(name, user.getUserId());
+        if (blueprint == null) {
+            throw new NotFoundException(String.format("Blueprint '%s' not found.", name));
+        }
+        return blueprint;
+    }
+
+    @Override
+    public void delete(String name, CbUser user) {
+        Blueprint blueprint = blueprintRepository.findByNameInAccount(name, user.getAccount(), user.getUserId());
+        if (blueprint == null) {
+            throw new NotFoundException(String.format("Blueprint '%s' not found.", name));
+        }
+        MDCBuilder.buildMdcContext(blueprint);
+
+        if (clusterRepository.findAllClusterByBlueprint(blueprint.getId()).isEmpty()) {
+            blueprintRepository.delete(blueprint);
+        } else {
+            throw new BadRequestException(String.format(
+                    "There are stacks associated with blueprint '%s'. Please remove these before the deleting the blueprint.", name));
         }
     }
 }

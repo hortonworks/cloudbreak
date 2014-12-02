@@ -28,7 +28,19 @@ import javax.persistence.UniqueConstraint;
         @NamedQuery(
                 name = "Template.findAllInAccount",
                 query = "SELECT t FROM Template t "
-                        + "WHERE t.account= :account ")
+                        + "WHERE t.account= :account "),
+        @NamedQuery(
+                name = "Template.findOneByName",
+                query = "SELECT t FROM Template t "
+                        + "WHERE t.name= :name and t.account= :account"),
+        @NamedQuery(
+                name = "Template.findByNameInAccount",
+                query = "SELECT t FROM Template t "
+                        + "WHERE t.name= :name and ((t.account= :account and t.publicInAccount=true) or t.owner= :owner)"),
+        @NamedQuery(
+                name = "Template.findByNameInUser",
+                query = "SELECT t FROM Template t "
+                        + "WHERE t.owner= :owner and t.name= :name")
 })
 public abstract class Template {
 

@@ -64,6 +64,20 @@ public class BlueprintController {
         return new ResponseEntity<>(blueprintConverter.convertAllEntityToJson(blueprints), HttpStatus.OK);
     }
 
+    @RequestMapping(value = "user/blueprints/{name}", method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity<BlueprintJson> getPrivateBlueprint(@ModelAttribute("user") CbUser user, @PathVariable String name) {
+        Blueprint blueprint = blueprintService.getPrivateBlueprint(name, user);
+        return new ResponseEntity<>(blueprintConverter.convert(blueprint), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "account/blueprints/{name}", method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity<BlueprintJson> createAccountBlueprint(@ModelAttribute("user") CbUser user, @PathVariable String name) {
+        Blueprint blueprint = blueprintService.getPublicBlueprint(name, user);
+        return new ResponseEntity<>(blueprintConverter.convert(blueprint), HttpStatus.OK);
+    }
+
     @RequestMapping(value = "account/blueprints", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<Set<BlueprintJson>> getAccountBlueprints(@ModelAttribute("user") CbUser user) {
@@ -86,6 +100,20 @@ public class BlueprintController {
     @ResponseBody
     public ResponseEntity<BlueprintJson> deleteBlueprint(@ModelAttribute("user") CbUser user, @PathVariable Long id) {
         blueprintService.delete(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @RequestMapping(value = "account/blueprints/{name}", method = RequestMethod.DELETE)
+    @ResponseBody
+    public ResponseEntity<BlueprintJson> deleteBlueprintInAccount(@ModelAttribute("user") CbUser user, @PathVariable String name) {
+        blueprintService.delete(name, user);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @RequestMapping(value = "user/blueprints/{name}", method = RequestMethod.DELETE)
+    @ResponseBody
+    public ResponseEntity<BlueprintJson> deleteBlueprintInPrivate(@ModelAttribute("user") CbUser user, @PathVariable String name) {
+        blueprintService.delete(name, user);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 

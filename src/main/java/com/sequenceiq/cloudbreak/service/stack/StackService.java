@@ -29,4 +29,10 @@ public interface StackService {
     void updateStatus(Long stackId, StatusRequest status);
 
     void updateNodeCount(Long stackId, Integer nodeCount);
+
+    Stack getPrivateStack(String name, CbUser cbUser);
+
+    Stack getPublicStack(String name, CbUser cbUser);
+
+    void delete(String name, CbUser cbUser);
 }

@@ -90,4 +90,42 @@ public class SimpleTemplateService implements TemplateService {
         }
     }
 
+    public Template getPrivateTemplate(String name, CbUser user) {
+        Template template = templateRepository.findByNameInUser(name, user.getUserId());
+        if (template == null) {
+            throw new NotFoundException(String.format(TEMPLATE_NOT_FOUND_MSG, name));
+        } else {
+            MDCBuilder.buildMdcContext(template);
+            return template;
+        }
+    }
+
+    public Template getPublicTemplate(String name, CbUser user) {
+        Template template = templateRepository.findOneByName(name, user.getAccount());
+        if (template == null) {
+            throw new NotFoundException(String.format(TEMPLATE_NOT_FOUND_MSG, name));
+        } else {
+            MDCBuilder.buildMdcContext(template);
+            return template;
+        }
+    }
+
+    @Override
+    public void delete(String templateName, CbUser cbUser) {
+        Template template = templateRepository.findByNameInAccount(templateName, cbUser.getAccount(), cbUser.getUserId());
+        if (template == null) {
+            throw new NotFoundException(String.format(TEMPLATE_NOT_FOUND_MSG, templateName));
+        }
+        MDCBuilder.buildMdcContext(template);
+        LOGGER.debug("Deleting template.", templateName);
+
+        List<Stack> allStackForTemplate = stackRepository.findAllStackForTemplate(template.getId());
+        if (allStackForTemplate.isEmpty()) {
+            templateRepository.delete(template);
+        } else {
+            throw new BadRequestException(String.format(
+                    "There are stacks associated with template '%s'. Please remove these before deleting the template.", templateName));
+        }
+    }
+
 }
