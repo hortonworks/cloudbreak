@@ -7,11 +7,11 @@ get_ip() {
   ifconfig eth0 | awk '/inet addr/{print substr($2,6)}'
 }
 
-fix_hostname_i() {
+fix_hostname() {
   if grep -q $(get_ip) /etc/hosts ;then
-    echo OK
+    sed -i "/$(get_ip)/d" /etc/hosts
   else
-    echo $(get_ip) $(cat /etc/hostname) >> /etc/hosts
+    echo OK
   fi
 }
 
@@ -106,6 +106,7 @@ start_ambari_server() {
      --name ambari-server \
      --net=host \
      --restart=always \
+     -e BRIDGE_IP=$(get_ip) \
      sequenceiq/ambari:$DOCKER_TAG /start-server
 
     register_ambari
@@ -113,11 +114,24 @@ start_ambari_server() {
 }
 
 start_ambari_agent() {
+  set_public_host_script
+
   docker run -d \
     --name ambari-agent \
     --net=host \
     --restart=always \
+    -e BRIDGE_IP=$(get_ip) \
+    $VOLUMES \
     sequenceiq/ambari:$DOCKER_TAG /start-agent
+}
+
+set_public_host_script() {
+  cat>/tmp/pubhost.sh<<"EOF"
+#!/bin/bash
+echo $(curl -s -m 5 http://169.254.169.254/latest/meta-data/public-hostname)
+EOF
+  chmod +x /tmp/pubhost.sh
+  VOLUMES="$VOLUMES -v /tmp/pubhost.sh:/etc/ambari-agent/conf/public-hostname.sh"
 }
 
 main() {
@@ -125,7 +139,7 @@ main() {
     shift
     eval "$@"
   else
-    fix_hostname_i
+    fix_hostname
     start_consul
     start_ambari_server
     start_ambari_agent
