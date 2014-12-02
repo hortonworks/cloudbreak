@@ -106,16 +106,6 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
 
         }
 
-        $scope.getAzureCertification = function(credentialId) {
-            GlobalCredentialCertificate.get({id:credentialId}, function(result) {
-                var blob = new Blob([result.cert], { type: 'text/plain;charset=utf-8' });
-                saveAs(blob, 'azure.cer');
-            }, function(error){
-                $scope.modifyStatusMessage("Azure certificate request failed: " + error.data.message);
-                $scope.modifyStatusClass("has-error");
-            });
-        }
-
         $scope.deleteCredential = function(credential) {
             GlobalCredential.delete({ id: credential.id }, function(success){
                 $rootScope.credentials.splice($rootScope.credentials.indexOf(credential), 1 );
