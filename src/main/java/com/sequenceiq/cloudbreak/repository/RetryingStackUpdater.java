@@ -321,8 +321,8 @@ public class RetryingStackUpdater {
         Set<Resource> notRemovedResources = new HashSet<>();
         for (Resource resource : stack.getResources()) {
             boolean removable = false;
-            for (Resource resource1 : resources) {
-                if (resource1.getResourceName().equals(resource.getResourceName()) && resource1.getResourceType().equals(resource.getResourceType())) {
+            for (Resource searchTarget : resources) {
+                if (searchTarget.getResourceName().equals(resource.getResourceName()) && searchTarget.getResourceType().equals(resource.getResourceType())) {
                     removable = true;
                     break;
                 }
