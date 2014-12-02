@@ -101,7 +101,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
 
         $scope.changeActiveCluster = function (clusterId) {
             $rootScope.activeCluster = $filter('filter')($rootScope.clusters, { id: clusterId })[0];
-            $rootScope.activeClusterEvents = $filter('filter')($rootScope.events,  { stackId: clusterId});
             $rootScope.activeClusterBlueprint = $filter('filter')($rootScope.blueprints, { id: $rootScope.activeCluster.blueprintId})[0];
             $rootScope.activeClusterTemplate = $filter('filter')($rootScope.templates, {id: $rootScope.activeCluster.templateId}, true)[0];
             $rootScope.activeClusterCredential = $filter('filter')($rootScope.credentials, {id: $rootScope.activeCluster.credentialId}, true)[0];
@@ -111,6 +110,18 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 }
             );
         }
+
+        $rootScope.events = [];
+
+        $scope.loadEvents = function () {
+            $rootScope.events = UserEvents.query(function(success) {
+                angular.forEach(success, function(item) {
+                    item.customTimeStamp =  new Date(item.eventTimestamp).toLocaleDateString() + " " + new Date(item.eventTimestamp).toLocaleTimeString();
+                });
+            });
+        }
+
+        $scope.loadEvents();
 
         $scope.stopCluster = function (activeCluster) {
             var newStatus = {"status":"STOPPED"};
@@ -189,7 +200,11 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
 
         $scope.logFilterFunction = function(element) {
             try {
-                return (!element.eventType.match('BILLING_STARTED') && !element.eventType.match('BILLING_STOPPED') && !element.eventType.match('BILLING_CHANGED')) ? true : false;
+                if (element.stackId === $rootScope.activeCluster.id) {
+                    return (!element.eventType.match('BILLING_STARTED') && !element.eventType.match('BILLING_STOPPED') && !element.eventType.match('BILLING_CHANGED')) ? true : false;
+                } else {
+                    return false;
+                }
             } catch (err) {
                 return false;
             }
@@ -210,17 +225,5 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 return false;
             }
         }
-
-        $rootScope.events = [];
-
-        $scope.loadEvents = function () {
-            $rootScope.events = UserEvents.query(function(success) {
-                angular.forEach(success, function(item) {
-                    item.customTimeStamp =  new Date(item.eventTimestamp).toLocaleDateString() + " " + new Date(item.eventTimestamp).toLocaleTimeString();
-                });
-            });
-        }
-
-        $scope.loadEvents();
 
     }]);
