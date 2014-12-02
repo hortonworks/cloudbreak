@@ -322,7 +322,7 @@ public class RetryingStackUpdater {
         for (Resource resource : stack.getResources()) {
             boolean removable = false;
             for (Resource resource1 : resources) {
-                if (resource1.getResourceName().equals(resource.getResourceName())) {
+                if (resource1.getResourceName().equals(resource.getResourceName()) && resource1.getResourceType().equals(resource.getResourceType())) {
                     removable = true;
                     break;
                 }
