@@ -78,6 +78,10 @@ import javax.persistence.Version;
                 query = "SELECT s from Stack s "
                         + "WHERE s.ambariIp= :ambariIp"),
         @NamedQuery(
+                name = "Stack.findOneByName",
+                query = "SELECT c FROM Stack c "
+                        + "WHERE c.name= :name"),
+        @NamedQuery(
                 name = "Stack.findByNameInAccount",
                 query = "SELECT s FROM Stack s "
                         + "WHERE s.name= :name and ((s.account= :account and s.publicInAccount=true) or s.owner= :owner)"),

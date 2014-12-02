@@ -30,6 +30,10 @@ import javax.persistence.UniqueConstraint;
                 query = "SELECT t FROM Template t "
                         + "WHERE t.account= :account "),
         @NamedQuery(
+                name = "Template.findOneByName",
+                query = "SELECT t FROM Template t "
+                        + "WHERE t.name= :name"),
+        @NamedQuery(
                 name = "Template.findByNameInAccount",
                 query = "SELECT t FROM Template t "
                         + "WHERE t.name= :name and ((t.account= :account and t.publicInAccount=true) or t.owner= :owner)"),

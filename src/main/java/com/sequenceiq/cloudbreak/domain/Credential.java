@@ -28,6 +28,10 @@ import javax.persistence.UniqueConstraint;
                         + "WHERE c.account= :account "
                         + "AND c.publicInAccount= true"),
         @NamedQuery(
+                name = "Credential.findOneByName",
+                query = "SELECT b FROM Credential b "
+                        + "WHERE b.name= :name "),
+        @NamedQuery(
                 name = "Credential.findAllInAccount",
                 query = "SELECT c FROM Credential c "
                         + "WHERE c.account= :account "),

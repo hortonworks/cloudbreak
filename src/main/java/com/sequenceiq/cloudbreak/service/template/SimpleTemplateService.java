@@ -101,7 +101,7 @@ public class SimpleTemplateService implements TemplateService {
     }
 
     public Template getPublicTemplate(String name, CbUser user) {
-        Template template = templateRepository.findByNameInAccount(name, user.getAccount(), user.getUserId());
+        Template template = templateRepository.findOneByName(name);
         if (template == null) {
             throw new NotFoundException(String.format(TEMPLATE_NOT_FOUND_MSG, name));
         } else {

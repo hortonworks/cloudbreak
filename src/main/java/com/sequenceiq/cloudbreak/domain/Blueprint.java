@@ -30,6 +30,10 @@ import javax.persistence.UniqueConstraint;
                 query = "SELECT b FROM Blueprint b "
                         + "WHERE b.account= :account "),
         @NamedQuery(
+                name = "Blueprint.findOneByName",
+                query = "SELECT b FROM Blueprint b "
+                        + "WHERE b.name= :name "),
+        @NamedQuery(
                 name = "Blueprint.findByNameInAccount",
                 query = "SELECT b FROM Blueprint b "
                         + "WHERE  b.name= :name and ((b.publicInAccount=true and b.account= :account) or b.owner= :owner)"),
