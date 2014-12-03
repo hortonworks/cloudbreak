@@ -1,7 +1,7 @@
 
 <!-- ........... ALARMS ...................................................... -->
-
-<div class="panel panel-default" ng-controller="periscopeController">
+<div ng-controller="periscopeController">
+<div class="panel panel-default">
     <div class="panel-heading">
         <h5><i class="fa fa-bell-o fa-fw"></i> ALARMS</h5>
     </div><!-- .panel-heading -->
@@ -12,8 +12,9 @@
                 <i class="fa fa-plus fa-fw"></i><span> create alarm</span>
             </a>
         </p>
+
         <!-- ......... CREATE ALARM FORM ............................................. -->
-        {{alarm}}
+
         <div class="panel panel-default">
             <div id="panel-create-alarm-collapse" class="panel-under-btn-collapse collapse">
                 <div class="panel-body">
@@ -135,27 +136,55 @@
                     <div class="panel-body">
                         <form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
                             <div class="form-group">
-                                <label class="col-sm-3 control-label" for="description-{{alarm.id}}">description</label>
+                                <label class="col-sm-3 control-label" for="alarm-description-{{alarm.id}}">description</label>
                                 <div class="col-sm-9">
-                                    <p id="description-{{alarm.id}}" class="form-control-static">{{alarm.description}}</p>
+                                    <p id="alarm-description-{{alarm.id}}" class="form-control-static">{{alarm.description}}</p>
                                 </div><!-- .col-sm-9 -->
                             </div><!-- .form-group -->
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label" for="period-{{alarm.id}}">period</label>
+                            <div ng-show="alarm.period!=undefined">
+                              <div class="form-group">
+                                  <label class="col-sm-3 control-label" for="period-{{alarm.id}}">period</label>
+                                  <div class="col-sm-9">
+                                      <p id="period-{{alarm.id}}" class="form-control-static">{{alarm.period}} minute(s)</p>
+                                  </div><!-- .col-sm-9 -->
+                              </div><!-- .form-group -->
+                              <div class="form-group">
+                                <label class="col-sm-3 control-label" for="alarm-{{alarm.id}}-metrics">metrics</label>
+                                <div class="col-sm-2">
+                                  <p class="form-control-static">{{alarm.metric}}</p>
+                                </div><!-- .col-sm-5 -->
+                                <div class="col-sm-3">
+                                  <p class="form-control-static">{{alarm.comparisonOperator}} (comparison operator)</p>
+                                </div><!-- .col-sm-2 -->
+                                <div class="col-sm-4">
+                                  <p class="form-control-static">{{alarm.threshold}} (threshold)</p>
+                                </div><!-- .col-sm-2 -->
+                              </div><!-- .form-group -->
+                            </div>
+                            <div ng-show="alarm.cron!=undefined">
+                              <div class="form-group">
+                                <label class="col-sm-3 control-label" for="alarm-{{alarm.id}}-time-zone">time zone</label>
                                 <div class="col-sm-9">
-                                    <p id="period-{{alarm.id}}" class="form-control-static">1 minute(s)</p>
+                                  <p id="alarm-{{alarm.id}}-time-zone" class="form-control-static">{{alarm.timeZone}}</p>
+                                </div><!-- .col-sm-9 -->
+                              </div><!-- .form-group -->
+                              <div class="form-group">
+                                <label class="col-sm-3 control-label" for="alarm-{{alarm.id}}-cron">cron expression</label>
+                                <div class="col-sm-9">
+                                  <p id="alarm-{{alarm.id}}-cron" class="form-control-static">{{alarm.cron}}</p>
+                                </div><!-- .col-sm-9 -->
+                              </div><!-- .form-group -->
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label" for="alarm-{{alarm.id}}">alarm</label>
+                                <div class="col-sm-9">
+                                    <p id="alarm-{{alarm.id}}" class="form-control-static">{{alarm}}</p>
                                 </div><!-- .col-sm-9 -->
                             </div><!-- .form-group -->
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label" for="metrics01">metrics</label>
+                            <div class="form-group" ng-repeat="notification in alarm.notifications">
+                                <label class="col-sm-3 control-label">notification ({{notification.type}})</label>
                                 <div class="col-sm-9">
-                                    <p id="metrics01" class="form-control-static">{{alarm}}</p>
-                                </div><!-- .col-sm-9 -->
-                            </div><!-- .form-group -->
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label" for="email-{{alarm.id}}">notification email</label>
-                                <div class="col-sm-9">
-                                    <p id="email-{{alarm.id}}" class="form-control-static">{{alarm.notifications}}</p>
+                                    <p ng-repeat="target in notification.target" class="form-control-static">{{target}}</p>
                                 </div><!-- .col-sm-9 -->
                             </div><!-- .form-group -->
                         </form>
@@ -175,7 +204,7 @@
                             <button type="button" class="btn btn-block btn-default" data-dismiss="modal">cancel</button>
                           </div>
                           <div class="col-xs-6">
-                            <button type="button" class="btn btn-block btn-danger" data-dismiss="modal" ng-click="deleteAlarm(alarm)"><i class="fa fa-times fa-fw"></i>terminate</button>
+                            <button type="button" class="btn btn-block btn-danger" data-dismiss="modal" ng-click="deleteAlarm(alarm)"><i class="fa fa-times fa-fw"></i>delete</button>
                           </div>
                         </div>
                       </div>
@@ -196,13 +225,35 @@
         <h5><i class="fa fa-expand fa-fw"></i> SCALING ACTIONS</h5>
     </div><!-- .panel-heading -->
     <div class="panel-body">
+        <form class="form-horizontal" role="form">
+          <div class="form-group">
+            <label class="col-sm-3 col-xs-12 control-label" for="cooldownTime">cooldown time</label>
+            <div class="col-sm-2 col-xs-4">
+              <input type="number" class="form-control text-right" id="cooldownTime" ng-model="scalingAction.cooldown">
+            </div><!-- .col-sm-2 -->
+            <div class="col-sm-1 col-xs-4">
+              <p class="form-control-static">minute(s)</p>
+            </div><!-- .col-sm-1 -->
+          </div><!-- .form-group -->
 
+          <div class="form-group">
+            <label class="col-sm-3 col-xs-12 control-label" for="clustersizeMin">cluster size min.</label>
+            <div class="col-sm-2 col-xs-4">
+              <input type="number" class="form-control text-right" id="clustersizeMin" ng-model="scalingAction.minSize">
+            </div><!-- .col-sm-2 -->
+          </div><!-- .form-group -->
+
+          <div class="form-group">
+            <label class="col-sm-3 col-xs-12 control-label" for="clustersizeMax">cluster size max.</label>
+            <div class="col-sm-2 col-xs-4">
+              <input type="number" class="form-control text-right" id="clustersizeMax" ng-model="scalingAction.maxSize">
+            </div><!-- .col-sm-2 -->
+          </div><!-- .form-group -->
+        </form>
         <p class="btn-row-over-panel">
-            <a class="btn btn-success" role="button" data-toggle="collapse" data-target="#panel-create-scaling-collapse">
-                <i class="fa fa-plus fa-fw"></i><span> create policy</span>
-            </a>
+          <a class="btn btn-success" role="button" data-toggle="collapse" data-target="#panel-create-scaling-collapse" id="create-policy-collapse-btn">
+            <i class="fa fa-plus fa-fw"></i><span> create policy</span></a>
         </p>
-
 
         <!-- ......... CREATE SCALING ACTION FORM ............................................. -->
 
@@ -213,43 +264,19 @@
                     <form class="form-horizontal" role="form">
 
                       <div class="form-group">
-                        <label class="col-sm-3 col-xs-12 control-label" for="cooldownTime">cooldown time</label>
-                        <div class="col-sm-2 col-xs-4">
-                          <input type="number" class="form-control text-right" id="cooldownTime" placeholder="">
-                        </div><!-- .col-sm-2 -->
-                        <div class="col-sm-1 col-xs-4">
-                          <p class="form-control-static">minute(s)</p>
-                        </div><!-- .col-sm-1 -->
-                      </div><!-- .form-group -->
-
-                      <div class="form-group">
-                        <label class="col-sm-3 col-xs-12 control-label" for="clustersizeMin">cluster size min.</label>
-                        <div class="col-sm-2 col-xs-4">
-                          <input type="number" class="form-control text-right" id="clustersizeMin" placeholder="">
-                        </div><!-- .col-sm-2 -->
-                      </div><!-- .form-group -->
-
-                      <div class="form-group">
-                        <label class="col-sm-3 col-xs-12 control-label" for="clustersizeMax">cluster size max.</label>
-                        <div class="col-sm-2 col-xs-4">
-                          <input type="number" class="form-control text-right" id="clustersizeMax" placeholder="">
-                        </div><!-- .col-sm-2 -->
-                      </div><!-- .form-group -->
-
-                      <div class="form-group">
                           <label class="col-sm-3 control-label" for="policyName">policy name</label>
                           <div class="col-sm-9">
-                              <input type="text" class="form-control" id="policyName" placeholder="max. 20 char">
+                              <input type="text" class="form-control" id="policyName" placeholder="max. 20 char" ng-model="scalingAction.policy.name">
                           </div><!-- .col-sm-9 -->
                       </div><!-- .form-group -->
 
                       <div class="form-group">
                           <label class="col-sm-3 col-xs-12 control-label" for="scalingAdjustment">scaling adjustment</label>
                           <div class="col-sm-4 col-xs-4">
-                              <input type="number" class="form-control text-right" id="scalingAdjustment" placeholder="">
+                              <input type="number" class="form-control text-right" id="scalingAdjustment" placeholder="12" ng-model="scalingAction.policy.scalingAdjustment">
                           </div><!-- .col-sm-3 -->
                           <div class="col-sm-5 col-xs-8">
-                              <select class="form-control" id="scalingAdjustmentType">
+                              <select class="form-control" id="scalingAdjustmentType" ng-model="scalingAction.policy.adjustmentType">
                                   <option value="NODE_COUNT">node count</option>
                                   <option value="PERCENTAGE">percentage</option>
                                   <option value="EXACT">exact</option>
@@ -260,24 +287,22 @@
                       <div class="form-group">
                         <label class="col-sm-3 control-label" for="policyHostGroup">host group</label>
                         <div class="col-sm-9">
-                          <input type="text" class="form-control" id="policyHostGroup" placeholder="max. 20 char">
+                          <input type="text" class="form-control" id="policyHostGroup" placeholder="max. 20 char" ng-model="scalingAction.policy.hostGroup">
                         </div><!-- .col-sm-9 -->
                       </div><!-- .form-group -->
 
                       <div class="form-group">
-                          <label class="col-sm-3 control-label" for="alarm">alarm</label>
+                          <label class="col-sm-3 control-label" for="alarmForScaling">alarm</label>
                           <div class="col-sm-9">
-                              <select class="form-control" id="alarm">
-                                  <option>– select alarm –</option>
-                                  <option>pendingContainerHigh</option>
-                                  <option>freeGlobalResourcesRateLow</option>
+                              <select class="form-control" id="alarmForScaling" ng-model="scalingAction.policy.alarmId" placeholder="select one">
+                                  <option ng-repeat="alarm in alarms" value="{{alarm.id}}" id="alarm-option-{{alarm.id}}">{{alarm.alarmName}} (ID:{{alarm.id}})</option>
                               </select>
                           </div><!-- .col-sm-9 -->
                       </div><!-- .form-group -->
 
                       <div class="row btn-row">
                           <div class="col-sm-9 col-sm-offset-3">
-                              <a id="createPolicy" class="btn btn-success btn-block" role="button"><i class="fa fa-plus fa-fw"></i> create policy</a>
+                              <a id="create-scaling-policy-btn" class="btn btn-success btn-block" role="button" ng-click="createPolicy()"><i class="fa fa-plus fa-fw"></i> create policy</a>
                           </div>
                       </div>
 
@@ -290,38 +315,70 @@
 
         <div class="panel-group" id="scaling-list-accordion">
 
-
             <!-- .............. SCALING ACTION POLICY .............................................. -->
 
-            <div class="panel panel-default">
+            <div class="panel panel-default" ng-repeat="policy in policies.scalingPolicies">
                 <div class="panel-heading">
-                    <h5><a data-toggle="collapse" data-parent="#scaling-list-accordion" data-target="#panel-scaling-collapse01"><i class="fa fa-expand fa-fw"></i>downScaleWhenHighResource</a></h5>
+                    <h5><a data-toggle="collapse" data-parent="#scaling-list-accordion" data-target="#panel-scaling-collapse-{{policy.id}}"><i class="fa fa-expand fa-fw"></i>{{policy.name}}</a></h5>
                 </div>
-                <div id="panel-scaling-collapse01" class="panel-collapse collapse">
-
-                    <p class="btn-row-over-panel"><a class="btn btn-danger" role="button"><i class="fa fa-times fa-fw"></i><span> delete</span></a></p>
-
+                <div id="panel-scaling-collapse-{{policy.id}}" class="panel-collapse collapse">
+                    <p class="btn-row-over-panel">
+                      <a class="btn btn-danger" role="button" id="delete-scaling-policy-btn-{{policy.id}}" data-target="#delete-scaling-policy-modal-{{policy.id}}" data-toggle="modal">
+                          <i class="fa fa-times fa-fw"></i><span> delete</span></a>
+                    </p>
                     <div class="panel-body">
-
-                        <form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
-
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label" for="scalingAdjustment01">scaling adjustment</label>
-                                <div class="col-sm-9">
-                                    <p id="scalingAdjustment01" class="form-control-static">2 node(s)</p>
-                                </div><!-- .col-sm-9 -->
-                            </div><!-- .form-group -->
-                            <div class="form-group">
-                                <label class="col-sm-3 control-label" for="alarm01">alarm</label>
-                                <div class="col-sm-9">
-                                    <p id="alarm01" class="form-control-static">freeGlobalResourcesRateLow</p>
-                                </div><!-- .col-sm-9 -->
-                            </div><!-- .form-group -->
-                        </form>
+                      <form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
+                        <div class="form-group">
+                          <label class="col-sm-3 control-label" for="scaling-adjustment-type-{{policy.id}}">adjustment type</label>
+                          <div class="col-sm-9">
+                            <p id="scaling-adjustment-type-{{policy.id}}" class="form-control-static">{{policy.adjustmentType}}</p>
+                          </div>
+                        </div>
+                        <div class="form-group">
+                          <label class="col-sm-3 control-label" for="scaling-adjustment-{{policy.id}}">scaling adjustment</label>
+                          <div class="col-sm-9">
+                            <p id="scaling-adjustment-{{policy.id}}" class="form-control-static">{{policy.scalingAdjustment}}</p>
+                          </div>
+                        </div>
+                        <div class="form-group">
+                          <label class="col-sm-3 control-label" for="scaling-policy-hostgroup-{{policy.id}}">host group</label>
+                          <div class="col-sm-9">
+                            <p id="scaling-policy-hostgroup-{{policy.id}}" class="form-control-static">{{policy.hostGroup}}</p>
+                          </div>
+                        </div>
+                        <div class="form-group">
+                          <label class="col-sm-3 control-label" for="alarm-{{policy.id}}">alarm</label>
+                          <div class="col-sm-9">
+                            <p id="alarm-{{policy.id}}" class="form-control-static" ng-repeat="alarm in alarms | filter:{id:policy.alarmId}">{{alarm.alarmName}} (ID:{{policy.alarmId}})</p>
+                          </div>
+                        </div>
+                      </form>
                     </div>
                 </div>
+                <div class="modal fade" id="delete-scaling-policy-modal-{{policy.id}}" tabindex="-1" role="dialog" aria-labelledby="modal01-title" aria-hidden="true">
+                  <div class="modal-dialog modal-sm">
+                    <div class="modal-content">
+                      <!-- .modal-header -->
+                      <div class="modal-body">
+                        <p>Delete policy <strong>{{policy.name}}</strong>?</p>
+                      </div>
+                      <div class="modal-footer">
+                        <div class="row">
+                          <div class="col-xs-6">
+                            <button type="button" class="btn btn-block btn-default" data-dismiss="modal">cancel</button>
+                          </div>
+                          <div class="col-xs-6">
+                            <button type="button" class="btn btn-block btn-danger" data-dismiss="modal" ng-click="deletePolicy(policy)"><i class="fa fa-times fa-fw"></i>delete</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
             </div><!-- .panel -->
         </div><!-- #scaling-list-accordion -->
 
     </div><!-- .panel-body -->
 </div><!-- .panel -->
+</div>
