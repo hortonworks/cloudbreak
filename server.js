@@ -54,7 +54,16 @@ var clientScopes = 'openid' +
     '+cloudbreak.credentials' +
     '+cloudbreak.blueprints' +
     '+cloudbreak.stacks' +
+    '+periscope.cluster' +
     '+cloudbreak.events+cloudbreak.usages.account+cloudbreak.usages.user';
+
+
+var periscopeAddress = process.env.ULU_PERISCOPE_ADDRESS;
+if (!periscopeAddress || (periscopeAddress.substring(0, 7) !== "http://" && periscopeAddress.substring(0, 8) !== "https://")){
+  console.log("ULU_PERISCOPE_ADDRESS must be specified and it must be a standard URL: 'http[s]://host[:port]/'");
+  environmentSet = false;
+}
+
 
 if (!clientSecret || !hostAddress || !clientId) {
   console.log("ULU_HOST_ADDRESS, ULU_OAUTH_CLIENT_ID and ULU_OAUTH_CLIENT_SECRET must be specified!");
@@ -215,6 +224,23 @@ app.get('*/credentials/certificate/*', function(req, res){
 });
 
 // wildcards should be proxied =================================================
+app.get('*/periscope/*', function(req,res){
+  proxyPeriscopeRequest(req, res, cloudbreakClient.get);
+});
+
+app.post('*/periscope/*', function(req,res){
+  proxyPeriscopeRequest(req, res, cloudbreakClient.post);
+});
+
+app.put('*/periscope/*', function(req,res){
+  proxyPeriscopeRequest(req, res, cloudbreakClient.put);
+});
+
+app.delete('*/periscope/*', function(req,res){
+  proxyPeriscopeRequest(req, res, cloudbreakClient.delete);
+});
+
+
 
 app.get('*/sultans/*', function(req,res){
     proxySultansRequest(req, res, cloudbreakClient.get);
@@ -247,7 +273,6 @@ app.put('*/sultans/*', function(req,res){
 app.put('*', function(req,res){
   proxyCloudbreakRequest(req, res, cloudbreakClient.put);
 });
-
 // proxy =======================================================================
 
 function proxyCloudbreakRequest(req, res, method){
@@ -269,6 +294,19 @@ function proxySultansRequest(req, res, method){
     method(sultansAddress + req_url, cbRequestArgs, function(data, response){
         res.status(response.statusCode).send(data);
     });
+}
+
+//Dummy implementation of handling http methods to periscope!!!
+function proxyPeriscopeRequest(req, res, method){
+  if (req.body){
+    cbRequestArgs.data = req.body;
+  }
+  cbRequestArgs.headers.Authorization = "Bearer " + req.session.token;
+  var req_url = req.url.replace("/periscope/", "");
+  console.log("Periscope request to: "+ periscopeAddress + req_url);
+  method(periscopeAddress + req_url, cbRequestArgs, function(data, response){
+    res.status(response.statusCode).send(data);
+  });
 }
 // socket ======================================================================
 
