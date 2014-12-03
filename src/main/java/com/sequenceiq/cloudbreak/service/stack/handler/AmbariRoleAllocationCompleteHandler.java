@@ -41,8 +41,6 @@ public class AmbariRoleAllocationCompleteHandler implements Consumer<Event<Ambar
         String ambariIp = provisionSuccess.getAmbariIp();
         LOGGER.info("Accepted {} event.", ReactorConfig.AMBARI_ROLE_ALLOCATION_COMPLETE_EVENT);
         Stack stack = stackRepository.findById(stackId);
-        MDCBuilder.buildMdcContext(stack);
-
         AmbariStartupPollerObject ambariStartupPollerObject = new AmbariStartupPollerObject(stack, ambariIp);
         ambariStartupPollerObjectPollingService.pollWithTimeout(ambariStartupListenerTask, ambariStartupPollerObject, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
     }
