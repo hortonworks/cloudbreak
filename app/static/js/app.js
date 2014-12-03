@@ -51,33 +51,31 @@ cloudbreakApp.directive('file', function(){
 });
 
 
-cloudbreakApp.config([ '$routeProvider', '$locationProvider', '$httpProvider', function($routeProvider, $locationProvider, $httpProvider) {
+cloudbreakApp.config([ '$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
     $routeProvider.when('/', {
         templateUrl: 'partials/dashboard.html',
         controller: 'uluwatuController'
     }) .otherwise({
         redirectTo : '/'
     });
-
-    var authInterceptor = ['$rootScope', '$q', '$window', function (scope, $q, $window) {
-        function success(response) {
-            return response;
-        }
-        function error(response) {
-            var status = response.status;
-            if (response.status === 401){
-              $window.location.href = scope.authorizeUrl;
-            }
-            return $q.reject(response);
-        }
-        return function (promise) {
-            return promise.then(success, error);
-        }
-    }];
-
-    $httpProvider.interceptors.push(authInterceptor);
-
-} ]);
+    }]).factory('authHttpResponseInterceptor',['$q', '$window', function ($q, $window) {
+         return {
+             response: function(response){
+                 if (response.status === 401){
+                    $window.location.href = '/logout';
+                 }
+                 return response || $q.when(response);
+             },
+             responseError: function(response) {
+                 if (response.status === 401){
+                     $window.location.href = '/logout';
+                 }
+                 return $q.reject(response);
+             }
+         }
+     }]).config(['$httpProvider',function($httpProvider) {
+         $httpProvider.interceptors.push('authHttpResponseInterceptor');
+     }]);
 
 cloudbreakApp.run(function ($rootScope, $http) {
     $http.get('messages.properties').then(function (messages) {
