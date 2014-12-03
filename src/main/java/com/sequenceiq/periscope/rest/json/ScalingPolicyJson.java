@@ -1,14 +1,20 @@
 package com.sequenceiq.periscope.rest.json;
 
 import com.sequenceiq.periscope.domain.AdjustmentType;
+import com.sun.istack.NotNull;
+
+import javax.validation.constraints.Pattern;
 
 public class ScalingPolicyJson implements Json {
 
     private Long id;
+    @Pattern(regexp = "([a-zA-Z][-a-zA-Z0-9]*)",
+            message = "The name can only contain alphanumeric characters and hyphens and has start with an alphanumeric character")
     private String name;
     private AdjustmentType adjustmentType;
     private int scalingAdjustment;
     private long alarmId;
+    @NotNull
     private String hostGroup;
 
     public Long getId() {

@@ -27,6 +27,8 @@ import com.sequenceiq.periscope.service.AlarmService;
 import com.sequenceiq.periscope.service.ClusterNotFoundException;
 import com.sequenceiq.periscope.utils.DateUtils;
 
+import javax.validation.Valid;
+
 @RestController
 @RequestMapping("/clusters/{clusterId}/alarms")
 public class AlarmController {
@@ -40,14 +42,14 @@ public class AlarmController {
 
     @RequestMapping(value = "/metric", method = RequestMethod.POST)
     public ResponseEntity<MetricAlarmsJson> createAlarms(@ModelAttribute("user") PeriscopeUser user,
-            @PathVariable long clusterId, @RequestBody MetricAlarmsJson json) throws ClusterNotFoundException {
+            @PathVariable long clusterId, @RequestBody @Valid MetricAlarmsJson json) throws ClusterNotFoundException {
         List<MetricAlarm> metricAlarms = metricAlarmConverter.convertAllFromJson(json.getAlarms());
         return createAlarmsResponse(alarmService.setMetricAlarms(user, clusterId, metricAlarms), HttpStatus.CREATED);
     }
 
     @RequestMapping(value = "/metric", method = RequestMethod.PUT)
     public ResponseEntity<MetricAlarmsJson> addAlarm(@ModelAttribute("user") PeriscopeUser user,
-            @PathVariable long clusterId, @RequestBody MetricAlarmJson json) throws ClusterNotFoundException {
+            @PathVariable long clusterId, @RequestBody @Valid MetricAlarmJson json) throws ClusterNotFoundException {
         MetricAlarm metricAlarm = metricAlarmConverter.convert(json);
         return createAlarmsResponse(alarmService.addMetricAlarm(user, clusterId, metricAlarm), HttpStatus.CREATED);
     }
@@ -66,7 +68,7 @@ public class AlarmController {
 
     @RequestMapping(value = "/time", method = RequestMethod.POST)
     public ResponseEntity<TimeAlarmsJson> createTimeAlarms(@ModelAttribute("user") PeriscopeUser user,
-            @PathVariable long clusterId, @RequestBody TimeAlarmsJson json) throws ClusterNotFoundException, ParseException {
+            @PathVariable long clusterId, @RequestBody @Valid TimeAlarmsJson json) throws ClusterNotFoundException, ParseException {
         List<TimeAlarm> alarms = timeAlarmConverter.convertAllFromJson(json.getAlarms());
         validateCronExpression(alarms);
         return createTimeAlarmsResponse(alarmService.setTimeAlarms(user, clusterId, alarms), HttpStatus.CREATED);
@@ -74,7 +76,7 @@ public class AlarmController {
 
     @RequestMapping(value = "/time", method = RequestMethod.PUT)
     public ResponseEntity<TimeAlarmsJson> addTimeAlarm(@ModelAttribute("user") PeriscopeUser user,
-            @PathVariable long clusterId, @RequestBody TimeAlarmJson json) throws ClusterNotFoundException, ParseException {
+            @PathVariable long clusterId, @RequestBody @Valid TimeAlarmJson json) throws ClusterNotFoundException, ParseException {
         TimeAlarm timeAlarm = timeAlarmConverter.convert(json);
         validateCronExpression(Arrays.asList(timeAlarm));
         return createTimeAlarmsResponse(alarmService.addTimeAlarm(user, clusterId, timeAlarm), HttpStatus.CREATED);

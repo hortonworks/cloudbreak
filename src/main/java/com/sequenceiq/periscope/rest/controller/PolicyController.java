@@ -20,6 +20,8 @@ import com.sequenceiq.periscope.service.ClusterNotFoundException;
 import com.sequenceiq.periscope.service.NoScalingGroupException;
 import com.sequenceiq.periscope.service.ScalingService;
 
+import javax.validation.Valid;
+
 @RestController
 @RequestMapping("/clusters/{clusterId}/policies")
 public class PolicyController {
@@ -33,14 +35,14 @@ public class PolicyController {
 
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<ScalingPoliciesJson> setScaling(@ModelAttribute("user") PeriscopeUser user, @PathVariable long clusterId,
-            @RequestBody ScalingPoliciesJson scalingPolicies) throws ClusterNotFoundException {
+            @RequestBody @Valid ScalingPoliciesJson scalingPolicies) throws ClusterNotFoundException {
         return createScalingPoliciesJsonResponse(scalingService.setScalingPolicies(user, clusterId,
                 policiesConverter.convert(scalingPolicies)), HttpStatus.CREATED);
     }
 
     @RequestMapping(method = RequestMethod.PUT)
     public ResponseEntity<ScalingPoliciesJson> addScaling(@ModelAttribute("user") PeriscopeUser user, @PathVariable long clusterId,
-            @RequestBody ScalingPolicyJson scalingPolicy) throws ClusterNotFoundException, NoScalingGroupException {
+            @RequestBody @Valid ScalingPolicyJson scalingPolicy) throws ClusterNotFoundException, NoScalingGroupException {
         return createScalingPoliciesJsonResponse(scalingService.addScalingPolicy(user, clusterId,
                 policyConverter.convert(scalingPolicy)), HttpStatus.CREATED);
     }

@@ -1,10 +1,13 @@
 package com.sequenceiq.periscope.rest.json;
 
+import javax.validation.constraints.Pattern;
 import java.util.List;
 
 public abstract class AbstractAlarmJson implements Json {
 
     private Long id;
+    @Pattern(regexp = "([a-zA-Z][-a-zA-Z0-9]*)",
+            message = "The name can only contain alphanumeric characters and hyphens and has start with an alphanumeric character")
     private String alarmName;
     private String description;
     private Long scalingPolicyId;
