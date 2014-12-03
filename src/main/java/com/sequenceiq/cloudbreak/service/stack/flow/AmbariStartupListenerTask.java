@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientService;
 import com.sequenceiq.cloudbreak.service.stack.event.StackCreationSuccess;
@@ -28,6 +29,7 @@ public class AmbariStartupListenerTask implements StatusCheckerTask<AmbariStartu
 
     @Override
     public boolean checkStatus(AmbariStartupPollerObject aSPO) {
+        MDCBuilder.buildMdcContext(aSPO.getStack());
         boolean ambariRunning = false;
         AmbariClient ambariClient = clientService.createDefault(aSPO.getAmbariIp());
         LOGGER.info("Starting polling of Ambari server's status [Ambari server IP: '{}'].", aSPO.getAmbariIp());
@@ -45,7 +47,7 @@ public class AmbariStartupListenerTask implements StatusCheckerTask<AmbariStartu
 
     @Override
     public void handleTimeout(AmbariStartupPollerObject ambariStartupPollerObject) {
-        LOGGER.error("Unhandled exception occured while trying to reach initializing Ambari server.");
+        LOGGER.error("Timeout occured while trying to reach initializing Ambari server.");
         LOGGER.info("Publishing {} event.", ReactorConfig.STACK_CREATE_FAILED_EVENT);
         StackOperationFailure stackCreationFailure = new StackOperationFailure(ambariStartupPollerObject.getStack().getId(),
                 "Unhandled exception occured while trying to reach initializing Ambari server.");
