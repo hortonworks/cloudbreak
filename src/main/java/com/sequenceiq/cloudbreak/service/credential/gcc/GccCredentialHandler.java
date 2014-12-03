@@ -13,9 +13,9 @@ import com.sequenceiq.cloudbreak.service.credential.RsaPublicKeyValidator;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccStackUtil;
 
 @Component
-public class GccCredentialInitializer {
+public class GccCredentialHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GccCredentialInitializer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GccCredentialHandler.class);
     @Autowired
     private RsaPublicKeyValidator rsaPublicKeyValidator;
     @Autowired

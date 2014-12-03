@@ -15,17 +15,17 @@ import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 
-public class AzureCredentialInitializerTest {
+public class AzureCredentialHandlerTest {
 
     @InjectMocks
-    private AzureCredentialInitializer azureCredentialInitializer;
+    private AzureCredentialHandler azureCredentialHandler;
 
     @Mock
     private AzureStackUtil azureStackUtil;
 
     @Before
     public void setUp() {
-        azureCredentialInitializer = new AzureCredentialInitializer();
+        azureCredentialHandler = new AzureCredentialHandler();
         MockitoAnnotations.initMocks(this);
     }
 
@@ -52,7 +52,7 @@ public class AzureCredentialInitializerTest {
 
         given(azureStackUtil.generateAzureServiceFiles(azureCredential)).willReturn(azureCredential);
         given(azureStackUtil.generateAzureSshCerFile(azureCredential)).willReturn(azureCredential);
-        azureCredentialInitializer.init(azureCredential);
+        azureCredentialHandler.init(azureCredential);
     }
 
 
@@ -63,7 +63,7 @@ public class AzureCredentialInitializerTest {
                         + "-----END CERTIFICATE-----");
         given(azureStackUtil.generateAzureServiceFiles(azureCredential)).willReturn(azureCredential);
         given(azureStackUtil.generateAzureSshCerFile(azureCredential)).willReturn(azureCredential);
-        azureCredentialInitializer.init(azureCredential);
+        azureCredentialHandler.init(azureCredential);
     }
 
 
@@ -75,7 +75,7 @@ public class AzureCredentialInitializerTest {
                         + "-----END CERTIFICATE-----");
         given(azureStackUtil.generateAzureServiceFiles(azureCredential)).willReturn(azureCredential);
         given(azureStackUtil.generateAzureSshCerFile(azureCredential)).willReturn(azureCredential);
-        azureCredentialInitializer.init(azureCredential);
+        azureCredentialHandler.init(azureCredential);
     }
 
     @Test(expected = BadRequestException.class)
@@ -99,7 +99,7 @@ public class AzureCredentialInitializerTest {
                         + "-----END CERTIFICATE-----");
         given(azureStackUtil.generateAzureServiceFiles(azureCredential)).willReturn(azureCredential);
         given(azureStackUtil.generateAzureSshCerFile(azureCredential)).willReturn(azureCredential);
-        azureCredentialInitializer.init(azureCredential);
+        azureCredentialHandler.init(azureCredential);
     }
 
     private AzureCredential azureCredential(String publicKey) {

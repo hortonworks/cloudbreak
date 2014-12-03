@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.controller.json.CredentialJson;
 import com.sequenceiq.cloudbreak.controller.validation.RequiredAzureCredentialParam;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
-import com.sequenceiq.cloudbreak.service.credential.azure.AzureCredentialInitializer;
+import com.sequenceiq.cloudbreak.service.credential.azure.AzureCredentialHandler;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AzureCredentialConverterTest {
@@ -29,7 +29,7 @@ public class AzureCredentialConverterTest {
     private static final String DUMMY_DESCRIPTION = "dummyDescription";
 
     @Mock
-    private AzureCredentialInitializer azureCredentialInitializer;
+    private AzureCredentialHandler azureCredentialHandler;
 
     @InjectMocks
     private AzureCredentialConverter underTest;
@@ -60,7 +60,7 @@ public class AzureCredentialConverterTest {
     @Test
     public void testConvertAzureCredentialJsonToEntity() {
         // GIVEN
-        given(azureCredentialInitializer.init(any(AzureCredential.class))).willReturn(createAzureCredential());
+        given(azureCredentialHandler.init(any(AzureCredential.class))).willReturn(createAzureCredential());
         // WHEN
         AzureCredential result = underTest.convert(credentialJson);
         // THEN

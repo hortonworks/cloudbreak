@@ -10,13 +10,13 @@ import com.sequenceiq.cloudbreak.controller.json.CredentialJson;
 import com.sequenceiq.cloudbreak.controller.validation.GccCredentialParam;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
-import com.sequenceiq.cloudbreak.service.credential.gcc.GccCredentialInitializer;
+import com.sequenceiq.cloudbreak.service.credential.gcc.GccCredentialHandler;
 
 @Component
 public class GccCredentialConverter extends AbstractConverter<CredentialJson, GccCredential> {
 
     @Autowired
-    private GccCredentialInitializer gccCredentialInitializer;
+    private GccCredentialHandler gccCredentialHandler;
 
     @Override
     public CredentialJson convert(GccCredential entity) {
@@ -42,7 +42,7 @@ public class GccCredentialConverter extends AbstractConverter<CredentialJson, Gc
         gccCredential.setCloudPlatform(CloudPlatform.GCC);
         gccCredential.setDescription(json.getDescription());
         gccCredential.setPublicKey(json.getPublicKey());
-        gccCredentialInitializer.init(gccCredential);
+        gccCredentialHandler.init(gccCredential);
         return gccCredential;
     }
 }

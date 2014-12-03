@@ -17,9 +17,9 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 
 @Component
-public class AzureCredentialInitializer {
+public class AzureCredentialHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AzureCredentialInitializer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AzureCredentialHandler.class);
 
     @Autowired
     private AzureStackUtil azureStackUtil;

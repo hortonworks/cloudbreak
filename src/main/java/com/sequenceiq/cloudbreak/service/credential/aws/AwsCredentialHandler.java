@@ -17,11 +17,11 @@ import com.sequenceiq.cloudbreak.service.credential.RsaPublicKeyValidator;
 import com.sequenceiq.cloudbreak.service.stack.connector.aws.AwsStackUtil;
 
 @Component
-public class AwsCredentialInitializer {
+public class AwsCredentialHandler {
 
     public static final String CLOUDBREAK_KEY_NAME = "cloudbreak-key";
     private static final int SUFFIX_RND = 999999;
-    private static final Logger LOGGER = LoggerFactory.getLogger(AwsCredentialInitializer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AwsCredentialHandler.class);
 
     @Autowired
     private RsaPublicKeyValidator rsaPublicKeyValidator;

@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.SnsTopic;
 import com.sequenceiq.cloudbreak.domain.TemporaryAwsCredentials;
 import com.sequenceiq.cloudbreak.service.credential.RsaPublicKeyValidator;
-import com.sequenceiq.cloudbreak.service.credential.aws.AwsCredentialInitializer;
+import com.sequenceiq.cloudbreak.service.credential.aws.AwsCredentialHandler;
 
 public class AwsCredentialConverterTest {
 
@@ -41,7 +41,7 @@ public class AwsCredentialConverterTest {
     private RsaPublicKeyValidator rsaPublicKeyValidator;
 
     @Mock
-    private AwsCredentialInitializer awsCredentialInitializer;
+    private AwsCredentialHandler awsCredentialHandler;
 
     private AwsCredential awsCredential;
 
@@ -87,7 +87,7 @@ public class AwsCredentialConverterTest {
     @Test
     public void testConvertAwsCredentialJsonToEntity() {
         // GIVEN
-        given(awsCredentialInitializer.init(any(AwsCredential.class))).willReturn(awsCredentialWithKeyName);
+        given(awsCredentialHandler.init(any(AwsCredential.class))).willReturn(awsCredentialWithKeyName);
         doNothing().when(rsaPublicKeyValidator).validate(any(AwsCredential.class));
         // WHEN
         AwsCredential result = underTest.convert(credentialJson);
