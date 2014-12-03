@@ -94,3 +94,65 @@ sl-user-data() {
     local username=${1:?"usage: <email>"}
     curl -X GET -H "Authorization: Bearer $SL_TOKEN" "$SL_UAA_ADDRESS/Users?attributes=id,userName,active,meta,emails,familyName,givenName,groups&filter=userName%20eq%20%27$username%27" | jq .resources[0]
 }
+
+sl-create-group() {
+    : ${SL_TOKEN:?"Please set the SL_TOKEN with sl-token function!"}
+    local groupname=${1:?"usage: <groupname>"}
+    curl -sX POST -H "Content-Type: application/json" -H "Authorization: Bearer $SL_TOKEN" -d '{"schemas":["urn:scim:schemas:core:1.0"],"displayName":"'$groupname'","members":[]}' "$SL_UAA_ADDRESS/Groups" | jq .
+}
+
+sl-get-group-by-name() {
+    : ${SL_TOKEN:?"Please set the SL_TOKEN with sl-token function!"}
+    local groupname=${1:?"usage: <groupname>"}
+    local groupid=$(sl-get-groupid-by-name $groupname)
+    curl -X GET -H "Authorization: Bearer $SL_TOKEN" "$SL_UAA_ADDRESS/Groups/$groupid" | jq .
+}
+
+sl-get-groups() {
+    : ${SL_TOKEN:?"Please set the SL_TOKEN with sl-token function!"}
+}
+
+sl-get-groupid-by-name() {
+    : ${SL_TOKEN:?"Please set the SL_TOKEN with sl-token function!"}
+    local groupname=${1:?"usage: <groupname>"}
+    curl -X GET -H "Authorization: Bearer $SL_TOKEN" "$SL_UAA_ADDRESS/Groups?attributes=id&filter=displayname%20eq%20%27$groupname%27" | jq .resources[0].id | sed -e 's/^"//'  -e 's/"$//'
+}
+
+sl-delete-group() {
+    : ${SL_TOKEN:?"Please set the SL_TOKEN with sl-token function!"}
+    local groupname=${1:?"usage: <groupname>"}
+    local groupid=$(sl-get-groupid-by-name $groupname)
+    curl -X DELETE -H "Authorization: Bearer $SL_TOKEN" "$SL_UAA_ADDRESS/Groups/$groupid" | jq .
+}
+
+sl-update-group-for-all-user() {
+    : ${SL_TOKEN:?"Please set the SL_TOKEN with sl-token function!"}
+    local groupname=${1:?"usage: <groupname>"}
+    local userids=$(sl-users | jq .resources | jq .[].id | sed -e 's/"//g')
+
+    local members='['
+    for userid in ${userids[*]}
+    do
+     members+='{"type":"USER","value":"'$userid'"},'
+    done
+
+    local last_char="${members: -1}"
+    if [ "$last_char" == "," ]; then
+        members="${members%?}"
+    fi
+    members+=']'
+
+    local group_details=$(sl-get-group-by-name $groupname)
+    local meta=$(echo -n "$group_details" | jq .meta)
+    local group_id=$(echo -n "$group_details" | jq .id | sed -e 's/"//g')
+    local if_match=$(echo -n "$group_details" | jq .meta.version)
+    local json=$(echo -n '{"schemas":["urn:scim:schemas:core:1.0"], "id": "'$group_id'", "displayName":"'$groupname'", "meta":'$meta',"members": '$members'}' | jq .)
+    curl -X PUT -H "Content-Type: application/json" -H "Authorization: Bearer $SL_TOKEN" -H "If-Match: $if_match" -d "$json" "$SL_UAA_ADDRESS/Groups/$group_id" | jq .
+
+}
+
+sl-check-token() {
+    local client=$SL_CLIENT_ID:$SL_CLIENT_SECRET
+    local client_base64=$(echo -n $client|base64)
+    curl -X POST -H "Authorization: Basic $client_base64" "$SL_UAA_ADDRESS/check_token?token=$SL_USER_TOKEN" | jq .
+}
