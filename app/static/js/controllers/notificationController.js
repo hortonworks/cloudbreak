@@ -2,8 +2,8 @@
 
 var log = log4javascript.getLogger("notificationController-logger");
 
-angular.module('uluwatuControllers').controller('notificationController', ['$scope', '$rootScope', '$filter',
-function ($scope, $rootScope, $filter) {
+angular.module('uluwatuControllers').controller('notificationController', ['$scope', '$rootScope', '$filter', 'PeriscopeCluster', 'Cluster',
+function ($scope, $rootScope, $filter, PeriscopeCluster, Cluster) {
     var successEvents = [ "REQUESTED",
                           "CREATE_IN_PROGRESS",
                           "UPDATE_IN_PROGRESS",
@@ -73,6 +73,7 @@ function ($scope, $rootScope, $filter) {
       $scope.modifyStatusMessage(msg, actCluster.name);
       $scope.modifyStatusClass("has-success");
       addNotificationToGlobalEvents(notification);
+      createPeriscopeCluster(actCluster, msg);
     }
 
     function handleUptimeNotification(notification) {
@@ -91,6 +92,27 @@ function ($scope, $rootScope, $filter) {
     function addNotificationToGlobalEvents(item) {
       item.customTimeStamp =  new Date(item.eventTimestamp).toLocaleDateString() + " " + new Date(item.eventTimestamp).toLocaleTimeString();
       $rootScope.events.push(item);
+    }
+
+    function createPeriscopeCluster(uluCluster, notificationMessage) {
+      console.log('Get cluster with id: ' + uluCluster.id)
+      if (notificationMessage.indexOf("Cluster installation successfully") > -1) {
+        Cluster.get({id: uluCluster.id}, function(cluster){
+          console.log(cluster)
+          if (cluster.status == 'AVAILABLE') {
+            var ambariJson = {
+              'host': uluCluster.ambariServerIp,
+              'port': '8080',
+              'user': uluCluster.userName,
+              'pass': uluCluster.password
+            };
+            PeriscopeCluster.save(ambariJson, function(periCluster){
+              console.log(periCluster);
+              $rootScope.periscopeClusters.push(periCluster);
+            });
+          }
+        }, function(error){});
+      }
     }
   }
 ]);
