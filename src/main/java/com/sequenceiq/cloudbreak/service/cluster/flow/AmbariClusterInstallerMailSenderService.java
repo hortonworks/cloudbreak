@@ -8,6 +8,7 @@ import javax.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -29,8 +30,8 @@ public class AmbariClusterInstallerMailSenderService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariClusterInstallerMailSenderService.class);
 
-    // @Value("${cb.smtp.sender.from}")
-    private String msgFrom = "no-reply@sequenceiq.com";
+    @Value("${cb.smtp.sender.from: no-reply@sequenceiq.com}")
+    private String msgFrom;
 
     @Autowired
     private MailSender mailSender;
