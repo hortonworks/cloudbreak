@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 import com.sequenceiq.cloudbreak.service.user.UserFilterField;
-import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 import freemarker.template.Configuration;
 
@@ -97,7 +96,6 @@ public class AmbariClusterInstallerMailSenderService {
             model.put("status", status);
             model.put("server", server);
             model.put("name", name);
-            model.put("style", FileReaderUtils.readFileFromClasspath("css/Cloudbreak.min.css"));
             text = FreeMarkerTemplateUtils.processTemplateIntoString(freemarkerConfiguration.getTemplate(template, "UTF-8"), model);
         } catch (Exception e) {
             LOGGER.error("Cluster installer email assembling failed. Exception: {}", e);
