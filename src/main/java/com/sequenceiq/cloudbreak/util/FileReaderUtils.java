@@ -33,11 +33,6 @@ public class FileReaderUtils {
         return Base64.encodeAsString(br.getBytes());
     }
 
-    public static final String readFileFromPathSimple(String fileName) throws IOException {
-        String br = IOUtils.toString(new FileInputStream(fileName));
-        return br;
-    }
-
     public static final String readBinaryFileFromPath(String fileName) throws IOException {
         Path path = Paths.get(fileName);
         return Base64.encodeAsString(Files.readAllBytes(path));
