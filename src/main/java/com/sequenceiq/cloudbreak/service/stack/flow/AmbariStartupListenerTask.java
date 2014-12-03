@@ -8,7 +8,6 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
 
-@Component
 public class AmbariStartupListenerTask implements StatusCheckerTask<AmbariStartupPollerObject> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariStartupListenerTask.class);

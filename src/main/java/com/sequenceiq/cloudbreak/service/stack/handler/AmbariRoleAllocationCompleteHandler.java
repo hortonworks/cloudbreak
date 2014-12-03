@@ -37,8 +37,6 @@ public class AmbariRoleAllocationCompleteHandler implements Consumer<Event<Ambar
     @Autowired
     private StackRepository stackRepository;
     @Autowired
-    private AmbariStartupListenerTask ambariStartupListenerTask;
-    @Autowired
     private PollingService<AmbariStartupPollerObject> ambariStartupPollerObjectPollingService;
 
     @Override
