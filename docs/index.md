@@ -16,7 +16,7 @@ Cloudbreak [API documentation](http://docs.cloudbreak.apiary.io/).
 ##Overview
 
 Cloudbreak is a RESTful Hadoop as a Service API. Once it is deployed in your favourite servlet container exposes a REST API allowing to span up Hadoop clusters of arbitrary sizes on your selected cloud provider. Provisioning Hadoop has never been easier.
-Cloudbreak is built on the foundation of cloud providers API (Amazon AWS, Microsoft Azure, Google Cloud Compute...), Apache Ambari, Docker containers, Serf and dnsmasq.
+Cloudbreak is built on the foundation of cloud providers API (Amazon AWS, Microsoft Azure, Google Cloud Platform...), Apache Ambari, Docker containers, Serf and dnsmasq.
 
 ##Benefits
 
@@ -314,7 +314,7 @@ Make sure that at API level (**APIs and auth** menu) you have enabled:
 * Google Cloud Storage
 * Google Cloud Storage JSON API
 
-When creating GCC credentials in Cloudbreak you will have to provide the email address of the Service Account and the project ID (from Google Developers Console - Projects) where the service account is created. You'll also have to upload the generated P12 file and provide an OpenSSH formatted public key that will be used as an SSH key.
+When creating GCP credentials in Cloudbreak you will have to provide the email address of the Service Account and the project ID (from Google Developers Console - Projects) where the service account is created. You'll also have to upload the generated P12 file and provide an OpenSSH formatted public key that will be used as an SSH key.
 
 <!--accounts.md-->
 
@@ -383,17 +383,17 @@ Using manage credentials you can link your cloud account with the Cloudbreak acc
 `SSH public key:` the SSH public key in OpenSSH format that's private keypair can be used to log into the launched instances later (The key generation process is described in the Configuring the Microsoft Azure account section)
 
 
-**Google Cloud**
+**Google Cloud Platform**
 
 `Name:` name of your credential
 
 `Description:` short description of your linked credential
 
-`Project Id:` your GCC Project id - see Accounts
+`Project Id:` your GCP Project id - see Accounts
 
-`Service Account Id:` your GCC service account mail address - see Accounts
+`Service Account Id:` your GCP service account mail address - see Accounts
 
-`Service Account private key:` your GCC service account generated private key - see Accounts
+`Service Account private key:` your GCP service account generated private key - see Accounts
 
 `SSH public key:` the SSH public key in OpenSSH format that's private keypair can be used to log into the launched instances later
 
@@ -443,7 +443,7 @@ Using manage templates you can create infrastructure templates.
 `Volume size (GB):` the size of the attached disks (in GB)
 
 
-**Google Cloud**
+**Google Cloud Platform**
 
 `Name:` name of your template
 
@@ -751,7 +751,7 @@ Apache Ambari allows you to create your own [custom Hadoop stack](https://cwiki.
 
 ####Cloud providers
 
-While we have just released the first public beta version of Cloudbreak, we have already started working on other cloud providers - namely Google Cloud Compute and Digital Ocean.
+While we have just released the first public beta version of Cloudbreak, we have already started working on other cloud providers - namely Google Cloud Platform and Digital Ocean.
 We have received many requests from people to integrate Cloudbreak with 3d party hypervisors and cloud providers - as IBM's SoftLayer. In case you'd like to have your favourite cloud provider listed don't hesitate to contact us or use our SDK and process to add yours. You can fill the following [questionnaire](https://docs.google.com/forms/d/129RVh6VfjRsuuHOcS3VPbFYTdM2SEjANDsGCR5Pul0I/viewform) and request your favourite cloud provider.
 
 Enjoy Cloudbreak - the Hadoop as a Service API which brings you a Hadoop ecosystem in minutes. You are literaly one click or REST call away from a fully functional, distributed Hadoop cluster.
