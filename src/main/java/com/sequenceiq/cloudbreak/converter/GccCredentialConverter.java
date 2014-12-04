@@ -3,21 +3,15 @@ package com.sequenceiq.cloudbreak.converter;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.json.CredentialJson;
 import com.sequenceiq.cloudbreak.controller.validation.GccCredentialParam;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
-import com.sequenceiq.cloudbreak.service.credential.gcc.GccCredentialHandler;
 
 @Component
 public class GccCredentialConverter extends AbstractConverter<CredentialJson, GccCredential> {
-
-    @Autowired
-    private GccCredentialHandler gccCredentialHandler;
-
     @Override
     public CredentialJson convert(GccCredential entity) {
         CredentialJson credentialJson = new CredentialJson();
@@ -42,7 +36,6 @@ public class GccCredentialConverter extends AbstractConverter<CredentialJson, Gc
         gccCredential.setCloudPlatform(CloudPlatform.GCC);
         gccCredential.setDescription(json.getDescription());
         gccCredential.setPublicKey(json.getPublicKey());
-        gccCredentialHandler.init(gccCredential);
         return gccCredential;
     }
 }

@@ -12,12 +12,14 @@ import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.ImportKeyPairRequest;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
+import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.service.credential.CredentialHandler;
 import com.sequenceiq.cloudbreak.service.credential.RsaPublicKeyValidator;
 import com.sequenceiq.cloudbreak.service.stack.connector.aws.AwsStackUtil;
 
 @Component
-public class AwsCredentialHandler {
+public class AwsCredentialHandler implements CredentialHandler<AwsCredential> {
 
     public static final String CLOUDBREAK_KEY_NAME = "cloudbreak-key";
     private static final int SUFFIX_RND = 999999;
@@ -32,6 +34,12 @@ public class AwsCredentialHandler {
     @Autowired
     private AwsStackUtil awsStackUtil;
 
+    @Override
+    public CloudPlatform getCloudPlatform() {
+        return CloudPlatform.AWS;
+    }
+
+    @Override
     public AwsCredential init(AwsCredential awsCredential) {
         rsaPublicKeyValidator.validate(awsCredential);
         validateIamRole(awsCredential);

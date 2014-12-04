@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.SnsTopic;
 import com.sequenceiq.cloudbreak.domain.TemporaryAwsCredentials;
 import com.sequenceiq.cloudbreak.service.credential.RsaPublicKeyValidator;
-import com.sequenceiq.cloudbreak.service.credential.aws.AwsCredentialHandler;
 
 public class AwsCredentialConverterTest {
 
@@ -40,12 +39,7 @@ public class AwsCredentialConverterTest {
     @Mock
     private RsaPublicKeyValidator rsaPublicKeyValidator;
 
-    @Mock
-    private AwsCredentialHandler awsCredentialHandler;
-
     private AwsCredential awsCredential;
-
-    private AwsCredential awsCredentialWithKeyName;
 
     private CredentialJson credentialJson;
 
@@ -54,8 +48,6 @@ public class AwsCredentialConverterTest {
         underTest = new AwsCredentialConverter();
         MockitoAnnotations.initMocks(this);
         awsCredential = createAwsCredential();
-        awsCredentialWithKeyName = createAwsCredential();
-        awsCredentialWithKeyName.setKeyPairName("mykeypair");
         credentialJson = createCredentialJson();
     }
 
@@ -87,7 +79,6 @@ public class AwsCredentialConverterTest {
     @Test
     public void testConvertAwsCredentialJsonToEntity() {
         // GIVEN
-        given(awsCredentialHandler.init(any(AwsCredential.class))).willReturn(awsCredentialWithKeyName);
         doNothing().when(rsaPublicKeyValidator).validate(any(AwsCredential.class));
         // WHEN
         AwsCredential result = underTest.convert(credentialJson);
@@ -95,8 +86,6 @@ public class AwsCredentialConverterTest {
         assertEquals(result.getRoleArn(),
                 credentialJson.getParameters().get(AWSCredentialParam.ROLE_ARN.getName()));
         assertEquals(result.getName(), credentialJson.getName());
-        assertEquals(result.getKeyPairName(), "mykeypair");
-
     }
 
     private AwsCredential createAwsCredential() {

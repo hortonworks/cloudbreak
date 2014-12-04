@@ -24,6 +24,8 @@ import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.service.credential.CredentialHandler;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
@@ -54,6 +56,9 @@ public class AppConfig {
     @Autowired
     private List<MetadataSetup> metadataSetups;
 
+    @Autowired
+    private List<CredentialHandler<? extends Credential>> credentialHandlers;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -82,6 +87,15 @@ public class AppConfig {
         Map<CloudPlatform, MetadataSetup> map = new HashMap<>();
         for (MetadataSetup metadataSetup : metadataSetups) {
             map.put(metadataSetup.getCloudPlatform(), metadataSetup);
+        }
+        return map;
+    }
+
+    @Bean
+    public Map<CloudPlatform, CredentialHandler> credentialHandlers() {
+        Map<CloudPlatform, CredentialHandler> map = new HashMap<>();
+        for (CredentialHandler credentialHandler : credentialHandlers) {
+            map.put(credentialHandler.getCloudPlatform(), credentialHandler);
         }
         return map;
     }

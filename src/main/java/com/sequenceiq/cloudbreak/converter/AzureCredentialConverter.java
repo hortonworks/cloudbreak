@@ -4,21 +4,15 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.json.CredentialJson;
 import com.sequenceiq.cloudbreak.controller.validation.RequiredAzureCredentialParam;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
-import com.sequenceiq.cloudbreak.service.credential.azure.AzureCredentialHandler;
 
 @Component
 public class AzureCredentialConverter extends AbstractConverter<CredentialJson, AzureCredential> {
-
-    @Autowired
-    private AzureCredentialHandler azureCredentialHandler;
-
     @Override
     public CredentialJson convert(AzureCredential entity) {
         CredentialJson credentialJson = new CredentialJson();
@@ -44,7 +38,6 @@ public class AzureCredentialConverter extends AbstractConverter<CredentialJson, 
         azureCredential.setPostFix(String.valueOf(new Date().getTime()));
         azureCredential.setCloudPlatform(CloudPlatform.AZURE);
         azureCredential.setPublicKey(json.getPublicKey());
-        azureCredentialHandler.init(azureCredential);
         return azureCredential;
     }
 }
