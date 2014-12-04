@@ -97,7 +97,7 @@ public class SimpleCredentialService implements CredentialService {
         if (credential == null) {
             throw new NotFoundException(String.format("Credential '%s' not found.", id));
         }
-        credentialRepository.delete(credential);
+        delete(credential);
     }
 
     @Override
@@ -106,7 +106,11 @@ public class SimpleCredentialService implements CredentialService {
         if (credential == null) {
             throw new NotFoundException(String.format("Credential '%s' not found.", name));
         }
-        credentialRepository.delete(credential);
+        delete(credential);
     }
 
+    private void delete(Credential credential) {
+        credentialRepository.delete(credential);
+        credentialHandlers.get(credential.getCloudPlatform()).delete(credential);
+    }
 }

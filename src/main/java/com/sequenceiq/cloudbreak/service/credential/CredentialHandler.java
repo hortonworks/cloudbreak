@@ -5,7 +5,9 @@ import com.sequenceiq.cloudbreak.domain.Credential;
 
 public interface CredentialHandler<T extends Credential> {
 
+    CloudPlatform getCloudPlatform();
+
     T init(T credential);
 
-    CloudPlatform getCloudPlatform();
+    boolean delete(T credential);
 }

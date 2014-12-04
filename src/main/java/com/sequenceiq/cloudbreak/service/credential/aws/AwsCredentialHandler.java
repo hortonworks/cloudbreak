@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.ec2.AmazonEC2Client;
+import com.amazonaws.services.ec2.model.DeleteKeyPairRequest;
 import com.amazonaws.services.ec2.model.ImportKeyPairRequest;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
@@ -44,6 +45,28 @@ public class AwsCredentialHandler implements CredentialHandler<AwsCredential> {
         rsaPublicKeyValidator.validate(awsCredential);
         validateIamRole(awsCredential);
         return importKeyPairs(awsCredential);
+    }
+
+    @Override
+    public boolean delete(AwsCredential awsCredential) {
+        boolean result = false;
+        MDCBuilder.buildMdcContext(awsCredential);
+        String keyPairName = awsCredential.getKeyPairName();
+        for (Regions regions : Regions.values()) {
+            if (!Regions.CN_NORTH_1.equals(regions) && !Regions.GovCloud.equals(regions)) {
+                try {
+                    AmazonEC2Client client = awsStackUtil.createEC2Client(regions, awsCredential);
+                    DeleteKeyPairRequest deleteKeyPairRequest = new DeleteKeyPairRequest(keyPairName);
+                    client.deleteKeyPair(deleteKeyPairRequest);
+                } catch (Exception e) {
+                    String errorMessage = String.format("Failed to delete public key [roleArn:'%s', region: '%s'], detailed message: %s",
+                            awsCredential.getRoleArn(), regions, e.getMessage());
+                    LOGGER.error(errorMessage, e);
+                    result = false;
+                }
+            }
+        }
+        return result;
     }
 
     private AwsCredential importKeyPairs(AwsCredential awsCredential) {

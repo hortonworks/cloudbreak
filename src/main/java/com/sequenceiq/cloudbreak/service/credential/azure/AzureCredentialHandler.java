@@ -36,6 +36,11 @@ public class AzureCredentialHandler implements CredentialHandler<AzureCredential
         return azureCredential;
     }
 
+    @Override
+    public boolean delete(AzureCredential credential) {
+        return true;
+    }
+
     private void validateCertificateFile(AzureCredential azureCredential) {
         MDCBuilder.buildMdcContext(azureCredential);
         try {
