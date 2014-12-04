@@ -24,20 +24,26 @@
                   </ul>
 
                   <div ng-show="metricBasedAlarm">
-                    <form class="form-horizontal" role="form">
-                        <div class="form-group">
+                    <form class="form-horizontal" role="form" name="metricBasedAlarmForm">
+                        <div class="form-group" ng-class="{'has-error': metricBasedAlarmForm.alarmName.$dirty && metricBasedAlarmForm.alarmName.$invalid }">
                             <label class="col-sm-3 control-label" for="alarmName">alarm name</label>
                             <div class="col-sm-9">
-                                <input type="text" class="form-control" id="alarmName" placeholder="max. 20 char" ng-model="alarm.alarmName">
+                                <input type="text" class="form-control" id="alarmName" name="alarmName" placeholder="min 5 max 100 char" ng-minlength="5" ng-maxlength="100" ng-model="alarm.alarmName" ng-pattern="/^[a-zA-Z][-a-zA-Z0-9]*$/" required>
+                                <div class="help-block" ng-show="metricBasedAlarmForm.alarmName.$dirty && metricBasedAlarmForm.alarmName.$invalid">
+                                    <i class="fa fa-warning"></i> {{error_msg.alarm_name_invalid}}
+                                </div>
                             </div><!-- .col-sm-9 -->
                         </div><!-- .form-group -->
-                        <div class="form-group">
+                        <div class="form-group" ng-class="{'has-error': metricBasedAlarmForm.alarmDesc.$dirty && metricBasedAlarmForm.alarmDesc.$invalid }">
                             <label class="col-sm-3 control-label" for="alarmDesc">description</label>
                             <div class="col-sm-9">
-                                <textarea class="form-control" id="alarmDesc" placeholder="" rows="2" ng-model="alarm.description"></textarea>
+                                <textarea class="form-control" id="alarmDesc" name="alarmDesc" placeholder="" rows="2" ng-model="alarm.description" ng-maxlength="1000"></textarea>
+                                <div class="help-block" ng-show="metricBasedAlarmForm.alarmDesc.$dirty && metricBasedAlarmForm.alarmDesc.$invalid">
+                                     <i class="fa fa-warning"></i> {{error_msg.alarm_description_invalid}}
+                                </div>
                             </div><!-- .col-sm-9 -->
                         </div><!-- .form-group -->
-                        <div class="form-group">
+                        <div class="form-group" ng-class="{ 'has-error': metricBasedAlarmForm.threshold.$dirty && metricBasedAlarmForm.threshold.$invalid }">
                             <label class="col-sm-3 control-label" for="metrics">metrics</label>
                             <div class="col-sm-5">
                                 <select class="form-control" id="metrics" ng-model="alarm.metric">
@@ -58,64 +64,88 @@
                                 </select>
                             </div><!-- .col-sm-2 -->
                             <div class="col-sm-2">
-                                <input type="number" class="form-control" id="threshold" placeholder="threshold" ng-model="alarm.threshold">
+                                <input type="number" class="form-control" id="threshold" name="threshold" placeholder="threshold" ng-model="alarm.threshold" required>
+                                <div class="help-block" ng-show="metricBasedAlarmForm.threshold.$dirty && metricBasedAlarmForm.threshold.$invalid">
+                                    <i class="fa fa-warning"></i> {{error_msg.alarm_threshold_invalid}}
+                                </div>
                             </div><!-- .col-sm-2 -->
                         </div><!-- .form-group -->
-                        <div class="form-group">
-                          <label class="col-sm-3 control-label" for="alarm-period">period</label>
-                          <div class="col-sm-9">
-                            <input type="number" class="form-control" id="alarm-period" placeholder="" ng-model="alarm.period">
+                        <div class="form-group" ng-class="{ 'has-error': metricBasedAlarmForm.alarm_period.$dirty && metricBasedAlarmForm.alarm_period.$invalid }">
+                            <label class="col-sm-3 control-label" for="alarm-period">period</label>
+                            <div class="col-sm-9">
+                               <input type="number" class="form-control" id="alarm-period" name="alarm_period" placeholder="" ng-model="alarm.period" required>
+                               <div class="help-block" ng-show="metricBasedAlarmForm.alarm_period.$dirty && metricBasedAlarmForm.alarm_period.$invalid">
+                                  <i class="fa fa-warning"></i> {{error_msg.alarm_period_invalid}}
+                               </div>
                             </div><!-- .col-sm-9 -->
-                          </div><!-- .form-group -->
-                        <div class="form-group">
+                        </div><!-- .form-group -->
+                        <div class="form-group" ng-class="{ 'has-error': metricBasedAlarmForm.email.$dirty && metricBasedAlarmForm.email.$invalid }">
                             <label class="col-sm-3 control-label" for="email">notification email (optional)</label>
                             <div class="col-sm-9">
-                                <input type="text" class="form-control" id="email" placeholder="" ng-model="alarm.email">
+                                <input type="email" class="form-control" id="email" name="email" placeholder="" ng-model="alarm.email">
+                                <div class="help-block" ng-show="metricBasedAlarmForm.email.$dirty && metricBasedAlarmForm.email.$invalid">
+                                     <i class="fa fa-warning"></i> {{error_msg.email_invalid}}
+                                </div>
                             </div><!-- .col-sm-9 -->
                         </div><!-- .form-group -->
                         <div class="row btn-row">
                             <div class="col-sm-9 col-sm-offset-3">
-                                <a id="createAlarm" class="btn btn-success btn-block" role="button" ng-click="createAlarm()"><i class="fa fa-plus fa-fw"></i> create alarm</a>
+                                <a id="createAlarm" class="btn btn-success btn-block" role="button" ng-disabled="metricBasedAlarmForm.$invalid" ng-click="createAlarm()"><i class="fa fa-plus fa-fw"></i> create alarm</a>
                             </div>
                         </div>
                     </form>
                   </div>
 
                   <div ng-show="timeBasedAlarm">
-                    <form class="form-horizontal" role="form">
-                      <div class="form-group">
-                        <label class="col-sm-3 control-label" for="alarmName">alarm name</label>
-                        <div class="col-sm-9">
-                          <input type="text" class="form-control" id="alarmName" placeholder="max. 20 char" ng-model="alarm.alarmName">
+                    <form class="form-horizontal" role="form" name="timeBasedAlarmForm">
+                        <div class="form-group" ng-class="{'has-error': timeBasedAlarmForm.alarmName.$dirty && timeBasedAlarmForm.alarmName.$invalid }">
+                          <label class="col-sm-3 control-label" for="alarmName">alarm name</label>
+                          <div class="col-sm-9">
+                             <input type="text" class="form-control" id="alarmName" name="alarmName" placeholder="min 5 max 100 char" ng-minlength="5" ng-maxlength="100" ng-model="alarm.alarmName" ng-pattern="/^[a-zA-Z][-a-zA-Z0-9]*$/" required>
+                             <div class="help-block" ng-show="timeBasedAlarmForm.alarmName.$dirty && timeBasedAlarmForm.alarmName.$invalid">
+                                  <i class="fa fa-warning"></i> {{error_msg.alarm_name_invalid}}
+                             </div>
                           </div><!-- .col-sm-9 -->
                         </div><!-- .form-group -->
-                        <div class="form-group">
-                          <label class="col-sm-3 control-label" for="alarmDesc">description</label>
-                          <div class="col-sm-9">
-                            <textarea class="form-control" id="alarmDesc" placeholder="" rows="2" ng-model="alarm.description"></textarea>
-                          </div><!-- .col-sm-9 -->
+                        <div class="form-group" ng-class="{'has-error': timeBasedAlarmForm.alarmDesc.$dirty && timeBasedAlarmForm.alarmDesc.$invalid }">
+                            <label class="col-sm-3 control-label" for="alarmDesc">description</label>
+                            <div class="col-sm-9">
+                                <textarea class="form-control" id="alarmDesc" name="alarmDesc" placeholder="" rows="2" ng-model="alarm.description" ng-maxlength="1000"></textarea>
+                                <div class="help-block" ng-show="timeBasedAlarmForm.alarmDesc.$dirty && timeBasedAlarmForm.alarmDesc.$invalid">
+                                     <i class="fa fa-warning"></i> {{error_msg.alarm_description_invalid}}
+                                </div>
+                            </div><!-- .col-sm-9 -->
                         </div><!-- .form-group -->
-                        <div class="form-group">
-                          <label class="col-sm-3 control-label" for="timezone">time zone</label>
-                          <div class="col-sm-9">
-                            <input type="text" class="form-control" id="timezone" placeholder="" ng-model="alarm.timeZone">
-                          </div><!-- .col-sm-5 -->
+                        <div class="form-group" ng-class="{'has-error': timeBasedAlarmForm.timeZone.$dirty && timeBasedAlarmForm.timeZone.$invalid }">
+                            <label class="col-sm-3 control-label" for="alarmDesc">time zone</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="timeZone" name="timeZone" placeholder="" rows="2" ng-model="alarm.timeZone" required></input>
+                                <div class="help-block" ng-show="timeBasedAlarmForm.timeZone.$dirty && timeBasedAlarmForm.timeZone.$invalid">
+                                    <i class="fa fa-warning"></i> {{error_msg.alarm_timezone_invalid}}
+                                </div>
+                            </div><!-- .col-sm-9 -->
                         </div><!-- .form-group -->
-                        <div class="form-group">
+                        <div class="form-group" ng-class="{'has-error': timeBasedAlarmForm.cronexpression.$dirty && timeBasedAlarmForm.cronexpression.$invalid }">
                           <label class="col-sm-3 control-label" for="cronexpression">cron expression</label>
                           <div class="col-sm-9">
-                            <input type="text" class="form-control" id="cronexpression" placeholder="" ng-model="alarm.cron">
+                            <input type="text" class="form-control" id="cronexpression" name="cronexpression" placeholder="" ng-model="alarm.cron" required>
+                            <div class="help-block" ng-show="timeBasedAlarmForm.cronexpression.$dirty && timeBasedAlarmForm.cronexpression.$invalid">
+                                <i class="fa fa-warning"></i> {{error_msg.alarm_cron_invalid}}
+                            </div>
                           </div><!-- .col-sm-5 -->
                         </div><!-- .form-group -->
-                        <div class="form-group">
+                        <div class="form-group" ng-class="{'has-error': imeBasedAlarmForm.email.$dirty && imeBasedAlarmForm.email.$invalid }">
                           <label class="col-sm-3 control-label" for="email">notification email (optional)</label>
                           <div class="col-sm-9">
-                            <input type="text" class="form-control" id="email" placeholder="" ng-model="alarm.email">
+                            <input type="text" class="form-control" id="email" name="email" placeholder="" ng-model="alarm.email">
+                            <div class="help-block" ng-show="timeBasedAlarmForm.email.$dirty && timeBasedAlarmForm.email.$invalid">
+                                <i class="fa fa-warning"></i> {{error_msg.email_invalid}}
+                            </div>
                           </div><!-- .col-sm-9 -->
                         </div><!-- .form-group -->
                         <div class="row btn-row">
                           <div class="col-sm-9 col-sm-offset-3">
-                            <a id="createAlarm" class="btn btn-success btn-block" role="button" ng-click="createAlarm()"><i class="fa fa-plus fa-fw"></i> create alarm</a>
+                            <a id="createAlarm" class="btn btn-success btn-block" role="button" ng-disabled="timeBasedAlarmForm.$invalid" ng-click="createAlarm()"><i class="fa fa-plus fa-fw"></i> create alarm</a>
                           </div>
                         </div>
                     </form>
@@ -225,28 +255,37 @@
         <h5><i class="fa fa-expand fa-fw"></i> SCALING ACTIONS</h5>
     </div><!-- .panel-heading -->
     <div class="panel-body">
-        <form class="form-horizontal" role="form">
-          <div class="form-group">
+        <form class="form-horizontal" role="form" name="scalingActionBaseForm">
+          <div class="form-group" ng-class="{ 'has-error': scalingActionBaseForm.cooldownTime.$dirty && scalingActionBaseForm.cooldownTime.$invalid }">
             <label class="col-sm-3 col-xs-12 control-label" for="cooldownTime">cooldown time</label>
             <div class="col-sm-2 col-xs-4">
-              <input type="number" class="form-control text-right" id="cooldownTime" ng-model="scalingAction.cooldown">
+              <input type="number" class="form-control text-right" id="cooldownTime" name="cooldownTime" ng-model="scalingAction.cooldown" required>
+              <div class="help-block" ng-show="scalingActionBaseForm.cooldownTime.$dirty && scalingActionBaseForm.cooldownTime.$invalid">
+                  <i class="fa fa-warning"></i> {{error_msg.scaling_policy_base_numbers}}
+              </div>
             </div><!-- .col-sm-2 -->
             <div class="col-sm-1 col-xs-4">
               <p class="form-control-static">minute(s)</p>
             </div><!-- .col-sm-1 -->
           </div><!-- .form-group -->
 
-          <div class="form-group">
+          <div class="form-group" ng-class="{ 'has-error': scalingActionBaseForm.clustersizeMin.$dirty && scalingActionBaseForm.clustersizeMin.$invalid }">
             <label class="col-sm-3 col-xs-12 control-label" for="clustersizeMin">cluster size min.</label>
             <div class="col-sm-2 col-xs-4">
-              <input type="number" class="form-control text-right" id="clustersizeMin" ng-model="scalingAction.minSize">
+              <input type="number" class="form-control text-right" id="clustersizeMin" name="clustersizeMin" ng-model="scalingAction.minSize" required>
+              <div class="help-block" ng-show="scalingActionBaseForm.clustersizeMin.$dirty && scalingActionBaseForm.clustersizeMin.$invalid">
+                 <i class="fa fa-warning"></i> {{error_msg.scaling_policy_base_numbers}}
+              </div>
             </div><!-- .col-sm-2 -->
           </div><!-- .form-group -->
 
-          <div class="form-group">
+          <div class="form-group" ng-class="{ 'has-error': scalingActionBaseForm.clustersizeMax.$dirty && scalingActionBaseForm.clustersizeMax.$invalid }">
             <label class="col-sm-3 col-xs-12 control-label" for="clustersizeMax">cluster size max.</label>
             <div class="col-sm-2 col-xs-4">
-              <input type="number" class="form-control text-right" id="clustersizeMax" ng-model="scalingAction.maxSize">
+              <input type="number" class="form-control text-right" id="clustersizeMax" name="clustersizeMax" ng-model="scalingAction.maxSize" required>
+              <div class="help-block" ng-show="scalingActionBaseForm.clustersizeMax.$dirty && scalingActionBaseForm.clustersizeMax.$invalid">
+                  <i class="fa fa-warning"></i> {{error_msg.scaling_policy_base_numbers}}
+              </div>
             </div><!-- .col-sm-2 -->
           </div><!-- .form-group -->
         </form>
@@ -261,19 +300,25 @@
             <div id="panel-create-scaling-collapse" class="panel-under-btn-collapse collapse">
                 <div class="panel-body">
 
-                    <form class="form-horizontal" role="form">
+                    <form class="form-horizontal" role="form" name="policyForm">
 
-                      <div class="form-group">
+                      <div class="form-group" ng-class="{ 'has-error': policyForm.policyName.$dirty && policyForm.policyName.$invalid }">
                           <label class="col-sm-3 control-label" for="policyName">policy name</label>
                           <div class="col-sm-9">
-                              <input type="text" class="form-control" id="policyName" placeholder="max. 20 char" ng-model="scalingAction.policy.name">
+                              <input type="text" class="form-control" id="policyName" name="policyName" placeholder="min 5 max 100 char" ng-minlength="5" ng-maxlength="100" ng-model="scalingAction.policy.name" required>
+                              <div class="help-block" ng-show="policyForm.policyName.$dirty && policyForm.policyName.$invalid">
+                                   <i class="fa fa-warning"></i> {{error_msg.scaling_policy_name_invalid}}
+                              </div>
                           </div><!-- .col-sm-9 -->
                       </div><!-- .form-group -->
 
-                      <div class="form-group">
+                      <div class="form-group" ng-class="{ 'has-error': policyForm.scalingAdjustment.$dirty && policyForm.scalingAdjustment.$invalid }">
                           <label class="col-sm-3 col-xs-12 control-label" for="scalingAdjustment">scaling adjustment</label>
                           <div class="col-sm-4 col-xs-4">
-                              <input type="number" class="form-control text-right" id="scalingAdjustment" placeholder="12" ng-model="scalingAction.policy.scalingAdjustment">
+                              <input type="number" class="form-control text-right" id="scalingAdjustment" name="scalingAdjustment" placeholder="12" ng-model="scalingAction.policy.scalingAdjustment" required>
+                              <div class="help-block" ng-show="policyForm.scalingAdjustment.$dirty && policyForm.scalingAdjustment.$invalid">
+                                  <i class="fa fa-warning"></i> {{error_msg.scaling_policy_adjustment_required}}
+                              </div>
                           </div><!-- .col-sm-3 -->
                           <div class="col-sm-5 col-xs-8">
                               <select class="form-control" id="scalingAdjustmentType" ng-model="scalingAction.policy.adjustmentType">
@@ -284,25 +329,31 @@
                           </div><!-- .col-sm-9 -->
                       </div><!-- .form-group -->
 
-                      <div class="form-group">
+                      <div class="form-group" ng-class="{ 'has-error': policyForm.policyHostGroup.$dirty && policyForm.policyHostGroup.$invalid }">
                         <label class="col-sm-3 control-label" for="policyHostGroup">host group</label>
                         <div class="col-sm-9">
-                          <input type="text" class="form-control" id="policyHostGroup" placeholder="max. 20 char" ng-model="scalingAction.policy.hostGroup">
+                          <input type="text" class="form-control" id="policyHostGroup" name="policyHostGroup" ng-model="scalingAction.policy.hostGroup" required>
+                          <div class="help-block" ng-show="policyForm.policyHostGroup.$dirty && policyForm.policyHostGroup.$invalid">
+                              <i class="fa fa-warning"></i> {{error_msg.scaling_policy_host_group_invalid}}
+                          </div>
                         </div><!-- .col-sm-9 -->
                       </div><!-- .form-group -->
 
-                      <div class="form-group">
+                      <div class="form-group" ng-class="{ 'has-error': policyForm.alarmForScaling.$dirty && policyForm.alarmForScaling.$invalid }">
                           <label class="col-sm-3 control-label" for="alarmForScaling">alarm</label>
                           <div class="col-sm-9">
-                              <select class="form-control" id="alarmForScaling" ng-model="scalingAction.policy.alarmId" placeholder="select one">
+                              <select class="form-control" id="alarmForScaling" name="alarmForScaling" ng-model="scalingAction.policy.alarmId" placeholder="select one" required>
                                   <option ng-repeat="alarm in alarms" value="{{alarm.id}}" id="alarm-option-{{alarm.id}}">{{alarm.alarmName}} (ID:{{alarm.id}})</option>
                               </select>
+                              <div class="help-block" ng-show="policyForm.alarmForScaling.$dirty && policyForm.alarmForScaling.$invalid">
+                                  <i class="fa fa-warning"></i> {{error_msg.scaling_policy_alarm_empty}}
+                              </div>
                           </div><!-- .col-sm-9 -->
                       </div><!-- .form-group -->
 
                       <div class="row btn-row">
                           <div class="col-sm-9 col-sm-offset-3">
-                              <a id="create-scaling-policy-btn" class="btn btn-success btn-block" role="button" ng-click="createPolicy()"><i class="fa fa-plus fa-fw"></i> create policy</a>
+                              <a id="create-scaling-policy-btn" ng-disabled="policyForm.$invalid || scalingActionBaseForm.$invalid" class="btn btn-success btn-block" role="button" ng-click="createPolicy()"><i class="fa fa-plus fa-fw"></i> create policy</a>
                           </div>
                       </div>
 
