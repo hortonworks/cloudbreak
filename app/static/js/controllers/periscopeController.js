@@ -82,15 +82,16 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
         $scope.deleteAlarm = function(alarm) {
           if ($scope.actPeriscopeCluster != undefined) {
             if (alarm.metric != undefined) {
-              MetricAlarm.delete({id: $scope.actPeriscopeCluster.id, alarmId: alarm.id}, function(success) { deleteSuccessHandler(success, alarm) });
+              MetricAlarm.delete({id: $scope.actPeriscopeCluster.id, alarmId: alarm.id}, function(success) { deleteSuccessHandler(success, alarm, $scope.actPeriscopeCluster.id) });
             } else {
-              TimeAlarm.delete({id: $scope.actPeriscopeCluster.id, alarmId: alarm.id}, function(success) { deleteSuccessHandler(success, alarm) });
+              TimeAlarm.delete({id: $scope.actPeriscopeCluster.id, alarmId: alarm.id}, function(success) { deleteSuccessHandler(success, alarm, $scope.actPeriscopeCluster.id) });
             }
           }
         }
 
-        function deleteSuccessHandler(success, alarm) {
+        function deleteSuccessHandler(success, alarm, periClusterId) {
           $scope.alarms = $filter('filter')($scope.alarms, function(value, index) { return value.id != alarm.id; }, true);
+          getScalingPolicies(periClusterId);
         }
 
         function getAlarms(id){
@@ -135,6 +136,7 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
             ScalingPolicy.save({id: $scope.actPeriscopeCluster.id}, $scope.scalingAction, function(success) {
               $scope.policies = success;
               $scope.scalingActionBaseForm.$setPristine();
+              $scope.policyForm.$setPristine();
               resetScalingActionForm();
               angular.element(document.querySelector('#create-policy-collapse-btn')).click();
             });
