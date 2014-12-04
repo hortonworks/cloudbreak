@@ -65,6 +65,8 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
               $scope.alarms.push(el);
             }
           });
+          $scope.metricBasedAlarmForm.$setPristine();
+          $scope.timeBasedAlarmForm.$setPristine();
           resetAlarmForms();
           angular.element(document.querySelector('#panel-create-periscope-alarm-btn')).click();
         }
@@ -132,6 +134,7 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
             delete $scope.scalingAction.policy;
             ScalingPolicy.save({id: $scope.actPeriscopeCluster.id}, $scope.scalingAction, function(success) {
               $scope.policies = success;
+              $scope.scalingActionBaseForm.$setPristine();
               resetScalingActionForm();
               angular.element(document.querySelector('#create-policy-collapse-btn')).click();
             });
