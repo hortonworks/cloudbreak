@@ -1575,8 +1575,8 @@ In order to avoid reacting for sudden spikes in the system and apply policies on
 Also a `threshold` can be configured, which specifies the variance applied by the operator for the selected `metric`.
 
 
-##Add, remove and show [/clusters/{clusterId}/alarms/metric]
-###Set the alarms [POST]
+##Add [/clusters/{clusterId}/alarms/metric]
+###Create a new metric alarm [POST]
 
 + Parameters
     + clusterId (required String `clusterID`) ... The id of the cluster.
@@ -1584,135 +1584,93 @@ Also a `threshold` can be configured, which specifies the variance applied by th
 + Request (application/json)
 
         {
-          "alarms": [
+          "alarmName": "freeGlobalResourcesRateLow",
+          "description": "Low free global resource rate",
+          "metric": "GLOBAL_RESOURCES",
+          "threshold": 0.5,
+          "comparisonOperator": "LESS_THAN",
+          "period": 1,
+          "notifications": [
             {
-              "alarmName": "pendingContainerHigh",
-              "description": "Number of pending containers is high",
-              "metric": "PENDING_CONTAINERS",
-              "threshold": 10,
-              "comparisonOperator": "GREATER_THAN",
-              "period": 10
-            },
-            {
-              "alarmName": "freeGlobalResourcesRateLow",
-              "description": "Low free global resource rate",
-              "metric": "GLOBAL_RESOURCES",
-              "threshold": 1,
-              "comparisonOperator": "EQUALS",
-              "period": 10,
-              "notifications": [
-                {
-                  "target": [
-                    "some1@gmail.com",
-                    "other1@gmail.com"
-                  ],
-                  "notificationType": "EMAIL"
-                }
-              ]
+              "target": [
+                "krisztian.horvath@sequenceiq.com"
+              ],
+              "notificationType": "EMAIL"
             }
           ]
         }
 
 + Response 201 (application/json)
 
-        {
-          "alarms": [
-            {
-              "notifications": [],
-              "id": 102,
-              "alarmName": "pendingContainerHigh",
-              "description": "Number of pending containers is high",
-              "metric": "PENDING_CONTAINERS",
-              "threshold": 10,
-              "comparisonOperator": "GREATER_THAN",
-              "period": 1,
-              "scalingPolicyId": null
-            },
-            {
-              "notifications": [
-                {
-                  "notificationType": "EMAIL",
-                  "target": [
-                    "some1@gmail.com",
-                    "other1@gmail.com"
-                  ]
-                }
-              ],
-              "id": 103,
-              "alarmName": "freeGlobalResourcesRateLow",
-              "description": "Low free global resource rate",
-              "metric": "GLOBAL_RESOURCES",
-              "threshold": 1,
-              "comparisonOperator": "EQUALS",
-              "period": 1,
-              "scalingPolicyId": null
-            }
-          ]
-        }
+        [
+          {
+            "id": 150,
+            "alarmName": "freeGlobalResourcesRateLow",
+            "description": "Low free global resource rate",
+            "scalingPolicyId": null,
+            "notifications": [
+              {
+                "target": [
+                  "krisztian.horvath@sequenceiq.com"
+                ],
+                "notificationType": "EMAIL"
+              }
+            ],
+            "metric": "GLOBAL_RESOURCES",
+            "comparisonOperator": "LESS_THAN",
+            "threshold": 0.5,
+            "period": 1
+          }
+        ]
 
-###Add new alarm [PUT]
+##Modify [/clusters/{clusterId}/alarms/metric/{alarmId}]
+###Modify an alarm [PUT]
 
 + Parameters
     + clusterId (required String `clusterID`) ... The id of the cluster.
+    + alarmId (required String `alarmId`) ... The id of the alarm.
 
 + Request (application/json)
 
         {
-          "alarmName": "unhealthyNodesHigh",
-          "description": "Number of unhealthy nodes is high",
-          "metric": "UNHEALTHY_NODES",
-          "threshold": 5,
-          "comparisonOperator": "GREATER_OR_EQUAL_THAN",
-          "period": 5
-        }
-
-+ Response 201 (application/json)
-
-        {
-          "alarms": [
+          "alarmName": "freeGlobalResourcesRateLow",
+          "description": "Low free global resource rate",
+          "metric": "GLOBAL_RESOURCES",
+          "threshold": 0.3,
+          "comparisonOperator": "EQUALS",
+          "period": 2,
+          "notifications": [
             {
-              "notifications": [],
-              "id": 100,
-              "alarmName": "pendingContainerHigh",
-              "description": "Number of pending containers is high",
-              "metric": "PENDING_CONTAINERS",
-              "threshold": 10,
-              "comparisonOperator": "GREATER_THAN",
-              "period": 1,
-              "scalingPolicyId": null
-            },
-            {
-              "notifications": [
-                {
-                  "notificationType": "EMAIL",
-                  "target": [
-                    "some1@gmail.com"
-                  ]
-                }
+              "target": [
+                "tamas.bihari@sequenceiq.com"
               ],
-              "id": 101,
-              "alarmName": "freeGlobalResourcesRateLow",
-              "description": "Low free global resource rate",
-              "metric": "GLOBAL_RESOURCES",
-              "threshold": 1,
-              "comparisonOperator": "EQUALS",
-              "period": 1,
-              "scalingPolicyId": null
-            },
-            {
-              "notifications": [],
-              "id": 102,
-              "alarmName": "unhealthyNodesHigh",
-              "description": "Number of unhealthy nodes is high",
-              "metric": "UNHEALTHY_NODES",
-              "threshold": 5,
-              "comparisonOperator": "GREATER_OR_EQUAL_THAN",
-              "period": 5,
-              "scalingPolicyId": null
+              "notificationType": "EMAIL"
             }
           ]
         }
 
++ Response 200 (application/json)
+
+        {
+          "id": 150,
+          "alarmName": "freeGlobalResourcesRateLow",
+          "description": "Low free global resource rate",
+          "scalingPolicyId": null,
+          "notifications": [
+            {
+              "target": [
+                "tamas.bihari@sequenceiq.com"
+              ],
+              "notificationType": "EMAIL"
+            }
+          ],
+          "metric": "GLOBAL_RESOURCES",
+          "comparisonOperator": "EQUALS",
+          "threshold": 0.3,
+          "period": 2
+        }
+
+##Retrieve [/clusters/{clusterId}/alarms/metric]
 ###Retrieve configured alarms [GET]
 
 + Parameters
@@ -1726,32 +1684,44 @@ Also a `threshold` can be configured, which specifies the variance applied by th
 
 + Response 200 (application/json)
 
-        {
-          "alarms": [
-            {
-              "notifications": [],
-              "scalingPolicyId": null,
-              "period": 10,
-              "comparisonOperator": "GREATER_THAN",
-              "threshold": 10,
-              "metric": "PENDING_CONTAINERS",
-              "description": "Number of pending containers is high",
-              "alarmName": "pendingContainerHigh",
-              "id": 50
-            },
-            {
-              "notifications": [],
-              "scalingPolicyId": null,
-              "period": 10,
-              "comparisonOperator": "EQUALS",
-              "threshold": 1,
-              "metric": "GLOBAL_RESOURCES",
-              "description": "Low free global resource rate",
-              "alarmName": "freeGlobalResourcesRateLow",
-              "id": 51
-            }
-          ]
-        }
+        [
+          {
+            "id": 150,
+            "alarmName": "freeGlobalResourcesRateLow",
+            "description": "Low free global resource rate",
+            "scalingPolicyId": null,
+            "notifications": [
+              {
+                "target": [
+                  "tamas.bihari@sequenceiq.com"
+                ],
+                "notificationType": "EMAIL"
+              }
+            ],
+            "metric": "GLOBAL_RESOURCES",
+            "comparisonOperator": "EQUALS",
+            "threshold": 0.3,
+            "period": 2
+          },
+          {
+            "id": 151,
+            "alarmName": "freeGlobalResourcesRateLow",
+            "description": "Low free global resource rate",
+            "scalingPolicyId": null,
+            "notifications": [
+              {
+                "target": [
+                  "krisztian.horvath@sequenceiq.com"
+                ],
+                "notificationType": "EMAIL"
+              }
+            ],
+            "metric": "GLOBAL_RESOURCES",
+            "comparisonOperator": "LESS_THAN",
+            "threshold": 0.5,
+            "period": 1
+          }
+        ]
 
 ##Delete [/clusters/{clusterId}/alarms/metric/{alarmId}]
 ###Delete an alarm [DELETE]
@@ -1786,80 +1756,65 @@ Also a `threshold` can be configured, which specifies the variance applied by th
 
 ##Time based alarms
 
-##Add, remove and show [/clusters/{clusterId}/alarms/time]
-###Set the alarms [POST]
+##Add [/clusters/{clusterId}/alarms/time]
+###Add a new time alarm [POST]
 
 + Parameters
     + clusterId (required String `clusterID`) ... The id of the cluster.
 
 + Request (application/json)
 
-        {
-          "alarms": [
-            {
-              "alarmName": "cron_worktime",
-              "description": "Number of nodes during worktime",
-              "timeZone": "Europe/Budapest",
-              "cron": "0 00 09 ? * MON-FRI"
-            }
-          ]
-        }
+    {
+      "alarmName": "cron-worktime",
+      "description": "Number of nodes during worktime",
+      "timeZone": "Europe/Budapest",
+      "cron": "0 24 15 ? * MON-FRI"
+    }
 
 + Response 201 (application/json)
 
+    [
       {
-        "alarms": [
-          {
-            "cron": "0 00 09 ? * MON-FRI",
-            "timeZone": "Europe/Budapest",
-            "notifications": [],
-            "scalingPolicyId": null,
-            "description": "Number of nodes during worktime",
-            "alarmName": "cron_worktime",
-            "id": 100
-          }
-        ]
-      }
-
-###Add an alarm [PUT]
-
-+ Parameters
-    + clusterId (required String `clusterID`) ... The id of the cluster.
-
-+ Request (application/json)
-
-      {
-        "alarmName": "cron_worktime",
+        "id": 152,
+        "alarmName": "cron-worktime",
         "description": "Number of nodes during worktime",
+        "scalingPolicyId": null,
+        "notifications": [],
         "timeZone": "Europe/Budapest",
-        "cron": "0 00 09 ? * MON-FRI"
+        "cron": "0 24 15 ? * MON-FRI"
       }
+    ]
 
-+ Response 201 (application/json)
+
+##Modify [/clusters/{clusterId}/alarms/time/{alarmId}]
+###Modify a time alarm [PUT]
+
++ Parameters
+    + clusterId (required String `clusterID`) ... The id of the cluster.
+    + alarmId (required String `alarmId`) ... The id of the alarm.
+
++ Request (application/json)
+
+    {
+      "alarmName": "cron-worktime-modified",
+      "description": "Number of nodes during worktime",
+      "timeZone": "Europe/Budapest",
+      "cron": "0 39 16 ? * MON-FRI"
+    }
+
++ Response 200 (application/json)
 
       {
-        "alarms": [
-          {
-            "cron": "0 00 09 ? * MON-FRI",
-            "timeZone": "Europe/Budapest",
-            "notifications": [],
-            "scalingPolicyId": null,
-            "description": "Number of nodes during worktime",
-            "alarmName": "cron_worktime",
-            "id": 100
-          },
-          {
-            "cron": "0 00 09 ? * MON-FRI",
-            "timeZone": "Europe/Budapest",
-            "notifications": [],
-            "scalingPolicyId": null,
-            "description": "Number of nodes during worktime",
-            "alarmName": "cron_worktime",
-            "id": 101
-          }
-        ]
+        "id": 152,
+        "alarmName": "cron-worktime-modified",
+        "description": "Number of nodes during worktime",
+        "scalingPolicyId": null,
+        "notifications": [],
+        "timeZone": "Europe/Budapest",
+        "cron": "0 39 16 ? * MON-FRI"
       }
 
+##Retrieve [/clusters/{clusterId}/alarms/time]
 ###Retrieve configured alarms [GET]
 
 + Parameters
@@ -1871,30 +1826,28 @@ Also a `threshold` can be configured, which specifies the variance applied by th
 
         }
 
-+ Response 201 (application/json)
++ Response 200 (application/json)
 
-      {
-        "alarms": [
-          {
-            "cron": "0 00 09 ? * MON-FRI",
-            "timeZone": "Europe/Budapest",
-            "notifications": [],
-            "scalingPolicyId": null,
-            "description": "Number of nodes during worktime",
-            "alarmName": "cron_worktime",
-            "id": 100
-          },
-          {
-            "cron": "0 00 09 ? * MON-FRI",
-            "timeZone": "Europe/Budapest",
-            "notifications": [],
-            "scalingPolicyId": null,
-            "description": "Number of nodes during worktime",
-            "alarmName": "cron_worktime",
-            "id": 101
-          }
-        ]
-      }
+      [
+        {
+          "id": 152,
+          "alarmName": "cron-worktime-modified",
+          "description": "Number of nodes during worktime",
+          "scalingPolicyId": null,
+          "notifications": [],
+          "timeZone": "Europe/Budapest",
+          "cron": "0 39 16 ? * MON-FRI"
+        },
+        {
+          "id": 153,
+          "alarmName": "cron-worktime",
+          "description": "Number of nodes during worktime",
+          "scalingPolicyId": null,
+          "notifications": [],
+          "timeZone": "Europe/Budapest",
+          "cron": "0 24 15 ? * MON-FRI"
+        }
+      ]
 
 ##Delete [/clusters/{clusterId}/alarms/time/{alarmId}]
 ###Delete an alarm [DELETE]
@@ -1933,109 +1886,61 @@ By default a fully configured and running [Cloudbreak](https://cloudbreak.sequen
 An SLA scaling policy can contain multiple alarms. As an alarm is triggered a `scalingAdjustment` is applied, however to keep the cluster size within boundaries a `minSize` and `maxSize` is attached to the cluster - thus a scaling policy can never over or undersize a cluster. Also in order to avoid stressing the cluster we have introduced a `cooldown` period (minutes) - though an alarm is raised and there is an associated scaling policy, the system will not apply the policy within the configured timeframe. In an SLA scaling policy the triggered rules are applied in order.
 Hosts can be added or removed from specific `hostgroups` - Ambari host groups are a set of machines with the same Hadoop “components” installed.
 
-##Add, remove and show [/clusters/{clusterId}/policies]
-###Set the scaling policies. [POST]
+##Add [/clusters/{clusterId}/policies]
+###Add a scaling policy. [POST]
 
 + Parameters
     + clusterId (required String `clusterID`) ... The id of the cluster.
 
 + Request (application/json)
 
-        {
-          "minSize": 2,
-          "maxSize": 10,
-          "cooldown": 35,
-          "scalingPolicies": [
-            {
-              "name": "downScaleWhenHighResource",
-              "adjustmentType": "NODE_COUNT",
-              "scalingAdjustment": -2,
-              "hostGroup": "slave_1",
-              "alarmId": "51"
-            },
-            {
-              "name": "upScaleWhenHighPendingContainers",
-              "adjustmentType": "EXACT",
-              "scalingAdjustment": 40,
-              "hostGroup": "slave_1",
-              "alarmId": "50"
-            }
-          ]
-        }
+      {
+        "name": "upScale",
+        "adjustmentType": "NODE_COUNT",
+        "scalingAdjustment": 2,
+        "hostGroup": "slave_1",
+        "alarmId": "151"
+      }
 
 + Response 201 (application/json)
 
+      [
         {
-          "cooldown": 35,
-          "scalingPolicies": [
-            {
-              "alarmId": 50,
-              "scalingAdjustment": 40,
-              "hostGroup": "slave_1",
-              "adjustmentType": "EXACT",
-              "name": "upScaleWhenHighPendingContainers",
-              "id": 101
-            },
-            {
-              "alarmId": 51,
-              "scalingAdjustment": -2,
-              "hostGroup": "slave_1",
-              "adjustmentType": "NODE_COUNT",
-              "name": "downScaleWhenHighResource",
-              "id": 100
-            }
-          ],
-          "maxSize": 10,
-          "minSize": 2
-        }
-
-###Add a scaling policy. [PUT]
-
-+ Parameters
-    + clusterId (required String `clusterID`) ... The id of the cluster.
-
-+ Request (application/json)
-
-        {
-          "name": "upScaleWhenHighUnhealthyNodes",
+          "id": 250,
+          "name": "upScale",
           "adjustmentType": "NODE_COUNT",
-          "scalingAdjustment": 5,
-          "hostGroup": "slave_1",
-          "alarmId": "102"
+          "scalingAdjustment": 2,
+          "alarmId": 152,
+          "hostGroup": "slave_1"
         }
+      ]
 
-+ Response 201 (application/json)
+##Modify [/clusters/{clusterId}/policies/{policyId}]
+###Modify a scaling policy. [PUT]
+
++ Parameters
+    + clusterId (required String `clusterID`) ... The id of the cluster.
+    + clusterId (required String `policyId`) ... The id of the policy.
+
++ Request (application/json)
+
+      {
+        "name": "upScaleModified",
+        "adjustmentType": "EXACT",
+        "scalingAdjustment": 2,
+        "hostGroup": "slave_1",
+        "alarmId": "151"
+      }
+
++ Response 200 (application/json)
 
         {
-          "cooldown": 1,
-          "scalingPolicies": [
-            {
-              "hostGroup": "slave_1",
-              "alarmId": 100,
-              "scalingAdjustment": 40,
-              "adjustmentType": "PERCENTAGE",
-              "name": "upScaleWhenHighPendingContainers",
-              "id": 200
-            },
-            {
-              "hostGroup": "slave_1",
-              "alarmId": 101,
-              "scalingAdjustment": -2,
-              "adjustmentType": "NODE_COUNT",
-              "name": "downScaleWhenHighResource",
-              "id": 201
-            },
-            {
-              "hostGroup": "slave_1",
-              "alarmId": 102,
-              "scalingAdjustment": 5,
-              "adjustmentType": "NODE_COUNT",
-              "name": "upScaleWhenHighUnhealthyNodes",
-              "id": 202
-            }
-          ],
-          "maxSize": 10,
-          "minSize": 2
+          "id": 250,
+          "name": "upScaleModified",
+          "adjustmentType": "EXACT",
+          "scalingAdjustment": 2,
+          "alarmId": 152,
+          "hostGroup": "slave_1"
         }
 
 ###List the scaling policies. [GET]
@@ -2051,29 +1956,24 @@ Hosts can be added or removed from specific `hostgroups` - Ambari host groups ar
 
 + Response 200 (application/json)
 
+      [
         {
-          "cooldown": 35,
-          "scalingPolicies": [
-            {
-              "alarmId": 50,
-              "scalingAdjustment": 40,
-              "hostGroup": "slave_1",
-              "adjustmentType": "PERCENTAGE",
-              "name": "upScaleWhenHighPendingContainers",
-              "id": 101
-            },
-            {
-              "alarmId": 51,
-              "scalingAdjustment": -2,
-              "hostGroup": "slave_1",
-              "adjustmentType": "NODE_COUNT",
-              "name": "downScaleWhenHighResource",
-              "id": 100
-            }
-          ],
-          "maxSize": 10,
-          "minSize": 2
+          "id": 250,
+          "name": "upScaleModified",
+          "adjustmentType": "EXACT",
+          "scalingAdjustment": 2,
+          "alarmId": 152,
+          "hostGroup": "slave_1"
+        },
+        {
+          "id": 251,
+          "name": "upScale",
+          "adjustmentType": "NODE_COUNT",
+          "scalingAdjustment": 2,
+          "alarmId": 151,
+          "hostGroup": "slave_1"
         }
+      ]
 
 ##Delete [/clusters/{clusterId}/policies/{policyId}]
 ###Delete a scaling policy. [DELETE]
@@ -2149,6 +2049,48 @@ _Note: not all of the features above are supported in the first `public beta` ve
 #Group Configuration
 Periscope brings in the capability to reconfigure a running cluster - in particular resource properties heavily used.
 These properties currently are mostly related to the Capacity Scheduler configurations, but as we add functionality to Periscope this set of properties will constantly increase.
+
+##Scaling [/clusters/{clusterId}/configurations/scaling]
+###Set the scaling configuration [POST]
+
++ Parameters
+    + clusterId (required String `clusterID`) ... The id of the cluster.
+
++ Request (application/json)
+
+        {
+          "minSize": 3,
+          "maxSize": 10,
+          "cooldown": 30
+        }
+
++ Response 200 (application/json)
+
+        {
+          "minSize": 3,
+          "maxSize": 10,
+          "cooldown": 30
+        }
+
+##Scaling [/clusters/{clusterId}/configurations/scaling]
+###Retrieve he scaling configuration [GET]
+
++ Parameters
+    + clusterId (required String `clusterID`) ... The id of the cluster.
+
++ Request (application/json)
+
+        {
+
+        }
+
++ Response 200 (application/json)
+
+        {
+          "minSize": 3,
+          "maxSize": 10,
+          "cooldown": 30
+        }
 
 ##Update [/clusters/{clusterId}/configurations]
 ###Reload Hadoop YARN configuration [POST]
