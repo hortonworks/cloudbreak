@@ -1,5 +1,0 @@
-#!/bin/bash
-UAA_REG_URL=http://localhost:5000
-ID=$2
-
-curl -sX POST -H "Content-Type: application/json" -d '{"password":"test123"}' $UAA_REG_URL/reset/$ID

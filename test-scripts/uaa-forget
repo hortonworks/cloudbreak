@@ -1,4 +1,0 @@
-#!/bin/bash
-UAA_REG_URL=http://localhost:5000
-
-curl -sX POST -H "Content-Type: application/json" -d '{"email": "oleewere@gmail.com"}' $UAA_REG_URL/forget
