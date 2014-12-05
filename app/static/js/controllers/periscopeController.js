@@ -133,12 +133,12 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
             newPolicies.push(newPolicy);
             $scope.scalingAction.scalingPolicies = newPolicies;
             delete $scope.scalingAction.policy;
+            angular.element(document.querySelector('#create-policy-collapse-btn')).click();
             ScalingPolicy.save({id: $scope.actPeriscopeCluster.id}, $scope.scalingAction, function(success) {
               $scope.policies = success;
               $scope.scalingActionBaseForm.$setPristine();
               $scope.policyForm.$setPristine();
               resetScalingActionForm();
-              angular.element(document.querySelector('#create-policy-collapse-btn')).click();
             });
           }
         }

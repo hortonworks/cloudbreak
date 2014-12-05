@@ -203,7 +203,7 @@
                         </div>
                     </section>
                     <section id="periscope-pane" ng-class="{ 'active': periscopeShow }" ng-show="periscopeShow" class="tab-pane fade in">
-                        <div ng-include="'tags/stack/periscope.tag'"></div>
+                        <div ng-include="'tags/periscope/periscope.tag'"></div>
                     </section>
                     <section id="metrics-pane" ng-class="{ 'active': metricsShow }" ng-show="metricsShow" targe class="tab-pane fade in">
                     </section>
