@@ -13,16 +13,6 @@ public class ScalingPoliciesConverter extends AbstractConverter<ScalingPoliciesJ
     private ScalingPolicyConverter scalingPolicyConverter;
 
     @Override
-    public ScalingPolicies convert(ScalingPoliciesJson source) {
-        ScalingPolicies group = new ScalingPolicies();
-        group.setCoolDown(source.getCoolDown());
-        group.setMaxSize(source.getMaxSize());
-        group.setMinSize(source.getMinSize());
-        group.setScalingPolicies(scalingPolicyConverter.convertAllFromJson(source.getScalingPolicies()));
-        return group;
-    }
-
-    @Override
     public ScalingPoliciesJson convert(ScalingPolicies source) {
         ScalingPoliciesJson group = new ScalingPoliciesJson();
         group.setCoolDown(source.getCoolDown());

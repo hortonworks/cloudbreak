@@ -1,9 +1,9 @@
 package com.sequenceiq.periscope.rest.json;
 
+import javax.validation.constraints.Pattern;
+
 import com.sequenceiq.periscope.domain.AdjustmentType;
 import com.sun.istack.NotNull;
-
-import javax.validation.constraints.Pattern;
 
 public class ScalingPolicyJson implements Json {
 

@@ -1,6 +1,5 @@
 package com.sequenceiq.periscope.service;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,24 +25,65 @@ public class AlarmService {
     @Autowired
     private ClusterService clusterService;
 
-    public List<MetricAlarm> setMetricAlarms(PeriscopeUser user, long clusterId, List<MetricAlarm> metricAlarms)
-            throws ClusterNotFoundException {
-        return addMetricAlarms(user, clusterId, metricAlarms, true);
+    public List<MetricAlarm> addMetricAlarm(PeriscopeUser user, long clusterId, MetricAlarm metricAlarm) throws ClusterNotFoundException {
+        Cluster cluster = clusterService.get(user, clusterId);
+        metricAlarmRepository.save(metricAlarm);
+        cluster.addAlarm(metricAlarm);
+        clusterRepository.save(cluster);
+        return cluster.getMetricAlarms();
     }
 
-    public List<MetricAlarm> addMetricAlarm(PeriscopeUser user, long clusterId, MetricAlarm metricAlarm)
-            throws ClusterNotFoundException {
-        return addMetricAlarms(user, clusterId, Arrays.asList(metricAlarm), false);
+    public MetricAlarm setMetricAlarm(PeriscopeUser user, long clusterId, long alarmId, MetricAlarm metricAlarm) throws ClusterNotFoundException {
+        Cluster cluster = clusterService.get(user, clusterId);
+        List<MetricAlarm> metricAlarms = cluster.getMetricAlarms();
+        MetricAlarm savedAlarm = null;
+        for (MetricAlarm alarm : metricAlarms) {
+            if (alarm.getId() == alarmId) {
+                alarm.setComparisonOperator(metricAlarm.getComparisonOperator());
+                alarm.setMetric(metricAlarm.getMetric());
+                alarm.setDescription(metricAlarm.getDescription());
+                alarm.setPeriod(metricAlarm.getPeriod());
+                alarm.setNotifications(metricAlarm.getNotifications());
+                alarm.setThreshold(metricAlarm.getThreshold());
+                metricAlarmRepository.save(alarm);
+                savedAlarm = alarm;
+                break;
+            }
+        }
+        if (savedAlarm == null) {
+            throw new AlarmNotFoundException(alarmId);
+        }
+        return savedAlarm;
     }
 
-    public List<TimeAlarm> setTimeAlarms(PeriscopeUser user, long clusterId, List<TimeAlarm> alarms)
-            throws ClusterNotFoundException {
-        return addTimeAlarms(user, clusterId, alarms, true);
+    public List<TimeAlarm> addTimeAlarm(PeriscopeUser user, long clusterId, TimeAlarm alarm) throws ClusterNotFoundException {
+        Cluster cluster = clusterService.get(user, clusterId);
+        timeAlarmRepository.save(alarm);
+        cluster.addAlarm(alarm);
+        clusterRepository.save(cluster);
+        return cluster.getTimeAlarms();
     }
 
-    public List<TimeAlarm> addTimeAlarm(PeriscopeUser user, long clusterId, TimeAlarm alarm)
-            throws ClusterNotFoundException {
-        return addTimeAlarms(user, clusterId, Arrays.asList(alarm), false);
+    public TimeAlarm setTimeAlarm(PeriscopeUser user, long clusterId, long alarmId, TimeAlarm timeAlarm) throws ClusterNotFoundException {
+        Cluster cluster = clusterService.get(user, clusterId);
+        List<TimeAlarm> timeAlarms = cluster.getTimeAlarms();
+        TimeAlarm savedAlarm = null;
+        for (TimeAlarm alarm : timeAlarms) {
+            if (alarm.getId() == alarmId) {
+                alarm.setNotifications(timeAlarm.getNotifications());
+                alarm.setDescription(timeAlarm.getDescription());
+                alarm.setCron(timeAlarm.getCron());
+                alarm.setTimeZone(timeAlarm.getTimeZone());
+                alarm.setName(timeAlarm.getName());
+                timeAlarmRepository.save(alarm);
+                savedAlarm = alarm;
+                break;
+            }
+        }
+        if (savedAlarm == null) {
+            throw new AlarmNotFoundException(alarmId);
+        }
+        return savedAlarm;
     }
 
     public List<MetricAlarm> getMetricAlarms(PeriscopeUser user, long clusterId) throws ClusterNotFoundException {
@@ -54,7 +94,7 @@ public class AlarmService {
         return clusterService.get(user, clusterId).getTimeAlarms();
     }
 
-    public List<MetricAlarm> deleteMetricAlarm(PeriscopeUser user, long clusterId, long alarmId) throws ClusterNotFoundException {
+    public MetricAlarm deleteMetricAlarm(PeriscopeUser user, long clusterId, long alarmId) throws ClusterNotFoundException {
         Cluster cluster = clusterService.get(user, clusterId);
         MetricAlarm metricAlarm = metricAlarmRepository.findOne(alarmId);
         if (metricAlarm == null) {
@@ -64,7 +104,7 @@ public class AlarmService {
         alarms.remove(metricAlarm);
         metricAlarmRepository.delete(metricAlarm);
         cluster.setMetricAlarms(alarms);
-        return alarms;
+        return metricAlarm;
     }
 
     public List<TimeAlarm> deleteTimeAlarm(PeriscopeUser user, long clusterId, long alarmId) throws ClusterNotFoundException {
@@ -78,40 +118,6 @@ public class AlarmService {
         timeAlarmRepository.delete(alarm);
         cluster.setTimeAlarms(alarms);
         return alarms;
-    }
-
-    private List<MetricAlarm> addMetricAlarms(PeriscopeUser user, long clusterId, List<MetricAlarm> alarms, boolean override)
-            throws ClusterNotFoundException {
-        Cluster cluster = clusterService.get(user, clusterId);
-        List<MetricAlarm> alarmList = cluster.getMetricAlarms();
-        if (override) {
-            metricAlarmRepository.delete(alarmList);
-            alarmList.clear();
-        }
-        for (MetricAlarm alarm : alarms) {
-            metricAlarmRepository.save(alarm);
-            alarmList.add(alarm);
-        }
-        clusterRepository.save(cluster);
-        cluster.setMetricAlarms(alarmList);
-        return alarmList;
-    }
-
-    private List<TimeAlarm> addTimeAlarms(PeriscopeUser user, long clusterId, List<TimeAlarm> alarms, boolean override)
-            throws ClusterNotFoundException {
-        Cluster cluster = clusterService.get(user, clusterId);
-        List<TimeAlarm> alarmList = cluster.getTimeAlarms();
-        if (override) {
-            timeAlarmRepository.delete(alarmList);
-            alarmList.clear();
-        }
-        for (TimeAlarm alarm : alarms) {
-            timeAlarmRepository.save(alarm);
-            alarmList.add(alarm);
-        }
-        clusterRepository.save(cluster);
-        cluster.setTimeAlarms(alarmList);
-        return alarmList;
     }
 
 }

@@ -18,6 +18,7 @@ import com.sequenceiq.periscope.rest.json.IdExceptionMessageJson;
 import com.sequenceiq.periscope.service.AlarmNotFoundException;
 import com.sequenceiq.periscope.service.ClusterNotFoundException;
 import com.sequenceiq.periscope.service.NoScalingGroupException;
+import com.sequenceiq.periscope.service.ScalingPolicyNotFoundException;
 
 @ControllerAdvice
 public class ExceptionController {
@@ -60,6 +61,11 @@ public class ExceptionController {
     @ExceptionHandler(AlarmNotFoundException.class)
     public ResponseEntity<IdExceptionMessageJson> handleClusterNotFoundException(AlarmNotFoundException e) {
         return createIdExceptionMessage(e.getId(), "Alarm not found", HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(ScalingPolicyNotFoundException.class)
+    public ResponseEntity<IdExceptionMessageJson> handlePolicyNotFoundException(ScalingPolicyNotFoundException e) {
+        return createIdExceptionMessage(e.getId(), "Scaling policy not found", HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(ConnectionException.class)

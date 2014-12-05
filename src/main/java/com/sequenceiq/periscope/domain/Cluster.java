@@ -41,6 +41,9 @@ import com.sequenceiq.periscope.service.configuration.ConfigParam;
 public class Cluster {
 
     private static final Logger LOGGER = PeriscopeLoggerFactory.getLogger(Cluster.class);
+    private static final int DEFAULT_MIN_SIZE = 10;
+    private static final int DEFAULT_MAX_SIZE = 500;
+    private static final int DEFAULT_COOLDOWN = 30;
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "template_generator")
@@ -58,9 +61,9 @@ public class Cluster {
     @JoinColumn(nullable = true)
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<TimeAlarm> timeAlarms = new ArrayList<>();
-    private int minSize = -1;
-    private int maxSize = -1;
-    private int coolDown = -1;
+    private int minSize = DEFAULT_MIN_SIZE;
+    private int maxSize = DEFAULT_MAX_SIZE;
+    private int coolDown = DEFAULT_COOLDOWN;
 
     @Transient
     private Map<Priority, Map<ApplicationId, SchedulerApplication>> applications;
@@ -135,11 +138,6 @@ public class Cluster {
 
     public void setState(ClusterState state) {
         this.state = state;
-    }
-
-    public void deleteAlarms() {
-        setMetricAlarms(null);
-        setTimeAlarms(null);
     }
 
     public List<BaseAlarm> getAlarms() {
@@ -274,6 +272,14 @@ public class Cluster {
 
     public synchronized SchedulerApplication addApplication(ApplicationReport appReport) {
         return addApplication(appReport, Priority.NORMAL);
+    }
+
+    public void addAlarm(BaseAlarm alarm) {
+        if (alarm instanceof MetricAlarm) {
+            metricAlarms.add((MetricAlarm) alarm);
+        } else {
+            timeAlarms.add((TimeAlarm) alarm);
+        }
     }
 
     public synchronized SchedulerApplication addApplication(ApplicationReport appReport, Priority priority) {
