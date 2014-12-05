@@ -38,7 +38,7 @@
 </div>
 
 <div class="form-group" ng-class="{ 'has-error': gccCredentialForm.gcc_caccPrivateKey.$dirty && gccCredentialForm.gcc_caccPrivateKey.$invalid }">
-    <label class="col-sm-3 control-label" for="gcc_caccPrivateKey">Service account private key:</label>
+    <label class="col-sm-3 control-label" for="gcc_caccPrivateKey">Service account private (p12) key</label>
     <div class="col-sm-9">
         <input type="file" data-file="gcc.p12"/>
     </div>
