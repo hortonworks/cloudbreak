@@ -265,23 +265,29 @@ Once this is configured, Cloudbreak is ready to launch Hadoop clusters on your b
 
 ###Configuring the Microsoft Azure account
 
-Once you have logged in Cloudbreak you will have to link your Azure account with the Cloudbreak one. Cloudbreak asks for your Azure `Subscription Id`, and will generate a `JKS` file and a `certificate` for you with your configured `passphrase`.
+In order to launch Hadoop clusters on the  Microsoft Azure cloud platform you'll need to link your Azure account with Cloudbreak. For this, you'll need an X509 certificate with a 2048-bit RSA keypair.
+
+Generate these artifacts with `openssl` by running the following command, and answering the questions in the command prompt:
+
+```
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout my_azure_private.key -out my_azure_cert.pem
+```
+
+The command generates the following files into the directory you ran the command:
+
+`my_azure_private.key`
+
+`my_azure_cert.pem`
+
+Fill the form by providing your Azure `Subscription Id`, a file password and the content of the previously generated certificate (my_azure_cert.pem).
+
+Cloudbreak generate a `JKS` file and a `certificate` for you with the `passphrase`.
+You will need to upload the generated certificate (that is automatically downloaded to you after the form submission) to your Azure account:
+
+On your `Azure Management Console` go to the `Settings` menu, click the `Management Certificates` tab and upload the downloaded `cert` file
+
 The JKS file and certificate (uploaded) will be used to encrypt the communication between Cloudbreak and Azure in both directions.
-Additionally when you are creating Templates you can specify a `password` or an `SSH public key` in order for you to be able to login in the launched instances. As you can see the communication in Cloudbreak for both directions is secure, and we will not be able to login into your instances.
-
-In order to create a Cloudbreak account associated with your Azure account you will need to perform the following steps.
-
-1. Log into Azure management console with the user account you'd like to use with Cloudbreak
-2. On Azure go to Settings and Subscriptions tab - Cloudbreak will need your `Subscription Id` to associate accounts
-3. On Cloudbreak API or UI you will have to add a password - this will be used as the `passphrase` for the JKS file and certificate we generate.
-4. You should download the generated `certification`
-5. On Azure go to Settings and `Management Certificates` and upload the `cert` file
-
-Use `openssl` to generate an X509 certificate with a 2048-bit RSA keypair. Please answer the few questions that the openssl prompts for (or you may leave them blank). The content in these fields is not used by the platform:
-
-```openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout myPrivateKey.key -out myCert.pem```
-
-The content of the myCert.pem file is the publicKey in the credential requests.
+Additionally when you are creating Templates you can specify a `password` or an `SSH public key` in order for you to be able to login in the launched instances. As you can see the communication in Cloudbreak for both directions is secure, and it's not possible for others to login into your instances.
 
 You are done - from now on Cloudbreak can launch Azure instances on your behalf.
 
