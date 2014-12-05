@@ -552,7 +552,7 @@ app.post('/activate', function(req, res){
                                 });
                             } else {
                                 console.log('User and admin company id is not the same.')
-                                res.statusCode = 401
+                                res.statusCode = 403
                                 res.json({message: 'User and admin company id is not the same.'})
                             }
                         });
@@ -783,7 +783,7 @@ isUserAdmin = function(req, res, userData, callback) {
        }
     }
     if (isAdmin == false) {
-      res.statusCode = 401
+      res.statusCode = 403
       res.json({message: 'User is not an admin.'})
     } else if (companyId == null){
       res.statusCode = 400
@@ -858,6 +858,15 @@ app.use(function(err, req, res, next){
 
 d.on('error', function(err) {
   console.error(err);
+});
+
+process.on('uncaughtException', function (err) {
+    if (err.code == 'ECONNREFUSED' || err.code == 'ECONNRESET' || err.code == 'ENETUNREACH') {
+        console.log('Exception error occurred: ' + err.code + ' when try to connect: ' + err.request.options.host + ':' + err.request.options.port + err.request.options.path);
+    } else {
+        console.log(err)
+        process.exit(1)
+    }
 });
 
 // listen
