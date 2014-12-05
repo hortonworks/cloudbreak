@@ -328,8 +328,8 @@ app.use(function(err, req, res, next){
 });
 
 process.on('uncaughtException', function (err) {
-    if (err.code == 'ECONNREFUSED' || err.code == 'ECONNRESET') {
-        console.log('uncaughtException error occurred: ' + err.code)
+    if (err.code == 'ECONNREFUSED' || err.code == 'ECONNRESET' || err.code == 'ENETUNREACH') {
+        console.log('Exception error occurred: ' + err.code + ' when try to connect: ' + err.request.options.host + ':' + err.request.options.port + err.request.options.path);
     } else {
         console.log(err)
         process.exit(1)
