@@ -41,8 +41,8 @@ import com.sequenceiq.periscope.service.configuration.ConfigParam;
 public class Cluster {
 
     private static final Logger LOGGER = PeriscopeLoggerFactory.getLogger(Cluster.class);
-    private static final int DEFAULT_MIN_SIZE = 10;
-    private static final int DEFAULT_MAX_SIZE = 500;
+    private static final int DEFAULT_MIN_SIZE = 2;
+    private static final int DEFAULT_MAX_SIZE = 100;
     private static final int DEFAULT_COOLDOWN = 30;
 
     @Id
