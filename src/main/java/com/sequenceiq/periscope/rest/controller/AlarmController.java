@@ -21,9 +21,7 @@ import com.sequenceiq.periscope.domain.TimeAlarm;
 import com.sequenceiq.periscope.rest.converter.MetricAlarmConverter;
 import com.sequenceiq.periscope.rest.converter.TimeAlarmConverter;
 import com.sequenceiq.periscope.rest.json.MetricAlarmJson;
-import com.sequenceiq.periscope.rest.json.MetricAlarmsJson;
 import com.sequenceiq.periscope.rest.json.TimeAlarmJson;
-import com.sequenceiq.periscope.rest.json.TimeAlarmsJson;
 import com.sequenceiq.periscope.service.AlarmService;
 import com.sequenceiq.periscope.service.ClusterNotFoundException;
 import com.sequenceiq.periscope.utils.DateUtils;
@@ -40,7 +38,7 @@ public class AlarmController {
     private TimeAlarmConverter timeAlarmConverter;
 
     @RequestMapping(value = "/metric", method = RequestMethod.POST)
-    public ResponseEntity<MetricAlarmsJson> createAlarm(@ModelAttribute("user") PeriscopeUser user,
+    public ResponseEntity<List<MetricAlarmJson>> createAlarm(@ModelAttribute("user") PeriscopeUser user,
             @PathVariable long clusterId, @RequestBody @Valid MetricAlarmJson json) throws ClusterNotFoundException {
         MetricAlarm metricAlarm = metricAlarmConverter.convert(json);
         return createMetricAlarmsResponse(alarmService.addMetricAlarm(user, clusterId, metricAlarm), HttpStatus.CREATED);
@@ -54,7 +52,7 @@ public class AlarmController {
     }
 
     @RequestMapping(value = "/metric", method = RequestMethod.GET)
-    public ResponseEntity<MetricAlarmsJson> getAlarms(@ModelAttribute("user") PeriscopeUser user,
+    public ResponseEntity<List<MetricAlarmJson>> getAlarms(@ModelAttribute("user") PeriscopeUser user,
             @PathVariable long clusterId) throws ClusterNotFoundException {
         return createAlarmsResponse(alarmService.getMetricAlarms(user, clusterId));
     }
@@ -66,7 +64,7 @@ public class AlarmController {
     }
 
     @RequestMapping(value = "/time", method = RequestMethod.POST)
-    public ResponseEntity<TimeAlarmsJson> createTimeAlarm(@ModelAttribute("user") PeriscopeUser user,
+    public ResponseEntity<List<TimeAlarmJson>> createTimeAlarm(@ModelAttribute("user") PeriscopeUser user,
             @PathVariable long clusterId, @RequestBody @Valid TimeAlarmJson json) throws ClusterNotFoundException, ParseException {
         TimeAlarm timeAlarm = validateTimeAlarm(json);
         return createTimeAlarmsResponse(alarmService.addTimeAlarm(user, clusterId, timeAlarm), HttpStatus.CREATED);
@@ -80,13 +78,13 @@ public class AlarmController {
     }
 
     @RequestMapping(value = "/time", method = RequestMethod.GET)
-    public ResponseEntity<TimeAlarmsJson> getTimeAlarms(@ModelAttribute("user") PeriscopeUser user,
+    public ResponseEntity<List<TimeAlarmJson>> getTimeAlarms(@ModelAttribute("user") PeriscopeUser user,
             @PathVariable long clusterId) throws ClusterNotFoundException {
         return createTimeAlarmsResponse(alarmService.getTimeAlarms(user, clusterId));
     }
 
     @RequestMapping(value = "/time/{alarmId}", method = RequestMethod.DELETE)
-    public ResponseEntity<TimeAlarmsJson> deleteTimeAlarm(@ModelAttribute("user") PeriscopeUser user,
+    public ResponseEntity<List<TimeAlarmJson>> deleteTimeAlarm(@ModelAttribute("user") PeriscopeUser user,
             @PathVariable long clusterId, @PathVariable long alarmId) throws ClusterNotFoundException {
         return createTimeAlarmsResponse(alarmService.deleteTimeAlarm(user, clusterId, alarmId));
     }
@@ -101,11 +99,11 @@ public class AlarmController {
         DateUtils.getCronExpression(alarm.getCron());
     }
 
-    private ResponseEntity<MetricAlarmsJson> createAlarmsResponse(List<MetricAlarm> metricAlarms) {
+    private ResponseEntity<List<MetricAlarmJson>> createAlarmsResponse(List<MetricAlarm> metricAlarms) {
         return createMetricAlarmsResponse(metricAlarms, HttpStatus.OK);
     }
 
-    private ResponseEntity<TimeAlarmsJson> createTimeAlarmsResponse(List<TimeAlarm> alarms) {
+    private ResponseEntity<List<TimeAlarmJson>> createTimeAlarmsResponse(List<TimeAlarm> alarms) {
         return createTimeAlarmsResponse(alarms, HttpStatus.OK);
     }
 
@@ -119,9 +117,9 @@ public class AlarmController {
         return new ResponseEntity<>(alarmResponse, status);
     }
 
-    private ResponseEntity<MetricAlarmsJson> createMetricAlarmsResponse(List<MetricAlarm> metricAlarms, HttpStatus status) {
+    private ResponseEntity<List<MetricAlarmJson>> createMetricAlarmsResponse(List<MetricAlarm> metricAlarms, HttpStatus status) {
         List<MetricAlarmJson> alarmResponse = metricAlarmConverter.convertAllToJson(metricAlarms);
-        return new ResponseEntity<>(new MetricAlarmsJson(alarmResponse), status);
+        return new ResponseEntity<>(alarmResponse, status);
     }
 
     private ResponseEntity<TimeAlarmJson> createTimeAlarmResponse(TimeAlarm alarm, HttpStatus status) {
@@ -129,8 +127,8 @@ public class AlarmController {
         return new ResponseEntity<>(alarmResponse, status);
     }
 
-    private ResponseEntity<TimeAlarmsJson> createTimeAlarmsResponse(List<TimeAlarm> alarms, HttpStatus status) {
+    private ResponseEntity<List<TimeAlarmJson>> createTimeAlarmsResponse(List<TimeAlarm> alarms, HttpStatus status) {
         List<TimeAlarmJson> alarmResponse = timeAlarmConverter.convertAllToJson(alarms);
-        return new ResponseEntity<>(new TimeAlarmsJson(alarmResponse), status);
+        return new ResponseEntity<>(alarmResponse, status);
     }
 }

@@ -48,4 +48,5 @@ curl -X GET -H "Authorization: Bearer $TOKEN" $HOST/clusters/50/policies | jq .
 curl -X DELETE -H "Authorization: Bearer $TOKEN" $HOST/clusters/50/policies/150 | jq .
 
 # set scaling configuration
-curl -X POST -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"minSize":3,"maxSize":10,"cooldown":30}' $HOST/clusters/50/policies/configuration | jq .
+curl -X POST -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"minSize":3,"maxSize":10,"cooldown":30}' $HOST/clusters/50/configurations/scaling | jq .
+curl -X GET -H "Authorization: Bearer $TOKEN" $HOST/clusters/50/configurations/scaling | jq .

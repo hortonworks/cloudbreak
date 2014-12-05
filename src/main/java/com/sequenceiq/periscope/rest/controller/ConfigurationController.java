@@ -2,6 +2,8 @@ package com.sequenceiq.periscope.rest.controller;
 
 import java.util.Map;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +22,7 @@ import com.sequenceiq.periscope.rest.converter.ClusterConverter;
 import com.sequenceiq.periscope.rest.converter.QueueSetupConverter;
 import com.sequenceiq.periscope.rest.json.ClusterJson;
 import com.sequenceiq.periscope.rest.json.QueueSetupJson;
+import com.sequenceiq.periscope.rest.json.ScalingConfigurationJson;
 import com.sequenceiq.periscope.service.ClusterNotFoundException;
 import com.sequenceiq.periscope.service.ClusterService;
 
@@ -39,6 +42,19 @@ public class ConfigurationController {
             @PathVariable long clusterId) throws ConnectionException, ClusterNotFoundException {
         Cluster cluster = clusterService.refreshConfiguration(user, clusterId);
         return new ResponseEntity<>(clusterConverter.convert(cluster), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/scaling", method = RequestMethod.POST)
+    public ResponseEntity<ScalingConfigurationJson> setScalingConfiguration(@ModelAttribute("user") PeriscopeUser user,
+            @PathVariable long clusterId, @RequestBody @Valid ScalingConfigurationJson json) throws ClusterNotFoundException {
+        clusterService.setScalingConfiguration(user, clusterId, json);
+        return new ResponseEntity<>(json, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/scaling", method = RequestMethod.GET)
+    public ResponseEntity<ScalingConfigurationJson> getScalingConfiguration(@ModelAttribute("user") PeriscopeUser user,
+            @PathVariable long clusterId) throws ClusterNotFoundException {
+        return new ResponseEntity<>(clusterService.getScalingConfiguration(user, clusterId), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/queue", method = RequestMethod.POST)

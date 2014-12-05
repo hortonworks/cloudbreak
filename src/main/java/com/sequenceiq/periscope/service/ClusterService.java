@@ -28,6 +28,7 @@ import com.sequenceiq.periscope.repository.ClusterRepository;
 import com.sequenceiq.periscope.repository.MetricAlarmRepository;
 import com.sequenceiq.periscope.repository.TimeAlarmRepository;
 import com.sequenceiq.periscope.repository.UserRepository;
+import com.sequenceiq.periscope.rest.json.ScalingConfigurationJson;
 import com.sequenceiq.periscope.utils.ClusterUtils;
 
 @Service
@@ -88,10 +89,26 @@ public class ClusterService {
         if (cluster == null) {
             throw new ClusterNotFoundException(clusterId);
         }
-        metricAlarmRepository.delete(cluster.getMetricAlarms());
-        timeAlarmRepository.delete(cluster.getTimeAlarms());
         clusterRepository.delete(cluster);
         return cluster;
+    }
+
+    public void setScalingConfiguration(PeriscopeUser user, long clusterId, ScalingConfigurationJson scalingConfiguration)
+            throws ClusterNotFoundException {
+        Cluster cluster = get(user, clusterId);
+        cluster.setMinSize(scalingConfiguration.getMinSize());
+        cluster.setMaxSize(scalingConfiguration.getMaxSize());
+        cluster.setCoolDown(scalingConfiguration.getCoolDown());
+        clusterRepository.save(cluster);
+    }
+
+    public ScalingConfigurationJson getScalingConfiguration(PeriscopeUser user, long clusterId) throws ClusterNotFoundException {
+        Cluster cluster = get(user, clusterId);
+        ScalingConfigurationJson configuration = new ScalingConfigurationJson();
+        configuration.setCoolDown(cluster.getCoolDown());
+        configuration.setMaxSize(cluster.getMaxSize());
+        configuration.setMinSize(cluster.getMinSize());
+        return configuration;
     }
 
     public Cluster setState(PeriscopeUser user, long clusterId, ClusterState state)

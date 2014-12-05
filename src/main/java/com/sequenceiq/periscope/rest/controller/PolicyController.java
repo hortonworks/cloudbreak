@@ -1,5 +1,7 @@
 package com.sequenceiq.periscope.rest.controller;
 
+import java.util.List;
+
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,11 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.sequenceiq.periscope.domain.PeriscopeUser;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
-import com.sequenceiq.periscope.model.ScalingPolicies;
-import com.sequenceiq.periscope.rest.converter.ScalingPoliciesConverter;
 import com.sequenceiq.periscope.rest.converter.ScalingPolicyConverter;
-import com.sequenceiq.periscope.rest.json.ScalingConfigurationJson;
-import com.sequenceiq.periscope.rest.json.ScalingPoliciesJson;
 import com.sequenceiq.periscope.rest.json.ScalingPolicyJson;
 import com.sequenceiq.periscope.service.ClusterNotFoundException;
 import com.sequenceiq.periscope.service.ScalingService;
@@ -30,12 +28,10 @@ public class PolicyController {
     @Autowired
     private ScalingService scalingService;
     @Autowired
-    private ScalingPoliciesConverter policiesConverter;
-    @Autowired
     private ScalingPolicyConverter policyConverter;
 
     @RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity<ScalingPoliciesJson> addScaling(@ModelAttribute("user") PeriscopeUser user, @PathVariable long clusterId,
+    public ResponseEntity<List<ScalingPolicyJson>> addScaling(@ModelAttribute("user") PeriscopeUser user, @PathVariable long clusterId,
             @RequestBody @Valid ScalingPolicyJson json) throws ClusterNotFoundException {
         ScalingPolicy scalingPolicy = policyConverter.convert(json);
         return createScalingPoliciesJsonResponse(scalingService.addScalingPolicy(user, clusterId, scalingPolicy), HttpStatus.CREATED);
@@ -49,34 +45,23 @@ public class PolicyController {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public ResponseEntity<ScalingPoliciesJson> getScaling(@ModelAttribute("user") PeriscopeUser user, @PathVariable long clusterId)
+    public ResponseEntity<List<ScalingPolicyJson>> getScaling(@ModelAttribute("user") PeriscopeUser user, @PathVariable long clusterId)
             throws ClusterNotFoundException {
-        return createScalingPoliciesJsonResponse(scalingService.getScalingPolicies(user, clusterId));
+        return createScalingPoliciesJsonResponse(scalingService.getScalingPolicies(user, clusterId), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/{policyId}", method = RequestMethod.DELETE)
-    public ResponseEntity<ScalingPoliciesJson> deletePolicy(@ModelAttribute("user") PeriscopeUser user,
+    public ResponseEntity<List<ScalingPolicyJson>> deletePolicy(@ModelAttribute("user") PeriscopeUser user,
             @PathVariable long clusterId, @PathVariable long policyId) throws ClusterNotFoundException {
-        return createScalingPoliciesJsonResponse(scalingService.deletePolicy(user, clusterId, policyId));
+        return createScalingPoliciesJsonResponse(scalingService.deletePolicy(user, clusterId, policyId), HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/configuration", method = RequestMethod.POST)
-    public ResponseEntity<ScalingConfigurationJson> setConfiguration(@ModelAttribute("user") PeriscopeUser user, @PathVariable long clusterId,
-            @RequestBody @Valid ScalingConfigurationJson json) throws ClusterNotFoundException {
-        scalingService.setScalingConfiguration(user, clusterId, json);
-        return new ResponseEntity<>(json, HttpStatus.OK);
-    }
-
-    private ResponseEntity<ScalingPoliciesJson> createScalingPoliciesJsonResponse(ScalingPolicies scalingPolicies) {
-        return createScalingPoliciesJsonResponse(scalingPolicies, HttpStatus.OK);
+    private ResponseEntity<List<ScalingPolicyJson>> createScalingPoliciesJsonResponse(List<ScalingPolicy> scalingPolicies, HttpStatus status) {
+        return new ResponseEntity<>(policyConverter.convertAllToJson(scalingPolicies), status);
     }
 
     private ResponseEntity<ScalingPolicyJson> createScalingPolicyJsonResponse(ScalingPolicy scalingPolicy, HttpStatus status) {
         return new ResponseEntity<>(policyConverter.convert(scalingPolicy), status);
-    }
-
-    private ResponseEntity<ScalingPoliciesJson> createScalingPoliciesJsonResponse(ScalingPolicies scalingPolicies, HttpStatus status) {
-        return new ResponseEntity<>(policiesConverter.convert(scalingPolicies), status);
     }
 
 }
