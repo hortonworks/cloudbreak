@@ -33,7 +33,7 @@ public class AwsStackUtil {
                         credentialsProvider.getExternalId(), credential);
         AmazonCloudFormationClient amazonCloudFormationClient = new AmazonCloudFormationClient(basicSessionCredentials);
         amazonCloudFormationClient.setRegion(Region.getRegion(regions));
-        LOGGER.info("Amazon CloudFormation client successfully created.");
+        LOGGER.debug("Amazon CloudFormation client successfully created.");
         return amazonCloudFormationClient;
     }
 
@@ -44,7 +44,7 @@ public class AwsStackUtil {
                         credentialsProvider.getExternalId(), credential);
         AmazonEC2Client amazonEC2Client = new AmazonEC2Client(basicSessionCredentials);
         amazonEC2Client.setRegion(Region.getRegion(regions));
-        LOGGER.info("Amazon EC2 client successfully created.");
+        LOGGER.debug("Amazon EC2 client successfully created.");
         return amazonEC2Client;
     }
 
@@ -55,7 +55,7 @@ public class AwsStackUtil {
                         credentialsProvider.getExternalId(), credential);
         AmazonAutoScalingClient amazonAutoScalingClient = new AmazonAutoScalingClient(basicSessionCredentials);
         amazonAutoScalingClient.setRegion(Region.getRegion(regions));
-        LOGGER.info("Amazon Autoscaling client successfully created.");
+        LOGGER.debug("Amazon Autoscaling client successfully created.");
         return amazonAutoScalingClient;
     }
 
@@ -66,7 +66,7 @@ public class AwsStackUtil {
                         credentialsProvider.getExternalId(), credential);
         AmazonSNSClient amazonSNSClient = new AmazonSNSClient(basicSessionCredentials);
         amazonSNSClient.setRegion(Region.getRegion(region));
-        LOGGER.info("Amazon SNS client successfully created.");
+        LOGGER.debug("Amazon SNS client successfully created.");
         return amazonSNSClient;
     }
 
