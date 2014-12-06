@@ -265,7 +265,9 @@ Once this is configured, Cloudbreak is ready to launch Hadoop clusters on your b
 
 ###Configuring the Microsoft Azure account
 
-In order to launch Hadoop clusters on the  Microsoft Azure cloud platform you'll need to link your Azure account with Cloudbreak. For this, you'll need an X509 certificate with a 2048-bit RSA keypair.
+In order to launch Hadoop clusters on the  Microsoft Azure cloud platform you'll need to link your Azure account with Cloudbreak. This can be achieved by creating a new `Azure Credential` in Cloudbreak.
+
+You'll need an X509 certificate with a 2048-bit RSA keypair.
 
 Generate these artifacts with `openssl` by running the following command, and answering the questions in the command prompt:
 
@@ -273,27 +275,25 @@ Generate these artifacts with `openssl` by running the following command, and an
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout my_azure_private.key -out my_azure_cert.pem
 ```
 
-The command generates the following files into the directory you ran the command:
+The command generates the following files into the directory you ran the command from:
 
-`my_azure_private.key`
+`my_azure_private.key` and `my_azure_cert.pem`
 
-`my_azure_cert.pem`
+(obviously artifacts can be named after your wish)
 
-Fill the form by providing your Azure `Subscription Id`, a file password and the content of the previously generated certificate (my_azure_cert.pem).
+Fill the form by providing your Azure `Subscription Id`, a file password and the **content** of the previously generated certificate (my_azure_cert.pem).
 
-Cloudbreak generate a `JKS` file and a `certificate` for you with the `passphrase`.
-You will need to upload the generated certificate (that is automatically downloaded to you after the form submission) to your Azure account:
+_Note:_ Cloudbreak will generate a `JKS` file (stored by the backend) and a `certificate` with the `passphrase`. You will need to upload the generated certificate (that is automatically downloaded to you after the form submission, alternatively you can download it any time from Cloudbreak) to your Azure account:
 
-On your `Azure Management Console` go to the `Settings` menu, click the `Management Certificates` tab and upload the downloaded `cert` file
+On your `Azure Management Console`, `Settings` menu, click the `Management Certificates` tab and upload the downloaded `cert` file
 
-The JKS file and certificate (uploaded) will be used to encrypt the communication between Cloudbreak and Azure in both directions.
-Additionally when you are creating Templates you can specify a `password` or an `SSH public key` in order for you to be able to login in the launched instances. As you can see the communication in Cloudbreak for both directions is secure, and it's not possible for others to login into your instances.
+The JKS file and certificate will be used to encrypt the communication between Cloudbreak and Azure in both directions.
 
 You are done - from now on Cloudbreak can launch Azure instances on your behalf.
 
-_Note1: Cloudbreak does not store any login details into these instances - when you are creating Templates you can specify a `password` or `SSH Public key` which you can use to login into the launched instances._
+_Note:_ Cloudbreak does not store any login details for these instances - when you create **Templates** you can specify a `password` or `SSH Public key` that can be used to login into the launched instances.
 
-_Note2: Because Azure does not directly support third party public images we will have to copy the used image from VM Depot into your storage account. The steps below need to be finished ONCE and only ONCE before any stack is created for every affinity group - **this is an automated step** - we have just highlighted in order to point out the first time slowness:_
+_Note:_ Because Azure does not directly support third party public images Cloudbreak will copy the used image from VM Depot into your storage account. The steps below need to be finished ONCE and only ONCE before any stack is created for every affinity group - **this is an automated step**  - it's only highlighted here as an explanation of why it takes longer for the first time:
 
 _1. Get the VM image - http://vmdepot.msopentech.com/Vhd/Show?vhdId=42480&version=43564_
 
