@@ -19,7 +19,8 @@
                 <div class="mod-LED">
                     <span ng-class="ledStyles[cluster.status]" title="titleStatus[cluster.status]"></span>
                 </div>
-                <a href="" ng-disabled="cluster.cloudPlatform === 'GCC'" class="mod-start-stop btn btn-cluster btn-block" role="button" ng-click="requestStatusChange(cluster)"><i class="fa fa-lg" ng-class="buttonStyles[cluster.status]"></i></a>
+                <a href="" ng-disabled="cluster.cloudPlatform === 'GCC' || !(cluster.status === 'STOPPED' || cluster.status === 'AVAILABLE')"
+                    ng-click="selectCluster(cluster)" class="mod-start-stop btn btn-cluster btn-block" role="button" data-toggle="modal" data-target="#modal-cluster-status-change"><i class="fa fa-lg" ng-class="buttonStyles[cluster.status]"></i></a>
             </div>
 
         </div>
@@ -27,4 +28,27 @@
     </div>
     <!-- .cluster-block -->
 
+</div>
+
+<div class="modal fade" id="modal-cluster-status-change" tabindex="-1" role="dialog" aria-labelledby="modal01-title" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+       <div class="modal-content">
+          <!-- .modal-header -->
+          <div class="modal-body">
+               <div ng-show="selectedCluster.status === 'STOPPED'"><p>Start cluster <strong>{{selectedCluster.name}}</strong> and its stack?</p></div>
+               <div ng-show="selectedCluster.status === 'AVAILABLE'"><p>Stop cluster <strong>{{selectedCluster.name}}</strong> and its stack?</p></div>
+          </div>
+          <div class="modal-footer">
+             <div class="row">
+                 <div class="col-xs-6">
+                    <button type="button" class="btn btn-block btn-default" data-dismiss="modal">cancel</button>
+                 </div>
+                 <div class="col-xs-6">
+                    <div ng-show="selectedCluster.status === 'STOPPED'"><button ng-show="selectedCluster.status === 'STOPPED'" type="button" class="btn btn-block btn-success" data-dismiss="modal" id="reqStatChangeBtn" ng-click="requestStatusChange(cluster)"><i class="fa fa-play fa-fw"></i>start</button></div>
+                    <div ng-show="selectedCluster.status === 'AVAILABLE'"><button ng-show="selectedCluster.status === 'AVAILABLE'" type="button" class="btn btn-block btn-warning" data-dismiss="modal" id="reqStatChangeBtn" ng-click="requestStatusChange(cluster)"><i class="fa fa-pause fa-fw"></i>stop</button></div>
+                 </div>
+             </div>
+          </div>
+       </div>
+    </div>
 </div>

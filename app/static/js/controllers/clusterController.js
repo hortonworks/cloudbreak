@@ -226,4 +226,8 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             }
         }
 
+        $scope.selectCluster = function(cluster) {
+                    $scope.selectedCluster = cluster
+        }
+
     }]);
