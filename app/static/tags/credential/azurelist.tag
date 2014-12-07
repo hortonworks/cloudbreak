@@ -28,15 +28,6 @@
     </div>
     <!-- .form-group -->
     <div class="form-group">
-        <label class="col-sm-3 control-label" for="jksPassword">Password</label>
-
-        <div class="col-sm-9">
-            <p id="jksPassword" class="form-control-static">{{credential.parameters.jksPassword}}</p>
-        </div>
-        <!-- .col-sm-9 -->
-    </div>
-    <!-- .form-group -->
-    <div class="form-group">
         <label class="col-sm-3 control-label" for="jksFile">Certification file</label>
 
         <div class="col-sm-9">
