@@ -7,25 +7,38 @@ import org.springframework.stereotype.Component;
 
 import com.google.api.services.compute.Compute;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.service.credential.CredentialHandler;
 import com.sequenceiq.cloudbreak.service.credential.RsaPublicKeyValidator;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccStackUtil;
 
 @Component
-public class GccCredentialInitializer {
+public class GccCredentialHandler implements CredentialHandler<GccCredential> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GccCredentialInitializer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GccCredentialHandler.class);
     @Autowired
     private RsaPublicKeyValidator rsaPublicKeyValidator;
     @Autowired
     private GccStackUtil gccStackUtil;
 
+    @Override
+    public CloudPlatform getCloudPlatform() {
+        return CloudPlatform.GCC;
+    }
+
+    @Override
     public GccCredential init(GccCredential gccCredential) {
         MDCBuilder.buildMdcContext(gccCredential);
         rsaPublicKeyValidator.validate(gccCredential);
         validateCredential(gccCredential);
         return gccCredential;
+    }
+
+    @Override
+    public boolean delete(GccCredential credential) {
+        return true;
     }
 
     private void validateCredential(GccCredential gccCredential) {

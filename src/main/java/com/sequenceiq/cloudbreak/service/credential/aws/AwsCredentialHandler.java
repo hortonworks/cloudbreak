@@ -9,19 +9,22 @@ import org.springframework.stereotype.Component;
 
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.ec2.AmazonEC2Client;
+import com.amazonaws.services.ec2.model.DeleteKeyPairRequest;
 import com.amazonaws.services.ec2.model.ImportKeyPairRequest;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
+import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.service.credential.CredentialHandler;
 import com.sequenceiq.cloudbreak.service.credential.RsaPublicKeyValidator;
 import com.sequenceiq.cloudbreak.service.stack.connector.aws.AwsStackUtil;
 
 @Component
-public class AwsCredentialInitializer {
+public class AwsCredentialHandler implements CredentialHandler<AwsCredential> {
 
     public static final String CLOUDBREAK_KEY_NAME = "cloudbreak-key";
     private static final int SUFFIX_RND = 999999;
-    private static final Logger LOGGER = LoggerFactory.getLogger(AwsCredentialInitializer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AwsCredentialHandler.class);
 
     @Autowired
     private RsaPublicKeyValidator rsaPublicKeyValidator;
@@ -32,10 +35,38 @@ public class AwsCredentialInitializer {
     @Autowired
     private AwsStackUtil awsStackUtil;
 
+    @Override
+    public CloudPlatform getCloudPlatform() {
+        return CloudPlatform.AWS;
+    }
+
+    @Override
     public AwsCredential init(AwsCredential awsCredential) {
         rsaPublicKeyValidator.validate(awsCredential);
         validateIamRole(awsCredential);
         return importKeyPairs(awsCredential);
+    }
+
+    @Override
+    public boolean delete(AwsCredential awsCredential) {
+        boolean result = false;
+        MDCBuilder.buildMdcContext(awsCredential);
+        String keyPairName = awsCredential.getKeyPairName();
+        for (Regions regions : Regions.values()) {
+            if (!Regions.CN_NORTH_1.equals(regions) && !Regions.GovCloud.equals(regions)) {
+                try {
+                    AmazonEC2Client client = awsStackUtil.createEC2Client(regions, awsCredential);
+                    DeleteKeyPairRequest deleteKeyPairRequest = new DeleteKeyPairRequest(keyPairName);
+                    client.deleteKeyPair(deleteKeyPairRequest);
+                } catch (Exception e) {
+                    String errorMessage = String.format("Failed to delete public key [roleArn:'%s', region: '%s'], detailed message: %s",
+                            awsCredential.getRoleArn(), regions, e.getMessage());
+                    LOGGER.error(errorMessage, e);
+                    result = false;
+                }
+            }
+        }
+        return result;
     }
 
     private AwsCredential importKeyPairs(AwsCredential awsCredential) {

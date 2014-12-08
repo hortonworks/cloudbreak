@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.service.credential;
 
+import java.util.Map;
 import java.util.Set;
+
+import javax.annotation.Resource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CbUserRole;
+import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
@@ -23,6 +27,9 @@ public class SimpleCredentialService implements CredentialService {
 
     @Autowired
     private CredentialRepository credentialRepository;
+
+    @Resource
+    private Map<CloudPlatform, CredentialHandler<Credential>> credentialHandlers;
 
     @Override
     public Set<Credential> retrievePrivateCredentials(CbUser user) {
@@ -52,9 +59,10 @@ public class SimpleCredentialService implements CredentialService {
     public Credential create(CbUser user, Credential credential) {
         MDCBuilder.buildMdcContext(credential);
         LOGGER.debug("Creating credential: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
-        Credential savedCredential = null;
+        credentialHandlers.get(credential.getCloudPlatform()).init(credential);
         credential.setOwner(user.getUserId());
         credential.setAccount(user.getAccount());
+        Credential savedCredential = null;
         try {
             savedCredential = credentialRepository.save(credential);
         } catch (DataIntegrityViolationException ex) {
@@ -89,7 +97,7 @@ public class SimpleCredentialService implements CredentialService {
         if (credential == null) {
             throw new NotFoundException(String.format("Credential '%s' not found.", id));
         }
-        credentialRepository.delete(credential);
+        delete(credential);
     }
 
     @Override
@@ -98,7 +106,11 @@ public class SimpleCredentialService implements CredentialService {
         if (credential == null) {
             throw new NotFoundException(String.format("Credential '%s' not found.", name));
         }
-        credentialRepository.delete(credential);
+        delete(credential);
     }
 
+    private void delete(Credential credential) {
+        credentialRepository.delete(credential);
+        credentialHandlers.get(credential.getCloudPlatform()).delete(credential);
+    }
 }

@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,20 +12,33 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
+import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.service.credential.CredentialHandler;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 
 @Component
-public class AzureCredentialInitializer {
+public class AzureCredentialHandler implements CredentialHandler<AzureCredential> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AzureCredentialInitializer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AzureCredentialHandler.class);
 
     @Autowired
     private AzureStackUtil azureStackUtil;
 
+    @Override
+    public CloudPlatform getCloudPlatform() {
+        return CloudPlatform.AZURE;
+    }
+
+    @Override
     public AzureCredential init(AzureCredential azureCredential) {
         validateCertificateFile(azureCredential);
         return azureCredential;
+    }
+
+    @Override
+    public boolean delete(AzureCredential credential) {
+        return true;
     }
 
     private void validateCertificateFile(AzureCredential azureCredential) {
@@ -34,7 +46,7 @@ public class AzureCredentialInitializer {
         try {
             InputStream is = new ByteArrayInputStream(azureCredential.getPublicKey().getBytes(StandardCharsets.UTF_8));
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
-            X509Certificate x509Certificate = (X509Certificate) cf.generateCertificate(is);
+            cf.generateCertificate(is);
             azureCredential = azureStackUtil.generateAzureSshCerFile(azureCredential);
             azureCredential = azureStackUtil.generateAzureServiceFiles(azureCredential);
         } catch (Exception e) {
