@@ -58,6 +58,6 @@
 
 <div class="row btn-row">
   <div class="col-sm-9 col-sm-offset-3">
-    <a id="create-scaling-policy-btn" ng-disabled="policyForm.$invalid || scalingActionBaseForm.$invalid" class="btn btn-success btn-block" role="button" ng-click="createPolicy()"><i class="fa fa-plus fa-fw"></i> create policy</a>
+    <a id="create-scaling-policy-btn" ng-disabled="policyForm.$invalid" class="btn btn-success btn-block" role="button" ng-click="createPolicy()"><i class="fa fa-plus fa-fw"></i> create policy</a>
   </div>
 </div>
