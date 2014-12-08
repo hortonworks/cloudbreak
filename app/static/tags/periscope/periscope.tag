@@ -1,5 +1,5 @@
 <!-- ........... ALARMS ...................................................... -->
-<div ng-controller="periscopeController">
+<div ng-controller="periscopeController" ng-show="autoScalingSLAPoliciesEnabled">
   <div class="panel panel-default">
     <div class="panel-heading">
       <h5><i class="fa fa-bell-o fa-fw"></i> ALARMS</h5>
@@ -157,3 +157,4 @@
   </div>
   <!-- .panel -->
 </div>
+<div class="alert alert-info" role="alert" ng-show="!autoScalingSLAPoliciesEnabled"><b>Please wait!</b> Cluster has not been available yet...</div>
