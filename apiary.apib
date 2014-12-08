@@ -1479,14 +1479,10 @@ To link a Hadoop cluster with Periscope the only required this is the Apache Amb
 
         }
 
-+ Response 200 (application/json)
++ Response 204 (application/json)
 
         {
-            "appMovement": "allowed",
-            "state": "RUNNING",
-            "port": "8080",
-            "host": "172.24.0.2",
-            "id": "1"
+
         }
 
 ##List [/clusters]
@@ -1602,26 +1598,24 @@ Also a `threshold` can be configured, which specifies the variance applied by th
 
 + Response 201 (application/json)
 
-        [
-          {
-            "id": 150,
-            "alarmName": "freeGlobalResourcesRateLow",
-            "description": "Low free global resource rate",
-            "scalingPolicyId": null,
-            "notifications": [
-              {
-                "target": [
-                  "kelly.slater@aspworldtour.com"
-                ],
-                "notificationType": "EMAIL"
-              }
-            ],
-            "metric": "GLOBAL_RESOURCES",
-            "comparisonOperator": "LESS_THAN",
-            "threshold": 0.5,
-            "period": 1
-          }
-        ]
+        {
+          "id": 150,
+          "alarmName": "freeGlobalResourcesRateLow",
+          "description": "Low free global resource rate",
+          "scalingPolicyId": null,
+          "notifications": [
+            {
+              "target": [
+                "kelly.slater@aspworldtour.com"
+              ],
+              "notificationType": "EMAIL"
+            }
+          ],
+          "metric": "GLOBAL_RESOURCES",
+          "comparisonOperator": "LESS_THAN",
+          "threshold": 0.5,
+          "period": 1
+        }
 
 ##Modify [/clusters/{clusterId}/alarms/metric/{alarmId}]
 ###Modify an alarm [PUT]
@@ -1736,22 +1730,10 @@ Also a `threshold` can be configured, which specifies the variance applied by th
 
         }
 
-+ Response 200 (application/json)
++ Response 204 (application/json)
 
         {
-          "alarms": [
-            {
-              "notifications": [],
-              "scalingPolicyId": null,
-              "period": 10,
-              "comparisonOperator": "EQUALS",
-              "threshold": 1,
-              "metric": "GLOBAL_RESOURCES",
-              "description": "Low free global resource rate",
-              "alarmName": "freeGlobalResourcesRateLow",
-              "id": 51
-            }
-          ]
+
         }
 
 ##Time based alarms
@@ -1773,18 +1755,15 @@ Also a `threshold` can be configured, which specifies the variance applied by th
 
 + Response 201 (application/json)
 
-    [
-      {
-        "id": 152,
-        "alarmName": "cron-worktime",
-        "description": "Number of nodes during worktime",
-        "scalingPolicyId": null,
-        "notifications": [],
-        "timeZone": "Europe/Budapest",
-        "cron": "0 24 15 ? * MON-FRI"
-      }
-    ]
-
+    {
+      "id": 152,
+      "alarmName": "cron-worktime",
+      "description": "Number of nodes during worktime",
+      "scalingPolicyId": null,
+      "notifications": [],
+      "timeZone": "Europe/Budapest",
+      "cron": "0 24 15 ? * MON-FRI"
+    }
 
 ##Modify [/clusters/{clusterId}/alarms/time/{alarmId}]
 ###Modify a time alarm [PUT]
@@ -1804,15 +1783,15 @@ Also a `threshold` can be configured, which specifies the variance applied by th
 
 + Response 200 (application/json)
 
-      {
-        "id": 152,
-        "alarmName": "cron-worktime-modified",
-        "description": "Number of nodes during worktime",
-        "scalingPolicyId": null,
-        "notifications": [],
-        "timeZone": "Europe/Budapest",
-        "cron": "0 39 16 ? * MON-FRI"
-      }
+    {
+      "id": 152,
+      "alarmName": "cron-worktime-modified",
+      "description": "Number of nodes during worktime",
+      "scalingPolicyId": null,
+      "notifications": [],
+      "timeZone": "Europe/Budapest",
+      "cron": "0 39 16 ? * MON-FRI"
+    }
 
 ##Retrieve [/clusters/{clusterId}/alarms/time]
 ###Retrieve configured alarms [GET]
@@ -1862,20 +1841,10 @@ Also a `threshold` can be configured, which specifies the variance applied by th
 
         }
 
-+ Response 200 (application/json)
++ Response 204 (application/json)
 
         {
-          "alarms": [
-            {
-              "cron": "0 00 09 ? * MON-FRI",
-              "timeZone": "Europe/Budapest",
-              "notifications": [],
-              "scalingPolicyId": null,
-              "description": "Number of nodes during worktime",
-              "alarmName": "cron_worktime",
-              "id": 100
-            }
-          ]
+
         }
 
 #Group Scaling Policy
@@ -1904,16 +1873,14 @@ Hosts can be added or removed from specific `hostgroups` - Ambari host groups ar
 
 + Response 201 (application/json)
 
-      [
-        {
-          "id": 250,
-          "name": "upScale",
-          "adjustmentType": "NODE_COUNT",
-          "scalingAdjustment": 2,
-          "alarmId": 152,
-          "hostGroup": "slave_1"
-        }
-      ]
+      {
+        "id": 250,
+        "name": "upScale",
+        "adjustmentType": "NODE_COUNT",
+        "scalingAdjustment": 2,
+        "alarmId": 152,
+        "hostGroup": "slave_1"
+      }
 
 ##Modify [/clusters/{clusterId}/policies/{policyId}]
 ###Modify a scaling policy. [PUT]
@@ -1934,14 +1901,14 @@ Hosts can be added or removed from specific `hostgroups` - Ambari host groups ar
 
 + Response 200 (application/json)
 
-        {
-          "id": 250,
-          "name": "upScaleModified",
-          "adjustmentType": "EXACT",
-          "scalingAdjustment": 2,
-          "alarmId": 152,
-          "hostGroup": "slave_1"
-        }
+      {
+        "id": 250,
+        "name": "upScaleModified",
+        "adjustmentType": "EXACT",
+        "scalingAdjustment": 2,
+        "alarmId": 152,
+        "hostGroup": "slave_1"
+      }
 
 ###List the scaling policies. [GET]
 
@@ -1988,22 +1955,10 @@ Hosts can be added or removed from specific `hostgroups` - Ambari host groups ar
 
         }
 
-+ Response 200 (application/json)
++ Response 204 (application/json)
 
         {
-          "cooldown": 35,
-          "scalingPolicies": [
-            {
-              "alarmId": 50,
-              "scalingAdjustment": 40,
-              "hostGroup": "slave_1",
-              "adjustmentType": "PERCENTAGE",
-              "name": "upScaleWhenHighPendingContainers",
-              "id": 101
-            }
-          ],
-          "maxSize": 10,
-          "minSize": 2
+
         }
 
 #Group Applications
