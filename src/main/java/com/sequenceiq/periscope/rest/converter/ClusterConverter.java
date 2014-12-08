@@ -12,6 +12,7 @@ public class ClusterConverter extends AbstractConverter<ClusterJson, Cluster> {
     public ClusterJson convert(Cluster source) {
         ClusterJson json = new ClusterJson();
         json.setId(source.getId());
+        json.setStackId(source.getStackId());
         json.setHost(source.getHost());
         json.setPort(source.getPort());
         json.setState(source.getState().name());

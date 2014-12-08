@@ -14,9 +14,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.periscope.domain.Ambari;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.PeriscopeUser;
+import com.sequenceiq.periscope.log.Logger;
+import com.sequenceiq.periscope.log.PeriscopeLoggerFactory;
+import com.sequenceiq.periscope.model.AmbariStack;
 import com.sequenceiq.periscope.model.HostResolution;
 import com.sequenceiq.periscope.model.Queue;
 import com.sequenceiq.periscope.model.QueueSetup;
@@ -34,6 +36,7 @@ import com.sequenceiq.periscope.utils.ClusterUtils;
 @Service
 public class ClusterService {
 
+    private static final Logger LOGGER = PeriscopeLoggerFactory.getLogger(ClusterService.class);
     private static final String CAPACITY_SCHEDULER = "capacity-scheduler";
     private static final String ROOT_PREFIX = "yarn.scheduler.capacity.root.";
     private static final String QUEUE_NAMES = ROOT_PREFIX + "queues";
@@ -53,15 +56,32 @@ public class ClusterService {
     @Value("${periscope.hostname.resolution:private}")
     private String hostNameResolution;
 
-    public Cluster add(PeriscopeUser user, Ambari ambari) throws ConnectionException {
+    public Cluster add(PeriscopeUser user, AmbariStack stack) throws ConnectionException {
         PeriscopeUser periscopeUser = userRepository.findOne(user.getId());
         if (periscopeUser == null) {
             periscopeUser = userRepository.save(user);
         }
-        Cluster cluster = new Cluster(periscopeUser, ambari, HostResolution.valueOf(hostNameResolution.toUpperCase()));
+        Cluster cluster = new Cluster(periscopeUser, stack, HostResolution.valueOf(hostNameResolution.toUpperCase()));
         cluster.start();
         clusterRepository.save(cluster);
         return clusterRegistry.add(user, cluster);
+    }
+
+    public Cluster modify(PeriscopeUser user, long clusterId, AmbariStack stack) throws ClusterNotFoundException, ConnectionException {
+        Cluster cluster = get(user, clusterId);
+        try {
+            Cluster probe = new Cluster(user, stack, HostResolution.valueOf(hostNameResolution.toUpperCase()));
+            probe.start();
+            probe.stop();
+        } catch (ConnectionException e) {
+            LOGGER.warn(clusterId, "Cannot modify the cluster as it fails to connect to Ambari", e);
+            throw e;
+        }
+        cluster.setAmbari(stack.getAmbari());
+        cluster.setStackId(stack.getStackId());
+        cluster.refreshConfiguration();
+        clusterRepository.save(cluster);
+        return cluster;
     }
 
     public Cluster get(PeriscopeUser user, long clusterId) throws ClusterNotFoundException {

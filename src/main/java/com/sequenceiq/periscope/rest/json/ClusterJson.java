@@ -7,6 +7,7 @@ public class ClusterJson implements Json {
     private String port;
     private String state;
     private String appMovement;
+    private Long stackId;
 
     public ClusterJson() {
     }
@@ -51,4 +52,11 @@ public class ClusterJson implements Json {
         this.appMovement = appMovement;
     }
 
+    public Long getStackId() {
+        return stackId;
+    }
+
+    public void setStackId(Long stackId) {
+        this.stackId = stackId;
+    }
 }

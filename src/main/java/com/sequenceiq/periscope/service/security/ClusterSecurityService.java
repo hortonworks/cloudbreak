@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.periscope.domain.Ambari;
 import com.sequenceiq.periscope.domain.PeriscopeUser;
+import com.sequenceiq.periscope.model.AmbariStack;
 import com.sequenceiq.periscope.service.CloudbreakService;
 
 import groovyx.net.http.HttpResponseException;
@@ -29,21 +30,21 @@ public class ClusterSecurityService {
         }
     }
 
-    public Ambari tryResolve(Ambari ambari) {
+    public AmbariStack tryResolve(Ambari ambari) {
         CloudbreakClient client = cloudbreakService.getClient();
         try {
             String host = ambari.getHost();
             String user = ambari.getUser();
             String pass = ambari.getPass();
+            long id = client.resolveToStackId(host);
             if (user == null && pass == null) {
-                int id = client.resolveToStackId(host);
                 Map<String, String> stack = (Map<String, String>) client.getStack("" + id);
-                return new Ambari(host, ambari.getPort(), stack.get("userName"), stack.get("password"));
+                return new AmbariStack(new Ambari(host, ambari.getPort(), stack.get("userName"), stack.get("password")), id);
             } else {
-                return ambari;
+                return new AmbariStack(ambari, id);
             }
         } catch (Exception e) {
-            return ambari;
+            return new AmbariStack(ambari);
         }
     }
 

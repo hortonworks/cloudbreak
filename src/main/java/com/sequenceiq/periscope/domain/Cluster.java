@@ -29,6 +29,7 @@ import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.ClusterMetricsIn
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.periscope.log.Logger;
 import com.sequenceiq.periscope.log.PeriscopeLoggerFactory;
+import com.sequenceiq.periscope.model.AmbariStack;
 import com.sequenceiq.periscope.model.HostResolution;
 import com.sequenceiq.periscope.model.Priority;
 import com.sequenceiq.periscope.model.SchedulerApplication;
@@ -49,7 +50,7 @@ public class Cluster {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "template_generator")
     @SequenceGenerator(name = "template_generator", sequenceName = "sequence_table")
     private long id;
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private Ambari ambari;
     @ManyToOne
     private PeriscopeUser user;
@@ -64,6 +65,7 @@ public class Cluster {
     private int minSize = DEFAULT_MIN_SIZE;
     private int maxSize = DEFAULT_MAX_SIZE;
     private int coolDown = DEFAULT_COOLDOWN;
+    private Long stackId;
 
     @Transient
     private Map<Priority, Map<ApplicationId, SchedulerApplication>> applications;
@@ -84,9 +86,10 @@ public class Cluster {
         this.applications = new ConcurrentHashMap<>();
     }
 
-    public Cluster(PeriscopeUser user, Ambari ambari, HostResolution resolution) throws ConnectionException {
+    public Cluster(PeriscopeUser user, AmbariStack stack, HostResolution resolution) throws ConnectionException {
         this.user = user;
-        this.ambari = ambari;
+        this.stackId = stack.getStackId();
+        this.ambari = stack.getAmbari();
         this.applications = new ConcurrentHashMap<>();
         this.resolution = resolution;
     }
@@ -219,6 +222,22 @@ public class Cluster {
 
     public String getAmbariPass() {
         return ambari.getPass();
+    }
+
+    public Ambari getAmbari() {
+        return ambari;
+    }
+
+    public void setAmbari(Ambari ambari) {
+        this.ambari = ambari;
+    }
+
+    public Long getStackId() {
+        return stackId;
+    }
+
+    public void setStackId(Long stackId) {
+        this.stackId = stackId;
     }
 
     public PeriscopeUser getUser() {

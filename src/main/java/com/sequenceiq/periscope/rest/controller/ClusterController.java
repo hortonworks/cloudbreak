@@ -18,6 +18,7 @@ import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.PeriscopeUser;
 import com.sequenceiq.periscope.log.Logger;
 import com.sequenceiq.periscope.log.PeriscopeLoggerFactory;
+import com.sequenceiq.periscope.model.AmbariStack;
 import com.sequenceiq.periscope.registry.ConnectionException;
 import com.sequenceiq.periscope.rest.converter.AmbariConverter;
 import com.sequenceiq.periscope.rest.converter.ClusterConverter;
@@ -48,17 +49,14 @@ public class ClusterController {
 
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<ClusterJson> addCluster(@ModelAttribute("user") PeriscopeUser user,
-            @RequestBody AmbariJson ambariServer) throws ConnectionException {
-        Ambari ambari = ambariConverter.convert(ambariServer);
-        boolean access = clusterSecurityService.hasAccess(user, ambari);
-        if (!access) {
-            String host = ambari.getHost();
-            LOGGER.info(-1, "Illegal access to Ambari cluster '{}' from user '{}'", host, user.getEmail());
-            throw new AccessDeniedException(String.format("Accessing Ambari cluster '%s' is not allowed", host));
-        } else {
-            Ambari resolvedAmbari = clusterSecurityService.tryResolve(ambari);
-            return createClusterJsonResponse(clusterService.add(user, resolvedAmbari), HttpStatus.CREATED);
-        }
+            @RequestBody AmbariJson ambariServer) throws ConnectionException, ClusterNotFoundException {
+        return setCluster(user, ambariServer, null);
+    }
+
+    @RequestMapping(value = "/{clusterId}", method = RequestMethod.PUT)
+    public ResponseEntity<ClusterJson> modifyCluster(@ModelAttribute("user") PeriscopeUser user,
+            @RequestBody AmbariJson ambariServer, @PathVariable long clusterId) throws ClusterNotFoundException, ConnectionException {
+        return setCluster(user, ambariServer, clusterId);
     }
 
     @RequestMapping(method = RequestMethod.GET)
@@ -91,6 +89,24 @@ public class ClusterController {
 
     private ResponseEntity<ClusterJson> createClusterJsonResponse(Cluster cluster, HttpStatus status) {
         return new ResponseEntity<>(clusterConverter.convert(cluster), status);
+    }
+
+    private ResponseEntity<ClusterJson> setCluster(PeriscopeUser user, AmbariJson json, Long clusterId)
+            throws ConnectionException, ClusterNotFoundException {
+        Ambari ambari = ambariConverter.convert(json);
+        boolean access = clusterSecurityService.hasAccess(user, ambari);
+        if (!access) {
+            String host = ambari.getHost();
+            LOGGER.info(-1, "Illegal access to Ambari cluster '{}' from user '{}'", host, user.getEmail());
+            throw new AccessDeniedException(String.format("Accessing Ambari cluster '%s' is not allowed", host));
+        } else {
+            AmbariStack resolvedAmbari = clusterSecurityService.tryResolve(ambari);
+            if (clusterId == null) {
+                return createClusterJsonResponse(clusterService.add(user, resolvedAmbari), HttpStatus.CREATED);
+            } else {
+                return createClusterJsonResponse(clusterService.modify(user, clusterId, resolvedAmbari), HttpStatus.OK);
+            }
+        }
     }
 
 }
