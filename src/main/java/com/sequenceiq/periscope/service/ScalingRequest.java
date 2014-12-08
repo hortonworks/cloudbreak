@@ -17,7 +17,10 @@ public class ScalingRequest implements Runnable {
     private static final Logger LOGGER = PeriscopeLoggerFactory.getLogger(ScalingRequest.class);
     private static final String AVAILABLE = "AVAILABLE";
     private static final int RETRY_COUNT = 100;
+    private static final int READY_COUNT = 2;
     private static final int SLEEP = 20000;
+    private final long sleepTime;
+    private final int retryCount;
     private final int desiredNodeCount;
     private final int totalNodes;
     private final Cluster cluster;
@@ -29,6 +32,17 @@ public class ScalingRequest implements Runnable {
     public ScalingRequest(Cluster cluster, ScalingPolicy policy, int totalNodes, int desiredNodeCount) {
         this.cluster = cluster;
         this.policy = policy;
+        this.sleepTime = SLEEP;
+        this.retryCount = RETRY_COUNT;
+        this.totalNodes = totalNodes;
+        this.desiredNodeCount = desiredNodeCount;
+    }
+
+    public ScalingRequest(Cluster cluster, ScalingPolicy policy, int totalNodes, int desiredNodeCount, long sleepTime, int retry) {
+        this.cluster = cluster;
+        this.policy = policy;
+        this.retryCount = retry;
+        this.sleepTime = sleepTime;
         this.totalNodes = totalNodes;
         this.desiredNodeCount = desiredNodeCount;
     }
@@ -91,19 +105,19 @@ public class ScalingRequest implements Runnable {
     }
 
     private boolean waitForReadyState(long clusterId, int stackId, CloudbreakClient client) throws InterruptedException {
-        boolean result = false;
         int retry = 0;
-        while (retry < RETRY_COUNT && !result) {
+        int ready = READY_COUNT;
+        while (ready > 0 && retry < retryCount) {
             LOGGER.info(clusterId, "Scaling: Waiting for cluster to be {}", AVAILABLE);
             String status = client.getStackStatus(stackId);
             if (AVAILABLE.equals(status)) {
-                result = true;
+                ready--;
             } else {
                 retry++;
             }
-            Thread.sleep(SLEEP);
+            Thread.sleep(sleepTime);
         }
-        return result;
+        return ready == 0;
     }
 
 }
