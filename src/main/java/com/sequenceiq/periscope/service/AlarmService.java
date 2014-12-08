@@ -25,12 +25,12 @@ public class AlarmService {
     @Autowired
     private ClusterService clusterService;
 
-    public List<MetricAlarm> addMetricAlarm(PeriscopeUser user, long clusterId, MetricAlarm metricAlarm) throws ClusterNotFoundException {
+    public MetricAlarm addMetricAlarm(PeriscopeUser user, long clusterId, MetricAlarm metricAlarm) throws ClusterNotFoundException {
         Cluster cluster = clusterService.get(user, clusterId);
         metricAlarmRepository.save(metricAlarm);
         cluster.addAlarm(metricAlarm);
         clusterRepository.save(cluster);
-        return cluster.getMetricAlarms();
+        return metricAlarm;
     }
 
     public MetricAlarm setMetricAlarm(PeriscopeUser user, long clusterId, long alarmId, MetricAlarm metricAlarm) throws ClusterNotFoundException {
@@ -56,12 +56,12 @@ public class AlarmService {
         return savedAlarm;
     }
 
-    public List<TimeAlarm> addTimeAlarm(PeriscopeUser user, long clusterId, TimeAlarm alarm) throws ClusterNotFoundException {
+    public TimeAlarm addTimeAlarm(PeriscopeUser user, long clusterId, TimeAlarm alarm) throws ClusterNotFoundException {
         Cluster cluster = clusterService.get(user, clusterId);
         timeAlarmRepository.save(alarm);
         cluster.addAlarm(alarm);
         clusterRepository.save(cluster);
-        return cluster.getTimeAlarms();
+        return alarm;
     }
 
     public TimeAlarm setTimeAlarm(PeriscopeUser user, long clusterId, long alarmId, TimeAlarm timeAlarm) throws ClusterNotFoundException {
@@ -94,7 +94,7 @@ public class AlarmService {
         return clusterService.get(user, clusterId).getTimeAlarms();
     }
 
-    public MetricAlarm deleteMetricAlarm(PeriscopeUser user, long clusterId, long alarmId) throws ClusterNotFoundException {
+    public void deleteMetricAlarm(PeriscopeUser user, long clusterId, long alarmId) throws ClusterNotFoundException {
         Cluster cluster = clusterService.get(user, clusterId);
         MetricAlarm metricAlarm = metricAlarmRepository.findOne(alarmId);
         if (metricAlarm == null) {
@@ -104,10 +104,9 @@ public class AlarmService {
         alarms.remove(metricAlarm);
         metricAlarmRepository.delete(metricAlarm);
         cluster.setMetricAlarms(alarms);
-        return metricAlarm;
     }
 
-    public List<TimeAlarm> deleteTimeAlarm(PeriscopeUser user, long clusterId, long alarmId) throws ClusterNotFoundException {
+    public void deleteTimeAlarm(PeriscopeUser user, long clusterId, long alarmId) throws ClusterNotFoundException {
         Cluster cluster = clusterService.get(user, clusterId);
         TimeAlarm alarm = timeAlarmRepository.findOne(alarmId);
         if (alarm == null) {
@@ -117,7 +116,6 @@ public class AlarmService {
         alarms.remove(alarm);
         timeAlarmRepository.delete(alarm);
         cluster.setTimeAlarms(alarms);
-        return alarms;
     }
 
 }

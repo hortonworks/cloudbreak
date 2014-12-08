@@ -74,7 +74,8 @@ public class ClusterController {
     @RequestMapping(value = "/{clusterId}", method = RequestMethod.DELETE)
     public ResponseEntity<ClusterJson> deleteCluster(@ModelAttribute("user") PeriscopeUser user,
             @PathVariable long clusterId) throws ClusterNotFoundException {
-        return createClusterJsonResponse(clusterService.remove(user, clusterId));
+        clusterService.remove(user, clusterId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @RequestMapping(value = "/{clusterId}/state", method = RequestMethod.POST)

@@ -104,13 +104,12 @@ public class ClusterService {
         return clusterRegistry.getAll(user);
     }
 
-    public Cluster remove(PeriscopeUser user, long clusterId) throws ClusterNotFoundException {
+    public void remove(PeriscopeUser user, long clusterId) throws ClusterNotFoundException {
         Cluster cluster = clusterRegistry.remove(user, clusterId);
         if (cluster == null) {
             throw new ClusterNotFoundException(clusterId);
         }
         clusterRepository.delete(cluster);
-        return cluster;
     }
 
     public void setScalingConfiguration(PeriscopeUser user, long clusterId, ScalingConfigurationJson scalingConfiguration)

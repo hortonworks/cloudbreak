@@ -87,7 +87,7 @@ public class ScalingService {
         return result;
     }
 
-    public List<ScalingPolicy> addScalingPolicy(PeriscopeUser user, long clusterId, ScalingPolicy policy) throws ClusterNotFoundException {
+    public ScalingPolicy addScalingPolicy(PeriscopeUser user, long clusterId, ScalingPolicy policy) throws ClusterNotFoundException {
         Cluster cluster = clusterService.get(user, clusterId);
         long alarmId = policy.getAlarm().getId();
         List<BaseAlarm> alarms = cluster.getAlarms();
@@ -99,10 +99,10 @@ public class ScalingService {
                 break;
             }
         }
-        return getScalingPolicies(cluster);
+        return policy;
     }
 
-    public List<ScalingPolicy> deletePolicy(PeriscopeUser user, long clusterId, long policyId) throws ClusterNotFoundException {
+    public void deletePolicy(PeriscopeUser user, long clusterId, long policyId) throws ClusterNotFoundException {
         Cluster cluster = clusterService.get(user, clusterId);
         List<BaseAlarm> alarms = cluster.getAlarms();
         for (BaseAlarm alarm : alarms) {
@@ -115,7 +115,6 @@ public class ScalingService {
         }
         clusterRepository.save(cluster);
         cluster.setAlarms(alarms);
-        return getScalingPolicies(user, clusterId);
     }
 
     public List<ScalingPolicy> getScalingPolicies(PeriscopeUser user, long clusterId) throws ClusterNotFoundException {

@@ -31,10 +31,10 @@ public class PolicyController {
     private ScalingPolicyConverter policyConverter;
 
     @RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity<List<ScalingPolicyJson>> addScaling(@ModelAttribute("user") PeriscopeUser user, @PathVariable long clusterId,
+    public ResponseEntity<ScalingPolicyJson> addScaling(@ModelAttribute("user") PeriscopeUser user, @PathVariable long clusterId,
             @RequestBody @Valid ScalingPolicyJson json) throws ClusterNotFoundException {
         ScalingPolicy scalingPolicy = policyConverter.convert(json);
-        return createScalingPoliciesJsonResponse(scalingService.addScalingPolicy(user, clusterId, scalingPolicy), HttpStatus.CREATED);
+        return createScalingPolicyJsonResponse(scalingService.addScalingPolicy(user, clusterId, scalingPolicy), HttpStatus.CREATED);
     }
 
     @RequestMapping(value = "/{policyId}", method = RequestMethod.PUT)
@@ -51,9 +51,10 @@ public class PolicyController {
     }
 
     @RequestMapping(value = "/{policyId}", method = RequestMethod.DELETE)
-    public ResponseEntity<List<ScalingPolicyJson>> deletePolicy(@ModelAttribute("user") PeriscopeUser user,
+    public ResponseEntity<ScalingPolicyJson> deletePolicy(@ModelAttribute("user") PeriscopeUser user,
             @PathVariable long clusterId, @PathVariable long policyId) throws ClusterNotFoundException {
-        return createScalingPoliciesJsonResponse(scalingService.deletePolicy(user, clusterId, policyId), HttpStatus.OK);
+        scalingService.deletePolicy(user, clusterId, policyId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     private ResponseEntity<List<ScalingPolicyJson>> createScalingPoliciesJsonResponse(List<ScalingPolicy> scalingPolicies, HttpStatus status) {
