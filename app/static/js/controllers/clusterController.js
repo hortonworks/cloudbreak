@@ -3,8 +3,8 @@
 var log = log4javascript.getLogger("clusterController-logger");
 var $jq = jQuery.noConflict();
 
-angular.module('uluwatuControllers').controller('clusterController', ['$scope', '$rootScope', '$filter', 'UluwatuCluster', 'GlobalStack', 'Cluster', '$interval', 'UserEvents', 'PeriscopeCluster',
-    function ($scope, $rootScope, $filter, UluwatuCluster, GlobalStack, Cluster, $interval, UserEvents, PeriscopeCluster) {
+angular.module('uluwatuControllers').controller('clusterController', ['$scope', '$rootScope', '$filter', 'UluwatuCluster', 'GlobalStack', 'Cluster', '$interval', 'UserEvents',
+    function ($scope, $rootScope, $filter, UluwatuCluster, GlobalStack, Cluster, $interval, UserEvents) {
 
         $rootScope.ledStyles = {
             "REQUESTED": "state2-run-blink",
@@ -70,8 +70,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             UluwatuCluster.save($scope.cluster, function (result) {
                 $rootScope.clusters.push(result);
                 initCluster();
-                //$scope.modifyStatusMessage($rootScope.error_msg.cluster_success1 + result.name + $rootScope.error_msg.cluster_success2);
-                //$scope.modifyStatusClass("has-success");
                 $jq('.carousel').carousel(0);
                 // enable toolbar buttons
                 $jq('#toggle-cluster-block-btn').removeClass('disabled');
@@ -91,32 +89,11 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 actCluster.status = "DELETE_IN_PROGRESS";
                 $scope.modifyStatusMessage($rootScope.error_msg.cluster_delete_success1 + cluster.id + $rootScope.error_msg.cluster_delete_success2);
                 $scope.modifyStatusClass("has-success");
-                deletePeriscopeCluster(actCluster);
+                $scope.$broadcast('DELETE_PERISCOPE_CLUSTER', cluster.ambariServerIp);
             }, function (failure){
                 $scope.modifyStatusMessage($rootScope.error_msg.cluster_delete_failed + ": " + failure.data.message);
                 $scope.modifyStatusClass("has-error");
             });
-        }
-
-        function deletePeriscopeCluster(cluster) {
-          console.log(cluster)
-          var periCluster = selectActivePeriClusterByAmbariIp(cluster);
-          if (periCluster != undefined) {
-            console.log('Delete periscope cluster with host: ' + periCluster.host);
-            console.log(periCluster);
-            PeriscopeCluster.delete({id: periCluster.id}, function(success){
-              $rootScope.periscopeClusters = $filter('filter')($rootScope.periscopeClusters, function(value, index) { return value.id != periCluster.id;});
-            });
-          }
-        }
-
-        function selectActivePeriClusterByAmbariIp(uluCluster) {
-          var periCluster = undefined;
-          var periClusters = $filter('filter')($rootScope.periscopeClusters, function(value, index) { return value.host == uluCluster.ambariServerIp; }, true);
-          if (periClusters != undefined && periClusters.length > 0) {
-            periCluster = periClusters[0];
-          }
-          return periCluster;
         }
 
         $scope.changeActiveCluster = function (clusterId) {

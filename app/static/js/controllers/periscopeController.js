@@ -2,8 +2,9 @@
 
 var log = log4javascript.getLogger("periscopeController-logger");
 
-angular.module('uluwatuControllers').controller('periscopeController', ['$scope', '$rootScope', '$filter', 'PeriscopeCluster', 'MetricAlarm', 'TimeAlarm', 'ScalingPolicy',
-    function ($scope, $rootScope, $filter, PeriscopeCluster, MetricAlarm, TimeAlarm, ScalingPolicy) {
+angular.module('uluwatuControllers').controller('periscopeController', ['$scope', '$rootScope', '$filter', 'PeriscopeCluster', 'MetricAlarm',
+  'TimeAlarm', 'ScalingPolicy', 'Cluster', 'PeriscopeClusterState',
+  function ($scope, $rootScope, $filter, PeriscopeCluster, MetricAlarm, TimeAlarm, ScalingPolicy, Cluster, PeriscopeClusterState) {
         $rootScope.periscopeClusters = PeriscopeCluster.query();
         $scope.alarms = [];
         $scope.policies = {};
@@ -17,18 +18,27 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
 
         $rootScope.$watch('activeCluster', function(uluCluster, oldUluCluster){
           if (uluCluster.ambariServerIp != undefined) {
-            var periCluster = selectActivePeriClusterByAmbariIp(uluCluster);
-            if(periCluster != undefined) {
-              console.log(periCluster)
-              $scope.actPeriscopeCluster = periCluster;
-              getAlarms(periCluster.id);
-              getScalingPolicies(periCluster.id)
-            } else {
-              //cluster is not ready yet disable autscaling functions
-              $scope.actPeriscopeCluster = undefined;
-            }
+            setActivePeriClusterWithResources(uluCluster.ambariServerIp);
           }
         }, false);
+
+        function setActivePeriClusterWithResources(ambariServerIp) {
+          var periCluster = selectActivePeriClusterByAmbariIp(ambariServerIp);
+          if (isActiveUluClusterEqualsPeriCluster(periCluster)) {
+            console.log(periCluster)
+            $scope.actPeriscopeCluster = periCluster;
+            getAlarms(periCluster.id);
+            getScalingPolicies(periCluster.id);
+          } else {
+            //cluster is not ready yet disable autscaling functions
+            $scope.actPeriscopeCluster = undefined;
+          }
+        }
+
+        function isActiveUluClusterEqualsPeriCluster(periCluster) {
+          return periCluster != undefined && $rootScope.activeCluster.ambariServerIp != undefined
+            && $rootScope.activeCluster.ambariServerIp == periCluster.ambariServerIp;
+        }
 
         $scope.activateMetricAlarmCreationForm = function(isMetricAlarm) {
           $scope.metricBasedAlarm = isMetricAlarm;
@@ -96,7 +106,6 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
 
         function getAlarms(id){
           $scope.alarms=[];
-          console.log($rootScope.activeCluster);
           MetricAlarm.query({id: id}, function (success) {
             success.alarms.forEach(function(el){ $scope.alarms.push(el); });
           });
@@ -109,14 +118,12 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
           ScalingPolicy.query({id: id}, function (policies) {
             $scope.policies = policies;
             resetScalingActionForm();
-            console.log('policies: ')
-            console.log(policies);
           });
         }
 
-        function selectActivePeriClusterByAmbariIp(uluCluster) {
+        function selectActivePeriClusterByAmbariIp(ambariServerIp) {
           var periCluster = undefined;
-          var periClusters = $filter('filter')($rootScope.periscopeClusters, function(value, index) { return value.host == uluCluster.ambariServerIp; }, true);
+          var periClusters = $filter('filter')($rootScope.periscopeClusters, function(value, index) { return value.host == ambariServerIp; }, true);
           if (periClusters != undefined && periClusters.length > 0) {
             periCluster = periClusters[0];
           }
@@ -165,6 +172,66 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
               $scope.policies = success;
             });
           }
+        }
+
+        $scope.$on('DELETE_PERISCOPE_CLUSTER', function(event, ambariIp) {
+            var periCluster = selectActivePeriClusterByAmbariIp(ambariIp);
+            if (periCluster != undefined) {
+              console.log('Delete periscope cluster with host: ' + periCluster.host);
+              console.log(periCluster);
+              PeriscopeCluster.delete({id: periCluster.id}, function(success){
+                $rootScope.periscopeClusters = $filter('filter')($rootScope.periscopeClusters, function(value, index) { return value.id != periCluster.id;});
+              });
+            }
+        });
+
+        $scope.$on('CREATE_OR_START_PERISCOPE_CLUSTER', function(event, uluwatuCluster, message) {
+          console.log(uluwatuCluster)
+          if (message.indexOf("Cluster installation successfully") > -1) {
+            createPeriscopeCluster(uluwatuCluster);
+          } else if(message.indexOf("Cluster started successfully") > -1) {
+            startPeriscopeCluster(uluwatuCluster);
+          }
+        });
+
+        function createPeriscopeCluster(uluCluster) {
+          console.log('Get cluster with id for create: ' + uluCluster.id)
+          Cluster.get({id: uluCluster.id}, function(cluster){
+            if (cluster.status == 'AVAILABLE') {
+              var ambariJson = {
+                'host': uluCluster.ambariServerIp,
+                'port': '8080',
+                'user': uluCluster.userName,
+                'pass': uluCluster.password
+              };
+              PeriscopeCluster.save(ambariJson, function(periCluster){
+                console.log(periCluster);
+                $rootScope.periscopeClusters.push(periCluster);
+                setActivePeriClusterWithResources(uluCluster.ambariServerIp);
+              }, function(error) {
+
+              });
+            }
+          });
+        }
+
+        function startPeriscopeCluster(uluCluster) {
+          console.log('Get cluster with id for start: ' + uluCluster.id)
+          Cluster.get({id: uluCluster.id}, function(cluster){
+            if (cluster.status == 'AVAILABLE') {
+              var periCluster = selectActivePeriClusterByAmbariIp(uluCluster.ambariServerIp);
+              console.log(periCluster)
+              if (periCluster != undefined) {
+                var periscopeClusterStatus = { 'state': 'RUNNING'};
+                PeriscopeClusterState.save({id: periCluster.id}, periscopeClusterStatus, function(success) {
+                  console.log('start of periscope cluster was successfully....');
+                  console.log(success)
+                  setActivePeriClusterWithResources(uluCluster.ambariServerIp);
+                }, function(error){
+                });
+              }
+            }
+          });
         }
     }
 ]);

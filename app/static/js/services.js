@@ -172,3 +172,8 @@ uluwatuServices.factory('UluwatuCluster', ['UserStack', 'Cluster', 'GlobalStack'
     function ($resource) {
       return $resource('periscope/clusters/:id/policies/:policyId', null, {'query':  {method:'GET', isArray:false}});
     }]);
+
+    uluwatuServices.factory('PeriscopeClusterState', ['$resource',
+    function ($resource) {
+      return $resource('periscope/clusters/:id/state');
+    }]);
