@@ -23,7 +23,10 @@
 <div class="form-group" ng-class="{'has-error': timeBasedAlarmForm.timeZone.$dirty && timeBasedAlarmForm.timeZone.$invalid }">
   <label class="col-sm-3 control-label" for="alarmDesc">time zone</label>
   <div class="col-sm-9">
-    <input type="text" class="form-control" id="timeZone" name="timeZone" placeholder="" rows="2" ng-model="alarm.timeZone" required></input>
+    <select class="form-control" id="timeZone" name="timeZone" ng-model="alarm.timeZone" required>
+      <option value="UTC">UTC</option>
+      <option value="Zulu">Zulu</option>
+    </select>
     <div class="help-block" ng-show="timeBasedAlarmForm.timeZone.$dirty && timeBasedAlarmForm.timeZone.$invalid">
       <i class="fa fa-warning"></i> {{error_msg.alarm_timezone_invalid}}
     </div>
