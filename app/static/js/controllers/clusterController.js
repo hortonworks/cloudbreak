@@ -89,7 +89,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 actCluster.status = "DELETE_IN_PROGRESS";
                 $scope.modifyStatusMessage($rootScope.error_msg.cluster_delete_success1 + cluster.id + $rootScope.error_msg.cluster_delete_success2);
                 $scope.modifyStatusClass("has-success");
-                $scope.$broadcast('DELETE_PERISCOPE_CLUSTER', cluster.ambariServerIp);
+                $scope.$broadcast('DELETE_PERISCOPE_CLUSTER', cluster.stackId);
             }, function (failure){
                 $scope.modifyStatusMessage($rootScope.error_msg.cluster_delete_failed + ": " + failure.data.message);
                 $scope.modifyStatusClass("has-error");

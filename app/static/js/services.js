@@ -155,7 +155,7 @@ uluwatuServices.factory('UluwatuCluster', ['UserStack', 'Cluster', 'GlobalStack'
 
     uluwatuServices.factory('PeriscopeCluster', ['$resource',
     function ($resource) {
-      return $resource('periscope/clusters/:id');
+      return $resource('periscope/clusters/:id', null, {'update': {method:'PUT', isArray:false}});
     }]);
 
     uluwatuServices.factory('PeriscopeClusterScalingConfiguration', ['$resource',
