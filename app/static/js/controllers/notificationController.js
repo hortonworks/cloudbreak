@@ -73,7 +73,7 @@ function ($scope, $rootScope, $filter, Cluster) {
       $scope.modifyStatusMessage(msg, actCluster.name);
       $scope.modifyStatusClass("has-success");
       addNotificationToGlobalEvents(notification);
-      $rootScope.$broadcast('CREATE_OR_START_PERISCOPE_CLUSTER', actCluster, msg);
+      $rootScope.$broadcast('START_PERISCOPE_CLUSTER', actCluster, msg);
     }
 
     function handleUptimeNotification(notification) {
