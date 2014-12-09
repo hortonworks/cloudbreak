@@ -115,7 +115,7 @@ start_ambari_server() {
 
 start_ambari_agent() {
   set_public_host_script
-
+  set_disk_as_volumes
   docker run -d \
     --name ambari-agent \
     --net=host \
@@ -125,13 +125,22 @@ start_ambari_agent() {
     sequenceiq/ambari:$DOCKER_TAG /start-agent
 }
 
+set_disk_as_volumes() {
+  for fn in `ls /mnt/ | grep fs`; do
+    VOLUMES="$VOLUMES -v /mnt/$fn:/mnt/$fn"
+  done
+}
+
+register_ambari_add() {
+  cp /user/local/register-ambari /etc/init.d/register-ambari
+  chmod +x /etc/init.d/register-ambari
+  chown root:root /etc/init.d/register-ambari
+  update-rc.d -f register-ambari defaults
+  update-rc.d -f register-ambari enable
+}
+
 set_public_host_script() {
-  cat>/tmp/pubhost.sh<<"EOF"
-#!/bin/bash
-echo $(hostname).cloudapp.net
-EOF
-  chmod +x /tmp/pubhost.sh
-  VOLUMES="$VOLUMES -v /tmp/pubhost.sh:/etc/ambari-agent/conf/public-hostname.sh"
+  VOLUMES="$VOLUMES -v /usr/local/public_host_script:/etc/ambari-agent/conf/public-hostname.sh"
 }
 
 main() {
@@ -139,10 +148,12 @@ main() {
     shift
     eval "$@"
   else
+    /usr/local/disk_mount.sh
     fix_hostname
     start_consul
     start_ambari_server
     start_ambari_agent
+    register_ambari_add
   fi
 }
 
