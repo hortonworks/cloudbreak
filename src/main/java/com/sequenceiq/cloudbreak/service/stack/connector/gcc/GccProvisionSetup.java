@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.sequenceiq.cloudbreak.service.PollingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,12 +44,20 @@ public class GccProvisionSetup implements ProvisionSetup {
     private static final String MAIN_PROJECT = "siq-haas";
     private static final String TAR_NAME = "debian.image.tar.gz";
     private static final int CONFLICT = 409;
+    private static final int MAX_POLLING_ATTEMPTS = 60;
+    private static final int POLLING_INTERVAL = 5000;
 
     @Autowired
     private Reactor reactor;
 
     @Autowired
     private GccStackUtil gccStackUtil;
+
+    @Autowired
+    private PollingService<GccImageReadyPollerObject> gccImageReadyPollerObjectPollingService;
+
+    @Autowired
+    private GccImageCheckerStatus gccImageCheckerStatus;
 
     @Override
     public void setupProvisioning(Stack stack) {
@@ -83,6 +92,9 @@ public class GccProvisionSetup implements ProvisionSetup {
                 image.setRawDisk(rawDisk);
                 Compute.Images.Insert ins1 = compute.images().insert(credential.getProjectId(), image);
                 ins1.execute();
+
+                GccImageReadyPollerObject gccInstanceReady = new GccImageReadyPollerObject(image.getName(), stack, compute);
+                gccImageReadyPollerObjectPollingService.pollWithTimeout(gccImageCheckerStatus, gccInstanceReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
             }
         } catch (IOException e) {
             LOGGER.error(String.format("Error occurs on %s stack under the setup", stack.getId()), e);
