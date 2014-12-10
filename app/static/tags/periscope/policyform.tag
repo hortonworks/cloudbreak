@@ -33,7 +33,9 @@
 <div class="form-group" ng-class="{ 'has-error': policyForm.policyHostGroup.$dirty && policyForm.policyHostGroup.$invalid }">
   <label class="col-sm-3 control-label" for="policyHostGroup">host group</label>
   <div class="col-sm-9">
-    <input type="text" class="form-control" id="policyHostGroup" name="policyHostGroup" ng-model="scalingAction.policy.hostGroup" required>
+    <select class="form-control" id="policyHostGroup" name="policyHostGroup" placeholder="select one" ng-model="scalingAction.policy.hostGroup" required>
+      <option ng-repeat="hostGroup in activeClusterBlueprint.ambariBlueprint.host_groups" value="{{hostGroup.name}}" id="host-group-{{hostGroup.name}}">{{hostGroup.name}}</option>
+    </select>
     <div class="help-block" ng-show="policyForm.policyHostGroup.$dirty && policyForm.policyHostGroup.$invalid">
       <i class="fa fa-warning"></i> {{error_msg.scaling_policy_host_group_invalid}}
     </div>
