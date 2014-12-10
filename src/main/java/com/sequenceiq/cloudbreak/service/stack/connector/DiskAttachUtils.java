@@ -9,7 +9,7 @@ public final class DiskAttachUtils {
     public static String buildDiskPathString(int volumeCount) {
         StringBuilder localDirs = new StringBuilder("");
         for (int i = 1; i <= volumeCount; i++) {
-            localDirs.append("/mnt/fs").append(i);
+            localDirs.append("/mnt/fs").append(i).append("/data");
             if (i != volumeCount) {
                 localDirs.append(",");
             }

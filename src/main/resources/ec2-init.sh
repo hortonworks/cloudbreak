@@ -1,6 +1,6 @@
 : ${NODE_PREFIX=amb}
 : ${MYDOMAIN:=mycorp.kom}
-: ${IMAGE:="sequenceiq/ambari:1.6.0"}
+: ${IMAGE:="sequenceiq/ambari:1.7.0-warmup"}
 
 # instance id from ec2 metadata
 INSTANCE_ID=$(curl -s 169.254.169.254/latest/meta-data/instance-id)
