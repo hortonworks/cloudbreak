@@ -56,14 +56,16 @@ public class AmbariConfigurationService {
         String result = entry.getValue();
         if (entry.getKey().startsWith("yarn.resourcemanager")) {
             int portStartIndex = result.indexOf(":");
-            String internalAddress = result.substring(0, portStartIndex);
-            String publicAddress = ambariClient.resolveInternalHostName(internalAddress);
-            if (internalAddress.equals(publicAddress)) {
-                if (internalAddress.contains(AZURE_ADDRESS)) {
-                    publicAddress = internalAddress.substring(0, internalAddress.indexOf(".") + 1) + AZURE_ADDRESS;
+            if (portStartIndex != -1) {
+                String internalAddress = result.substring(0, portStartIndex);
+                String publicAddress = ambariClient.resolveInternalHostName(internalAddress);
+                if (internalAddress.equals(publicAddress)) {
+                    if (internalAddress.contains(AZURE_ADDRESS)) {
+                        publicAddress = internalAddress.substring(0, internalAddress.indexOf(".") + 1) + AZURE_ADDRESS;
+                    }
                 }
+                result = publicAddress + result.substring(portStartIndex);
             }
-            result = publicAddress + result.substring(portStartIndex);
         }
         return result;
     }
