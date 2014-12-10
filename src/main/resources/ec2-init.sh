@@ -125,7 +125,7 @@ start_ambari_agent() {
     sequenceiq/ambari:$DOCKER_TAG /start-agent
 }
 
-set_disk_as_vloumes() {
+set_disk_as_volumes() {
   for fn in `ls /mnt/ | grep fs`; do
     VOLUMES="$VOLUMES -v /mnt/$fn:/mnt/$fn"
   done
@@ -136,7 +136,7 @@ set_public_host_script() {
 }
 
 register_ambari_add() {
-  cp /user/local/register-ambari /etc/init.d/register-ambari
+  cp /usr/local/register-ambari /etc/init.d/register-ambari
   chmod +x /etc/init.d/register-ambari
   chown root:root /etc/init.d/register-ambari
   update-rc.d -f register-ambari defaults
