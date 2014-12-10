@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccStackUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -27,7 +28,6 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccDiskCheckerStatus;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccDiskReadyPollerObject;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccImageType;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveCheckerStatus;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveReadyPollerObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.GccSimpleInstanceResourceBuilder;
@@ -52,6 +52,8 @@ public class GccDiskResourceBuilder extends GccSimpleInstanceResourceBuilder {
     private PollingService<GccRemoveReadyPollerObject> gccRemoveReadyPollerObjectPollingService;
     @Autowired
     private JsonHelper jsonHelper;
+    @Autowired
+    private GccStackUtil gccStackUtil;
 
     @Override
     public List<Resource> create(GccProvisionContextObject po, int index, List<Resource> resources) throws Exception {
@@ -63,7 +65,7 @@ public class GccDiskResourceBuilder extends GccSimpleInstanceResourceBuilder {
         disk.setName(name);
         disk.setKind(((GccTemplate) stack.getTemplate()).getGccRawDiskType().getUrl(po.getProjectId(), template.getGccZone()));
         Compute.Disks.Insert insDisk = po.getCompute().disks().insert(po.getProjectId(), template.getGccZone().getValue(), disk);
-        insDisk.setSourceImage(GccImageType.DEBIAN_HACK.getAmbariUbuntu(po.getProjectId()));
+        insDisk.setSourceImage(gccStackUtil.getAmbariUbuntu(po.getProjectId()));
         insDisk.execute();
         GccDiskReadyPollerObject gccDiskReady = new GccDiskReadyPollerObject(po.getCompute(), stack, name);
         gccDiskReadyPollerObjectPollingService.pollWithTimeout(gccDiskCheckerStatus, gccDiskReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);

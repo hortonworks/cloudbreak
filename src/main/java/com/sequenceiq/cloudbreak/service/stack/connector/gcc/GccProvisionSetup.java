@@ -29,7 +29,6 @@ import com.sequenceiq.cloudbreak.domain.GccTemplate;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccImageType;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
 
 import reactor.core.Reactor;
@@ -40,9 +39,7 @@ public class GccProvisionSetup implements ProvisionSetup {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GccProvisionSetup.class);
 
-    private static final String BUCKET_NAME = "sequenceiqimage";
     private static final String MAIN_PROJECT = "siq-haas";
-    private static final String TAR_NAME = "debian.image.tar.gz";
     private static final int CONFLICT = 409;
     private static final int MAX_POLLING_ATTEMPTS = 60;
     private static final int POLLING_INTERVAL = 5000;
@@ -81,14 +78,16 @@ public class GccProvisionSetup implements ProvisionSetup {
                         throw ex;
                     }
                 }
-                Storage.Objects.Copy copy = storage.objects().copy(BUCKET_NAME, TAR_NAME, credential.getProjectId() + time, TAR_NAME,
+                String tarName = gccStackUtil.getTarName();
+                Storage.Objects.Copy copy = storage.objects().copy(gccStackUtil.getBucket(), tarName,
+                        credential.getProjectId() + time, tarName,
                         new StorageObject());
                 copy.execute();
 
                 Image image = new Image();
-                image.setName(GccImageType.DEBIAN_HACK.getImageName());
+                image.setName(gccStackUtil.getImageName());
                 Image.RawDisk rawDisk = new Image.RawDisk();
-                rawDisk.setSource(String.format("http://storage.googleapis.com/%s/%s", credential.getProjectId() + time, TAR_NAME));
+                rawDisk.setSource(String.format("http://storage.googleapis.com/%s/%s", credential.getProjectId() + time, tarName));
                 image.setRawDisk(rawDisk);
                 Compute.Images.Insert ins1 = compute.images().insert(credential.getProjectId(), image);
                 ins1.execute();
@@ -117,7 +116,7 @@ public class GccProvisionSetup implements ProvisionSetup {
     private boolean containsSpecificImage(ImageList imageList) {
         try {
             for (Image image : imageList.getItems()) {
-                if (image.getName().equals(GccImageType.DEBIAN_HACK.getImageName())) {
+                if (image.getName().equals(gccStackUtil.getImageName())) {
                     return true;
                 }
             }

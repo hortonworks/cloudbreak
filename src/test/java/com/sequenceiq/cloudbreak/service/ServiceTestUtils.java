@@ -26,7 +26,6 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.service.stack.connector.ConnectorTestUtil;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccImageType;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccInstanceType;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccRawDiskType;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccZone;
@@ -220,7 +219,6 @@ public final class ServiceTestUtils {
                 GccTemplate gccTemplate = new GccTemplate();
                 gccTemplate.setId(1L);
                 gccTemplate.setContainerCount(0);
-                gccTemplate.setGccImageType(GccImageType.DEBIAN_HACK);
                 gccTemplate.setGccInstanceType(GccInstanceType.N1_STANDARD_1);
                 gccTemplate.setGccRawDiskType(GccRawDiskType.HDD);
                 gccTemplate.setGccZone(GccZone.US_CENTRAL1_A);

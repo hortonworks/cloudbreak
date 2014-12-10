@@ -9,7 +9,6 @@ import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
 import com.sequenceiq.cloudbreak.controller.validation.GccTemplateParam;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.GccTemplate;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccImageType;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccInstanceType;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccRawDiskType;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccZone;
@@ -27,7 +26,6 @@ public class GccTemplateConverter extends AbstractConverter<TemplateJson, GccTem
         gccTemplateJson.setVolumeSize(entity.getVolumeSize());
         gccTemplateJson.setDescription(entity.getDescription());
         Map<String, Object> props = new HashMap<>();
-        putProperty(props, GccTemplateParam.IMAGETYPE.getName(), entity.getGccImageType());
         putProperty(props, GccTemplateParam.INSTANCETYPE.getName(), entity.getGccInstanceType());
         putProperty(props, GccTemplateParam.ZONE.getName(), entity.getGccZone());
         putProperty(props, GccTemplateParam.CONTAINERCOUNT.getName(), entity.getContainerCount());
@@ -44,7 +42,6 @@ public class GccTemplateConverter extends AbstractConverter<TemplateJson, GccTem
         gccTemplate.setDescription(json.getDescription());
         gccTemplate.setVolumeCount((json.getVolumeCount() == null) ? 0 : json.getVolumeCount());
         gccTemplate.setVolumeSize((json.getVolumeSize() == null) ? 0 : json.getVolumeSize());
-        gccTemplate.setGccImageType(GccImageType.valueOf(json.getParameters().get(GccTemplateParam.IMAGETYPE.getName()).toString()));
         gccTemplate.setGccInstanceType(GccInstanceType.valueOf(json.getParameters().get(GccTemplateParam.INSTANCETYPE.getName()).toString()));
         gccTemplate.setGccZone(GccZone.valueOf(json.getParameters().get(GccTemplateParam.ZONE.getName()).toString()));
         Object containerCount = json.getParameters().get(GccTemplateParam.CONTAINERCOUNT.getName());
