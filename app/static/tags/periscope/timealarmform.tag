@@ -24,8 +24,7 @@
   <label class="col-sm-3 control-label" for="alarmDesc">time zone</label>
   <div class="col-sm-9">
     <select class="form-control" id="timeZone" name="timeZone" ng-model="alarm.timeZone" required>
-      <option value="UTC">UTC</option>
-      <option value="Zulu">Zulu</option>
+      <option ng-repeat="mapEntry in config.TIME_ZONES | orderBy:timeZoneOrderGetter:true" value="{{mapEntry.key}}">{{mapEntry.value}}</option>
     </select>
     <div class="help-block" ng-show="timeBasedAlarmForm.timeZone.$dirty && timeBasedAlarmForm.timeZone.$invalid">
       <i class="fa fa-warning"></i> {{error_msg.alarm_timezone_invalid}}

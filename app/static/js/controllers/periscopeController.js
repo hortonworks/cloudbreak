@@ -143,6 +143,8 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
           if ($scope.metricBasedAlarm) {
             $scope.alarm.metric = "PENDING_CONTAINERS";
             $scope.alarm.comparisonOperator = "EQUALS";
+          } else {
+            $scope.alarm.timeZone = 'Etc/GMT';
           }
         }
 
@@ -208,14 +210,15 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
         }
 
         $scope.$on('DELETE_PERISCOPE_CLUSTER', function(event, stackId) {
-            var periCluster = $filter('filter')($rootScope.periscopeClusters, function(value, index) { return value.stackId == stackId; }, true)[0];
-            if (periCluster != undefined) {
-              console.log('Delete periscope cluster with host: ' + periCluster.host);
-              console.log(periCluster);
-              PeriscopeCluster.delete({id: periCluster.id}, function(success){
-                $rootScope.periscopeClusters = $filter('filter')($rootScope.periscopeClusters, function(value, index) { return value.id != periCluster.id;});
-              });
-            }
+          console.log('Delete periscope cluster with stack id: ' + stackId);
+          var periCluster = $filter('filter')($rootScope.periscopeClusters, function(value, index) { return value.stackId == stackId; }, true)[0];
+          if (periCluster != undefined) {
+            console.log('Delete periscope cluster with host: ' + periCluster.host);
+            console.log(periCluster);
+            PeriscopeCluster.delete({id: periCluster.id}, function(success){
+              $rootScope.periscopeClusters = $filter('filter')($rootScope.periscopeClusters, function(value, index) { return value.id != periCluster.id;});
+            });
+          }
         });
 
         $scope.$on('START_PERISCOPE_CLUSTER', function(event, uluwatuCluster, message) {
@@ -290,6 +293,14 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
           }, function(error) {
             console.log(error)
           });
+        }
+
+        $scope.timeZoneOrderGetter = function(mapEntry) {
+          var result = 0;
+          if(mapEntry.key != undefined && mapEntry.key != 'Etc/GMT') {
+            result = parseInt(mapEntry.key.replace("Etc/GMT",""));
+          }
+          return result;
         }
     }
 ]);

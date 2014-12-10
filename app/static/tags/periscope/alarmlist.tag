@@ -45,7 +45,7 @@
         <div class="form-group">
           <label class="col-sm-3 control-label" for="alarm-{{alarm.id}}-time-zone">time zone</label>
           <div class="col-sm-9">
-            <p id="alarm-{{alarm.id}}-time-zone" class="form-control-static">{{alarm.timeZone}}</p>
+            <p id="alarm-{{alarm.id}}-time-zone" class="form-control-static" ng-repeat="timeZone in config.TIME_ZONES | filter:{key: alarm.timeZone}:true">{{timeZone.value}}</p>
           </div>
           <!-- .col-sm-9 -->
         </div>
