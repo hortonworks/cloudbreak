@@ -136,7 +136,7 @@ set_public_host_script() {
 }
 
 register_ambari_add() {
-  cp /user/local/register-ambari /etc/init.d/register-ambari
+  cp /usr/local/register-ambari /etc/init.d/register-ambari
   chmod +x /etc/init.d/register-ambari
   chown root:root /etc/init.d/register-ambari
   update-rc.d -f register-ambari defaults
