@@ -4,7 +4,6 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccImageType;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccInstanceType;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccRawDiskType;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccZone;
@@ -14,8 +13,6 @@ public class GccTemplate extends Template implements ProvisionEntity {
 
     @Enumerated(EnumType.STRING)
     private GccZone gccZone;
-    @Enumerated(EnumType.STRING)
-    private GccImageType gccImageType;
     @Enumerated(EnumType.STRING)
     private GccInstanceType gccInstanceType;
     private Boolean moreContainerOnOneHost = Boolean.FALSE;
@@ -33,14 +30,6 @@ public class GccTemplate extends Template implements ProvisionEntity {
 
     public void setGccZone(GccZone gccZone) {
         this.gccZone = gccZone;
-    }
-
-    public GccImageType getGccImageType() {
-        return gccImageType;
-    }
-
-    public void setGccImageType(GccImageType gccImageType) {
-        this.gccImageType = gccImageType;
     }
 
     public GccInstanceType getGccInstanceType() {

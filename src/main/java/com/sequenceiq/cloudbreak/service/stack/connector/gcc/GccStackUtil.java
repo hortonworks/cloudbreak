@@ -9,10 +9,14 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
@@ -40,6 +44,12 @@ public class GccStackUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(GccStackUtil.class);
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
     private static final List<String> SCOPES = Arrays.asList(ComputeScopes.COMPUTE, StorageScopes.DEVSTORAGE_FULL_CONTROL);
+
+    private static final String GCC_IMAGE_TYPE_PREFIX = "https://www.googleapis.com/compute/v1/projects/%s/global/images/";
+    private static final String EMPTY_BUCKET = "";
+
+    @Value("${cb.gcp.source.image.path:sequenceiqimage/debian.image.tar.gz}")
+    private String sourceImagePath;
 
     public Compute buildCompute(GccCredential gccCredential) {
         MDCBuilder.buildMdcContext(gccCredential);
@@ -136,8 +146,38 @@ public class GccStackUtil {
         return credential;
     }
 
+    public String getBucket() {
+        if (StringUtils.isEmpty(sourceImagePath) && createParts(sourceImagePath).length > 1) {
+            String[] parts = createParts(sourceImagePath);
+            return StringUtils.join(ArrayUtils.remove(parts, parts.length - 1), "/");
+        } else {
+            LOGGER.warn("No bucket found in source image path.");
+            return EMPTY_BUCKET;
+        }
+    }
+
+    public String getTarName() {
+        if (!StringUtils.isEmpty(sourceImagePath)) {
+            String[] parts = createParts(sourceImagePath);
+            return parts[parts.length - 1];
+        } else {
+            throw new InternalServerException("Source image path environment variable is not well formed");
+        }
+    }
+
+    public String getImageName() {
+        return getTarName().replaceAll("(\\.tar|\\.zip|\\.gz|\\.gzip)", "").replaceAll("\\.", "-");
+    }
+
+    public String getAmbariUbuntu(String projectId) {
+        return String.format(GCC_IMAGE_TYPE_PREFIX + getImageName(), projectId);
+    }
+
     private String longName(String resourceName, String projectId) {
         return String.format("%s.c.%s.internal", resourceName, projectId);
     }
 
+    private String[] createParts(String splittable) {
+        return splittable.split("/");
+    }
 }
