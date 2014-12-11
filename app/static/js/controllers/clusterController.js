@@ -70,10 +70,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             UluwatuCluster.save($scope.cluster, function (result) {
                 $rootScope.clusters.push(result);
                 initCluster();
-
-                $scope.modifyStatusMessage($rootScope.error_msg.cluster_success1 + result.name + $rootScope.error_msg.cluster_success2);
-                $scope.modifyStatusClass("has-success");
-
                 $jq('.carousel').carousel(0);
                 // enable toolbar buttons
                 $jq('#toggle-cluster-block-btn').removeClass('disabled');
@@ -93,6 +89,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 actCluster.status = "DELETE_IN_PROGRESS";
                 $scope.modifyStatusMessage($rootScope.error_msg.cluster_delete_success1 + cluster.id + $rootScope.error_msg.cluster_delete_success2);
                 $scope.modifyStatusClass("has-success");
+                $scope.$broadcast('DELETE_PERISCOPE_CLUSTER', cluster.id);
             }, function (failure){
                 $scope.modifyStatusMessage($rootScope.error_msg.cluster_delete_failed + ": " + failure.data.message);
                 $scope.modifyStatusClass("has-error");
@@ -128,7 +125,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             Cluster.update({id: activeCluster.id}, newStatus, function(success){
 
                 GlobalStack.update({id: activeCluster.id}, newStatus, function(result){
-                    activeCluster.status = "STOP_REQUESTED";
+                  activeCluster.status = "STOP_REQUESTED";
                 }, function(error) {
                   $scope.modifyStatusMessage($rootScope.error_msg.cluster_stop_failed + ": " + error.data.message);
                   $scope.modifyStatusClass("has-error");

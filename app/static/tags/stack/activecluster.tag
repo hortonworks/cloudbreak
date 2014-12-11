@@ -7,7 +7,8 @@
         <div id="cluster-details-panel-collapse">
             <div class="panel-body">
                 <ul class="nav nav-pills nav-justified" role="tablist">
-
+                  <li class="active"><a ng-click="showDetails()" role="tab" data-toggle="tab">details</a></li>
+                  <li><a role="tab" ng-click="showPeriscope()" role="tab" data-toggle="tab">autoscaling SLA policies</a></li>
                 </ul>
                 <div class="tab-content">
                     <section id="cluster-details-pane" ng-class="{ 'active': detailsShow }" ng-show="detailsShow" class="tab-pane fade in">
@@ -202,7 +203,7 @@
                         </div>
                     </section>
                     <section id="periscope-pane" ng-class="{ 'active': periscopeShow }" ng-show="periscopeShow" class="tab-pane fade in">
-                        <div ng-include="'tags/stack/periscope.tag'"></div>
+                        <div ng-include="'tags/periscope/periscope.tag'"></div>
                     </section>
                     <section id="metrics-pane" ng-class="{ 'active': metricsShow }" ng-show="metricsShow" targe class="tab-pane fade in">
                     </section>

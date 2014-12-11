@@ -119,7 +119,7 @@ uluwatuServices.factory('UluwatuCluster', ['UserStack', 'Cluster', 'GlobalStack'
                     templateId: cluster.templateId,
                     credentialId: cluster.credentialId,
                     password: cluster.password,
-                    userName: cluster.userName
+                    userName: cluster.userName,
                 }
                 UserStack.save(stack, function (result) {
                     cluster.id = result.id;
@@ -151,5 +151,34 @@ uluwatuServices.factory('UluwatuCluster', ['UserStack', 'Cluster', 'GlobalStack'
         }
 
         return new AggregateCluster(UserStack, Cluster);
-    }])
-;
+    }]);
+
+    uluwatuServices.factory('PeriscopeCluster', ['$resource',
+    function ($resource) {
+      return $resource('periscope/clusters/:id', null, {'update': {method:'PUT', isArray:false}});
+    }]);
+
+    uluwatuServices.factory('PeriscopeClusterScalingConfiguration', ['$resource',
+    function ($resource) {
+      return $resource('periscope/clusters/:id/configurations/scaling');
+    }]);
+
+    uluwatuServices.factory('PeriscopeClusterState', ['$resource',
+    function ($resource) {
+      return $resource('periscope/clusters/:id/state');
+    }]);
+
+    uluwatuServices.factory('MetricAlarm', ['$resource',
+    function ($resource) {
+      return $resource('periscope/clusters/:id/alarms/metric/:alarmId', null, {'save': {method:'POST', isArray:false}});
+    }]);
+
+    uluwatuServices.factory('TimeAlarm', ['$resource',
+    function ($resource) {
+      return $resource('periscope/clusters/:id/alarms/time/:alarmId', null, {'save':  {method:'POST', isArray:false}});
+    }]);
+
+    uluwatuServices.factory('ScalingPolicy', ['$resource',
+    function ($resource) {
+      return $resource('periscope/clusters/:id/policies/:policyId', null, {'query':  {method:'GET', isArray:true}});
+    }]);

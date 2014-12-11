@@ -2,8 +2,8 @@
 
 var log = log4javascript.getLogger("notificationController-logger");
 
-angular.module('uluwatuControllers').controller('notificationController', ['$scope', '$rootScope', '$filter',
-function ($scope, $rootScope, $filter) {
+angular.module('uluwatuControllers').controller('notificationController', ['$scope', '$rootScope', '$filter', 'Cluster',
+function ($scope, $rootScope, $filter, Cluster) {
     var successEvents = [ "REQUESTED",
                           "CREATE_IN_PROGRESS",
                           "UPDATE_IN_PROGRESS",
@@ -73,6 +73,7 @@ function ($scope, $rootScope, $filter) {
       $scope.modifyStatusMessage(msg, actCluster.name);
       $scope.modifyStatusClass("has-success");
       addNotificationToGlobalEvents(notification);
+      $rootScope.$broadcast('START_PERISCOPE_CLUSTER', actCluster, msg);
     }
 
     function handleUptimeNotification(notification) {
