@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
@@ -231,13 +232,22 @@ public class AmbariClusterService implements ClusterService {
     private void validateComponentsCategory(Stack stack, HostGroupAdjustmentJson hostGroupAdjustment) {
         AmbariClient ambariClient = clientService.create(stack);
         Cluster cluster = stack.getCluster();
+        MDCBuilder.buildMdcContext(cluster);
         String hostGroup = hostGroupAdjustment.getHostGroup();
-        Map<String, String> categories = ambariClient.getComponentsCategory(cluster.getBlueprint().getName(), hostGroup);
-        for (String component : categories.keySet()) {
-            if (categories.get(component).equalsIgnoreCase(MASTER_CATEGORY)) {
-                throw new BadRequestException(
-                        String.format("Cannot downscale the '%s' hostGroupAdjustment group, because it contains a '%s' component", hostGroup, component));
+        Blueprint blueprint = cluster.getBlueprint();
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            JsonNode root = mapper.readTree(blueprint.getBlueprintText());
+            String blueprintName = root.path("Blueprints").path("blueprint_name").asText();
+            Map<String, String> categories = ambariClient.getComponentsCategory(blueprintName, hostGroup);
+            for (String component : categories.keySet()) {
+                if (categories.get(component).equalsIgnoreCase(MASTER_CATEGORY)) {
+                    throw new BadRequestException(
+                            String.format("Cannot downscale the '%s' hostGroupAdjustment group, because it contains a '%s' component", hostGroup, component));
+                }
             }
+        } catch (IOException e) {
+            LOGGER.warn("Cannot check the host components category", e);
         }
     }
 
