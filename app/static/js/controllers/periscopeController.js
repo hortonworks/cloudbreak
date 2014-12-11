@@ -185,7 +185,7 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
           if ($scope.actPeriscopeCluster != undefined) {
             ScalingPolicy.save({id: $scope.actPeriscopeCluster.id}, $scope.scalingAction.policy, function(success) {
               angular.element(document.querySelector('#create-policy-collapse-btn')).click();
-              $scope.policies.push(success);
+              getScalingPolicies($scope.actPeriscopeCluster.id);
               $scope.policyForm.$setPristine();
               resetScalingActionForm();
             });
