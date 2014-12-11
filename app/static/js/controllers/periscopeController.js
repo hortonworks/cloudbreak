@@ -20,8 +20,6 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
         $rootScope.$watch('activeCluster', function(uluCluster, oldUluCluster){
           if (uluCluster.ambariServerIp != undefined) {
             var periCluster = selectPeriscopeClusterByAmbariIp(uluCluster.ambariServerIp);
-            console.log($rootScope.activeCluster.ambariServerIp)
-            console.log(periCluster)
             if (isSelectedUluClusterEqualsPeriClusterAndRunning(periCluster)) {
               setActivePeriClusterWithResources(periCluster);
             } else {
@@ -77,23 +75,19 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
           var uluCluster = $rootScope.activeCluster;
           var periCluster = $filter('filter')($rootScope.periscopeClusters, function(value, index) { return value.stackId == uluCluster.id; }, true)[0];
           if (periCluster == undefined) {
-            console.log('create new periscope cluster....')
             createPeriscopeCluster(uluCluster);
           } else if (periCluster.state == 'SUSPENDED') {
-            console.log('start periscope cluster....')
             startPeriscopeCluster(uluCluster);
           }
         }
 
         $scope.disableAutoScaling = function() {
-          console.log('disable autoscaling....')
           var uluCluster = $rootScope.activeCluster;
           var periCluster = $filter('filter')($rootScope.periscopeClusters, function(value, index) { return value.stackId == uluCluster.id; }, true)[0];
           var periscopeClusterStatus = { 'state': 'SUSPENDED'};
           PeriscopeClusterState.save({id: periCluster.id}, periscopeClusterStatus, function(success) {
             periCluster.state = 'SUSPENDED';
             disableAutoScalingPolicies();
-            console.log('periscope cluster was SUSPENDED successfully....');
           }, function(error){
             addMessageToStatusBar($rootScope.error_msg.peri_cluster_update_failed + ": " + error.data.message, "has-error");
           });
@@ -180,7 +174,6 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
         $scope.updateScalingConfiguration = function() {
           if ($scope.actPeriscopeCluster != undefined) {
             PeriscopeClusterScalingConfiguration.save({id: $scope.actPeriscopeCluster.id}, $scope.scalingConfiguration, function(success) {
-              console.log($scope.scalingConfiguration)
               $scope.scalingConfiguration = success;
             }, function(error) {
               addMessageToStatusBar($rootScope.error_msg.peri_cluster_update_failed + ": " + error.data.message, "has-error");
@@ -191,7 +184,6 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
         $scope.createPolicy = function() {
           if ($scope.actPeriscopeCluster != undefined) {
             ScalingPolicy.save({id: $scope.actPeriscopeCluster.id}, $scope.scalingAction.policy, function(success) {
-              console.log(success)
               angular.element(document.querySelector('#create-policy-collapse-btn')).click();
               $scope.policies.push(success);
               $scope.policyForm.$setPristine();
@@ -217,11 +209,8 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
         }
 
         $scope.$on('DELETE_PERISCOPE_CLUSTER', function(event, stackId) {
-          console.log('Delete periscope cluster with stack id: ' + stackId);
           var periCluster = $filter('filter')($rootScope.periscopeClusters, function(value, index) { return value.stackId == stackId; }, true)[0];
           if (periCluster != undefined) {
-            console.log('Delete periscope cluster with host: ' + periCluster.host);
-            console.log(periCluster);
             PeriscopeCluster.delete({id: periCluster.id}, function(success){
               $rootScope.periscopeClusters = $filter('filter')($rootScope.periscopeClusters, function(value, index) { return value.id != periCluster.id;});
             }, function(error) {
@@ -231,18 +220,15 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
         });
 
         $scope.$on('START_PERISCOPE_CLUSTER', function(event, uluwatuCluster, message) {
-          console.log(uluwatuCluster)
           if(message.indexOf("Cluster started successfully") > -1) {
             startPeriscopeCluster(uluwatuCluster);
           }
         });
 
         function startPeriscopeCluster(uluCluster) {
-          console.log('Get cluster with id for start: ' + uluCluster.id)
           Cluster.get({id: uluCluster.id}, function(cluster){
             if (cluster.status == 'AVAILABLE') {
               var periCluster = $filter('filter')($rootScope.periscopeClusters, function(value, index) { return value.stackId == uluCluster.id; }, true)[0];
-              console.log(periCluster)
               if (periCluster != undefined) {
                 //update ambari ip after start
                 var ambariJson = createAmbariJsonFromUluwatuCluster(uluCluster);
@@ -251,8 +237,6 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
                   //set state to RUNNING
                   var periscopeClusterStatus = { 'state': 'RUNNING'};
                   PeriscopeClusterState.save({id: periCluster.id}, periscopeClusterStatus, function(success) {
-                    console.log('start of periscope cluster was successfully....');
-                    console.log(success)
                     periCluster.state = 'RUNNING';
                     if (isSelectedUluClusterEqualsPeriClusterAndRunning(periCluster)) {
                       setActivePeriClusterWithResources(periCluster);
@@ -270,15 +254,11 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
         }
 
         function createPeriscopeCluster(uluCluster) {
-          console.log('Get cluster with id for create: ' + uluCluster.id)
           Cluster.get({id: uluCluster.id}, function(cluster) {
             if (cluster.status == 'AVAILABLE') {
-              console.log(cluster)
               var ambariJson = createAmbariJsonFromUluwatuCluster(uluCluster);
               PeriscopeCluster.save(ambariJson, function(periCluster){
-                console.log(periCluster);
                 $rootScope.periscopeClusters.push(periCluster);
-
                 var periCluster = selectPeriscopeClusterByAmbariIp(uluCluster.ambariServerIp);
                 if (isSelectedUluClusterEqualsPeriClusterAndRunning(periCluster)) {
                   setActivePeriClusterWithResources(periCluster);
