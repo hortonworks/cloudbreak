@@ -310,6 +310,7 @@ repositories {
 
 dependencies {
     compile("org.springframework.boot:spring-boot-starter-web:1.0.2.RELEASE")
+    compile('org.springframework.boot:spring-boot-actuator:1.1.9.RELEASE')
     compile("org.springframework.security:spring-security-web:3.2.3.RELEASE")
     compile("org.springframework.security.oauth:spring-security-oauth2:2.0.3.RELEASE")
     compile("org.springframework.boot:spring-boot-starter-data-jpa:1.0.2.RELEASE")
@@ -319,9 +320,9 @@ dependencies {
     compile("org.apache.hadoop:hadoop-yarn-client:${hadoopVersion}")
     compile("org.apache.hadoop:hadoop-yarn-server-resourcemanager:${hadoopVersion}")
     compile("org.apache.hadoop:hadoop-common:${hadoopVersion}")
-    compile("com.sequenceiq:ambari-client16:1.6.1")
+    compile("com.sequenceiq:ambari-client16:1.6.19")
     compile("javax.servlet:javax.servlet-api:3.0.1")
-    compile("com.sequenceiq:cloudbreak-rest-client:0.2.17")
+    compile("com.sequenceiq:cloudbreak-rest-client:0.2.19")
     compile("org.freemarker:freemarker:2.3.20")
     compile("javax.mail:mail:1.4.7")
     compile("org.apache.httpcomponents:httpclient:4.3.5")
