@@ -38,19 +38,6 @@
 
 </div>
 
-<div class="form-group" ng-class="{ 'has-error': azureCredentialForm.cjksPassword.$dirty && azureCredentialForm.cjksPassword.$invalid }">
-    <label class="col-sm-3 control-label" for="cjksPassword">File password</label>
-
-    <div class="col-sm-9">
-        <input type="password" class="form-control" id="cjksPassword" name="cjksPassword" ng-model="credentialAzure.parameters.jksPassword" ng-minlength="6" ng-maxlength="10" required placeholder="min. 6 max. 10 char">
-        <div class="help-block" ng-show="azureCredentialForm.cjksPassword.$dirty && azureCredentialForm.cjksPassword.$invalid">
-            <i class="fa fa-warning"></i> {{error_msg.credential_file_pwd_invalid}}
-        </div>
-    </div>
-    <!-- .col-sm-9 -->
-
-</div>
-
 <div class="form-group" ng-class="{ 'has-error': azureCredentialForm.azure_sshPublicKey.$dirty && azureCredentialForm.azure_sshPublicKey.$invalid }">
     <label class="col-sm-3 control-label" for="azure_sshPublicKey">SSH certificate:</label>
 
