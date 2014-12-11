@@ -38,6 +38,7 @@ public class AzureStackUtil {
     public static final String ERROR = "\"error\":\"Could not fetch data from azure\"";
     public static final String CREDENTIAL = "credential";
     public static final String IMAGE_NAME = "ambari-docker-v1";
+    public static final String DEFAULT_JKS_PASS = "azure1";
     public static final Logger LOGGER = LoggerFactory.getLogger(AzureStackUtil.class);
 
     @Value("${cb.azure.image.uri}")
@@ -68,7 +69,7 @@ public class AzureStackUtil {
                 FileOutputStream output = new FileOutputStream(jksFile);
                 IOUtils.write(Base64.decodeBase64(credential.getJksFile()), output);
             }
-            return new AzureClient(credential.getSubscriptionId(), jksFile.getAbsolutePath(), credential.getJks());
+            return new AzureClient(credential.getSubscriptionId(), jksFile.getAbsolutePath(), DEFAULT_JKS_PASS);
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
             throw new InternalServerException(e.getMessage());

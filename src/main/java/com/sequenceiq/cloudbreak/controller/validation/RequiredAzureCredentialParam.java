@@ -4,8 +4,7 @@ import com.google.common.base.Optional;
 
 public enum RequiredAzureCredentialParam implements TemplateParam {
 
-    SUBSCRIPTION_ID("subscriptionId", true, String.class, Optional.<String>absent()),
-    JKS_PASSWORD("jksPassword", true, String.class, Optional.<String>absent());
+    SUBSCRIPTION_ID("subscriptionId", true, String.class, Optional.<String>absent());
 
     private final String paramName;
     private final Class clazz;
