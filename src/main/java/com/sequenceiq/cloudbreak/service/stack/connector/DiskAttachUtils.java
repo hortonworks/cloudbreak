@@ -6,10 +6,10 @@ public final class DiskAttachUtils {
         throw new IllegalStateException();
     }
 
-    public static String buildDiskPathString(int volumeCount) {
+    public static String buildDiskPathString(int volumeCount, String directory) {
         StringBuilder localDirs = new StringBuilder("");
         for (int i = 1; i <= volumeCount; i++) {
-            localDirs.append("/mnt/fs").append(i).append("/data");
+            localDirs.append("/mnt/fs").append(i).append("/").append(directory);
             if (i != volumeCount) {
                 localDirs.append(",");
             }
