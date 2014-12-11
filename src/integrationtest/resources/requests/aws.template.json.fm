@@ -1,0 +1,14 @@
+{
+   "parameters":{
+      "sshLocation":"${sshLocation!"0.0.0.0/0"}",
+      "region":"${region!"EU_WEST_1"}",
+      "instanceType":"${instanceType!"T2Medium"}",
+      "volumeType":"${instanceType!"Standard"}",
+      "amiId":"${amiId!"ami-e66cc191"}"
+   },
+   "name":"${templateName!"it-template"}",
+   "description":"${templateDescription!"Integration Test Template"}",
+   "volumeCount":${volumeCount!1},
+   "volumeSize":${volumeSize!10},
+   "cloudPlatform":"${cloudPlatform!"AWS"}"
+}

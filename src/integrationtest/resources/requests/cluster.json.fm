@@ -1,0 +1,5 @@
+{
+   "name":"${clusterName!"it-cluster"}",
+   "blueprintId":"${blueprintId!59}",
+   "emailNeeded":${emailNeeded!"false"}
+}
