@@ -64,7 +64,6 @@ if (!periscopeAddress || (periscopeAddress.substring(0, 7) !== "http://" && peri
   environmentSet = false;
 }
 
-
 if (!clientSecret || !hostAddress || !clientId) {
   console.log("ULU_HOST_ADDRESS, ULU_OAUTH_CLIENT_ID and ULU_OAUTH_CLIENT_SECRET must be specified!");
   environmentSet = false;
@@ -103,6 +102,10 @@ if (cloudbreakAddress.slice(-1) !== '/') {
 
 if (sultansAddress.slice(-1) !== '/') {
   sultansAddress += '/';
+}
+
+if (periscopeAddress.slice(-1) !== '/') {
+  periscopeAddress += '/';
 }
 
 var redirectUri = hostAddress + 'authorize';
@@ -328,12 +331,7 @@ app.use(function(err, req, res, next){
 });
 
 process.on('uncaughtException', function (err) {
-    if (err.code == 'ECONNREFUSED' || err.code == 'ECONNRESET' || err.code == 'ENETUNREACH') {
-        console.log('Exception error occurred: ' + err.code + ' when try to connect: ' + err.request.options.host + ':' + err.request.options.port + err.request.options.path);
-    } else {
-        console.log(err)
-        process.exit(1)
-    }
+  console.log('Exception error occurred: ' + err.code + ' when try to connect: ' + err.request.options.host + ':' + err.request.options.port + err.request.options.path);
 });
 
 // listen ======================================================================
