@@ -143,12 +143,16 @@ set_public_host_script() {
   VOLUMES="$VOLUMES -v /usr/local/public_host_script:/etc/ambari-agent/conf/public-hostname.sh"
 }
 
+format_disks() {
+  /usr/local/disk_mount.sh
+}
+
 main() {
   if [[ "$1" == "::" ]]; then
     shift
     eval "$@"
   else
-    /usr/local/disk_mount.sh
+    format_disks
     fix_hostname
     start_consul
     start_ambari_server

@@ -143,12 +143,16 @@ register_ambari_add() {
   update-rc.d -f register-ambari enable
 }
 
+format_disks() {
+  /usr/local/disk_mount.sh
+}
+
 main() {
   if [[ "$1" == "::" ]]; then
     shift
     eval "$@"
   else
-    /usr/local/disk_mount.sh
+    format_disks
     fix_hostname
     start_consul
     start_ambari_server
