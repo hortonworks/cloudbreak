@@ -9,7 +9,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -31,6 +30,7 @@ import com.google.api.services.compute.model.DiskList;
 import com.google.api.services.compute.model.Instance;
 import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.StorageScopes;
+import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.domain.GccTemplate;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -147,7 +147,7 @@ public class GccStackUtil {
     }
 
     public String getBucket() {
-        if (StringUtils.isEmpty(sourceImagePath) && createParts(sourceImagePath).length > 1) {
+        if (!StringUtils.isEmpty(sourceImagePath) && createParts(sourceImagePath).length > 1) {
             String[] parts = createParts(sourceImagePath);
             return StringUtils.join(ArrayUtils.remove(parts, parts.length - 1), "/");
         } else {
