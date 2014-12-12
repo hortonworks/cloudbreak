@@ -16,8 +16,8 @@ public class KeyGeneratorService {
                 "-keyalg", "RSA",
                 "-keystore", path,
                 "-keysize", "2048",
-                "-keypass", azureCredential.getJks(),
-                "-storepass", azureCredential.getJks(),
+                "-keypass", AzureStackUtil.DEFAULT_JKS_PASS,
+                "-storepass", AzureStackUtil.DEFAULT_JKS_PASS,
                 "-dname", "cn=" + user + azureCredential.getPostFix() + ", ou=engineering, o=company, c=US"
         });
     }

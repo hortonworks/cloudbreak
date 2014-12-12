@@ -7,6 +7,7 @@ import static org.mockito.Matchers.any;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -53,8 +54,6 @@ public class AzureCredentialConverterTest {
         assertEquals(result.getCloudPlatform(), azureCredential.getCloudPlatform());
         assertEquals(result.getName(), azureCredential.getName());
         assertEquals(result.getDescription(), azureCredential.getDescription());
-        assertEquals(result.getParameters().get(RequiredAzureCredentialParam.JKS_PASSWORD.getName()),
-                azureCredential.getJks());
     }
 
     @Test
@@ -65,15 +64,13 @@ public class AzureCredentialConverterTest {
         AzureCredential result = underTest.convert(credentialJson);
         // THEN
         assertEquals(result.getCloudPlatform(), credentialJson.getCloudPlatform());
-        assertEquals(result.getJks(),
-                credentialJson.getParameters().get(RequiredAzureCredentialParam.JKS_PASSWORD.getName()));
+        assertEquals(result.getJks(), AzureStackUtil.DEFAULT_JKS_PASS);
         assertEquals(result.getName(), credentialJson.getName());
     }
 
     private CredentialJson createCredentialJson() {
         CredentialJson credentialJson = new CredentialJson();
         Map<String, Object> params = new HashMap<>();
-        params.put(RequiredAzureCredentialParam.JKS_PASSWORD.getName(), DUMMY_JKS);
         params.put(RequiredAzureCredentialParam.SUBSCRIPTION_ID.getName(), DUMMY_SUBSCRIPTION_ID);
         credentialJson.setParameters(params);
         credentialJson.setCloudPlatform(CloudPlatform.AZURE);
