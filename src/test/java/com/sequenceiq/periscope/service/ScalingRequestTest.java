@@ -27,7 +27,6 @@ public class ScalingRequestTest {
     private static final int SLEEP = 0;
 
     private ScalingRequest scalingRequest;
-
     @Mock
     private CloudbreakService cloudbreakService;
 
@@ -83,10 +82,10 @@ public class ScalingRequestTest {
         when(cluster.getId()).thenReturn(1L);
         when(cloudbreakClient.resolveToStackId("ambari.com")).thenReturn(50);
         when(cloudbreakClient.getStackStatus(50)).thenAnswer(new Answer<String>() {
-            int invocation = 0;
+            private int invocation;
 
             @Override
-            public String answer(InvocationOnMock mock) throws Throwable {
+            public String answer(InvocationOnMock mock) throws Exception {
                 switch (invocation++) {
                     case 0:
                     case 2:
@@ -117,10 +116,10 @@ public class ScalingRequestTest {
         when(cluster.getId()).thenReturn(1L);
         when(cloudbreakClient.resolveToStackId("ambari.com")).thenReturn(50);
         when(cloudbreakClient.getStackStatus(50)).thenAnswer(new Answer<String>() {
-            int invocation = 0;
+            private int invocation;
 
             @Override
-            public String answer(InvocationOnMock mock) throws Throwable {
+            public String answer(InvocationOnMock mock) throws Exception {
                 switch (invocation++) {
                     case 1:
                         return "AVAILABLE";
@@ -173,10 +172,10 @@ public class ScalingRequestTest {
         when(cloudbreakClient.resolveToStackId("ambari.com")).thenReturn(50);
         when(cloudbreakClient.getStackStatus(50)).thenReturn("AVAILABLE");
         doAnswer(new Answer<String>() {
-            int invocation = 0;
+            private int invocation;
 
             @Override
-            public String answer(InvocationOnMock mock) throws Throwable {
+            public String answer(InvocationOnMock mock) throws Exception {
                 switch (invocation++) {
                     case 0:
                         throw new RuntimeException();
