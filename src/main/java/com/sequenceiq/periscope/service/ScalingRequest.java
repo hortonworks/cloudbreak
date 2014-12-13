@@ -86,7 +86,8 @@ public class ScalingRequest implements Runnable {
         }
     }
 
-    private boolean sendInstallRequest(CloudbreakClient client, int scalingAdjustment, String hostGroup, long clusterId, int stackId) {
+    private boolean sendInstallRequest(CloudbreakClient client, int scalingAdjustment,
+            String hostGroup, long clusterId, int stackId) throws InterruptedException {
         LOGGER.info(clusterId, "Sending request to install components to the host(s)");
         int retry = 0;
         while (retry < clusterRetryCount) {
@@ -95,6 +96,7 @@ public class ScalingRequest implements Runnable {
                 break;
             } catch (Exception e) {
                 retry++;
+                Thread.sleep(sleepTime);
             }
         }
         return retry != clusterRetryCount;
