@@ -16,11 +16,13 @@ public class ScalingRequest implements Runnable {
 
     private static final Logger LOGGER = PeriscopeLoggerFactory.getLogger(ScalingRequest.class);
     private static final String AVAILABLE = "AVAILABLE";
-    private static final int RETRY_COUNT = 100;
-    private static final int READY_COUNT = 2;
+    private static final int STACK_RETRY_COUNT = 100;
+    private static final int CLUSTER_RETRY_COUNT = 3;
+    private static final int STACK_AVAILABLE_ACK = 2;
     private static final int SLEEP = 20000;
     private final long sleepTime;
-    private final int retryCount;
+    private final int stackRetryCount;
+    private final int clusterRetryCount;
     private final int desiredNodeCount;
     private final int totalNodes;
     private final Cluster cluster;
@@ -30,20 +32,17 @@ public class ScalingRequest implements Runnable {
     private CloudbreakService cloudbreakService;
 
     public ScalingRequest(Cluster cluster, ScalingPolicy policy, int totalNodes, int desiredNodeCount) {
-        this.cluster = cluster;
-        this.policy = policy;
-        this.sleepTime = SLEEP;
-        this.retryCount = RETRY_COUNT;
-        this.totalNodes = totalNodes;
-        this.desiredNodeCount = desiredNodeCount;
+        this(cluster, policy, totalNodes, desiredNodeCount, SLEEP, STACK_RETRY_COUNT, CLUSTER_RETRY_COUNT);
     }
 
-    public ScalingRequest(Cluster cluster, ScalingPolicy policy, int totalNodes, int desiredNodeCount, long sleepTime, int retry) {
+    public ScalingRequest(Cluster cluster, ScalingPolicy policy, int totalNodes,
+            int desiredNodeCount, long sleepTime, int stackRetry, int clusterRetry) {
         this.cluster = cluster;
         this.policy = policy;
-        this.retryCount = retry;
+        this.stackRetryCount = stackRetry;
         this.sleepTime = sleepTime;
         this.totalNodes = totalNodes;
+        this.clusterRetryCount = clusterRetry;
         this.desiredNodeCount = desiredNodeCount;
     }
 
@@ -72,8 +71,12 @@ public class ScalingRequest implements Runnable {
             client.putStack(stackId, scalingAdjustment);
             boolean ready = waitForReadyState(clusterId, stackId, client);
             if (ready) {
-                LOGGER.info(clusterId, "Sending request to install components to the host(s)");
-                client.putCluster(stackId, hostGroup, scalingAdjustment);
+                boolean sent = sendInstallRequest(client, scalingAdjustment, hostGroup, clusterId, stackId);
+                if (sent) {
+                    LOGGER.info(clusterId, "Install request successfully sent");
+                } else {
+                    LOGGER.info(clusterId, "Could not send the install request");
+                }
             } else {
                 LOGGER.info(clusterId, "Instance(s) didn't start in time, skipping scaling");
                 // TODO should we terminate the launched instances?
@@ -81,6 +84,20 @@ public class ScalingRequest implements Runnable {
         } catch (Exception e) {
             LOGGER.error(clusterId, "Error adding nodes to cluster", e);
         }
+    }
+
+    private boolean sendInstallRequest(CloudbreakClient client, int scalingAdjustment, String hostGroup, long clusterId, int stackId) {
+        LOGGER.info(clusterId, "Sending request to install components to the host(s)");
+        int retry = 0;
+        while (retry < clusterRetryCount) {
+            try {
+                client.putCluster(stackId, hostGroup, scalingAdjustment);
+                break;
+            } catch (Exception e) {
+                retry++;
+            }
+        }
+        return retry != clusterRetryCount;
     }
 
     private void scaleDown(CloudbreakClient client, int scalingAdjustment) {
@@ -106,8 +123,8 @@ public class ScalingRequest implements Runnable {
 
     private boolean waitForReadyState(long clusterId, int stackId, CloudbreakClient client) throws InterruptedException {
         int retry = 0;
-        int ready = READY_COUNT;
-        while (ready > 0 && retry < retryCount) {
+        int ready = STACK_AVAILABLE_ACK;
+        while (ready > 0 && retry < stackRetryCount) {
             LOGGER.info(clusterId, "Scaling: Waiting for cluster to be {}", AVAILABLE);
             String status = client.getStackStatus(stackId);
             if (AVAILABLE.equals(status)) {
