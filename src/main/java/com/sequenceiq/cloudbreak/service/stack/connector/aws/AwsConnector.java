@@ -1,16 +1,13 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.aws;
 
-import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +37,6 @@ import com.amazonaws.services.ec2.model.StopInstancesRequest;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
-import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Credential;
@@ -63,7 +59,6 @@ import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.StackUpdateSuccess;
 import com.sequenceiq.cloudbreak.service.stack.flow.AwsInstanceStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.flow.AwsInstances;
-import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 import reactor.core.Reactor;
 import reactor.event.Event;
@@ -119,11 +114,10 @@ public class AwsConnector implements CloudPlatformConnector {
     public void deleteStack(Stack stack, Credential credential) {
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Deleting stack: {}", stack.getId());
-        AwsTemplate template = (AwsTemplate) stack.getTemplate();
         AwsCredential awsCredential = (AwsCredential) credential;
         Resource resource = stack.getResourceByType(ResourceType.CLOUDFORMATION_STACK);
         if (resource != null) {
-            AmazonCloudFormationClient client = awsStackUtil.createCloudFormationClient(template.getRegion(), awsCredential);
+            AmazonCloudFormationClient client = awsStackUtil.createCloudFormationClient(Regions.valueOf(stack.getRegion()), awsCredential);
             LOGGER.info("Deleting CloudFormation stack for stack: {} [cf stack id: {}]", stack.getId(), resource.getResourceName());
             DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(resource.getResourceName());
             try {
@@ -137,21 +131,21 @@ public class AwsConnector implements CloudPlatformConnector {
                     throw e;
                 }
             }
-
-            String asGroupName = cfStackUtil.getAutoscalingGroupName(stack, client);
-            AmazonAutoScalingClient amazonASClient = awsStackUtil.createAutoScalingClient(template.getRegion(), awsCredential);
-            List<AutoScalingGroup> asGroups = amazonASClient.describeAutoScalingGroups(new DescribeAutoScalingGroupsRequest()
-                    .withAutoScalingGroupNames(asGroupName)).getAutoScalingGroups();
-            if (!asGroups.isEmpty()) {
-                if (!asGroups.get(0).getSuspendedProcesses().isEmpty()) {
-                    amazonASClient.updateAutoScalingGroup(new UpdateAutoScalingGroupRequest()
-                            .withAutoScalingGroupName(asGroupName)
-                            .withMinSize(0)
-                            .withDesiredCapacity(0));
-                    amazonASClient.resumeProcesses(new ResumeProcessesRequest().withAutoScalingGroupName(asGroupName));
+            for (TemplateGroup templateGroup : stack.getTemplateGroups()) {
+                String asGroupName = cfStackUtil.getAutoscalingGroupName(stack, templateGroup.getGroupName());
+                AmazonAutoScalingClient amazonASClient = awsStackUtil.createAutoScalingClient(Regions.valueOf(stack.getRegion()), awsCredential);
+                List<AutoScalingGroup> asGroups = amazonASClient.describeAutoScalingGroups(new DescribeAutoScalingGroupsRequest()
+                        .withAutoScalingGroupNames(asGroupName)).getAutoScalingGroups();
+                if (!asGroups.isEmpty()) {
+                    if (!asGroups.get(0).getSuspendedProcesses().isEmpty()) {
+                        amazonASClient.updateAutoScalingGroup(new UpdateAutoScalingGroupRequest()
+                                .withAutoScalingGroupName(asGroupName)
+                                .withMinSize(0)
+                                .withDesiredCapacity(0));
+                        amazonASClient.resumeProcesses(new ResumeProcessesRequest().withAutoScalingGroupName(asGroupName));
+                    }
                 }
             }
-
             DeleteStackRequest deleteStackRequest = new DeleteStackRequest().withStackName(resource.getResourceName());
             client.deleteStack(deleteStackRequest);
         } else {
@@ -168,42 +162,16 @@ public class AwsConnector implements CloudPlatformConnector {
     @Override
     public void buildStack(Stack stack, String userData, Map<String, Object> setupProperties) {
         MDCBuilder.buildMdcContext(stack);
-        AwsTemplate awsTemplate = (AwsTemplate) stack.getTemplate();
         AwsCredential awsCredential = (AwsCredential) stack.getCredential();
         AmazonCloudFormationClient client = awsStackUtil.createCloudFormationClient(Regions.valueOf(stack.getRegion()), awsCredential);
         String stackName = String.format("%s-%s", stack.getName(), stack.getId());
         List<Parameter> parameters = new ArrayList<>(Arrays.asList(
-                new Parameter().withParameterKey("SSHLocation").withParameterValue(awsTemplate.getSshLocation()),
+                new Parameter().withParameterKey("SSHLocation").withParameterValue("0.0.0.0/0"),
                 new Parameter().withParameterKey("CBUserData").withParameterValue(userData),
                 new Parameter().withParameterKey("StackName").withParameterValue(stackName),
                 new Parameter().withParameterKey("StackOwner").withParameterValue(awsCredential.getRoleArn()),
                 new Parameter().withParameterKey("KeyName").withParameterValue(awsCredential.getKeyPairName())
         ));
-
-      /*  StringBuilder sb = new StringBuilder();
-        String file = FileReaderUtils.readFileFromClasspath("templates/cf-hg-template.ftl");
-        for (TemplateGroup templateGroup : stack.getTemplateGroups()) {
-            boolean spotPriced = ((AwsTemplate) templateGroup.getTemplate()).getSpotPrice() == null ? false : true;
-            String temp = file.replaceAll("HOST_GROUP", templateGroup.getGroupName())
-                    .replaceAll("NODE_COUNT", templateGroup.getNodeCount().toString())
-                    .replaceAll("VOLUME_COUNT", templateGroup.getTemplate().getVolumeCount().toString())
-                    .replaceAll("VOLUME_SIZE", templateGroup.getTemplate().getVolumeSize().toString())
-                    .replaceAll("AMI_ID", ((AwsTemplate) templateGroup.getTemplate()).getAmiId())
-                    .replaceAll("INSTANCE_TYPE", ((AwsTemplate) templateGroup.getTemplate()).getInstanceType().toString())
-                    .replaceAll("VOLUME_TYPE", ((AwsTemplate) templateGroup.getTemplate()).getVolumeType().toString());
-            if (spotPriced) {
-                temp = temp.replaceAll("IS_SPOT_PRICE", "true");
-                temp = temp.replaceAll("SPOT_PRICE", ((AwsTemplate) templateGroup.getTemplate()).getSpotPrice().toString());
-            } else {
-                temp = temp.replaceAll("IS_SPOT_PRICE", "false");
-            }
-            sb.append(temp + ",");
-        }*/
-      /*  String endfile = FileReaderUtils.readFileFromClasspath("templates/aws-cf-stack.ftl");
-        endfile = endfile.replace("GENERATED_VALUE", sb.toString());
-        String endftl = stack.getId() == null ? "/tmp/" + new Date().getTime() + "stack.ftl" : "/tmp/" + stack.getId() + "stack.ftl";
-        FileOutputStream output = new FileOutputStream(endftl);
-        IOUtils.write(endfile, output);*/
         CreateStackRequest createStackRequest = createStackRequest()
                 .withStackName(stackName)
                 .withTemplateBody(cfTemplateBuilder.build("templates/aws-cf-stack.ftl", false, stack.getTemplateSetAsList()))
@@ -219,44 +187,44 @@ public class AwsConnector implements CloudPlatformConnector {
     }
 
     @Override
-    public boolean addInstances(Stack stack, String userData, Integer instanceCount) {
+    public boolean addInstances(Stack stack, String userData, Integer instanceCount, String hostGroup) {
         MDCBuilder.buildMdcContext(stack);
-        Integer requiredInstances = stack.getNodeCount() + instanceCount;
-        Regions region = ((AwsTemplate) stack.getTemplate()).getRegion();
+        Integer requiredInstances = stack.getFullNodeCount() + instanceCount;
+        Regions region = Regions.valueOf(stack.getRegion());
         AwsCredential credential = (AwsCredential) stack.getCredential();
         AmazonAutoScalingClient amazonASClient = awsStackUtil.createAutoScalingClient(region, credential);
         AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(region, credential);
-        String asGroupName = cfStackUtil.getAutoscalingGroupName(stack);
+        String asGroupName = cfStackUtil.getAutoscalingGroupName(stack, hostGroup);
         amazonASClient.updateAutoScalingGroup(new UpdateAutoScalingGroupRequest()
                 .withAutoScalingGroupName(asGroupName)
                 .withMaxSize(requiredInstances)
                 .withDesiredCapacity(requiredInstances));
-        LOGGER.info("Updated AutoScaling group's desiredCapacity: [stack: '{}', from: '{}', to: '{}']", stack.getId(), stack.getNodeCount(),
-                stack.getNodeCount() + instanceCount);
+        LOGGER.info("Updated AutoScaling group's desiredCapacity: [stack: '{}', from: '{}', to: '{}']", stack.getId(), stack.getFullNodeCount(),
+                stack.getFullNodeCount() + instanceCount);
         AutoScalingGroupReady asGroupReady = new AutoScalingGroupReady(stack, amazonEC2Client, amazonASClient, asGroupName, requiredInstances);
         LOGGER.info("Polling autoscaling group until new instances are ready. [stack: {}, asGroup: {}]", stack.getId(), asGroupName);
         pollingService.pollWithTimeout(asGroupStatusCheckerTask, asGroupReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT, stack.getId());
-        reactor.notify(ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT, Event.wrap(new AddInstancesComplete(CloudPlatform.AWS, stack.getId(), null)));
+        reactor.notify(ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT, Event.wrap(new AddInstancesComplete(CloudPlatform.AWS, stack.getId(), null, hostGroup)));
         return true;
     }
 
     @Override
-    public boolean removeInstances(Stack stack, Set<String> instanceIds) {
+    public boolean removeInstances(Stack stack, Set<String> instanceIds, String hostGroup) {
         MDCBuilder.buildMdcContext(stack);
-        Regions region = ((AwsTemplate) stack.getTemplate()).getRegion();
+        Regions region = Regions.valueOf(stack.getRegion());
         AwsCredential credential = (AwsCredential) stack.getCredential();
         AmazonAutoScalingClient amazonASClient = awsStackUtil.createAutoScalingClient(region, credential);
         AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(region, credential);
 
-        String asGroupName = cfStackUtil.getAutoscalingGroupName(stack);
+        String asGroupName = cfStackUtil.getAutoscalingGroupName(stack, hostGroup);
         DetachInstancesRequest detachInstancesRequest = new DetachInstancesRequest().withAutoScalingGroupName(asGroupName).withInstanceIds(instanceIds)
                 .withShouldDecrementDesiredCapacity(true);
         amazonASClient.detachInstances(detachInstancesRequest);
         amazonEC2Client.terminateInstances(new TerminateInstancesRequest().withInstanceIds(instanceIds));
         LOGGER.info("Terminated instances in stack '{}': '{}'", stack.getId(), instanceIds);
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, stack.getId());
-        reactor.notify(ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, Event.wrap(new StackUpdateSuccess(stack.getId(), true, instanceIds)));
+        reactor.notify(ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, Event.wrap(new StackUpdateSuccess(stack.getId(), true, instanceIds, hostGroup)));
         return true;
     }
 
@@ -277,33 +245,35 @@ public class AwsConnector implements CloudPlatformConnector {
     private boolean setStackState(Stack stack, boolean stopped) {
         MDCBuilder.buildMdcContext(stack);
         boolean result = true;
-        Regions region = ((AwsTemplate) stack.getTemplate()).getRegion();
+        Regions region = Regions.valueOf(stack.getRegion());
         AwsCredential credential = (AwsCredential) stack.getCredential();
         AmazonAutoScalingClient amazonASClient = awsStackUtil.createAutoScalingClient(region, credential);
         AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(region, credential);
-        String asGroupName = cfStackUtil.getAutoscalingGroupName(stack);
-        Set<InstanceMetaData> instanceMetaData = stack.getInstanceMetaData();
-        Collection<String> instances = new ArrayList<>(instanceMetaData.size());
-        for (InstanceMetaData instance : instanceMetaData) {
-            instances.add(instance.getInstanceId());
-        }
-        try {
-            if (stopped) {
-                amazonASClient.suspendProcesses(new SuspendProcessesRequest().withAutoScalingGroupName(asGroupName));
-                amazonEC2Client.stopInstances(new StopInstancesRequest().withInstanceIds(instances));
-            } else {
-                amazonASClient.resumeProcesses(new ResumeProcessesRequest().withAutoScalingGroupName(asGroupName));
-                amazonEC2Client.startInstances(new StartInstancesRequest().withInstanceIds(instances));
-                awsPollingService.pollWithTimeout(
-                        new AwsInstanceStatusCheckerTask(),
-                        new AwsInstances(stack, amazonEC2Client, new ArrayList(instances), "Running"),
-                        AmbariClusterConnector.POLLING_INTERVAL,
-                        AmbariClusterConnector.MAX_ATTEMPTS_FOR_AMBARI_OPS);
-                updateInstanceMetadata(stack, amazonEC2Client, instanceMetaData, instances);
+        for (TemplateGroup templateGroup : stack.getTemplateGroups()) {
+            String asGroupName = cfStackUtil.getAutoscalingGroupName(stack, templateGroup.getGroupName());
+            Set<InstanceMetaData> instanceMetaData = stack.getInstanceMetaData();
+            Collection<String> instances = new ArrayList<>(instanceMetaData.size());
+            for (InstanceMetaData instance : instanceMetaData) {
+                instances.add(instance.getInstanceId());
             }
-        } catch (Exception e) {
-            LOGGER.error(String.format("Failed to %s AWS instances on stack: %s", stopped ? "stop" : "start", stack.getId()), e);
-            result = false;
+            try {
+                if (stopped) {
+                    amazonASClient.suspendProcesses(new SuspendProcessesRequest().withAutoScalingGroupName(asGroupName));
+                    amazonEC2Client.stopInstances(new StopInstancesRequest().withInstanceIds(instances));
+                } else {
+                    amazonASClient.resumeProcesses(new ResumeProcessesRequest().withAutoScalingGroupName(asGroupName));
+                    amazonEC2Client.startInstances(new StartInstancesRequest().withInstanceIds(instances));
+                    awsPollingService.pollWithTimeout(
+                            new AwsInstanceStatusCheckerTask(),
+                            new AwsInstances(stack, amazonEC2Client, new ArrayList(instances), "Running"),
+                            AmbariClusterConnector.POLLING_INTERVAL,
+                            AmbariClusterConnector.MAX_ATTEMPTS_FOR_AMBARI_OPS);
+                    updateInstanceMetadata(stack, amazonEC2Client, instanceMetaData, instances);
+                }
+            } catch (Exception e) {
+                LOGGER.error(String.format("Failed to %s AWS instances on stack: %s", stopped ? "stop" : "start", stack.getId()));
+                result = false;
+            }
         }
         return result;
     }

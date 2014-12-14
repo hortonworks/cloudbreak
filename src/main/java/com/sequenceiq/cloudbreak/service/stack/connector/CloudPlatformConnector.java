@@ -12,9 +12,9 @@ public interface CloudPlatformConnector {
 
     void buildStack(Stack stack, String userData, Map<String, Object> setupProperties);
 
-    boolean addInstances(Stack stack, String userData, Integer instanceCount);
+    boolean addInstances(Stack stack, String userData, Integer instanceCount, String hostGroup);
 
-    boolean removeInstances(Stack stack, Set<String> instanceIds);
+    boolean removeInstances(Stack stack, Set<String> instanceIds, String hostGroup);
 
     void deleteStack(Stack stack, Credential credential);
 

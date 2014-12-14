@@ -91,7 +91,8 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
             if (scalingAdjustment > 0) {
                 if (cloudPlatform.isWithTemplate()) {
                     cloudPlatformConnectors.get(cloudPlatform)
-                            .addInstances(stack, userDataBuilder.build(cloudPlatform, stack.getHash(), new HashMap<String, String>()), scalingAdjustment);
+                            .addInstances(stack, userDataBuilder.build(cloudPlatform, stack.getHash(), new HashMap<String, String>()),
+                                    scalingAdjustment, request.getHostGroup());
                 } else {
                     ResourceBuilderInit resourceBuilderInit = resourceBuilderInits.get(cloudPlatform);
                     final ProvisionContextObject pCO =
@@ -101,7 +102,7 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
                     }
                     List<Future<Boolean>> futures = new ArrayList<>();
                     final Set<Resource> resourceSet = new HashSet<>();
-                    for (int i = stack.getNodeCount(); i < stack.getNodeCount() + scalingAdjustment; i++) {
+                    for (int i = stack.getFullNodeCount(); i < stack.getFullNodeCount() + scalingAdjustment; i++) {
                         final int index = i;
                         Future<Boolean> submit = resourceBuilderExecutor.submit(new Callable<Boolean>() {
                             @Override
@@ -138,7 +139,7 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
 
                     LOGGER.info("Publishing {} event.", ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT);
                     reactor.notify(ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT,
-                            Event.wrap(new AddInstancesComplete(cloudPlatform, stack.getId(), resourceSet)));
+                            Event.wrap(new AddInstancesComplete(cloudPlatform, stack.getId(), resourceSet, request.getHostGroup())));
                 }
             } else {
                 Set<String> instanceIds = new HashSet<>();
@@ -152,7 +153,7 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
                     }
                 }
                 if (cloudPlatform.isWithTemplate()) {
-                    cloudPlatformConnectors.get(cloudPlatform).removeInstances(stack, instanceIds);
+                    cloudPlatformConnectors.get(cloudPlatform).removeInstances(stack, instanceIds, request.getHostGroup());
                 } else {
                     ResourceBuilderInit resourceBuilderInit = resourceBuilderInits.get(cloudPlatform);
                     final DeleteContextObject dCO = resourceBuilderInit.decommissionInit(stack, instanceIds);
@@ -194,7 +195,8 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
                     stackUpdater.removeStackResources(stackId, dCO.getDecommisionResources());
                     LOGGER.info("Terminated instances in stack: '{}'", instanceIds);
                     LOGGER.info("Publishing {} event.", ReactorConfig.STACK_UPDATE_SUCCESS_EVENT);
-                    reactor.notify(ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, Event.wrap(new StackUpdateSuccess(stack.getId(), true, instanceIds)));
+                    reactor.notify(ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, Event.wrap(new StackUpdateSuccess(stack.getId(), true,
+                            instanceIds, request.getHostGroup())));
                 }
             }
         } catch (AddInstancesFailedException e) {

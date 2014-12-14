@@ -78,7 +78,7 @@ public class AmbariRoleAllocatorTest {
     @Test
     public void testAllocateRolesWhenStackNodeCountAndMetaDataSizeIsNotEqual() {
         // GIVEN
-        stack.setNodeCount(3);
+       // stack.setNodeCount(3);
         given(stackRepository.findById(1L)).willReturn(stack);
         given(stackRepository.findOneWithLists(1L)).willReturn(stack);
         // WHEN
@@ -111,14 +111,14 @@ public class AmbariRoleAllocatorTest {
 
     private Stack createStack() {
         Stack stack = new Stack();
-        stack.setNodeCount(2);
+       // stack.setNodeCount(2);
         stack.setId(1L);
         return stack;
     }
 
     private Stack updatedStack() {
         Stack stack = new Stack();
-        stack.setNodeCount(2);
+        //stack.setNodeCount(2);
         stack.setId(1L);
         stack.setMetadataReady(true);
         return stack;

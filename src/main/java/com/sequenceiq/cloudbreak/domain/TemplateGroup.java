@@ -13,7 +13,7 @@ public class TemplateGroup implements ProvisionEntity {
     private Long id;
     @OneToOne
     private Template template;
-    private Long nodeCount;
+    private Integer nodeCount;
     private String groupName;
     @ManyToOne
     private Stack stack;
@@ -42,11 +42,11 @@ public class TemplateGroup implements ProvisionEntity {
         this.template = template;
     }
 
-    public Long getNodeCount() {
+    public Integer getNodeCount() {
         return nodeCount;
     }
 
-    public void setNodeCount(Long nodeCount) {
+    public void setNodeCount(Integer nodeCount) {
         this.nodeCount = nodeCount;
     }
 

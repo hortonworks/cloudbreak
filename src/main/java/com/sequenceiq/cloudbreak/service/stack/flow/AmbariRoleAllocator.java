@@ -62,10 +62,10 @@ public class AmbariRoleAllocator {
             Stack stack = stackRepository.findById(stackId);
             MDCBuilder.buildMdcContext(stack);
             if (!stack.isMetadataReady()) {
-                if (coreInstanceMetaData.size() != stack.getNodeCount()) {
+                if (coreInstanceMetaData.size() != stack.getFullNodeCount()) {
                     throw new WrongMetadataException(String.format(
                             "Size of the collected metadata set does not equal the node count of the stack. [metadata size=%s] [nodecount=%s]",
-                            coreInstanceMetaData.size(), stack.getNodeCount()));
+                            coreInstanceMetaData.size(), stack.getFullNodeCount()));
                 }
                 Set<InstanceMetaData> instancesMetaData = prepareInstanceMetaData(stack, coreInstanceMetaData);
                 stackUpdater.updateStackMetaData(stackId, instancesMetaData);
@@ -89,7 +89,7 @@ public class AmbariRoleAllocator {
         }
     }
 
-    public void updateInstanceMetadata(Long stackId, Set<CoreInstanceMetaData> coreInstanceMetaData) {
+    public void updateInstanceMetadata(Long stackId, Set<CoreInstanceMetaData> coreInstanceMetaData, String hostGroup) {
         Stack stack = stackRepository.findOneWithLists(stackId);
         MDCBuilder.buildMdcContext(stack);
         try {
@@ -106,7 +106,7 @@ public class AmbariRoleAllocator {
                 instanceIds.add(metadataEntry.getInstanceId());
             }
             LOGGER.info("Publishing {} event.", ReactorConfig.STACK_UPDATE_SUCCESS_EVENT);
-            reactor.notify(ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, Event.wrap(new StackUpdateSuccess(stackId, false, instanceIds)));
+            reactor.notify(ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, Event.wrap(new StackUpdateSuccess(stackId, false, instanceIds, hostGroup)));
         } catch (Exception e) {
             String errMessage = "Unhandled exception occurred while updating stack metadata.";
             LOGGER.error(errMessage, e);

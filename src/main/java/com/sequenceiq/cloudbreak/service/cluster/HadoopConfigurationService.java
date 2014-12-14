@@ -21,11 +21,6 @@ public class HadoopConfigurationService {
 
     public Map<String, Map<String, String>> getConfiguration(Stack stack) {
         Map<String, Map<String, String>> hadoopConfig = new HashMap<>();
-        int volumeCount = stack.getTemplate().getVolumeCount();
-        if (volumeCount > 0) {
-            hadoopConfig.put(YARN_SITE, getYarnSiteConfigs(buildDiskPathString(volumeCount, "nodemanager")));
-            hadoopConfig.put(HDFS_SITE, getHDFSSiteConfigs(buildDiskPathString(volumeCount, "datanode")));
-        }
         return hadoopConfig;
     }
 

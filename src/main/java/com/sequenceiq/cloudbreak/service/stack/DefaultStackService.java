@@ -25,7 +25,6 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.StatusRequest;
-import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
@@ -133,7 +132,6 @@ public class DefaultStackService implements StackService {
     public Stack create(CbUser user, Stack stack) {
         MDCBuilder.buildMdcContext(stack);
         Stack savedStack = null;
-        Template template = templateRepository.findOne(stack.getTemplate().getId());
         stack.setOwner(user.getUserId());
         stack.setAccount(user.getAccount());
         stack.setHash(generateHash(stack));
@@ -144,7 +142,7 @@ public class DefaultStackService implements StackService {
             try {
                 savedStack = stackRepository.save(stack);
                 LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_REQUEST_EVENT, stack.getId());
-                reactor.notify(ReactorConfig.PROVISION_REQUEST_EVENT, Event.wrap(new ProvisionRequest(template.cloudPlatform(), stack.getId())));
+                reactor.notify(ReactorConfig.PROVISION_REQUEST_EVENT, Event.wrap(new ProvisionRequest(stack.cloudPlatform(), stack.getId())));
             } catch (DataIntegrityViolationException ex) {
                 throw new DuplicateKeyValueException(stack.getName(), ex);
             }
@@ -208,8 +206,8 @@ public class DefaultStackService implements StackService {
             throw new BadRequestException(String.format("Requested scaling adjustment on stack '%s' is 0. Nothing to do.", stackId));
         }
         if (0 > hostGroupAdjustmentJson.getScalingAdjustment()) {
-            if (-1 * hostGroupAdjustmentJson.getScalingAdjustment() > stack.getNodeCount()) {
-                throw new BadRequestException(String.format("There are %s instances in stack '%s'. Cannot remove %s instances.", stack.getNodeCount(), stackId,
+            if (-1 * hostGroupAdjustmentJson.getScalingAdjustment() > stack.getFullNodeCount()) {
+                throw new BadRequestException(String.format("There are %s instances in stack '%s'. Cannot remove %s instances.", stack.getFullNodeCount(), stackId,
                         -1 * hostGroupAdjustmentJson.getScalingAdjustment()));
             }
             int removeableHosts = 0;
@@ -231,7 +229,8 @@ public class DefaultStackService implements StackService {
         LOGGER.info("Publishing {} event [scalingAdjustment: '{}']", ReactorConfig.UPDATE_INSTANCES_REQUEST_EVENT,
                 hostGroupAdjustmentJson.getScalingAdjustment());
         reactor.notify(ReactorConfig.UPDATE_INSTANCES_REQUEST_EVENT,
-                Event.wrap(new UpdateInstancesRequest(stack.cloudPlatform(), stack.getId(), hostGroupAdjustmentJson.getScalingAdjustment())));
+                Event.wrap(new UpdateInstancesRequest(stack.cloudPlatform(), stack.getId(),
+                        hostGroupAdjustmentJson.getScalingAdjustment(), hostGroupAdjustmentJson.getHostGroup())));
     }
 
     @Override

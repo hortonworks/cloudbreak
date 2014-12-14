@@ -94,7 +94,7 @@ public class StackCreationFailureHandlerTest {
         stack.setName(STACK_NAME);
         stack.setCredential(new AzureCredential());
         AzureTemplate azureTemplate = new AzureTemplate();
-        stack.setTemplate(azureTemplate);
+        //stack.setTemplate(azureTemplate);
         stack.setOwner(DUMMY_EMAIL);
         return stack;
     }

@@ -33,8 +33,11 @@ import javax.persistence.Version;
                         + "WHERE c.id= :id"),
         @NamedQuery(
                 name = "Stack.findAllStackForTemplate",
-                query = "SELECT c FROM Stack c "
-                        + "WHERE c.template.id= :id"),
+                query = "SELECT c FROM Stack c inner join c.templateGroups tg "
+                        + "LEFT JOIN FETCH c.resources "
+                        + "LEFT JOIN FETCH c.instanceMetaData "
+                        + "LEFT JOIN FETCH c.templateGroups "
+                        + "WHERE tg.template.id= :id"),
         @NamedQuery(
                 name = "Stack.findStackForCluster",
                 query = "SELECT c FROM Stack c "
@@ -122,7 +125,6 @@ public class Stack implements ProvisionEntity {
     private boolean publicInAccount;
     private String region;
 
-    private Integer nodeCount;
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
 
@@ -144,9 +146,6 @@ public class Stack implements ProvisionEntity {
 
     @OneToMany(mappedBy = "stack", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<InstanceMetaData> instanceMetaData = new HashSet<>();
-
-    @OneToOne
-    private Template template;
 
     @OneToOne
     private Credential credential;
@@ -217,22 +216,6 @@ public class Stack implements ProvisionEntity {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public Integer getNodeCount() {
-        return nodeCount;
-    }
-
-    public void setNodeCount(Integer nodeCount) {
-        this.nodeCount = nodeCount;
-    }
-
-    public Template getTemplate() {
-        return template;
-    }
-
-    public void setTemplate(Template template) {
-        this.template = template;
     }
 
     public Cluster getCluster() {
@@ -375,6 +358,14 @@ public class Stack implements ProvisionEntity {
         return null;
     }
 
+    public Integer getFullNodeCount() {
+        int nodeCount = 0;
+        for (TemplateGroup templateGroup : templateGroups) {
+            nodeCount += templateGroup.getNodeCount();
+        }
+        return nodeCount;
+    }
+
     public List<TemplateGroup> getTemplateSetAsList() {
         List<TemplateGroup> templateGroupsList = new ArrayList();
         templateGroupsList.addAll(templateGroups);
@@ -383,10 +374,6 @@ public class Stack implements ProvisionEntity {
 
     public CloudPlatform cloudPlatform() {
         return credential.getCloudPlatform();
-    }
-
-    public Integer getMultiplier() {
-        return template.getMultiplier();
     }
 
 }

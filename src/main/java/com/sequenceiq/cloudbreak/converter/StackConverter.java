@@ -41,8 +41,6 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
     @Override
     public StackJson convert(Stack entity) {
         StackJson stackJson = new StackJson();
-        stackJson.setTemplateId(entity.getTemplate().getId());
-        stackJson.setNodeCount(entity.getNodeCount());
         stackJson.setName(entity.getName());
         stackJson.setOwner(entity.getOwner());
         stackJson.setAccount(entity.getAccount());
@@ -72,7 +70,6 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
     @Override
     public Stack convert(StackJson json) {
         Stack stack = new Stack();
-        stack.setNodeCount(json.getNodeCount());
         stack.setName(json.getName());
         stack.setUserName(json.getUserName());
         stack.setPassword(json.getPassword());
@@ -82,11 +79,6 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
             stack.setCredential(credentialRepository.findOne(json.getCredentialId()));
         } catch (AccessDeniedException e) {
             throw new AccessDeniedException(String.format("Access to credential '%s' is denied or credential doesn't exist.", json.getCredentialId()), e);
-        }
-        try {
-            stack.setTemplate(templateRepository.findOne(Long.valueOf(json.getTemplateId())));
-        } catch (AccessDeniedException e) {
-            throw new AccessDeniedException(String.format("Access to template '%s' is denied or template doesn't exist.", json.getTemplateId()), e);
         }
         stack.setStatus(Status.REQUESTED);
         stack.setTemplateGroups(templateGroupConverter.convertAllJsonToEntity(json.getTemplateGroups(), stack));

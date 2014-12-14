@@ -45,7 +45,7 @@ public class StackUpdateSuccessHandler implements Consumer<Event<StackUpdateSucc
         LOGGER.info("Accepted {} event.", ReactorConfig.STACK_UPDATE_SUCCESS_EVENT);
         Set<String> instanceIds = updateSuccess.getInstanceIds();
         if (updateSuccess.isRemoveInstances()) {
-            stackUpdater.updateNodeCount(stackId, stack.getNodeCount() - instanceIds.size());
+            stackUpdater.updateNodeCount(stackId, stack.getFullNodeCount() - instanceIds.size(), updateSuccess.getHostGroup());
             Set<InstanceMetaData> metadataToRemove = new HashSet<>();
             for (InstanceMetaData metadataEntry : stack.getInstanceMetaData()) {
                 for (String instanceId : instanceIds) {
@@ -60,7 +60,7 @@ public class StackUpdateSuccessHandler implements Consumer<Event<StackUpdateSucc
             eventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_CHANGED.name(),
                     "Billing changed due to downscaling of cluster infrastructure.");
         } else {
-            stackUpdater.updateNodeCount(stackId, stack.getNodeCount() + instanceIds.size());
+            stackUpdater.updateNodeCount(stackId, stack.getFullNodeCount() + instanceIds.size(), updateSuccess.getHostGroup());
             eventService.fireCloudbreakEvent(stackId, BillingStatus.BILLING_CHANGED.name(), "Billing changed due to upscaling of cluster infrastructure.");
         }
         stackUpdater.updateMetadataReady(stackId, true);

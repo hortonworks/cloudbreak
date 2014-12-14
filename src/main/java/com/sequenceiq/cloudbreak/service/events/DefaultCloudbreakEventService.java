@@ -11,10 +11,7 @@ import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
-import com.sequenceiq.cloudbreak.domain.AwsTemplate;
-import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
-import com.sequenceiq.cloudbreak.domain.GccTemplate;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.CloudbreakEventRepository;
@@ -89,7 +86,7 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
         stackEvent.setStackId(stack.getId());
         stackEvent.setStackStatus(stack.getStatus());
         stackEvent.setStackName(stack.getName());
-        stackEvent.setNodeCount(stack.getNodeCount());
+        stackEvent.setNodeCount(stack.getFullNodeCount());
 
         populateClusterData(stackEvent, stack);
         populateTemplateData(stackEvent, stack);
@@ -111,7 +108,7 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
         MDCBuilder.buildMdcContext(stackEvent);
         String vmType = null;
         String region = null;
-        switch (stack.cloudPlatform()) {
+       /* switch (stack.cloudPlatform()) {
             case AWS:
                 vmType = ((AwsTemplate) stack.getTemplate()).getInstanceType().name();
                 region = ((AwsTemplate) stack.getTemplate()).getRegion().getName();
@@ -126,7 +123,7 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
                 break;
             default:
                 throw new IllegalStateException("Unsupported cloud platform :" + stack.cloudPlatform());
-        }
+        }*/
         stackEvent.setVmType(vmType);
         stackEvent.setRegion(region);
         stackEvent.setCloud(stack.cloudPlatform().name());

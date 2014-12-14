@@ -330,7 +330,7 @@ public class AmbariClusterConnector {
         LOGGER.info("Waiting for hosts to connect.[Ambari server address: {}]", stack.getAmbariIp());
         hostsPollingService.pollWithTimeout(
                 new AmbariHostsStatusCheckerTask(),
-                new AmbariHosts(stack, ambariClient, stack.getNodeCount() * stack.getMultiplier()),
+                new AmbariHosts(stack, ambariClient, stack.getFullNodeCount()),
                 POLLING_INTERVAL,
                 MAX_ATTEMPTS_FOR_HOSTS);
     }

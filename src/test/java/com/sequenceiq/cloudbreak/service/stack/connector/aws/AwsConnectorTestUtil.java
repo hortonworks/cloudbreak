@@ -31,8 +31,8 @@ public class AwsConnectorTestUtil extends ConnectorTestUtil {
         stack.setCredential(credential);
         stack.setOwner(owner);
         stack.setAccount(account);
-        stack.setTemplate(awsTemplate);
-        stack.setNodeCount(NODE_COUNT);
+       // stack.setTemplate(awsTemplate);
+       // stack.setNodeCount(NODE_COUNT);
         stack.setStatus(Status.REQUESTED);
         stack.setResources(resources);
         return stack;

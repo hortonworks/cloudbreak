@@ -31,7 +31,7 @@ public class TemplateGroupConverter extends AbstractConverter<TemplateGroupJson,
     public TemplateGroup convert(TemplateGroupJson json) {
         TemplateGroup templateGroup = new TemplateGroup();
         templateGroup.setGroupName(json.getGroup());
-        templateGroup.setNodeCount(Long.parseLong(String.valueOf(json.getNodeCount())));
+        templateGroup.setNodeCount(Integer.valueOf(String.valueOf(json.getNodeCount())));
         try {
             templateGroup.setTemplate(templateRepository.findOne(Long.valueOf(json.getTemplateId())));
         } catch (AccessDeniedException e) {

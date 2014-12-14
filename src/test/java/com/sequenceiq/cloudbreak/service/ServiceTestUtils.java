@@ -108,11 +108,11 @@ public final class ServiceTestUtils {
         Stack stack = new Stack();
         stack.setAmbariIp("168.192.12.13");
         stack.setCredential(credential);
-        stack.setNodeCount(2);
+        //stack.setNodeCount(2);
         stack.setMetadataReady(true);
         stack.setOwner(owner);
         stack.setAccount(account);
-        stack.setTemplate(template);
+        //stack.setTemplate(template);
         stack.setCluster(cluster);
         stack.setPublicInAccount(true);
         stack.setResources(resources);
