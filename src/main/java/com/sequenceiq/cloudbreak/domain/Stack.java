@@ -97,7 +97,14 @@ import javax.persistence.Version;
                         + "WHERE t.owner= :owner and t.name= :name"),
         @NamedQuery(
                 name = "Stack.findByCredential",
-                query = "SELECT t FROM Stack t WHERE t.credential.id= :credentialId")
+                query = "SELECT t FROM Stack t WHERE t.credential.id= :credentialId"
+                        + "LEFT JOIN FETCH s.resources "
+                        + "LEFT JOIN FETCH s.instanceMetaData "
+                        + "LEFT JOIN FETCH s.templateGroups "
+                        + "LEFT JOIN FETCH t.resources "
+                        + "LEFT JOIN FETCH t.instanceMetaData "
+                        + "LEFT JOIN FETCH t.templateGroups "
+                        + "WHERE t.owner= :owner and t.name= :name")
 })
 public class Stack implements ProvisionEntity {
 

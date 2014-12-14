@@ -27,15 +27,7 @@
       "MinLength": "1",
       "MaxLength": "50"
     },
-    
-    "InstanceCount" : {
-      "Description" : "Number of instances that should be started in the stack.",
-      "Type" : "Number",
-      "Default" : "3",
-      "MinValue" : "1",
-      "MaxValue" : "99"
-    },
-    
+
     "CBUserData" : {
       "Description" : "User data to be executed",
       "Type" : "String",
@@ -50,49 +42,6 @@
       "MaxLength": "255",
       "AllowedPattern" : "[\\x20-\\x7E]*",
       "ConstraintDescription" : "can contain only ASCII characters."
-    },    
- 
-    "InstanceType" : {
-      "Description" : "EC2 instance type of nodes to start",
-      "Type" : "String",
-      "Default" : "t2.small",
-      "AllowedValues" : [ "t2.micro","t2.small","t2.medium","m3.medium","m3.large","m3.xlarge","m3.2xlarge","c3.large","c3.xlarge","c3.2xlarge","c3.4xlarge","c3.8xlarge"],
-      "ConstraintDescription" : "must be a valid EC2 instance type."
-    },
-    
-    "AMI" : {
-      "Description" : "AMI that's used to start instances",
-      "Type" : "String",
-      "MinLength": "12",
-      "MaxLength": "12",
-      "AllowedPattern" : "ami-[a-z0-9]{8}",
-      "ConstraintDescription" : "must follow pattern: ami-xxxxxxxx"
-    },
-    
-    <#if useSpot>
-	"SpotPrice" : {
-      "Description" : "The maximum price for the instances per hour if they were started as spot priced.",
-      "Type" : "Number",
-      "Default" : "0.5",
-      "MinValue": "0.01",
-      "MaxValue": "100"
-    },
-    </#if>
-    
-    "VolumeSize" : {
-      "Description" : "Size of the attached volumes in GB",
-      "Type" : "Number",
-      "Default" : "40",
-      "MinValue": "10",
-      "MaxValue": "1000"
-    },
-    
-    "VolumeType" : {
-      "Description" : "Type of the attached volumes (SSD or magnetic)",
-      "Type" : "String",
-      "Default" : "gp2",
-      "AllowedValues" : [ "gp2","standard"],
-      "ConstraintDescription" : "must be 'gp2' or 'standard'."
     }
 
   },
@@ -178,23 +127,23 @@
         "RouteTableId" : { "Ref" : "PublicRouteTable" }
       }
     },
-    
-	"AmbariNodes" : {
+    <#list templates as tgroup>
+	"AmbariNodes${tgroup.groupName?replace('_', '')}" : {
       "Type" : "AWS::AutoScaling::AutoScalingGroup",
       "DependsOn" : "PublicSubnet",
       "Properties" : {
         "AvailabilityZones" : [{ "Fn::GetAtt" : [ "PublicSubnet", "AvailabilityZone" ] }],
         "VPCZoneIdentifier" : [{ "Ref" : "PublicSubnet" }],
-        "LaunchConfigurationName" : { "Ref" : "AmbariNodeLaunchConfig" },
+        "LaunchConfigurationName" : { "Ref" : "AmbariNodeLaunchConfig${tgroup.groupName?replace('_', '')}" },
         "MinSize" : 1,
-        "MaxSize" : { "Ref" : "InstanceCount" },
-        "DesiredCapacity" : { "Ref" : "InstanceCount" },
+        "MaxSize" : ${tgroup.nodeCount},
+        "DesiredCapacity" : ${tgroup.nodeCount},
         "Tags" : [ { "Key" : "Name", "Value" : { "Ref" : "StackName" }, "PropagateAtLaunch" : "true" },
         		   { "Key" : "owner", "Value" : { "Ref" : "StackOwner" }, "PropagateAtLaunch" : "true" } ]
       }
     },
 
-    "AmbariNodeLaunchConfig"  : {
+    "AmbariNodeLaunchConfig${tgroup.groupName?replace('_', '')}"  : {
       "Type" : "AWS::AutoScaling::LaunchConfiguration",
       "Properties" : {
       	"BlockDeviceMappings" : [
@@ -223,28 +172,29 @@
           }
 		  <#assign seq = ["f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]>
 			<#list seq as x>
-			<#if x_index = volumeCount><#break></#if>
+			<#if x_index = tgroup.template.volumeCount><#break></#if>
   		  ,{
           	"DeviceName" : "/dev/xvd${x}",
           	"Ebs" : {
-           	  "VolumeSize" : { "Ref" : "VolumeSize" },
-           	  "VolumeType" : { "Ref" : "VolumeType" }
+           	  "VolumeSize" : ${tgroup.template.volumeSize},
+           	  "VolumeType" : "${tgroup.template.volumeType}"
             }
-      	  }	
+      	  }
 			</#list>
       	],
-        "ImageId"        : { "Ref" : "AMI" },
+        "ImageId"        : "${tgroup.template.amiId}",
         "SecurityGroups" : [ { "Ref" : "ClusterNodeSecurityGroup" } ],
-        "InstanceType"   : { "Ref" : "InstanceType" },
+        "InstanceType"   : "${tgroup.template.instanceType}",
         "KeyName"        : { "Ref" : "KeyName" },
         "AssociatePublicIpAddress" : "true",
-        <#if useSpot>
+        <#if false>
         "SpotPrice"      : { "Ref" : "SpotPrice" },
         </#if>
         "UserData"       : { "Fn::Base64" : { "Ref" : "CBUserData"}}
       }
     },
-    
+    </#list>
+
     "ClusterNodeSecurityGroup" : {
       "Type" : "AWS::EC2::SecurityGroup",
       "Properties" : {

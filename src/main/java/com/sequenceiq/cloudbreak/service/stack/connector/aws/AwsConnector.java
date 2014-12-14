@@ -1,13 +1,16 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.aws;
 
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +48,8 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.Status;
+import com.sequenceiq.cloudbreak.domain.TemplateGroup;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
@@ -58,6 +63,7 @@ import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.StackUpdateSuccess;
 import com.sequenceiq.cloudbreak.service.stack.flow.AwsInstanceStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.flow.AwsInstances;
+import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 import reactor.core.Reactor;
 import reactor.event.Event;
@@ -164,29 +170,48 @@ public class AwsConnector implements CloudPlatformConnector {
         MDCBuilder.buildMdcContext(stack);
         AwsTemplate awsTemplate = (AwsTemplate) stack.getTemplate();
         AwsCredential awsCredential = (AwsCredential) stack.getCredential();
-        AmazonCloudFormationClient client = awsStackUtil.createCloudFormationClient(awsTemplate.getRegion(), awsCredential);
+        AmazonCloudFormationClient client = awsStackUtil.createCloudFormationClient(Regions.valueOf(stack.getRegion()), awsCredential);
         String stackName = String.format("%s-%s", stack.getName(), stack.getId());
-        boolean spotPriced = awsTemplate.getSpotPrice() == null ? false : true;
         List<Parameter> parameters = new ArrayList<>(Arrays.asList(
                 new Parameter().withParameterKey("SSHLocation").withParameterValue(awsTemplate.getSshLocation()),
                 new Parameter().withParameterKey("CBUserData").withParameterValue(userData),
                 new Parameter().withParameterKey("StackName").withParameterValue(stackName),
                 new Parameter().withParameterKey("StackOwner").withParameterValue(awsCredential.getRoleArn()),
-                new Parameter().withParameterKey("InstanceCount").withParameterValue(stack.getNodeCount().toString()),
-                new Parameter().withParameterKey("InstanceType").withParameterValue(awsTemplate.getInstanceType().toString()),
-                new Parameter().withParameterKey("KeyName").withParameterValue(awsCredential.getKeyPairName()),
-                new Parameter().withParameterKey("AMI").withParameterValue(awsTemplate.getAmiId()),
-                new Parameter().withParameterKey("VolumeSize").withParameterValue(awsTemplate.getVolumeSize().toString()),
-                new Parameter().withParameterKey("VolumeType").withParameterValue(awsTemplate.getVolumeType().toString())));
-        if (spotPriced) {
-            parameters.add(new Parameter().withParameterKey("SpotPrice").withParameterValue(awsTemplate.getSpotPrice().toString()));
-        }
+                new Parameter().withParameterKey("KeyName").withParameterValue(awsCredential.getKeyPairName())
+        ));
+
+      /*  StringBuilder sb = new StringBuilder();
+        String file = FileReaderUtils.readFileFromClasspath("templates/cf-hg-template.ftl");
+        for (TemplateGroup templateGroup : stack.getTemplateGroups()) {
+            boolean spotPriced = ((AwsTemplate) templateGroup.getTemplate()).getSpotPrice() == null ? false : true;
+            String temp = file.replaceAll("HOST_GROUP", templateGroup.getGroupName())
+                    .replaceAll("NODE_COUNT", templateGroup.getNodeCount().toString())
+                    .replaceAll("VOLUME_COUNT", templateGroup.getTemplate().getVolumeCount().toString())
+                    .replaceAll("VOLUME_SIZE", templateGroup.getTemplate().getVolumeSize().toString())
+                    .replaceAll("AMI_ID", ((AwsTemplate) templateGroup.getTemplate()).getAmiId())
+                    .replaceAll("INSTANCE_TYPE", ((AwsTemplate) templateGroup.getTemplate()).getInstanceType().toString())
+                    .replaceAll("VOLUME_TYPE", ((AwsTemplate) templateGroup.getTemplate()).getVolumeType().toString());
+            if (spotPriced) {
+                temp = temp.replaceAll("IS_SPOT_PRICE", "true");
+                temp = temp.replaceAll("SPOT_PRICE", ((AwsTemplate) templateGroup.getTemplate()).getSpotPrice().toString());
+            } else {
+                temp = temp.replaceAll("IS_SPOT_PRICE", "false");
+            }
+            sb.append(temp + ",");
+        }*/
+      /*  String endfile = FileReaderUtils.readFileFromClasspath("templates/aws-cf-stack.ftl");
+        endfile = endfile.replace("GENERATED_VALUE", sb.toString());
+        String endftl = stack.getId() == null ? "/tmp/" + new Date().getTime() + "stack.ftl" : "/tmp/" + stack.getId() + "stack.ftl";
+        FileOutputStream output = new FileOutputStream(endftl);
+        IOUtils.write(endfile, output);*/
         CreateStackRequest createStackRequest = createStackRequest()
                 .withStackName(stackName)
-                .withTemplateBody(cfTemplateBuilder.build("templates/aws-cf-stack.ftl", awsTemplate.getVolumeCount(), spotPriced))
+                .withTemplateBody(cfTemplateBuilder.build("templates/aws-cf-stack.ftl", false, stack.getTemplateSetAsList()))
                 .withNotificationARNs((String) setupProperties.get(SnsTopicManager.NOTIFICATION_TOPIC_ARN_KEY))
                 .withParameters(parameters);
         client.createStack(createStackRequest);
+
+
         Set<Resource> resources = new HashSet<>();
         resources.add(new Resource(ResourceType.CLOUDFORMATION_STACK, stackName, stack));
         Stack updatedStack = stackUpdater.updateStackResources(stack.getId(), resources);

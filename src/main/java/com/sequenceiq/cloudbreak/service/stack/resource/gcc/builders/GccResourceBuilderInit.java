@@ -83,7 +83,6 @@ public class GccResourceBuilderInit implements
             } catch (IOException ex) {
                 LOGGER.error("There was a problem with the describe instance on Google cloud");
             }
-
         }
         result.addAll(resourceList);
         GccDeleteContextObject gccDeleteContextObject = new GccDeleteContextObject(stack.getId(), credential.getProjectId(),
