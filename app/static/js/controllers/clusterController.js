@@ -108,13 +108,20 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         $scope.changeActiveCluster = function (clusterId) {
             $rootScope.activeCluster = $filter('filter')($rootScope.clusters, { id: clusterId })[0];
             $rootScope.activeClusterBlueprint = $filter('filter')($rootScope.blueprints, { id: $rootScope.activeCluster.blueprintId})[0];
+<<<<<<< HEAD
             $rootScope.activeClusterTemplate = $filter('filter')($rootScope.templates, {id: $rootScope.activeCluster.templateId})[0];
+=======
+>>>>>>> CLOUD-338 fixed templates
             $rootScope.activeClusterCredential = $filter('filter')($rootScope.credentials, {id: $rootScope.activeCluster.credentialId}, true)[0];
             $rootScope.activeCluster.cloudPlatform =  $rootScope.activeClusterCredential.cloudPlatform;
             GlobalStack.get({ id: clusterId }, function(success) {
                     $rootScope.activeCluster.description = success.description;
                 }
             );
+        }
+
+        $scope.getSelectedTemplate = function (templateId) {
+            return $filter('filter')($rootScope.templates, { id: templateId}, true)[0];
         }
 
         $rootScope.events = [];

@@ -125,19 +125,19 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="panel panel-default">
+                        <div class="panel panel-default" ng-repeat="group in $root.activeCluster.templateGroups">
                             <div class="panel-heading">
-                                <h5><a href="" data-toggle="collapse" data-target='#panel-collapse01'><i class="fa fa-file-o fa-fw"></i>Template: {{activeClusterTemplate.name}}</a></h5>
+                                <h5><a href="" data-toggle="collapse" data-target='#panel-collapsetmp{{group.templateId}}'><span class="badge pull-right ng-binding">{{group.group}}: {{group.nodeCount}} node</span><i class="fa fa-file-o fa-fw"></i>Template: {{getSelectedTemplate(group.templateId).name}}</a></h5>
                             </div>
-                            <div id="panel-collapse01" class="panel-collapse collapse">
-                                <div class="panel-body" ng-if="activeClusterTemplate.cloudPlatform == 'AWS' ">
-                                    <div ng-include="'tags/template/awslist.tag'" ng-repeat="template in [activeClusterTemplate]"></div>
+                            <div id="panel-collapsetmp{{group.templateId}}" class="panel-collapse collapse">
+                                <div class="panel-body" ng-if="$root.activeCluster.cloudPlatform == 'AWS' ">
+                                    <div ng-include="'tags/template/awslist.tag'" ng-repeat="template in $root.templates| filter:{id: group.templateId}"></div>
                                 </div>
-                                <div class="panel-body" ng-if="activeClusterTemplate.cloudPlatform == 'AZURE' ">
-                                    <div ng-include="'tags/template/azurelist.tag'" ng-repeat="template in [activeClusterTemplate]"></div>
+                                <div class="panel-body" ng-if="$root.activeCluster.cloudPlatform == 'AZURE' ">
+                                    <div ng-include="'tags/template/azurelist.tag'" ng-repeat="template in $root.templates| filter:{id: group.templateId}"></div>
                                 </div>
-                                <div class="panel-body" ng-if="activeClusterTemplate.cloudPlatform == 'GCC' ">
-                                    <div ng-include="'tags/template/gcclist.tag'" ng-repeat="template in [activeClusterTemplate]"></div>
+                                <div class="panel-body" ng-if="$root.activeCluster.cloudPlatform == 'GCC' ">
+                                    <div ng-include="'tags/template/gcclist.tag'" ng-repeat="template in $root.templates| filter:{id: group.templateId}"></div>
                                 </div>
                             </div>
                         </div>
