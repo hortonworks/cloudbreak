@@ -144,7 +144,6 @@ uluwatuServices.factory('UluwatuCluster', ['UserStack', 'AccountStack', 'Cluster
 
             this.save = function (cluster, successHandler, failureHandler) {
                 var stack = {
-                    nodeCount: cluster.nodeCount,
                     name: cluster.name,
                     credentialId: cluster.credentialId,
                     password: cluster.password,

@@ -174,6 +174,13 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         function getUluwatuClusters(){
           UluwatuCluster.query(function (clusters) {
               $rootScope.clusters = clusters;
+              angular.forEach($rootScope.clusters, function(item) {
+                   var nodeCount = 0;
+                   angular.forEach(item.templateGroups, function(group) {
+                       nodeCount += group.nodeCount;
+                   });
+                   item.nodeCount = nodeCount;
+              });
               $scope.$parent.orderClusters();
           });
         }
@@ -217,7 +224,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         }
 
         $scope.selectCluster = function(cluster) {
-                    $scope.selectedCluster = cluster
+            $scope.selectedCluster = cluster
         }
 
     }]);

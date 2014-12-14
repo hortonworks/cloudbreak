@@ -52,6 +52,7 @@
         </div>
         <!-- .col-sm-9 -->
     </div>
+<<<<<<< HEAD
     <!-- .form-group -->
     <div class="form-group">
         <label class="col-sm-3 control-label" for="location">Location</label>
@@ -61,6 +62,8 @@
         </div>
         <!-- .col-sm-9 -->
     </div>
+=======
+>>>>>>> CLOUD-338 fixed forms
     <div class="form-group">
         <label class="col-sm-3 control-label" for="location">Attached volumes per instance</label>
 

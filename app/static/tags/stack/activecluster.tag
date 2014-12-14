@@ -49,6 +49,18 @@
                                     <p id="sl_nodeCount" class="form-control-static">{{activeCluster.nodeCount}}</p>
                                 </div>
                             </div>
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label" for="sl_region">Region</label>
+                                <div class="col-sm-9" ng-if="activeCluster.cloudPlatform == 'AWS' ">
+                                    <p id="sl_region" class="form-control-static" ng-repeat="item in $root.config.AWS.awsRegions | filter:{key: activeCluster.region}">{{item.value}}</p>
+                                </div>
+                                <div class="col-sm-9" ng-if="activeCluster.cloudPlatform == 'GCC' ">
+                                     <p id="sl_region" class="form-control-static" ng-repeat="item in $root.config.GCC.gccRegions | filter:{key: activeCluster.region}">{{item.value}}</p>
+                                </div>
+                                <div class="col-sm-9" ng-if="activeCluster.cloudPlatform == 'AZURE' ">
+                                    <p id="sl_region" class="form-control-static" ng-repeat="item in $root.config.AZURE.azureRegions | filter:{key: activeCluster.region}">{{item.value}}</p>
+                                </div>
+                            </div>
                             <div class="form-group" ng-if="activeCluster.cluster.statusReason === null && (activeCluster.statusReason != null && activeCluster.statusReason != '')">
                                 <label class="col-sm-3 control-label" for="sl_cloudStatus">Cluster status</label>
                                 <div class="col-sm-9">

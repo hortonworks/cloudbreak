@@ -32,14 +32,6 @@
         <!-- .col-sm-9 -->
     </div>
     <div class="form-group">
-        <label class="col-sm-3 control-label" for="awsregion">Region</label>
-
-        <div class="col-sm-9">
-            <p id="awsregion" class="form-control-static" ng-repeat="item in $root.config.AWS.awsRegions | filter:{key: template.parameters.region}">{{item.value}}</p>
-        </div>
-        <!-- .col-sm-9 -->
-    </div>
-    <div class="form-group">
         <label class="col-sm-3 control-label" for="awsinstanceType">Instance type</label>
 
         <div class="col-sm-9">

@@ -17,14 +17,6 @@
         </div>
         <!-- .col-sm-9 -->
     </div>
-    <div class="form-group">
-        <label class="col-sm-3 control-label" for="gcclgccZone">Zone</label>
-
-        <div class="col-sm-9">
-            <p id="gcclgccZone" class="form-control-static" ng-repeat="item in $root.config.GCC.gccRegions | filter:{key: template.parameters.gccZone}">{{item.value}}</p>
-        </div>
-        <!-- .col-sm-9 -->
-    </div>
 
     <!-- .form-group -->
     <div class="form-group">

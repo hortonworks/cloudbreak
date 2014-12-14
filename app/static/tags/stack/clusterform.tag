@@ -16,16 +16,6 @@
                             </div>
                         </div>
                     </div>
-                    <div class="form-group" ng-class="{ 'has-error': clusterCreationForm.cl_clusterSize.$dirty && clusterCreationForm.cl_clusterSize.$invalid }">
-                        <label class="col-sm-3 control-label" for="cl_clusterSize">Cluster size</label>
-                        <div class="col-sm-9">
-                            <input type="number" name="cl_clusterSize" class="form-control" ng-model="cluster.nodeCount" id="cl_clusterSize" min="3"   max="100000" placeholder="3 - 100000" required>
-                            <div class="help-block"
-                                 ng-show="clusterCreationForm.cl_clusterSize.$dirty && clusterCreationForm.cl_clusterSize.$invalid"><i class="fa fa-warning"></i>
-                                {{error_msg.cluster_size_invalid}}
-                            </div>
-                        </div>
-                    </div>
                     <div class="form-group" ng-class="{ 'has-error': clusterCreationForm.cl_clusterUserName.$dirty && clusterCreationForm.cl_clusterUserName.$invalid }">
                         <label class="col-sm-3 control-label" for="cl_clusterUserName">Ambari username</label>
                         <div class="col-sm-9">
@@ -55,15 +45,6 @@
                             </select>
                             <select class="form-control" id="selectRegion" ng-model="cluster.region" ng-show="activeCredential.cloudPlatform == 'GCC'">
                                 <option ng-repeat="region in $root.config.GCC.gccRegions" value="{{region.key}}">{{region.value}}</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="col-sm-3 control-label" for="selectTemplate">Template</label>
-                        <div class="col-sm-9">
-                            <select class="form-control" id="selectTemplate" ng-model="cluster.templateId" required >
-                                <option ng-repeat="template in $root.templates | orderBy:'name'" data-value="{{template.id}}" value="{{template.id}}" id="{{template.id}}" ng-if="template.cloudPlatform == activeCredential.cloudPlatform">{{template.name}}
-                                </option>
                             </select>
                         </div>
                     </div>

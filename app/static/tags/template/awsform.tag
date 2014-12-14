@@ -37,6 +37,7 @@
 
     </div>
     <div class="form-group">
+<<<<<<< HEAD
         <label class="col-sm-3 control-label" for="aws_tregion">Region</label>
 
         <div class="col-sm-9">
@@ -47,6 +48,8 @@
 
     </div>
     <div class="form-group">
+=======
+>>>>>>> CLOUD-338 fixed forms
         <label class="col-sm-3 control-label" for="aws_tinstanceType">Instance type</label>
 
         <div class="col-sm-9">
