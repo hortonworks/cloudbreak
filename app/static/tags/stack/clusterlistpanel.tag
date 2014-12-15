@@ -44,8 +44,8 @@
                     <button type="button" class="btn btn-block btn-default" data-dismiss="modal">cancel</button>
                  </div>
                  <div class="col-xs-6">
-                    <div ng-show="selectedCluster.status === 'STOPPED'"><button ng-show="selectedCluster.status === 'STOPPED'" type="button" class="btn btn-block btn-success" data-dismiss="modal" id="reqStatChangeBtn" ng-click="requestStatusChange(cluster)"><i class="fa fa-play fa-fw"></i>start</button></div>
-                    <div ng-show="selectedCluster.status === 'AVAILABLE'"><button ng-show="selectedCluster.status === 'AVAILABLE'" type="button" class="btn btn-block btn-warning" data-dismiss="modal" id="reqStatChangeBtn" ng-click="requestStatusChange(cluster)"><i class="fa fa-pause fa-fw"></i>stop</button></div>
+                    <div ng-show="selectedCluster.status === 'STOPPED'"><button ng-show="selectedCluster.status === 'STOPPED'" type="button" class="btn btn-block btn-success" data-dismiss="modal" id="reqStatChangeBtn" ng-click="requestStatusChange(selectedCluster)"><i class="fa fa-play fa-fw"></i>start</button></div>
+                    <div ng-show="selectedCluster.status === 'AVAILABLE'"><button ng-show="selectedCluster.status === 'AVAILABLE'" type="button" class="btn btn-block btn-warning" data-dismiss="modal" id="reqStatChangeBtn" ng-click="requestStatusChange(selectedCluster)"><i class="fa fa-pause fa-fw"></i>stop</button></div>
                  </div>
              </div>
           </div>
