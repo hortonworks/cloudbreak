@@ -672,6 +672,16 @@ The sequence diagram below shows the flow.
 
 <!--addnewcloud.md-->
 
+<!--states.md-->
+
+##Stack lifecycle
+
+In order to understand the state of your Hadoop as a Servie stack and the potential outcomes we have put together a UML state diagram.
+
+![](https://raw.githubusercontent.com/sequenceiq/cloudbreak/master/docs/images/stack_state_diag.png)
+
+<!--states.md-->
+
 <!--quickstart.md-->
 
 ##QuickStart and installation
