@@ -11,7 +11,6 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.GccTemplate;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccInstanceType;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccRawDiskType;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccZone;
 
 @Component
 public class GccTemplateConverter extends AbstractConverter<TemplateJson, GccTemplate> {
@@ -28,8 +27,6 @@ public class GccTemplateConverter extends AbstractConverter<TemplateJson, GccTem
         gccTemplateJson.setPublicInAccount(entity.isPublicInAccount());
         Map<String, Object> props = new HashMap<>();
         putProperty(props, GccTemplateParam.INSTANCETYPE.getName(), entity.getGccInstanceType());
-        putProperty(props, GccTemplateParam.ZONE.getName(), entity.getGccZone());
-        putProperty(props, GccTemplateParam.CONTAINERCOUNT.getName(), entity.getContainerCount());
         putProperty(props, GccTemplateParam.TYPE.getName(), entity.getGccRawDiskType());
         gccTemplateJson.setParameters(props);
         gccTemplateJson.setDescription(entity.getDescription() == null ? "" : entity.getDescription());
@@ -44,11 +41,6 @@ public class GccTemplateConverter extends AbstractConverter<TemplateJson, GccTem
         gccTemplate.setVolumeCount((json.getVolumeCount() == null) ? 0 : json.getVolumeCount());
         gccTemplate.setVolumeSize((json.getVolumeSize() == null) ? 0 : json.getVolumeSize());
         gccTemplate.setGccInstanceType(GccInstanceType.valueOf(json.getParameters().get(GccTemplateParam.INSTANCETYPE.getName()).toString()));
-        gccTemplate.setGccZone(GccZone.valueOf(json.getParameters().get(GccTemplateParam.ZONE.getName()).toString()));
-        Object containerCount = json.getParameters().get(GccTemplateParam.CONTAINERCOUNT.getName());
-        if (containerCount != null) {
-            gccTemplate.setContainerCount(Integer.valueOf(containerCount.toString()));
-        }
         Object type = json.getParameters().get(GccTemplateParam.TYPE.getName());
         if (type != null) {
             gccTemplate.setGccRawDiskType(GccRawDiskType.valueOf(type.toString()));

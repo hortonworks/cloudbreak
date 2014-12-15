@@ -11,7 +11,6 @@ import com.amazonaws.services.ec2.model.VolumeType;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
-import com.sequenceiq.cloudbreak.domain.AzureLocation;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
@@ -28,7 +27,6 @@ import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.service.stack.connector.ConnectorTestUtil;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccInstanceType;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccRawDiskType;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccZone;
 
 public final class ServiceTestUtils {
 
@@ -193,7 +191,6 @@ public final class ServiceTestUtils {
                 azureTemplate.setOwner(owner);
                 azureTemplate.setAccount(account);
                 azureTemplate.setVmType("test-vm-type");
-                azureTemplate.setLocation(AzureLocation.NORTH_EUROPE);
                 azureTemplate.setImageName("TEST_IMAGE");
                 azureTemplate.setVolumeCount(1);
                 azureTemplate.setVolumeSize(100);
@@ -206,7 +203,6 @@ public final class ServiceTestUtils {
                 awsTemplate.setOwner(owner);
                 awsTemplate.setAccount(account);
                 awsTemplate.setInstanceType(InstanceType.C1Medium);
-                awsTemplate.setRegion(Regions.EU_WEST_1);
                 awsTemplate.setAmiId("ami-12345");
                 awsTemplate.setVolumeType(VolumeType.Gp2);
                 awsTemplate.setSshLocation("0.0.0.0/0");
@@ -218,10 +214,8 @@ public final class ServiceTestUtils {
             case GCC:
                 GccTemplate gccTemplate = new GccTemplate();
                 gccTemplate.setId(1L);
-                gccTemplate.setContainerCount(0);
                 gccTemplate.setGccInstanceType(GccInstanceType.N1_STANDARD_1);
                 gccTemplate.setGccRawDiskType(GccRawDiskType.HDD);
-                gccTemplate.setGccZone(GccZone.US_CENTRAL1_A);
                 gccTemplate.setDescription("gcc test template");
                 gccTemplate.setOwner(owner);
                 gccTemplate.setAccount(account);

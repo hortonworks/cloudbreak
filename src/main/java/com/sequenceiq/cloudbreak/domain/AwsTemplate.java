@@ -4,15 +4,12 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 
-import com.amazonaws.regions.Regions;
 import com.amazonaws.services.ec2.model.InstanceType;
 import com.amazonaws.services.ec2.model.VolumeType;
 
 @Entity
 public class AwsTemplate extends Template implements ProvisionEntity {
 
-    @Enumerated(EnumType.STRING)
-    private Regions region;
     private String amiId;
     @Enumerated(EnumType.STRING)
     private InstanceType instanceType;
@@ -22,14 +19,6 @@ public class AwsTemplate extends Template implements ProvisionEntity {
     private Double spotPrice;
 
     public AwsTemplate() {
-    }
-
-    public Regions getRegion() {
-        return region;
-    }
-
-    public void setRegion(Regions region) {
-        this.region = region;
     }
 
     public String getAmiId() {
@@ -59,11 +48,6 @@ public class AwsTemplate extends Template implements ProvisionEntity {
     @Override
     public CloudPlatform cloudPlatform() {
         return CloudPlatform.AWS;
-    }
-
-    @Override
-    public Integer getMultiplier() {
-        return 1;
     }
 
     public VolumeType getVolumeType() {

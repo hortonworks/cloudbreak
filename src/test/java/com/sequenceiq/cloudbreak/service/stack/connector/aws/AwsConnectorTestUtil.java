@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.stack.connector.aws;
 
 import java.util.Set;
 
-import com.amazonaws.regions.Regions;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.InstanceType;
 import com.amazonaws.services.ec2.model.VolumeType;
@@ -50,7 +49,6 @@ public class AwsConnectorTestUtil extends ConnectorTestUtil {
     public static AwsTemplate createAwsTemplate() {
         AwsTemplate awsTemplate = new AwsTemplate();
         awsTemplate.setId(DEFAULT_ID);
-        awsTemplate.setRegion(Regions.DEFAULT_REGION);
         awsTemplate.setInstanceType(InstanceType.C1Medium);
         awsTemplate.setSshLocation(SSH_LOCATION);
         awsTemplate.setVolumeCount(2);
@@ -63,7 +61,6 @@ public class AwsConnectorTestUtil extends ConnectorTestUtil {
     public static AwsTemplate createAwsTemplateWithZeroVolumes() {
         AwsTemplate awsTemplate = new AwsTemplate();
         awsTemplate.setId(DEFAULT_ID);
-        awsTemplate.setRegion(Regions.DEFAULT_REGION);
         awsTemplate.setInstanceType(InstanceType.C1Medium);
         awsTemplate.setSshLocation(SSH_LOCATION);
         awsTemplate.setVolumeCount(0);

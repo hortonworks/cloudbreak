@@ -32,7 +32,6 @@ import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.StorageScopes;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
-import com.sequenceiq.cloudbreak.domain.GccTemplate;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -103,8 +102,7 @@ public class GccStackUtil {
                     executeInstance.getNetworkInterfaces().get(0).getNetworkIP(),
                     executeInstance.getNetworkInterfaces().get(0).getAccessConfigs().get(0).getNatIP(),
                     stack.getTemplateAsGroup(resource.getGroupName()).getTemplate().getVolumeCount(),
-                    longName(resource.getResourceName(), credential.getProjectId()),
-                    ((GccTemplate) stack.getTemplateAsGroup(resource.getGroupName()).getTemplate()).getContainerCount()
+                    longName(resource.getResourceName(), credential.getProjectId())
             );
             return coreInstanceMetaData;
         } catch (IOException e) {

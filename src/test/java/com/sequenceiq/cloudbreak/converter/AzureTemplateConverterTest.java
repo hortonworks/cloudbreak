@@ -53,8 +53,7 @@ public class AzureTemplateConverterTest {
         TemplateJson result = underTest.convert(azureTemplate);
         // THEN
         assertEquals(result.getCloudPlatform(), azureTemplate.cloudPlatform());
-        assertEquals(result.getParameters().get(AzureTemplateParam.LOCATION.getName()),
-                azureTemplate.getLocation().name());
+
 
     }
 
@@ -65,8 +64,6 @@ public class AzureTemplateConverterTest {
         AzureTemplate result = underTest.convert(templateJson);
         assertEquals(result.cloudPlatform(), templateJson.getCloudPlatform());
         assertEquals(result.getDescription(), templateJson.getDescription());
-        assertEquals(result.getLocation().name(),
-                templateJson.getParameters().get(AzureTemplateParam.LOCATION.getName()));
     }
 
     @Test
@@ -129,7 +126,6 @@ public class AzureTemplateConverterTest {
         azureTemplate.setVmType(DUMMY_VM_TYPE);
         azureTemplate.setDescription(DUMMY_DESCRIPTION);
         azureTemplate.setImageName(DUMMY_IMAGE_NAME);
-        azureTemplate.setLocation(DUMMY_LOCATION);
         azureTemplate.setName(DUMMY_NAME);
         azureTemplate.setId(1L);
         Set<Port> ports = new HashSet<>();
