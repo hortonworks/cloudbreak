@@ -32,12 +32,13 @@ import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccDiskMode;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccDiskType;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccInstanceCheckerStatus;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccInstanceReadyPollerObject;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveCheckerStatus;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveReadyPollerObject;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccResourceCheckerStatus;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccResourceCreationException;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccResourceReadyPollerObject;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccDiskMode;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccDiskType;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.GccSimpleInstanceResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDescribeContextObject;
@@ -50,9 +51,9 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
     @Autowired
     private StackRepository stackRepository;
     @Autowired
-    private GccInstanceCheckerStatus gccInstanceReadyCheckerStatus;
+    private GccResourceCheckerStatus gccResourceCheckerStatus;
     @Autowired
-    private PollingService<GccInstanceReadyPollerObject> gccInstanceReadyPollerObjectPollingService;
+    private PollingService<GccResourceReadyPollerObject> gccInstanceReadyPollerObjectPollingService;
     @Autowired
     private GccRemoveCheckerStatus gccRemoveCheckerStatus;
     @Autowired
@@ -96,10 +97,15 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
                 po.getCompute().instances().insert(gccCredential.getProjectId(), gccTemplate.getGccZone().getValue(), instance);
 
         ins.setPrettyPrint(Boolean.TRUE);
-        ins.execute();
-        GccInstanceReadyPollerObject gccInstanceReady = new GccInstanceReadyPollerObject(po.getCompute(), stack, name);
-        gccInstanceReadyPollerObjectPollingService.pollWithTimeout(gccInstanceReadyCheckerStatus, gccInstanceReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
-        return Arrays.asList(new Resource(resourceType(), name, stack));
+        Operation execute = ins.execute();
+        if (execute.getHttpErrorStatusCode() == null) {
+            Compute.ZoneOperations.Get zoneOperations = createZoneOperations(po.getCompute(), gccCredential, gccTemplate, execute);
+            GccResourceReadyPollerObject gccInstanceReady = new GccResourceReadyPollerObject(zoneOperations, stack, name);
+            gccInstanceReadyPollerObjectPollingService.pollWithTimeout(gccResourceCheckerStatus, gccInstanceReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+            return Arrays.asList(new Resource(resourceType(), name, stack));
+        } else {
+            throw new GccResourceCreationException(execute.getHttpErrorMessage(), resourceType(), name);
+        }
     }
 
     private List<AttachedDisk> getAttachedDisks(List<Resource> resources, GccCredential gccCredential, GccTemplate gccTemplate) {

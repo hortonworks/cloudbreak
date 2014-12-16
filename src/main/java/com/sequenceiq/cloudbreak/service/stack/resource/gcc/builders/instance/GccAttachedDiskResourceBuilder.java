@@ -29,8 +29,9 @@ import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccDiskCheckerStatus;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccDiskReadyPollerObject;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccResourceCheckerStatus;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccResourceCreationException;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccResourceReadyPollerObject;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveCheckerStatus;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveReadyPollerObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.GccSimpleInstanceResourceBuilder;
@@ -45,9 +46,9 @@ public class GccAttachedDiskResourceBuilder extends GccSimpleInstanceResourceBui
     @Autowired
     private StackRepository stackRepository;
     @Autowired
-    private GccDiskCheckerStatus gccDiskCheckerStatus;
+    private GccResourceCheckerStatus gccResourceCheckerStatus;
     @Autowired
-    private PollingService<GccDiskReadyPollerObject> gccDiskReadyPollerObjectPollingService;
+    private PollingService<GccResourceReadyPollerObject> gccDiskReadyPollerObjectPollingService;
     @Autowired
     private GccRemoveCheckerStatus gccRemoveCheckerStatus;
     @Autowired
@@ -62,6 +63,7 @@ public class GccAttachedDiskResourceBuilder extends GccSimpleInstanceResourceBui
     public List<Resource> create(final GccProvisionContextObject po, int index, List<Resource> resources) throws Exception {
         final Stack stack = stackRepository.findById(po.getStackId());
         final GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
+        final GccCredential gccCredential = (GccCredential) stack.getCredential();
         final List<Resource> resourcesListTemp = new ArrayList<>();
         final String name = String.format("%s-%s-%s", stack.getName(), index, new Date().getTime());
 
@@ -77,10 +79,15 @@ public class GccAttachedDiskResourceBuilder extends GccSimpleInstanceResourceBui
                     disk.setName(value);
                     disk.setKind(((GccTemplate) stack.getTemplate()).getGccRawDiskType().getUrl(po.getProjectId(), gccTemplate.getGccZone()));
                     Compute.Disks.Insert insDisk = po.getCompute().disks().insert(po.getProjectId(), gccTemplate.getGccZone().getValue(), disk);
-                    insDisk.execute();
-                    GccDiskReadyPollerObject gccDiskReady = new GccDiskReadyPollerObject(po.getCompute(), stack, value);
-                    gccDiskReadyPollerObjectPollingService.pollWithTimeout(gccDiskCheckerStatus, gccDiskReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
-                    return new Resource(resourceType(), value, stack);
+                    Operation execute = insDisk.execute();
+                    if (execute.getHttpErrorStatusCode() == null) {
+                        Compute.ZoneOperations.Get zoneOperations = createZoneOperations(po.getCompute(), gccCredential, gccTemplate, execute);
+                        GccResourceReadyPollerObject gccDiskReady = new GccResourceReadyPollerObject(zoneOperations, stack, name);
+                        gccDiskReadyPollerObjectPollingService.pollWithTimeout(gccResourceCheckerStatus, gccDiskReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+                        return new Resource(resourceType(), value, stack);
+                    } else {
+                        throw new GccResourceCreationException(execute.getHttpErrorMessage(), resourceType(), name);
+                    }
                 }
             });
             futures.add(submit);

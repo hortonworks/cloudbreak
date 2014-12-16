@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccStackUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -26,10 +25,12 @@ import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccDiskCheckerStatus;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccDiskReadyPollerObject;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccResourceCheckerStatus;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccResourceCreationException;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccResourceReadyPollerObject;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveCheckerStatus;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveReadyPollerObject;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.GccSimpleInstanceResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDescribeContextObject;
@@ -43,9 +44,9 @@ public class GccDiskResourceBuilder extends GccSimpleInstanceResourceBuilder {
     @Autowired
     private StackRepository stackRepository;
     @Autowired
-    private GccDiskCheckerStatus gccDiskCheckerStatus;
+    private GccResourceCheckerStatus gccResourceCheckerStatus;
     @Autowired
-    private PollingService<GccDiskReadyPollerObject> gccDiskReadyPollerObjectPollingService;
+    private PollingService<GccResourceReadyPollerObject> gccDiskReadyPollerObjectPollingService;
     @Autowired
     private GccRemoveCheckerStatus gccRemoveCheckerStatus;
     @Autowired
@@ -59,6 +60,7 @@ public class GccDiskResourceBuilder extends GccSimpleInstanceResourceBuilder {
     public List<Resource> create(GccProvisionContextObject po, int index, List<Resource> resources) throws Exception {
         Stack stack = stackRepository.findById(po.getStackId());
         GccTemplate template = (GccTemplate) stack.getTemplate();
+        GccCredential credential = (GccCredential) stack.getCredential();
         String name = String.format("%s-%s-%s", stack.getName(), index, new Date().getTime());
         Disk disk = new Disk();
         disk.setSizeGb(SIZE);
@@ -66,10 +68,15 @@ public class GccDiskResourceBuilder extends GccSimpleInstanceResourceBuilder {
         disk.setKind(((GccTemplate) stack.getTemplate()).getGccRawDiskType().getUrl(po.getProjectId(), template.getGccZone()));
         Compute.Disks.Insert insDisk = po.getCompute().disks().insert(po.getProjectId(), template.getGccZone().getValue(), disk);
         insDisk.setSourceImage(gccStackUtil.getAmbariUbuntu(po.getProjectId()));
-        insDisk.execute();
-        GccDiskReadyPollerObject gccDiskReady = new GccDiskReadyPollerObject(po.getCompute(), stack, name);
-        gccDiskReadyPollerObjectPollingService.pollWithTimeout(gccDiskCheckerStatus, gccDiskReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
-        return Arrays.asList(new Resource(resourceType(), name, stack));
+        Operation execute = insDisk.execute();
+        if (execute.getHttpErrorStatusCode() == null) {
+            Compute.ZoneOperations.Get zoneOperations = createZoneOperations(po.getCompute(), credential, template, execute);
+            GccResourceReadyPollerObject gccDiskReady = new GccResourceReadyPollerObject(zoneOperations, stack, name);
+            gccDiskReadyPollerObjectPollingService.pollWithTimeout(gccResourceCheckerStatus, gccDiskReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+            return Arrays.asList(new Resource(resourceType(), name, stack));
+        } else {
+            throw new GccResourceCreationException(execute.getHttpErrorMessage(), resourceType(), name);
+        }
     }
 
     @Override
