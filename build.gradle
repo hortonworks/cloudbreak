@@ -208,7 +208,7 @@ class BuildInfoTask extends DefaultTask {
             [
                     "info.app.name=" + basename,
                     "info.app.version=" + buildVersion,
-                    "management.contextPath=" + "\${CB_MANAGEMENT_CONTEXT_PATH}"
+                    "management.contextPath=" + "\\"
             ].each { out.println it }
         }
     }
