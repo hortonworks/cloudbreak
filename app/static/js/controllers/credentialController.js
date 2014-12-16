@@ -58,6 +58,7 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
 
         $scope.createAzureCredential = function() {
             $scope.credentialAzure.cloudPlatform = "AZURE";
+            $scope.credentialAzure.publicKey = $base64.encode($scope.credentialAzure.publicKey)
 
             UserCredential.save($scope.credentialAzure, function(result){
                 $scope.credentialAzure.id = result.id;
