@@ -28,6 +28,7 @@ public class AzureCredentialConverterTest {
     private static final String DUMMY_NAME = "dummyName";
     private static final String DUMMY_SUBSCRIPTION_ID = "dummySubscriptionId";
     private static final String DUMMY_DESCRIPTION = "dummyDescription";
+    private static final String DUMMY_PUBLIC_KEY = "dummyPublicKey";
 
     @Mock
     private AzureCredentialHandler azureCredentialHandler;
@@ -77,6 +78,7 @@ public class AzureCredentialConverterTest {
         credentialJson.setId(1L);
         credentialJson.setName(DUMMY_NAME);
         credentialJson.setDescription(DUMMY_DESCRIPTION);
+        credentialJson.setPublicKey(DUMMY_PUBLIC_KEY);
         return credentialJson;
     }
 

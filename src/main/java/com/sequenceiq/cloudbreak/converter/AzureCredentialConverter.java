@@ -4,7 +4,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.api.client.repackaged.org.apache.commons.codec.binary.StringUtils;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
+import org.apache.commons.codec.binary.Base64;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.json.CredentialJson;
@@ -38,6 +40,7 @@ public class AzureCredentialConverter extends AbstractConverter<CredentialJson, 
         azureCredential.setPostFix(String.valueOf(new Date().getTime()));
         azureCredential.setCloudPlatform(CloudPlatform.AZURE);
         azureCredential.setPublicKey(json.getPublicKey());
+        azureCredential.setPublicKey(StringUtils.newStringUtf8(Base64.decodeBase64(json.getPublicKey())));
         return azureCredential;
     }
 }
