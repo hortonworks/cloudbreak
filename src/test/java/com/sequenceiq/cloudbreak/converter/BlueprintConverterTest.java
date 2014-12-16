@@ -46,8 +46,8 @@ public class BlueprintConverterTest {
     public static final String DUMMY_BLUEPRINT_TEXT_HOSTGROUPS_DONT_HAVE_SLAVE =
             "{\"Blueprints\":{\"blueprint_name\":\"asd\"},\"host_groups\":[{\"name\":\"group1\"},{\"name\":\"group2\"}]}";
 
-    public static final String DUMMY_BLUEPRINT_FOR_AMBARI_1_7 =
-            "{\"configurations\":[{\"nagios-env\":{\"nagios_contact\":\"admin@localhost\"}},{\"hdfs-site\":{\"dfs.datanode.data.dir\":\""
+    public static final String DUMMY_BLUEPRINT_FOR_AMBARI_1_6 =
+            "{\"configurations\":[{\"global\":{\"nagios_contact\":\"admin@localhost\"}},{\"hdfs-site\":{\"dfs.datanode.data.dir\":\""
                     + "/mnt/fs1/,/mnt/fs2/\"}},{\"yarn-site\":{\"yarn.nodemanager.local-dirs\":\"/mnt/fs1/,/mnt/fs2/\"}}],\"host_groups\":[{\"name\":"
                     + "\"master\",\"components\":[{\"name\":\"NAMENODE\"},{\"name\":\"GANGLIA_SERVER\"},{\"name\":\"HISTORYSERVER\"},{\"name\":"
                     + "\"SECONDARY_NAMENODE\"},{\"name\":\"RESOURCEMANAGER\"},{\"name\":\"HISTORYSERVER\"},{\"name\":\"NAGIOS_SERVER\"},{\"name\":\""
@@ -58,7 +58,7 @@ public class BlueprintConverterTest {
                     + "\"HDP\",\"stack_version\":\"2.1\"}}";
 
     public static final String DUMMY_BLUEPRINT_WITHOUT_GLOBAL_NAGIOS_CONFIG =
-            "{\"configurations\":[{\"global\":{},\"nagios-env\":{\"nagios_contact\":\"admin@localhost\"}}],\"host_groups\":["
+            "{\"configurations\":[{\"global\":{\"nagios_contact\":\"admin@localhost\"},\"nagios-env\":{}}],\"host_groups\":["
                     + "{\"name\":\"master\",\"components\":[{\"name\":\"NAMENODE\"},{\"name\":\"SECONDARY_NAMENODE\"},{\"name\":\"RESOURCEMANAGER\"},"
                     + "{\"name\":\"HISTORYSERVER\"},{\"name\":\"NAGIOS_SERVER\"},{\"name\":\"APP_TIMELINE_SERVER\"},{\"name\":\"ZOOKEEPER_SERVER\"}],"
                     + "\"cardinality\":\"1\"},{\"name\":\"slave_1\",\"components\":[{\"name\":\"DATANODE\"},{\"name\":\"HDFS_CLIENT\"},"
@@ -133,9 +133,9 @@ public class BlueprintConverterTest {
     }
 
     @Test(expected = BadRequestException.class)
-    public void testConvertBlueprintJsonToEntityShouldThrowBadRequestWhenBlueprintForAmbari17() {
+    public void testConvertBlueprintJsonToEntityShouldThrowBadRequestWhenBlueprintForAmbari16() {
         // GIVEN
-        given(jsonNode.toString()).willReturn(DUMMY_BLUEPRINT_FOR_AMBARI_1_7);
+        given(jsonNode.toString()).willReturn(DUMMY_BLUEPRINT_FOR_AMBARI_1_6);
         blueprintJson.setAmbariBlueprint(jsonNode);
         blueprintJson.setUrl(null);
         // WHEN
@@ -145,7 +145,7 @@ public class BlueprintConverterTest {
     }
 
     @Test(expected = BadRequestException.class)
-    public void testConvertBlueprintJsonToEntityShouldThrowBadRequestWhenBlueprintHasNoNagiosConfigInGlobal() {
+    public void testConvertBlueprintJsonToEntityShouldThrowBadRequestWhenBlueprintHasNoNagiosConfigInNagiosEnv() {
         // GIVEN
         given(jsonNode.toString()).willReturn(DUMMY_BLUEPRINT_WITHOUT_GLOBAL_NAGIOS_CONFIG);
         blueprintJson.setAmbariBlueprint(jsonNode);
