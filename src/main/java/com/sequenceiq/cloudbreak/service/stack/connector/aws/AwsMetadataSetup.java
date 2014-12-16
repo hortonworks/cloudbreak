@@ -85,23 +85,24 @@ public class AwsMetadataSetup implements MetadataSetup {
                 pollingService.pollWithTimeout(asGroupStatusCheckerTask, asGroupReady, POLLING_INTERVAL, MAX_SPOT_POLLING_ATTEMPTS);
             }
         }
-        List<String> instanceIds = new ArrayList<>();
-        for (TemplateGroup templateGroup : stack.getTemplateGroups()) {
-            instanceIds.addAll(cfStackUtil.getInstanceIds(stack, amazonASClient, amazonCFClient, templateGroup.getGroupName()));
-        }
 
-        DescribeInstancesRequest instancesRequest = new DescribeInstancesRequest().withInstanceIds(instanceIds);
-        DescribeInstancesResult instancesResult = amazonEC2Client.describeInstances(instancesRequest);
-        for (Reservation reservation : instancesResult.getReservations()) {
-            LOGGER.info("Number of instances found in reservation: {}", reservation.getInstances().size());
-            for (com.amazonaws.services.ec2.model.Instance instance : reservation.getInstances()) {
-                coreInstanceMetadata.add(new CoreInstanceMetaData(
-                        instance.getInstanceId(),
-                        instance.getPrivateIpAddress(),
-                        instance.getPublicDnsName(),
-                        instance.getBlockDeviceMappings().size() - 1,
-                        instance.getPrivateDnsName()
-                        ));
+        for (TemplateGroup templateGroup : stack.getTemplateGroups()) {
+            List<String> instanceIds = new ArrayList<>();
+            instanceIds.addAll(cfStackUtil.getInstanceIds(stack, amazonASClient, amazonCFClient, templateGroup.getGroupName()));
+            DescribeInstancesRequest instancesRequest = new DescribeInstancesRequest().withInstanceIds(instanceIds);
+            DescribeInstancesResult instancesResult = amazonEC2Client.describeInstances(instancesRequest);
+            for (Reservation reservation : instancesResult.getReservations()) {
+                LOGGER.info("Number of instances found in reservation: {}", reservation.getInstances().size());
+                for (com.amazonaws.services.ec2.model.Instance instance : reservation.getInstances()) {
+                    coreInstanceMetadata.add(new CoreInstanceMetaData(
+                            instance.getInstanceId(),
+                            instance.getPrivateIpAddress(),
+                            instance.getPublicDnsName(),
+                            instance.getBlockDeviceMappings().size() - 1,
+                            instance.getPrivateDnsName(),
+                            templateGroup.getGroupName()
+                            ));
+                }
             }
         }
 
@@ -118,29 +119,32 @@ public class AwsMetadataSetup implements MetadataSetup {
         AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(
                 Regions.valueOf(stack.getRegion()),
                 (AwsCredential) stack.getCredential());
-        List<String> instanceIds = new ArrayList<>();
+
         for (TemplateGroup templateGroup : stack.getTemplateGroups()) {
+            List<String> instanceIds = new ArrayList<>();
             instanceIds.addAll(cfStackUtil.getInstanceIds(stack, templateGroup.getGroupName()));
-        }
-        DescribeInstancesRequest instancesRequest = new DescribeInstancesRequest().withInstanceIds(instanceIds);
-        DescribeInstancesResult instancesResult = amazonEC2Client.describeInstances(instancesRequest);
-        for (Reservation reservation : instancesResult.getReservations()) {
-            for (final com.amazonaws.services.ec2.model.Instance instance : reservation.getInstances()) {
-                boolean metadataExists = FluentIterable.from(stack.getInstanceMetaData()).anyMatch(new Predicate<InstanceMetaData>() {
-                    @Override
-                    public boolean apply(InstanceMetaData input) {
-                        return input.getInstanceId().equals(instance.getInstanceId());
+
+            DescribeInstancesRequest instancesRequest = new DescribeInstancesRequest().withInstanceIds(instanceIds);
+            DescribeInstancesResult instancesResult = amazonEC2Client.describeInstances(instancesRequest);
+            for (Reservation reservation : instancesResult.getReservations()) {
+                for (final com.amazonaws.services.ec2.model.Instance instance : reservation.getInstances()) {
+                    boolean metadataExists = FluentIterable.from(stack.getInstanceMetaData()).anyMatch(new Predicate<InstanceMetaData>() {
+                        @Override
+                        public boolean apply(InstanceMetaData input) {
+                            return input.getInstanceId().equals(instance.getInstanceId());
+                        }
+                    });
+                    if (!metadataExists) {
+                        coreInstanceMetadata.add(new CoreInstanceMetaData(
+                                instance.getInstanceId(),
+                                instance.getPrivateIpAddress(),
+                                instance.getPublicDnsName(),
+                                instance.getBlockDeviceMappings().size() - 1,
+                                instance.getPrivateDnsName(),
+                                hostGroup
+                        ));
+                        LOGGER.info("New instance added to metadata: [stack: '{}', instanceId: '{}']", stack.getId(), instance.getInstanceId());
                     }
-                });
-                if (!metadataExists) {
-                    coreInstanceMetadata.add(new CoreInstanceMetaData(
-                            instance.getInstanceId(),
-                            instance.getPrivateIpAddress(),
-                            instance.getPublicDnsName(),
-                            instance.getBlockDeviceMappings().size() - 1,
-                            instance.getPrivateDnsName()
-                            ));
-                    LOGGER.info("New instance added to metadata: [stack: '{}', instanceId: '{}']", stack.getId(), instance.getInstanceId());
                 }
             }
         }

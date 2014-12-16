@@ -312,7 +312,7 @@ public class AmbariClusterConnector {
     private void addBlueprint(Stack stack, AmbariClient ambariClient, Blueprint blueprint) {
         MDCBuilder.buildMdcContext(stack);
         try {
-            ambariClient.addBlueprint(blueprint.getBlueprintText(), hadoopConfigurationService.getConfiguration(stack));
+            ambariClient.addBlueprintWithHostgroupConfiguration(blueprint.getBlueprintText(), hadoopConfigurationService.getConfiguration(stack));
             LOGGER.info("Blueprint added [Stack: {}, blueprint: '{}']", stack.getId(), blueprint.getId());
         } catch (HttpResponseException e) {
             if ("Conflict".equals(e.getMessage())) {
@@ -339,7 +339,15 @@ public class AmbariClusterConnector {
         MDCBuilder.buildMdcContext(stack);
         waitForHosts(stack, ambariClient);
         LOGGER.info("Asking Ambari client to recommend host-hostGroup mapping [Ambari server address: {}]", stack.getAmbariIp());
-        Map<String, List<String>> hostGroupMappings = ambariClient.recommendAssignments(blueprintName);
+        Map<String, List<String>> hostGroupMappings = new HashMap<>();
+        Map<String, String> hostNames = ambariClient.getHostNames();
+        Set<InstanceMetaData> instanceMetaData = stack.getInstanceMetaData();
+        for (InstanceMetaData metaData : instanceMetaData) {
+            if(hostGroupMappings.get(metaData.getHostGroup()) == null) {
+                hostGroupMappings.put(metaData.getHostGroup(), new ArrayList<String>());
+            }
+            hostGroupMappings.get(metaData.getHostGroup()).add(hostNames.get(metaData.getPublicIp()));
+        }
         LOGGER.info("recommended host-hostGroup mappings for stack: {}", hostGroupMappings);
         return hostGroupMappings;
     }

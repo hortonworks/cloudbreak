@@ -37,7 +37,7 @@ public class HadoopConfigurationServiceTest {
         Stack stack = ServiceTestUtils.createStack(template, credential, resources);
         resources.add(new Resource(ResourceType.CLOUDFORMATION_STACK, "", stack));
         // WHEN
-        Map<String, String> result = underTest.getConfiguration(stack).get(HadoopConfigurationService.YARN_SITE);
+        Map<String, Map<String, String>> result = underTest.getConfiguration(stack).get(HadoopConfigurationService.YARN_SITE);
         // THEN
         assertEquals("/mnt/fs1,/mnt/fs2", result.get(HadoopConfigurationService.YARN_NODEMANAGER_LOCAL_DIRS));
         assertEquals("/mnt/fs1,/mnt/fs2", result.get(HadoopConfigurationService.YARN_NODEMANAGER_LOG_DIRS));
@@ -51,7 +51,7 @@ public class HadoopConfigurationServiceTest {
         Stack stack = ServiceTestUtils.createStack(template, credential, resources);
         resources.add(new Resource(ResourceType.CLOUDFORMATION_STACK, "", stack));
         // WHEN
-        Map<String, Map<String, String>> configuration = underTest.getConfiguration(stack);
+        Map<String, Map<String, Map<String, String>>> configuration = underTest.getConfiguration(stack);
         // THEN
         assertEquals(0, configuration.size());
     }
@@ -64,7 +64,7 @@ public class HadoopConfigurationServiceTest {
         Stack stack = ServiceTestUtils.createStack(template, credential, resources);
         resources.add(new Resource(ResourceType.CLOUDFORMATION_STACK, "", stack));
         // WHEN
-        Map<String, String> result = underTest.getConfiguration(stack).get(HadoopConfigurationService.HDFS_SITE);
+        Map<String, Map<String, String>> result = underTest.getConfiguration(stack).get(HadoopConfigurationService.HDFS_SITE);
         // THEN
         assertEquals("/mnt/fs1,/mnt/fs2", result.get(HadoopConfigurationService.HDFS_DATANODE_DATA_DIRS));
     }
@@ -77,7 +77,7 @@ public class HadoopConfigurationServiceTest {
         Stack stack = ServiceTestUtils.createStack(template, credential, resources);
         resources.add(new Resource(ResourceType.CLOUDFORMATION_STACK, "", stack));
         // WHEN
-        Map<String, Map<String, String>> configuration = underTest.getConfiguration(stack);
+        Map<String, Map<String, Map<String, String>>> configuration = underTest.getConfiguration(stack);
         // THEN
         assertEquals(0, configuration.size());
     }

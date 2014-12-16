@@ -102,7 +102,8 @@ public class GccStackUtil {
                     executeInstance.getNetworkInterfaces().get(0).getNetworkIP(),
                     executeInstance.getNetworkInterfaces().get(0).getAccessConfigs().get(0).getNatIP(),
                     stack.getTemplateAsGroup(resource.getGroupName()).getTemplate().getVolumeCount(),
-                    longName(resource.getResourceName(), credential.getProjectId())
+                    longName(resource.getResourceName(), credential.getProjectId()),
+                    resource.getGroupName()
             );
             return coreInstanceMetaData;
         } catch (IOException e) {

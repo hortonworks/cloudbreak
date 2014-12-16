@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
-import static com.sequenceiq.cloudbreak.service.stack.connector.DiskAttachUtils.buildDiskPathString;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -9,6 +7,8 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.TemplateGroup;
+import com.sequenceiq.cloudbreak.service.stack.connector.DiskAttachUtils;
 
 @Service
 public class HadoopConfigurationService {
@@ -19,8 +19,18 @@ public class HadoopConfigurationService {
     public static final String YARN_NODEMANAGER_LOG_DIRS = "yarn.nodemanager.log-dirs";
     public static final String HDFS_DATANODE_DATA_DIRS = "dfs.datanode.data.dir";
 
-    public Map<String, Map<String, String>> getConfiguration(Stack stack) {
-        Map<String, Map<String, String>> hadoopConfig = new HashMap<>();
+    public Map<String, Map<String, Map<String, String>>> getConfiguration(Stack stack) {
+        Map<String, Map<String, Map<String, String>>> hadoopConfig = new HashMap<>();
+        for (TemplateGroup templateGroup : stack.getTemplateGroups()) {
+            Map<String, Map<String, String>> tmpConfig = new HashMap<>();
+            int volumeCount = templateGroup.getTemplate().getVolumeCount();
+            if (volumeCount > 0) {
+                String localDirs = DiskAttachUtils.buildDiskPathString(volumeCount);
+                tmpConfig.put(YARN_SITE, getYarnSiteConfigs(localDirs));
+                tmpConfig.put(HDFS_SITE, getHDFSSiteConfigs(localDirs));
+                hadoopConfig.put(templateGroup.getGroupName(), tmpConfig);
+            }
+        }
         return hadoopConfig;
     }
 

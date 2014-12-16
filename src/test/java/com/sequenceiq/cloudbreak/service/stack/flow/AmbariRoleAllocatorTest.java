@@ -102,8 +102,10 @@ public class AmbariRoleAllocatorTest {
 
     private Set<CoreInstanceMetaData> createCoreInstanceMetaData() {
         Set<CoreInstanceMetaData> metaData = new HashSet<>();
-        CoreInstanceMetaData data1 = new CoreInstanceMetaData("instanceId1", "123.123.123.123", "dummyPublicIp1", 3, "john1.john.j5.internal.cloudapp.net");
-        CoreInstanceMetaData data2 = new CoreInstanceMetaData("instanceId2", "123.123.123.124", "dummyPublicIp2", 3, "john2.john.j5.internal.cloudapp.net");
+        CoreInstanceMetaData data1 =
+                new CoreInstanceMetaData("instanceId1", "123.123.123.123", "dummyPublicIp1", 3, "john1.john.j5.internal.cloudapp.net", "master");
+        CoreInstanceMetaData data2 =
+                new CoreInstanceMetaData("instanceId2", "123.123.123.124", "dummyPublicIp2", 3, "john2.john.j5.internal.cloudapp.net", "master");
         metaData.add(data1);
         metaData.add(data2);
         return metaData;

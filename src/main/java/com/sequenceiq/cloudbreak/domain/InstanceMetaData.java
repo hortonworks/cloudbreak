@@ -36,9 +36,18 @@ public class InstanceMetaData implements ProvisionEntity {
     private Integer containerCount = 0;
     @ManyToOne
     private Stack stack;
+    private String hostGroup;
 
     public InstanceMetaData() {
 
+    }
+
+    public String getHostGroup() {
+        return hostGroup;
+    }
+
+    public void setHostGroup(String hostGroup) {
+        this.hostGroup = hostGroup;
     }
 
     public String getPrivateIp() {
