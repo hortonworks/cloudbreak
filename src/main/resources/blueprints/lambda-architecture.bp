@@ -1,7 +1,7 @@
 {
   "configurations": [
     {
-      "global": {
+      "nagios-env": {
         "nagios_contact": "admin@localhost"
       }
     }
@@ -75,9 +75,6 @@
         },
         {
           "name": "PIG"
-        },
-        {
-          "name": "STORM_REST_API"
         },
         {
           "name": "STORM_UI_SERVER"
@@ -161,6 +158,6 @@
   "Blueprints": {
     "blueprint_name": "lambda-architecture",
     "stack_name": "HDP",
-    "stack_version": "2.1"
+    "stack_version": "2.2"
   }
 }
