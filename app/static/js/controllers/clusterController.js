@@ -77,6 +77,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
 
             $scope.cluster.credentialId = $rootScope.activeCredential.id;
             UluwatuCluster.save($scope.cluster, function (result) {
+                result.nodeCount = $scope.calculateFullNodeCount(result);
                 $rootScope.clusters.push(result);
                 initCluster();
                 $jq('.carousel').carousel(0);
@@ -182,14 +183,18 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
           UluwatuCluster.query(function (clusters) {
               $rootScope.clusters = clusters;
               angular.forEach($rootScope.clusters, function(item) {
-                   var nodeCount = 0;
-                   angular.forEach(item.templateGroups, function(group) {
-                       nodeCount += group.nodeCount;
-                   });
-                   item.nodeCount = nodeCount;
+                   item.nodeCount = $scope.calculateFullNodeCount(item);
               });
               $scope.$parent.orderClusters();
           });
+        }
+
+        $scope.calculateFullNodeCount = function(cluster) {
+          var nodeCount = 0;
+          angular.forEach(cluster.templateGroups, function(group) {
+            nodeCount += group.nodeCount;
+          });
+          return nodeCount;
         }
 
         function initCluster(){
