@@ -56,7 +56,8 @@ angular.module('uluwatuControllers').controller('mainController', ['$scope', '$r
                     {key: 'EAST_ASIA', value: 'East Asia', cloud: 'AZURE'},
                     {key: 'EAST_US', value: 'East US', cloud: 'AZURE'},
                     {key: 'NORTH_EUROPE', value: 'North Europe', cloud: 'AZURE'},
-                    {key: 'WEST_US', value: 'West US', cloud: 'AZURE'}
+                    {key: 'WEST_US', value: 'West US', cloud: 'AZURE'},
+                    {key: 'WEST_EUROPE', value: 'West EU', cloud: 'AZURE'}
                 ],
                 azureVmTypes: [
                     {key: 'SMALL', value: 'Small', cloud: 'AZURE'},
