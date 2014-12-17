@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.gcc;
 
+import java.io.IOException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -18,11 +20,13 @@ public class GccResourceCheckerStatus implements StatusCheckerTask<GccResourceRe
     public boolean checkStatus(GccResourceReadyPollerObject gccResourceReadyPollerObject) {
         MDCBuilder.buildMdcContext(gccResourceReadyPollerObject.getStack());
         LOGGER.info("Checking status of Gcc resource '{}'.", gccResourceReadyPollerObject.getName());
+        Operation execute = null;
         try {
-            Operation execute = gccResourceReadyPollerObject.getZoneOperations().execute();
+            execute = gccResourceReadyPollerObject.getZoneOperations().execute();
+
             if (execute.getHttpErrorStatusCode() != null) {
                 throw new GccResourceCreationException(String.format(
-                        "Something went wrong. Instances in Gcc resource '%s' with '%s' operation not started in a reasonable timeframe on '%s' stack.",
+                        "Something went wrong. Resource in Gcc '%s' with '%s' operation not started in a reasonable timeframe on '%s' stack.",
                         gccResourceReadyPollerObject.getName(),
                         gccResourceReadyPollerObject.getOperationName(),
                         gccResourceReadyPollerObject.getStack().getId()));
@@ -30,15 +34,19 @@ public class GccResourceCheckerStatus implements StatusCheckerTask<GccResourceRe
                 Integer progress = execute.getProgress();
                 return (progress.intValue() != FINISHED) ? false : true;
             }
-        } catch (Exception e) {
-            return false;
+        } catch (IOException e) {
+            throw new GccResourceCreationException(String.format(
+                    "Something went wrong. Resource in Gcc '%s' with '%s' operation not started in a reasonable timeframe on '%s' stack.",
+                    gccResourceReadyPollerObject.getName(),
+                    gccResourceReadyPollerObject.getOperationName(),
+                    gccResourceReadyPollerObject.getStack().getId()));
         }
     }
 
     @Override
     public void handleTimeout(GccResourceReadyPollerObject gccResourceReadyPollerObject) {
         throw new GccResourceCreationException(String.format(
-                "Something went wrong. Instances in Gcc resource '%s' with '%s' operation  not started in a reasonable timeframe on '%s' stack.",
+                "Something went wrong. Resource in Gcc '%s' with '%s' operation  not started in a reasonable timeframe on '%s' stack.",
                 gccResourceReadyPollerObject.getName(), gccResourceReadyPollerObject.getOperationName(), gccResourceReadyPollerObject.getStack().getId()));
     }
 
