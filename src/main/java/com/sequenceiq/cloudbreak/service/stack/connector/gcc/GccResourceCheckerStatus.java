@@ -20,10 +20,10 @@ public class GccResourceCheckerStatus implements StatusCheckerTask<GccResourceRe
     public boolean checkStatus(GccResourceReadyPollerObject gccResourceReadyPollerObject) {
         MDCBuilder.buildMdcContext(gccResourceReadyPollerObject.getStack());
         LOGGER.info("Checking status of Gcc resource '{}'.", gccResourceReadyPollerObject.getName());
-        Operation execute = null;
+        Operation operation = null;
         try {
-            execute = gccResourceReadyPollerObject.getZoneOperations().execute();
-            return analyzeOperation(execute, gccResourceReadyPollerObject);
+            operation = gccResourceReadyPollerObject.getZoneOperations().execute();
+            return analyzeOperation(operation, gccResourceReadyPollerObject);
         } catch (IOException e) {
             throw new GccResourceCreationException(String.format(
                     "Something went wrong. Resource in Gcc '%s' with '%s' operation failed on '%s' stack.",
