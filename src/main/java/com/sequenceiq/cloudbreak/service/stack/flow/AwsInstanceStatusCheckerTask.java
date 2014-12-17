@@ -11,6 +11,8 @@ import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.Reservation;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
@@ -49,7 +51,10 @@ public class AwsInstanceStatusCheckerTask implements StatusCheckerTask<AwsInstan
     @Override
     public boolean exitPoller(AwsInstances awsInstances) {
         try {
-            stackRepository.findById(awsInstances.getStack().getId());
+            Stack byId = stackRepository.findById(awsInstances.getStack().getId());
+            if (byId == null || byId.getStatus().equals(Status.DELETE_IN_PROGRESS)) {
+                return true;
+            }
             return false;
         } catch (Exception ex) {
             return true;

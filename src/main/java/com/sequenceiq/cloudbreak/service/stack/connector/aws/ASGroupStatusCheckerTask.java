@@ -11,6 +11,8 @@ import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusRequest;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusResult;
 import com.amazonaws.services.ec2.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
@@ -63,7 +65,10 @@ public class ASGroupStatusCheckerTask implements StatusCheckerTask<AutoScalingGr
     @Override
     public boolean exitPoller(AutoScalingGroupReady autoScalingGroupReady) {
         try {
-            stackRepository.findById(autoScalingGroupReady.getStack().getId());
+            Stack byId = stackRepository.findById(autoScalingGroupReady.getStack().getId());
+            if (byId == null || byId.getStatus().equals(Status.DELETE_IN_PROGRESS)) {
+                return true;
+            }
             return false;
         } catch (Exception ex) {
             return true;

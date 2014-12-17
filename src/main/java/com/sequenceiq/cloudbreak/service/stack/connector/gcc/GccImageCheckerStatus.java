@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 
 import com.google.api.services.compute.Compute;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
@@ -49,7 +51,10 @@ public class GccImageCheckerStatus implements StatusCheckerTask<GccImageReadyPol
     @Override
     public boolean exitPoller(GccImageReadyPollerObject gccImageReadyPollerObject) {
         try {
-            stackRepository.findById(gccImageReadyPollerObject.getStack().getId());
+            Stack byId = stackRepository.findById(gccImageReadyPollerObject.getStack().getId());
+            if (byId == null || byId.getStatus().equals(Status.DELETE_IN_PROGRESS)) {
+                return true;
+            }
             return false;
         } catch (Exception ex) {
             return true;

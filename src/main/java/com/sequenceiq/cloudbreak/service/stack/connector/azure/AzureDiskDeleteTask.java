@@ -12,6 +12,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
@@ -66,7 +68,10 @@ public class AzureDiskDeleteTask implements StatusCheckerTask<AzureDiskRemoveDel
     @Override
     public boolean exitPoller(AzureDiskRemoveDeleteTaskContext azureDiskRemoveDeleteTaskContext) {
         try {
-            stackRepository.findById(azureDiskRemoveDeleteTaskContext.getStack().getId());
+            Stack byId = stackRepository.findById(azureDiskRemoveDeleteTaskContext.getStack().getId());
+            if (byId == null || byId.getStatus().equals(Status.DELETE_IN_PROGRESS)) {
+                return true;
+            }
             return false;
         } catch (Exception ex) {
             return true;

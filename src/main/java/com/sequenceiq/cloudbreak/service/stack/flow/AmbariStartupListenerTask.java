@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
@@ -45,7 +47,10 @@ public class AmbariStartupListenerTask implements StatusCheckerTask<AmbariStartu
     @Override
     public boolean exitPoller(AmbariStartupPollerObject ambariStartupPollerObject) {
         try {
-            stackRepository.findById(ambariStartupPollerObject.getStack().getId());
+            Stack byId = stackRepository.findById(ambariStartupPollerObject.getStack().getId());
+            if (byId == null || byId.getStatus().equals(Status.DELETE_IN_PROGRESS)) {
+                return true;
+            }
             return false;
         } catch (Exception ex) {
             return true;

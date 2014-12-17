@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.api.services.compute.model.Operation;
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
@@ -48,7 +50,10 @@ public class GccResourceCheckerStatus implements StatusCheckerTask<GccResourceRe
     @Override
     public boolean exitPoller(GccResourceReadyPollerObject gccResourceReadyPollerObject) {
         try {
-            stackRepository.findById(gccResourceReadyPollerObject.getStack().getId());
+            Stack byId = stackRepository.findById(gccResourceReadyPollerObject.getStack().getId());
+            if (byId == null || byId.getStatus().equals(Status.DELETE_IN_PROGRESS)) {
+                return true;
+            }
             return false;
         } catch (Exception ex) {
             return true;
