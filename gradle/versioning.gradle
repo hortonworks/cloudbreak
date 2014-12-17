@@ -1,6 +1,7 @@
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import org.ajoberstar.grgit.*
+
+import java.text.DateFormat
+import java.text.SimpleDateFormat
 
 buildscript {
     repositories { mavenCentral() }
@@ -8,7 +9,7 @@ buildscript {
 }
 
 Integer majorVersion = 0
-Integer minorVersion = 2
+Integer minorVersion = 3
 
 def env = project.hasProperty('env') ? project.getProperty('env') : 'local'
 def config = new ConfigSlurper(env).parse(file("$rootDir/gradle/config/buildConfig.groovy").toURL())
