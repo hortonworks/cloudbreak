@@ -115,7 +115,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
         function initializeAzureTemp() {
             $scope.azureTemp = {
                 parameters: {
-                    location: "NORTH_EUROPE",
+                    location: "WEST_EUROPE",
                     vmType: "MEDIUM"
                 }
             }
