@@ -26,11 +26,10 @@ public class GccResourceCheckerStatus implements StatusCheckerTask<GccResourceRe
             return analyzeOperation(execute, gccResourceReadyPollerObject);
         } catch (IOException e) {
             throw new GccResourceCreationException(String.format(
-                    "Something went wrong. Resource in Gcc '%s' with '%s' operation failed on '%s' stack with %s message.",
+                    "Something went wrong. Resource in Gcc '%s' with '%s' operation failed on '%s' stack.",
                     gccResourceReadyPollerObject.getName(),
                     gccResourceReadyPollerObject.getOperationName(),
-                    gccResourceReadyPollerObject.getStack().getId(),
-                    execute.getHttpErrorMessage()));
+                    gccResourceReadyPollerObject.getStack().getId()));
         }
     }
 
@@ -51,7 +50,7 @@ public class GccResourceCheckerStatus implements StatusCheckerTask<GccResourceRe
 
     private boolean analyzeOperation(Operation operation, GccResourceReadyPollerObject gccResourceReadyPollerObject) {
         MDCBuilder.buildMdcContext(gccResourceReadyPollerObject.getStack());
-        if (operation.getHttpErrorStatusCode() != null) {
+        if (operation.getHttpErrorStatusCode() != null || operation.getError() != null) {
             StringBuilder error = new StringBuilder();
             if (operation.getError() != null) {
                 if (operation.getError().getErrors() != null && operation.getError().getErrors().size() > 0) {
