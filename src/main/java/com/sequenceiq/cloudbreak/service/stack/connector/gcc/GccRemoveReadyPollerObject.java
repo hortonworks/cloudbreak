@@ -9,28 +9,23 @@ public class GccRemoveReadyPollerObject {
     private Compute.GlobalOperations.Get globalOperations;
     private Stack stack;
     private String name;
+    private String operationName;
 
-    public GccRemoveReadyPollerObject(Compute.ZoneOperations.Get zoneOperations, Compute.GlobalOperations.Get globalOperations, Stack stack, String name) {
+    public GccRemoveReadyPollerObject(Compute.ZoneOperations.Get zoneOperations, Compute.GlobalOperations.Get globalOperations,
+            Stack stack, String name, String operationName) {
         this.stack = stack;
         this.name = name;
         this.zoneOperations = zoneOperations;
         this.globalOperations = globalOperations;
+        this.operationName = operationName;
     }
 
     public Compute.ZoneOperations.Get getZoneOperations() {
         return zoneOperations;
     }
 
-    public void setZoneOperations(Compute.ZoneOperations.Get zoneOperations) {
-        this.zoneOperations = zoneOperations;
-    }
-
     public Compute.GlobalOperations.Get getGlobalOperations() {
         return globalOperations;
-    }
-
-    public void setGlobalOperations(Compute.GlobalOperations.Get globalOperations) {
-        this.globalOperations = globalOperations;
     }
 
     public String getName() {
@@ -47,5 +42,9 @@ public class GccRemoveReadyPollerObject {
 
     public void setStack(Stack stack) {
         this.stack = stack;
+    }
+
+    public String getOperationName() {
+        return operationName;
     }
 }
