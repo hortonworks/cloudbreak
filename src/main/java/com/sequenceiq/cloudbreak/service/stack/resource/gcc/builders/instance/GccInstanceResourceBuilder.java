@@ -100,7 +100,7 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
         Operation execute = ins.execute();
         if (execute.getHttpErrorStatusCode() == null) {
             Compute.ZoneOperations.Get zoneOperations = createZoneOperations(po.getCompute(), gccCredential, gccTemplate, execute);
-            GccResourceReadyPollerObject gccInstanceReady = new GccResourceReadyPollerObject(zoneOperations, stack, name);
+            GccResourceReadyPollerObject gccInstanceReady = new GccResourceReadyPollerObject(zoneOperations, stack, name, execute.getName());
             gccInstanceReadyPollerObjectPollingService.pollWithTimeout(gccResourceCheckerStatus, gccInstanceReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
             return Arrays.asList(new Resource(resourceType(), name, stack));
         } else {
