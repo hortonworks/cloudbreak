@@ -110,6 +110,9 @@ public class AwsConnector implements CloudPlatformConnector {
     @Autowired
     private StackRepository stackRepository;
 
+    @Autowired
+    private AwsInstanceStatusCheckerTask awsInstanceStatusCheckerTask;
+
     @Override
     public StackDescription describeStackWithResources(Stack stack, Credential credential) {
         MDCBuilder.buildMdcContext(stack);
@@ -317,7 +320,7 @@ public class AwsConnector implements CloudPlatformConnector {
                 amazonASClient.resumeProcesses(new ResumeProcessesRequest().withAutoScalingGroupName(asGroupName));
                 amazonEC2Client.startInstances(new StartInstancesRequest().withInstanceIds(instances));
                 awsPollingService.pollWithTimeout(
-                        new AwsInstanceStatusCheckerTask(),
+                        awsInstanceStatusCheckerTask,
                         new AwsInstances(stack, amazonEC2Client, new ArrayList(instances), "Running"),
                         AmbariClusterConnector.POLLING_INTERVAL,
                         AmbariClusterConnector.MAX_ATTEMPTS_FOR_AMBARI_OPS);

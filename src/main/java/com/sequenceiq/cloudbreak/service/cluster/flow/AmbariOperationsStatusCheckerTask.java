@@ -6,12 +6,18 @@ import java.util.Map.Entry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
 
+@Component
+@Scope("prototype")
 public class AmbariOperationsStatusCheckerTask implements StatusCheckerTask<AmbariOperations> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariOperationsStatusCheckerTask.class);
@@ -19,6 +25,9 @@ public class AmbariOperationsStatusCheckerTask implements StatusCheckerTask<Amba
     private static final BigDecimal COMPLETED = new BigDecimal(100.0);
     private static final BigDecimal FAILED = new BigDecimal(-1.0);
     private static final int MAX_RETRY = 3;
+
+    @Autowired
+    private StackRepository stackRepository;
 
     @Override
     public boolean checkStatus(AmbariOperations t) {
@@ -51,6 +60,16 @@ public class AmbariOperationsStatusCheckerTask implements StatusCheckerTask<Amba
     public void handleTimeout(AmbariOperations t) {
         throw new IllegalStateException(String.format("Ambari operations timed out: %s", t.getRequests()));
 
+    }
+
+    @Override
+    public boolean exitPoller(AmbariOperations ambariOperations) {
+        try {
+            stackRepository.findById(ambariOperations.getStack().getId());
+            return false;
+        } catch (Exception ex) {
+            return true;
+        }
     }
 
     @Override

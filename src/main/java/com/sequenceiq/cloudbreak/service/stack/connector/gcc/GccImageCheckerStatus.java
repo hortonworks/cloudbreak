@@ -1,21 +1,27 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.gcc;
 
+import java.io.IOException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.google.api.services.compute.Compute;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.AddInstancesFailedException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
-import java.io.IOException;
 
 @Component
 public class GccImageCheckerStatus implements StatusCheckerTask<GccImageReadyPollerObject> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GccImageCheckerStatus.class);
     private static final String READY = "READY";
+
+    @Autowired
+    private StackRepository stackRepository;
 
     @Override
     public boolean checkStatus(GccImageReadyPollerObject gccImageReadyPollerObject) {
@@ -38,6 +44,16 @@ public class GccImageCheckerStatus implements StatusCheckerTask<GccImageReadyPol
         throw new AddInstancesFailedException(String.format(
                 "Something went wrong. Gcc image '%s' did not set up in a reasonable timeframe",
                 gccImageReadyPollerObject.getName()));
+    }
+
+    @Override
+    public boolean exitPoller(GccImageReadyPollerObject gccImageReadyPollerObject) {
+        try {
+            stackRepository.findById(gccImageReadyPollerObject.getStack().getId());
+            return false;
+        } catch (Exception ex) {
+            return true;
+        }
     }
 
     @Override

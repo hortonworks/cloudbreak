@@ -4,11 +4,13 @@ import java.io.IOException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.model.Operation;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 
 @Component
@@ -17,6 +19,9 @@ public class GccRemoveCheckerStatus implements StatusCheckerTask<GccRemoveReadyP
     private static final Logger LOGGER = LoggerFactory.getLogger(GccRemoveCheckerStatus.class);
     private static final int FINISHED = 100;
     private static final int NOT_FOUND = 404;
+
+    @Autowired
+    private StackRepository stackRepository;
 
     @Override
     public boolean checkStatus(GccRemoveReadyPollerObject gccRemoveReadyPollerObject) {
@@ -62,6 +67,16 @@ public class GccRemoveCheckerStatus implements StatusCheckerTask<GccRemoveReadyP
         throw new GccResourceRemoveException(String.format(
                 "Something went wrong. Remove of '%s' resource unsuccess in a reasonable timeframe on '%s' stack.",
                 gccRemoveReadyPollerObject.getName(), gccRemoveReadyPollerObject.getStack().getId()));
+    }
+
+    @Override
+    public boolean exitPoller(GccRemoveReadyPollerObject gccRemoveReadyPollerObject) {
+        try {
+            stackRepository.findById(gccRemoveReadyPollerObject.getStack().getId());
+            return false;
+        } catch (Exception ex) {
+            return true;
+        }
     }
 
     @Override

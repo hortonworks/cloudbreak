@@ -12,6 +12,7 @@ import com.amazonaws.services.ec2.model.DescribeInstanceStatusRequest;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusResult;
 import com.amazonaws.services.ec2.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.AddInstancesFailedException;
 
@@ -24,6 +25,9 @@ public class ASGroupStatusCheckerTask implements StatusCheckerTask<AutoScalingGr
 
     @Autowired
     private CloudFormationStackUtil cfStackUtil;
+
+    @Autowired
+    private StackRepository stackRepository;
 
     @Override
     public boolean checkStatus(AutoScalingGroupReady asGroupReady) {
@@ -54,6 +58,16 @@ public class ASGroupStatusCheckerTask implements StatusCheckerTask<AutoScalingGr
         throw new AddInstancesFailedException(String.format(
                 "Something went wrong. Instances in Auto Scaling group '%s' not started in a reasonable timeframe.",
                 t.getAutoScalingGroupName()));
+    }
+
+    @Override
+    public boolean exitPoller(AutoScalingGroupReady autoScalingGroupReady) {
+        try {
+            stackRepository.findById(autoScalingGroupReady.getStack().getId());
+            return false;
+        } catch (Exception ex) {
+            return true;
+        }
     }
 
     @Override

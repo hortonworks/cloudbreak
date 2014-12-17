@@ -58,6 +58,9 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
     @Autowired
     private AzureStackUtil azureStackUtil;
 
+    @Autowired
+    private AzureInstanceStatusCheckerTask azureInstanceStatusCheckerTask;
+
     @Override
     public List<Resource> create(AzureProvisionContextObject po, int index, List<Resource> resources) throws Exception {
         Stack stack = stackRepository.findById(po.getStackId());
@@ -171,7 +174,7 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
         boolean started = setStackState(aSSCO.getStack().getId(), resource, aSSCO.getNewAzureClient(credential), false);
         if (started) {
             azurePollingService.pollWithTimeout(
-                    new AzureInstanceStatusCheckerTask(),
+                    azureInstanceStatusCheckerTask,
                     new AzureInstances(aSSCO.getStack(), aSSCO.getNewAzureClient(credential), Arrays.asList(resource.getResourceName()), "Running"),
                     POLLING_INTERVAL,
                     MAX_ATTEMPTS_FOR_AMBARI_OPS);

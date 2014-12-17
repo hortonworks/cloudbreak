@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.BillingStatus;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
@@ -30,6 +29,7 @@ import com.sequenceiq.cloudbreak.service.cluster.AmbariClientService;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterStatusUpdateRequest;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariHealthCheckerTask;
+import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariHealthCheckerTaskPollerObject;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariHosts;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariHostsJoinStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
@@ -67,7 +67,7 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
     private PollingService<AmbariHosts> ambariHostJoin;
 
     @Autowired
-    private PollingService<AmbariClient> ambariHealthChecker;
+    private PollingService<AmbariHealthCheckerTaskPollerObject> ambariHealthChecker;
 
     @javax.annotation.Resource
     private Map<CloudPlatform, List<ResourceBuilder>> instanceResourceBuilders;
@@ -86,6 +86,12 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
 
     @Autowired
     private AmbariClientService clientService;
+
+    @Autowired
+    private AmbariHealthCheckerTask ambariHealthCheckerTask;
+
+    @Autowired
+    private AmbariHostsJoinStatusCheckerTask ambariHostsJoinStatusCheckerTask;
 
     @Override
     public void accept(Event<StackStatusUpdateRequest> event) {
@@ -192,14 +198,13 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
 
     private void waitForAmbariToStart(Stack stack) {
         ambariHealthChecker.pollWithTimeout(
-                new AmbariHealthCheckerTask(),
-                clientService.create(stack),
+                ambariHealthCheckerTask,
+                new AmbariHealthCheckerTaskPollerObject(stack, clientService.create(stack)),
                 AmbariClusterConnector.POLLING_INTERVAL,
                 AmbariClusterConnector.MAX_ATTEMPTS_FOR_HOSTS);
     }
 
     private boolean waitForHostsToJoin(Stack stack) {
-        AmbariHostsJoinStatusCheckerTask ambariHostsJoinStatusCheckerTask = new AmbariHostsJoinStatusCheckerTask();
         AmbariHosts ambariHosts =
                 new AmbariHosts(stack, clientService.create(stack), stack.getNodeCount() * stack.getMultiplier());
         ambariHostJoin.pollWithTimeout(

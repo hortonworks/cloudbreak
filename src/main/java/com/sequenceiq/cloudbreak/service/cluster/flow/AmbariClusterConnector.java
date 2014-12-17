@@ -99,6 +99,15 @@ public class AmbariClusterConnector {
     @Autowired
     private CloudbreakEventService eventService;
 
+    @Autowired
+    private AmbariHostsStatusCheckerTask ambariHostsStatusCheckerTask;
+
+    @Autowired
+    private AmbariOperationsStatusCheckerTask ambariOperationsStatusCheckerTask;
+
+    @Autowired
+    private DNDecommissionStatusCheckerTask dnDecommissionStatusCheckerTask;
+
     public void installAmbariCluster(Stack stack) {
         Cluster cluster = stack.getCluster();
         MDCBuilder.buildMdcContext(cluster);
@@ -282,7 +291,7 @@ public class AmbariClusterConnector {
         if (requestId != -1) {
             LOGGER.info("Waiting for Hadoop services to {} on stack", action);
             operationsPollingService.pollWithTimeout(
-                    new AmbariOperationsStatusCheckerTask(),
+                    ambariOperationsStatusCheckerTask,
                     new AmbariOperations(stack, ambariClient, singletonMap(action + " services", requestId)),
                     AmbariClusterConnector.POLLING_INTERVAL,
                     AmbariClusterConnector.MAX_ATTEMPTS_FOR_AMBARI_OPS);
@@ -310,7 +319,7 @@ public class AmbariClusterConnector {
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Waiting for hosts to connect.[Ambari server address: {}]", stack.getAmbariIp());
         hostsPollingService.pollWithTimeout(
-                new AmbariHostsStatusCheckerTask(),
+                ambariHostsStatusCheckerTask,
                 new AmbariHosts(stack, ambariClient, stack.getNodeCount() * stack.getMultiplier()),
                 POLLING_INTERVAL,
                 MAX_ATTEMPTS_FOR_HOSTS);
@@ -392,7 +401,7 @@ public class AmbariClusterConnector {
     private void waitForAmbariOperations(Stack stack, AmbariClient ambariClient, Map<String, Integer> operationRequests) {
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Waiting for Ambari operations to finish. [Operation requests: {}]", operationRequests);
-        waitForAmbariOperations(stack, ambariClient, new AmbariOperationsStatusCheckerTask(), operationRequests);
+        waitForAmbariOperations(stack, ambariClient, ambariOperationsStatusCheckerTask, operationRequests);
     }
 
     private void waitForAmbariOperations(Stack stack, AmbariClient ambariClient, StatusCheckerTask task, Map<String, Integer> operationRequests) {
@@ -406,7 +415,7 @@ public class AmbariClusterConnector {
     private void waitForDataNodeDecommission(Stack stack, AmbariClient ambariClient) {
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Waiting for DataNodes to move the blocks to other nodes");
-        waitForAmbariOperations(stack, ambariClient, new DNDecommissionStatusCheckerTask(), Collections.<String, Integer>emptyMap());
+        waitForAmbariOperations(stack, ambariClient, dnDecommissionStatusCheckerTask, Collections.<String, Integer>emptyMap());
     }
 
     private Map<String, Integer> prepareHost(AmbariClient ambariClient, Stack stack, String host, String hostgroup) {

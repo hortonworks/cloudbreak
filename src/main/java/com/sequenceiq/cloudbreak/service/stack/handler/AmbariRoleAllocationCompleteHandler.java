@@ -38,6 +38,9 @@ public class AmbariRoleAllocationCompleteHandler implements Consumer<Event<Ambar
     private StackRepository stackRepository;
     @Autowired
     private PollingService<AmbariStartupPollerObject> ambariStartupPollerObjectPollingService;
+    @Autowired
+    private AmbariStartupListenerTask ambariStartupListenerTask;
+
 
     @Override
     public void accept(Event<AmbariRoleAllocationComplete> event) {
@@ -49,7 +52,7 @@ public class AmbariRoleAllocationCompleteHandler implements Consumer<Event<Ambar
         Stack stack = stackRepository.findById(stackId);
         AmbariStartupPollerObject ambariStartupPollerObject = new AmbariStartupPollerObject(stack, ambariIp, clientService.createDefault(ambariIp));
         try {
-            ambariStartupPollerObjectPollingService.pollWithTimeout(new AmbariStartupListenerTask(),
+            ambariStartupPollerObjectPollingService.pollWithTimeout(ambariStartupListenerTask,
                     ambariStartupPollerObject, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
             LOGGER.info("Publishing {} event.", ReactorConfig.STACK_CREATE_SUCCESS_EVENT);
             reactor.notify(ReactorConfig.STACK_CREATE_SUCCESS_EVENT, Event.wrap(new StackCreationSuccess(stack.getId(), ambariIp)));

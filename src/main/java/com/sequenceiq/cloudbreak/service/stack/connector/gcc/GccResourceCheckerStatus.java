@@ -4,10 +4,12 @@ import java.io.IOException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.api.services.compute.model.Operation;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 
 @Component
@@ -15,6 +17,9 @@ public class GccResourceCheckerStatus implements StatusCheckerTask<GccResourceRe
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GccResourceCheckerStatus.class);
     private static final int FINISHED = 100;
+
+    @Autowired
+    private StackRepository stackRepository;
 
     @Override
     public boolean checkStatus(GccResourceReadyPollerObject gccResourceReadyPollerObject) {
@@ -38,6 +43,16 @@ public class GccResourceCheckerStatus implements StatusCheckerTask<GccResourceRe
         throw new GccResourceCreationException(String.format(
                 "Something went wrong. Resource in Gcc '%s' with '%s' operation  not started in a reasonable timeframe on '%s' stack.",
                 gccResourceReadyPollerObject.getName(), gccResourceReadyPollerObject.getOperationName(), gccResourceReadyPollerObject.getStack().getId()));
+    }
+
+    @Override
+    public boolean exitPoller(GccResourceReadyPollerObject gccResourceReadyPollerObject) {
+        try {
+            stackRepository.findById(gccResourceReadyPollerObject.getStack().getId());
+            return false;
+        } catch (Exception ex) {
+            return true;
+        }
     }
 
     @Override

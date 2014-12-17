@@ -4,14 +4,23 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 
+@Component
+@Scope("prototype")
 public class DNDecommissionStatusCheckerTask implements StatusCheckerTask<AmbariOperations> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DNDecommissionStatusCheckerTask.class);
+
+    @Autowired
+    private StackRepository stackRepository;
 
     @Override
     public boolean checkStatus(AmbariOperations t) {
@@ -29,6 +38,16 @@ public class DNDecommissionStatusCheckerTask implements StatusCheckerTask<Ambari
     public void handleTimeout(AmbariOperations t) {
         throw new IllegalStateException("DataNode decommission timed out");
 
+    }
+
+    @Override
+    public boolean exitPoller(AmbariOperations ambariOperations) {
+        try {
+            stackRepository.findById(ambariOperations.getStack().getId());
+            return false;
+        } catch (Exception ex) {
+            return true;
+        }
     }
 
     @Override
