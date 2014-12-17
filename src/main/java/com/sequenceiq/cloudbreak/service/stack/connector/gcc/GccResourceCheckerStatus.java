@@ -26,20 +26,22 @@ public class GccResourceCheckerStatus implements StatusCheckerTask<GccResourceRe
 
             if (execute.getHttpErrorStatusCode() != null) {
                 throw new GccResourceCreationException(String.format(
-                        "Something went wrong. Resource in Gcc '%s' with '%s' operation not started in a reasonable timeframe on '%s' stack.",
+                        "Something went wrong. Resource in Gcc '%s' with '%s' operation failed on '%s' stack with %s message.",
                         gccResourceReadyPollerObject.getName(),
                         gccResourceReadyPollerObject.getOperationName(),
-                        gccResourceReadyPollerObject.getStack().getId()));
+                        gccResourceReadyPollerObject.getStack().getId(),
+                        execute.getHttpErrorMessage()));
             } else {
                 Integer progress = execute.getProgress();
                 return (progress.intValue() != FINISHED) ? false : true;
             }
         } catch (IOException e) {
             throw new GccResourceCreationException(String.format(
-                    "Something went wrong. Resource in Gcc '%s' with '%s' operation not started in a reasonable timeframe on '%s' stack.",
+                    "Something went wrong. Resource in Gcc '%s' with '%s' operation failed on '%s' stack with %s message.",
                     gccResourceReadyPollerObject.getName(),
                     gccResourceReadyPollerObject.getOperationName(),
-                    gccResourceReadyPollerObject.getStack().getId()));
+                    gccResourceReadyPollerObject.getStack().getId(),
+                    execute.getHttpErrorMessage()));
         }
     }
 
