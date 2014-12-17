@@ -23,18 +23,7 @@ public class GccResourceCheckerStatus implements StatusCheckerTask<GccResourceRe
         Operation execute = null;
         try {
             execute = gccResourceReadyPollerObject.getZoneOperations().execute();
-
-            if (execute.getHttpErrorStatusCode() != null) {
-                throw new GccResourceCreationException(String.format(
-                        "Something went wrong. Resource in Gcc '%s' with '%s' operation failed on '%s' stack with %s message.",
-                        gccResourceReadyPollerObject.getName(),
-                        gccResourceReadyPollerObject.getOperationName(),
-                        gccResourceReadyPollerObject.getStack().getId(),
-                        execute.getHttpErrorMessage()));
-            } else {
-                Integer progress = execute.getProgress();
-                return (progress.intValue() != FINISHED) ? false : true;
-            }
+            return analyzeOperation(execute, gccResourceReadyPollerObject);
         } catch (IOException e) {
             throw new GccResourceCreationException(String.format(
                     "Something went wrong. Resource in Gcc '%s' with '%s' operation failed on '%s' stack with %s message.",
@@ -57,5 +46,31 @@ public class GccResourceCheckerStatus implements StatusCheckerTask<GccResourceRe
         MDCBuilder.buildMdcContext(gccResourceReadyPollerObject.getStack());
         return String.format("Gcc resource '%s' is ready on '%s' stack",
                 gccResourceReadyPollerObject.getName(), gccResourceReadyPollerObject.getStack().getId());
+    }
+
+
+    private boolean analyzeOperation(Operation operation, GccResourceReadyPollerObject gccResourceReadyPollerObject) {
+        MDCBuilder.buildMdcContext(gccResourceReadyPollerObject.getStack());
+        if (operation.getHttpErrorStatusCode() != null) {
+            StringBuilder error = new StringBuilder();
+            if (operation.getError() != null) {
+                if (operation.getError().getErrors() != null && operation.getError().getErrors().size() > 0) {
+                    for (Operation.Error.Errors errors : operation.getError().getErrors()) {
+                        error.append(String.format("code: %s -> message: %s %s", errors.getCode(), errors.getMessage(), System.lineSeparator()));
+                    }
+                }
+            }
+            throw new GccResourceCreationException(String.format(
+                    "Something went wrong. Resource in Gcc '%s' with '%s' operation failed on '%s' stack with %s message: %s",
+                    gccResourceReadyPollerObject.getName(),
+                    gccResourceReadyPollerObject.getOperationName(),
+                    gccResourceReadyPollerObject.getStack().getId(),
+                    operation.getHttpErrorMessage(),
+                    error.toString()));
+        } else {
+            Integer progress = operation.getProgress();
+            return (progress.intValue() != FINISHED) ? false : true;
+        }
+
     }
 }
