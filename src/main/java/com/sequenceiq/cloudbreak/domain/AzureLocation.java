@@ -4,6 +4,7 @@ public enum AzureLocation {
     EAST_ASIA("East Asia"),
     SOUTHEAST_ASIA("Southeast Asia"),
     NORTH_EUROPE("North Europe"),
+    WEST_EUROPE("West Europe"),
     EAST_US("East US"),
     WEST_US("West US"),
     JAPAN_EAST("Japan East"),

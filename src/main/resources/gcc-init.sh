@@ -1,8 +1,7 @@
 : ${NODE_PREFIX=amb}
 : ${MYDOMAIN:=mycorp.kom}
-: ${IMAGE:="sequenceiq/ambari:1.6.0"}
+: ${IMAGE:="sequenceiq/ambari:1.7.0-warmup"}
 : ${INSTANCE_ID:="0"}
-
 
 # instance id from ec2 metadata
 INSTANCE_ID=$(curl -s http://metadata.google.internal/computeMetadata/v1/instance/hostname -H "Metadata-Flavor: Google")

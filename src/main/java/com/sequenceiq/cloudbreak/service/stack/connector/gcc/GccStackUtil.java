@@ -48,7 +48,7 @@ public class GccStackUtil {
     private static final String GCC_IMAGE_TYPE_PREFIX = "https://www.googleapis.com/compute/v1/projects/%s/global/images/";
     private static final String EMPTY_BUCKET = "";
 
-    @Value("${cb.gcp.source.image.path:sequenceiqimage/debian.image.tar.gz}")
+    @Value("${cb.gcp.source.image.path}")
     private String sourceImagePath;
 
     public Compute buildCompute(GccCredential gccCredential) {

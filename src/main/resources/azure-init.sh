@@ -1,6 +1,6 @@
 : ${NODE_PREFIX=amb}
 : ${MYDOMAIN:=mycorp.kom}
-: ${IMAGE:="sequenceiq/ambari:1.6.0"}
+: ${IMAGE:="sequenceiq/ambari:1.7.0-warmup"}
 : ${INSTANCE_ID:="0"}
 
 # instance id from azure metadata
