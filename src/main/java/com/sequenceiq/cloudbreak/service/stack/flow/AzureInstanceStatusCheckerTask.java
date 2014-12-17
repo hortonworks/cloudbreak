@@ -4,30 +4,23 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
-import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 
 @Component
 @Scope("prototype")
-public class AzureInstanceStatusCheckerTask implements StatusCheckerTask<AzureInstances> {
+public class AzureInstanceStatusCheckerTask implements StatusCheckerTask<AzureInstancesPollerObject> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureInstanceStatusCheckerTask.class);
 
-    @Autowired
-    private StackRepository stackRepository;
-
     @Override
-    public boolean checkStatus(AzureInstances instances) {
+    public boolean checkStatus(AzureInstancesPollerObject instances) {
         MDCBuilder.buildMdcContext(instances.getStack());
         AzureClient azureClient = instances.getAzureClient();
         for (String instance : instances.getInstances()) {
@@ -42,27 +35,19 @@ public class AzureInstanceStatusCheckerTask implements StatusCheckerTask<AzureIn
     }
 
     @Override
-    public void handleTimeout(AzureInstances t) {
+    public void handleTimeout(AzureInstancesPollerObject t) {
         throw new InternalServerException(String.format("Azure instances could not reach the desired status: %s on stack.", t));
     }
 
     @Override
-    public boolean exitPoller(AzureInstances azureInstances) {
-        try {
-            Stack byId = stackRepository.findById(azureInstances.getStack().getId());
-            if (byId == null || byId.getStatus().equals(Status.DELETE_IN_PROGRESS)) {
-                return true;
-            }
-            return false;
-        } catch (Exception ex) {
-            return true;
-        }
+    public String successMessage(AzureInstancesPollerObject t) {
+        MDCBuilder.buildMdcContext(t.getStack());
+        return String.format("Azure instances successfully reached status: %s on stack.", t.getStatus());
     }
 
     @Override
-    public String successMessage(AzureInstances t) {
-        MDCBuilder.buildMdcContext(t.getStack());
-        return String.format("Azure instances successfully reached status: %s on stack.", t.getStatus());
+    public void handleExit(AzureInstancesPollerObject azureInstances) {
+        return;
     }
 
 }

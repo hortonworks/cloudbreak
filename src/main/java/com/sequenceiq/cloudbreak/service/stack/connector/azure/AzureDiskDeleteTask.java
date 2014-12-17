@@ -7,15 +7,11 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
-import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.AddInstancesFailedException;
 
@@ -27,9 +23,6 @@ public class AzureDiskDeleteTask implements StatusCheckerTask<AzureDiskRemoveDel
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureDiskDeleteTask.class);
     private static final int NOT_FOUND = 404;
-
-    @Autowired
-    private StackRepository stackRepository;
 
     @Override
     public boolean checkStatus(AzureDiskRemoveDeleteTaskContext aRRPO) {
@@ -66,22 +59,14 @@ public class AzureDiskDeleteTask implements StatusCheckerTask<AzureDiskRemoveDel
     }
 
     @Override
-    public boolean exitPoller(AzureDiskRemoveDeleteTaskContext azureDiskRemoveDeleteTaskContext) {
-        try {
-            Stack byId = stackRepository.findById(azureDiskRemoveDeleteTaskContext.getStack().getId());
-            if (byId == null || byId.getStatus().equals(Status.DELETE_IN_PROGRESS)) {
-                return true;
-            }
-            return false;
-        } catch (Exception ex) {
-            return true;
-        }
-    }
-
-    @Override
     public String successMessage(AzureDiskRemoveDeleteTaskContext azureDiskRemoveDeleteTaskContext) {
         MDCBuilder.buildMdcContext(azureDiskRemoveDeleteTaskContext.getStack());
         return String.format("Azure resource '%s' is removed success on '%s' stack",
                 azureDiskRemoveDeleteTaskContext.getName(), azureDiskRemoveDeleteTaskContext.getStack().getId());
+    }
+
+    @Override
+    public void handleExit(AzureDiskRemoveDeleteTaskContext azureDiskRemoveDeleteTaskContext) {
+        return;
     }
 }

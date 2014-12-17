@@ -27,7 +27,7 @@ import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.domain.GccTemplate;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.service.PollingService;
+import com.sequenceiq.cloudbreak.service.StackDependentPollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
 
@@ -39,7 +39,6 @@ public class GccProvisionSetup implements ProvisionSetup {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GccProvisionSetup.class);
 
-    private static final String MAIN_PROJECT = "siq-haas";
     private static final int CONFLICT = 409;
     private static final int MAX_POLLING_ATTEMPTS = 60;
     private static final int POLLING_INTERVAL = 5000;
@@ -51,10 +50,10 @@ public class GccProvisionSetup implements ProvisionSetup {
     private GccStackUtil gccStackUtil;
 
     @Autowired
-    private PollingService<GccImageReadyPollerObject> gccImageReadyPollerObjectPollingService;
+    private StackDependentPollingService<GccImageReadyPollerObject> gccImageReadyPollerObjectPollingService;
 
     @Autowired
-    private GccImageCheckerStatus gccImageCheckerStatus;
+    private GccImageCheckerTask gccImageCheckerTask;
 
     @Override
     public void setupProvisioning(Stack stack) {
@@ -94,19 +93,15 @@ public class GccProvisionSetup implements ProvisionSetup {
 
                 GccImageReadyPollerObject gccImageReadyPollerObject = new GccImageReadyPollerObject(image.getName(), stack, compute);
                 gccImageReadyPollerObjectPollingService
-                        .pollWithTimeout(gccImageCheckerStatus, gccImageReadyPollerObject, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+                        .pollWithTimeout(gccImageCheckerTask, gccImageReadyPollerObject, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
             }
         } catch (IOException e) {
             LOGGER.error(String.format("Error occurs on %s stack under the setup", stack.getId()), e);
             throw new InternalServerException(e.getMessage());
         }
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT, stack.getId());
-        reactor.notify(ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT,
-                Event.wrap(
-                        new ProvisionSetupComplete(getCloudPlatform(), stack.getId())
-                                .withSetupProperty(CREDENTIAL, stack.getCredential())
-                )
-        );
+        reactor.notify(ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT, Event.wrap(
+                        new ProvisionSetupComplete(getCloudPlatform(), stack.getId()).withSetupProperty(CREDENTIAL, stack.getCredential())));
     }
 
     @Override

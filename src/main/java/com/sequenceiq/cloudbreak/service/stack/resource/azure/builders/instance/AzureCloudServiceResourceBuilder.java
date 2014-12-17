@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.PollingService;
+import com.sequenceiq.cloudbreak.service.StackDependentPollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureCloudServiceDeleteTask;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureCloudServiceDeleteTaskContext;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureDiskDeleteTask;
@@ -47,11 +47,11 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
     @Autowired
     private AzureDiskDeleteTask azureDiskDeleteTask;
     @Autowired
-    private PollingService<AzureDiskRemoveDeleteTaskContext> azureDiskRemoveReadyPollerObjectPollingService;
+    private StackDependentPollingService<AzureDiskRemoveDeleteTaskContext> azureDiskRemoveReadyPollerObjectPollingService;
     @Autowired
     private AzureCloudServiceDeleteTask azureCloudServiceDeleteTask;
     @Autowired
-    private PollingService<AzureCloudServiceDeleteTaskContext> azureCloudServiceRemoveReadyPollerObjectPollingService;
+    private StackDependentPollingService<AzureCloudServiceDeleteTaskContext> azureCloudServiceRemoveReadyPollerObjectPollingService;
 
     @Override
     public List<Resource> create(AzureProvisionContextObject po, int index, List<Resource> resources) throws Exception {

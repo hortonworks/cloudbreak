@@ -55,14 +55,14 @@ import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.PollingService;
+import com.sequenceiq.cloudbreak.service.StackDependentPollingService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.event.AddInstancesComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.StackUpdateSuccess;
 import com.sequenceiq.cloudbreak.service.stack.flow.AwsInstanceStatusCheckerTask;
-import com.sequenceiq.cloudbreak.service.stack.flow.AwsInstances;
+import com.sequenceiq.cloudbreak.service.stack.flow.AwsInstancesPollerObject;
 
 import reactor.core.Reactor;
 import reactor.event.Event;
@@ -99,10 +99,10 @@ public class AwsConnector implements CloudPlatformConnector {
     private InstanceMetaDataRepository instanceMetaDataRepository;
 
     @Autowired
-    private PollingService<AwsInstances> awsPollingService;
+    private StackDependentPollingService<AwsInstancesPollerObject> awsPollingService;
 
     @Autowired
-    private PollingService<AutoScalingGroupReady> pollingService;
+    private StackDependentPollingService<AutoScalingGroupReadyPollerObject> pollingService;
 
     @Autowired
     private ClusterRepository clusterRepository;
@@ -258,7 +258,8 @@ public class AwsConnector implements CloudPlatformConnector {
                 .withDesiredCapacity(requiredInstances));
         LOGGER.info("Updated AutoScaling group's desiredCapacity: [stack: '{}', from: '{}', to: '{}']", stack.getId(), stack.getNodeCount(),
                 stack.getNodeCount() + instanceCount);
-        AutoScalingGroupReady asGroupReady = new AutoScalingGroupReady(stack, amazonEC2Client, amazonASClient, asGroupName, requiredInstances);
+        AutoScalingGroupReadyPollerObject asGroupReady =
+                new AutoScalingGroupReadyPollerObject(stack, amazonEC2Client, amazonASClient, asGroupName, requiredInstances);
         LOGGER.info("Polling autoscaling group until new instances are ready. [stack: {}, asGroup: {}]", stack.getId(), asGroupName);
         pollingService.pollWithTimeout(asGroupStatusCheckerTask, asGroupReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT, stack.getId());
@@ -321,7 +322,7 @@ public class AwsConnector implements CloudPlatformConnector {
                 amazonEC2Client.startInstances(new StartInstancesRequest().withInstanceIds(instances));
                 awsPollingService.pollWithTimeout(
                         awsInstanceStatusCheckerTask,
-                        new AwsInstances(stack, amazonEC2Client, new ArrayList(instances), "Running"),
+                        new AwsInstancesPollerObject(stack, amazonEC2Client, new ArrayList(instances), "Running"),
                         AmbariClusterConnector.POLLING_INTERVAL,
                         AmbariClusterConnector.MAX_ATTEMPTS_FOR_AMBARI_OPS);
                 updateInstanceMetadata(stack, amazonEC2Client, instanceMetaData, instances);

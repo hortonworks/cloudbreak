@@ -14,8 +14,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
-import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
@@ -71,22 +69,14 @@ public class AzureCloudServiceDeleteTask implements StatusCheckerTask<AzureCloud
     }
 
     @Override
-    public boolean exitPoller(AzureCloudServiceDeleteTaskContext azureCloudServiceDeleteTaskContext) {
-        try {
-            Stack byId = stackRepository.findById(azureCloudServiceDeleteTaskContext.getStack().getId());
-            if (byId == null || byId.getStatus().equals(Status.DELETE_IN_PROGRESS)) {
-                return true;
-            }
-            return false;
-        } catch (Exception ex) {
-            return true;
-        }
-    }
-
-    @Override
     public String successMessage(AzureCloudServiceDeleteTaskContext azureDiskRemoveReadyPollerObject) {
         MDCBuilder.buildMdcContext(azureDiskRemoveReadyPollerObject.getStack());
         return String.format("Azure resource '%s' is removed success on '%s' stack",
                 azureDiskRemoveReadyPollerObject.getName(), azureDiskRemoveReadyPollerObject.getStack().getId());
+    }
+
+    @Override
+    public void handleExit(AzureCloudServiceDeleteTaskContext azureCloudServiceDeleteTaskContext) {
+        return;
     }
 }

@@ -2,18 +2,18 @@ package com.sequenceiq.cloudbreak.service.stack.connector.gcc;
 
 import com.google.api.services.compute.Compute;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.service.cluster.flow.StackDependentPollerObject;
 
-public class GccRemoveReadyPollerObject {
+public class GccRemoveReadyPollerObject extends StackDependentPollerObject {
 
     private Compute.ZoneOperations.Get zoneOperations;
     private Compute.GlobalOperations.Get globalOperations;
-    private Stack stack;
     private String name;
     private String operationName;
 
-    public GccRemoveReadyPollerObject(Compute.ZoneOperations.Get zoneOperations, Compute.GlobalOperations.Get globalOperations,
-            Stack stack, String name, String operationName) {
-        this.stack = stack;
+    public GccRemoveReadyPollerObject(Compute.ZoneOperations.Get zoneOperations, Compute.GlobalOperations.Get globalOperations, Stack stack, String name,
+            String operationName) {
+        super(stack);
         this.name = name;
         this.zoneOperations = zoneOperations;
         this.globalOperations = globalOperations;
@@ -34,14 +34,6 @@ public class GccRemoveReadyPollerObject {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public Stack getStack() {
-        return stack;
-    }
-
-    public void setStack(Stack stack) {
-        this.stack = stack;
     }
 
     public String getOperationName() {

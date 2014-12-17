@@ -24,12 +24,12 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.PollingService;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccResourceCheckerStatus;
+import com.sequenceiq.cloudbreak.service.StackDependentPollingService;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveCheckerTask;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveReadyPollerObject;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccResourceCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccResourceCreationException;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccResourceReadyPollerObject;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveCheckerStatus;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveReadyPollerObject;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.GccSimpleInstanceResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDeleteContextObject;
@@ -44,13 +44,13 @@ public class GccDiskResourceBuilder extends GccSimpleInstanceResourceBuilder {
     @Autowired
     private StackRepository stackRepository;
     @Autowired
-    private GccResourceCheckerStatus gccResourceCheckerStatus;
+    private GccResourceCheckerTask gccResourceCheckerTask;
     @Autowired
-    private PollingService<GccResourceReadyPollerObject> gccDiskReadyPollerObjectPollingService;
+    private StackDependentPollingService<GccResourceReadyPollerObject> gccDiskReadyPollerObjectPollingService;
     @Autowired
-    private GccRemoveCheckerStatus gccRemoveCheckerStatus;
+    private GccRemoveCheckerTask gccRemoveCheckerTask;
     @Autowired
-    private PollingService<GccRemoveReadyPollerObject> gccRemoveReadyPollerObjectPollingService;
+    private StackDependentPollingService<GccRemoveReadyPollerObject> gccRemoveReadyPollerObjectPollingService;
     @Autowired
     private JsonHelper jsonHelper;
     @Autowired
@@ -72,7 +72,7 @@ public class GccDiskResourceBuilder extends GccSimpleInstanceResourceBuilder {
         if (execute.getHttpErrorStatusCode() == null) {
             Compute.ZoneOperations.Get zoneOperations = createZoneOperations(po.getCompute(), credential, template, execute);
             GccResourceReadyPollerObject gccDiskReady = new GccResourceReadyPollerObject(zoneOperations, stack, name, execute.getName());
-            gccDiskReadyPollerObjectPollingService.pollWithTimeout(gccResourceCheckerStatus, gccDiskReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+            gccDiskReadyPollerObjectPollingService.pollWithTimeout(gccResourceCheckerTask, gccDiskReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
             return Arrays.asList(new Resource(resourceType(), name, stack));
         } else {
             throw new GccResourceCreationException(execute.getHttpErrorMessage(), resourceType(), name);
@@ -91,7 +91,7 @@ public class GccDiskResourceBuilder extends GccSimpleInstanceResourceBuilder {
             Compute.GlobalOperations.Get globalOperations = createGlobalOperations(d.getCompute(), gccCredential, gccTemplate, operation);
             GccRemoveReadyPollerObject gccRemoveReady =
                     new GccRemoveReadyPollerObject(zoneOperations, globalOperations, stack, resource.getResourceName(), operation.getName());
-            gccRemoveReadyPollerObjectPollingService.pollWithTimeout(gccRemoveCheckerStatus, gccRemoveReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+            gccRemoveReadyPollerObjectPollingService.pollWithTimeout(gccRemoveCheckerTask, gccRemoveReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
         } catch (GoogleJsonResponseException ex) {
             exceptionHandler(ex, resource.getResourceName(), stack);
         } catch (IOException e) {

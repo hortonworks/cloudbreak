@@ -35,7 +35,7 @@ import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.X509Certificate;
 import com.sequenceiq.cloudbreak.service.stack.flow.AzureInstanceStatusCheckerTask;
-import com.sequenceiq.cloudbreak.service.stack.flow.AzureInstances;
+import com.sequenceiq.cloudbreak.service.stack.flow.AzureInstancesPollerObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureSimpleInstanceResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDescribeContextObject;
@@ -53,7 +53,7 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
     private StackRepository stackRepository;
 
     @Autowired
-    private PollingService<AzureInstances> azurePollingService;
+    private PollingService<AzureInstancesPollerObject> azurePollingService;
 
     @Autowired
     private AzureStackUtil azureStackUtil;
@@ -175,7 +175,7 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
         if (started) {
             azurePollingService.pollWithTimeout(
                     azureInstanceStatusCheckerTask,
-                    new AzureInstances(aSSCO.getStack(), aSSCO.getNewAzureClient(credential), Arrays.asList(resource.getResourceName()), "Running"),
+                    new AzureInstancesPollerObject(aSSCO.getStack(), aSSCO.getNewAzureClient(credential), Arrays.asList(resource.getResourceName()), "Running"),
                     POLLING_INTERVAL,
                     MAX_ATTEMPTS_FOR_AMBARI_OPS);
             return true;

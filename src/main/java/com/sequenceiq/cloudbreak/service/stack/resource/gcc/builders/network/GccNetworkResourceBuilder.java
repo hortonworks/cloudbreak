@@ -23,8 +23,8 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.PollingService;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveCheckerStatus;
+import com.sequenceiq.cloudbreak.service.StackDependentPollingService;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveReadyPollerObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.GccSimpleNetworkResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDeleteContextObject;
@@ -39,9 +39,9 @@ public class GccNetworkResourceBuilder extends GccSimpleNetworkResourceBuilder {
     @Autowired
     private StackRepository stackRepository;
     @Autowired
-    private GccRemoveCheckerStatus gccRemoveCheckerStatus;
+    private GccRemoveCheckerTask gccRemoveCheckerTask;
     @Autowired
-    private PollingService<GccRemoveReadyPollerObject> gccRemoveReadyPollerObjectPollingService;
+    private StackDependentPollingService<GccRemoveReadyPollerObject> gccRemoveReadyPollerObjectPollingService;
     @Autowired
     private JsonHelper jsonHelper;
 
@@ -66,8 +66,13 @@ public class GccNetworkResourceBuilder extends GccSimpleNetworkResourceBuilder {
             Compute.ZoneOperations.Get zoneOperations = createZoneOperations(d.getCompute(), gccCredential, gccTemplate, operation);
             Compute.GlobalOperations.Get globalOperations = createGlobalOperations(d.getCompute(), gccCredential, gccTemplate, operation);
             GccRemoveReadyPollerObject gccRemoveReady =
+<<<<<<< HEAD
                     new GccRemoveReadyPollerObject(zoneOperations, globalOperations, stack, resource.getResourceName(), operation.getName());
             gccRemoveReadyPollerObjectPollingService.pollWithTimeout(gccRemoveCheckerStatus, gccRemoveReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+=======
+                    new GccRemoveReadyPollerObject(zoneOperations, globalOperations, stack, resource.getResourceName());
+            gccRemoveReadyPollerObjectPollingService.pollWithTimeout(gccRemoveCheckerTask, gccRemoveReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+>>>>>>> CLOUD-304 pollers with exit criteria
         } catch (GoogleJsonResponseException ex) {
             exceptionHandler(ex, resource.getResourceName(), stack);
         } catch (IOException e) {

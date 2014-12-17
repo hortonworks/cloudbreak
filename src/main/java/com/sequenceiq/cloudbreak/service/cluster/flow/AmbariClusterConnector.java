@@ -36,7 +36,7 @@ import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.PollingService;
+import com.sequenceiq.cloudbreak.service.StackDependentPollingService;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariHostsUnavailableException;
@@ -82,10 +82,10 @@ public class AmbariClusterConnector {
     private Reactor reactor;
 
     @Autowired
-    private PollingService<AmbariOperations> operationsPollingService;
+    private StackDependentPollingService<AmbariOperationsPollerObject> operationsPollingService;
 
     @Autowired
-    private PollingService<AmbariHosts> hostsPollingService;
+    private StackDependentPollingService<AmbariHostsPollerObject> hostsPollingService;
 
     @Autowired
     private HadoopConfigurationService hadoopConfigurationService;
@@ -292,7 +292,7 @@ public class AmbariClusterConnector {
             LOGGER.info("Waiting for Hadoop services to {} on stack", action);
             operationsPollingService.pollWithTimeout(
                     ambariOperationsStatusCheckerTask,
-                    new AmbariOperations(stack, ambariClient, singletonMap(action + " services", requestId)),
+                    new AmbariOperationsPollerObject(stack, ambariClient, singletonMap(action + " services", requestId)),
                     AmbariClusterConnector.POLLING_INTERVAL,
                     AmbariClusterConnector.MAX_ATTEMPTS_FOR_AMBARI_OPS);
         }
@@ -320,7 +320,7 @@ public class AmbariClusterConnector {
         LOGGER.info("Waiting for hosts to connect.[Ambari server address: {}]", stack.getAmbariIp());
         hostsPollingService.pollWithTimeout(
                 ambariHostsStatusCheckerTask,
-                new AmbariHosts(stack, ambariClient, stack.getNodeCount() * stack.getMultiplier()),
+                new AmbariHostsPollerObject(stack, ambariClient, stack.getNodeCount() * stack.getMultiplier()),
                 POLLING_INTERVAL,
                 MAX_ATTEMPTS_FOR_HOSTS);
     }
@@ -407,7 +407,7 @@ public class AmbariClusterConnector {
     private void waitForAmbariOperations(Stack stack, AmbariClient ambariClient, StatusCheckerTask task, Map<String, Integer> operationRequests) {
         operationsPollingService.pollWithTimeout(
                 task,
-                new AmbariOperations(stack, ambariClient, operationRequests),
+                new AmbariOperationsPollerObject(stack, ambariClient, operationRequests),
                 POLLING_INTERVAL,
                 MAX_ATTEMPTS_FOR_AMBARI_OPS);
     }

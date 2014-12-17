@@ -11,15 +11,13 @@ import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.Reservation;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
-import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 
 @Component
 @Scope("prototype")
-public class AwsInstanceStatusCheckerTask implements StatusCheckerTask<AwsInstances> {
+public class AwsInstanceStatusCheckerTask implements StatusCheckerTask<AwsInstancesPollerObject> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsInstanceStatusCheckerTask.class);
 
@@ -27,7 +25,7 @@ public class AwsInstanceStatusCheckerTask implements StatusCheckerTask<AwsInstan
     private StackRepository stackRepository;
 
     @Override
-    public boolean checkStatus(AwsInstances instances) {
+    public boolean checkStatus(AwsInstancesPollerObject instances) {
         DescribeInstancesResult result = instances.getAmazonEC2Client().describeInstances(
                 new DescribeInstancesRequest().withInstanceIds(instances.getInstances()));
         String instancesStatus = instances.getStatus();
@@ -44,26 +42,18 @@ public class AwsInstanceStatusCheckerTask implements StatusCheckerTask<AwsInstan
     }
 
     @Override
-    public void handleTimeout(AwsInstances t) {
+    public void handleTimeout(AwsInstancesPollerObject t) {
         throw new InternalServerException(String.format("AWS instances could not reach the desired status: %s on stack: %s", t, t.getStack().getId()));
     }
 
     @Override
-    public boolean exitPoller(AwsInstances awsInstances) {
-        try {
-            Stack byId = stackRepository.findById(awsInstances.getStack().getId());
-            if (byId == null || byId.getStatus().equals(Status.DELETE_IN_PROGRESS)) {
-                return true;
-            }
-            return false;
-        } catch (Exception ex) {
-            return true;
-        }
+    public String successMessage(AwsInstancesPollerObject t) {
+        return String.format("AWS instances successfully reached status: %s on stack: %s", t.getStatus(), t.getStack().getId());
     }
 
     @Override
-    public String successMessage(AwsInstances t) {
-        return String.format("AWS instances successfully reached status: %s on stack: %s", t.getStatus(), t.getStack().getId());
+    public void handleExit(AwsInstancesPollerObject awsInstances) {
+        return;
     }
 
 }

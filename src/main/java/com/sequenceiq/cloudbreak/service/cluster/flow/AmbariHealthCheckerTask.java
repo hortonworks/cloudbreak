@@ -2,29 +2,20 @@ package com.sequenceiq.cloudbreak.service.cluster.flow;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
-import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 
 @Component
-@Scope("prototype")
-public class AmbariHealthCheckerTask implements StatusCheckerTask<AmbariHealthCheckerTaskPollerObject> {
+public class AmbariHealthCheckerTask implements StatusCheckerTask<AmbariHealthCheckerPollerObject> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariHealthCheckerTask.class);
 
-    @Autowired
-    private StackRepository stackRepository;
-
     @Override
-    public boolean checkStatus(AmbariHealthCheckerTaskPollerObject ambariHealthCheckerTaskPollerObject) {
+    public boolean checkStatus(AmbariHealthCheckerPollerObject ambariHealthCheckerPollerObject) {
         try {
-            String ambariHealth = ambariHealthCheckerTaskPollerObject.getAmbariClient().healthCheck();
+            String ambariHealth = ambariHealthCheckerPollerObject.getAmbariClient().healthCheck();
             if ("RUNNING".equals(ambariHealth)) {
                 return true;
             }
@@ -36,26 +27,19 @@ public class AmbariHealthCheckerTask implements StatusCheckerTask<AmbariHealthCh
     }
 
     @Override
-    public void handleTimeout(AmbariHealthCheckerTaskPollerObject t) {
+    public void handleTimeout(AmbariHealthCheckerPollerObject t) {
         throw new InternalServerException(String.format("Operation timed out. Ambari server could not start %s", t.getAmbariClient().getAmbari().getUri()));
     }
 
+
     @Override
-    public boolean exitPoller(AmbariHealthCheckerTaskPollerObject ambariHealthCheckerTaskPollerObject) {
-        try {
-            Stack byId = stackRepository.findById(ambariHealthCheckerTaskPollerObject.getStack().getId());
-            if (byId == null || byId.getStatus().equals(Status.DELETE_IN_PROGRESS)) {
-                return true;
-            }
-            return false;
-        } catch (Exception ex) {
-            return true;
-        }
+    public String successMessage(AmbariHealthCheckerPollerObject t) {
+        return String.format("Ambari server successfully started '%s'", t.getAmbariClient().getAmbari().getUri());
     }
 
     @Override
-    public String successMessage(AmbariHealthCheckerTaskPollerObject t) {
-        return String.format("Ambari server successfully started '%s'", t.getAmbariClient().getAmbari().getUri());
+    public void handleExit(AmbariHealthCheckerPollerObject ambariHealthCheckerPollerObject) {
+        return;
     }
 
 }

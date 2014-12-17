@@ -26,7 +26,8 @@ public class PollingService<T> {
         boolean timeout = false;
         int attempts = 0;
         MDCBuilder.buildMdcContext();
-        while (!success && !timeout && !statusCheckerTask.exitPoller(t)) {
+        boolean exit = exitPolling(t);
+        while (!success && !timeout && !exit) {
             LOGGER.info("Polling attempt {}.", attempts);
             success = statusCheckerTask.checkStatus(t);
             if (success) {
@@ -42,6 +43,13 @@ public class PollingService<T> {
         if (timeout) {
             statusCheckerTask.handleTimeout(t);
         }
+        if (timeout) {
+            statusCheckerTask.handleExit(t);
+        }
+    }
+
+    protected boolean exitPolling(T t) {
+        return false;
     }
 
     private void sleep(int duration) {

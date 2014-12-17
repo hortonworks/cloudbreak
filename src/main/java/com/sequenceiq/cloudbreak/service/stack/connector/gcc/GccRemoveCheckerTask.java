@@ -4,26 +4,19 @@ import java.io.IOException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.model.Operation;
-import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 
 @Component
-public class GccRemoveCheckerStatus implements StatusCheckerTask<GccRemoveReadyPollerObject> {
+public class GccRemoveCheckerTask implements StatusCheckerTask<GccRemoveReadyPollerObject> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GccRemoveCheckerStatus.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GccRemoveCheckerTask.class);
     private static final int FINISHED = 100;
     private static final int NOT_FOUND = 404;
-
-    @Autowired
-    private StackRepository stackRepository;
 
     @Override
     public boolean checkStatus(GccRemoveReadyPollerObject gccRemoveReadyPollerObject) {
@@ -40,6 +33,8 @@ public class GccRemoveCheckerStatus implements StatusCheckerTask<GccRemoveReadyP
                     gccRemoveReadyPollerObject.getName(),
                     gccRemoveReadyPollerObject.getOperationName(),
                     gccRemoveReadyPollerObject.getStack().getId()));
+        } catch (IOException e) {
+            return false;
         }
     }
 
@@ -72,19 +67,6 @@ public class GccRemoveCheckerStatus implements StatusCheckerTask<GccRemoveReadyP
     }
 
     @Override
-    public boolean exitPoller(GccRemoveReadyPollerObject gccRemoveReadyPollerObject) {
-        try {
-            Stack byId = stackRepository.findById(gccRemoveReadyPollerObject.getStack().getId());
-            if (byId == null || byId.getStatus().equals(Status.DELETE_IN_PROGRESS)) {
-                return true;
-            }
-            return false;
-        } catch (Exception ex) {
-            return true;
-        }
-    }
-
-    @Override
     public String successMessage(GccRemoveReadyPollerObject gccRemoveReadyPollerObject) {
         MDCBuilder.buildMdcContext(gccRemoveReadyPollerObject.getStack());
         return String.format("Gcc resource '%s' is removed success on '%s' stack",
@@ -113,6 +95,10 @@ public class GccRemoveCheckerStatus implements StatusCheckerTask<GccRemoveReadyP
             Integer progress = operation.getProgress();
             return (progress.intValue() != FINISHED) ? false : true;
         }
+    }
 
+    @Override
+    public void handleExit(GccRemoveReadyPollerObject gccRemoveReadyPollerObject) {
+        return;
     }
 }

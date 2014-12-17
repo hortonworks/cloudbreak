@@ -53,7 +53,7 @@ public class AwsMetadataSetup implements MetadataSetup {
     private CloudFormationStackUtil cfStackUtil;
 
     @Autowired
-    private PollingService<AutoScalingGroupReady> pollingService;
+    private PollingService<AutoScalingGroupReadyPollerObject> pollingService;
 
     @Autowired
     private ASGroupStatusCheckerTask asGroupStatusCheckerTask;
@@ -74,7 +74,8 @@ public class AwsMetadataSetup implements MetadataSetup {
 
         // wait until all instances are up
         String asGroupName = cfStackUtil.getAutoscalingGroupName(stack);
-        AutoScalingGroupReady asGroupReady = new AutoScalingGroupReady(stack, amazonEC2Client, amazonASClient, asGroupName, stack.getNodeCount());
+        AutoScalingGroupReadyPollerObject asGroupReady =
+                new AutoScalingGroupReadyPollerObject(stack, amazonEC2Client, amazonASClient, asGroupName, stack.getNodeCount());
         LOGGER.info("Polling autoscaling group until new instances are ready. [stack: {}, asGroup: {}]", stack.getId(), asGroupName);
         if (awsTemplate.getSpotPrice() == null) {
             pollingService.pollWithTimeout(asGroupStatusCheckerTask, asGroupReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
@@ -95,7 +96,7 @@ public class AwsMetadataSetup implements MetadataSetup {
                         instance.getPublicDnsName(),
                         instance.getBlockDeviceMappings().size() - 1,
                         instance.getPrivateDnsName()
-                        ));
+                ));
             }
         }
 
@@ -130,7 +131,7 @@ public class AwsMetadataSetup implements MetadataSetup {
                             instance.getPublicDnsName(),
                             instance.getBlockDeviceMappings().size() - 1,
                             instance.getPrivateDnsName()
-                            ));
+                    ));
                     LOGGER.info("New instance added to metadata: [stack: '{}', instanceId: '{}']", stack.getId(), instance.getInstanceId());
                 }
             }

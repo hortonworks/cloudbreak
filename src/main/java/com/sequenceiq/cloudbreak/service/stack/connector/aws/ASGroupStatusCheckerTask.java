@@ -11,15 +11,12 @@ import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusRequest;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusResult;
 import com.amazonaws.services.ec2.model.InstanceStatus;
-import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.AddInstancesFailedException;
 
 @Component
-public class ASGroupStatusCheckerTask implements StatusCheckerTask<AutoScalingGroupReady> {
+public class ASGroupStatusCheckerTask implements StatusCheckerTask<AutoScalingGroupReadyPollerObject> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ASGroupStatusCheckerTask.class);
 
@@ -28,11 +25,8 @@ public class ASGroupStatusCheckerTask implements StatusCheckerTask<AutoScalingGr
     @Autowired
     private CloudFormationStackUtil cfStackUtil;
 
-    @Autowired
-    private StackRepository stackRepository;
-
     @Override
-    public boolean checkStatus(AutoScalingGroupReady asGroupReady) {
+    public boolean checkStatus(AutoScalingGroupReadyPollerObject asGroupReady) {
         MDCBuilder.buildMdcContext(asGroupReady.getStack());
         LOGGER.info("Checking status of autoscaling group '{}'", asGroupReady.getAutoScalingGroupName());
         AmazonEC2Client amazonEC2Client = asGroupReady.getAmazonEC2Client();
@@ -56,28 +50,20 @@ public class ASGroupStatusCheckerTask implements StatusCheckerTask<AutoScalingGr
     }
 
     @Override
-    public void handleTimeout(AutoScalingGroupReady t) {
+    public void handleTimeout(AutoScalingGroupReadyPollerObject t) {
         throw new AddInstancesFailedException(String.format(
                 "Something went wrong. Instances in Auto Scaling group '%s' not started in a reasonable timeframe.",
                 t.getAutoScalingGroupName()));
     }
 
     @Override
-    public boolean exitPoller(AutoScalingGroupReady autoScalingGroupReady) {
-        try {
-            Stack byId = stackRepository.findById(autoScalingGroupReady.getStack().getId());
-            if (byId == null || byId.getStatus().equals(Status.DELETE_IN_PROGRESS)) {
-                return true;
-            }
-            return false;
-        } catch (Exception ex) {
-            return true;
-        }
+    public String successMessage(AutoScalingGroupReadyPollerObject t) {
+        MDCBuilder.buildMdcContext(t.getStack());
+        return String.format("AutoScaling group '%s' is ready. All %s instances are running.", t.getAutoScalingGroupName(), t.getRequiredInstances());
     }
 
     @Override
-    public String successMessage(AutoScalingGroupReady t) {
-        MDCBuilder.buildMdcContext(t.getStack());
-        return String.format("AutoScaling group '%s' is ready. All %s instances are running.", t.getAutoScalingGroupName(), t.getRequiredInstances());
+    public void handleExit(AutoScalingGroupReadyPollerObject autoScalingGroupReadyPollerObject) {
+        return;
     }
 }

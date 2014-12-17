@@ -6,21 +6,17 @@ import java.util.Map.Entry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
 
 @Component
 @Scope("prototype")
-public class AmbariOperationsStatusCheckerTask implements StatusCheckerTask<AmbariOperations> {
+public class AmbariOperationsStatusCheckerTask implements StatusCheckerTask<AmbariOperationsPollerObject> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariOperationsStatusCheckerTask.class);
 
@@ -28,11 +24,8 @@ public class AmbariOperationsStatusCheckerTask implements StatusCheckerTask<Amba
     private static final BigDecimal FAILED = new BigDecimal(-1.0);
     private static final int MAX_RETRY = 3;
 
-    @Autowired
-    private StackRepository stackRepository;
-
     @Override
-    public boolean checkStatus(AmbariOperations t) {
+    public boolean checkStatus(AmbariOperationsPollerObject t) {
         MDCBuilder.buildMdcContext(t.getStack());
         Map<String, Integer> installRequests = t.getRequests();
         boolean allFinished = true;
@@ -59,27 +52,19 @@ public class AmbariOperationsStatusCheckerTask implements StatusCheckerTask<Amba
     }
 
     @Override
-    public void handleTimeout(AmbariOperations t) {
+    public void handleTimeout(AmbariOperationsPollerObject t) {
         throw new IllegalStateException(String.format("Ambari operations timed out: %s", t.getRequests()));
 
     }
 
     @Override
-    public boolean exitPoller(AmbariOperations ambariOperations) {
-        try {
-            Stack byId = stackRepository.findById(ambariOperations.getStack().getId());
-            if (byId == null || byId.getStatus().equals(Status.DELETE_IN_PROGRESS)) {
-                return true;
-            }
-            return false;
-        } catch (Exception ex) {
-            return true;
-        }
+    public String successMessage(AmbariOperationsPollerObject t) {
+        return String.format("Requested Ambari operations completed: %s", t.getRequests().toString());
     }
 
     @Override
-    public String successMessage(AmbariOperations t) {
-        return String.format("Requested Ambari operations completed: %s", t.getRequests().toString());
+    public void handleExit(AmbariOperationsPollerObject ambariOperationsPollerObject) {
+        return;
     }
 
 }

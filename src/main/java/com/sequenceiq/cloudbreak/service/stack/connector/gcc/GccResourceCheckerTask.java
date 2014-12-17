@@ -4,24 +4,17 @@ import java.io.IOException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.api.services.compute.model.Operation;
-import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 
 @Component
-public class GccResourceCheckerStatus implements StatusCheckerTask<GccResourceReadyPollerObject> {
+public class GccResourceCheckerTask implements StatusCheckerTask<GccResourceReadyPollerObject> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GccResourceCheckerStatus.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GccResourceCheckerTask.class);
     private static final int FINISHED = 100;
-
-    @Autowired
-    private StackRepository stackRepository;
 
     @Override
     public boolean checkStatus(GccResourceReadyPollerObject gccResourceReadyPollerObject) {
@@ -48,23 +41,15 @@ public class GccResourceCheckerStatus implements StatusCheckerTask<GccResourceRe
     }
 
     @Override
-    public boolean exitPoller(GccResourceReadyPollerObject gccResourceReadyPollerObject) {
-        try {
-            Stack byId = stackRepository.findById(gccResourceReadyPollerObject.getStack().getId());
-            if (byId == null || byId.getStatus().equals(Status.DELETE_IN_PROGRESS)) {
-                return true;
-            }
-            return false;
-        } catch (Exception ex) {
-            return true;
-        }
-    }
-
-    @Override
     public String successMessage(GccResourceReadyPollerObject gccResourceReadyPollerObject) {
         MDCBuilder.buildMdcContext(gccResourceReadyPollerObject.getStack());
         return String.format("Gcc resource '%s' is ready on '%s' stack",
                 gccResourceReadyPollerObject.getName(), gccResourceReadyPollerObject.getStack().getId());
+    }
+
+    @Override
+    public void handleExit(GccResourceReadyPollerObject gccResourceReadyPollerObject) {
+        return;
     }
 
 
