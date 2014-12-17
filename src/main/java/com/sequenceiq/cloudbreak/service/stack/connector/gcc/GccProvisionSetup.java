@@ -7,7 +7,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.sequenceiq.cloudbreak.service.PollingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +27,7 @@ import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.domain.GccTemplate;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
 
@@ -92,8 +92,9 @@ public class GccProvisionSetup implements ProvisionSetup {
                 Compute.Images.Insert ins1 = compute.images().insert(credential.getProjectId(), image);
                 ins1.execute();
 
-                GccImageReadyPollerObject gccInstanceReady = new GccImageReadyPollerObject(image.getName(), stack, compute);
-                gccImageReadyPollerObjectPollingService.pollWithTimeout(gccImageCheckerStatus, gccInstanceReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+                GccImageReadyPollerObject gccImageReadyPollerObject = new GccImageReadyPollerObject(image.getName(), stack, compute);
+                gccImageReadyPollerObjectPollingService
+                        .pollWithTimeout(gccImageCheckerStatus, gccImageReadyPollerObject, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
             }
         } catch (IOException e) {
             LOGGER.error(String.format("Error occurs on %s stack under the setup", stack.getId()), e);

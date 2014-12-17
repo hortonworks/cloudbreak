@@ -71,7 +71,7 @@ public class GccDiskResourceBuilder extends GccSimpleInstanceResourceBuilder {
         Operation execute = insDisk.execute();
         if (execute.getHttpErrorStatusCode() == null) {
             Compute.ZoneOperations.Get zoneOperations = createZoneOperations(po.getCompute(), credential, template, execute);
-            GccResourceReadyPollerObject gccDiskReady = new GccResourceReadyPollerObject(zoneOperations, stack, name);
+            GccResourceReadyPollerObject gccDiskReady = new GccResourceReadyPollerObject(zoneOperations, stack, name, execute.getName());
             gccDiskReadyPollerObjectPollingService.pollWithTimeout(gccResourceCheckerStatus, gccDiskReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
             return Arrays.asList(new Resource(resourceType(), name, stack));
         } else {

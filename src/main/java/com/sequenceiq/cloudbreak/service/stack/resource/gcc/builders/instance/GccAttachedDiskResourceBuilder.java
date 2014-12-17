@@ -82,7 +82,7 @@ public class GccAttachedDiskResourceBuilder extends GccSimpleInstanceResourceBui
                     Operation execute = insDisk.execute();
                     if (execute.getHttpErrorStatusCode() == null) {
                         Compute.ZoneOperations.Get zoneOperations = createZoneOperations(po.getCompute(), gccCredential, gccTemplate, execute);
-                        GccResourceReadyPollerObject gccDiskReady = new GccResourceReadyPollerObject(zoneOperations, stack, name);
+                        GccResourceReadyPollerObject gccDiskReady = new GccResourceReadyPollerObject(zoneOperations, stack, name, execute.getName());
                         gccDiskReadyPollerObjectPollingService.pollWithTimeout(gccResourceCheckerStatus, gccDiskReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
                         return new Resource(resourceType(), value, stack);
                     } else {
