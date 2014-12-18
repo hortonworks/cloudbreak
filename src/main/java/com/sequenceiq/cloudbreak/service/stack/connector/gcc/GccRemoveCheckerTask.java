@@ -33,8 +33,6 @@ public class GccRemoveCheckerTask implements StatusCheckerTask<GccRemoveReadyPol
                     gccRemoveReadyPollerObject.getName(),
                     gccRemoveReadyPollerObject.getOperationName(),
                     gccRemoveReadyPollerObject.getStack().getId()));
-        } catch (IOException e) {
-            return false;
         }
     }
 
