@@ -40,8 +40,7 @@
         <label class="col-sm-3 control-label" for="aws_tregion">Region</label>
 
         <div class="col-sm-9">
-            <select class="form-control" id="aws_tregion" ng-model="awsTemp.parameters.region" required>
-                <option ng-repeat="region in $root.config.AWS.awsRegions" value="{{region.key}}">{{region.value}}</option>
+            <select class="form-control" id="aws_tregion" ng-options="region.key as region.value for region in $root.config.AWS.awsRegions" ng-model="awsTemp.parameters.region" required>
             </select>
         </div>
         <!-- .col-sm-9 -->
@@ -51,8 +50,7 @@
         <label class="col-sm-3 control-label" for="aws_tinstanceType">Instance type</label>
 
         <div class="col-sm-9">
-            <select class="form-control" id="aws_tinstanceType" ng-model="awsTemp.parameters.instanceType" required>
-                <option ng-repeat="instanceType in $root.config.AWS.instanceType" value="{{instanceType.key}}">{{instanceType.value}}</option>
+            <select class="form-control" id="aws_tinstanceType" ng-options="instanceType.key as instanceType.value for instanceType in $root.config.AWS.instanceType" ng-model="awsTemp.parameters.instanceType" required>
             </select>
         </div>
         <!-- .col-sm-9 -->
@@ -93,8 +91,7 @@
         <label class="col-sm-3 control-label" for="aws_tvolumetype">Volume type</label>
 
         <div class="col-sm-9">
-            <select class="form-control" id="aws_tvolumetype" ng-model="awsTemp.parameters.volumeType" required>
-                <option ng-repeat="volumeType in $root.config.AWS.volumeTypes" value="{{volumeType.key}}">{{volumeType.value}}</option>
+            <select class="form-control" id="aws_tvolumetype" ng-options="volumeType.key as volumeType.value for volumeType in $root.config.AWS.volumeTypes" ng-model="awsTemp.parameters.volumeType" required>
             </select>
         </div>
         <!-- .col-sm-9 -->

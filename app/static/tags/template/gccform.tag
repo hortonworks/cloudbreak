@@ -1,6 +1,5 @@
 <div class="form-group" ng-class="{ 'has-error': gccTemplateForm.gcc_tclusterName.$dirty && gccTemplateForm.gcc_tclusterName.$invalid }">
     <label class="col-sm-3 control-label" for="gcc_tclusterName">Name</label>
-
     <div class="col-sm-9">
         <input type="text" class="form-control" ng-pattern="/^[a-zA-Z][-a-zA-Z0-9]*$/" name="gcc_tclusterName" ng-model="gccTemp.name" ng-minlength="5" ng-maxlength="100" required id="gcc_tclusterName" placeholder="min. 5 max. 100 char">
         <div class="help-block" ng-show="gccTemplateForm.gcc_tclusterName.$dirty && gccTemplateForm.gcc_tclusterName.$invalid">
@@ -20,16 +19,14 @@
 <div class="form-group">
     <label class="col-sm-3 control-label" for="gcc_tregion">Region</label>
     <div class="col-sm-9">
-        <select class="form-control" id="gcc_tregion" ng-model="gccTemp.parameters.gccZone">
-            <option ng-repeat="region in $root.config.GCC.gccRegions" value="{{region.key}}">{{region.value}}</option>
+        <select class="form-control" id="gcc_tregion" ng-options="region.key as region.value for region in $root.config.GCC.gccRegions" ng-model="gccTemp.parameters.gccZone">
         </select>
     </div>
 </div>
 <div class="form-group">
     <label class="col-sm-3 control-label" for="gcc_tinstanceType">Instance type</label>
     <div class="col-sm-9">
-        <select class="form-control" id="gcc_tinstanceType" ng-model="gccTemp.parameters.gccInstanceType">
-            <option ng-repeat="instanceType in $root.config.GCC.gccInstanceTypes" value="{{instanceType.key}}">{{instanceType.value}}</option>
+        <select class="form-control" id="gcc_tinstanceType" ng-options="instanceType.key as instanceType.value for instanceType in $root.config.GCC.gccInstanceTypes" ng-model="gccTemp.parameters.gccInstanceType">
         </select>
     </div>
 </div>
@@ -55,8 +52,7 @@
 <div class="form-group">
     <label class="col-sm-3 control-label" for="gcc_tvolumetype">Volume type</label>
     <div class="col-sm-9">
-        <select class="form-control" id="gcc_tvolumetype" ng-model="gccTemp.parameters.volumeType">
-            <option ng-repeat="diskType in $root.config.GCC.gccDiskTypes" value="{{diskType.key}}">{{diskType.value}}</option>
+        <select class="form-control" id="gcc_tvolumetype" ng-options="diskType.key as diskType.value for diskType in $root.config.GCC.gccDiskTypes" ng-model="gccTemp.parameters.volumeType">
         </select>
     </div>
 </div>

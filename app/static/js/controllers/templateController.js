@@ -6,9 +6,6 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
     function ($scope, $rootScope, $filter, UserTemplate, GlobalTemplate) {
 
         $rootScope.templates = UserTemplate.query();
-        $scope.azureTemp = {};
-        $scope.gccTemp = {};
-        $scope.azureTemp = {};
         $scope.awsTemplateForm = {};
         $scope.gccTemplateForm = {};
         initializeAzureTemp();
