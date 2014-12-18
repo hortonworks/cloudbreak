@@ -76,7 +76,7 @@ public class GccRemoveCheckerStatus implements StatusCheckerTask<GccRemoveReadyP
         if (operation.getHttpErrorStatusCode() != null || operation.getError() != null) {
             StringBuilder error = new StringBuilder();
             if (operation.getError() != null) {
-                if (operation.getError().getErrors() != null && operation.getError().getErrors().size() > 0) {
+                if (operation.getError().getErrors() != null) {
                     for (Operation.Error.Errors errors : operation.getError().getErrors()) {
                         error.append(String.format("code: %s -> message: %s %s", errors.getCode(), errors.getMessage(), System.lineSeparator()));
                     }
