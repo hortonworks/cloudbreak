@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.StackDependentPollingService;
+import com.sequenceiq.cloudbreak.service.SimplePollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveReadyPollerObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.GccSimpleNetworkResourceBuilder;
@@ -39,7 +39,7 @@ public class GccFireWallInResourceBuilder extends GccSimpleNetworkResourceBuilde
     @Autowired
     private GccRemoveCheckerTask gccRemoveCheckerTask;
     @Autowired
-    private StackDependentPollingService<GccRemoveReadyPollerObject> gccRemoveReadyPollerObjectPollingService;
+    private SimplePollingService<GccRemoveReadyPollerObject> gccRemoveReadyPollerObjectPollingService;
     @Autowired
     private JsonHelper jsonHelper;
 

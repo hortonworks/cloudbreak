@@ -31,7 +31,7 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.PollingService;
+import com.sequenceiq.cloudbreak.service.StackDependentPollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.X509Certificate;
 import com.sequenceiq.cloudbreak.service.stack.flow.AzureInstanceStatusCheckerTask;
@@ -53,7 +53,7 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
     private StackRepository stackRepository;
 
     @Autowired
-    private PollingService<AzureInstancesPollerObject> azurePollingService;
+    private StackDependentPollingService<AzureInstancesPollerObject> azurePollingService;
 
     @Autowired
     private AzureStackUtil azureStackUtil;

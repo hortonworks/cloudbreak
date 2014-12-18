@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.service.PollingService;
+import com.sequenceiq.cloudbreak.service.SimplePollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataSetupComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataUpdateComplete;
@@ -53,7 +53,7 @@ public class AwsMetadataSetup implements MetadataSetup {
     private CloudFormationStackUtil cfStackUtil;
 
     @Autowired
-    private PollingService<AutoScalingGroupReadyPollerObject> pollingService;
+    private SimplePollingService<AutoScalingGroupReadyPollerObject> pollingService;
 
     @Autowired
     private ASGroupStatusCheckerTask asGroupStatusCheckerTask;

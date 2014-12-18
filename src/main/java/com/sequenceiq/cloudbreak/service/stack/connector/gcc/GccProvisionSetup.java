@@ -27,7 +27,7 @@ import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.domain.GccTemplate;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.service.StackDependentPollingService;
+import com.sequenceiq.cloudbreak.service.SimplePollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
 
@@ -50,7 +50,7 @@ public class GccProvisionSetup implements ProvisionSetup {
     private GccStackUtil gccStackUtil;
 
     @Autowired
-    private StackDependentPollingService<GccImageReadyPollerObject> gccImageReadyPollerObjectPollingService;
+    private SimplePollingService<GccImageReadyPollerObject> gccImageReadyPollerObjectPollingService;
 
     @Autowired
     private GccImageCheckerTask gccImageCheckerTask;

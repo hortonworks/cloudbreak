@@ -2,16 +2,18 @@ package com.sequenceiq.cloudbreak.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
-public abstract class PollingService<T> {
+@Component
+public class SimplePollingService<T> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PollingService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SimplePollingService.class);
 
     /**
-     * Executes a {@link StatusCheckerTask} until it signals success, or the
-     * maximum attempts are reached. A {@link StatusCheckerTask} has no
+     * Executes a {@link com.sequenceiq.cloudbreak.service.StatusCheckerTask} until it signals success, or the
+     * maximum attempts are reached. A {@link com.sequenceiq.cloudbreak.service.StatusCheckerTask} has no
      * restrictions about what kind of tasks it should do, it just needs to
      * return if the task succeeded or not. If maxAttempts is lower than 0,
      * there will be no timeout.
@@ -47,7 +49,9 @@ public abstract class PollingService<T> {
         }
     }
 
-    protected abstract boolean exitPolling(T t);
+    protected boolean exitPolling(T t) {
+        return false;
+    }
 
     private void sleep(int duration) {
         try {
