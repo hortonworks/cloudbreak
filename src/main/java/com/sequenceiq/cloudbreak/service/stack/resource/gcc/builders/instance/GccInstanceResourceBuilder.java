@@ -144,12 +144,12 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
         try {
             GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
             GccCredential gccCredential = (GccCredential) stack.getCredential();
-            Operation execute = d.getCompute().instances()
+            Operation operation = d.getCompute().instances()
                     .delete(gccCredential.getProjectId(), gccTemplate.getGccZone().getValue(), resource.getResourceName()).execute();
-            Compute.ZoneOperations.Get zoneOperations = createZoneOperations(d.getCompute(), gccCredential, gccTemplate, execute);
-            Compute.GlobalOperations.Get globalOperations = createGlobalOperations(d.getCompute(), gccCredential, gccTemplate, execute);
+            Compute.ZoneOperations.Get zoneOperations = createZoneOperations(d.getCompute(), gccCredential, gccTemplate, operation);
+            Compute.GlobalOperations.Get globalOperations = createGlobalOperations(d.getCompute(), gccCredential, gccTemplate, operation);
             GccRemoveReadyPollerObject gccRemoveReady =
-                    new GccRemoveReadyPollerObject(zoneOperations, globalOperations, stack, resource.getResourceName());
+                    new GccRemoveReadyPollerObject(zoneOperations, globalOperations, stack, resource.getResourceName(), operation.getName());
             gccRemoveReadyPollerObjectPollingService.pollWithTimeout(gccRemoveCheckerStatus, gccRemoveReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
         } catch (GoogleJsonResponseException ex) {
             exceptionHandler(ex, resource.getResourceName(), stack);
