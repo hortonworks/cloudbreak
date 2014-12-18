@@ -24,10 +24,11 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.SimplePollingService;
-import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureCloudServiceDeleteTask;
+import com.sequenceiq.cloudbreak.service.PollingResult;
+import com.sequenceiq.cloudbreak.service.PollingService;
+import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureCloudServiceDeleteCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureCloudServiceDeleteTaskContext;
-import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureDiskDeleteTask;
+import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureDiskDeleteCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureDiskRemoveDeleteTaskContext;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureSimpleInstanceResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDeleteContextObject;
@@ -43,15 +44,14 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
 
     @Autowired
     private StackRepository stackRepository;
-
     @Autowired
-    private AzureDiskDeleteTask azureDiskDeleteTask;
+    private AzureDiskDeleteCheckerTask azureDiskDeleteCheckerTask;
     @Autowired
-    private SimplePollingService<AzureDiskRemoveDeleteTaskContext> azureDiskRemoveReadyPollerObjectPollingService;
+    private PollingService<AzureDiskRemoveDeleteTaskContext> azureDiskRemoveReadyPollerObjectPollingService;
     @Autowired
-    private AzureCloudServiceDeleteTask azureCloudServiceDeleteTask;
+    private AzureCloudServiceDeleteCheckerTask azureCloudServiceDeleteCheckerTask;
     @Autowired
-    private SimplePollingService<AzureCloudServiceDeleteTaskContext> azureCloudServiceRemoveReadyPollerObjectPollingService;
+    private PollingService<AzureCloudServiceDeleteTaskContext> azureCloudServiceRemoveReadyPollerObjectPollingService;
 
     @Override
     public List<Resource> create(AzureProvisionContextObject po, int index, List<Resource> resources) throws Exception {
@@ -81,21 +81,26 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
         AzureCloudServiceDeleteTaskContext azureCloudServiceDeleteTaskContext =
                 new AzureCloudServiceDeleteTaskContext(aDCO.getCommonName(), resource.getResourceName(),
                         stack, aDCO.getNewAzureClient(credential));
-        azureCloudServiceRemoveReadyPollerObjectPollingService
-                .pollWithTimeout(azureCloudServiceDeleteTask, azureCloudServiceDeleteTaskContext, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
-
-        AzureClient azureClient = aDCO.getNewAzureClient(credential);
-        JsonNode actualObj = MAPPER.readValue((String) azureClient.getDisks(), JsonNode.class);
-        List<String> disks = (List<String>) actualObj.get("Disks").findValues("Disk").get(0).findValuesAsText("Name");
-        for (String jsonNode : disks) {
-            if (jsonNode.startsWith(String.format("%s-%s-0", resource.getResourceName(), resource.getResourceName()))) {
-                AzureDiskRemoveDeleteTaskContext azureDiskRemoveReadyPollerObject = new AzureDiskRemoveDeleteTaskContext(aDCO.getCommonName(), jsonNode,
-                        stack, aDCO.getNewAzureClient(credential));
-                azureDiskRemoveReadyPollerObjectPollingService
-                        .pollWithTimeout(azureDiskDeleteTask, azureDiskRemoveReadyPollerObject, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+        PollingResult pollingResult = azureCloudServiceRemoveReadyPollerObjectPollingService
+                .pollWithTimeout(azureCloudServiceDeleteCheckerTask, azureCloudServiceDeleteTaskContext, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+        if (pollingResult.equals(PollingResult.SUCCESS)) {
+            AzureClient azureClient = aDCO.getNewAzureClient(credential);
+            JsonNode actualObj = MAPPER.readValue((String) azureClient.getDisks(), JsonNode.class);
+            List<String> disks = (List<String>) actualObj.get("Disks").findValues("Disk").get(0).findValuesAsText("Name");
+            for (String jsonNode : disks) {
+                if (jsonNode.startsWith(String.format("%s-%s-0", resource.getResourceName(), resource.getResourceName()))) {
+                    AzureDiskRemoveDeleteTaskContext azureDiskRemoveReadyPollerObject = new AzureDiskRemoveDeleteTaskContext(aDCO.getCommonName(), jsonNode,
+                            stack, aDCO.getNewAzureClient(credential));
+                    PollingResult pollingDiskResult = azureDiskRemoveReadyPollerObjectPollingService
+                            .pollWithTimeout(azureDiskDeleteCheckerTask, azureDiskRemoveReadyPollerObject, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+                    if (!PollingResult.SUCCESS.equals(pollingDiskResult)) {
+                        return false;
+                    }
+                }
             }
+            return true;
         }
-        return true;
+        return false;
     }
 
     @Override

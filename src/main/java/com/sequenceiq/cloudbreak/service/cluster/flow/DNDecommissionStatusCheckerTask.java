@@ -9,11 +9,11 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.StackDependentStatusCheckerTask;
 
 @Component
 @Scope("prototype")
-public class DNDecommissionStatusCheckerTask implements StatusCheckerTask<AmbariOperationsPollerObject> {
+public class DNDecommissionStatusCheckerTask extends StackDependentStatusCheckerTask<AmbariOperationsPollerObject> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DNDecommissionStatusCheckerTask.class);
 

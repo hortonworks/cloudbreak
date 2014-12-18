@@ -9,11 +9,11 @@ import org.springframework.stereotype.Component;
 import com.google.api.services.compute.Compute;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.StackDependentStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.AddInstancesFailedException;
 
 @Component
-public class GccImageCheckerTask implements StatusCheckerTask<GccImageReadyPollerObject> {
+public class GccImageCheckerTask extends StackDependentStatusCheckerTask<GccImageReadyPollerObject> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GccImageCheckerTask.class);
     private static final String READY = "READY";

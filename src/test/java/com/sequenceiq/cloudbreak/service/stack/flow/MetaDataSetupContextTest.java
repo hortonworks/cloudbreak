@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
-import static org.mockito.BDDMockito.doNothing;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.times;
 import static org.mockito.BDDMockito.verify;
@@ -58,7 +57,7 @@ public class MetaDataSetupContextTest {
         // GIVEN
         given(metadataSetups.get(CloudPlatform.AZURE)).willReturn(metadataSetup);
         given(stackRepository.findOneWithLists(1L)).willReturn(stack);
-        doNothing().when(metadataSetup).setupMetadata(stack);
+        given(metadataSetup.setupMetadata(stack)).willReturn(true);
         // WHEN
         underTest.setupMetadata(CloudPlatform.AZURE, 1L);
         // THEN

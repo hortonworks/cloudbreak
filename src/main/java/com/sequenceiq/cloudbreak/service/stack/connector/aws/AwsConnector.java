@@ -55,7 +55,8 @@ import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.StackDependentPollingService;
+import com.sequenceiq.cloudbreak.service.PollingResult;
+import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.event.AddInstancesComplete;
@@ -99,10 +100,10 @@ public class AwsConnector implements CloudPlatformConnector {
     private InstanceMetaDataRepository instanceMetaDataRepository;
 
     @Autowired
-    private StackDependentPollingService<AwsInstancesPollerObject> awsPollingService;
+    private PollingService<AwsInstancesPollerObject> awsPollingService;
 
     @Autowired
-    private StackDependentPollingService<AutoScalingGroupReadyPollerObject> pollingService;
+    private PollingService<AutoScalingGroupReadyPollerObject> pollingService;
 
     @Autowired
     private ClusterRepository clusterRepository;
@@ -261,9 +262,11 @@ public class AwsConnector implements CloudPlatformConnector {
         AutoScalingGroupReadyPollerObject asGroupReady =
                 new AutoScalingGroupReadyPollerObject(stack, amazonEC2Client, amazonASClient, asGroupName, requiredInstances);
         LOGGER.info("Polling autoscaling group until new instances are ready. [stack: {}, asGroup: {}]", stack.getId(), asGroupName);
-        pollingService.pollWithTimeout(asGroupStatusCheckerTask, asGroupReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
-        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT, stack.getId());
-        reactor.notify(ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT, Event.wrap(new AddInstancesComplete(CloudPlatform.AWS, stack.getId(), null)));
+        PollingResult pollingResult = pollingService.pollWithTimeout(asGroupStatusCheckerTask, asGroupReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+        if (PollingResult.SUCCESS.equals(pollingResult)) {
+            LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT, stack.getId());
+            reactor.notify(ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT, Event.wrap(new AddInstancesComplete(CloudPlatform.AWS, stack.getId(), null)));
+        }
         return true;
     }
 
@@ -320,12 +323,16 @@ public class AwsConnector implements CloudPlatformConnector {
             } else {
                 amazonASClient.resumeProcesses(new ResumeProcessesRequest().withAutoScalingGroupName(asGroupName));
                 amazonEC2Client.startInstances(new StartInstancesRequest().withInstanceIds(instances));
-                awsPollingService.pollWithTimeout(
+                PollingResult pollingResult = awsPollingService.pollWithTimeout(
                         awsInstanceStatusCheckerTask,
                         new AwsInstancesPollerObject(stack, amazonEC2Client, new ArrayList(instances), "Running"),
                         AmbariClusterConnector.POLLING_INTERVAL,
                         AmbariClusterConnector.MAX_ATTEMPTS_FOR_AMBARI_OPS);
-                updateInstanceMetadata(stack, amazonEC2Client, instanceMetaData, instances);
+                if (PollingResult.SUCCESS.equals(pollingResult)) {
+                    updateInstanceMetadata(stack, amazonEC2Client, instanceMetaData, instances);
+                } else {
+                    return false;
+                }
             }
         } catch (Exception e) {
             LOGGER.error(String.format("Failed to %s AWS instances on stack: %s", stopped ? "stop" : "start", stack.getId()));

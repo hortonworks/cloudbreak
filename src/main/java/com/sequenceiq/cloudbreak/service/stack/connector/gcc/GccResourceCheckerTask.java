@@ -8,10 +8,10 @@ import org.springframework.stereotype.Component;
 
 import com.google.api.services.compute.model.Operation;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.StackDependentStatusCheckerTask;
 
 @Component
-public class GccResourceCheckerTask implements StatusCheckerTask<GccResourceReadyPollerObject> {
+public class GccResourceCheckerTask extends StackDependentStatusCheckerTask<GccResourceReadyPollerObject> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GccResourceCheckerTask.class);
     private static final int FINISHED = 100;

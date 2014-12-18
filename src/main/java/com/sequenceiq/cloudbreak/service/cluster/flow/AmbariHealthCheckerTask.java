@@ -5,10 +5,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
-import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.StackDependentStatusCheckerTask;
 
 @Component
-public class AmbariHealthCheckerTask implements StatusCheckerTask<AmbariHealthCheckerPollerObject> {
+public class AmbariHealthCheckerTask extends StackDependentStatusCheckerTask<AmbariHealthCheckerPollerObject> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariHealthCheckerTask.class);
 

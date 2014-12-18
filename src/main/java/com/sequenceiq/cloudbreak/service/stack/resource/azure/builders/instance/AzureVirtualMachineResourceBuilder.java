@@ -31,7 +31,8 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.StackDependentPollingService;
+import com.sequenceiq.cloudbreak.service.PollingResult;
+import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.X509Certificate;
 import com.sequenceiq.cloudbreak.service.stack.flow.AzureInstanceStatusCheckerTask;
@@ -53,7 +54,7 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
     private StackRepository stackRepository;
 
     @Autowired
-    private StackDependentPollingService<AzureInstancesPollerObject> azurePollingService;
+    private PollingService<AzureInstancesPollerObject> azurePollingService;
 
     @Autowired
     private AzureStackUtil azureStackUtil;
@@ -173,12 +174,11 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
         AzureCredential credential = (AzureCredential) stack.getCredential();
         boolean started = setStackState(aSSCO.getStack().getId(), resource, aSSCO.getNewAzureClient(credential), false);
         if (started) {
-            azurePollingService.pollWithTimeout(
+            PollingResult pollingResult = azurePollingService.pollWithTimeout(
                     azureInstanceStatusCheckerTask,
                     new AzureInstancesPollerObject(aSSCO.getStack(), aSSCO.getNewAzureClient(credential), Arrays.asList(resource.getResourceName()), "Running"),
                     POLLING_INTERVAL,
                     MAX_ATTEMPTS_FOR_AMBARI_OPS);
-            return true;
         }
         return false;
     }
@@ -193,12 +193,12 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
     private boolean setStackState(Long stackId, Resource resource, AzureClient azureClient, boolean stopped) {
         boolean result = true;
         try {
-                Map<String, String> vmContext = createVMContext(resource.getResourceName());
-                if (stopped) {
-                    azureClient.stopVirtualMachine(vmContext);
-                } else {
-                    azureClient.startVirtualMachine(vmContext);
-                }
+            Map<String, String> vmContext = createVMContext(resource.getResourceName());
+            if (stopped) {
+                azureClient.stopVirtualMachine(vmContext);
+            } else {
+                azureClient.startVirtualMachine(vmContext);
+            }
 
         } catch (Exception e) {
             LOGGER.error(String.format("Failed to %s AZURE instances on stack: %s", stopped ? "stop" : "start", stackId));

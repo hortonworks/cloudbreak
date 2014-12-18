@@ -9,4 +9,6 @@ public interface StatusCheckerTask<T> {
     String successMessage(T t);
 
     void handleExit(T t);
+
+    boolean exitPolling(T t);
 }

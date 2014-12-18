@@ -31,8 +31,8 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.SimplePollingService;
-import com.sequenceiq.cloudbreak.service.StackDependentPollingService;
+import com.sequenceiq.cloudbreak.service.PollingResult;
+import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveReadyPollerObject;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccResourceCheckerTask;
@@ -54,11 +54,11 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
     @Autowired
     private GccResourceCheckerTask gccResourceCheckerTask;
     @Autowired
-    private StackDependentPollingService<GccResourceReadyPollerObject> gccInstanceReadyPollerObjectPollingService;
+    private PollingService<GccResourceReadyPollerObject> gccInstanceReadyPollerObjectPollingService;
     @Autowired
     private GccRemoveCheckerTask gccRemoveCheckerTask;
     @Autowired
-    private SimplePollingService<GccRemoveReadyPollerObject> gccRemoveReadyPollerObjectPollingService;
+    private PollingService<GccRemoveReadyPollerObject> gccRemoveReadyPollerObjectPollingService;
     @Autowired
     private JsonHelper jsonHelper;
 
@@ -151,7 +151,8 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
             Compute.GlobalOperations.Get globalOperations = createGlobalOperations(d.getCompute(), gccCredential, gccTemplate, operation);
             GccRemoveReadyPollerObject gccRemoveReady =
                     new GccRemoveReadyPollerObject(zoneOperations, globalOperations, stack, resource.getResourceName(), operation.getName());
-            gccRemoveReadyPollerObjectPollingService.pollWithTimeout(gccRemoveCheckerTask, gccRemoveReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+            PollingResult pollingResult = gccRemoveReadyPollerObjectPollingService
+                    .pollWithTimeout(gccRemoveCheckerTask, gccRemoveReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
         } catch (GoogleJsonResponseException ex) {
             exceptionHandler(ex, resource.getResourceName(), stack);
         } catch (IOException e) {

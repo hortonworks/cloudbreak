@@ -4,18 +4,16 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.StackDependentStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 
 @Component
-@Scope("prototype")
-public class AzureInstanceStatusCheckerTask implements StatusCheckerTask<AzureInstancesPollerObject> {
+public class AzureInstanceStatusCheckerTask extends StackDependentStatusCheckerTask<AzureInstancesPollerObject> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureInstanceStatusCheckerTask.class);
 

@@ -9,12 +9,12 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.StackDependentStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariHostsUnavailableException;
 
 @Component
 @Scope("prototype")
-public class AmbariHostsJoinStatusCheckerTask implements StatusCheckerTask<AmbariHostsPollerObject> {
+public class AmbariHostsJoinStatusCheckerTask extends StackDependentStatusCheckerTask<AmbariHostsPollerObject> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariHostsJoinStatusCheckerTask.class);
 

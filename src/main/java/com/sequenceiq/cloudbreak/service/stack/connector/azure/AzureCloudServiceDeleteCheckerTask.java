@@ -9,24 +9,22 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.SimpleStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.AddInstancesFailedException;
 
 import groovyx.net.http.HttpResponseDecorator;
 import groovyx.net.http.HttpResponseException;
 
 @Component
-@Scope("prototype")
-public class AzureCloudServiceDeleteTask implements StatusCheckerTask<AzureCloudServiceDeleteTaskContext> {
+public class AzureCloudServiceDeleteCheckerTask extends SimpleStatusCheckerTask<AzureCloudServiceDeleteTaskContext> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AzureCloudServiceDeleteTask.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AzureCloudServiceDeleteCheckerTask.class);
     private static final int NOT_FOUND = 404;
 
     @Autowired

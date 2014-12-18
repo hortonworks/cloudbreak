@@ -49,8 +49,10 @@ public class ProvisionCompleteHandler implements Consumer<Event<ProvisionComplet
         LOGGER.info("Accepted {} event on stack.", ReactorConfig.PROVISION_COMPLETE_EVENT);
         Set<Resource> resourcesSet = event.getData().getResources();
         retryingStackUpdater.updateStackResources(stackId, resourcesSet);
-        metadataSetupContext.setupMetadata(cloudPlatform, stackId);
-        cloudbreakEventService.fireCloudbreakEvent(stackId, BillingStatus.BILLING_STARTED.name(), "Provision of stack is successfully finished");
+        boolean result = metadataSetupContext.setupMetadata(cloudPlatform, stackId);
+        if (result) {
+            cloudbreakEventService.fireCloudbreakEvent(stackId, BillingStatus.BILLING_STARTED.name(), "Provision of stack is successfully finished");
+        }
     }
 
 }

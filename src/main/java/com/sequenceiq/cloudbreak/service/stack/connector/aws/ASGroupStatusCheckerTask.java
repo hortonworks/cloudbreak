@@ -12,11 +12,11 @@ import com.amazonaws.services.ec2.model.DescribeInstanceStatusRequest;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusResult;
 import com.amazonaws.services.ec2.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.StackDependentStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.AddInstancesFailedException;
 
 @Component
-public class ASGroupStatusCheckerTask implements StatusCheckerTask<AutoScalingGroupReadyPollerObject> {
+public class ASGroupStatusCheckerTask extends StackDependentStatusCheckerTask<AutoScalingGroupReadyPollerObject> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ASGroupStatusCheckerTask.class);
 
