@@ -27,8 +27,7 @@
     <label class="col-sm-3 control-label" for="azure_tlocation">Location</label>
 
     <div class="col-sm-9">
-        <select class="form-control" id="azure_tlocation" ng-model="azureTemp.parameters.location" required>
-            <option ng-repeat="region in $root.config.AZURE.azureRegions" value="{{region.key}}">{{region.value}}</option>
+        <select class="form-control" id="azure_tlocation" ng-options="region.key as region.value for region in $root.config.AZURE.azureRegions" ng-model="azureTemp.parameters.location" required>
         </select>
     </div>
     <!-- .col-sm-9 -->
@@ -37,8 +36,7 @@
 <div class="form-group">
     <label class="col-sm-3 control-label" for="azure_tvmType">Instance type</label>
     <div class="col-sm-9">
-        <select class="form-control" id="azure_tvmType" ng-model="azureTemp.parameters.vmType" required>
-            <option ng-repeat="vmType in $root.config.AZURE.azureVmTypes" value="{{vmType.key}}">{{vmType.value}}</option>
+        <select class="form-control" id="azure_tvmType" ng-options="vmType.key as vmType.value for vmType in $root.config.AZURE.azureVmTypes" ng-model="azureTemp.parameters.vmType" required>
         </select>
     </div>
     <!-- .col-sm-9 -->

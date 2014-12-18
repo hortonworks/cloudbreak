@@ -99,8 +99,8 @@ angular.module('uluwatuControllers').controller('mainController', ['$scope', '$r
                     {key: 'M3Large', value: 'M3Large', cloud: 'AWS'},
                     {key: 'M3Xlarge', value: 'M3Xlarge', cloud: 'AWS'},
                     {key: 'M32xlarge', value: 'M32xlarge', cloud: 'AWS'},
-                    {key: 'C3large', value: 'C3large', cloud: 'AWS'},
-                    {key: 'C3xlarge', value: 'C3xlarge', cloud: 'AWS'},
+                    {key: 'C3Large', value: 'C3Large', cloud: 'AWS'},
+                    {key: 'C3Xlarge', value: 'C3Xlarge', cloud: 'AWS'},
                     {key: 'C32xlarge', value: 'C32xlarge', cloud: 'AWS'},
                     {key: 'C34xlarge', value: 'C34xlarge', cloud: 'AWS'},
                     {key: 'C38xlarge', value: 'C38xlarge', cloud: 'AWS'}
