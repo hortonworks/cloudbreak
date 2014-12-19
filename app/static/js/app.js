@@ -2,7 +2,7 @@
 
 /* App Module */
 
-var cloudbreakApp = angular.module('cloudbreakApp', ['ngRoute', 'base64', 'uluwatuControllers', 'uluwatuServices']);
+var cloudbreakApp = angular.module('cloudbreakApp', ['ngRoute', 'base64', 'blockUI', 'uluwatuControllers', 'uluwatuServices']);
 
 
 cloudbreakApp.directive('match', function($parse) {
@@ -75,7 +75,20 @@ cloudbreakApp.config([ '$routeProvider', '$locationProvider', function($routePro
          }
      }]).config(['$httpProvider',function($httpProvider) {
          $httpProvider.interceptors.push('authHttpResponseInterceptor');
-     }]);
+     }]).config(function(blockUIConfig) {
+          blockUIConfig.autoInjectBodyBlock = false
+          blockUIConfig.requestFilter = function(config) {
+            var block = false
+            if (config.url.match(/^user\/templates($|\/).*/) || config.url.match(/^user\/blueprints($|\/).*/)
+            || config.url.match(/^user\/credentials($|\/).*/) || config.url.match(/^periscope\/clusters($|\/).*/)
+            || (config.url.match(/^stacks\/(\d+)\/cluster($|\/).*/) && config.method == 'POST')){
+                block = true
+            }
+            if (!block) {
+                return block
+            }
+          };
+     });
 
 cloudbreakApp.run(function ($rootScope, $http) {
     $http.get('messages.properties').then(function (messages) {
