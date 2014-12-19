@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.credential;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -11,13 +12,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CbUserRole;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 
 @Service
@@ -27,6 +31,9 @@ public class SimpleCredentialService implements CredentialService {
 
     @Autowired
     private CredentialRepository credentialRepository;
+
+    @Autowired
+    private StackRepository stackRepository;
 
     @Resource
     private Map<CloudPlatform, CredentialHandler<Credential>> credentialHandlers;
@@ -110,7 +117,12 @@ public class SimpleCredentialService implements CredentialService {
     }
 
     private void delete(Credential credential) {
-        credentialRepository.delete(credential);
-        credentialHandlers.get(credential.getCloudPlatform()).delete(credential);
+        List<Stack> stacks = stackRepository.findByCredential(credential.getId());
+        if (stacks.isEmpty()) {
+            credentialHandlers.get(credential.getCloudPlatform()).delete(credential);
+            credentialRepository.delete(credential);
+        } else {
+            throw new BadRequestException(String.format("Credential '%d' is in use, cannot be deleted.", credential.getId()));
+        }
     }
 }

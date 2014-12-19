@@ -45,4 +45,5 @@ public interface StackRepository extends CrudRepository<Stack, Long> {
     @PostAuthorize("hasPermission(returnObject,'read')")
     Stack findOneByName(@Param("name") String name, @Param("account") String account);
 
+    List<Stack> findByCredential(@Param("credentialId") Long credentialId);
 }
