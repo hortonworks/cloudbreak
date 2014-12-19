@@ -49,7 +49,7 @@ public class AwsCredentialHandler implements CredentialHandler<AwsCredential> {
 
     @Override
     public boolean delete(AwsCredential awsCredential) {
-        boolean result = false;
+        boolean result = true;
         MDCBuilder.buildMdcContext(awsCredential);
         String keyPairName = awsCredential.getKeyPairName();
         for (Regions regions : Regions.values()) {
