@@ -79,8 +79,8 @@ cloudbreakApp.config([ '$routeProvider', '$locationProvider', function($routePro
           blockUIConfig.autoInjectBodyBlock = false
           blockUIConfig.requestFilter = function(config) {
             var block = false
-            if (config.url.match(/^user\/templates($|\/).*/) || config.url.match(/^user\/blueprints($|\/).*/)
-            || config.url.match(/^user\/credentials($|\/).*/) || config.url.match(/^periscope\/clusters($|\/).*/)
+            if (config.url.match(/^(.*)templates($|\/).*/) || config.url.match(/^(.*)blueprints($|\/).*/)
+            || config.url.match(/^(.*)credentials($|\/).*/) || config.url.match(/^periscope\/clusters($|\/).*/)
             || (config.url.match(/^stacks\/(\d+)\/cluster($|\/).*/) && config.method == 'POST')){
                 block = true
             }
