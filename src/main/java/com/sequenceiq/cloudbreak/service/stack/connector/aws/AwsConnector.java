@@ -324,7 +324,7 @@ public class AwsConnector implements CloudPlatformConnector {
                 updateInstanceMetadata(stack, amazonEC2Client, instanceMetaData, instances);
             }
         } catch (Exception e) {
-            LOGGER.error(String.format("Failed to %s AWS instances on stack: %s", stopped ? "stop" : "start", stack.getId()));
+            LOGGER.error(String.format("Failed to %s AWS instances on stack: %s", stopped ? "stop" : "start", stack.getId()), e);
             result = false;
         }
         return result;
