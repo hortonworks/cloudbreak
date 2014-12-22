@@ -37,6 +37,8 @@ import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.X509Certificate;
 import com.sequenceiq.cloudbreak.service.stack.flow.AzureInstanceStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.flow.AzureInstancesPollerObject;
+import com.sequenceiq.cloudbreak.service.stack.flow.AzureResourcePollerObject;
+import com.sequenceiq.cloudbreak.service.stack.flow.AzureResourceStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureSimpleInstanceResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDescribeContextObject;
@@ -61,6 +63,12 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
 
     @Autowired
     private AzureInstanceStatusCheckerTask azureInstanceStatusCheckerTask;
+
+    @Autowired
+    private AzureResourceStatusCheckerTask azureResourceStatusCheckerTask;
+
+    @Autowired
+    private PollingService<AzureResourcePollerObject> pollingService;
 
     @Override
     public List<Resource> create(AzureProvisionContextObject po, int index, List<Resource> resources) throws Exception {
@@ -126,8 +134,8 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
         props.put(VMTYPE, AzureVmType.valueOf(azureTemplate.getVmType()).vmType().replaceAll(" ", ""));
         AzureClient azureClient = po.getNewAzureClient(azureCredential);
         HttpResponseDecorator virtualMachineResponse = (HttpResponseDecorator) azureClient.createVirtualMachine(props);
-        String requestId = (String) azureClient.getRequestId(virtualMachineResponse);
-        waitUntilComplete(azureClient, requestId);
+        AzureResourcePollerObject pollerObject = new AzureResourcePollerObject(azureClient, virtualMachineResponse, stack);
+        pollingService.pollWithTimeout(azureResourceStatusCheckerTask, pollerObject, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
         return Arrays.asList(new Resource(resourceType(), vmName, stack));
     }
 
@@ -145,8 +153,8 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
             props.put(NAME, resource.getResourceName());
             AzureClient azureClient = aDCO.getNewAzureClient(credential);
             HttpResponseDecorator deleteVirtualMachineResult = (HttpResponseDecorator) azureClient.deleteVirtualMachine(props);
-            String requestId = (String) azureClient.getRequestId(deleteVirtualMachineResult);
-            waitUntilComplete(azureClient, requestId);
+            AzureResourcePollerObject pollerObject = new AzureResourcePollerObject(azureClient, deleteVirtualMachineResult, stack);
+            pollingService.pollWithTimeout(azureResourceStatusCheckerTask, pollerObject, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
         } catch (HttpResponseException ex) {
             httpResponseExceptionHandler(ex, resource.getResourceName(), stack.getOwner(), stack);
         } catch (Exception ex) {
