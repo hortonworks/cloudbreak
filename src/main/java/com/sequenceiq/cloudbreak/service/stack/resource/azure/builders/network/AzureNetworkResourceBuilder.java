@@ -20,6 +20,9 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.PollingService;
+import com.sequenceiq.cloudbreak.service.stack.flow.AzureResourcePollerObject;
+import com.sequenceiq.cloudbreak.service.stack.flow.AzureResourceStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureSimpleNetworkResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDescribeContextObject;
@@ -35,6 +38,12 @@ public class AzureNetworkResourceBuilder extends AzureSimpleNetworkResourceBuild
     @Autowired
     private StackRepository stackRepository;
 
+    @Autowired
+    private AzureResourceStatusCheckerTask azureResourceStatusCheckerTask;
+
+    @Autowired
+    private PollingService<AzureResourcePollerObject> pollingService;
+
     @Override
     public List<Resource> create(AzureProvisionContextObject po, int index, List<Resource> resources) throws Exception {
         Stack stack = stackRepository.findById(po.getStackId());
@@ -46,9 +55,9 @@ public class AzureNetworkResourceBuilder extends AzureSimpleNetworkResourceBuild
             props.put(SUBNETNAME, name);
             props.put(ADDRESSPREFIX, "172.16.0.0/16");
             props.put(SUBNETADDRESSPREFIX, "172.16.0.0/24");
-            HttpResponseDecorator virtualNetworkResponse = (HttpResponseDecorator) po.getAzureClient().createVirtualNetwork(props);
-            String requestId = (String) po.getAzureClient().getRequestId(virtualNetworkResponse);
-            waitUntilComplete(po.getAzureClient(), requestId);
+            HttpResponseDecorator response = (HttpResponseDecorator) po.getAzureClient().createVirtualNetwork(props);
+            AzureResourcePollerObject pollerObject = new AzureResourcePollerObject(po.getAzureClient(), response, stack);
+            pollingService.pollWithTimeout(azureResourceStatusCheckerTask, pollerObject, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
         }
         return Arrays.asList(new Resource(ResourceType.AZURE_NETWORK, name, stack));
     }
@@ -63,8 +72,8 @@ public class AzureNetworkResourceBuilder extends AzureSimpleNetworkResourceBuild
             props.put(NAME, resource.getResourceName());
             AzureClient azureClient = aDCO.getNewAzureClient(credential);
             HttpResponseDecorator deleteVirtualNetworkResult = (HttpResponseDecorator) azureClient.deleteVirtualNetwork(props);
-            String requestId = (String) azureClient.getRequestId(deleteVirtualNetworkResult);
-            boolean finished = azureClient.waitUntilComplete(requestId);
+            AzureResourcePollerObject pollerObject = new AzureResourcePollerObject(aDCO.getNewAzureClient(credential), deleteVirtualNetworkResult, stack);
+            pollingService.pollWithTimeout(azureResourceStatusCheckerTask, pollerObject, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
         } catch (HttpResponseException ex) {
             httpResponseExceptionHandler(ex, resource.getResourceName(), stack.getOwner(), stack);
         } catch (Exception ex) {

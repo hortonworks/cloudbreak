@@ -30,6 +30,8 @@ import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureCloudService
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureCloudServiceDeleteTaskContext;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureDiskDeleteCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureDiskRemoveDeleteTaskContext;
+import com.sequenceiq.cloudbreak.service.stack.flow.AzureResourcePollerObject;
+import com.sequenceiq.cloudbreak.service.stack.flow.AzureResourceStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureSimpleInstanceResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDescribeContextObject;
@@ -52,6 +54,10 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
     private AzureCloudServiceDeleteCheckerTask azureCloudServiceDeleteCheckerTask;
     @Autowired
     private PollingService<AzureCloudServiceDeleteTaskContext> azureCloudServiceRemoveReadyPollerObjectPollingService;
+    @Autowired
+    private AzureResourceStatusCheckerTask azureResourceStatusCheckerTask;
+    @Autowired
+    private PollingService<AzureResourcePollerObject> pollingService;
 
     @Override
     public List<Resource> create(AzureProvisionContextObject po, int index, List<Resource> resources) throws Exception {
@@ -69,8 +75,8 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
         props.put(AFFINITYGROUP, po.getCommonName());
         AzureClient azureClient = po.getNewAzureClient(azureCredential);
         HttpResponseDecorator cloudServiceResponse = (HttpResponseDecorator) azureClient.createCloudService(props);
-        String requestId = (String) azureClient.getRequestId(cloudServiceResponse);
-        waitUntilComplete(azureClient, requestId);
+        AzureResourcePollerObject pollerObject = new AzureResourcePollerObject(azureClient, cloudServiceResponse, stack);
+        pollingService.pollWithTimeout(azureResourceStatusCheckerTask, pollerObject, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
         return Arrays.asList(new Resource(ResourceType.AZURE_CLOUD_SERVICE, vmName, stack));
     }
 

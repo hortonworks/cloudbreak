@@ -28,6 +28,8 @@ public abstract class AzureSimpleNetworkResourceBuilder implements
     protected static final String ADDRESSPREFIX = "addressPrefix";
     protected static final String SUBNETADDRESSPREFIX = "subnetAddressPrefix";
     protected static final String SUBNETNAME = "subnetName";
+    protected static final int MAX_POLLING_ATTEMPTS = 60;
+    protected static final int POLLING_INTERVAL = 5000;
 
     public CloudPlatform cloudPlatform() {
         return CloudPlatform.AZURE;

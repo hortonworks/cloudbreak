@@ -22,8 +22,11 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.X509Certificate;
+import com.sequenceiq.cloudbreak.service.stack.flow.AzureResourcePollerObject;
+import com.sequenceiq.cloudbreak.service.stack.flow.AzureResourceStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureSimpleInstanceResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDescribeContextObject;
@@ -36,9 +39,13 @@ import groovyx.net.http.HttpResponseDecorator;
 public class AzureServiceCertificateResourceBuilder extends AzureSimpleInstanceResourceBuilder {
     @Autowired
     private StackRepository stackRepository;
-
     @Autowired
     private AzureStackUtil azureStackUtil;
+    @Autowired
+    private AzureResourceStatusCheckerTask azureResourceStatusCheckerTask;
+    @Autowired
+    private PollingService<AzureResourcePollerObject> pollingService;
+
 
     @Override
     public List<Resource> create(AzureProvisionContextObject po, int index, List<Resource> resources) throws Exception {
@@ -62,8 +69,8 @@ public class AzureServiceCertificateResourceBuilder extends AzureSimpleInstanceR
         }
         AzureClient azureClient = po.getNewAzureClient(azureCredential);
         HttpResponseDecorator serviceCertificate = (HttpResponseDecorator) azureClient.createServiceCertificate(props);
-        String requestId = (String) azureClient.getRequestId(serviceCertificate);
-        waitUntilComplete(azureClient, requestId);
+        AzureResourcePollerObject pollerObject = new AzureResourcePollerObject(azureClient, serviceCertificate, stack);
+        pollingService.pollWithTimeout(azureResourceStatusCheckerTask, pollerObject, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
         return Arrays.asList(new Resource(resourceType(), name, stack));
     }
 
