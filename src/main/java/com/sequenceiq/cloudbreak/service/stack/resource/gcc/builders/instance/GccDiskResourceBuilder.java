@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.domain.GccTemplate;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.TemplateGroup;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
@@ -65,7 +64,7 @@ public class GccDiskResourceBuilder extends GccSimpleInstanceResourceBuilder {
     public Boolean create(final CreateResourceRequest createResourceRequest, TemplateGroup templateGroup, String region) throws Exception {
         final GccDiskCreateRequest gDCR = (GccDiskCreateRequest) createResourceRequest;
         Stack stack = stackRepository.findById(gDCR.getStackId());
-        Compute.Disks.Insert insDisk = gDCR.getCompute().disks().insert(gDCR.getProjectId(), gDCR.getGccTemplate().getGccZone().getValue(), gDCR.getDisk());
+        Compute.Disks.Insert insDisk = gDCR.getCompute().disks().insert(gDCR.getProjectId(), GccZone.valueOf(region).getValue(), gDCR.getDisk());
         insDisk.setSourceImage(gccStackUtil.getAmbariUbuntu(gDCR.getProjectId()));
         Operation execute = insDisk.execute();
         if (execute.getHttpErrorStatusCode() == null) {
@@ -82,7 +81,6 @@ public class GccDiskResourceBuilder extends GccSimpleInstanceResourceBuilder {
     public Boolean delete(Resource resource, GccDeleteContextObject deleteContextObject, String region) throws Exception {
         Stack stack = stackRepository.findById(deleteContextObject.getStackId());
         try {
-            GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
             GccCredential gccCredential = (GccCredential) stack.getCredential();
             Operation operation = deleteContextObject.getCompute().disks()
                     .delete(gccCredential.getProjectId(), GccZone.valueOf(region).getValue(), resource.getResourceName()).execute();
@@ -102,7 +100,6 @@ public class GccDiskResourceBuilder extends GccSimpleInstanceResourceBuilder {
     @Override
     public Optional<String> describe(Resource resource, GccDescribeContextObject describeContextObject, String region) throws Exception {
         Stack stack = stackRepository.findById(describeContextObject.getStackId());
-        GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
         GccCredential gccCredential = (GccCredential) stack.getCredential();
         try {
             Compute.Disks.Get getDisk =
@@ -115,7 +112,7 @@ public class GccDiskResourceBuilder extends GccSimpleInstanceResourceBuilder {
     }
 
     @Override
-    public List<Resource> buildResources(GccProvisionContextObject provisionContextObject, int index, List<Resource> resources) {
+    public List<Resource> buildResources(GccProvisionContextObject provisionContextObject, int index, List<Resource> resources, TemplateGroup templateGroup) {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         Resource resource = new Resource(resourceType(), String.format("%s-%s-%s", stack.getName(), index, new Date().getTime()), stack);
         return Arrays.asList(resource);
@@ -123,14 +120,14 @@ public class GccDiskResourceBuilder extends GccSimpleInstanceResourceBuilder {
 
     @Override
     public CreateResourceRequest buildCreateRequest(GccProvisionContextObject provisionContextObject, List<Resource> resources,
-            List<Resource> buildResources, int index) throws Exception {
+            List<Resource> buildResources, int index, TemplateGroup templateGroup) throws Exception {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         GccCredential gccCredential = (GccCredential) stack.getCredential();
-        GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
+        GccTemplate gccTemplate = (GccTemplate) templateGroup.getTemplate();
         Disk disk = new Disk();
         disk.setSizeGb(SIZE);
         disk.setName(buildResources.get(0).getResourceName());
-        disk.setKind(gccTemplate.getGccRawDiskType().getUrl(provisionContextObject.getProjectId(), gccTemplate.getGccZone()));
+        disk.setKind(gccTemplate.getGccRawDiskType().getUrl(provisionContextObject.getProjectId(), GccZone.valueOf(stack.getRegion())));
         return new GccDiskCreateRequest(provisionContextObject.getStackId(), resources, disk, provisionContextObject.getProjectId(),
                 provisionContextObject.getCompute(), gccTemplate, gccCredential, buildResources);
     }

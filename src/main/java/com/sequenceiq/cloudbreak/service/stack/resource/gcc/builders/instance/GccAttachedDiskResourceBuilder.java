@@ -27,7 +27,6 @@ import com.sequenceiq.cloudbreak.domain.GccTemplate;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.TemplateGroup;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
@@ -75,7 +74,7 @@ public class GccAttachedDiskResourceBuilder extends GccSimpleInstanceResourceBui
                 @Override
                 public Boolean call() throws Exception {
                     Compute.Disks.Insert insDisk = gADCR.getCompute().disks().insert(gADCR.getProjectId(),
-                            gADCR.getGccTemplate().getGccZone().getValue(), disk);
+                            GccZone.valueOf(region).getValue(), disk);
                     Operation execute = insDisk.execute();
                     if (execute.getHttpErrorStatusCode() == null) {
                         Compute.ZoneOperations.Get zoneOperations =
@@ -130,11 +129,11 @@ public class GccAttachedDiskResourceBuilder extends GccSimpleInstanceResourceBui
     }
 
     @Override
-    public List<Resource> buildResources(GccProvisionContextObject provisionContextObject, int index, List<Resource> resources) {
+    public List<Resource> buildResources(GccProvisionContextObject provisionContextObject, int index, List<Resource> resources, TemplateGroup templateGroup) {
         List<Resource> names = new ArrayList<>();
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         String name = String.format("%s-%s-%s", stack.getName(), index, new Date().getTime());
-        for (int i = 0; i < stack.getTemplate().getVolumeCount(); i++) {
+        for (int i = 0; i < templateGroup.getTemplate().getVolumeCount(); i++) {
             names.add(new Resource(resourceType(), name + "-" + i, stack));
         }
         return names;
@@ -142,16 +141,16 @@ public class GccAttachedDiskResourceBuilder extends GccSimpleInstanceResourceBui
 
     @Override
     public CreateResourceRequest buildCreateRequest(GccProvisionContextObject provisionContextObject, List<Resource> resources,
-            List<Resource> buildResources, int index) throws Exception {
+            List<Resource> buildResources, int index, TemplateGroup templateGroup) throws Exception {
         List<Disk> disks = new ArrayList<>();
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
-        GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
+        GccTemplate gccTemplate = (GccTemplate) templateGroup.getTemplate();
         GccCredential gccCredential = (GccCredential) stack.getCredential();
         for (Resource buildName : buildResources) {
             Disk disk = new Disk();
-            disk.setSizeGb(stack.getTemplate().getVolumeSize().longValue());
+            disk.setSizeGb(templateGroup.getTemplate().getVolumeSize().longValue());
             disk.setName(buildName.getResourceName());
-            disk.setKind(gccTemplate.getGccRawDiskType().getUrl(provisionContextObject.getProjectId(), gccTemplate.getGccZone()));
+            disk.setKind(gccTemplate.getGccRawDiskType().getUrl(provisionContextObject.getProjectId(), GccZone.valueOf(stack.getRegion())));
             disks.add(disk);
         }
         return new GccAttachedDiskCreateRequest(provisionContextObject.getStackId(), resources, disks, provisionContextObject.getProjectId(),

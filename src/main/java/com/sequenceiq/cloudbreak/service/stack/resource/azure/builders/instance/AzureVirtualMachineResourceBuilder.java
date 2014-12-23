@@ -14,8 +14,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.plaf.synth.Region;
-
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
@@ -72,7 +70,7 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
     }
 
     @Override
-    public List<Resource> buildResources(AzureProvisionContextObject provisionContextObject, int index, List<Resource> resources) {
+    public List<Resource> buildResources(AzureProvisionContextObject provisionContextObject, int index, List<Resource> resources, TemplateGroup templateGroup) {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         String vmName = filterResourcesByType(resources, ResourceType.AZURE_CLOUD_SERVICE).get(0).getResourceName();
         return Arrays.asList(new Resource(resourceType(), vmName, stack));
@@ -80,10 +78,10 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
 
     @Override
     public CreateResourceRequest buildCreateRequest(AzureProvisionContextObject provisionContextObject, List<Resource> resources,
-            List<Resource> buildResources, int index) throws Exception {
+            List<Resource> buildResources, int index, TemplateGroup templateGroup) throws Exception {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         String internalIp = "172.16.0." + (index + VALID_IP_RANGE_START);
-        AzureTemplate azureTemplate = (AzureTemplate) stack.getTemplate();
+        AzureTemplate azureTemplate = (AzureTemplate) templateGroup.getTemplate();
         AzureCredential azureCredential = (AzureCredential) stack.getCredential();
         byte[] encoded = Base64.encodeBase64(buildResources.get(0).getResourceName().getBytes());
         String label = new String(encoded);

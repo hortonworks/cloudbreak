@@ -57,13 +57,13 @@ public class DummyNetworkResourceBuilder
     }
 
     @Override
-    public List<Resource> buildResources(DummyProvisionContextObject provisionContextObject, int index, List<Resource> resources) {
+    public List<Resource> buildResources(DummyProvisionContextObject provisionContextObject, int index, List<Resource> resources, TemplateGroup templateGroup) {
         return Arrays.asList(new Resource(resourceType(), "network" + index, new Stack()));
     }
 
     @Override
     public CreateResourceRequest buildCreateRequest(DummyProvisionContextObject provisionContextObject, List<Resource> resources,
-            List<Resource> buildResources, int index) throws Exception {
+            List<Resource> buildResources, int index, TemplateGroup templateGroup) throws Exception {
         return new DummyNetworkCreateRequest(new ArrayList<Resource>());
     }
 

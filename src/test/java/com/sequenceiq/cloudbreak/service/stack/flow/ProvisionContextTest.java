@@ -210,7 +210,6 @@ public class ProvisionContextTest {
         stack.setId(1L);
         stack.setStatus(Status.REQUESTED);
         stack.setName(DUMMY_NAME);
-        stack.setNodeCount(3);
         stack.setOwner("gipszjakab@myemail.com");
         return stack;
     }

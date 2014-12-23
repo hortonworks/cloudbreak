@@ -79,20 +79,20 @@ public class AzureAffinityGroupResourceBuilder extends AzureSimpleNetworkResourc
     }
 
     @Override
-    public List<Resource> buildResources(AzureProvisionContextObject provisionContextObject, int index, List<Resource> resources) {
+    public List<Resource> buildResources(AzureProvisionContextObject provisionContextObject, int index, List<Resource> resources, TemplateGroup templateGroup) {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         return Arrays.asList(new Resource(resourceType(), provisionContextObject.getCommonName(), stack));
     }
 
     @Override
     public AzureAffinityGroupCreateRequest buildCreateRequest(AzureProvisionContextObject provisionContextObject, List<Resource> resources,
-            List<Resource> buildResources, int i) throws Exception {
+            List<Resource> buildResources, int i, TemplateGroup templateGroup) throws Exception {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
-        AzureTemplate template = (AzureTemplate) stack.getTemplate();
+        AzureTemplate template = (AzureTemplate) templateGroup.getTemplate();
         AzureCredential azureCredential = (AzureCredential) stack.getCredential();
         Map<String, String> props = new HashMap<>();
         props.put(NAME, buildResources.get(0).getResourceName());
-        props.put(LOCATION, template.getLocation().location());
+        props.put(LOCATION, stack.getRegion());
         props.put(DESCRIPTION, template.getDescription());
         return new AzureAffinityGroupCreateRequest(buildResources.get(0).getResourceName(), provisionContextObject.getStackId(), props,
                 azureStackUtil.createAzureClient(azureCredential), resources, buildResources);

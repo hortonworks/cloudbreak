@@ -110,7 +110,11 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
                                 List<Resource> resources = new ArrayList<>();
                                 for (final ResourceBuilder resourceBuilder : instanceResourceBuilders.get(cloudPlatform)) {
                                     CreateResourceRequest createResourceRequest =
-                                            resourceBuilder.buildCreateRequest(pCO, resources, resourceBuilder.buildResources(pCO, index, resources), index);
+                                            resourceBuilder.buildCreateRequest(pCO,
+                                                    resources,
+                                                    resourceBuilder.buildResources(pCO, index, resources, stack.getTemplateAsGroup(request.getHostGroup())),
+                                                    index,
+                                                    stack.getTemplateAsGroup(request.getHostGroup()));
                                     stackUpdater.addStackResources(stack.getId(), createResourceRequest.getBuildableResources());
                                     resources.addAll(createResourceRequest.getBuildableResources());
                                     resourceSet.addAll(createResourceRequest.getBuildableResources());

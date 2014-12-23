@@ -109,7 +109,7 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
     }
 
     @Override
-    public List<Resource> buildResources(AzureProvisionContextObject provisionContextObject, int index, List<Resource> resources) {
+    public List<Resource> buildResources(AzureProvisionContextObject provisionContextObject, int index, List<Resource> resources, TemplateGroup templateGroup) {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         String vmName = getVmName(provisionContextObject.filterResourcesByType(ResourceType.AZURE_NETWORK).get(0).getResourceName(), index);
         return Arrays.asList(new Resource(resourceType(), vmName + String.valueOf(new Date().getTime()), stack));
@@ -117,9 +117,9 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
 
     @Override
     public CreateResourceRequest buildCreateRequest(AzureProvisionContextObject provisionContextObject, List<Resource> resources,
-            List<Resource> buildResources, int index) throws Exception {
+            List<Resource> buildResources, int index, TemplateGroup templateGroup) throws Exception {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
-        AzureTemplate azureTemplate = (AzureTemplate) stack.getTemplate();
+        AzureTemplate azureTemplate = (AzureTemplate) templateGroup.getTemplate();
         String vmName = buildResources.get(0).getResourceName();
         if (vmName.length() > MAX_NAME_LENGTH) {
             vmName = vmName.substring(vmName.length() - MAX_NAME_LENGTH, vmName.length());
