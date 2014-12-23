@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
+import static com.sequenceiq.cloudbreak.service.stack.connector.DiskAttachUtils.buildDiskPathString;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -8,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.TemplateGroup;
-import com.sequenceiq.cloudbreak.service.stack.connector.DiskAttachUtils;
 
 @Service
 public class HadoopConfigurationService {
@@ -25,9 +26,8 @@ public class HadoopConfigurationService {
             Map<String, Map<String, String>> tmpConfig = new HashMap<>();
             int volumeCount = templateGroup.getTemplate().getVolumeCount();
             if (volumeCount > 0) {
-                String localDirs = DiskAttachUtils.buildDiskPathString(volumeCount);
-                tmpConfig.put(YARN_SITE, getYarnSiteConfigs(localDirs));
-                tmpConfig.put(HDFS_SITE, getHDFSSiteConfigs(localDirs));
+                tmpConfig.put(YARN_SITE, getYarnSiteConfigs(buildDiskPathString(volumeCount, "nodemanager")));
+                tmpConfig.put(HDFS_SITE, getHDFSSiteConfigs(buildDiskPathString(volumeCount, "datanode")));
                 hadoopConfig.put(templateGroup.getGroupName(), tmpConfig);
             }
         }
