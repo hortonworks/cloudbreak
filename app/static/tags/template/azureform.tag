@@ -24,19 +24,6 @@
 </div>
 
 <div class="form-group">
-<<<<<<< HEAD
-    <label class="col-sm-3 control-label" for="azure_tlocation">Location</label>
-
-    <div class="col-sm-9">
-        <select class="form-control" id="azure_tlocation" ng-options="region.key as region.value for region in $root.config.AZURE.azureRegions" ng-model="azureTemp.parameters.location" required>
-        </select>
-    </div>
-    <!-- .col-sm-9 -->
-
-</div>
-<div class="form-group">
-=======
->>>>>>> CLOUD-338 fixed forms
     <label class="col-sm-3 control-label" for="azure_tvmType">Instance type</label>
     <div class="col-sm-9">
         <select class="form-control" id="azure_tvmType" ng-options="vmType.key as vmType.value for vmType in $root.config.AZURE.azureVmTypes" ng-model="azureTemp.parameters.vmType" required>

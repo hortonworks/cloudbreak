@@ -16,14 +16,6 @@
         <!-- .col-sm-9 -->
     </div>
     <div class="form-group">
-        <label class="col-sm-3 control-label" for="awsamiId">AMI</label>
-
-        <div class="col-sm-9">
-            <p id="awsamiId" class="form-control-static">{{template.parameters.amiId}}</p>
-        </div>
-        <!-- .col-sm-9 -->
-    </div>
-    <div class="form-group">
         <label class="col-sm-3 control-label" for="awssshLocation">SSH location</label>
 
         <div class="col-sm-9">
