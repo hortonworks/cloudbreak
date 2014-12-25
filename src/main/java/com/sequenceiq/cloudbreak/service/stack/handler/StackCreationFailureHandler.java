@@ -101,7 +101,7 @@ public class StackCreationFailureHandler implements Consumer<Event<StackOperatio
                         future.get();
                     }
                 }
-                for (int i = instanceResourceBuilders.get(cloudPlatform).size() - 1; i >= 0; i--) {
+                for (int i = networkResourceBuilders.get(cloudPlatform).size() - 1; i >= 0; i--) {
                     for (Resource resource
                             : stack.getResourcesByType(networkResourceBuilders.get(cloudPlatform).get(i).resourceType())) {
                         networkResourceBuilders.get(cloudPlatform).get(i).rollback(resource, dCO, stack.getRegion());

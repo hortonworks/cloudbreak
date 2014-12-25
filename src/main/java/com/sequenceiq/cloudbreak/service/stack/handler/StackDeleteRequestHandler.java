@@ -89,7 +89,7 @@ public class StackDeleteRequestHandler implements Consumer<Event<StackDeleteRequ
                         future.get();
                     }
                 }
-                for (int i = instanceResourceBuilders.get(data.getCloudPlatform()).size() - 1; i >= 0; i--) {
+                for (int i = networkResourceBuilders.get(data.getCloudPlatform()).size() - 1; i >= 0; i--) {
                     for (Resource resource : stack.getResourcesByType(networkResourceBuilders.get(data.getCloudPlatform()).get(i).resourceType())) {
                         networkResourceBuilders.get(data.getCloudPlatform()).get(i).delete(resource, dCO, stack.getRegion());
                     }

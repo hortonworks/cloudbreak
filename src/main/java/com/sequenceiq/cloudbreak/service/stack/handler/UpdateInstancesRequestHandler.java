@@ -119,7 +119,6 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
                                     resources.addAll(createResourceRequest.getBuildableResources());
                                     resourceSet.addAll(createResourceRequest.getBuildableResources());
                                     resourceBuilder.create(createResourceRequest, stack.getTemplateSetAsList().get(0), stack.getRegion());
-                                    resources.addAll(new ArrayList<Resource>());
                                 }
                                 return true;
                             }
