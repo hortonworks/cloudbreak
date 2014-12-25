@@ -10,7 +10,6 @@ import com.amazonaws.services.ec2.model.VolumeType;
 @Entity
 public class AwsTemplate extends Template implements ProvisionEntity {
 
-    private String amiId;
     @Enumerated(EnumType.STRING)
     private InstanceType instanceType;
     private String sshLocation;
@@ -19,14 +18,6 @@ public class AwsTemplate extends Template implements ProvisionEntity {
     private Double spotPrice;
 
     public AwsTemplate() {
-    }
-
-    public String getAmiId() {
-        return amiId;
-    }
-
-    public void setAmiId(String amiId) {
-        this.amiId = amiId;
     }
 
     public InstanceType getInstanceType() {

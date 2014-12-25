@@ -73,7 +73,7 @@ public class GccRemoveCheckerStatus implements StatusCheckerTask<GccRemoveReadyP
 
     private boolean analyzeOperation(Operation operation, GccRemoveReadyPollerObject gccRemoveReadyPollerObject) {
         MDCBuilder.buildMdcContext(gccRemoveReadyPollerObject.getStack());
-        if (operation.getHttpErrorStatusCode() != null || operation.getError() != null) {
+        if ((operation.getHttpErrorStatusCode() != null || operation.getError() != null) && operation.getHttpErrorStatusCode() != 404) {
             StringBuilder error = new StringBuilder();
             if (operation.getError() != null) {
                 if (operation.getError().getErrors() != null) {

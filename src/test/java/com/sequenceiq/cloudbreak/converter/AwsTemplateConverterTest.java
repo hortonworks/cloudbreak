@@ -78,7 +78,6 @@ public class AwsTemplateConverterTest {
         awsTemplate.setDescription(DUMMY_DESCRIPTION);
         awsTemplate.setInstanceType(InstanceType.C1Medium);
         awsTemplate.setSshLocation(DUMMY_SSH_LOCATION);
-        awsTemplate.setAmiId(DUMMY_AMI_ID);
         awsTemplate.setName(DUMMY_NAME);
         awsTemplate.setPublicInAccount(true);
         return awsTemplate;

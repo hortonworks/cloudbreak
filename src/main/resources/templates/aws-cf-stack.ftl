@@ -42,6 +42,15 @@
       "MaxLength": "255",
       "AllowedPattern" : "[\\x20-\\x7E]*",
       "ConstraintDescription" : "can contain only ASCII characters."
+    },
+
+    "AMI" : {
+      "Description" : "AMI that's used to start instances",
+      "Type" : "String",
+      "MinLength": "12",
+      "MaxLength": "12",
+      "AllowedPattern" : "ami-[a-z0-9]{8}",
+      "ConstraintDescription" : "must follow pattern: ami-xxxxxxxx"
     }
 
   },
@@ -183,7 +192,7 @@
       	  }
 			</#list>
       	],
-        "ImageId"        : "${tgroup.template.amiId}",
+        "ImageId"        : { "Ref" : "AMI" },
         "SecurityGroups" : [ { "Ref" : "ClusterNodeSecurityGroup" } ],
         "InstanceType"   : "${tgroup.template.instanceType}",
         "KeyName"        : { "Ref" : "KeyName" },
