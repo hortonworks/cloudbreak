@@ -40,7 +40,7 @@ public class GccRemoveCheckerStatus implements StatusCheckerTask<GccRemoveReadyP
         if (ex.getDetails().get("code").equals(NOT_FOUND)) {
             try {
                 Operation operation = gccRemoveReadyPollerObject.getGlobalOperations().execute();
-                return analyzeOperation(operation, gccRemoveReadyPollerObject);
+                return analyzeOperation(operation, gccRemoveReadyPollerObject, ex);
             } catch (IOException e) {
                 throw new GccResourceRemoveException(String.format(
                         "Something went wrong. Resource in Gcc '%s' with '%s' operation failed on '%s' stack.",
@@ -71,9 +71,17 @@ public class GccRemoveCheckerStatus implements StatusCheckerTask<GccRemoveReadyP
                 gccRemoveReadyPollerObject.getName(), gccRemoveReadyPollerObject.getStack().getId());
     }
 
+    private boolean analyzeOperation(Operation operation, GccRemoveReadyPollerObject gccRemoveReadyPollerObject, GoogleJsonResponseException ex) {
+        if(ex != null && ex.getDetails().get("code").equals(NOT_FOUND)) {
+            return true;
+        } else {
+            return analyzeOperation(operation, gccRemoveReadyPollerObject);
+        }
+    }
+
     private boolean analyzeOperation(Operation operation, GccRemoveReadyPollerObject gccRemoveReadyPollerObject) {
         MDCBuilder.buildMdcContext(gccRemoveReadyPollerObject.getStack());
-        if ((operation.getHttpErrorStatusCode() != null || operation.getError() != null) && operation.getHttpErrorStatusCode() != 404) {
+        if ((operation.getHttpErrorStatusCode() != null || operation.getError() != null) ) {
             StringBuilder error = new StringBuilder();
             if (operation.getError() != null) {
                 if (operation.getError().getErrors() != null) {
