@@ -59,7 +59,7 @@
     <label class="col-sm-3 control-label" for="azure_tvolumesize">Volume size (GB)</label>
 
     <div class="col-sm-9">
-        <input type="number" class="form-control" id="azure_tvolumesize" name="azure_tvolumesize" ng-model="azureTemp.volumeSize"  placeholder="10 - 1024 GB" min="10" max="1024" required>
+        <input type="number" class="form-control" id="azure_tvolumesize" name="azure_tvolumesize" ng-model="azureTemp.volumeSize"  placeholder="10 - 1000 GB" min="10" max="1000" required>
         <div class="help-block" ng-show="azureTemplateForm.azure_tvolumesize.$dirty && azureTemplateForm.azure_tvolumesize.$invalid">
             <i class="fa fa-warning"></i> {{error_msg.volume_size_invalid}}
         </div>
