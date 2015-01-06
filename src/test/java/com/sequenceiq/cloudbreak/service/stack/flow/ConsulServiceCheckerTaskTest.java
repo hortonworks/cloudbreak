@@ -44,7 +44,7 @@ public class ConsulServiceCheckerTaskTest {
         when(raw1.makeGetRequest(SERVICE_ENDPOINT + AMBARI_SERVICE, null, QueryParams.DEFAULT)).thenThrow(ConnectException.class);
         when(raw2.makeGetRequest(SERVICE_ENDPOINT + AMBARI_SERVICE, null, QueryParams.DEFAULT)).thenThrow(ConnectException.class);
 
-        boolean result = task.checkStatus(new ConsulServiceContext(stack, Arrays.asList(client1, client2), AMBARI_SERVICE));
+        boolean result = task.checkStatus(new ConsulContext(stack, Arrays.asList(client1, client2), Arrays.asList(AMBARI_SERVICE)));
 
         assertFalse(result);
     }
@@ -60,7 +60,7 @@ public class ConsulServiceCheckerTaskTest {
         when(raw1.makeGetRequest(SERVICE_ENDPOINT + AMBARI_SERVICE, null, QueryParams.DEFAULT)).thenThrow(ConnectException.class);
         when(raw2.makeGetRequest(SERVICE_ENDPOINT + AMBARI_SERVICE, null, QueryParams.DEFAULT)).thenReturn(rawResponse);
 
-        boolean result = task.checkStatus(new ConsulServiceContext(stack, Arrays.asList(client1, client2), AMBARI_SERVICE));
+        boolean result = task.checkStatus(new ConsulContext(stack, Arrays.asList(client1, client2), Arrays.asList(AMBARI_SERVICE)));
 
         assertTrue(result);
     }

@@ -5,16 +5,16 @@ import java.util.List;
 import com.ecwid.consul.v1.ConsulClient;
 import com.sequenceiq.cloudbreak.domain.Stack;
 
-public class ConsulServiceContext {
+public class ConsulContext {
 
     private final Stack stack;
     private final List<ConsulClient> consulClients;
-    private final String serviceName;
+    private final List<String> targets;
 
-    public ConsulServiceContext(Stack stack, List<ConsulClient> consulClients, String serviceName) {
+    public ConsulContext(Stack stack, List<ConsulClient> consulClients, List<String> targets) {
         this.stack = stack;
         this.consulClients = consulClients;
-        this.serviceName = serviceName;
+        this.targets = targets;
     }
 
     public Stack getStack() {
@@ -25,7 +25,7 @@ public class ConsulServiceContext {
         return consulClients;
     }
 
-    public String getServiceName() {
-        return serviceName;
+    public List<String> getTargets() {
+        return targets;
     }
 }

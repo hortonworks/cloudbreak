@@ -11,15 +11,15 @@ import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 
-public class ConsulServiceCheckerTask implements StatusCheckerTask<ConsulServiceContext> {
+public class ConsulServiceCheckerTask implements StatusCheckerTask<ConsulContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConsulServiceCheckerTask.class);
 
     @Override
-    public boolean checkStatus(ConsulServiceContext consulServiceContext) {
-        MDCBuilder.buildMdcContext(consulServiceContext.getStack());
-        String serviceName = consulServiceContext.getServiceName();
-        List<ConsulClient> clients = consulServiceContext.getConsulClients();
+    public boolean checkStatus(ConsulContext consulContext) {
+        MDCBuilder.buildMdcContext(consulContext.getStack());
+        String serviceName = consulContext.getTargets().get(0);
+        List<ConsulClient> clients = consulContext.getConsulClients();
         LOGGER.info("Checking '{}' different hosts for service registration of '{}'", clients.size(), serviceName);
         List<CatalogService> service = ConsulUtils.getService(clients, serviceName);
         if (service.isEmpty()) {
@@ -32,13 +32,13 @@ public class ConsulServiceCheckerTask implements StatusCheckerTask<ConsulService
     }
 
     @Override
-    public void handleTimeout(ConsulServiceContext t) {
-        throw new InternalServerException(String.format("Operation timed out. Consul service is not registered %s", t.getServiceName()));
+    public void handleTimeout(ConsulContext t) {
+        throw new InternalServerException(String.format("Operation timed out. Consul service is not registered %s", t.getTargets()));
     }
 
     @Override
-    public String successMessage(ConsulServiceContext t) {
-        return String.format("Consul service successfully registered '%s'", t.getServiceName());
+    public String successMessage(ConsulContext t) {
+        return String.format("Consul service successfully registered '%s'", t.getTargets());
     }
 
 }
