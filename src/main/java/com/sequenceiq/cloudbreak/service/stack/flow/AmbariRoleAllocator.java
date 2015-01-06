@@ -156,15 +156,10 @@ public class AmbariRoleAllocator {
         for (InstanceMetaData instanceMetaData : instancesMetaData) {
             String privateIp = instanceMetaData.getPrivateIp();
             String address = members.get(privateIp);
-            if (address == null) {
-                throw new WrongMetadataException("Consul agent didn't join to the cluster on host: " + privateIp);
+            if (!instanceMetaData.getLongName().endsWith(CONSUL_DOMAIN)) {
+                instanceMetaData.setLongName(address + CONSUL_DOMAIN);
             }
-            instanceMetaData.setLongName(getConsulHostName(members, privateIp));
         }
-    }
-
-    private String getConsulHostName(Map<String, String> members, String ip) {
-        return members.get(ip) + CONSUL_DOMAIN;
     }
 
     private Set<InstanceMetaData> prepareInstanceMetaData(Stack stack, Set<CoreInstanceMetaData> coreInstanceMetaData) {
