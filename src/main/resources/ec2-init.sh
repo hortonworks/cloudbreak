@@ -1,4 +1,4 @@
-: ${DOCKER_TAG:=1.6.0-consul}
+: ${DOCKER_TAG:=1.7.0-consul}
 : ${CONSUL_IMAGE:=sequenceiq/consul:v0.4.1.ptr}
 
 set -x
@@ -49,23 +49,40 @@ consul_join_ip() {
 }
 
 start_consul() {
-
-  CONSUL_OPTIONS="-advertise $(get_ip)"
-
-  if [ $(my_order) -gt 1 ]; then
-    CONSUL_OPTIONS="$CONSUL_OPTIONS -retry-join $(consul_join_ip)"
-  fi
-
-  if [ $(my_order) -le 3 ]; then
-    CONSUL_OPTIONS="$CONSUL_OPTIONS -server -bootstrap-expect 3"
-  fi
-
+  get_consul_opts
   docker rm -f consul &> /dev/null
   docker run -d \
     --name consul \
     --net=host \
     --restart=always \
     $CONSUL_IMAGE $CONSUL_OPTIONS
+}
+
+get_consul_opts() {
+  CONSUL_OPTIONS="-advertise $(get_ip)"
+
+  if does_cluster_exist; then
+    CONSUL_OPTIONS="$CONSUL_OPTIONS -retry-join $(consul_join_ip)"
+  else
+    if [ $(my_order) -gt 1 ]; then
+      CONSUL_OPTIONS="$CONSUL_OPTIONS -retry-join $(consul_join_ip)"
+    fi
+
+    if [ $(my_order) -le 3 ]; then
+      CONSUL_OPTIONS="$CONSUL_OPTIONS -server -bootstrap-expect 3"
+    fi
+  fi
+}
+
+does_cluster_exist() {
+  ip_arr=($(get_vpc_peers))
+  for ip in "${ip_arr[@]}"; do
+    leader=$(curl -s ${ip}:8500/v1/status/leader|jq . -r)
+    if [ -n "$leader" ]; then
+      return 0
+    fi
+  done
+  return 1
 }
 
 consul_leader() {
