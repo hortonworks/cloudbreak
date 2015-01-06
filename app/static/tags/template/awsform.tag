@@ -77,7 +77,7 @@
 
         <div class="col-sm-9">
             <input type="number" name="aws_tvolumesize" class="form-control" ng-model="awsTemp.volumeSize" id="aws_tvolumesize" min="10"
-                   max="1024" placeholder="10 - 1024 GB" required>
+                   max="1000" placeholder="10 - 1000 GB" required>
 
             <div class="help-block"
                  ng-show="awsTemplateForm.aws_tvolumesize.$dirty && awsTemplateForm.aws_tvolumesize.$invalid"><i class="fa fa-warning"></i>

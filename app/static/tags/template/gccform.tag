@@ -42,7 +42,7 @@
 <div class="form-group">
     <label class="col-sm-3 control-label" for="gcc_tvolumesize">Volume size (GB)</label>
     <div class="col-sm-9">
-        <input type="number" name="gcc_tvolumesize" class="form-control" ng-model="gccTemp.volumeSize" id="gcc_tvolumesize" min="10" max="1024" placeholder="10 - 1024 GB" required>
+        <input type="number" name="gcc_tvolumesize" class="form-control" ng-model="gccTemp.volumeSize" id="gcc_tvolumesize" min="10" max="1000" placeholder="10 - 1000 GB" required>
         <div class="help-block"
              ng-show="gccTemplateForm.gcc_tvolumesize.$dirty && gccTemplateForm.gcc_tvolumesize.$invalid"><i class="fa fa-warning"></i>
             {{error_msg.volume_size_invalid}}
