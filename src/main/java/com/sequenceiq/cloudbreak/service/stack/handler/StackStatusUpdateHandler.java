@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientService;
+import com.sequenceiq.cloudbreak.service.cluster.AmbariHostsUnavailableException;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterStatusUpdateRequest;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariHealthCheckerTask;
@@ -135,8 +136,7 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
                                 Event.wrap(new ClusterStatusUpdateRequest(stack.getId(), statusRequest)));
                     } else {
                         cluster.setStatus(Status.START_FAILED);
-                        stack.setCluster(cluster);
-                        stackRepository.save(stack);
+                        clusterRepository.save(cluster);
                         stackUpdater.updateStackStatus(stackId, Status.AVAILABLE, "Services could not start because host(s) could not join.");
                     }
                 }
@@ -202,11 +202,15 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
         AmbariHostsJoinStatusCheckerTask ambariHostsJoinStatusCheckerTask = new AmbariHostsJoinStatusCheckerTask();
         AmbariHosts ambariHosts =
                 new AmbariHosts(stack, clientService.create(stack), stack.getNodeCount() * stack.getMultiplier());
-        ambariHostJoin.pollWithTimeout(
-                ambariHostsJoinStatusCheckerTask,
-                ambariHosts,
-                AmbariClusterConnector.POLLING_INTERVAL,
-                AmbariClusterConnector.MAX_ATTEMPTS_FOR_HOSTS);
+        try {
+            ambariHostJoin.pollWithTimeout(
+                    ambariHostsJoinStatusCheckerTask,
+                    ambariHosts,
+                    AmbariClusterConnector.POLLING_INTERVAL,
+                    AmbariClusterConnector.MAX_ATTEMPTS_FOR_HOSTS);
+        } catch (AmbariHostsUnavailableException ex) {
+            LOGGER.error(ex.getMessage());
+        }
         return ambariHostsJoinStatusCheckerTask.checkStatus(ambariHosts);
     }
 }
