@@ -1,9 +1,11 @@
 buildscript {
     repositories {
         mavenCentral()
+        jcenter()
     }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.0.2.RELEASE")
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:1.0.2.RELEASE"
+        classpath "com.smokejumperit.gradle.license:Gradle-License-Report:0.0.2"
     }
 }
 
@@ -17,6 +19,7 @@ apply plugin: 'maven'
 apply plugin: 'checkstyle'
 apply plugin: 'jacoco'
 apply plugin: 'sonar-runner'
+apply plugin:'license-report'
 
 sourceCompatibility = 1.7
 group = 'com.sequenceiq'
@@ -124,6 +127,7 @@ repositories {
 }
 
 dependencies {
+
     compile 'org.springframework.boot:spring-boot-starter-web:1.0.2.RELEASE'
     compile 'org.springframework.boot:spring-boot-starter-actuator:1.0.2.RELEASE'
     compile 'org.springframework.boot:spring-boot-starter-data-jpa:1.0.2.RELEASE'
