@@ -2,8 +2,8 @@
 
 var log = log4javascript.getLogger("usageController-logger");
 
-angular.module('uluwatuControllers').controller('usageController', ['$scope', '$rootScope', '$filter', 'UserUsages',
-    function ($scope, $rootScope, $filter, UserUsages) {
+angular.module('uluwatuControllers').controller('usageController', ['$scope', '$rootScope', '$filter', 'UserUsages', 'AccountUsages',
+    function ($scope, $rootScope, $filter, UserUsages, AccountUsages) {
 
         initFilter();
         initSums();
@@ -41,77 +41,82 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
             'M32xlarge': 0.560
         }
 
+        var month = new Array();
+        month[0] = "January";
+        month[1] = "February";
+        month[2] = "March";
+        month[3] = "April";
+        month[4] = "May";
+        month[5] = "June";
+        month[6] = "July";
+        month[7] = "August";
+        month[8] = "September";
+        month[9] = "October";
+        month[10] = "November";
+        month[11] = "December";
+        // var n = month[date.getMonth()];
 
         $scope.clearFilter = function() {
             initFilter();
         }
 
         $scope.loadUsages = function () {
-
+            var usagesSince = $scope.usageFilter.since;
+            var zone = $scope.usageFilter.zone.toLowerCase().replace(/_/g, "-");
             var param = "";
-            param =  param.concat($scope.localFilter.since !== null ? "since=".concat(new Date($scope.localFilter.since).getTime().toString().concat("&")) : "");
-            param =  param.concat($scope.localFilter.user !== "" ? "user=".concat($scope.localFilter.user.concat("&")) : "");
-            param = param.concat($scope.localFilter.account !== "" ? "account=".concat($scope.localFilter.account.concat("&")) : "");
-            param = param.concat($scope.localFilter.cloud !== "all" ? "cloud=".concat($scope.localFilter.cloud.concat("&")) : "");
-            param = param.concat($scope.localFilter.zone !== "all" ? "zone=".concat($scope.localFilter.zone.concat("&")) : "");
-            param = param.concat($scope.localFilter.vmtype !== "any" ? "vmtype=".concat($scope.localFilter.vmtype.concat("&")) : "");
-            param = param.concat($scope.localFilter.hours !== "" ? "hours=".concat($scope.localFilter.hours.concat("&")) : "");
+            param =  param.concat($scope.usageFilter.since !== null ? "since=".concat(usagesSince.getTime().toString().concat("&")) : "");
+            param =  param.concat($scope.usageFilter.user !== "all" ? "user=".concat($scope.usageFilter.user.concat("&")) : "");
+            param = param.concat($scope.usageFilter.cloud !== "all" ? "cloud=".concat($scope.usageFilter.cloud.concat("&")) : "");
+            param = param.concat($scope.usageFilter.zone !== "all" ? "zone=".concat(zone.concat("&")) : "");
             if( param.substr(-1) === "&" ) {
                 param = param.substring(0, param.length - 1);
             }
 
-            $scope.usages = UserUsages.query({ param: param }, function(success) {
+            var usagesPerMonth;
+            var date = new Date();
+            var targetMonth = new Date(usagesSince.getFullYear(), usagesSince.getMonth(), 1, 0, 0, 0, 0);
+            var actMonth = new Date(date.getFullYear(), date.getMonth(), 1, 0, 0, 0, 0);
+            console.log('target date(since): '+usagesSince)
+            while(targetMonth <= actMonth) {
+              console.log('year:' + actMonth.getFullYear() + 'month:' + month[actMonth.getMonth()]);
+              actMonth.setMonth(actMonth.getMonth()-1);
+            }
+
+            $scope.usages = AccountUsages.query({ param: param }, function(success) {
                 initSums();
+                console.log(success);
+                var usagesByMonth = new Array();
                 angular.forEach(success, function(item) {
                     item.monthString = new Date(item.day).getFullYear() + "-" +  new Date(item.day).getMonth();
                     item.monthDayString = new Date(item.day).toLocaleDateString();
+
+                    var calculatedCost;
+                    var usageByProvider;
                     if ($scope.gccFilterFunction(item)) {
-                        var m = (parseFloat(item.instanceHours) * parseFloat($scope.gccPrice[item.machineType]));
-                        $scope.gccSum.fullMoney += parseFloat(m);
-                        $scope.gccSum.fullHours += parseFloat(item.instanceHours);
-                        item.money = parseFloat(m).toFixed(2);
-                        var result = $filter('filter')($scope.gccSum.items, {stackId: item.stackId}, true);
-                        if (result.length > 0) {
-                            var index = $scope.gccSum.items.indexOf(result[0]);
-                            $scope.gccSum.items[index].money = (parseFloat(result[0].money) + parseFloat(m)).toFixed(2);
-                        } else {
-                            var newItem = item;
-                            newItem.money = parseFloat(m).toFixed(2);
-                            $scope.gccSum.items.push(newItem);
-                        }
+                        calculatedCost = parseFloat(item.instanceHours) * parseFloat($scope.gccPrice[item.machineType]);
+                        usageByProvider = $scope.gccSum;
                     } else if($scope.azureFilterFunction(item)) {
-                        var m = (parseFloat(item.instanceHours) * parseFloat($scope.azurePrice[item.machineType]));
-                        $scope.azureSum.fullMoney += parseFloat(m);
-                        $scope.azureSum.fullHours += parseFloat(item.instanceHours);
-                        item.money = parseFloat(m).toFixed(2);
-                        var result = $filter('filter')($scope.azureSum.items, {stackId: item.stackId}, true);
-                        if (result.length > 0) {
-                            var index = $scope.azureSum.items.indexOf(result[0]);
-                            $scope.azureSum.items[index].money = (parseFloat(result[0].money) + parseFloat(m)).toFixed(2);
-                        } else {
-                            var newItem = item;
-                            newItem.money = parseFloat(m).toFixed(2);
-                            $scope.azureSum.items.push(newItem);
-                        }
+                        calculatedCost = parseFloat(item.instanceHours) * parseFloat($scope.azurePrice[item.machineType]);
+                        usageByProvider = $scope.azureSum;
                     } else if($scope.awsFilterFunction(item)) {
-                        var m = (parseFloat(item.instanceHours) * parseFloat($scope.awsPrice[item.machineType]));
-                        $scope.awsSum.fullMoney += parseFloat(m);
-                        $scope.awsSum.fullHours += parseFloat(item.instanceHours);
-                        item.money = parseFloat(m).toFixed(2);
-                        var result = $filter('filter')($scope.awsSum.items, {stackId: item.stackId}, true);
-                        if (result.length > 0) {
-                            var index = $scope.awsSum.items.indexOf(result[0]);
-                            $scope.awsSum.items[index].money = (parseFloat(result[0].money) + parseFloat(m)).toFixed(2);
-                        } else {
-                            var newItem = item;
-                            newItem.money = parseFloat(m).toFixed(2);
-                            $scope.awsSum.items.push(newItem);
-                        }
+                        calculatedCost = parseFloat(item.instanceHours) * parseFloat($scope.awsPrice[item.machineType]);
+                        usageByProvider = $scope.awsSum;
                     }
+                  console.log('stackid: '+item.stackId+' instanceHours: '+item.instanceHours+' calculatedCost: '+calculatedCost);
+
+                    usageByProvider.fullHours += parseFloat(item.instanceHours);
+                    var newFullMoney = parseFloat(usageByProvider.fullMoney) + parseFloat(calculatedCost);
+                    usageByProvider.fullMoney = parseFloat(newFullMoney).toFixed(2);
+                    item.money = parseFloat(calculatedCost).toFixed(2);
+                    var result = $filter('filter')(usageByProvider.items, {stackId: item.stackId}, true);
+                    if (result.length > 0) {
+                      result[0].money = (parseFloat(result[0].money) + parseFloat(calculatedCost)).toFixed(2);
+                      result[0].instanceHours = result[0].instanceHours + item.instanceHours;
+                    } else {
+                      usageByProvider.items.push(item);
+                    }
+
                 });
-                $scope.gccSum.fullMoney = $scope.gccSum.fullMoney.toFixed(2);
-                $scope.azureSum.fullMoney =  $scope.azureSum.fullMoney.toFixed(2);
-                $scope.awsSum.fullMoney =  $scope.awsSum.fullMoney.toFixed(2);
             });
         }
 
@@ -141,34 +146,34 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
 
         $scope.cloudShowFunction = function(cloud) {
             try {
-                return ($scope.localFilter.cloud == cloud || $scope.localFilter.cloud == 'all');
+                return ($scope.usageFilter.cloud == cloud || $scope.usageFilter.cloud == 'all');
             } catch (err) {
                 return false;
             }
         };
 
         $scope.selectedRegion =function() {
-            if($filter('filter')($rootScope.config.AWS.awsRegions, { key: $scope.localFilter.zone}).length === 1) {
-                $scope.localFilter.cloud = 'AWS';
-            } else if ($filter('filter')($rootScope.config.AZURE.azureRegions, { key: $scope.localFilter.zone}).length === 1) {
-                $scope.localFilter.cloud = 'AZURE';
-            } else if($filter('filter')($rootScope.config.GCC.gccRegions, { key: $scope.localFilter.zone}).length === 1) {
-                $scope.localFilter.cloud = 'GCC';
+            if($filter('filter')($rootScope.config.AWS.awsRegions, { key: $scope.usageFilter.zone}).length === 1) {
+                $scope.usageFilter.cloud = 'AWS';
+            } else if ($filter('filter')($rootScope.config.AZURE.azureRegions, { key: $scope.usageFilter.zone}).length === 1) {
+                $scope.usageFilter.cloud = 'AZURE';
+            } else if($filter('filter')($rootScope.config.GCC.gccRegions, { key: $scope.usageFilter.zone}).length === 1) {
+                $scope.usageFilter.cloud = 'GCC';
             }
         }
 
         $scope.selectedInstance =function() {
-            if($filter('filter')($rootScope.config.AWS.instanceType, { key: $scope.localFilter.vmtype}).length === 1) {
-                $scope.localFilter.cloud = 'AWS';
-            } else if ($filter('filter')($rootScope.config.AZURE.azureVmTypes, { key: $scope.localFilter.vmtype}).length === 1) {
-                $scope.localFilter.cloud = 'AZURE';
-            } else if($filter('filter')($rootScope.config.GCC.gccInstanceTypes, { key: $scope.localFilter.vmtype}).length === 1) {
-                $scope.localFilter.cloud = 'GCC';
+            if($filter('filter')($rootScope.config.AWS.instanceType, { key: $scope.usageFilter.vmtype}).length === 1) {
+                $scope.usageFilter.cloud = 'AWS';
+            } else if ($filter('filter')($rootScope.config.AZURE.azureVmTypes, { key: $scope.usageFilter.vmtype}).length === 1) {
+                $scope.usageFilter.cloud = 'AZURE';
+            } else if($filter('filter')($rootScope.config.GCC.gccInstanceTypes, { key: $scope.usageFilter.vmtype}).length === 1) {
+                $scope.usageFilter.cloud = 'GCC';
             }
         }
 
         $scope.setDate = function(date) {
-            $scope.localFilter.since = new Date(date);
+            $scope.usageFilter.since = new Date(date);
         }
 
         function initSums() {
@@ -190,15 +195,16 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
         }
 
         function initFilter() {
-            $scope.localFilter = {
-                since: null,
-                user: "",
-                account: "",
-                cloud: "all",
-                zone: "all",
-                vmtype: "any",
-                hours: ""
-            };
+          var endDate = new Date();
+          var since = new Date();
+          since.setMonth(since.getMonth()-1);
+          $scope.usageFilter = {
+              since: since,
+              endDate: endDate,
+              user: "all",
+              cloud: "all",
+              zone: "all"
+          };
         }
 
     }

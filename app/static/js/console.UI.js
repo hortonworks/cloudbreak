@@ -283,4 +283,20 @@ function addDatePickerPanelJQueryEventListeners() {
         angular.element($jq("#datePickerStart")).scope().setDate(e.date._d.toString());
         $jq('.col-xs-6').has(this).addClass('active');
     });
+
+    $jq('#datePickerEnd').datetimepicker({
+      icons: {
+        time: "fa fa-clock-o",
+        date: "fa fa-calendar",
+        up: "fa fa-arrow-up",
+        down: "fa fa-arrow-down"
+      },
+      pickTime: false
+    });
+
+    $jq("#datePickerEnd").on("dp.change", function (e) {
+      // filter activated
+      angular.element($jq("#datePickerEnd")).scope().setDate(e.date._d.toString());
+      $jq('.col-xs-6').has(this).addClass('active');
+    });
 }
