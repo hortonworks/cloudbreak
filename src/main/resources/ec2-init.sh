@@ -150,14 +150,6 @@ set_public_host_script() {
   VOLUMES="$VOLUMES -v /usr/local/public_host_script:/etc/ambari-agent/conf/public-hostname.sh"
 }
 
-register_ambari_add() {
-  cp /usr/local/register-ambari /etc/init.d/register-ambari
-  chmod +x /etc/init.d/register-ambari
-  chown root:root /etc/init.d/register-ambari
-  update-rc.d -f register-ambari defaults
-  update-rc.d -f register-ambari enable
-}
-
 format_disks() {
   /usr/local/disk_mount.sh
 }
@@ -172,7 +164,6 @@ main() {
     start_consul
     start_ambari_server
     start_ambari_agent
-    register_ambari_add
   fi
 }
 
