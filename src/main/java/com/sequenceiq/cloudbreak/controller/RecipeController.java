@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -57,6 +58,13 @@ public class RecipeController {
     @ResponseBody
     public ResponseEntity<IdJson> createUserRecipe(@ModelAttribute("user") CbUser user, @RequestBody @Valid RecipeJson recipeRequest) {
         return createRecipe(user, recipeRequest, false);
+    }
+
+    @RequestMapping(value = "recipes/{id}", method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity<RecipeJson> getRecipe(@PathVariable Long id) {
+        Recipe recipe = recipeService.get(id);
+        return new ResponseEntity<>(recipeConverter.convert(recipe), HttpStatus.OK);
     }
 
     private ResponseEntity<IdJson> createRecipe(CbUser user, RecipeJson recipeRequest, boolean publicInAccount) {

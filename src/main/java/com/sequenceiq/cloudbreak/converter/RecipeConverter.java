@@ -15,8 +15,15 @@ import com.sequenceiq.cloudbreak.domain.Recipe;
 public class RecipeConverter extends AbstractConverter<RecipeJson, Recipe> {
 
     @Override
-    public RecipeJson convert(Recipe entity) {
-        return null;
+    public RecipeJson convert(Recipe recipe) {
+        RecipeJson json = new RecipeJson();
+        json.setName(recipe.getName());
+        json.setDescription(recipe.getDescription());
+        json.setPlugins(convertPlugins(recipe.getPlugins()));
+        json.setCustomerId(recipe.getCustomerId());
+        json.setId(recipe.getId().toString());
+        json.setBlueprintFromText(recipe.getBlueprint().getBlueprintText());
+        return json;
     }
 
     @Override
@@ -24,6 +31,7 @@ public class RecipeConverter extends AbstractConverter<RecipeJson, Recipe> {
         Recipe recipe = new Recipe();
         recipe.setName(json.getName());
         recipe.setCustomerId(json.getCustomerId());
+        recipe.setDescription(json.getDescription());
         recipe.setPlugins(convertPlugins(json.getPlugins(), recipe));
         return recipe;
     }
@@ -51,5 +59,16 @@ public class RecipeConverter extends AbstractConverter<RecipeJson, Recipe> {
     private String getPluginName(PluginJson pluginJson) {
         String[] splits = pluginJson.getUrl().split("/");
         return splits[splits.length - 1].replace("consul-plugins-", "").replace(".git", "");
+    }
+
+    private List<PluginJson> convertPlugins(List<Plugin> plugins) {
+        List<PluginJson> pluginJsons = new ArrayList<>();
+        for (Plugin plugin : plugins) {
+            PluginJson pluginJson = new PluginJson();
+            pluginJson.setUrl(plugin.getUrl());
+            pluginJson.setParameters(plugin.getParameters());
+            pluginJsons.add(pluginJson);
+        }
+        return pluginJsons;
     }
 }

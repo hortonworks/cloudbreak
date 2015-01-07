@@ -6,6 +6,7 @@ public enum LoggerResourceType {
     CLUSTER("CLUSTER"),
     TEMPLATE("TEMPLATE"),
     BLUEPRINT("BLUEPRINT"),
+    RECIPE("RECIPE"),
     CREDENTIAL("CREDENTIAL"),
     EVENT("EVENT"),
     EVENT_DATA("EVENT_DATA"),

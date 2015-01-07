@@ -6,4 +6,6 @@ import com.sequenceiq.cloudbreak.domain.Recipe;
 public interface RecipeService {
 
     Recipe create(CbUser user, Recipe recipe);
+
+    Recipe get(Long id);
 }

@@ -72,6 +72,10 @@ public class RecipeJson implements JsonEntity {
         this.blueprint = node.toString();
     }
 
+    public void setBlueprintFromText(String blueprintText) {
+        this.blueprint = blueprintText;
+    }
+
     public List<PluginJson> getPlugins() {
         return plugins;
     }

@@ -30,6 +30,8 @@ public class Recipe implements ProvisionEntity {
 
     private String name;
 
+    private String description;
+
     private String customerId;
 
     @ManyToOne
@@ -58,6 +60,14 @@ public class Recipe implements ProvisionEntity {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getCustomerId() {
