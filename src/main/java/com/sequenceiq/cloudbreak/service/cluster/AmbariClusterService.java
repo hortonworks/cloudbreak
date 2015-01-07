@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.domain.APIResourceType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -97,7 +98,7 @@ public class AmbariClusterService implements ClusterService {
         try {
             cluster = clusterRepository.save(cluster);
         } catch (DataIntegrityViolationException ex) {
-            throw new DuplicateKeyValueException(cluster.getName(), ex);
+            throw new DuplicateKeyValueException(APIResourceType.CLUSTER, cluster.getName(), ex);
         }
         stack = stackUpdater.updateStackCluster(stack.getId(), cluster);
         LOGGER.info("Publishing {} event", ReactorConfig.CLUSTER_REQUESTED_EVENT);

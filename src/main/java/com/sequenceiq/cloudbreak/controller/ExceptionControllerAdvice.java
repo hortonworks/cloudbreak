@@ -90,6 +90,9 @@ public class ExceptionControllerAdvice {
         MDCBuilder.buildMdcContext();
         LOGGER.error(e.getMessage(), e);
         return new ResponseEntity<>(
-                new ExceptionResult("The name '" + e.getValue() + "' is already taken, please choose a different one"), HttpStatus.BAD_REQUEST);
+                new ExceptionResult(String.format("The %s name '%s' is already taken, please choose a different one",
+                        e.getResourceType().toString().toLowerCase(),
+                        e.getValue())),
+                HttpStatus.CONFLICT);
     }
 }

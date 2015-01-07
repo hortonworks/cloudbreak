@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
+import com.sequenceiq.cloudbreak.domain.APIResourceType;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CbUserRole;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
@@ -73,7 +74,7 @@ public class SimpleCredentialService implements CredentialService {
         try {
             savedCredential = credentialRepository.save(credential);
         } catch (DataIntegrityViolationException ex) {
-            throw new DuplicateKeyValueException(credential.getName(), ex);
+            throw new DuplicateKeyValueException(APIResourceType.CREDENTIAL, credential.getName(), ex);
         }
         return savedCredential;
     }

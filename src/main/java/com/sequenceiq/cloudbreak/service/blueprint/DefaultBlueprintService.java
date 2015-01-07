@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
+import com.sequenceiq.cloudbreak.domain.APIResourceType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CbUserRole;
@@ -62,7 +63,7 @@ public class DefaultBlueprintService implements BlueprintService {
         try {
             savedBlueprint = blueprintRepository.save(blueprint);
         } catch (DataIntegrityViolationException ex) {
-            throw new DuplicateKeyValueException(blueprint.getName(), ex);
+            throw new DuplicateKeyValueException(APIResourceType.BLUEPRINT, blueprint.getName(), ex);
         }
         return savedBlueprint;
     }
