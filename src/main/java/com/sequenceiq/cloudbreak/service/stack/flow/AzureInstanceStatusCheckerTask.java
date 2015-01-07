@@ -4,19 +4,21 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.StackDependentStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 
-public class AzureInstanceStatusCheckerTask implements StatusCheckerTask<AzureInstances> {
+@Component
+public class AzureInstanceStatusCheckerTask extends StackDependentStatusCheckerTask<AzureInstancesPollerObject> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureInstanceStatusCheckerTask.class);
 
     @Override
-    public boolean checkStatus(AzureInstances instances) {
+    public boolean checkStatus(AzureInstancesPollerObject instances) {
         MDCBuilder.buildMdcContext(instances.getStack());
         AzureClient azureClient = instances.getAzureClient();
         for (String instance : instances.getInstances()) {
@@ -31,14 +33,19 @@ public class AzureInstanceStatusCheckerTask implements StatusCheckerTask<AzureIn
     }
 
     @Override
-    public void handleTimeout(AzureInstances t) {
+    public void handleTimeout(AzureInstancesPollerObject t) {
         throw new InternalServerException(String.format("Azure instances could not reach the desired status: %s on stack.", t));
     }
 
     @Override
-    public String successMessage(AzureInstances t) {
+    public String successMessage(AzureInstancesPollerObject t) {
         MDCBuilder.buildMdcContext(t.getStack());
         return String.format("Azure instances successfully reached status: %s on stack.", t.getStatus());
+    }
+
+    @Override
+    public void handleExit(AzureInstancesPollerObject azureInstances) {
+        return;
     }
 
 }

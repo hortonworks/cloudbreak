@@ -21,27 +21,35 @@ public class PollingService<T> {
      * @param interval sleeps this many milliseconds between status checking attempts
      * @param maxAttempts signals how many times will the status check be executed before timeout
      */
-    public void pollWithTimeout(StatusCheckerTask<T> statusCheckerTask, T t, int interval, int maxAttempts) {
+    public PollingResult pollWithTimeout(StatusCheckerTask<T> statusCheckerTask, T t, int interval, int maxAttempts) {
         boolean success = false;
         boolean timeout = false;
         int attempts = 0;
         MDCBuilder.buildMdcContext();
-        while (!success && !timeout) {
+        boolean exit = statusCheckerTask.exitPolling(t);
+        while (!success && !timeout && !exit) {
             LOGGER.info("Polling attempt {}.", attempts);
             success = statusCheckerTask.checkStatus(t);
             if (success) {
                 LOGGER.info(statusCheckerTask.successMessage(t));
-                return;
+                return PollingResult.SUCCESS;
             }
             sleep(interval);
             attempts++;
             if (maxAttempts > 0) {
                 timeout = attempts >= maxAttempts;
             }
+            exit = statusCheckerTask.exitPolling(t);
         }
         if (timeout) {
             statusCheckerTask.handleTimeout(t);
+            return PollingResult.TIMEOUT;
         }
+        if (exit) {
+            statusCheckerTask.handleExit(t);
+            return PollingResult.EXIT;
+        }
+        return PollingResult.SUCCESS;
     }
 
     private void sleep(int duration) {

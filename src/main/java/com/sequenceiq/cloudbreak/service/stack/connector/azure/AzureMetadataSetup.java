@@ -45,7 +45,7 @@ public class AzureMetadataSetup implements MetadataSetup {
     private Reactor reactor;
 
     @Override
-    public void setupMetadata(Stack stack) {
+    public boolean setupMetadata(Stack stack) {
         MDCBuilder.buildMdcContext(stack);
         AzureCredential azureCredential = (AzureCredential) stack.getCredential();
         AzureClient azureClient = AzureStackUtil.createAzureClient(azureCredential);
@@ -53,6 +53,7 @@ public class AzureMetadataSetup implements MetadataSetup {
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.METADATA_SETUP_COMPLETE_EVENT, stack.getId());
         reactor.notify(ReactorConfig.METADATA_SETUP_COMPLETE_EVENT,
                 Event.wrap(new MetadataSetupComplete(CloudPlatform.AZURE, stack.getId(), instanceMetaDatas)));
+        return true;
     }
 
     @Override

@@ -31,10 +31,11 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveCheckerStatus;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveReadyPollerObject;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccResourceCheckerStatus;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccResourceCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccResourceCreationException;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccResourceReadyPollerObject;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccDiskMode;
@@ -51,11 +52,11 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
     @Autowired
     private StackRepository stackRepository;
     @Autowired
-    private GccResourceCheckerStatus gccResourceCheckerStatus;
+    private GccResourceCheckerTask gccResourceCheckerTask;
     @Autowired
     private PollingService<GccResourceReadyPollerObject> gccInstanceReadyPollerObjectPollingService;
     @Autowired
-    private GccRemoveCheckerStatus gccRemoveCheckerStatus;
+    private GccRemoveCheckerTask gccRemoveCheckerTask;
     @Autowired
     private PollingService<GccRemoveReadyPollerObject> gccRemoveReadyPollerObjectPollingService;
     @Autowired
@@ -101,7 +102,7 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
         if (execute.getHttpErrorStatusCode() == null) {
             Compute.ZoneOperations.Get zoneOperations = createZoneOperations(po.getCompute(), gccCredential, gccTemplate, execute);
             GccResourceReadyPollerObject gccInstanceReady = new GccResourceReadyPollerObject(zoneOperations, stack, name, execute.getName());
-            gccInstanceReadyPollerObjectPollingService.pollWithTimeout(gccResourceCheckerStatus, gccInstanceReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+            gccInstanceReadyPollerObjectPollingService.pollWithTimeout(gccResourceCheckerTask, gccInstanceReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
             return Arrays.asList(new Resource(resourceType(), name, stack));
         } else {
             throw new GccResourceCreationException(execute.getHttpErrorMessage(), resourceType(), name);
@@ -150,7 +151,8 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
             Compute.GlobalOperations.Get globalOperations = createGlobalOperations(d.getCompute(), gccCredential, gccTemplate, operation);
             GccRemoveReadyPollerObject gccRemoveReady =
                     new GccRemoveReadyPollerObject(zoneOperations, globalOperations, stack, resource.getResourceName(), operation.getName());
-            gccRemoveReadyPollerObjectPollingService.pollWithTimeout(gccRemoveCheckerStatus, gccRemoveReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+            PollingResult pollingResult = gccRemoveReadyPollerObjectPollingService
+                    .pollWithTimeout(gccRemoveCheckerTask, gccRemoveReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
         } catch (GoogleJsonResponseException ex) {
             exceptionHandler(ex, resource.getResourceName(), stack);
         } catch (IOException e) {

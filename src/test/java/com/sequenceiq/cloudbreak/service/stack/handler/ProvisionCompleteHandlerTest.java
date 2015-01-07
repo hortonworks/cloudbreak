@@ -5,7 +5,6 @@ import static org.mockito.Matchers.anySet;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -64,7 +63,7 @@ public class ProvisionCompleteHandlerTest {
     public void testAcceptProvisionCompleteEvent() {
         // GIVEN
         given(stackRepository.findById(anyLong())).willReturn(ServiceTestUtils.createStack());
-        doNothing().when(metadataSetupContext).setupMetadata(any(CloudPlatform.class), anyLong());
+        given(metadataSetupContext.setupMetadata(any(CloudPlatform.class), anyLong())).willReturn(true);
         given(retryingStackUpdater.updateStackResources(any(Long.class), anySet())).willReturn(null);
         // WHEN
         underTest.accept(event);

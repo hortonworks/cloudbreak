@@ -2,14 +2,16 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.StackDependentStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
 
-public class AmbariStartupListenerTask implements StatusCheckerTask<AmbariStartupPollerObject> {
+@Component
+public class AmbariStartupListenerCheckerTask extends StackDependentStatusCheckerTask<AmbariStartupPollerObject> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AmbariStartupListenerTask.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AmbariStartupListenerCheckerTask.class);
 
     @Override
     public boolean checkStatus(AmbariStartupPollerObject aSPO) {
@@ -36,5 +38,10 @@ public class AmbariStartupListenerTask implements StatusCheckerTask<AmbariStartu
     @Override
     public String successMessage(AmbariStartupPollerObject aSPO) {
         return "Ambari startup finished with success result.";
+    }
+
+    @Override
+    public void handleExit(AmbariStartupPollerObject ambariStartupPollerObject) {
+        return;
     }
 }

@@ -8,12 +8,12 @@ import org.springframework.stereotype.Component;
 
 import com.google.api.services.compute.model.Operation;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.StackDependentStatusCheckerTask;
 
 @Component
-public class GccResourceCheckerStatus implements StatusCheckerTask<GccResourceReadyPollerObject> {
+public class GccResourceCheckerTask extends StackDependentStatusCheckerTask<GccResourceReadyPollerObject> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GccResourceCheckerStatus.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GccResourceCheckerTask.class);
     private static final int FINISHED = 100;
 
     @Override
@@ -45,6 +45,11 @@ public class GccResourceCheckerStatus implements StatusCheckerTask<GccResourceRe
         MDCBuilder.buildMdcContext(gccResourceReadyPollerObject.getStack());
         return String.format("Gcc resource '%s' is ready on '%s' stack",
                 gccResourceReadyPollerObject.getName(), gccResourceReadyPollerObject.getStack().getId());
+    }
+
+    @Override
+    public void handleExit(GccResourceReadyPollerObject gccResourceReadyPollerObject) {
+        return;
     }
 
 

@@ -2,25 +2,17 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.service.cluster.flow.StackDependentPollerObject;
 
-public class AmbariStartupPollerObject {
+public class AmbariStartupPollerObject extends StackDependentPollerObject {
 
-    private Stack stack;
     private String ambariIp;
     private AmbariClient ambariClient;
 
     public AmbariStartupPollerObject(Stack stack, String ambariIp, AmbariClient ambariClient) {
-        this.stack = stack;
+        super(stack);
         this.ambariIp = ambariIp;
         this.ambariClient = ambariClient;
-    }
-
-    public Stack getStack() {
-        return stack;
-    }
-
-    public void setStack(Stack stack) {
-        this.stack = stack;
     }
 
     public String getAmbariIp() {

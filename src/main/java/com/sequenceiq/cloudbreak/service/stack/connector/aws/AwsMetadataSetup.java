@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataSetupComplete;
@@ -53,14 +54,14 @@ public class AwsMetadataSetup implements MetadataSetup {
     private CloudFormationStackUtil cfStackUtil;
 
     @Autowired
-    private PollingService<AutoScalingGroupReady> pollingService;
+    private PollingService<AutoScalingGroupReadyPollerObject> pollingService;
 
     @Autowired
     private ASGroupStatusCheckerTask asGroupStatusCheckerTask;
 
 
     @Override
-    public void setupMetadata(Stack stack) {
+    public boolean setupMetadata(Stack stack) {
         MDCBuilder.buildMdcContext(stack);
 
         Set<CoreInstanceMetaData> coreInstanceMetadata = new HashSet<>();
@@ -74,34 +75,39 @@ public class AwsMetadataSetup implements MetadataSetup {
 
         // wait until all instances are up
         String asGroupName = cfStackUtil.getAutoscalingGroupName(stack);
-        AutoScalingGroupReady asGroupReady = new AutoScalingGroupReady(stack, amazonEC2Client, amazonASClient, asGroupName, stack.getNodeCount());
+        AutoScalingGroupReadyPollerObject asGroupReady =
+                new AutoScalingGroupReadyPollerObject(stack, amazonEC2Client, amazonASClient, asGroupName, stack.getNodeCount());
         LOGGER.info("Polling autoscaling group until new instances are ready. [stack: {}, asGroup: {}]", stack.getId(), asGroupName);
+        PollingResult pollingResult = null;
         if (awsTemplate.getSpotPrice() == null) {
-            pollingService.pollWithTimeout(asGroupStatusCheckerTask, asGroupReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+            pollingResult = pollingService.pollWithTimeout(asGroupStatusCheckerTask, asGroupReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
         } else {
-            pollingService.pollWithTimeout(asGroupStatusCheckerTask, asGroupReady, POLLING_INTERVAL, MAX_SPOT_POLLING_ATTEMPTS);
+            pollingResult = pollingService.pollWithTimeout(asGroupStatusCheckerTask, asGroupReady, POLLING_INTERVAL, MAX_SPOT_POLLING_ATTEMPTS);
         }
+        if (PollingResult.SUCCESS.equals(pollingResult)) {
+            List<String> instanceIds = cfStackUtil.getInstanceIds(stack, amazonASClient, amazonCFClient);
 
-        List<String> instanceIds = cfStackUtil.getInstanceIds(stack, amazonASClient, amazonCFClient);
-
-        DescribeInstancesRequest instancesRequest = new DescribeInstancesRequest().withInstanceIds(instanceIds);
-        DescribeInstancesResult instancesResult = amazonEC2Client.describeInstances(instancesRequest);
-        for (Reservation reservation : instancesResult.getReservations()) {
-            LOGGER.info("Number of instances found in reservation: {}", reservation.getInstances().size());
-            for (com.amazonaws.services.ec2.model.Instance instance : reservation.getInstances()) {
-                coreInstanceMetadata.add(new CoreInstanceMetaData(
-                        instance.getInstanceId(),
-                        instance.getPrivateIpAddress(),
-                        instance.getPublicDnsName(),
-                        instance.getBlockDeviceMappings().size() - 1,
-                        instance.getPrivateDnsName()
-                        ));
+            DescribeInstancesRequest instancesRequest = new DescribeInstancesRequest().withInstanceIds(instanceIds);
+            DescribeInstancesResult instancesResult = amazonEC2Client.describeInstances(instancesRequest);
+            for (Reservation reservation : instancesResult.getReservations()) {
+                LOGGER.info("Number of instances found in reservation: {}", reservation.getInstances().size());
+                for (com.amazonaws.services.ec2.model.Instance instance : reservation.getInstances()) {
+                    coreInstanceMetadata.add(new CoreInstanceMetaData(
+                            instance.getInstanceId(),
+                            instance.getPrivateIpAddress(),
+                            instance.getPublicDnsName(),
+                            instance.getBlockDeviceMappings().size() - 1,
+                            instance.getPrivateDnsName()
+                    ));
+                }
             }
-        }
 
-        LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.METADATA_SETUP_COMPLETE_EVENT, stack.getId());
-        reactor.notify(ReactorConfig.METADATA_SETUP_COMPLETE_EVENT,
-                Event.wrap(new MetadataSetupComplete(CloudPlatform.AWS, stack.getId(), coreInstanceMetadata)));
+            LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.METADATA_SETUP_COMPLETE_EVENT, stack.getId());
+            reactor.notify(ReactorConfig.METADATA_SETUP_COMPLETE_EVENT,
+                    Event.wrap(new MetadataSetupComplete(CloudPlatform.AWS, stack.getId(), coreInstanceMetadata)));
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -130,7 +136,7 @@ public class AwsMetadataSetup implements MetadataSetup {
                             instance.getPublicDnsName(),
                             instance.getBlockDeviceMappings().size() - 1,
                             instance.getPrivateDnsName()
-                            ));
+                    ));
                     LOGGER.info("New instance added to metadata: [stack: '{}', instanceId: '{}']", stack.getId(), instance.getInstanceId());
                 }
             }

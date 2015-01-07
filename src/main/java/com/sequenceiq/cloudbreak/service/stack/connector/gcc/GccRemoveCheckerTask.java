@@ -9,12 +9,12 @@ import org.springframework.stereotype.Component;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.model.Operation;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.SimpleStatusCheckerTask;
 
 @Component
-public class GccRemoveCheckerStatus implements StatusCheckerTask<GccRemoveReadyPollerObject> {
+public class GccRemoveCheckerTask extends SimpleStatusCheckerTask<GccRemoveReadyPollerObject> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GccRemoveCheckerStatus.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GccRemoveCheckerTask.class);
     private static final int FINISHED = 100;
     private static final int NOT_FOUND = 404;
 
@@ -93,6 +93,10 @@ public class GccRemoveCheckerStatus implements StatusCheckerTask<GccRemoveReadyP
             Integer progress = operation.getProgress();
             return (progress.intValue() != FINISHED) ? false : true;
         }
+    }
 
+    @Override
+    public void handleExit(GccRemoveReadyPollerObject gccRemoveReadyPollerObject) {
+        return;
     }
 }

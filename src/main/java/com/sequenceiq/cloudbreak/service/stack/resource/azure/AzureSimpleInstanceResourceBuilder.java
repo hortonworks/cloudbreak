@@ -65,8 +65,6 @@ public abstract class AzureSimpleInstanceResourceBuilder implements
         return String.format("%s-%s", azureTemplate, i);
     }
 
-
-
     protected List<Resource> filterResourcesByType(List<Resource> resources, ResourceType resourceType) {
         List<Resource> resourcesTemp = new ArrayList<>();
         for (Resource resource : resources) {

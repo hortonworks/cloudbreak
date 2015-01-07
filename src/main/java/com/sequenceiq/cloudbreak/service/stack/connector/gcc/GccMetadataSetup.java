@@ -39,7 +39,7 @@ public class GccMetadataSetup implements MetadataSetup {
     private GccStackUtil gccStackUtil;
 
     @Override
-    public void setupMetadata(Stack stack) {
+    public boolean setupMetadata(Stack stack) {
         MDCBuilder.buildMdcContext(stack);
         Set<CoreInstanceMetaData> instanceMetaDatas = new HashSet<>();
         List<Resource> resourcesByType = stack.getResourcesByType(ResourceType.GCC_INSTANCE);
@@ -48,6 +48,7 @@ public class GccMetadataSetup implements MetadataSetup {
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.METADATA_SETUP_COMPLETE_EVENT, stack.getId());
         reactor.notify(ReactorConfig.METADATA_SETUP_COMPLETE_EVENT,
                 Event.wrap(new MetadataSetupComplete(CloudPlatform.GCC, stack.getId(), instanceMetaDatas)));
+        return true;
     }
 
     private Set<CoreInstanceMetaData> collectMetaData(Stack stack, GccTemplate template, List<Resource> resources) {

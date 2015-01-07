@@ -6,13 +6,15 @@ import java.util.Map.Entry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.StackDependentStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
 
-public class AmbariOperationsStatusCheckerTask implements StatusCheckerTask<AmbariOperations> {
+@Component
+public class AmbariOperationsStatusCheckerTask extends StackDependentStatusCheckerTask<AmbariOperationsPollerObject> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariOperationsStatusCheckerTask.class);
 
@@ -21,7 +23,7 @@ public class AmbariOperationsStatusCheckerTask implements StatusCheckerTask<Amba
     private static final int MAX_RETRY = 3;
 
     @Override
-    public boolean checkStatus(AmbariOperations t) {
+    public boolean checkStatus(AmbariOperationsPollerObject t) {
         MDCBuilder.buildMdcContext(t.getStack());
         Map<String, Integer> installRequests = t.getRequests();
         boolean allFinished = true;
@@ -48,14 +50,19 @@ public class AmbariOperationsStatusCheckerTask implements StatusCheckerTask<Amba
     }
 
     @Override
-    public void handleTimeout(AmbariOperations t) {
+    public void handleTimeout(AmbariOperationsPollerObject t) {
         throw new IllegalStateException(String.format("Ambari operations timed out: %s", t.getRequests()));
 
     }
 
     @Override
-    public String successMessage(AmbariOperations t) {
+    public String successMessage(AmbariOperationsPollerObject t) {
         return String.format("Requested Ambari operations completed: %s", t.getRequests().toString());
+    }
+
+    @Override
+    public void handleExit(AmbariOperationsPollerObject ambariOperationsPollerObject) {
+        return;
     }
 
 }

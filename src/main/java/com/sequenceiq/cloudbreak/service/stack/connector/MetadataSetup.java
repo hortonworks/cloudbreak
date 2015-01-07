@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 
 public interface MetadataSetup {
 
-    void setupMetadata(Stack stack);
+    boolean setupMetadata(Stack stack);
 
     void addNewNodesToMetadata(Stack stack, Set<Resource> resourceList);
 

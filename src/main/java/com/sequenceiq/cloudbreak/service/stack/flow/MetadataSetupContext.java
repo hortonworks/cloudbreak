@@ -34,17 +34,18 @@ public class MetadataSetupContext {
     @Autowired
     private Reactor reactor;
 
-    public void setupMetadata(CloudPlatform cloudPlatform, Long stackId) {
+    public boolean setupMetadata(CloudPlatform cloudPlatform, Long stackId) {
         Stack stack = stackRepository.findOneWithLists(stackId);
         MDCBuilder.buildMdcContext(stack);
         try {
             MetadataSetup metadataSetup = metadataSetups.get(cloudPlatform);
-            metadataSetup.setupMetadata(stack);
+            return metadataSetup.setupMetadata(stack);
         } catch (Exception e) {
             LOGGER.error("Unhandled exception occurred while creating stack.", e);
             LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.STACK_CREATE_FAILED_EVENT, stackId);
             StackOperationFailure stackCreationFailure = new StackOperationFailure(stackId, "Internal server error occurred while creating stack.");
             reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(stackCreationFailure));
+            return false;
         }
     }
 

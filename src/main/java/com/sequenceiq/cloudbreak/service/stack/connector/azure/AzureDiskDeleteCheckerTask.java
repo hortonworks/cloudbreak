@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.azure;
 
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.NAME;
-import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.SERVICENAME;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,30 +12,28 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.SimpleStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.AddInstancesFailedException;
 
 import groovyx.net.http.HttpResponseDecorator;
 import groovyx.net.http.HttpResponseException;
 
 @Component
-public class AzureCloudServiceDeleteTask implements StatusCheckerTask<AzureCloudServiceDeleteTaskContext> {
+public class AzureDiskDeleteCheckerTask extends SimpleStatusCheckerTask<AzureDiskRemoveDeleteTaskContext> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AzureCloudServiceDeleteTask.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AzureDiskDeleteCheckerTask.class);
     private static final int NOT_FOUND = 404;
 
     @Override
-    public boolean checkStatus(AzureCloudServiceDeleteTaskContext aRRPO) {
+    public boolean checkStatus(AzureDiskRemoveDeleteTaskContext aRRPO) {
         MDCBuilder.buildMdcContext(aRRPO.getStack());
-        LOGGER.info("Checking status of remove cloud service '{}'.", aRRPO.getName());
+        LOGGER.info("Checking status of remove disk '{}' on '{}' stack.", aRRPO.getName(), aRRPO.getStack().getId());
         try {
             Map<String, String> props = new HashMap<>();
-            props.put(SERVICENAME, aRRPO.getCommonName());
             props.put(NAME, aRRPO.getName());
-            AzureClient azureClient = aRRPO.getAzureClient();
-            HttpResponseDecorator deleteCloudServiceResult = (HttpResponseDecorator) azureClient.deleteCloudService(props);
-            String requestId = (String) azureClient.getRequestId(deleteCloudServiceResult);
-            waitForFinishing(azureClient, requestId);
+            HttpResponseDecorator deleteDisk = (HttpResponseDecorator) aRRPO.getAzureClient().deleteDisk(props);
+            String requestId = (String) aRRPO.getAzureClient().getRequestId(deleteDisk);
+            waitForFinishing(aRRPO.getAzureClient(), requestId);
         } catch (HttpResponseException ex) {
             if (ex.getStatusCode() != NOT_FOUND) {
                 return false;
@@ -55,16 +52,21 @@ public class AzureCloudServiceDeleteTask implements StatusCheckerTask<AzureCloud
     }
 
     @Override
-    public void handleTimeout(AzureCloudServiceDeleteTaskContext azureDiskRemoveReadyPollerObject) {
+    public void handleTimeout(AzureDiskRemoveDeleteTaskContext azureDiskRemoveDeleteTaskContext) {
         throw new AddInstancesFailedException(String.format(
                 "Something went wrong. Remove of '%s' resource unsuccess in a reasonable timeframe on '%s' stack.",
-                azureDiskRemoveReadyPollerObject.getName(), azureDiskRemoveReadyPollerObject.getStack().getId()));
+                azureDiskRemoveDeleteTaskContext.getName(), azureDiskRemoveDeleteTaskContext.getStack().getId()));
     }
 
     @Override
-    public String successMessage(AzureCloudServiceDeleteTaskContext azureDiskRemoveReadyPollerObject) {
-        MDCBuilder.buildMdcContext(azureDiskRemoveReadyPollerObject.getStack());
+    public String successMessage(AzureDiskRemoveDeleteTaskContext azureDiskRemoveDeleteTaskContext) {
+        MDCBuilder.buildMdcContext(azureDiskRemoveDeleteTaskContext.getStack());
         return String.format("Azure resource '%s' is removed success on '%s' stack",
-                azureDiskRemoveReadyPollerObject.getName(), azureDiskRemoveReadyPollerObject.getStack().getId());
+                azureDiskRemoveDeleteTaskContext.getName(), azureDiskRemoveDeleteTaskContext.getStack().getId());
+    }
+
+    @Override
+    public void handleExit(AzureDiskRemoveDeleteTaskContext azureDiskRemoveDeleteTaskContext) {
+        return;
     }
 }

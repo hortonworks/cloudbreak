@@ -4,17 +4,21 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.StackDependentStatusCheckerTask;
 
-public class DNDecommissionStatusCheckerTask implements StatusCheckerTask<AmbariOperations> {
+@Component
+@Scope("prototype")
+public class DNDecommissionStatusCheckerTask extends StackDependentStatusCheckerTask<AmbariOperationsPollerObject> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DNDecommissionStatusCheckerTask.class);
 
     @Override
-    public boolean checkStatus(AmbariOperations t) {
+    public boolean checkStatus(AmbariOperationsPollerObject t) {
         MDCBuilder.buildMdcContext(t.getStack());
         AmbariClient ambariClient = t.getAmbariClient();
         Map<String, Long> dataNodes = ambariClient.getDecommissioningDataNodes();
@@ -26,14 +30,19 @@ public class DNDecommissionStatusCheckerTask implements StatusCheckerTask<Ambari
     }
 
     @Override
-    public void handleTimeout(AmbariOperations t) {
+    public void handleTimeout(AmbariOperationsPollerObject t) {
         throw new IllegalStateException("DataNode decommission timed out");
 
     }
 
     @Override
-    public String successMessage(AmbariOperations t) {
+    public String successMessage(AmbariOperationsPollerObject t) {
         return "Requested DataNode decommission operations completed";
+    }
+
+    @Override
+    public void handleExit(AmbariOperationsPollerObject ambariOperationsPollerObject) {
+        return;
     }
 
 }

@@ -3,25 +3,17 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 import java.util.List;
 
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.service.cluster.flow.StackDependentPollerObject;
 
-public abstract class AbstractInstances {
+public abstract class AbstractInstancesPollerObject extends StackDependentPollerObject {
 
-    private Stack stack;
     private List<String> instances;
     private String status;
 
-    protected AbstractInstances(Stack stack, List<String> instances, String status) {
-        this.stack = stack;
+    protected AbstractInstancesPollerObject(Stack stack, List<String> instances, String status) {
+        super(stack);
         this.instances = instances;
         this.status = status;
-    }
-
-    public Stack getStack() {
-        return stack;
-    }
-
-    public void setStack(Stack stack) {
-        this.stack = stack;
     }
 
     public List<String> getInstances() {

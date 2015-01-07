@@ -12,11 +12,11 @@ import com.amazonaws.services.ec2.model.DescribeInstanceStatusRequest;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusResult;
 import com.amazonaws.services.ec2.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
+import com.sequenceiq.cloudbreak.service.StackDependentStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.AddInstancesFailedException;
 
 @Component
-public class ASGroupStatusCheckerTask implements StatusCheckerTask<AutoScalingGroupReady> {
+public class ASGroupStatusCheckerTask extends StackDependentStatusCheckerTask<AutoScalingGroupReadyPollerObject> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ASGroupStatusCheckerTask.class);
 
@@ -26,7 +26,7 @@ public class ASGroupStatusCheckerTask implements StatusCheckerTask<AutoScalingGr
     private CloudFormationStackUtil cfStackUtil;
 
     @Override
-    public boolean checkStatus(AutoScalingGroupReady asGroupReady) {
+    public boolean checkStatus(AutoScalingGroupReadyPollerObject asGroupReady) {
         MDCBuilder.buildMdcContext(asGroupReady.getStack());
         LOGGER.info("Checking status of autoscaling group '{}'", asGroupReady.getAutoScalingGroupName());
         AmazonEC2Client amazonEC2Client = asGroupReady.getAmazonEC2Client();
@@ -50,15 +50,20 @@ public class ASGroupStatusCheckerTask implements StatusCheckerTask<AutoScalingGr
     }
 
     @Override
-    public void handleTimeout(AutoScalingGroupReady t) {
+    public void handleTimeout(AutoScalingGroupReadyPollerObject t) {
         throw new AddInstancesFailedException(String.format(
                 "Something went wrong. Instances in Auto Scaling group '%s' not started in a reasonable timeframe.",
                 t.getAutoScalingGroupName()));
     }
 
     @Override
-    public String successMessage(AutoScalingGroupReady t) {
+    public String successMessage(AutoScalingGroupReadyPollerObject t) {
         MDCBuilder.buildMdcContext(t.getStack());
         return String.format("AutoScaling group '%s' is ready. All %s instances are running.", t.getAutoScalingGroupName(), t.getRequiredInstances());
+    }
+
+    @Override
+    public void handleExit(AutoScalingGroupReadyPollerObject autoScalingGroupReadyPollerObject) {
+        return;
     }
 }
