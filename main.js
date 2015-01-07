@@ -580,7 +580,7 @@ app.get('/users', function(req, res){
                           groupMemberIds.forEach(function(groupMember) {
                              request({
                                method: 'GET',
-                               url: uaaAddress + '/Users?attributes=userName,active&filter=id eq  "' + groupMember.value + '"',
+                               url: uaaAddress + '/Users?attributes=id,userName,active&filter=id eq  "' + groupMember.value + '"',
                                headers: {'Accept' : 'application/json',
                                          'Authorization' : 'Bearer ' + token,
                                           'Content-Type' : 'application/json'
