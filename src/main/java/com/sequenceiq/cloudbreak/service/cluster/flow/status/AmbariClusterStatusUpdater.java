@@ -77,7 +77,7 @@ public class AmbariClusterStatusUpdater {
     }
 
     private boolean updateClusterStatus(Stack stack, Status newClusterStatus) {
-        Cluster cluster = clusterRepository.findById(stack.getCluster().getId());
+        Cluster cluster = stack.getCluster();
         boolean result = false;
         if (cluster.getStatus() != newClusterStatus) {
             LOGGER.info("Cluster {} status is updated from {} to {}", cluster.getId(), cluster.getStatus(), newClusterStatus);
