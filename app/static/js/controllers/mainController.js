@@ -82,7 +82,7 @@ angular.module('uluwatuControllers').controller('mainController', ['$scope', '$r
                     {key: 'SA_EAST_1', value: 'South America (São Paulo)', cloud: 'AWS'}
                 ],
                 amis: [
-                    {key: 'US_EAST_1', value: 'ami-d06e0eb8'},
+                    {key: 'US_EAST_1', value: 'ami-30a0d658'},
                     {key: 'US_WEST_1', value: 'ami-0968774c'},
                     {key: 'US_WEST_2', value: 'ami-85d588b5'},
                     {key: 'EU_WEST_1', value: 'ami-51a52226'},
