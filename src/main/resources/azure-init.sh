@@ -59,10 +59,10 @@ get_consul_opts() {
   CONSUL_OPTIONS="-advertise $(get_ip)"
 
   if does_cluster_exist; then
-    con_join
+    CONSUL_OPTIONS="$CONSUL_OPTIONS -retry-join $leader"
   else
     if [ $(my_order) -gt 1 ]; then
-      con_join
+      CONSUL_OPTIONS="$CONSUL_OPTIONS -retry-join $(consul_join_ip)"
     fi
 
     if [ $(my_order) -le 3 ]; then
@@ -71,15 +71,12 @@ get_consul_opts() {
   fi
 }
 
-con_join() {
-  CONSUL_OPTIONS="$CONSUL_OPTIONS -retry-join $(consul_join_ip)"
-}
-
 does_cluster_exist() {
   ip_arr=($(get_vpc_peers))
   for ip in "${ip_arr[@]}"; do
     leader=$(curl -s ${ip}:8500/v1/status/leader|jq . -r)
     if [ -n "$leader" ]; then
+      leader=${leader%:*}
       return 0
     fi
   done
