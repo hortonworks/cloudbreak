@@ -588,7 +588,7 @@ app.get('/users', function(req, res){
                              }, function (error, response, body) {
                                 if (response.statusCode == 200){
                                  var resultResource = JSON.parse(body).resources[0]
-                                 users.push({username: resultResource.userName, active: resultResource.active})
+                                 users.push({id: resultResource.id, username: resultResource.userName, active: resultResource.active})
                                 }
                                 completed_requests++;
                                 if (completed_requests == groupMemberIds.length){
