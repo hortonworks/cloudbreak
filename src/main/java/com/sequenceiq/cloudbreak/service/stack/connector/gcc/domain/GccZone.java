@@ -18,4 +18,13 @@ public enum GccZone {
     public String getValue() {
         return value;
     }
+
+    public static GccZone fromName(String regionName) {
+        for (GccZone region : GccZone.values()) {
+            if (regionName.equals(region.getValue())) {
+                return region;
+            }
+        }
+        throw new IllegalArgumentException("Cannot create enum from " + regionName + " value!");
+    }
 }

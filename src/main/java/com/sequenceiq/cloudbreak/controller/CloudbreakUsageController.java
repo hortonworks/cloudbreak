@@ -12,10 +12,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.amazonaws.regions.Regions;
 import com.sequenceiq.cloudbreak.controller.json.CloudbreakUsageJson;
+import com.sequenceiq.cloudbreak.domain.AzureLocation;
 import com.sequenceiq.cloudbreak.domain.CbUsageFilterParameters;
 import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.facade.CloudbreakUsagesFacade;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccZone;
 
 @Controller
 public class CloudbreakUsageController {
@@ -35,8 +39,9 @@ public class CloudbreakUsageController {
             @RequestParam(value = "hours", required = false) Long hours,
             @RequestParam(value = "blueprintname", required = false) String bpName,
             @RequestParam(value = "blueprintid", required = false) Long bpId) {
+        String region = getZoneByProvider(cloud, zone);
         CbUsageFilterParameters params = new CbUsageFilterParameters.Builder().setAccount(accountId).setOwner(userId).setSince(since).setCloud(cloud)
-                .setRegion(zone).setVmType(vmtype).setInstanceHours(hours).setBpId(bpId).setBpName(bpName).build();
+                .setRegion(region).setVmType(vmtype).setInstanceHours(hours).setBpId(bpId).setBpName(bpName).build();
         List<CloudbreakUsageJson> usages = cloudbreakUsagesFacade.getUsagesFor(params);
         return new ResponseEntity<>(usages, HttpStatus.OK);
     }
@@ -52,8 +57,9 @@ public class CloudbreakUsageController {
             @RequestParam(value = "hours", required = false) Long hours,
             @RequestParam(value = "blueprintname", required = false) String bpName,
             @RequestParam(value = "blueprintid", required = false) Long bpId) {
+        String region = getZoneByProvider(cloud, zone);
         CbUsageFilterParameters params = new CbUsageFilterParameters.Builder().setAccount(user.getAccount()).setOwner(userId).setSince(since)
-                .setCloud(cloud).setRegion(zone).setVmType(vmtype).setInstanceHours(hours).setBpId(bpId).setBpName(bpName).build();
+                .setCloud(cloud).setRegion(region).setVmType(vmtype).setInstanceHours(hours).setBpId(bpId).setBpName(bpName).build();
         List<CloudbreakUsageJson> usages = cloudbreakUsagesFacade.getUsagesFor(params);
         return new ResponseEntity<>(usages, HttpStatus.OK);
     }
@@ -68,8 +74,9 @@ public class CloudbreakUsageController {
             @RequestParam(value = "hours", required = false) Long hours,
             @RequestParam(value = "blueprintname", required = false) String bpName,
             @RequestParam(value = "blueprintid", required = false) Long bpId) {
+        String region = getZoneByProvider(cloud, zone);
         CbUsageFilterParameters params = new CbUsageFilterParameters.Builder().setAccount(user.getAccount()).setOwner(user.getUserId()).setSince(since)
-                .setCloud(cloud).setRegion(zone).setVmType(vmtype).setInstanceHours(hours).setBpId(bpId).setBpName(bpName).build();
+                .setCloud(cloud).setRegion(region).setVmType(vmtype).setInstanceHours(hours).setBpId(bpId).setBpName(bpName).build();
         List<CloudbreakUsageJson> usages = cloudbreakUsagesFacade.getUsagesFor(params);
         return new ResponseEntity<>(usages, HttpStatus.OK);
     }
@@ -81,5 +88,18 @@ public class CloudbreakUsageController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-
+    private String getZoneByProvider(String cloud, String zoneFromJson) {
+        String zone = null;
+        if (zoneFromJson != null && CloudPlatform.AWS.name().equals(cloud)) {
+            Regions transformedZone = Regions.valueOf(zoneFromJson);
+            zone = transformedZone.getName();
+        } else if (zoneFromJson != null && CloudPlatform.GCC.name().equals(cloud)) {
+            GccZone transformedZone = GccZone.valueOf(zoneFromJson);
+            zone = transformedZone.getValue();
+        } else if (zoneFromJson != null && CloudPlatform.AZURE.name().equals(cloud)) {
+            AzureLocation transformedZone = AzureLocation.valueOf(zoneFromJson);
+            zone = transformedZone.location();
+        }
+        return zone;
+    }
 }

@@ -5,9 +5,13 @@ import java.text.SimpleDateFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.amazonaws.regions.Regions;
 import com.sequenceiq.cloudbreak.controller.json.CloudbreakUsageJson;
+import com.sequenceiq.cloudbreak.domain.AzureLocation;
 import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccZone;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 import com.sequenceiq.cloudbreak.service.user.UserFilterField;
 
@@ -21,6 +25,7 @@ public class CloudbreakUsageConverter extends AbstractConverter<CloudbreakUsageJ
     @Override
     public CloudbreakUsageJson convert(CloudbreakUsage entity) {
         String day = DATE_FORMAT.format(entity.getDay());
+        String zone = getZoneNameByProvider(entity.getCloud(), entity.getZone());
         CbUser cbUser = userDetailsService.getDetails(entity.getOwner(), UserFilterField.USERID);
 
         CloudbreakUsageJson json = new CloudbreakUsageJson();
@@ -29,7 +34,7 @@ public class CloudbreakUsageConverter extends AbstractConverter<CloudbreakUsageJ
         json.setBlueprintName(entity.getBlueprintName());
         json.setBlueprintId(entity.getBlueprintId());
         json.setCloud(entity.getCloud());
-        json.setZone(entity.getZone());
+        json.setZone(zone);
         json.setInstanceHours(entity.getInstanceHours());
         json.setMachineType(entity.getMachineType());
         json.setDay(day);
@@ -55,6 +60,20 @@ public class CloudbreakUsageConverter extends AbstractConverter<CloudbreakUsageJ
         entity.setStackStatus(json.getStackStatus());
         entity.setStackName(json.getStackName());
         return entity;
+    }
 
+    private String getZoneNameByProvider(String cloud, String zoneFromUsage) {
+        String zone = null;
+        if (zoneFromUsage != null && CloudPlatform.AWS.name().equals(cloud)) {
+            Regions transformedZone = Regions.fromName(zoneFromUsage);
+            zone = transformedZone.name();
+        } else if (zoneFromUsage != null && CloudPlatform.GCC.name().equals(cloud)) {
+            GccZone transformedZone = GccZone.fromName(zoneFromUsage);
+            zone = transformedZone.name();
+        } else if (zoneFromUsage != null && CloudPlatform.AZURE.name().equals(cloud)) {
+            AzureLocation transformedZone = AzureLocation.fromName(zoneFromUsage);
+            zone = transformedZone.name();
+        }
+        return zone;
     }
 }
