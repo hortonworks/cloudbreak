@@ -120,12 +120,11 @@
                 <td ng-if="$index == 0" rowspan="{{gccSum.items.length}}">{{usage.cloud}}</td>
                 <td>{{usage.stackName}}</td>
                 <td>{{usage.username}}</td>
-                <td>{{usage.zone}}</td>
+                <td><p id="awsregion" class="form-control-static" ng-repeat="item in $root.config.GCC.gccRegions | filter:{key: usage.zone}">{{item.value}}</p></td>
                 <td class="text-right">{{usage.instanceHours}} hrs</td>
                 <td class="text-right">{{usage.money}} $</td>
               </tr>
               <tr class="row-summa" ng-show="usages && gccSum.items.length != 0">
-                <td>&nbsp;</td>
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
@@ -138,13 +137,12 @@
                 <td ng-if="$index == 0" rowspan="{{awsSum.items.length}}">{{usage.cloud}}</td>
                 <td>{{usage.stackName}}</td>
                 <td>{{usage.username}}</td>
-                <td>{{usage.zone}}</td>
+                <td><p id="awsregion" class="form-control-static" ng-repeat="item in $root.config.AWS.awsRegions | filter:{key: usage.zone}">{{item.value}}</p></td>
                 <td class="text-right">{{usage.instanceHours}} hrs</td>
                 <td class="text-right">{{usage.money}} $</td>
               </tr>
 
               <tr class="row-summa" ng-show="usages && awsSum.items.length != 0">
-                <td>&nbsp;</td>
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
@@ -157,13 +155,12 @@
                 <td ng-if="$index == 0" rowspan="{{azureSum.items.length}}">{{usage.cloud}}</td>
                 <td>{{usage.stackName}}</td>
                 <td>{{usage.username}}</td>
-                <td>{{usage.zone}}</td>
+                <td><p id="awsregion" class="form-control-static" ng-repeat="item in $root.config.AZURE.azureRegions | filter:{key: usage.zone}">{{item.value}}</p></td>
                 <td class="text-right">{{usage.instanceHours}} hrs</td>
                 <td class="text-right">{{usage.money}} $</td>
               </tr>
 
               <tr class="row-summa" ng-show="usages && azureSum.items.length != 0">
-                <td>&nbsp;</td>
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
