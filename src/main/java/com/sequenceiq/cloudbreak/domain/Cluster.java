@@ -41,6 +41,9 @@ public class Cluster implements ProvisionEntity {
     @ManyToOne
     private Blueprint blueprint;
 
+    @ManyToOne
+    private Recipe recipe;
+
     @Column(nullable = false)
     private String name;
 
@@ -87,6 +90,14 @@ public class Cluster implements ProvisionEntity {
 
     public void setBlueprint(Blueprint blueprint) {
         this.blueprint = blueprint;
+    }
+
+    public Recipe getRecipe() {
+        return recipe;
+    }
+
+    public void setRecipe(Recipe recipe) {
+        this.recipe = recipe;
     }
 
     public String getName() {
