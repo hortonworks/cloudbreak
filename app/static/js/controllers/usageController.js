@@ -4,9 +4,7 @@ var log = log4javascript.getLogger("usageController-logger");
 
 angular.module('uluwatuControllers').controller('usageController', ['$scope', '$rootScope', '$filter', 'UserUsages', 'AccountUsages',
     function ($scope, $rootScope, $filter, UserUsages, AccountUsages) {
-
-        initFilter();
-        initSums();
+        $scope.regions = [];
 
         $scope.gccPrice = {
             'n1-standard-1': 0.045,
@@ -41,6 +39,7 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
             'M32xlarge': 0.560
         }
 
+
         var month = new Array();
         month[0] = "January";
         month[1] = "February";
@@ -62,16 +61,9 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
 
         $scope.loadUsages = function () {
             var usagesSince = $scope.usageFilter.since;
-            var zone = $scope.usageFilter.zone.toLowerCase().replace(/_/g, "-");
-            var param = "";
-            param =  param.concat($scope.usageFilter.since !== null ? "since=".concat(usagesSince.getTime().toString().concat("&")) : "");
-            param =  param.concat($scope.usageFilter.user !== "all" ? "user=".concat($scope.usageFilter.user.concat("&")) : "");
-            param = param.concat($scope.usageFilter.cloud !== "all" ? "cloud=".concat($scope.usageFilter.cloud.concat("&")) : "");
-            param = param.concat($scope.usageFilter.zone !== "all" ? "zone=".concat(zone.concat("&")) : "");
-            if( param.substr(-1) === "&" ) {
-                param = param.substring(0, param.length - 1);
-            }
+            var param = createRequestParams(usagesSince);
 
+            //requested interval by months
             var usagesPerMonth;
             var date = new Date();
             var targetMonth = new Date(usagesSince.getFullYear(), usagesSince.getMonth(), 1, 0, 0, 0, 0);
@@ -81,6 +73,7 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
               console.log('year:' + actMonth.getFullYear() + 'month:' + month[actMonth.getMonth()]);
               actMonth.setMonth(actMonth.getMonth()-1);
             }
+            //requested interval by months
 
             $scope.usages = AccountUsages.query({ param: param }, function(success) {
                 initSums();
@@ -102,7 +95,6 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
                         calculatedCost = parseFloat(item.instanceHours) * parseFloat($scope.awsPrice[item.machineType]);
                         usageByProvider = $scope.awsSum;
                     }
-                  console.log('stackid: '+item.stackId+' instanceHours: '+item.instanceHours+' calculatedCost: '+calculatedCost);
 
                     usageByProvider.fullHours += parseFloat(item.instanceHours);
                     var newFullMoney = parseFloat(usageByProvider.fullMoney) + parseFloat(calculatedCost);
@@ -118,6 +110,18 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
 
                 });
             });
+        }
+
+        function createRequestParams(usagesSince) {
+          var param = "";
+          param =  param.concat($scope.usageFilter.since !== null ? "since=".concat(usagesSince.getTime().toString().concat("&")) : "");
+          param =  param.concat($scope.usageFilter.user !== "all" ? "user=".concat($scope.usageFilter.user.concat("&")) : "");
+          param = param.concat($scope.usageFilter.cloud !== "all" ? "cloud=".concat($scope.usageFilter.cloud.concat("&")) : "");
+          param = param.concat($scope.usageFilter.zone !== "all" ? "zone=".concat($scope.usageFilter.zone.concat("&")) : "");
+          if( param.substr(-1) === "&" ) {
+            param = param.substring(0, param.length - 1);
+          }
+          return param;
         }
 
         $scope.gccFilterFunction = function(element) {
@@ -144,30 +148,29 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
             }
         };
 
-        $scope.cloudShowFunction = function(cloud) {
-            try {
-                return ($scope.usageFilter.cloud == cloud || $scope.usageFilter.cloud == 'all');
-            } catch (err) {
-                return false;
-            }
+        $scope.selectRegionsByProvider = function() {
+          $scope.regions = [];
+          $scope.usageFilter.zone = 'all';
+
+          if ($scope.usageFilter.cloud == 'AWS' || $scope.usageFilter.cloud == 'all') {
+            $rootScope.config.AWS.awsRegions.forEach(function(item) {$scope.regions.push(item);});
+          }
+
+          if ($scope.usageFilter.cloud == 'AZURE' || $scope.usageFilter.cloud == 'all') {
+            $rootScope.config.AZURE.azureRegions.forEach(function(item) {$scope.regions.push(item);});
+          }
+
+          if ($scope.usageFilter.cloud == 'GCC' || $scope.usageFilter.cloud == 'all') {
+            $rootScope.config.GCC.gccRegions.forEach(function(item) {$scope.regions.push(item);});
+          }
         };
 
-        $scope.selectedRegion =function() {
+        $scope.selectProviderByRegion = function() {
             if($filter('filter')($rootScope.config.AWS.awsRegions, { key: $scope.usageFilter.zone}).length === 1) {
                 $scope.usageFilter.cloud = 'AWS';
             } else if ($filter('filter')($rootScope.config.AZURE.azureRegions, { key: $scope.usageFilter.zone}).length === 1) {
                 $scope.usageFilter.cloud = 'AZURE';
             } else if($filter('filter')($rootScope.config.GCC.gccRegions, { key: $scope.usageFilter.zone}).length === 1) {
-                $scope.usageFilter.cloud = 'GCC';
-            }
-        }
-
-        $scope.selectedInstance =function() {
-            if($filter('filter')($rootScope.config.AWS.instanceType, { key: $scope.usageFilter.vmtype}).length === 1) {
-                $scope.usageFilter.cloud = 'AWS';
-            } else if ($filter('filter')($rootScope.config.AZURE.azureVmTypes, { key: $scope.usageFilter.vmtype}).length === 1) {
-                $scope.usageFilter.cloud = 'AZURE';
-            } else if($filter('filter')($rootScope.config.GCC.gccInstanceTypes, { key: $scope.usageFilter.vmtype}).length === 1) {
                 $scope.usageFilter.cloud = 'GCC';
             }
         }
@@ -205,7 +208,10 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
               cloud: "all",
               zone: "all"
           };
+          $scope.selectRegionsByProvider();
         }
 
+        initFilter();
+        initSums();
     }
 ]);

@@ -63,7 +63,7 @@
             <label for="cloudProvider">cloud provider</label>
 
             <div>
-              <select class="form-control input-sm" id="cloudProvider" ng-model="usageFilter.cloud">
+              <select class="form-control input-sm" id="cloudProvider" ng-model="usageFilter.cloud" ng-change="selectRegionsByProvider()">
                 <option>all</option>
                 <option value="AWS">Amazon EC2</option>
                 <option value="AZURE">Microsoft Azure</option>
@@ -74,11 +74,9 @@
           <div class="col-xs-6 col-sm-2 col-md-2">
             <label for="region">region</label>
             <div>
-              <select class="form-control input-sm" id="region" ng-model="usageFilter.zone" ng-change="selectedRegion()">
-                <option>all</option>
-                <option ng-repeat="region in $root.config.AWS.awsRegions" ng-show="cloudShowFunction('AWS')" value="{{region.key}}">{{region.value}}</option>
-                <option ng-repeat="region in $root.config.AZURE.azureRegions" ng-show="cloudShowFunction('AZURE')" value="{{region.key}}">{{region.value}}</option>
-                <option ng-repeat="region in $root.config.GCC.gccRegions" ng-show="cloudShowFunction('GCC')" value="{{region.key}}">{{region.value}}</option>
+              <select class="form-control input-sm" id="region" ng-model="usageFilter.zone" ng-change="selectProviderByRegion()">
+                <option value="all">all</option>
+                <option ng-repeat="region in regions" value="{{region.key}}">{{region.value}}</option>
               </select>
             </div>
           </div>
