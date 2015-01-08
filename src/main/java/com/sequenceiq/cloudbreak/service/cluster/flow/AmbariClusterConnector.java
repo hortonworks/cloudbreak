@@ -47,6 +47,7 @@ import com.sequenceiq.cloudbreak.service.cluster.event.ClusterCreationSuccess;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsFailure;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsSuccess;
 import com.sequenceiq.cloudbreak.service.cluster.filter.AmbariHostFilterService;
+import com.sequenceiq.cloudbreak.service.cluster.flow.status.AmbariClusterStatusUpdater;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 
 import groovyx.net.http.HttpResponseException;
@@ -98,6 +99,9 @@ public class AmbariClusterConnector {
 
     @Autowired
     private CloudbreakEventService eventService;
+
+    @Autowired
+    private AmbariClusterStatusUpdater clusterStatusUpdater;
 
     public void installAmbariCluster(Stack stack) {
         Cluster cluster = stack.getCluster();
@@ -290,6 +294,21 @@ public class AmbariClusterConnector {
         return result;
     }
 
+    private void saveHostMetadata(Cluster cluster, Map<String, List<String>> hostGroupMappings) {
+        Set<HostMetadata> hostMetadata = new HashSet<>();
+        for (Entry<String, List<String>> hostGroupMapping : hostGroupMappings.entrySet()) {
+            for (String hostName : hostGroupMapping.getValue()) {
+                HostMetadata hostMetadataEntry = new HostMetadata();
+                hostMetadataEntry.setHostName(hostName);
+                hostMetadataEntry.setHostGroup(hostGroupMapping.getKey());
+                hostMetadataEntry.setCluster(cluster);
+                hostMetadata.add(hostMetadataEntry);
+            }
+        }
+        cluster.setHostMetadata(hostMetadata);
+        clusterRepository.save(cluster);
+    }
+
     private void addBlueprint(Stack stack, AmbariClient ambariClient, Blueprint blueprint) {
         MDCBuilder.buildMdcContext(stack);
         try {
@@ -323,21 +342,6 @@ public class AmbariClusterConnector {
         Map<String, List<String>> hostGroupMappings = ambariClient.recommendAssignments(blueprintName);
         LOGGER.info("recommended host-hostGroup mappings for stack: {}", hostGroupMappings);
         return hostGroupMappings;
-    }
-
-    private void saveHostMetadata(Cluster cluster, Map<String, List<String>> hostGroupMappings) {
-        Set<HostMetadata> hostMetadata = new HashSet<>();
-        for (Entry<String, List<String>> hostGroupMapping : hostGroupMappings.entrySet()) {
-            for (String hostName : hostGroupMapping.getValue()) {
-                HostMetadata hostMetadataEntry = new HostMetadata();
-                hostMetadataEntry.setHostName(hostName);
-                hostMetadataEntry.setHostGroup(hostGroupMapping.getKey());
-                hostMetadataEntry.setCluster(cluster);
-                hostMetadata.add(hostMetadataEntry);
-            }
-        }
-        cluster.setHostMetadata(hostMetadata);
-        clusterRepository.save(cluster);
     }
 
     private void addHostMetadata(Cluster cluster, Map<String, String> hosts) {
@@ -453,39 +457,6 @@ public class AmbariClusterConnector {
     }
 
     public void checkClusterState(Stack stack) {
-        MDCBuilder.buildMdcContext(stack.getCluster());
-        try {
-            if (clusterIsFailedState(stack)) {
-                AmbariClient ambariClient = clientService.create(stack);
-                Map<String, Map<String, String>> serviceComponentsMap = ambariClient.getServiceComponentsMap();
-                boolean available = true;
-                for (Entry<String, Map<String, String>> stringMapEntry : serviceComponentsMap.entrySet()) {
-                    for (Entry<String, String> stringStringEntry : stringMapEntry.getValue().entrySet()) {
-                        if (!"STARTED".equals(stringStringEntry.getValue()) && !stringStringEntry.getKey().endsWith("_CLIENT")) {
-                            available = false;
-                        }
-                    }
-                }
-                if (available) {
-                    Cluster cluster = clusterRepository.findById(stack.getCluster().getId());
-                    cluster.setStatus(Status.AVAILABLE);
-                    cluster.setStatusReason("The cluster and its services are available.");
-                    clusterRepository.save(cluster);
-                    stackUpdater.updateStackStatus(stack.getId(), Status.AVAILABLE, "The cluster and its services are available.");
-                }
-            }
-        } catch (Exception ex) {
-            LOGGER.error("There was a problem with the ambari.");
-        }
-
-    }
-
-    private boolean clusterIsFailedState(Stack stack) {
-        return (Status.CREATE_FAILED.equals(stack.getCluster().getStatus()) || Status.START_FAILED.equals(stack.getCluster().getStatus())
-                || Status.STOP_FAILED.equals(stack.getCluster().getStatus()) || Status.CREATE_IN_PROGRESS.equals(stack.getCluster().getStatus())
-                || Status.UPDATE_IN_PROGRESS.equals(stack.getCluster().getStatus()))
-                && (Status.CREATE_FAILED.equals(stack.getStatus()) || Status.START_FAILED.equals(stack.getStatus())
-                || Status.STOP_FAILED.equals(stack.getStatus()) || Status.CREATE_IN_PROGRESS.equals(stack.getStatus())
-                || Status.UPDATE_IN_PROGRESS.equals(stack.getStatus()));
+        clusterStatusUpdater.updateClusterStatus(stack);
     }
 }
