@@ -111,7 +111,7 @@ app.post('/', function(req, res){
                 res.redirect('confirm')
             }
         } else {
-            res.render('login',{ errorMessage: "Incorrect email/password. (or your account is disabled)" });
+            res.render('login',{ errorMessage: "Incorrect email/password or account is disabled." });
         }
     });
 });
