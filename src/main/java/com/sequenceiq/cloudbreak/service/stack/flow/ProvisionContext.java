@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.BuildStackFailureException;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
@@ -27,6 +29,7 @@ import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.StackOperationFailure;
+import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
 import com.sequenceiq.cloudbreak.service.stack.resource.ProvisionContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
@@ -81,41 +84,49 @@ public class ProvisionContext {
                     final ProvisionContextObject pCO =
                             resourceBuilderInit.provisionInit(stack, userDataBuilder.build(cloudPlatform, stack.getHash(), userDataParams));
                     for (ResourceBuilder resourceBuilder : networkResourceBuilders.get(cloudPlatform)) {
-                        List<Resource> resourceList = resourceBuilder.create(pCO, 0, new ArrayList<Resource>());
+                        List<String> list = resourceBuilder.buildNames(pCO, 0, Arrays.asList(resourceSet));
+                        List<Resource> resourceList = new ArrayList<>();
+                        for (String s : list) {
+                            resourceList.add(new Resource(resourceBuilder.resourceType(), s, stack));
+                        }
                         stackUpdater.addStackResources(stack.getId(), resourceList);
                         resourceSet.addAll(resourceList);
                         pCO.getNetworkResources().addAll(resourceList);
+                        CreateResourceRequest createResourceRequest = resourceBuilder.buildCreateRequest(pCO, Lists.newArrayList(resourceSet), list, 0);
+                        resourceBuilder.create(createResourceRequest);
                     }
-                    List<Future<List<Resource>>> futures = new ArrayList<>();
+                    List<Future<Boolean>> futures = new ArrayList<>();
                     for (int i = 0; i < stack.getNodeCount(); i++) {
                         final int index = i;
                         final Stack finalStack = stack;
-                        Future<List<Resource>> submit = resourceBuilderExecutor.submit(new Callable<List<Resource>>() {
+                        Future<Boolean> submit = resourceBuilderExecutor.submit(new Callable<Boolean>() {
                             @Override
-                            public List<Resource> call() throws Exception {
+                            public Boolean call() throws Exception {
                                 LOGGER.info("Node {}. creation starting", index);
                                 List<Resource> resources = new ArrayList<>();
                                 for (final ResourceBuilder resourceBuilder : instanceResourceBuilders.get(cloudPlatform)) {
-                                    List<Resource> resourceList = resourceBuilder.create(pCO, index, resources);
+                                    List<String> list = resourceBuilder.buildNames(pCO, index, resources);
+                                    List<Resource> resourceList = new ArrayList<>();
+                                    for (String s : list) {
+                                        resourceList.add(new Resource(resourceBuilder.resourceType(), s, finalStack));
+                                    }
                                     stackUpdater.addStackResources(finalStack.getId(), resourceList);
+                                    CreateResourceRequest createResourceRequest = resourceBuilder.buildCreateRequest(pCO, resources, list, index);
+                                    resourceBuilder.create(createResourceRequest);
                                     resources.addAll(resourceList);
                                     LOGGER.info("Node {}. creation in progress resource {} creation finished.", index, resourceBuilder.resourceBuilderType());
                                 }
-                                return resources;
+                                return true;
                             }
                         });
                         futures.add(submit);
                     }
-                    Exception exception = null;
-                    for (Future<List<Resource>> future : futures) {
+                    for (Future<Boolean> future : futures) {
                         try {
-                            resourceSet.addAll(future.get());
-                        } catch (Exception e) {
-                            exception = e;
+                            future.get();
+                        } catch (Exception ex) {
+                            throw new BuildStackFailureException(ex.getMessage(), ex, stackRepository.findOneWithLists(stackId).getResources());
                         }
-                    }
-                    if (exception != null) {
-                        throw new BuildStackFailureException(exception.getMessage(), exception, stack.getResources());
                     }
 
                     LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_COMPLETE_EVENT, stack.getId());
@@ -129,7 +140,6 @@ public class ProvisionContext {
                         stack.getId(), stack.getStatus());
             }
         } catch (BuildStackFailureException e) {
-            stackUpdater.updateStackResources(stackId, e.getResourceSet());
             LOGGER.error("Unhandled exception occured while creating stack.", e);
             LOGGER.info("Publishing {} event.", ReactorConfig.STACK_CREATE_FAILED_EVENT);
             StackOperationFailure stackCreationFailure = new StackOperationFailure(stackId, "Internal server error occured while creating stack.");

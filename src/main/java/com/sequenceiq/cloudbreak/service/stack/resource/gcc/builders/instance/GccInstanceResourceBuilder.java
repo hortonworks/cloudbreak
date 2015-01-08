@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccResourceCreation
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccResourceReadyPollerObject;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccDiskMode;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccDiskType;
+import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.GccSimpleInstanceResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDescribeContextObject;
@@ -62,49 +63,20 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
     private JsonHelper jsonHelper;
 
     @Override
-    public List<Resource> create(GccProvisionContextObject po, int index, List<Resource> resources) throws Exception {
-        Stack stack = stackRepository.findById(po.getStackId());
-        GccCredential gccCredential = (GccCredential) stack.getCredential();
-        GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
-
-        List<AttachedDisk> listOfDisks = new ArrayList<>();
-        listOfDisks.addAll(getBootDiskList(resources, gccCredential, gccTemplate));
-        listOfDisks.addAll(getAttachedDisks(resources, gccCredential, gccTemplate));
-
-        String name = String.format("%s-%s-%s", stack.getName(), index, new Date().getTime());
-        Instance instance = new Instance();
-        instance.setMachineType(String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/machineTypes/%s",
-                po.getProjectId(), gccTemplate.getGccZone().getValue(), gccTemplate.getGccInstanceType().getValue()));
-        instance.setName(name);
-        instance.setCanIpForward(Boolean.TRUE);
-        instance.setNetworkInterfaces(getNetworkInterface(po.getProjectId(), stack.getName()));
-        instance.setDisks(listOfDisks);
-        Metadata metadata = new Metadata();
-        metadata.setItems(Lists.<Metadata.Items>newArrayList());
-
-        Metadata.Items sshMetaData = new Metadata.Items();
-        sshMetaData.setKey("sshKeys");
-        sshMetaData.setValue("ubuntu:" + gccCredential.getPublicKey());
-
-        Metadata.Items startupScript = new Metadata.Items();
-        startupScript.setKey("startup-script");
-        startupScript.setValue(po.getUserData());
-
-        metadata.getItems().add(sshMetaData);
-        metadata.getItems().add(startupScript);
-        instance.setMetadata(metadata);
+    public Boolean create(final CreateResourceRequest cRR) throws Exception {
+        final GccInstanceCreateRequest gICR = (GccInstanceCreateRequest) cRR;
+        Stack stack = stackRepository.findById(gICR.getStackId());
         Compute.Instances.Insert ins =
-                po.getCompute().instances().insert(gccCredential.getProjectId(), gccTemplate.getGccZone().getValue(), instance);
-
+                gICR.getCompute().instances().insert(gICR.getProjectId(), gICR.getGccTemplate().getGccZone().getValue(), gICR.getInstance());
         ins.setPrettyPrint(Boolean.TRUE);
         Operation execute = ins.execute();
         if (execute.getHttpErrorStatusCode() == null) {
-            Compute.ZoneOperations.Get zoneOperations = createZoneOperations(po.getCompute(), gccCredential, gccTemplate, execute);
-            GccResourceReadyPollerObject gccInstanceReady = new GccResourceReadyPollerObject(zoneOperations, stack, name, execute.getName());
-            gccInstanceReadyPollerObjectPollingService.pollWithTimeout(gccResourceCheckerStatus, gccInstanceReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
-            return Arrays.asList(new Resource(resourceType(), name, stack));
+            Compute.ZoneOperations.Get zoneOperations = createZoneOperations(gICR.getCompute(), gICR.getGccCredential(), gICR.getGccTemplate(), execute);
+            GccResourceReadyPollerObject instReady = new GccResourceReadyPollerObject(zoneOperations, stack, gICR.getInstance().getName(), execute.getName());
+            gccInstanceReadyPollerObjectPollingService.pollWithTimeout(gccResourceCheckerStatus, instReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+            return true;
         } else {
-            throw new GccResourceCreationException(execute.getHttpErrorMessage(), resourceType(), name);
+            throw new GccResourceCreationException(execute.getHttpErrorMessage(), resourceType(), gICR.getInstance().getName());
         }
     }
 
@@ -169,6 +141,47 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
         }
     }
 
+    @Override
+    public List<String> buildNames(GccProvisionContextObject po, int index, List<Resource> resources) {
+        Stack stack = stackRepository.findById(po.getStackId());
+        return Arrays.asList(String.format("%s-%s-%s", stack.getName(), index, new Date().getTime()));
+    }
+
+    @Override
+    public CreateResourceRequest buildCreateRequest(GccProvisionContextObject po, List<Resource> res, List<String> buildNames, int index) throws Exception {
+        Stack stack = stackRepository.findById(po.getStackId());
+        GccCredential gccCredential = (GccCredential) stack.getCredential();
+        GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
+
+        List<AttachedDisk> listOfDisks = new ArrayList<>();
+        listOfDisks.addAll(getBootDiskList(res, gccCredential, gccTemplate));
+        listOfDisks.addAll(getAttachedDisks(res, gccCredential, gccTemplate));
+
+        Instance instance = new Instance();
+        instance.setMachineType(String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/machineTypes/%s",
+                po.getProjectId(), gccTemplate.getGccZone().getValue(), gccTemplate.getGccInstanceType().getValue()));
+        instance.setName(buildNames.get(0));
+        instance.setCanIpForward(Boolean.TRUE);
+        instance.setNetworkInterfaces(getNetworkInterface(po.getProjectId(), stack.getName()));
+        instance.setDisks(listOfDisks);
+        Metadata metadata = new Metadata();
+        metadata.setItems(Lists.<Metadata.Items>newArrayList());
+
+        Metadata.Items sshMetaData = new Metadata.Items();
+        sshMetaData.setKey("sshKeys");
+        sshMetaData.setValue("ubuntu:" + gccCredential.getPublicKey());
+
+        Metadata.Items startupScript = new Metadata.Items();
+        startupScript.setKey("startup-script");
+        startupScript.setValue(po.getUserData());
+
+        metadata.getItems().add(sshMetaData);
+        metadata.getItems().add(startupScript);
+        instance.setMetadata(metadata);
+
+        return new GccInstanceCreateRequest(po.getStackId(), res, instance, po.getProjectId(), po.getCompute(), gccTemplate, gccCredential);
+    }
+
     public Instance describe(Stack stack, Compute compute, Resource resource) throws IOException {
         GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
         GccCredential gccCredential = (GccCredential) stack.getCredential();
@@ -191,6 +204,56 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
     @Override
     public ResourceType resourceType() {
         return ResourceType.GCC_INSTANCE;
+    }
+
+    public class GccInstanceCreateRequest extends CreateResourceRequest {
+
+        private Long stackId;
+        private List<Resource> resources = new ArrayList<>();
+        private Instance instance;
+        private String projectId;
+        private Compute compute;
+        private GccTemplate gccTemplate;
+        private GccCredential gccCredential;
+
+        public GccInstanceCreateRequest(Long stackId, List<Resource> resources, Instance instance,
+                String projectId, Compute compute, GccTemplate gccTemplate, GccCredential gccCredential) {
+            this.stackId = stackId;
+            this.resources = resources;
+            this.instance = instance;
+            this.projectId = projectId;
+            this.compute = compute;
+            this.gccTemplate = gccTemplate;
+            this.gccCredential = gccCredential;
+        }
+
+        public Long getStackId() {
+            return stackId;
+        }
+
+        public List<Resource> getResources() {
+            return resources;
+        }
+
+        public Instance getInstance() {
+            return instance;
+        }
+
+        public String getProjectId() {
+            return projectId;
+        }
+
+        public Compute getCompute() {
+            return compute;
+        }
+
+        public GccTemplate getGccTemplate() {
+            return gccTemplate;
+        }
+
+        public GccCredential getGccCredential() {
+            return gccCredential;
+        }
     }
 
 }

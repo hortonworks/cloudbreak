@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureCloudService
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureCloudServiceDeleteTaskContext;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureDiskDeleteTask;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureDiskRemoveDeleteTaskContext;
+import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureSimpleInstanceResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDescribeContextObject;
@@ -43,7 +44,6 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
 
     @Autowired
     private StackRepository stackRepository;
-
     @Autowired
     private AzureDiskDeleteTask azureDiskDeleteTask;
     @Autowired
@@ -54,24 +54,12 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
     private PollingService<AzureCloudServiceDeleteTaskContext> azureCloudServiceRemoveReadyPollerObjectPollingService;
 
     @Override
-    public List<Resource> create(AzureProvisionContextObject po, int index, List<Resource> resources) throws Exception {
-        Stack stack = stackRepository.findById(po.getStackId());
-        AzureTemplate azureTemplate = (AzureTemplate) stack.getTemplate();
-        AzureCredential azureCredential = (AzureCredential) stack.getCredential();
-        String vmName = getVmName(po.filterResourcesByType(ResourceType.AZURE_NETWORK).get(0).getResourceName(), index)
-                + String.valueOf(new Date().getTime());
-        if (vmName.length() > MAX_NAME_LENGTH) {
-            vmName = vmName.substring(vmName.length() - MAX_NAME_LENGTH, vmName.length());
-        }
-        Map<String, String> props = new HashMap<>();
-        props.put(NAME, vmName);
-        props.put(DESCRIPTION, azureTemplate.getDescription());
-        props.put(AFFINITYGROUP, po.getCommonName());
-        AzureClient azureClient = po.getNewAzureClient(azureCredential);
-        HttpResponseDecorator cloudServiceResponse = (HttpResponseDecorator) azureClient.createCloudService(props);
-        String requestId = (String) azureClient.getRequestId(cloudServiceResponse);
-        waitUntilComplete(azureClient, requestId);
-        return Arrays.asList(new Resource(ResourceType.AZURE_CLOUD_SERVICE, vmName, stack));
+    public Boolean create(final CreateResourceRequest cRR) throws Exception {
+        AzureCloudServiceCreateRequest aCSCR = (AzureCloudServiceCreateRequest) cRR;
+        HttpResponseDecorator cloudServiceResponse = (HttpResponseDecorator) aCSCR.getAzureClient().createCloudService(aCSCR.getProps());
+        String requestId = (String) aCSCR.getAzureClient().getRequestId(cloudServiceResponse);
+        waitUntilComplete(aCSCR.getAzureClient(), requestId);
+        return true;
     }
 
     @Override
@@ -115,7 +103,52 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
     }
 
     @Override
+    public List<String> buildNames(AzureProvisionContextObject po, int index, List<Resource> resources) {
+        String vmName = getVmName(po.filterResourcesByType(ResourceType.AZURE_NETWORK).get(0).getResourceName(), index);
+        return Arrays.asList(vmName + String.valueOf(new Date().getTime()));
+    }
+
+    @Override
+    public CreateResourceRequest buildCreateRequest(AzureProvisionContextObject po, List<Resource> res, List<String> buildNames, int index) throws Exception {
+        Stack stack = stackRepository.findById(po.getStackId());
+        AzureTemplate azureTemplate = (AzureTemplate) stack.getTemplate();
+        String vmName = buildNames.get(0);
+        if (vmName.length() > MAX_NAME_LENGTH) {
+            vmName = vmName.substring(vmName.length() - MAX_NAME_LENGTH, vmName.length());
+        }
+        Map<String, String> props = new HashMap<>();
+        props.put(NAME, vmName);
+        props.put(DESCRIPTION, azureTemplate.getDescription());
+        props.put(AFFINITYGROUP, po.getCommonName());
+        return new AzureCloudServiceCreateRequest(props, po.getNewAzureClient((AzureCredential) stack.getCredential()), res);
+    }
+
+    @Override
     public ResourceType resourceType() {
         return ResourceType.AZURE_CLOUD_SERVICE;
+    }
+
+    public class AzureCloudServiceCreateRequest extends CreateResourceRequest {
+        private Map<String, String> props = new HashMap<>();
+        private AzureClient azureClient;
+        private List<Resource> resources;
+
+        public AzureCloudServiceCreateRequest(Map<String, String> props, AzureClient azureClient, List<Resource> resources) {
+            this.props = props;
+            this.azureClient = azureClient;
+            this.resources = resources;
+        }
+
+        public Map<String, String> getProps() {
+            return props;
+        }
+
+        public AzureClient getAzureClient() {
+            return azureClient;
+        }
+
+        public List<Resource> getResources() {
+            return resources;
+        }
     }
 }

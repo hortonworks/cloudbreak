@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.X509Certificate;
 import com.sequenceiq.cloudbreak.service.stack.flow.AzureInstanceStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.flow.AzureInstances;
+import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureSimpleInstanceResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDescribeContextObject;
@@ -59,72 +60,12 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
     private AzureStackUtil azureStackUtil;
 
     @Override
-    public List<Resource> create(AzureProvisionContextObject po, int index, List<Resource> resources) throws Exception {
-        Stack stack = stackRepository.findById(po.getStackId());
-        String vmName = filterResourcesByType(resources, ResourceType.AZURE_CLOUD_SERVICE).get(0).getResourceName();
-        String internalIp = "172.16.0." + (index + VALID_IP_RANGE_START);
-        AzureTemplate azureTemplate = (AzureTemplate) stack.getTemplate();
-        AzureCredential azureCredential = (AzureCredential) stack.getCredential();
-        byte[] encoded = Base64.encodeBase64(vmName.getBytes());
-        String label = new String(encoded);
-        Map<String, Object> props = new HashMap<>();
-        List<Port> ports = new ArrayList<>();
-        ports.add(new Port("Ambari", "8080", "8080", "tcp"));
-        ports.add(new Port("NameNode", "50070", "50070", "tcp"));
-        ports.add(new Port("RM Web", "8088", "8088", "tcp"));
-        ports.add(new Port("RM Scheduler", "8030", "8030", "tcp"));
-        ports.add(new Port("RM IPC", "8050", "8050", "tcp"));
-        ports.add(new Port("Job History Server", "19888", "19888", "tcp"));
-        ports.add(new Port("HBase Master", "60010", "60010", "tcp"));
-        ports.add(new Port("Falcon", "15000", "15000", "tcp"));
-        ports.add(new Port("Storm", "8744", "8744", "tcp"));
-        ports.add(new Port("Oozie", "11000", "11000", "tcp"));
-        ports.add(new Port("HTTP", "80", "80", "tcp"));
-        props.put(NAME, vmName);
-        props.put(DEPLOYMENTSLOT, PRODUCTION);
-        props.put(LABEL, label);
-        props.put(IMAGENAME,
-                azureTemplate.getImageName().equals(AzureStackUtil.IMAGE_NAME) ? po.getOsImageName() : azureTemplate.getImageName());
-        props.put(IMAGESTOREURI, buildimageStoreUri(po.getCommonName(), vmName));
-        props.put(HOSTNAME, vmName);
-        props.put(USERNAME, DEFAULT_USER_NAME);
-        X509Certificate sshCert = null;
-        try {
-            sshCert = azureStackUtil.createX509Certificate(azureCredential);
-        } catch (FileNotFoundException e) {
-            throw new StackCreationFailureException(e);
-        } catch (CertificateException e) {
-            throw new StackCreationFailureException(e);
-        }
-        try {
-            props.put(SSHPUBLICKEYFINGERPRINT, sshCert.getSha1Fingerprint().toUpperCase());
-        } catch (CertificateEncodingException e) {
-            throw new StackCreationFailureException(e);
-        } catch (NoSuchAlgorithmException e) {
-            throw new StackCreationFailureException(e);
-        }
-        props.put(SSHPUBLICKEYPATH, String.format("/home/%s/.ssh/authorized_keys", DEFAULT_USER_NAME));
-        props.put(AFFINITYGROUP, po.getCommonName());
-        if (azureTemplate.getVolumeCount() > 0) {
-            List<Integer> disks = new ArrayList<>();
-            for (int i = 0; i < azureTemplate.getVolumeCount(); i++) {
-                disks.add(azureTemplate.getVolumeSize());
-            }
-            props.put(DISKS, disks);
-        }
-
-        props.put(SERVICENAME, vmName);
-        props.put(SUBNETNAME, po.filterResourcesByType(ResourceType.AZURE_NETWORK).get(0).getResourceName());
-        props.put(VIRTUAL_NETWORK_IP_ADDRESS, internalIp);
-        props.put(CUSTOMDATA, new String(Base64.encodeBase64(po.getUserData().getBytes())));
-        props.put(VIRTUALNETWORKNAME, po.filterResourcesByType(ResourceType.AZURE_NETWORK).get(0).getResourceName());
-        props.put(PORTS, ports);
-        props.put(VMTYPE, AzureVmType.valueOf(azureTemplate.getVmType()).vmType().replaceAll(" ", ""));
-        AzureClient azureClient = po.getNewAzureClient(azureCredential);
-        HttpResponseDecorator virtualMachineResponse = (HttpResponseDecorator) azureClient.createVirtualMachine(props);
-        String requestId = (String) azureClient.getRequestId(virtualMachineResponse);
-        waitUntilComplete(azureClient, requestId);
-        return Arrays.asList(new Resource(resourceType(), vmName, stack));
+    public Boolean create(final CreateResourceRequest cRR) throws Exception {
+        AzureVirtualMachineCreateRequest aCSCR = (AzureVirtualMachineCreateRequest) cRR;
+        HttpResponseDecorator virtualMachineResponse = (HttpResponseDecorator) aCSCR.getAzureClient().createVirtualMachine(aCSCR.getProps());
+        String requestId = (String) aCSCR.getAzureClient().getRequestId(virtualMachineResponse);
+        waitUntilComplete(aCSCR.getAzureClient(), requestId);
+        return true;
     }
 
     private String buildimageStoreUri(String commonName, String vmName) {
@@ -187,6 +128,76 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
         return setStackState(aSSCO.getStack().getId(), resource, aSSCO.getNewAzureClient(credential), true);
     }
 
+    @Override
+    public List<String> buildNames(AzureProvisionContextObject po, int index, List<Resource> resources) {
+        String vmName = filterResourcesByType(resources, ResourceType.AZURE_CLOUD_SERVICE).get(0).getResourceName();
+        return Arrays.asList(vmName);
+    }
+
+    @Override
+    public CreateResourceRequest buildCreateRequest(AzureProvisionContextObject po, List<Resource> res, List<String> buildNames, int index) throws Exception {
+        Stack stack = stackRepository.findById(po.getStackId());
+        String internalIp = "172.16.0." + (index + VALID_IP_RANGE_START);
+        AzureTemplate azureTemplate = (AzureTemplate) stack.getTemplate();
+        AzureCredential azureCredential = (AzureCredential) stack.getCredential();
+        byte[] encoded = Base64.encodeBase64(buildNames.get(0).getBytes());
+        String label = new String(encoded);
+        Map<String, Object> props = new HashMap<>();
+        List<Port> ports = new ArrayList<>();
+        ports.add(new Port("Ambari", "8080", "8080", "tcp"));
+        ports.add(new Port("NameNode", "50070", "50070", "tcp"));
+        ports.add(new Port("RM Web", "8088", "8088", "tcp"));
+        ports.add(new Port("RM Scheduler", "8030", "8030", "tcp"));
+        ports.add(new Port("RM IPC", "8050", "8050", "tcp"));
+        ports.add(new Port("Job History Server", "19888", "19888", "tcp"));
+        ports.add(new Port("HBase Master", "60010", "60010", "tcp"));
+        ports.add(new Port("Falcon", "15000", "15000", "tcp"));
+        ports.add(new Port("Storm", "8744", "8744", "tcp"));
+        ports.add(new Port("Oozie", "11000", "11000", "tcp"));
+        ports.add(new Port("HTTP", "80", "80", "tcp"));
+        props.put(NAME, buildNames.get(0));
+        props.put(DEPLOYMENTSLOT, PRODUCTION);
+        props.put(LABEL, label);
+        props.put(IMAGENAME,
+                azureTemplate.getImageName().equals(AzureStackUtil.IMAGE_NAME) ? po.getOsImageName() : azureTemplate.getImageName());
+        props.put(IMAGESTOREURI, buildimageStoreUri(po.getCommonName(), buildNames.get(0)));
+        props.put(HOSTNAME, buildNames.get(0));
+        props.put(USERNAME, DEFAULT_USER_NAME);
+        X509Certificate sshCert = null;
+        try {
+            sshCert = azureStackUtil.createX509Certificate(azureCredential);
+        } catch (FileNotFoundException e) {
+            throw new StackCreationFailureException(e);
+        } catch (CertificateException e) {
+            throw new StackCreationFailureException(e);
+        }
+        try {
+            props.put(SSHPUBLICKEYFINGERPRINT, sshCert.getSha1Fingerprint().toUpperCase());
+        } catch (CertificateEncodingException e) {
+            throw new StackCreationFailureException(e);
+        } catch (NoSuchAlgorithmException e) {
+            throw new StackCreationFailureException(e);
+        }
+        props.put(SSHPUBLICKEYPATH, String.format("/home/%s/.ssh/authorized_keys", DEFAULT_USER_NAME));
+        props.put(AFFINITYGROUP, po.getCommonName());
+        if (azureTemplate.getVolumeCount() > 0) {
+            List<Integer> disks = new ArrayList<>();
+            for (int i = 0; i < azureTemplate.getVolumeCount(); i++) {
+                disks.add(azureTemplate.getVolumeSize());
+            }
+            props.put(DISKS, disks);
+        }
+
+        props.put(SERVICENAME, buildNames.get(0));
+        props.put(SUBNETNAME, po.filterResourcesByType(ResourceType.AZURE_NETWORK).get(0).getResourceName());
+        props.put(VIRTUAL_NETWORK_IP_ADDRESS, internalIp);
+        props.put(CUSTOMDATA, new String(Base64.encodeBase64(po.getUserData().getBytes())));
+        props.put(VIRTUALNETWORKNAME, po.filterResourcesByType(ResourceType.AZURE_NETWORK).get(0).getResourceName());
+        props.put(PORTS, ports);
+        props.put(VMTYPE, AzureVmType.valueOf(azureTemplate.getVmType()).vmType().replaceAll(" ", ""));
+        return new AzureVirtualMachineCreateRequest(props, po.getNewAzureClient(azureCredential), res);
+    }
+
     private boolean setStackState(Long stackId, Resource resource, AzureClient azureClient, boolean stopped) {
         boolean result = true;
         try {
@@ -215,4 +226,29 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
     public ResourceType resourceType() {
         return ResourceType.AZURE_VIRTUAL_MACHINE;
     }
+
+    public class AzureVirtualMachineCreateRequest extends CreateResourceRequest {
+        private Map<String, Object> props = new HashMap<>();
+        private AzureClient azureClient;
+        private List<Resource> resources;
+
+        public AzureVirtualMachineCreateRequest(Map<String, Object> props, AzureClient azureClient, List<Resource> resources) {
+            this.props = props;
+            this.azureClient = azureClient;
+            this.resources = resources;
+        }
+
+        public Map<String, Object> getProps() {
+            return props;
+        }
+
+        public AzureClient getAzureClient() {
+            return azureClient;
+        }
+
+        public List<Resource> getResources() {
+            return resources;
+        }
+    }
+
 }

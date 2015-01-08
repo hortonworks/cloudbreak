@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureSimpleNetworkResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDescribeContextObject;
@@ -36,21 +37,14 @@ public class AzureNetworkResourceBuilder extends AzureSimpleNetworkResourceBuild
     private StackRepository stackRepository;
 
     @Override
-    public List<Resource> create(AzureProvisionContextObject po, int index, List<Resource> resources) throws Exception {
-        Stack stack = stackRepository.findById(po.getStackId());
-        String name = stack.getName().replaceAll("\\s+", "") + String.valueOf(new Date().getTime());
-        if (!po.getAzureClient().getVirtualNetworkConfiguration().toString().contains(name)) {
-            Map<String, String> props = new HashMap<>();
-            props.put(NAME, name);
-            props.put(AFFINITYGROUP, po.getCommonName());
-            props.put(SUBNETNAME, name);
-            props.put(ADDRESSPREFIX, "172.16.0.0/16");
-            props.put(SUBNETADDRESSPREFIX, "172.16.0.0/24");
-            HttpResponseDecorator virtualNetworkResponse = (HttpResponseDecorator) po.getAzureClient().createVirtualNetwork(props);
-            String requestId = (String) po.getAzureClient().getRequestId(virtualNetworkResponse);
-            waitUntilComplete(po.getAzureClient(), requestId);
+    public Boolean create(CreateResourceRequest cRR) throws Exception {
+        AzureNetworkCreateRequest aCSCR = (AzureNetworkCreateRequest) cRR;
+        if (!aCSCR.getAzureClient().getVirtualNetworkConfiguration().toString().contains(aCSCR.getName())) {
+            HttpResponseDecorator virtualNetworkResponse = (HttpResponseDecorator) aCSCR.getAzureClient().createVirtualNetwork(aCSCR.getProps());
+            String requestId = (String) aCSCR.getAzureClient().getRequestId(virtualNetworkResponse);
+            waitUntilComplete(aCSCR.getAzureClient(), requestId);
         }
-        return Arrays.asList(new Resource(ResourceType.AZURE_NETWORK, name, stack));
+        return true;
     }
 
     @Override
@@ -79,7 +73,64 @@ public class AzureNetworkResourceBuilder extends AzureSimpleNetworkResourceBuild
     }
 
     @Override
+    public List<String> buildNames(AzureProvisionContextObject po, int index, List<Resource> resources) {
+        Stack stack = stackRepository.findById(po.getStackId());
+        return Arrays.asList(stack.getName().replaceAll("\\s+", "") + String.valueOf(new Date().getTime()));
+    }
+
+    @Override
+    public CreateResourceRequest buildCreateRequest(AzureProvisionContextObject po, List<Resource> res, List<String> buildNames, int index) throws Exception {
+        Stack stack = stackRepository.findById(po.getStackId());
+        AzureCredential credential = (AzureCredential) stack.getCredential();
+        Map<String, String> props = new HashMap<>();
+        props.put(NAME, buildNames.get(0));
+        props.put(AFFINITYGROUP, filterResourcesByType(res, ResourceType.AZURE_AFFINITY_GROUP).get(0).getResourceName());
+        props.put(SUBNETNAME, buildNames.get(0));
+        props.put(ADDRESSPREFIX, "172.16.0.0/16");
+        props.put(SUBNETADDRESSPREFIX, "172.16.0.0/24");
+        AzureClient azureClient = po.getNewAzureClient(credential);
+        return new AzureNetworkCreateRequest(buildNames.get(0), po.getStackId(), props, azureClient, res);
+    }
+
+    @Override
     public ResourceType resourceType() {
         return ResourceType.AZURE_NETWORK;
     }
+
+    public class AzureNetworkCreateRequest extends CreateResourceRequest {
+        private Map<String, String> props = new HashMap<>();
+        private AzureClient azureClient;
+        private String name;
+        private Long stackId;
+        private List<Resource> resources;
+
+        public AzureNetworkCreateRequest(String name, Long stackId, Map<String, String> props, AzureClient azureClient, List<Resource> resources) {
+            this.name = name;
+            this.stackId = stackId;
+            this.props = props;
+            this.azureClient = azureClient;
+            this.resources = resources;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public Long getStackId() {
+            return stackId;
+        }
+
+        public Map<String, String> getProps() {
+            return props;
+        }
+
+        public AzureClient getAzureClient() {
+            return azureClient;
+        }
+
+        public List<Resource> getResources() {
+            return resources;
+        }
+    }
+
 }

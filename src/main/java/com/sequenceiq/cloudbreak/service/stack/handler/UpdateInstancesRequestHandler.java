@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.service.stack.event.AddInstancesComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.StackOperationFailure;
 import com.sequenceiq.cloudbreak.service.stack.event.StackUpdateSuccess;
 import com.sequenceiq.cloudbreak.service.stack.event.UpdateInstancesRequest;
+import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
 import com.sequenceiq.cloudbreak.service.stack.resource.DeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.ProvisionContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
@@ -97,26 +98,34 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
                     for (ResourceBuilder resourceBuilder : networkResourceBuilders.get(cloudPlatform)) {
                         pCO.getNetworkResources().addAll(stack.getResourcesByType(resourceBuilder.resourceType()));
                     }
-                    List<Future<List<Resource>>> futures = new ArrayList<>();
-                    Set<Resource> resourceSet = new HashSet<>();
+                    List<Future<Boolean>> futures = new ArrayList<>();
+                    final Set<Resource> resourceSet = new HashSet<>();
                     for (int i = stack.getNodeCount(); i < stack.getNodeCount() + scalingAdjustment; i++) {
                         final int index = i;
-                        Future<List<Resource>> submit = resourceBuilderExecutor.submit(new Callable<List<Resource>>() {
+                        Future<Boolean> submit = resourceBuilderExecutor.submit(new Callable<Boolean>() {
                             @Override
-                            public List<Resource> call() throws Exception {
+                            public Boolean call() throws Exception {
                                 List<Resource> resources = new ArrayList<>();
                                 for (final ResourceBuilder resourceBuilder : instanceResourceBuilders.get(cloudPlatform)) {
-                                    List<Resource> resourceList = resourceBuilder.create(pCO, index, resources);
+                                    List<String> list = resourceBuilder.buildNames(pCO, index, resources);
+                                    List<Resource> resourceList = new ArrayList<Resource>();
+                                    for (String s : list) {
+                                        resourceList.add(new Resource(resourceBuilder.resourceType(), s, stack));
+                                    }
+                                    stackUpdater.addStackResources(stack.getId(), resourceList);
                                     resources.addAll(resourceList);
+                                    resourceSet.addAll(resourceList);
+                                    CreateResourceRequest createResourceRequest = resourceBuilder.buildCreateRequest(pCO, resources, list, index);
+                                    resourceBuilder.create(createResourceRequest);
                                 }
-                                return resources;
+                                return true;
                             }
                         });
                         futures.add(submit);
                     }
-                    for (Future<List<Resource>> future : futures) {
+                    for (Future<Boolean> future : futures) {
                         try {
-                            resourceSet.addAll(future.get());
+                            future.get();
                         } catch (Exception e) {
                             throw new BuildStackFailureException(e.getMessage(), e, resourceSet);
                         }

@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveCheckerStatus;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveReadyPollerObject;
+import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.GccSimpleNetworkResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDescribeContextObject;
@@ -46,14 +47,11 @@ public class GccNetworkResourceBuilder extends GccSimpleNetworkResourceBuilder {
     private JsonHelper jsonHelper;
 
     @Override
-    public List<Resource> create(GccProvisionContextObject contextObject, int index, List<Resource> resources) throws Exception {
-        Stack stack = stackRepository.findById(contextObject.getStackId());
-        Network network = new Network();
-        network.setName(stack.getName());
-        network.setIPv4Range("10.0.0.0/24");
-        Compute.Networks.Insert networkInsert = contextObject.getCompute().networks().insert(contextObject.getProjectId(), network);
+    public Boolean create(CreateResourceRequest cRR) throws Exception {
+        final GccNetworkCreateRequest gNCR = (GccNetworkCreateRequest) cRR;
+        Compute.Networks.Insert networkInsert = gNCR.getCompute().networks().insert(gNCR.getProjectId(), gNCR.getNetwork());
         networkInsert.execute();
-        return Arrays.asList(new Resource(resourceType(), stack.getName(), stack));
+        return true;
     }
 
     @Override
@@ -99,8 +97,53 @@ public class GccNetworkResourceBuilder extends GccSimpleNetworkResourceBuilder {
     }
 
     @Override
+    public List<String> buildNames(GccProvisionContextObject po, int index, List<Resource> resources) {
+        Stack stack = stackRepository.findById(po.getStackId());
+        return Arrays.asList(stack.getName());
+    }
+
+    @Override
+    public CreateResourceRequest buildCreateRequest(GccProvisionContextObject po, List<Resource> res, List<String> buildNames, int index) throws Exception {
+        Stack stack = stackRepository.findById(po.getStackId());
+        Network network = new Network();
+        network.setName(stack.getName());
+        network.setIPv4Range("10.0.0.0/24");
+        return new GccNetworkCreateRequest(po.getStackId(), network, po.getProjectId(), po.getCompute());
+    }
+
+    @Override
     public ResourceType resourceType() {
         return ResourceType.GCC_NETWORK;
+    }
+
+    public class GccNetworkCreateRequest extends CreateResourceRequest {
+        private Long stackId;
+        private Network network;
+        private String projectId;
+        private Compute compute;
+
+        public GccNetworkCreateRequest(Long stackId, Network network, String projectId, Compute compute) {
+            this.stackId = stackId;
+            this.network = network;
+            this.projectId = projectId;
+            this.compute = compute;
+        }
+
+        public Long getStackId() {
+            return stackId;
+        }
+
+        public Network getNetwork() {
+            return network;
+        }
+
+        public String getProjectId() {
+            return projectId;
+        }
+
+        public Compute getCompute() {
+            return compute;
+        }
     }
 
 }

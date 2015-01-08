@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveCheckerStatus;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveReadyPollerObject;
+import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.GccSimpleNetworkResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDescribeContextObject;
@@ -44,29 +45,11 @@ public class GccFireWallInResourceBuilder extends GccSimpleNetworkResourceBuilde
     private JsonHelper jsonHelper;
 
     @Override
-    public List<Resource> create(GccProvisionContextObject pO, int index, List<Resource> resources) throws Exception {
-        Stack stack = stackRepository.findById(pO.getStackId());
-
-        Firewall firewall = new Firewall();
-        Firewall.Allowed allowed1 = new Firewall.Allowed();
-        allowed1.setIPProtocol("tcp");
-        allowed1.setPorts(ImmutableList.of("1-65535"));
-
-        Firewall.Allowed allowed2 = new Firewall.Allowed();
-        allowed2.setIPProtocol("icmp");
-
-        Firewall.Allowed allowed3 = new Firewall.Allowed();
-        allowed3.setIPProtocol("udp");
-        allowed3.setPorts(ImmutableList.of("1-65535"));
-
-        firewall.setAllowed(ImmutableList.of(allowed1, allowed2, allowed3));
-        firewall.setName(stack.getName() + "in");
-        firewall.setSourceRanges(ImmutableList.of("10.0.0.0/16"));
-        firewall.setNetwork(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s",
-                pO.getProjectId(), pO.filterResourcesByType(ResourceType.GCC_NETWORK).get(0).getResourceName()));
-        Compute.Firewalls.Insert firewallInsert = pO.getCompute().firewalls().insert(pO.getProjectId(), firewall);
+    public Boolean create(CreateResourceRequest cRR) throws Exception {
+        final GccFireWallInCreateRequest gFWICR = (GccFireWallInCreateRequest) cRR;
+        Compute.Firewalls.Insert firewallInsert = gFWICR.getCompute().firewalls().insert(gFWICR.getProjectId(), gFWICR.getFirewall());
         firewallInsert.execute();
-        return Arrays.asList(new Resource(resourceType(), stack.getName() + "in", stack));
+        return true;
     }
 
     @Override
@@ -95,8 +78,69 @@ public class GccFireWallInResourceBuilder extends GccSimpleNetworkResourceBuilde
     }
 
     @Override
+    public List<String> buildNames(GccProvisionContextObject po, int index, List<Resource> resources) {
+        Stack stack = stackRepository.findById(po.getStackId());
+        return Arrays.asList(stack.getName() + "in");
+    }
+
+    @Override
+    public CreateResourceRequest buildCreateRequest(GccProvisionContextObject po, List<Resource> res, List<String> buildNames, int index) throws Exception {
+        Stack stack = stackRepository.findById(po.getStackId());
+
+        Firewall firewall = new Firewall();
+        Firewall.Allowed allowed1 = new Firewall.Allowed();
+        allowed1.setIPProtocol("tcp");
+        allowed1.setPorts(ImmutableList.of("1-65535"));
+
+        Firewall.Allowed allowed2 = new Firewall.Allowed();
+        allowed2.setIPProtocol("icmp");
+
+        Firewall.Allowed allowed3 = new Firewall.Allowed();
+        allowed3.setIPProtocol("udp");
+        allowed3.setPorts(ImmutableList.of("1-65535"));
+
+        firewall.setAllowed(ImmutableList.of(allowed1, allowed2, allowed3));
+        firewall.setName(buildNames.get(0));
+        firewall.setSourceRanges(ImmutableList.of("10.0.0.0/16"));
+        firewall.setNetwork(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s",
+                po.getProjectId(), po.filterResourcesByType(ResourceType.GCC_NETWORK).get(0).getResourceName()));
+
+        return new GccFireWallInCreateRequest(po.getStackId(), firewall, po.getProjectId(), po.getCompute());
+    }
+
+    @Override
     public ResourceType resourceType() {
         return ResourceType.GCC_FIREWALL_IN;
+    }
+
+    public class GccFireWallInCreateRequest extends CreateResourceRequest {
+        private Long stackId;
+        private Firewall firewall;
+        private String projectId;
+        private Compute compute;
+
+        public GccFireWallInCreateRequest(Long stackId, Firewall firewall, String projectId, Compute compute) {
+            this.stackId = stackId;
+            this.firewall = firewall;
+            this.projectId = projectId;
+            this.compute = compute;
+        }
+
+        public Long getStackId() {
+            return stackId;
+        }
+
+        public Firewall getFirewall() {
+            return firewall;
+        }
+
+        public String getProjectId() {
+            return projectId;
+        }
+
+        public Compute getCompute() {
+            return compute;
+        }
     }
 
 }

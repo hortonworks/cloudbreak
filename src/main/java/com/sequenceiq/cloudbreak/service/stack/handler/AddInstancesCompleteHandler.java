@@ -46,7 +46,6 @@ public class AddInstancesCompleteHandler implements Consumer<Event<AddInstancesC
         if (resourcesSet != null) {
             Set<Resource> resources = stack.getResources();
             resources.addAll(resourcesSet);
-            retryingStackUpdater.updateStackResources(stackId, resources);
         }
         metadataSetupContext.updateMetadata(cloudPlatform, stackId, resourcesSet);
     }
