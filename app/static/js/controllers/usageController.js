@@ -60,10 +60,10 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
         }
 
         $scope.loadUsages = function () {
-            var usagesSince = $scope.usageFilter.since;
+            var usagesSince = $scope.usageFilter.startDate;
             var param = createRequestParams(usagesSince);
 
-            //requested interval by months
+            //requested interval grouped by months
             var usagesPerMonth;
             var date = new Date();
             var targetMonth = new Date(usagesSince.getFullYear(), usagesSince.getMonth(), 1, 0, 0, 0, 0);
@@ -73,7 +73,7 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
               console.log('year:' + actMonth.getFullYear() + 'month:' + month[actMonth.getMonth()]);
               actMonth.setMonth(actMonth.getMonth()-1);
             }
-            //requested interval by months
+            //requested interval grouped by months
 
             $scope.usages = AccountUsages.query({ param: param }, function(success) {
                 initSums();
@@ -114,7 +114,7 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
 
         function createRequestParams(usagesSince) {
           var param = "";
-          param =  param.concat($scope.usageFilter.since !== null ? "since=".concat(usagesSince.getTime().toString().concat("&")) : "");
+          param =  param.concat(usagesSince !== null ? "since=".concat(usagesSince.getTime().toString().concat("&")) : "");
           param =  param.concat($scope.usageFilter.user !== "all" ? "user=".concat($scope.usageFilter.user.concat("&")) : "");
           param = param.concat($scope.usageFilter.cloud !== "all" ? "cloud=".concat($scope.usageFilter.cloud.concat("&")) : "");
           param = param.concat($scope.usageFilter.zone !== "all" ? "zone=".concat($scope.usageFilter.zone.concat("&")) : "");
@@ -175,8 +175,16 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
             }
         }
 
-        $scope.setDate = function(date) {
-            $scope.usageFilter.since = new Date(date);
+        $scope.setStartDate = function(dateString) {
+            // console.log('startdate'+date)
+            $scope.usageFilter.startDate = floorToDay(dateString);
+            $scope.$apply();
+        }
+
+        $scope.setEndDate = function(dateString) {
+          // console.log('enddate'+date)
+          $scope.usageFilter.endDate = floorToDay(dateString);
+          $scope.$apply();
         }
 
         function initSums() {
@@ -199,16 +207,21 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
 
         function initFilter() {
           var endDate = new Date();
-          var since = new Date();
-          since.setMonth(since.getMonth()-1);
+          var startDate = new Date();
+          startDate.setMonth(startDate.getMonth()-1);
           $scope.usageFilter = {
-              since: since,
-              endDate: endDate,
+              startDate: floorToDay(startDate),
+              endDate: floorToDay(endDate),
               user: "all",
               cloud: "all",
               zone: "all"
           };
           $scope.selectRegionsByProvider();
+        }
+
+        function floorToDay(dateString) {
+          var date = new Date(dateString);
+          return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
         }
 
         initFilter();

@@ -280,7 +280,7 @@ function addDatePickerPanelJQueryEventListeners() {
 
     $jq("#datePickerStart").on("dp.change", function (e) {
         // filter activated
-        angular.element($jq("#datePickerStart")).scope().setDate(e.date._d.toString());
+        angular.element($jq("#datePickerStart")).scope().setStartDate(e.date._d.toString());
         $jq('.col-xs-6').has(this).addClass('active');
     });
 
@@ -296,7 +296,7 @@ function addDatePickerPanelJQueryEventListeners() {
 
     $jq("#datePickerEnd").on("dp.change", function (e) {
       // filter activated
-      angular.element($jq("#datePickerEnd")).scope().setDate(e.date._d.toString());
+      angular.element($jq("#datePickerEnd")).scope().setEndDate(e.date._d.toString());
       $jq('.col-xs-6').has(this).addClass('active');
     });
 }

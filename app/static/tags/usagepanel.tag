@@ -14,31 +14,37 @@
 
         <h5><i class="fa fa-filter fa-fw"></i> filters</h5>
 
-        <form class="row row-filter">
+        <form class="row row-filter" name="usageFilterForm">
           <div class="col-xs-6 col-sm-2 col-md-2">
             <label for="startDate">start date</label>
-            <div>
+            <div ng-class="{ 'has-error': usageFilterForm.startDate.$invalid }">
               <div class="input-group date" id="datePickerStart" data-date-format="YYYY-MM-DD">
-                <input type="date" class="form-control input-sm" id="startDate" ng-model="usageFilter.since">
+                <input type="date" class="form-control input-sm" id="startDate" ng-model="usageFilter.startDate" name="startDate" startdatevalidation="endDate">
                 <span class="input-group-btn">
                     <button class="btn btn-default btn-sm" type="button">
                         <i class="fa fa-calendar"></i>
                     </button>
                 </span>
               </div>
+              <div class="help-block" ng-show="usageFilterForm.startDate.$invalid">
+                <i class="fa fa-warning"></i> {{error_msg.usage_startdate_invalid}}
+              </div>
             </div>
           </div>
 
           <div class="col-xs-6 col-sm-2 col-md-2">
             <label for="endDate">end date</label>
-            <div>
+            <div ng-class="{ 'has-error': usageFilterForm.endDate.$invalid }">
               <div class="input-group date" id="datePickerEnd" data-date-format="YYYY-MM-DD">
-                <input type="date" class="form-control input-sm" id="endDate" ng-model="usageFilter.endDate">
+                <input type="date" class="form-control input-sm" id="endDate" ng-model="usageFilter.endDate" name="endDate" enddatevalidation>
                 <span class="input-group-btn">
                     <button class="btn btn-default btn-sm" type="button">
                       <i class="fa fa-calendar"></i>
                     </button>
                   </span>
+              </div>
+              <div class="help-block" ng-show="usageFilterForm.endDate.$invalid">
+                <i class="fa fa-warning"></i> {{error_msg.usage_enddate_invalid}}
               </div>
             </div>
           </div>
@@ -47,10 +53,10 @@
             <label for="user">user</label>
             <div>
               <div class="input-group">
-                <span class="input-group-addon">
+                <!--span class="input-group-addon">
                     <i class="fa fa-search"></i>
                 </span>
-                <!--input class="form-control input-sm" type="text" ng-model="usageFilter.user" id="user"-->
+                <input class="form-control input-sm" type="text" ng-model="usageFilter.user" id="user"-->
                 <select class="form-control input-sm" id="cloudProvider" ng-model="usageFilter.user">
                   <option default value="all">all</option>
                   <option ng-repeat="user in $root.accountUsers" value="{{user.id}}">{{user.username}}</option>
@@ -84,7 +90,7 @@
           <div class="col-xs-6 col-sm-2 col-md-2">
             <a id="btnClearFilters" class="btn btn-danger btn-block" ng-click="clearFilter()" role="button">
               <i class="fa fa-eraser fa-fw"></i>clear filters</a>
-            <a id="btnGenReport" ng-click="loadUsages()" class="btn btn-success btn-block" role="button">
+            <a id="btnGenReport" ng-click="loadUsages()" class="btn btn-success btn-block" role="button" ng-disabled="usageFilterForm.startDate.$invalid || usageFilterForm.endDate.$invalid">
               <i class="fa fa-table fa-fw"></i>
               <!-- <i class="fa fa-circle-o-notch fa-spin fa-fw"></i> -->generate report</a>
           </div>
