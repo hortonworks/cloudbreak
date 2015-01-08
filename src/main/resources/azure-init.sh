@@ -147,7 +147,7 @@ set_disk_as_volumes() {
 }
 
 set_public_host_script() {
-  VOLUMES="$VOLUMES -v /usr/local/public_host_script:/etc/ambari-agent/conf/public-hostname.sh"
+  VOLUMES="$VOLUMES -v /usr/local/public_host_script.sh:/etc/ambari-agent/conf/public-hostname.sh"
 }
 
 format_disks() {
