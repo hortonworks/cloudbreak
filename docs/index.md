@@ -67,7 +67,7 @@ For further information please visit our [API documentation](http://docs.cloudbr
 ###Blueprints
 
 Ambari Blueprints are a declarative definition of a Hadoop cluster. With a Blueprint, you specify a stack, the component layout and the configurations to materialise a Hadoop cluster instance. Hostgroups defined in blueprints can be associated to different VPC subnets and availability zones, thus you can span up a highly available cluster running on different datacenters or availability zones.
-We have a few default blueprints available from single node to multi node blueprints and lambda architecture.
+We have a few default blueprints available from multi node blueprints to lambda architectures.
 
 For further information please visit our [API documentation](http://docs.cloudbreak.apiary.io/#blueprints).
 
@@ -174,31 +174,19 @@ _Note: You can run Apache Spark on a cluster provisioned with Cloudbreak by usin
 
 We provide a list of default Hadoop cluster Blueprints for your convenience, however you can always build and use your own Blueprint.
 
-1. Simple single node - Apache Ambari blueprint
-
-This is a simple [Blueprint](https://raw.githubusercontent.com/sequenceiq/ambari-rest-client/1.6.0/src/main/resources/blueprints/single-node-hdfs-yarn) which allows you to launch a single node, pseudo-distributed Hadoop Cluster in the cloud.
-
-It allows you to use the following services: HDFS, YARN, MAPREDUCE2.
-
-2. Full stack single node - HDP 2.1 blueprint
-
-This is a complex [Blueprint](https://raw.githubusercontent.com/sequenceiq/ambari-rest-client/1.6.0/src/main/resources/blueprints/hdp-singlenode-default) which allows you to launch a single node, pseudo-distributed Hadoop Cluster in the cloud.
-
-It allows you to use the following services: HDFS, YARN, MAPREDUCE2, GANGLIA, HBASE, HIVE, HCATALOG, WEBHCAT, NAGIOS, OOZIE, PIG, SQOOP, STORM, TEZ, FALCON, ZOOKEEPER.
-
-3. Simple multi node - Apache Ambari blueprint
+1. Simple multi node - Apache Ambari blueprint
 
 This is a simple [Blueprint](https://raw.githubusercontent.com/sequenceiq/ambari-rest-client/1.6.0/src/main/resources/blueprints/multi-node-hdfs-yarn) which allows you to launch a multi node, fully distributed Hadoop Cluster in the cloud.
 
 It allows you to use the following services: HDFS, YARN, MAPREDUCE2.
 
-4. Full stack multi node - HDP 2.1 blueprint
+2. Full stack multi node - HDP 2.1 blueprint
 
 This is a complex [Blueprint](https://raw.githubusercontent.com/sequenceiq/ambari-rest-client/1.6.0/src/main/resources/blueprints/hdp-multinode-default) which allows you to launch a multi node, fully distributed Hadoop Cluster in the cloud.
 
 It allows you to use the following services: HDFS, YARN, MAPREDUCE2, GANGLIA, HBASE, HIVE, HCATALOG, WEBHCAT, NAGIOS, OOZIE, PIG, SQOOP, STORM, TEZ, FALCON, ZOOKEEPER.
 
-5. Custom blueprints
+3. Custom blueprints
 
 We allow you to build your own Blueprint - for further instructions please check the Apache Ambari [documentation](https://cwiki.apache.org/confluence/display/AMBARI/Blueprints).
 
@@ -208,8 +196,7 @@ We are trying to figure out the hosts to hostgroups assignments - and in order t
 
 _Note: Apache Ambari community and SequenceIQ is working on an auto-hostgroup assignment algorithm; in the meantime please follow our conventions and check the default blueprints as examples, or ask us to support you._
 
-1. When you are creating a Single node blueprint, the name of the default host group has to be `master`.
-2. When you are creating a Multi node blueprint, all the worker node components (a.k.a. Slaves) will have to be grouped in host groups named `slave_*`. _Replace * with the number of Slave hostgroups_.
+When you are creating a Multi node blueprint, all the worker node components (a.k.a. Slaves) will have to be grouped in host groups named `slave_*`. _Replace * with the number of Slave hostgroups_.
 
 The default rule for multi node clusters is that there must be at least as many hosts as the number of host groups. Each NOT slave host groups (master, gateway, etc) will be launched with a cardinality of 1 (1 node per master, gateway, hosts, etc.), and all the rest of the nodes are equally distributed among Slave nodes (if there are multiple slave host groups).
 
@@ -733,27 +720,28 @@ The first public beta version of Cloudbreak supports Hadoop on Amazon's EC2 and 
 Versions:
 
 CentOS - 6.5
-Hortonworks Data Platform - 2.1
-Apache Hadoop - 2.4.0
-Apache Tez - 0.4
-Apache Pig - 0.12.1
-Apache Hive & HCatalog - 0.13.0
-Apache HBase - 0.98.0
-Apache Phoenix - 4.0.0
-Apache Accumulo - 1.5.1
-Apache Storm - 0.9.1
-Apache Mahout - 0.9.0
-Apache Solr - 4.7.2
-Apache Falcon - 0.5.0
-Apache Sqoop - 1.4.4
-Apache Flume - 1.4.0
-Apache Ambari - 1.6.1
-Apache Oozie - 4.0.0
+Hortonworks Data Platform - 2.2
+Apache Hadoop - 2.6.0
+Apache Tez - 0.6
+Apache Pig - 0.14
+Apache Hive & HCatalog - 0.14.0
+Apache HBase - 0.98.4
+Apache Phoenix - 4.2
+Apache Accumulo - 1.6.1
+Apache Storm - 0.9.3
+Apache Spark - 1.2.0
+Apache Slider - 0.5.1
+Apache Solr -  4.10.0
+Apache Kafka - 0.8.1
+Apache Falcon - 0.6.0
+Apache Sqoop - 1.4.5
+Apache Flume - 1.5.0
+Apache Ambari - 1.7.0
+Apache Oozie - 4.1.0
 Apache Zookeeper - 3.4.5
-Apache Knox - 0.4.0
-Docker - 1.1
-Serf - 0.5.0
-dnsmasq - 2.7
+Apache Knox - 0.5.0
+Docker - 1.3
+Consul - 0.4.1
 
 ###Future releases
 

@@ -143,7 +143,7 @@ public class AmbariClusterInstallerTest {
     private Blueprint createBlueprint() {
         Blueprint blueprint = new Blueprint();
         blueprint.setId(1L);
-        blueprint.setBlueprintName("single-node-yarn");
+        blueprint.setBlueprintName("multi-node-yarn");
         return blueprint;
     }
 

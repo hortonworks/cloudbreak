@@ -21,7 +21,7 @@
 
 # Ambari
 : ${CB_MANAGEMENT_CONTEXT_PATH:?"Please set the CB_MANAGEMENT_CONTEXT_PATH environment variable!"}
-: ${CB_BLUEPRINT_DEFAULTS:="lambda-architecture,multi-node-hdfs-yarn,single-node-hdfs-yarn"}
+: ${CB_BLUEPRINT_DEFAULTS:="lambda-architecture,multi-node-hdfs-yarn, hdp-multinode-default"}
 
 # AWS related (optional) settings - not setting them causes AWS related operations to fail
 : ${AWS_ACCESS_KEY_ID:?"Please set the AWS_ACCESS_KEY_ID environment variable!"}
