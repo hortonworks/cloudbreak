@@ -83,6 +83,8 @@ cloudbreakApp.config([ '$routeProvider', '$locationProvider', function($routePro
             || config.url.match(/^(.*)credentials($|\/).*/) || config.url.match(/^periscope\/clusters($|\/).*/)
             || (config.url.match(/^stacks\/(\d+)\/cluster($|\/).*/) && config.method == 'POST')){
                 block = true
+            } else if (config.url.match(/^(.*)usages($|\?).*/) && config.method == 'GET') {
+                block = true;
             }
             if (!block) {
                 return block

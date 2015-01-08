@@ -251,22 +251,6 @@ function addPanelJQueryEventListeners(panel){
 }
 
 function addDatePickerPanelJQueryEventListeners() {
-    var timers = new Array;
-    var timersIndex = 0;
-
-    $jq('#btnGenReport').click(function (e) {
-        var self = this;
-        e.preventDefault();
-        // disable button, start spinner
-        $jq(this).addClass('disabled')
-            .find('i').removeClass('fa-table').addClass('fa-circle-o-notch fa-spin');
-        // simulated delay
-        timers[timersIndex++] = window.setTimeout(function () {
-            // enable button, stop spinner
-            $jq(self).removeClass('disabled')
-                .find('i').removeClass('fa-circle-o-notch fa-spin').addClass('fa-table');
-        }, 1500);
-    });
 
     $jq('#datePickerStart').datetimepicker({
         icons: {
