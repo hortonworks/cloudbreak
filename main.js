@@ -111,7 +111,7 @@ app.post('/', function(req, res){
                 res.redirect('confirm')
             }
         } else {
-            res.render('login',{ errorMessage: "The email or password you entered is incorrect." });
+            res.render('login',{ errorMessage: "Incorrect email/password or account is disabled." });
         }
     });
 });
@@ -572,40 +572,67 @@ app.get('/users', function(req, res){
         getToken(req, res, function(token){
             getUserByName(req, res, token, adminUserName, 'id,userName,groups', function(adminUserData){
                 isUserAdmin(req, res, adminUserData, function(companyId){
-                    getGroupByName(req, res, token, companyId, 'members', function(groupData){
-                        var groupMemberIds = groupData.members
-                        var completed_requests = 0;
-                        var users = [];
-                        if (groupMemberIds.length != 0) {
-                          groupMemberIds.forEach(function(groupMember) {
-                             request({
-                               method: 'GET',
-                               url: uaaAddress + '/Users?attributes=id,userName,active&filter=id eq  "' + groupMember.value + '"',
-                               headers: {'Accept' : 'application/json',
+                    getGroupByName(req, res, token, 'sequenceiq.cloudbreak.admin', 'members', function(adminGroupData){
+                        var adminGroupMembers = adminGroupData.members
+                        var adminGroupMemberIds = [];
+                        adminGroupMembers.forEach(function(adminGroupMember) {
+                            adminGroupMemberIds.push(adminGroupMember.value);
+                        });
+                        getGroupByName(req, res, token, companyId, 'members', function(groupData){
+                            var groupMemberIds = groupData.members
+                            var completed_requests = 0;
+                            var users = [];
+                            if (groupMemberIds.length != 0) {
+                                groupMemberIds.forEach(function(groupMember) {
+                                    request({
+                                    method: 'GET',
+                                    url: uaaAddress + '/Users?attributes=id,userName,active&filter=id eq  "' + groupMember.value + '"',
+                                    headers: {'Accept' : 'application/json',
                                          'Authorization' : 'Bearer ' + token,
                                           'Content-Type' : 'application/json'
-                               }
-                             }, function (error, response, body) {
-                                if (response.statusCode == 200){
-                                 var resultResource = JSON.parse(body).resources[0]
-                                 users.push({id: resultResource.id, username: resultResource.userName, active: resultResource.active})
-                                }
-                                completed_requests++;
-                                if (completed_requests == groupMemberIds.length){
-                                 res.json(users)
-                                }
-                              });
-                           });
+                                    }
+                                    },function (error, response, body) {
+                                        if (response.statusCode == 200){
+                                            var resultResource = JSON.parse(body).resources[0]
+                                            var isAdmin = (adminGroupMemberIds.indexOf(resultResource.id) == -1) ? false : true
+                                            users.push({id: resultResource.id, username: resultResource.userName, active: resultResource.active, admin: isAdmin})
+                                        }
+                                        completed_requests++;
+                                        if (completed_requests == groupMemberIds.length){
+                                            res.json(users)
+                                        }
+                                    });
+                                });
                         } else {
                           console.log('No users found for this company.')
                           res.statusCode = 400
                           res.json({message: 'No users found for this company.'})
                         }
                     })
+                    })
                 });
             });
         });
     });
+});
+
+app.post('/permission', function(req, res){
+    var role = req.body.role
+    var userId = req.body.id
+    if (role == 'admin') {
+         getAdminName(req, res, function(adminUserName){
+            getToken(req, res, function(token){
+                getUserByName(req, res, token, adminUserName, 'id,userName,groups', function(adminUserData){
+                    isUserAdmin(req, res, adminUserData, function(companyId){
+                        updateGroup(token, userId, 'sequenceiq.cloudbreak.admin')
+                    });
+                });
+            });
+         });
+    } else {
+        res.statusCode = 400
+        res.json({message: 'Not existing permission type.'})
+    }
 });
 
 // service methods
