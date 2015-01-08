@@ -73,23 +73,24 @@ public class AzureNetworkResourceBuilder extends AzureSimpleNetworkResourceBuild
     }
 
     @Override
-    public List<String> buildNames(AzureProvisionContextObject po, int index, List<Resource> resources) {
+    public List<Resource> buildNames(AzureProvisionContextObject po, int index, List<Resource> resources) {
         Stack stack = stackRepository.findById(po.getStackId());
-        return Arrays.asList(stack.getName().replaceAll("\\s+", "") + String.valueOf(new Date().getTime()));
+        String s = stack.getName().replaceAll("\\s+", "") + String.valueOf(new Date().getTime());
+        return Arrays.asList(new Resource(resourceType(), s, stack));
     }
 
     @Override
-    public CreateResourceRequest buildCreateRequest(AzureProvisionContextObject po, List<Resource> res, List<String> buildNames, int index) throws Exception {
+    public CreateResourceRequest buildCreateRequest(AzureProvisionContextObject po, List<Resource> res, List<Resource> buildNames, int index) throws Exception {
         Stack stack = stackRepository.findById(po.getStackId());
         AzureCredential credential = (AzureCredential) stack.getCredential();
         Map<String, String> props = new HashMap<>();
-        props.put(NAME, buildNames.get(0));
+        props.put(NAME, buildNames.get(0).getResourceName());
         props.put(AFFINITYGROUP, filterResourcesByType(res, ResourceType.AZURE_AFFINITY_GROUP).get(0).getResourceName());
-        props.put(SUBNETNAME, buildNames.get(0));
+        props.put(SUBNETNAME, buildNames.get(0).getResourceName());
         props.put(ADDRESSPREFIX, "172.16.0.0/16");
         props.put(SUBNETADDRESSPREFIX, "172.16.0.0/24");
         AzureClient azureClient = po.getNewAzureClient(credential);
-        return new AzureNetworkCreateRequest(buildNames.get(0), po.getStackId(), props, azureClient, res);
+        return new AzureNetworkCreateRequest(buildNames.get(0).getResourceName(), po.getStackId(), props, azureClient, res, buildNames);
     }
 
     @Override
@@ -104,7 +105,9 @@ public class AzureNetworkResourceBuilder extends AzureSimpleNetworkResourceBuild
         private Long stackId;
         private List<Resource> resources;
 
-        public AzureNetworkCreateRequest(String name, Long stackId, Map<String, String> props, AzureClient azureClient, List<Resource> resources) {
+        public AzureNetworkCreateRequest(String name, Long stackId, Map<String, String> props, AzureClient azureClient, List<Resource> resources,
+                List<Resource> buildNames) {
+            super(buildNames);
             this.name = name;
             this.stackId = stackId;
             this.props = props;

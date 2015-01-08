@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.flow.dummy.network;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -7,6 +8,7 @@ import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
+import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.stack.flow.dummy.DummyDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.flow.dummy.DummyDescribeContextObject;
 import com.sequenceiq.cloudbreak.service.stack.flow.dummy.DummyProvisionContextObject;
@@ -54,13 +56,13 @@ public class DummyNetworkResourceBuilder
     }
 
     @Override
-    public List<String> buildNames(DummyProvisionContextObject po, int index, List<Resource> resources) {
-        return Arrays.asList("network" + index);
+    public List<Resource> buildNames(DummyProvisionContextObject po, int index, List<Resource> resources) {
+        return Arrays.asList(new Resource(resourceType(), "network" + index, new Stack()));
     }
 
     @Override
-    public CreateResourceRequest buildCreateRequest(DummyProvisionContextObject po, List<Resource> res, List<String> buildNames, int index) throws Exception {
-        return new DummyNetworkCreateRequest();
+    public CreateResourceRequest buildCreateRequest(DummyProvisionContextObject po, List<Resource> res, List<Resource> buildNames, int index) throws Exception {
+        return new DummyNetworkCreateRequest(new ArrayList<Resource>());
     }
 
     @Override
@@ -75,6 +77,9 @@ public class DummyNetworkResourceBuilder
 
     public class DummyNetworkCreateRequest extends CreateResourceRequest {
 
+        public DummyNetworkCreateRequest(List<Resource> buildableResources) {
+            super(buildableResources);
+        }
     }
 
 }

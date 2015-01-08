@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.flow.dummy.instance;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -8,6 +9,7 @@ import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
+import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.stack.flow.dummy.DummyDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.flow.dummy.DummyDescribeContextObject;
 import com.sequenceiq.cloudbreak.service.stack.flow.dummy.DummyProvisionContextObject;
@@ -55,13 +57,13 @@ public class DummyExVirtualMachineResourceBuilder
     }
 
     @Override
-    public List<String> buildNames(DummyProvisionContextObject po, int index, List<Resource> resources) {
-        return Arrays.asList("virtualmachine" + index);
+    public List<Resource> buildNames(DummyProvisionContextObject po, int index, List<Resource> resources) {
+        return Arrays.asList(new Resource(resourceType(), "virtualmachine" + index, new Stack()));
     }
 
     @Override
-    public CreateResourceRequest buildCreateRequest(DummyProvisionContextObject po, List<Resource> res, List<String> buildNames, int index) throws Exception {
-        return new DummyVirtualMachineCreateRequest();
+    public CreateResourceRequest buildCreateRequest(DummyProvisionContextObject po, List<Resource> res, List<Resource> buildNames, int index) throws Exception {
+        return new DummyVirtualMachineCreateRequest(new ArrayList<Resource>());
     }
 
     @Override
@@ -76,5 +78,8 @@ public class DummyExVirtualMachineResourceBuilder
 
     public class DummyVirtualMachineCreateRequest extends CreateResourceRequest {
 
+        public DummyVirtualMachineCreateRequest(List<Resource> buildableResources) {
+            super(buildableResources);
+        }
     }
 }

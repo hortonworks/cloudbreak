@@ -84,15 +84,13 @@ public class ProvisionContext {
                     final ProvisionContextObject pCO =
                             resourceBuilderInit.provisionInit(stack, userDataBuilder.build(cloudPlatform, stack.getHash(), userDataParams));
                     for (ResourceBuilder resourceBuilder : networkResourceBuilders.get(cloudPlatform)) {
-                        List<String> list = resourceBuilder.buildNames(pCO, 0, Arrays.asList(resourceSet));
-                        List<Resource> resourceList = new ArrayList<>();
-                        for (String s : list) {
-                            resourceList.add(new Resource(resourceBuilder.resourceType(), s, stack));
-                        }
-                        stackUpdater.addStackResources(stack.getId(), resourceList);
-                        resourceSet.addAll(resourceList);
-                        pCO.getNetworkResources().addAll(resourceList);
-                        CreateResourceRequest createResourceRequest = resourceBuilder.buildCreateRequest(pCO, Lists.newArrayList(resourceSet), list, 0);
+                        CreateResourceRequest createResourceRequest =
+                                resourceBuilder.buildCreateRequest(pCO,
+                                        Lists.newArrayList(resourceSet),
+                                        resourceBuilder.buildNames(pCO, 0, Arrays.asList(resourceSet)), 0);
+                        stackUpdater.addStackResources(stack.getId(), createResourceRequest.getBuildableResources());
+                        resourceSet.addAll(createResourceRequest.getBuildableResources());
+                        pCO.getNetworkResources().addAll(createResourceRequest.getBuildableResources());
                         resourceBuilder.create(createResourceRequest);
                     }
                     List<Future<Boolean>> futures = new ArrayList<>();
@@ -105,15 +103,11 @@ public class ProvisionContext {
                                 LOGGER.info("Node {}. creation starting", index);
                                 List<Resource> resources = new ArrayList<>();
                                 for (final ResourceBuilder resourceBuilder : instanceResourceBuilders.get(cloudPlatform)) {
-                                    List<String> list = resourceBuilder.buildNames(pCO, index, resources);
-                                    List<Resource> resourceList = new ArrayList<>();
-                                    for (String s : list) {
-                                        resourceList.add(new Resource(resourceBuilder.resourceType(), s, finalStack));
-                                    }
-                                    stackUpdater.addStackResources(finalStack.getId(), resourceList);
-                                    CreateResourceRequest createResourceRequest = resourceBuilder.buildCreateRequest(pCO, resources, list, index);
+                                    CreateResourceRequest createResourceRequest =
+                                            resourceBuilder.buildCreateRequest(pCO, resources, resourceBuilder.buildNames(pCO, index, resources), index);
+                                    stackUpdater.addStackResources(finalStack.getId(), createResourceRequest.getBuildableResources());
                                     resourceBuilder.create(createResourceRequest);
-                                    resources.addAll(resourceList);
+                                    resources.addAll(createResourceRequest.getBuildableResources());
                                     LOGGER.info("Node {}. creation in progress resource {} creation finished.", index, resourceBuilder.resourceBuilderType());
                                 }
                                 return true;

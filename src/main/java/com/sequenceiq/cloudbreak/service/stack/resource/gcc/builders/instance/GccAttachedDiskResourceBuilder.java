@@ -127,30 +127,30 @@ public class GccAttachedDiskResourceBuilder extends GccSimpleInstanceResourceBui
     }
 
     @Override
-    public List<String> buildNames(GccProvisionContextObject po, int index, List<Resource> resources) {
-        List<String> names = new ArrayList<>();
+    public List<Resource> buildNames(GccProvisionContextObject po, int index, List<Resource> resources) {
+        List<Resource> names = new ArrayList<>();
         Stack stack = stackRepository.findById(po.getStackId());
         String name = String.format("%s-%s-%s", stack.getName(), index, new Date().getTime());
         for (int i = 0; i < stack.getTemplate().getVolumeCount(); i++) {
-            names.add(name + "-" + i);
+            names.add(new Resource(resourceType(), name + "-" + i, stack));
         }
         return names;
     }
 
     @Override
-    public CreateResourceRequest buildCreateRequest(GccProvisionContextObject po, List<Resource> res, List<String> buildNames, int index) throws Exception {
+    public CreateResourceRequest buildCreateRequest(GccProvisionContextObject po, List<Resource> res, List<Resource> buildNames, int index) throws Exception {
         List<Disk> disks = new ArrayList<>();
         Stack stack = stackRepository.findById(po.getStackId());
         GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
         GccCredential gccCredential = (GccCredential) stack.getCredential();
-        for (String buildName : buildNames) {
+        for (Resource buildName : buildNames) {
             Disk disk = new Disk();
             disk.setSizeGb(stack.getTemplate().getVolumeSize().longValue());
-            disk.setName(buildName);
+            disk.setName(buildName.getResourceName());
             disk.setKind(gccTemplate.getGccRawDiskType().getUrl(po.getProjectId(), gccTemplate.getGccZone()));
             disks.add(disk);
         }
-        return new GccAttachedDiskCreateRequest(po.getStackId(), res, disks, po.getProjectId(), po.getCompute(), gccTemplate, gccCredential);
+        return new GccAttachedDiskCreateRequest(po.getStackId(), res, disks, po.getProjectId(), po.getCompute(), gccTemplate, gccCredential, buildNames);
     }
 
     @Override
@@ -169,7 +169,8 @@ public class GccAttachedDiskResourceBuilder extends GccSimpleInstanceResourceBui
         private GccCredential gccCredential;
 
         public GccAttachedDiskCreateRequest(Long stackId, List<Resource> resources, List<Disk> disks,
-                String projectId, Compute compute, GccTemplate gccTemplate, GccCredential gccCredential) {
+                String projectId, Compute compute, GccTemplate gccTemplate, GccCredential gccCredential, List<Resource> buildNames) {
+            super(buildNames);
             this.stackId = stackId;
             this.resources = resources;
             this.disks = disks;

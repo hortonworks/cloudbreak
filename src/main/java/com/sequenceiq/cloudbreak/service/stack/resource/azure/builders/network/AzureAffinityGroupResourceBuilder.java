@@ -75,20 +75,21 @@ public class AzureAffinityGroupResourceBuilder extends AzureSimpleNetworkResourc
     }
 
     @Override
-    public List<String> buildNames(AzureProvisionContextObject po, int index, List<Resource> resources) {
-        return Arrays.asList(po.getCommonName());
+    public List<Resource> buildNames(AzureProvisionContextObject po, int index, List<Resource> resources) {
+        Stack stack = stackRepository.findById(po.getStackId());
+        return Arrays.asList(new Resource(resourceType(), po.getCommonName(), stack));
     }
 
     @Override
-    public AzureAffinityGroupCreateRequest buildCreateRequest(AzureProvisionContextObject po, List<Resource> res, List<String> n, int index) throws Exception {
+    public AzureAffinityGroupCreateRequest buildCreateRequest(AzureProvisionContextObject po, List<Resource> res, List<Resource> n, int i) throws Exception {
         Stack stack = stackRepository.findById(po.getStackId());
         AzureTemplate template = (AzureTemplate) stack.getTemplate();
         AzureCredential azureCredential = (AzureCredential) stack.getCredential();
         Map<String, String> props = new HashMap<>();
-        props.put(NAME, n.get(0));
+        props.put(NAME, n.get(0).getResourceName());
         props.put(LOCATION, template.getLocation().location());
         props.put(DESCRIPTION, template.getDescription());
-        return new AzureAffinityGroupCreateRequest(n.get(0), po.getStackId(), props, po.getNewAzureClient(azureCredential), res);
+        return new AzureAffinityGroupCreateRequest(n.get(0).getResourceName(), po.getStackId(), props, po.getNewAzureClient(azureCredential), res, n);
     }
 
     @Override
@@ -103,7 +104,9 @@ public class AzureAffinityGroupResourceBuilder extends AzureSimpleNetworkResourc
         private Long stackId;
         private List<Resource> resources;
 
-        public AzureAffinityGroupCreateRequest(String name, Long stackId, Map<String, String> props, AzureClient azureClient, List<Resource> resources) {
+        public AzureAffinityGroupCreateRequest(String name, Long stackId, Map<String, String> props, AzureClient azureClient, List<Resource> resources,
+                List<Resource> buildNames) {
+            super(buildNames);
             this.name = name;
             this.stackId = stackId;
             this.props = props;

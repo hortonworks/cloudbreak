@@ -74,20 +74,21 @@ public class AzureStorageAccountResourceBuilder extends AzureSimpleNetworkResour
     }
 
     @Override
-    public List<String> buildNames(AzureProvisionContextObject po, int index, List<Resource> resources) {
-        return Arrays.asList(po.getCommonName());
+    public List<Resource> buildNames(AzureProvisionContextObject po, int index, List<Resource> resources) {
+        Stack stack = stackRepository.findById(po.getStackId());
+        return Arrays.asList(new Resource(resourceType(), po.getCommonName(), stack));
     }
 
     @Override
-    public CreateResourceRequest buildCreateRequest(AzureProvisionContextObject po, List<Resource> res, List<String> buildNames, int index) throws Exception {
+    public CreateResourceRequest buildCreateRequest(AzureProvisionContextObject po, List<Resource> res, List<Resource> buildNames, int index) throws Exception {
         Stack stack = stackRepository.findById(po.getStackId());
         AzureCredential credential = (AzureCredential) stack.getCredential();
         Map<String, String> props = new HashMap<>();
-        props.put(NAME, buildNames.get(0));
+        props.put(NAME, buildNames.get(0).getResourceName());
         props.put(DESCRIPTION, stack.getTemplate().getDescription());
         props.put(AFFINITYGROUP, po.getCommonName());
         AzureClient azureClient = po.getNewAzureClient(credential);
-        return new AzureStorageAccountCreateRequest(buildNames.get(0), po.getStackId(), props, azureClient, res);
+        return new AzureStorageAccountCreateRequest(buildNames.get(0).getResourceName(), po.getStackId(), props, azureClient, res, buildNames);
     }
 
     @Override
@@ -102,7 +103,9 @@ public class AzureStorageAccountResourceBuilder extends AzureSimpleNetworkResour
         private Long stackId;
         private List<Resource> resources;
 
-        public AzureStorageAccountCreateRequest(String name, Long stackId, Map<String, String> props, AzureClient azureClient, List<Resource> resources) {
+        public AzureStorageAccountCreateRequest(String name, Long stackId, Map<String, String> props, AzureClient azureClient, List<Resource> resources,
+                List<Resource> buildNames) {
+            super(buildNames);
             this.name = name;
             this.stackId = stackId;
             this.props = props;

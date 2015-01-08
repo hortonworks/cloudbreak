@@ -107,15 +107,11 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
                             public Boolean call() throws Exception {
                                 List<Resource> resources = new ArrayList<>();
                                 for (final ResourceBuilder resourceBuilder : instanceResourceBuilders.get(cloudPlatform)) {
-                                    List<String> list = resourceBuilder.buildNames(pCO, index, resources);
-                                    List<Resource> resourceList = new ArrayList<Resource>();
-                                    for (String s : list) {
-                                        resourceList.add(new Resource(resourceBuilder.resourceType(), s, stack));
-                                    }
-                                    stackUpdater.addStackResources(stack.getId(), resourceList);
-                                    resources.addAll(resourceList);
-                                    resourceSet.addAll(resourceList);
-                                    CreateResourceRequest createResourceRequest = resourceBuilder.buildCreateRequest(pCO, resources, list, index);
+                                    CreateResourceRequest createResourceRequest =
+                                            resourceBuilder.buildCreateRequest(pCO, resources, resourceBuilder.buildNames(pCO, index, resources), index);
+                                    stackUpdater.addStackResources(stack.getId(), createResourceRequest.getBuildableResources());
+                                    resources.addAll(createResourceRequest.getBuildableResources());
+                                    resourceSet.addAll(createResourceRequest.getBuildableResources());
                                     resourceBuilder.create(createResourceRequest);
                                 }
                                 return true;

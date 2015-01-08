@@ -78,13 +78,13 @@ public class GccFireWallInResourceBuilder extends GccSimpleNetworkResourceBuilde
     }
 
     @Override
-    public List<String> buildNames(GccProvisionContextObject po, int index, List<Resource> resources) {
+    public List<Resource> buildNames(GccProvisionContextObject po, int index, List<Resource> resources) {
         Stack stack = stackRepository.findById(po.getStackId());
-        return Arrays.asList(stack.getName() + "in");
+        return Arrays.asList(new Resource(resourceType(), stack.getName() + "in", stack));
     }
 
     @Override
-    public CreateResourceRequest buildCreateRequest(GccProvisionContextObject po, List<Resource> res, List<String> buildNames, int index) throws Exception {
+    public CreateResourceRequest buildCreateRequest(GccProvisionContextObject po, List<Resource> res, List<Resource> buildNames, int index) throws Exception {
         Stack stack = stackRepository.findById(po.getStackId());
 
         Firewall firewall = new Firewall();
@@ -100,12 +100,12 @@ public class GccFireWallInResourceBuilder extends GccSimpleNetworkResourceBuilde
         allowed3.setPorts(ImmutableList.of("1-65535"));
 
         firewall.setAllowed(ImmutableList.of(allowed1, allowed2, allowed3));
-        firewall.setName(buildNames.get(0));
+        firewall.setName(buildNames.get(0).getResourceName());
         firewall.setSourceRanges(ImmutableList.of("10.0.0.0/16"));
         firewall.setNetwork(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s",
                 po.getProjectId(), po.filterResourcesByType(ResourceType.GCC_NETWORK).get(0).getResourceName()));
 
-        return new GccFireWallInCreateRequest(po.getStackId(), firewall, po.getProjectId(), po.getCompute());
+        return new GccFireWallInCreateRequest(po.getStackId(), firewall, po.getProjectId(), po.getCompute(), buildNames);
     }
 
     @Override
@@ -119,7 +119,8 @@ public class GccFireWallInResourceBuilder extends GccSimpleNetworkResourceBuilde
         private String projectId;
         private Compute compute;
 
-        public GccFireWallInCreateRequest(Long stackId, Firewall firewall, String projectId, Compute compute) {
+        public GccFireWallInCreateRequest(Long stackId, Firewall firewall, String projectId, Compute compute, List<Resource> buildNames) {
+            super(buildNames);
             this.stackId = stackId;
             this.firewall = firewall;
             this.projectId = projectId;

@@ -129,18 +129,19 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
     }
 
     @Override
-    public List<String> buildNames(AzureProvisionContextObject po, int index, List<Resource> resources) {
+    public List<Resource> buildNames(AzureProvisionContextObject po, int index, List<Resource> resources) {
+        Stack stack = stackRepository.findById(po.getStackId());
         String vmName = filterResourcesByType(resources, ResourceType.AZURE_CLOUD_SERVICE).get(0).getResourceName();
-        return Arrays.asList(vmName);
+        return Arrays.asList(new Resource(resourceType(), vmName, stack));
     }
 
     @Override
-    public CreateResourceRequest buildCreateRequest(AzureProvisionContextObject po, List<Resource> res, List<String> buildNames, int index) throws Exception {
+    public CreateResourceRequest buildCreateRequest(AzureProvisionContextObject po, List<Resource> res, List<Resource> buildNames, int index) throws Exception {
         Stack stack = stackRepository.findById(po.getStackId());
         String internalIp = "172.16.0." + (index + VALID_IP_RANGE_START);
         AzureTemplate azureTemplate = (AzureTemplate) stack.getTemplate();
         AzureCredential azureCredential = (AzureCredential) stack.getCredential();
-        byte[] encoded = Base64.encodeBase64(buildNames.get(0).getBytes());
+        byte[] encoded = Base64.encodeBase64(buildNames.get(0).getResourceName().getBytes());
         String label = new String(encoded);
         Map<String, Object> props = new HashMap<>();
         List<Port> ports = new ArrayList<>();
@@ -160,7 +161,7 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
         props.put(LABEL, label);
         props.put(IMAGENAME,
                 azureTemplate.getImageName().equals(AzureStackUtil.IMAGE_NAME) ? po.getOsImageName() : azureTemplate.getImageName());
-        props.put(IMAGESTOREURI, buildimageStoreUri(po.getCommonName(), buildNames.get(0)));
+        props.put(IMAGESTOREURI, buildimageStoreUri(po.getCommonName(), buildNames.get(0).getResourceName()));
         props.put(HOSTNAME, buildNames.get(0));
         props.put(USERNAME, DEFAULT_USER_NAME);
         X509Certificate sshCert = null;
@@ -195,7 +196,7 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
         props.put(VIRTUALNETWORKNAME, po.filterResourcesByType(ResourceType.AZURE_NETWORK).get(0).getResourceName());
         props.put(PORTS, ports);
         props.put(VMTYPE, AzureVmType.valueOf(azureTemplate.getVmType()).vmType().replaceAll(" ", ""));
-        return new AzureVirtualMachineCreateRequest(props, po.getNewAzureClient(azureCredential), res);
+        return new AzureVirtualMachineCreateRequest(props, po.getNewAzureClient(azureCredential), res, buildNames);
     }
 
     private boolean setStackState(Long stackId, Resource resource, AzureClient azureClient, boolean stopped) {
@@ -232,7 +233,8 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
         private AzureClient azureClient;
         private List<Resource> resources;
 
-        public AzureVirtualMachineCreateRequest(Map<String, Object> props, AzureClient azureClient, List<Resource> resources) {
+        public AzureVirtualMachineCreateRequest(Map<String, Object> props, AzureClient azureClient, List<Resource> resources, List<Resource> buildNames) {
+            super(buildNames);
             this.props = props;
             this.azureClient = azureClient;
             this.resources = resources;

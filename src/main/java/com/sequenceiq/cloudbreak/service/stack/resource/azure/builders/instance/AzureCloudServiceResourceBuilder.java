@@ -103,16 +103,17 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
     }
 
     @Override
-    public List<String> buildNames(AzureProvisionContextObject po, int index, List<Resource> resources) {
+    public List<Resource> buildNames(AzureProvisionContextObject po, int index, List<Resource> resources) {
+        Stack stack = stackRepository.findById(po.getStackId());
         String vmName = getVmName(po.filterResourcesByType(ResourceType.AZURE_NETWORK).get(0).getResourceName(), index);
-        return Arrays.asList(vmName + String.valueOf(new Date().getTime()));
+        return Arrays.asList(new Resource(resourceType(), vmName + String.valueOf(new Date().getTime()), stack));
     }
 
     @Override
-    public CreateResourceRequest buildCreateRequest(AzureProvisionContextObject po, List<Resource> res, List<String> buildNames, int index) throws Exception {
+    public CreateResourceRequest buildCreateRequest(AzureProvisionContextObject po, List<Resource> res, List<Resource> buildNames, int index) throws Exception {
         Stack stack = stackRepository.findById(po.getStackId());
         AzureTemplate azureTemplate = (AzureTemplate) stack.getTemplate();
-        String vmName = buildNames.get(0);
+        String vmName = buildNames.get(0).getResourceName();
         if (vmName.length() > MAX_NAME_LENGTH) {
             vmName = vmName.substring(vmName.length() - MAX_NAME_LENGTH, vmName.length());
         }
@@ -120,7 +121,7 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
         props.put(NAME, vmName);
         props.put(DESCRIPTION, azureTemplate.getDescription());
         props.put(AFFINITYGROUP, po.getCommonName());
-        return new AzureCloudServiceCreateRequest(props, po.getNewAzureClient((AzureCredential) stack.getCredential()), res);
+        return new AzureCloudServiceCreateRequest(props, po.getNewAzureClient((AzureCredential) stack.getCredential()), res, buildNames);
     }
 
     @Override
@@ -133,7 +134,8 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
         private AzureClient azureClient;
         private List<Resource> resources;
 
-        public AzureCloudServiceCreateRequest(Map<String, String> props, AzureClient azureClient, List<Resource> resources) {
+        public AzureCloudServiceCreateRequest(Map<String, String> props, AzureClient azureClient, List<Resource> resources, List<Resource> buildNames) {
+            super(buildNames);
             this.props = props;
             this.azureClient = azureClient;
             this.resources = resources;

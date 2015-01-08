@@ -24,9 +24,9 @@ public interface ResourceBuilder<P extends ProvisionContextObject, D extends Del
 
     Boolean stop(SSCO ssco, Resource resource);
 
-    List<String> buildNames(P po, int index, List<Resource> resources);
+    List<Resource> buildNames(P po, int index, List<Resource> resources);
 
-    CreateResourceRequest buildCreateRequest(P po, List<Resource> res, List<String> buildNames, int index) throws Exception;
+    CreateResourceRequest buildCreateRequest(P po, List<Resource> res, List<Resource> buildNames, int index) throws Exception;
 
     ResourceType resourceType();
 

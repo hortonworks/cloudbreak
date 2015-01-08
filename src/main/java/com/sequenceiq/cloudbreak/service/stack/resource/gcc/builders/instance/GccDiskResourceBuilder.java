@@ -111,21 +111,22 @@ public class GccDiskResourceBuilder extends GccSimpleInstanceResourceBuilder {
     }
 
     @Override
-    public List<String> buildNames(GccProvisionContextObject po, int index, List<Resource> resources) {
+    public List<Resource> buildNames(GccProvisionContextObject po, int index, List<Resource> resources) {
         Stack stack = stackRepository.findById(po.getStackId());
-        return Arrays.asList(String.format("%s-%s-%s", stack.getName(), index, new Date().getTime()));
+        Resource resource = new Resource(resourceType(), String.format("%s-%s-%s", stack.getName(), index, new Date().getTime()), stack);
+        return Arrays.asList(resource);
     }
 
     @Override
-    public CreateResourceRequest buildCreateRequest(GccProvisionContextObject po, List<Resource> res, List<String> buildNames, int index) throws Exception {
+    public CreateResourceRequest buildCreateRequest(GccProvisionContextObject po, List<Resource> res, List<Resource> buildNames, int index) throws Exception {
         Stack stack = stackRepository.findById(po.getStackId());
         GccCredential gccCredential = (GccCredential) stack.getCredential();
         GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
         Disk disk = new Disk();
         disk.setSizeGb(SIZE);
-        disk.setName(buildNames.get(0));
+        disk.setName(buildNames.get(0).getResourceName());
         disk.setKind(gccTemplate.getGccRawDiskType().getUrl(po.getProjectId(), gccTemplate.getGccZone()));
-        return new GccDiskCreateRequest(po.getStackId(), res, disk, po.getProjectId(), po.getCompute(), gccTemplate, gccCredential);
+        return new GccDiskCreateRequest(po.getStackId(), res, disk, po.getProjectId(), po.getCompute(), gccTemplate, gccCredential, buildNames);
     }
 
     @Override
@@ -144,7 +145,8 @@ public class GccDiskResourceBuilder extends GccSimpleInstanceResourceBuilder {
         private GccCredential gccCredential;
 
         public GccDiskCreateRequest(Long stackId, List<Resource> resources, Disk disk,
-                String projectId, Compute compute, GccTemplate gccTemplate, GccCredential gccCredential) {
+                String projectId, Compute compute, GccTemplate gccTemplate, GccCredential gccCredential, List<Resource> buildNames) {
+            super(buildNames);
             this.stackId = stackId;
             this.resources = resources;
             this.disk = disk;

@@ -142,13 +142,14 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
     }
 
     @Override
-    public List<String> buildNames(GccProvisionContextObject po, int index, List<Resource> resources) {
+    public List<Resource> buildNames(GccProvisionContextObject po, int index, List<Resource> resources) {
         Stack stack = stackRepository.findById(po.getStackId());
-        return Arrays.asList(String.format("%s-%s-%s", stack.getName(), index, new Date().getTime()));
+        Resource resource = new Resource(resourceType(), String.format("%s-%s-%s", stack.getName(), index, new Date().getTime()), stack);
+        return Arrays.asList(resource);
     }
 
     @Override
-    public CreateResourceRequest buildCreateRequest(GccProvisionContextObject po, List<Resource> res, List<String> buildNames, int index) throws Exception {
+    public CreateResourceRequest buildCreateRequest(GccProvisionContextObject po, List<Resource> res, List<Resource> buildNames, int index) throws Exception {
         Stack stack = stackRepository.findById(po.getStackId());
         GccCredential gccCredential = (GccCredential) stack.getCredential();
         GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
@@ -160,7 +161,7 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
         Instance instance = new Instance();
         instance.setMachineType(String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/machineTypes/%s",
                 po.getProjectId(), gccTemplate.getGccZone().getValue(), gccTemplate.getGccInstanceType().getValue()));
-        instance.setName(buildNames.get(0));
+        instance.setName(buildNames.get(0).getResourceName());
         instance.setCanIpForward(Boolean.TRUE);
         instance.setNetworkInterfaces(getNetworkInterface(po.getProjectId(), stack.getName()));
         instance.setDisks(listOfDisks);
@@ -179,7 +180,7 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
         metadata.getItems().add(startupScript);
         instance.setMetadata(metadata);
 
-        return new GccInstanceCreateRequest(po.getStackId(), res, instance, po.getProjectId(), po.getCompute(), gccTemplate, gccCredential);
+        return new GccInstanceCreateRequest(po.getStackId(), res, instance, po.getProjectId(), po.getCompute(), gccTemplate, gccCredential, buildNames);
     }
 
     public Instance describe(Stack stack, Compute compute, Resource resource) throws IOException {
@@ -217,7 +218,8 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
         private GccCredential gccCredential;
 
         public GccInstanceCreateRequest(Long stackId, List<Resource> resources, Instance instance,
-                String projectId, Compute compute, GccTemplate gccTemplate, GccCredential gccCredential) {
+                String projectId, Compute compute, GccTemplate gccTemplate, GccCredential gccCredential, List<Resource> buildNames) {
+            super(buildNames);
             this.stackId = stackId;
             this.resources = resources;
             this.instance = instance;

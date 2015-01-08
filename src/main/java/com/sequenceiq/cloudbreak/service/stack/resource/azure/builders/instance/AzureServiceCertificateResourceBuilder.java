@@ -61,17 +61,18 @@ public class AzureServiceCertificateResourceBuilder extends AzureSimpleInstanceR
     }
 
     @Override
-    public List<String> buildNames(AzureProvisionContextObject po, int index, List<Resource> resources) {
+    public List<Resource> buildNames(AzureProvisionContextObject po, int index, List<Resource> resources) {
+        Stack stack = stackRepository.findById(po.getStackId());
         String name = filterResourcesByType(resources, ResourceType.AZURE_CLOUD_SERVICE).get(0).getResourceName();
-        return Arrays.asList(name);
+        return Arrays.asList(new Resource(resourceType(), name, stack));
     }
 
     @Override
-    public CreateResourceRequest buildCreateRequest(AzureProvisionContextObject po, List<Resource> res, List<String> buildNames, int index) throws Exception {
+    public CreateResourceRequest buildCreateRequest(AzureProvisionContextObject po, List<Resource> res, List<Resource> buildNames, int index) throws Exception {
         Stack stack = stackRepository.findById(po.getStackId());
         AzureCredential azureCredential = (AzureCredential) stack.getCredential();
         Map<String, String> props = new HashMap<>();
-        props.put(NAME, buildNames.get(0));
+        props.put(NAME, buildNames.get(0).getResourceName());
         X509Certificate sshCert = null;
         try {
             sshCert = azureStackUtil.createX509Certificate(azureCredential);
@@ -85,7 +86,7 @@ public class AzureServiceCertificateResourceBuilder extends AzureSimpleInstanceR
         } catch (CertificateEncodingException e) {
             throw new StackCreationFailureException(e);
         }
-        return new AzureServiceCertificateCreateRequest(props, po.getNewAzureClient(azureCredential), res);
+        return new AzureServiceCertificateCreateRequest(props, po.getNewAzureClient(azureCredential), res, buildNames);
     }
 
     @Override
@@ -98,7 +99,8 @@ public class AzureServiceCertificateResourceBuilder extends AzureSimpleInstanceR
         private AzureClient azureClient;
         private List<Resource> resources;
 
-        public AzureServiceCertificateCreateRequest(Map<String, String> props, AzureClient azureClient, List<Resource> resources) {
+        public AzureServiceCertificateCreateRequest(Map<String, String> props, AzureClient azureClient, List<Resource> resources, List<Resource> buildNames) {
+            super(buildNames);
             this.props = props;
             this.azureClient = azureClient;
             this.resources = resources;
