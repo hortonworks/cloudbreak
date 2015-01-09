@@ -31,6 +31,7 @@ public class CloudbreakUsageController {
     @ResponseBody
     public ResponseEntity<List<CloudbreakUsageJson>> deployerUsages(@ModelAttribute("user") CbUser user,
             @RequestParam(value = "since", required = false) Long since,
+            @RequestParam(value = "filterenddate", required = false) Long filterEndDate,
             @RequestParam(value = "user", required = false) String userId,
             @RequestParam(value = "account", required = false) String accountId,
             @RequestParam(value = "cloud", required = false) String cloud,
@@ -40,8 +41,9 @@ public class CloudbreakUsageController {
             @RequestParam(value = "blueprintname", required = false) String bpName,
             @RequestParam(value = "blueprintid", required = false) Long bpId) {
         String region = getZoneByProvider(cloud, zone);
-        CbUsageFilterParameters params = new CbUsageFilterParameters.Builder().setAccount(accountId).setOwner(userId).setSince(since).setCloud(cloud)
-                .setRegion(region).setVmType(vmtype).setInstanceHours(hours).setBpId(bpId).setBpName(bpName).build();
+        CbUsageFilterParameters params = new CbUsageFilterParameters.Builder().setAccount(accountId).setOwner(userId)
+                .setSince(since).setCloud(cloud).setRegion(region).setVmType(vmtype).setInstanceHours(hours)
+                .setBpId(bpId).setBpName(bpName).setFilterEndDate(filterEndDate).build();
         List<CloudbreakUsageJson> usages = cloudbreakUsagesFacade.getUsagesFor(params);
         return new ResponseEntity<>(usages, HttpStatus.OK);
     }
@@ -50,6 +52,7 @@ public class CloudbreakUsageController {
     @ResponseBody
     public ResponseEntity<List<CloudbreakUsageJson>> accountUsages(@ModelAttribute("user") CbUser user,
             @RequestParam(value = "since", required = false) Long since,
+            @RequestParam(value = "filterenddate", required = false) Long filterEndDate,
             @RequestParam(value = "user", required = false) String userId,
             @RequestParam(value = "cloud", required = false) String cloud,
             @RequestParam(value = "zone", required = false) String zone,
@@ -58,8 +61,9 @@ public class CloudbreakUsageController {
             @RequestParam(value = "blueprintname", required = false) String bpName,
             @RequestParam(value = "blueprintid", required = false) Long bpId) {
         String region = getZoneByProvider(cloud, zone);
-        CbUsageFilterParameters params = new CbUsageFilterParameters.Builder().setAccount(user.getAccount()).setOwner(userId).setSince(since)
-                .setCloud(cloud).setRegion(region).setVmType(vmtype).setInstanceHours(hours).setBpId(bpId).setBpName(bpName).build();
+        CbUsageFilterParameters params = new CbUsageFilterParameters.Builder().setAccount(user.getAccount()).setOwner(userId)
+                .setSince(since).setCloud(cloud).setRegion(region).setVmType(vmtype).setInstanceHours(hours).setBpId(bpId)
+                .setBpName(bpName).setFilterEndDate(filterEndDate).build();
         List<CloudbreakUsageJson> usages = cloudbreakUsagesFacade.getUsagesFor(params);
         return new ResponseEntity<>(usages, HttpStatus.OK);
     }
@@ -68,6 +72,7 @@ public class CloudbreakUsageController {
     @ResponseBody
     public ResponseEntity<List<CloudbreakUsageJson>> userUsages(@ModelAttribute("user") CbUser user,
             @RequestParam(value = "since", required = false) Long since,
+            @RequestParam(value = "filterenddate", required = false) Long filterEndDate,
             @RequestParam(value = "cloud", required = false) String cloud,
             @RequestParam(value = "zone", required = false) String zone,
             @RequestParam(value = "vmtype", required = false) String vmtype,
@@ -75,8 +80,9 @@ public class CloudbreakUsageController {
             @RequestParam(value = "blueprintname", required = false) String bpName,
             @RequestParam(value = "blueprintid", required = false) Long bpId) {
         String region = getZoneByProvider(cloud, zone);
-        CbUsageFilterParameters params = new CbUsageFilterParameters.Builder().setAccount(user.getAccount()).setOwner(user.getUserId()).setSince(since)
-                .setCloud(cloud).setRegion(region).setVmType(vmtype).setInstanceHours(hours).setBpId(bpId).setBpName(bpName).build();
+        CbUsageFilterParameters params = new CbUsageFilterParameters.Builder().setAccount(user.getAccount()).setOwner(user.getUserId())
+                .setSince(since).setCloud(cloud).setRegion(region).setVmType(vmtype).setInstanceHours(hours).setBpId(bpId)
+                .setBpName(bpName).setFilterEndDate(filterEndDate).build();
         List<CloudbreakUsageJson> usages = cloudbreakUsagesFacade.getUsagesFor(params);
         return new ResponseEntity<>(usages, HttpStatus.OK);
     }

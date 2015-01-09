@@ -44,4 +44,14 @@ public class CloudbreakUsageSpecifications {
             }
         };
     }
+
+    public static Specification<CloudbreakUsage> usagesBefore(final Long date) {
+        return new Specification<CloudbreakUsage>() {
+            @Override
+            public Predicate toPredicate(final Root<CloudbreakUsage> cloudbreakUsageRoot, final CriteriaQuery<?> query,
+                    final CriteriaBuilder cb) {
+                return (date == null) ? cb.and() : cb.lessThan(cloudbreakUsageRoot.<Date>get("day"), new Date(date));
+            }
+        };
+    }
 }

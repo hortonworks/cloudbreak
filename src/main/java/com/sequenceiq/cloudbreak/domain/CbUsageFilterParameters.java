@@ -10,6 +10,7 @@ public class CbUsageFilterParameters {
     private Long instanceHours;
     private Long bpId;
     private String bpName;
+    private Long filterEndDate;
 
     private CbUsageFilterParameters(Builder builder) {
         this.account = builder.account;
@@ -21,6 +22,7 @@ public class CbUsageFilterParameters {
         this.instanceHours = builder.instanceHours;
         this.bpId = builder.bpId;
         this.bpName = builder.bpName;
+        this.filterEndDate = builder.filterEndDate;
     }
 
     public String getAccount() {
@@ -59,6 +61,10 @@ public class CbUsageFilterParameters {
         return bpName;
     }
 
+    public Long getFilterEndDate() {
+        return filterEndDate;
+    }
+
     public static class Builder {
         private String account;
         private String owner;
@@ -69,6 +75,7 @@ public class CbUsageFilterParameters {
         private Long instanceHours;
         private Long bpId;
         private String bpName;
+        private Long filterEndDate;
 
         public Builder setAccount(String account) {
             this.account = account;
@@ -112,6 +119,11 @@ public class CbUsageFilterParameters {
 
         public Builder setBpName(String bpName) {
             this.bpName = bpName;
+            return this;
+        }
+
+        public Builder setFilterEndDate(Long filterEndDate) {
+            this.filterEndDate = filterEndDate;
             return this;
         }
 
