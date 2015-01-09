@@ -35,6 +35,10 @@ a:active, a:hover {
     outline: 0
 }
 
+a:hover {
+  cursor:pointer;
+}
+
 abbr[title] {
     border-bottom: 1px dotted
 }
