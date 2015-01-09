@@ -22,22 +22,22 @@ public class DummyExNetworkResourceBuilder
         implements ResourceBuilder<DummyProvisionContextObject, DummyDeleteContextObject, DummyDescribeContextObject, DummyStartStopContextObject> {
 
     @Override
-    public Boolean create(CreateResourceRequest cRR) throws Exception {
+    public Boolean create(CreateResourceRequest createResourceRequest) throws Exception {
         throw new BadRequestException("It's a test");
     }
 
     @Override
-    public Boolean delete(Resource resource, DummyDeleteContextObject dummyDeleteContextObject) throws Exception {
+    public Boolean delete(Resource resource, DummyDeleteContextObject deleteContextObject) throws Exception {
         return true;
     }
 
     @Override
-    public Boolean rollback(Resource resource, DummyDeleteContextObject dummyDeleteContextObject) throws Exception {
+    public Boolean rollback(Resource resource, DummyDeleteContextObject deleteContextObject) throws Exception {
         return true;
     }
 
     @Override
-    public Optional<String> describe(Resource resource, DummyDescribeContextObject dummyDescribeContextObject) throws Exception {
+    public Optional<String> describe(Resource resource, DummyDescribeContextObject describeContextObject) throws Exception {
         return Optional.absent();
     }
 
@@ -47,22 +47,23 @@ public class DummyExNetworkResourceBuilder
     }
 
     @Override
-    public Boolean start(DummyStartStopContextObject dummyStartStopContextObject, Resource resource) {
+    public Boolean start(DummyStartStopContextObject startStopContextObject, Resource resource) {
         return true;
     }
 
     @Override
-    public Boolean stop(DummyStartStopContextObject dummyStartStopContextObject, Resource resource) {
+    public Boolean stop(DummyStartStopContextObject startStopContextObject, Resource resource) {
         return true;
     }
 
     @Override
-    public List<Resource> buildResources(DummyProvisionContextObject po, int index, List<Resource> resources) {
+    public List<Resource> buildResources(DummyProvisionContextObject provisionContextObject, int index, List<Resource> resources) {
         return Arrays.asList(new Resource(resourceType(), "network" + index, new Stack()));
     }
 
     @Override
-    public CreateResourceRequest buildCreateRequest(DummyProvisionContextObject po, List<Resource> res, List<Resource> buildNames, int index) throws Exception {
+    public CreateResourceRequest buildCreateRequest(DummyProvisionContextObject provisionContextObject, List<Resource> resources,
+            List<Resource> buildResources, int index) throws Exception {
         return new DummyExNetworkCreateRequest(new ArrayList<Resource>());
     }
 

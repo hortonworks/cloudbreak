@@ -42,8 +42,8 @@ public class AzureServiceCertificateResourceBuilder extends AzureSimpleInstanceR
     private AzureStackUtil azureStackUtil;
 
     @Override
-    public Boolean create(final CreateResourceRequest cRR) throws Exception {
-        AzureServiceCertificateCreateRequest aCSCR = (AzureServiceCertificateCreateRequest) cRR;
+    public Boolean create(final CreateResourceRequest createResourceRequest) throws Exception {
+        AzureServiceCertificateCreateRequest aCSCR = (AzureServiceCertificateCreateRequest) createResourceRequest;
         HttpResponseDecorator serviceCertificate = (HttpResponseDecorator) aCSCR.getAzureClient().createServiceCertificate(aCSCR.getProps());
         String requestId = (String) aCSCR.getAzureClient().getRequestId(serviceCertificate);
         waitUntilComplete(aCSCR.getAzureClient(), requestId);
@@ -51,28 +51,29 @@ public class AzureServiceCertificateResourceBuilder extends AzureSimpleInstanceR
     }
 
     @Override
-    public Boolean delete(Resource resource, AzureDeleteContextObject azureDeleteContextObject) throws Exception {
+    public Boolean delete(Resource resource, AzureDeleteContextObject deleteContextObject) throws Exception {
         return true;
     }
 
     @Override
-    public Optional<String> describe(Resource resource, AzureDescribeContextObject azureDescribeContextObject) throws Exception {
+    public Optional<String> describe(Resource resource, AzureDescribeContextObject describeContextObject) throws Exception {
         return Optional.absent();
     }
 
     @Override
-    public List<Resource> buildResources(AzureProvisionContextObject po, int index, List<Resource> resources) {
-        Stack stack = stackRepository.findById(po.getStackId());
+    public List<Resource> buildResources(AzureProvisionContextObject provisionContextObject, int index, List<Resource> resources) {
+        Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         String name = filterResourcesByType(resources, ResourceType.AZURE_CLOUD_SERVICE).get(0).getResourceName();
         return Arrays.asList(new Resource(resourceType(), name, stack));
     }
 
     @Override
-    public CreateResourceRequest buildCreateRequest(AzureProvisionContextObject po, List<Resource> res, List<Resource> buildNames, int index) throws Exception {
-        Stack stack = stackRepository.findById(po.getStackId());
+    public CreateResourceRequest buildCreateRequest(AzureProvisionContextObject provisionContextObject, List<Resource> resources,
+            List<Resource> buildResources, int index) throws Exception {
+        Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         AzureCredential azureCredential = (AzureCredential) stack.getCredential();
         Map<String, String> props = new HashMap<>();
-        props.put(NAME, buildNames.get(0).getResourceName());
+        props.put(NAME, buildResources.get(0).getResourceName());
         X509Certificate sshCert = null;
         try {
             sshCert = azureStackUtil.createX509Certificate(azureCredential);
@@ -86,7 +87,7 @@ public class AzureServiceCertificateResourceBuilder extends AzureSimpleInstanceR
         } catch (CertificateEncodingException e) {
             throw new StackCreationFailureException(e);
         }
-        return new AzureServiceCertificateCreateRequest(props, po.getNewAzureClient(azureCredential), res, buildNames);
+        return new AzureServiceCertificateCreateRequest(props, provisionContextObject.getNewAzureClient(azureCredential), resources, buildResources);
     }
 
     @Override

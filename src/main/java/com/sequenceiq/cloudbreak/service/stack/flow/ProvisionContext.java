@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.BuildStackFailureException;
@@ -115,12 +116,19 @@ public class ProvisionContext {
                         });
                         futures.add(submit);
                     }
+
+                    StringBuilder sb = new StringBuilder();
+                    Optional<Exception> exception = Optional.absent();
                     for (Future<Boolean> future : futures) {
                         try {
                             future.get();
                         } catch (Exception ex) {
-                            throw new BuildStackFailureException(ex.getMessage(), ex, stackRepository.findOneWithLists(stackId).getResources());
+                            exception = Optional.fromNullable(ex);
+                            sb.append(String.format("%s, ", ex.getMessage()));
                         }
+                    }
+                    if (exception.isPresent()) {
+                        throw new BuildStackFailureException(sb.toString(), exception.orNull(), stackRepository.findOneWithLists(stackId).getResources());
                     }
 
                     LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_COMPLETE_EVENT, stack.getId());

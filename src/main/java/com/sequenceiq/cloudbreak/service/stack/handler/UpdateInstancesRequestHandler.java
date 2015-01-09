@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.BuildStackFailureException;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
@@ -119,13 +120,21 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
                         });
                         futures.add(submit);
                     }
+
+                    StringBuilder sb = new StringBuilder();
+                    Optional<Exception> exception = Optional.absent();
                     for (Future<Boolean> future : futures) {
                         try {
                             future.get();
-                        } catch (Exception e) {
-                            throw new BuildStackFailureException(e.getMessage(), e, resourceSet);
+                        } catch (Exception ex) {
+                            exception = Optional.fromNullable(ex);
+                            sb.append(String.format("%s, ", ex.getMessage()));
                         }
                     }
+                    if (exception.isPresent()) {
+                        throw new BuildStackFailureException(sb.toString(), exception.orNull(), stackRepository.findOneWithLists(stackId).getResources());
+                    }
+
                     LOGGER.info("Publishing {} event.", ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT);
                     reactor.notify(ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT,
                             Event.wrap(new AddInstancesComplete(cloudPlatform, stack.getId(), resourceSet)));

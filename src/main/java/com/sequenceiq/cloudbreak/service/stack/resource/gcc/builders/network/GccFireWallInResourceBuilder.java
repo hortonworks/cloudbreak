@@ -45,22 +45,22 @@ public class GccFireWallInResourceBuilder extends GccSimpleNetworkResourceBuilde
     private JsonHelper jsonHelper;
 
     @Override
-    public Boolean create(CreateResourceRequest cRR) throws Exception {
-        final GccFireWallInCreateRequest gFWICR = (GccFireWallInCreateRequest) cRR;
+    public Boolean create(CreateResourceRequest createResourceRequest) throws Exception {
+        final GccFireWallInCreateRequest gFWICR = (GccFireWallInCreateRequest) createResourceRequest;
         Compute.Firewalls.Insert firewallInsert = gFWICR.getCompute().firewalls().insert(gFWICR.getProjectId(), gFWICR.getFirewall());
         firewallInsert.execute();
         return true;
     }
 
     @Override
-    public Boolean delete(Resource resource, GccDeleteContextObject d) throws Exception {
-        Stack stack = stackRepository.findById(d.getStackId());
+    public Boolean delete(Resource resource, GccDeleteContextObject deleteContextObject) throws Exception {
+        Stack stack = stackRepository.findById(deleteContextObject.getStackId());
         try {
             GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
             GccCredential gccCredential = (GccCredential) stack.getCredential();
-            Operation operation = d.getCompute().firewalls().delete(gccCredential.getProjectId(), resource.getResourceName()).execute();
-            Compute.ZoneOperations.Get zoneOperations = createZoneOperations(d.getCompute(), gccCredential, gccTemplate, operation);
-            Compute.GlobalOperations.Get globalOperations = createGlobalOperations(d.getCompute(), gccCredential, gccTemplate, operation);
+            Operation operation = deleteContextObject.getCompute().firewalls().delete(gccCredential.getProjectId(), resource.getResourceName()).execute();
+            Compute.ZoneOperations.Get zoneOperations = createZoneOperations(deleteContextObject.getCompute(), gccCredential, gccTemplate, operation);
+            Compute.GlobalOperations.Get globalOperations = createGlobalOperations(deleteContextObject.getCompute(), gccCredential, gccTemplate, operation);
             GccRemoveReadyPollerObject gccRemoveReady =
                     new GccRemoveReadyPollerObject(zoneOperations, globalOperations, stack, resource.getResourceName(), operation.getName());
             gccRemoveReadyPollerObjectPollingService.pollWithTimeout(gccRemoveCheckerStatus, gccRemoveReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
@@ -73,19 +73,20 @@ public class GccFireWallInResourceBuilder extends GccSimpleNetworkResourceBuilde
     }
 
     @Override
-    public Optional<String> describe(Resource resource, GccDescribeContextObject dco) throws Exception {
+    public Optional<String> describe(Resource resource, GccDescribeContextObject describeContextObject) throws Exception {
         return Optional.absent();
     }
 
     @Override
-    public List<Resource> buildResources(GccProvisionContextObject po, int index, List<Resource> resources) {
-        Stack stack = stackRepository.findById(po.getStackId());
+    public List<Resource> buildResources(GccProvisionContextObject provisionContextObject, int index, List<Resource> resources) {
+        Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         return Arrays.asList(new Resource(resourceType(), stack.getName() + "in", stack));
     }
 
     @Override
-    public CreateResourceRequest buildCreateRequest(GccProvisionContextObject po, List<Resource> res, List<Resource> buildNames, int index) throws Exception {
-        Stack stack = stackRepository.findById(po.getStackId());
+    public CreateResourceRequest buildCreateRequest(GccProvisionContextObject provisionContextObject, List<Resource> resources,
+            List<Resource> buildResources, int index) throws Exception {
+        Stack stack = stackRepository.findById(provisionContextObject.getStackId());
 
         Firewall firewall = new Firewall();
         Firewall.Allowed allowed1 = new Firewall.Allowed();
@@ -100,12 +101,13 @@ public class GccFireWallInResourceBuilder extends GccSimpleNetworkResourceBuilde
         allowed3.setPorts(ImmutableList.of("1-65535"));
 
         firewall.setAllowed(ImmutableList.of(allowed1, allowed2, allowed3));
-        firewall.setName(buildNames.get(0).getResourceName());
+        firewall.setName(buildResources.get(0).getResourceName());
         firewall.setSourceRanges(ImmutableList.of("10.0.0.0/16"));
         firewall.setNetwork(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s",
-                po.getProjectId(), po.filterResourcesByType(ResourceType.GCC_NETWORK).get(0).getResourceName()));
+                provisionContextObject.getProjectId(), provisionContextObject.filterResourcesByType(ResourceType.GCC_NETWORK).get(0).getResourceName()));
 
-        return new GccFireWallInCreateRequest(po.getStackId(), firewall, po.getProjectId(), po.getCompute(), buildNames);
+        return new GccFireWallInCreateRequest(provisionContextObject.getStackId(), firewall, provisionContextObject.getProjectId(),
+                provisionContextObject.getCompute(), buildResources);
     }
 
     @Override

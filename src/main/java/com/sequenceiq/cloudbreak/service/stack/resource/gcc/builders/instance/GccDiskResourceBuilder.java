@@ -59,8 +59,8 @@ public class GccDiskResourceBuilder extends GccSimpleInstanceResourceBuilder {
     private GccStackUtil gccStackUtil;
 
     @Override
-    public Boolean create(final CreateResourceRequest cRR) throws Exception {
-        final GccDiskCreateRequest gDCR = (GccDiskCreateRequest) cRR;
+    public Boolean create(final CreateResourceRequest createResourceRequest) throws Exception {
+        final GccDiskCreateRequest gDCR = (GccDiskCreateRequest) createResourceRequest;
         Stack stack = stackRepository.findById(gDCR.getStackId());
         Compute.Disks.Insert insDisk = gDCR.getCompute().disks().insert(gDCR.getProjectId(), gDCR.getGccTemplate().getGccZone().getValue(), gDCR.getDisk());
         insDisk.setSourceImage(gccStackUtil.getAmbariUbuntu(gDCR.getProjectId()));
@@ -76,15 +76,15 @@ public class GccDiskResourceBuilder extends GccSimpleInstanceResourceBuilder {
     }
 
     @Override
-    public Boolean delete(Resource resource, GccDeleteContextObject d) throws Exception {
-        Stack stack = stackRepository.findById(d.getStackId());
+    public Boolean delete(Resource resource, GccDeleteContextObject deleteContextObject) throws Exception {
+        Stack stack = stackRepository.findById(deleteContextObject.getStackId());
         try {
             GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
             GccCredential gccCredential = (GccCredential) stack.getCredential();
-            Operation operation = d.getCompute().disks()
+            Operation operation = deleteContextObject.getCompute().disks()
                     .delete(gccCredential.getProjectId(), gccTemplate.getGccZone().getValue(), resource.getResourceName()).execute();
-            Compute.ZoneOperations.Get zoneOperations = createZoneOperations(d.getCompute(), gccCredential, gccTemplate, operation);
-            Compute.GlobalOperations.Get globalOperations = createGlobalOperations(d.getCompute(), gccCredential, gccTemplate, operation);
+            Compute.ZoneOperations.Get zoneOperations = createZoneOperations(deleteContextObject.getCompute(), gccCredential, gccTemplate, operation);
+            Compute.GlobalOperations.Get globalOperations = createGlobalOperations(deleteContextObject.getCompute(), gccCredential, gccTemplate, operation);
             GccRemoveReadyPollerObject gccRemoveReady =
                     new GccRemoveReadyPollerObject(zoneOperations, globalOperations, stack, resource.getResourceName(), operation.getName());
             gccRemoveReadyPollerObjectPollingService.pollWithTimeout(gccRemoveCheckerStatus, gccRemoveReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
@@ -97,13 +97,14 @@ public class GccDiskResourceBuilder extends GccSimpleInstanceResourceBuilder {
     }
 
     @Override
-    public Optional<String> describe(Resource resource, GccDescribeContextObject dco) throws Exception {
-        Stack stack = stackRepository.findById(dco.getStackId());
+    public Optional<String> describe(Resource resource, GccDescribeContextObject describeContextObject) throws Exception {
+        Stack stack = stackRepository.findById(describeContextObject.getStackId());
         GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
         GccCredential gccCredential = (GccCredential) stack.getCredential();
         try {
             Compute.Disks.Get getDisk =
-                    dco.getCompute().disks().get(gccCredential.getProjectId(), gccTemplate.getGccZone().getValue(), resource.getResourceName());
+                    describeContextObject.getCompute().disks().get(gccCredential.getProjectId(), gccTemplate.getGccZone().getValue(),
+                            resource.getResourceName());
             return Optional.fromNullable(getDisk.execute().toPrettyString());
         } catch (IOException e) {
             return Optional.fromNullable(jsonHelper.createJsonFromString(String.format("{\"Disk\": {%s}}", ERROR)).toString());
@@ -111,22 +112,24 @@ public class GccDiskResourceBuilder extends GccSimpleInstanceResourceBuilder {
     }
 
     @Override
-    public List<Resource> buildResources(GccProvisionContextObject po, int index, List<Resource> resources) {
-        Stack stack = stackRepository.findById(po.getStackId());
+    public List<Resource> buildResources(GccProvisionContextObject provisionContextObject, int index, List<Resource> resources) {
+        Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         Resource resource = new Resource(resourceType(), String.format("%s-%s-%s", stack.getName(), index, new Date().getTime()), stack);
         return Arrays.asList(resource);
     }
 
     @Override
-    public CreateResourceRequest buildCreateRequest(GccProvisionContextObject po, List<Resource> res, List<Resource> buildNames, int index) throws Exception {
-        Stack stack = stackRepository.findById(po.getStackId());
+    public CreateResourceRequest buildCreateRequest(GccProvisionContextObject provisionContextObject, List<Resource> resources,
+            List<Resource> buildResources, int index) throws Exception {
+        Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         GccCredential gccCredential = (GccCredential) stack.getCredential();
         GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
         Disk disk = new Disk();
         disk.setSizeGb(SIZE);
-        disk.setName(buildNames.get(0).getResourceName());
-        disk.setKind(gccTemplate.getGccRawDiskType().getUrl(po.getProjectId(), gccTemplate.getGccZone()));
-        return new GccDiskCreateRequest(po.getStackId(), res, disk, po.getProjectId(), po.getCompute(), gccTemplate, gccCredential, buildNames);
+        disk.setName(buildResources.get(0).getResourceName());
+        disk.setKind(gccTemplate.getGccRawDiskType().getUrl(provisionContextObject.getProjectId(), gccTemplate.getGccZone()));
+        return new GccDiskCreateRequest(provisionContextObject.getStackId(), resources, disk, provisionContextObject.getProjectId(),
+                provisionContextObject.getCompute(), gccTemplate, gccCredential, buildResources);
     }
 
     @Override

@@ -69,17 +69,17 @@ public abstract class AzureSimpleNetworkResourceBuilder implements
     }
 
     @Override
-    public Boolean start(AzureStartStopContextObject aSSCO, Resource resource) {
+    public Boolean start(AzureStartStopContextObject startStopContextObject, Resource resource) {
         return true;
     }
 
     @Override
-    public Boolean stop(AzureStartStopContextObject aSSCO, Resource resource) {
+    public Boolean stop(AzureStartStopContextObject startStopContextObject, Resource resource) {
         return true;
     }
 
     @Override
-    public Boolean rollback(Resource resource, AzureDeleteContextObject azureDeleteContextObject) throws Exception {
-        return delete(resource, azureDeleteContextObject);
+    public Boolean rollback(Resource resource, AzureDeleteContextObject deleteContextObject) throws Exception {
+        return delete(resource, deleteContextObject);
     }
 }

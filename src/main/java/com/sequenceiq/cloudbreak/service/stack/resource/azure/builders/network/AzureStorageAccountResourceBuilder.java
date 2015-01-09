@@ -38,8 +38,8 @@ public class AzureStorageAccountResourceBuilder extends AzureSimpleNetworkResour
     private StackRepository stackRepository;
 
     @Override
-    public Boolean create(CreateResourceRequest cRR) throws Exception {
-        AzureStorageAccountCreateRequest aCSCR = (AzureStorageAccountCreateRequest) cRR;
+    public Boolean create(CreateResourceRequest createResourceRequest) throws Exception {
+        AzureStorageAccountCreateRequest aCSCR = (AzureStorageAccountCreateRequest) createResourceRequest;
         try {
             aCSCR.getAzureClient().getStorageAccount(aCSCR.getName());
         } catch (Exception ex) {
@@ -59,14 +59,14 @@ public class AzureStorageAccountResourceBuilder extends AzureSimpleNetworkResour
     }
 
     @Override
-    public Boolean delete(Resource resource, AzureDeleteContextObject aDCO) throws Exception {
+    public Boolean delete(Resource resource, AzureDeleteContextObject deleteContextObject) throws Exception {
         return true;
     }
 
     @Override
-    public Optional<String> describe(Resource resource, AzureDescribeContextObject aDCO) throws Exception {
+    public Optional<String> describe(Resource resource, AzureDescribeContextObject describeContextObject) throws Exception {
         try {
-            Object storageAccount = aDCO.getAzureClient().getStorageAccount(resource.getResourceName());
+            Object storageAccount = describeContextObject.getAzureClient().getStorageAccount(resource.getResourceName());
             return Optional.fromNullable(storageAccount.toString());
         } catch (Exception ex) {
             return Optional.fromNullable(String.format("{\"StorageService\": {%s}}", ERROR));
@@ -74,21 +74,23 @@ public class AzureStorageAccountResourceBuilder extends AzureSimpleNetworkResour
     }
 
     @Override
-    public List<Resource> buildResources(AzureProvisionContextObject po, int index, List<Resource> resources) {
-        Stack stack = stackRepository.findById(po.getStackId());
-        return Arrays.asList(new Resource(resourceType(), po.getCommonName(), stack));
+    public List<Resource> buildResources(AzureProvisionContextObject provisionContextObject, int index, List<Resource> resources) {
+        Stack stack = stackRepository.findById(provisionContextObject.getStackId());
+        return Arrays.asList(new Resource(resourceType(), provisionContextObject.getCommonName(), stack));
     }
 
     @Override
-    public CreateResourceRequest buildCreateRequest(AzureProvisionContextObject po, List<Resource> res, List<Resource> buildNames, int index) throws Exception {
-        Stack stack = stackRepository.findById(po.getStackId());
+    public CreateResourceRequest buildCreateRequest(AzureProvisionContextObject provisionContextObject, List<Resource> resources,
+            List<Resource> buildResources, int index) throws Exception {
+        Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         AzureCredential credential = (AzureCredential) stack.getCredential();
         Map<String, String> props = new HashMap<>();
-        props.put(NAME, buildNames.get(0).getResourceName());
+        props.put(NAME, buildResources.get(0).getResourceName());
         props.put(DESCRIPTION, stack.getTemplate().getDescription());
-        props.put(AFFINITYGROUP, po.getCommonName());
-        AzureClient azureClient = po.getNewAzureClient(credential);
-        return new AzureStorageAccountCreateRequest(buildNames.get(0).getResourceName(), po.getStackId(), props, azureClient, res, buildNames);
+        props.put(AFFINITYGROUP, provisionContextObject.getCommonName());
+        AzureClient azureClient = provisionContextObject.getNewAzureClient(credential);
+        return new AzureStorageAccountCreateRequest(buildResources.get(0).getResourceName(), provisionContextObject.getStackId(), props, azureClient,
+                resources, buildResources);
     }
 
     @Override

@@ -37,8 +37,8 @@ public class AzureNetworkResourceBuilder extends AzureSimpleNetworkResourceBuild
     private StackRepository stackRepository;
 
     @Override
-    public Boolean create(CreateResourceRequest cRR) throws Exception {
-        AzureNetworkCreateRequest aCSCR = (AzureNetworkCreateRequest) cRR;
+    public Boolean create(CreateResourceRequest createResourceRequest) throws Exception {
+        AzureNetworkCreateRequest aCSCR = (AzureNetworkCreateRequest) createResourceRequest;
         if (!aCSCR.getAzureClient().getVirtualNetworkConfiguration().toString().contains(aCSCR.getName())) {
             HttpResponseDecorator virtualNetworkResponse = (HttpResponseDecorator) aCSCR.getAzureClient().createVirtualNetwork(aCSCR.getProps());
             String requestId = (String) aCSCR.getAzureClient().getRequestId(virtualNetworkResponse);
@@ -48,14 +48,14 @@ public class AzureNetworkResourceBuilder extends AzureSimpleNetworkResourceBuild
     }
 
     @Override
-    public Boolean delete(Resource resource, AzureDeleteContextObject aDCO) throws Exception {
-        Stack stack = stackRepository.findById(aDCO.getStackId());
+    public Boolean delete(Resource resource, AzureDeleteContextObject deleteContextObject) throws Exception {
+        Stack stack = stackRepository.findById(deleteContextObject.getStackId());
         AzureCredential credential = (AzureCredential) stack.getCredential();
         Map<String, String> props;
         try {
             props = new HashMap<>();
             props.put(NAME, resource.getResourceName());
-            AzureClient azureClient = aDCO.getNewAzureClient(credential);
+            AzureClient azureClient = deleteContextObject.getNewAzureClient(credential);
             HttpResponseDecorator deleteVirtualNetworkResult = (HttpResponseDecorator) azureClient.deleteVirtualNetwork(props);
             String requestId = (String) azureClient.getRequestId(deleteVirtualNetworkResult);
             boolean finished = azureClient.waitUntilComplete(requestId);
@@ -68,29 +68,31 @@ public class AzureNetworkResourceBuilder extends AzureSimpleNetworkResourceBuild
     }
 
     @Override
-    public Optional<String> describe(Resource resource, AzureDescribeContextObject azureDescribeContextObject) throws Exception {
+    public Optional<String> describe(Resource resource, AzureDescribeContextObject describeContextObject) throws Exception {
         return Optional.absent();
     }
 
     @Override
-    public List<Resource> buildResources(AzureProvisionContextObject po, int index, List<Resource> resources) {
-        Stack stack = stackRepository.findById(po.getStackId());
+    public List<Resource> buildResources(AzureProvisionContextObject provisionContextObject, int index, List<Resource> resources) {
+        Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         String s = stack.getName().replaceAll("\\s+", "") + String.valueOf(new Date().getTime());
         return Arrays.asList(new Resource(resourceType(), s, stack));
     }
 
     @Override
-    public CreateResourceRequest buildCreateRequest(AzureProvisionContextObject po, List<Resource> res, List<Resource> buildNames, int index) throws Exception {
-        Stack stack = stackRepository.findById(po.getStackId());
+    public CreateResourceRequest buildCreateRequest(AzureProvisionContextObject provisionContextObject, List<Resource> resources,
+            List<Resource> buildResources, int index) throws Exception {
+        Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         AzureCredential credential = (AzureCredential) stack.getCredential();
         Map<String, String> props = new HashMap<>();
-        props.put(NAME, buildNames.get(0).getResourceName());
-        props.put(AFFINITYGROUP, filterResourcesByType(res, ResourceType.AZURE_AFFINITY_GROUP).get(0).getResourceName());
-        props.put(SUBNETNAME, buildNames.get(0).getResourceName());
+        props.put(NAME, buildResources.get(0).getResourceName());
+        props.put(AFFINITYGROUP, filterResourcesByType(resources, ResourceType.AZURE_AFFINITY_GROUP).get(0).getResourceName());
+        props.put(SUBNETNAME, buildResources.get(0).getResourceName());
         props.put(ADDRESSPREFIX, "172.16.0.0/16");
         props.put(SUBNETADDRESSPREFIX, "172.16.0.0/24");
-        AzureClient azureClient = po.getNewAzureClient(credential);
-        return new AzureNetworkCreateRequest(buildNames.get(0).getResourceName(), po.getStackId(), props, azureClient, res, buildNames);
+        AzureClient azureClient = provisionContextObject.getNewAzureClient(credential);
+        return new AzureNetworkCreateRequest(buildResources.get(0).getResourceName(), provisionContextObject.getStackId(), props, azureClient,
+                resources, buildResources);
     }
 
     @Override

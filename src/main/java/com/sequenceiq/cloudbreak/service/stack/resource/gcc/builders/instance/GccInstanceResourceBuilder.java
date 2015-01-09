@@ -63,8 +63,8 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
     private JsonHelper jsonHelper;
 
     @Override
-    public Boolean create(final CreateResourceRequest cRR) throws Exception {
-        final GccInstanceCreateRequest gICR = (GccInstanceCreateRequest) cRR;
+    public Boolean create(final CreateResourceRequest createResourceRequest) throws Exception {
+        final GccInstanceCreateRequest gICR = (GccInstanceCreateRequest) createResourceRequest;
         Stack stack = stackRepository.findById(gICR.getStackId());
         Compute.Instances.Insert ins =
                 gICR.getCompute().instances().insert(gICR.getProjectId(), gICR.getGccTemplate().getGccZone().getValue(), gICR.getInstance());
@@ -111,15 +111,15 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
     }
 
     @Override
-    public Boolean delete(Resource resource, GccDeleteContextObject d) throws Exception {
-        Stack stack = stackRepository.findById(d.getStackId());
+    public Boolean delete(Resource resource, GccDeleteContextObject deleteContextObject) throws Exception {
+        Stack stack = stackRepository.findById(deleteContextObject.getStackId());
         try {
             GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
             GccCredential gccCredential = (GccCredential) stack.getCredential();
-            Operation operation = d.getCompute().instances()
+            Operation operation = deleteContextObject.getCompute().instances()
                     .delete(gccCredential.getProjectId(), gccTemplate.getGccZone().getValue(), resource.getResourceName()).execute();
-            Compute.ZoneOperations.Get zoneOperations = createZoneOperations(d.getCompute(), gccCredential, gccTemplate, operation);
-            Compute.GlobalOperations.Get globalOperations = createGlobalOperations(d.getCompute(), gccCredential, gccTemplate, operation);
+            Compute.ZoneOperations.Get zoneOperations = createZoneOperations(deleteContextObject.getCompute(), gccCredential, gccTemplate, operation);
+            Compute.GlobalOperations.Get globalOperations = createGlobalOperations(deleteContextObject.getCompute(), gccCredential, gccTemplate, operation);
             GccRemoveReadyPollerObject gccRemoveReady =
                     new GccRemoveReadyPollerObject(zoneOperations, globalOperations, stack, resource.getResourceName(), operation.getName());
             gccRemoveReadyPollerObjectPollingService.pollWithTimeout(gccRemoveCheckerStatus, gccRemoveReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
@@ -132,38 +132,39 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
     }
 
     @Override
-    public Optional<String> describe(Resource resource, GccDescribeContextObject dco) throws Exception {
+    public Optional<String> describe(Resource resource, GccDescribeContextObject describeContextObject) throws Exception {
         try {
-            Stack stack = stackRepository.findById(dco.getStackId());
-            return Optional.fromNullable(describe(stack, dco.getCompute(), resource).toPrettyString());
+            Stack stack = stackRepository.findById(describeContextObject.getStackId());
+            return Optional.fromNullable(describe(stack, describeContextObject.getCompute(), resource).toPrettyString());
         } catch (IOException e) {
             return Optional.fromNullable(jsonHelper.createJsonFromString(String.format("{\"VirtualMachine\": {%s}}", ERROR)).toString());
         }
     }
 
     @Override
-    public List<Resource> buildResources(GccProvisionContextObject po, int index, List<Resource> resources) {
-        Stack stack = stackRepository.findById(po.getStackId());
+    public List<Resource> buildResources(GccProvisionContextObject provisionContextObject, int index, List<Resource> resources) {
+        Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         Resource resource = new Resource(resourceType(), String.format("%s-%s-%s", stack.getName(), index, new Date().getTime()), stack);
         return Arrays.asList(resource);
     }
 
     @Override
-    public CreateResourceRequest buildCreateRequest(GccProvisionContextObject po, List<Resource> res, List<Resource> buildNames, int index) throws Exception {
-        Stack stack = stackRepository.findById(po.getStackId());
+    public CreateResourceRequest buildCreateRequest(GccProvisionContextObject provisionContextObject, List<Resource> resources,
+            List<Resource> buildResources, int index) throws Exception {
+        Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         GccCredential gccCredential = (GccCredential) stack.getCredential();
         GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
 
         List<AttachedDisk> listOfDisks = new ArrayList<>();
-        listOfDisks.addAll(getBootDiskList(res, gccCredential, gccTemplate));
-        listOfDisks.addAll(getAttachedDisks(res, gccCredential, gccTemplate));
+        listOfDisks.addAll(getBootDiskList(resources, gccCredential, gccTemplate));
+        listOfDisks.addAll(getAttachedDisks(resources, gccCredential, gccTemplate));
 
         Instance instance = new Instance();
         instance.setMachineType(String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/machineTypes/%s",
-                po.getProjectId(), gccTemplate.getGccZone().getValue(), gccTemplate.getGccInstanceType().getValue()));
-        instance.setName(buildNames.get(0).getResourceName());
+                provisionContextObject.getProjectId(), gccTemplate.getGccZone().getValue(), gccTemplate.getGccInstanceType().getValue()));
+        instance.setName(buildResources.get(0).getResourceName());
         instance.setCanIpForward(Boolean.TRUE);
-        instance.setNetworkInterfaces(getNetworkInterface(po.getProjectId(), stack.getName()));
+        instance.setNetworkInterfaces(getNetworkInterface(provisionContextObject.getProjectId(), stack.getName()));
         instance.setDisks(listOfDisks);
         Metadata metadata = new Metadata();
         metadata.setItems(Lists.<Metadata.Items>newArrayList());
@@ -174,13 +175,14 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
 
         Metadata.Items startupScript = new Metadata.Items();
         startupScript.setKey("startup-script");
-        startupScript.setValue(po.getUserData());
+        startupScript.setValue(provisionContextObject.getUserData());
 
         metadata.getItems().add(sshMetaData);
         metadata.getItems().add(startupScript);
         instance.setMetadata(metadata);
 
-        return new GccInstanceCreateRequest(po.getStackId(), res, instance, po.getProjectId(), po.getCompute(), gccTemplate, gccCredential, buildNames);
+        return new GccInstanceCreateRequest(provisionContextObject.getStackId(), resources, instance, provisionContextObject.getProjectId(),
+                provisionContextObject.getCompute(), gccTemplate, gccCredential, buildResources);
     }
 
     public Instance describe(Stack stack, Compute compute, Resource resource) throws IOException {

@@ -61,8 +61,8 @@ public class GccAttachedDiskResourceBuilder extends GccSimpleInstanceResourceBui
     private AsyncTaskExecutor intermediateBuilderExecutor;
 
     @Override
-    public Boolean create(final CreateResourceRequest cRR) throws Exception {
-        final GccAttachedDiskCreateRequest gADCR = (GccAttachedDiskCreateRequest) cRR;
+    public Boolean create(final CreateResourceRequest createResourceRequest) throws Exception {
+        final GccAttachedDiskCreateRequest gADCR = (GccAttachedDiskCreateRequest) createResourceRequest;
         final Stack stack = stackRepository.findById(gADCR.getStackId());
         List<Future<Boolean>> futures = new ArrayList<>();
         for (final Disk disk : gADCR.getDisks()) {
@@ -92,15 +92,15 @@ public class GccAttachedDiskResourceBuilder extends GccSimpleInstanceResourceBui
     }
 
     @Override
-    public Boolean delete(Resource resource, GccDeleteContextObject d) throws Exception {
-        Stack stack = stackRepository.findById(d.getStackId());
+    public Boolean delete(Resource resource, GccDeleteContextObject deleteContextObject) throws Exception {
+        Stack stack = stackRepository.findById(deleteContextObject.getStackId());
         try {
             GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
             GccCredential gccCredential = (GccCredential) stack.getCredential();
-            Operation operation = d.getCompute().disks()
+            Operation operation = deleteContextObject.getCompute().disks()
                     .delete(gccCredential.getProjectId(), gccTemplate.getGccZone().getValue(), resource.getResourceName()).execute();
-            Compute.ZoneOperations.Get zoneOperations = createZoneOperations(d.getCompute(), gccCredential, gccTemplate, operation);
-            Compute.GlobalOperations.Get globalOperations = createGlobalOperations(d.getCompute(), gccCredential, gccTemplate, operation);
+            Compute.ZoneOperations.Get zoneOperations = createZoneOperations(deleteContextObject.getCompute(), gccCredential, gccTemplate, operation);
+            Compute.GlobalOperations.Get globalOperations = createGlobalOperations(deleteContextObject.getCompute(), gccCredential, gccTemplate, operation);
             GccRemoveReadyPollerObject gccRemoveReady =
                     new GccRemoveReadyPollerObject(zoneOperations, globalOperations, stack, resource.getResourceName(), operation.getName());
             gccRemoveReadyPollerObjectPollingService.pollWithTimeout(gccRemoveCheckerStatus, gccRemoveReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
@@ -113,13 +113,14 @@ public class GccAttachedDiskResourceBuilder extends GccSimpleInstanceResourceBui
     }
 
     @Override
-    public Optional<String> describe(Resource resource, GccDescribeContextObject dco) throws Exception {
-        Stack stack = stackRepository.findById(dco.getStackId());
+    public Optional<String> describe(Resource resource, GccDescribeContextObject describeContextObject) throws Exception {
+        Stack stack = stackRepository.findById(describeContextObject.getStackId());
         GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
         GccCredential gccCredential = (GccCredential) stack.getCredential();
         try {
             Compute.Disks.Get getDisk =
-                    dco.getCompute().disks().get(gccCredential.getProjectId(), gccTemplate.getGccZone().getValue(), resource.getResourceName());
+                    describeContextObject.getCompute().disks().get(gccCredential.getProjectId(), gccTemplate.getGccZone().getValue(),
+                            resource.getResourceName());
             return Optional.fromNullable(getDisk.execute().toPrettyString());
         } catch (IOException e) {
             return Optional.fromNullable(jsonHelper.createJsonFromString(String.format("{\"Attached_Disk\": {%s}}", ERROR)).toString());
@@ -127,9 +128,9 @@ public class GccAttachedDiskResourceBuilder extends GccSimpleInstanceResourceBui
     }
 
     @Override
-    public List<Resource> buildResources(GccProvisionContextObject po, int index, List<Resource> resources) {
+    public List<Resource> buildResources(GccProvisionContextObject provisionContextObject, int index, List<Resource> resources) {
         List<Resource> names = new ArrayList<>();
-        Stack stack = stackRepository.findById(po.getStackId());
+        Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         String name = String.format("%s-%s-%s", stack.getName(), index, new Date().getTime());
         for (int i = 0; i < stack.getTemplate().getVolumeCount(); i++) {
             names.add(new Resource(resourceType(), name + "-" + i, stack));
@@ -138,19 +139,21 @@ public class GccAttachedDiskResourceBuilder extends GccSimpleInstanceResourceBui
     }
 
     @Override
-    public CreateResourceRequest buildCreateRequest(GccProvisionContextObject po, List<Resource> res, List<Resource> buildNames, int index) throws Exception {
+    public CreateResourceRequest buildCreateRequest(GccProvisionContextObject provisionContextObject, List<Resource> resources,
+            List<Resource> buildResources, int index) throws Exception {
         List<Disk> disks = new ArrayList<>();
-        Stack stack = stackRepository.findById(po.getStackId());
+        Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         GccTemplate gccTemplate = (GccTemplate) stack.getTemplate();
         GccCredential gccCredential = (GccCredential) stack.getCredential();
-        for (Resource buildName : buildNames) {
+        for (Resource buildName : buildResources) {
             Disk disk = new Disk();
             disk.setSizeGb(stack.getTemplate().getVolumeSize().longValue());
             disk.setName(buildName.getResourceName());
-            disk.setKind(gccTemplate.getGccRawDiskType().getUrl(po.getProjectId(), gccTemplate.getGccZone()));
+            disk.setKind(gccTemplate.getGccRawDiskType().getUrl(provisionContextObject.getProjectId(), gccTemplate.getGccZone()));
             disks.add(disk);
         }
-        return new GccAttachedDiskCreateRequest(po.getStackId(), res, disks, po.getProjectId(), po.getCompute(), gccTemplate, gccCredential, buildNames);
+        return new GccAttachedDiskCreateRequest(provisionContextObject.getStackId(), resources, disks, provisionContextObject.getProjectId(),
+                provisionContextObject.getCompute(), gccTemplate, gccCredential, buildResources);
     }
 
     @Override
