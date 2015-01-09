@@ -82,14 +82,14 @@ angular.module('uluwatuControllers').controller('mainController', ['$scope', '$r
                     {key: 'SA_EAST_1', value: 'South America (São Paulo)', cloud: 'AWS'}
                 ],
                 amis: [
-                    {key: 'US_EAST_1', value: 'ami-0613626e'},
-                    {key: 'US_WEST_1', value: 'ami-cf1c038a'},
-                    {key: 'US_WEST_2', value: 'ami-23c69b13'},
-                    {key: 'EU_WEST_1', value: 'ami-cdbd3aba'},
-                    {key: 'AP_SOUTHEAST_1', value: 'ami-97c2ebc5'},
-                    {key: 'AP_SOUTHEAST_2', value: 'ami-55a1cb6f'},
-                    {key: 'AP_NORTHEAST_1', value: 'ami-88f1e789'},
-                    {key: 'SA_EAST_1', value: 'ami-074bf91a'}
+                    {key: 'US_EAST_1', value: 'ami-0676076e'},
+                    {key: 'US_WEST_1', value: 'ami-79041b3c'},
+                    {key: 'US_WEST_2', value: 'ami-e91e42d9'},
+                    {key: 'EU_WEST_1', value: 'ami-5b7cfb2c'},
+                    {key: 'AP_SOUTHEAST_1', value: 'ami-69d6ff3b'},
+                    {key: 'AP_SOUTHEAST_2', value: 'ami-adb1db97'},
+                    {key: 'AP_NORTHEAST_1', value: 'ami-a8899fa9'},
+                    {key: 'SA_EAST_1', value: 'ami-a1388abc'}
                 ],
                 instanceType: [
                     {key: 'T2Micro', value: 'T2Micro', cloud: 'AWS'},
