@@ -7,8 +7,17 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 
 @Entity
+@NamedQueries({
+        @NamedQuery(
+                name = "Plugin.findAllForRecipe",
+                query = "SELECT p FROM Plugin p " +
+                        "LEFT JOIN FETCH p.parameters " +
+                        "WHERE p.recipe.id= :recipeId")
+})
 public class Plugin {
 
     @Id

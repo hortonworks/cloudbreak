@@ -49,11 +49,11 @@ public class ClusterRequestHandlerTest {
     public void testAcceptEventWhenAmbariStartedAndStatusRequestedShouldInstallAmbariCluster() {
         // GIVEN
         stackEvent.getData().setCluster(createClusterWithStatus(Status.REQUESTED));
-        doNothing().when(ambariClusterInstaller).installAmbariCluster(stackEvent.getData());
+        doNothing().when(ambariClusterInstaller).buildAmbariCluster(stackEvent.getData());
         // WHEN
         underTest.accept(stackEvent);
         // THEN
-        verify(ambariClusterInstaller, times(1)).installAmbariCluster(any(Stack.class));
+        verify(ambariClusterInstaller, times(1)).buildAmbariCluster(any(Stack.class));
     }
 
     @Test
@@ -63,7 +63,7 @@ public class ClusterRequestHandlerTest {
         // WHEN
         underTest.accept(stackEvent);
         // THEN
-        verify(ambariClusterInstaller, times(0)).installAmbariCluster(any(Stack.class));
+        verify(ambariClusterInstaller, times(0)).buildAmbariCluster(any(Stack.class));
     }
 
     @Test
@@ -72,11 +72,11 @@ public class ClusterRequestHandlerTest {
         stackEvent.setKey(CLUSTER_REQUESTED);
         stackEvent.getData().setCluster(createClusterWithStatus(Status.REQUESTED));
         stackEvent.getData().setStatus(Status.AVAILABLE);
-        doNothing().when(ambariClusterInstaller).installAmbariCluster(stackEvent.getData());
+        doNothing().when(ambariClusterInstaller).buildAmbariCluster(stackEvent.getData());
         // WHEN
         underTest.accept(stackEvent);
         // THEN
-        verify(ambariClusterInstaller, times(1)).installAmbariCluster(any(Stack.class));
+        verify(ambariClusterInstaller, times(1)).buildAmbariCluster(any(Stack.class));
     }
 
     @Test
@@ -85,11 +85,11 @@ public class ClusterRequestHandlerTest {
         stackEvent.setKey(CLUSTER_REQUESTED);
         stackEvent.getData().setCluster(createClusterWithStatus(Status.REQUESTED));
         stackEvent.getData().setStatus(Status.CREATE_IN_PROGRESS);
-        doNothing().when(ambariClusterInstaller).installAmbariCluster(stackEvent.getData());
+        doNothing().when(ambariClusterInstaller).buildAmbariCluster(stackEvent.getData());
         // WHEN
         underTest.accept(stackEvent);
         // THEN
-        verify(ambariClusterInstaller, times(0)).installAmbariCluster(any(Stack.class));
+        verify(ambariClusterInstaller, times(0)).buildAmbariCluster(any(Stack.class));
     }
 
     private Cluster createClusterWithStatus(Status status) {

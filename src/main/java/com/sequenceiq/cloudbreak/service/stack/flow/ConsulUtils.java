@@ -7,10 +7,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.codec.binary.Base64;
+
 import com.ecwid.consul.v1.ConsulClient;
 import com.ecwid.consul.v1.QueryParams;
 import com.ecwid.consul.v1.agent.model.Member;
 import com.ecwid.consul.v1.catalog.model.CatalogService;
+import com.ecwid.consul.v1.event.model.Event;
+import com.ecwid.consul.v1.event.model.EventParams;
+import com.ecwid.consul.v1.kv.model.GetValue;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 
 public final class ConsulUtils {
@@ -59,6 +64,44 @@ public final class ConsulUtils {
             return result;
         } catch (Exception e) {
             return Collections.emptyMap();
+        }
+    }
+
+    public static String fireEvent(List<ConsulClient> clients, String event, String payload, EventParams eventParams, QueryParams queryParams) {
+        for (ConsulClient client : clients) {
+            String eventId = fireEvent(client, event, payload, eventParams, queryParams);
+            if (eventId != null) {
+                return eventId;
+            }
+        }
+        return null;
+    }
+
+    public static String fireEvent(ConsulClient client, String event, String payload, EventParams eventParams, QueryParams queryParams) {
+        try {
+            Event response = client.eventFire(event, payload, eventParams, queryParams).getValue();
+            return response.getId();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public static String getKVValue(List<ConsulClient> clients, String key, QueryParams queryParams) {
+        for (ConsulClient client : clients) {
+            String value = getKVValue(client, key, queryParams);
+            if (value != null) {
+                return value;
+            }
+        }
+        return null;
+    }
+
+    public static String getKVValue(ConsulClient client, String key, QueryParams queryParams) {
+        try {
+            GetValue getValue = client.getKVValue(key, queryParams).getValue();
+            return new String(Base64.decodeBase64(getValue.getValue()));
+        } catch (Exception e) {
+            return null;
         }
     }
 

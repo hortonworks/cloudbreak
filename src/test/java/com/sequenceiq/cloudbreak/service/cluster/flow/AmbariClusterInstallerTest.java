@@ -76,7 +76,7 @@ public class AmbariClusterInstallerTest {
         doNothing().when(ambariClient).createCluster(cluster.getName(), blueprint.getBlueprintName(), strListMap);
         given(ambariClient.getRequestProgress()).willReturn(new BigDecimal(100.0));
         // WHEN
-        underTest.installAmbariCluster(stack);
+        underTest.buildAmbariCluster(stack);
         // THEN
         verify(reactor, times(1)).notify(any(ReactorConfig.class), any(Event.class));
     }
@@ -90,7 +90,7 @@ public class AmbariClusterInstallerTest {
         given(ambariClient.recommendAssignments(anyString())).willReturn(strListMap);
         doNothing().when(ambariClient).createCluster(cluster.getName(), blueprint.getBlueprintName(), strListMap);
         // WHEN
-        underTest.installAmbariCluster(stack);
+        underTest.buildAmbariCluster(stack);
         // THEN
         verify(reactor, times(1)).notify(any(ReactorConfig.class), any(Event.class));
     }
@@ -104,7 +104,7 @@ public class AmbariClusterInstallerTest {
         given(ambariClient.recommendAssignments(anyString())).willReturn(strListMap);
         doThrow(new IllegalArgumentException()).when(ambariClient).createCluster(cluster.getName(), blueprint.getBlueprintName(), strListMap);
         // WHEN
-        underTest.installAmbariCluster(stack);
+        underTest.buildAmbariCluster(stack);
         // THEN
         verify(reactor, times(1)).notify(any(ReactorConfig.class), any(Event.class));
     }
@@ -118,7 +118,7 @@ public class AmbariClusterInstallerTest {
         doReturn(ambariClient).when(clientService).createDefault(stack.getAmbariIp());
         given(ambariClient.recommendAssignments(anyString())).willReturn(strListMap);
         // WHEN
-        underTest.installAmbariCluster(stack);
+        underTest.buildAmbariCluster(stack);
         // THEN
         verify(reactor, times(1)).notify(any(ReactorConfig.class), any(Event.class));
     }

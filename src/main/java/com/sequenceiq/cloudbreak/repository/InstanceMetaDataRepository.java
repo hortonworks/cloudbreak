@@ -9,6 +9,8 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 
 public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaData, Long> {
 
+    Set<InstanceMetaData> findAllInStack(@Param("stackId") Long stackId);
+
     InstanceMetaData findHostInStack(@Param("stackId") Long stackId, @Param("hostName") String hostName);
 
     Set<InstanceMetaData> findUnregisteredHostsInStack(@Param("stackId") Long stackId);

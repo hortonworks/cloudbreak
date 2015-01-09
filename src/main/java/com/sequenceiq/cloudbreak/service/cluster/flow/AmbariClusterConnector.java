@@ -30,12 +30,14 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.Plugin;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
+import com.sequenceiq.cloudbreak.repository.PluginRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
@@ -44,6 +46,7 @@ import com.sequenceiq.cloudbreak.service.cluster.AmbariClientService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariHostsUnavailableException;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
 import com.sequenceiq.cloudbreak.service.cluster.HadoopConfigurationService;
+import com.sequenceiq.cloudbreak.service.cluster.PluginFailureException;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterCreationFailure;
 import com.sequenceiq.cloudbreak.service.cluster.event.ClusterCreationSuccess;
 import com.sequenceiq.cloudbreak.service.cluster.event.UpdateAmbariHostsFailure;
@@ -79,6 +82,9 @@ public class AmbariClusterConnector {
     private InstanceMetaDataRepository instanceMetadataRepository;
 
     @Autowired
+    private PluginRepository pluginRepository;
+
+    @Autowired
     private RetryingStackUpdater stackUpdater;
 
     @Autowired
@@ -105,17 +111,28 @@ public class AmbariClusterConnector {
     @Autowired
     private AmbariClusterStatusUpdater clusterStatusUpdater;
 
-    public void installAmbariCluster(Stack stack) {
+    @Autowired
+    private PluginManager pluginManager;
+
+    public void buildAmbariCluster(Stack stack) {
         Cluster cluster = stack.getCluster();
         MDCBuilder.buildMdcContext(cluster);
         try {
-            LOGGER.info("Starting Ambari cluster installation [Ambari server address: {}]", stack.getAmbariIp());
-            stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS, "Installation of cluster has been started.");
+            LOGGER.info("Starting Ambari cluster setup [Ambari server address: {}]", stack.getAmbariIp());
+            stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS, "Building of cluster has been started.");
             cluster.setCreationStarted(new Date().getTime());
             cluster = clusterRepository.save(cluster);
             Blueprint blueprint = cluster.getBlueprint();
-            AmbariClient ambariClient = clientService.create(stack);
 
+            AmbariClient ambariClient = clientService.create(stack);
+            if (cluster.getRecipe() != null) {
+                Set<InstanceMetaData> instanceMetaData = instanceMetadataRepository.findAllInStack(stack.getId());
+                Set<Plugin> plugins = pluginRepository.findAllForRecipe(cluster.getRecipe().getId());
+                Set<String> installEventIds = pluginManager.installPlugins(instanceMetaData, plugins);
+                pluginManager.waitForEventFinish(stack, instanceMetaData, installEventIds);
+                Set<String> triggerEventIds = pluginManager.triggerPlugins(instanceMetaData, plugins);
+                pluginManager.waitForEventFinish(stack, instanceMetaData, triggerEventIds);
+            }
             addBlueprint(stack, ambariClient, blueprint);
             Map<String, List<String>> hostGroupMappings = recommend(stack, ambariClient);
             saveHostMetadata(cluster, hostGroupMappings);
@@ -123,7 +140,7 @@ public class AmbariClusterConnector {
             waitForClusterInstall(stack, ambariClient);
             runSmokeTest(stack, ambariClient);
             clusterCreateSuccess(cluster, new Date().getTime(), stack.getAmbariIp());
-        } catch (AmbariHostsUnavailableException | AmbariOperationFailedException | InvalidHostGroupHostAssociation e) {
+        } catch (PluginFailureException | AmbariHostsUnavailableException | AmbariOperationFailedException | InvalidHostGroupHostAssociation e) {
             LOGGER.error(e.getMessage(), e);
             clusterCreateFailed(stack, cluster, e.getMessage());
         } catch (Exception e) {

@@ -18,7 +18,11 @@ import javax.persistence.NamedQuery;
                 name = "InstanceMetaData.findUnregisteredHostsInStack",
                 query = "SELECT i FROM InstanceMetaData i "
                         + "WHERE i.instanceGroup.stack.id= :stackId "
-                        + "AND i.removable= true")
+                        + "AND i.removable= true"),
+        @NamedQuery(
+                name = "InstanceMetaData.findAllInStack",
+                query = "SELECT i FROM InstanceMetaData i "
+                        + "WHERE i.instanceGroup.stack.id= :stackId")
 })
 public class InstanceMetaData implements ProvisionEntity {
 
