@@ -104,17 +104,21 @@
               <tr>
                 <!-- <th></th> -->
                 <th>cloud</th>
-                <th>stack name</th>
+                <th>
+                  <a title="sort by" ng-click="reverse=!reverse;orderUsagesBy('stackName',reverse)">stack name
+                    <i class="fa fa-sort"></i>
+                  </a>
+                </th>
                 <th>user</th>
                 <th>region</th>
                 <th class="text-right">
-                  <a title="sort by">running time
+                  <a title="sort by" ng-click="reverse=!reverse;orderUsagesBy('instanceHours',reverse)">running time
                         <i class="fa fa-sort"></i>
                     </a>
                 </th>
                 <th class="text-right">
-                  <a title="sort by" class="active">estimated costs
-                        <i class="fa fa-sort-down"></i>
+                  <a title="sort by" ng-click="reverse=!reverse;orderUsagesBy('money',reverse)">estimated costs
+                        <i class="fa fa-sort"></i>
                     </a>
                 </th>
               </tr>

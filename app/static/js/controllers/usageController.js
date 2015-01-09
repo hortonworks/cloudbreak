@@ -89,7 +89,7 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
 
         function processUsages(usages) {
           initSums();
-          console.log(usages);
+          // console.log(usages);
           var usagesByMonth = new Array();
           angular.forEach(usages, function(item) {
             item.monthString = new Date(item.day).getFullYear() + "-" +  new Date(item.day).getMonth();
@@ -121,6 +121,7 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
             }
 
           });
+          $scope.orderUsagesBy('stackName', false);
         }
 
         function createRequestParams(usagesSince) {
@@ -199,6 +200,12 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
           // console.log('enddate'+date)
           $scope.usageFilter.endDate = floorToDay(dateString);
           $scope.$apply();
+        }
+
+        $scope.orderUsagesBy = function(predicate, reverse) {
+          $scope.gccSum.items = $filter('orderBy')($scope.gccSum.items, predicate, reverse);
+          $scope.azureSum.items = $filter('orderBy')($scope.azureSum.items, predicate, reverse);
+          $scope.awsSum.items = $filter('orderBy')($scope.awsSum.items, predicate, reverse);
         }
 
         function initSums() {
