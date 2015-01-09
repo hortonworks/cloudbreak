@@ -10,19 +10,23 @@ import com.sequenceiq.cloudbreak.domain.ResourceType;
 public interface ResourceBuilder<P extends ProvisionContextObject, D extends DeleteContextObject, DCO extends DescribeContextObject,
         SSCO extends StartStopContextObject> {
 
-    List<Resource> create(P po, int index, List<Resource> resources) throws Exception;
+    Boolean create(CreateResourceRequest createResourceRequest) throws Exception;
 
-    Boolean delete(Resource resource, D d) throws Exception;
+    Boolean delete(Resource resource, D deleteContextObject) throws Exception;
 
-    Boolean rollback(Resource resource, D d) throws Exception;
+    Boolean rollback(Resource resource, D deleteContextObject) throws Exception;
 
-    Optional<String> describe(Resource resource, DCO dco) throws Exception;
+    Optional<String> describe(Resource resource, DCO describeContextObject) throws Exception;
 
     ResourceBuilderType resourceBuilderType();
 
-    Boolean start(SSCO ssco, Resource resource);
+    Boolean start(SSCO startStopContextObject, Resource resource);
 
-    Boolean stop(SSCO ssco, Resource resource);
+    Boolean stop(SSCO startStopContextObject, Resource resource);
+
+    List<Resource> buildResources(P provisionContextObject, int index, List<Resource> resources);
+
+    CreateResourceRequest buildCreateRequest(P provisionContextObject, List<Resource> resources, List<Resource> buildResources, int index) throws Exception;
 
     ResourceType resourceType();
 

@@ -61,12 +61,6 @@ public abstract class AzureSimpleInstanceResourceBuilder implements
         return ResourceBuilderType.INSTANCE_RESOURCE;
     }
 
-    public String getVmName(String azureTemplate, int i) {
-        return String.format("%s-%s", azureTemplate, i);
-    }
-
-
-
     protected List<Resource> filterResourcesByType(List<Resource> resources, ResourceType resourceType) {
         List<Resource> resourcesTemp = new ArrayList<>();
         for (Resource resource : resources) {
@@ -75,6 +69,10 @@ public abstract class AzureSimpleInstanceResourceBuilder implements
             }
         }
         return resourcesTemp;
+    }
+
+    protected String getVmName(String azureTemplate, int i) {
+        return String.format("%s-%s", azureTemplate, i);
     }
 
     protected void httpResponseExceptionHandler(HttpResponseException ex, String resourceName, String user, Stack stack) {
@@ -94,17 +92,17 @@ public abstract class AzureSimpleInstanceResourceBuilder implements
     }
 
     @Override
-    public Boolean start(AzureStartStopContextObject aSSCO, Resource resource) {
+    public Boolean start(AzureStartStopContextObject startStopContextObject, Resource resource) {
         return true;
     }
 
     @Override
-    public Boolean stop(AzureStartStopContextObject aSSCO, Resource resource) {
+    public Boolean stop(AzureStartStopContextObject startStopContextObject, Resource resource) {
         return true;
     }
 
     @Override
-    public Boolean rollback(Resource resource, AzureDeleteContextObject azureDeleteContextObject) throws Exception {
-        return delete(resource, azureDeleteContextObject);
+    public Boolean rollback(Resource resource, AzureDeleteContextObject deleteContextObject) throws Exception {
+        return delete(resource, deleteContextObject);
     }
 }

@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.service.stack.resource.azure;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -7,6 +10,7 @@ import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
@@ -47,6 +51,16 @@ public abstract class AzureSimpleNetworkResourceBuilder implements
         }
     }
 
+    protected List<Resource> filterResourcesByType(List<Resource> resources, ResourceType resourceType) {
+        List<Resource> resourcesTemp = new ArrayList<>();
+        for (Resource resource : resources) {
+            if (resourceType.equals(resource.getResourceType())) {
+                resourcesTemp.add(resource);
+            }
+        }
+        return resourcesTemp;
+    }
+
     protected void waitUntilComplete(AzureClient azureClient, String requestId) {
         boolean finished = azureClient.waitUntilComplete(requestId);
         if (!finished) {
@@ -55,17 +69,17 @@ public abstract class AzureSimpleNetworkResourceBuilder implements
     }
 
     @Override
-    public Boolean start(AzureStartStopContextObject aSSCO, Resource resource) {
+    public Boolean start(AzureStartStopContextObject startStopContextObject, Resource resource) {
         return true;
     }
 
     @Override
-    public Boolean stop(AzureStartStopContextObject aSSCO, Resource resource) {
+    public Boolean stop(AzureStartStopContextObject startStopContextObject, Resource resource) {
         return true;
     }
 
     @Override
-    public Boolean rollback(Resource resource, AzureDeleteContextObject azureDeleteContextObject) throws Exception {
-        return delete(resource, azureDeleteContextObject);
+    public Boolean rollback(Resource resource, AzureDeleteContextObject deleteContextObject) throws Exception {
+        return delete(resource, deleteContextObject);
     }
 }

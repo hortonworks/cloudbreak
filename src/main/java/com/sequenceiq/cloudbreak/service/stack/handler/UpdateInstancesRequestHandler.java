@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.BuildStackFailureException;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
@@ -33,6 +34,7 @@ import com.sequenceiq.cloudbreak.service.stack.event.AddInstancesComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.StackOperationFailure;
 import com.sequenceiq.cloudbreak.service.stack.event.StackUpdateSuccess;
 import com.sequenceiq.cloudbreak.service.stack.event.UpdateInstancesRequest;
+import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
 import com.sequenceiq.cloudbreak.service.stack.resource.DeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.ProvisionContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
@@ -97,30 +99,42 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
                     for (ResourceBuilder resourceBuilder : networkResourceBuilders.get(cloudPlatform)) {
                         pCO.getNetworkResources().addAll(stack.getResourcesByType(resourceBuilder.resourceType()));
                     }
-                    List<Future<List<Resource>>> futures = new ArrayList<>();
-                    Set<Resource> resourceSet = new HashSet<>();
+                    List<Future<Boolean>> futures = new ArrayList<>();
+                    final Set<Resource> resourceSet = new HashSet<>();
                     for (int i = stack.getNodeCount(); i < stack.getNodeCount() + scalingAdjustment; i++) {
                         final int index = i;
-                        Future<List<Resource>> submit = resourceBuilderExecutor.submit(new Callable<List<Resource>>() {
+                        Future<Boolean> submit = resourceBuilderExecutor.submit(new Callable<Boolean>() {
                             @Override
-                            public List<Resource> call() throws Exception {
+                            public Boolean call() throws Exception {
                                 List<Resource> resources = new ArrayList<>();
                                 for (final ResourceBuilder resourceBuilder : instanceResourceBuilders.get(cloudPlatform)) {
-                                    List<Resource> resourceList = resourceBuilder.create(pCO, index, resources);
-                                    resources.addAll(resourceList);
+                                    CreateResourceRequest createResourceRequest =
+                                            resourceBuilder.buildCreateRequest(pCO, resources, resourceBuilder.buildResources(pCO, index, resources), index);
+                                    stackUpdater.addStackResources(stack.getId(), createResourceRequest.getBuildableResources());
+                                    resources.addAll(createResourceRequest.getBuildableResources());
+                                    resourceSet.addAll(createResourceRequest.getBuildableResources());
+                                    resourceBuilder.create(createResourceRequest);
                                 }
-                                return resources;
+                                return true;
                             }
                         });
                         futures.add(submit);
                     }
-                    for (Future<List<Resource>> future : futures) {
+
+                    StringBuilder sb = new StringBuilder();
+                    Optional<Exception> exception = Optional.absent();
+                    for (Future<Boolean> future : futures) {
                         try {
-                            resourceSet.addAll(future.get());
-                        } catch (Exception e) {
-                            throw new BuildStackFailureException(e.getMessage(), e, resourceSet);
+                            future.get();
+                        } catch (Exception ex) {
+                            exception = Optional.fromNullable(ex);
+                            sb.append(String.format("%s, ", ex.getMessage()));
                         }
                     }
+                    if (exception.isPresent()) {
+                        throw new BuildStackFailureException(sb.toString(), exception.orNull(), stackRepository.findOneWithLists(stackId).getResources());
+                    }
+
                     LOGGER.info("Publishing {} event.", ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT);
                     reactor.notify(ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT,
                             Event.wrap(new AddInstancesComplete(cloudPlatform, stack.getId(), resourceSet)));

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.aws;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -96,7 +97,9 @@ public class SnsMessageHandler {
             LOGGER.info("CloudFormation stack creation completed.");
             LOGGER.info("Publishing {} event.", ReactorConfig.PROVISION_COMPLETE_EVENT);
             Set<Resource> resourceSet = new HashSet<>();
-            resourceSet.add(new Resource(ResourceType.CLOUDFORMATION_STACK, cfMessage.get("StackName"), stack));
+            Resource resource = new Resource(ResourceType.CLOUDFORMATION_STACK, cfMessage.get("StackName"), stack);
+            resourceSet.add(resource);
+            stackUpdater.addStackResources(stack.getId(), Arrays.asList(resource));
             reactor.notify(ReactorConfig.PROVISION_COMPLETE_EVENT, Event.wrap(new ProvisionComplete(CloudPlatform.AWS, stack.getId(), resourceSet)));
         }
     }

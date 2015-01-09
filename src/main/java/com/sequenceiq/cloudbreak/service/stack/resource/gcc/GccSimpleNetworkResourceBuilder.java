@@ -53,18 +53,18 @@ public abstract class GccSimpleNetworkResourceBuilder implements
     }
 
     @Override
-    public Boolean start(GccStartStopContextObject ssco, Resource resource) {
+    public Boolean start(GccStartStopContextObject startStopContextObject, Resource resource) {
         return true;
     }
 
     @Override
-    public Boolean stop(GccStartStopContextObject ssco, Resource resource) {
+    public Boolean stop(GccStartStopContextObject startStopContextObject, Resource resource) {
         return true;
     }
 
     @Override
-    public Boolean rollback(Resource resource, GccDeleteContextObject gDCO) throws Exception {
-        return delete(resource, gDCO);
+    public Boolean rollback(Resource resource, GccDeleteContextObject deleteContextObject) throws Exception {
+        return delete(resource, deleteContextObject);
     }
 
     @Override
