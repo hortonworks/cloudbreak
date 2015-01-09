@@ -76,41 +76,51 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
             // }
             //requested interval grouped by months
 
-            $scope.usages = AccountUsages.query({ param: param }, function(success) {
-                initSums();
-                console.log(success);
-                var usagesByMonth = new Array();
-                angular.forEach(success, function(item) {
-                    item.monthString = new Date(item.day).getFullYear() + "-" +  new Date(item.day).getMonth();
-                    item.monthDayString = new Date(item.day).toLocaleDateString();
+            if ($scope.$parent.user.admin != undefined && $scope.$parent.user.admin) {
+              $scope.usages = AccountUsages.query({ param: param }, function(success) {
+                processUsages(success);
+              });
+            } else {
+              $scope.usages = UserUsages.query({ param: param }, function(success) {
+                processUsages(success);
+              });
+            }
+        }
 
-                    var calculatedCost;
-                    var usageByProvider;
-                    if ($scope.gccFilterFunction(item)) {
-                        calculatedCost = parseFloat(item.instanceHours) * parseFloat($scope.gccPrice[item.machineType]);
-                        usageByProvider = $scope.gccSum;
-                    } else if($scope.azureFilterFunction(item)) {
-                        calculatedCost = parseFloat(item.instanceHours) * parseFloat($scope.azurePrice[item.machineType]);
-                        usageByProvider = $scope.azureSum;
-                    } else if($scope.awsFilterFunction(item)) {
-                        calculatedCost = parseFloat(item.instanceHours) * parseFloat($scope.awsPrice[item.machineType]);
-                        usageByProvider = $scope.awsSum;
-                    }
+        function processUsages(usages) {
+          initSums();
+          console.log(usages);
+          var usagesByMonth = new Array();
+          angular.forEach(usages, function(item) {
+            item.monthString = new Date(item.day).getFullYear() + "-" +  new Date(item.day).getMonth();
+            item.monthDayString = new Date(item.day).toLocaleDateString();
 
-                    usageByProvider.fullHours += parseFloat(item.instanceHours);
-                    var newFullMoney = parseFloat(usageByProvider.fullMoney) + parseFloat(calculatedCost);
-                    usageByProvider.fullMoney = parseFloat(newFullMoney).toFixed(2);
-                    item.money = parseFloat(calculatedCost).toFixed(2);
-                    var result = $filter('filter')(usageByProvider.items, {stackId: item.stackId}, true);
-                    if (result.length > 0) {
-                      result[0].money = (parseFloat(result[0].money) + parseFloat(calculatedCost)).toFixed(2);
-                      result[0].instanceHours = result[0].instanceHours + item.instanceHours;
-                    } else {
-                      usageByProvider.items.push(item);
-                    }
+            var calculatedCost;
+            var usageByProvider;
+            if ($scope.gccFilterFunction(item)) {
+              calculatedCost = parseFloat(item.instanceHours) * parseFloat($scope.gccPrice[item.machineType]);
+              usageByProvider = $scope.gccSum;
+            } else if($scope.azureFilterFunction(item)) {
+              calculatedCost = parseFloat(item.instanceHours) * parseFloat($scope.azurePrice[item.machineType]);
+              usageByProvider = $scope.azureSum;
+            } else if($scope.awsFilterFunction(item)) {
+              calculatedCost = parseFloat(item.instanceHours) * parseFloat($scope.awsPrice[item.machineType]);
+              usageByProvider = $scope.awsSum;
+            }
 
-                });
-            });
+            usageByProvider.fullHours += parseFloat(item.instanceHours);
+            var newFullMoney = parseFloat(usageByProvider.fullMoney) + parseFloat(calculatedCost);
+            usageByProvider.fullMoney = parseFloat(newFullMoney).toFixed(2);
+            item.money = parseFloat(calculatedCost).toFixed(2);
+            var result = $filter('filter')(usageByProvider.items, {stackId: item.stackId}, true);
+            if (result.length > 0) {
+              result[0].money = (parseFloat(result[0].money) + parseFloat(calculatedCost)).toFixed(2);
+              result[0].instanceHours = result[0].instanceHours + item.instanceHours;
+            } else {
+              usageByProvider.items.push(item);
+            }
+
+          });
         }
 
         function createRequestParams(usagesSince) {

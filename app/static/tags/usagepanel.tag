@@ -1,13 +1,13 @@
 <div id="panel-usages" class="col-md-12" ng-controller="usageController">
   <div class="panel panel-default">
-    <!-- <div class="panel-heading panel-heading-nav">
+    <div class="panel-heading panel-heading-nav">
         <a href="" id="usages-btn" class="btn btn-info btn-fa-2x" role="button" data-toggle="collapse"
            data-target="#panel-usages-collapse"><i class="fa fa-angle-down fa-2x fa-fw-forced"></i></a>
-        <h4>cost explorer</h4>
-    </div> -->
+        <h4>usage explorer</h4>
+    </div>
 
-    <div id="panel-usages-collapse" class="">
-      <!-- <div id="panel-usages-collapse" class="panel-btn-in-header-collapse collapse"> -->
+    <!-- <div id="panel-usages-collapse" class=""> -->
+    <div id="panel-usages-collapse" class="panel-btn-in-header-collapse collapse">
 
 
       <div class="panel-body">
@@ -49,7 +49,7 @@
             </div>
           </div>
 
-          <div class="col-xs-6 col-sm-2 col-md-2">
+          <div class="col-xs-6 col-sm-2 col-md-2" ng-show="user.admin">
             <label for="user">user</label>
             <div>
               <div class="input-group">
@@ -59,7 +59,7 @@
                 <input class="form-control input-sm" type="text" ng-model="usageFilter.user" id="user"-->
                 <select class="form-control input-sm" id="cloudProvider" ng-model="usageFilter.user">
                   <option default value="all">all</option>
-                  <option ng-repeat="user in $root.accountUsers" value="{{user.id}}">{{user.username}}</option>
+                  <option ng-repeat="u in $root.accountUsers" value="{{u.id}}">{{u.username}}</option>
                 </select>
               </div>
             </div>

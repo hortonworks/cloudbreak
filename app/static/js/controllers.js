@@ -10,8 +10,8 @@ popUpAppender.setLayout(layout);
 
 var uluwatuControllers = angular.module('uluwatuControllers', []);
 
-uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '$rootScope', '$filter',
-    function ($scope, $http, User, $rootScope, $filter) {
+uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '$rootScope', '$filter', 'UserPermission',
+    function ($scope, $http, User, $rootScope, $filter, UserPermission) {
         var orderBy = $filter('orderBy');
         $scope.user = User.get();
 
@@ -27,6 +27,7 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
 
         $scope.statusMessage = "";
         $scope.statusclass = "";
+        getUserPermission();
 
         $scope.modifyStatusMessage = function(message, name) {
             var now = new Date();
@@ -90,6 +91,12 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
 
         $scope.eventTimestampAsFloat = function(element) {
           return parseFloat(element.eventTimestamp);
+        }
+
+        function getUserPermission(){
+          UserPermission.get(function(success){
+            $scope.user.admin = success.admin;
+          });
         }
     }
 ]);

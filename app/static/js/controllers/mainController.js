@@ -6,17 +6,17 @@ var $jq = jQuery.noConflict();
 angular.module('uluwatuControllers').controller('mainController', ['$scope', '$rootScope', '$filter', '$interval',
     function ($scope, $rootScope, $filter, $interval) {
 
-        $scope.managementShow = true;
-        $scope.eventShow = false;
+        $scope.showManagement = true;
+        $scope.showAccountPanel = false;
 
-        $scope.showManagement = function () {
-            $scope.managementShow = true;
-            $scope.eventShow = false;
+        $scope.activateManagement = function () {
+            $scope.showManagement = true;
+            $scope.showAccountPanel = false;
         }
 
-        $scope.showEvents = function () {
-            $scope.managementShow = false;
-            $scope.eventShow = true;
+        $scope.activateAccountPanel = function () {
+            $scope.showManagement = false;
+            $scope.showAccountPanel = true;
         }
 
 
