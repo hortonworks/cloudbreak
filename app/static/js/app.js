@@ -112,7 +112,7 @@ cloudbreakApp.directive('startdatevalidation', function($parse) {
     require: 'ngModel',
     link: function(scope, elem, attrs, ctrl) {
       scope.$watch(function() {
-        return $parse(attrs.startdatevalidation)(scope.usageFilter) > ctrl.$modelValue;
+        return $parse(attrs.startdatevalidation)(scope.usageFilter) >= ctrl.$modelValue;
       }, function(currentValue) {
         ctrl.$setValidity('startDateInvalid', currentValue);
       });

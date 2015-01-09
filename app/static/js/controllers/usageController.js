@@ -40,20 +40,21 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
         }
 
 
-        var month = new Array();
-        month[0] = "January";
-        month[1] = "February";
-        month[2] = "March";
-        month[3] = "April";
-        month[4] = "May";
-        month[5] = "June";
-        month[6] = "July";
-        month[7] = "August";
-        month[8] = "September";
-        month[9] = "October";
-        month[10] = "November";
-        month[11] = "December";
-        // var n = month[date.getMonth()];
+        //requested interval grouped by months
+        // var month = new Array();
+        // month[0] = "January";
+        // month[1] = "February";
+        // month[2] = "March";
+        // month[3] = "April";
+        // month[4] = "May";
+        // month[5] = "June";
+        // month[6] = "July";
+        // month[7] = "August";
+        // month[8] = "September";
+        // month[9] = "October";
+        // month[10] = "November";
+        // month[11] = "December";
+        //requested interval grouped by months
 
         $scope.clearFilter = function() {
             initFilter();
@@ -64,15 +65,15 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
             var param = createRequestParams(usagesSince);
 
             //requested interval grouped by months
-            var usagesPerMonth;
-            var date = new Date();
-            var targetMonth = new Date(usagesSince.getFullYear(), usagesSince.getMonth(), 1, 0, 0, 0, 0);
-            var actMonth = new Date(date.getFullYear(), date.getMonth(), 1, 0, 0, 0, 0);
-            console.log('target date(since): '+usagesSince)
-            while(targetMonth <= actMonth) {
-              console.log('year:' + actMonth.getFullYear() + 'month:' + month[actMonth.getMonth()]);
-              actMonth.setMonth(actMonth.getMonth()-1);
-            }
+            // var usagesPerMonth;
+            // var date = new Date();
+            // var targetMonth = new Date(usagesSince.getFullYear(), usagesSince.getMonth(), 1, 0, 0, 0, 0);
+            // var actMonth = new Date(date.getFullYear(), date.getMonth(), 1, 0, 0, 0, 0);
+            // console.log('target date(since): '+usagesSince)
+            // while(targetMonth <= actMonth) {
+            //   console.log('year:' + actMonth.getFullYear() + 'month:' + month[actMonth.getMonth()]);
+            //   actMonth.setMonth(actMonth.getMonth()-1);
+            // }
             //requested interval grouped by months
 
             $scope.usages = AccountUsages.query({ param: param }, function(success) {
@@ -114,7 +115,10 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
 
         function createRequestParams(usagesSince) {
           var param = "";
+          var filterEndDate = new Date($scope.usageFilter.endDate.getTime());
+          filterEndDate.setDate(filterEndDate.getDate() + 1);
           param =  param.concat(usagesSince !== null ? "since=".concat(usagesSince.getTime().toString().concat("&")) : "");
+          param =  param.concat(filterEndDate !== null ? "filterenddate=".concat(filterEndDate.getTime().toString().concat("&")) : "");
           param =  param.concat($scope.usageFilter.user !== "all" ? "user=".concat($scope.usageFilter.user.concat("&")) : "");
           param = param.concat($scope.usageFilter.cloud !== "all" ? "cloud=".concat($scope.usageFilter.cloud.concat("&")) : "");
           param = param.concat($scope.usageFilter.zone !== "all" ? "zone=".concat($scope.usageFilter.zone.concat("&")) : "");
