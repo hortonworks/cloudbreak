@@ -87,7 +87,7 @@ public class ProvisionContext {
                         CreateResourceRequest createResourceRequest =
                                 resourceBuilder.buildCreateRequest(pCO,
                                         Lists.newArrayList(resourceSet),
-                                        resourceBuilder.buildNames(pCO, 0, Arrays.asList(resourceSet)), 0);
+                                        resourceBuilder.buildResources(pCO, 0, Arrays.asList(resourceSet)), 0);
                         stackUpdater.addStackResources(stack.getId(), createResourceRequest.getBuildableResources());
                         resourceSet.addAll(createResourceRequest.getBuildableResources());
                         pCO.getNetworkResources().addAll(createResourceRequest.getBuildableResources());
@@ -104,7 +104,7 @@ public class ProvisionContext {
                                 List<Resource> resources = new ArrayList<>();
                                 for (final ResourceBuilder resourceBuilder : instanceResourceBuilders.get(cloudPlatform)) {
                                     CreateResourceRequest createResourceRequest =
-                                            resourceBuilder.buildCreateRequest(pCO, resources, resourceBuilder.buildNames(pCO, index, resources), index);
+                                            resourceBuilder.buildCreateRequest(pCO, resources, resourceBuilder.buildResources(pCO, index, resources), index);
                                     stackUpdater.addStackResources(finalStack.getId(), createResourceRequest.getBuildableResources());
                                     resourceBuilder.create(createResourceRequest);
                                     resources.addAll(createResourceRequest.getBuildableResources());

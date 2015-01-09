@@ -74,7 +74,7 @@ public class AzureStorageAccountResourceBuilder extends AzureSimpleNetworkResour
     }
 
     @Override
-    public List<Resource> buildNames(AzureProvisionContextObject po, int index, List<Resource> resources) {
+    public List<Resource> buildResources(AzureProvisionContextObject po, int index, List<Resource> resources) {
         Stack stack = stackRepository.findById(po.getStackId());
         return Arrays.asList(new Resource(resourceType(), po.getCommonName(), stack));
     }

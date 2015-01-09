@@ -73,7 +73,7 @@ public class AzureNetworkResourceBuilder extends AzureSimpleNetworkResourceBuild
     }
 
     @Override
-    public List<Resource> buildNames(AzureProvisionContextObject po, int index, List<Resource> resources) {
+    public List<Resource> buildResources(AzureProvisionContextObject po, int index, List<Resource> resources) {
         Stack stack = stackRepository.findById(po.getStackId());
         String s = stack.getName().replaceAll("\\s+", "") + String.valueOf(new Date().getTime());
         return Arrays.asList(new Resource(resourceType(), s, stack));

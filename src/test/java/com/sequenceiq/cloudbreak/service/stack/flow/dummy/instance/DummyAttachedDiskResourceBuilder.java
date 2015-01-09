@@ -56,7 +56,7 @@ public class DummyAttachedDiskResourceBuilder
     }
 
     @Override
-    public List<Resource> buildNames(DummyProvisionContextObject po, int index, List<Resource> resources) {
+    public List<Resource> buildResources(DummyProvisionContextObject po, int index, List<Resource> resources) {
         return Arrays.asList(new Resource(resourceType(), "attacheddisk" + index, new Stack()));
     }
 

@@ -61,7 +61,7 @@ public class AzureServiceCertificateResourceBuilder extends AzureSimpleInstanceR
     }
 
     @Override
-    public List<Resource> buildNames(AzureProvisionContextObject po, int index, List<Resource> resources) {
+    public List<Resource> buildResources(AzureProvisionContextObject po, int index, List<Resource> resources) {
         Stack stack = stackRepository.findById(po.getStackId());
         String name = filterResourcesByType(resources, ResourceType.AZURE_CLOUD_SERVICE).get(0).getResourceName();
         return Arrays.asList(new Resource(resourceType(), name, stack));

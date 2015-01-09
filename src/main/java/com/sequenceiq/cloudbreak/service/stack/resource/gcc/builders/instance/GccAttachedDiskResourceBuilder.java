@@ -127,7 +127,7 @@ public class GccAttachedDiskResourceBuilder extends GccSimpleInstanceResourceBui
     }
 
     @Override
-    public List<Resource> buildNames(GccProvisionContextObject po, int index, List<Resource> resources) {
+    public List<Resource> buildResources(GccProvisionContextObject po, int index, List<Resource> resources) {
         List<Resource> names = new ArrayList<>();
         Stack stack = stackRepository.findById(po.getStackId());
         String name = String.format("%s-%s-%s", stack.getName(), index, new Date().getTime());
