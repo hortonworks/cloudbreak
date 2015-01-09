@@ -40,7 +40,7 @@ public class AmbariRoleAllocator {
     private static final String AMBARI_SERVICE = "ambari-8080";
     private static final String CONSUL_DOMAIN = ".node.consul";
     private static final int POLLING_INTERVAL = 5000;
-    private static final int MAX_POLLING_ATTEMPTS = 10000;
+    private static final int MAX_POLLING_ATTEMPTS = 100;
 
     @Autowired
     private StackRepository stackRepository;
