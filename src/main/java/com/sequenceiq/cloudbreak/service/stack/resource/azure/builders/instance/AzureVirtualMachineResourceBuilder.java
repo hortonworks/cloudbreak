@@ -159,13 +159,13 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
         ports.add(new Port("Storm", "8744", "8744", "tcp"));
         ports.add(new Port("Oozie", "11000", "11000", "tcp"));
         ports.add(new Port("HTTP", "80", "80", "tcp"));
-        props.put(NAME, buildResources.get(0));
+        props.put(NAME, buildResources.get(0).getResourceName());
         props.put(DEPLOYMENTSLOT, PRODUCTION);
         props.put(LABEL, label);
         props.put(IMAGENAME,
                 azureTemplate.getImageName().equals(AzureStackUtil.IMAGE_NAME) ? provisionContextObject.getOsImageName() : azureTemplate.getImageName());
         props.put(IMAGESTOREURI, buildimageStoreUri(provisionContextObject.getCommonName(), buildResources.get(0).getResourceName()));
-        props.put(HOSTNAME, buildResources.get(0));
+        props.put(HOSTNAME, buildResources.get(0).getResourceName());
         props.put(USERNAME, DEFAULT_USER_NAME);
         X509Certificate sshCert = null;
         try {
@@ -192,7 +192,7 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
             props.put(DISKS, disks);
         }
 
-        props.put(SERVICENAME, buildResources.get(0));
+        props.put(SERVICENAME, buildResources.get(0).getResourceName());
         props.put(SUBNETNAME, provisionContextObject.filterResourcesByType(ResourceType.AZURE_NETWORK).get(0).getResourceName());
         props.put(VIRTUAL_NETWORK_IP_ADDRESS, internalIp);
         props.put(CUSTOMDATA, new String(Base64.encodeBase64(provisionContextObject.getUserData().getBytes())));
