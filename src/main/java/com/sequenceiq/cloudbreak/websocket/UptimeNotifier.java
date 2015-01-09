@@ -51,7 +51,7 @@ public class UptimeNotifier {
         notification.setStackId(stack.getId());
         notification.setEventType(UPTIME_NOTIFICATION);
         notification.setEventMessage(String.valueOf(uptime));
-        notification.setCloud(stack.getCredential().getCloudPlatform().toString());
+        notification.setCloud(stack.getCredential().cloudPlatform().toString());
         notification.setBlueprintId(stack.getCluster().getBlueprint().getId());
         notification.setBlueprintName(stack.getCluster().getBlueprint().getBlueprintName());
         return notification;

@@ -108,7 +108,7 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
         MDCBuilder.buildMdcContext(stackEvent);
         String vmType = null;
         String region = null;
-       /* switch (stack.cloudPlatform()) {
+        /* switch (stack.cloudPlatform()) {
             case AWS:
                 vmType = ((AwsTemplate) stack.getTemplate()).getInstanceType().name();
                 region = ((AwsTemplate) stack.getTemplate()).getRegion().getName();

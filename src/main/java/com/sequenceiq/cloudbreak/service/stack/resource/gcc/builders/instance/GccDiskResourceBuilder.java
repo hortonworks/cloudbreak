@@ -64,11 +64,11 @@ public class GccDiskResourceBuilder extends GccSimpleInstanceResourceBuilder {
     public Boolean create(final CreateResourceRequest createResourceRequest, TemplateGroup templateGroup, String region) throws Exception {
         final GccDiskCreateRequest gDCR = (GccDiskCreateRequest) createResourceRequest;
         Stack stack = stackRepository.findById(gDCR.getStackId());
-        Compute.Disks.Insert insDisk = gDCR.getCompute().disks().insert(gDCR.getProjectId(), GccZone.valueOf(region).getValue(), gDCR.getDisk());
+        Compute.Disks.Insert insDisk = gDCR.getCompute().disks().insert(gDCR.getProjectId(), GccZone.valueOf(stack.getRegion()).getValue(), gDCR.getDisk());
         insDisk.setSourceImage(gccStackUtil.getAmbariUbuntu(gDCR.getProjectId()));
         Operation execute = insDisk.execute();
         if (execute.getHttpErrorStatusCode() == null) {
-            Compute.ZoneOperations.Get zoneOperations = createZoneOperations(gDCR.getCompute(), gDCR.getGccCredential(), execute, GccZone.valueOf(region));
+            Compute.ZoneOperations.Get zoneOperations = createZoneOperations(gDCR.getCompute(), gDCR.getGccCredential(), execute, GccZone.valueOf(stack.getRegion()));
             GccResourceReadyPollerObject gccDiskReady = new GccResourceReadyPollerObject(zoneOperations, stack, gDCR.getDisk().getName(), execute.getName());
             gccDiskReadyPollerObjectPollingService.pollWithTimeout(gccResourceCheckerStatus, gccDiskReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
             return true;

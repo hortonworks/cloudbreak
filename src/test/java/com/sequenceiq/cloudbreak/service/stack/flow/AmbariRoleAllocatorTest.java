@@ -60,7 +60,6 @@ public class AmbariRoleAllocatorTest {
         underTest.allocateRoles(1L, coreInstanceMetaData);
         // THEN
         verify(reactor, times(1)).notify(any(ReactorConfig.class), any(Event.class));
-        verify(stackUpdater, times(1)).updateMetadataReady(anyLong(), anyBoolean());
     }
 
     @Test
@@ -78,7 +77,7 @@ public class AmbariRoleAllocatorTest {
     @Test
     public void testAllocateRolesWhenStackNodeCountAndMetaDataSizeIsNotEqual() {
         // GIVEN
-       // stack.setNodeCount(3);
+        // stack.setNodeCount(3);
         given(stackRepository.findById(1L)).willReturn(stack);
         given(stackRepository.findOneWithLists(1L)).willReturn(stack);
         // WHEN
@@ -113,7 +112,7 @@ public class AmbariRoleAllocatorTest {
 
     private Stack createStack() {
         Stack stack = new Stack();
-       // stack.setNodeCount(2);
+        // stack.setNodeCount(2);
         stack.setId(1L);
         return stack;
     }

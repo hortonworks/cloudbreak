@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.domain.SnsTopic;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.domain.TemplateGroup;
 import com.sequenceiq.cloudbreak.service.stack.connector.ConnectorTestUtil;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccInstanceType;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccRawDiskType;
@@ -108,9 +109,10 @@ public final class ServiceTestUtils {
         stack.setCredential(credential);
         //stack.setNodeCount(2);
         stack.setMetadataReady(true);
+        stack.setRegion("EU_WEST_1");
         stack.setOwner(owner);
         stack.setAccount(account);
-        //stack.setTemplate(template);
+        stack.setTemplateGroups(new HashSet<TemplateGroup>());
         stack.setCluster(cluster);
         stack.setPublicInAccount(true);
         stack.setResources(resources);
@@ -151,7 +153,6 @@ public final class ServiceTestUtils {
                 azureCredential.setId(1L);
                 azureCredential.setOwner(owner);
                 azureCredential.setAccount(account);
-                azureCredential.setCloudPlatform(platform);
                 azureCredential.setPublicInAccount(true);
                 azureCredential.setPublicKey(PUBLIC_KEY);
                 return azureCredential;
@@ -160,7 +161,6 @@ public final class ServiceTestUtils {
                 awsCredential.setId(1L);
                 awsCredential.setOwner(owner);
                 awsCredential.setAccount(account);
-                awsCredential.setCloudPlatform(platform);
                 awsCredential.setPublicInAccount(true);
                 awsCredential.setRoleArn("rolearn");
                 awsCredential.setPublicKey(PUBLIC_KEY);
@@ -170,7 +170,6 @@ public final class ServiceTestUtils {
                 gccCredential.setId(1L);
                 gccCredential.setOwner(owner);
                 gccCredential.setAccount(account);
-                gccCredential.setCloudPlatform(platform);
                 gccCredential.setPublicInAccount(true);
                 gccCredential.setPublicKey(PUBLIC_KEY);
                 return gccCredential;

@@ -6,7 +6,6 @@ import javax.persistence.Enumerated;
 
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccInstanceType;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccRawDiskType;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccZone;
 
 @Entity
 public class GccTemplate extends Template implements ProvisionEntity {

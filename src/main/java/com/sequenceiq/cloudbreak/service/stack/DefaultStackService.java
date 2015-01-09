@@ -207,7 +207,8 @@ public class DefaultStackService implements StackService {
         }
         if (0 > hostGroupAdjustmentJson.getScalingAdjustment()) {
             if (-1 * hostGroupAdjustmentJson.getScalingAdjustment() > stack.getFullNodeCount()) {
-                throw new BadRequestException(String.format("There are %s instances in stack '%s'. Cannot remove %s instances.", stack.getFullNodeCount(), stackId,
+                throw new BadRequestException(String.format("There are %s instances in stack '%s'. Cannot remove %s instances.",
+                        stack.getFullNodeCount(), stackId,
                         -1 * hostGroupAdjustmentJson.getScalingAdjustment()));
             }
             int removeableHosts = 0;

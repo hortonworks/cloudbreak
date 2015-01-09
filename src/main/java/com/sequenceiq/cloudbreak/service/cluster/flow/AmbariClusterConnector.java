@@ -343,7 +343,7 @@ public class AmbariClusterConnector {
         Map<String, String> hostNames = ambariClient.getHostNames();
         Set<InstanceMetaData> instanceMetaData = stack.getInstanceMetaData();
         for (InstanceMetaData metaData : instanceMetaData) {
-            if(hostGroupMappings.get(metaData.getHostGroup()) == null) {
+            if (hostGroupMappings.get(metaData.getHostGroup()) == null) {
                 hostGroupMappings.put(metaData.getHostGroup(), new ArrayList<String>());
             }
             hostGroupMappings.get(metaData.getHostGroup()).add(hostNames.get(metaData.getPublicIp()));

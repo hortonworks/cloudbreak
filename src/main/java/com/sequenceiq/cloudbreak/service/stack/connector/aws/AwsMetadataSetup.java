@@ -79,7 +79,7 @@ public class AwsMetadataSetup implements MetadataSetup {
             String asGroupName = cfStackUtil.getAutoscalingGroupName(stack, templateGroup.getGroupName());
             AutoScalingGroupReady asGroupReady = new AutoScalingGroupReady(stack, amazonEC2Client, amazonASClient, asGroupName, templateGroup.getNodeCount());
             LOGGER.info("Polling autoscaling group until new instances are ready. [stack: {}, asGroup: {}]", stack.getId(), asGroupName);
-            if (((AwsTemplate)templateGroup.getTemplate()).getSpotPrice() == null) {
+            if (((AwsTemplate) templateGroup.getTemplate()).getSpotPrice() == null) {
                 pollingService.pollWithTimeout(asGroupStatusCheckerTask, asGroupReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
             } else {
                 pollingService.pollWithTimeout(asGroupStatusCheckerTask, asGroupReady, POLLING_INTERVAL, MAX_SPOT_POLLING_ATTEMPTS);

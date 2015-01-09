@@ -44,7 +44,6 @@ public class AzureStorageAccountResourceBuilder extends AzureSimpleNetworkResour
     @Override
     public Boolean create(CreateResourceRequest createResourceRequest, TemplateGroup templateGroup, String region) throws Exception {
         AzureStorageAccountCreateRequest aCSCR = (AzureStorageAccountCreateRequest) createResourceRequest;
-        Stack stack = stackRepository.findById(aCSCR.getStackId());
         try {
             aCSCR.getAzureClient().getStorageAccount(aCSCR.getName());
         } catch (Exception ex) {

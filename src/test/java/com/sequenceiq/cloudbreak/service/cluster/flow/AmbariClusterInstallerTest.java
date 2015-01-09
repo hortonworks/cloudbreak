@@ -113,7 +113,7 @@ public class AmbariClusterInstallerTest {
     public void testInstallAmbariWhenReachedMaxPollingEventsShouldInstallationFailed() throws Exception {
         // GIVEN
         Map<String, List<String>> strListMap = createStringListMap();
-       // stack.setNodeCount(0);
+        // stack.setNodeCount(0);
         given(clusterRepository.save(cluster)).willReturn(cluster);
         doReturn(ambariClient).when(clientService).createDefault(stack.getAmbariIp());
         given(ambariClient.recommendAssignments(anyString())).willReturn(strListMap);

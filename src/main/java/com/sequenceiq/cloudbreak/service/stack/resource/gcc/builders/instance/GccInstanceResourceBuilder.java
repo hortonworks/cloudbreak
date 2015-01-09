@@ -73,7 +73,7 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
         ins.setPrettyPrint(Boolean.TRUE);
         Operation execute = ins.execute();
         if (execute.getHttpErrorStatusCode() == null) {
-            Compute.ZoneOperations.Get zoneOperations = createZoneOperations(gICR.getCompute(), gICR.getGccCredential(), execute, GccZone.valueOf(region));
+            Compute.ZoneOperations.Get zoneOperations = createZoneOperations(gICR.getCompute(), gICR.getGccCredential(), execute, GccZone.valueOf(stack.getRegion()));
             GccResourceReadyPollerObject instReady = new GccResourceReadyPollerObject(zoneOperations, stack, gICR.getInstance().getName(), execute.getName());
             gccInstanceReadyPollerObjectPollingService.pollWithTimeout(gccResourceCheckerStatus, instReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
             return true;

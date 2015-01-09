@@ -7,7 +7,6 @@ import static org.mockito.Matchers.any;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,6 +19,7 @@ import com.sequenceiq.cloudbreak.controller.validation.RequiredAzureCredentialPa
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.service.credential.azure.AzureCredentialHandler;
+import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AzureCredentialConverterTest {
@@ -52,7 +52,7 @@ public class AzureCredentialConverterTest {
         // WHEN
         CredentialJson result = underTest.convert(azureCredential);
         // THEN
-        assertEquals(result.getCloudPlatform(), azureCredential.getCloudPlatform());
+        assertEquals(result.getCloudPlatform(), azureCredential.cloudPlatform());
         assertEquals(result.getName(), azureCredential.getName());
         assertEquals(result.getDescription(), azureCredential.getDescription());
     }
@@ -64,7 +64,7 @@ public class AzureCredentialConverterTest {
         // WHEN
         AzureCredential result = underTest.convert(credentialJson);
         // THEN
-        assertEquals(result.getCloudPlatform(), credentialJson.getCloudPlatform());
+        assertEquals(result.cloudPlatform(), credentialJson.getCloudPlatform());
         assertEquals(result.getJks(), AzureStackUtil.DEFAULT_JKS_PASS);
         assertEquals(result.getName(), credentialJson.getName());
     }
@@ -87,7 +87,6 @@ public class AzureCredentialConverterTest {
         azureCredential.setJks(DUMMY_JKS);
         azureCredential.setName(DUMMY_NAME);
         azureCredential.setSubscriptionId(DUMMY_SUBSCRIPTION_ID);
-        azureCredential.setCloudPlatform(CloudPlatform.AZURE);
         azureCredential.setDescription(DUMMY_DESCRIPTION);
         azureCredential.setId(1L);
         azureCredential.setPublicInAccount(true);

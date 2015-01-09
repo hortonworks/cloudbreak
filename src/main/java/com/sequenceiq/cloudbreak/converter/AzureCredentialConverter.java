@@ -4,15 +4,15 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.google.api.client.repackaged.org.apache.commons.codec.binary.StringUtils;
-import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.stereotype.Component;
 
+import com.google.api.client.repackaged.org.apache.commons.codec.binary.StringUtils;
 import com.sequenceiq.cloudbreak.controller.json.CredentialJson;
 import com.sequenceiq.cloudbreak.controller.validation.RequiredAzureCredentialParam;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 
 @Component
 public class AzureCredentialConverter extends AbstractConverter<CredentialJson, AzureCredential> {
@@ -39,7 +39,6 @@ public class AzureCredentialConverter extends AbstractConverter<CredentialJson, 
         azureCredential.setDescription(json.getDescription());
         azureCredential.setSubscriptionId(String.valueOf(json.getParameters().get(RequiredAzureCredentialParam.SUBSCRIPTION_ID.getName())));
         azureCredential.setPostFix(String.valueOf(new Date().getTime()));
-        azureCredential.setCloudPlatform(CloudPlatform.AZURE);
         azureCredential.setPublicInAccount(json.isPublicInAccount());
         azureCredential.setPublicKey(json.getPublicKey());
         azureCredential.setPublicKey(StringUtils.newStringUtf8(Base64.decodeBase64(json.getPublicKey())));

@@ -74,11 +74,11 @@ public class GccAttachedDiskResourceBuilder extends GccSimpleInstanceResourceBui
                 @Override
                 public Boolean call() throws Exception {
                     Compute.Disks.Insert insDisk = gADCR.getCompute().disks().insert(gADCR.getProjectId(),
-                            GccZone.valueOf(region).getValue(), disk);
+                            GccZone.valueOf(stack.getRegion()).getValue(), disk);
                     Operation execute = insDisk.execute();
                     if (execute.getHttpErrorStatusCode() == null) {
                         Compute.ZoneOperations.Get zoneOperations =
-                                createZoneOperations(gADCR.getCompute(), gADCR.getGccCredential(), execute, GccZone.valueOf(region));
+                                createZoneOperations(gADCR.getCompute(), gADCR.getGccCredential(), execute, GccZone.valueOf(stack.getRegion()));
                         GccResourceReadyPollerObject gccDiskReady = new GccResourceReadyPollerObject(zoneOperations, stack, disk.getName(), execute.getName());
                         gccDiskReadyPollerObjectPollingService.pollWithTimeout(gccResourceCheckerStatus, gccDiskReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
                         return true;

@@ -32,10 +32,10 @@ public class UpdateStackRequestValidatorTest {
                 new ArrayList<String>(),
                 PathImpl.createRootPath(),
                 new DummyConstraintDescriptor()
-                );
+        );
     }
 
-   /* @Test
+    /* @Test
     public void testIsValidShouldReturnTrueWhenStatusIsUpdated() {
         UpdateStackJson updateStackJson = new UpdateStackJson();
         updateStackJson.setScalingAdjustment(null);

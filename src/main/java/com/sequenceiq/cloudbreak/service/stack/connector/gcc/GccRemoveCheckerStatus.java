@@ -72,7 +72,7 @@ public class GccRemoveCheckerStatus implements StatusCheckerTask<GccRemoveReadyP
     }
 
     private boolean analyzeOperation(Operation operation, GccRemoveReadyPollerObject gccRemoveReadyPollerObject, GoogleJsonResponseException ex) {
-        if(ex != null && ex.getDetails().get("code").equals(NOT_FOUND)) {
+        if (ex != null && ex.getDetails().get("code").equals(NOT_FOUND)) {
             return true;
         } else {
             return analyzeOperation(operation, gccRemoveReadyPollerObject);
@@ -81,7 +81,7 @@ public class GccRemoveCheckerStatus implements StatusCheckerTask<GccRemoveReadyP
 
     private boolean analyzeOperation(Operation operation, GccRemoveReadyPollerObject gccRemoveReadyPollerObject) {
         MDCBuilder.buildMdcContext(gccRemoveReadyPollerObject.getStack());
-        if ((operation.getHttpErrorStatusCode() != null || operation.getError() != null) ) {
+        if (operation.getHttpErrorStatusCode() != null || operation.getError() != null) {
             StringBuilder error = new StringBuilder();
             if (operation.getError() != null) {
                 if (operation.getError().getErrors() != null) {

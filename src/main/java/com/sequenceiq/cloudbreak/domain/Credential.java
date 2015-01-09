@@ -2,8 +2,6 @@ package com.sequenceiq.cloudbreak.domain;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -57,9 +55,6 @@ public abstract class Credential {
 
     @Column(nullable = false)
     private String name;
-
-    @Enumerated(EnumType.STRING)
-    private CloudPlatform cloudPlatform;
 
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
@@ -130,14 +125,6 @@ public abstract class Credential {
 
     public void setPublicKey(String publicKey) {
         this.publicKey = publicKey;
-    }
-
-    public CloudPlatform getCloudPlatform() {
-        return cloudPlatform;
-    }
-
-    public void setCloudPlatform(CloudPlatform cloudPlatform) {
-        this.cloudPlatform = cloudPlatform;
     }
 
     public abstract CloudPlatform cloudPlatform();
