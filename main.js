@@ -394,7 +394,7 @@ app.get('/confirm/:confirm_token', function(req, res){
 app.post('/invite', function (req, res){
     var inviteEmail = req.body.invite_email
     if (validator.validateEmail(inviteEmail)){
-        getAdminName(req, res, function(adminUserName){
+        getUserName(req, res, function(adminUserName){
            getToken(req, res, function(token){
               getUserByName(req, res, token, adminUserName, 'id,userName,groups', function(userData){
                 isUserAdmin(req, res, userData, function(companyId){
@@ -512,7 +512,7 @@ app.post('/activate', function(req, res){
     var email = req.body.email
 
     if (activate != null && (activate === true || activate === false) && validator.validateEmail(email)) {
-        getAdminName(req, res, function(adminUserName){
+        getUserName(req, res, function(adminUserName){
             getToken(req, res, function(token){
                 getUserByName(req, res, token, adminUserName, 'id,userName,groups', function(adminUserData){
                     isUserAdmin(req, res, adminUserData, function(companyId){
@@ -568,7 +568,7 @@ app.post('/activate', function(req, res){
 });
 
 app.get('/users', function(req, res){
-    getAdminName(req, res, function(adminUserName){
+    getUserName(req, res, function(adminUserName){
         getToken(req, res, function(token){
             getUserByName(req, res, token, adminUserName, 'id,userName,groups', function(adminUserData){
                 isUserAdmin(req, res, adminUserData, function(companyId){
@@ -620,7 +620,7 @@ app.post('/permission', function(req, res){
     var role = req.body.role
     var userId = req.body.id
     if (role == 'admin') {
-         getAdminName(req, res, function(adminUserName){
+         getUserName(req, res, function(adminUserName){
             getToken(req, res, function(token){
                 getUserByName(req, res, token, adminUserName, 'id,userName,groups', function(adminUserData){
                     isUserAdmin(req, res, adminUserData, function(companyId){
@@ -634,6 +634,23 @@ app.post('/permission', function(req, res){
         res.statusCode = 400
         res.json({message: 'Not existing permission type.'})
     }
+});
+
+app.get('/permission', function(req, res){
+        getUserName(req, res, function(userName){
+                    getToken(req, res, function(token){
+                        getUserByName(req, res, token, userName, 'id,userName,groups', function(userData){
+                            var groups = userData.groups
+                            var isAdmin = false
+                            for (var i = 0; i < groups.length; i++ ){
+                                   if (groups[i].display.lastIndexOf('sequenceiq.cloudbreak.admin', 0) === 0){
+                                      isAdmin = true
+                                   }
+                            }
+                            res.json({admin: isAdmin})
+                        });
+                    });
+        });
 });
 
 // service methods
@@ -768,7 +785,7 @@ registerUser = function(req, res, token) {
              })
 }
 
-getAdminName = function(req, res, callback) {
+getUserName = function(req, res, callback) {
     var authHeader = req.headers['authorization']
     var options = {
         headers: { 'Authorization': authHeader }
@@ -783,8 +800,8 @@ getAdminName = function(req, res, callback) {
         }
         needle.post(uaaAddress + "/check_token", 'token=' + token, checkTokenRespOption, function(err, checkTokenResp){
             if (checkTokenResp.statusCode == 200){
-               var adminUserName = checkTokenResp.body.user_name
-               callback(adminUserName)
+               var userName = checkTokenResp.body.user_name
+               callback(userName)
             } else {
                 console.log('Cannot retrieve user name from token.')
                 res.statusCode = checkTokenResp.statusCode
