@@ -21,4 +21,13 @@ public enum AzureLocation {
         return this.location;
     }
 
+    public static AzureLocation fromName(String regionName) {
+        for (AzureLocation region : AzureLocation.values()) {
+            if (regionName.equals(region.location())) {
+                return region;
+            }
+        }
+        throw new IllegalArgumentException("Cannot create enum from " + regionName + " value!");
+    }
+
 }
