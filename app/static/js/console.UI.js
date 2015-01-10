@@ -251,22 +251,6 @@ function addPanelJQueryEventListeners(panel){
 }
 
 function addDatePickerPanelJQueryEventListeners() {
-    var timers = new Array;
-    var timersIndex = 0;
-
-    $jq('#btnGenReport').click(function (e) {
-        var self = this;
-        e.preventDefault();
-        // disable button, start spinner
-        $jq(this).addClass('disabled')
-            .find('i').removeClass('fa-table').addClass('fa-circle-o-notch fa-spin');
-        // simulated delay
-        timers[timersIndex++] = window.setTimeout(function () {
-            // enable button, stop spinner
-            $jq(self).removeClass('disabled')
-                .find('i').removeClass('fa-circle-o-notch fa-spin').addClass('fa-table');
-        }, 1500);
-    });
 
     $jq('#datePickerStart').datetimepicker({
         icons: {
@@ -280,7 +264,23 @@ function addDatePickerPanelJQueryEventListeners() {
 
     $jq("#datePickerStart").on("dp.change", function (e) {
         // filter activated
-        angular.element($jq("#datePickerStart")).scope().setDate(e.date._d.toString());
+        angular.element($jq("#datePickerStart")).scope().setStartDate(e.date._d.toString());
         $jq('.col-xs-6').has(this).addClass('active');
+    });
+
+    $jq('#datePickerEnd').datetimepicker({
+      icons: {
+        time: "fa fa-clock-o",
+        date: "fa fa-calendar",
+        up: "fa fa-arrow-up",
+        down: "fa fa-arrow-down"
+      },
+      pickTime: false
+    });
+
+    $jq("#datePickerEnd").on("dp.change", function (e) {
+      // filter activated
+      angular.element($jq("#datePickerEnd")).scope().setEndDate(e.date._d.toString());
+      $jq('.col-xs-6').has(this).addClass('active');
     });
 }

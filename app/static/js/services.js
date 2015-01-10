@@ -65,6 +65,11 @@ uluwatuServices.factory('UserUsages', ['$resource',
         return $resource('user/usages?:param');
     }]);
 
+uluwatuServices.factory('AccountUsages', ['$resource',
+  function ($resource) {
+    return $resource('account/usages?:param');
+  }]);
+
 uluwatuServices.factory('UserInvite', ['$resource',
     function ($resource) {
         return $resource('sultans/invite');
@@ -78,6 +83,11 @@ uluwatuServices.factory('AccountUsers', ['$resource',
 uluwatuServices.factory('ActivateAccountUsers', ['$resource',
     function ($resource) {
         return $resource('sultans/activate');
+    }]);
+
+uluwatuServices.factory('UserPermission', ['$resource',
+    function ($resource) {
+      return $resource('sultans/permission');
     }]);
 
 uluwatuServices.factory('UserEvents', ['$resource',

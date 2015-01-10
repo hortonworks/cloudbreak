@@ -22,9 +22,9 @@
 
             <ul class="nav navbar-nav navbar-right">
 
-                <!-- ........ USER DROPDOWN ................................................ -->
+                <li ng-class="showManagement == true ? 'active' : ''" ng-disabled="showManagement"><a data-value="cred-002" ng-click="activateManagement()" ><i class="fa fa-cloud fa-fw"></i> dashboard</a></li>
 
-                <li ng-class="managementShow == true ? 'active' : ''" ng-disabled="managementShow"><a data-value="cred-002" ng-click="showManagement()" ><i class="fa fa-cloud fa-fw"></i> dashboard</a></li>
+                <li ng-class="showAccountPanel == true ? 'active' : ''" ng-disabled="showAccountPanel"><a data-value="cred-003" ng-click="activateAccountPanel()" ><i class="fa fa-tasks fa-fw"></i> account</a></li>
 
                 <!-- ........ CREDENTIALS DROPDOWN ......................................... -->
 
@@ -143,7 +143,7 @@
 </section>
 
 
-<section class="management-panels" ng-show="managementShow" >
+<section class="management-panels" ng-show="showManagement" >
     <div class="container-fluid">
         <div class="row">
             <div ng-include onload="addPanelJQueryEventListeners('templates')" src="'tags/templatepanel.tag'"></div>
@@ -157,7 +157,7 @@
     </div>
 </section>
 
-<section class="management-panels" ng-show="eventShow">
+<section class="management-panels" ng-show="showAccountPanel">
     <link href="css/Admin.min.css" rel="stylesheet">
     <div class="container-fluid">
         <div class="row">

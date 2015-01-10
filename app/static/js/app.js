@@ -83,6 +83,8 @@ cloudbreakApp.config([ '$routeProvider', '$locationProvider', function($routePro
             || config.url.match(/^(.*)credentials($|\/).*/) || config.url.match(/^periscope\/clusters($|\/).*/)
             || (config.url.match(/^stacks\/(\d+)\/cluster($|\/).*/) && config.method == 'POST')){
                 block = true
+            } else if (config.url.match(/^(.*)usages($|\?).*/) && config.method == 'GET') {
+                block = true;
             }
             if (!block) {
                 return block
@@ -103,4 +105,30 @@ cloudbreakApp.run(function ($rootScope, $http) {
             "DELETE_COMPLETED": $rootScope.error_msg.title_delete_completed
         }
     });
+});
+
+cloudbreakApp.directive('startdatevalidation', function($parse) {
+  return {
+    require: 'ngModel',
+    link: function(scope, elem, attrs, ctrl) {
+      scope.$watch(function() {
+        return $parse(attrs.startdatevalidation)(scope.usageFilter) >= ctrl.$modelValue;
+      }, function(currentValue) {
+        ctrl.$setValidity('startDateInvalid', currentValue);
+      });
+    }
+  };
+});
+
+cloudbreakApp.directive('enddatevalidation', function($parse) {
+  return {
+    require: 'ngModel',
+    link: function(scope, elem, attrs, ctrl) {
+      scope.$watch(function() {
+        return (new Date) > ctrl.$modelValue;
+      }, function(currentValue) {
+        ctrl.$setValidity('endDateInvalid', currentValue);
+      });
+    }
+  };
 });
