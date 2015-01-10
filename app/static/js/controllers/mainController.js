@@ -71,7 +71,25 @@ angular.module('uluwatuControllers').controller('mainController', ['$scope', '$r
                     {key: 'SMALL', value: 'Small', cloud: 'AZURE'},
                     {key: 'MEDIUM', value: 'Medium', cloud: 'AZURE'},
                     {key: 'LARGE', value: 'Large', cloud: 'AZURE'},
-                    {key: 'EXTRA_LARGE', value: 'Extra Large', cloud: 'AZURE'}
+                    {key: 'EXTRA_LARGE', value: 'Extra Large', cloud: 'AZURE'},
+                    {key: 'A5', value: 'A5', cloud: 'AZURE'},
+                    {key: 'A6', value: 'A6', cloud: 'AZURE'},
+                    {key: 'A7', value: 'A7', cloud: 'AZURE'},
+                    {key: 'A8', value: 'A8', cloud: 'AZURE'},
+                    {key: 'A9', value: 'A9', cloud: 'AZURE'},
+                    {key: 'STANDARD_D1', value: 'Standard_D1', cloud: 'AZURE'},
+                    {key: 'STANDARD_D2', value: 'Standard_D2', cloud: 'AZURE'},
+                    {key: 'STANDARD_D3', value: 'Standard_D3', cloud: 'AZURE'},
+                    {key: 'STANDARD_D4', value: 'Standard_D4', cloud: 'AZURE'},
+                    {key: 'STANDARD_G1', value: 'Standard_G1', cloud: 'AZURE'},
+                    {key: 'STANDARD_G2', value: 'Standard_G2', cloud: 'AZURE'},
+                    {key: 'STANDARD_G3', value: 'Standard_G3', cloud: 'AZURE'},
+                    {key: 'STANDARD_G4', value: 'Standard_G4', cloud: 'AZURE'},
+                    {key: 'STANDARD_G5', value: 'Standard_G5', cloud: 'AZURE'},
+                    {key: 'STANDARD_D11', value: 'Standard_D11', cloud: 'AZURE'},
+                    {key: 'STANDARD_D12', value: 'Standard_D12', cloud: 'AZURE'},
+                    {key: 'STANDARD_D13', value: 'Standard_D13', cloud: 'AZURE'},
+                    {key: 'STANDARD_D14', value: 'Standard_D14', cloud: 'AZURE'}
                 ]
             },
             'AWS': {
