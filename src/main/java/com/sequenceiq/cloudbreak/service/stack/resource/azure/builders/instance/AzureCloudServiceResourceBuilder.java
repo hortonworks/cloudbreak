@@ -81,7 +81,7 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
                         jsonNode,
                         stack, deleteContextObject.getNewAzureClient(credential));
                 azureDiskRemoveReadyPollerObjectPollingService
-                        .pollWithTimeout(azureDiskDeleteTask, azureDiskRemoveReadyPollerObject, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+                        .pollWithTimeout(azureDiskDeleteTask, azureDiskRemoveReadyPollerObject, POLLING_INTERVAL, 100);
             }
         }
         return true;
