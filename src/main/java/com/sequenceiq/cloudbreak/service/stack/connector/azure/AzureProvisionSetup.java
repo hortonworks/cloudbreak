@@ -74,7 +74,6 @@ public class AzureProvisionSetup implements ProvisionSetup {
         MDCBuilder.buildMdcContext(stack);
         Credential credential = stack.getCredential();
         AzureClient azureClient = AzureStackUtil.createAzureClient((AzureCredential) credential);
-        Object locations = azureClient.getLocations();
         if (!azureClient.isImageAvailable(azureStackUtil.getOsImageName(credential))) {
             String affinityGroupName = ((AzureCredential) credential).getCommonName();
             createAffinityGroup(stack, azureClient, affinityGroupName);
