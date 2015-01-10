@@ -41,6 +41,7 @@ import groovyx.net.http.HttpResponseDecorator;
 @Order(1)
 public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourceBuilder {
     private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final int DISK_MAX_ATTEMPTS = 100;
 
     @Autowired
     private StackRepository stackRepository;
@@ -81,7 +82,7 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
                         jsonNode,
                         stack, deleteContextObject.getNewAzureClient(credential));
                 azureDiskRemoveReadyPollerObjectPollingService
-                        .pollWithTimeout(azureDiskDeleteTask, azureDiskRemoveReadyPollerObject, POLLING_INTERVAL, 100);
+                        .pollWithTimeout(azureDiskDeleteTask, azureDiskRemoveReadyPollerObject, POLLING_INTERVAL, DISK_MAX_ATTEMPTS);
             }
         }
         return true;
