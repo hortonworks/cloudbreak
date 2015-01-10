@@ -114,8 +114,8 @@ var optionsAuth={user: clientId, password: clientSecret};
 var identityServerClient = new restClient.Client(optionsAuth);
 identityServerClient.registerMethod("retrieveToken", identityServerAddress + "oauth/token", "POST");
 
-var cloudbreakClient = new restClient.Client();
-cloudbreakClient.registerMethod("subscribe", cloudbreakAddress + "subscriptions", "POST");
+var proxyRestClient = new restClient.Client();
+proxyRestClient.registerMethod("subscribe", cloudbreakAddress + "subscriptions", "POST");
 
 var sultansClient = new restClient.Client();
 
@@ -212,7 +212,7 @@ app.get('*/credentials/certificate/*', function(req, res){
     cbRequestArgs.data = req.body;
   }
   cbRequestArgs.headers.Authorization = "Bearer " + req.session.token;
-  cloudbreakClient.get(cloudbreakAddress + req.url, cbRequestArgs, function(data,response){
+  proxyRestClient.get(cloudbreakAddress + req.url, cbRequestArgs, function(data,response){
     if (data != null) {
       res.setHeader('Content-disposition', 'attachment; filename=azure.cer');
       res.setHeader('Content-type', 'application/x-x509-ca-cert');
@@ -228,53 +228,53 @@ app.get('*/credentials/certificate/*', function(req, res){
 
 // wildcards should be proxied =================================================
 app.get('*/periscope/*', function(req,res){
-  proxyPeriscopeRequest(req, res, cloudbreakClient.get);
+  proxyPeriscopeRequest(req, res, proxyRestClient.get);
 });
 
 app.post('*/periscope/*', function(req,res){
-  proxyPeriscopeRequest(req, res, cloudbreakClient.post);
+  proxyPeriscopeRequest(req, res, proxyRestClient.post);
 });
 
 app.put('*/periscope/*', function(req,res){
-  proxyPeriscopeRequest(req, res, cloudbreakClient.put);
+  proxyPeriscopeRequest(req, res, proxyRestClient.put);
 });
 
 app.delete('*/periscope/*', function(req,res){
-  proxyPeriscopeRequest(req, res, cloudbreakClient.delete);
+  proxyPeriscopeRequest(req, res, proxyRestClient.delete);
 });
 
 
 
 app.get('*/sultans/*', function(req,res){
-    proxySultansRequest(req, res, cloudbreakClient.get);
+    proxySultansRequest(req, res, proxyRestClient.get);
 });
 
 app.get('*', function(req,res){
-  proxyCloudbreakRequest(req, res, cloudbreakClient.get);
+  proxyCloudbreakRequest(req, res, proxyRestClient.get);
 });
 
 app.post('*/sultans/*', function(req,res){
-    proxySultansRequest(req, res, cloudbreakClient.post);
+    proxySultansRequest(req, res, proxyRestClient.post);
 });
 
 app.post('*', function(req,res){
-  proxyCloudbreakRequest(req, res, cloudbreakClient.post);
+  proxyCloudbreakRequest(req, res, proxyRestClient.post);
 });
 
 app.delete('*/sultans/*', function(req,res){
-    proxySultansRequest(req, res, cloudbreakClient.delete);
+    proxySultansRequest(req, res, proxyRestClient.delete);
 });
 
 app.delete('*', function(req,res){
-  proxyCloudbreakRequest(req, res, cloudbreakClient.delete);
+  proxyCloudbreakRequest(req, res, proxyRestClient.delete);
 });
 
 app.put('*/sultans/*', function(req,res){
-    proxySultansRequest(req, res, cloudbreakClient.put);
+    proxySultansRequest(req, res, proxyRestClient.put);
 });
 
 app.put('*', function(req,res){
-  proxyCloudbreakRequest(req, res, cloudbreakClient.put);
+  proxyCloudbreakRequest(req, res, proxyRestClient.put);
 });
 // proxy =======================================================================
 
@@ -285,6 +285,8 @@ function proxyCloudbreakRequest(req, res, method){
   cbRequestArgs.headers.Authorization = "Bearer " + req.session.token;
   method(cloudbreakAddress + req.url, cbRequestArgs, function(data,response){
     res.status(response.statusCode).send(data);
+  }).on('error', function(err){
+    res.status(500).send("Uluwatu could not connect to the requested backend.");
   });
 }
 
@@ -296,10 +298,11 @@ function proxySultansRequest(req, res, method){
     var req_url = req.url.replace("/sultans/", "");
     method(sultansAddress + req_url, cbRequestArgs, function(data, response){
         res.status(response.statusCode).send(data);
+    }).on('error', function(err){
+      res.status(500).send("Uluwatu could not connect to the requested backend.");
     });
 }
 
-//Dummy implementation of handling http methods to periscope!!!
 function proxyPeriscopeRequest(req, res, method){
   if (req.body){
     cbRequestArgs.data = req.body;
@@ -309,6 +312,8 @@ function proxyPeriscopeRequest(req, res, method){
   console.log("Periscope request to: "+ periscopeAddress + req_url);
   method(periscopeAddress + req_url, cbRequestArgs, function(data, response){
     res.status(response.statusCode).send(data);
+  }).on('error', function(err){
+    res.status(500).send("Uluwatu could not connect to the requested backend.");
   });
 }
 // socket ======================================================================
@@ -357,7 +362,7 @@ identityServerClient.methods.retrieveToken(getClientTokenArgs, function(data, re
       },
       data: { "endpointUrl": hostAddress + "notifications" }
     }
-    cloudbreakClient.methods.subscribe(subscribeArgs, function(data, response){
+    proxyRestClient.methods.subscribe(subscribeArgs, function(data, response){
       if (response.statusCode === 201 && data.id){
         console.log("Subscribed to Cloudbreak notifications. Subscription id: [" + data.id + "]");
       } else if (response.statusCode === 409){
