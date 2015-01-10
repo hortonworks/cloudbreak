@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataSetupComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.MetadataUpdateComplete;
@@ -40,7 +41,13 @@ public class AzureMetadataSetup implements MetadataSetup {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureMetadataSetup.class);
     private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final int POLLING_INTERVAL = 5000;
+    private static final int MAX_POLLING_ATTEMPTS = 10;
 
+    @Autowired
+    private AzureMetadataSetupCheckerTask azureMetadataSetupCheckerTask;
+    @Autowired
+    private PollingService<AzureMetadataSetupCheckerTaskContext> azureMetadataSetupCheckerTaskPollingService;
     @Autowired
     private Reactor reactor;
 
@@ -89,6 +96,10 @@ public class AzureMetadataSetup implements MetadataSetup {
         Map<String, Object> props = new HashMap<>();
         props.put(NAME, resource.getResourceName());
         props.put(SERVICENAME, resource.getResourceName());
+        AzureMetadataSetupCheckerTaskContext azureMetadataSetupCheckerTaskContext =
+                new AzureMetadataSetupCheckerTaskContext(azureClient, stack, props);
+        azureMetadataSetupCheckerTaskPollingService
+                .pollWithTimeout(azureMetadataSetupCheckerTask, azureMetadataSetupCheckerTaskContext, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
         Object virtualMachine = azureClient.getVirtualMachine(props);
         try {
             CoreInstanceMetaData instanceMetaData = new CoreInstanceMetaData(
