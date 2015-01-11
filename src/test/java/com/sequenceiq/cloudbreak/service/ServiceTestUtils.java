@@ -104,15 +104,28 @@ public final class ServiceTestUtils {
     }
 
     public static Stack createStack(String owner, String account, Template template, Credential credential, Cluster cluster, Set<Resource> resources) {
+        Template template1 = createTemplate(CloudPlatform.AWS);
+        Template template2 = createTemplate(CloudPlatform.AWS);
+        Set<TemplateGroup> templateGroups = new HashSet<>();
+        TemplateGroup templateGroup1 = new TemplateGroup();
+        templateGroup1.setNodeCount(2);
+        templateGroup1.setGroupName("master");
+        templateGroup1.setTemplate(template1);
+        templateGroups.add(templateGroup1);
+        TemplateGroup templateGroup2 = new TemplateGroup();
+        templateGroup2.setNodeCount(2);
+        templateGroup2.setGroupName("slave_1");
+        templateGroup2.setTemplate(template2);
+        templateGroups.add(templateGroup2);
         Stack stack = new Stack();
         stack.setAmbariIp("168.192.12.13");
         stack.setCredential(credential);
-        //stack.setNodeCount(2);
         stack.setMetadataReady(true);
         stack.setRegion("EU_WEST_1");
         stack.setOwner(owner);
         stack.setAccount(account);
-        stack.setTemplateGroups(new HashSet<TemplateGroup>());
+        stack.setStatus(Status.REQUESTED);
+        stack.setTemplateGroups(templateGroups);
         stack.setCluster(cluster);
         stack.setPublicInAccount(true);
         stack.setResources(resources);

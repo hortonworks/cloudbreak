@@ -89,7 +89,8 @@ public class ProvisionContext {
                         CreateResourceRequest createResourceRequest =
                                 resourceBuilder.buildCreateRequest(pCO,
                                         Lists.newArrayList(resourceSet),
-                                        resourceBuilder.buildResources(pCO, 0, Arrays.asList(resourceSet), Lists.newArrayList(stack.getTemplateGroups()).get(0)),
+                                        resourceBuilder.buildResources(pCO, 0, Arrays.asList(resourceSet),
+                                                Lists.newArrayList(stack.getTemplateGroups()).get(0)),
                                         0,
                                         Lists.newArrayList(stack.getTemplateGroups()).get(0));
                         stackUpdater.addStackResources(stack.getId(), createResourceRequest.getBuildableResources());
@@ -118,7 +119,8 @@ public class ProvisionContext {
                                         stackUpdater.addStackResources(finalStack.getId(), createResourceRequest.getBuildableResources());
                                         resourceBuilder.create(createResourceRequest, stringTemplateGroupEntry, finalStack.getRegion());
                                         resources.addAll(createResourceRequest.getBuildableResources());
-                                        LOGGER.info("Node {}. creation in progress resource {} creation finished.", index, resourceBuilder.resourceBuilderType());
+                                        LOGGER.info("Node {}. creation in progress resource {} creation finished.", index,
+                                                resourceBuilder.resourceBuilderType());
                                     }
                                     return true;
                                 }

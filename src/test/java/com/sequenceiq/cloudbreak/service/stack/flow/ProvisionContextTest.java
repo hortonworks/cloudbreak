@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.ServiceTestUtils;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
 import com.sequenceiq.cloudbreak.service.stack.flow.dummy.DummyResourceBuilderInit;
@@ -91,7 +92,7 @@ public class ProvisionContextTest {
     public void setUp() {
         underTest = new ProvisionContext();
         MockitoAnnotations.initMocks(this);
-        stack = createStack();
+        stack = ServiceTestUtils.createStack();
 
         Map<CloudPlatform, ResourceBuilderInit> resourceBuilderInits = new HashMap<>();
         resourceBuilderInits.put(CloudPlatform.GCC, new DummyResourceBuilderInit());
@@ -123,7 +124,7 @@ public class ProvisionContextTest {
         // WHEN
         underTest.buildStack(cloudPlatform, 1L, setupProperties, userDataParams);
         // THEN
-        verify(stackUpdater, times(7)).addStackResources(anyLong(), anyList());
+        verify(stackUpdater, times(9)).addStackResources(anyLong(), anyList());
         verify(reactor, times(1)).notify(eq(ReactorConfig.PROVISION_COMPLETE_EVENT), Event.wrap(anyObject()));
     }
 
@@ -167,7 +168,7 @@ public class ProvisionContextTest {
         // WHEN
         underTest.buildStack(cloudPlatform, 1L, setupProperties, userDataParams);
         // THEN
-        verify(stackUpdater, times(7)).addStackResources(anyLong(), anyList());
+        verify(stackUpdater, times(9)).addStackResources(anyLong(), anyList());
         verify(reactor, times(1)).notify(eq(ReactorConfig.STACK_CREATE_FAILED_EVENT), Event.wrap(anyObject()));
     }
 
@@ -203,14 +204,5 @@ public class ProvisionContextTest {
         instances.add(1, new DummyVirtualMachineResourceBuilder());
         instanceResourceBuilders.put(CloudPlatform.GCC, instances);
         ReflectionTestUtils.setField(underTest, "instanceResourceBuilders", instanceResourceBuilders);
-    }
-
-    private Stack createStack() {
-        Stack stack = new Stack();
-        stack.setId(1L);
-        stack.setStatus(Status.REQUESTED);
-        stack.setName(DUMMY_NAME);
-        stack.setOwner("gipszjakab@myemail.com");
-        return stack;
     }
 }

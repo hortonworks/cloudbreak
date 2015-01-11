@@ -73,7 +73,8 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
         ins.setPrettyPrint(Boolean.TRUE);
         Operation execute = ins.execute();
         if (execute.getHttpErrorStatusCode() == null) {
-            Compute.ZoneOperations.Get zoneOperations = createZoneOperations(gICR.getCompute(), gICR.getGccCredential(), execute, GccZone.valueOf(stack.getRegion()));
+            Compute.ZoneOperations.Get zoneOperations = createZoneOperations(gICR.getCompute(),
+                    gICR.getGccCredential(), execute, GccZone.valueOf(stack.getRegion()));
             GccResourceReadyPollerObject instReady = new GccResourceReadyPollerObject(zoneOperations, stack, gICR.getInstance().getName(), execute.getName());
             gccInstanceReadyPollerObjectPollingService.pollWithTimeout(gccResourceCheckerStatus, instReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
             return true;
@@ -119,7 +120,8 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
             GccCredential gccCredential = (GccCredential) stack.getCredential();
             Operation operation = deleteContextObject.getCompute().instances()
                     .delete(gccCredential.getProjectId(), GccZone.valueOf(region).getValue(), resource.getResourceName()).execute();
-            Compute.ZoneOperations.Get zoneOperations = createZoneOperations(deleteContextObject.getCompute(), gccCredential, operation, GccZone.valueOf(region));
+            Compute.ZoneOperations.Get zoneOperations = createZoneOperations(deleteContextObject.getCompute(),
+                    gccCredential, operation, GccZone.valueOf(region));
             Compute.GlobalOperations.Get globalOperations = createGlobalOperations(deleteContextObject.getCompute(), gccCredential, operation);
             GccRemoveReadyPollerObject gccRemoveReady =
                     new GccRemoveReadyPollerObject(zoneOperations, globalOperations, stack, resource.getResourceName(), operation.getName());
@@ -145,7 +147,9 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
     @Override
     public List<Resource> buildResources(GccProvisionContextObject provisionContextObject, int index, List<Resource> resources, TemplateGroup templateGroup) {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
-        Resource resource = new Resource(resourceType(), String.format("%s-%s-%s", stack.getName(), index, new Date().getTime()), stack);
+        Resource resource = new Resource(resourceType(),
+                String.format("%s-%s-%s", stack.getName(), index, new Date().getTime()), stack,
+                Lists.newArrayList(stack.getTemplateGroups()).get(0).getGroupName());
         return Arrays.asList(resource);
     }
 

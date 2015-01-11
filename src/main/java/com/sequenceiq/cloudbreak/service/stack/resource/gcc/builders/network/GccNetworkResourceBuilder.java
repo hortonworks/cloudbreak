@@ -100,7 +100,7 @@ public class GccNetworkResourceBuilder extends GccSimpleNetworkResourceBuilder {
     @Override
     public List<Resource> buildResources(GccProvisionContextObject provisionContextObject, int index, List<Resource> resources, TemplateGroup templateGroup) {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
-        return Arrays.asList(new Resource(resourceType(), stack.getName(), stack));
+        return Arrays.asList(new Resource(resourceType(), stack.getName(), stack, templateGroup.getGroupName()));
     }
 
     @Override

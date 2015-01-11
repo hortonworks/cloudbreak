@@ -68,7 +68,8 @@ public class GccDiskResourceBuilder extends GccSimpleInstanceResourceBuilder {
         insDisk.setSourceImage(gccStackUtil.getAmbariUbuntu(gDCR.getProjectId()));
         Operation execute = insDisk.execute();
         if (execute.getHttpErrorStatusCode() == null) {
-            Compute.ZoneOperations.Get zoneOperations = createZoneOperations(gDCR.getCompute(), gDCR.getGccCredential(), execute, GccZone.valueOf(stack.getRegion()));
+            Compute.ZoneOperations.Get zoneOperations = createZoneOperations(gDCR.getCompute(),
+                    gDCR.getGccCredential(), execute, GccZone.valueOf(stack.getRegion()));
             GccResourceReadyPollerObject gccDiskReady = new GccResourceReadyPollerObject(zoneOperations, stack, gDCR.getDisk().getName(), execute.getName());
             gccDiskReadyPollerObjectPollingService.pollWithTimeout(gccResourceCheckerStatus, gccDiskReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
             return true;
@@ -84,7 +85,8 @@ public class GccDiskResourceBuilder extends GccSimpleInstanceResourceBuilder {
             GccCredential gccCredential = (GccCredential) stack.getCredential();
             Operation operation = deleteContextObject.getCompute().disks()
                     .delete(gccCredential.getProjectId(), GccZone.valueOf(region).getValue(), resource.getResourceName()).execute();
-            Compute.ZoneOperations.Get zoneOperations = createZoneOperations(deleteContextObject.getCompute(), gccCredential, operation, GccZone.valueOf(region));
+            Compute.ZoneOperations.Get zoneOperations = createZoneOperations(deleteContextObject.getCompute(),
+                    gccCredential, operation, GccZone.valueOf(region));
             Compute.GlobalOperations.Get globalOperations = createGlobalOperations(deleteContextObject.getCompute(), gccCredential, operation);
             GccRemoveReadyPollerObject gccRemoveReady =
                     new GccRemoveReadyPollerObject(zoneOperations, globalOperations, stack, resource.getResourceName(), operation.getName());
@@ -114,7 +116,8 @@ public class GccDiskResourceBuilder extends GccSimpleInstanceResourceBuilder {
     @Override
     public List<Resource> buildResources(GccProvisionContextObject provisionContextObject, int index, List<Resource> resources, TemplateGroup templateGroup) {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
-        Resource resource = new Resource(resourceType(), String.format("%s-%s-%s", stack.getName(), index, new Date().getTime()), stack);
+        Resource resource = new Resource(resourceType(),
+                String.format("%s-%s-%s", stack.getName(), index, new Date().getTime()), stack, templateGroup.getGroupName());
         return Arrays.asList(resource);
     }
 

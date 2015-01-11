@@ -76,7 +76,7 @@ public class AwsProvisionerTest {
         MockitoAnnotations.initMocks(this);
         credential = ServiceTestUtils.createCredential(CloudPlatform.AWS);
         Set<Resource> resources = new HashSet<>();
-        resources.add(new Resource(ResourceType.CLOUDFORMATION_STACK, "", stack));
+        resources.add(new Resource(ResourceType.CLOUDFORMATION_STACK, "", stack, "master"));
         stack = ServiceTestUtils.createStack(ServiceTestUtils.createTemplate(CloudPlatform.AWS), credential, resources);
     }
 

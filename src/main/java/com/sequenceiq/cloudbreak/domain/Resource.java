@@ -36,12 +36,6 @@ public class Resource {
         this.stack = stack;
     }
 
-    public Resource(ResourceType resourceType, String resourceName, Stack stack) {
-        this.resourceType = resourceType;
-        this.resourceName = resourceName;
-        this.stack = stack;
-    }
-
     public String getGroupName() {
         return groupName;
     }

@@ -7,6 +7,7 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.AzureLocation;
@@ -16,6 +17,7 @@ import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.TemplateGroup;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
@@ -62,9 +64,10 @@ public class AzureResourceBuilderInit implements
         AzureClient azureClient =  azureStackUtil.createAzureClient((AzureCredential) stack.getCredential());
         List<Resource> resourceList = new ArrayList<>();
         for (String res : decommissionSet) {
-            resourceList.add(new Resource(ResourceType.AZURE_VIRTUAL_MACHINE, res, stack));
-            resourceList.add(new Resource(ResourceType.AZURE_SERVICE_CERTIFICATE, res, stack));
-            resourceList.add(new Resource(ResourceType.AZURE_CLOUD_SERVICE, res, stack));
+            List<TemplateGroup> templateGroups = Lists.newArrayList(stack.getTemplateGroups());
+            resourceList.add(new Resource(ResourceType.AZURE_VIRTUAL_MACHINE, res, stack, templateGroups.get(0).getGroupName()));
+            resourceList.add(new Resource(ResourceType.AZURE_SERVICE_CERTIFICATE, res, stack, templateGroups.get(0).getGroupName()));
+            resourceList.add(new Resource(ResourceType.AZURE_CLOUD_SERVICE, res, stack, templateGroups.get(0).getGroupName()));
         }
         AzureDeleteContextObject azureDeleteContextObject =
                 new AzureDeleteContextObject(stack.getId(), credential.getCommonName(template.getLocation()), azureClient, resourceList);

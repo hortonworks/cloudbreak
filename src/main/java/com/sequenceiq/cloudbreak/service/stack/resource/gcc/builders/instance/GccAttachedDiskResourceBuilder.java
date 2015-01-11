@@ -20,6 +20,7 @@ import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.Disk;
 import com.google.api.services.compute.model.Operation;
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
@@ -35,10 +36,8 @@ import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveReadyPolle
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccResourceCheckerStatus;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccResourceCreationException;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccResourceReadyPollerObject;
-import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveCheckerStatus;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveReadyPollerObject;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccZone;
+import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.GccSimpleInstanceResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDescribeContextObject;
@@ -100,9 +99,10 @@ public class GccAttachedDiskResourceBuilder extends GccSimpleInstanceResourceBui
         Stack stack = stackRepository.findById(deleteContextObject.getStackId());
         try {
             GccCredential gccCredential = (GccCredential) stack.getCredential();
-           Operation operation = deleteContextObject.getCompute().disks()
+            Operation operation = deleteContextObject.getCompute().disks()
                     .delete(gccCredential.getProjectId(), GccZone.valueOf(region).getValue(), resource.getResourceName()).execute();
-            Compute.ZoneOperations.Get zoneOperations = createZoneOperations(deleteContextObject.getCompute(), gccCredential, operation, GccZone.valueOf(region));
+            Compute.ZoneOperations.Get zoneOperations = createZoneOperations(deleteContextObject.getCompute(),
+                    gccCredential, operation, GccZone.valueOf(region));
             Compute.GlobalOperations.Get globalOperations = createGlobalOperations(deleteContextObject.getCompute(), gccCredential, operation);
             GccRemoveReadyPollerObject gccRemoveReady =
                     new GccRemoveReadyPollerObject(zoneOperations, globalOperations, stack, resource.getResourceName(), operation.getName());
@@ -121,7 +121,8 @@ public class GccAttachedDiskResourceBuilder extends GccSimpleInstanceResourceBui
         GccCredential gccCredential = (GccCredential) stack.getCredential();
         try {
             Compute.Disks.Get getDisk =
-                    describeContextObject.getCompute().disks().get(gccCredential.getProjectId(), GccZone.valueOf(region).getValue(), resource.getResourceName());
+                    describeContextObject.getCompute().disks().get(gccCredential.getProjectId(),
+                            GccZone.valueOf(region).getValue(), resource.getResourceName());
             return Optional.fromNullable(getDisk.execute().toPrettyString());
         } catch (IOException e) {
             return Optional.fromNullable(jsonHelper.createJsonFromString(String.format("{\"Attached_Disk\": {%s}}", ERROR)).toString());
@@ -134,7 +135,7 @@ public class GccAttachedDiskResourceBuilder extends GccSimpleInstanceResourceBui
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         String name = String.format("%s-%s-%s", stack.getName(), index, new Date().getTime());
         for (int i = 0; i < templateGroup.getTemplate().getVolumeCount(); i++) {
-            names.add(new Resource(resourceType(), name + "-" + i, stack));
+            names.add(new Resource(resourceType(), name + "-" + i, stack, Lists.newArrayList(stack.getTemplateGroups()).get(0).getGroupName()));
         }
         return names;
     }

@@ -37,6 +37,7 @@ import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.StartInstancesRequest;
 import com.amazonaws.services.ec2.model.StopInstancesRequest;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
@@ -187,7 +188,7 @@ public class AwsConnector implements CloudPlatformConnector {
 
 
         Set<Resource> resources = new HashSet<>();
-        resources.add(new Resource(ResourceType.CLOUDFORMATION_STACK, stackName, stack));
+        resources.add(new Resource(ResourceType.CLOUDFORMATION_STACK, stackName, stack,  Lists.newArrayList(stack.getTemplateGroups()).get(0).getGroupName()));
         Stack updatedStack = stackUpdater.updateStackResources(stack.getId(), resources);
         LOGGER.info("CloudFormation stack creation request sent with stack name: '{}' for stack: '{}'", stackName, updatedStack.getId());
     }

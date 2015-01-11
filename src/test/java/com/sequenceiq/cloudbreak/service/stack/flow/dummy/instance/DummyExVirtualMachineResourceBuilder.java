@@ -59,7 +59,7 @@ public class DummyExVirtualMachineResourceBuilder
 
     @Override
     public List<Resource> buildResources(DummyProvisionContextObject provisionContextObject, int index, List<Resource> resources, TemplateGroup templateGroup) {
-        return Arrays.asList(new Resource(resourceType(), "virtualmachine" + index, new Stack()));
+        return Arrays.asList(new Resource(resourceType(), "virtualmachine" + index, new Stack(), "master"));
     }
 
     @Override

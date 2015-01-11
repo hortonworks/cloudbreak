@@ -90,7 +90,8 @@ public class GccProvisionSetup implements ProvisionSetup {
                 image.setRawDisk(rawDisk);
                 Compute.Images.Insert ins1 = compute.images().insert(credential.getProjectId(), image);
                 ins1.execute();
-                GccImageReadyPollerObject gccImageReadyPollerObject = new GccImageReadyPollerObject(compute, stack, image.getName(), GccZone.valueOf(stack.getRegion()));
+                GccImageReadyPollerObject gccImageReadyPollerObject = new GccImageReadyPollerObject(compute,
+                        stack, image.getName(), GccZone.valueOf(stack.getRegion()));
                 gccImageReadyPollerObjectPollingService
                         .pollWithTimeout(gccImageCheckerStatus, gccImageReadyPollerObject, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
             }

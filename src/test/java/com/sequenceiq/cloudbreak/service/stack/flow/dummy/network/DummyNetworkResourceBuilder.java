@@ -58,7 +58,7 @@ public class DummyNetworkResourceBuilder
 
     @Override
     public List<Resource> buildResources(DummyProvisionContextObject provisionContextObject, int index, List<Resource> resources, TemplateGroup templateGroup) {
-        return Arrays.asList(new Resource(resourceType(), "network" + index, new Stack()));
+        return Arrays.asList(new Resource(resourceType(), "network" + index, new Stack(), "master"));
     }
 
     @Override

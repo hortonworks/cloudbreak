@@ -56,7 +56,7 @@ public class ProvisionCompleteHandlerTest {
         underTest = new ProvisionCompleteHandler();
         MockitoAnnotations.initMocks(this);
         resourceSet = new HashSet<>();
-        resourceSet.add(new Resource(ResourceType.CLOUDFORMATION_STACK, "", new Stack()));
+        resourceSet.add(new Resource(ResourceType.CLOUDFORMATION_STACK, "", new Stack(), "master"));
         event = createEvent();
     }
 

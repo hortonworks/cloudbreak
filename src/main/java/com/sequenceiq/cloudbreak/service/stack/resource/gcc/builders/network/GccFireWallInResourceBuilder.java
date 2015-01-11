@@ -59,7 +59,8 @@ public class GccFireWallInResourceBuilder extends GccSimpleNetworkResourceBuilde
         try {
             GccCredential gccCredential = (GccCredential) stack.getCredential();
             Operation operation = deleteContextObject.getCompute().firewalls().delete(gccCredential.getProjectId(), resource.getResourceName()).execute();
-            Compute.ZoneOperations.Get zoneOperations = createZoneOperations(deleteContextObject.getCompute(), gccCredential, operation, GccZone.valueOf(region));
+            Compute.ZoneOperations.Get zoneOperations = createZoneOperations(deleteContextObject.getCompute(),
+                    gccCredential, operation, GccZone.valueOf(region));
             Compute.GlobalOperations.Get globalOperations = createGlobalOperations(deleteContextObject.getCompute(), gccCredential, operation);
             GccRemoveReadyPollerObject gccRemoveReady =
                     new GccRemoveReadyPollerObject(zoneOperations, globalOperations, stack, resource.getResourceName(), operation.getName());
@@ -80,7 +81,7 @@ public class GccFireWallInResourceBuilder extends GccSimpleNetworkResourceBuilde
     @Override
     public List<Resource> buildResources(GccProvisionContextObject provisionContextObject, int index, List<Resource> resources, TemplateGroup templateGroup) {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
-        return Arrays.asList(new Resource(resourceType(), stack.getName() + "in", stack));
+        return Arrays.asList(new Resource(resourceType(), stack.getName() + "in", stack, templateGroup.getGroupName()));
     }
 
     @Override

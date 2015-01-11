@@ -81,7 +81,7 @@ public class GccFireWallOutResourceBuilder extends GccSimpleNetworkResourceBuild
     @Override
     public List<Resource> buildResources(GccProvisionContextObject provisionContextObject, int index, List<Resource> resources, TemplateGroup templateGroup) {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
-        return Arrays.asList(new Resource(resourceType(), stack.getName() + "out", stack));
+        return Arrays.asList(new Resource(resourceType(), stack.getName() + "out", stack, templateGroup.getGroupName()));
     }
 
     @Override

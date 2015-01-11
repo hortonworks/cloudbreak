@@ -73,7 +73,7 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
     public List<Resource> buildResources(AzureProvisionContextObject provisionContextObject, int index, List<Resource> resources, TemplateGroup templateGroup) {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         String vmName = filterResourcesByType(resources, ResourceType.AZURE_CLOUD_SERVICE).get(0).getResourceName();
-        return Arrays.asList(new Resource(resourceType(), vmName, stack));
+        return Arrays.asList(new Resource(resourceType(), vmName, stack, templateGroup.getGroupName()));
     }
 
     @Override

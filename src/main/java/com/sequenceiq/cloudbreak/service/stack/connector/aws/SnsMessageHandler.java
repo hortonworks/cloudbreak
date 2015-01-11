@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -97,7 +98,8 @@ public class SnsMessageHandler {
             LOGGER.info("CloudFormation stack creation completed.");
             LOGGER.info("Publishing {} event.", ReactorConfig.PROVISION_COMPLETE_EVENT);
             Set<Resource> resourceSet = new HashSet<>();
-            Resource resource = new Resource(ResourceType.CLOUDFORMATION_STACK, cfMessage.get("StackName"), stack);
+            Resource resource = new Resource(ResourceType.CLOUDFORMATION_STACK, cfMessage.get("StackName"), stack,
+                    Lists.newArrayList(stack.getTemplateGroups()).get(0).getGroupName());
             resourceSet.add(resource);
             stackUpdater.addStackResources(stack.getId(), Arrays.asList(resource));
             reactor.notify(ReactorConfig.PROVISION_COMPLETE_EVENT, Event.wrap(new ProvisionComplete(CloudPlatform.AWS, stack.getId(), resourceSet)));

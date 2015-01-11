@@ -35,7 +35,7 @@ public class HadoopConfigurationServiceTest {
         // GIVEN
         Template template = ServiceTestUtils.createTemplate(CloudPlatform.AWS);
         Stack stack = ServiceTestUtils.createStack(template, credential, resources);
-        resources.add(new Resource(ResourceType.CLOUDFORMATION_STACK, "", stack));
+        resources.add(new Resource(ResourceType.CLOUDFORMATION_STACK, "", stack, "master"));
         // WHEN
         Map<String, Map<String, String>> result = underTest.getConfiguration(stack).get(HadoopConfigurationService.YARN_SITE);
         // THEN
@@ -49,7 +49,7 @@ public class HadoopConfigurationServiceTest {
         // GIVEN
         Template template = ServiceTestUtils.createTemplate(CloudPlatform.AWS);
         Stack stack = ServiceTestUtils.createStack(template, credential, resources);
-        resources.add(new Resource(ResourceType.CLOUDFORMATION_STACK, "", stack));
+        resources.add(new Resource(ResourceType.CLOUDFORMATION_STACK, "", stack, "master"));
         // WHEN
         Map<String, Map<String, Map<String, String>>> configuration = underTest.getConfiguration(stack);
         // THEN
@@ -62,7 +62,7 @@ public class HadoopConfigurationServiceTest {
         // GIVEN
         Template template = ServiceTestUtils.createTemplate(CloudPlatform.AWS);
         Stack stack = ServiceTestUtils.createStack(template, credential, resources);
-        resources.add(new Resource(ResourceType.CLOUDFORMATION_STACK, "", stack));
+        resources.add(new Resource(ResourceType.CLOUDFORMATION_STACK, "", stack, "master"));
         // WHEN
         Map<String, Map<String, String>> result = underTest.getConfiguration(stack).get(HadoopConfigurationService.HDFS_SITE);
         // THEN
@@ -75,7 +75,7 @@ public class HadoopConfigurationServiceTest {
         // GIVEN
         Template template = ServiceTestUtils.createTemplate(CloudPlatform.AWS);
         Stack stack = ServiceTestUtils.createStack(template, credential, resources);
-        resources.add(new Resource(ResourceType.CLOUDFORMATION_STACK, "", stack));
+        resources.add(new Resource(ResourceType.CLOUDFORMATION_STACK, "", stack, "master"));
         // WHEN
         Map<String, Map<String, Map<String, String>>> configuration = underTest.getConfiguration(stack);
         // THEN

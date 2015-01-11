@@ -112,7 +112,7 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
     public List<Resource> buildResources(AzureProvisionContextObject provisionContextObject, int index, List<Resource> resources, TemplateGroup templateGroup) {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         String vmName = getVmName(provisionContextObject.filterResourcesByType(ResourceType.AZURE_NETWORK).get(0).getResourceName(), index);
-        return Arrays.asList(new Resource(resourceType(), vmName + String.valueOf(new Date().getTime()), stack));
+        return Arrays.asList(new Resource(resourceType(), vmName + String.valueOf(new Date().getTime()), stack, templateGroup.getGroupName()));
     }
 
     @Override

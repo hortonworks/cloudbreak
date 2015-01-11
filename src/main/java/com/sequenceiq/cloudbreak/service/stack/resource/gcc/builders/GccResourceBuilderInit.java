@@ -16,12 +16,14 @@ import com.google.api.services.compute.model.Instance;
 import com.google.api.services.dns.Dns;
 import com.google.api.services.dns.model.ManagedZone;
 import com.google.api.services.dns.model.ManagedZonesListResponse;
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.TemplateGroup;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccZone;
@@ -70,15 +72,16 @@ public class GccResourceBuilderInit implements
         GccCredential credential = (GccCredential) stack.getCredential();
         Compute compute = gccStackUtil.buildCompute(credential, stack);
         List<Resource> resourceList = new ArrayList<>();
+        List<TemplateGroup> templateGroups = Lists.newArrayList(stack.getTemplateGroups());
         for (String res : decommissionSet) {
-            resourceList.add(new Resource(ResourceType.GCC_INSTANCE, res, stack));
+            resourceList.add(new Resource(ResourceType.GCC_INSTANCE, res, stack, templateGroups.get(0).getGroupName()));
         }
         List<Resource> result = new ArrayList<>();
         for (Resource resource : resourceList) {
             try {
                 Instance instance = gccInstanceResourceBuilder.describe(stack, compute, resource, GccZone.valueOf(stack.getRegion()));
                 for (AttachedDisk attachedDisk : instance.getDisks()) {
-                    result.add(new Resource(ResourceType.GCC_ATTACHED_DISK, attachedDisk.getDeviceName(), stack));
+                    result.add(new Resource(ResourceType.GCC_ATTACHED_DISK, attachedDisk.getDeviceName(), stack, templateGroups.get(0).getGroupName()));
                 }
             } catch (IOException ex) {
                 LOGGER.error("There was a problem with the describe instance on Google cloud");
