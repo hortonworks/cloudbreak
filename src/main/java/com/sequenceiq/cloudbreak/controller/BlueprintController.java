@@ -44,13 +44,13 @@ public class BlueprintController {
     @RequestMapping(value = "user/blueprints", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<IdJson> createPrivateBlueprint(@ModelAttribute("user") CbUser user, @RequestBody @Valid BlueprintJson blueprintRequest) {
-        return createBlueprint(user, blueprintRequest, false);
+        return createBlueprint(user, blueprintRequest);
     }
 
     @RequestMapping(value = "account/blueprints", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<IdJson> createAccountBlueprint(@ModelAttribute("user") CbUser user, @RequestBody @Valid BlueprintJson blueprintRequest) {
-        return createBlueprint(user, blueprintRequest, true);
+        return createBlueprint(user, blueprintRequest);
     }
 
     @RequestMapping(value = "user/blueprints", method = RequestMethod.GET)
@@ -99,7 +99,7 @@ public class BlueprintController {
     @RequestMapping(value = "blueprints/{id}", method = RequestMethod.DELETE)
     @ResponseBody
     public ResponseEntity<BlueprintJson> deleteBlueprint(@ModelAttribute("user") CbUser user, @PathVariable Long id) {
-        blueprintService.delete(id);
+        blueprintService.delete(id, user);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
@@ -117,9 +117,8 @@ public class BlueprintController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    private ResponseEntity<IdJson> createBlueprint(CbUser user, BlueprintJson blueprintRequest, Boolean publicInAccount) {
+    private ResponseEntity<IdJson> createBlueprint(CbUser user, BlueprintJson blueprintRequest) {
         Blueprint blueprint = blueprintConverter.convert(blueprintRequest);
-        blueprint.setPublicInAccount(publicInAccount);
         blueprint = blueprintService.create(user, blueprint);
         return new ResponseEntity<>(new IdJson(blueprint.getId()), HttpStatus.CREATED);
     }

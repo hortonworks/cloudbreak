@@ -39,7 +39,7 @@ public class DefaultBlueprintService implements BlueprintService {
         if (user.getRoles().contains(CbUserRole.ADMIN)) {
             return blueprintRepository.findAllInAccount(user.getAccount());
         } else {
-            return blueprintRepository.findPublicsInAccount(user.getAccount());
+            return blueprintRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
         }
     }
 
@@ -68,18 +68,13 @@ public class DefaultBlueprintService implements BlueprintService {
     }
 
     @Override
-    public void delete(Long id) {
-        Blueprint blueprint = blueprintRepository.findOne(id);
+    public void delete(Long id, CbUser user) {
+        Blueprint blueprint = blueprintRepository.findByIdInAccount(id, user.getAccount(), user.getUserId());
         MDCBuilder.buildMdcContext(blueprint);
         if (blueprint == null) {
             throw new NotFoundException(String.format("Blueprint '%s' not found.", id));
         }
-        if (clusterRepository.findAllClusterByBlueprint(blueprint.getId()).isEmpty()) {
-            blueprintRepository.delete(blueprint);
-        } else {
-            throw new BadRequestException(String.format(
-                    "There are stacks associated with blueprint '%s'. Please remove these before the deleting the blueprint.", id));
-        }
+        delete(blueprint, user);
     }
 
     @Override
@@ -106,13 +101,20 @@ public class DefaultBlueprintService implements BlueprintService {
         if (blueprint == null) {
             throw new NotFoundException(String.format("Blueprint '%s' not found.", name));
         }
-        MDCBuilder.buildMdcContext(blueprint);
+        delete(blueprint, user);
+    }
 
+    private void delete(Blueprint blueprint, CbUser user) {
+        MDCBuilder.buildMdcContext(blueprint);
         if (clusterRepository.findAllClusterByBlueprint(blueprint.getId()).isEmpty()) {
-            blueprintRepository.delete(blueprint);
+            if (!user.getUserId().equals(blueprint.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
+                throw new BadRequestException("Public blueprints can be deleted only by account admins or owners.");
+            } else {
+                blueprintRepository.delete(blueprint);
+            }
         } else {
             throw new BadRequestException(String.format(
-                    "There are stacks associated with blueprint '%s'. Please remove these before the deleting the blueprint.", name));
+                    "There are stacks associated with blueprint '%s'. Please remove these before the deleting the blueprint.", blueprint.getId()));
         }
     }
 }

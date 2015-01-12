@@ -23,6 +23,7 @@ public class BlueprintJson implements JsonEntity {
     @Size(max = 1000)
     private String description;
     private Integer hostGroupCount;
+    private boolean publicInAccount;
 
     @JsonRawValue
     public String getAmbariBlueprint() {
@@ -87,4 +88,12 @@ public class BlueprintJson implements JsonEntity {
         this.hostGroupCount = hostGroupCount;
     }
 
+    @JsonProperty("public")
+    public boolean isPublicInAccount() {
+        return publicInAccount;
+    }
+
+    public void setPublicInAccount(boolean publicInAccount) {
+        this.publicInAccount = publicInAccount;
+    }
 }

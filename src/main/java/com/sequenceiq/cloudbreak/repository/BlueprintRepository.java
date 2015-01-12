@@ -20,11 +20,13 @@ public interface BlueprintRepository extends CrudRepository<Blueprint, Long> {
 
     Set<Blueprint> findForUser(@Param("user") String user);
 
-    Set<Blueprint> findPublicsInAccount(@Param("account") String account);
+    Set<Blueprint> findPublicInAccountForUser(@Param("user") String user, @Param("account") String account);
 
     Set<Blueprint> findAllInAccount(@Param("account") String account);
 
     Blueprint findByNameInAccount(@Param("name") String name, @Param("account") String account, @Param("owner") String owner);
+
+    Blueprint findByIdInAccount(@Param("id") Long id, @Param("account") String account, @Param("owner") String owner);
 
     Blueprint findByNameInUser(@Param("name") String name, @Param("owner") String owner);
 

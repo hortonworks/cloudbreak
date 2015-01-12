@@ -18,6 +18,7 @@ public class GccCredentialConverter extends AbstractConverter<CredentialJson, Gc
         credentialJson.setId(entity.getId());
         credentialJson.setCloudPlatform(CloudPlatform.GCC);
         credentialJson.setName(entity.getName());
+        credentialJson.setPublicInAccount(entity.isPublicInAccount());
         Map<String, Object> params = new HashMap<>();
         params.put(GccCredentialParam.SERVICE_ACCOUNT_ID.getName(), entity.getServiceAccountId());
         params.put(GccCredentialParam.PROJECTID.getName(), entity.getProjectId());
@@ -36,6 +37,7 @@ public class GccCredentialConverter extends AbstractConverter<CredentialJson, Gc
         gccCredential.setCloudPlatform(CloudPlatform.GCC);
         gccCredential.setDescription(json.getDescription());
         gccCredential.setPublicKey(json.getPublicKey());
+        gccCredential.setPublicInAccount(json.isPublicInAccount());
         return gccCredential;
     }
 }

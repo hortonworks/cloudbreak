@@ -46,13 +46,13 @@ public class StackController {
     @RequestMapping(value = "user/stacks", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<IdJson> createPrivateStack(@ModelAttribute("user") CbUser user, @RequestBody @Valid StackJson stackRequest) {
-        return createStack(user, stackRequest, false);
+        return createStack(user, stackRequest);
     }
 
     @RequestMapping(value = "account/stacks", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<IdJson> createAccountStack(@ModelAttribute("user") CbUser user, @RequestBody @Valid StackJson stackRequest) {
-        return createStack(user, stackRequest, true);
+        return createStack(user, stackRequest);
     }
 
     @RequestMapping(value = "user/stacks", method = RequestMethod.GET)
@@ -104,8 +104,8 @@ public class StackController {
 
     @RequestMapping(value = "stacks/{id}", method = RequestMethod.DELETE)
     @ResponseBody
-    public ResponseEntity<TemplateJson> deleteStack(@PathVariable Long id) {
-        stackService.delete(id);
+    public ResponseEntity<TemplateJson> deleteStack(@ModelAttribute("user") CbUser user, @PathVariable Long id) {
+        stackService.delete(id, user);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
@@ -153,9 +153,8 @@ public class StackController {
         return new ResponseEntity<>(stackConverter.convert(stack), HttpStatus.OK);
     }
 
-    private ResponseEntity<IdJson> createStack(CbUser user, StackJson stackRequest, Boolean publicInAccount) {
+    private ResponseEntity<IdJson> createStack(CbUser user, StackJson stackRequest) {
         Stack stack = stackConverter.convert(stackRequest);
-        stack.setPublicInAccount(publicInAccount);
         stack = stackService.create(user, stack);
         return new ResponseEntity<>(new IdJson(stack.getId()), HttpStatus.CREATED);
     }

@@ -65,10 +65,10 @@ import javax.persistence.Version;
                 query = "SELECT s FROM Stack s "
                         + "WHERE s.owner= :user"),
         @NamedQuery(
-                name = "Stack.findPublicsInAccount",
+                name = "Stack.findPublicInAccountForUser",
                 query = "SELECT s FROM Stack s "
-                        + "WHERE s.account= :account "
-                        + "AND s.publicInAccount= true"),
+                        + "WHERE (s.account= :account AND s.publicInAccount= true) "
+                        + "OR s.owner= :user"),
         @NamedQuery(
                 name = "Stack.findAllInAccount",
                 query = "SELECT s FROM Stack s "
@@ -81,6 +81,10 @@ import javax.persistence.Version;
                 name = "Stack.findOneByName",
                 query = "SELECT c FROM Stack c "
                         + "WHERE c.name= :name and c.account= :account"),
+        @NamedQuery(
+                name = "Stack.findByIdInAccount",
+                query = "SELECT s FROM Stack s "
+                        + "WHERE s.id= :id and ((s.account= :account and s.publicInAccount=true) or s.owner= :owner)"),
         @NamedQuery(
                 name = "Stack.findByNameInAccount",
                 query = "SELECT s FROM Stack s "

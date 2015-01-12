@@ -47,13 +47,13 @@ public class TemplateController {
     @RequestMapping(value = "user/templates", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<IdJson> createPrivateTemplate(@ModelAttribute("user") CbUser user, @RequestBody @Valid TemplateJson templateRequest) {
-        return createTemplate(user, templateRequest, false);
+        return createTemplate(user, templateRequest);
     }
 
     @RequestMapping(value = "account/templates", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<IdJson> createAccountTemplate(@ModelAttribute("user") CbUser user, @RequestBody @Valid TemplateJson templateRequest) {
-        return createTemplate(user, templateRequest, true);
+        return createTemplate(user, templateRequest);
     }
 
     @RequestMapping(value = "user/templates", method = RequestMethod.GET)
@@ -97,7 +97,7 @@ public class TemplateController {
     @RequestMapping(value = "templates/{id}", method = RequestMethod.DELETE)
     @ResponseBody
     public ResponseEntity<TemplateJson> deleteTemplate(@ModelAttribute("user") CbUser user, @PathVariable Long id) {
-        templateService.delete(id);
+        templateService.delete(id, user);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -115,9 +115,8 @@ public class TemplateController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    private ResponseEntity<IdJson> createTemplate(CbUser user, TemplateJson templateRequest, boolean publicInAccount) {
+    private ResponseEntity<IdJson> createTemplate(CbUser user, TemplateJson templateRequest) {
         Template template = convert(templateRequest);
-        template.setPublicInAccount(publicInAccount);
         template = templateService.create(user, template);
         return new ResponseEntity<>(new IdJson(template.getId()), HttpStatus.CREATED);
     }

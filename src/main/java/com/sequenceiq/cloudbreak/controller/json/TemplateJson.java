@@ -35,6 +35,7 @@ public class TemplateJson implements JsonEntity {
     @Max(value = 1000, message = "The size of the volume has to be less than or equal to 1000 GB")
     @NotNull
     private Integer volumeSize;
+    private boolean publicInAccount;
 
     @JsonProperty("id")
     public Long getId() {
@@ -94,4 +95,12 @@ public class TemplateJson implements JsonEntity {
         this.volumeCount = volumeCount;
     }
 
+    @JsonProperty("public")
+    public boolean isPublicInAccount() {
+        return publicInAccount;
+    }
+
+    public void setPublicInAccount(boolean publicInAccount) {
+        this.publicInAccount = publicInAccount;
+    }
 }

@@ -23,6 +23,7 @@ public class AzureTemplateConverter extends AbstractConverter<TemplateJson, Azur
         azureTemplateJson.setCloudPlatform(CloudPlatform.AZURE);
         azureTemplateJson.setId(entity.getId());
         azureTemplateJson.setDescription(entity.getDescription());
+        azureTemplateJson.setPublicInAccount(entity.isPublicInAccount());
         Map<String, Object> props = new HashMap<>();
         putProperty(props, AzureTemplateParam.LOCATION.getName(), entity.getLocation());
         putProperty(props, AzureTemplateParam.IMAGENAME.getName(), entity.getImageName());
@@ -45,6 +46,7 @@ public class AzureTemplateConverter extends AbstractConverter<TemplateJson, Azur
         azureTemplate.setName(String.valueOf(json.getName()));
         azureTemplate.setVmType(String.valueOf(json.getParameters().get(AzureTemplateParam.VMTYPE.getName())));
         azureTemplate.setDescription(json.getDescription());
+        azureTemplate.setPublicInAccount(json.isPublicInAccount());
         azureTemplate.setVolumeCount((json.getVolumeCount() == null) ? 0 : json.getVolumeCount());
         azureTemplate.setVolumeSize((json.getVolumeSize() == null) ? 0 : json.getVolumeSize());
         AzureVmType azureVmType = AzureVmType.valueOf(json.getParameters().get(AzureTemplateParam.VMTYPE.getName()).toString());

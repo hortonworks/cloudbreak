@@ -37,6 +37,7 @@ public class BlueprintConverter extends AbstractConverter<BlueprintJson, Bluepri
         blueprintJson.setId(String.valueOf(entity.getId()));
         blueprintJson.setBlueprintName(entity.getBlueprintName());
         blueprintJson.setName(entity.getName());
+        blueprintJson.setPublicInAccount(entity.isPublicInAccount());
         blueprintJson.setDescription(entity.getDescription() == null ? "" : entity.getDescription());
         blueprintJson.setHostGroupCount(entity.getHostGroupCount());
         try {
@@ -66,6 +67,7 @@ public class BlueprintConverter extends AbstractConverter<BlueprintJson, Bluepri
 
         validateBlueprint(blueprint.getBlueprintText());
         blueprint.setName(json.getName());
+        blueprint.setPublicInAccount(json.isPublicInAccount());
         blueprint.setDescription(json.getDescription());
         ObjectMapper mapper = new ObjectMapper();
         try {

@@ -83,7 +83,7 @@ public class DefaultStackService implements StackService {
         if (user.getRoles().contains(CbUserRole.ADMIN)) {
             return stackRepository.findAllInAccount(user.getAccount());
         } else {
-            return stackRepository.findPublicsInAccount(user.getAccount());
+            return stackRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
         }
     }
 
@@ -127,12 +127,10 @@ public class DefaultStackService implements StackService {
     @Override
     public void delete(String name, CbUser user) {
         Stack stack = stackRepository.findByNameInAccount(name, user.getAccount(), user.getUserId());
-        MDCBuilder.buildMdcContext(stack);
-        LOGGER.info("Stack delete requested.");
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", name));
         }
-        delete(stack.getId());
+        delete(stack, user);
     }
 
     @Override
@@ -159,15 +157,12 @@ public class DefaultStackService implements StackService {
     }
 
     @Override
-    public void delete(Long id) {
-        Stack stack = stackRepository.findOne(id);
-        MDCBuilder.buildMdcContext(stack);
-        LOGGER.info("Stack delete requested.");
+    public void delete(Long id, CbUser user) {
+        Stack stack = stackRepository.findByIdInAccount(id, user.getAccount(), user.getUserId());
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", id));
         }
-        LOGGER.info("Publishing {} event.", ReactorConfig.DELETE_REQUEST_EVENT);
-        reactor.notify(ReactorConfig.DELETE_REQUEST_EVENT, Event.wrap(new StackDeleteRequest(stack.getTemplate().cloudPlatform(), stack.getId())));
+        delete(stack, user);
     }
 
     @Override
@@ -262,6 +257,17 @@ public class DefaultStackService implements StackService {
             }
         }
         throw new NotFoundException("Metadata not found on stack.");
+    }
+
+    private void delete(Stack stack, CbUser user) {
+        MDCBuilder.buildMdcContext(stack);
+        LOGGER.info("Stack delete requested.");
+        if (!user.getUserId().equals(stack.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
+            throw new BadRequestException("Public stacks can be deleted only by account admins or owners.");
+        } else {
+            LOGGER.info("Publishing {} event.", ReactorConfig.DELETE_REQUEST_EVENT);
+            reactor.notify(ReactorConfig.DELETE_REQUEST_EVENT, Event.wrap(new StackDeleteRequest(stack.getTemplate().cloudPlatform(), stack.getId())));
+        }
     }
 
     private String generateHash(Stack stack) {
