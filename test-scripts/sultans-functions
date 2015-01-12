@@ -79,6 +79,12 @@ sl-invite() {
     curl -sX POST -H "Content-Type: application/json" -H "Authorization: Bearer $SL_USER_TOKEN" -d '{"invite_email" : "'$email'"}' $SL_LOCATION/invite | jq .
 }
 
+sl-is-admin() {
+    : ${SL_LOCATION:?"Please set the SL_LOCATION with sl-location function!"}
+    : ${SL_USER_TOKEN:?"Please set the SL_USER_TOKEN with sl-oauth-login function!"}
+    curl -svX GET -H "Content-Type: application/json" -H "Authorization: Bearer $SL_USER_TOKEN" $SL_LOCATION/permission
+}
+
 sl-users() {
     : ${SL_TOKEN:?"Please set the SL_TOKEN with sl-token function!"}
     curl -X GET -H "Authorization: Bearer $SL_TOKEN" "$SL_UAA_ADDRESS/Users?attributes=id,userName&count=10000" | jq .
