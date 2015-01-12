@@ -28,8 +28,7 @@ public class RsaPublicKeyValidatorTest {
         );
     }
 
-    @Test(expected = BadRequestException.class)
-    public void inValidPublicKeyWillFailWhenMissingUser() {
+    public void inValidPublicKeyWillCorrectWhenMissingUser() {
         rsaPublicKeyValidator.validate(
                 azureCredential(
                         "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCasJyap4swb4Hk4xOlnF3OmKVwzmv2e053yrtvcUPaxCeboSltOBReuT"
@@ -77,6 +76,54 @@ public class RsaPublicKeyValidatorTest {
         rsaPublicKeyValidator.validate(
                 azureCredential(
                         "ImBAD")
+        );
+    }
+
+    @Test
+    public void validSsh2PublicKeyWillNotFail() {
+        rsaPublicKeyValidator.validate(
+                azureCredential(
+                        "---- BEGIN SSH2 PUBLIC KEY ----\n"
+                            + "Comment: \"2048-bit RSA, converted by ricsi@Richards-MacBook-Pro.local \"\n"
+                                + "AAAAB3NzaC1yc2EAAAADAQABAAABAQC0Rfl2G2vDs6yc19RxCqReunFgpYj+ucyLobpTCB\n"
+                            + "tfDwzIbJot2Fmife6M42mBtiTmAK6x8kcUEeab6CB4MUzsqF7vGTFUjwWirG/XU5pYXFUB\n"
+                            + "hi8xzey+KS9KVrQ+UuKJh/AN9iSQeMV+rgT1yF5+etVH+bK1/37QCKp3+mCqjFzPyQOrvk\n"
+                            + "GZv4sYyRwX7BKBLleQmIVWpofpjT7BfcCxH877RzC5YMIi65aBc82Dl6tH6OEiP7mzByU5\n"
+                            + "2yvH6JFuwZ/9fWj1vXCWJzxx2w0F1OU8Zwg8gNNzL+SVb9+xfBE7xBHMpYFg72hBWPh862\n"
+                            + "Ce36F4NZd3MpWMSjMmpDPh\n"
+                            + "---- END SSH2 PUBLIC KEY ----"
+                )
+        );
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void validSsh2PublicKeyWillNotFailWhenBeginAndEndSsh2Missing() {
+        rsaPublicKeyValidator.validate(
+                azureCredential(
+                                "Comment: \"2048-bit RSA, converted by ricsi@Richards-MacBook-Pro.local \"\n"
+                                + "AAAAB3NzaC1yc2EAAAADAQABAAABAQC0Rfl2G2vDs6yc19RxCqReunFgpYj+ucyLobpTCB\n"
+                                + "tfDwzIbJot2Fmife6M42mBtiTmAK6x8kcUEeab6CB4MUzsqF7vGTFUjwWirG/XU5pYXFUB\n"
+                                + "hi8xzey+KS9KVrQ+UuKJh/AN9iSQeMV+rgT1yF5+etVH+bK1/37QCKp3+mCqjFzPyQOrvk\n"
+                                + "GZv4sYyRwX7BKBLleQmIVWpofpjT7BfcCxH877RzC5YMIi65aBc82Dl6tH6OEiP7mzByU5\n"
+                                + "2yvH6JFuwZ/9fWj1vXCWJzxx2w0F1OU8Zwg8gNNzL+SVb9+xfBE7xBHMpYFg72hBWPh862\n"
+                                + "Ce36F4NZd3MpWMSjMmpDPh\n"
+                )
+        );
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void validSsh2PublicKeyWillFailWhenKeyMissing() {
+        rsaPublicKeyValidator.validate(
+                azureCredential(
+                                "Comment: \"2048-bit RSA, converted by ricsi@Richards-MacBook-Pro.local \"\n"
+                                + "AAAAB3NzaC1yc2EAAAADAQABAAABAQC0Rfl2G2vDs6yc19RxCqReunFgpYj+ucyLobpTCB\n"
+                                + "tfDwzIbJot2Fmife6M42mBtiTmAK6x8kcUEeab6CB4MUzsqF7vGTFUjwWirG/XU5pYXFUB\n"
+                                + "hi8xzey+KS9KVrQ+UuKJh/AN9iSQeMV+rgT1yF5+etVH+bK1/37QCKp3+mCqjFzPyQOrvk\n"
+                                + "GZv4sYyRwX7BKBLleQmIVWpofpjT7BfcCxH877RzC5YMIi65aBc82Dl6tH6OEiP7mzByU5\n"
+                                + "2yvH6JFuwZ/9fWj1vXCWJzxx2w0F1OU8Zwg8gNNzL+SVb9+xfBE7xBHMpYFg72hBWPh862\n"
+                                + "Ce36F4NZd3MpWMSjMmpDPh\n"
+                                + "---- END SSH2 PUBLIC KEY ----"
+                )
         );
     }
 
