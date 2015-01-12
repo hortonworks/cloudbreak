@@ -35,10 +35,6 @@ a:active, a:hover {
     outline: 0
 }
 
-a:hover {
-  cursor:pointer;
-}
-
 abbr[title] {
     border-bottom: 1px dotted
 }
@@ -5592,8 +5588,4 @@ footer p {
 
 footer a:hover {
     color: #9bd5e3
-}
-
-.public-account-info {
-    color: rgb(47, 162, 204)
 }
