@@ -85,6 +85,8 @@ cloudbreakApp.config([ '$routeProvider', '$locationProvider', function($routePro
                 block = true
             } else if (config.url.match(/^(.*)usages($|\?).*/) && config.method == 'GET') {
                 block = true;
+            } else if (config.url.match(/^(.*)users($|\?).*/) || config.url.match(/^(.*)permission($|\?).*/)){
+                block = true;
             }
             if (!block) {
                 return block

@@ -110,12 +110,18 @@
                ng-show="awsTemplateForm.aws_tspotprice.$dirty && awsTemplateForm.aws_tspotprice.$invalid"><i class="fa fa-warning"></i>
               {{error_msg.spot_price_invalid}}
           </div>
+          <!-- .col-sm-9 -->
         </div>
-
-        <!-- .col-sm-9 -->
-      </div>
     </div>
-
+    
+    <div class="form-group">
+            <label class="col-sm-3 control-label" for="aws_publicinaccount">Public in account</label>
+            <div class="col-sm-9">
+                <input type="checkbox" name="aws_publicinaccount" id="aws_publicinaccount" ng-model="awsTemp.public">
+            </div>
+       <!-- .col-sm-9 -->
+    </div>
+                        
     <div class="row btn-row">
         <div class="col-sm-9 col-sm-offset-3">
             <a id="createAwsTemplate" ng-disabled="awsTemplateForm.$invalid" class="btn btn-success btn-block" ng-click="createAwsTemplate()" role="button"><i class="fa fa-plus fa-fw"></i>

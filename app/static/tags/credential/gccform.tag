@@ -52,6 +52,13 @@
             </div>
     </div>
 </div>
+<div class="form-group">
+      <label class="col-sm-3 control-label" for="gccCred_publicInAccount">Public in account</label>
+      <div class="col-sm-9">
+          <input type="checkbox" name="gccCred_publicInAccount" id="gccCred_publicInAccount" ng-model="credentialGcc.public">
+      </div>
+       <!-- .col-sm-9 -->
+</div>
 <div class="row btn-row">
     <div class="col-sm-9 col-sm-offset-3">
         <a id="createGccCredential" ng-disabled="gccCredentialForm.$invalid || !gcc.p12" ng-click="createGccCredential()" class="btn btn-success btn-block" role="button"><i class="fa fa-plus fa-fw"></i> create credential</a>

@@ -2,9 +2,9 @@
 
 var log = log4javascript.getLogger("credentialController-logger");
 
-angular.module('uluwatuControllers').controller('credentialController', ['$scope', '$rootScope', '$base64', 'UserCredential', 'GlobalCredential', 'GlobalCredentialCertificate',
-    function ($scope, $rootScope, $base64, UserCredential, GlobalCredential, GlobalCredentialCertificate) {
-        $rootScope.credentials = UserCredential.query();
+angular.module('uluwatuControllers').controller('credentialController', ['$scope', '$rootScope', '$base64', 'AccountCredential', 'GlobalCredential', 'GlobalCredentialCertificate',
+    function ($scope, $rootScope, $base64, AccountCredential, GlobalCredential, GlobalCredentialCertificate) {
+        $rootScope.credentials = AccountCredential.query();
         $rootScope.credentialInCreation = false;
         $scope.credentialAws = {};
         $scope.credentialAzure = {};
@@ -39,7 +39,7 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
         $scope.createAwsCredential = function() {
             $scope.credentialAws.cloudPlatform = "AWS";
             $rootScope.credentialInCreation = true;
-            UserCredential.save($scope.credentialAws, function(result) {
+            AccountCredential.save($scope.credentialAws, function(result) {
                 $scope.credentialAws.id = result.id;
                 $rootScope.credentials.push($scope.credentialAws);
                 $scope.credentialAws = {};
@@ -60,7 +60,7 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
             $scope.credentialAzure.cloudPlatform = "AZURE";
             $scope.credentialAzure.publicKey = $base64.encode($scope.credentialAzure.publicKey)
 
-            UserCredential.save($scope.credentialAzure, function(result){
+            AccountCredential.save($scope.credentialAzure, function(result){
                 $scope.credentialAzure.id = result.id;
                 $rootScope.credentials.push($scope.credentialAzure);
                 $scope.credentialAzure = {};
@@ -85,7 +85,7 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
             reader.onloadend = function(evt) {
                 if (evt.target.readyState == FileReader.DONE) {
                   $scope.credentialGcc.parameters.serviceAccountPrivateKey = $base64.encode(evt.target.result);
-                  UserCredential.save($scope.credentialGcc, function(result){
+                  AccountCredential.save($scope.credentialGcc, function(result){
                       $scope.credentialGcc.id = result.id;
                       $rootScope.credentials.push($scope.credentialGcc);
                       $scope.credentialGcc = {};

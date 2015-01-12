@@ -2,10 +2,10 @@
 
 var log = log4javascript.getLogger("templateController-logger");
 
-angular.module('uluwatuControllers').controller('templateController', ['$scope', '$rootScope', '$filter', 'UserTemplate', 'GlobalTemplate',
-    function ($scope, $rootScope, $filter, UserTemplate, GlobalTemplate) {
+angular.module('uluwatuControllers').controller('templateController', ['$scope', '$rootScope', '$filter', 'AccountTemplate', 'GlobalTemplate',
+    function ($scope, $rootScope, $filter, AccountTemplate, GlobalTemplate) {
 
-        $rootScope.templates = UserTemplate.query();
+        $rootScope.templates = AccountTemplate.query();
         $scope.awsTemplateForm = {};
         $scope.gccTemplateForm = {};
         initializeAzureTemp();
@@ -34,7 +34,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
             $scope.awsTemp.cloudPlatform = 'AWS';
             $scope.awsTemp.parameters.amiId = ($filter('filter')($rootScope.config.AWS.amis, { key: $scope.awsTemp.parameters.region})[0]).value;
 
-            UserTemplate.save($scope.awsTemp, function (result) {
+            AccountTemplate.save($scope.awsTemp, function (result) {
                 $scope.awsTemp.id = result.id;
                 $rootScope.templates.push($scope.awsTemp);
                 initializeAwsTemp();
@@ -51,7 +51,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
         $scope.createGccTemplate = function () {
             $scope.gccTemp.cloudPlatform = 'GCC';
 
-            UserTemplate.save($scope.gccTemp, function (result) {
+            AccountTemplate.save($scope.gccTemp, function (result) {
                 $scope.gccTemp.id = result.id;
                 $rootScope.templates.push($scope.gccTemp);
                 initializeGccTemp();
@@ -69,7 +69,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
             $scope.azureTemp.cloudPlatform = "AZURE";
             $scope.azureTemp.parameters.imageName = "ambari-docker-v1";
 
-            UserTemplate.save($scope.azureTemp, function (result) {
+            AccountTemplate.save($scope.azureTemp, function (result) {
                 $scope.azureTemp.id = result.id;
                 $rootScope.templates.push($scope.azureTemp);
                 initializeAzureTemp();

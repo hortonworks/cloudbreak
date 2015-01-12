@@ -16,6 +16,11 @@ uluwatuServices.factory('UserTemplate', ['$resource',
     function ($resource) {
         return $resource('user/templates');
     }]);
+    
+uluwatuServices.factory('AccountTemplate', ['$resource',
+    function ($resource) {
+        return $resource('account/templates');
+    }]);
 
 uluwatuServices.factory('GlobalTemplate', ['$resource',
     function ($resource) {
@@ -27,6 +32,11 @@ uluwatuServices.factory('UserBlueprint', ['$resource',
         return $resource('user/blueprints');
     }]);
 
+uluwatuServices.factory('AccountBlueprint', ['$resource',
+    function ($resource) {
+        return $resource('account/blueprints');
+    }]);
+
 uluwatuServices.factory('GlobalBlueprint', ['$resource',
     function ($resource) {
         return $resource('blueprints/:id');
@@ -35,6 +45,11 @@ uluwatuServices.factory('GlobalBlueprint', ['$resource',
 uluwatuServices.factory('UserCredential', ['$resource',
     function ($resource) {
         return $resource('user/credentials');
+    }]);
+    
+uluwatuServices.factory('AccountCredential', ['$resource',
+    function ($resource) {
+        return $resource('account/credentials');
     }]);
 
 uluwatuServices.factory('GlobalCredential', ['$resource',
@@ -58,6 +73,11 @@ uluwatuServices.factory('GlobalCredentialCertificate', ['$resource',
 uluwatuServices.factory('UserStack', ['$resource',
     function ($resource) {
         return $resource('user/stacks');
+    }]);
+    
+uluwatuServices.factory('AccountStack', ['$resource',
+    function ($resource) {
+        return $resource('account/stacks');
     }]);
 
 uluwatuServices.factory('UserUsages', ['$resource',
@@ -105,12 +125,12 @@ uluwatuServices.factory('GlobalStack', ['$resource',
         return $resource('stacks/:id', null, { 'update': { method:'PUT' } });
     }]);
 
-uluwatuServices.factory('UluwatuCluster', ['UserStack', 'Cluster', 'GlobalStack',
-    function (UserStack, Cluster, GlobalStack) {
+uluwatuServices.factory('UluwatuCluster', ['AccountStack', 'Cluster', 'GlobalStack',
+    function (AccountStack, Cluster, GlobalStack) {
         function AggregateCluster(UserStack, Cluster) {
 
             this.query = function (successHandler) {
-                UserStack.query(function (stacks) {
+                AccountStack.query(function (stacks) {
                     var clusters = [];
                     for (var i = 0; i < stacks.length; i++) {
                         clusters[i] = stacks[i];
@@ -130,8 +150,9 @@ uluwatuServices.factory('UluwatuCluster', ['UserStack', 'Cluster', 'GlobalStack'
                     credentialId: cluster.credentialId,
                     password: cluster.password,
                     userName: cluster.userName,
+                    public: cluster.public
                 }
-                UserStack.save(stack, function (result) {
+                AccountStack.save(stack, function (result) {
                     cluster.id = result.id;
                     var cbCluster = {
                         name: cluster.name,
@@ -160,7 +181,7 @@ uluwatuServices.factory('UluwatuCluster', ['UserStack', 'Cluster', 'GlobalStack'
             }
         }
 
-        return new AggregateCluster(UserStack, Cluster);
+        return new AggregateCluster(AccountStack, Cluster);
     }]);
 
     uluwatuServices.factory('PeriscopeCluster', ['$resource',
