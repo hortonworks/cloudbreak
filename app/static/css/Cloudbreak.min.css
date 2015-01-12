@@ -5593,3 +5593,7 @@ footer p {
 footer a:hover {
     color: #9bd5e3
 }
+
+.public-account-info {
+    color: rgb(47, 162, 204)
+}

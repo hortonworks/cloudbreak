@@ -2,13 +2,13 @@
 
 var log = log4javascript.getLogger("blueprintController-logger");
 
-angular.module('uluwatuControllers').controller('blueprintController', ['$scope', '$rootScope', 'UserBlueprint', 'GlobalBlueprint',
-    function ($scope, $rootScope, UserBlueprint, GlobalBlueprint) {
-        $rootScope.blueprints = UserBlueprint.query();
+angular.module('uluwatuControllers').controller('blueprintController', ['$scope', '$rootScope', 'AccountBlueprint', 'GlobalBlueprint',
+    function ($scope, $rootScope, AccountBlueprint, GlobalBlueprint) {
+        $rootScope.blueprints = AccountBlueprint.query();
         initializeBlueprint();
 
         $scope.createBlueprint = function () {
-            UserBlueprint.save($scope.blueprint, function (result) {
+            AccountBlueprint.save($scope.blueprint, function (result) {
                 GlobalBlueprint.get({ id: result.id}, function(success) {
                   $rootScope.blueprints.push(success);
                   initializeBlueprint();

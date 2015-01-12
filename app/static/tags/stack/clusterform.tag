@@ -63,7 +63,12 @@
                             </select>
                         </div>
                     </div>
-
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="cluster_publicInAccount">Public in account</label>
+                        <div class="col-sm-9">
+                             <input type="checkbox" name="cluster_publicInAccount" id="cluster_publicInAccount" ng-model="cluster.public">
+                         </div>
+                    </div>
                     <div class="form-group" >
                         <label class="col-sm-3 control-label" for="emailneeded">Email notification when cluster is provisioned</label>
                         <div class="col-sm-9">

@@ -8,22 +8,22 @@
         <div id="panel-users-collapse" class="panel-btn-in-header-collapse collapse">
             <div class="panel-body">
 
-                <p class="btn-row-over-panel"><a class="btn btn-success" role="button" data-toggle="collapse" data-target="#panel-invite-users-collapse"><i class="fa fa-plus fa-fw"></i><span> invite new user</span></a></p>
+                <p class="btn-row-over-panel"><a id="inviteCollapse" class="btn btn-success" role="button" data-toggle="collapse" data-target="#panel-create-users-collapse"><i class="fa fa-plus fa-fw"></i><span> invite new user</span></a></p>
 
                 <!-- ............ CREATE FORM ............................................. -->
 
                 <div class="panel panel-default" >
-                    <div  class="panel-under-btn-collapse" class="panel-under-btn-collapse collapse">
+                    <div id="panel-create-users-collapse" class="panel-under-btn-collapse collapse">
                         <div class="panel-body">
 
-                            <form class="form-horizontal" role="form" id="inviteForm">
+                            <form class="form-horizontal" role="form" name="inviteForm">
 
-                                <div class="form-group" >
+                                <div class="form-group" ng-class="{ 'has-error': inviteForm.emailNewUser.$dirty && inviteForm.emailNewUser.$invalid }">
                                     <label class="col-sm-3 control-label" for="emailNewUser">email address</label>
                                     <div class="col-sm-9">
-                                        <input type="text" class="form-control" ng-model="invite.mail" id="emailNewUser" type="email" placeholder="" required>
-                                        <div class="help-block" ng-show="invite.mail.$dirty && invite.mail.$invalid">
-                                            <i class="fa fa-warning"></i> {{error_msg.credential_ssh_key_invalid}}
+                                        <input class="form-control" ng-model="invite.mail" id="emailNewUser" name="emailNewUser" type="email" placeholder="" required>
+                                        <div class="help-block" ng-show="inviteForm.emailNewUser.$dirty && inviteForm.emailNewUser.$invalid">
+                                            <i class="fa fa-warning"></i> {{error_msg.email_invalid}}
                                         </div>
                                     </div>
 
@@ -31,7 +31,7 @@
 
                                 <div class="row btn-row">
                                     <div class="col-sm-9 col-sm-offset-3">
-                                        <a id="inviteUser" class="btn btn-success btn-block" ng-click="inviteUser()" role="button"><i class="fa fa-plus fa-fw"></i> invite user</a>
+                                        <a id="inviteUser" class="btn btn-success btn-block" ng-disabled="inviteForm.$invalid" ng-click="inviteUser()" role="button"><i class="fa fa-plus fa-fw"></i> invite user</a>
                                     </div>
                                 </div>
 
@@ -53,9 +53,8 @@
                             <h5><a data-toggle="collapse" data-parent="#user-list-accordion" data-target="#panel-user-collapse{{actualuser.idx}}"><i class="fa fa-user fa-fw"></i>{{actualuser.username}}</a></h5>
                         </div>
                         <div id="panel-user-collapse{{actualuser.idx}}" class="panel-collapse collapse">
-
-                            <p class="btn-row-over-panel"><a class="btn btn-danger" ng-click="activateUser(false, actualuser.username)" role="button"><i class="fa fa-circle-o fa-fw"></i><span> deactivate user</span></a></p>
-
+                            <p class="btn-row-over-panel pull-right"><a class="btn btn-danger" ng-click="activateUser(false, actualuser.username)" role="button"><i class="fa fa-circle-o fa-fw"></i><span> deactivate user</span></a></p>
+                            <p class="btn-row-over-panel pull-right" ng-hide="actualuser.admin"><a class="btn btn-info" ng-click="makeAdmin(actualuser.id, actualuser.idx)" role="button"><i class="fa fa-plus fa-fw"></i>make admin</a></p>
                             <div class="panel-body">
                                 <form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
                                     <div class="form-group">
@@ -79,7 +78,7 @@
                         </div>
                         <div id="panel-user-collapse{{actualuser.idx}}" class="panel-collapse collapse">
 
-                            <p class="btn-row-over-panel"><a class="btn btn-danger" role="button" ng-click="activateUser(true, actualuser.username)"><i class="fa fa-circle-o fa-fw"></i><span> activate user</span></a></p>
+                            <p class="btn-row-over-panel"><a class="btn btn-info" role="button" ng-click="activateUser(true, actualuser.username)"><i class="fa fa-circle-o fa-fw"></i><span> activate user</span></a></p>
 
                             <div class="panel-body">
 
