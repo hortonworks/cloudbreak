@@ -93,7 +93,7 @@ regApp.controller("loginController", ['$scope', '$http', '$rootScope',
 regApp.controller("regForAccController", ['$scope', '$http',
     function ($scope, $http) {
             $scope.signUpByInvite = function() {
-                $http({method: 'POST',dataType: 'json',url:  "/registerForAccount",
+                $http({method: 'POST',dataType: 'json',url:  "/account/register",
                        data: {email: email.value, firstName: firstName.value, lastName: lastName.value, password: password.value,
                               company: company.value}
                       }).success(function(responseData){

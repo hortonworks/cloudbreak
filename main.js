@@ -293,13 +293,13 @@ updateGroup = function(token, userId, displayName) {
                 needle.put(uaaAddress + '/Groups/' + id, JSON.stringify(updateGroupData), updateGroupOptions,
                  function(err, updateResp) {
                     if (updateResp.statusCode == 200) {
-                        console.log("PUT - update group (id:"+ id + ") is successful (registration)")
+                        console.log("PUT - update group (id:"+ id + ", name: " + displayName + ") is successful.")
                     } else {
-                        console.log("PUT - failed to update group (id:"+ id + ", registration), code: " + updateResp.statusCode)
+                        console.log("PUT - failed to update group (id:"+ id + ", name: " + displayName + "), code: " + updateResp.statusCode)
                     }
                  });
                 } else {
-                    console.log("GET - cannot retrieve group (registration)")
+                    console.log("GET - cannot retrieve group: " + displayName)
                 }
         });
 }
@@ -431,7 +431,7 @@ app.post('/forget', function(req, res){
     }
 });
 
-app.get('/registerForAccount', function(req, res){
+app.get('/account/register', function(req, res){
     req.session.acc_token = req.param('token')
     req.session.acc_email = req.param('email')
     var inviter = req.param('inviter')
@@ -455,7 +455,7 @@ app.get('/registerForAccount', function(req, res){
     });
 });
 
-app.post('/registerForAccount', function(req, res){
+app.post('/account/register', function(req, res){
     var regToken = req.session.acc_token
     var email = req.session.acc_email
     if (regToken == null || email == null){
@@ -868,7 +868,7 @@ inviteUser = function(req, res, token, inviteEmail, adminUserName, companyId) {
 
            var templateFile = path.join(__dirname,'templates','invite-email.jade')
            mailer.sendMail(req.body.invite_email, 'Cloudbreak invite' , templateFile, {user: adminUserName,
-           invite: process.env.SL_ADDRESS + '/registerForAccount?token=' + userTempToken + '&email=' + inviteEmail + '&inviter=' + adminUserName})
+           invite: process.env.SL_ADDRESS + '/account/register?token=' + userTempToken + '&email=' + inviteEmail + '&inviter=' + adminUserName})
            res.json({message: 'SUCCESS'})
        } else {
           res.statusCode = 400
