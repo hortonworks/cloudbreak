@@ -49,6 +49,29 @@ public final class PublicKeyReaderUtil {
         return ret;
     }
 
+    public static PublicKey loadOpenSsh(final String key) throws PublicKeyParseException {
+        final int c = key.charAt(0);
+
+        final String base64;
+
+        if (c == 's') {
+            base64 = PublicKeyReaderUtil.extractOpenSSHBase64(key);
+        } else {
+            throw new PublicKeyParseException(PublicKeyParseException.ErrorCode.UNKNOWN_PUBLIC_KEY_FILE_FORMAT);
+        }
+
+        final SSH2DataBuffer buf = new SSH2DataBuffer(Base64.decodeBase64(base64.getBytes()));
+        final String type = buf.readString();
+        final PublicKey ret;
+        if (PublicKeyReaderUtil.SSH2_RSA_KEY.equals(type)) {
+            ret = decodePublicKey(buf);
+        } else {
+            throw new PublicKeyParseException(PublicKeyParseException.ErrorCode.UNKNOWN_PUBLIC_KEY_CERTIFICATE_FORMAT);
+        }
+
+        return ret;
+    }
+
     public static String extractOpenSSHBase64(final String key)
             throws PublicKeyParseException {
         final String base64;
