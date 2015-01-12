@@ -21,6 +21,7 @@ import com.sequenceiq.cloud.azure.client.AzureClientUtil;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
+import com.sequenceiq.cloudbreak.domain.AzureLocation;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
@@ -73,9 +74,10 @@ public class AzureProvisionSetup implements ProvisionSetup {
     public void setupProvisioning(Stack stack) {
         MDCBuilder.buildMdcContext(stack);
         Credential credential = stack.getCredential();
+        AzureTemplate template = (AzureTemplate) stack.getTemplate();
         AzureClient azureClient = AzureStackUtil.createAzureClient((AzureCredential) credential);
-        if (!azureClient.isImageAvailable(azureStackUtil.getOsImageName(credential))) {
-            String affinityGroupName = ((AzureCredential) credential).getCommonName();
+        if (!azureClient.isImageAvailable(azureStackUtil.getOsImageName(credential, template.getLocation()))) {
+            String affinityGroupName = ((AzureCredential) credential).getCommonName(template.getLocation());
             createAffinityGroup(stack, azureClient, affinityGroupName);
             String storageName = String.format("%s%s", VM_COMMON_NAME, stack.getId());
             createStorage(stack, azureClient, affinityGroupName);
@@ -97,7 +99,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
             AzureClientUtil.copyOsImage(storageAccountKey, baseImageUri, targetImageUri);
 
             checkCopyStatus(stack, targetImageUri, storageAccountKey);
-            createOsImageLink(credential, azureClient, targetImageUri);
+            createOsImageLink(credential, azureClient, targetImageUri, template.getLocation());
         }
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT, stack.getId());
         reactor.notify(ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT,
@@ -107,10 +109,10 @@ public class AzureProvisionSetup implements ProvisionSetup {
         );
     }
 
-    private void createOsImageLink(Credential credential, AzureClient azureClient, String targetImageUri) {
+    private void createOsImageLink(Credential credential, AzureClient azureClient, String targetImageUri, AzureLocation location) {
         Map<String, String> params;
         params = new HashMap<>();
-        params.put(AzureStackUtil.NAME, azureStackUtil.getOsImageName(credential));
+        params.put(AzureStackUtil.NAME, azureStackUtil.getOsImageName(credential, location));
         params.put(OS, "Linux");
         params.put(MEDIALINK, targetImageUri);
         azureClient.addOsImage(params);

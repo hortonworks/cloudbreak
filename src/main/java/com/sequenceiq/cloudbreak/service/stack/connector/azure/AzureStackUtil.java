@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
+import com.sequenceiq.cloudbreak.domain.AzureLocation;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
@@ -53,10 +54,10 @@ public class AzureStackUtil {
     @Autowired
     private UserDetailsService userDetailsService;
 
-    public String getOsImageName(Credential credential) {
+    public String getOsImageName(Credential credential, AzureLocation location) {
         String[] split = baseImageUri.split("/");
         AzureCredential azureCredential = (AzureCredential) credential;
-        return String.format("%s-%s-%s", azureCredential.getCommonName(), IMAGE_NAME,
+        return String.format("%s-%s-%s", azureCredential.getCommonName(location), IMAGE_NAME,
                 split[split.length - 1].replaceAll(".vhd", ""));
     }
 

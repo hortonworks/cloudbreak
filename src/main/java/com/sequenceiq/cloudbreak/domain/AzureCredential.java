@@ -75,8 +75,8 @@ public class AzureCredential extends Credential implements ProvisionEntity {
         this.postFix = postFix;
     }
 
-    public String getCommonName() {
-        String result = subscriptionId.replaceAll("\\s+", "").replaceAll("-", "");
+    public String getCommonName(AzureLocation location) {
+        String result = subscriptionId.replaceAll("\\s+", "").replaceAll("-", "") + location.location().toLowerCase().replaceAll(" ", "");
         if (result.length() > END_INDEX) {
             return result.substring(result.length() - END_INDEX, result.length());
         }
