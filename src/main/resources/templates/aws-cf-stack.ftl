@@ -197,8 +197,8 @@
         "InstanceType"   : "${tgroup.template.instanceType}",
         "KeyName"        : { "Ref" : "KeyName" },
         "AssociatePublicIpAddress" : "true",
-        <#if false>
-        "SpotPrice"      : { "Ref" : "SpotPrice" },
+        <#if useSpot>
+        "SpotPrice"      : ${tgroup.template.spotPrice},
         </#if>
         "UserData"       : { "Fn::Base64" : { "Ref" : "CBUserData"}}
       }
