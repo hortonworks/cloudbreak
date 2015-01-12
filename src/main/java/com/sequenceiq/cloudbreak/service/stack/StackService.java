@@ -20,7 +20,7 @@ public interface StackService {
 
     Stack create(CbUser user, Stack stack);
 
-    void delete(Long id);
+    void delete(Long id, CbUser cbUser);
 
     Set<InstanceMetaData> getMetaData(String hash);
 

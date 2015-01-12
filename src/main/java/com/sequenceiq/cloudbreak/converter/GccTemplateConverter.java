@@ -25,6 +25,7 @@ public class GccTemplateConverter extends AbstractConverter<TemplateJson, GccTem
         gccTemplateJson.setVolumeCount(entity.getVolumeCount());
         gccTemplateJson.setVolumeSize(entity.getVolumeSize());
         gccTemplateJson.setDescription(entity.getDescription());
+        gccTemplateJson.setPublicInAccount(entity.isPublicInAccount());
         Map<String, Object> props = new HashMap<>();
         putProperty(props, GccTemplateParam.INSTANCETYPE.getName(), entity.getGccInstanceType());
         putProperty(props, GccTemplateParam.ZONE.getName(), entity.getGccZone());
@@ -39,6 +40,7 @@ public class GccTemplateConverter extends AbstractConverter<TemplateJson, GccTem
     public GccTemplate convert(TemplateJson json) {
         GccTemplate gccTemplate = new GccTemplate();
         gccTemplate.setName(json.getName());
+        gccTemplate.setPublicInAccount(json.isPublicInAccount());
         gccTemplate.setDescription(json.getDescription());
         gccTemplate.setVolumeCount((json.getVolumeCount() == null) ? 0 : json.getVolumeCount());
         gccTemplate.setVolumeSize((json.getVolumeSize() == null) ? 0 : json.getVolumeSize());

@@ -24,6 +24,7 @@ public class AzureCredentialConverter extends AbstractConverter<CredentialJson, 
         credentialJson.setName(entity.getName());
         credentialJson.setDescription(entity.getDescription());
         credentialJson.setPublicKey(entity.getPublicKey());
+        credentialJson.setPublicInAccount(entity.isPublicInAccount());
         Map<String, Object> params = new HashMap<>();
         params.put(RequiredAzureCredentialParam.SUBSCRIPTION_ID.getName(), entity.getSubscriptionId());
         credentialJson.setParameters(params);
@@ -39,6 +40,7 @@ public class AzureCredentialConverter extends AbstractConverter<CredentialJson, 
         azureCredential.setSubscriptionId(String.valueOf(json.getParameters().get(RequiredAzureCredentialParam.SUBSCRIPTION_ID.getName())));
         azureCredential.setPostFix(String.valueOf(new Date().getTime()));
         azureCredential.setCloudPlatform(CloudPlatform.AZURE);
+        azureCredential.setPublicInAccount(json.isPublicInAccount());
         azureCredential.setPublicKey(json.getPublicKey());
         azureCredential.setPublicKey(StringUtils.newStringUtf8(Base64.decodeBase64(json.getPublicKey())));
         return azureCredential;

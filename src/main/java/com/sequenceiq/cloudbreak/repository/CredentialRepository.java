@@ -18,11 +18,13 @@ public interface CredentialRepository extends CrudRepository<Credential, Long> {
 
     Set<Credential> findForUser(@Param("user") String user);
 
-    Set<Credential> findPublicsInAccount(@Param("account") String account);
+    Set<Credential> findPublicInAccountForUser(@Param("user") String user, @Param("account") String account);
 
     Set<Credential> findAllInAccount(@Param("account") String account);
 
     Credential findByNameInAccount(@Param("name") String name, @Param("account") String account, @Param("owner") String owner);
+
+    Credential findByIdInAccount(@Param("id") Long id, @Param("account") String account, @Param("owner") String owner);
 
     Credential findByNameInUser(@Param("name") String name, @Param("owner") String owner);
 

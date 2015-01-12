@@ -47,6 +47,8 @@ public class DefaultBlueprintLoaderService {
                 Blueprint bp = blueprintConverter.convert(blueprintJson);
                 MDCBuilder.buildMdcContext(bp);
                 bp.setOwner(user.getUserId());
+                bp.setAccount(user.getAccount());
+                bp.setPublicInAccount(true);
                 blueprints.add(bp);
             } catch (Exception e) {
                 MDCBuilder.buildMdcContext();

@@ -94,6 +94,7 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
         stack.setName(json.getName());
         stack.setUserName(json.getUserName());
         stack.setPassword(json.getPassword());
+        stack.setPublicInAccount(json.isPublicInAccount());
         try {
             stack.setCredential(credentialRepository.findOne(json.getCredentialId()));
         } catch (AccessDeniedException e) {

@@ -15,7 +15,7 @@ public interface CredentialService {
 
     Credential create(CbUser user, Credential credential);
 
-    void delete(Long id);
+    void delete(Long id, CbUser user);
 
     Credential getPublicCredential(String name, CbUser user);
 

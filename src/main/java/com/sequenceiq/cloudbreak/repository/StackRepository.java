@@ -20,7 +20,7 @@ public interface StackRepository extends CrudRepository<Stack, Long> {
 
     Set<Stack> findForUser(@Param("user") String user);
 
-    Set<Stack> findPublicsInAccount(@Param("account") String account);
+    Set<Stack> findPublicInAccountForUser(@Param("user") String user, @Param("account") String account);
 
     Set<Stack> findAllInAccount(@Param("account") String account);
 
@@ -37,6 +37,8 @@ public interface StackRepository extends CrudRepository<Stack, Long> {
     List<Stack> findRequestedStacksWithCredential(@Param("credentialId") Long credentialId);
 
     Stack findStackByHash(@Param("hash") String hash);
+
+    Stack findByIdInAccount(@Param("id") Long id, @Param("account") String account, @Param("owner") String owner);
 
     Stack findByNameInAccount(@Param("name") String name, @Param("account") String account, @Param("owner") String owner);
 

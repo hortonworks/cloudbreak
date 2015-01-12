@@ -21,10 +21,10 @@ import javax.persistence.UniqueConstraint;
                 query = "SELECT b FROM Blueprint b "
                         + "WHERE b.owner= :user"),
         @NamedQuery(
-                name = "Blueprint.findPublicsInAccount",
+                name = "Blueprint.findPublicInAccountForUser",
                 query = "SELECT b FROM Blueprint b "
-                        + "WHERE b.account= :account "
-                        + "AND b.publicInAccount= true"),
+                        + "WHERE (b.account= :account AND b.publicInAccount= true) "
+                        + "OR b.owner= :user"),
         @NamedQuery(
                 name = "Blueprint.findAllInAccount",
                 query = "SELECT b FROM Blueprint b "
@@ -33,6 +33,10 @@ import javax.persistence.UniqueConstraint;
                 name = "Blueprint.findOneByName",
                 query = "SELECT b FROM Blueprint b "
                         + "WHERE b.name= :name and b.account= :account"),
+        @NamedQuery(
+                name = "Blueprint.findByIdInAccount",
+                query = "SELECT b FROM Blueprint b "
+                        + "WHERE  b.id= :id and ((b.publicInAccount=true and b.account= :account) or b.owner= :owner)"),
         @NamedQuery(
                 name = "Blueprint.findByNameInAccount",
                 query = "SELECT b FROM Blueprint b "

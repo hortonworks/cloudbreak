@@ -56,13 +56,13 @@ public class CredentialController {
     @RequestMapping(value = "user/credentials", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<IdJson> savePrivateCredential(@ModelAttribute("user") CbUser user, @Valid @RequestBody CredentialJson credentialRequest) {
-        return createCredential(user, credentialRequest, false);
+        return createCredential(user, credentialRequest);
     }
 
     @RequestMapping(value = "account/credentials", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<IdJson> saveAccountCredential(@ModelAttribute("user") CbUser user, @Valid @RequestBody CredentialJson credentialRequest)  {
-        return createCredential(user, credentialRequest, true);
+        return createCredential(user, credentialRequest);
     }
 
     @RequestMapping(value = "user/credentials", method = RequestMethod.GET)
@@ -103,7 +103,7 @@ public class CredentialController {
     @RequestMapping(value = "credentials/{credentialId}", method = RequestMethod.DELETE)
     @ResponseBody
     public ResponseEntity<CredentialJson> deleteCredential(@ModelAttribute("user") CbUser user, @PathVariable Long credentialId) {
-        credentialService.delete(credentialId);
+        credentialService.delete(credentialId, user);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -143,9 +143,8 @@ public class CredentialController {
         return null;
     }
 
-    private ResponseEntity<IdJson> createCredential(CbUser user, CredentialJson credentialRequest, Boolean publicInAccount) {
+    private ResponseEntity<IdJson> createCredential(CbUser user, CredentialJson credentialRequest) {
         Credential credential = convert(credentialRequest);
-        credential.setPublicInAccount(publicInAccount);
         credential = credentialService.create(user, credential);
         return new ResponseEntity<>(new IdJson(credential.getId()), HttpStatus.CREATED);
     }

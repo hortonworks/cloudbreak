@@ -23,10 +23,10 @@ import javax.persistence.UniqueConstraint;
                 query = "SELECT c FROM Credential c "
                         + "WHERE c.owner= :user"),
         @NamedQuery(
-                name = "Credential.findPublicsInAccount",
+                name = "Credential.findPublicInAccountForUser",
                 query = "SELECT c FROM Credential c "
-                        + "WHERE c.account= :account "
-                        + "AND c.publicInAccount= true"),
+                        + "WHERE (c.account= :account AND c.publicInAccount= true) "
+                        + "OR c.owner= :user"),
         @NamedQuery(
                 name = "Credential.findOneByName",
                 query = "SELECT b FROM Credential b "
@@ -35,6 +35,10 @@ import javax.persistence.UniqueConstraint;
                 name = "Credential.findAllInAccount",
                 query = "SELECT c FROM Credential c "
                         + "WHERE c.account= :account "),
+        @NamedQuery(
+                name = "Credential.findByIdInAccount",
+                query = "SELECT c FROM Credential c "
+                        + "WHERE c.id= :id and ((c.publicInAccount=true and c.account= :account) or c.owner= :owner)"),
         @NamedQuery(
                 name = "Credential.findByNameInAccount",
                 query = "SELECT c FROM Credential c "

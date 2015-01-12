@@ -15,7 +15,7 @@ public interface BlueprintService {
 
     Blueprint create(CbUser user, Blueprint blueprintRequest);
 
-    void delete(Long id);
+    void delete(Long id, CbUser user);
 
     Blueprint getPublicBlueprint(String name, CbUser user);
 

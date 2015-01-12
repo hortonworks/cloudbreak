@@ -48,7 +48,7 @@ public class SimpleCredentialService implements CredentialService {
         if (user.getRoles().contains(CbUserRole.ADMIN)) {
             return credentialRepository.findAllInAccount(user.getAccount());
         } else {
-            return credentialRepository.findPublicsInAccount(user.getAccount());
+            return credentialRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
         }
     }
 
@@ -99,12 +99,12 @@ public class SimpleCredentialService implements CredentialService {
     }
 
     @Override
-    public void delete(Long id) {
-        Credential credential = credentialRepository.findOne(id);
+    public void delete(Long id, CbUser user) {
+        Credential credential = credentialRepository.findByIdInAccount(id, user.getAccount(), user.getUserId());
         if (credential == null) {
             throw new NotFoundException(String.format("Credential '%s' not found.", id));
         }
-        delete(credential);
+        delete(credential, user);
     }
 
     @Override
@@ -113,16 +113,20 @@ public class SimpleCredentialService implements CredentialService {
         if (credential == null) {
             throw new NotFoundException(String.format("Credential '%s' not found.", name));
         }
-        delete(credential);
+        delete(credential, user);
     }
 
-    private void delete(Credential credential) {
-        List<Stack> stacks = stackRepository.findByCredential(credential.getId());
-        if (stacks.isEmpty()) {
-            credentialHandlers.get(credential.getCloudPlatform()).delete(credential);
-            credentialRepository.delete(credential);
+    private void delete(Credential credential, CbUser user) {
+        if (!user.getUserId().equals(credential.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
+            throw new BadRequestException("Public credentials can be deleted only by account admins or owners.");
         } else {
-            throw new BadRequestException(String.format("Credential '%d' is in use, cannot be deleted.", credential.getId()));
+            List<Stack> stacks = stackRepository.findByCredential(credential.getId());
+            if (stacks.isEmpty()) {
+                credentialHandlers.get(credential.getCloudPlatform()).delete(credential);
+                credentialRepository.delete(credential);
+            } else {
+                throw new BadRequestException(String.format("Credential '%d' is in use, cannot be deleted.", credential.getId()));
+            }
         }
     }
 }

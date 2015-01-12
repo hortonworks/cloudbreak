@@ -27,6 +27,7 @@ public class CredentialJson implements JsonEntity {
     private String description;
     @NotNull
     private String publicKey;
+    private boolean publicInAccount;
 
     public CredentialJson() {
 
@@ -82,4 +83,12 @@ public class CredentialJson implements JsonEntity {
         this.parameters = parameters;
     }
 
+    @JsonProperty("public")
+    public boolean isPublicInAccount() {
+        return publicInAccount;
+    }
+
+    public void setPublicInAccount(boolean publicInAccount) {
+        this.publicInAccount = publicInAccount;
+    }
 }

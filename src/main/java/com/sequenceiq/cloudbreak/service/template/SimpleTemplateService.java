@@ -43,7 +43,7 @@ public class SimpleTemplateService implements TemplateService {
         if (user.getRoles().contains(CbUserRole.ADMIN)) {
             return templateRepository.findAllInAccount(user.getAccount());
         } else {
-            return templateRepository.findPublicsInAccount(user.getAccount());
+            return templateRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
         }
     }
 
@@ -74,20 +74,12 @@ public class SimpleTemplateService implements TemplateService {
     }
 
     @Override
-    public void delete(Long templateId) {
-        Template template = templateRepository.findOne(templateId);
-        MDCBuilder.buildMdcContext(template);
-        LOGGER.debug("Deleting template.", templateId);
+    public void delete(Long templateId, CbUser user) {
+        Template template = templateRepository.findByIdInAccount(templateId, user.getAccount(), user.getUserId());
         if (template == null) {
             throw new NotFoundException(String.format(TEMPLATE_NOT_FOUND_MSG, templateId));
         }
-        List<Stack> allStackForTemplate = stackRepository.findAllStackForTemplate(templateId);
-        if (allStackForTemplate.isEmpty()) {
-            templateRepository.delete(template);
-        } else {
-            throw new BadRequestException(String.format(
-                    "There are stacks associated with template '%s'. Please remove these before deleting the template.", templateId));
-        }
+        delete(template, user);
     }
 
     public Template getPrivateTemplate(String name, CbUser user) {
@@ -111,20 +103,27 @@ public class SimpleTemplateService implements TemplateService {
     }
 
     @Override
-    public void delete(String templateName, CbUser cbUser) {
-        Template template = templateRepository.findByNameInAccount(templateName, cbUser.getAccount(), cbUser.getUserId());
+    public void delete(String templateName, CbUser user) {
+        Template template = templateRepository.findByNameInAccount(templateName, user.getAccount(), user.getUserId());
         if (template == null) {
             throw new NotFoundException(String.format(TEMPLATE_NOT_FOUND_MSG, templateName));
         }
-        MDCBuilder.buildMdcContext(template);
-        LOGGER.debug("Deleting template.", templateName);
+        delete(template, user);
+    }
 
+    private void delete(Template template, CbUser user) {
+        MDCBuilder.buildMdcContext(template);
+        LOGGER.debug("Deleting template. {} - {}", new Object[]{template.getId(), template.getName()});
         List<Stack> allStackForTemplate = stackRepository.findAllStackForTemplate(template.getId());
         if (allStackForTemplate.isEmpty()) {
-            templateRepository.delete(template);
+            if (!user.getUserId().equals(template.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
+                throw new BadRequestException("Public templates can be deleted only by account admins or owners.");
+            } else {
+                templateRepository.delete(template);
+            }
         } else {
             throw new BadRequestException(String.format(
-                    "There are stacks associated with template '%s'. Please remove these before deleting the template.", templateName));
+                    "There are stacks associated with template '%s'. Please remove these before deleting the template.", template.getName()));
         }
     }
 
