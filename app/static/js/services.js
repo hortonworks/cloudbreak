@@ -127,7 +127,7 @@ uluwatuServices.factory('GlobalStack', ['$resource',
 
 uluwatuServices.factory('UluwatuCluster', ['AccountStack', 'Cluster', 'GlobalStack',
     function (AccountStack, Cluster, GlobalStack) {
-        function AggregateCluster(UserStack, Cluster) {
+        function AggregateCluster(AccountStack, Cluster) {
 
             this.query = function (successHandler) {
                 AccountStack.query(function (stacks) {
