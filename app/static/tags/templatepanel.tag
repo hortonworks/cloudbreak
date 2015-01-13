@@ -61,6 +61,8 @@
                             <h5>
                                 <a href="" data-toggle="collapse" data-parent="#templete-list-accordion" data-target="#panel-template-collapse{{template.id}}"><i class="fa fa-file-o fa-fw"></i>{{template.name}}</a>
                                 <i class="fa fa-users fa-lg public-account-info pull-right" ng-show="template.public"></i>
+                                <span class="label label-info pull-right">{{template.cloudPlatform}}</span>
+
                             </h5>
                         </div>
                         <div id="panel-template-collapse{{template.id}}" class="panel-collapse collapse">
