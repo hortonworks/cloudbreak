@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureSimpleNetworkResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDeleteContextObject;
@@ -35,6 +36,8 @@ public class AzureNetworkResourceBuilder extends AzureSimpleNetworkResourceBuild
 
     @Autowired
     private StackRepository stackRepository;
+    @Autowired
+    private AzureStackUtil azureStackUtil;
 
     @Override
     public Boolean create(CreateResourceRequest createResourceRequest) throws Exception {
@@ -55,7 +58,7 @@ public class AzureNetworkResourceBuilder extends AzureSimpleNetworkResourceBuild
         try {
             props = new HashMap<>();
             props.put(NAME, resource.getResourceName());
-            AzureClient azureClient = deleteContextObject.getNewAzureClient(credential);
+            AzureClient azureClient = azureStackUtil.createAzureClient(credential);
             HttpResponseDecorator deleteVirtualNetworkResult = (HttpResponseDecorator) azureClient.deleteVirtualNetwork(props);
             String requestId = (String) azureClient.getRequestId(deleteVirtualNetworkResult);
             boolean finished = azureClient.waitUntilComplete(requestId);
@@ -90,7 +93,7 @@ public class AzureNetworkResourceBuilder extends AzureSimpleNetworkResourceBuild
         props.put(SUBNETNAME, buildResources.get(0).getResourceName());
         props.put(ADDRESSPREFIX, "172.16.0.0/16");
         props.put(SUBNETADDRESSPREFIX, "172.16.0.0/24");
-        AzureClient azureClient = provisionContextObject.getNewAzureClient(credential);
+        AzureClient azureClient = azureStackUtil.createAzureClient(credential);
         return new AzureNetworkCreateRequest(buildResources.get(0).getResourceName(), provisionContextObject.getStackId(), props, azureClient,
                 resources, buildResources);
     }

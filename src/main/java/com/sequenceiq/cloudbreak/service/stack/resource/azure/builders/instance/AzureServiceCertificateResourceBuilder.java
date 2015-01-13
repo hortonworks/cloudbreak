@@ -87,7 +87,7 @@ public class AzureServiceCertificateResourceBuilder extends AzureSimpleInstanceR
         } catch (CertificateEncodingException e) {
             throw new StackCreationFailureException(e);
         }
-        return new AzureServiceCertificateCreateRequest(props, provisionContextObject.getNewAzureClient(azureCredential), resources, buildResources);
+        return new AzureServiceCertificateCreateRequest(props, azureStackUtil.createAzureClient(azureCredential), resources, buildResources);
     }
 
     @Override

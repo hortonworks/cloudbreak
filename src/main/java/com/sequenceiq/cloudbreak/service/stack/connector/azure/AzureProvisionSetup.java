@@ -75,7 +75,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
         MDCBuilder.buildMdcContext(stack);
         Credential credential = stack.getCredential();
         AzureTemplate template = (AzureTemplate) stack.getTemplate();
-        AzureClient azureClient = AzureStackUtil.createAzureClient((AzureCredential) credential);
+        AzureClient azureClient = azureStackUtil.createAzureClient((AzureCredential) credential);
         if (!azureClient.isImageAvailable(azureStackUtil.getOsImageName(credential, template.getLocation()))) {
             String affinityGroupName = ((AzureCredential) credential).getCommonName(template.getLocation());
             createAffinityGroup(stack, azureClient, affinityGroupName);
@@ -164,7 +164,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
         Credential credential = stack.getCredential();
         azureStackUtil.migrateFilesIfNeeded((AzureCredential) credential);
         try {
-            AzureClient azureClient = AzureStackUtil.createAzureClient((AzureCredential) credential);
+            AzureClient azureClient = azureStackUtil.createAzureClient((AzureCredential) credential);
             Object osImages = azureClient.getOsImages();
         } catch (Exception ex) {
             if ("Forbidden".equals(ex.getMessage())) {

@@ -61,7 +61,7 @@ public class AzureStackUtil {
                 split[split.length - 1].replaceAll(".vhd", ""));
     }
 
-    public static AzureClient createAzureClient(AzureCredential credential) {
+    public synchronized AzureClient createAzureClient(AzureCredential credential) {
         MDCBuilder.buildMdcContext(credential);
         try {
             String jksPath = credential.getId() == null ? "/tmp/" + new Date().getTime() + ".jks" : "/tmp/" + credential.getId() + ".jks";
@@ -75,13 +75,6 @@ public class AzureStackUtil {
             LOGGER.error(e.getMessage());
             throw new InternalServerException(e.getMessage());
         }
-    }
-
-    public static Map<String, String> createVMContext(String vmName) {
-        Map<String, String> context = new HashMap<>();
-        context.put(SERVICENAME, vmName);
-        context.put(NAME, vmName);
-        return context;
     }
 
     public File buildAzureSshCerFile(AzureCredential azureCredential) throws IOException, GeneralSecurityException {

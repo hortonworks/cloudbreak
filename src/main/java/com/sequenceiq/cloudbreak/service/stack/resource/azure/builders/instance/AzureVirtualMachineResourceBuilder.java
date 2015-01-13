@@ -80,7 +80,7 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
             Map<String, String> props = new HashMap<>();
             props.put(SERVICENAME, resource.getResourceName());
             props.put(NAME, resource.getResourceName());
-            AzureClient azureClient = deleteContextObject.getNewAzureClient(credential);
+            AzureClient azureClient = azureStackUtil.createAzureClient(credential);
             HttpResponseDecorator deleteVirtualMachineResult = (HttpResponseDecorator) azureClient.deleteVirtualMachine(props);
             String requestId = (String) azureClient.getRequestId(deleteVirtualMachineResult);
             waitUntilComplete(azureClient, requestId);
@@ -97,7 +97,7 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
         Stack stack = stackRepository.findById(describeContextObject.getStackId());
         AzureCredential credential = (AzureCredential) stack.getCredential();
         try {
-            AzureClient azureClient = describeContextObject.getNewAzureClient(credential);
+            AzureClient azureClient = azureStackUtil.createAzureClient(credential);
             Object cloudService = azureClient.getCloudService(resource.getResourceName());
             return Optional.fromNullable(cloudService.toString());
         } catch (Exception ex) {
@@ -109,11 +109,11 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
     public Boolean start(AzureStartStopContextObject startStopContextObject, Resource resource) {
         Stack stack = stackRepository.findById(startStopContextObject.getStack().getId());
         AzureCredential credential = (AzureCredential) stack.getCredential();
-        boolean started = setStackState(startStopContextObject.getStack().getId(), resource, startStopContextObject.getNewAzureClient(credential), false);
+        boolean started = setStackState(startStopContextObject.getStack().getId(), resource, azureStackUtil.createAzureClient(credential), false);
         if (started) {
             azurePollingService.pollWithTimeout(
                     new AzureInstanceStatusCheckerTask(),
-                    new AzureInstances(startStopContextObject.getStack(), startStopContextObject.getNewAzureClient(credential),
+                    new AzureInstances(startStopContextObject.getStack(), azureStackUtil.createAzureClient(credential),
                             Arrays.asList(resource.getResourceName()), "Running"),
                     POLLING_INTERVAL,
                     MAX_ATTEMPTS_FOR_AMBARI_OPS);
@@ -126,7 +126,7 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
     public Boolean stop(AzureStartStopContextObject startStopContextObject, Resource resource) {
         Stack stack = stackRepository.findById(startStopContextObject.getStack().getId());
         AzureCredential credential = (AzureCredential) stack.getCredential();
-        return setStackState(startStopContextObject.getStack().getId(), resource, startStopContextObject.getNewAzureClient(credential), true);
+        return setStackState(startStopContextObject.getStack().getId(), resource, azureStackUtil.createAzureClient(credential), true);
     }
 
     @Override
@@ -199,7 +199,7 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
         props.put(VIRTUALNETWORKNAME, provisionContextObject.filterResourcesByType(ResourceType.AZURE_NETWORK).get(0).getResourceName());
         props.put(PORTS, ports);
         props.put(VMTYPE, AzureVmType.valueOf(azureTemplate.getVmType()).vmType().replaceAll(" ", ""));
-        return new AzureVirtualMachineCreateRequest(props, provisionContextObject.getNewAzureClient(azureCredential), resources, buildResources);
+        return new AzureVirtualMachineCreateRequest(props, azureStackUtil.createAzureClient(azureCredential), resources, buildResources);
     }
 
     private boolean setStackState(Long stackId, Resource resource, AzureClient azureClient, boolean stopped) {

@@ -1,8 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.resource.azure.model;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
-import com.sequenceiq.cloudbreak.domain.AzureCredential;
-import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.resource.DescribeContextObject;
 
 public class AzureDescribeContextObject extends DescribeContextObject {
@@ -32,7 +30,4 @@ public class AzureDescribeContextObject extends DescribeContextObject {
         this.commonName = commonName;
     }
 
-    public synchronized AzureClient getNewAzureClient(AzureCredential credential) {
-        return AzureStackUtil.createAzureClient(credential);
-    }
 }

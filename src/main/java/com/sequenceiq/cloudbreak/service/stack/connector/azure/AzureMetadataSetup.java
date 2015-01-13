@@ -50,12 +50,14 @@ public class AzureMetadataSetup implements MetadataSetup {
     private PollingService<AzureMetadataSetupCheckerTaskContext> azureMetadataSetupCheckerTaskPollingService;
     @Autowired
     private Reactor reactor;
+    @Autowired
+    private AzureStackUtil azureStackUtil;
 
     @Override
     public void setupMetadata(Stack stack) {
         MDCBuilder.buildMdcContext(stack);
         AzureCredential azureCredential = (AzureCredential) stack.getCredential();
-        AzureClient azureClient = AzureStackUtil.createAzureClient(azureCredential);
+        AzureClient azureClient = azureStackUtil.createAzureClient(azureCredential);
         Set<CoreInstanceMetaData> instanceMetaDatas = collectMetaData(stack, azureClient);
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.METADATA_SETUP_COMPLETE_EVENT, stack.getId());
         reactor.notify(ReactorConfig.METADATA_SETUP_COMPLETE_EVENT,
@@ -66,7 +68,7 @@ public class AzureMetadataSetup implements MetadataSetup {
     public void addNewNodesToMetadata(Stack stack, Set<Resource> resourceList) {
         MDCBuilder.buildMdcContext(stack);
         AzureCredential azureCredential = (AzureCredential) stack.getCredential();
-        AzureClient azureClient = AzureStackUtil.createAzureClient(azureCredential);
+        AzureClient azureClient = azureStackUtil.createAzureClient(azureCredential);
         List<Resource> resources = new ArrayList<>();
         for (Resource resource : resourceList) {
             if (ResourceType.AZURE_VIRTUAL_MACHINE.equals(resource.getResourceType())) {

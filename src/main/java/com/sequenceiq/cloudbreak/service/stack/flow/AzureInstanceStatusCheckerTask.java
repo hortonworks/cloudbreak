@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
+import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.NAME;
+import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.SERVICENAME;
+
+import java.util.HashMap;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -9,7 +13,6 @@ import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
-import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 
 public class AzureInstanceStatusCheckerTask implements StatusCheckerTask<AzureInstances> {
 
@@ -20,7 +23,7 @@ public class AzureInstanceStatusCheckerTask implements StatusCheckerTask<AzureIn
         MDCBuilder.buildMdcContext(instances.getStack());
         AzureClient azureClient = instances.getAzureClient();
         for (String instance : instances.getInstances()) {
-            Map<String, String> vmContext = AzureStackUtil.createVMContext(instance);
+            Map<String, String> vmContext = createVMContext(instance);
             String status = instances.getStatus();
             if (!status.equals(azureClient.getVirtualMachineState(vmContext))) {
                 LOGGER.info("Azure instance is not in {} status on stack.", status);
@@ -28,6 +31,13 @@ public class AzureInstanceStatusCheckerTask implements StatusCheckerTask<AzureIn
             }
         }
         return true;
+    }
+
+    private Map<String, String> createVMContext(String vmName) {
+        Map<String, String> context = new HashMap<>();
+        context.put(SERVICENAME, vmName);
+        context.put(NAME, vmName);
+        return context;
     }
 
     @Override
