@@ -24,18 +24,6 @@
         <!-- .col-sm-9 -->
 
     </div>
-    <div class="form-group" ng-class="{ 'has-error': awsTemplateForm.aws_tsshLocation.$dirty && awsTemplateForm.aws_tsshLocation.$invalid }">
-        <label class="col-sm-3 control-label" for="aws_tsshLocation">SSH location</label>
-
-        <div class="col-sm-9">
-            <input type="text" class="form-control" id="aws_tsshLocation" name="aws_tsshLocation" ng-model="awsTemp.parameters.sshLocation" placeholder="0.0.0.0/0" required ng-pattern="/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\/(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/i">
-            <div class="help-block" ng-show="awsTemplateForm.aws_tsshLocation.$dirty && awsTemplateForm.aws_tsshLocation.$invalid">
-                <i class="fa fa-warning"></i> {{error_msg.template_ssh_location_invalid}}
-            </div>
-        </div>
-        <!-- .col-sm-9 -->
-
-    </div>
     <div class="form-group">
         <label class="col-sm-3 control-label" for="aws_tinstanceType">Instance type</label>
 
@@ -103,7 +91,7 @@
           <!-- .col-sm-9 -->
         </div>
     </div>
-    
+
     <div class="form-group">
             <label class="col-sm-3 control-label" for="aws_publicinaccount">Public in account</label>
             <div class="col-sm-9">
@@ -111,7 +99,7 @@
             </div>
        <!-- .col-sm-9 -->
     </div>
-                        
+
     <div class="row btn-row">
         <div class="col-sm-9 col-sm-offset-3">
             <a id="createAwsTemplate" ng-disabled="awsTemplateForm.$invalid" class="btn btn-success btn-block" ng-click="createAwsTemplate()" role="button"><i class="fa fa-plus fa-fw"></i>
