@@ -77,6 +77,11 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
 
             $scope.cluster.credentialId = $rootScope.activeCredential.id;
             UluwatuCluster.save($scope.cluster, function (result) {
+                var nodeCount = 0;
+                angular.forEach(result.templateGroups, function(group) {
+                  nodeCount += group.nodeCount;
+                });
+                result.nodeCount = nodeCount;
                 $rootScope.clusters.push(result);
                 initCluster();
                 $jq('.carousel').carousel(0);
