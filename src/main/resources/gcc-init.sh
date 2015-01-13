@@ -1,4 +1,4 @@
-: ${DOCKER_TAG:=1.7.0-hadoop-user-cp}
+: ${DOCKER_TAG:=1.7.0-consul}
 : ${CONSUL_IMAGE:=sequenceiq/consul:v0.4.1.ptr}
 
 set -x
