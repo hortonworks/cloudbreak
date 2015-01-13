@@ -30,6 +30,9 @@ import javax.persistence.Version;
         @NamedQuery(
                 name = "Stack.findById",
                 query = "SELECT c FROM Stack c "
+                        + "LEFT JOIN FETCH c.resources "
+                        + "LEFT JOIN FETCH c.instanceMetaData "
+                        + "LEFT JOIN FETCH c.templateGroups "
                         + "WHERE c.id= :id"),
         @NamedQuery(
                 name = "Stack.findAllStackForTemplate",
@@ -41,6 +44,9 @@ import javax.persistence.Version;
         @NamedQuery(
                 name = "Stack.findStackForCluster",
                 query = "SELECT c FROM Stack c "
+                        + "LEFT JOIN FETCH c.resources "
+                        + "LEFT JOIN FETCH c.instanceMetaData "
+                        + "LEFT JOIN FETCH c.templateGroups "
                         + "WHERE c.cluster.id= :id"),
         @NamedQuery(
                 name = "Stack.findStackWithListsForCluster",
@@ -52,6 +58,9 @@ import javax.persistence.Version;
         @NamedQuery(
                 name = "Stack.findRequestedStacksWithCredential",
                 query = "SELECT c FROM Stack c "
+                        + "LEFT JOIN FETCH c.resources "
+                        + "LEFT JOIN FETCH c.instanceMetaData "
+                        + "LEFT JOIN FETCH c.templateGroups "
                         + "WHERE c.credential.id= :credentialId "
                         + "AND c.status= 'REQUESTED'"),
         @NamedQuery(
@@ -68,35 +77,59 @@ import javax.persistence.Version;
         @NamedQuery(
                 name = "Stack.findForUser",
                 query = "SELECT s FROM Stack s "
+                        + "LEFT JOIN FETCH s.resources "
+                        + "LEFT JOIN FETCH s.instanceMetaData "
+                        + "LEFT JOIN FETCH s.templateGroups "
                         + "WHERE s.owner= :user"),
         @NamedQuery(
                 name = "Stack.findPublicInAccountForUser",
                 query = "SELECT s FROM Stack s "
+                        + "LEFT JOIN FETCH s.resources "
+                        + "LEFT JOIN FETCH s.instanceMetaData "
+                        + "LEFT JOIN FETCH s.templateGroups "
                         + "WHERE (s.account= :account AND s.publicInAccount= true) "
                         + "OR s.owner= :user"),
         @NamedQuery(
                 name = "Stack.findAllInAccount",
                 query = "SELECT s FROM Stack s "
+                        + "LEFT JOIN FETCH s.resources "
+                        + "LEFT JOIN FETCH s.instanceMetaData "
+                        + "LEFT JOIN FETCH s.templateGroups "
                         + "WHERE s.account= :account "),
         @NamedQuery(
                 name = "Stack.findByAmbari",
                 query = "SELECT s from Stack s "
+                        + "LEFT JOIN FETCH s.resources "
+                        + "LEFT JOIN FETCH s.instanceMetaData "
+                        + "LEFT JOIN FETCH s.templateGroups "
                         + "WHERE s.ambariIp= :ambariIp"),
         @NamedQuery(
                 name = "Stack.findOneByName",
                 query = "SELECT c FROM Stack c "
+                        + "LEFT JOIN FETCH c.resources "
+                        + "LEFT JOIN FETCH c.instanceMetaData "
+                        + "LEFT JOIN FETCH c.templateGroups "
                         + "WHERE c.name= :name and c.account= :account"),
         @NamedQuery(
                 name = "Stack.findByIdInAccount",
                 query = "SELECT s FROM Stack s "
+                        + "LEFT JOIN FETCH s.resources "
+                        + "LEFT JOIN FETCH s.instanceMetaData "
+                        + "LEFT JOIN FETCH s.templateGroups "
                         + "WHERE s.id= :id and ((s.account= :account and s.publicInAccount=true) or s.owner= :owner)"),
         @NamedQuery(
                 name = "Stack.findByNameInAccount",
                 query = "SELECT s FROM Stack s "
+                        + "LEFT JOIN FETCH s.resources "
+                        + "LEFT JOIN FETCH s.instanceMetaData "
+                        + "LEFT JOIN FETCH s.templateGroups "
                         + "WHERE s.name= :name and ((s.account= :account and s.publicInAccount=true) or s.owner= :owner)"),
         @NamedQuery(
                 name = "Stack.findByNameInUser",
                 query = "SELECT t FROM Stack t "
+                        + "LEFT JOIN FETCH t.resources "
+                        + "LEFT JOIN FETCH t.instanceMetaData "
+                        + "LEFT JOIN FETCH t.templateGroups "
                         + "WHERE t.owner= :owner and t.name= :name"),
         @NamedQuery(
                 name = "Stack.findByCredential",
