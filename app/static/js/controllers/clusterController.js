@@ -207,22 +207,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             }
         }
 
-        $scope.gccFilterFunction = function(element) {
-            try {
-                return element.kind.match("compute#instance") ? true : false;
-            } catch (err) {
-                return false;
-            }
-        }
-
-        $scope.azureFilterFunction = function(element) {
-            try {
-                return element.Deployment === undefined ? false : true;
-            } catch (err) {
-                return false;
-            }
-        }
-
         $scope.selectCluster = function(cluster) {
                     $scope.selectedCluster = cluster
         }
