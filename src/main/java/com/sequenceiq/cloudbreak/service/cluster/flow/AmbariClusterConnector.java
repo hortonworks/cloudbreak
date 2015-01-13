@@ -30,16 +30,12 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.KeyValue;
-import com.sequenceiq.cloudbreak.domain.Plugin;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
-import com.sequenceiq.cloudbreak.repository.KeyValueRepository;
-import com.sequenceiq.cloudbreak.repository.PluginRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
@@ -84,12 +80,6 @@ public class AmbariClusterConnector {
     private InstanceMetaDataRepository instanceMetadataRepository;
 
     @Autowired
-    private PluginRepository pluginRepository;
-
-    @Autowired
-    private KeyValueRepository keyValueRepository;
-
-    @Autowired
     private RetryingStackUpdater stackUpdater;
 
     @Autowired
@@ -117,7 +107,7 @@ public class AmbariClusterConnector {
     private AmbariClusterStatusUpdater clusterStatusUpdater;
 
     @Autowired
-    private PluginManager pluginManager;
+    private RecipeEngine recipeEngine;
 
     public void buildAmbariCluster(Stack stack) {
         Cluster cluster = stack.getCluster();
@@ -131,14 +121,7 @@ public class AmbariClusterConnector {
 
             AmbariClient ambariClient = clientService.create(stack);
             if (cluster.getRecipe() != null) {
-                Set<InstanceMetaData> instanceMetaData = instanceMetadataRepository.findAllInStack(stack.getId());
-                Set<Plugin> plugins = pluginRepository.findAllForRecipe(cluster.getRecipe().getId());
-                Set<KeyValue> keyValues = keyValueRepository.findAllForRecipe(cluster.getRecipe().getId());
-                pluginManager.prepareKeyValues(instanceMetaData, keyValues);
-                Set<String> installEventIds = pluginManager.installPlugins(instanceMetaData, plugins);
-                pluginManager.waitForEventFinish(stack, instanceMetaData, installEventIds);
-                Set<String> triggerEventIds = pluginManager.triggerPlugins(instanceMetaData, plugins);
-                pluginManager.waitForEventFinish(stack, instanceMetaData, triggerEventIds);
+                recipeEngine.executeRecipe(stack);
             }
             addBlueprint(stack, ambariClient, blueprint);
             Map<String, List<String>> hostGroupMappings = recommend(stack, ambariClient);
