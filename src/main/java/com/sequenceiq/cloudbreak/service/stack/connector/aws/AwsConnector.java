@@ -190,7 +190,7 @@ public class AwsConnector implements CloudPlatformConnector {
 
 
         Set<Resource> resources = new HashSet<>();
-        resources.add(new Resource(ResourceType.CLOUDFORMATION_STACK, stackName, stack,  Lists.newArrayList(stack.getTemplateGroups()).get(0).getGroupName()));
+        resources.add(new Resource(ResourceType.CLOUDFORMATION_STACK, stackName, stack, Lists.newArrayList(stack.getTemplateGroups()).get(0).getGroupName()));
         Stack updatedStack = stackUpdater.updateStackResources(stack.getId(), resources);
         LOGGER.info("CloudFormation stack creation request sent with stack name: '{}' for stack: '{}'", stackName, updatedStack.getId());
     }
@@ -200,7 +200,7 @@ public class AwsConnector implements CloudPlatformConnector {
         boolean spotPrice = true;
         for (TemplateGroup templateGroup : templateGroups) {
             AwsTemplate awsTemplate = (AwsTemplate) templateGroup.getTemplate();
-            if(awsTemplate.getSpotPrice() == null) {
+            if (awsTemplate.getSpotPrice() == null) {
                 spotPrice = false;
             }
         }

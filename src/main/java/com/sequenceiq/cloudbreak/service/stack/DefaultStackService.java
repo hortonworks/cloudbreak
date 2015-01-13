@@ -255,7 +255,7 @@ public class DefaultStackService implements StackService {
             throw new BadRequestException("Public stacks can be deleted only by account admins or owners.");
         } else {
             LOGGER.info("Publishing {} event.", ReactorConfig.DELETE_REQUEST_EVENT);
-            reactor.notify(ReactorConfig.DELETE_REQUEST_EVENT, Event.wrap(new StackDeleteRequest(stack.getTemplate().cloudPlatform(), stack.getId())));
+            reactor.notify(ReactorConfig.DELETE_REQUEST_EVENT, Event.wrap(new StackDeleteRequest(stack.cloudPlatform(), stack.getId())));
         }
     }
 
