@@ -77,7 +77,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
 
             $scope.cluster.credentialId = $rootScope.activeCredential.id;
             UluwatuCluster.save($scope.cluster, function (result) {
-                result.nodeCount = $scope.calculateFullNodeCount(result);
                 $rootScope.clusters.push(result);
                 initCluster();
                 $jq('.carousel').carousel(0);
@@ -109,10 +108,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         $scope.changeActiveCluster = function (clusterId) {
             $rootScope.activeCluster = $filter('filter')($rootScope.clusters, { id: clusterId })[0];
             $rootScope.activeClusterBlueprint = $filter('filter')($rootScope.blueprints, { id: $rootScope.activeCluster.blueprintId})[0];
-<<<<<<< HEAD
-            $rootScope.activeClusterTemplate = $filter('filter')($rootScope.templates, {id: $rootScope.activeCluster.templateId})[0];
-=======
->>>>>>> CLOUD-338 fixed templates
             $rootScope.activeClusterCredential = $filter('filter')($rootScope.credentials, {id: $rootScope.activeCluster.credentialId}, true)[0];
             $rootScope.activeCluster.cloudPlatform =  $rootScope.activeClusterCredential.cloudPlatform;
             GlobalStack.get({ id: clusterId }, function(success) {
@@ -183,18 +178,14 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
           UluwatuCluster.query(function (clusters) {
               $rootScope.clusters = clusters;
               angular.forEach($rootScope.clusters, function(item) {
-                   item.nodeCount = $scope.calculateFullNodeCount(item);
+                   var nodeCount = 0;
+                   angular.forEach(item.templateGroups, function(group) {
+                       nodeCount += group.nodeCount;
+                   });
+                   item.nodeCount = nodeCount;
               });
               $scope.$parent.orderClusters();
           });
-        }
-
-        $scope.calculateFullNodeCount = function(cluster) {
-          var nodeCount = 0;
-          angular.forEach(cluster.templateGroups, function(group) {
-            nodeCount += group.nodeCount;
-          });
-          return nodeCount;
         }
 
         function initCluster(){
