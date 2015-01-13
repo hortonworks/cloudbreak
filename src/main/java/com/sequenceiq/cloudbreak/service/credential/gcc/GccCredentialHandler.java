@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.credential.CredentialHandler;
-import com.sequenceiq.cloudbreak.service.credential.RsaPublicKeyValidator;
+import com.sequenceiq.cloudbreak.service.credential.OpenSshPublicKeyValidator;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccStackUtil;
 
 @Component
@@ -19,7 +19,7 @@ public class GccCredentialHandler implements CredentialHandler<GccCredential> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GccCredentialHandler.class);
     @Autowired
-    private RsaPublicKeyValidator rsaPublicKeyValidator;
+    private OpenSshPublicKeyValidator rsaPublicKeyValidator;
     @Autowired
     private GccStackUtil gccStackUtil;
 

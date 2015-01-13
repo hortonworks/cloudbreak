@@ -11,6 +11,7 @@
     <suppress checks="ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="UpdateInstancesRequestHandler.java" />
     <suppress checks="ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="StackStatusUpdateHandler.java" />
     <suppress checks="ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="AzureCloudServiceResourceBuilder.java" />
+    <suppress checks="ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="PublicKeyReaderUtil.java"/>
     <suppress checks="MagicNumberCheck" files="test|Dummy|Mock|simulator" />
     <suppress id="IllegalTypeImpl" files="test" />
     <suppress checks="IllegalCatch" files="test" />
@@ -21,6 +22,7 @@
     <suppress id="string-instantiation" files="AzureProvisioner.java"/>
     <suppress id="string-instantiation" files="AwsStackUtil.java"/>
     <suppress id="string-instantiation" files="RemoteUserDetailsService.java"/>
+    <suppress id="string-instantiation" files="PublicKeyReaderUtil.java"/>
     <suppress id="string-instantiation" files="AzureServiceCertificateResourceBuilder.java"/>
     <suppress id="string-instantiation" files="AzureVirtualMachineResourceBuilder.java"/>
     <suppress checks="ParameterNumber" files="AzureProvisioner.java"/>
