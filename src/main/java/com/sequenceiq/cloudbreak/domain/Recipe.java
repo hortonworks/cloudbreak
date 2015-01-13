@@ -40,6 +40,9 @@ public class Recipe implements ProvisionEntity {
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Plugin> plugins;
 
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<KeyValue> keyValues;
+
     private String account;
 
     private String owner;
@@ -92,6 +95,14 @@ public class Recipe implements ProvisionEntity {
 
     public void setPlugins(List<Plugin> plugins) {
         this.plugins = plugins;
+    }
+
+    public List<KeyValue> getKeyValues() {
+        return keyValues;
+    }
+
+    public void setKeyValues(List<KeyValue> keyValues) {
+        this.keyValues = keyValues;
     }
 
     public String getAccount() {

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.ecwid.consul.v1.ConsulClient;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.KeyValue;
 import com.sequenceiq.cloudbreak.domain.Plugin;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.PollingService;
@@ -20,11 +21,21 @@ import com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils;
 @Component
 public class ConsulPluginManager implements PluginManager {
 
-    public static final String INSTALL_PLUGIN_EVENT = "install";
+    public static final String INSTALL_PLUGIN_EVENT = "install-plugin";
     public static final String FINISH_SIGNAL = "FINISHED";
 
     @Autowired
     private PollingService<ConsulKVCheckerContext> keyValuePollingService;
+
+    @Override
+    public void prepareKeyValues(Collection<InstanceMetaData> instanceMetaData, Collection<KeyValue> keyValues) {
+        List<ConsulClient> clients = ConsulUtils.createClients(instanceMetaData);
+        for (KeyValue kv : keyValues) {
+            if (!ConsulUtils.putKVValue(clients, kv.getKey(), kv.getValue(), null)){
+                throw new PluginFailureException("Failed to put values in Consul's key-value store.");
+            }
+        }
+    }
 
     @Override
     public Set<String> installPlugins(Collection<InstanceMetaData> instanceMetaData, Collection<Plugin> plugins) {

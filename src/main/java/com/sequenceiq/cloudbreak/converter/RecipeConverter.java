@@ -5,9 +5,11 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.controller.json.KeyValueJson;
 import com.sequenceiq.cloudbreak.controller.json.PluginJson;
 import com.sequenceiq.cloudbreak.controller.json.RecipeJson;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.KeyValue;
 import com.sequenceiq.cloudbreak.domain.Plugin;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 
@@ -23,6 +25,7 @@ public class RecipeConverter extends AbstractConverter<RecipeJson, Recipe> {
         json.setCustomerId(recipe.getCustomerId());
         json.setId(recipe.getId().toString());
         json.setBlueprintFromText(recipe.getBlueprint().getBlueprintText());
+        json.setKeyValues(convertKeyValues(recipe.getKeyValues()));
         return json;
     }
 
@@ -33,6 +36,7 @@ public class RecipeConverter extends AbstractConverter<RecipeJson, Recipe> {
         recipe.setCustomerId(json.getCustomerId());
         recipe.setDescription(json.getDescription());
         recipe.setPlugins(convertPlugins(json.getPlugins(), recipe));
+        recipe.setKeyValues(convertKeyValues(json.getKeyValues(), recipe));
         return recipe;
     }
 
@@ -56,6 +60,18 @@ public class RecipeConverter extends AbstractConverter<RecipeJson, Recipe> {
         return plugins;
     }
 
+    private List<KeyValue> convertKeyValues(List<KeyValueJson> kvJsons, Recipe recipe) {
+        List<KeyValue> keyValues = new ArrayList<>();
+        for (KeyValueJson kvJson : kvJsons) {
+            KeyValue keyValue = new KeyValue();
+            keyValue.setKey(kvJson.getKey());
+            keyValue.setValue(kvJson.getValue());
+            keyValue.setRecipe(recipe);
+            keyValues.add(keyValue);
+        }
+        return keyValues;
+    }
+
     private String getPluginName(PluginJson pluginJson) {
         String[] splits = pluginJson.getUrl().split("/");
         return splits[splits.length - 1].replace("consul-plugins-", "").replace(".git", "");
@@ -70,5 +86,16 @@ public class RecipeConverter extends AbstractConverter<RecipeJson, Recipe> {
             pluginJsons.add(pluginJson);
         }
         return pluginJsons;
+    }
+
+    private List<KeyValueJson> convertKeyValues(List<KeyValue> keyValues) {
+        List<KeyValueJson> kvJsons = new ArrayList<>();
+        for (KeyValue keyValue : keyValues) {
+            KeyValueJson kvJson = new KeyValueJson();
+            kvJson.setKey(keyValue.getKey());
+            kvJson.setValue(keyValue.getValue());
+            kvJsons.add(kvJson);
+        }
+        return kvJsons;
     }
 }

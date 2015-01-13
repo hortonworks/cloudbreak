@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.domain;
 
 import java.util.List;
 
+import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -32,8 +33,8 @@ public class Plugin {
     private Recipe recipe;
 
     @ElementCollection
+    @Column(length = 1000000, columnDefinition = "TEXT")
     private List<String> parameters;
-
 
     public Long getId() {
         return id;

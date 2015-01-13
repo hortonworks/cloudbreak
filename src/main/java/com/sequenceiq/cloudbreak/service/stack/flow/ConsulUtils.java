@@ -16,6 +16,7 @@ import com.ecwid.consul.v1.catalog.model.CatalogService;
 import com.ecwid.consul.v1.event.model.Event;
 import com.ecwid.consul.v1.event.model.EventParams;
 import com.ecwid.consul.v1.kv.model.GetValue;
+import com.ecwid.consul.v1.kv.model.PutParams;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 
 public final class ConsulUtils {
@@ -102,6 +103,24 @@ public final class ConsulUtils {
             return new String(Base64.decodeBase64(getValue.getValue()));
         } catch (Exception e) {
             return null;
+        }
+    }
+
+    public static Boolean putKVValue(List<ConsulClient> clients, String key, String value, PutParams putParams) {
+        for (ConsulClient client : clients) {
+            Boolean result = putKVValue(client, key, value, putParams);
+            if (result) {
+                return result;
+            }
+        }
+        return false;
+    }
+
+    public static Boolean putKVValue(ConsulClient client, String key, String value, PutParams putParams) {
+        try {
+            return client.setKVValue(key, value, putParams).getValue();
+        } catch (Exception e) {
+            return false;
         }
     }
 

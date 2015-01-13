@@ -27,6 +27,9 @@ public class RecipeJson implements JsonEntity {
 
     private List<PluginJson> plugins;
 
+    @JsonProperty("keyvalues")
+    private List<KeyValueJson> keyValues;
+
     private String blueprint;
 
     @JsonProperty("id")
@@ -82,5 +85,13 @@ public class RecipeJson implements JsonEntity {
 
     public void setPlugins(List<PluginJson> plugins) {
         this.plugins = plugins;
+    }
+
+    public List<KeyValueJson> getKeyValues() {
+        return keyValues;
+    }
+
+    public void setKeyValues(List<KeyValueJson> keyValues) {
+        this.keyValues = keyValues;
     }
 }
