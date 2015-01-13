@@ -15,8 +15,7 @@ public class AzureMetadataSetupCheckerTask implements StatusCheckerTask<AzureMet
     @Override
     public boolean checkStatus(AzureMetadataSetupCheckerTaskContext azureMetadataSetupCheckerTaskContext) {
         try {
-            Object virtualMachine = azureMetadataSetupCheckerTaskContext.getAzureClient()
-                    .getVirtualMachine(azureMetadataSetupCheckerTaskContext.getProps());
+            azureMetadataSetupCheckerTaskContext.getAzureClient().getVirtualMachine(azureMetadataSetupCheckerTaskContext.getProps());
             return true;
         } catch (Exception ex) {
             return false;
