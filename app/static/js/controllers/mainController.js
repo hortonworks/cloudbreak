@@ -55,7 +55,15 @@ angular.module('uluwatuControllers').controller('mainController', ['$scope', '$r
                     {key: 'BRAZIL_SOUTH', value: 'Brazil South', cloud: 'AZURE'},
                     {key: 'EAST_ASIA', value: 'East Asia', cloud: 'AZURE'},
                     {key: 'EAST_US', value: 'East US', cloud: 'AZURE'},
+                    {key: 'CENTRAL_US', value: 'Central US', cloud: 'AZURE'},
                     {key: 'NORTH_EUROPE', value: 'North Europe', cloud: 'AZURE'},
+                    {key: 'SOUTH_CENTRAL_US', value: 'South Central US'},
+                    {key: 'NORTH_CENTRAL_US', value: 'North Central US', cloud: 'AZURE'},
+                    {key: 'EAST_US_2', value: 'East US 2', cloud: 'AZURE'},
+                    {key: 'JAPAN_EAST', value: 'Japan East', cloud: 'AZURE'},
+                    {key: 'JAPAN_WEST', value: 'Japan West', cloud: 'AZURE'},
+                    {key: 'SOUTHEAST_ASIA', value: 'Southeast Asia', cloud: 'AZURE'},
+                    {key: 'BRAZIL_SOUTH', value: 'Brazil South', cloud: 'AZURE'},
                     {key: 'WEST_US', value: 'West US', cloud: 'AZURE'},
                     {key: 'WEST_EUROPE', value: 'West EU', cloud: 'AZURE'}
                 ],
@@ -63,7 +71,25 @@ angular.module('uluwatuControllers').controller('mainController', ['$scope', '$r
                     {key: 'SMALL', value: 'Small', cloud: 'AZURE'},
                     {key: 'MEDIUM', value: 'Medium', cloud: 'AZURE'},
                     {key: 'LARGE', value: 'Large', cloud: 'AZURE'},
-                    {key: 'EXTRA_LARGE', value: 'Extra Large', cloud: 'AZURE'}
+                    {key: 'EXTRA_LARGE', value: 'Extra Large', cloud: 'AZURE'},
+                    {key: 'A5', value: 'A5', cloud: 'AZURE'},
+                    {key: 'A6', value: 'A6', cloud: 'AZURE'},
+                    {key: 'A7', value: 'A7', cloud: 'AZURE'},
+                    {key: 'A8', value: 'A8', cloud: 'AZURE'},
+                    {key: 'A9', value: 'A9', cloud: 'AZURE'},
+                    {key: 'STANDARD_D1', value: 'Standard_D1', cloud: 'AZURE'},
+                    {key: 'STANDARD_D2', value: 'Standard_D2', cloud: 'AZURE'},
+                    {key: 'STANDARD_D3', value: 'Standard_D3', cloud: 'AZURE'},
+                    {key: 'STANDARD_D4', value: 'Standard_D4', cloud: 'AZURE'},
+                    {key: 'STANDARD_G1', value: 'Standard_G1', cloud: 'AZURE'},
+                    {key: 'STANDARD_G2', value: 'Standard_G2', cloud: 'AZURE'},
+                    {key: 'STANDARD_G3', value: 'Standard_G3', cloud: 'AZURE'},
+                    {key: 'STANDARD_G4', value: 'Standard_G4', cloud: 'AZURE'},
+                    {key: 'STANDARD_G5', value: 'Standard_G5', cloud: 'AZURE'},
+                    {key: 'STANDARD_D11', value: 'Standard_D11', cloud: 'AZURE'},
+                    {key: 'STANDARD_D12', value: 'Standard_D12', cloud: 'AZURE'},
+                    {key: 'STANDARD_D13', value: 'Standard_D13', cloud: 'AZURE'},
+                    {key: 'STANDARD_D14', value: 'Standard_D14', cloud: 'AZURE'}
                 ]
             },
             'AWS': {
@@ -82,14 +108,14 @@ angular.module('uluwatuControllers').controller('mainController', ['$scope', '$r
                     {key: 'SA_EAST_1', value: 'South America (São Paulo)', cloud: 'AWS'}
                 ],
                 amis: [
-                    {key: 'US_EAST_1', value: 'ami-d06e0eb8'},
-                    {key: 'US_WEST_1', value: 'ami-8dccdec8'},
-                    {key: 'US_WEST_2', value: 'ami-f9a6f7c9'},
-                    {key: 'EU_WEST_1', value: 'ami-9856e8ef'},
-                    {key: 'AP_SOUTHEAST_1', value: 'ami-cb496699'},
-                    {key: 'AP_SOUTHEAST_2', value: 'ami-b392fa89'},
-                    {key: 'AP_NORTHEAST_1', value: 'ami-1c17181d'},
-                    {key: 'SA_EAST_1', value: 'ami-b101b1ac'}
+                    {key: 'US_EAST_1', value: 'ami-b4eb9adc'},
+                    {key: 'US_WEST_1', value: 'ami-63283726'},
+                    {key: 'US_WEST_2', value: 'ami-632e7253'},
+                    {key: 'EU_WEST_1', value: 'ami-953cbbe2'},
+                    {key: 'AP_SOUTHEAST_1', value: 'ami-27bf9675'},
+                    {key: 'AP_SOUTHEAST_2', value: 'ami-9b86eca1'},
+                    {key: 'AP_NORTHEAST_1', value: 'ami-58627359'},
+                    {key: 'SA_EAST_1', value: 'ami-272c9e3a'}
                 ],
                 instanceType: [
                     {key: 'T2Micro', value: 'T2Micro', cloud: 'AWS'},
