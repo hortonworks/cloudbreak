@@ -22,19 +22,15 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.access.AccessDeniedException;
 
-import com.amazonaws.services.cloudformation.model.DescribeStacksResult;
-import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.sequenceiq.cloudbreak.controller.json.ClusterResponse;
 import com.sequenceiq.cloudbreak.controller.json.InstanceMetaDataJson;
 import com.sequenceiq.cloudbreak.controller.json.StackJson;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
-import com.sequenceiq.cloudbreak.domain.AwsStackDescription;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.StackDescription;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
@@ -74,8 +70,6 @@ public class StackConverterTest {
 
     private StackJson stackJson;
 
-    private StackDescription stackDescription;
-
     private AwsTemplate awsTemplate;
 
     private AwsCredential awsCredential;
@@ -84,7 +78,6 @@ public class StackConverterTest {
     public void setUp() {
         underTest = new StackConverter();
         MockitoAnnotations.initMocks(this);
-        stackDescription = createStackDescription();
         awsCredential = new AwsCredential();
         awsCredential.setId(DUMMY_ID);
         awsTemplate = new AwsTemplate();
@@ -133,7 +126,7 @@ public class StackConverterTest {
         given(metaDataConverter.convertAllJsonToEntity(anySetOf(InstanceMetaDataJson.class)))
                 .willReturn(new HashSet<InstanceMetaData>());
         // WHEN
-        StackJson result = underTest.convert(stack, stackDescription);
+        StackJson result = underTest.convert(stack);
         // THEN
         assertEquals(result.getAmbariServerIp(), stack.getAmbariIp());
         assertEquals(result.getId(), stack.getId());
@@ -149,7 +142,7 @@ public class StackConverterTest {
         given(metaDataConverter.convertAllJsonToEntity(anySetOf(InstanceMetaDataJson.class)))
                 .willReturn(new HashSet<InstanceMetaData>());
         // WHEN
-        StackJson result = underTest.convert(stack, stackDescription);
+        StackJson result = underTest.convert(stack);
         // THEN
         assertEquals(result.getAmbariServerIp(), stack.getAmbariIp());
         assertEquals(result.getId(), stack.getId());
@@ -233,12 +226,6 @@ public class StackConverterTest {
         stackJson.setStatus(Status.AVAILABLE);
         stackJson.setTemplateId(DUMMY_ID);
         return stackJson;
-    }
-
-    private StackDescription createStackDescription() {
-        DescribeStacksResult dSResult = new DescribeStacksResult();
-        DescribeInstancesResult dIResult = new DescribeInstancesResult();
-        return new AwsStackDescription(dSResult, dIResult);
     }
 
 }

@@ -13,7 +13,6 @@ import javax.validation.constraints.Size;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
-import com.sequenceiq.cloudbreak.domain.StackDescription;
 import com.sequenceiq.cloudbreak.domain.Status;
 
 public class StackJson implements JsonEntity {
@@ -34,7 +33,6 @@ public class StackJson implements JsonEntity {
     private String account;
     private boolean publicInAccount;
     private CloudPlatform cloudPlatform;
-    private StackDescription description;
     @NotNull
     private Long credentialId;
     private Status status;
@@ -123,16 +121,6 @@ public class StackJson implements JsonEntity {
 
     public void setCredentialId(Long credentialId) {
         this.credentialId = credentialId;
-    }
-
-    @JsonProperty("description")
-    public StackDescription getDescription() {
-        return description;
-    }
-
-    @JsonIgnore
-    public void setDescription(StackDescription description) {
-        this.description = description;
     }
 
     @JsonProperty("status")

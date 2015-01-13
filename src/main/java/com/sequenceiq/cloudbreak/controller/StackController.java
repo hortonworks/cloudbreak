@@ -27,7 +27,6 @@ import com.sequenceiq.cloudbreak.converter.StackConverter;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.StackDescription;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataIncompleteException;
 
@@ -73,8 +72,7 @@ public class StackController {
     @ResponseBody
     public ResponseEntity<StackJson> getStack(@PathVariable Long id) {
         Stack stack = stackService.get(id);
-        StackDescription stackDescription = stackService.getStackDescription(stack);
-        StackJson stackJson = stackConverter.convert(stack, stackDescription);
+        StackJson stackJson = stackConverter.convert(stack);
         return new ResponseEntity<>(stackJson, HttpStatus.OK);
     }
 
@@ -82,8 +80,7 @@ public class StackController {
     @ResponseBody
     public ResponseEntity<StackJson> getStackInPrivate(@ModelAttribute("user") CbUser user, @PathVariable String name) {
         Stack stack = stackService.getPrivateStack(name, user);
-        StackDescription stackDescription = stackService.getStackDescription(stack);
-        StackJson stackJson = stackConverter.convert(stack, stackDescription);
+        StackJson stackJson = stackConverter.convert(stack);
         return new ResponseEntity<>(stackJson, HttpStatus.OK);
     }
 
@@ -91,8 +88,7 @@ public class StackController {
     @ResponseBody
     public ResponseEntity<StackJson> getStackInPublic(@ModelAttribute("user") CbUser user, @PathVariable String name) {
         Stack stack = stackService.getPublicStack(name, user);
-        StackDescription stackDescription = stackService.getStackDescription(stack);
-        StackJson stackJson = stackConverter.convert(stack, stackDescription);
+        StackJson stackJson = stackConverter.convert(stack);
         return new ResponseEntity<>(stackJson, HttpStatus.OK);
     }
 

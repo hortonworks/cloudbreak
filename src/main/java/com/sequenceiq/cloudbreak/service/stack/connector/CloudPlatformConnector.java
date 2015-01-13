@@ -7,7 +7,6 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.StackDescription;
 
 public interface CloudPlatformConnector {
 
@@ -16,8 +15,6 @@ public interface CloudPlatformConnector {
     boolean addInstances(Stack stack, String userData, Integer instanceCount);
 
     boolean removeInstances(Stack stack, Set<String> instanceIds);
-
-    StackDescription describeStackWithResources(Stack stack, Credential credential);
 
     void deleteStack(Stack stack, Credential credential);
 
