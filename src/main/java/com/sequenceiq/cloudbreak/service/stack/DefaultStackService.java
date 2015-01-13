@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.domain.CbUserRole;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.StackDescription;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.StatusRequest;
 import com.sequenceiq.cloudbreak.domain.Template;
@@ -38,7 +37,6 @@ import com.sequenceiq.cloudbreak.service.stack.event.ProvisionRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.StackStatusUpdateRequest;
 import com.sequenceiq.cloudbreak.service.stack.event.UpdateInstancesRequest;
-import com.sequenceiq.cloudbreak.service.stack.flow.DescribeContext;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataIncompleteException;
 
 import reactor.core.Reactor;
@@ -63,9 +61,6 @@ public class DefaultStackService implements StackService {
 
     @Autowired
     private ClusterRepository clusterRepository;
-
-    @Autowired
-    private DescribeContext describeContext;
 
     @Autowired
     private AmbariClusterConnector ambariClusterConnector;
@@ -232,17 +227,6 @@ public class DefaultStackService implements StackService {
         LOGGER.info("Publishing {} event [scalingAdjustment: '{}']", ReactorConfig.UPDATE_INSTANCES_REQUEST_EVENT, scalingAdjustment);
         reactor.notify(ReactorConfig.UPDATE_INSTANCES_REQUEST_EVENT,
                 Event.wrap(new UpdateInstancesRequest(stack.getTemplate().cloudPlatform(), stack.getId(), scalingAdjustment)));
-    }
-
-    @Override
-    public StackDescription getStackDescription(Stack stack) {
-        MDCBuilder.buildMdcContext(stack);
-        ambariClusterConnector.checkClusterState(stack);
-        CloudPlatform cp = stack.getTemplate().cloudPlatform();
-        LOGGER.debug("Getting stack description for cloud platform: {} ...", cp);
-        StackDescription description = describeContext.describeStackWithResources(stack);
-        LOGGER.debug("Found stack description {}", description.getClass());
-        return description;
     }
 
     @Override

@@ -23,15 +23,11 @@ import com.amazonaws.services.autoscaling.model.UpdateAutoScalingGroupRequest;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.CreateStackRequest;
 import com.amazonaws.services.cloudformation.model.DeleteStackRequest;
-import com.amazonaws.services.cloudformation.model.DescribeStackResourcesRequest;
-import com.amazonaws.services.cloudformation.model.DescribeStackResourcesResult;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
-import com.amazonaws.services.cloudformation.model.DescribeStacksResult;
 import com.amazonaws.services.cloudformation.model.Parameter;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
-import com.amazonaws.services.ec2.model.Filter;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.StartInstancesRequest;
@@ -43,12 +39,10 @@ import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.DetailedAwsStackDescription;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.StackDescription;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
@@ -109,52 +103,6 @@ public class AwsConnector implements CloudPlatformConnector {
 
     @Autowired
     private StackRepository stackRepository;
-
-    @Override
-    public StackDescription describeStackWithResources(Stack stack, Credential credential) {
-        MDCBuilder.buildMdcContext(stack);
-        AwsTemplate awsInfra = (AwsTemplate) stack.getTemplate();
-        AwsCredential awsCredential = (AwsCredential) credential;
-        DescribeStacksResult stackResult = null;
-        DescribeStackResourcesResult resourcesResult = null;
-        DescribeInstancesResult instancesResult = null;
-        Resource resource = stack.getResourceByType(ResourceType.CLOUDFORMATION_STACK);
-        if (resource != null) {
-            try {
-                AmazonCloudFormationClient client = awsStackUtil.createCloudFormationClient(awsInfra.getRegion(), awsCredential);
-                DescribeStacksRequest stackRequest = new DescribeStacksRequest().withStackName(
-                        resource.getResourceName()
-                );
-                stackResult = client.describeStacks(stackRequest);
-
-                DescribeStackResourcesRequest resourcesRequest = new DescribeStackResourcesRequest().withStackName(
-                        resource.getResourceName()
-                );
-                resourcesResult = client.describeStackResources(resourcesRequest);
-            } catch (AmazonServiceException e) {
-                if (CF_SERVICE_NAME.equals(e.getServiceName())
-                        && e.getErrorMessage().equals(String.format("Stack:%s does not exist",
-                        resource.getResourceName()))) {
-                    LOGGER.error("Amazon CloudFormation stack {} doesn't exist. Returning null in describeStack.",
-                            resource.getResourceName());
-                    stackResult = new DescribeStacksResult();
-                } else {
-                    throw e;
-                }
-            }
-            try {
-                AmazonEC2Client ec2Client = awsStackUtil.createEC2Client(awsInfra.getRegion(), awsCredential);
-                DescribeInstancesRequest instancesRequest = new DescribeInstancesRequest()
-                        .withFilters(new Filter().withName("tag:" + INSTANCE_TAG_NAME).withValues(resource.getResourceName()));
-                instancesResult = ec2Client.describeInstances(instancesRequest);
-            } catch (Exception ex) {
-                LOGGER.error(ex.getMessage(), ex);
-                instancesResult = new DescribeInstancesResult();
-            }
-
-        }
-        return new DetailedAwsStackDescription(stackResult, resourcesResult, instancesResult);
-    }
 
     /**
      * If the stack is in stopped state, it means that the AutoScalingGroup's scaling policies are suspended and it causes that
