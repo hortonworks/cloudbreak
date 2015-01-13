@@ -42,7 +42,7 @@ public class AzureMetadataSetup implements MetadataSetup {
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureMetadataSetup.class);
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final int POLLING_INTERVAL = 5000;
-    private static final int MAX_POLLING_ATTEMPTS = 10;
+    private static final int MAX_POLLING_ATTEMPTS = 100;
 
     @Autowired
     private AzureMetadataSetupCheckerTask azureMetadataSetupCheckerTask;
