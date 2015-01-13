@@ -21,7 +21,10 @@ public class GccRemoveCheckerStatus implements StatusCheckerTask<GccRemoveReadyP
     @Override
     public boolean checkStatus(GccRemoveReadyPollerObject gccRemoveReadyPollerObject) {
         MDCBuilder.buildMdcContext(gccRemoveReadyPollerObject.getStack());
-        LOGGER.info("Checking status of remove '{}' on '{}' stack.", gccRemoveReadyPollerObject.getName(), gccRemoveReadyPollerObject.getStack().getId());
+        LOGGER.info("Checking status of remove '{}' {} on '{}' stack.",
+                gccRemoveReadyPollerObject.getName(),
+                gccRemoveReadyPollerObject.getResourceType().name(),
+                gccRemoveReadyPollerObject.getStack().getId());
         try {
             Operation operation = gccRemoveReadyPollerObject.getZoneOperations().execute();
             return analyzeOperation(operation, gccRemoveReadyPollerObject);
@@ -29,8 +32,9 @@ public class GccRemoveCheckerStatus implements StatusCheckerTask<GccRemoveReadyP
             return exceptionHandler(ex, gccRemoveReadyPollerObject);
         } catch (NullPointerException | IOException e) {
             throw new GccResourceRemoveException(String.format(
-                    "Something went wrong. Resource in Gcc '%s' with '%s' operation failed on '%s' stack.",
+                    "Something went wrong. Resource in Gcc '%s'[%s] with '%s' operation failed on '%s' stack.",
                     gccRemoveReadyPollerObject.getName(),
+                    gccRemoveReadyPollerObject.getResourceType().name(),
                     gccRemoveReadyPollerObject.getOperationName(),
                     gccRemoveReadyPollerObject.getStack().getId()));
         }
@@ -43,15 +47,17 @@ public class GccRemoveCheckerStatus implements StatusCheckerTask<GccRemoveReadyP
                 return analyzeOperation(operation, gccRemoveReadyPollerObject, ex);
             } catch (IOException e) {
                 throw new GccResourceRemoveException(String.format(
-                        "Something went wrong. Resource in Gcc '%s' with '%s' operation failed on '%s' stack.",
+                        "Something went wrong. Resource in Gcc '%s'[%s] with '%s' operation failed on '%s' stack.",
                         gccRemoveReadyPollerObject.getName(),
+                        gccRemoveReadyPollerObject.getResourceType().name(),
                         gccRemoveReadyPollerObject.getOperationName(),
                         gccRemoveReadyPollerObject.getStack().getId()));
             }
         } else {
             throw new GccResourceRemoveException(String.format(
-                    "Something went wrong. Resource in Gcc '%s' with '%s' operation failed on '%s' stack.",
+                    "Something went wrong. Resource in Gcc '%s'[%s] with '%s' operation failed on '%s' stack.",
                     gccRemoveReadyPollerObject.getName(),
+                    gccRemoveReadyPollerObject.getResourceType().name(),
                     gccRemoveReadyPollerObject.getOperationName(),
                     gccRemoveReadyPollerObject.getStack().getId()));
         }
@@ -60,15 +66,15 @@ public class GccRemoveCheckerStatus implements StatusCheckerTask<GccRemoveReadyP
     @Override
     public void handleTimeout(GccRemoveReadyPollerObject gccRemoveReadyPollerObject) {
         throw new GccResourceRemoveException(String.format(
-                "Something went wrong. Remove of '%s' resource unsuccess in a reasonable timeframe on '%s' stack.",
-                gccRemoveReadyPollerObject.getName(), gccRemoveReadyPollerObject.getStack().getId()));
+                "Something went wrong. Remove of '%s'[%s] resource unsuccess in a reasonable timeframe on '%s' stack.",
+                gccRemoveReadyPollerObject.getName(), gccRemoveReadyPollerObject.getResourceType(), gccRemoveReadyPollerObject.getStack().getId()));
     }
 
     @Override
     public String successMessage(GccRemoveReadyPollerObject gccRemoveReadyPollerObject) {
         MDCBuilder.buildMdcContext(gccRemoveReadyPollerObject.getStack());
-        return String.format("Gcc resource '%s' is removed success on '%s' stack",
-                gccRemoveReadyPollerObject.getName(), gccRemoveReadyPollerObject.getStack().getId());
+        return String.format("Gcc resource '%s'[%s] is removed success on '%s' stack",
+                gccRemoveReadyPollerObject.getName(), gccRemoveReadyPollerObject.getResourceType(), gccRemoveReadyPollerObject.getStack().getId());
     }
 
     private boolean analyzeOperation(Operation operation, GccRemoveReadyPollerObject gccRemoveReadyPollerObject, GoogleJsonResponseException ex) {
@@ -91,8 +97,9 @@ public class GccRemoveCheckerStatus implements StatusCheckerTask<GccRemoveReadyP
                 }
             }
             throw new GccResourceRemoveException(String.format(
-                    "Something went wrong. Resource in Gcc '%s' with '%s' operation failed on '%s' stack with %s message: %s",
+                    "Something went wrong. Resource in Gcc '%s' [%s] with '%s' operation failed on '%s' stack with %s message: %s",
                     gccRemoveReadyPollerObject.getName(),
+                    gccRemoveReadyPollerObject.getResourceType().name(),
                     gccRemoveReadyPollerObject.getOperationName(),
                     gccRemoveReadyPollerObject.getStack().getId(),
                     operation.getHttpErrorMessage(),
