@@ -95,67 +95,21 @@
                                 <h5><a href="" data-toggle="collapse" data-target="#panel-collapse0002"><i class="fa fa-align-justify fa-fw"></i>Cloud stack description: {{activeCluster.name}}</a></h5>
                             </div>
                             <div id="panel-collapse0002" class="panel-collapse collapse">
-                                <div class="panel-body" ng-switch on="activeCluster.cloudPlatform">
-                                    <div ng-switch-when="GCC">
+                                <div class="panel-body">
                                         <table class="table table-report table-sortable-cols table-with-pagination ">
                                             <thead>
                                             <tr>
                                                 <th>name</th>
-                                                <th>status</th>
                                                 <th>private IP</th>
                                             </tr>
                                             </thead>
                                             <tbody>
-                                            <tr ng-repeat="instance in activeCluster.description.resources| filter:gccFilterFunction">
-                                                <td>{{instance.name}}</td>
-                                                <td>{{instance.status}}</td>
-                                                <td>{{instance.networkInterfaces[0].networkIP}}</td>
+                                            <tr ng-repeat="instance in activeCluster.metadata">
+                                                <td>{{instance.longName}}</td>
+                                                <td>{{instance.privateIp}}</td>
                                             </tr>
                                             </tbody>
                                         </table>
-                                    </div>
-                                    <div ng-switch-when="AZURE">
-                                        <table class="table table-report table-sortable-cols table-with-pagination ">
-                                            <thead>
-                                            <tr>
-                                                <th>name</th>
-                                                <th>status</th>
-                                                <th>private IP</th>
-                                                <th>public IP</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                            <tr ng-repeat="instance in activeCluster.description.resources| filter:azureFilterFunction">
-                                                <td>{{instance.Deployment.Name}}</td>
-                                                <td>{{instance.Deployment.Status}}</td>
-                                                <td>{{instance.Deployment.RoleInstanceList.RoleInstance.IpAddress}}</td>
-                                                <td>{{instance.Deployment.VirtualIPs.VirtualIP.Address}}</td>
-                                            </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    <div ng-switch-when="AWS">
-                                        <table class="table table-report table-sortable-cols table-with-pagination ">
-                                            <thead>
-                                            <tr>
-                                                <th>name</th>
-                                                <th>status</th>
-                                                <th>private IP</th>
-                                                <th>public IP</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                            <tr ng-repeat="instance in activeCluster.description.instances.reservations[0].instances">
-                                                <td>{{instance.instanceId}}</td>
-                                                <td>{{instance.state.name}}</td>
-                                                <td>{{instance.privateIpAddress}}</td>
-                                                <td>{{instance.publicIpAddress}}</td>
-                                            </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    <div ng-switch-default><pre id="sl_description" class="form-control-static">{{activeCluster.description | json}}</pre></div>
-
                                 </div>
                             </div>
                         </div>
