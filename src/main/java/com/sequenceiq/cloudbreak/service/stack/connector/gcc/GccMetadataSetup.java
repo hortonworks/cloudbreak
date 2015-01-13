@@ -14,7 +14,6 @@ import com.google.api.services.compute.Compute;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
-import com.sequenceiq.cloudbreak.domain.GccTemplate;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -41,16 +40,13 @@ public class GccMetadataSetup implements MetadataSetup {
     @Override
     public void setupMetadata(Stack stack) {
         MDCBuilder.buildMdcContext(stack);
-        Set<CoreInstanceMetaData> instanceMetaDatas = new HashSet<>();
         List<Resource> resourcesByType = stack.getResourcesByType(ResourceType.GCC_INSTANCE);
-        GccTemplate template = (GccTemplate) stack.getTemplate();
-        instanceMetaDatas = collectMetaData(stack, template, resourcesByType);
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.METADATA_SETUP_COMPLETE_EVENT, stack.getId());
         reactor.notify(ReactorConfig.METADATA_SETUP_COMPLETE_EVENT,
-                Event.wrap(new MetadataSetupComplete(CloudPlatform.GCC, stack.getId(), instanceMetaDatas)));
+                Event.wrap(new MetadataSetupComplete(CloudPlatform.GCC, stack.getId(), collectMetaData(stack, resourcesByType))));
     }
 
-    private Set<CoreInstanceMetaData> collectMetaData(Stack stack, GccTemplate template, List<Resource> resources) {
+    private Set<CoreInstanceMetaData> collectMetaData(Stack stack, List<Resource> resources) {
         Set<CoreInstanceMetaData> instanceMetaDatas = new HashSet<>();
         Compute compute = gccStackUtil.buildCompute((GccCredential) stack.getCredential(), stack);
         for (Resource resource : resources) {
@@ -68,7 +64,7 @@ public class GccMetadataSetup implements MetadataSetup {
                 resources.add(resource);
             }
         }
-        Set<CoreInstanceMetaData> instanceMetaDatas = collectMetaData(stack, (GccTemplate) stack.getTemplate(), resources);
+        Set<CoreInstanceMetaData> instanceMetaDatas = collectMetaData(stack, resources);
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.METADATA_UPDATE_COMPLETE_EVENT, stack.getId());
         reactor.notify(ReactorConfig.METADATA_UPDATE_COMPLETE_EVENT,
                 Event.wrap(new MetadataUpdateComplete(CloudPlatform.GCC, stack.getId(), instanceMetaDatas)));

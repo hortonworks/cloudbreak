@@ -8,8 +8,6 @@ import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
@@ -22,6 +20,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
+import com.sequenceiq.cloudbreak.domain.AzureLocation;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
@@ -53,14 +52,14 @@ public class AzureStackUtil {
     @Autowired
     private UserDetailsService userDetailsService;
 
-    public String getOsImageName(Credential credential) {
+    public String getOsImageName(Credential credential, AzureLocation location) {
         String[] split = baseImageUri.split("/");
         AzureCredential azureCredential = (AzureCredential) credential;
-        return String.format("%s-%s-%s", azureCredential.getCommonName(), IMAGE_NAME,
+        return String.format("%s-%s-%s", azureCredential.getCommonName(location), IMAGE_NAME,
                 split[split.length - 1].replaceAll(".vhd", ""));
     }
 
-    public static AzureClient createAzureClient(AzureCredential credential) {
+    public synchronized AzureClient createAzureClient(AzureCredential credential) {
         MDCBuilder.buildMdcContext(credential);
         try {
             String jksPath = credential.getId() == null ? "/tmp/" + new Date().getTime() + ".jks" : "/tmp/" + credential.getId() + ".jks";
@@ -74,13 +73,6 @@ public class AzureStackUtil {
             LOGGER.error(e.getMessage());
             throw new InternalServerException(e.getMessage());
         }
-    }
-
-    public static Map<String, String> createVMContext(String vmName) {
-        Map<String, String> context = new HashMap<>();
-        context.put(SERVICENAME, vmName);
-        context.put(NAME, vmName);
-        return context;
     }
 
     public File buildAzureSshCerFile(AzureCredential azureCredential) throws IOException, GeneralSecurityException {

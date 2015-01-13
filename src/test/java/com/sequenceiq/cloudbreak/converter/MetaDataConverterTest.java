@@ -1,11 +1,12 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import com.sequenceiq.cloudbreak.controller.json.InstanceMetaDataJson;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import com.sequenceiq.cloudbreak.controller.json.InstanceMetaDataJson;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 
 public class MetaDataConverterTest {
 
@@ -36,7 +37,6 @@ public class MetaDataConverterTest {
         assertEquals(result.getAmbariServer(), metaData.getAmbariServer());
         assertEquals(result.getDockerSubnet(), metaData.getDockerSubnet());
         assertEquals(result.getInstanceId(), metaData.getInstanceId());
-        assertEquals(result.getInstanceIndex(), metaData.getInstanceIndex());
         assertEquals(result.getPrivateIp(), metaData.getPrivateIp());
         assertEquals(result.getPublicIp(), metaData.getPublicIp());
 
@@ -48,7 +48,6 @@ public class MetaDataConverterTest {
         metaData.setDockerSubnet("dummyDockerSubnet");
         metaData.setId(1L);
         metaData.setInstanceId("dummyInstanceId");
-        metaData.setInstanceIndex(1);
         metaData.setPrivateIp("dummyPrivateIp");
         metaData.setPublicIp("dummyPublicIp");
         return metaData;

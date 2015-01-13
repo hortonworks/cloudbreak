@@ -29,7 +29,6 @@ public class InstanceMetaData implements ProvisionEntity {
     private String publicIp;
     private Integer volumeCount;
     private String instanceId;
-    private int instanceIndex;
     private Boolean ambariServer;
     private String dockerSubnet;
     private String longName;
@@ -80,14 +79,6 @@ public class InstanceMetaData implements ProvisionEntity {
 
     public void setInstanceId(String instanceId) {
         this.instanceId = instanceId;
-    }
-
-    public int getInstanceIndex() {
-        return instanceIndex;
-    }
-
-    public void setInstanceIndex(int instanceIndex) {
-        this.instanceIndex = instanceIndex;
     }
 
     public Boolean getAmbariServer() {

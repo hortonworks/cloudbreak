@@ -78,7 +78,7 @@ public abstract class AzureSimpleInstanceResourceBuilder implements
     protected void httpResponseExceptionHandler(HttpResponseException ex, String resourceName, String user, Stack stack) {
         MDCBuilder.buildMdcContext(stack);
         if (ex.getStatusCode() != NOT_FOUND) {
-            throw new InternalServerException(ex.getMessage());
+            throw new InternalServerException(ex.getResponse().getData().toString());
         } else {
             LOGGER.error(String.format("Azure resource not found with %s name for %s user.", resourceName, user));
         }

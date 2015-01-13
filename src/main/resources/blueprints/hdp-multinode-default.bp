@@ -89,6 +89,9 @@
           "name": "RESOURCEMANAGER"
         },
         {
+          "name": "HDFS_CLIENT"
+        },
+        {
           "name": "APP_TIMELINE_SERVER"
         },
         {

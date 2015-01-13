@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureSimpleNetworkResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDeleteContextObject;
@@ -37,6 +38,8 @@ public class AzureAffinityGroupResourceBuilder extends AzureSimpleNetworkResourc
 
     @Autowired
     private StackRepository stackRepository;
+    @Autowired
+    private AzureStackUtil azureStackUtil;
 
     @Override
     public Boolean create(CreateResourceRequest createResourceRequest) throws Exception {
@@ -91,7 +94,7 @@ public class AzureAffinityGroupResourceBuilder extends AzureSimpleNetworkResourc
         props.put(LOCATION, template.getLocation().location());
         props.put(DESCRIPTION, template.getDescription());
         return new AzureAffinityGroupCreateRequest(buildResources.get(0).getResourceName(), provisionContextObject.getStackId(), props,
-                provisionContextObject.getNewAzureClient(azureCredential), resources, buildResources);
+                azureStackUtil.createAzureClient(azureCredential), resources, buildResources);
     }
 
     @Override
