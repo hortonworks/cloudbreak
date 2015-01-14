@@ -111,18 +111,18 @@
                                         <table class="table table-report table-sortable-cols table-with-pagination table-condensed" style="background-color: transparent;">
                                             <thead>
                                             <tr>
-                                                <th>Name</th>
-                                                <th>Private Adress</th>
-                                                <th>Public Address</th>
-                                                <th>Hostgroup Name</th>
+                                                <th class="col-md-4">Name</th>
+                                                <th class="col-md-3">Private Adress</th>
+                                                <th class="col-md-3">Public Address</th>
+                                                <th class="col-md-2">Hostgroup Name</th>
                                             </tr>
                                             </thead>
                                             <tbody>
                                             <tr ng-repeat="instance in activeCluster.metadata">
-                                                <td>{{instance.longName}}</td>
-                                                <td>{{instance.privateIp}}</td>
-                                                <td>{{instance.publicIp}}</td>
-                                                <td><span class="label label-default">{{instance.hostgroup}}</span></td>
+                                                <td class="col-md-4">{{instance.longName}}</td>
+                                                <td class="col-md-3">{{instance.privateIp}}</td>
+                                                <td class="col-md-3">{{instance.publicIp}}</td>
+                                                <td class="col-md-2"><span class="label label-default">{{instance.hostgroup}}</span></td>
                                             </tr>
                                             </tbody>
                                         </table>
