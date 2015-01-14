@@ -2,8 +2,8 @@
 
 var log = log4javascript.getLogger("templateController-logger");
 
-angular.module('uluwatuControllers').controller('templateController', ['$scope', '$rootScope', '$filter', 'AccountTemplate', 'GlobalTemplate',
-    function ($scope, $rootScope, $filter, AccountTemplate, GlobalTemplate) {
+angular.module('uluwatuControllers').controller('templateController', ['$scope', '$rootScope', '$filter', 'UserTemplate', 'AccountTemplate', 'GlobalTemplate',
+    function ($scope, $rootScope, $filter, UserTemplate, AccountTemplate, GlobalTemplate) {
 
         $rootScope.templates = AccountTemplate.query();
         $scope.awsTemplateForm = {};
@@ -33,8 +33,21 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
         $scope.createAwsTemplate = function () {
             $scope.awsTemp.cloudPlatform = 'AWS';
             $scope.awsTemp.parameters.amiId = ($filter('filter')($rootScope.config.AWS.amis, { key: $scope.awsTemp.parameters.region})[0]).value;
-
-            AccountTemplate.save($scope.awsTemp, function (result) {
+            if ($scope.awsTemp.public) {
+                AccountTemplate.save($scope.awsTemp, function (result) {
+                    handleAwsTemplateSuccess(result)
+                }, function (error) {
+                    handleAwsTemplateError(error)
+                });
+            } else {
+                UserTemplate.save($scope.awsTemp, function (result) {
+                    handleAwsTemplateSuccess(result)
+                }, function (error) {
+                    handleAwsTemplateError(error)
+                });
+            }
+            
+            function handleAwsTemplateSuccess(result) {
                 $scope.awsTemp.id = result.id;
                 $rootScope.templates.push($scope.awsTemp);
                 initializeAwsTemp();
@@ -42,16 +55,36 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                 $scope.modifyStatusClass("has-success");
                 $scope.awsTemplateForm.$setPristine();
                 collapseCreateTemplateFormPanel();
-            }, function (error) {
+            }
+            
+            function handleAwsTemplateError(error) {
                 $scope.modifyStatusMessage($rootScope.error_msg.aws_template_failed + ": " + error.data.message);
                 $scope.modifyStatusClass("has-error");
-            });
+            }
         }
 
         $scope.createGccTemplate = function () {
             $scope.gccTemp.cloudPlatform = 'GCC';
-
+            if ($scope.gccTemp.public) {
+                AccountTemplate.save($scope.gccTemp, function (result) {
+                    handleGccTemplateSuccess(result)
+                }, function (error) {
+                    handleGccTemplateError(error)
+                });
+            } else {
+                UserTemplate.save($scope.gccTemp, function (result) {
+                    handleGccTemplateSuccess(result)
+                }, function (error) {
+                    handleGccTemplateError(error)
+                });
+            }
             AccountTemplate.save($scope.gccTemp, function (result) {
+                handleGccTemplateSuccess(result)
+            }, function (error) {
+                handleGccTemplateError(error)
+            });
+            
+            function handleGccTemplateSuccess(result) {
                 $scope.gccTemp.id = result.id;
                 $rootScope.templates.push($scope.gccTemp);
                 initializeGccTemp();
@@ -59,17 +92,32 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                 $scope.modifyStatusClass("has-success");
                 $scope.gccTemplateForm.$setPristine();
                 collapseCreateTemplateFormPanel();
-            }, function (error) {
+            }
+            
+            function handleGccTemplateError(error) {
                 $scope.modifyStatusMessage($rootScope.error_msg.gcc_template_failed + ": " + error.data.message);
                 $scope.modifyStatusClass("has-error");
-            });
+            }
         }
 
         $scope.createAzureTemplate = function () {
             $scope.azureTemp.cloudPlatform = "AZURE";
             $scope.azureTemp.parameters.imageName = "ambari-docker-v1";
-
-            AccountTemplate.save($scope.azureTemp, function (result) {
+            if($scope.azureTemp.public) {
+                AccountTemplate.save($scope.azureTemp, function (result) {
+                  handleAzureTemplateSuccess(result)
+               }, function (error) {
+                  handleAzureTemplateError(error)
+               });
+            } else {
+               UserTemplate.save($scope.azureTemp, function (result) {
+                  handleAzureTemplateSuccess(result)
+               }, function (error) {
+                  handleAzureTemplateError(error)
+               });
+            }
+            
+            function handleAzureTemplateSuccess(result) {
                 $scope.azureTemp.id = result.id;
                 $rootScope.templates.push($scope.azureTemp);
                 initializeAzureTemp();
@@ -77,10 +125,13 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                 $scope.modifyStatusClass("has-success");
                 $scope.azureTemplateForm.$setPristine();
                 collapseCreateTemplateFormPanel();
-            }, function (error) {
+            }
+            
+            function handleAzureTemplateError(error) {
                 $scope.modifyStatusMessage($rootScope.error_msg.azure_template_failed + ": " + error.data.message);
                 $scope.modifyStatusClass("has-error");
-            });
+            }
+            
         }
 
         $scope.deleteTemplate = function (template) {

@@ -2,25 +2,43 @@
 
 var log = log4javascript.getLogger("blueprintController-logger");
 
-angular.module('uluwatuControllers').controller('blueprintController', ['$scope', '$rootScope', 'AccountBlueprint', 'GlobalBlueprint',
-    function ($scope, $rootScope, AccountBlueprint, GlobalBlueprint) {
+angular.module('uluwatuControllers').controller('blueprintController', ['$scope', '$rootScope', 'UserBlueprint', 'AccountBlueprint', 'GlobalBlueprint',
+    function ($scope, $rootScope, UserBlueprint, AccountBlueprint, GlobalBlueprint) {
         $rootScope.blueprints = AccountBlueprint.query();
         initializeBlueprint();
 
         $scope.createBlueprint = function () {
-            AccountBlueprint.save($scope.blueprint, function (result) {
-                GlobalBlueprint.get({ id: result.id}, function(success) {
-                  $rootScope.blueprints.push(success);
-                  initializeBlueprint();
-                  $scope.modifyStatusMessage($rootScope.error_msg.blueprint_success1 + success.id + $rootScope.error_msg.blueprint_success2);
-                  $scope.modifyStatusClass("has-success");
-                  $scope.blueprintForm.$setPristine();
-                  angular.element(document.querySelector('#panel-create-blueprints-collapse-btn')).click();
+            if ($scope.blueprint.public) {
+                AccountBlueprint.save($scope.blueprint, function (result) {
+                    GlobalBlueprint.get({ id: result.id}, function(success) {
+                        handleBlueprintSuccess(success)
+                    });
+                }, function (error) {
+                    handleBlueprintError(error)
+                });           
+            } else {
+                UserBlueprint.save($scope.blueprint, function (result) {
+                    GlobalBlueprint.get({ id: result.id}, function(success) {
+                        handleBlueprintSuccess(success)
+                    });
+                }, function (error) {
+                    handleBlueprintError(error)
                 });
-            }, function (error) {
+            }
+            
+            function handleBlueprintSuccess(success) {
+                $rootScope.blueprints.push(success);
+                initializeBlueprint();
+                $scope.modifyStatusMessage($rootScope.error_msg.blueprint_success1 + success.id + $rootScope.error_msg.blueprint_success2);
+                $scope.modifyStatusClass("has-success");
+                $scope.blueprintForm.$setPristine();
+                angular.element(document.querySelector('#panel-create-blueprints-collapse-btn')).click();
+            }
+            
+            function handleBlueprintError(error) {
                 $scope.modifyStatusMessage($rootScope.error_msg.blueprint_template_failed + ": " + error.data.message);
-                $scope.modifyStatusClass("has-error");
-            });
+                $scope.modifyStatusClass("has-error");            
+            }
         }
 
         $scope.deleteBlueprint = function (blueprint) {
