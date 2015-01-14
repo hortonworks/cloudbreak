@@ -8,8 +8,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.ecwid.consul.v1.ConsulClient;
+import com.ecwid.consul.v1.OperationException;
 import com.ecwid.consul.v1.QueryParams;
 import com.ecwid.consul.v1.agent.model.Member;
 import com.ecwid.consul.v1.catalog.model.CatalogService;
@@ -20,6 +23,8 @@ import com.ecwid.consul.v1.kv.model.PutParams;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 
 public final class ConsulUtils {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConsulUtils.class);
 
     private static final int CONSUL_CLIENTS = 3;
 
@@ -82,7 +87,11 @@ public final class ConsulUtils {
         try {
             Event response = client.eventFire(event, payload, eventParams, queryParams).getValue();
             return response.getId();
+        } catch (OperationException e) {
+            LOGGER.info("Failed to fire Consul event '{}'. Status code: {}, Message: {}", event, e.getStatusCode(), e.getStatusMessage());
+            return null;
         } catch (Exception e) {
+            LOGGER.info("Failed to fire Consul event '{}'. Message: {}", event, e.getMessage());
             return null;
         }
     }
@@ -100,8 +109,12 @@ public final class ConsulUtils {
     public static String getKVValue(ConsulClient client, String key, QueryParams queryParams) {
         try {
             GetValue getValue = client.getKVValue(key, queryParams).getValue();
-            return new String(Base64.decodeBase64(getValue.getValue()));
+            return getValue == null ? null : new String(Base64.decodeBase64(getValue.getValue()));
+        } catch (OperationException e) {
+            LOGGER.info("Failed to get entry '{}' from Consul's key-value store. Status code: {}, Message: {}", key, e.getStatusCode(), e.getStatusMessage());
+            return null;
         } catch (Exception e) {
+            LOGGER.info("Failed to get entry '{}' from Consul's key-value store. Error message: {}", key, e.getMessage());
             return null;
         }
     }
@@ -119,7 +132,11 @@ public final class ConsulUtils {
     public static Boolean putKVValue(ConsulClient client, String key, String value, PutParams putParams) {
         try {
             return client.setKVValue(key, value, putParams).getValue();
+        } catch (OperationException e) {
+            LOGGER.info("Failed to put entry '{}' in Consul's key-value store. Status code: {}, Message: {}", key, e.getStatusCode(), e.getStatusMessage());
+            return false;
         } catch (Exception e) {
+            LOGGER.info("Failed to put entry '{}' in Consul's key-value store. Error message: {}", key, e.getMessage());
             return false;
         }
     }

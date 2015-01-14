@@ -46,7 +46,8 @@ public class ConsulPluginManager implements PluginManager {
             if (eventId != null) {
                 eventIds.add(eventId);
             } else {
-                throw new PluginFailureException("Failed to install plugins, Consul client couldn't fire the event or failed to retrieve an event ID.");
+                throw new PluginFailureException("Failed to install plugins, Consul client couldn't fire the event or failed to retrieve an event ID." +
+                        "Maybe the payload was too long (max. 512 bytes)?");
             }
         }
         return eventIds;
