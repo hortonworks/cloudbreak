@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.TemplateGroupJson;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.TemplateGroup;
@@ -32,6 +33,9 @@ public class TemplateGroupConverter extends AbstractConverter<TemplateGroupJson,
         TemplateGroup templateGroup = new TemplateGroup();
         templateGroup.setGroupName(json.getGroup());
         templateGroup.setNodeCount(Integer.valueOf(String.valueOf(json.getNodeCount())));
+        if (json.getGroup().contains("master") && json.getNodeCount() != 1) {
+            throw new BadRequestException("If you have a master hostgroup than the count of the nodes has to be 1 on master group.");
+        }
         try {
             templateGroup.setTemplate(templateRepository.findOne(Long.valueOf(json.getTemplateId())));
         } catch (AccessDeniedException e) {

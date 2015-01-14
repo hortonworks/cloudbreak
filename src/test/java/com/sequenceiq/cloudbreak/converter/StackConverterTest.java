@@ -23,6 +23,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.access.AccessDeniedException;
 
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.ClusterResponse;
 import com.sequenceiq.cloudbreak.controller.json.InstanceMetaDataJson;
 import com.sequenceiq.cloudbreak.controller.json.StackJson;
@@ -161,7 +162,7 @@ public class StackConverterTest {
         verify(clusterConverter, times(0)).convert(any(Cluster.class), anyString());
     }
 
-    @Test
+    @Test(expected = BadRequestException.class)
     public void testConvertStackJsonToEntity() {
         // GIVEN
         given(credentialRepository.findOne(DUMMY_ID)).willReturn(awsCredential);

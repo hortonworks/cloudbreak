@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.ClusterResponse;
 import com.sequenceiq.cloudbreak.controller.json.StackJson;
 import com.sequenceiq.cloudbreak.controller.json.TemplateGroupJson;
@@ -23,6 +24,7 @@ import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 @Component
 public class StackConverter extends AbstractConverter<StackJson, Stack> {
 
+    private static final int MIN_NODE_COUNT = 3;
     @Autowired
     private TemplateRepository templateRepository;
 
@@ -82,6 +84,9 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
         }
         stack.setStatus(Status.REQUESTED);
         stack.setTemplateGroups(templateGroupConverter.convertAllJsonToEntity(json.getTemplateGroups(), stack));
+        if (stack.getFullNodeCount() < MIN_NODE_COUNT) {
+            throw new BadRequestException("NodeCount of stack has to be more than 3.");
+        }
         return stack;
     }
 
