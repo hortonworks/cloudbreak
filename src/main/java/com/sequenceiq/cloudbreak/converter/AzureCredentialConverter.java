@@ -45,4 +45,10 @@ public class AzureCredentialConverter extends AbstractConverter<CredentialJson, 
         azureCredential.setPublicKey(StringUtils.newStringUtf8(Base64.decodeBase64(json.getPublicKey())));
         return azureCredential;
     }
+
+    public AzureCredential convert(CredentialJson json, boolean publicInAccount) {
+        AzureCredential azureCredential = convert(json);
+        azureCredential.setPublicInAccount(publicInAccount);
+        return azureCredential;
+    }
 }

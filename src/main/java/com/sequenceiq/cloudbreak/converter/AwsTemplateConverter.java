@@ -52,7 +52,6 @@ public class AwsTemplateConverter extends AbstractConverter<TemplateJson, AwsTem
                 ? String.valueOf(json.getParameters().get(AwsTemplateParam.SSH_LOCATION.getName())) : DEFAULT_SSH_LOCATION;
         awsTemplate.setSshLocation(sshLocation);
         awsTemplate.setDescription(json.getDescription());
-        awsTemplate.setPublicInAccount(json.isPublicInAccount());
         awsTemplate.setVolumeCount((json.getVolumeCount() == null) ? 0 : json.getVolumeCount());
         awsTemplate.setVolumeSize((json.getVolumeSize() == null) ? 0 : json.getVolumeSize());
         awsTemplate.setVolumeType(VolumeType.valueOf(String.valueOf(json.getParameters().get(AwsTemplateParam.VOLUME_TYPE.getName()))));
@@ -60,6 +59,12 @@ public class AwsTemplateConverter extends AbstractConverter<TemplateJson, AwsTem
                 && json.getParameters().get(AwsTemplateParam.SPOT_PRICE.getName()) != null
                 ? Double.valueOf(json.getParameters().get(AwsTemplateParam.SPOT_PRICE.getName()).toString()) : null;
         awsTemplate.setSpotPrice(spotPrice);
+        return awsTemplate;
+    }
+
+    public AwsTemplate convert(TemplateJson json, boolean publicInAccount) {
+        AwsTemplate awsTemplate = convert(json);
+        awsTemplate.setPublicInAccount(publicInAccount);
         return awsTemplate;
     }
 }

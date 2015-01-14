@@ -46,7 +46,6 @@ public class AzureTemplateConverter extends AbstractConverter<TemplateJson, Azur
         azureTemplate.setName(String.valueOf(json.getName()));
         azureTemplate.setVmType(String.valueOf(json.getParameters().get(AzureTemplateParam.VMTYPE.getName())));
         azureTemplate.setDescription(json.getDescription());
-        azureTemplate.setPublicInAccount(json.isPublicInAccount());
         azureTemplate.setVolumeCount((json.getVolumeCount() == null) ? 0 : json.getVolumeCount());
         azureTemplate.setVolumeSize((json.getVolumeSize() == null) ? 0 : json.getVolumeSize());
         AzureVmType azureVmType = AzureVmType.valueOf(json.getParameters().get(AzureTemplateParam.VMTYPE.getName()).toString());
@@ -56,6 +55,12 @@ public class AzureTemplateConverter extends AbstractConverter<TemplateJson, Azur
                             azureVmType.vmType(),
                             azureVmType.maxDiskSize()));
         }
+        return azureTemplate;
+    }
+
+    public AzureTemplate convert(TemplateJson json, boolean publicInAccount) {
+        AzureTemplate azureTemplate = convert(json);
+        azureTemplate.setPublicInAccount(publicInAccount);
         return azureTemplate;
     }
 

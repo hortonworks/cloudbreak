@@ -44,13 +44,13 @@ public class BlueprintController {
     @RequestMapping(value = "user/blueprints", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<IdJson> createPrivateBlueprint(@ModelAttribute("user") CbUser user, @RequestBody @Valid BlueprintJson blueprintRequest) {
-        return createBlueprint(user, blueprintRequest);
+        return createBlueprint(user, blueprintRequest, false);
     }
 
     @RequestMapping(value = "account/blueprints", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<IdJson> createAccountBlueprint(@ModelAttribute("user") CbUser user, @RequestBody @Valid BlueprintJson blueprintRequest) {
-        return createBlueprint(user, blueprintRequest);
+        return createBlueprint(user, blueprintRequest, true);
     }
 
     @RequestMapping(value = "user/blueprints", method = RequestMethod.GET)
@@ -117,8 +117,8 @@ public class BlueprintController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    private ResponseEntity<IdJson> createBlueprint(CbUser user, BlueprintJson blueprintRequest) {
-        Blueprint blueprint = blueprintConverter.convert(blueprintRequest);
+    private ResponseEntity<IdJson> createBlueprint(CbUser user, BlueprintJson blueprintRequest, boolean publicInAccount) {
+        Blueprint blueprint = blueprintConverter.convert(blueprintRequest, publicInAccount);
         blueprint = blueprintService.create(user, blueprint);
         return new ResponseEntity<>(new IdJson(blueprint.getId()), HttpStatus.CREATED);
     }

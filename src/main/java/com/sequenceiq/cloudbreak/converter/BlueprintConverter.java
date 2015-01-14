@@ -67,7 +67,6 @@ public class BlueprintConverter extends AbstractConverter<BlueprintJson, Bluepri
 
         validateBlueprint(blueprint.getBlueprintText());
         blueprint.setName(json.getName());
-        blueprint.setPublicInAccount(json.isPublicInAccount());
         blueprint.setDescription(json.getDescription());
         ObjectMapper mapper = new ObjectMapper();
         try {
@@ -84,6 +83,12 @@ public class BlueprintConverter extends AbstractConverter<BlueprintJson, Bluepri
             throw new BadRequestException("Invalid Blueprint: Failed to parse JSON.", e);
         }
 
+        return blueprint;
+    }
+
+    public Blueprint convert(BlueprintJson json, boolean publicInAccount) {
+        Blueprint blueprint = convert(json);
+        blueprint.setPublicInAccount(publicInAccount);
         return blueprint;
     }
 
