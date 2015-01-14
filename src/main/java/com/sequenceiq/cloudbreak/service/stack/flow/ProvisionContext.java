@@ -100,9 +100,10 @@ public class ProvisionContext {
                         resourceBuilder.create(createResourceRequest, templateGroups.get(0), stack.getRegion());
                     }
                     List<Future<Boolean>> futures = new ArrayList<>();
+                    int fullIndex = 0;
                     for (final TemplateGroup stringTemplateGroupEntry : stack.getTemplateGroups()) {
                         for (int i = 0; i < stringTemplateGroupEntry.getNodeCount(); i++) {
-                            final int index = i;
+                            final int index = fullIndex;
                             final Stack finalStack = stack;
                             Future<Boolean> submit = resourceBuilderExecutor.submit(new Callable<Boolean>() {
                                 @Override
@@ -126,6 +127,7 @@ public class ProvisionContext {
                                 }
                             });
                             futures.add(submit);
+                            fullIndex++;
                         }
                     }
 

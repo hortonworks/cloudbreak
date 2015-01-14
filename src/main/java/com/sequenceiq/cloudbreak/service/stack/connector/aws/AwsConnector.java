@@ -178,7 +178,7 @@ public class AwsConnector implements CloudPlatformConnector {
                 new Parameter().withParameterKey("StackName").withParameterValue(stackName),
                 new Parameter().withParameterKey("StackOwner").withParameterValue(awsCredential.getRoleArn()),
                 new Parameter().withParameterKey("KeyName").withParameterValue(awsCredential.getKeyPairName()),
-                new Parameter().withParameterKey("AMI").withParameterValue(prepareAmis().get(stack.getRegion()))
+                new Parameter().withParameterKey("AMI").withParameterValue(prepareAmis().get(Regions.valueOf(stack.getRegion()).getName()))
         ));
         CreateStackRequest createStackRequest = createStackRequest()
                 .withStackName(stackName)
