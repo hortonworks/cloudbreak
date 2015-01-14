@@ -7,15 +7,15 @@
                 <h4>
                     <a href="" class="btn btn-cluster btn-block" role="button" ng-click="changeActiveCluster(cluster.id)">{{cluster.name}}<i class="fa fa-angle-right fa-25x"></i></a>
                 </h4>
-                <dl class="row" style="padding-bottom: 4px;">
+                <dl class="row" style="padding-bottom: 4px;height: 25px;">
                   <div class="col-md-4">
                     <h6 style="margin: 0px;">
                       <span class="label label-info">{{cluster.cloudPlatform}}</span>
                     </h6>
                   </div>
-                  <div class="col-md-4">
+                  <div class="col-md-4" ng-show="cluster.public">
                     <h4>
-                      <i class="fa fa-users fa-md public-account-info" ng-show="cluster.public"></i>
+                      <i class="fa fa-users fa-md public-account-info"></i>
                     </h4>
                   </div>
                 </dl>

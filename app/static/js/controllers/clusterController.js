@@ -82,6 +82,8 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                   nodeCount += group.nodeCount;
                 });
                 result.nodeCount = nodeCount;
+                result.cloudPlatform = $filter('filter')($rootScope.credentials, {id: $rootScope.activeCredential.id}, true)[0].cloudPlatform;
+                result.public = $scope.cluster.public;
                 $rootScope.clusters.push(result);
                 initCluster();
                 $jq('.carousel').carousel(0);
