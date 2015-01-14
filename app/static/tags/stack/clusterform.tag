@@ -63,41 +63,50 @@
                              <input type="checkbox" name="cluster_publicInAccount" id="cluster_publicInAccount" ng-model="cluster.public">
                          </div>
                     </div>
-                    <div ng-repeat="templateGroup in cluster.templateGroups">
-                        <div class="panel panel-default">
-                            <div class="panel-heading">
-                                <h3 class="panel-title">{{templateGroup.group}}</h3>
-                            </div>
-                            <div class="panel-body">
-                                <div class="form-group" >
+                    <div class="form-group" >
+                      <label class="col-sm-3 control-label" for="emailneeded">Email notification when cluster is provisioned</label>
+                      <div class="col-sm-9">
+                        <input type="checkbox" id="emailneeded" ng-model="cluster.email" name="emailneeded">
+                      </div>
+                    </div>
+                    <div class="form-group" ng-show="cluster.templateGroups">
+                      <label class="col-sm-3 control-label" for="hostgroupconfig">Hostgroup configuration</label>
+                      <div class="col-sm-8 col-sm-offset-1">
+                        <div ng-repeat="templateGroup in cluster.templateGroups" id="hostgroupconfig">
+                          <div class="row">
+                            <div>
+                              <div class="panel panel-default" style="border-top-left-radius: 0.5em; border-top-right-radius: 0.5em;">
+                                <div class="panel-heading" style="border-top-left-radius: 0.5em; border-top-right-radius: 0.5em;">
+                                  <h3 class="panel-title">{{templateGroup.group}}</h3>
+                                </div>
+                                <div class="panel-body">
+                                  <div class="form-group" >
                                     <label class="col-sm-3 control-label" for="templateNodeCount{{$index}}">Group size</label>
                                     <div class="col-sm-9">
-                                        <input type="number" name="templateNodeCount{{$index}}" class="form-control" ng-model="templateGroup.nodeCount" id="templateNodeCount{{$index}}" min="1"   max="100000" placeholder="1 - 100000" required>
+                                      <input type="number" name="templateNodeCount{{$index}}" class="form-control" ng-model="templateGroup.nodeCount" id="templateNodeCount{{$index}}" min="1"   max="100000" placeholder="1 - 100000" required>
                                         <div class="help-block"
-                                             ng-show="clusterCreationForm.templateNodeCount{{$index}}.$dirty && clusterCreationForm.templateNodeCount{{$index}}.$invalid"><i class="fa fa-warning"></i>
-                                            {{error_msg.cluster_size_invalid}}
+                                          ng-show="clusterCreationForm.templateNodeCount{{$index}}.$dirty && clusterCreationForm.templateNodeCount{{$index}}.$invalid"><i class="fa fa-warning"></i>
+                                          {{error_msg.cluster_size_invalid}}
                                         </div>
+                                      </div>
                                     </div>
-                                </div>
-                                <div class="form-group" >
-                                    <label class="col-sm-3 control-label" for="templateName{{$index}}">Template</label>
-                                    <div class="col-sm-9">
+                                    <div class="form-group" >
+                                      <label class="col-sm-3 control-label" for="templateName{{$index}}">Template</label>
+                                      <div class="col-sm-9">
                                         <select class="form-control" id="templateName{{$index}}" ng-model="templateGroup.templateId" required >
-                                            <option ng-repeat="template in $root.templates | orderBy:'name'" data-value="{{template.id}}" value="{{template.id}}" id="{{template.id}}" ng-if="template.cloudPlatform == activeCredential.cloudPlatform">{{template.name}}
-                                            </option>
+                                          <option ng-repeat="template in $root.templates | orderBy:'name'" data-value="{{template.id}}" value="{{template.id}}" id="{{template.id}}" ng-if="template.cloudPlatform == activeCredential.cloudPlatform">{{template.name}}
+                                          </option>
                                         </select>
+                                      </div>
                                     </div>
+                                  </div>
                                 </div>
+                              </div>
                             </div>
-                        </div>
+                          </div>
+                      </div>
                     </div>
 
-                    <div class="form-group" >
-                        <label class="col-sm-3 control-label" for="emailneeded">Email notification when cluster is provisioned</label>
-                        <div class="col-sm-9">
-                            <input type="checkbox" id="emailneeded" ng-model="cluster.email" name="emailneeded">
-                        </div>
-                    </div>
                     <div class="row btn-row">
                         <div class="col-sm-9 col-sm-offset-3">
                             <a href="" id="createCluster" class="btn btn-success btn-block" ng-disabled="clusterCreationForm.$invalid" role="button" ng-click="createCluster()"><i class="fa fa-plus fa-fw"></i>create and start cluster</a>
