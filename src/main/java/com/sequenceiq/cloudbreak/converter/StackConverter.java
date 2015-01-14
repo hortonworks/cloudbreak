@@ -66,7 +66,6 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
         stack.setName(json.getName());
         stack.setUserName(json.getUserName());
         stack.setPassword(json.getPassword());
-        stack.setPublicInAccount(json.isPublicInAccount());
         try {
             stack.setCredential(credentialRepository.findOne(json.getCredentialId()));
         } catch (AccessDeniedException e) {
@@ -78,6 +77,12 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
             throw new AccessDeniedException(String.format("Access to template '%s' is denied or template doesn't exist.", json.getTemplateId()), e);
         }
         stack.setStatus(Status.REQUESTED);
+        return stack;
+    }
+
+    public Stack convert(StackJson json, boolean publicInAccount) {
+        Stack stack = convert(json);
+        stack.setPublicInAccount(publicInAccount);
         return stack;
     }
 

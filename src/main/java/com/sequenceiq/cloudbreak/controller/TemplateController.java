@@ -47,13 +47,13 @@ public class TemplateController {
     @RequestMapping(value = "user/templates", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<IdJson> createPrivateTemplate(@ModelAttribute("user") CbUser user, @RequestBody @Valid TemplateJson templateRequest) {
-        return createTemplate(user, templateRequest);
+        return createTemplate(user, templateRequest, false);
     }
 
     @RequestMapping(value = "account/templates", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<IdJson> createAccountTemplate(@ModelAttribute("user") CbUser user, @RequestBody @Valid TemplateJson templateRequest) {
-        return createTemplate(user, templateRequest);
+        return createTemplate(user, templateRequest, true);
     }
 
     @RequestMapping(value = "user/templates", method = RequestMethod.GET)
@@ -115,23 +115,23 @@ public class TemplateController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    private ResponseEntity<IdJson> createTemplate(CbUser user, TemplateJson templateRequest) {
-        Template template = convert(templateRequest);
+    private ResponseEntity<IdJson> createTemplate(CbUser user, TemplateJson templateRequest, boolean publicInAccount) {
+        Template template = convert(templateRequest, publicInAccount);
         template = templateService.create(user, template);
         return new ResponseEntity<>(new IdJson(template.getId()), HttpStatus.CREATED);
     }
 
-    private Template convert(TemplateJson templateRequest) {
+    private Template convert(TemplateJson templateRequest, boolean publicInAccount) {
         Template template = null;
         switch (templateRequest.getCloudPlatform()) {
             case AWS:
-                template = awsTemplateConverter.convert(templateRequest);
+                template = awsTemplateConverter.convert(templateRequest, publicInAccount);
                 break;
             case AZURE:
-                template = azureTemplateConverter.convert(templateRequest);
+                template = azureTemplateConverter.convert(templateRequest, publicInAccount);
                 break;
             case GCC:
-                template = gccTemplateConverter.convert(templateRequest);
+                template = gccTemplateConverter.convert(templateRequest, publicInAccount);
                 break;
             default:
                 throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", templateRequest.getCloudPlatform()));

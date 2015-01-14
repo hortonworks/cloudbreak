@@ -56,13 +56,13 @@ public class CredentialController {
     @RequestMapping(value = "user/credentials", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<IdJson> savePrivateCredential(@ModelAttribute("user") CbUser user, @Valid @RequestBody CredentialJson credentialRequest) {
-        return createCredential(user, credentialRequest);
+        return createCredential(user, credentialRequest, false);
     }
 
     @RequestMapping(value = "account/credentials", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<IdJson> saveAccountCredential(@ModelAttribute("user") CbUser user, @Valid @RequestBody CredentialJson credentialRequest)  {
-        return createCredential(user, credentialRequest);
+        return createCredential(user, credentialRequest, true);
     }
 
     @RequestMapping(value = "user/credentials", method = RequestMethod.GET)
@@ -143,23 +143,23 @@ public class CredentialController {
         return null;
     }
 
-    private ResponseEntity<IdJson> createCredential(CbUser user, CredentialJson credentialRequest) {
-        Credential credential = convert(credentialRequest);
+    private ResponseEntity<IdJson> createCredential(CbUser user, CredentialJson credentialRequest, boolean publicInAccount) {
+        Credential credential = convert(credentialRequest, publicInAccount);
         credential = credentialService.create(user, credential);
         return new ResponseEntity<>(new IdJson(credential.getId()), HttpStatus.CREATED);
     }
 
-    private Credential convert(CredentialJson json) {
+    private Credential convert(CredentialJson json, boolean publicInAccount) {
         Credential ret = null;
         switch (json.getCloudPlatform()) {
             case AWS:
-                ret = awsCredentialConverter.convert(json);
+                ret = awsCredentialConverter.convert(json, publicInAccount);
                 break;
             case AZURE:
-                ret = azureCredentialConverter.convert(json);
+                ret = azureCredentialConverter.convert(json, publicInAccount);
                 break;
             case GCC:
-                ret = gccCredentialConverter.convert(json);
+                ret = gccCredentialConverter.convert(json, publicInAccount);
                 break;
             default:
                 throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", json.getCloudPlatform()));

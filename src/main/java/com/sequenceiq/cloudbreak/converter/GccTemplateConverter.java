@@ -40,7 +40,6 @@ public class GccTemplateConverter extends AbstractConverter<TemplateJson, GccTem
     public GccTemplate convert(TemplateJson json) {
         GccTemplate gccTemplate = new GccTemplate();
         gccTemplate.setName(json.getName());
-        gccTemplate.setPublicInAccount(json.isPublicInAccount());
         gccTemplate.setDescription(json.getDescription());
         gccTemplate.setVolumeCount((json.getVolumeCount() == null) ? 0 : json.getVolumeCount());
         gccTemplate.setVolumeSize((json.getVolumeSize() == null) ? 0 : json.getVolumeSize());
@@ -55,6 +54,12 @@ public class GccTemplateConverter extends AbstractConverter<TemplateJson, GccTem
             gccTemplate.setGccRawDiskType(GccRawDiskType.valueOf(type.toString()));
         }
         gccTemplate.setDescription(json.getDescription());
+        return gccTemplate;
+    }
+
+    public GccTemplate convert(TemplateJson templateJson, boolean publicInAccount) {
+        GccTemplate gccTemplate = convert(templateJson);
+        gccTemplate.setPublicInAccount(publicInAccount);
         return gccTemplate;
     }
 

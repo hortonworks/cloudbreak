@@ -45,13 +45,13 @@ public class StackController {
     @RequestMapping(value = "user/stacks", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<IdJson> createPrivateStack(@ModelAttribute("user") CbUser user, @RequestBody @Valid StackJson stackRequest) {
-        return createStack(user, stackRequest);
+        return createStack(user, stackRequest, false);
     }
 
     @RequestMapping(value = "account/stacks", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<IdJson> createAccountStack(@ModelAttribute("user") CbUser user, @RequestBody @Valid StackJson stackRequest) {
-        return createStack(user, stackRequest);
+        return createStack(user, stackRequest, true);
     }
 
     @RequestMapping(value = "user/stacks", method = RequestMethod.GET)
@@ -149,8 +149,8 @@ public class StackController {
         return new ResponseEntity<>(stackConverter.convert(stack), HttpStatus.OK);
     }
 
-    private ResponseEntity<IdJson> createStack(CbUser user, StackJson stackRequest) {
-        Stack stack = stackConverter.convert(stackRequest);
+    private ResponseEntity<IdJson> createStack(CbUser user, StackJson stackRequest, boolean publicInAccount) {
+        Stack stack = stackConverter.convert(stackRequest, publicInAccount);
         stack = stackService.create(user, stack);
         return new ResponseEntity<>(new IdJson(stack.getId()), HttpStatus.CREATED);
     }
