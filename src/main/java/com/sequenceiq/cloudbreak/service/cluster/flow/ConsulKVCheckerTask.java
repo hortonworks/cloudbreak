@@ -20,18 +20,23 @@ public class ConsulKVCheckerTask implements StatusCheckerTask<ConsulKVCheckerCon
         MDCBuilder.buildMdcContext(context.getStack());
         List<String> keys = context.getKeys();
         String expectedValue = context.getExpectedValue();
+        String failValue = context.getFailValue();
         List<ConsulClient> clients = context.getConsulClients();
         LOGGER.info("Checking '{}' different hosts if keys in Consul's key-value store have the expected value", clients.size(), keys, expectedValue);
         boolean keysFound = true;
-        StringBuilder result = new StringBuilder();
+        boolean failed = false;
+        StringBuilder result = new StringBuilder("\n");
         for (String key : keys) {
             String value = ConsulUtils.getKVValue(clients, key, null);
             if (value != null) {
-                if (!value.equals(expectedValue)) {
-                    result.append(String.format("Key '%s' found in KV store, but doesn't match the expected value.", key)).append("\n");
-                    keysFound = false;
+                if (value.equals(failValue)) {
+                    result.append(String.format("Key '%s' found in KV store, and matches the failure signal '%s'.", key, failValue)).append("\n");
+                    failed = true;
+                } else if (value.equals(expectedValue)) {
+                    result.append(String.format("Key '%s' found in KV store, and matches the expected value '%s!", key, expectedValue)).append("\n");
                 } else {
-                    result.append(String.format("Key '%s' found in KV store, and matches the expected value!", key)).append("\n");
+                    result.append(String.format("Key '%s' found in KV store, but doesn't match the expected value '%s.", key, expectedValue)).append("\n");
+                    keysFound = false;
                 }
             } else {
                 result.append(String.format("Key '%s' cannot be found in KV store!", key)).append("\n");
@@ -39,6 +44,9 @@ public class ConsulKVCheckerTask implements StatusCheckerTask<ConsulKVCheckerCon
             }
         }
         LOGGER.info(result.toString());
+        if (failed) {
+            throw new PluginFailureException(String.format("One or more entries in Consul's key-value store signal failure: ", result.toString()));
+        }
         return keysFound;
     }
 

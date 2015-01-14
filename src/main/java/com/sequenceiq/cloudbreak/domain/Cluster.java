@@ -61,6 +61,7 @@ public class Cluster implements ProvisionEntity {
 
     private Long upSince;
 
+    @Column(length = 1000000, columnDefinition = "TEXT")
     private String statusReason;
 
     private Boolean emailNeeded;

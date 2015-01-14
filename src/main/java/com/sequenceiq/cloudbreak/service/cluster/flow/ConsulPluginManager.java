@@ -23,6 +23,7 @@ public class ConsulPluginManager implements PluginManager {
 
     public static final String INSTALL_PLUGIN_EVENT = "install-plugin";
     public static final String FINISH_SIGNAL = "FINISHED";
+    public static final String FAILED_SIGNAL = "FAILED";
 
     @Autowired
     private PollingService<ConsulKVCheckerContext> keyValuePollingService;
@@ -78,7 +79,7 @@ public class ConsulPluginManager implements PluginManager {
         List<String> keys = generateKeys(instanceMetaData, eventIds);
         keyValuePollingService.pollWithTimeout(
                 new ConsulKVCheckerTask(),
-                new ConsulKVCheckerContext(stack, clients, keys, FINISH_SIGNAL),
+                new ConsulKVCheckerContext(stack, clients, keys, FINISH_SIGNAL, FAILED_SIGNAL),
                 5000, 30
         );
     }
