@@ -113,28 +113,35 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
               chartsDataByProvider = chartsData.aws;
             }
 
-            var actDay = new Date(item.day);
-            var shortDate = actDay.getFullYear()+'-'+(actDay.getMonth()+1)+'-'+actDay.getDate();
-            var chartData = $filter('filter')(chartsDataByProvider, { 'date': shortDate}, true);
-            if (chartData.length > 0) {
-              chartData[0].hours += item.instanceHours;
-            }
-
-            usageByProvider.fullHours += parseFloat(item.instanceHours);
-            var newFullMoney = parseFloat(usageByProvider.fullMoney) + parseFloat(calculatedCost);
-            usageByProvider.fullMoney = parseFloat(newFullMoney).toFixed(2);
-            item.money = parseFloat(calculatedCost).toFixed(2);
-            var result = $filter('filter')(usageByProvider.items, {stackId: item.stackId}, true);
-            if (result.length > 0) {
-              result[0].money = (parseFloat(result[0].money) + parseFloat(calculatedCost)).toFixed(2);
-              result[0].instanceHours = result[0].instanceHours + item.instanceHours;
-            } else {
-              usageByProvider.items.push(item);
-            }
+            addUsageToChartsData(item, chartsDataByProvider);
+            addUsageToSum(item, calculatedCost, usageByProvider)
 
           });
           $scope.orderUsagesBy('stackName', false);
           $scope.dataOfCharts = chartsData;
+        }
+
+        function addUsageToChartsData(item, chartsDataByProvider) {
+          var actDay = new Date(item.day);
+          var shortDate = actDay.getFullYear()+'-'+(actDay.getMonth()+1)+'-'+actDay.getDate();
+          var chartData = $filter('filter')(chartsDataByProvider, { 'date': shortDate}, true);
+          if (chartData.length > 0) {
+            chartData[0].hours += item.instanceHours;
+          }
+        }
+
+        function addUsageToSum(item, calculatedCost, usageByProvider) {
+          usageByProvider.fullHours += parseFloat(item.instanceHours);
+          var newFullMoney = parseFloat(usageByProvider.fullMoney) + parseFloat(calculatedCost);
+          usageByProvider.fullMoney = parseFloat(newFullMoney).toFixed(2);
+          item.money = parseFloat(calculatedCost).toFixed(2);
+          var result = $filter('filter')(usageByProvider.items, {stackId: item.stackId}, true);
+          if (result.length > 0) {
+            result[0].money = (parseFloat(result[0].money) + parseFloat(calculatedCost)).toFixed(2);
+            result[0].instanceHours = result[0].instanceHours + item.instanceHours;
+          } else {
+            usageByProvider.items.push(item);
+          }
         }
 
         $scope.gccFilterFunction = function(element) {
