@@ -46,7 +46,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                     handleAwsTemplateError(error)
                 });
             }
-            
+
             function handleAwsTemplateSuccess(result) {
                 $scope.awsTemp.id = result.id;
                 $rootScope.templates.push($scope.awsTemp);
@@ -56,7 +56,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                 $scope.awsTemplateForm.$setPristine();
                 collapseCreateTemplateFormPanel();
             }
-            
+
             function handleAwsTemplateError(error) {
                 $scope.modifyStatusMessage($rootScope.error_msg.aws_template_failed + ": " + error.data.message);
                 $scope.modifyStatusClass("has-error");
@@ -78,12 +78,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                     handleGccTemplateError(error)
                 });
             }
-            AccountTemplate.save($scope.gccTemp, function (result) {
-                handleGccTemplateSuccess(result)
-            }, function (error) {
-                handleGccTemplateError(error)
-            });
-            
+
             function handleGccTemplateSuccess(result) {
                 $scope.gccTemp.id = result.id;
                 $rootScope.templates.push($scope.gccTemp);
@@ -93,7 +88,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                 $scope.gccTemplateForm.$setPristine();
                 collapseCreateTemplateFormPanel();
             }
-            
+
             function handleGccTemplateError(error) {
                 $scope.modifyStatusMessage($rootScope.error_msg.gcc_template_failed + ": " + error.data.message);
                 $scope.modifyStatusClass("has-error");
@@ -116,7 +111,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                   handleAzureTemplateError(error)
                });
             }
-            
+
             function handleAzureTemplateSuccess(result) {
                 $scope.azureTemp.id = result.id;
                 $rootScope.templates.push($scope.azureTemp);
@@ -126,12 +121,12 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                 $scope.azureTemplateForm.$setPristine();
                 collapseCreateTemplateFormPanel();
             }
-            
+
             function handleAzureTemplateError(error) {
                 $scope.modifyStatusMessage($rootScope.error_msg.azure_template_failed + ": " + error.data.message);
                 $scope.modifyStatusClass("has-error");
             }
-            
+
         }
 
         $scope.deleteTemplate = function (template) {
