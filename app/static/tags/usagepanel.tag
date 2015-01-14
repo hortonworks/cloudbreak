@@ -7,7 +7,7 @@
     </div>
 
     <!-- <div id="panel-usages-collapse" class=""> -->
-    <div id="panel-usages-collapse" class="panel-btn-in-header-collapse collapse">
+    <div id="panel-usages-collapse" class="panel-btn-in-header-collapse collapse" style="background-color: white;">
 
 
       <div class="panel-body">
@@ -180,6 +180,8 @@
           </table>
         </div>
         <!-- .table-responsive -->
+
+        <div class="row" usagecharts></div>
 
       </div>
       <!-- .panel-body -->

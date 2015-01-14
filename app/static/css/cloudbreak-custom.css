@@ -5,3 +5,15 @@ a:hover {
 .public-account-info {
   color: rgb(47, 162, 204)
 }
+
+.legend {
+  display: table;
+  padding-top: 60px;
+}
+.legend>span{
+  margin: 2px;
+  padding: 4px 40px 4px 10px;
+  line-height: 1.8;
+  word-wrap; normal;
+  display: table;
+}

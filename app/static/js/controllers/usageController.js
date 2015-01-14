@@ -39,73 +39,85 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
             'M32xlarge': 0.560
         }
 
-
-        //requested interval grouped by months
-        // var month = new Array();
-        // month[0] = "January";
-        // month[1] = "February";
-        // month[2] = "March";
-        // month[3] = "April";
-        // month[4] = "May";
-        // month[5] = "June";
-        // month[6] = "July";
-        // month[7] = "August";
-        // month[8] = "September";
-        // month[9] = "October";
-        // month[10] = "November";
-        // month[11] = "December";
-        //requested interval grouped by months
-
         $scope.clearFilter = function() {
             initFilter();
         }
 
         $scope.loadUsages = function () {
-            var usagesSince = $scope.usageFilter.startDate;
-            var param = createRequestParams(usagesSince);
+            initSums();
+            var filterStartDate = $scope.usageFilter.startDate;
+            var filterEndDate = new Date($scope.usageFilter.endDate.getTime());
+            var param = createRequestParams(filterStartDate);
+            var chartsData = { gcp: [], azure: [], aws: [], cloud: $scope.usageFilter.cloud};
 
-            //requested interval grouped by months
-            // var usagesPerMonth;
-            // var date = new Date();
-            // var targetMonth = new Date(usagesSince.getFullYear(), usagesSince.getMonth(), 1, 0, 0, 0, 0);
-            // var actMonth = new Date(date.getFullYear(), date.getMonth(), 1, 0, 0, 0, 0);
-            // console.log('target date(since): '+usagesSince)
-            // while(targetMonth <= actMonth) {
-            //   console.log('year:' + actMonth.getFullYear() + 'month:' + month[actMonth.getMonth()]);
-            //   actMonth.setMonth(actMonth.getMonth()-1);
-            // }
-            //requested interval grouped by months
+            populateChartsDataBySelectedPeriod(chartsData, filterStartDate, filterEndDate);
 
             if ($scope.$parent.user.admin != undefined && $scope.$parent.user.admin) {
               $scope.usages = AccountUsages.query({ param: param }, function(success) {
-                processUsages(success);
+                processUsages(success, chartsData);
               });
             } else {
               $scope.usages = UserUsages.query({ param: param }, function(success) {
-                processUsages(success);
+                processUsages(success, chartsData);
               });
             }
         }
 
-        function processUsages(usages) {
-          initSums();
-          // console.log(usages);
-          var usagesByMonth = new Array();
+        function createRequestParams(filterStartDate) {
+          var param = "";
+          var filterEndDate = new Date($scope.usageFilter.endDate.getTime());
+          filterEndDate.setDate(filterEndDate.getDate() + 1);
+          param =  param.concat(filterStartDate !== null ? "since=".concat(filterStartDate.getTime().toString().concat("&")) : "");
+          param =  param.concat(filterEndDate !== null ? "filterenddate=".concat(filterEndDate.getTime().toString().concat("&")) : "");
+          param =  param.concat($scope.usageFilter.user !== "all" ? "user=".concat($scope.usageFilter.user.concat("&")) : "");
+          param = param.concat($scope.usageFilter.cloud !== "all" ? "cloud=".concat($scope.usageFilter.cloud.concat("&")) : "");
+          param = param.concat($scope.usageFilter.zone !== "all" ? "zone=".concat($scope.usageFilter.zone.concat("&")) : "");
+          if( param.substr(-1) === "&" ) {
+            param = param.substring(0, param.length - 1);
+          }
+          return param;
+        }
+
+        function populateChartsDataBySelectedPeriod(chartsData, filterStartDate, filterEndDate){
+          var usagesPerMonth;
+          var startDay = new Date(filterStartDate.getFullYear(), filterStartDate.getMonth(), filterStartDate.getDate(), 0, 0, 0, 0);
+          var endDay = new Date(filterEndDate.getFullYear(), filterEndDate.getMonth(), filterEndDate.getDate(), 0, 0, 0, 0);
+          while(startDay <= endDay) {
+            var shortDate = startDay.getFullYear()+'-'+(startDay.getMonth()+1)+'-'+startDay.getDate();
+            chartsData.gcp.push({ 'date': shortDate, 'hours': parseInt(0)});
+            chartsData.azure.push({ 'date': shortDate, 'hours': parseInt(0)});
+            chartsData.aws.push({ 'date': shortDate, 'hours': parseInt(0)});
+            startDay.setDate(startDay.getDate()+1);
+          }
+        }
+
+        function processUsages(usages, chartsData) {
           angular.forEach(usages, function(item) {
             item.monthString = new Date(item.day).getFullYear() + "-" +  new Date(item.day).getMonth();
             item.monthDayString = new Date(item.day).toLocaleDateString();
 
             var calculatedCost;
             var usageByProvider;
+            var chartsDataByProvider;
             if ($scope.gccFilterFunction(item)) {
               calculatedCost = parseFloat(item.instanceHours) * parseFloat($scope.gccPrice[item.machineType]);
               usageByProvider = $scope.gccSum;
+              chartsDataByProvider = chartsData.gcp;
             } else if($scope.azureFilterFunction(item)) {
               calculatedCost = parseFloat(item.instanceHours) * parseFloat($scope.azurePrice[item.machineType]);
               usageByProvider = $scope.azureSum;
+              chartsDataByProvider = chartsData.azure;
             } else if($scope.awsFilterFunction(item)) {
               calculatedCost = parseFloat(item.instanceHours) * parseFloat($scope.awsPrice[item.machineType]);
               usageByProvider = $scope.awsSum;
+              chartsDataByProvider = chartsData.aws;
+            }
+
+            var actDay = new Date(item.day);
+            var shortDate = actDay.getFullYear()+'-'+(actDay.getMonth()+1)+'-'+actDay.getDate();
+            var chartData = $filter('filter')(chartsDataByProvider, { 'date': shortDate}, true);
+            if (chartData.length > 0) {
+              chartData[0].hours += item.instanceHours;
             }
 
             usageByProvider.fullHours += parseFloat(item.instanceHours);
@@ -122,21 +134,7 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
 
           });
           $scope.orderUsagesBy('stackName', false);
-        }
-
-        function createRequestParams(usagesSince) {
-          var param = "";
-          var filterEndDate = new Date($scope.usageFilter.endDate.getTime());
-          filterEndDate.setDate(filterEndDate.getDate() + 1);
-          param =  param.concat(usagesSince !== null ? "since=".concat(usagesSince.getTime().toString().concat("&")) : "");
-          param =  param.concat(filterEndDate !== null ? "filterenddate=".concat(filterEndDate.getTime().toString().concat("&")) : "");
-          param =  param.concat($scope.usageFilter.user !== "all" ? "user=".concat($scope.usageFilter.user.concat("&")) : "");
-          param = param.concat($scope.usageFilter.cloud !== "all" ? "cloud=".concat($scope.usageFilter.cloud.concat("&")) : "");
-          param = param.concat($scope.usageFilter.zone !== "all" ? "zone=".concat($scope.usageFilter.zone.concat("&")) : "");
-          if( param.substr(-1) === "&" ) {
-            param = param.substring(0, param.length - 1);
-          }
-          return param;
+          $scope.dataOfCharts = chartsData;
         }
 
         $scope.gccFilterFunction = function(element) {
@@ -191,13 +189,11 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
         }
 
         $scope.setStartDate = function(dateString) {
-            // console.log('startdate'+date)
             $scope.usageFilter.startDate = floorToDay(dateString);
             $scope.$apply();
         }
 
         $scope.setEndDate = function(dateString) {
-          // console.log('enddate'+date)
           $scope.usageFilter.endDate = floorToDay(dateString);
           $scope.$apply();
         }
@@ -209,20 +205,25 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
         }
 
         function initSums() {
-            $scope.awsSum={
+            $scope.awsSum = {
                 fullMoney: 0,
                 fullHours: 0,
                 items: []
             };
-            $scope.gccSum={
+            $scope.gccSum = {
                 fullMoney: 0,
                 fullHours: 0,
                 items: []
             };
-            $scope.azureSum={
+            $scope.azureSum = {
                 fullMoney: 0,
                 fullHours: 0,
                 items: []
+            };
+            $scope.dataOfCharts = {
+              gcp: [],
+              azure: [],
+              aws: []
             };
         }
 
