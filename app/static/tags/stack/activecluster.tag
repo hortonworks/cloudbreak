@@ -108,12 +108,13 @@
                             </div>
                             <div id="panel-collapse0002" class="panel-collapse collapse">
                                 <div class="panel-body">
-                                        <table class="table table-report table-sortable-cols table-with-pagination ">
+                                        <table class="table table-report table-sortable-cols table-with-pagination table-condensed" style="background-color: transparent;">
                                             <thead>
                                             <tr>
-                                                <th>name</th>
-                                                <th>private IP</th>
-                                                <th>public IP</th>
+                                                <th>Name</th>
+                                                <th>Private Adress</th>
+                                                <th>Public Address</th>
+                                                <th>Hostgroup Name</th>
                                             </tr>
                                             </thead>
                                             <tbody>
@@ -121,6 +122,7 @@
                                                 <td>{{instance.longName}}</td>
                                                 <td>{{instance.privateIp}}</td>
                                                 <td>{{instance.publicIp}}</td>
+                                                <td><span class="label label-default">{{instance.hostgroup}}</span></td>
                                             </tr>
                                             </tbody>
                                         </table>
