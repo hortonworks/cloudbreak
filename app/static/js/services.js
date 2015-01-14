@@ -125,9 +125,9 @@ uluwatuServices.factory('GlobalStack', ['$resource',
         return $resource('stacks/:id', null, { 'update': { method:'PUT' } });
     }]);
 
-uluwatuServices.factory('UluwatuCluster', ['AccountStack', 'Cluster', 'GlobalStack',
-    function (AccountStack, Cluster, GlobalStack) {
-        function AggregateCluster(AccountStack, Cluster) {
+uluwatuServices.factory('UluwatuCluster', ['UserStack', 'AccountStack', 'Cluster', 'GlobalStack',
+    function (UserStack, AccountStack, Cluster, GlobalStack) {
+        function AggregateCluster(UserStack, AccountStack, Cluster) {
 
             this.query = function (successHandler) {
                 AccountStack.query(function (stacks) {
@@ -149,10 +149,23 @@ uluwatuServices.factory('UluwatuCluster', ['AccountStack', 'Cluster', 'GlobalSta
                     templateId: cluster.templateId,
                     credentialId: cluster.credentialId,
                     password: cluster.password,
-                    userName: cluster.userName,
-                    public: cluster.public
+                    userName: cluster.userName
                 }
-                AccountStack.save(stack, function (result) {
+                if (cluster.public) {
+                    AccountStack.save(stack, function (result) {
+                        stackSuccessHandler(result)
+                    }, function (failure) {
+                        failureHandler(failure);
+                    });
+                } else {
+                    UserStack.save(stack, function (result) {
+                        stackSuccessHandler(result)
+                    }, function (failure) {
+                        failureHandler(failure);
+                    });
+                }
+                
+                function stackSuccessHandler(result) {
                     cluster.id = result.id;
                     var cbCluster = {
                         name: cluster.name,
@@ -167,9 +180,7 @@ uluwatuServices.factory('UluwatuCluster', ['AccountStack', 'Cluster', 'GlobalSta
                     }, function (failure) {
                         failureHandler(failure);
                     });
-                }, function (failure) {
-                    failureHandler(failure);
-                });
+                }
             }
 
             this.delete = function (cluster, successHandler, failureHandler) {
@@ -181,7 +192,7 @@ uluwatuServices.factory('UluwatuCluster', ['AccountStack', 'Cluster', 'GlobalSta
             }
         }
 
-        return new AggregateCluster(AccountStack, Cluster);
+        return new AggregateCluster(UserStack, AccountStack, Cluster);
     }]);
 
     uluwatuServices.factory('PeriscopeCluster', ['$resource',
