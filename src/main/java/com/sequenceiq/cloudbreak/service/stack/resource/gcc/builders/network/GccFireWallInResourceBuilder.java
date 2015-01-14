@@ -74,11 +74,6 @@ public class GccFireWallInResourceBuilder extends GccSimpleNetworkResourceBuilde
     }
 
     @Override
-    public Optional<String> describe(Resource resource, GccDescribeContextObject describeContextObject, String region) throws Exception {
-        return Optional.absent();
-    }
-
-    @Override
     public List<Resource> buildResources(GccProvisionContextObject provisionContextObject, int index, List<Resource> resources, TemplateGroup templateGroup) {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         return Arrays.asList(new Resource(resourceType(), stack.getName() + "in", stack, templateGroup.getGroupName()));

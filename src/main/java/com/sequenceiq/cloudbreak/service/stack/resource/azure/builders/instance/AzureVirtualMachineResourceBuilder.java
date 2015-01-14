@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.stack.resource.azure.builders.instance;
 
-import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.ERROR;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.NAME;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.SERVICENAME;
 
@@ -19,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import com.google.common.base.Optional;
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.StackCreationFailureException;
@@ -40,7 +38,6 @@ import com.sequenceiq.cloudbreak.service.stack.flow.AzureInstances;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureSimpleInstanceResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDeleteContextObject;
-import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDescribeContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureProvisionContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureStartStopContextObject;
 
@@ -164,19 +161,6 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
             throw new InternalServerException(ex.getMessage());
         }
         return true;
-    }
-
-    @Override
-    public Optional<String> describe(Resource resource, AzureDescribeContextObject aDCO, String region) throws Exception {
-        Stack stack = stackRepository.findById(aDCO.getStackId());
-        AzureCredential credential = (AzureCredential) stack.getCredential();
-        try {
-            AzureClient azureClient = azureStackUtil.createAzureClient(credential);
-            Object cloudService = azureClient.getCloudService(resource.getResourceName());
-            return Optional.fromNullable(cloudService.toString());
-        } catch (Exception ex) {
-            return Optional.fromNullable(String.format("{\"HostedService\": {%s}}", ERROR));
-        }
     }
 
     @Override

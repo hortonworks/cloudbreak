@@ -68,16 +68,6 @@ public class AzureStorageAccountResourceBuilder extends AzureSimpleNetworkResour
     }
 
     @Override
-    public Optional<String> describe(Resource resource, AzureDescribeContextObject describeContextObject, String region) throws Exception {
-        try {
-            Object storageAccount = describeContextObject.getAzureClient().getStorageAccount(resource.getResourceName());
-            return Optional.fromNullable(storageAccount.toString());
-        } catch (Exception ex) {
-            return Optional.fromNullable(String.format("{\"StorageService\": {%s}}", ERROR));
-        }
-    }
-
-    @Override
     public List<Resource> buildResources(AzureProvisionContextObject provisionContextObject, int index, List<Resource> resources, TemplateGroup templateGroup) {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         return Arrays.asList(new Resource(resourceType(), provisionContextObject.getCommonName(), stack, templateGroup.getGroupName()));

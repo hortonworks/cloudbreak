@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.stack.resource;
 
 import java.util.List;
 
-import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
@@ -16,8 +15,6 @@ public interface ResourceBuilder<P extends ProvisionContextObject, D extends Del
     Boolean delete(Resource resource, D d, String region) throws Exception;
 
     Boolean rollback(Resource resource, D d, String region) throws Exception;
-
-    Optional<String> describe(Resource resource, DCO describeContextObject, String region) throws Exception;
 
     ResourceBuilderType resourceBuilderType();
 

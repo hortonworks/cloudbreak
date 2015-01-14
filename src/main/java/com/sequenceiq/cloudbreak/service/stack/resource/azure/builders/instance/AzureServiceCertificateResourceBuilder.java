@@ -91,11 +91,6 @@ public class AzureServiceCertificateResourceBuilder extends AzureSimpleInstanceR
         return true;
     }
 
-    @Override
-    public Optional<String> describe(Resource resource, AzureDescribeContextObject azureDescribeContextObject, String region) throws Exception {
-        return Optional.absent();
-    }
-
     public class AzureServiceCertificateCreateRequest extends CreateResourceRequest {
         private Map<String, String> props = new HashMap<>();
         private AzureClient azureClient;

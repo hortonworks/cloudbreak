@@ -38,11 +38,6 @@ public class DummyExVirtualMachineResourceBuilder
     }
 
     @Override
-    public Optional<String> describe(Resource resource, DummyDescribeContextObject describeContextObject, String region) throws Exception {
-        return Optional.absent();
-    }
-
-    @Override
     public ResourceBuilderType resourceBuilderType() {
         return ResourceBuilderType.INSTANCE_RESOURCE;
     }

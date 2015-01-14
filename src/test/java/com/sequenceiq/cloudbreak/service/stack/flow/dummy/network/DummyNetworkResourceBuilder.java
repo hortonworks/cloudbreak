@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
@@ -34,11 +33,6 @@ public class DummyNetworkResourceBuilder
     @Override
     public Boolean rollback(Resource resource, DummyDeleteContextObject deleteContextObject, String region) throws Exception {
         return true;
-    }
-
-    @Override
-    public Optional<String> describe(Resource resource, DummyDescribeContextObject describeContextObject, String region) throws Exception {
-        return Optional.absent();
     }
 
     @Override

@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service.stack.resource.gcc.builders.network;
 
-import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.ERROR;
-
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -14,7 +12,6 @@ import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.Network;
 import com.google.api.services.compute.model.Operation;
-import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
@@ -30,7 +27,6 @@ import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccZone;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.GccSimpleNetworkResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDeleteContextObject;
-import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDescribeContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccProvisionContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccStartStopContextObject;
 
@@ -73,18 +69,6 @@ public class GccNetworkResourceBuilder extends GccSimpleNetworkResourceBuilder {
             throw new InternalServerException(e.getMessage());
         }
         return true;
-    }
-
-    @Override
-    public Optional<String> describe(Resource resource, GccDescribeContextObject describeContextObject, String region) throws Exception {
-        Stack stack = stackRepository.findById(describeContextObject.getStackId());
-        GccCredential gccCredential = (GccCredential) stack.getCredential();
-        try {
-            Compute.Networks.Get getNetwork = describeContextObject.getCompute().networks().get(gccCredential.getProjectId(), resource.getResourceName());
-            return Optional.fromNullable(getNetwork.execute().toPrettyString());
-        } catch (IOException e) {
-            return Optional.fromNullable(jsonHelper.createJsonFromString(String.format("{\"Network\": {%s}}", ERROR)).toString());
-        }
     }
 
     @Override

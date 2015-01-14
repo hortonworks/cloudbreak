@@ -72,11 +72,6 @@ public class AzureNetworkResourceBuilder extends AzureSimpleNetworkResourceBuild
     }
 
     @Override
-    public Optional<String> describe(Resource resource, AzureDescribeContextObject azureDescribeContextObject, String region) throws Exception {
-        return Optional.absent();
-    }
-
-    @Override
     public List<Resource> buildResources(AzureProvisionContextObject provisionContextObject, int index, List<Resource> resources, TemplateGroup templateGroup) {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         String s = stack.getName().replaceAll("\\s+", "") + String.valueOf(new Date().getTime());

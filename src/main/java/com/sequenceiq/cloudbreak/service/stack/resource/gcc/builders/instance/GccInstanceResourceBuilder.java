@@ -135,16 +135,6 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
     }
 
     @Override
-    public Optional<String> describe(Resource resource, GccDescribeContextObject describeContextObject, String region) throws Exception {
-        try {
-            Stack stack = stackRepository.findById(describeContextObject.getStackId());
-            return Optional.fromNullable(describe(stack, describeContextObject.getCompute(), resource,  GccZone.valueOf(region)).toPrettyString());
-        } catch (IOException e) {
-            return Optional.fromNullable(jsonHelper.createJsonFromString(String.format("{\"VirtualMachine\": {%s}}", ERROR)).toString());
-        }
-    }
-
-    @Override
     public List<Resource> buildResources(GccProvisionContextObject provisionContextObject, int index, List<Resource> resources, TemplateGroup templateGroup) {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         Resource resource = new Resource(resourceType(),

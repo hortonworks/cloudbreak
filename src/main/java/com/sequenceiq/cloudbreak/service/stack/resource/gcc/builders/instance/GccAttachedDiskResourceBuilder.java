@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service.stack.resource.gcc.builders.instance;
 
-import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.ERROR;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -19,7 +17,6 @@ import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.Disk;
 import com.google.api.services.compute.model.Operation;
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
@@ -40,7 +37,6 @@ import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccZone;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.GccSimpleInstanceResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDeleteContextObject;
-import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDescribeContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccProvisionContextObject;
 
 @Component
@@ -113,20 +109,6 @@ public class GccAttachedDiskResourceBuilder extends GccSimpleInstanceResourceBui
             throw new InternalServerException(e.getMessage());
         }
         return true;
-    }
-
-    @Override
-    public Optional<String> describe(Resource resource, GccDescribeContextObject describeContextObject, String region) throws Exception {
-        Stack stack = stackRepository.findById(describeContextObject.getStackId());
-        GccCredential gccCredential = (GccCredential) stack.getCredential();
-        try {
-            Compute.Disks.Get getDisk =
-                    describeContextObject.getCompute().disks().get(gccCredential.getProjectId(),
-                            GccZone.valueOf(region).getValue(), resource.getResourceName());
-            return Optional.fromNullable(getDisk.execute().toPrettyString());
-        } catch (IOException e) {
-            return Optional.fromNullable(jsonHelper.createJsonFromString(String.format("{\"Attached_Disk\": {%s}}", ERROR)).toString());
-        }
     }
 
     @Override

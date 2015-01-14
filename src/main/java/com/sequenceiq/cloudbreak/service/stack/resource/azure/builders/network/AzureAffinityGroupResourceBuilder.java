@@ -69,16 +69,6 @@ public class AzureAffinityGroupResourceBuilder extends AzureSimpleNetworkResourc
     }
 
     @Override
-    public Optional<String> describe(Resource resource, AzureDescribeContextObject describeContextObject, String region) throws Exception {
-        try {
-            Object affinityGroup = describeContextObject.getAzureClient().getAffinityGroup(resource.getResourceName());
-            return Optional.fromNullable(affinityGroup.toString());
-        } catch (Exception ex) {
-            return Optional.fromNullable(String.format("{\"AffinityGroup\": {%s}}", ERROR));
-        }
-    }
-
-    @Override
     public List<Resource> buildResources(AzureProvisionContextObject provisionContextObject, int index, List<Resource> resources, TemplateGroup templateGroup) {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         return Arrays.asList(new Resource(resourceType(), provisionContextObject.getCommonName(), stack, templateGroup.getGroupName()));

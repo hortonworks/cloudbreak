@@ -10,9 +10,18 @@ public class InstanceMetaDataJson implements JsonEntity {
     private String dockerSubnet;
     private String longName;
     private Integer containerCount;
+    private String hostgroup;
 
     public InstanceMetaDataJson() {
 
+    }
+
+    public String getHostgroup() {
+        return hostgroup;
+    }
+
+    public void setHostgroup(String hostgroup) {
+        this.hostgroup = hostgroup;
     }
 
     public String getPrivateIp() {

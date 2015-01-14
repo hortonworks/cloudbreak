@@ -100,20 +100,6 @@ public class GccDiskResourceBuilder extends GccSimpleInstanceResourceBuilder {
     }
 
     @Override
-    public Optional<String> describe(Resource resource, GccDescribeContextObject describeContextObject, String region) throws Exception {
-        Stack stack = stackRepository.findById(describeContextObject.getStackId());
-        GccCredential gccCredential = (GccCredential) stack.getCredential();
-        try {
-            Compute.Disks.Get getDisk =
-                    describeContextObject.getCompute().disks().get(gccCredential.getProjectId(), GccZone.valueOf(region).getValue(),
-                            resource.getResourceName());
-            return Optional.fromNullable(getDisk.execute().toPrettyString());
-        } catch (IOException e) {
-            return Optional.fromNullable(jsonHelper.createJsonFromString(String.format("{\"Disk\": {%s}}", ERROR)).toString());
-        }
-    }
-
-    @Override
     public List<Resource> buildResources(GccProvisionContextObject provisionContextObject, int index, List<Resource> resources, TemplateGroup templateGroup) {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         Resource resource = new Resource(resourceType(),
