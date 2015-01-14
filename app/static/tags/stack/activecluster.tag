@@ -113,12 +113,14 @@
                                             <tr>
                                                 <th>name</th>
                                                 <th>private IP</th>
+                                                <th>public IP</th>
                                             </tr>
                                             </thead>
                                             <tbody>
                                             <tr ng-repeat="instance in activeCluster.metadata">
                                                 <td>{{instance.longName}}</td>
                                                 <td>{{instance.privateIp}}</td>
+                                                <td>{{instance.publicIp}}</td>
                                             </tr>
                                             </tbody>
                                         </table>
