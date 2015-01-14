@@ -7,8 +7,7 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.TemplateGroup;
 
-public interface ResourceBuilder<P extends ProvisionContextObject, D extends DeleteContextObject, DCO extends DescribeContextObject,
-        SSCO extends StartStopContextObject> {
+public interface ResourceBuilder<P extends ProvisionContextObject, D extends DeleteContextObject, SSCO extends StartStopContextObject> {
 
     Boolean create(CreateResourceRequest createResourceRequest, TemplateGroup templateGroup, String region) throws Exception;
 

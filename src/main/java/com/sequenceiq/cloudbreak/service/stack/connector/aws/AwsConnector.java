@@ -283,7 +283,7 @@ public class AwsConnector implements CloudPlatformConnector {
             Set<InstanceMetaData> instanceMetaData = stack.getInstanceMetaData();
             Collection<String> instances = new ArrayList<>(instanceMetaData.size());
             for (InstanceMetaData instance : instanceMetaData) {
-                if(instance.getHostGroup().equals(templateGroup.getGroupName())) {
+                if (instance.getHostGroup().equals(templateGroup.getGroupName())) {
                     instances.add(instance.getInstanceId());
                 }
             }

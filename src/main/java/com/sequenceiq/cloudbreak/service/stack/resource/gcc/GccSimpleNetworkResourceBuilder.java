@@ -18,12 +18,11 @@ import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccZone;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDeleteContextObject;
-import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDescribeContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccProvisionContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccStartStopContextObject;
 
 public abstract class GccSimpleNetworkResourceBuilder implements
-        ResourceBuilder<GccProvisionContextObject, GccDeleteContextObject, GccDescribeContextObject, GccStartStopContextObject> {
+        ResourceBuilder<GccProvisionContextObject, GccDeleteContextObject, GccStartStopContextObject> {
     protected static final Logger LOGGER = LoggerFactory.getLogger(GccSimpleNetworkResourceBuilder.class);
     protected static final int MAX_POLLING_ATTEMPTS = 60;
     protected static final int POLLING_INTERVAL = 5000;

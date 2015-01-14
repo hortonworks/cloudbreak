@@ -11,7 +11,6 @@ import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.TemplateGroup;
 import com.sequenceiq.cloudbreak.service.stack.flow.dummy.DummyDeleteContextObject;
-import com.sequenceiq.cloudbreak.service.stack.flow.dummy.DummyDescribeContextObject;
 import com.sequenceiq.cloudbreak.service.stack.flow.dummy.DummyProvisionContextObject;
 import com.sequenceiq.cloudbreak.service.stack.flow.dummy.DummyStartStopContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
@@ -19,7 +18,7 @@ import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
 
 public class DummyExNetworkResourceBuilder
-        implements ResourceBuilder<DummyProvisionContextObject, DummyDeleteContextObject, DummyDescribeContextObject, DummyStartStopContextObject> {
+        implements ResourceBuilder<DummyProvisionContextObject, DummyDeleteContextObject, DummyStartStopContextObject> {
 
     @Override
     public Boolean create(CreateResourceRequest createResourceRequest, TemplateGroup templateGroup, String region) throws Exception {

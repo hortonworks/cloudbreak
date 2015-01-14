@@ -189,12 +189,12 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
     private boolean setStackState(Long stackId, Resource resource, AzureClient azureClient, boolean stopped) {
         boolean result = true;
         try {
-                Map<String, String> vmContext = createVMContext(resource.getResourceName());
-                if (stopped) {
-                    azureClient.stopVirtualMachine(vmContext);
-                } else {
-                    azureClient.startVirtualMachine(vmContext);
-                }
+            Map<String, String> vmContext = createVMContext(resource.getResourceName());
+            if (stopped) {
+                azureClient.stopVirtualMachine(vmContext);
+            } else {
+                azureClient.startVirtualMachine(vmContext);
+            }
 
         } catch (Exception e) {
             LOGGER.error(String.format("Failed to %s AZURE instances on stack: %s", stopped ? "stop" : "start", stackId));
