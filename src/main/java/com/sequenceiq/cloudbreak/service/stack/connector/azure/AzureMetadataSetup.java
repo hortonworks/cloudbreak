@@ -98,10 +98,9 @@ public class AzureMetadataSetup implements MetadataSetup {
         Map<String, Object> props = new HashMap<>();
         props.put(NAME, resource.getResourceName());
         props.put(SERVICENAME, resource.getResourceName());
-        AzureMetadataSetupCheckerTaskContext azureMetadataSetupCheckerTaskContext =
-                new AzureMetadataSetupCheckerTaskContext(azureClient, stack, props);
-        azureMetadataSetupCheckerTaskPollingService
-                .pollWithTimeout(azureMetadataSetupCheckerTask, azureMetadataSetupCheckerTaskContext, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+        AzureMetadataSetupCheckerTaskContext azureMetadataSetupCheckerTaskContext = new AzureMetadataSetupCheckerTaskContext(azureClient, stack, props);
+        azureMetadataSetupCheckerTaskPollingService.pollWithTimeout(azureMetadataSetupCheckerTask, azureMetadataSetupCheckerTaskContext,
+                POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
         Object virtualMachine = azureClient.getVirtualMachine(props);
         try {
             CoreInstanceMetaData instanceMetaData = new CoreInstanceMetaData(

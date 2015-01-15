@@ -36,6 +36,8 @@ import com.sequenceiq.cloudbreak.service.stack.connector.azure.X509Certificate;
 import com.sequenceiq.cloudbreak.service.stack.flow.AzureInstanceStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.flow.AzureInstances;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
+import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureResourcePollerObject;
+import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureResourceStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureSimpleInstanceResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureProvisionContextObject;
@@ -57,12 +59,19 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
     @Autowired
     private AzureStackUtil azureStackUtil;
 
+    @Autowired
+    private AzureResourceStatusCheckerTask azureResourceStatusCheckerTask;
+
+    @Autowired
+    private PollingService<AzureResourcePollerObject> azureResourcePollerObjectPollingService;
+
     @Override
     public Boolean create(final CreateResourceRequest createResourceRequest, final TemplateGroup templateGroup, final String region) throws Exception {
         AzureVirtualMachineCreateRequest aCSCR = (AzureVirtualMachineCreateRequest) createResourceRequest;
         HttpResponseDecorator virtualMachineResponse = (HttpResponseDecorator) aCSCR.getAzureClient().createVirtualMachine(aCSCR.getProps());
-        String requestId = (String) aCSCR.getAzureClient().getRequestId(virtualMachineResponse);
-        waitUntilComplete(aCSCR.getAzureClient(), requestId);
+        AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(aCSCR.getAzureClient(), virtualMachineResponse, aCSCR.getStack());
+        azureResourcePollerObjectPollingService.pollWithTimeout(azureResourceStatusCheckerTask, azureResourcePollerObject,
+                POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
         return true;
     }
 
@@ -136,7 +145,7 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
         props.put(VIRTUALNETWORKNAME, provisionContextObject.filterResourcesByType(ResourceType.AZURE_NETWORK).get(0).getResourceName());
         props.put(PORTS, ports);
         props.put(VMTYPE, AzureVmType.valueOf(azureTemplate.getVmType()).vmType().replaceAll(" ", ""));
-        return new AzureVirtualMachineCreateRequest(props, azureStackUtil.createAzureClient(azureCredential), resources, buildResources);
+        return new AzureVirtualMachineCreateRequest(props, azureStackUtil.createAzureClient(azureCredential), resources, buildResources, stack);
     }
 
     private String buildimageStoreUri(String commonName, String vmName) {
@@ -219,9 +228,12 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
         private Map<String, Object> props = new HashMap<>();
         private AzureClient azureClient;
         private List<Resource> resources;
+        private Stack stack;
 
-        public AzureVirtualMachineCreateRequest(Map<String, Object> props, AzureClient azureClient, List<Resource> resources, List<Resource> buildNames) {
+        public AzureVirtualMachineCreateRequest(Map<String, Object> props, AzureClient azureClient, List<Resource> resources, List<Resource> buildNames,
+                Stack stack) {
             super(buildNames);
+            this.stack = stack;
             this.props = props;
             this.azureClient = azureClient;
             this.resources = resources;
@@ -233,6 +245,10 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
 
         public AzureClient getAzureClient() {
             return azureClient;
+        }
+
+        public Stack getStack() {
+            return stack;
         }
 
         public List<Resource> getResources() {

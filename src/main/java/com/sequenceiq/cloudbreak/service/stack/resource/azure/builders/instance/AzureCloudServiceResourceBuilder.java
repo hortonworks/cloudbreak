@@ -26,6 +26,8 @@ import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureCloudService
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureCloudServiceDeleteTaskContext;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
+import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureResourcePollerObject;
+import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureResourceStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureSimpleInstanceResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureProvisionContextObject;
@@ -46,13 +48,19 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
     private PollingService<AzureCloudServiceDeleteTaskContext> azureCloudServiceRemoveReadyPollerObjectPollingService;
     @Autowired
     private AzureStackUtil azureStackUtil;
+    @Autowired
+    private AzureResourceStatusCheckerTask azureResourceStatusCheckerTask;
+    @Autowired
+    private PollingService<AzureResourcePollerObject> azureResourcePollerObjectPollingService;
+
 
     @Override
     public Boolean create(final CreateResourceRequest createResourceRequest, TemplateGroup templateGroup, String region) throws Exception {
         AzureCloudServiceCreateRequest aCSCR = (AzureCloudServiceCreateRequest) createResourceRequest;
         HttpResponseDecorator cloudServiceResponse = (HttpResponseDecorator) aCSCR.getAzureClient().createCloudService(aCSCR.getProps());
-        String requestId = (String) aCSCR.getAzureClient().getRequestId(cloudServiceResponse);
-        waitUntilComplete(aCSCR.getAzureClient(), requestId);
+        AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(aCSCR.getAzureClient(), cloudServiceResponse, aCSCR.getStack());
+        azureResourcePollerObjectPollingService.pollWithTimeout(azureResourceStatusCheckerTask, azureResourcePollerObject,
+                POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
         return true;
     }
 
@@ -89,7 +97,7 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
         props.put(DESCRIPTION, azureTemplate.getDescription());
         props.put(AFFINITYGROUP, provisionContextObject.getCommonName());
         return new AzureCloudServiceCreateRequest(props, azureStackUtil.createAzureClient((AzureCredential) stack.getCredential()),
-                resources, buildResources);
+                resources, buildResources, stack);
     }
 
     @Override
@@ -101,12 +109,19 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
         private Map<String, String> props = new HashMap<>();
         private AzureClient azureClient;
         private List<Resource> resources;
+        private Stack stack;
 
-        public AzureCloudServiceCreateRequest(Map<String, String> props, AzureClient azureClient, List<Resource> resources, List<Resource> buildNames) {
+        public AzureCloudServiceCreateRequest(Map<String, String> props, AzureClient azureClient, List<Resource> resources, List<Resource> buildNames,
+                Stack stack) {
             super(buildNames);
             this.props = props;
             this.azureClient = azureClient;
             this.resources = resources;
+            this.stack = stack;
+        }
+
+        public Stack getStack() {
+            return stack;
         }
 
         public Map<String, String> getProps() {
