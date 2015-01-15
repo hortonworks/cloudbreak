@@ -111,7 +111,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 $scope.modifyStatusClass("has-error");
             });
         }
-
         $scope.changeActiveCluster = function (clusterId) {
             $rootScope.activeCluster = $filter('filter')($rootScope.clusters, { id: clusterId })[0];
             $rootScope.activeClusterBlueprint = $filter('filter')($rootScope.blueprints, { id: $rootScope.activeCluster.blueprintId})[0];
@@ -119,8 +118,31 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             $rootScope.activeCluster.cloudPlatform =  $rootScope.activeClusterCredential.cloudPlatform;
             GlobalStack.get({ id: clusterId }, function(success) {
                     $rootScope.activeCluster.description = success.description;
+                    $scope.pagination = {
+                                currentPage: 1,
+                                itemsPerPage: 10,
+                                totalItems: $rootScope.activeCluster.metadata.length
+                    }
                 }
             );
+        }
+         $scope.$watch('pagination.currentPage + pagination.itemsPerPage', function(){
+            if ($rootScope.activeCluster.metadata != null) {
+                paginateMetadata();
+            }
+         });
+         
+        $scope.orderMetadataBy = function(predicate, reverse) {
+            if ($rootScope.activeCluster.metadata != null) {
+                $rootScope.activeCluster.metadata = $filter('orderBy')($rootScope.activeCluster.metadata, predicate, reverse);
+                paginateMetadata();
+            }
+        }
+        
+        function paginateMetadata() {
+            var begin = (($scope.pagination.currentPage - 1) * $scope.pagination.itemsPerPage),
+            end = begin + $scope.pagination.itemsPerPage;
+            $scope.filteredActiveClusterData = $rootScope.activeCluster.metadata.slice(begin, end);
         }
 
         $scope.getSelectedTemplate = function (templateId) {

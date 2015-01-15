@@ -2,7 +2,7 @@
 
 /* App Module */
 
-var cloudbreakApp = angular.module('cloudbreakApp', ['ngRoute', 'base64', 'blockUI', 'uluwatuControllers', 'uluwatuServices']);
+var cloudbreakApp = angular.module('cloudbreakApp', ['ngRoute', 'base64', 'blockUI', 'ui.bootstrap', 'uluwatuControllers', 'uluwatuServices']);
 
 
 cloudbreakApp.directive('match', function($parse) {

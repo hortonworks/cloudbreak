@@ -107,25 +107,44 @@
                                 <h5><a href="" data-toggle="collapse" data-target="#panel-collapse0002"><i class="fa fa-align-justify fa-fw"></i>Cloud stack description: {{activeCluster.name}}</a></h5>
                             </div>
                             <div id="panel-collapse0002" class="panel-collapse collapse">
-                                <div class="panel-body">
-                                        <table class="table table-report table-sortable-cols table-with-pagination table-condensed" style="background-color: transparent;">
+                                <div class="panel-body pagination">
+                                        <select name="itemsPerPageSelector" class="form-control pull-right" style="width: auto" data-live-search="true" ng-model="pagination.itemsPerPage">
+                                             <option selected value="10">10</option>
+                                             <option value="25">25</option>
+                                             <option value="50">50</option>
+                                             <option value="100">100</option>
+                                        </select>
+                                        <table id="metadataTable" class="table table-report table-sortable-cols table-with-pagination table-condensed" style="background-color: transparent;">
                                             <thead>
-                                            <tr>
-                                                <th class="col-md-4">Name</th>
-                                                <th class="col-md-3">Private Adress</th>
-                                                <th class="col-md-3">Public Address</th>
-                                                <th class="col-md-2">Hostgroup Name</th>
-                                            </tr>
+                                              <tr>
+                                                 <th>
+                                                 <a title="sort by" ng-click="reverse=!reverse;orderMetadataBy('longName',reverse)">Name</a>
+                                                 <i class="fa fa-sort"></i>
+                                                 </th>
+                                                 <th>
+                                                 <a title="sort by" ng-click="reverse=!reverse;orderMetadataBy('privateIp',reverse)">Private Address</a>
+                                                 <i class="fa fa-sort"></i>
+                                                 </th>
+                                                 <th>
+                                                 <a title="sort by" ng-click="reverse=!reverse;orderMetadataBy('publicIp',reverse)">Public Address</a>
+                                                 <i class="fa fa-sort"></i>
+                                                 </th>
+                                                 <th>
+                                                 <a title="sort by" ng-click="reverse=!reverse;orderMetadataBy('hostgroup',reverse)">Hostgroup Name</a>
+                                                 </th>
+                                               </tr>
                                             </thead>
                                             <tbody>
-                                            <tr ng-repeat="instance in activeCluster.metadata">
-                                                <td class="col-md-4">{{instance.longName}}</td>
-                                                <td class="col-md-3">{{instance.privateIp}}</td>
-                                                <td class="col-md-3">{{instance.publicIp}}</td>
-                                                <td class="col-md-2"><span class="label label-default">{{instance.hostgroup}}</span></td>
+                                            <tr ng-repeat="instance in filteredActiveClusterData">
+                                                <td data-title="'name'" class="col-md-4">{{instance.longName}}</td>
+                                                <td data-title="'public IP'" class="col-md-3">{{instance.publicIp}}</td>
+                                                <td data-title="'private IP'" class="col-md-3">{{instance.privateIp}}</td>
+                                                <td data-title="'host group'" class="col-md-2"><span class="label label-default">{{instance.hostgroup}}</span></td>
                                             </tr>
                                             </tbody>
                                         </table>
+                                        <pagination boundary-links="true" total-items="pagination.totalItems" items-per-page="pagination.itemsPerPage"
+                                             ng-model="pagination.currentPage" max-size="10"></pagination>
                                 </div>
                             </div>
                         </div>
