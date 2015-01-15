@@ -33,7 +33,7 @@ public class TemplateGroupConverter extends AbstractConverter<TemplateGroupJson,
         TemplateGroup templateGroup = new TemplateGroup();
         templateGroup.setGroupName(json.getGroup());
         templateGroup.setNodeCount(Integer.valueOf(String.valueOf(json.getNodeCount())));
-        if (json.getGroup().contains("master") && json.getNodeCount() != 1) {
+        if (!json.getGroup().contains("slave") && json.getNodeCount() != 1) {
             throw new BadRequestException("If you have a master hostgroup than the count of the nodes has to be 1 on master group.");
         }
         try {
