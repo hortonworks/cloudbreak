@@ -122,11 +122,11 @@
                                                  <i class="fa fa-sort"></i>
                                                  </th>
                                                  <th>
-                                                 <a title="sort by" ng-click="reverse=!reverse;orderMetadataBy('privateIp',reverse)">Private Address</a>
+                                                 <a title="sort by" ng-click="reverse=!reverse;orderMetadataBy('publicIp',reverse)">Public Address</a>
                                                  <i class="fa fa-sort"></i>
                                                  </th>
                                                  <th>
-                                                 <a title="sort by" ng-click="reverse=!reverse;orderMetadataBy('publicIp',reverse)">Public Address</a>
+                                                 <a title="sort by" ng-click="reverse=!reverse;orderMetadataBy('privateIp',reverse)">Private Address</a>
                                                  <i class="fa fa-sort"></i>
                                                  </th>
                                                  <th>
