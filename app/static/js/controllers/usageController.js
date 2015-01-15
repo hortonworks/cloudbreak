@@ -84,9 +84,9 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
           var endDay = new Date(filterEndDate.getFullYear(), filterEndDate.getMonth(), filterEndDate.getDate(), 0, 0, 0, 0);
           while(startDay <= endDay) {
             var shortDate = startDay.getFullYear()+'-'+(startDay.getMonth()+1)+'-'+startDay.getDate();
-            chartsData.gcp.push({ 'date': shortDate, 'hours': parseInt(0)});
-            chartsData.azure.push({ 'date': shortDate, 'hours': parseInt(0)});
-            chartsData.aws.push({ 'date': shortDate, 'hours': parseInt(0)});
+            chartsData.gcp.push({ 'date': startDay.getTime(), 'hours': parseInt(0)});
+            chartsData.azure.push({ 'date': startDay.getTime(), 'hours': parseInt(0)});
+            chartsData.aws.push({ 'date': startDay.getTime(), 'hours': parseInt(0)});
             startDay.setDate(startDay.getDate()+1);
           }
         }
@@ -123,8 +123,8 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
 
         function addUsageToChartsData(item, chartsDataByProvider) {
           var actDay = new Date(item.day);
-          var shortDate = actDay.getFullYear()+'-'+(actDay.getMonth()+1)+'-'+actDay.getDate();
-          var chartData = $filter('filter')(chartsDataByProvider, { 'date': shortDate}, true);
+          var shortDate = new Date(actDay.getFullYear(), actDay.getMonth(), actDay.getDate(), 0, 0, 0, 0);
+          var chartData = $filter('filter')(chartsDataByProvider, { 'date': shortDate.getTime()}, true);
           if (chartData.length > 0) {
             chartData[0].hours += item.instanceHours;
           }
