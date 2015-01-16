@@ -35,7 +35,7 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
     private ClusterConverter clusterConverter;
 
     @Autowired
-    private TemplateGroupConverter templateGroupConverter;
+    private InstanceGroupConverter instanceGroupConverter;
 
     @Autowired
     private MetaDataConverter metaDataConverter;
@@ -58,7 +58,7 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
         stackJson.setHash(entity.getHash());
         stackJson.setRegion(entity.getRegion());
         List<InstanceGroupJson> templateGroups = new ArrayList<>();
-        templateGroups.addAll(templateGroupConverter.convertAllEntityToJson(entity.getInstanceGroups()));
+        templateGroups.addAll(instanceGroupConverter.convertAllEntityToJson(entity.getInstanceGroups()));
         stackJson.setInstanceGroups(templateGroups);
         stackJson.setMetadata(metaDataConverter.convertAllEntityToJson(entity.getInstanceMetaData()));
         if (entity.getCluster() != null) {
@@ -83,9 +83,9 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
             throw new AccessDeniedException(String.format("Access to credential '%s' is denied or credential doesn't exist.", json.getCredentialId()), e);
         }
         stack.setStatus(Status.REQUESTED);
-        stack.setInstanceGroups(templateGroupConverter.convertAllJsonToEntity(json.getInstanceGroups(), stack));
+        stack.setInstanceGroups(instanceGroupConverter.convertAllJsonToEntity(json.getInstanceGroups(), stack));
         if (stack.getFullNodeCount() < MIN_NODE_COUNT) {
-            throw new BadRequestException("NodeCount of stack has to be more than 3.");
+            throw new BadRequestException("NodeCount of stack has to be at least 3.");
         }
         return stack;
     }

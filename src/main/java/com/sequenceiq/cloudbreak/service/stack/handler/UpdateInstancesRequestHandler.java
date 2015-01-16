@@ -118,7 +118,7 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
                                     stackUpdater.addStackResources(stack.getId(), createResourceRequest.getBuildableResources());
                                     resources.addAll(createResourceRequest.getBuildableResources());
                                     resourceSet.addAll(createResourceRequest.getBuildableResources());
-                                    resourceBuilder.create(createResourceRequest, stack.getTemplateSetAsList().get(0), stack.getRegion());
+                                    resourceBuilder.create(createResourceRequest, stack.getInstanceGroupsAsList().get(0), stack.getRegion());
                                 }
                                 return true;
                             }

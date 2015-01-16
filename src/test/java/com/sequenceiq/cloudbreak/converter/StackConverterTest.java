@@ -68,7 +68,7 @@ public class StackConverterTest {
     private ClusterConverter clusterConverter;
 
     @Mock
-    private TemplateGroupConverter templateGroupConverter;
+    private InstanceGroupConverter instanceGroupConverter;
 
     @Mock
     private MetaDataConverter metaDataConverter;
@@ -91,9 +91,9 @@ public class StackConverterTest {
         awsTemplate.setId(DUMMY_ID);
         stack = createStack();
         stackJson = createStackJson();
-        given(templateGroupConverter.convertAllJsonToEntity(anySetOf(InstanceGroupJson.class)))
+        given(instanceGroupConverter.convertAllJsonToEntity(anySetOf(InstanceGroupJson.class)))
                 .willReturn(new HashSet<InstanceGroup>());
-        given(templateGroupConverter.convertAllEntityToJson(anySetOf(InstanceGroup.class)))
+        given(instanceGroupConverter.convertAllEntityToJson(anySetOf(InstanceGroup.class)))
                 .willReturn(new HashSet<InstanceGroupJson>());
     }
 

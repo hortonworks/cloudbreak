@@ -78,7 +78,7 @@ public class ClusterConverter {
             }
             hostGroupCount++;
             if (!find) {
-                throw new BadRequestException(String.format("Hostgroup with '%s' name was not defined as instancegroup", name));
+                throw new BadRequestException(String.format("The name of host group '%s' doesn't match any of the defined instance groups.", name));
             }
         }
         if (stack.getInstanceGroups().size() != hostGroupCount) {

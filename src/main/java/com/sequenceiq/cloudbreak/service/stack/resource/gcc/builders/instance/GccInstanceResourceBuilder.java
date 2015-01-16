@@ -69,8 +69,8 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
         ins.setPrettyPrint(Boolean.TRUE);
         Operation execute = ins.execute();
         if (execute.getHttpErrorStatusCode() == null) {
-            Compute.ZoneOperations.Get zoneOperations = createZoneOperations(gICR.getCompute(),
-                    gICR.getGccCredential(), execute, GccZone.valueOf(stack.getRegion()));
+            Compute.ZoneOperations.Get zoneOperations = createZoneOperations(gICR.getCompute(), gICR.getGccCredential(), execute,
+                    GccZone.valueOf(stack.getRegion()));
             GccResourceReadyPollerObject instReady = new GccResourceReadyPollerObject(zoneOperations, stack, gICR.getInstance().getName(), execute.getName());
             gccInstanceReadyPollerObjectPollingService.pollWithTimeout(gccResourceCheckerStatus, instReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
             return true;
@@ -84,6 +84,7 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
         for (Resource resource : filterResourcesByType(resources, ResourceType.GCC_ATTACHED_DISK)) {
             AttachedDisk attachedDisk = new AttachedDisk();
             attachedDisk.setBoot(false);
+            attachedDisk.setAutoDelete(true);
             attachedDisk.setType(GccDiskType.PERSISTENT.getValue());
             attachedDisk.setMode(GccDiskMode.READ_WRITE.getValue());
             attachedDisk.setDeviceName(resource.getResourceName());
@@ -99,6 +100,7 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
         for (Resource resource : filterResourcesByType(resources, ResourceType.GCC_DISK)) {
             AttachedDisk attachedDisk = new AttachedDisk();
             attachedDisk.setBoot(true);
+            attachedDisk.setAutoDelete(true);
             attachedDisk.setType(GccDiskType.PERSISTENT.getValue());
             attachedDisk.setMode(GccDiskMode.READ_WRITE.getValue());
             attachedDisk.setDeviceName(resource.getResourceName());

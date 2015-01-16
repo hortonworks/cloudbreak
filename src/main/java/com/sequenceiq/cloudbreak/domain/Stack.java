@@ -396,10 +396,8 @@ public class Stack implements ProvisionEntity {
         return nodeCount;
     }
 
-    public List<InstanceGroup> getTemplateSetAsList() {
-        List<InstanceGroup> instanceGroupsList = new ArrayList();
-        instanceGroupsList.addAll(instanceGroups);
-        return instanceGroupsList;
+    public List<InstanceGroup> getInstanceGroupsAsList() {
+        return new ArrayList<>(instanceGroups);
     }
 
     public CloudPlatform cloudPlatform() {

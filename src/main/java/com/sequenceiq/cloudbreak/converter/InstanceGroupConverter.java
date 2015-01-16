@@ -23,7 +23,7 @@ public class InstanceGroupConverter extends AbstractConverter<InstanceGroupJson,
         InstanceGroupJson instanceGroupJson = new InstanceGroupJson();
         instanceGroupJson.setGroup(entity.getGroupName());
         instanceGroupJson.setId(entity.getId());
-        instanceGroupJson.setNodeCount(Integer.parseInt(entity.getNodeCount().toString()));
+        instanceGroupJson.setNodeCount(entity.getNodeCount());
         instanceGroupJson.setTemplateId(entity.getTemplate().getId());
         return instanceGroupJson;
     }
@@ -32,12 +32,12 @@ public class InstanceGroupConverter extends AbstractConverter<InstanceGroupJson,
     public InstanceGroup convert(InstanceGroupJson json) {
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setGroupName(json.getGroup());
-        instanceGroup.setNodeCount(Integer.valueOf(String.valueOf(json.getNodeCount())));
+        instanceGroup.setNodeCount(json.getNodeCount());
         if (!json.getGroup().contains("slave") && json.getNodeCount() != 1) {
             throw new BadRequestException("If you have a master hostgroup than the count of the nodes has to be 1 on master group.");
         }
         try {
-            instanceGroup.setTemplate(templateRepository.findOne(Long.valueOf(json.getTemplateId())));
+            instanceGroup.setTemplate(templateRepository.findOne(json.getTemplateId()));
         } catch (AccessDeniedException e) {
             throw new AccessDeniedException(String.format("Access to template '%s' is denied or template doesn't exist.", json.getTemplateId()), e);
         }

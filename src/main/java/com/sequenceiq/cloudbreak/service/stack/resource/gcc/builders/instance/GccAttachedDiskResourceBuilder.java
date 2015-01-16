@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.stack.resource.gcc.builders.instance;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -13,11 +12,9 @@ import org.springframework.core.annotation.Order;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Component;
 
-import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.Disk;
 import com.google.api.services.compute.model.Operation;
-import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.domain.GccTemplate;
@@ -91,22 +88,6 @@ public class GccAttachedDiskResourceBuilder extends GccSimpleInstanceResourceBui
 
     @Override
     public Boolean delete(Resource resource, GccDeleteContextObject deleteContextObject, String region) throws Exception {
-        Stack stack = stackRepository.findById(deleteContextObject.getStackId());
-        try {
-            GccCredential gccCredential = (GccCredential) stack.getCredential();
-            Operation operation = deleteContextObject.getCompute().disks()
-                    .delete(gccCredential.getProjectId(), GccZone.valueOf(region).getValue(), resource.getResourceName()).execute();
-            Compute.ZoneOperations.Get zoneOperations = createZoneOperations(deleteContextObject.getCompute(),
-                    gccCredential, operation, GccZone.valueOf(region));
-            Compute.GlobalOperations.Get globalOperations = createGlobalOperations(deleteContextObject.getCompute(), gccCredential, operation);
-            GccRemoveReadyPollerObject gccRemoveReady =
-                    new GccRemoveReadyPollerObject(zoneOperations, globalOperations, stack, resource.getResourceName(), operation.getName(), resourceType());
-            gccRemoveReadyPollerObjectPollingService.pollWithTimeout(gccRemoveCheckerStatus, gccRemoveReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
-        } catch (GoogleJsonResponseException ex) {
-            exceptionHandler(ex, resource.getResourceName(), stack);
-        } catch (IOException e) {
-            throw new InternalServerException(e.getMessage());
-        }
         return true;
     }
 
