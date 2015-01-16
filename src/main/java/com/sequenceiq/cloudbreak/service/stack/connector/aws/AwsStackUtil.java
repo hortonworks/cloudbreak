@@ -12,7 +12,6 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.ec2.AmazonEC2Client;
-import com.amazonaws.services.ec2.model.Tag;
 import com.amazonaws.services.sns.AmazonSNSClient;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -74,15 +73,6 @@ public class AwsStackUtil {
     public String encode(String userData) {
         byte[] encoded = Base64.encodeBase64(userData.getBytes());
         return new String(encoded);
-    }
-
-    public String getTagValueByName(com.amazonaws.services.ec2.model.Instance instance, String tagKey) {
-        for (Tag tag : instance.getTags()) {
-            if (tagKey.equals(tag.getKey())) {
-                return tag.getValue();
-            }
-        }
-        return "";
     }
 
     public void sleep(Stack stack, int duration) {
