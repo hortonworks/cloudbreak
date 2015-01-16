@@ -157,8 +157,6 @@ public class DefaultStackService implements StackService {
             throw new NotFoundException(String.format("Stack '%s' not found", id));
         }
         delete(stack, user);
-        LOGGER.info("Publishing {} event.", ReactorConfig.DELETE_REQUEST_EVENT);
-        reactor.notify(ReactorConfig.DELETE_REQUEST_EVENT, Event.wrap(new StackDeleteRequest(stack.cloudPlatform(), stack.getId())));
     }
 
     @Override
@@ -206,14 +204,15 @@ public class DefaultStackService implements StackService {
             throw new BadRequestException(String.format("Requested scaling adjustment on stack '%s' is 0. Nothing to do.", stackId));
         }
         if (0 > hostGroupAdjustmentJson.getScalingAdjustment()) {
-            if (-1 * hostGroupAdjustmentJson.getScalingAdjustment() > stack.getFullNodeCount()) {
+            if (-1 * hostGroupAdjustmentJson.getScalingAdjustment() >
+                    stack.getInstanceGroupByInstanceGroupName(hostGroupAdjustmentJson.getHostGroup()).getNodeCount()) {
                 throw new BadRequestException(String.format("There are %s instances in stack '%s'. Cannot remove %s instances.",
-                        stack.getFullNodeCount(), stackId,
+                        stack.getInstanceGroupByInstanceGroupName(hostGroupAdjustmentJson.getHostGroup()).getNodeCount(), stackId,
                         -1 * hostGroupAdjustmentJson.getScalingAdjustment()));
             }
             int removeableHosts = 0;
             for (InstanceMetaData metadataEntry : stack.getInstanceMetaData()) {
-                if (metadataEntry.isRemovable()) {
+                if (metadataEntry.isRemovable() && metadataEntry.getInstanceGroup().equals(hostGroupAdjustmentJson.getHostGroup())) {
                     removeableHosts++;
                 }
             }

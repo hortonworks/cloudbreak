@@ -266,7 +266,7 @@ public class RetryingStackUpdater {
     private Stack doUpdateNodeCount(Long stackId, Integer nodeCount, String hostGroup) {
         Stack stack = stackRepository.findById(stackId);
         MDCBuilder.buildMdcContext(stack);
-        stack.getTemplateAsGroup(hostGroup).setNodeCount(nodeCount);
+        stack.getInstanceGroupByInstanceGroupName(hostGroup).setNodeCount(nodeCount);
         stack = stackRepository.save(stack);
         LOGGER.info("Updated stack: [nodeCount: '{}'].", nodeCount);
         return stack;

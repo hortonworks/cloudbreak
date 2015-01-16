@@ -218,7 +218,7 @@ public class AwsConnector implements CloudPlatformConnector {
     @Override
     public boolean addInstances(Stack stack, String userData, Integer instanceCount, String hostGroup) {
         MDCBuilder.buildMdcContext(stack);
-        Integer requiredInstances = stack.getTemplateAsGroup(hostGroup).getNodeCount() + instanceCount;
+        Integer requiredInstances = stack.getInstanceGroupByInstanceGroupName(hostGroup).getNodeCount() + instanceCount;
         Regions region = Regions.valueOf(stack.getRegion());
         AwsCredential credential = (AwsCredential) stack.getCredential();
         AmazonAutoScalingClient amazonASClient = awsStackUtil.createAutoScalingClient(region, credential);

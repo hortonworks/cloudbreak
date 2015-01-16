@@ -101,7 +101,7 @@ public class GccStackUtil {
                     resource.getResourceName(),
                     executeInstance.getNetworkInterfaces().get(0).getNetworkIP(),
                     executeInstance.getNetworkInterfaces().get(0).getAccessConfigs().get(0).getNatIP(),
-                    stack.getTemplateAsGroup(resource.getInstanceGroup()).getTemplate().getVolumeCount(),
+                    stack.getInstanceGroupByInstanceGroupName(resource.getInstanceGroup()).getTemplate().getVolumeCount(),
                     longName(resource.getResourceName(), credential.getProjectId()),
                     resource.getInstanceGroup()
             );

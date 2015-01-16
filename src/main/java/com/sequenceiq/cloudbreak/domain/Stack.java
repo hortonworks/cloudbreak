@@ -379,7 +379,7 @@ public class Stack implements ProvisionEntity {
         return null;
     }
 
-    public InstanceGroup getTemplateAsGroup(String group) {
+    public InstanceGroup getInstanceGroupByInstanceGroupName(String group) {
         for (InstanceGroup instanceGroup : instanceGroups) {
             if (group.equals(instanceGroup.getGroupName())) {
                 return instanceGroup;
