@@ -8,47 +8,47 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.json.TemplateGroupJson;
+import com.sequenceiq.cloudbreak.controller.json.InstanceGroupJson;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.TemplateGroup;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 
 @Component
-public class TemplateGroupConverter extends AbstractConverter<TemplateGroupJson, TemplateGroup> {
+public class TemplateGroupConverter extends AbstractConverter<InstanceGroupJson, InstanceGroup> {
     @Autowired
     private TemplateRepository templateRepository;
 
     @Override
-    public TemplateGroupJson convert(TemplateGroup entity) {
-        TemplateGroupJson templateGroupJson = new TemplateGroupJson();
-        templateGroupJson.setGroup(entity.getGroupName());
-        templateGroupJson.setId(entity.getId());
-        templateGroupJson.setNodeCount(Integer.parseInt(entity.getNodeCount().toString()));
-        templateGroupJson.setTemplateId(entity.getTemplate().getId());
-        return templateGroupJson;
+    public InstanceGroupJson convert(InstanceGroup entity) {
+        InstanceGroupJson instanceGroupJson = new InstanceGroupJson();
+        instanceGroupJson.setGroup(entity.getGroupName());
+        instanceGroupJson.setId(entity.getId());
+        instanceGroupJson.setNodeCount(Integer.parseInt(entity.getNodeCount().toString()));
+        instanceGroupJson.setTemplateId(entity.getTemplate().getId());
+        return instanceGroupJson;
     }
 
     @Override
-    public TemplateGroup convert(TemplateGroupJson json) {
-        TemplateGroup templateGroup = new TemplateGroup();
-        templateGroup.setGroupName(json.getGroup());
-        templateGroup.setNodeCount(Integer.valueOf(String.valueOf(json.getNodeCount())));
+    public InstanceGroup convert(InstanceGroupJson json) {
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setGroupName(json.getGroup());
+        instanceGroup.setNodeCount(Integer.valueOf(String.valueOf(json.getNodeCount())));
         if (!json.getGroup().contains("slave") && json.getNodeCount() != 1) {
             throw new BadRequestException("If you have a master hostgroup than the count of the nodes has to be 1 on master group.");
         }
         try {
-            templateGroup.setTemplate(templateRepository.findOne(Long.valueOf(json.getTemplateId())));
+            instanceGroup.setTemplate(templateRepository.findOne(Long.valueOf(json.getTemplateId())));
         } catch (AccessDeniedException e) {
             throw new AccessDeniedException(String.format("Access to template '%s' is denied or template doesn't exist.", json.getTemplateId()), e);
         }
-        return templateGroup;
+        return instanceGroup;
     }
 
-    public Set<TemplateGroup> convertAllJsonToEntity(Collection<TemplateGroupJson> jsonList, Stack stack) {
-        Set<TemplateGroup> templateGroups = convertAllJsonToEntity(jsonList);
-        for (TemplateGroup templateGroup : templateGroups) {
-            templateGroup.setStack(stack);
+    public Set<InstanceGroup> convertAllJsonToEntity(Collection<InstanceGroupJson> jsonList, Stack stack) {
+        Set<InstanceGroup> instanceGroups = convertAllJsonToEntity(jsonList);
+        for (InstanceGroup instanceGroup : instanceGroups) {
+            instanceGroup.setStack(stack);
         }
-        return templateGroups;
+        return instanceGroups;
     }
 }

@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.TemplateGroup;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.service.stack.flow.dummy.DummyDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.flow.dummy.DummyProvisionContextObject;
 import com.sequenceiq.cloudbreak.service.stack.flow.dummy.DummyStartStopContextObject;
@@ -21,7 +21,7 @@ public class DummyExNetworkResourceBuilder
         implements ResourceBuilder<DummyProvisionContextObject, DummyDeleteContextObject, DummyStartStopContextObject> {
 
     @Override
-    public Boolean create(CreateResourceRequest createResourceRequest, TemplateGroup templateGroup, String region) throws Exception {
+    public Boolean create(CreateResourceRequest createResourceRequest, InstanceGroup instanceGroup, String region) throws Exception {
         throw new BadRequestException("It's a test");
     }
 
@@ -51,13 +51,13 @@ public class DummyExNetworkResourceBuilder
     }
 
     @Override
-    public List<Resource> buildResources(DummyProvisionContextObject provisionContextObject, int index, List<Resource> resources, TemplateGroup templateGroup) {
+    public List<Resource> buildResources(DummyProvisionContextObject provisionContextObject, int index, List<Resource> resources, InstanceGroup instanceGroup) {
         return Arrays.asList(new Resource(resourceType(), "network" + index, new Stack(), "master"));
     }
 
     @Override
     public CreateResourceRequest buildCreateRequest(DummyProvisionContextObject provisionContextObject, List<Resource> resources,
-            List<Resource> buildResources, int index, TemplateGroup templateGroup) throws Exception {
+            List<Resource> buildResources, int index, InstanceGroup instanceGroup) throws Exception {
         return new DummyExNetworkCreateRequest(new ArrayList<Resource>());
     }
 

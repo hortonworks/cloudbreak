@@ -49,7 +49,7 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.domain.TemplateGroup;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
@@ -138,8 +138,8 @@ public class AwsConnector implements CloudPlatformConnector {
                     throw e;
                 }
             }
-            for (TemplateGroup templateGroup : stack.getTemplateGroups()) {
-                String asGroupName = cfStackUtil.getAutoscalingGroupName(stack, templateGroup.getGroupName());
+            for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+                String asGroupName = cfStackUtil.getAutoscalingGroupName(stack, instanceGroup.getGroupName());
                 AmazonAutoScalingClient amazonASClient = awsStackUtil.createAutoScalingClient(Regions.valueOf(stack.getRegion()), awsCredential);
                 List<AutoScalingGroup> asGroups = amazonASClient.describeAutoScalingGroups(new DescribeAutoScalingGroupsRequest()
                         .withAutoScalingGroupNames(asGroupName)).getAutoScalingGroups();
@@ -183,23 +183,23 @@ public class AwsConnector implements CloudPlatformConnector {
         CreateStackRequest createStackRequest = createStackRequest()
                 .withStackName(stackName)
                 .withTemplateBody(cfTemplateBuilder.build("templates/aws-cf-stack.ftl",
-                        spotPriceNeeded(stack.getTemplateGroups()), stack.getTemplateSetAsList()))
+                        spotPriceNeeded(stack.getInstanceGroups()), stack.getTemplateSetAsList()))
                 .withNotificationARNs((String) setupProperties.get(SnsTopicManager.NOTIFICATION_TOPIC_ARN_KEY))
                 .withParameters(parameters);
         client.createStack(createStackRequest);
 
 
         Set<Resource> resources = new HashSet<>();
-        resources.add(new Resource(ResourceType.CLOUDFORMATION_STACK, stackName, stack, Lists.newArrayList(stack.getTemplateGroups()).get(0).getGroupName()));
+        resources.add(new Resource(ResourceType.CLOUDFORMATION_STACK, stackName, stack, Lists.newArrayList(stack.getInstanceGroups()).get(0).getGroupName()));
         Stack updatedStack = stackUpdater.updateStackResources(stack.getId(), resources);
         LOGGER.info("CloudFormation stack creation request sent with stack name: '{}' for stack: '{}'", stackName, updatedStack.getId());
     }
 
 
-    private boolean spotPriceNeeded(Set<TemplateGroup> templateGroups) {
+    private boolean spotPriceNeeded(Set<InstanceGroup> instanceGroups) {
         boolean spotPrice = true;
-        for (TemplateGroup templateGroup : templateGroups) {
-            AwsTemplate awsTemplate = (AwsTemplate) templateGroup.getTemplate();
+        for (InstanceGroup instanceGroup : instanceGroups) {
+            AwsTemplate awsTemplate = (AwsTemplate) instanceGroup.getTemplate();
             if (awsTemplate.getSpotPrice() == null) {
                 spotPrice = false;
             }
@@ -278,12 +278,12 @@ public class AwsConnector implements CloudPlatformConnector {
         AwsCredential credential = (AwsCredential) stack.getCredential();
         AmazonAutoScalingClient amazonASClient = awsStackUtil.createAutoScalingClient(region, credential);
         AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(region, credential);
-        for (TemplateGroup templateGroup : stack.getTemplateGroups()) {
-            String asGroupName = cfStackUtil.getAutoscalingGroupName(stack, templateGroup.getGroupName());
+        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+            String asGroupName = cfStackUtil.getAutoscalingGroupName(stack, instanceGroup.getGroupName());
             Set<InstanceMetaData> instanceMetaData = stack.getInstanceMetaData();
             Collection<String> instances = new ArrayList<>(instanceMetaData.size());
             for (InstanceMetaData instance : instanceMetaData) {
-                if (instance.getHostGroup().equals(templateGroup.getGroupName())) {
+                if (instance.getInstanceGroup().equals(instanceGroup.getGroupName())) {
                     instances.add(instance.getInstanceId());
                 }
             }

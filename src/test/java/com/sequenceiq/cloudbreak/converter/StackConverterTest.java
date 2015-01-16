@@ -27,7 +27,7 @@ import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.ClusterResponse;
 import com.sequenceiq.cloudbreak.controller.json.InstanceMetaDataJson;
 import com.sequenceiq.cloudbreak.controller.json.StackJson;
-import com.sequenceiq.cloudbreak.controller.json.TemplateGroupJson;
+import com.sequenceiq.cloudbreak.controller.json.InstanceGroupJson;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
@@ -35,7 +35,7 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.domain.TemplateGroup;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 
@@ -91,10 +91,10 @@ public class StackConverterTest {
         awsTemplate.setId(DUMMY_ID);
         stack = createStack();
         stackJson = createStackJson();
-        given(templateGroupConverter.convertAllJsonToEntity(anySetOf(TemplateGroupJson.class)))
-                .willReturn(new HashSet<TemplateGroup>());
-        given(templateGroupConverter.convertAllEntityToJson(anySetOf(TemplateGroup.class)))
-                .willReturn(new HashSet<TemplateGroupJson>());
+        given(templateGroupConverter.convertAllJsonToEntity(anySetOf(InstanceGroupJson.class)))
+                .willReturn(new HashSet<InstanceGroup>());
+        given(templateGroupConverter.convertAllEntityToJson(anySetOf(InstanceGroup.class)))
+                .willReturn(new HashSet<InstanceGroupJson>());
     }
 
     @Test
@@ -215,7 +215,7 @@ public class StackConverterTest {
         stack.setPublicInAccount(true);
         stack.setAccount(DUMMY_NAME);
         stack.setOwner(DUMMY_NAME);
-        stack.setTemplateGroups(new HashSet<TemplateGroup>());
+        stack.setInstanceGroups(new HashSet<InstanceGroup>());
         return stack;
     }
 
@@ -235,7 +235,7 @@ public class StackConverterTest {
         //stackJson.setNodeCount(NODE_COUNT);
         stackJson.setStatus(Status.AVAILABLE);
         //stackJson.setTemplateId(DUMMY_ID);
-        stackJson.setTemplateGroups(new ArrayList<TemplateGroupJson>());
+        stackJson.setInstanceGroups(new ArrayList<InstanceGroupJson>());
         return stackJson;
     }
 

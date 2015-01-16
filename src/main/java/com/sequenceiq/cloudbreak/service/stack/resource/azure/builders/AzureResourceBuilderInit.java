@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.TemplateGroup;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
@@ -62,10 +62,10 @@ public class AzureResourceBuilderInit implements
         AzureClient azureClient = azureStackUtil.createAzureClient((AzureCredential) stack.getCredential());
         List<Resource> resourceList = new ArrayList<>();
         for (String res : decommissionSet) {
-            List<TemplateGroup> templateGroups = Lists.newArrayList(stack.getTemplateGroups());
-            resourceList.add(new Resource(ResourceType.AZURE_VIRTUAL_MACHINE, res, stack, templateGroups.get(0).getGroupName()));
-            resourceList.add(new Resource(ResourceType.AZURE_SERVICE_CERTIFICATE, res, stack, templateGroups.get(0).getGroupName()));
-            resourceList.add(new Resource(ResourceType.AZURE_CLOUD_SERVICE, res, stack, templateGroups.get(0).getGroupName()));
+            List<InstanceGroup> instanceGroups = Lists.newArrayList(stack.getInstanceGroups());
+            resourceList.add(new Resource(ResourceType.AZURE_VIRTUAL_MACHINE, res, stack, instanceGroups.get(0).getGroupName()));
+            resourceList.add(new Resource(ResourceType.AZURE_SERVICE_CERTIFICATE, res, stack, instanceGroups.get(0).getGroupName()));
+            resourceList.add(new Resource(ResourceType.AZURE_CLOUD_SERVICE, res, stack, instanceGroups.get(0).getGroupName()));
         }
         AzureDeleteContextObject azureDeleteContextObject =
                 new AzureDeleteContextObject(stack.getId(), credential.getCommonName(azureLocation), azureClient, resourceList);

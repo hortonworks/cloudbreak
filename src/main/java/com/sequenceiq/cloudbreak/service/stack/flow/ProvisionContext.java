@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
-import com.sequenceiq.cloudbreak.domain.TemplateGroup;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -90,19 +90,19 @@ public class ProvisionContext {
                                 resourceBuilder.buildCreateRequest(pCO,
                                         Lists.newArrayList(resourceSet),
                                         resourceBuilder.buildResources(pCO, 0, Arrays.asList(resourceSet),
-                                                Lists.newArrayList(stack.getTemplateGroups()).get(0)),
+                                                Lists.newArrayList(stack.getInstanceGroups()).get(0)),
                                         0,
-                                        Lists.newArrayList(stack.getTemplateGroups()).get(0));
+                                        Lists.newArrayList(stack.getInstanceGroups()).get(0));
                         stackUpdater.addStackResources(stack.getId(), createResourceRequest.getBuildableResources());
                         resourceSet.addAll(createResourceRequest.getBuildableResources());
                         pCO.getNetworkResources().addAll(createResourceRequest.getBuildableResources());
-                        List<TemplateGroup> templateGroups = Lists.newArrayList(stack.getTemplateGroups());
-                        resourceBuilder.create(createResourceRequest, templateGroups.get(0), stack.getRegion());
+                        List<InstanceGroup> instanceGroups = Lists.newArrayList(stack.getInstanceGroups());
+                        resourceBuilder.create(createResourceRequest, instanceGroups.get(0), stack.getRegion());
                     }
                     List<Future<Boolean>> futures = new ArrayList<>();
                     int fullIndex = 0;
-                    for (final TemplateGroup stringTemplateGroupEntry : stack.getTemplateGroups()) {
-                        for (int i = 0; i < stringTemplateGroupEntry.getNodeCount(); i++) {
+                    for (final InstanceGroup stringInstanceGroupEntry : stack.getInstanceGroups()) {
+                        for (int i = 0; i < stringInstanceGroupEntry.getNodeCount(); i++) {
                             final int index = fullIndex;
                             final Stack finalStack = stack;
                             Future<Boolean> submit = resourceBuilderExecutor.submit(new Callable<Boolean>() {
@@ -114,11 +114,11 @@ public class ProvisionContext {
                                         CreateResourceRequest createResourceRequest =
                                                 resourceBuilder.buildCreateRequest(pCO,
                                                         resources,
-                                                        resourceBuilder.buildResources(pCO, index, resources, stringTemplateGroupEntry),
+                                                        resourceBuilder.buildResources(pCO, index, resources, stringInstanceGroupEntry),
                                                         index,
-                                                        stringTemplateGroupEntry);
+                                                        stringInstanceGroupEntry);
                                         stackUpdater.addStackResources(finalStack.getId(), createResourceRequest.getBuildableResources());
-                                        resourceBuilder.create(createResourceRequest, stringTemplateGroupEntry, finalStack.getRegion());
+                                        resourceBuilder.create(createResourceRequest, stringInstanceGroupEntry, finalStack.getRegion());
                                         resources.addAll(createResourceRequest.getBuildableResources());
                                         LOGGER.info("Node {}. creation in progress resource {} creation finished.", index,
                                                 resourceBuilder.resourceBuilderType());

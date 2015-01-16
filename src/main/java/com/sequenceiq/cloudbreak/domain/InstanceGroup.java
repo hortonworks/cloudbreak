@@ -7,7 +7,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 
 @Entity
-public class TemplateGroup implements ProvisionEntity {
+public class InstanceGroup implements ProvisionEntity {
     @Id
     @GeneratedValue
     private Long id;

@@ -26,7 +26,7 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.TemplateGroup;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
@@ -74,21 +74,21 @@ public class AwsMetadataSetup implements MetadataSetup {
         AmazonAutoScalingClient amazonASClient = awsStackUtil.createAutoScalingClient(Regions.valueOf(stack.getRegion()), awsCredential);
         AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(Regions.valueOf(stack.getRegion()), awsCredential);
 
-        for (TemplateGroup templateGroup : stack.getTemplateGroups()) {
+        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             // wait until all instances are up
-            String asGroupName = cfStackUtil.getAutoscalingGroupName(stack, templateGroup.getGroupName());
-            AutoScalingGroupReady asGroupReady = new AutoScalingGroupReady(stack, amazonEC2Client, amazonASClient, asGroupName, templateGroup.getNodeCount());
+            String asGroupName = cfStackUtil.getAutoscalingGroupName(stack, instanceGroup.getGroupName());
+            AutoScalingGroupReady asGroupReady = new AutoScalingGroupReady(stack, amazonEC2Client, amazonASClient, asGroupName, instanceGroup.getNodeCount());
             LOGGER.info("Polling autoscaling group until new instances are ready. [stack: {}, asGroup: {}]", stack.getId(), asGroupName);
-            if (((AwsTemplate) templateGroup.getTemplate()).getSpotPrice() == null) {
+            if (((AwsTemplate) instanceGroup.getTemplate()).getSpotPrice() == null) {
                 pollingService.pollWithTimeout(asGroupStatusCheckerTask, asGroupReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
             } else {
                 pollingService.pollWithTimeout(asGroupStatusCheckerTask, asGroupReady, POLLING_INTERVAL, MAX_SPOT_POLLING_ATTEMPTS);
             }
         }
 
-        for (TemplateGroup templateGroup : stack.getTemplateGroups()) {
+        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             List<String> instanceIds = new ArrayList<>();
-            instanceIds.addAll(cfStackUtil.getInstanceIds(stack, amazonASClient, amazonCFClient, templateGroup.getGroupName()));
+            instanceIds.addAll(cfStackUtil.getInstanceIds(stack, amazonASClient, amazonCFClient, instanceGroup.getGroupName()));
             DescribeInstancesRequest instancesRequest = new DescribeInstancesRequest().withInstanceIds(instanceIds);
             DescribeInstancesResult instancesResult = amazonEC2Client.describeInstances(instancesRequest);
             for (Reservation reservation : instancesResult.getReservations()) {
@@ -100,7 +100,7 @@ public class AwsMetadataSetup implements MetadataSetup {
                             instance.getPublicDnsName(),
                             instance.getBlockDeviceMappings().size() - 1,
                             instance.getPrivateDnsName(),
-                            templateGroup.getGroupName()
+                            instanceGroup.getGroupName()
                             ));
                 }
             }
@@ -120,9 +120,9 @@ public class AwsMetadataSetup implements MetadataSetup {
                 Regions.valueOf(stack.getRegion()),
                 (AwsCredential) stack.getCredential());
 
-        for (TemplateGroup templateGroup : stack.getTemplateGroups()) {
+        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             List<String> instanceIds = new ArrayList<>();
-            instanceIds.addAll(cfStackUtil.getInstanceIds(stack, templateGroup.getGroupName()));
+            instanceIds.addAll(cfStackUtil.getInstanceIds(stack, instanceGroup.getGroupName()));
 
             DescribeInstancesRequest instancesRequest = new DescribeInstancesRequest().withInstanceIds(instanceIds);
             DescribeInstancesResult instancesResult = amazonEC2Client.describeInstances(instancesRequest);

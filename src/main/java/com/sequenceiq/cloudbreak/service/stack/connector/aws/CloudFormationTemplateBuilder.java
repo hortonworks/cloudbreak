@@ -11,7 +11,7 @@ import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
-import com.sequenceiq.cloudbreak.domain.TemplateGroup;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
@@ -22,7 +22,7 @@ public class CloudFormationTemplateBuilder {
     @Autowired
     private Configuration freemarkerConfiguration;
 
-    public String build(String templatePath, boolean spotPriced, List<TemplateGroup> templates) {
+    public String build(String templatePath, boolean spotPriced, List<InstanceGroup> templates) {
         Map<String, Object> model = new HashMap<>();
         model.put("templates", templates);
         model.put("useSpot", spotPriced);

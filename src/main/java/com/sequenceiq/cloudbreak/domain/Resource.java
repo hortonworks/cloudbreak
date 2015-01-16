@@ -14,7 +14,7 @@ public class Resource {
     @Id
     @GeneratedValue
     private Long id;
-    private String groupName;
+    private String instanceGroup;
 
     @Enumerated(EnumType.STRING)
     private ResourceType resourceType;
@@ -29,19 +29,19 @@ public class Resource {
 
     }
 
-    public Resource(ResourceType resourceType, String resourceName, Stack stack, String groupName) {
+    public Resource(ResourceType resourceType, String resourceName, Stack stack, String instanceGroup) {
         this.resourceType = resourceType;
         this.resourceName = resourceName;
-        this.groupName = groupName;
+        this.instanceGroup = instanceGroup;
         this.stack = stack;
     }
 
-    public String getGroupName() {
-        return groupName;
+    public String getInstanceGroup() {
+        return instanceGroup;
     }
 
-    public void setGroupName(String groupName) {
-        this.groupName = groupName;
+    public void setInstanceGroup(String instanceGroup) {
+        this.instanceGroup = instanceGroup;
     }
 
     public Long getId() {

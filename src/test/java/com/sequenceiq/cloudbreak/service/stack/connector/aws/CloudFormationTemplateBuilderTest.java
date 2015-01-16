@@ -16,7 +16,7 @@ import com.amazonaws.services.ec2.model.InstanceType;
 import com.amazonaws.services.ec2.model.VolumeType;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
-import com.sequenceiq.cloudbreak.domain.TemplateGroup;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 
 import freemarker.template.Configuration;
 
@@ -39,7 +39,7 @@ public class CloudFormationTemplateBuilderTest {
 
     @Test
     public void testBuildTemplateShouldCreateTwoDeviceNameEntriesWhenTwoVolumesAreSpecified() {
-        TemplateGroup templateGroup1 = new TemplateGroup();
+        InstanceGroup instanceGroup1 = new InstanceGroup();
         AwsTemplate awsTemplate = new AwsTemplate();
         awsTemplate.setInstanceType(InstanceType.C1Medium);
         awsTemplate.setSpotPrice(0.2);
@@ -48,11 +48,11 @@ public class CloudFormationTemplateBuilderTest {
         awsTemplate.setVolumeCount(2);
         awsTemplate.setVolumeSize(100);
         awsTemplate.setVolumeType(VolumeType.Gp2);
-        templateGroup1.setNodeCount(1);
-        templateGroup1.setTemplate(awsTemplate);
-        templateGroup1.setGroupName("master");
+        instanceGroup1.setNodeCount(1);
+        instanceGroup1.setTemplate(awsTemplate);
+        instanceGroup1.setGroupName("master");
         // WHEN
-        String result = underTest.build("templates/aws-cf-stack.ftl", false, Arrays.asList(templateGroup1));
+        String result = underTest.build("templates/aws-cf-stack.ftl", false, Arrays.asList(instanceGroup1));
         // THEN
         assertTrue(result.contains("\"DeviceName\" : \"/dev/xvdf\""));
         assertTrue(result.contains("\"DeviceName\" : \"/dev/xvdg\""));
@@ -61,7 +61,7 @@ public class CloudFormationTemplateBuilderTest {
 
     @Test
     public void testBuildTemplateShouldHaveSpotPriceSpecifiedWhenItIsSet() {
-        TemplateGroup templateGroup1 = new TemplateGroup();
+        InstanceGroup instanceGroup1 = new InstanceGroup();
         AwsTemplate awsTemplate = new AwsTemplate();
         awsTemplate.setInstanceType(InstanceType.C1Medium);
         awsTemplate.setSpotPrice(0.2);
@@ -70,18 +70,18 @@ public class CloudFormationTemplateBuilderTest {
         awsTemplate.setVolumeCount(1);
         awsTemplate.setVolumeSize(100);
         awsTemplate.setVolumeType(VolumeType.Gp2);
-        templateGroup1.setNodeCount(1);
-        templateGroup1.setTemplate(awsTemplate);
-        templateGroup1.setGroupName("master");
+        instanceGroup1.setNodeCount(1);
+        instanceGroup1.setTemplate(awsTemplate);
+        instanceGroup1.setGroupName("master");
         // WHEN
-        String result = underTest.build("templates/aws-cf-stack.ftl", true, Arrays.asList(templateGroup1));
+        String result = underTest.build("templates/aws-cf-stack.ftl", true, Arrays.asList(instanceGroup1));
         // THEN
         assertTrue(result.contains("\"SpotPrice\""));
     }
 
     @Test
     public void testBuildTemplateShouldNotHaveSpotPriceSpecifiedWhenItIsSetToFalse() {
-        TemplateGroup templateGroup1 = new TemplateGroup();
+        InstanceGroup instanceGroup1 = new InstanceGroup();
         AwsTemplate awsTemplate = new AwsTemplate();
         awsTemplate.setInstanceType(InstanceType.C1Medium);
         awsTemplate.setSshLocation("0.0.0.0/0");
@@ -89,11 +89,11 @@ public class CloudFormationTemplateBuilderTest {
         awsTemplate.setVolumeCount(1);
         awsTemplate.setVolumeSize(100);
         awsTemplate.setVolumeType(VolumeType.Gp2);
-        templateGroup1.setNodeCount(1);
-        templateGroup1.setTemplate(awsTemplate);
-        templateGroup1.setGroupName("master");
+        instanceGroup1.setNodeCount(1);
+        instanceGroup1.setTemplate(awsTemplate);
+        instanceGroup1.setGroupName("master");
         // WHEN
-        String result = underTest.build("templates/aws-cf-stack.ftl", false, Arrays.asList(templateGroup1));
+        String result = underTest.build("templates/aws-cf-stack.ftl", false, Arrays.asList(instanceGroup1));
         // THEN
         assertFalse(result.contains("\"SpotPrice\""));
     }
@@ -101,6 +101,6 @@ public class CloudFormationTemplateBuilderTest {
     @Test(expected = InternalServerException.class)
     public void testBuildTemplateShouldThrowInternalServerExceptionWhenTemplateDoesNotExist() {
         // WHEN
-        underTest.build("templates/non-existent.ftl", false, new ArrayList<TemplateGroup>());
+        underTest.build("templates/non-existent.ftl", false, new ArrayList<InstanceGroup>());
     }
 }

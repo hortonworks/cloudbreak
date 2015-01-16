@@ -39,7 +39,7 @@ public class ClusterController {
     @RequestMapping(value = "/stacks/{stackId}/cluster", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<String> create(@ModelAttribute("user") CbUser user, @PathVariable Long stackId, @RequestBody @Valid ClusterRequest clusterRequest) {
-        Cluster cluster = clusterConverter.convert(clusterRequest);
+        Cluster cluster = clusterConverter.convert(clusterRequest, stackId);
         clusterService.create(user, stackId, cluster);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }

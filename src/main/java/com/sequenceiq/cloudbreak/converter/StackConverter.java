@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.ClusterResponse;
 import com.sequenceiq.cloudbreak.controller.json.StackJson;
-import com.sequenceiq.cloudbreak.controller.json.TemplateGroupJson;
+import com.sequenceiq.cloudbreak.controller.json.InstanceGroupJson;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
@@ -57,9 +57,9 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
         stackJson.setPassword(entity.getPassword());
         stackJson.setHash(entity.getHash());
         stackJson.setRegion(entity.getRegion());
-        List<TemplateGroupJson> templateGroups = new ArrayList<>();
-        templateGroups.addAll(templateGroupConverter.convertAllEntityToJson(entity.getTemplateGroups()));
-        stackJson.setTemplateGroups(templateGroups);
+        List<InstanceGroupJson> templateGroups = new ArrayList<>();
+        templateGroups.addAll(templateGroupConverter.convertAllEntityToJson(entity.getInstanceGroups()));
+        stackJson.setInstanceGroups(templateGroups);
         stackJson.setMetadata(metaDataConverter.convertAllEntityToJson(entity.getInstanceMetaData()));
         if (entity.getCluster() != null) {
             stackJson.setCluster(clusterConverter.convert(entity.getCluster(), "{}"));
@@ -83,7 +83,7 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
             throw new AccessDeniedException(String.format("Access to credential '%s' is denied or credential doesn't exist.", json.getCredentialId()), e);
         }
         stack.setStatus(Status.REQUESTED);
-        stack.setTemplateGroups(templateGroupConverter.convertAllJsonToEntity(json.getTemplateGroups(), stack));
+        stack.setInstanceGroups(templateGroupConverter.convertAllJsonToEntity(json.getInstanceGroups(), stack));
         if (stack.getFullNodeCount() < MIN_NODE_COUNT) {
             throw new BadRequestException("NodeCount of stack has to be more than 3.");
         }

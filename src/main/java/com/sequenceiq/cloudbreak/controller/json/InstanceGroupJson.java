@@ -8,7 +8,7 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class TemplateGroupJson implements JsonEntity {
+public class InstanceGroupJson implements JsonEntity {
 
     private Long id;
     @NotNull
@@ -20,7 +20,7 @@ public class TemplateGroupJson implements JsonEntity {
     @NotNull
     private String group;
 
-    public TemplateGroupJson() {
+    public InstanceGroupJson() {
 
     }
 

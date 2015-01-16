@@ -45,7 +45,7 @@ public class StackJson implements JsonEntity {
     private ClusterResponse cluster;
     private String statusReason;
     private Set<InstanceMetaDataJson> metadata = new HashSet<>();
-    private List<TemplateGroupJson> templateGroups = new ArrayList<>();
+    private List<InstanceGroupJson> instanceGroups = new ArrayList<>();
 
     public StackJson() {
     }
@@ -84,12 +84,12 @@ public class StackJson implements JsonEntity {
         this.password = password;
     }
 
-    public List<TemplateGroupJson> getTemplateGroups() {
-        return templateGroups;
+    public List<InstanceGroupJson> getInstanceGroups() {
+        return instanceGroups;
     }
 
-    public void setTemplateGroups(List<TemplateGroupJson> templateGroups) {
-        this.templateGroups = templateGroups;
+    public void setInstanceGroups(List<InstanceGroupJson> instanceGroups) {
+        this.instanceGroups = instanceGroups;
     }
 
     @JsonProperty("cloudPlatform")

@@ -9,7 +9,7 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.TemplateGroup;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 
 @Service
 public class HadoopConfigurationService {
@@ -22,13 +22,13 @@ public class HadoopConfigurationService {
 
     public Map<String, Map<String, Map<String, String>>> getConfiguration(Stack stack) {
         Map<String, Map<String, Map<String, String>>> hadoopConfig = new HashMap<>();
-        for (TemplateGroup templateGroup : stack.getTemplateGroups()) {
+        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             Map<String, Map<String, String>> tmpConfig = new HashMap<>();
-            int volumeCount = templateGroup.getTemplate().getVolumeCount();
+            int volumeCount = instanceGroup.getTemplate().getVolumeCount();
             if (volumeCount > 0) {
                 tmpConfig.put(YARN_SITE, getYarnSiteConfigs(buildDiskPathString(volumeCount, "nodemanager")));
                 tmpConfig.put(HDFS_SITE, getHDFSSiteConfigs(buildDiskPathString(volumeCount, "datanode")));
-                hadoopConfig.put(templateGroup.getGroupName(), tmpConfig);
+                hadoopConfig.put(instanceGroup.getGroupName(), tmpConfig);
             }
         }
         return hadoopConfig;

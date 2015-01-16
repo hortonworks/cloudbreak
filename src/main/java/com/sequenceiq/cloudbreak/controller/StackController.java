@@ -57,9 +57,6 @@ public class StackController {
     @RequestMapping(value = "user/stacks", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<Set<StackJson>> getPrivateStacks(@ModelAttribute("user") CbUser user) {
-        /*Set<TemplateGroup> groups = new HashSet<>();
-        TemplateGroup
-        groups.add()*/
         Set<Stack> stacks = stackService.retrievePrivateStacks(user);
         return new ResponseEntity<>(stackConverter.convertAllEntityToJson(stacks), HttpStatus.OK);
     }

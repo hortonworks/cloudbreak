@@ -99,7 +99,7 @@ public class SnsMessageHandler {
             LOGGER.info("Publishing {} event.", ReactorConfig.PROVISION_COMPLETE_EVENT);
             Set<Resource> resourceSet = new HashSet<>();
             Resource resource = new Resource(ResourceType.CLOUDFORMATION_STACK, cfMessage.get("StackName"), stack,
-                    Lists.newArrayList(stack.getTemplateGroups()).get(0).getGroupName());
+                    Lists.newArrayList(stack.getInstanceGroups()).get(0).getGroupName());
             resourceSet.add(resource);
             stackUpdater.addStackResources(stack.getId(), Arrays.asList(resource));
             reactor.notify(ReactorConfig.PROVISION_COMPLETE_EVENT, Event.wrap(new ProvisionComplete(CloudPlatform.AWS, stack.getId(), resourceSet)));
