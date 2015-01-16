@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.azure;
 
 import java.io.IOException;
-
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
@@ -10,7 +10,8 @@ import com.sequenceiq.cloudbreak.domain.AzureCredential;
 public class KeyGeneratorService {
 
     public void generateKey(String user, AzureCredential azureCredential, String alias, String path) throws Exception {
-        sun.security.tools.KeyTool.main(new String[]{
+        String command = StringUtils.join(new String[]{
+                "keytool",
                 "-genkeypair",
                 "-alias", alias,
                 "-keyalg", "RSA",
@@ -18,8 +19,10 @@ public class KeyGeneratorService {
                 "-keysize", "2048",
                 "-keypass", AzureStackUtil.DEFAULT_JKS_PASS,
                 "-storepass", AzureStackUtil.DEFAULT_JKS_PASS,
-                "-dname", "cn=" + user + azureCredential.getPostFix() + ", ou=engineering, o=company, c=US"
-        });
+                "-dname", "cn=" + user + azureCredential.getPostFix() + ",ou=engineering,o=company,c=US"
+        }, " ");
+        Process p = Runtime.getRuntime().exec(command);
+        p.waitFor();
     }
 
     public void generateSshKey(String path) throws IOException, InterruptedException {
@@ -36,6 +39,5 @@ public class KeyGeneratorService {
             p.waitFor();
         }
     }
-
 
 }
