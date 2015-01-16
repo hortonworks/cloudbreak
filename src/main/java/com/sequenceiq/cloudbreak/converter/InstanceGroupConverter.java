@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 
 @Component
-public class TemplateGroupConverter extends AbstractConverter<InstanceGroupJson, InstanceGroup> {
+public class InstanceGroupConverter extends AbstractConverter<InstanceGroupJson, InstanceGroup> {
     @Autowired
     private TemplateRepository templateRepository;
 
