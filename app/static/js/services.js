@@ -149,7 +149,7 @@ uluwatuServices.factory('UluwatuCluster', ['UserStack', 'AccountStack', 'Cluster
                     password: cluster.password,
                     userName: cluster.userName,
                     region: cluster.region,
-                    templateGroups: cluster.templateGroups
+                    instanceGroups: cluster.instanceGroups
                 }
                 if (cluster.public) {
                     AccountStack.save(stack, function (result) {

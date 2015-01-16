@@ -69,21 +69,21 @@
                         <input type="checkbox" id="emailneeded" ng-model="cluster.email" name="emailneeded">
                       </div>
                     </div>
-                    <div class="form-group" ng-show="cluster.templateGroups">
+                    <div class="form-group" ng-show="cluster.instanceGroups">
                       <label class="col-sm-3 control-label" for="hostgroupconfig">Hostgroup configuration</label>
                       <div class="col-sm-8 col-sm-offset-1">
-                        <div ng-repeat="templateGroup in cluster.templateGroups" id="hostgroupconfig">
+                        <div ng-repeat="instanceGroup in cluster.instanceGroups" id="hostgroupconfig">
                           <div class="row">
                             <div>
                               <div class="panel panel-default" style="border-top-left-radius: 0.5em; border-top-right-radius: 0.5em;">
                                 <div class="panel-heading" style="border-top-left-radius: 0.5em; border-top-right-radius: 0.5em;">
-                                  <h3 class="panel-title">{{templateGroup.group}}</h3>
+                                  <h3 class="panel-title">{{instanceGroup.group}}</h3>
                                 </div>
                                 <div class="panel-body">
                                   <div class="form-group" >
                                     <label class="col-sm-3 control-label" for="templateNodeCount{{$index}}">Group size</label>
                                     <div class="col-sm-9">
-                                      <input type="number" name="templateNodeCount{{$index}}" class="form-control" ng-model="templateGroup.nodeCount" id="templateNodeCount{{$index}}" min="1"   max="100000" placeholder="1 - 100000" required>
+                                      <input type="number" name="templateNodeCount{{$index}}" class="form-control" ng-model="instanceGroup.nodeCount" id="templateNodeCount{{$index}}" min="1"   max="100000" placeholder="1 - 100000" required>
                                         <div class="help-block"
                                           ng-show="clusterCreationForm.templateNodeCount{{$index}}.$dirty && clusterCreationForm.templateNodeCount{{$index}}.$invalid"><i class="fa fa-warning"></i>
                                           {{error_msg.cluster_size_invalid}}
@@ -93,7 +93,7 @@
                                     <div class="form-group" >
                                       <label class="col-sm-3 control-label" for="templateName{{$index}}">Template</label>
                                       <div class="col-sm-9">
-                                        <select class="form-control" id="templateName{{$index}}" ng-model="templateGroup.templateId" required >
+                                        <select class="form-control" id="templateName{{$index}}" ng-model="instanceGroup.templateId" required >
                                           <option ng-repeat="template in $root.templates | orderBy:'name'" data-value="{{template.id}}" value="{{template.id}}" id="{{template.id}}" ng-if="template.cloudPlatform == activeCredential.cloudPlatform">{{template.name}}
                                           </option>
                                         </select>

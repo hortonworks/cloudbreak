@@ -58,7 +58,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             actualBp[0].ambariBlueprint.host_groups.forEach(function(k){
                 hostgroups.push({templateId: null, group: k.name, nodeCount: 0});
             });
-            $scope.cluster.templateGroups = hostgroups;
+            $scope.cluster.instanceGroups = hostgroups;
         }
 
         $scope.createCluster = function () {
@@ -78,7 +78,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             $scope.cluster.credentialId = $rootScope.activeCredential.id;
             UluwatuCluster.save($scope.cluster, function (result) {
                 var nodeCount = 0;
-                angular.forEach(result.templateGroups, function(group) {
+                angular.forEach(result.instanceGroups, function(group) {
                   nodeCount += group.nodeCount;
                 });
                 result.nodeCount = nodeCount;
@@ -131,14 +131,14 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 paginateMetadata();
             }
          });
-         
+
         $scope.orderMetadataBy = function(predicate, reverse) {
             if ($rootScope.activeCluster.metadata != null) {
                 $rootScope.activeCluster.metadata = $filter('orderBy')($rootScope.activeCluster.metadata, predicate, reverse);
                 paginateMetadata();
             }
         }
-        
+
         function paginateMetadata() {
             var begin = (($scope.pagination.currentPage - 1) * $scope.pagination.itemsPerPage),
             end = begin + $scope.pagination.itemsPerPage;
@@ -208,7 +208,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
               $rootScope.clusters = clusters;
               angular.forEach($rootScope.clusters, function(item) {
                    var nodeCount = 0;
-                   angular.forEach(item.templateGroups, function(group) {
+                   angular.forEach(item.instanceGroups, function(group) {
                        nodeCount += group.nodeCount;
                    });
                    item.nodeCount = nodeCount;
