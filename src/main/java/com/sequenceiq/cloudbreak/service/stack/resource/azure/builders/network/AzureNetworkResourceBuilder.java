@@ -83,7 +83,7 @@ public class AzureNetworkResourceBuilder extends AzureSimpleNetworkResourceBuild
     public List<Resource> buildResources(AzureProvisionContextObject provisionContextObject, int index, List<Resource> resources, InstanceGroup instanceGroup) {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         String s = stack.getName().replaceAll("\\s+", "") + String.valueOf(new Date().getTime());
-        return Arrays.asList(new Resource(resourceType(), s, stack, instanceGroup.getGroupName()));
+        return Arrays.asList(new Resource(resourceType(), s, stack, null));
     }
 
     @Override
