@@ -217,7 +217,8 @@ public class AwsConnector implements CloudPlatformConnector {
     @Override
     public boolean addInstances(Stack stack, String userData, Integer instanceCount, String hostGroup) {
         MDCBuilder.buildMdcContext(stack);
-        Integer requiredInstances = stack.getInstanceGroupByInstanceGroupName(hostGroup).getNodeCount() + instanceCount;
+        InstanceGroup instanceGroupByInstanceGroupName = stack.getInstanceGroupByInstanceGroupName(hostGroup);
+        Integer requiredInstances = instanceGroupByInstanceGroupName.getNodeCount() + instanceCount;
         Regions region = Regions.valueOf(stack.getRegion());
         AwsCredential credential = (AwsCredential) stack.getCredential();
         AmazonAutoScalingClient amazonASClient = awsStackUtil.createAutoScalingClient(region, credential);
@@ -227,8 +228,9 @@ public class AwsConnector implements CloudPlatformConnector {
                 .withAutoScalingGroupName(asGroupName)
                 .withMaxSize(requiredInstances)
                 .withDesiredCapacity(requiredInstances));
-        LOGGER.info("Updated AutoScaling group's desiredCapacity: [stack: '{}', from: '{}', to: '{}']", stack.getId(), stack.getFullNodeCount(),
-                stack.getFullNodeCount() + instanceCount);
+        LOGGER.info("Updated AutoScaling group's desiredCapacity: [stack: '{}', from: '{}', to: '{}']", stack.getId(),
+                instanceGroupByInstanceGroupName.getNodeCount(),
+                instanceGroupByInstanceGroupName.getNodeCount() + instanceCount);
         AutoScalingGroupReady asGroupReady = new AutoScalingGroupReady(stack, amazonEC2Client, amazonASClient, asGroupName, requiredInstances);
         LOGGER.info("Polling autoscaling group until new instances are ready. [stack: {}, asGroup: {}]", stack.getId(), asGroupName);
         pollingService.pollWithTimeout(asGroupStatusCheckerTask, asGroupReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
