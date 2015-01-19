@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
@@ -64,11 +65,13 @@ public class ClusterCreationSuccessHandler implements Consumer<Event<ClusterCrea
         cluster.setUpSince(clusterCreationSuccess.getCreationFinished());
         clusterRepository.save(cluster);
         Stack stack = stackRepository.findStackWithListsForCluster(clusterId);
-        Set<InstanceMetaData> instances = stack.getInstanceMetaData();
-        for (InstanceMetaData instanceMetaData : instances) {
-            instanceMetaData.setRemovable(false);
+        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+            Set<InstanceMetaData> instances = instanceGroup.getInstanceMetaData();
+            for (InstanceMetaData instanceMetaData : instances) {
+                instanceMetaData.setRemovable(false);
+            }
+            stackUpdater.updateStackMetaData(stack.getId(), instances, instanceGroup.getGroupName());
         }
-        stackUpdater.updateStackMetaData(stack.getId(), instances);
         stackUpdater.updateStackStatus(stack.getId(), Status.AVAILABLE, "Cluster installation successfully finished. AMBARI_IP:" + stack.getAmbariIp());
 
         if (cluster.getEmailNeeded()) {

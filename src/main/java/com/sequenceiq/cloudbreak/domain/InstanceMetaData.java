@@ -12,12 +12,12 @@ import javax.persistence.NamedQuery;
         @NamedQuery(
                 name = "InstanceMetaData.findHostInStack",
                 query = "SELECT i FROM InstanceMetaData i "
-                        + "WHERE i.stack.id= :stackId "
+                        + "WHERE i.instanceGroup.stack.id= :stackId "
                         + "AND i.longName= :hostName"),
         @NamedQuery(
                 name = "InstanceMetaData.findUnregisteredHostsInStack",
                 query = "SELECT i FROM InstanceMetaData i "
-                        + "WHERE i.stack.id= :stackId "
+                        + "WHERE i.instanceGroup.stack.id= :stackId "
                         + "AND i.removable= true")
 })
 public class InstanceMetaData implements ProvisionEntity {
@@ -35,18 +35,17 @@ public class InstanceMetaData implements ProvisionEntity {
     private Boolean removable;
     private Integer containerCount = 0;
     @ManyToOne
-    private Stack stack;
-    private String instanceGroup;
+    private InstanceGroup instanceGroup;
 
     public InstanceMetaData() {
 
     }
 
-    public String getInstanceGroup() {
+    public InstanceGroup getInstanceGroup() {
         return instanceGroup;
     }
 
-    public void setInstanceGroup(String instanceGroup) {
+    public void setInstanceGroup(InstanceGroup instanceGroup) {
         this.instanceGroup = instanceGroup;
     }
 
@@ -104,14 +103,6 @@ public class InstanceMetaData implements ProvisionEntity {
 
     public void setDockerSubnet(String dockerSubnet) {
         this.dockerSubnet = dockerSubnet;
-    }
-
-    public Stack getStack() {
-        return stack;
-    }
-
-    public void setStack(Stack stack) {
-        this.stack = stack;
     }
 
     public String getLongName() {

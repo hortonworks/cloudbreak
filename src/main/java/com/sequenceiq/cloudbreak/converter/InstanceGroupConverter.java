@@ -18,6 +18,9 @@ public class InstanceGroupConverter extends AbstractConverter<InstanceGroupJson,
     @Autowired
     private TemplateRepository templateRepository;
 
+    @Autowired
+    private MetaDataConverter metaDataConverter;
+
     @Override
     public InstanceGroupJson convert(InstanceGroup entity) {
         InstanceGroupJson instanceGroupJson = new InstanceGroupJson();
@@ -25,6 +28,7 @@ public class InstanceGroupConverter extends AbstractConverter<InstanceGroupJson,
         instanceGroupJson.setId(entity.getId());
         instanceGroupJson.setNodeCount(entity.getNodeCount());
         instanceGroupJson.setTemplateId(entity.getTemplate().getId());
+        instanceGroupJson.setMetadata(metaDataConverter.convertAllEntityToJson(entity.getInstanceMetaData()));
         return instanceGroupJson;
     }
 

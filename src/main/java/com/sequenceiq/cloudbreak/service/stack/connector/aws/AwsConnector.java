@@ -281,9 +281,8 @@ public class AwsConnector implements CloudPlatformConnector {
         AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(region, credential);
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             String asGroupName = cfStackUtil.getAutoscalingGroupName(stack, instanceGroup.getGroupName());
-            Set<InstanceMetaData> instanceMetaData = stack.getInstanceMetaData();
-            Collection<String> instances = new ArrayList<>(instanceMetaData.size());
-            for (InstanceMetaData instance : instanceMetaData) {
+            Collection<String> instances = new ArrayList<>();
+            for (InstanceMetaData instance : instanceGroup.getInstanceMetaData()) {
                 if (instance.getInstanceGroup().equals(instanceGroup.getGroupName())) {
                     instances.add(instance.getInstanceId());
                 }
@@ -300,7 +299,7 @@ public class AwsConnector implements CloudPlatformConnector {
                             new AwsInstances(stack, amazonEC2Client, new ArrayList(instances), "Running"),
                             AmbariClusterConnector.POLLING_INTERVAL,
                             AmbariClusterConnector.MAX_ATTEMPTS_FOR_AMBARI_OPS);
-                    updateInstanceMetadata(stack, amazonEC2Client, instanceMetaData, instances);
+                    updateInstanceMetadata(stack, amazonEC2Client, stack.getAllInstanceMetaData(), instances);
                 }
             } catch (Exception e) {
                 LOGGER.error(String.format("Failed to %s AWS instances on stack: %s", stopped ? "stop" : "start", stack.getId()));

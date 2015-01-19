@@ -5,6 +5,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anySet;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -18,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -54,7 +56,7 @@ public class AmbariRoleAllocatorTest {
     public void testAllocateRoles() {
         // GIVEN
         given(stackRepository.findById(1L)).willReturn(stack);
-        given(stackUpdater.updateStackMetaData(anyLong(), anySet())).willReturn(stack);
+        given(stackUpdater.updateStackMetaData(anyLong(), anySet(), anyString())).willReturn(stack);
         given(stackUpdater.updateMetadataReady(1L, true)).willReturn(updatedStack());
         // WHEN
         underTest.allocateRoles(1L, coreInstanceMetaData);
@@ -102,9 +104,11 @@ public class AmbariRoleAllocatorTest {
     private Set<CoreInstanceMetaData> createCoreInstanceMetaData() {
         Set<CoreInstanceMetaData> metaData = new HashSet<>();
         CoreInstanceMetaData data1 =
-                new CoreInstanceMetaData("instanceId1", "123.123.123.123", "dummyPublicIp1", 3, "john1.john.j5.internal.cloudapp.net", "master");
+                new CoreInstanceMetaData("instanceId1", "123.123.123.123", "dummyPublicIp1", 3, "john1.john.j5.internal.cloudapp.net",
+                        new InstanceGroup());
         CoreInstanceMetaData data2 =
-                new CoreInstanceMetaData("instanceId2", "123.123.123.124", "dummyPublicIp2", 3, "john2.john.j5.internal.cloudapp.net", "master");
+                new CoreInstanceMetaData("instanceId2", "123.123.123.124", "dummyPublicIp2", 3, "john2.john.j5.internal.cloudapp.net",
+                        new InstanceGroup());
         metaData.add(data1);
         metaData.add(data2);
         return metaData;

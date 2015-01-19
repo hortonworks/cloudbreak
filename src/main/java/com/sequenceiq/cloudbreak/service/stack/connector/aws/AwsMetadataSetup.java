@@ -100,7 +100,7 @@ public class AwsMetadataSetup implements MetadataSetup {
                             instance.getPublicDnsName(),
                             instance.getBlockDeviceMappings().size() - 1,
                             instance.getPrivateDnsName(),
-                            instanceGroup.getGroupName()
+                            instanceGroup
                             ));
                 }
             }
@@ -128,7 +128,7 @@ public class AwsMetadataSetup implements MetadataSetup {
             DescribeInstancesResult instancesResult = amazonEC2Client.describeInstances(instancesRequest);
             for (Reservation reservation : instancesResult.getReservations()) {
                 for (final com.amazonaws.services.ec2.model.Instance instance : reservation.getInstances()) {
-                    boolean metadataExists = FluentIterable.from(stack.getInstanceMetaData()).anyMatch(new Predicate<InstanceMetaData>() {
+                    boolean metadataExists = FluentIterable.from(instanceGroup.getInstanceMetaData()).anyMatch(new Predicate<InstanceMetaData>() {
                         @Override
                         public boolean apply(InstanceMetaData input) {
                             return input.getInstanceId().equals(instance.getInstanceId());
@@ -141,7 +141,7 @@ public class AwsMetadataSetup implements MetadataSetup {
                                 instance.getPublicDnsName(),
                                 instance.getBlockDeviceMappings().size() - 1,
                                 instance.getPrivateDnsName(),
-                                hostGroup
+                                instanceGroup
                         ));
                         LOGGER.info("New instance added to metadata: [stack: '{}', instanceId: '{}']", stack.getId(), instance.getInstanceId());
                     }

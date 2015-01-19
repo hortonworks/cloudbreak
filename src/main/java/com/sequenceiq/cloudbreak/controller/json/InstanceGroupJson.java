@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -19,6 +22,7 @@ public class InstanceGroupJson implements JsonEntity {
     private int nodeCount;
     @NotNull
     private String group;
+    private Set<InstanceMetaDataJson> metadata = new HashSet<>();
 
     public InstanceGroupJson() {
 
@@ -56,5 +60,15 @@ public class InstanceGroupJson implements JsonEntity {
 
     public void setGroup(String group) {
         this.group = group;
+    }
+
+    @JsonProperty("metadata")
+    public Set<InstanceMetaDataJson> getMetadata() {
+        return metadata;
+    }
+
+    @JsonIgnore
+    public void setMetadata(Set<InstanceMetaDataJson> metadata) {
+        this.metadata = metadata;
     }
 }

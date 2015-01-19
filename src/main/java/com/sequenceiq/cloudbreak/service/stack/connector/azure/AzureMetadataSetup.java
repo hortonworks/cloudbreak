@@ -109,7 +109,7 @@ public class AzureMetadataSetup implements MetadataSetup {
                     resource.getResourceName() + ".cloudapp.net",
                     stack.getInstanceGroupByInstanceGroupName(resource.getInstanceGroup()).getTemplate().getVolumeCount(),
                     getLongName((String) virtualMachine),
-                    resource.getInstanceGroup()
+                    stack.getInstanceGroupByInstanceGroupName(resource.getInstanceGroup())
                     );
             return instanceMetaData;
         } catch (IOException e) {

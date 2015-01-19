@@ -12,7 +12,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
@@ -53,8 +53,8 @@ public class ClusterCreationSuccessHandlerTest {
         cluster = new Cluster();
         cluster.setEmailNeeded(false);
         stack = new Stack();
-        Set<InstanceMetaData> instanceMetaData = new HashSet<>();
-        stack.setInstanceMetaData(instanceMetaData);
+        Set<InstanceGroup> instanceMetaData = new HashSet<>();
+        stack.setInstanceGroups(instanceMetaData);
         cluster.setOwner("John");
         cluster.setAccount("Acme");
     }

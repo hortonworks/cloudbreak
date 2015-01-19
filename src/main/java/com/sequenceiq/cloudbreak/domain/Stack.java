@@ -31,35 +31,30 @@ import javax.persistence.Version;
                 name = "Stack.findById",
                 query = "SELECT c FROM Stack c "
                         + "LEFT JOIN FETCH c.resources "
-                        + "LEFT JOIN FETCH c.instanceMetaData "
                         + "LEFT JOIN FETCH c.instanceGroups "
                         + "WHERE c.id= :id"),
         @NamedQuery(
                 name = "Stack.findAllStackForTemplate",
                 query = "SELECT c FROM Stack c inner join c.instanceGroups tg "
                         + "LEFT JOIN FETCH c.resources "
-                        + "LEFT JOIN FETCH c.instanceMetaData "
                         + "LEFT JOIN FETCH c.instanceGroups "
                         + "WHERE tg.template.id= :id"),
         @NamedQuery(
                 name = "Stack.findStackForCluster",
                 query = "SELECT c FROM Stack c "
                         + "LEFT JOIN FETCH c.resources "
-                        + "LEFT JOIN FETCH c.instanceMetaData "
                         + "LEFT JOIN FETCH c.instanceGroups "
                         + "WHERE c.cluster.id= :id"),
         @NamedQuery(
                 name = "Stack.findStackWithListsForCluster",
                 query = "SELECT c FROM Stack c "
                         + "LEFT JOIN FETCH c.resources "
-                        + "LEFT JOIN FETCH c.instanceMetaData "
                         + "LEFT JOIN FETCH c.instanceGroups "
                         + "WHERE c.cluster.id= :id"),
         @NamedQuery(
                 name = "Stack.findRequestedStacksWithCredential",
                 query = "SELECT c FROM Stack c "
                         + "LEFT JOIN FETCH c.resources "
-                        + "LEFT JOIN FETCH c.instanceMetaData "
                         + "LEFT JOIN FETCH c.instanceGroups "
                         + "WHERE c.credential.id= :credentialId "
                         + "AND c.status= 'REQUESTED'"),
@@ -67,7 +62,6 @@ import javax.persistence.Version;
                 name = "Stack.findOneWithLists",
                 query = "SELECT c FROM Stack c "
                         + "LEFT JOIN FETCH c.resources "
-                        + "LEFT JOIN FETCH c.instanceMetaData "
                         + "LEFT JOIN FETCH c.instanceGroups "
                         + "WHERE c.id= :id"),
         @NamedQuery(
@@ -78,14 +72,12 @@ import javax.persistence.Version;
                 name = "Stack.findForUser",
                 query = "SELECT s FROM Stack s "
                         + "LEFT JOIN FETCH s.resources "
-                        + "LEFT JOIN FETCH s.instanceMetaData "
                         + "LEFT JOIN FETCH s.instanceGroups "
                         + "WHERE s.owner= :user"),
         @NamedQuery(
                 name = "Stack.findPublicInAccountForUser",
                 query = "SELECT s FROM Stack s "
                         + "LEFT JOIN FETCH s.resources "
-                        + "LEFT JOIN FETCH s.instanceMetaData "
                         + "LEFT JOIN FETCH s.instanceGroups "
                         + "WHERE (s.account= :account AND s.publicInAccount= true) "
                         + "OR s.owner= :user"),
@@ -93,42 +85,36 @@ import javax.persistence.Version;
                 name = "Stack.findAllInAccount",
                 query = "SELECT s FROM Stack s "
                         + "LEFT JOIN FETCH s.resources "
-                        + "LEFT JOIN FETCH s.instanceMetaData "
                         + "LEFT JOIN FETCH s.instanceGroups "
                         + "WHERE s.account= :account "),
         @NamedQuery(
                 name = "Stack.findByAmbari",
                 query = "SELECT s from Stack s "
                         + "LEFT JOIN FETCH s.resources "
-                        + "LEFT JOIN FETCH s.instanceMetaData "
                         + "LEFT JOIN FETCH s.instanceGroups "
                         + "WHERE s.ambariIp= :ambariIp"),
         @NamedQuery(
                 name = "Stack.findOneByName",
                 query = "SELECT c FROM Stack c "
                         + "LEFT JOIN FETCH c.resources "
-                        + "LEFT JOIN FETCH c.instanceMetaData "
                         + "LEFT JOIN FETCH c.instanceGroups "
                         + "WHERE c.name= :name and c.account= :account"),
         @NamedQuery(
                 name = "Stack.findByIdInAccount",
                 query = "SELECT s FROM Stack s "
                         + "LEFT JOIN FETCH s.resources "
-                        + "LEFT JOIN FETCH s.instanceMetaData "
                         + "LEFT JOIN FETCH s.instanceGroups "
                         + "WHERE s.id= :id and ((s.account= :account and s.publicInAccount=true) or s.owner= :owner)"),
         @NamedQuery(
                 name = "Stack.findByNameInAccount",
                 query = "SELECT s FROM Stack s "
                         + "LEFT JOIN FETCH s.resources "
-                        + "LEFT JOIN FETCH s.instanceMetaData "
                         + "LEFT JOIN FETCH s.instanceGroups "
                         + "WHERE s.name= :name and ((s.account= :account and s.publicInAccount=true) or s.owner= :owner)"),
         @NamedQuery(
                 name = "Stack.findByNameInUser",
                 query = "SELECT t FROM Stack t "
                         + "LEFT JOIN FETCH t.resources "
-                        + "LEFT JOIN FETCH t.instanceMetaData "
                         + "LEFT JOIN FETCH t.instanceGroups "
                         + "WHERE t.owner= :owner and t.name= :name"),
         @NamedQuery(
@@ -136,7 +122,6 @@ import javax.persistence.Version;
                 query = "SELECT t FROM Stack t "
                         + "LEFT JOIN FETCH t.resources "
                         + "LEFT JOIN FETCH t.instanceGroups "
-                        + "LEFT JOIN FETCH t.instanceMetaData "
                         + "WHERE t.credential.id= :credentialId ")
 })
 public class Stack implements ProvisionEntity {
@@ -173,9 +158,6 @@ public class Stack implements ProvisionEntity {
     private String hash;
 
     private boolean metadataReady;
-
-    @OneToMany(mappedBy = "stack", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<InstanceMetaData> instanceMetaData = new HashSet<>();
 
     @OneToOne
     private Credential credential;
@@ -336,14 +318,6 @@ public class Stack implements ProvisionEntity {
         this.metadataReady = metadataReady;
     }
 
-    public Set<InstanceMetaData> getInstanceMetaData() {
-        return instanceMetaData;
-    }
-
-    public void setInstanceMetaData(Set<InstanceMetaData> instanceMetaData) {
-        this.instanceMetaData = instanceMetaData;
-    }
-
     public String getRegion() {
         return region;
     }
@@ -394,6 +368,14 @@ public class Stack implements ProvisionEntity {
             nodeCount += instanceGroup.getNodeCount();
         }
         return nodeCount;
+    }
+
+    public Set<InstanceMetaData> getAllInstanceMetaData() {
+        Set<InstanceMetaData> instanceMetaDatas = new HashSet<>();
+        for (InstanceGroup instanceGroup : instanceGroups) {
+            instanceMetaDatas.addAll(instanceGroup.getInstanceMetaData());
+        }
+        return instanceMetaDatas;
     }
 
     public List<InstanceGroup> getInstanceGroupsAsList() {

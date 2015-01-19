@@ -60,7 +60,6 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
         List<InstanceGroupJson> templateGroups = new ArrayList<>();
         templateGroups.addAll(instanceGroupConverter.convertAllEntityToJson(entity.getInstanceGroups()));
         stackJson.setInstanceGroups(templateGroups);
-        stackJson.setMetadata(metaDataConverter.convertAllEntityToJson(entity.getInstanceMetaData()));
         if (entity.getCluster() != null) {
             stackJson.setCluster(clusterConverter.convert(entity.getCluster(), "{}"));
         } else {

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -21,6 +22,7 @@ import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CbUserRole;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
@@ -211,7 +213,7 @@ public class DefaultStackService implements StackService {
                         -1 * hostGroupAdjustmentJson.getScalingAdjustment()));
             }
             int removeableHosts = 0;
-            for (InstanceMetaData metadataEntry : stack.getInstanceMetaData()) {
+            for (InstanceMetaData metadataEntry : stack.getAllInstanceMetaData()) {
                 if (metadataEntry.isRemovable() && metadataEntry.getInstanceGroup().equals(hostGroupAdjustmentJson.getHostGroup())) {
                     removeableHosts++;
                 }
@@ -240,8 +242,14 @@ public class DefaultStackService implements StackService {
             if (!stack.isMetadataReady()) {
                 throw new MetadataIncompleteException("Instance metadata is incomplete.");
             }
-            if (!stack.getInstanceMetaData().isEmpty()) {
-                return stack.getInstanceMetaData();
+            Set<InstanceMetaData> instanceMetaData = new HashSet<>();
+            for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+                if (!instanceGroup.getInstanceMetaData().isEmpty()) {
+                    instanceMetaData.addAll(instanceGroup.getInstanceMetaData());
+                }
+            }
+            if (!instanceMetaData.isEmpty()) {
+                return instanceMetaData;
             }
         }
         throw new NotFoundException("Metadata not found on stack.");

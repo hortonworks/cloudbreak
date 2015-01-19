@@ -108,7 +108,7 @@ public class StackConverterTest {
         assertEquals(result.getAmbariServerIp(), stack.getAmbariIp());
         assertEquals(result.getId(), stack.getId());
         assertEquals(result.getCloudPlatform(), CloudPlatform.AWS);
-        assertNotNull(result.getMetadata());
+        assertNotNull(result.getInstanceGroups());
         assertEquals(result.getAccount(), DUMMY_NAME);
         assertEquals(result.getOwner(), DUMMY_NAME);
         assertTrue(result.isPublicInAccount());
@@ -127,7 +127,7 @@ public class StackConverterTest {
         assertEquals(result.getAmbariServerIp(), stack.getAmbariIp());
         assertEquals(result.getId(), stack.getId());
         assertEquals(result.getCloudPlatform(), CloudPlatform.AWS);
-        assertNotNull(result.getMetadata());
+        assertNotNull(result.getInstanceGroups());
         verify(clusterConverter, times(0)).convert(any(Cluster.class), anyString());
     }
 
@@ -142,7 +142,7 @@ public class StackConverterTest {
         assertEquals(result.getAmbariServerIp(), stack.getAmbariIp());
         assertEquals(result.getId(), stack.getId());
         assertEquals(result.getCloudPlatform(), CloudPlatform.AWS);
-        assertNotNull(result.getMetadata());
+        assertNotNull(result.getInstanceGroups());
         verify(clusterConverter, times(1)).convert(any(Cluster.class), anyString());
     }
 
@@ -158,7 +158,7 @@ public class StackConverterTest {
         assertEquals(result.getAmbariServerIp(), stack.getAmbariIp());
         assertEquals(result.getId(), stack.getId());
         assertEquals(result.getCloudPlatform(), CloudPlatform.AWS);
-        assertNotNull(result.getMetadata());
+        assertNotNull(result.getInstanceGroups());
         verify(clusterConverter, times(0)).convert(any(Cluster.class), anyString());
     }
 
@@ -205,7 +205,7 @@ public class StackConverterTest {
         stack.setDescription(DESCRIPTION);
         stack.setHash(DUMMY_HASH);
         stack.setId(DUMMY_ID);
-        stack.setInstanceMetaData(new HashSet<InstanceMetaData>());
+        stack.setInstanceGroups(new HashSet<InstanceGroup>());
         stack.setMetadataReady(METADATA_READY);
         stack.setName(DUMMY_NAME);
         //stack.setNodeCount(NODE_COUNT);
@@ -230,7 +230,7 @@ public class StackConverterTest {
         stackJson.setPublicInAccount(false);
         stackJson.setAccount(DUMMY_HASH);
         stackJson.setOwner(DUMMY_HASH);
-        stackJson.setMetadata(new HashSet<InstanceMetaDataJson>());
+        stackJson.setInstanceGroups(new ArrayList<InstanceGroupJson>());
         stackJson.setName(DUMMY_NAME);
         //stackJson.setNodeCount(NODE_COUNT);
         stackJson.setStatus(Status.AVAILABLE);

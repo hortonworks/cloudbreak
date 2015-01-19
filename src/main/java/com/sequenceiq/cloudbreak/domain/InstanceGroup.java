@@ -1,9 +1,14 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
 @Entity
@@ -17,6 +22,8 @@ public class InstanceGroup implements ProvisionEntity {
     private String groupName;
     @ManyToOne
     private Stack stack;
+    @OneToMany(mappedBy = "instanceGroup", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<InstanceMetaData> instanceMetaData = new HashSet<>();
 
     public String getGroupName() {
         return groupName;
@@ -56,5 +63,13 @@ public class InstanceGroup implements ProvisionEntity {
 
     public void setStack(Stack stack) {
         this.stack = stack;
+    }
+
+    public Set<InstanceMetaData> getInstanceMetaData() {
+        return instanceMetaData;
+    }
+
+    public void setInstanceMetaData(Set<InstanceMetaData> instanceMetaData) {
+        this.instanceMetaData = instanceMetaData;
     }
 }

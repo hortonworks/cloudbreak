@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
@@ -341,12 +342,13 @@ public class AmbariClusterConnector {
         LOGGER.info("Asking Ambari client to recommend host-hostGroup mapping [Ambari server address: {}]", stack.getAmbariIp());
         Map<String, List<String>> hostGroupMappings = new HashMap<>();
         Map<String, String> hostNames = ambariClient.getHostNames();
-        Set<InstanceMetaData> instanceMetaData = stack.getInstanceMetaData();
-        for (InstanceMetaData metaData : instanceMetaData) {
-            if (hostGroupMappings.get(metaData.getInstanceGroup()) == null) {
-                hostGroupMappings.put(metaData.getInstanceGroup(), new ArrayList<String>());
+        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+            for (InstanceMetaData metaData : instanceGroup.getInstanceMetaData()) {
+                if (hostGroupMappings.get(instanceGroup.getGroupName()) == null) {
+                    hostGroupMappings.put(instanceGroup.getGroupName(), new ArrayList<String>());
+                }
+                hostGroupMappings.get(instanceGroup.getGroupName()).add(hostNames.get(metaData.getPublicIp()));
             }
-            hostGroupMappings.get(metaData.getInstanceGroup()).add(hostNames.get(metaData.getPublicIp()));
         }
         LOGGER.info("recommended host-hostGroup mappings for stack: {}", hostGroupMappings);
         return hostGroupMappings;

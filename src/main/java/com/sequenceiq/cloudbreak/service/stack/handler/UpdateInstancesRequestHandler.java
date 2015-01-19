@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.BuildStackFailureException;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
@@ -148,11 +149,13 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
             } else {
                 Set<String> instanceIds = new HashSet<>();
                 int i = 0;
-                for (InstanceMetaData metadataEntry : stack.getInstanceMetaData()) {
-                    if (metadataEntry.isRemovable()) {
-                        instanceIds.add(metadataEntry.getInstanceId());
-                        if (++i >= scalingAdjustment * -1) {
-                            break;
+                for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+                    for (InstanceMetaData metadataEntry : instanceGroup.getInstanceMetaData()) {
+                        if (metadataEntry.isRemovable()) {
+                            instanceIds.add(metadataEntry.getInstanceId());
+                            if (++i >= scalingAdjustment * -1) {
+                                break;
+                            }
                         }
                     }
                 }
