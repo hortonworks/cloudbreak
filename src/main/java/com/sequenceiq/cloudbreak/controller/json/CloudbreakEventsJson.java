@@ -18,6 +18,7 @@ public class CloudbreakEventsJson implements JsonEntity {
     private String stackName;
     private Status stackStatus;
     private Integer nodeCount;
+    private String instanceGroup;
 
     public Integer getNodeCount() {
         return nodeCount;
@@ -129,5 +130,13 @@ public class CloudbreakEventsJson implements JsonEntity {
 
     public void setStackName(String stackName) {
         this.stackName = stackName;
+    }
+
+    public String getInstanceGroup() {
+        return instanceGroup;
+    }
+
+    public void setInstanceGroup(String instanceGroup) {
+        this.instanceGroup = instanceGroup;
     }
 }

@@ -83,7 +83,7 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
         CloudbreakEvent stackEvent = new CloudbreakEvent();
 
         stackEvent.setEventTimestamp(Calendar.getInstance().getTime());
-        stackEvent.setEventMessage(eventMessage);
+        stackEvent.setEventMessage(String.format("Interaction on '%s' hostgroup %s", instanceGroup.getGroupName(), eventMessage));
         stackEvent.setEventType(eventType);
         stackEvent.setOwner(stack.getOwner());
         stackEvent.setAccount(stack.getAccount());
@@ -127,5 +127,6 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
         stackEvent.setVmType(vmType);
         stackEvent.setRegion(stack.getRegion());
         stackEvent.setCloud(stack.cloudPlatform().name());
+        stackEvent.setInstanceGroup(instanceGroup.getGroupName());
     }
 }
