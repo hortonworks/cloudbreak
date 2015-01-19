@@ -84,6 +84,10 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 result.nodeCount = nodeCount;
                 result.cloudPlatform = $filter('filter')($rootScope.credentials, {id: $rootScope.activeCredential.id}, true)[0].cloudPlatform;
                 result.public = $scope.cluster.public;
+                angular.forEach(result.instanceGroups, function(item) {
+                  item.templateId = parseFloat(item.templateId);
+                });
+                result.blueprintId = parseFloat(result.blueprintId);
                 $rootScope.clusters.push(result);
                 initCluster();
                 $jq('.carousel').carousel(0);
@@ -118,6 +122,12 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             $rootScope.activeCluster.cloudPlatform =  $rootScope.activeClusterCredential.cloudPlatform;
             GlobalStack.get({ id: clusterId }, function(success) {
                     $rootScope.activeCluster.description = success.description;
+                    $rootScope.activeCluster.metadata = [];
+                    angular.forEach($rootScope.activeCluster.instanceGroups, function(item) {
+                      angular.forEach(item.metadata, function(item1) {
+                        $rootScope.activeCluster.metadata.push(item1)
+                      });
+                    });
                     $scope.pagination = {
                                 currentPage: 1,
                                 itemsPerPage: 10,
