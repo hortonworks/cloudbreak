@@ -53,7 +53,7 @@ import javax.persistence.Version;
                         + "WHERE c.cluster.id= :id"),
         @NamedQuery(
                 name = "Stack.findRequestedStacksWithCredential",
-                query = "SELECT c FROM Stack c "
+                query = "SELECT DISTINCT c FROM Stack c "
                         + "LEFT JOIN FETCH c.resources "
                         + "LEFT JOIN FETCH c.instanceGroups "
                         + "WHERE c.credential.id= :credentialId "
