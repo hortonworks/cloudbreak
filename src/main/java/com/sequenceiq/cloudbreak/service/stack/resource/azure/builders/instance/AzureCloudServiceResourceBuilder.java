@@ -13,6 +13,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Optional;
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
@@ -55,7 +56,7 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
 
 
     @Override
-    public Boolean create(final CreateResourceRequest createResourceRequest, InstanceGroup instanceGroup, String region) throws Exception {
+    public Boolean create(final CreateResourceRequest createResourceRequest, String region) throws Exception {
         AzureCloudServiceCreateRequest aCSCR = (AzureCloudServiceCreateRequest) createResourceRequest;
         HttpResponseDecorator cloudServiceResponse = (HttpResponseDecorator) aCSCR.getAzureClient().createCloudService(aCSCR.getProps());
         AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(aCSCR.getAzureClient(), cloudServiceResponse, aCSCR.getStack());
@@ -77,17 +78,18 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
     }
 
     @Override
-    public List<Resource> buildResources(AzureProvisionContextObject provisionContextObject, int index, List<Resource> resources, InstanceGroup instanceGroup) {
+    public List<Resource> buildResources(AzureProvisionContextObject provisionContextObject, int index, List<Resource> resources,
+            Optional<InstanceGroup> instanceGroup) {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         String vmName = getVmName(provisionContextObject.filterResourcesByType(ResourceType.AZURE_NETWORK).get(0).getResourceName(), index);
-        return Arrays.asList(new Resource(resourceType(), vmName + String.valueOf(new Date().getTime()), stack, instanceGroup.getGroupName()));
+        return Arrays.asList(new Resource(resourceType(), vmName + String.valueOf(new Date().getTime()), stack, instanceGroup.orNull().getGroupName()));
     }
 
     @Override
     public CreateResourceRequest buildCreateRequest(AzureProvisionContextObject provisionContextObject, List<Resource> resources,
-            List<Resource> buildResources, int index, InstanceGroup instanceGroup) throws Exception {
+            List<Resource> buildResources, int index, Optional<InstanceGroup> instanceGroup) throws Exception {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
-        AzureTemplate azureTemplate = (AzureTemplate) instanceGroup.getTemplate();
+        AzureTemplate azureTemplate = (AzureTemplate) instanceGroup.orNull().getTemplate();
         String vmName = buildResources.get(0).getResourceName();
         if (vmName.length() > MAX_NAME_LENGTH) {
             vmName = vmName.substring(vmName.length() - MAX_NAME_LENGTH, vmName.length());
@@ -97,7 +99,7 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
         props.put(DESCRIPTION, azureTemplate.getDescription());
         props.put(AFFINITYGROUP, provisionContextObject.getCommonName());
         return new AzureCloudServiceCreateRequest(props, azureStackUtil.createAzureClient((AzureCredential) stack.getCredential()),
-                resources, buildResources, stack);
+                resources, buildResources, stack, instanceGroup.orNull());
     }
 
     @Override
@@ -110,14 +112,16 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
         private AzureClient azureClient;
         private List<Resource> resources;
         private Stack stack;
+        private InstanceGroup instanceGroup;
 
         public AzureCloudServiceCreateRequest(Map<String, String> props, AzureClient azureClient, List<Resource> resources, List<Resource> buildNames,
-                Stack stack) {
+                Stack stack, InstanceGroup instanceGroup) {
             super(buildNames);
             this.props = props;
             this.azureClient = azureClient;
             this.resources = resources;
             this.stack = stack;
+            this.instanceGroup = instanceGroup;
         }
 
         public Stack getStack() {
@@ -134,6 +138,10 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
 
         public List<Resource> getResources() {
             return resources;
+        }
+
+        public InstanceGroup getInstanceGroup() {
+            return instanceGroup;
         }
     }
 }

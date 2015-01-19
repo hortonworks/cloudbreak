@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Optional;
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.StackCreationFailureException;
@@ -39,7 +40,7 @@ public class AzureStorageAccountResourceBuilder extends AzureSimpleNetworkResour
     private AzureStackUtil azureStackUtil;
 
     @Override
-    public Boolean create(CreateResourceRequest createResourceRequest, InstanceGroup instanceGroup, String region) throws Exception {
+    public Boolean create(CreateResourceRequest createResourceRequest, String region) throws Exception {
         AzureStorageAccountCreateRequest aCSCR = (AzureStorageAccountCreateRequest) createResourceRequest;
         try {
             aCSCR.getAzureClient().getStorageAccount(aCSCR.getName());
@@ -65,19 +66,20 @@ public class AzureStorageAccountResourceBuilder extends AzureSimpleNetworkResour
     }
 
     @Override
-    public List<Resource> buildResources(AzureProvisionContextObject provisionContextObject, int index, List<Resource> resources, InstanceGroup instanceGroup) {
+    public List<Resource> buildResources(AzureProvisionContextObject provisionContextObject, int index, List<Resource> resources,
+            Optional<InstanceGroup> instanceGroup) {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         return Arrays.asList(new Resource(resourceType(), provisionContextObject.getCommonName(), stack, null));
     }
 
     @Override
     public CreateResourceRequest buildCreateRequest(AzureProvisionContextObject provisionContextObject, List<Resource> resources,
-            List<Resource> buildResources, int index, InstanceGroup instanceGroup) throws Exception {
+            List<Resource> buildResources, int index, Optional<InstanceGroup> instanceGroup) throws Exception {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         AzureCredential credential = (AzureCredential) stack.getCredential();
         Map<String, String> props = new HashMap<>();
         props.put(NAME, buildResources.get(0).getResourceName());
-        props.put(DESCRIPTION, instanceGroup.getTemplate().getDescription());
+        props.put(DESCRIPTION, "description");
         props.put(AFFINITYGROUP, provisionContextObject.getCommonName());
         AzureClient azureClient = azureStackUtil.createAzureClient(credential);
         return new AzureStorageAccountCreateRequest(buildResources.get(0).getResourceName(), provisionContextObject.getStackId(), props, azureClient,

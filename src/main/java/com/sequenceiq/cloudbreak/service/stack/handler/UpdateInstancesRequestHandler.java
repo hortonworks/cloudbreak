@@ -113,13 +113,13 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
                                             resourceBuilder.buildCreateRequest(pCO,
                                                     resources,
                                                     resourceBuilder.buildResources(pCO, index, resources,
-                                                            stack.getInstanceGroupByInstanceGroupName(request.getHostGroup())),
+                                                            Optional.of(stack.getInstanceGroupByInstanceGroupName(request.getHostGroup()))),
                                                     index,
-                                                    stack.getInstanceGroupByInstanceGroupName(request.getHostGroup()));
+                                                    Optional.of(stack.getInstanceGroupByInstanceGroupName(request.getHostGroup())));
                                     stackUpdater.addStackResources(stack.getId(), createResourceRequest.getBuildableResources());
                                     resources.addAll(createResourceRequest.getBuildableResources());
                                     resourceSet.addAll(createResourceRequest.getBuildableResources());
-                                    resourceBuilder.create(createResourceRequest, stack.getInstanceGroupsAsList().get(0), stack.getRegion());
+                                    resourceBuilder.create(createResourceRequest, stack.getRegion());
                                 }
                                 return true;
                             }

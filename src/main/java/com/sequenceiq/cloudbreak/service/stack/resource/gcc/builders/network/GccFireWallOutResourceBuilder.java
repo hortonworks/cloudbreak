@@ -12,6 +12,7 @@ import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.Firewall;
 import com.google.api.services.compute.model.Operation;
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
@@ -44,7 +45,7 @@ public class GccFireWallOutResourceBuilder extends GccSimpleNetworkResourceBuild
     private JsonHelper jsonHelper;
 
     @Override
-    public Boolean create(CreateResourceRequest createResourceRequest, InstanceGroup instanceGroup, String region) throws Exception {
+    public Boolean create(CreateResourceRequest createResourceRequest, String region) throws Exception {
         final GccFireWallOutCreateRequest gFWOCR = (GccFireWallOutCreateRequest) createResourceRequest;
         Compute.Firewalls.Insert firewallInsert = gFWOCR.getCompute().firewalls().insert(gFWOCR.getProjectId(), gFWOCR.getFirewall());
         firewallInsert.execute();
@@ -57,9 +58,9 @@ public class GccFireWallOutResourceBuilder extends GccSimpleNetworkResourceBuild
         try {
             GccCredential gccCredential = (GccCredential) stack.getCredential();
             Operation operation = deleteContextObject.getCompute().firewalls().delete(gccCredential.getProjectId(), resource.getResourceName()).execute();
-            Operation execute = deleteContextObject.getCompute().firewalls().delete(gccCredential.getProjectId(), resource.getResourceName()).execute();
-            Compute.ZoneOperations.Get zoneOperations = createZoneOperations(deleteContextObject.getCompute(), gccCredential, execute, GccZone.valueOf(region));
-            Compute.GlobalOperations.Get globalOperations = createGlobalOperations(deleteContextObject.getCompute(), gccCredential, execute);
+            Compute.ZoneOperations.Get zoneOperations =
+                    createZoneOperations(deleteContextObject.getCompute(), gccCredential, operation, GccZone.valueOf(region));
+            Compute.GlobalOperations.Get globalOperations = createGlobalOperations(deleteContextObject.getCompute(), gccCredential, operation);
             GccRemoveReadyPollerObject gccRemoveReady =
                     new GccRemoveReadyPollerObject(zoneOperations, globalOperations, stack, resource.getResourceName(), operation.getName(), resourceType());
             gccRemoveReadyPollerObjectPollingService.pollWithTimeout(gccRemoveCheckerStatus, gccRemoveReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
@@ -72,14 +73,15 @@ public class GccFireWallOutResourceBuilder extends GccSimpleNetworkResourceBuild
     }
 
     @Override
-    public List<Resource> buildResources(GccProvisionContextObject provisionContextObject, int index, List<Resource> resources, InstanceGroup instanceGroup) {
+    public List<Resource> buildResources(GccProvisionContextObject provisionContextObject, int index, List<Resource> resources,
+            Optional<InstanceGroup> instanceGroup) {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         return Arrays.asList(new Resource(resourceType(), stack.getName() + "out", stack, null));
     }
 
     @Override
     public CreateResourceRequest buildCreateRequest(GccProvisionContextObject provisionContextObject, List<Resource> resources,
-            List<Resource> buildResources, int index, InstanceGroup instanceGroup) throws Exception {
+            List<Resource> buildResources, int index, Optional<InstanceGroup> instanceGroup) throws Exception {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
 
         Firewall firewall = new Firewall();

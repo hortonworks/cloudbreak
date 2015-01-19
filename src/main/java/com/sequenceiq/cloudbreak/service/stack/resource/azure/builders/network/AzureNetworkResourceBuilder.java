@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Optional;
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
@@ -47,7 +48,7 @@ public class AzureNetworkResourceBuilder extends AzureSimpleNetworkResourceBuild
 
 
     @Override
-    public Boolean create(CreateResourceRequest createResourceRequest, InstanceGroup instanceGroup, String region) throws Exception {
+    public Boolean create(CreateResourceRequest createResourceRequest, String region) throws Exception {
         AzureNetworkCreateRequest aCSCR = (AzureNetworkCreateRequest) createResourceRequest;
         Stack stack = stackRepository.findById(aCSCR.getStackId());
         if (!aCSCR.getAzureClient().getVirtualNetworkConfiguration().toString().contains(aCSCR.getName())) {
@@ -80,7 +81,8 @@ public class AzureNetworkResourceBuilder extends AzureSimpleNetworkResourceBuild
     }
 
     @Override
-    public List<Resource> buildResources(AzureProvisionContextObject provisionContextObject, int index, List<Resource> resources, InstanceGroup instanceGroup) {
+    public List<Resource> buildResources(AzureProvisionContextObject provisionContextObject, int index, List<Resource> resources,
+            Optional<InstanceGroup> instanceGroup) {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         String s = stack.getName().replaceAll("\\s+", "") + String.valueOf(new Date().getTime());
         return Arrays.asList(new Resource(resourceType(), s, stack, null));
@@ -88,7 +90,7 @@ public class AzureNetworkResourceBuilder extends AzureSimpleNetworkResourceBuild
 
     @Override
     public CreateResourceRequest buildCreateRequest(AzureProvisionContextObject provisionContextObject, List<Resource> resources,
-            List<Resource> buildResources, int index, InstanceGroup instanceGroup) throws Exception {
+            List<Resource> buildResources, int index, Optional<InstanceGroup> instanceGroup) throws Exception {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         AzureCredential credential = (AzureCredential) stack.getCredential();
         Map<String, String> props = new HashMap<>();

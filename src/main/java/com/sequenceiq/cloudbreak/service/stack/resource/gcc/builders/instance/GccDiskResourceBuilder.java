@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.Disk;
 import com.google.api.services.compute.model.Operation;
+import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.domain.GccTemplate;
@@ -54,7 +55,7 @@ public class GccDiskResourceBuilder extends GccSimpleInstanceResourceBuilder {
     private GccStackUtil gccStackUtil;
 
     @Override
-    public Boolean create(final CreateResourceRequest createResourceRequest, InstanceGroup instanceGroup, String region) throws Exception {
+    public Boolean create(final CreateResourceRequest createResourceRequest, String region) throws Exception {
         final GccDiskCreateRequest gDCR = (GccDiskCreateRequest) createResourceRequest;
         Stack stack = stackRepository.findById(gDCR.getStackId());
         Compute.Disks.Insert insDisk = gDCR.getCompute().disks().insert(gDCR.getProjectId(), GccZone.valueOf(stack.getRegion()).getValue(), gDCR.getDisk());
@@ -77,19 +78,20 @@ public class GccDiskResourceBuilder extends GccSimpleInstanceResourceBuilder {
     }
 
     @Override
-    public List<Resource> buildResources(GccProvisionContextObject provisionContextObject, int index, List<Resource> resources, InstanceGroup instanceGroup) {
+    public List<Resource> buildResources(GccProvisionContextObject provisionContextObject, int index, List<Resource> resources,
+            Optional<InstanceGroup> instanceGroup) {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         Resource resource = new Resource(resourceType(),
-                String.format("%s-%s-%s", stack.getName(), index, new Date().getTime()), stack, instanceGroup.getGroupName());
+                String.format("%s-%s-%s", stack.getName(), index, new Date().getTime()), stack, instanceGroup.orNull().getGroupName());
         return Arrays.asList(resource);
     }
 
     @Override
     public CreateResourceRequest buildCreateRequest(GccProvisionContextObject provisionContextObject, List<Resource> resources,
-            List<Resource> buildResources, int index, InstanceGroup instanceGroup) throws Exception {
+            List<Resource> buildResources, int index, Optional<InstanceGroup> instanceGroup) throws Exception {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         GccCredential gccCredential = (GccCredential) stack.getCredential();
-        GccTemplate gccTemplate = (GccTemplate) instanceGroup.getTemplate();
+        GccTemplate gccTemplate = (GccTemplate) instanceGroup.orNull().getTemplate();
         Disk disk = new Disk();
         disk.setSizeGb(SIZE);
         disk.setName(buildResources.get(0).getResourceName());

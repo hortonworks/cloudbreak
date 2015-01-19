@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
@@ -20,7 +21,7 @@ public class DummyVirtualMachineResourceBuilder
         implements ResourceBuilder<DummyProvisionContextObject, DummyDeleteContextObject, DummyStartStopContextObject> {
 
     @Override
-    public Boolean create(CreateResourceRequest createResourceRequest, InstanceGroup instanceGroup, String region) throws Exception {
+    public Boolean create(CreateResourceRequest createResourceRequest, String region) throws Exception {
         return true;
     }
 
@@ -50,13 +51,14 @@ public class DummyVirtualMachineResourceBuilder
     }
 
     @Override
-    public List<Resource> buildResources(DummyProvisionContextObject provisionContextObject, int index, List<Resource> resources, InstanceGroup instanceGroup) {
+    public List<Resource> buildResources(DummyProvisionContextObject provisionContextObject, int index, List<Resource> resources,
+            Optional<InstanceGroup> instanceGroup) {
         return Arrays.asList(new Resource(resourceType(), "virtualmachine" + index, new Stack(), "master"));
     }
 
     @Override
     public CreateResourceRequest buildCreateRequest(DummyProvisionContextObject provisionContextObject, List<Resource> resources,
-            List<Resource> buildResources, int index, InstanceGroup instanceGroup) throws Exception {
+            List<Resource> buildResources, int index, Optional<InstanceGroup> instanceGroup) throws Exception {
         return new DummyVirtualMachineCreateRequest(new ArrayList<Resource>());
     }
 

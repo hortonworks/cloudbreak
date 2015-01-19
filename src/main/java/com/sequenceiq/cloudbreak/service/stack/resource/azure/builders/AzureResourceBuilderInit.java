@@ -7,16 +7,13 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.Lists;
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.AzureLocation;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Resource;
-import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
@@ -62,10 +59,11 @@ public class AzureResourceBuilderInit implements
         AzureClient azureClient = azureStackUtil.createAzureClient((AzureCredential) stack.getCredential());
         List<Resource> resourceList = new ArrayList<>();
         for (String res : decommissionSet) {
-            List<InstanceGroup> instanceGroups = Lists.newArrayList(stack.getInstanceGroups());
-            resourceList.add(new Resource(ResourceType.AZURE_VIRTUAL_MACHINE, res, stack, instanceGroups.get(0).getGroupName()));
-            resourceList.add(new Resource(ResourceType.AZURE_SERVICE_CERTIFICATE, res, stack, instanceGroups.get(0).getGroupName()));
-            resourceList.add(new Resource(ResourceType.AZURE_CLOUD_SERVICE, res, stack, instanceGroups.get(0).getGroupName()));
+            for (Resource resource : stack.getResources()) {
+                if (resource.getResourceName().equals(res)) {
+                    resourceList.add(resource);
+                }
+            }
         }
         AzureDeleteContextObject azureDeleteContextObject =
                 new AzureDeleteContextObject(stack.getId(), credential.getCommonName(azureLocation), azureClient, resourceList);

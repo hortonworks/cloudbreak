@@ -18,6 +18,7 @@ import com.google.api.services.compute.model.Instance;
 import com.google.api.services.compute.model.Metadata;
 import com.google.api.services.compute.model.NetworkInterface;
 import com.google.api.services.compute.model.Operation;
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
@@ -61,7 +62,7 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
     private JsonHelper jsonHelper;
 
     @Override
-    public Boolean create(final CreateResourceRequest createResourceRequest, InstanceGroup instanceGroup, String region) throws Exception {
+    public Boolean create(final CreateResourceRequest createResourceRequest, String region) throws Exception {
         final GccInstanceCreateRequest gICR = (GccInstanceCreateRequest) createResourceRequest;
         Stack stack = stackRepository.findById(gICR.getStackId());
         Compute.Instances.Insert ins =
@@ -133,20 +134,21 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
     }
 
     @Override
-    public List<Resource> buildResources(GccProvisionContextObject provisionContextObject, int index, List<Resource> resources, InstanceGroup instanceGroup) {
+    public List<Resource> buildResources(GccProvisionContextObject provisionContextObject, int index, List<Resource> resources,
+            Optional<InstanceGroup> instanceGroup) {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         Resource resource = new Resource(resourceType(),
                 String.format("%s-%s-%s", stack.getName(), index, new Date().getTime()), stack,
-                instanceGroup.getGroupName());
+                instanceGroup.orNull().getGroupName());
         return Arrays.asList(resource);
     }
 
     @Override
     public CreateResourceRequest buildCreateRequest(GccProvisionContextObject provisionContextObject, List<Resource> resources,
-            List<Resource> buildResources, int index, InstanceGroup instanceGroup) throws Exception {
+            List<Resource> buildResources, int index, Optional<InstanceGroup> instanceGroup) throws Exception {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         GccCredential gccCredential = (GccCredential) stack.getCredential();
-        GccTemplate gccTemplate = (GccTemplate) instanceGroup.getTemplate();
+        GccTemplate gccTemplate = (GccTemplate) instanceGroup.orNull().getTemplate();
 
         List<AttachedDisk> listOfDisks = new ArrayList<>();
         listOfDisks.addAll(getBootDiskList(resources, gccCredential, GccZone.valueOf(stack.getRegion())));

@@ -12,6 +12,7 @@ import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.Firewall;
 import com.google.api.services.compute.model.Operation;
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
@@ -44,7 +45,7 @@ public class GccFireWallInResourceBuilder extends GccSimpleNetworkResourceBuilde
     private JsonHelper jsonHelper;
 
     @Override
-    public Boolean create(CreateResourceRequest createResourceRequest, InstanceGroup instanceGroup, String region) throws Exception {
+    public Boolean create(CreateResourceRequest createResourceRequest, String region) throws Exception {
         final GccFireWallInCreateRequest gFWICR = (GccFireWallInCreateRequest) createResourceRequest;
         Compute.Firewalls.Insert firewallInsert = gFWICR.getCompute().firewalls().insert(gFWICR.getProjectId(), gFWICR.getFirewall());
         firewallInsert.execute();
@@ -72,14 +73,15 @@ public class GccFireWallInResourceBuilder extends GccSimpleNetworkResourceBuilde
     }
 
     @Override
-    public List<Resource> buildResources(GccProvisionContextObject provisionContextObject, int index, List<Resource> resources, InstanceGroup instanceGroup) {
+    public List<Resource> buildResources(GccProvisionContextObject provisionContextObject, int index, List<Resource> resources,
+            Optional<InstanceGroup> instanceGroup) {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         return Arrays.asList(new Resource(resourceType(), stack.getName() + "in", stack, null));
     }
 
     @Override
     public CreateResourceRequest buildCreateRequest(GccProvisionContextObject provisionContextObject, List<Resource> resources,
-            List<Resource> buildResources, int index, InstanceGroup instanceGroup) throws Exception {
+            List<Resource> buildResources, int index, Optional<InstanceGroup> instanceGroup) throws Exception {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
 
         Firewall firewall = new Firewall();

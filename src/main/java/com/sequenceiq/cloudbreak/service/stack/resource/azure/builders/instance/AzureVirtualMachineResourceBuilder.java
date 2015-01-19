@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Optional;
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.StackCreationFailureException;
@@ -66,7 +67,7 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
     private PollingService<AzureResourcePollerObject> azureResourcePollerObjectPollingService;
 
     @Override
-    public Boolean create(final CreateResourceRequest createResourceRequest, final InstanceGroup instanceGroup, final String region) throws Exception {
+    public Boolean create(final CreateResourceRequest createResourceRequest, final String region) throws Exception {
         AzureVirtualMachineCreateRequest aCSCR = (AzureVirtualMachineCreateRequest) createResourceRequest;
         HttpResponseDecorator virtualMachineResponse = (HttpResponseDecorator) aCSCR.getAzureClient().createVirtualMachine(aCSCR.getProps());
         AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(aCSCR.getAzureClient(), virtualMachineResponse, aCSCR.getStack());
@@ -76,18 +77,19 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
     }
 
     @Override
-    public List<Resource> buildResources(AzureProvisionContextObject provisionContextObject, int index, List<Resource> resources, InstanceGroup instanceGroup) {
+    public List<Resource> buildResources(AzureProvisionContextObject provisionContextObject, int index, List<Resource> resources,
+            Optional<InstanceGroup> instanceGroup) {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         String vmName = filterResourcesByType(resources, ResourceType.AZURE_CLOUD_SERVICE).get(0).getResourceName();
-        return Arrays.asList(new Resource(resourceType(), vmName, stack, instanceGroup.getGroupName()));
+        return Arrays.asList(new Resource(resourceType(), vmName, stack, instanceGroup.orNull().getGroupName()));
     }
 
     @Override
     public CreateResourceRequest buildCreateRequest(AzureProvisionContextObject provisionContextObject, List<Resource> resources,
-            List<Resource> buildResources, int index, InstanceGroup instanceGroup) throws Exception {
+            List<Resource> buildResources, int index, Optional<InstanceGroup> instanceGroup) throws Exception {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         String internalIp = "172.16.0." + (index + VALID_IP_RANGE_START);
-        AzureTemplate azureTemplate = (AzureTemplate) instanceGroup.getTemplate();
+        AzureTemplate azureTemplate = (AzureTemplate) instanceGroup.orNull().getTemplate();
         AzureCredential azureCredential = (AzureCredential) stack.getCredential();
         byte[] encoded = Base64.encodeBase64(buildResources.get(0).getResourceName().getBytes());
         String label = new String(encoded);
@@ -145,7 +147,8 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
         props.put(VIRTUALNETWORKNAME, provisionContextObject.filterResourcesByType(ResourceType.AZURE_NETWORK).get(0).getResourceName());
         props.put(PORTS, ports);
         props.put(VMTYPE, AzureVmType.valueOf(azureTemplate.getVmType()).vmType().replaceAll(" ", ""));
-        return new AzureVirtualMachineCreateRequest(props, azureStackUtil.createAzureClient(azureCredential), resources, buildResources, stack);
+        return new AzureVirtualMachineCreateRequest(props,
+                azureStackUtil.createAzureClient(azureCredential), resources, buildResources, stack, instanceGroup.orNull());
     }
 
     private String buildimageStoreUri(String commonName, String vmName) {
@@ -229,14 +232,16 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
         private AzureClient azureClient;
         private List<Resource> resources;
         private Stack stack;
+        private InstanceGroup instanceGroup;
 
         public AzureVirtualMachineCreateRequest(Map<String, Object> props, AzureClient azureClient, List<Resource> resources, List<Resource> buildNames,
-                Stack stack) {
+                Stack stack, InstanceGroup instanceGroup) {
             super(buildNames);
             this.stack = stack;
             this.props = props;
             this.azureClient = azureClient;
             this.resources = resources;
+            this.instanceGroup = instanceGroup;
         }
 
         public Map<String, Object> getProps() {
@@ -253,6 +258,10 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
 
         public List<Resource> getResources() {
             return resources;
+        }
+
+        public InstanceGroup getInstanceGroup() {
+            return instanceGroup;
         }
     }
 

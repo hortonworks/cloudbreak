@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Optional;
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.controller.StackCreationFailureException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
@@ -50,7 +51,7 @@ public class AzureServiceCertificateResourceBuilder extends AzureSimpleInstanceR
     private PollingService<AzureResourcePollerObject> azureResourcePollerObjectPollingService;
 
     @Override
-    public Boolean create(final CreateResourceRequest createResourceRequest, final InstanceGroup instanceGroup, final String region) throws Exception {
+    public Boolean create(final CreateResourceRequest createResourceRequest, final String region) throws Exception {
         AzureServiceCertificateCreateRequest aCSCR = (AzureServiceCertificateCreateRequest) createResourceRequest;
         HttpResponseDecorator serviceCertificate = (HttpResponseDecorator) aCSCR.getAzureClient().createServiceCertificate(aCSCR.getProps());
         AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(aCSCR.getAzureClient(), serviceCertificate, aCSCR.getStack());
@@ -60,15 +61,16 @@ public class AzureServiceCertificateResourceBuilder extends AzureSimpleInstanceR
     }
 
     @Override
-    public List<Resource> buildResources(AzureProvisionContextObject provisionContextObject, int index, List<Resource> resources, InstanceGroup instanceGroup) {
+    public List<Resource> buildResources(AzureProvisionContextObject provisionContextObject, int index, List<Resource> resources,
+            Optional<InstanceGroup> instanceGroup) {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         String name = filterResourcesByType(resources, ResourceType.AZURE_CLOUD_SERVICE).get(0).getResourceName();
-        return Arrays.asList(new Resource(resourceType(), name, stack, instanceGroup.getGroupName()));
+        return Arrays.asList(new Resource(resourceType(), name, stack, instanceGroup.orNull().getGroupName()));
     }
 
     @Override
     public CreateResourceRequest buildCreateRequest(AzureProvisionContextObject provisionContextObject, List<Resource> resources,
-            List<Resource> buildResources, int index, InstanceGroup instanceGroup) throws Exception {
+            List<Resource> buildResources, int index, Optional<InstanceGroup> instanceGroup) throws Exception {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         AzureCredential azureCredential = (AzureCredential) stack.getCredential();
         Map<String, String> props = new HashMap<>();
@@ -86,7 +88,8 @@ public class AzureServiceCertificateResourceBuilder extends AzureSimpleInstanceR
         } catch (CertificateEncodingException e) {
             throw new StackCreationFailureException(e);
         }
-        return new AzureServiceCertificateCreateRequest(props, azureStackUtil.createAzureClient(azureCredential), resources, buildResources, stack);
+        return new AzureServiceCertificateCreateRequest(props,
+                azureStackUtil.createAzureClient(azureCredential), resources, buildResources, stack, instanceGroup.orNull());
     }
 
     @Override
@@ -104,18 +107,24 @@ public class AzureServiceCertificateResourceBuilder extends AzureSimpleInstanceR
         private AzureClient azureClient;
         private List<Resource> resources;
         private Stack stack;
+        private InstanceGroup instanceGroup;
 
         public AzureServiceCertificateCreateRequest(Map<String, String> props, AzureClient azureClient, List<Resource> resources, List<Resource> buildNames,
-                Stack stack) {
+                Stack stack, InstanceGroup instanceGroup) {
             super(buildNames);
             this.props = props;
             this.azureClient = azureClient;
             this.resources = resources;
             this.stack = stack;
+            this.instanceGroup = instanceGroup;
         }
 
         public Stack getStack() {
             return stack;
+        }
+
+        public InstanceGroup getInstanceGroup() {
+            return instanceGroup;
         }
 
         public Map<String, String> getProps() {

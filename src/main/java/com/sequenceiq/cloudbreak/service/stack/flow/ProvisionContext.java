@@ -90,19 +90,18 @@ public class ProvisionContext {
                                 resourceBuilder.buildCreateRequest(pCO,
                                         Lists.newArrayList(resourceSet),
                                         resourceBuilder.buildResources(pCO, 0, Arrays.asList(resourceSet),
-                                                Lists.newArrayList(stack.getInstanceGroups()).get(0)),
+                                                Optional.<InstanceGroup>absent()),
                                         0,
-                                        Lists.newArrayList(stack.getInstanceGroups()).get(0));
+                                        Optional.<InstanceGroup>absent());
                         stackUpdater.addStackResources(stack.getId(), createResourceRequest.getBuildableResources());
                         resourceSet.addAll(createResourceRequest.getBuildableResources());
                         pCO.getNetworkResources().addAll(createResourceRequest.getBuildableResources());
-                        List<InstanceGroup> instanceGroups = Lists.newArrayList(stack.getInstanceGroups());
-                        resourceBuilder.create(createResourceRequest, instanceGroups.get(0), stack.getRegion());
+                        resourceBuilder.create(createResourceRequest, stack.getRegion());
                     }
                     List<Future<Boolean>> futures = new ArrayList<>();
                     int fullIndex = 0;
-                    for (final InstanceGroup stringInstanceGroupEntry : stack.getInstanceGroups()) {
-                        for (int i = 0; i < stringInstanceGroupEntry.getNodeCount(); i++) {
+                    for (final InstanceGroup instanceGroupEntry : stack.getInstanceGroups()) {
+                        for (int i = 0; i < instanceGroupEntry.getNodeCount(); i++) {
                             final int index = fullIndex;
                             final Stack finalStack = stack;
                             Future<Boolean> submit = resourceBuilderExecutor.submit(new Callable<Boolean>() {
@@ -114,11 +113,11 @@ public class ProvisionContext {
                                         CreateResourceRequest createResourceRequest =
                                                 resourceBuilder.buildCreateRequest(pCO,
                                                         resources,
-                                                        resourceBuilder.buildResources(pCO, index, resources, stringInstanceGroupEntry),
+                                                        resourceBuilder.buildResources(pCO, index, resources, Optional.of(instanceGroupEntry)),
                                                         index,
-                                                        stringInstanceGroupEntry);
+                                                        Optional.of(instanceGroupEntry));
                                         stackUpdater.addStackResources(finalStack.getId(), createResourceRequest.getBuildableResources());
-                                        resourceBuilder.create(createResourceRequest, stringInstanceGroupEntry, finalStack.getRegion());
+                                        resourceBuilder.create(createResourceRequest, finalStack.getRegion());
                                         resources.addAll(createResourceRequest.getBuildableResources());
                                         LOGGER.info("Node {}. creation in progress resource {} creation finished.", index,
                                                 resourceBuilder.resourceBuilderType());

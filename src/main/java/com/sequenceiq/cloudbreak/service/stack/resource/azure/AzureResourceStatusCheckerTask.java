@@ -41,7 +41,8 @@ public class AzureResourceStatusCheckerTask  implements StatusCheckerTask<AzureR
 
     @Override
     public void handleTimeout(AzureResourcePollerObject t) {
-        throw new InternalServerException(String.format("Azure resource could not reach the desired status: %s on stack.", t.getStack().getId()));
+        throw new InternalServerException(String.format("Operation timed out. Azure resource could not reach the desired status: %s on stack.",
+                t.getStack().getId()));
     }
 
     @Override
