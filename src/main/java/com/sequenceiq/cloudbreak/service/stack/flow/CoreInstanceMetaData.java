@@ -8,18 +8,18 @@ public class CoreInstanceMetaData {
     private Integer volumeCount;
     private String longName;
     private Integer containerCount = 0;
-    private String hostGroup;
+    private String instanceGroup;
 
     public CoreInstanceMetaData() {
     }
 
-    public CoreInstanceMetaData(String instanceId, String privateIp, String publicDns, Integer volumeCount, String longName, String hostGroup) {
+    public CoreInstanceMetaData(String instanceId, String privateIp, String publicDns, Integer volumeCount, String longName, String instanceGroup) {
         this.instanceId = instanceId;
         this.privateIp = privateIp;
         this.publicDns = publicDns;
         this.volumeCount = volumeCount;
         this.longName = longName;
-        this.hostGroup = hostGroup;
+        this.instanceGroup = instanceGroup;
     }
 
     public String getInstanceId() {
@@ -46,7 +46,7 @@ public class CoreInstanceMetaData {
         return containerCount;
     }
 
-    public String getHostGroup() {
-        return hostGroup;
+    public String getInstanceGroup() {
+        return instanceGroup;
     }
 }
