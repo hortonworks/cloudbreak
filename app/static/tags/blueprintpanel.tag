@@ -52,6 +52,11 @@
                         </div>
                         <div id="panel-blueprint-collapse{{blueprint.id}}" class="panel-collapse collapse">
 
+                            <p class="btn-row-over-panel pull-left">
+                                 <a href="" class="btn btn-info" role="button" ng-click="copyAndEditBlueprint(blueprint)">
+                                    <i class="fa fa-copy fa-fw"></i><span> copy & edit</span>
+                                 </a>
+                            </p>
                             <p class="btn-row-over-panel">
                                 <a href="" class="btn btn-danger" role="button" ng-click="deleteBlueprint(blueprint)">
                                     <i class="fa fa-times fa-fw"></i><span> delete</span>
