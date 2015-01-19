@@ -80,7 +80,8 @@ import javax.persistence.Version;
                         + "LEFT JOIN FETCH s.resources "
                         + "LEFT JOIN FETCH s.instanceGroups ig "
                         + "LEFT JOIN FETCH ig.instanceMetaData "
-                        + "WHERE s.owner= :user"),
+                        + "WHERE s.owner= :user"
+                        + "AND status <> 'DELETE_COMPLETED' "),
         @NamedQuery(
                 name = "Stack.findPublicInAccountForUser",
                 query = "SELECT s FROM Stack s "
@@ -88,14 +89,16 @@ import javax.persistence.Version;
                         + "LEFT JOIN FETCH s.instanceGroups ig "
                         + "LEFT JOIN FETCH ig.instanceMetaData "
                         + "WHERE (s.account= :account AND s.publicInAccount= true) "
-                        + "OR s.owner= :user"),
+                        + "OR s.owner= :user"
+                        + "AND status <> 'DELETE_COMPLETED'"),
         @NamedQuery(
                 name = "Stack.findAllInAccount",
                 query = "SELECT s FROM Stack s "
                         + "LEFT JOIN FETCH s.resources "
                         + "LEFT JOIN FETCH s.instanceGroups ig "
                         + "LEFT JOIN FETCH ig.instanceMetaData "
-                        + "WHERE s.account= :account "),
+                        + "WHERE s.account= :account "
+                        + "AND status <> 'DELETE_COMPLETED' "),
         @NamedQuery(
                 name = "Stack.findByAmbari",
                 query = "SELECT s from Stack s "

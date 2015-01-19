@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.handler;
 
+import java.util.Date;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +22,10 @@ import reactor.function.Consumer;
 
 @Service
 public class StackDeleteCompleteHandler implements Consumer<Event<StackDeleteComplete>> {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(StackDeleteCompleteHandler.class);
+    private static final String DELETE_COMPLETED_MSG = "Cluster and its infrastructure were successfully terminated.";
+    private static final String BILLING_STOPPED_MSG = "Billing stopped because of the termination of the cluster and its infrastructure.";
+    private static final String DELIMITER = "_";
 
     @Autowired
     private StackRepository stackRepository;
@@ -34,15 +38,22 @@ public class StackDeleteCompleteHandler implements Consumer<Event<StackDeleteCom
 
     @Override
     public void accept(Event<StackDeleteComplete> stackDeleteComplete) {
-        String msg = "Cluster and its infrastructure were successfully terminated.";
         StackDeleteComplete data = stackDeleteComplete.getData();
-        retryingStackUpdater.updateStackStatus(data.getStackId(), Status.DELETE_COMPLETED, msg);
-        String statusReason = "Billing stopped because the termination of the cluster and its infrastructure.";
-        cloudbreakEventService.fireCloudbreakEvent(data.getStackId(), BillingStatus.BILLING_STOPPED.name(), statusReason);
-        Stack oneWithLists = stackRepository.findOneWithLists(data.getStackId());
-        MDCBuilder.buildMdcContext(oneWithLists);
+        Stack stack = stackRepository.findOneWithLists(data.getStackId());
+        MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Accepted {} event.", ReactorConfig.DELETE_COMPLETE_EVENT);
-        stackRepository.delete(oneWithLists);
-        retryingStackUpdater.updateStackStatusReason(oneWithLists.getId(), String.format(msg));
+        cloudbreakEventService.fireCloudbreakEvent(data.getStackId(), Status.DELETE_COMPLETED.name(), DELETE_COMPLETED_MSG);
+        cloudbreakEventService.fireCloudbreakEvent(data.getStackId(), BillingStatus.BILLING_STOPPED.name(), BILLING_STOPPED_MSG);
+        updateStackFields(stack);
+        retryingStackUpdater.updateStack(stack);
+    }
+
+    private void updateStackFields(Stack stack) {
+        Date now = new Date();
+        String terminatedName = stack.getName() + DELIMITER + now.getTime();
+        stack.getCluster().setName(terminatedName);
+        stack.setName(terminatedName);
+        stack.setStatus(Status.DELETE_COMPLETED);
+        stack.setStatusReason(DELETE_COMPLETED_MSG);
     }
 }
