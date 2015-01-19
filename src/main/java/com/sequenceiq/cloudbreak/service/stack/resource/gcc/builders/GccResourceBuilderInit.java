@@ -11,8 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.api.services.compute.Compute;
-import com.google.api.services.compute.model.AttachedDisk;
-import com.google.api.services.compute.model.Instance;
 import com.google.api.services.dns.Dns;
 import com.google.api.services.dns.model.ManagedZone;
 import com.google.api.services.dns.model.ManagedZonesListResponse;
@@ -20,13 +18,12 @@ import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccStackUtil;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccZone;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.builders.instance.GccInstanceResourceBuilder;
@@ -75,20 +72,8 @@ public class GccResourceBuilderInit implements
         for (String res : decommissionSet) {
             resourceList.add(new Resource(ResourceType.GCC_INSTANCE, res, stack, instanceGroups.get(0).getGroupName()));
         }
-        List<Resource> result = new ArrayList<>();
-        for (Resource resource : resourceList) {
-            try {
-                Instance instance = gccInstanceResourceBuilder.describe(stack, compute, resource, GccZone.valueOf(stack.getRegion()));
-                for (AttachedDisk attachedDisk : instance.getDisks()) {
-                    result.add(new Resource(ResourceType.GCC_ATTACHED_DISK, attachedDisk.getDeviceName(), stack, instanceGroups.get(0).getGroupName()));
-                }
-            } catch (IOException ex) {
-                LOGGER.error("There was a problem with the describe instance on Google cloud");
-            }
-        }
-        result.addAll(resourceList);
         GccDeleteContextObject gccDeleteContextObject = new GccDeleteContextObject(stack.getId(), credential.getProjectId(),
-                compute, result);
+                compute, resourceList);
         return gccDeleteContextObject;
     }
 
