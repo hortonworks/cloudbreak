@@ -102,6 +102,7 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
             }
             
             function handleAzureCredentialError(error) {
+                $scope.credentialAzure.publicKey = $base64.decode($scope.credentialAzure.publicKey)
                 $scope.modifyStatusMessage($rootScope.error_msg.azure_credential_failed + error.data.message);
                 $scope.modifyStatusClass("has-error");
             }
