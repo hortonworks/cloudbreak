@@ -283,7 +283,7 @@ public class AwsConnector implements CloudPlatformConnector {
             String asGroupName = cfStackUtil.getAutoscalingGroupName(stack, instanceGroup.getGroupName());
             Collection<String> instances = new ArrayList<>();
             for (InstanceMetaData instance : instanceGroup.getInstanceMetaData()) {
-                if (instance.getInstanceGroup().equals(instanceGroup.getGroupName())) {
+                if (instance.getInstanceGroup().getGroupName().equals(instanceGroup.getGroupName())) {
                     instances.add(instance.getInstanceId());
                 }
             }

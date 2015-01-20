@@ -4,6 +4,7 @@ import static java.util.Collections.singletonMap;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -276,7 +277,11 @@ public class AmbariClusterConnector {
         int requestId = -1;
         try {
             if (stopped) {
-                requestId = ambariClient.stopAllServices();
+                if (!allServiceStopped(ambariClient.getHostComponentsStates())) {
+                    requestId = ambariClient.stopAllServices();
+                } else {
+                    requestId = -1;
+                }
             } else {
                 requestId = ambariClient.startAllServices();
             }
@@ -293,6 +298,19 @@ public class AmbariClusterConnector {
                     AmbariClusterConnector.MAX_ATTEMPTS_FOR_AMBARI_OPS);
         }
         return result;
+    }
+
+    private boolean allServiceStopped(Map<String, Map<String, String>> hostComponentsStates) {
+        boolean stopped = true;
+        Collection<Map<String, String>> values = hostComponentsStates.values();
+        for (Map<String, String> value : values) {
+            for (String state : value.values()) {
+                if (!"INSTALLED".equals(state)) {
+                    stopped = false;
+                }
+            }
+        }
+        return stopped;
     }
 
     private void saveHostMetadata(Cluster cluster, Map<String, List<String>> hostGroupMappings) {
