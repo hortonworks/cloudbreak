@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.controller;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.sequenceiq.cloudbreak.controller.json.BlueprintJson;
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
 import com.sequenceiq.cloudbreak.controller.json.RecipeJson;
 import com.sequenceiq.cloudbreak.converter.BlueprintConverter;
@@ -30,8 +35,6 @@ import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
 public class RecipeController {
 
     public static final String RECIPE_BP_PREFIX = "recipe-bp-";
-    @Autowired
-    private RecipeService stackService;
 
     @Autowired
     private RecipeConverter recipeConverter;
@@ -58,6 +61,20 @@ public class RecipeController {
     @ResponseBody
     public ResponseEntity<IdJson> createUserRecipe(@ModelAttribute("user") CbUser user, @RequestBody @Valid RecipeJson recipeRequest) {
         return createRecipe(user, recipeRequest, false);
+    }
+
+    @RequestMapping(value = "user/recipes", method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity<Set<RecipeJson>> getPrivateRecipes(@ModelAttribute("user") CbUser user) {
+        Set<Recipe> recipes = recipeService.retrievePrivateRecipes(user);
+        return new ResponseEntity<>(recipeConverter.convertAllEntityToJson(recipes), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "account/recipes", method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity<Set<RecipeJson>> getAccountRecipes(@ModelAttribute("user") CbUser user) {
+        Set<Recipe> recipes = recipeService.retrieveAccountRecipes(user);
+        return new ResponseEntity<>(recipeConverter.convertAllEntityToJson(recipes), HttpStatus.OK);
     }
 
     @RequestMapping(value = "recipes/{id}", method = RequestMethod.GET)

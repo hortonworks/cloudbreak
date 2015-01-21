@@ -1,10 +1,13 @@
 package com.sequenceiq.cloudbreak.service.recipe;
 
+import java.util.Set;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.domain.CbUserRole;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.RecipeRepository;
@@ -30,5 +33,19 @@ public class SimpleRecipeService implements RecipeService {
             throw new NotFoundException(String.format("Recipe '%s' not found", id));
         }
         return recipe;
+    }
+
+    @Override
+    public Set<Recipe> retrievePrivateRecipes(CbUser user) {
+        return recipeRepository.findForUser(user.getUserId());
+    }
+
+    @Override
+    public Set<Recipe> retrieveAccountRecipes(CbUser user) {
+        if (user.getRoles().contains(CbUserRole.ADMIN)) {
+            return recipeRepository.findAllInAccount(user.getAccount());
+        } else {
+            return recipeRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
+        }
     }
 }
