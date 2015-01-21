@@ -12,8 +12,8 @@
     <suppress checks="ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="StackStatusUpdateHandler.java" />
     <suppress checks="ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="AzureCloudServiceResourceBuilder.java" />
     <suppress checks="ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="PublicKeyReaderUtil.java"/>
-    <!-- refactor it you filthy animal :) -->
     <suppress checks="ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="ProvisionContext.java" />
+    <suppress checks="ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="MDCBuilder.java"/>
     <suppress checks="MagicNumberCheck" files="test|Dummy|Mock|simulator" />
     <suppress id="IllegalTypeImpl" files="test" />
     <suppress checks="IllegalCatch" files="test" />
@@ -27,6 +27,7 @@
     <suppress id="string-instantiation" files="PublicKeyReaderUtil.java"/>
     <suppress id="string-instantiation" files="AzureServiceCertificateResourceBuilder.java"/>
     <suppress id="string-instantiation" files="AzureVirtualMachineResourceBuilder.java"/>
+    <suppress id="string-instantiation" files="ConsulUtils.java"/>
     <suppress checks="ParameterNumber" files="AzureProvisioner.java"/>
     <suppress checks="ParameterNumber" files="CloudbreakUsageController.java"/>
     <suppress checks="IllegalCatch" files="CredentialController.java"/>

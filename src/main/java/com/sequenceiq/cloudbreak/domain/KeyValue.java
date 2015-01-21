@@ -12,8 +12,8 @@ import javax.persistence.NamedQuery;
 @NamedQueries({
         @NamedQuery(
                 name = "KeyValue.findAllForRecipe",
-                query = "SELECT k FROM KeyValue k " +
-                        "WHERE k.recipe.id= :recipeId")
+                query = "SELECT k FROM KeyValue k "
+                        + "WHERE k.recipe.id= :recipeId")
 })
 public class KeyValue {
 

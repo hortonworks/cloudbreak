@@ -15,9 +15,9 @@ import javax.persistence.NamedQuery;
 @NamedQueries({
         @NamedQuery(
                 name = "Plugin.findAllForRecipe",
-                query = "SELECT p FROM Plugin p " +
-                        "LEFT JOIN FETCH p.parameters " +
-                        "WHERE p.recipe.id= :recipeId")
+                query = "SELECT p FROM Plugin p "
+                        + "LEFT JOIN FETCH p.parameters "
+                        + "WHERE p.recipe.id= :recipeId")
 })
 public class Plugin {
 

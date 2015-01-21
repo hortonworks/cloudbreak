@@ -60,7 +60,8 @@ public class ClusterConverter {
                 JsonNode root = mapper.readTree(blueprint.getBlueprintText());
                 validateBlueprintRequest(root, stackRepository.findById(stackId));
             } catch (AccessDeniedException e) {
-                throw new AccessDeniedException(String.format("Access to blueprint '%s' is denied or blueprint doesn't exist.", clusterRequest.getBlueprintId()), e);
+                throw new AccessDeniedException(
+                        String.format("Access to blueprint '%s' is denied or blueprint doesn't exist.", clusterRequest.getBlueprintId()), e);
             } catch (IOException e) {
                 throw new BadRequestException(String.format("Blueprint [%s] can not convert to json node.", clusterRequest.getBlueprintId()));
             }
@@ -121,9 +122,9 @@ public class ClusterConverter {
             clusterResponse.setMinutesUp(0);
         }
         clusterResponse.setStatusReason(cluster.getStatusReason());
-        if (cluster.getBlueprint() != null){
+        if (cluster.getBlueprint() != null) {
             clusterResponse.setBlueprintId(cluster.getBlueprint().getId());
-        } else if (cluster.getRecipe() != null){
+        } else if (cluster.getRecipe() != null) {
             clusterResponse.setBlueprintId(cluster.getRecipe().getBlueprint().getId());
             clusterResponse.setRecipeId(cluster.getRecipe().getId());
         }
