@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.handler;
 
-import java.util.HashSet;
+import java.util.Calendar;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -45,33 +45,36 @@ public class StackUpdateSuccessHandler implements Consumer<Event<StackUpdateSucc
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Accepted {} event.", ReactorConfig.STACK_UPDATE_SUCCESS_EVENT);
         Set<String> instanceIds = updateSuccess.getInstanceIds();
+        InstanceGroup instanceGroup = stack.getInstanceGroupByInstanceGroupName(updateSuccess.getHostGroup());
         if (updateSuccess.isRemoveInstances()) {
-            stackUpdater.updateNodeCount(stackId, stack.getInstanceGroupByInstanceGroupName(updateSuccess.getHostGroup()).getNodeCount()  - instanceIds.size(),
-                    updateSuccess.getHostGroup());
-            for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-                Set<InstanceMetaData> metadataToRemove = new HashSet<>();
-                for (InstanceMetaData metadataEntry : instanceGroup.getInstanceMetaData()) {
-                    for (String instanceId : instanceIds) {
-                        if (metadataEntry.getInstanceId().equals(instanceId)) {
-                            metadataToRemove.add(metadataEntry);
-                        }
-                    }
-                }
-                instanceGroup.getInstanceMetaData().removeAll(metadataToRemove);
-                stackUpdater.updateStackMetaData(stackId, instanceGroup.getInstanceMetaData(), instanceGroup.getGroupName());
-            }
-            LOGGER.info("Successfully removed metadata of instances '{}' in stack.", instanceIds);
-            eventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_CHANGED.name(),
-                    "Billing changed due to downscaling of cluster infrastructure.");
+            setInstanceMetaDatasToTerminated(updateSuccess, stackId, instanceIds, instanceGroup);
         } else {
-            stackUpdater.updateNodeCount(stackId, stack.getInstanceGroupByInstanceGroupName(updateSuccess.getHostGroup()).getNodeCount() + instanceIds.size(),
-                    updateSuccess.getHostGroup());
+            int nodeCount = instanceGroup.getNodeCount() + instanceIds.size();
+            stackUpdater.updateNodeCount(stackId, nodeCount, updateSuccess.getHostGroup());
             eventService.fireCloudbreakEvent(stackId, BillingStatus.BILLING_CHANGED.name(), "Billing changed due to upscaling of cluster infrastructure.");
         }
         stackUpdater.updateMetadataReady(stackId, true);
         String statusCause = String.format("%sscaling of cluster infrastructure was successfully.", updateSuccess.isRemoveInstances() ? "Down" : "Up");
         stackUpdater.updateStackStatus(stackId, Status.AVAILABLE, statusCause);
 
+    }
+
+    private void setInstanceMetaDatasToTerminated(StackUpdateSuccess updateSuccess, Long stackId, Set<String> instanceIds, InstanceGroup instanceGroup) {
+        int nodeCount = instanceGroup.getNodeCount() - instanceIds.size();
+        stackUpdater.updateNodeCount(stackId, nodeCount, updateSuccess.getHostGroup());
+
+        for (InstanceMetaData metadataEntry : instanceGroup.getInstanceMetaData()) {
+            if (instanceIds.contains(metadataEntry.getInstanceId())) {
+                long timeInMillis = Calendar.getInstance().getTimeInMillis();
+                metadataEntry.setTerminationDate(timeInMillis);
+                metadataEntry.setTerminated(true);
+            }
+        }
+
+        stackUpdater.updateStackMetaData(stackId, instanceGroup.getAllInstanceMetaData(), instanceGroup.getGroupName());
+        LOGGER.info("Successfully terminated metadata of instances '{}' in stack.", instanceIds);
+        eventService.fireCloudbreakEvent(stackId, BillingStatus.BILLING_CHANGED.name(),
+                "Billing changed due to downscaling of cluster infrastructure.");
     }
 
 }
