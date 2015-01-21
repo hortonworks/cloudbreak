@@ -125,20 +125,20 @@ public class StackStatusUpdateHandler implements Consumer<Event<StackStatusUpdat
             if (started) {
                 waitForAmbariToStart(stack);
                 Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
-                LOGGER.info("Update stack state to: {}", Status.AVAILABLE);
-                String statusReason = "Cluster infrastructure is available, starting of services has been requested. AMBARI_IP:" + stack.getAmbariIp();
-                stackUpdater.updateStackStatus(stackId, Status.AVAILABLE, statusReason);
-                if (cluster != null && Status.START_REQUESTED.equals(cluster.getStatus())) {
-                    boolean hostsJoined = waitForHostsToJoin(stack);
-                    if (hostsJoined) {
-                        cloudbreakEventService.fireCloudbreakEvent(stackId, Status.START_IN_PROGRESS.name(), "Services are starting.");
-                        reactor.notify(ReactorConfig.CLUSTER_STATUS_UPDATE_EVENT,
-                                Event.wrap(new ClusterStatusUpdateRequest(stack.getId(), statusRequest)));
-                    } else {
-                        cluster.setStatus(Status.START_FAILED);
-                        clusterRepository.save(cluster);
-                        stackUpdater.updateStackStatus(stackId, Status.AVAILABLE, "Services could not start because host(s) could not join.");
-                    }
+                boolean hostsJoined = waitForHostsToJoin(stack);
+                if (hostsJoined) {
+                    String statusReason = "Cluster infrastructure is available, starting of services has been requested. AMBARI_IP:" + stack.getAmbariIp();
+                    LOGGER.info("Update stack state to: {}", Status.AVAILABLE);
+                    stackUpdater.updateStackStatus(stackId, Status.AVAILABLE, statusReason);
+                }
+                if (hostsJoined && cluster != null && Status.START_REQUESTED.equals(cluster.getStatus())) {
+                    cloudbreakEventService.fireCloudbreakEvent(stackId, Status.START_IN_PROGRESS.name(), "Services are starting.");
+                    reactor.notify(ReactorConfig.CLUSTER_STATUS_UPDATE_EVENT,
+                            Event.wrap(new ClusterStatusUpdateRequest(stack.getId(), statusRequest)));
+                } else if (!hostsJoined && cluster != null && Status.START_REQUESTED.equals(cluster.getStatus())) {
+                    cluster.setStatus(Status.START_FAILED);
+                    clusterRepository.save(cluster);
+                    stackUpdater.updateStackStatus(stackId, Status.AVAILABLE, "Services could not start because host(s) could not join.");
                 }
             } else {
                 LOGGER.info("Update stack state to: {}", Status.START_FAILED);
