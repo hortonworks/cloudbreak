@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.handler;
 
+import java.util.Calendar;
 import java.util.Date;
 
 import org.slf4j.Logger;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.BillingStatus;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -55,5 +57,14 @@ public class StackDeleteCompleteHandler implements Consumer<Event<StackDeleteCom
         stack.setName(terminatedName);
         stack.setStatus(Status.DELETE_COMPLETED);
         stack.setStatusReason(DELETE_COMPLETED_MSG);
+        terminateMetaDataInstances(stack);
+    }
+
+    private void terminateMetaDataInstances(Stack stack) {
+        for (InstanceMetaData metaData : stack.getRunningInstanceMetaData()) {
+            long timeInMillis = Calendar.getInstance().getTimeInMillis();
+            metaData.setTerminationDate(timeInMillis);
+            metaData.setTerminated(true);
+        }
     }
 }

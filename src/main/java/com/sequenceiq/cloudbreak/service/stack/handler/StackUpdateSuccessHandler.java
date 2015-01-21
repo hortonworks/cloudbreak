@@ -47,7 +47,7 @@ public class StackUpdateSuccessHandler implements Consumer<Event<StackUpdateSucc
         Set<String> instanceIds = updateSuccess.getInstanceIds();
         InstanceGroup instanceGroup = stack.getInstanceGroupByInstanceGroupName(updateSuccess.getHostGroup());
         if (updateSuccess.isRemoveInstances()) {
-            setInstanceMetaDatasToTerminated(updateSuccess, stackId, instanceIds, instanceGroup);
+            terminateMetaDataInstances(updateSuccess, stackId, instanceIds, instanceGroup);
         } else {
             int nodeCount = instanceGroup.getNodeCount() + instanceIds.size();
             stackUpdater.updateNodeCount(stackId, nodeCount, updateSuccess.getHostGroup());
@@ -59,7 +59,7 @@ public class StackUpdateSuccessHandler implements Consumer<Event<StackUpdateSucc
 
     }
 
-    private void setInstanceMetaDatasToTerminated(StackUpdateSuccess updateSuccess, Long stackId, Set<String> instanceIds, InstanceGroup instanceGroup) {
+    private void terminateMetaDataInstances(StackUpdateSuccess updateSuccess, Long stackId, Set<String> instanceIds, InstanceGroup instanceGroup) {
         int nodeCount = instanceGroup.getNodeCount() - instanceIds.size();
         stackUpdater.updateNodeCount(stackId, nodeCount, updateSuccess.getHostGroup());
 
