@@ -20,9 +20,9 @@ get_vpc_peers() {
     METADATA_STATUS=204
     MAX_RETRIES=60
     RETRIES=0
-    while [ $METADATA_STATUS -eq 204 ] || [ $METADATA_STATUS -eq 000 ] && [ $RETRIES -ne $MAX_RETRIES ]; do
+    while [ $METADATA_STATUS -ne 200 ]  && [ $RETRIES -ne $MAX_RETRIES ]; do
       METADATA_STATUS=$(curl -sk -o /tmp/metadata_result -w "%{http_code}" -X GET -H Content-Type:application/json $METADATA_ADDRESS/stacks/metadata/$METADATA_HASH);
-      [ $METADATA_STATUS -eq 204 ] || [ $METADATA_STATUS -eq 000 ] && sleep 5 && ((RETRIES++));
+      [ $METADATA_STATUS -ne 200 ] && sleep 5 && ((RETRIES++));
     done
 
     [ $METADATA_STATUS -ne 200 ] && exit 1;
@@ -74,7 +74,7 @@ get_consul_opts() {
 does_cluster_exist() {
   ip_arr=($(get_vpc_peers))
   for ip in "${ip_arr[@]}"; do
-    leader=$(curl -s ${ip}:8500/v1/status/leader|jq . -r)
+    leader=$(curl -s -m 2 ${ip}:8500/v1/status/leader|jq . -r)
     if [ -n "$leader" ]; then
       leader=${leader%:*}
       return 0
