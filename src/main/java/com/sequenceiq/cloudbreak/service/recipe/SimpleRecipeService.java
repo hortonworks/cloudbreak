@@ -48,4 +48,22 @@ public class SimpleRecipeService implements RecipeService {
             return recipeRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
         }
     }
+
+    @Override
+    public Recipe getPrivateRecipe(String name, CbUser user) {
+        Recipe recipe = recipeRepository.findByNameForUser(name, user.getUserId());
+        if (recipe == null) {
+            throw new NotFoundException(String.format("Recipe '%s' not found.", name));
+        }
+        return recipe;
+    }
+
+    @Override
+    public Recipe getPublicRecipe(String name, CbUser user) {
+        Recipe recipe = recipeRepository.findByNameInAccount(name, user.getAccount());
+        if (recipe == null) {
+            throw new NotFoundException(String.format("Recipe '%s' not found.", name));
+        }
+        return recipe;
+    }
 }

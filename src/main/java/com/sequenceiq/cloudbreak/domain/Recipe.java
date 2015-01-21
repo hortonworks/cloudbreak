@@ -21,16 +21,20 @@ import javax.persistence.UniqueConstraint;
         @NamedQuery(
                 name = "Recipe.findForUser",
                 query = "SELECT r FROM Recipe r "
-                        + "WHERE r.owner= :user"),
+                        + "WHERE r.owner= :owner"),
         @NamedQuery(
                 name = "Recipe.findPublicInAccountForUser",
                 query = "SELECT r FROM Recipe r "
                         + "WHERE (r.account= :account AND r.publicInAccount= true) "
-                        + "OR r.owner= :user"),
+                        + "OR r.owner= :owner"),
         @NamedQuery(
                 name = "Recipe.findAllInAccount",
                 query = "SELECT r FROM Recipe r "
                         + "WHERE r.account= :account "),
+        @NamedQuery(
+                name = "Recipe.findByNameForUser",
+                query = "SELECT r FROM Recipe r "
+                        + "WHERE r.name= :name and r.owner= :owner "),
         @NamedQuery(
                 name = "Recipe.findByNameInAccount",
                 query = "SELECT r FROM Recipe r WHERE r.name= :name and r.account= :account")

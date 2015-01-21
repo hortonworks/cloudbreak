@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Set;
 
 import javax.validation.Valid;
@@ -75,6 +73,20 @@ public class RecipeController {
     public ResponseEntity<Set<RecipeJson>> getAccountRecipes(@ModelAttribute("user") CbUser user) {
         Set<Recipe> recipes = recipeService.retrieveAccountRecipes(user);
         return new ResponseEntity<>(recipeConverter.convertAllEntityToJson(recipes), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "user/recipes/{name}", method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity<RecipeJson> getPrivateRecipe(@ModelAttribute("user") CbUser user, @PathVariable String name) {
+        Recipe recipe = recipeService.getPrivateRecipe(name, user);
+        return new ResponseEntity<>(recipeConverter.convert(recipe), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "account/recipes/{name}", method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity<RecipeJson> getAccountRecipe(@ModelAttribute("user") CbUser user, @PathVariable String name) {
+        Recipe recipe = recipeService.getPublicRecipe(name, user);
+        return new ResponseEntity<>(recipeConverter.convert(recipe), HttpStatus.OK);
     }
 
     @RequestMapping(value = "recipes/{id}", method = RequestMethod.GET)

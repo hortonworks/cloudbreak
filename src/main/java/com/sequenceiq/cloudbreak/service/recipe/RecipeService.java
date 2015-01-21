@@ -14,4 +14,8 @@ public interface RecipeService {
     Set<Recipe> retrievePrivateRecipes(CbUser user);
 
     Set<Recipe> retrieveAccountRecipes(CbUser user);
+
+    Recipe getPrivateRecipe(String name, CbUser user);
+
+    Recipe getPublicRecipe(String name, CbUser user);
 }

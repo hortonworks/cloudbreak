@@ -16,4 +16,7 @@ public interface RecipeRepository extends CrudRepository<Recipe, Long> {
     Set<Recipe> findAllInAccount(@Param("account") String account);
 
     Set<Recipe> findForUser(@Param("owner") String userId);
+
+    Recipe findByNameForUser(@Param("name") String name, @Param("owner") String userId);
+
 }
