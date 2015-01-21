@@ -50,6 +50,13 @@ sl-delete-user() {
    curl -X DELETE -H "Authorization: Bearer $SL_TOKEN" -H "If-Match: $version" "$SL_UAA_ADDRESS/Users/$user_id"
 }
 
+sl-delete-user-by-name() {
+    local user_name=${1:?"usage: <user-name>"}
+    local version=${2:?"usage: <version> -> get it from sl-user-data function"}
+    local user_id=$(sl-user-data $user_name | jq .id | sed -e 's/^"//' -e 's/"$//')
+    curl -X DELETE -H "Authorization: Bearer $SL_TOKEN" -H "If-Match: $version" "$SL_UAA_ADDRESS/Users/$user_id"
+}
+
 sl-register() {
     : ${SL_LOCATION:?"Please set the SL_LOCATION with sl-location function!"}
     local username=${1:?"usage: <email> <password> <company>"}
