@@ -66,6 +66,16 @@ public class InstanceGroup implements ProvisionEntity {
     }
 
     public Set<InstanceMetaData> getInstanceMetaData() {
+        Set<InstanceMetaData> resultSet = new HashSet<>();
+        for (InstanceMetaData metaData : instanceMetaData) {
+            if (!metaData.isTerminated()) {
+                resultSet.add(metaData);
+            }
+        }
+        return resultSet;
+    }
+
+    public Set<InstanceMetaData> getAllInstanceMetaData() {
         return instanceMetaData;
     }
 

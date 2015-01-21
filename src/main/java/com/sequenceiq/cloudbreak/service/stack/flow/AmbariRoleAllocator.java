@@ -77,7 +77,7 @@ public class AmbariRoleAllocator {
                     stackUpdater.updateStackMetaData(stackId, instancesMetaData, instanceGroup.getGroupName());
                 }
                 stack = stackUpdater.updateMetadataReady(stackId, true);
-                Set<InstanceMetaData> allInstanceMetaData = stack.getAllInstanceMetaData();
+                Set<InstanceMetaData> allInstanceMetaData = stack.getRunningInstanceMetaData();
                 String publicAmbariAddress = updateAmbariInstanceMetadata(stack, allInstanceMetaData);
                 waitForConsulAgents(stack, allInstanceMetaData);
                 updateToConsulHostNames(allInstanceMetaData);
