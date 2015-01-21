@@ -5,11 +5,13 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CbUserRole;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.RecipeRepository;
 
 @Component
@@ -17,6 +19,9 @@ public class SimpleRecipeService implements RecipeService {
 
     @Autowired
     private RecipeRepository recipeRepository;
+
+    @Autowired
+    private ClusterRepository clusterRepository;
 
     @Override
     public Recipe create(CbUser user, Recipe recipe) {
@@ -65,5 +70,37 @@ public class SimpleRecipeService implements RecipeService {
             throw new NotFoundException(String.format("Recipe '%s' not found.", name));
         }
         return recipe;
+    }
+
+    @Override
+    public void delete(Long id, CbUser user) {
+        Recipe recipe = recipeRepository.findOne(id);
+        if (recipe == null) {
+            throw new NotFoundException(String.format("Recipe '%s' not found.", id));
+        }
+        delete(recipe, user);
+    }
+
+    @Override
+    public void delete(String name, CbUser user) {
+        Recipe recipe = recipeRepository.findByNameInAccount(name, user.getAccount());
+        if (recipe == null) {
+            throw new NotFoundException(String.format("Recipe '%s' not found.", name));
+        }
+        delete(recipe, user);
+    }
+
+    private void delete(Recipe recipe, CbUser user) {
+        MDCBuilder.buildMdcContext(recipe);
+        if (clusterRepository.findAllClustersByRecipe(recipe.getId()).isEmpty()) {
+            if (!user.getUserId().equals(recipe.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
+                throw new BadRequestException("Public recipes can only be deleted by owners or account admins.");
+            } else {
+                recipeRepository.delete(recipe);
+            }
+        } else {
+            throw new BadRequestException(String.format(
+                    "There are clusters associated with recipe '%s'. Please remove these before deleting the recipe.", recipe.getId()));
+        }
     }
 }

@@ -18,4 +18,8 @@ public interface RecipeService {
     Recipe getPrivateRecipe(String name, CbUser user);
 
     Recipe getPublicRecipe(String name, CbUser user);
+
+    void delete(Long id, CbUser user);
+
+    void delete(String name, CbUser user);
 }

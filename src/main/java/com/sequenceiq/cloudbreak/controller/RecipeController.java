@@ -96,6 +96,27 @@ public class RecipeController {
         return new ResponseEntity<>(recipeConverter.convert(recipe), HttpStatus.OK);
     }
 
+    @RequestMapping(value = "recipes/{id}", method = RequestMethod.DELETE)
+    @ResponseBody
+    public ResponseEntity<String> deleteBlueprint(@ModelAttribute("user") CbUser user, @PathVariable Long id) {
+        recipeService.delete(id, user);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @RequestMapping(value = "account/recipes/{name}", method = RequestMethod.DELETE)
+    @ResponseBody
+    public ResponseEntity<String> deleteBlueprintInAccount(@ModelAttribute("user") CbUser user, @PathVariable String name) {
+        recipeService.delete(name, user);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @RequestMapping(value = "user/recipes/{name}", method = RequestMethod.DELETE)
+    @ResponseBody
+    public ResponseEntity<String> deleteBlueprintInPrivate(@ModelAttribute("user") CbUser user, @PathVariable String name) {
+        recipeService.delete(name, user);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
     private ResponseEntity<IdJson> createRecipe(CbUser user, RecipeJson recipeRequest, boolean publicInAccount) {
         if (recipeRepository.findByNameInAccount(recipeRequest.getName(), user.getAccount()) != null) {
             throw new DuplicateKeyValueException(APIResourceType.RECIPE, recipeRequest.getName());

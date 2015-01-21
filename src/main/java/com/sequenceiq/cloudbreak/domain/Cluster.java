@@ -23,9 +23,13 @@ import javax.persistence.UniqueConstraint;
 })
 @NamedQueries({
         @NamedQuery(
-                name = "Cluster.findAllClusterByBlueprint",
+                name = "Cluster.findAllClustersByBlueprint",
                 query = "SELECT c FROM Cluster c "
                         + "WHERE c.blueprint.id= :id"),
+        @NamedQuery(
+                name = "Cluster.findAllClustersByRecipe",
+                query = "SELECT c FROM Cluster c "
+                        + "WHERE c.recipe.id= :id"),
         @NamedQuery(
                 name = "Cluster.findOneWithLists",
                 query = "SELECT c FROM Cluster c "
