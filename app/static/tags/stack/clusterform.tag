@@ -46,6 +46,9 @@
                             <select class="form-control" id="selectRegion" ng-model="cluster.region" ng-show="activeCredential.cloudPlatform == 'GCC'">
                                 <option ng-repeat="region in $root.config.GCC.gccRegions" value="{{region.key}}">{{region.value}}</option>
                             </select>
+                            <select class="form-control" id="selectRegion" ng-model="cluster.region" ng-show="activeCredential.cloudPlatform == 'OPENSTACK'">
+                              <option ng-repeat="region in $root.config.OPENSTACK.regions" value="{{region.key}}">{{region.value}}</option>
+                            </select>
                         </div>
                     </div>
                     <div class="form-group">
