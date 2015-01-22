@@ -39,7 +39,7 @@
 </div>
 
 <div class="form-group" ng-class="{ 'has-error': awsCredentialForm.aws_sshPublicKey.$dirty && awsCredentialForm.aws_sshPublicKey.$invalid }">
-    <label class="col-sm-3 control-label" for="aws_sshPublicKey">SSH public key:</label>
+    <label class="col-sm-3 control-label" for="aws_sshPublicKey">SSH public key</label>
 
     <div class="col-sm-9">
         <textarea placeholder="ssh-rsa AAAAB3... user-eu" rows="4" type="text" class="form-control" ng-model="credentialAws.publicKey" name="aws_sshPublicKey" id="aws_sshPublicKey" required></textarea>

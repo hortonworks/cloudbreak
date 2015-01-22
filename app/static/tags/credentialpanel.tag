@@ -31,7 +31,10 @@
                                     <div class="btn-group btn-group-justified">
                                         <a id="awsChange" type="button" class="btn btn-info" ng-click="createAwsCredentialRequest()">Aws</a>
                                         <a id="azureChange" type="button" class="btn btn-default" ng-click="createAzureCredentialRequest()">Azure</a>
-                                        <a id="gccChange" type="button" class="btn btn-default" ng-click="createGccCredentialRequest()">Gcc</a>
+                                    </div>
+                                    <div class="btn-group btn-group-justified">
+                                      <a id="gccChange" type="button" class="btn btn-default" ng-click="createGccCredentialRequest()">Gcc</a>
+                                      <a id="openstackChange" type="button" class="btn btn-default" ng-click="createOpenstackCredentialRequest()">Openstack</a>
                                     </div>
                                 </div>
                             </div>
@@ -47,6 +50,10 @@
 
                             <form class="form-horizontal" role="form" name="gccCredentialForm" ng-show="gccCredential && !credentialInCreation">
                                 <div ng-include src="'tags/credential/gccform.tag'"></div>
+                            </form>
+
+                            <form class="form-horizontal" role="form" name="openstackCredentialForm" ng-show="openstackCredential && !credentialInCreation">
+                              <div ng-include src="'tags/credential/openstackform.tag'"></div>
                             </form>
                         </div>
                     </div>
@@ -88,6 +95,10 @@
 
                             <div class="panel-body" ng-if="credential.cloudPlatform == 'AWS' ">
                                 <div ng-include src="'tags/credential/awslist.tag'"></div>
+                            </div>
+
+                            <div class="panel-body" ng-if="credential.cloudPlatform == 'OPENSTACK' ">
+                              <div ng-include src="'tags/credential/openstacklist.tag'"></div>
                             </div>
                         </div>
                     </div>

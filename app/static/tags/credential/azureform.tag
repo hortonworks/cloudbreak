@@ -39,7 +39,7 @@
 </div>
 
 <div class="form-group" ng-class="{ 'has-error': azureCredentialForm.azure_sshPublicKey.$dirty && azureCredentialForm.azure_sshPublicKey.$invalid }">
-    <label class="col-sm-3 control-label" for="azure_sshPublicKey">SSH certificate:</label>
+    <label class="col-sm-3 control-label" for="azure_sshPublicKey">SSH certificate</label>
 
     <div class="col-sm-9">
         <textarea rows="4" type="text" placeholder="-----BEGIN CERTIFICATE-----

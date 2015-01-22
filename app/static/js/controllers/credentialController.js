@@ -9,12 +9,15 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
         $scope.credentialAws = {};
         $scope.credentialAzure = {};
         $scope.credentialGcc = {};
+        $scope.credentialOpenstack = {};
         $scope.azureCredential = false;
         $scope.awsCredential = true;
         $scope.gccCredential = false;
+        $scope.oepnstackCredential = false;
         $scope.awsCredentialForm = {};
         $scope.gccCredentialForm = {};
         $scope.azureCredentialForm = {};
+        $scope.openstackCredentialForm = {};
         $scope.gcc = {};
         $scope.gcc.p12 = "";
 
@@ -22,24 +25,34 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
             $scope.azureCredential = false;
             $scope.awsCredential = true;
             $scope.gccCredential = false;
+            $scope.oepnstackCredential = false;
         }
 
         $scope.createAzureCredentialRequest = function() {
             $scope.azureCredential = true;
             $scope.awsCredential = false;
             $scope.gccCredential = false;
+            $scope.oepnstackCredential = false;
         }
 
         $scope.createGccCredentialRequest = function() {
             $scope.azureCredential = false;
             $scope.awsCredential = false;
             $scope.gccCredential = true;
+            $scope.oepnstackCredential = false;
+        }
+
+        $scope.createOpenstackCredentialRequest = function() {
+          $scope.azureCredential = false;
+          $scope.awsCredential = false;
+          $scope.gccCredential = false;
+          $scope.openstackCredential = true;
         }
 
         $scope.createAwsCredential = function() {
             $scope.credentialAws.cloudPlatform = "AWS";
             $rootScope.credentialInCreation = true;
-            
+
             if ($scope.credentialAws.public){
                 AccountCredential.save($scope.credentialAws, function(result) {
                     handleAwsCredentialSuccess(result)
@@ -53,7 +66,7 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
                     handleAwsCredentialError(error)
                 });
             }
-            
+
             function handleAwsCredentialSuccess(result) {
                 $scope.credentialAws.id = result.id;
                 $rootScope.credentials.push($scope.credentialAws);
@@ -62,14 +75,50 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
                 $scope.modifyStatusClass("has-success");
                 $scope.awsCredentialForm.$setPristine();
                 collapseCreateCredentialFormPanel();
-                $rootScope.credentialInCreation = false;            
+                $rootScope.credentialInCreation = false;
             }
-            
+
             function handleAwsCredentialError(error) {
                 $scope.modifyStatusMessage($rootScope.error_msg.aws_credential_failed + error.data.message);
                 $scope.modifyStatusClass("has-error");
                 $rootScope.credentialInCreation = false;
             }
+        }
+
+        $scope.createOpenstackCredential = function() {
+          $scope.credentialOpenstack.cloudPlatform = "OPENSTACK";
+          $rootScope.credentialInCreation = true;
+
+          if ($scope.credentialOpenstack.public){
+            AccountCredential.save($scope.credentialOpenstack, function(result) {
+              handleOpenstackCredentialSuccess(result)
+            }, function (error) {
+              handleOpenstackCredentialError(error)
+            });
+          } else {
+            UserCredential.save($scope.credentialOpenstack, function(result) {
+              handleOpenstackCredentialSuccess(result)
+            }, function (error) {
+              handleOpenstackCredentialError(error)
+            });
+          }
+
+          function handleOpenstackCredentialSuccess(result) {
+            $scope.credentialOpenstack.id = result.id;
+            $rootScope.credentials.push($scope.credentialOpenstack);
+            $scope.credentialOpenstack = {};
+            $scope.modifyStatusMessage($rootScope.error_msg.openstack_credential_success1 + result.id + $rootScope.error_msg.openstack_credential_success2);
+            $scope.modifyStatusClass("has-success");
+            $scope.credentialOpenstackForm.$setPristine();
+            collapseCreateCredentialFormPanel();
+            $rootScope.credentialInCreation = false;
+          }
+
+          function handleOpenstackCredentialError(error) {
+            $scope.modifyStatusMessage($rootScope.error_msg.openstack_credential_failed + error.data.message);
+            $scope.modifyStatusClass("has-error");
+            $rootScope.credentialInCreation = false;
+          }
         }
 
         $scope.createAzureCredential = function() {
@@ -89,7 +138,7 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
                     handleAzureCredentialError(error)
                 });
             }
-            
+
             function handleAzureCredentialSuccess(result) {
                 $scope.credentialAzure.id = result.id;
                 $rootScope.credentials.push($scope.credentialAzure);
@@ -98,9 +147,9 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
                 $scope.modifyStatusClass("has-success");
                 window.location.href = "credentials/certificate/" + result.id
                 $scope.azureCredentialForm.$setPristine();
-                collapseCreateCredentialFormPanel();          
+                collapseCreateCredentialFormPanel();
             }
-            
+
             function handleAzureCredentialError(error) {
                 $scope.credentialAzure.publicKey = $base64.decode($scope.credentialAzure.publicKey)
                 $scope.modifyStatusMessage($rootScope.error_msg.azure_credential_failed + error.data.message);
@@ -118,7 +167,7 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
             reader.onloadend = function(evt) {
                 if (evt.target.readyState == FileReader.DONE) {
                   $scope.credentialGcc.parameters.serviceAccountPrivateKey = $base64.encode(evt.target.result);
-                  
+
                   if ($scope.credentialGcc.public) {
                     AccountCredential.save($scope.credentialGcc, function(result){
                       handleGccCredentialSuccess(result)
@@ -134,7 +183,7 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
                   }
                 }
             };
-            
+
             function handleGccCredentialSuccess(result) {
                  $scope.credentialGcc.id = result.id;
                  $rootScope.credentials.push($scope.credentialGcc);
