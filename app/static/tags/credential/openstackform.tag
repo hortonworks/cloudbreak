@@ -29,7 +29,7 @@
     <label class="col-sm-3 control-label" for="ouser">User</label>
 
     <div class="col-sm-9">
-        <input type="text" class="form-control" name="ouser" ng-model="credentialOpenstack.parameters.user" ng-minlength="5" required id="ouser" placeholder="min. 5 char">
+        <input type="text" class="form-control" name="ouser" ng-model="credentialOpenstack.parameters.user" required id="ouser" placeholder="openstack user name">
         <div class="help-block" ng-show="openstackCredentialForm.ouser.$dirty && openstackCredentialForm.ouser.$invalid">
             <i class="fa fa-warning"></i> {{error_msg.openstack_credential_ouser_invalid}}
         </div>
@@ -42,7 +42,7 @@
   <label class="col-sm-3 control-label" for="opassword">Password</label>
 
   <div class="col-sm-9">
-    <input type="text" class="form-control" name="opassword" ng-model="credentialOpenstack.parameters.password" ng-minlength="5" required id="opassword" placeholder="min. 5 char">
+    <input type="text" class="form-control" name="opassword" ng-model="credentialOpenstack.parameters.password" required id="opassword" placeholder="openstack password">
       <div class="help-block" ng-show="openstackCredentialForm.opassword.$dirty && openstackCredentialForm.opassword.$invalid">
         <i class="fa fa-warning"></i> {{error_msg.openstack_credential_opassword_invalid}}
       </div>
@@ -55,7 +55,7 @@
   <label class="col-sm-3 control-label" for="otenantName">Tenant Name</label>
 
   <div class="col-sm-9">
-    <input type="text" class="form-control" name="otenantName" ng-model="credentialOpenstack.parameters.tenantName" ng-minlength="5" required id="otenantName" placeholder="min. 5 char">
+    <input type="text" class="form-control" name="otenantName" ng-model="credentialOpenstack.parameters.tenantName" required id="otenantName" placeholder="openstack tenant name">
       <div class="help-block" ng-show="openstackCredentialForm.otenantName.$dirty && openstackCredentialForm.otenantName.$invalid">
         <i class="fa fa-warning"></i> {{error_msg.openstack_credential_otenantName_invalid}}
       </div>
