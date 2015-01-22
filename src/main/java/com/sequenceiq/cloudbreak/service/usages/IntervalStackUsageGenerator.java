@@ -111,15 +111,11 @@ public class IntervalStackUsageGenerator {
         CloudbreakUsage usage = new CloudbreakUsage();
         usage.setOwner(event.getOwner());
         usage.setAccount(event.getAccount());
-        usage.setBlueprintId(event.getBlueprintId());
-        usage.setBlueprintName(event.getBlueprintName());
-        usage.setCloud(event.getCloud());
-        usage.setZone(event.getRegion());
-        usage.setMachineType(event.getVmType());
+        usage.setProvider(event.getCloud());
+        usage.setRegion(event.getRegion());
         usage.setInstanceHours(nodesRunningHours);
         usage.setDay(day);
         usage.setStackId(event.getStackId());
-        usage.setStackStatus(event.getStackStatus());
         usage.setStackName(event.getStackName());
         return usage;
     }

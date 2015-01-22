@@ -3,8 +3,6 @@ package com.sequenceiq.cloudbreak.domain;
 import java.util.Date;
 
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
@@ -18,25 +16,19 @@ public class CloudbreakUsage implements ProvisionEntity {
 
     private String account;
 
-    private String blueprintName;
-    private Long blueprintId;
+    private Long stackId;
+
+    private String stackName;
+
+    private String provider;
+
+    private String region;
 
     private Date day;
 
-    private String cloud;
-
-    private String zone;
-
-    private String machineType;
-
     private Long instanceHours;
 
-    private Long stackId;
-
-    @Enumerated(EnumType.STRING)
-    private Status stackStatus;
-
-    private String stackName;
+    private Double costs;
 
     public Long getId() {
         return id;
@@ -62,44 +54,20 @@ public class CloudbreakUsage implements ProvisionEntity {
         this.account = account;
     }
 
-    public String getBlueprintName() {
-        return blueprintName;
+    public String getProvider() {
+        return provider;
     }
 
-    public void setBlueprintName(String blueprintName) {
-        this.blueprintName = blueprintName;
+    public void setProvider(String provider) {
+        this.provider = provider;
     }
 
-    public Long getBlueprintId() {
-        return blueprintId;
+    public String getRegion() {
+        return region;
     }
 
-    public void setBlueprintId(Long blueprintId) {
-        this.blueprintId = blueprintId;
-    }
-
-    public String getCloud() {
-        return cloud;
-    }
-
-    public void setCloud(String cloud) {
-        this.cloud = cloud;
-    }
-
-    public String getZone() {
-        return zone;
-    }
-
-    public void setZone(String zone) {
-        this.zone = zone;
-    }
-
-    public String getMachineType() {
-        return machineType;
-    }
-
-    public void setMachineType(String machineType) {
-        this.machineType = machineType;
+    public void setRegion(String region) {
+        this.region = region;
     }
 
     public Long getInstanceHours() {
@@ -126,14 +94,6 @@ public class CloudbreakUsage implements ProvisionEntity {
         this.stackId = stackId;
     }
 
-    public Status getStackStatus() {
-        return stackStatus;
-    }
-
-    public void setStackStatus(Status stackStatus) {
-        this.stackStatus = stackStatus;
-    }
-
     public String getStackName() {
         return stackName;
     }
@@ -148,16 +108,22 @@ public class CloudbreakUsage implements ProvisionEntity {
         sb.append("id=").append(id);
         sb.append(", owner='").append(owner).append('\'');
         sb.append(", account='").append(account).append('\'');
-        sb.append(", blueprintName='").append(blueprintName).append('\'');
-        sb.append(", blueprintId=").append(blueprintId);
         sb.append(", day=").append(day);
-        sb.append(", cloud='").append(cloud).append('\'');
-        sb.append(", zone='").append(zone).append('\'');
-        sb.append(", machineType='").append(machineType).append('\'');
+        sb.append(", provider='").append(provider).append('\'');
+        sb.append(", region='").append(region).append('\'');
         sb.append(", instanceHours='").append(instanceHours).append('\'');
         sb.append(", stackId='").append(stackId).append('\'');
+        sb.append(", stackName='").append(stackName).append('\'');
+        sb.append(", costs='").append(costs).append('\'');
         sb.append('}');
         return sb.toString();
     }
 
+    public Double getCosts() {
+        return costs;
+    }
+
+    public void setCosts(Double costs) {
+        this.costs = costs;
+    }
 }

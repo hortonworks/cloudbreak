@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
-import com.sequenceiq.cloudbreak.domain.Status;
-
 public class CloudbreakUsageJson implements JsonEntity {
     private String owner;
 
@@ -9,24 +7,19 @@ public class CloudbreakUsageJson implements JsonEntity {
 
     private String account;
 
-    private String blueprintName;
-    private Long blueprintId;
-
-    private Long stackId;
-
     private String day;
 
-    private String cloud;
+    private String provider;
 
-    private String zone;
-
-    private String machineType;
+    private String region;
 
     private Long instanceHours;
 
-    private Status stackStatus;
+    private Long stackId;
 
     private String stackName;
+
+    private Double costs;
 
     public String getOwner() {
         return owner;
@@ -44,22 +37,6 @@ public class CloudbreakUsageJson implements JsonEntity {
         this.account = account;
     }
 
-    public String getBlueprintName() {
-        return blueprintName;
-    }
-
-    public void setBlueprintName(String blueprintName) {
-        this.blueprintName = blueprintName;
-    }
-
-    public Long getBlueprintId() {
-        return blueprintId;
-    }
-
-    public void setBlueprintId(Long blueprintId) {
-        this.blueprintId = blueprintId;
-    }
-
     public String getDay() {
         return day;
     }
@@ -68,28 +45,20 @@ public class CloudbreakUsageJson implements JsonEntity {
         this.day = day;
     }
 
-    public String getCloud() {
-        return cloud;
+    public String getProvider() {
+        return provider;
     }
 
-    public void setCloud(String cloud) {
-        this.cloud = cloud;
+    public void setProvider(String provider) {
+        this.provider = provider;
     }
 
-    public String getZone() {
-        return zone;
+    public String getRegion() {
+        return region;
     }
 
-    public void setZone(String zone) {
-        this.zone = zone;
-    }
-
-    public String getMachineType() {
-        return machineType;
-    }
-
-    public void setMachineType(String machineType) {
-        this.machineType = machineType;
+    public void setRegion(String region) {
+        this.region = region;
     }
 
     public Long getInstanceHours() {
@@ -108,14 +77,6 @@ public class CloudbreakUsageJson implements JsonEntity {
         this.stackId = stackId;
     }
 
-    public Status getStackStatus() {
-        return stackStatus;
-    }
-
-    public void setStackStatus(Status stackStatus) {
-        this.stackStatus = stackStatus;
-    }
-
     public String getUsername() {
         return username;
     }
@@ -130,5 +91,13 @@ public class CloudbreakUsageJson implements JsonEntity {
 
     public void setStackName(String stackName) {
         this.stackName = stackName;
+    }
+
+    public Double getCosts() {
+        return costs;
+    }
+
+    public void setCosts(Double costs) {
+        this.costs = costs;
     }
 }
