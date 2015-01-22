@@ -4,11 +4,9 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -19,7 +17,6 @@ import com.sequenceiq.cloudbreak.controller.validation.AzureTemplateParam;
 import com.sequenceiq.cloudbreak.domain.AzureLocation;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
-import com.sequenceiq.cloudbreak.domain.Port;
 
 public class AzureTemplateConverterTest {
 
@@ -128,8 +125,6 @@ public class AzureTemplateConverterTest {
         azureTemplate.setImageName(DUMMY_IMAGE_NAME);
         azureTemplate.setName(DUMMY_NAME);
         azureTemplate.setId(1L);
-        Set<Port> ports = new HashSet<>();
-        ports.add(new Port(DUMMY_NAME, PORT, LOCAL_PORT, DUMMY_PROTOCOL));
         azureTemplate.setPublicInAccount(true);
         return azureTemplate;
     }

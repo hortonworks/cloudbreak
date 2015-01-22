@@ -25,11 +25,10 @@ import com.sequenceiq.cloudbreak.controller.StackCreationFailureException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.AzureVmType;
-import com.sequenceiq.cloudbreak.domain.Port;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
@@ -264,6 +263,24 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
 
         public InstanceGroup getInstanceGroup() {
             return instanceGroup;
+        }
+    }
+
+    public class Port {
+
+        private String localPort;
+        private String name;
+        private String port;
+        private String protocol;
+
+        public Port() {
+        }
+
+        public Port(String name, String port, String localPort, String protocol) {
+            this.name = name;
+            this.localPort = localPort;
+            this.port = port;
+            this.protocol = protocol;
         }
     }
 
