@@ -87,7 +87,7 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
         stackEvent.setStackId(stack.getId());
         stackEvent.setStackStatus(stack.getStatus());
         stackEvent.setStackName(stack.getName());
-        stackEvent.setNodeCount(instanceGroup.getNodeCount());
+        stackEvent.setNodeCount(stack.getRunningInstanceMetaData().size());
 
         populateClusterData(stackEvent, stack);
         populateTemplateData(stackEvent, stack, instanceGroup);
