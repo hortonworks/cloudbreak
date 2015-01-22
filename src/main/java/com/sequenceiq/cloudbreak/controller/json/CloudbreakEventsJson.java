@@ -11,7 +11,6 @@ public class CloudbreakEventsJson implements JsonEntity {
     private String account;
     private String cloud;
     private String region;
-    private String vmType;
     private long blueprintId;
     private String blueprintName;
     private Long stackId;
@@ -82,14 +81,6 @@ public class CloudbreakEventsJson implements JsonEntity {
 
     public void setRegion(String region) {
         this.region = region;
-    }
-
-    public String getVmType() {
-        return vmType;
-    }
-
-    public void setVmType(String vmType) {
-        this.vmType = vmType;
     }
 
     public String getBlueprintName() {

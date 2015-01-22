@@ -21,7 +21,6 @@ public class CloudbreakEventConverter extends AbstractConverter<CloudbreakEvents
         json.setEventType(entity.getEventType());
         json.setEventTimestamp(entity.getEventTimestamp().getTime());
         json.setRegion(entity.getRegion());
-        json.setVmType(entity.getVmType());
         json.setOwner(entity.getOwner());
         json.setStackId(entity.getStackId());
         json.setStackName(entity.getStackName());
@@ -42,7 +41,6 @@ public class CloudbreakEventConverter extends AbstractConverter<CloudbreakEvents
         entity.setEventType(json.getEventType());
         entity.setEventTimestamp(new Date(json.getEventTimestamp()));
         entity.setRegion(json.getRegion());
-        entity.setVmType(json.getVmType());
         entity.setOwner(json.getOwner());
         entity.setStackId(json.getStackId());
         entity.setStackName(json.getStackName());

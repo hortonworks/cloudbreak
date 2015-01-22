@@ -148,7 +148,6 @@ public class StackUsageGenerator {
         event.setBlueprintId(startEvent.getBlueprintId());
         event.setBlueprintName(startEvent.getBlueprintName());
         event.setEventTimestamp(cal.getTime());
-        event.setVmType(startEvent.getVmType());
         event.setCloud(startEvent.getCloud());
         event.setRegion(startEvent.getRegion());
         event.setStackId(startEvent.getStackId());
