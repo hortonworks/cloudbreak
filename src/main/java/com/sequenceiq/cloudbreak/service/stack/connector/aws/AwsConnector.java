@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
+import com.amazonaws.services.autoscaling.model.AutoScalingGroup;
+import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
 import com.amazonaws.services.autoscaling.model.DetachInstancesRequest;
 import com.amazonaws.services.autoscaling.model.ResumeProcessesRequest;
 import com.amazonaws.services.autoscaling.model.SuspendProcessesRequest;
@@ -43,7 +45,6 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
@@ -105,8 +106,8 @@ public class AwsConnector implements CloudPlatformConnector {
     private StackRepository stackRepository;
 
     /**
-     * If the stack is in stopped state, it means that the AutoScalingGroup's scaling policies are suspended and it causes that
-     * the CloudFormation delete won't be able to remove the ASG. In this case the ASG size is reduced to zero and the processes are resumed first.
+     * If the AutoScaling group has some suspended scaling policies it causes that the CloudFormation stack delete won't be able to remove the ASG.
+     * In this case the ASG size is reduced to zero and the processes are resumed first.
      */
     @Override
     public void deleteStack(Stack stack, Credential credential) {
@@ -131,14 +132,18 @@ public class AwsConnector implements CloudPlatformConnector {
                 }
             }
 
-            if (Status.STOPPED.equals(stack.getStatus())) {
-                String asGroupName = cfStackUtil.getAutoscalingGroupName(stack, client);
-                AmazonAutoScalingClient amazonASClient = awsStackUtil.createAutoScalingClient(template.getRegion(), awsCredential);
-                amazonASClient.updateAutoScalingGroup(new UpdateAutoScalingGroupRequest()
-                        .withAutoScalingGroupName(asGroupName)
-                        .withMinSize(0)
-                        .withDesiredCapacity(0));
-                amazonASClient.resumeProcesses(new ResumeProcessesRequest().withAutoScalingGroupName(asGroupName));
+            String asGroupName = cfStackUtil.getAutoscalingGroupName(stack, client);
+            AmazonAutoScalingClient amazonASClient = awsStackUtil.createAutoScalingClient(template.getRegion(), awsCredential);
+            List<AutoScalingGroup> asGroups = amazonASClient.describeAutoScalingGroups(new DescribeAutoScalingGroupsRequest()
+                    .withAutoScalingGroupNames(asGroupName)).getAutoScalingGroups();
+            if (!asGroups.isEmpty()) {
+                if (!asGroups.get(0).getSuspendedProcesses().isEmpty()) {
+                    amazonASClient.updateAutoScalingGroup(new UpdateAutoScalingGroupRequest()
+                            .withAutoScalingGroupName(asGroupName)
+                            .withMinSize(0)
+                            .withDesiredCapacity(0));
+                    amazonASClient.resumeProcesses(new ResumeProcessesRequest().withAutoScalingGroupName(asGroupName));
+                }
             }
 
             DeleteStackRequest deleteStackRequest = new DeleteStackRequest().withStackName(resource.getResourceName());
