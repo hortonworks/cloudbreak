@@ -134,7 +134,9 @@ angular.module('uluwatuControllers').controller('mainController', ['$scope', '$r
 
             },
             'OPENSTACK': {
-
+              regions : [
+                {key: 'LOCAL', value: 'local', cloud: 'OPENSTACK'}
+              ]
             },
             'EVENT_TYPE': {
                 "REQUESTED": "requested",
