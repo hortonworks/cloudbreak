@@ -117,7 +117,7 @@ public class AmbariClusterConnector {
             AmbariClient ambariClient = clientService.create(stack);
 
             addBlueprint(stack, ambariClient, blueprint);
-            Map<String, List<String>> hostGroupMappings = recommend(stack, ambariClient, blueprint.getBlueprintName());
+            Map<String, List<String>> hostGroupMappings = recommend(stack, ambariClient);
             saveHostMetadata(cluster, hostGroupMappings);
             ambariClient.createCluster(cluster.getName(), blueprint.getBlueprintName(), hostGroupMappings);
             waitForClusterInstall(stack, ambariClient);
@@ -354,18 +354,17 @@ public class AmbariClusterConnector {
                 MAX_ATTEMPTS_FOR_HOSTS);
     }
 
-    private Map<String, List<String>> recommend(Stack stack, AmbariClient ambariClient, String blueprintName) throws InvalidHostGroupHostAssociation {
+    private Map<String, List<String>> recommend(Stack stack, AmbariClient ambariClient) throws InvalidHostGroupHostAssociation {
         MDCBuilder.buildMdcContext(stack);
         waitForHosts(stack, ambariClient);
         LOGGER.info("Asking Ambari client to recommend host-hostGroup mapping [Ambari server address: {}]", stack.getAmbariIp());
         Map<String, List<String>> hostGroupMappings = new HashMap<>();
-        Map<String, String> hostNames = ambariClient.getHostNames();
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             for (InstanceMetaData metaData : instanceGroup.getInstanceMetaData()) {
                 if (hostGroupMappings.get(instanceGroup.getGroupName()) == null) {
                     hostGroupMappings.put(instanceGroup.getGroupName(), new ArrayList<String>());
                 }
-                hostGroupMappings.get(instanceGroup.getGroupName()).add(hostNames.get(metaData.getPublicIp()));
+                hostGroupMappings.get(instanceGroup.getGroupName()).add(metaData.getLongName());
             }
         }
         LOGGER.info("recommended host-hostGroup mappings for stack: {}", hostGroupMappings);

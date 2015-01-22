@@ -22,10 +22,12 @@ import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
 import com.sequenceiq.cloudbreak.converter.AwsTemplateConverter;
 import com.sequenceiq.cloudbreak.converter.AzureTemplateConverter;
 import com.sequenceiq.cloudbreak.converter.GccTemplateConverter;
+import com.sequenceiq.cloudbreak.converter.OpenStackTemplateConverter;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
-import com.sequenceiq.cloudbreak.domain.GccTemplate;
 import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.domain.GccTemplate;
+import com.sequenceiq.cloudbreak.domain.OpenStackTemplate;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
 
@@ -43,6 +45,9 @@ public class TemplateController {
 
     @Autowired
     private AzureTemplateConverter azureTemplateConverter;
+
+    @Autowired
+    private OpenStackTemplateConverter openStackTemplateConverter;
 
     @RequestMapping(value = "user/templates", method = RequestMethod.POST)
     @ResponseBody
@@ -122,39 +127,33 @@ public class TemplateController {
     }
 
     private Template convert(TemplateJson templateRequest, boolean publicInAccount) {
-        Template template = null;
         switch (templateRequest.getCloudPlatform()) {
             case AWS:
-                template = awsTemplateConverter.convert(templateRequest, publicInAccount);
-                break;
+                return awsTemplateConverter.convert(templateRequest);
             case AZURE:
-                template = azureTemplateConverter.convert(templateRequest, publicInAccount);
-                break;
+                return azureTemplateConverter.convert(templateRequest);
             case GCC:
-                template = gccTemplateConverter.convert(templateRequest, publicInAccount);
-                break;
+                return gccTemplateConverter.convert(templateRequest);
+            case OPENSTACK:
+                return openStackTemplateConverter.convert(templateRequest);
             default:
                 throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", templateRequest.getCloudPlatform()));
         }
-        return template;
     }
 
     private TemplateJson convert(Template template) {
-        TemplateJson templateJson = null;
         switch (template.cloudPlatform()) {
             case AWS:
-                templateJson = awsTemplateConverter.convert((AwsTemplate) template);
-                break;
+                return awsTemplateConverter.convert((AwsTemplate) template);
             case AZURE:
-                templateJson = azureTemplateConverter.convert((AzureTemplate) template);
-                break;
+                return azureTemplateConverter.convert((AzureTemplate) template);
             case GCC:
-                templateJson = gccTemplateConverter.convert((GccTemplate) template);
-                break;
+                return gccTemplateConverter.convert((GccTemplate) template);
+            case OPENSTACK:
+                return openStackTemplateConverter.convert((OpenStackTemplate) template);
             default:
                 throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", template.cloudPlatform()));
         }
-        return templateJson;
     }
 
     private Set<TemplateJson> convert(Set<Template> templates) {

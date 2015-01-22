@@ -69,7 +69,7 @@ public class SimpleCredentialService implements CredentialService {
         credentialHandlers.get(credential.cloudPlatform()).init(credential);
         credential.setOwner(user.getUserId());
         credential.setAccount(user.getAccount());
-        Credential savedCredential = null;
+        Credential savedCredential;
         try {
             savedCredential = credentialRepository.save(credential);
         } catch (DataIntegrityViolationException ex) {

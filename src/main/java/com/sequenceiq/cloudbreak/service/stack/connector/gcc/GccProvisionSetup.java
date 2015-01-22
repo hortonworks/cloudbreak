@@ -39,7 +39,6 @@ public class GccProvisionSetup implements ProvisionSetup {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GccProvisionSetup.class);
 
-    private static final String MAIN_PROJECT = "siq-haas";
     private static final int CONFLICT = 409;
     private static final int MAX_POLLING_ATTEMPTS = 60;
     private static final int POLLING_INTERVAL = 5000;

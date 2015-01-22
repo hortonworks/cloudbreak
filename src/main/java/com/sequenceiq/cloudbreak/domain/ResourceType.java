@@ -13,6 +13,9 @@ public enum ResourceType {
     // AWS
     CLOUDFORMATION_STACK,
 
+    // OPENSTACK
+    HEAT_STACK,
+
     // GCC
     GCC_DISK,
     GCC_ATTACHED_DISK,
