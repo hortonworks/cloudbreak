@@ -25,6 +25,7 @@ public class ScalingRequestTest {
     private static final int S_RETRY_COUNT = 10;
     private static final int C_RETRY_COUNT = 3;
     private static final int SLEEP = 0;
+    private static final String HOST_GROUP = "group";
 
     private ScalingRequest scalingRequest;
     @Mock
@@ -35,7 +36,7 @@ public class ScalingRequestTest {
         Cluster cluster = mock(Cluster.class);
         ScalingPolicy scalingPolicy = mock(ScalingPolicy.class);
         CloudbreakClient cloudbreakClient = mock(CloudbreakClient.class);
-        when(scalingPolicy.getHostGroup()).thenReturn("group");
+        when(scalingPolicy.getHostGroup()).thenReturn(HOST_GROUP);
         when(cluster.getHost()).thenReturn("ambari.com");
         when(cluster.getId()).thenReturn(1L);
         when(cloudbreakClient.resolveToStackId("ambari.com")).thenReturn(50);
@@ -46,9 +47,9 @@ public class ScalingRequestTest {
 
         scalingRequest.run();
 
-        verify(cloudbreakClient, times(1)).putStack(50, 5);
+        verify(cloudbreakClient, times(1)).putStack(50, HOST_GROUP, 5);
         verify(cloudbreakClient, times(10)).getStackStatus(50);
-        verify(cloudbreakClient, times(0)).putCluster(50, "group", 5);
+        verify(cloudbreakClient, times(0)).putCluster(50, HOST_GROUP, 5);
     }
 
     @Test
@@ -56,7 +57,7 @@ public class ScalingRequestTest {
         Cluster cluster = mock(Cluster.class);
         ScalingPolicy scalingPolicy = mock(ScalingPolicy.class);
         CloudbreakClient cloudbreakClient = mock(CloudbreakClient.class);
-        when(scalingPolicy.getHostGroup()).thenReturn("group");
+        when(scalingPolicy.getHostGroup()).thenReturn(HOST_GROUP);
         when(cluster.getHost()).thenReturn("ambari.com");
         when(cluster.getId()).thenReturn(1L);
         when(cloudbreakClient.resolveToStackId("ambari.com")).thenReturn(50);
@@ -67,9 +68,9 @@ public class ScalingRequestTest {
 
         scalingRequest.run();
 
-        verify(cloudbreakClient, times(1)).putStack(50, 5);
+        verify(cloudbreakClient, times(1)).putStack(50, HOST_GROUP, 5);
         verify(cloudbreakClient, times(2)).getStackStatus(50);
-        verify(cloudbreakClient, times(1)).putCluster(50, "group", 5);
+        verify(cloudbreakClient, times(1)).putCluster(50, HOST_GROUP, 5);
     }
 
     @Test
@@ -77,7 +78,7 @@ public class ScalingRequestTest {
         Cluster cluster = mock(Cluster.class);
         ScalingPolicy scalingPolicy = mock(ScalingPolicy.class);
         CloudbreakClient cloudbreakClient = mock(CloudbreakClient.class);
-        when(scalingPolicy.getHostGroup()).thenReturn("group");
+        when(scalingPolicy.getHostGroup()).thenReturn(HOST_GROUP);
         when(cluster.getHost()).thenReturn("ambari.com");
         when(cluster.getId()).thenReturn(1L);
         when(cloudbreakClient.resolveToStackId("ambari.com")).thenReturn(50);
@@ -101,9 +102,9 @@ public class ScalingRequestTest {
 
         scalingRequest.run();
 
-        verify(cloudbreakClient, times(1)).putStack(50, 5);
+        verify(cloudbreakClient, times(1)).putStack(50, HOST_GROUP, 5);
         verify(cloudbreakClient, times(3)).getStackStatus(50);
-        verify(cloudbreakClient, times(1)).putCluster(50, "group", 5);
+        verify(cloudbreakClient, times(1)).putCluster(50, HOST_GROUP, 5);
     }
 
     @Test
@@ -111,7 +112,7 @@ public class ScalingRequestTest {
         Cluster cluster = mock(Cluster.class);
         ScalingPolicy scalingPolicy = mock(ScalingPolicy.class);
         CloudbreakClient cloudbreakClient = mock(CloudbreakClient.class);
-        when(scalingPolicy.getHostGroup()).thenReturn("group");
+        when(scalingPolicy.getHostGroup()).thenReturn(HOST_GROUP);
         when(cluster.getHost()).thenReturn("ambari.com");
         when(cluster.getId()).thenReturn(1L);
         when(cloudbreakClient.resolveToStackId("ambari.com")).thenReturn(50);
@@ -134,9 +135,9 @@ public class ScalingRequestTest {
 
         scalingRequest.run();
 
-        verify(cloudbreakClient, times(1)).putStack(50, 5);
+        verify(cloudbreakClient, times(1)).putStack(50, HOST_GROUP, 5);
         verify(cloudbreakClient, times(11)).getStackStatus(50);
-        verify(cloudbreakClient, times(0)).putCluster(50, "group", 5);
+        verify(cloudbreakClient, times(0)).putCluster(50, HOST_GROUP, 5);
     }
 
     @Test
@@ -144,21 +145,21 @@ public class ScalingRequestTest {
         Cluster cluster = mock(Cluster.class);
         ScalingPolicy scalingPolicy = mock(ScalingPolicy.class);
         CloudbreakClient cloudbreakClient = mock(CloudbreakClient.class);
-        when(scalingPolicy.getHostGroup()).thenReturn("group");
+        when(scalingPolicy.getHostGroup()).thenReturn(HOST_GROUP);
         when(cluster.getHost()).thenReturn("ambari.com");
         when(cluster.getId()).thenReturn(1L);
         when(cloudbreakClient.resolveToStackId("ambari.com")).thenReturn(50);
         when(cloudbreakClient.getStackStatus(50)).thenReturn("AVAILABLE");
-        doThrow(new RuntimeException()).when(cloudbreakClient).putCluster(50, "group", 5);
+        doThrow(new RuntimeException()).when(cloudbreakClient).putCluster(50, HOST_GROUP, 5);
         when(cloudbreakService.getClient()).thenReturn(cloudbreakClient);
         scalingRequest = new ScalingRequest(cluster, scalingPolicy, 5, 10, SLEEP, S_RETRY_COUNT, C_RETRY_COUNT);
         ReflectionTestUtils.setField(scalingRequest, "cloudbreakService", cloudbreakService);
 
         scalingRequest.run();
 
-        verify(cloudbreakClient, times(1)).putStack(50, 5);
+        verify(cloudbreakClient, times(1)).putStack(50, HOST_GROUP, 5);
         verify(cloudbreakClient, times(2)).getStackStatus(50);
-        verify(cloudbreakClient, times(3)).putCluster(50, "group", 5);
+        verify(cloudbreakClient, times(3)).putCluster(50, HOST_GROUP, 5);
     }
 
     @Test
@@ -166,7 +167,7 @@ public class ScalingRequestTest {
         Cluster cluster = mock(Cluster.class);
         ScalingPolicy scalingPolicy = mock(ScalingPolicy.class);
         CloudbreakClient cloudbreakClient = mock(CloudbreakClient.class);
-        when(scalingPolicy.getHostGroup()).thenReturn("group");
+        when(scalingPolicy.getHostGroup()).thenReturn(HOST_GROUP);
         when(cluster.getHost()).thenReturn("ambari.com");
         when(cluster.getId()).thenReturn(1L);
         when(cloudbreakClient.resolveToStackId("ambari.com")).thenReturn(50);
@@ -183,16 +184,16 @@ public class ScalingRequestTest {
                         return "AVAILABLE";
                 }
             }
-        }).when(cloudbreakClient).putCluster(50, "group", 5);
+        }).when(cloudbreakClient).putCluster(50, HOST_GROUP, 5);
         when(cloudbreakService.getClient()).thenReturn(cloudbreakClient);
         scalingRequest = new ScalingRequest(cluster, scalingPolicy, 5, 10, SLEEP, S_RETRY_COUNT, C_RETRY_COUNT);
         ReflectionTestUtils.setField(scalingRequest, "cloudbreakService", cloudbreakService);
 
         scalingRequest.run();
 
-        verify(cloudbreakClient, times(1)).putStack(50, 5);
+        verify(cloudbreakClient, times(1)).putStack(50, HOST_GROUP, 5);
         verify(cloudbreakClient, times(2)).getStackStatus(50);
-        verify(cloudbreakClient, times(2)).putCluster(50, "group", 5);
+        verify(cloudbreakClient, times(2)).putCluster(50, HOST_GROUP, 5);
     }
 
 }

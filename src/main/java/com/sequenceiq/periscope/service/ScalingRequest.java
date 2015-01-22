@@ -68,7 +68,7 @@ public class ScalingRequest implements Runnable {
         try {
             LOGGER.info(clusterId, "Sending request to add {} instance(s)", scalingAdjustment);
             int stackId = client.resolveToStackId(ambari);
-            client.putStack(stackId, scalingAdjustment);
+            client.putStack(stackId, hostGroup, scalingAdjustment);
             boolean ready = waitForReadyState(clusterId, stackId, client);
             if (ready) {
                 boolean sent = sendInstallRequest(client, scalingAdjustment, hostGroup, clusterId, stackId);
@@ -113,7 +113,7 @@ public class ScalingRequest implements Runnable {
             boolean ready = waitForReadyState(clusterId, stackId, client);
             if (ready) {
                 LOGGER.info(clusterId, "Sending request to terminate {} instance(s)", scalingAdjustment);
-                client.putStack(stackId, scalingAdjustment);
+                client.putStack(stackId, hostGroup, scalingAdjustment);
             } else {
                 LOGGER.info(clusterId, "Instance(s) didn't stop in time, skipping scaling");
                 // TODO should we force instance termination?
