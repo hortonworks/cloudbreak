@@ -38,7 +38,7 @@ meta_order() {
 
 my_order() {
   local myip=$(get_ip)
-  meta_order | grep ${myip} | cut -d" " -f 1
+  meta_order | grep "\b${myip}$" | cut -d" " -f 1
 }
 
 consul_join_ip() {

@@ -20,7 +20,7 @@ get_vpc_peers() {
     METADATA_STATUS=204
     MAX_RETRIES=60
     RETRIES=0
-    while [ $METADATA_STATUS -ne 200 ]  && [ $RETRIES -ne $MAX_RETRIES ]; do
+    while [ $METADATA_STATUS -ne 200 ] && [ $RETRIES -ne $MAX_RETRIES ]; do
       METADATA_STATUS=$(curl -sk -o /tmp/metadata_result -w "%{http_code}" -X GET -H Content-Type:application/json $METADATA_ADDRESS/stacks/metadata/$METADATA_HASH);
       [ $METADATA_STATUS -ne 200 ] && sleep 5 && ((RETRIES++));
     done
@@ -38,7 +38,7 @@ meta_order() {
 
 my_order() {
   local myip=$(get_ip)
-  meta_order | grep ${myip} | cut -d" " -f 1
+  meta_order | grep "\b${myip}$" | cut -d" " -f 1
 }
 
 consul_join_ip() {
