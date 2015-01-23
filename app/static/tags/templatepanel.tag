@@ -28,7 +28,10 @@
                                     <div class="btn-group btn-group-justified">
                                         <a id="awsTemplateChange" type="button" class="btn btn-info" role="button" ng-click="createAwsTemplateRequest()">Aws</a>
                                         <a id="azureTemplateChange" class="btn btn-default" role="button" ng-click="createAzureTemplateRequest()">Azure</a>
-                                        <a id="gccTemplateChange" class="btn btn-default" role="button" ng-click="createGccTemplateRequest()">Gcc</a>
+                                    </div>
+                                    <div class="btn-group btn-group-justified">
+                                      <a id="gccTemplateChange" class="btn btn-default" role="button" ng-click="createGccTemplateRequest()">Gcc</a>
+                                      <a id="openstackTemplateChange" class="btn btn-default" role="button" ng-click="createOpenstackTemplateRequest()">Openstack</a>
                                     </div>
                                 </div>
                             </div>
@@ -43,6 +46,9 @@
 
                             <form class="form-horizontal" role="form" ng-show="gccTemplate" name="gccTemplateForm" ng-show="gccTemplate">
                                 <div ng-include src="'tags/template/gccform.tag'"></div>
+                            </form>
+                            <form class="form-horizontal" role="form" ng-show="openstackTemplate" name="openstackTemplateForm" ng-show="openstackTemplate">
+                              <div ng-include src="'tags/template/openstackform.tag'"></div>
                             </form>
                         </div>
                     </div>
@@ -83,6 +89,11 @@
                             <div class="panel-body" ng-if="template.cloudPlatform == 'AWS' ">
                                 <div ng-include src="'tags/template/awslist.tag'"></div>
                             </div>
+
+                            <div class="panel-body" ng-if="template.cloudPlatform == 'OPENSTACK' ">
+                              <div ng-include src="'tags/template/openstacklist.tag'"></div>
+                            </div>
+
                         </div>
                     </div>
                     <!-- .panel -->

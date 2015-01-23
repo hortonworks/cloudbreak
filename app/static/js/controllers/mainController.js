@@ -133,6 +133,11 @@ angular.module('uluwatuControllers').controller('mainController', ['$scope', '$r
                 ]
 
             },
+            'OPENSTACK': {
+              regions : [
+                {key: 'LOCAL', value: 'local', cloud: 'OPENSTACK'}
+              ]
+            },
             'EVENT_TYPE': {
                 "REQUESTED": "requested",
                 "CREATE_IN_PROGRESS": "create in progress",

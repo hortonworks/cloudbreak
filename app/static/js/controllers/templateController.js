@@ -8,26 +8,38 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
         $rootScope.templates = AccountTemplate.query();
         $scope.awsTemplateForm = {};
         $scope.gccTemplateForm = {};
+        $scope.openstackTemplateForm = {};
         initializeAzureTemp();
         initializeAwsTemp();
         initializeGccTemp();
+        initializeOpenstackTemp();
 
         $scope.createAwsTemplateRequest = function () {
             $scope.azureTemplate = false;
             $scope.awsTemplate = true;
             $scope.gccTemplate = false;
+            $scope.openstackTemplate = false;
         }
 
         $scope.createAzureTemplateRequest = function () {
             $scope.azureTemplate = true;
             $scope.awsTemplate = false;
             $scope.gccTemplate = false;
+            $scope.openstackTemplate = false;
         }
 
         $scope.createGccTemplateRequest = function () {
             $scope.azureTemplate = false;
             $scope.awsTemplate = false;
             $scope.gccTemplate = true;
+            $scope.openstackTemplate = false;
+        }
+
+        $scope.createOpenstackTemplateRequest = function () {
+          $scope.azureTemplate = false;
+          $scope.awsTemplate = false;
+          $scope.gccTemplate = false;
+          $scope.openstackTemplate = true;
         }
 
         $scope.createAwsTemplate = function () {
@@ -62,6 +74,38 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                 $scope.modifyStatusMessage($rootScope.error_msg.aws_template_failed + ": " + error.data.message);
                 $scope.modifyStatusClass("has-error");
             }
+        }
+
+        $scope.createOpenstackTemplate = function () {
+          $scope.openstackTemp.cloudPlatform = 'OPENSTACK';
+          if ($scope.openstackTemp.public) {
+            AccountTemplate.save($scope.openstackTemp, function (result) {
+              handleOpenstackTemplateSuccess(result)
+            }, function (error) {
+              handleOpenstackTemplateError(error)
+            });
+          } else {
+            UserTemplate.save($scope.openstackTemp, function (result) {
+              handleOpenstackTemplateSuccess(result)
+            }, function (error) {
+              handleOpenstackTemplateError(error)
+            });
+          }
+
+          function handleOpenstackTemplateSuccess(result) {
+            $scope.openstackTemp.id = result.id;
+            $rootScope.templates.push($scope.openstackTemp);
+            initializeOpenstackTemp();
+            $scope.modifyStatusMessage($rootScope.error_msg.openstack_template_success1 + result.id + $rootScope.error_msg.openstack_template_success2);
+            $scope.modifyStatusClass("has-success");
+            $scope.openstackTemplateForm.$setPristine();
+            collapseCreateTemplateFormPanel();
+          }
+
+          function handleOpenstackTemplateError(error) {
+            $scope.modifyStatusMessage($rootScope.error_msg.openstack_template_failed + ": " + error.data.message);
+            $scope.modifyStatusClass("has-error");
+          }
         }
 
         $scope.createGccTemplate = function () {
@@ -149,7 +193,6 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
             $scope.awsTemp = {
                 parameters: {
                     sshLocation: "0.0.0.0/0",
-                    region: "EU_WEST_1",
                     instanceType: "T2Medium",
                     volumeType: "Standard"
                 }
@@ -159,17 +202,22 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
         function initializeAzureTemp() {
             $scope.azureTemp = {
                 parameters: {
-                    location: "WEST_EUROPE",
                     vmType: "MEDIUM"
                 }
             }
+        }
+
+        function initializeOpenstackTemp() {
+          $scope.openstackTemp = {
+            parameters: {
+            }
+          }
         }
 
         function initializeGccTemp() {
             $scope.gccTemp = {
                 parameters: {
                     gccInstanceType: "N1_STANDARD_2",
-                    gccZone: "EUROPE_WEST1_B",
                     volumeType: "HDD"
                 }
             }

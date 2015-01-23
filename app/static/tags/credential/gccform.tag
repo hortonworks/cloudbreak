@@ -44,7 +44,7 @@
     </div>
 </div>
 <div class="form-group" ng-class="{ 'has-error': gccCredentialForm.gcc_sshPublicKey.$dirty && gccCredentialForm.gcc_sshPublicKey.$invalid }">
-    <label class="col-sm-3 control-label" for="gcc_sshPublicKey">SSH public key:</label>
+    <label class="col-sm-3 control-label" for="gcc_sshPublicKey">SSH public key</label>
         <div class="col-sm-9">
             <textarea rows="4" placeholder="ssh-rsa AAAAB3... user-eu" type="text" class="form-control" ng-model="credentialGcc.publicKey" name="gcc_sshPublicKey" id="gcc_sshPublicKey" required></textarea>
             <div class="help-block" ng-show="gccCredentialForm.gcc_sshPublicKey.$dirty && gccCredentialForm.gcc_sshPublicKey.$invalid">

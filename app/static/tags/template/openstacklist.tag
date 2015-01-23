@@ -1,0 +1,50 @@
+<form class="form-horizontal" role="document"><!-- role: 'document' - non-editable "form" -->
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="openstackclusterName">Name</label>
+
+        <div class="col-sm-9">
+            <p id="openstackclusterName" class="form-control-static">{{template.name}}</p>
+        </div>
+        <!-- .col-sm-9 -->
+    </div>
+    <div class="form-group" ng-show="template.description">
+        <label class="col-sm-3 control-label" for="openstackclusterDesc">Description</label>
+
+        <div class="col-sm-9">
+            <p id="openstackclusterDesc" class="form-control-static">{{template.description}}</p>
+        </div>
+        <!-- .col-sm-9 -->
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="openstackpublicNetId">Public Net Id</label>
+
+        <div class="col-sm-9">
+            <p id="openstackpublicNetId" class="form-control-static">{{template.parameters.publicNetId}}</p>
+        </div>
+        <!-- .col-sm-9 -->
+    </div>
+    <div class="form-group">
+      <label class="col-sm-3 control-label" for="openstackinstanceType">Instance type</label>
+
+      <div class="col-sm-9">
+        <p id="openstackinstanceType" class="form-control-static">{{template.parameters.instanceType}}</p>
+      </div>
+      <!-- .col-sm-9 -->
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="openstackvolumecount">Attached volumes per instance</label>
+
+        <div class="col-sm-9">
+            <p id="openstackvolumecount" class="form-control-static">{{template.volumeCount}}</p>
+        </div>
+        <!-- .col-sm-9 -->
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="openstackvolumesize">Volume size (GB)</label>
+
+        <div class="col-sm-9">
+            <p id="openstackvolumesize" class="form-control-static">{{template.volumeSize}}</p>
+        </div>
+        <!-- .col-sm-9 -->
+    </div>
+</form>
