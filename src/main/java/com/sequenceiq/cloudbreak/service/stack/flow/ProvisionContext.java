@@ -155,14 +155,14 @@ public class ProvisionContext {
                         stack.getId(), stack.getStatus());
             }
         } catch (BuildStackFailureException e) {
-            LOGGER.error("Unhandled exception occured while creating stack.", e);
+            LOGGER.error("Unhandled exception occurred while creating stack.", e);
             LOGGER.info("Publishing {} event.", ReactorConfig.STACK_CREATE_FAILED_EVENT);
-            StackOperationFailure stackCreationFailure = new StackOperationFailure(stackId, "Internal server error occured while creating stack.");
+            StackOperationFailure stackCreationFailure = new StackOperationFailure(stackId, "Internal server error occurred while creating stack.");
             reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(stackCreationFailure));
         } catch (Exception e) {
-            LOGGER.error("Unhandled exception occured while creating stack.", e);
+            LOGGER.error("Unhandled exception occurred while creating stack.", e);
             LOGGER.info("Publishing {} event.", ReactorConfig.STACK_CREATE_FAILED_EVENT);
-            StackOperationFailure stackCreationFailure = new StackOperationFailure(stackId, "Internal server error occured while creating stack.");
+            StackOperationFailure stackCreationFailure = new StackOperationFailure(stackId, "Internal server error occurred while creating stack.");
             reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(stackCreationFailure));
         }
     }

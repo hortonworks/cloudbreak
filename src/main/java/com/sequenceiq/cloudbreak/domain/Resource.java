@@ -29,6 +29,10 @@ public class Resource {
 
     }
 
+    public Resource(ResourceType resourceType, String resourceName, Stack stack) {
+        this(resourceType, resourceName, stack, null);
+    }
+
     public Resource(ResourceType resourceType, String resourceName, Stack stack, String instanceGroup) {
         this.resourceType = resourceType;
         this.resourceName = resourceName;

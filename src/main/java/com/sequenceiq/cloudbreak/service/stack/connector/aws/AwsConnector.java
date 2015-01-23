@@ -68,8 +68,6 @@ import reactor.event.Event;
 @Service
 public class AwsConnector implements CloudPlatformConnector {
 
-    public static final String INSTANCE_TAG_NAME = "Name";
-    private static final String CF_SERVICE_NAME = "AmazonCloudFormation";
     private static final int MAX_POLLING_ATTEMPTS = 60;
     private static final int POLLING_INTERVAL = 5000;
 
@@ -188,7 +186,7 @@ public class AwsConnector implements CloudPlatformConnector {
 
 
         Set<Resource> resources = new HashSet<>();
-        resources.add(new Resource(ResourceType.CLOUDFORMATION_STACK, stackName, stack, null));
+        resources.add(new Resource(ResourceType.CLOUDFORMATION_STACK, stackName, stack));
         Stack updatedStack = stackUpdater.updateStackResources(stack.getId(), resources);
         LOGGER.info("CloudFormation stack creation request sent with stack name: '{}' for stack: '{}'", stackName, updatedStack.getId());
     }

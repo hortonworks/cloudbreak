@@ -7,6 +7,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -80,6 +81,13 @@ public class SecurityConfig {
             rts.setClientSecret(clientSecret);
             rts.setCheckTokenEndpointUrl(identityServerUrl + "/check_token");
             return rts;
+        }
+
+        @Bean
+        StandardPBEStringEncryptor encryptor() {
+            StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
+            encryptor.setPassword(clientSecret);
+            return encryptor;
         }
 
         @Override

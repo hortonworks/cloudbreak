@@ -61,6 +61,7 @@ checkstyleIntegrationtest {
 configurations {
     deployerJars
     all*.exclude group: 'org.slf4j', module: 'slf4j-log4j12'
+    all*.exclude group: 'com.google.guava', module: 'guava-jdk5'
     testCompile.exclude module: 'groovy-all', version: '2.1.8'
 }
 
@@ -167,8 +168,12 @@ dependencies {
     compile group: 'com.google.apis', name: 'google-api-services-storage', version: 'v1-rev6-1.19.0'
     compile group: 'com.google.apis', name: 'google-api-services-dns', version: 'v1beta1-rev9-1.19.0'
 
+    compile group: 'org.pacesys', name: 'openstack4j', version: '2.0.0'
+
     compile group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.47'
     compile group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: '1.47'
+
+    compile 'org.jasypt:jasypt:1.9.2'
 
     runtime group: 'activation', name: 'activation', version: '1.0.2'
 

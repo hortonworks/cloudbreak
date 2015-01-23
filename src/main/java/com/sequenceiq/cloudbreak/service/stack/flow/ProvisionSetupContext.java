@@ -41,10 +41,10 @@ public class ProvisionSetupContext {
             ProvisionSetup provisionSetup = provisionSetups.get(cloudPlatform);
             provisionSetup.setupProvisioning(stackRepository.findById(stackId));
         } catch (Exception e) {
-            LOGGER.error("Unhandled exception occured while setting up provisioning.", e);
+            LOGGER.error("Unhandled exception occurred while setting up provisioning.", e);
             LOGGER.info("Publishing {} event", ReactorConfig.STACK_CREATE_FAILED_EVENT);
             reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(new StackOperationFailure(stackId,
-                    "Internal server error occured while setting up provisioning.")));
+                    "Internal server error occurred while setting up provisioning.")));
         }
     }
 
