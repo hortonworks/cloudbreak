@@ -417,6 +417,7 @@ Using manage templates you can create infrastructure templates.
 
 `Spot price:` option to set a spot price - not mandatory, if specified we will request spot price instances (which might take a while or never be fulfilled by Amazon)
 
+The user name if you want to ssh into one of your instance is `ubuntu` .
 
 
 **Azure**
@@ -435,6 +436,8 @@ Using manage templates you can create infrastructure templates.
 
 `Volume size (GB):` the size of the attached disks (in GB)
 
+The user name if you want to ssh into one of your instance is `ubuntu` .
+
 
 **Google Cloud Platform**
 
@@ -451,6 +454,8 @@ Using manage templates you can create infrastructure templates.
 `Attached volumes per instance:` the number of disks to be attached
 
 `Volume size (GB):` the size of the attached disks (in GB)
+
+The user name if you want to ssh into one of your instance is `ubuntu` .
 
 ###Manage blueprints
 Blueprints are your declarative definition of a Hadoop cluster.
