@@ -363,6 +363,9 @@ Using manage credentials you can link your cloud account with the Cloudbreak acc
 
 `SSH public key:` an SSH public key in OpenSSH format that's private keypair can be used to log into the launched instances later
 
+The user name if you want to ssh into one of your instance is `ubuntu` .
+
+
 **Azure**
 
 `Name:` name of your credential
@@ -374,6 +377,8 @@ Using manage credentials you can link your cloud account with the Cloudbreak acc
 `File password:` your generated JKS file password - see Accounts
 
 `SSH public key:` the SSH public key in OpenSSH format that's private keypair can be used to log into the launched instances later (The key generation process is described in the Configuring the Microsoft Azure account section)
+
+The user name if you want to ssh into one of your instance is `ubuntu`.
 
 
 **Google Cloud Platform**
@@ -389,6 +394,8 @@ Using manage credentials you can link your cloud account with the Cloudbreak acc
 `Service Account private key:` your GCP service account generated private key - see Accounts
 
 `SSH public key:` the SSH public key in OpenSSH format that's private keypair can be used to log into the launched instances later
+
+The user name if you want to ssh into one of your instance is `ubuntu`.
 
 
 ###Manage templates
@@ -417,8 +424,6 @@ Using manage templates you can create infrastructure templates.
 
 `Spot price:` option to set a spot price - not mandatory, if specified we will request spot price instances (which might take a while or never be fulfilled by Amazon)
 
-The user name if you want to ssh into one of your instance is `ubuntu` .
-
 
 **Azure**
 
@@ -435,8 +440,6 @@ The user name if you want to ssh into one of your instance is `ubuntu` .
 `Attached volumes per instance:` the number of disks to be attached
 
 `Volume size (GB):` the size of the attached disks (in GB)
-
-The user name if you want to ssh into one of your instance is `ubuntu` .
 
 
 **Google Cloud Platform**
@@ -455,7 +458,6 @@ The user name if you want to ssh into one of your instance is `ubuntu` .
 
 `Volume size (GB):` the size of the attached disks (in GB)
 
-The user name if you want to ssh into one of your instance is `ubuntu` .
 
 ###Manage blueprints
 Blueprints are your declarative definition of a Hadoop cluster.
