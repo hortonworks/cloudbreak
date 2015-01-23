@@ -52,15 +52,6 @@
         </div>
         <!-- .col-sm-9 -->
     </div>
-    <!-- .form-group -->
-    <div class="form-group">
-        <label class="col-sm-3 control-label" for="location">Location</label>
-
-        <div class="col-sm-9">
-            <p id="location" class="form-control-static" ng-repeat="item in $root.config.AZURE.azureRegions | filter:{key: template.parameters.location}:true">{{item.value}}</p>
-        </div>
-        <!-- .col-sm-9 -->
-    </div>
     <div class="form-group">
         <label class="col-sm-3 control-label" for="location">Attached volumes per instance</label>
 

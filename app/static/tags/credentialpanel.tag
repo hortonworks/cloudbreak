@@ -63,7 +63,9 @@
                         <div class="panel-heading">
                             <h5><a href="" data-toggle="collapse" data-parent="#credential-list-accordion"
                                    data-target="#panel-credential-collapse{{credential.id}}"><i class="fa fa-tag fa-fw"></i>{{credential.name}}</a>
-                                <i class="fa fa-users fa-lg public-account-info pull-right" ng-show="credential.public"></i>
+                                <span class="label label-info pull-right" >{{credential.cloudPlatform}}</span>
+                                <i class="fa fa-users fa-lg public-account-info pull-right" style="padding-right: 5px" ng-show="credential.public"></i>
+
                             </h5>
                         </div>
                         <div id="panel-credential-collapse{{credential.id}}" class="panel-collapse collapse">

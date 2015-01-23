@@ -32,6 +32,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
 
         $scope.createAwsTemplate = function () {
             $scope.awsTemp.cloudPlatform = 'AWS';
+            $scope.awsTemp.parameters.sshLocation = '0.0.0.0/0';
             $scope.awsTemp.parameters.amiId = ($filter('filter')($rootScope.config.AWS.amis, { key: $scope.awsTemp.parameters.region})[0]).value;
             if ($scope.awsTemp.public) {
                 AccountTemplate.save($scope.awsTemp, function (result) {

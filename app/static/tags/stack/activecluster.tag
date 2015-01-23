@@ -13,10 +13,10 @@
                 <div class="tab-content">
                     <section id="cluster-details-pane" ng-class="{ 'active': detailsShow }" ng-show="detailsShow" class="tab-pane fade in">
                         <p class="text-right">
-                            <a href="" class="btn btn-success" role="button" ng-show="activeCluster.cloudPlatform != 'GCC' && activeCluster.status == 'STOPPED'" data-toggle="modal" data-target="#modal-start-cluster">
+                            <a href="" class="btn btn-success" role="button" ng-show="activeCluster.status == 'STOPPED'" data-toggle="modal" data-target="#modal-start-cluster">
                                 <i class="fa fa-play fa-fw"></i><span> start</span>
                             </a>
-                            <a href="" class="btn btn-warning" role="button" ng-show="activeCluster.cloudPlatform != 'GCC' && activeCluster.status == 'AVAILABLE'" data-toggle="modal" data-target="#modal-stop-cluster">
+                            <a href="" class="btn btn-warning" role="button" ng-show="activeCluster.status == 'AVAILABLE'" data-toggle="modal" data-target="#modal-stop-cluster">
                                 <i class="fa fa-pause fa-fw"></i><span> stop</span>
                             </a>
                             <a href="" id="terminate-btn" class="btn btn-danger" role="button" data-toggle="modal" data-target="#modal-terminate">
@@ -47,6 +47,18 @@
                                 <label class="col-sm-3 control-label" for="sl_nodeCount">Number of nodes</label>
                                 <div class="col-sm-9">
                                     <p id="sl_nodeCount" class="form-control-static">{{activeCluster.nodeCount}}</p>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label" for="sl_region">Region</label>
+                                <div class="col-sm-9" ng-if="activeCluster.cloudPlatform == 'AWS' ">
+                                    <p id="sl_region" class="form-control-static" ng-repeat="item in $root.config.AWS.awsRegions | filter:{key: activeCluster.region}:true">{{item.value}}</p>
+                                </div>
+                                <div class="col-sm-9" ng-if="activeCluster.cloudPlatform == 'GCC' ">
+                                     <p id="sl_region" class="form-control-static" ng-repeat="item in $root.config.GCC.gccRegions | filter:{key: activeCluster.region}:true">{{item.value}}</p>
+                                </div>
+                                <div class="col-sm-9" ng-if="activeCluster.cloudPlatform == 'AZURE' ">
+                                    <p id="sl_region" class="form-control-static" ng-repeat="item in $root.config.AZURE.azureRegions | filter:{key: activeCluster.region}:true">{{item.value}}</p>
                                 </div>
                             </div>
                             <div class="form-group" ng-if="activeCluster.cluster.statusReason === null && (activeCluster.statusReason != null && activeCluster.statusReason != '')">
@@ -95,37 +107,60 @@
                                 <h5><a href="" data-toggle="collapse" data-target="#panel-collapse0002"><i class="fa fa-align-justify fa-fw"></i>Cloud stack description: {{activeCluster.name}}</a></h5>
                             </div>
                             <div id="panel-collapse0002" class="panel-collapse collapse">
-                                <div class="panel-body">
-                                        <table class="table table-report table-sortable-cols table-with-pagination ">
+                                <div class="panel-body pagination">
+                                        <select name="itemsPerPageSelector" class="form-control pull-right" style="width: auto" data-live-search="true" ng-model="pagination.itemsPerPage">
+                                             <option selected value="10">10</option>
+                                             <option value="25">25</option>
+                                             <option value="50">50</option>
+                                             <option value="100">100</option>
+                                        </select>
+                                        <table id="metadataTable" class="table table-report table-sortable-cols table-with-pagination table-condensed" style="background-color: transparent;">
                                             <thead>
-                                            <tr>
-                                                <th>name</th>
-                                                <th>private IP</th>
-                                            </tr>
+                                              <tr>
+                                                 <th>
+                                                 <a title="sort by" ng-click="reverse=!reverse;orderMetadataBy('longName',reverse)">Name</a>
+                                                 <i class="fa fa-sort"></i>
+                                                 </th>
+                                                 <th>
+                                                 <a title="sort by" ng-click="reverse=!reverse;orderMetadataBy('publicIp',reverse)">Public Address</a>
+                                                 <i class="fa fa-sort"></i>
+                                                 </th>
+                                                 <th>
+                                                 <a title="sort by" ng-click="reverse=!reverse;orderMetadataBy('privateIp',reverse)">Private Address</a>
+                                                 <i class="fa fa-sort"></i>
+                                                 </th>
+                                                 <th>
+                                                 <a title="sort by" ng-click="reverse=!reverse;orderMetadataBy('hostgroup',reverse)">Hostgroup Name</a>
+                                                 </th>
+                                               </tr>
                                             </thead>
                                             <tbody>
-                                            <tr ng-repeat="instance in activeCluster.metadata">
-                                                <td>{{instance.longName}}</td>
-                                                <td>{{instance.privateIp}}</td>
+                                            <tr ng-repeat="instance in filteredActiveClusterData">
+                                                <td data-title="'name'" class="col-md-4">{{instance.longName}}</td>
+                                                <td data-title="'public IP'" class="col-md-3">{{instance.publicIp}}</td>
+                                                <td data-title="'private IP'" class="col-md-3">{{instance.privateIp}}</td>
+                                                <td data-title="'host group'" class="col-md-2"><span class="label label-default">{{instance.instanceGroup}}</span></td>
                                             </tr>
                                             </tbody>
                                         </table>
+                                        <pagination boundary-links="true" total-items="pagination.totalItems" items-per-page="pagination.itemsPerPage"
+                                             ng-model="pagination.currentPage" max-size="10"></pagination>
                                 </div>
                             </div>
                         </div>
-                        <div class="panel panel-default">
+                        <div class="panel panel-default" ng-repeat="group in $root.activeCluster.instanceGroups">
                             <div class="panel-heading">
-                                <h5><a href="" data-toggle="collapse" data-target='#panel-collapse01'><i class="fa fa-file-o fa-fw"></i>Template: {{activeClusterTemplate.name}}</a></h5>
+                                <h5><a href="" data-toggle="collapse" data-target='#panel-collapsetmp{{group.templateId}}'><span class="badge pull-right ng-binding">{{group.group}}: {{group.nodeCount}} node</span><i class="fa fa-file-o fa-fw"></i>Template: {{getSelectedTemplate(group.templateId).name}}</a></h5>
                             </div>
-                            <div id="panel-collapse01" class="panel-collapse collapse">
-                                <div class="panel-body" ng-if="activeClusterTemplate.cloudPlatform == 'AWS' ">
-                                    <div ng-include="'tags/template/awslist.tag'" ng-repeat="template in [activeClusterTemplate]"></div>
+                            <div id="panel-collapsetmp{{group.templateId}}" class="panel-collapse collapse">
+                                <div class="panel-body" ng-if="$root.activeCluster.cloudPlatform == 'AWS' ">
+                                    <div ng-include="'tags/template/awslist.tag'" ng-repeat="template in $root.templates| filter:{id: group.templateId}"></div>
                                 </div>
-                                <div class="panel-body" ng-if="activeClusterTemplate.cloudPlatform == 'AZURE' ">
-                                    <div ng-include="'tags/template/azurelist.tag'" ng-repeat="template in [activeClusterTemplate]"></div>
+                                <div class="panel-body" ng-if="$root.activeCluster.cloudPlatform == 'AZURE' ">
+                                    <div ng-include="'tags/template/azurelist.tag'" ng-repeat="template in $root.templates| filter:{id: group.templateId}"></div>
                                 </div>
-                                <div class="panel-body" ng-if="activeClusterTemplate.cloudPlatform == 'GCC' ">
-                                    <div ng-include="'tags/template/gcclist.tag'" ng-repeat="template in [activeClusterTemplate]"></div>
+                                <div class="panel-body" ng-if="$root.activeCluster.cloudPlatform == 'GCC' ">
+                                    <div ng-include="'tags/template/gcclist.tag'" ng-repeat="template in $root.templates| filter:{id: group.templateId}"></div>
                                 </div>
                             </div>
                         </div>

@@ -52,6 +52,15 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         getUluwatuClusters();
         initCluster();
 
+        $scope.selectedBlueprintChange = function () {
+            var actualBp = $filter('filter')($rootScope.blueprints, { id: $scope.cluster.blueprintId});
+            var hostgroups = [];
+            actualBp[0].ambariBlueprint.host_groups.forEach(function(k){
+                hostgroups.push({templateId: null, group: k.name, nodeCount: 0});
+            });
+            $scope.cluster.instanceGroups = hostgroups;
+        }
+
         $scope.createCluster = function () {
             var blueprint = $filter('filter')($rootScope.blueprints, {id: $scope.cluster.blueprintId}, true)[0];
 
@@ -68,6 +77,17 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
 
             $scope.cluster.credentialId = $rootScope.activeCredential.id;
             UluwatuCluster.save($scope.cluster, function (result) {
+                var nodeCount = 0;
+                angular.forEach(result.instanceGroups, function(group) {
+                  nodeCount += group.nodeCount;
+                });
+                result.nodeCount = nodeCount;
+                result.cloudPlatform = $filter('filter')($rootScope.credentials, {id: $rootScope.activeCredential.id}, true)[0].cloudPlatform;
+                result.public = $scope.cluster.public;
+                angular.forEach(result.instanceGroups, function(item) {
+                  item.templateId = parseFloat(item.templateId);
+                });
+                result.blueprintId = parseFloat(result.blueprintId);
                 $rootScope.clusters.push(result);
                 initCluster();
                 $jq('.carousel').carousel(0);
@@ -95,17 +115,48 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 $scope.modifyStatusClass("has-error");
             });
         }
-
         $scope.changeActiveCluster = function (clusterId) {
             $rootScope.activeCluster = $filter('filter')($rootScope.clusters, { id: clusterId })[0];
             $rootScope.activeClusterBlueprint = $filter('filter')($rootScope.blueprints, { id: $rootScope.activeCluster.blueprintId})[0];
-            $rootScope.activeClusterTemplate = $filter('filter')($rootScope.templates, {id: $rootScope.activeCluster.templateId})[0];
             $rootScope.activeClusterCredential = $filter('filter')($rootScope.credentials, {id: $rootScope.activeCluster.credentialId}, true)[0];
             $rootScope.activeCluster.cloudPlatform =  $rootScope.activeClusterCredential.cloudPlatform;
             GlobalStack.get({ id: clusterId }, function(success) {
                     $rootScope.activeCluster.description = success.description;
+                    $rootScope.activeCluster.metadata = [];
+                    angular.forEach($rootScope.activeCluster.instanceGroups, function(item) {
+                      angular.forEach(item.metadata, function(item1) {
+                        $rootScope.activeCluster.metadata.push(item1)
+                      });
+                    });
+                    $scope.pagination = {
+                                currentPage: 1,
+                                itemsPerPage: 10,
+                                totalItems: $rootScope.activeCluster.metadata.length
+                    }
                 }
             );
+        }
+         $scope.$watch('pagination.currentPage + pagination.itemsPerPage', function(){
+            if ($rootScope.activeCluster.metadata != null) {
+                paginateMetadata();
+            }
+         });
+
+        $scope.orderMetadataBy = function(predicate, reverse) {
+            if ($rootScope.activeCluster.metadata != null) {
+                $rootScope.activeCluster.metadata = $filter('orderBy')($rootScope.activeCluster.metadata, predicate, reverse);
+                paginateMetadata();
+            }
+        }
+
+        function paginateMetadata() {
+            var begin = (($scope.pagination.currentPage - 1) * $scope.pagination.itemsPerPage),
+            end = begin + $scope.pagination.itemsPerPage;
+            $scope.filteredActiveClusterData = $rootScope.activeCluster.metadata.slice(begin, end);
+        }
+
+        $scope.getSelectedTemplate = function (templateId) {
+            return $filter('filter')($rootScope.templates, { id: templateId}, true)[0];
         }
 
         $rootScope.events = [];
@@ -165,6 +216,13 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         function getUluwatuClusters(){
           UluwatuCluster.query(function (clusters) {
               $rootScope.clusters = clusters;
+              angular.forEach($rootScope.clusters, function(item) {
+                   var nodeCount = 0;
+                   angular.forEach(item.instanceGroups, function(group) {
+                       nodeCount += group.nodeCount;
+                   });
+                   item.nodeCount = nodeCount;
+              });
               $scope.$parent.orderClusters();
           });
         }
@@ -208,7 +266,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         }
 
         $scope.selectCluster = function(cluster) {
-                    $scope.selectedCluster = cluster
+            $scope.selectedCluster = cluster
         }
 
     }]);

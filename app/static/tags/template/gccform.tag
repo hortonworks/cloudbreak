@@ -17,13 +17,6 @@
     </div>
 </div>
 <div class="form-group">
-    <label class="col-sm-3 control-label" for="gcc_tregion">Region</label>
-    <div class="col-sm-9">
-        <select class="form-control" id="gcc_tregion" ng-options="region.key as region.value for region in $root.config.GCC.gccRegions" ng-model="gccTemp.parameters.gccZone">
-        </select>
-    </div>
-</div>
-<div class="form-group">
     <label class="col-sm-3 control-label" for="gcc_tinstanceType">Instance type</label>
     <div class="col-sm-9">
         <select class="form-control" id="gcc_tinstanceType" ng-options="instanceType.key as instanceType.value for instanceType in $root.config.GCC.gccInstanceTypes" ng-model="gccTemp.parameters.gccInstanceType">
