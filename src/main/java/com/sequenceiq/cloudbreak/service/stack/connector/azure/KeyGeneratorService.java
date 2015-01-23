@@ -1,10 +1,23 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.azure;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+
+import javax.xml.bind.DatatypeConverter;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
+import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+
+import sun.security.x509.X509CertImpl;
+
 
 @Component
 public class KeyGeneratorService {
@@ -25,19 +38,24 @@ public class KeyGeneratorService {
         p.waitFor();
     }
 
-    public void generateSshKey(String path) throws IOException, InterruptedException {
-        String[] commands = new String[]{
-                //String.format("openssl req -x509 -nodes -days 365 -newkey rsa:1024 -keyout %s.pem -out %s.pem -batch", path, path),
-                String.format("openssl x509 -inform pem -in %s.pem -outform der -out %s.cer", path, path),
-                String.format("openssl pkcs12 -export -out %s.p12 -inkey %s.pem -in %s.pem -password pass:password", path, path, path),
-                String.format("keytool -importkeystore -destkeystore %s.jks -srcstoretype PKCS12 -srckeystore %s.p12 "
-                        + "-storepass password -srcstorepass password -noprompt", path, path)
-        };
+    public void generateSshKey(String path) throws IOException, CertificateException {
+        String certAndKey = FileReaderUtils.readFileFromPathToString(path + ".pem");
+        byte[] certBytes = parseDERFromPEM(certAndKey, "-----BEGIN CERTIFICATE-----", "-----END CERTIFICATE-----");
+        X509Certificate cert = generateCertificateFromDER(certBytes);
+        File file = new File(path + ".cer");
+        FileOutputStream fileOutputStream = new FileOutputStream(file);
+        ((X509CertImpl) cert).derEncode(fileOutputStream);
+    }
 
-        for (String command : commands) {
-            Process p = Runtime.getRuntime().exec(command);
-            p.waitFor();
-        }
+    protected static byte[] parseDERFromPEM(String pem, String beginDelimiter, String endDelimiter) {
+        String[] tokens = pem.split(beginDelimiter);
+        tokens = tokens[1].split(endDelimiter);
+        return DatatypeConverter.parseBase64Binary(tokens[0]);
+    }
+
+    protected static X509Certificate generateCertificateFromDER(byte[] certBytes) throws CertificateException {
+        CertificateFactory factory = CertificateFactory.getInstance("X.509");
+        return (X509Certificate) factory.generateCertificate(new ByteArrayInputStream(certBytes));
     }
 
 }

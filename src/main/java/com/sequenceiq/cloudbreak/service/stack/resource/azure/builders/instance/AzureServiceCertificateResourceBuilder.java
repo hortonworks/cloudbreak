@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
-import com.sequenceiq.cloudbreak.service.stack.connector.azure.X509Certificate;
+import com.sequenceiq.cloudbreak.service.stack.connector.azure.CbX509Certificate;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureResourcePollerObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureResourceStatusCheckerTask;
@@ -75,7 +75,7 @@ public class AzureServiceCertificateResourceBuilder extends AzureSimpleInstanceR
         AzureCredential azureCredential = (AzureCredential) stack.getCredential();
         Map<String, String> props = new HashMap<>();
         props.put(NAME, buildResources.get(0).getResourceName());
-        X509Certificate sshCert = null;
+        CbX509Certificate sshCert = null;
         try {
             sshCert = azureStackUtil.createX509Certificate(azureCredential);
         } catch (FileNotFoundException e) {

@@ -134,7 +134,7 @@ public class AzureStackUtil {
         try {
             keyGeneratorService.generateSshKey(sshPemPathWithoutExtension);
             azureCredential.setSshCerFile(FileReaderUtils.readBinaryFileFromPath(sshPemPathWithoutExtension + ".cer"));
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
             LOGGER.error("An error occured under the ssh generation for {} template. The error was: {} {}", azureCredential.getId(), e.getMessage(), e);
             throw new InternalServerException(e.getMessage());
         }
@@ -142,8 +142,8 @@ public class AzureStackUtil {
         return azureCredential;
     }
 
-    public X509Certificate createX509Certificate(AzureCredential azureCredential) throws IOException, GeneralSecurityException {
-        return new X509Certificate(buildAzureSshCerFile(azureCredential).getAbsolutePath());
+    public CbX509Certificate createX509Certificate(AzureCredential azureCredential) throws IOException, GeneralSecurityException {
+        return new CbX509Certificate(buildAzureSshCerFile(azureCredential).getAbsolutePath());
     }
 
     public void migrateFilesIfNeeded(AzureCredential credential) {

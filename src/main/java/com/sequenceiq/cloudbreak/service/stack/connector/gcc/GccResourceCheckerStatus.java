@@ -19,7 +19,7 @@ public class GccResourceCheckerStatus implements StatusCheckerTask<GccResourceRe
     @Override
     public boolean checkStatus(GccResourceReadyPollerObject gccResourceReadyPollerObject) {
         MDCBuilder.buildMdcContext(gccResourceReadyPollerObject.getStack());
-        LOGGER.info("Checking status of Gcc resource '{}' [%s].", gccResourceReadyPollerObject.getName(),
+        LOGGER.info("Checking status of Gcc resource '{}' [{}].", gccResourceReadyPollerObject.getName(),
                 gccResourceReadyPollerObject.getResourceType().name());
         Operation operation = null;
         try {

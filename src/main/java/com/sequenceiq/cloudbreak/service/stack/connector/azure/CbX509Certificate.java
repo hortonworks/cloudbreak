@@ -13,13 +13,13 @@ import java.security.cert.CertificateFactory;
 import com.google.common.base.Strings;
 
 
-public class X509Certificate {
+public class CbX509Certificate {
 
     public static final int RADIX = 16;
     public static final int SIZE = 40;
     private Certificate cert;
 
-    public X509Certificate(String path) throws FileNotFoundException, CertificateException {
+    public CbX509Certificate(String path) throws FileNotFoundException, CertificateException {
         CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
         cert = certificateFactory.generateCertificate(new FileInputStream(path));
     }

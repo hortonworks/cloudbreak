@@ -18,17 +18,19 @@ import com.google.api.services.compute.model.Instance;
 import com.google.api.services.compute.model.Metadata;
 import com.google.api.services.compute.model.NetworkInterface;
 import com.google.api.services.compute.model.Operation;
+import com.google.api.services.compute.model.Tags;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
+import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
 import com.sequenceiq.cloudbreak.domain.GccTemplate;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveCheckerStatus;
@@ -43,11 +45,14 @@ import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.GccSimpleInstanceResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccProvisionContextObject;
+import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
+import com.sequenceiq.cloudbreak.service.user.UserFilterField;
 
 @Component
 @Order(3)
 public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder {
 
+    public static final int TAG_MAX_LENGTH = 61;
     @Autowired
     private StackRepository stackRepository;
     @Autowired
@@ -60,6 +65,8 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
     private PollingService<GccRemoveReadyPollerObject> gccRemoveReadyPollerObjectPollingService;
     @Autowired
     private JsonHelper jsonHelper;
+    @Autowired
+    private UserDetailsService userDetailsService;
 
     @Override
     public Boolean create(final CreateResourceRequest createResourceRequest, String region) throws Exception {
@@ -176,6 +183,14 @@ public class GccInstanceResourceBuilder extends GccSimpleInstanceResourceBuilder
         metadata.getItems().add(sshMetaData);
         metadata.getItems().add(startupScript);
         instance.setMetadata(metadata);
+
+        CbUser cbUser = userDetailsService.getDetails(stack.getOwner(), UserFilterField.USERID);
+        Tags tags = new Tags();
+        tags.setItems(Arrays.asList(
+                stack.getAccount(),
+                cbUser.getUsername().replaceAll("[^A-Za-z0-9 ]", "").toLowerCase().substring(0, TAG_MAX_LENGTH),
+                "cloudbreak"));
+        instance.setTags(tags);
 
         return new GccInstanceCreateRequest(provisionContextObject.getStackId(), resources, instance, provisionContextObject.getProjectId(),
                 provisionContextObject.getCompute(), gccTemplate, gccCredential, buildResources);

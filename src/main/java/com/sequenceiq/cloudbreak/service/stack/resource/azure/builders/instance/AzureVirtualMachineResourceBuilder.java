@@ -32,7 +32,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
-import com.sequenceiq.cloudbreak.service.stack.connector.azure.X509Certificate;
+import com.sequenceiq.cloudbreak.service.stack.connector.azure.CbX509Certificate;
 import com.sequenceiq.cloudbreak.service.stack.flow.AzureInstanceStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.flow.AzureInstances;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
@@ -114,7 +114,7 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
         props.put(IMAGESTOREURI, buildimageStoreUri(provisionContextObject.getCommonName(), buildResources.get(0).getResourceName()));
         props.put(HOSTNAME, buildResources.get(0).getResourceName());
         props.put(USERNAME, DEFAULT_USER_NAME);
-        X509Certificate sshCert = null;
+        CbX509Certificate sshCert = null;
         try {
             sshCert = azureStackUtil.createX509Certificate(azureCredential);
         } catch (FileNotFoundException e) {
