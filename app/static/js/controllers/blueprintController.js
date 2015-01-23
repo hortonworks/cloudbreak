@@ -40,6 +40,17 @@ angular.module('uluwatuControllers').controller('blueprintController', ['$scope'
                 $scope.modifyStatusClass("has-error");            
             }
         }
+        
+        $scope.copyAndEditBlueprint = function(blueprint) {
+             var newBlueprint = angular.copy(blueprint)
+             angular.element(document.querySelector('#panel-create-blueprints-collapse')).collapse('show');
+             angular.element(document.querySelector('#panel-blueprint-collapse' + blueprint.id)).collapse('hide')
+             $scope.blueprint = newBlueprint;
+             $scope.blueprint.name = ""
+             $scope.blueprint.ambariBlueprint.toString = function(){ // formatting textarea
+                     return JSON.stringify(this, null, "    ");
+             }
+        }
 
         $scope.deleteBlueprint = function (blueprint) {
             GlobalBlueprint.delete({ id: blueprint.id }, function (success) {
