@@ -143,10 +143,10 @@ dependencies {
         exclude group: 'commons-logging'
     }
     compile 'org.hibernate:hibernate-validator:5.1.1.Final'
-    compile('com.sequenceiq:azure-rest-client:0.1.18') {
+    compile('com.sequenceiq:azure-rest-client:0.1.19') {
         exclude group: 'log4j';
     }
-    compile('com.sequenceiq:ambari-client17:1.7.25') {
+    compile('com.sequenceiq:ambari-client17:1.7.28') {
         exclude group: 'org.slf4j';
     }
     compile 'org.apache.commons:commons-lang3:3.3.2'
@@ -163,7 +163,7 @@ dependencies {
 
     compile group: 'com.google.http-client', name: 'google-http-client-jackson2', version: '1.17.0-rc'
     compile group: 'com.google.oauth-client', name: 'google-oauth-client-jetty', version: '1.17.0-rc'
-    compile group: 'com.google.apis', name: 'google-api-services-compute', version: 'v1-rev1-1.17.0-rc'
+    compile group: 'com.google.apis', name: 'google-api-services-compute', version: 'v1-rev46-1.19.1'
     compile group: 'com.google.apis', name: 'google-api-services-storage', version: 'v1-rev6-1.19.0'
     compile group: 'com.google.apis', name: 'google-api-services-dns', version: 'v1beta1-rev9-1.19.0'
 

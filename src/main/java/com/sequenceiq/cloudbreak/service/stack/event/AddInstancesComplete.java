@@ -8,10 +8,12 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 public class AddInstancesComplete extends ProvisionEvent {
 
     private Set<Resource> resources;
+    private String hostGroup;
 
-    public AddInstancesComplete(CloudPlatform cloudPlatform, Long stackId, Set<Resource> resources) {
+    public AddInstancesComplete(CloudPlatform cloudPlatform, Long stackId, Set<Resource> resources, String hostGroup) {
         super(cloudPlatform, stackId);
         this.resources = resources;
+        this.hostGroup = hostGroup;
     }
 
     public Set<Resource> getResources() {
@@ -22,4 +24,11 @@ public class AddInstancesComplete extends ProvisionEvent {
         this.resources = resources;
     }
 
+    public String getHostGroup() {
+        return hostGroup;
+    }
+
+    public void setHostGroup(String hostGroup) {
+        this.hostGroup = hostGroup;
+    }
 }

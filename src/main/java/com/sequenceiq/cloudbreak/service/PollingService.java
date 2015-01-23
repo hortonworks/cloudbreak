@@ -27,7 +27,7 @@ public class PollingService<T> {
         int attempts = 0;
         MDCBuilder.buildMdcContext();
         while (!success && !timeout) {
-            LOGGER.info("Polling attempt {}.", attempts);
+            LOGGER.info("Polling attempt {} with {} status checker.", attempts, t.getClass());
             success = statusCheckerTask.checkStatus(t);
             if (success) {
                 LOGGER.info(statusCheckerTask.successMessage(t));

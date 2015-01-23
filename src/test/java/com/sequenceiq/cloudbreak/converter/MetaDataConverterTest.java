@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.controller.json.InstanceMetaDataJson;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 
 public class MetaDataConverterTest {
@@ -50,6 +51,9 @@ public class MetaDataConverterTest {
         metaData.setInstanceId("dummyInstanceId");
         metaData.setPrivateIp("dummyPrivateIp");
         metaData.setPublicIp("dummyPublicIp");
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setGroupName("master");
+        metaData.setInstanceGroup(instanceGroup);
         return metaData;
     }
 }

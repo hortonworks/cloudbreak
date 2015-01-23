@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.BillingStatus;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
@@ -45,22 +46,26 @@ public class StackUpdateSuccessHandler implements Consumer<Event<StackUpdateSucc
         LOGGER.info("Accepted {} event.", ReactorConfig.STACK_UPDATE_SUCCESS_EVENT);
         Set<String> instanceIds = updateSuccess.getInstanceIds();
         if (updateSuccess.isRemoveInstances()) {
-            stackUpdater.updateNodeCount(stackId, stack.getNodeCount() - instanceIds.size());
-            Set<InstanceMetaData> metadataToRemove = new HashSet<>();
-            for (InstanceMetaData metadataEntry : stack.getInstanceMetaData()) {
-                for (String instanceId : instanceIds) {
-                    if (metadataEntry.getInstanceId().equals(instanceId)) {
-                        metadataToRemove.add(metadataEntry);
+            stackUpdater.updateNodeCount(stackId, stack.getInstanceGroupByInstanceGroupName(updateSuccess.getHostGroup()).getNodeCount()  - instanceIds.size(),
+                    updateSuccess.getHostGroup());
+            for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+                Set<InstanceMetaData> metadataToRemove = new HashSet<>();
+                for (InstanceMetaData metadataEntry : instanceGroup.getInstanceMetaData()) {
+                    for (String instanceId : instanceIds) {
+                        if (metadataEntry.getInstanceId().equals(instanceId)) {
+                            metadataToRemove.add(metadataEntry);
+                        }
                     }
                 }
+                instanceGroup.getInstanceMetaData().removeAll(metadataToRemove);
+                stackUpdater.updateStackMetaData(stackId, instanceGroup.getInstanceMetaData(), instanceGroup.getGroupName());
             }
-            stack.getInstanceMetaData().removeAll(metadataToRemove);
-            stackUpdater.updateStackMetaData(stackId, stack.getInstanceMetaData());
             LOGGER.info("Successfully removed metadata of instances '{}' in stack.", instanceIds);
             eventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_CHANGED.name(),
                     "Billing changed due to downscaling of cluster infrastructure.");
         } else {
-            stackUpdater.updateNodeCount(stackId, stack.getNodeCount() + instanceIds.size());
+            stackUpdater.updateNodeCount(stackId, stack.getInstanceGroupByInstanceGroupName(updateSuccess.getHostGroup()).getNodeCount() + instanceIds.size(),
+                    updateSuccess.getHostGroup());
             eventService.fireCloudbreakEvent(stackId, BillingStatus.BILLING_CHANGED.name(), "Billing changed due to upscaling of cluster infrastructure.");
         }
         stackUpdater.updateMetadataReady(stackId, true);

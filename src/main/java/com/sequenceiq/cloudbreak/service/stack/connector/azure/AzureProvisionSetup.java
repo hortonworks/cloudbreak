@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.AzureLocation;
-import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -74,10 +73,10 @@ public class AzureProvisionSetup implements ProvisionSetup {
     public void setupProvisioning(Stack stack) {
         MDCBuilder.buildMdcContext(stack);
         Credential credential = stack.getCredential();
-        AzureTemplate template = (AzureTemplate) stack.getTemplate();
+        AzureLocation azureLocation = AzureLocation.valueOf(stack.getRegion());
         AzureClient azureClient = azureStackUtil.createAzureClient((AzureCredential) credential);
-        if (!azureClient.isImageAvailable(azureStackUtil.getOsImageName(credential, template.getLocation()))) {
-            String affinityGroupName = ((AzureCredential) credential).getCommonName(template.getLocation());
+        if (!azureClient.isImageAvailable(azureStackUtil.getOsImageName(credential, azureLocation))) {
+            String affinityGroupName = ((AzureCredential) credential).getCommonName(azureLocation);
             createAffinityGroup(stack, azureClient, affinityGroupName);
             String storageName = String.format("%s%s", VM_COMMON_NAME, stack.getId());
             createStorage(stack, azureClient, affinityGroupName);
@@ -99,7 +98,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
             AzureClientUtil.copyOsImage(storageAccountKey, baseImageUri, targetImageUri);
 
             checkCopyStatus(stack, targetImageUri, storageAccountKey);
-            createOsImageLink(credential, azureClient, targetImageUri, template.getLocation());
+            createOsImageLink(credential, azureClient, targetImageUri, azureLocation);
         }
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT, stack.getId());
         reactor.notify(ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT,
@@ -212,7 +211,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
                 Map<String, String> params = new HashMap<>();
                 params.put(AzureStackUtil.NAME, affinityGroupName);
                 params.put(DESCRIPTION, VM_COMMON_NAME);
-                params.put(LOCATION, ((AzureTemplate) stack.getTemplate()).getLocation().location());
+                params.put(LOCATION, AzureLocation.valueOf(stack.getRegion()).location());
                 azureClient.createAffinityGroup(params);
             } else {
                 LOGGER.error(String.format("Error occurs on %s stack under the affinity group creation", stack.getId()), ex);

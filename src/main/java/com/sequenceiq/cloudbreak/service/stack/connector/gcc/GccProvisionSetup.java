@@ -24,11 +24,11 @@ import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
-import com.sequenceiq.cloudbreak.domain.GccTemplate;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
+import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccZone;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
 
 import reactor.core.Reactor;
@@ -62,7 +62,6 @@ public class GccProvisionSetup implements ProvisionSetup {
         try {
             Storage storage = gccStackUtil.buildStorage((GccCredential) stack.getCredential(), stack);
             Compute compute = gccStackUtil.buildCompute((GccCredential) stack.getCredential(), stack);
-            GccTemplate template = (GccTemplate) stack.getTemplate();
             GccCredential credential = (GccCredential) stack.getCredential();
             ImageList list = compute.images().list(credential.getProjectId()).execute();
             Long time = new Date().getTime();
@@ -91,8 +90,8 @@ public class GccProvisionSetup implements ProvisionSetup {
                 image.setRawDisk(rawDisk);
                 Compute.Images.Insert ins1 = compute.images().insert(credential.getProjectId(), image);
                 ins1.execute();
-
-                GccImageReadyPollerObject gccImageReadyPollerObject = new GccImageReadyPollerObject(image.getName(), stack, compute);
+                GccImageReadyPollerObject gccImageReadyPollerObject = new GccImageReadyPollerObject(compute,
+                        stack, image.getName(), GccZone.valueOf(stack.getRegion()));
                 gccImageReadyPollerObjectPollingService
                         .pollWithTimeout(gccImageCheckerStatus, gccImageReadyPollerObject, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
             }

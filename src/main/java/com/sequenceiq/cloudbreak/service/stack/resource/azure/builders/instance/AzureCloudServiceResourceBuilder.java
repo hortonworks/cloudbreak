@@ -1,8 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.resource.azure.builders.instance;
 
-import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.ERROR;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.NAME;
-import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.SERVICENAME;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -14,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
 import com.sequenceiq.cloud.azure.client.AzureClient;
@@ -23,17 +20,17 @@ import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureCloudServiceDeleteTask;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureCloudServiceDeleteTaskContext;
-import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureDiskDeleteTask;
-import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureDiskRemoveDeleteTaskContext;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
+import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureResourcePollerObject;
+import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureResourceStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureSimpleInstanceResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDeleteContextObject;
-import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDescribeContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureProvisionContextObject;
 
 import groovyx.net.http.HttpResponseDecorator;
@@ -47,27 +44,29 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
     @Autowired
     private StackRepository stackRepository;
     @Autowired
-    private AzureDiskDeleteTask azureDiskDeleteTask;
-    @Autowired
-    private PollingService<AzureDiskRemoveDeleteTaskContext> azureDiskRemoveReadyPollerObjectPollingService;
-    @Autowired
     private AzureCloudServiceDeleteTask azureCloudServiceDeleteTask;
     @Autowired
     private PollingService<AzureCloudServiceDeleteTaskContext> azureCloudServiceRemoveReadyPollerObjectPollingService;
     @Autowired
     private AzureStackUtil azureStackUtil;
+    @Autowired
+    private AzureResourceStatusCheckerTask azureResourceStatusCheckerTask;
+    @Autowired
+    private PollingService<AzureResourcePollerObject> azureResourcePollerObjectPollingService;
+
 
     @Override
-    public Boolean create(final CreateResourceRequest createResourceRequest) throws Exception {
+    public Boolean create(final CreateResourceRequest createResourceRequest, String region) throws Exception {
         AzureCloudServiceCreateRequest aCSCR = (AzureCloudServiceCreateRequest) createResourceRequest;
         HttpResponseDecorator cloudServiceResponse = (HttpResponseDecorator) aCSCR.getAzureClient().createCloudService(aCSCR.getProps());
-        String requestId = (String) aCSCR.getAzureClient().getRequestId(cloudServiceResponse);
-        waitUntilComplete(aCSCR.getAzureClient(), requestId);
+        AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(aCSCR.getAzureClient(), cloudServiceResponse, aCSCR.getStack());
+        azureResourcePollerObjectPollingService.pollWithTimeout(azureResourceStatusCheckerTask, azureResourcePollerObject,
+                POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
         return true;
     }
 
     @Override
-    public Boolean delete(Resource resource, AzureDeleteContextObject deleteContextObject) throws Exception {
+    public Boolean delete(Resource resource, AzureDeleteContextObject deleteContextObject, String region) throws Exception {
         Stack stack = stackRepository.findById(deleteContextObject.getStackId());
         AzureCredential credential = (AzureCredential) stack.getCredential();
         AzureCloudServiceDeleteTaskContext azureCloudServiceDeleteTaskContext =
@@ -75,50 +74,22 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
                         stack, azureStackUtil.createAzureClient(credential));
         azureCloudServiceRemoveReadyPollerObjectPollingService
                 .pollWithTimeout(azureCloudServiceDeleteTask, azureCloudServiceDeleteTaskContext, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
-
-        AzureClient azureClient = azureStackUtil.createAzureClient(credential);
-        JsonNode actualObj = MAPPER.readValue((String) azureClient.getDisks(), JsonNode.class);
-        List<String> disks = (List<String>) actualObj.get("Disks").findValues("Disk").get(0).findValuesAsText("Name");
-        for (String jsonNode : disks) {
-            if (jsonNode.startsWith(String.format("%s-%s-0", resource.getResourceName(), resource.getResourceName()))) {
-                AzureDiskRemoveDeleteTaskContext azureDiskRemoveReadyPollerObject = new AzureDiskRemoveDeleteTaskContext(deleteContextObject.getCommonName(),
-                        jsonNode,
-                        stack, azureStackUtil.createAzureClient(credential));
-                azureDiskRemoveReadyPollerObjectPollingService
-                        .pollWithTimeout(azureDiskDeleteTask, azureDiskRemoveReadyPollerObject, POLLING_INTERVAL, DISK_MAX_ATTEMPTS);
-            }
-        }
         return true;
     }
 
     @Override
-    public Optional<String> describe(Resource resource, AzureDescribeContextObject describeContextObject) throws Exception {
-        Stack stack = stackRepository.findById(describeContextObject.getStackId());
-        AzureCredential credential = (AzureCredential) stack.getCredential();
-        Map<String, String> props = new HashMap<>();
-        props.put(SERVICENAME, resource.getResourceName());
-        props.put(NAME, resource.getResourceName());
-        try {
-            AzureClient azureClient = azureStackUtil.createAzureClient(credential);
-            Object virtualMachine = azureClient.getVirtualMachine(props);
-            return Optional.fromNullable(virtualMachine.toString());
-        } catch (Exception ex) {
-            return Optional.fromNullable(String.format("{\"Deployment\": {%s}}", ERROR));
-        }
-    }
-
-    @Override
-    public List<Resource> buildResources(AzureProvisionContextObject provisionContextObject, int index, List<Resource> resources) {
+    public List<Resource> buildResources(AzureProvisionContextObject provisionContextObject, int index, List<Resource> resources,
+            Optional<InstanceGroup> instanceGroup) {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         String vmName = getVmName(provisionContextObject.filterResourcesByType(ResourceType.AZURE_NETWORK).get(0).getResourceName(), index);
-        return Arrays.asList(new Resource(resourceType(), vmName + String.valueOf(new Date().getTime()), stack));
+        return Arrays.asList(new Resource(resourceType(), vmName + String.valueOf(new Date().getTime()), stack, instanceGroup.orNull().getGroupName()));
     }
 
     @Override
     public CreateResourceRequest buildCreateRequest(AzureProvisionContextObject provisionContextObject, List<Resource> resources,
-            List<Resource> buildResources, int index) throws Exception {
+            List<Resource> buildResources, int index, Optional<InstanceGroup> instanceGroup) throws Exception {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
-        AzureTemplate azureTemplate = (AzureTemplate) stack.getTemplate();
+        AzureTemplate azureTemplate = (AzureTemplate) instanceGroup.orNull().getTemplate();
         String vmName = buildResources.get(0).getResourceName();
         if (vmName.length() > MAX_NAME_LENGTH) {
             vmName = vmName.substring(vmName.length() - MAX_NAME_LENGTH, vmName.length());
@@ -128,7 +99,7 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
         props.put(DESCRIPTION, azureTemplate.getDescription());
         props.put(AFFINITYGROUP, provisionContextObject.getCommonName());
         return new AzureCloudServiceCreateRequest(props, azureStackUtil.createAzureClient((AzureCredential) stack.getCredential()),
-                resources, buildResources);
+                resources, buildResources, stack, instanceGroup.orNull());
     }
 
     @Override
@@ -140,12 +111,21 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
         private Map<String, String> props = new HashMap<>();
         private AzureClient azureClient;
         private List<Resource> resources;
+        private Stack stack;
+        private InstanceGroup instanceGroup;
 
-        public AzureCloudServiceCreateRequest(Map<String, String> props, AzureClient azureClient, List<Resource> resources, List<Resource> buildNames) {
+        public AzureCloudServiceCreateRequest(Map<String, String> props, AzureClient azureClient, List<Resource> resources, List<Resource> buildNames,
+                Stack stack, InstanceGroup instanceGroup) {
             super(buildNames);
             this.props = props;
             this.azureClient = azureClient;
             this.resources = resources;
+            this.stack = stack;
+            this.instanceGroup = instanceGroup;
+        }
+
+        public Stack getStack() {
+            return stack;
         }
 
         public Map<String, String> getProps() {
@@ -158,6 +138,10 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
 
         public List<Resource> getResources() {
             return resources;
+        }
+
+        public InstanceGroup getInstanceGroup() {
+            return instanceGroup;
         }
     }
 }

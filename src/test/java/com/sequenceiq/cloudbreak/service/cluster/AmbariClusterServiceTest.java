@@ -174,8 +174,8 @@ public class AmbariClusterServiceTest {
         when(hostMetadataRepository.findHostsInHostgroup("slave_1", cluster.getId())).thenReturn(hostsMetaData);
         when(clientService.create(stack)).thenReturn(ambariClient);
         when(ambariClient.getComponentsCategory("multi-node-yarn", "slave_1")).thenReturn(singletonMap("DATANODE", "SLAVE"));
-        when(configurationService.getConfiguration(ambariClient)).thenReturn(singletonMap(ConfigParam.DFS_REPLICATION.key(), "2"));
-        when(hostFilterService.filterHostsForDecommission(stack, hostsMetaData)).thenReturn(Collections.<HostMetadata>emptyList());
+        when(configurationService.getConfiguration(ambariClient, "slave_1")).thenReturn(singletonMap(ConfigParam.DFS_REPLICATION.key(), "2"));
+        when(hostFilterService.filterHostsForDecommission(stack, hostsMetaData, "slave_1")).thenReturn(Collections.<HostMetadata>emptyList());
 
         Exception result = null;
         try {
@@ -202,8 +202,8 @@ public class AmbariClusterServiceTest {
         when(hostMetadataRepository.findHostsInHostgroup("slave_1", cluster.getId())).thenReturn(hostsMetaData);
         when(clientService.create(stack)).thenReturn(ambariClient);
         when(ambariClient.getComponentsCategory("multi-node-yarn", "slave_1")).thenReturn(singletonMap("DATANODE", "SLAVE"));
-        when(configurationService.getConfiguration(ambariClient)).thenReturn(singletonMap(ConfigParam.DFS_REPLICATION.key(), "1"));
-        when(hostFilterService.filterHostsForDecommission(stack, hostsMetaData)).thenReturn(asList(metadata2, metadata3));
+        when(configurationService.getConfiguration(ambariClient, "slave_1")).thenReturn(singletonMap(ConfigParam.DFS_REPLICATION.key(), "1"));
+        when(hostFilterService.filterHostsForDecommission(stack, hostsMetaData, "slave_1")).thenReturn(asList(metadata2, metadata3));
 
         Exception result = null;
         try {
@@ -247,8 +247,8 @@ public class AmbariClusterServiceTest {
         when(hostMetadataRepository.findHostsInHostgroup("slave_1", cluster.getId())).thenReturn(hostsMetaData);
         when(clientService.create(stack)).thenReturn(ambariClient);
         when(ambariClient.getComponentsCategory("multi-node-yarn", "slave_1")).thenReturn(singletonMap("DATANODE", "SLAVE"));
-        when(configurationService.getConfiguration(ambariClient)).thenReturn(singletonMap(ConfigParam.DFS_REPLICATION.key(), "1"));
-        when(hostFilterService.filterHostsForDecommission(stack, hostsMetaData)).thenReturn(hostsMetadataList);
+        when(configurationService.getConfiguration(ambariClient, "slave_1")).thenReturn(singletonMap(ConfigParam.DFS_REPLICATION.key(), "1"));
+        when(hostFilterService.filterHostsForDecommission(stack, hostsMetaData, "slave_1")).thenReturn(hostsMetadataList);
         when(ambariClient.getBlueprintMap(cluster.getBlueprint().getBlueprintName())).thenReturn(singletonMap("slave_1", asList("DATANODE")));
         when(ambariClient.getDFSSpace()).thenReturn(dfsSpace);
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node1")).thenReturn(instanceMetaData1);
@@ -292,8 +292,8 @@ public class AmbariClusterServiceTest {
         when(hostMetadataRepository.findHostsInHostgroup("slave_1", cluster.getId())).thenReturn(hostsMetaData);
         when(clientService.create(stack)).thenReturn(ambariClient);
         when(ambariClient.getComponentsCategory("multi-node-yarn", "slave_1")).thenReturn(singletonMap("DATANODE", "SLAVE"));
-        when(configurationService.getConfiguration(ambariClient)).thenReturn(singletonMap(ConfigParam.DFS_REPLICATION.key(), "1"));
-        when(hostFilterService.filterHostsForDecommission(stack, hostsMetaData)).thenReturn(hostsMetadataList);
+        when(configurationService.getConfiguration(ambariClient, "slave_1")).thenReturn(singletonMap(ConfigParam.DFS_REPLICATION.key(), "1"));
+        when(hostFilterService.filterHostsForDecommission(stack, hostsMetaData, "slave_1")).thenReturn(hostsMetadataList);
         when(ambariClient.getBlueprintMap(cluster.getBlueprint().getBlueprintName())).thenReturn(singletonMap("slave_1", asList("DATANODE")));
         when(ambariClient.getDFSSpace()).thenReturn(dfsSpace);
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node1")).thenReturn(instanceMetaData1);
@@ -341,8 +341,8 @@ public class AmbariClusterServiceTest {
         when(hostMetadataRepository.findHostsInHostgroup("slave_1", cluster.getId())).thenReturn(hostsMetaData);
         when(clientService.create(stack)).thenReturn(ambariClient);
         when(ambariClient.getComponentsCategory("multi-node-yarn", "slave_1")).thenReturn(singletonMap("DATANODE", "SLAVE"));
-        when(configurationService.getConfiguration(ambariClient)).thenReturn(singletonMap(ConfigParam.DFS_REPLICATION.key(), "1"));
-        when(hostFilterService.filterHostsForDecommission(stack, hostsMetaData)).thenReturn(hostsMetadataList);
+        when(configurationService.getConfiguration(ambariClient, "slave_1")).thenReturn(singletonMap(ConfigParam.DFS_REPLICATION.key(), "1"));
+        when(hostFilterService.filterHostsForDecommission(stack, hostsMetaData, "slave_1")).thenReturn(hostsMetadataList);
         when(ambariClient.getBlueprintMap(cluster.getBlueprint().getBlueprintName())).thenReturn(singletonMap("slave_1", asList("DATANODE")));
         when(ambariClient.getDFSSpace()).thenReturn(dfsSpace);
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node1")).thenReturn(instanceMetaData1);
@@ -387,8 +387,8 @@ public class AmbariClusterServiceTest {
         when(hostMetadataRepository.findHostsInHostgroup("slave_1", cluster.getId())).thenReturn(hostsMetaData);
         when(clientService.create(stack)).thenReturn(ambariClient);
         when(ambariClient.getComponentsCategory("multi-node-yarn", "slave_1")).thenReturn(singletonMap("DATANODE", "SLAVE"));
-        when(configurationService.getConfiguration(ambariClient)).thenReturn(singletonMap(ConfigParam.DFS_REPLICATION.key(), "1"));
-        when(hostFilterService.filterHostsForDecommission(stack, hostsMetaData)).thenReturn(hostsMetadataList);
+        when(configurationService.getConfiguration(ambariClient, "slave_1")).thenReturn(singletonMap(ConfigParam.DFS_REPLICATION.key(), "1"));
+        when(hostFilterService.filterHostsForDecommission(stack, hostsMetaData, "slave_1")).thenReturn(hostsMetadataList);
         when(ambariClient.getBlueprintMap(cluster.getBlueprint().getBlueprintName())).thenReturn(singletonMap("slave_1", asList("DATANODE")));
         when(ambariClient.getDFSSpace()).thenReturn(dfsSpace);
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node1")).thenReturn(instanceMetaData1);

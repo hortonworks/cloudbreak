@@ -11,14 +11,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.api.services.compute.Compute;
-import com.google.api.services.compute.model.AttachedDisk;
-import com.google.api.services.compute.model.Instance;
 import com.google.api.services.dns.Dns;
 import com.google.api.services.dns.model.ManagedZone;
 import com.google.api.services.dns.model.ManagedZonesListResponse;
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -28,13 +28,12 @@ import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.builders.instance.GccInstanceResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDeleteContextObject;
-import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDescribeContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccProvisionContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccStartStopContextObject;
 
 @Component
 public class GccResourceBuilderInit implements
-        ResourceBuilderInit<GccProvisionContextObject, GccDeleteContextObject, GccDescribeContextObject, GccStartStopContextObject> {
+        ResourceBuilderInit<GccProvisionContextObject, GccDeleteContextObject, GccStartStopContextObject> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GccResourceBuilderInit.class);
 
@@ -69,33 +68,18 @@ public class GccResourceBuilderInit implements
         GccCredential credential = (GccCredential) stack.getCredential();
         Compute compute = gccStackUtil.buildCompute(credential, stack);
         List<Resource> resourceList = new ArrayList<>();
+        List<InstanceGroup> instanceGroups = Lists.newArrayList(stack.getInstanceGroups());
         for (String res : decommissionSet) {
-            resourceList.add(new Resource(ResourceType.GCC_INSTANCE, res, stack));
+            resourceList.add(new Resource(ResourceType.GCC_INSTANCE, res, stack, instanceGroups.get(0).getGroupName()));
         }
-        List<Resource> result = new ArrayList<>();
-        for (Resource resource : resourceList) {
-            Instance instance = gccInstanceResourceBuilder.describe(stack, compute, resource);
-            for (AttachedDisk attachedDisk : instance.getDisks()) {
-                result.add(new Resource(ResourceType.GCC_ATTACHED_DISK, attachedDisk.getDeviceName(), stack));
-            }
-        }
-        result.addAll(resourceList);
         GccDeleteContextObject gccDeleteContextObject = new GccDeleteContextObject(stack.getId(), credential.getProjectId(),
-                compute, result);
+                compute, resourceList);
         return gccDeleteContextObject;
     }
 
     @Override
     public GccStartStopContextObject startStopInit(Stack stack) throws Exception {
         return new GccStartStopContextObject(stack);
-    }
-
-    @Override
-    public GccDescribeContextObject describeInit(Stack stack) throws Exception {
-        GccCredential credential = (GccCredential) stack.getCredential();
-        GccDescribeContextObject gccDescribeContextObject = new GccDescribeContextObject(stack.getId(), credential.getProjectId(),
-                gccStackUtil.buildCompute(credential, stack));
-        return gccDescribeContextObject;
     }
 
     private ManagedZone buildManagedZone(Dns dns, Stack stack) throws IOException {

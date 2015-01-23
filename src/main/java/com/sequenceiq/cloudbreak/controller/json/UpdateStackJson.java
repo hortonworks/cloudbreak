@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
-import javax.validation.constraints.Digits;
-
 import com.sequenceiq.cloudbreak.controller.validation.ValidUpdateStackRequest;
 import com.sequenceiq.cloudbreak.domain.StatusRequest;
 
@@ -10,8 +8,7 @@ public class UpdateStackJson implements JsonEntity {
 
     private StatusRequest status;
 
-    @Digits(fraction = 0, integer = 10, message = "The node count has to be a number")
-    private Integer scalingAdjustment;
+    private HostGroupAdjustmentJson hostGroupAdjustment;
 
     public UpdateStackJson() {
 
@@ -25,11 +22,11 @@ public class UpdateStackJson implements JsonEntity {
         this.status = status;
     }
 
-    public Integer getScalingAdjustment() {
-        return scalingAdjustment;
+    public HostGroupAdjustmentJson getHostGroupAdjustment() {
+        return hostGroupAdjustment;
     }
 
-    public void setScalingAdjustment(Integer scalingAdjustment) {
-        this.scalingAdjustment = scalingAdjustment;
+    public void setHostGroupAdjustment(HostGroupAdjustmentJson hostGroupAdjustment) {
+        this.hostGroupAdjustment = hostGroupAdjustment;
     }
 }

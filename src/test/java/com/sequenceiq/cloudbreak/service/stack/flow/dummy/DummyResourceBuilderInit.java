@@ -5,7 +5,6 @@ import java.util.Set;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.stack.resource.DeleteContextObject;
-import com.sequenceiq.cloudbreak.service.stack.resource.DescribeContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.ProvisionContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
@@ -30,11 +29,6 @@ public class DummyResourceBuilderInit implements ResourceBuilderInit {
     @Override
     public StartStopContextObject startStopInit(Stack stack) throws Exception {
         return new DummyStartStopContextObject(stack);
-    }
-
-    @Override
-    public DescribeContextObject describeInit(Stack stack) throws Exception {
-        return new DummyDescribeContextObject(1L);
     }
 
     @Override

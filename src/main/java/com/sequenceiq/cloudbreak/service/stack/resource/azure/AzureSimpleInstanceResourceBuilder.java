@@ -16,14 +16,13 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDeleteContextObject;
-import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDescribeContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureProvisionContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureStartStopContextObject;
 
 import groovyx.net.http.HttpResponseException;
 
 public abstract class AzureSimpleInstanceResourceBuilder implements
-        ResourceBuilder<AzureProvisionContextObject, AzureDeleteContextObject, AzureDescribeContextObject, AzureStartStopContextObject> {
+        ResourceBuilder<AzureProvisionContextObject, AzureDeleteContextObject, AzureStartStopContextObject> {
     protected static final Logger LOGGER = LoggerFactory.getLogger(AzureSimpleInstanceResourceBuilder.class);
     protected static final int POLLING_INTERVAL = 5000;
     protected static final int MAX_POLLING_ATTEMPTS = 60;
@@ -92,17 +91,17 @@ public abstract class AzureSimpleInstanceResourceBuilder implements
     }
 
     @Override
-    public Boolean start(AzureStartStopContextObject startStopContextObject, Resource resource) {
+    public Boolean start(AzureStartStopContextObject startStopContextObject, Resource resource, String region) {
         return true;
     }
 
     @Override
-    public Boolean stop(AzureStartStopContextObject startStopContextObject, Resource resource) {
+    public Boolean stop(AzureStartStopContextObject startStopContextObject, Resource resource, String region) {
         return true;
     }
 
     @Override
-    public Boolean rollback(Resource resource, AzureDeleteContextObject deleteContextObject) throws Exception {
-        return delete(resource, deleteContextObject);
+    public Boolean rollback(Resource resource, AzureDeleteContextObject deleteContextObject, String region) throws Exception {
+        return delete(resource, deleteContextObject, region);
     }
 }

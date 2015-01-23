@@ -54,8 +54,8 @@ public class AzureMetadataSetupTest {
 
     public Set<Resource> getDefaultResourceSet() {
         Set<Resource> resources = new HashSet<>();
-        resources.add(new Resource(ResourceType.AZURE_CLOUD_SERVICE, DUMMY_VM_NAME, stack));
-        resources.add(new Resource(ResourceType.AZURE_VIRTUAL_MACHINE, DUMMY_VM_NAME, stack));
+        resources.add(new Resource(ResourceType.AZURE_CLOUD_SERVICE, DUMMY_VM_NAME, stack, "master"));
+        resources.add(new Resource(ResourceType.AZURE_VIRTUAL_MACHINE, DUMMY_VM_NAME, stack, "master"));
         return resources;
     }
 

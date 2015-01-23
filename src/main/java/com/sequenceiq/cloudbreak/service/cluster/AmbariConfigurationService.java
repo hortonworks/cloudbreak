@@ -23,9 +23,9 @@ public class AmbariConfigurationService {
         }
     }
 
-    public Map<String, String> getConfiguration(AmbariClient ambariClient) throws ConnectException {
+    public Map<String, String> getConfiguration(AmbariClient ambariClient, String hostGroup) throws ConnectException {
         Map<String, String> configuration = new HashMap<>();
-        Set<Map.Entry<String, Map<String, String>>> serviceConfigs = ambariClient.getServiceConfigMap().entrySet();
+        Set<Map.Entry<String, Map<String, String>>> serviceConfigs = ambariClient.getServiceConfigMapByHostGroup(hostGroup).entrySet();
         for (Map.Entry<String, Map<String, String>> serviceEntry : serviceConfigs) {
             for (Map.Entry<String, String> configEntry : serviceEntry.getValue().entrySet()) {
                 if (CONFIG_LIST.contains(configEntry.getKey())) {

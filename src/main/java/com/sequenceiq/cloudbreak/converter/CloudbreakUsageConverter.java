@@ -65,13 +65,13 @@ public class CloudbreakUsageConverter extends AbstractConverter<CloudbreakUsageJ
     private String getZoneNameByProvider(String cloud, String zoneFromUsage) {
         String zone = null;
         if (zoneFromUsage != null && CloudPlatform.AWS.name().equals(cloud)) {
-            Regions transformedZone = Regions.fromName(zoneFromUsage);
+            Regions transformedZone = Regions.valueOf(zoneFromUsage);
             zone = transformedZone.name();
         } else if (zoneFromUsage != null && CloudPlatform.GCC.name().equals(cloud)) {
-            GccZone transformedZone = GccZone.fromName(zoneFromUsage);
+            GccZone transformedZone = GccZone.valueOf(zoneFromUsage);
             zone = transformedZone.name();
         } else if (zoneFromUsage != null && CloudPlatform.AZURE.name().equals(cloud)) {
-            AzureLocation transformedZone = AzureLocation.fromName(zoneFromUsage);
+            AzureLocation transformedZone = AzureLocation.valueOf(zoneFromUsage);
             zone = transformedZone.name();
         }
         return zone;

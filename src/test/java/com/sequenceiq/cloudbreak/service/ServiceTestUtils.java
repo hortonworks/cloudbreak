@@ -11,7 +11,6 @@ import com.amazonaws.services.ec2.model.VolumeType;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
-import com.sequenceiq.cloudbreak.domain.AzureLocation;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
@@ -25,10 +24,10 @@ import com.sequenceiq.cloudbreak.domain.SnsTopic;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.service.stack.connector.ConnectorTestUtil;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccInstanceType;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccRawDiskType;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccZone;
 
 public final class ServiceTestUtils {
 
@@ -105,14 +104,28 @@ public final class ServiceTestUtils {
     }
 
     public static Stack createStack(String owner, String account, Template template, Credential credential, Cluster cluster, Set<Resource> resources) {
+        Template template1 = createTemplate(CloudPlatform.AWS);
+        Template template2 = createTemplate(CloudPlatform.AWS);
+        Set<InstanceGroup> instanceGroups = new HashSet<>();
+        InstanceGroup instanceGroup1 = new InstanceGroup();
+        instanceGroup1.setNodeCount(2);
+        instanceGroup1.setGroupName("master");
+        instanceGroup1.setTemplate(template1);
+        instanceGroups.add(instanceGroup1);
+        InstanceGroup instanceGroup2 = new InstanceGroup();
+        instanceGroup2.setNodeCount(2);
+        instanceGroup2.setGroupName("slave_1");
+        instanceGroup2.setTemplate(template2);
+        instanceGroups.add(instanceGroup2);
         Stack stack = new Stack();
         stack.setAmbariIp("168.192.12.13");
         stack.setCredential(credential);
-        stack.setNodeCount(2);
         stack.setMetadataReady(true);
+        stack.setRegion("EU_WEST_1");
         stack.setOwner(owner);
         stack.setAccount(account);
-        stack.setTemplate(template);
+        stack.setStatus(Status.REQUESTED);
+        stack.setInstanceGroups(instanceGroups);
         stack.setCluster(cluster);
         stack.setPublicInAccount(true);
         stack.setResources(resources);
@@ -153,7 +166,6 @@ public final class ServiceTestUtils {
                 azureCredential.setId(1L);
                 azureCredential.setOwner(owner);
                 azureCredential.setAccount(account);
-                azureCredential.setCloudPlatform(platform);
                 azureCredential.setPublicInAccount(true);
                 azureCredential.setPublicKey(PUBLIC_KEY);
                 return azureCredential;
@@ -162,7 +174,6 @@ public final class ServiceTestUtils {
                 awsCredential.setId(1L);
                 awsCredential.setOwner(owner);
                 awsCredential.setAccount(account);
-                awsCredential.setCloudPlatform(platform);
                 awsCredential.setPublicInAccount(true);
                 awsCredential.setRoleArn("rolearn");
                 awsCredential.setPublicKey(PUBLIC_KEY);
@@ -172,7 +183,6 @@ public final class ServiceTestUtils {
                 gccCredential.setId(1L);
                 gccCredential.setOwner(owner);
                 gccCredential.setAccount(account);
-                gccCredential.setCloudPlatform(platform);
                 gccCredential.setPublicInAccount(true);
                 gccCredential.setPublicKey(PUBLIC_KEY);
                 return gccCredential;
@@ -193,7 +203,6 @@ public final class ServiceTestUtils {
                 azureTemplate.setOwner(owner);
                 azureTemplate.setAccount(account);
                 azureTemplate.setVmType("test-vm-type");
-                azureTemplate.setLocation(AzureLocation.NORTH_EUROPE);
                 azureTemplate.setImageName("TEST_IMAGE");
                 azureTemplate.setVolumeCount(1);
                 azureTemplate.setVolumeSize(100);
@@ -206,8 +215,6 @@ public final class ServiceTestUtils {
                 awsTemplate.setOwner(owner);
                 awsTemplate.setAccount(account);
                 awsTemplate.setInstanceType(InstanceType.C1Medium);
-                awsTemplate.setRegion(Regions.EU_WEST_1);
-                awsTemplate.setAmiId("ami-12345");
                 awsTemplate.setVolumeType(VolumeType.Gp2);
                 awsTemplate.setSshLocation("0.0.0.0/0");
                 awsTemplate.setVolumeCount(1);
@@ -218,10 +225,8 @@ public final class ServiceTestUtils {
             case GCC:
                 GccTemplate gccTemplate = new GccTemplate();
                 gccTemplate.setId(1L);
-                gccTemplate.setContainerCount(0);
                 gccTemplate.setGccInstanceType(GccInstanceType.N1_STANDARD_1);
                 gccTemplate.setGccRawDiskType(GccRawDiskType.HDD);
-                gccTemplate.setGccZone(GccZone.US_CENTRAL1_A);
                 gccTemplate.setDescription("gcc test template");
                 gccTemplate.setOwner(owner);
                 gccTemplate.setAccount(account);

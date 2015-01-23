@@ -155,6 +155,7 @@ public class StackUsageGenerator {
         event.setStackStatus(startEvent.getStackStatus());
         event.setStackName(startEvent.getStackName());
         event.setNodeCount(startEvent.getNodeCount());
+        event.setInstanceGroup(startEvent.getInstanceGroup());
         return event;
     }
 

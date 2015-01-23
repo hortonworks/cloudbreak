@@ -4,11 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anySet;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -79,7 +76,7 @@ public class AwsProvisionerTest {
         MockitoAnnotations.initMocks(this);
         credential = ServiceTestUtils.createCredential(CloudPlatform.AWS);
         Set<Resource> resources = new HashSet<>();
-        resources.add(new Resource(ResourceType.CLOUDFORMATION_STACK, "", stack));
+        resources.add(new Resource(ResourceType.CLOUDFORMATION_STACK, "", stack, "master"));
         stack = ServiceTestUtils.createStack(ServiceTestUtils.createTemplate(CloudPlatform.AWS), credential, resources);
     }
 
@@ -93,7 +90,7 @@ public class AwsProvisionerTest {
         given(createStackResult.getStackId()).willReturn(STACK_ID);
         given(stackUpdater.updateStackResources(anyLong(), anySet())).willReturn(stack);
         given(underTest.createStackRequest()).willReturn(createStackRequest);
-        given(cfTemplateBuilder.build(anyString(), anyInt(), anyBoolean())).willReturn("templatebody");
+        //given(cfTemplateBuilder.build(anyString(), anyInt(), anyBoolean())).willReturn("templatebody");
         Map<String, Object> setupProperties = new HashMap<>();
         setupProperties.put(SnsTopicManager.NOTIFICATION_TOPIC_ARN_KEY, "topicArn");
         // WHEN

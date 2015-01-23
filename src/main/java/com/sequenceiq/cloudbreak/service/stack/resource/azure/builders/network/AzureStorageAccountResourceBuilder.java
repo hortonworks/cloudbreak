@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.stack.resource.azure.builders.network;
 
-import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.ERROR;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.NAME;
 
 import java.util.Arrays;
@@ -20,12 +19,12 @@ import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureSimpleNetworkResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDeleteContextObject;
-import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDescribeContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureProvisionContextObject;
 
 import groovyx.net.http.HttpResponseDecorator;
@@ -41,7 +40,7 @@ public class AzureStorageAccountResourceBuilder extends AzureSimpleNetworkResour
     private AzureStackUtil azureStackUtil;
 
     @Override
-    public Boolean create(CreateResourceRequest createResourceRequest) throws Exception {
+    public Boolean create(CreateResourceRequest createResourceRequest, String region) throws Exception {
         AzureStorageAccountCreateRequest aCSCR = (AzureStorageAccountCreateRequest) createResourceRequest;
         try {
             aCSCR.getAzureClient().getStorageAccount(aCSCR.getName());
@@ -62,34 +61,25 @@ public class AzureStorageAccountResourceBuilder extends AzureSimpleNetworkResour
     }
 
     @Override
-    public Boolean delete(Resource resource, AzureDeleteContextObject deleteContextObject) throws Exception {
+    public Boolean delete(Resource resource, AzureDeleteContextObject deleteContextObject, String region) throws Exception {
         return true;
     }
 
     @Override
-    public Optional<String> describe(Resource resource, AzureDescribeContextObject describeContextObject) throws Exception {
-        try {
-            Object storageAccount = describeContextObject.getAzureClient().getStorageAccount(resource.getResourceName());
-            return Optional.fromNullable(storageAccount.toString());
-        } catch (Exception ex) {
-            return Optional.fromNullable(String.format("{\"StorageService\": {%s}}", ERROR));
-        }
-    }
-
-    @Override
-    public List<Resource> buildResources(AzureProvisionContextObject provisionContextObject, int index, List<Resource> resources) {
+    public List<Resource> buildResources(AzureProvisionContextObject provisionContextObject, int index, List<Resource> resources,
+            Optional<InstanceGroup> instanceGroup) {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
-        return Arrays.asList(new Resource(resourceType(), provisionContextObject.getCommonName(), stack));
+        return Arrays.asList(new Resource(resourceType(), provisionContextObject.getCommonName(), stack, null));
     }
 
     @Override
     public CreateResourceRequest buildCreateRequest(AzureProvisionContextObject provisionContextObject, List<Resource> resources,
-            List<Resource> buildResources, int index) throws Exception {
+            List<Resource> buildResources, int index, Optional<InstanceGroup> instanceGroup) throws Exception {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         AzureCredential credential = (AzureCredential) stack.getCredential();
         Map<String, String> props = new HashMap<>();
         props.put(NAME, buildResources.get(0).getResourceName());
-        props.put(DESCRIPTION, stack.getTemplate().getDescription());
+        props.put(DESCRIPTION, "description");
         props.put(AFFINITYGROUP, provisionContextObject.getCommonName());
         AzureClient azureClient = azureStackUtil.createAzureClient(credential);
         return new AzureStorageAccountCreateRequest(buildResources.get(0).getResourceName(), provisionContextObject.getStackId(), props, azureClient,

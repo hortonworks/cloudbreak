@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.GccTemplate;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.CloudbreakEventRepository;
@@ -52,9 +53,9 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     }
 
     @Override
-    public CloudbreakEvent createStackEvent(Long stackId, String eventType, String eventMessage) {
+    public CloudbreakEvent createStackEvent(Long stackId, String eventType, String eventMessage, InstanceGroup instanceGroup) {
         Stack stack = stackRepository.findById(stackId);
-        CloudbreakEvent stackEvent = createStackEvent(stack, eventType, eventMessage);
+        CloudbreakEvent stackEvent = createStackEvent(stack, eventType, eventMessage, instanceGroup);
         stackEvent = eventRepository.save(stackEvent);
 
         Notification notification = new Notification(stackEvent);
@@ -78,21 +79,21 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
         return null != events ? events : Collections.EMPTY_LIST;
     }
 
-    private CloudbreakEvent createStackEvent(Stack stack, String eventType, String eventMessage) {
+    private CloudbreakEvent createStackEvent(Stack stack, String eventType, String eventMessage, InstanceGroup instanceGroup) {
         CloudbreakEvent stackEvent = new CloudbreakEvent();
 
         stackEvent.setEventTimestamp(Calendar.getInstance().getTime());
-        stackEvent.setEventMessage(eventMessage);
+        stackEvent.setEventMessage(String.format("Interaction on '%s' hostgroup %s", instanceGroup.getGroupName(), eventMessage));
         stackEvent.setEventType(eventType);
         stackEvent.setOwner(stack.getOwner());
         stackEvent.setAccount(stack.getAccount());
         stackEvent.setStackId(stack.getId());
         stackEvent.setStackStatus(stack.getStatus());
         stackEvent.setStackName(stack.getName());
-        stackEvent.setNodeCount(stack.getNodeCount());
+        stackEvent.setNodeCount(instanceGroup.getNodeCount());
 
         populateClusterData(stackEvent, stack);
-        populateTemplateData(stackEvent, stack);
+        populateTemplateData(stackEvent, stack, instanceGroup);
 
         return stackEvent;
     }
@@ -107,28 +108,25 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
         }
     }
 
-    private void populateTemplateData(CloudbreakEvent stackEvent, Stack stack) {
+    private void populateTemplateData(CloudbreakEvent stackEvent, Stack stack, InstanceGroup instanceGroup) {
         MDCBuilder.buildMdcContext(stackEvent);
         String vmType = null;
-        String region = null;
-        switch (stack.getTemplate().cloudPlatform()) {
+        switch (stack.cloudPlatform()) {
             case AWS:
-                vmType = ((AwsTemplate) stack.getTemplate()).getInstanceType().name();
-                region = ((AwsTemplate) stack.getTemplate()).getRegion().getName();
+                vmType = ((AwsTemplate) instanceGroup.getTemplate()).getInstanceType().name();
                 break;
             case AZURE:
-                vmType = ((AzureTemplate) stack.getTemplate()).getVmType();
-                region = ((AzureTemplate) stack.getTemplate()).getLocation().location();
+                vmType = ((AzureTemplate) instanceGroup.getTemplate()).getVmType();
                 break;
             case GCC:
-                vmType = ((GccTemplate) stack.getTemplate()).getGccInstanceType().getValue();
-                region = ((GccTemplate) stack.getTemplate()).getGccZone().getValue();
+                vmType = ((GccTemplate) instanceGroup.getTemplate()).getGccInstanceType().getValue();
                 break;
             default:
-                throw new IllegalStateException("Unsupported cloud platform :" + stack.getTemplate().cloudPlatform());
+                throw new IllegalStateException("Unsupported cloud platform :" + stack.cloudPlatform());
         }
         stackEvent.setVmType(vmType);
-        stackEvent.setRegion(region);
-        stackEvent.setCloud(stack.getTemplate().cloudPlatform().name());
+        stackEvent.setRegion(stack.getRegion());
+        stackEvent.setCloud(stack.cloudPlatform().name());
+        stackEvent.setInstanceGroup(instanceGroup.getGroupName());
     }
 }

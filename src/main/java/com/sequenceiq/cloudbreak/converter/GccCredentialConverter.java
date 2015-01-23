@@ -34,7 +34,6 @@ public class GccCredentialConverter extends AbstractConverter<CredentialJson, Gc
         gccCredential.setServiceAccountId(String.valueOf(json.getParameters().get(GccCredentialParam.SERVICE_ACCOUNT_ID.getName())));
         gccCredential.setServiceAccountPrivateKey(String.valueOf(json.getParameters().get(GccCredentialParam.SERVICE_ACCOUNT_PRIVATE_KEY.getName())));
         gccCredential.setProjectId(String.valueOf(json.getParameters().get(GccCredentialParam.PROJECTID.getName())));
-        gccCredential.setCloudPlatform(CloudPlatform.GCC);
         gccCredential.setDescription(json.getDescription());
         gccCredential.setPublicKey(json.getPublicKey());
         return gccCredential;

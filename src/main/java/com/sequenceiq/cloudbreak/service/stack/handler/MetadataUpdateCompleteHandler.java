@@ -37,6 +37,6 @@ public class MetadataUpdateCompleteHandler implements Consumer<Event<MetadataUpd
         Stack stack = stackRepository.findById(stackId);
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Accepted {} event.", ReactorConfig.METADATA_UPDATE_COMPLETE_EVENT, stackId);
-        ambariRoleAllocator.updateInstanceMetadata(stackId, coreInstanceMetaData);
+        ambariRoleAllocator.updateInstanceMetadata(stackId, coreInstanceMetaData, data.getHostGroup());
     }
 }

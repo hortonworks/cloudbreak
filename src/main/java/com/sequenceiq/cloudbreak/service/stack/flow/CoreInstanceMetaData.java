@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+
 public class CoreInstanceMetaData {
 
     private String instanceId;
@@ -8,21 +10,18 @@ public class CoreInstanceMetaData {
     private Integer volumeCount;
     private String longName;
     private Integer containerCount = 0;
+    private InstanceGroup instanceGroup;
 
     public CoreInstanceMetaData() {
     }
 
-    public CoreInstanceMetaData(String instanceId, String privateIp, String publicDns, Integer volumeCount, String longName, Integer containerCount) {
+    public CoreInstanceMetaData(String instanceId, String privateIp, String publicDns, Integer volumeCount, String longName, InstanceGroup instanceGroup) {
         this.instanceId = instanceId;
         this.privateIp = privateIp;
         this.publicDns = publicDns;
         this.volumeCount = volumeCount;
         this.longName = longName;
-        this.containerCount = containerCount;
-    }
-
-    public CoreInstanceMetaData(String instanceId, String privateIp, String publicDns, Integer volumeCount, String longName) {
-        this(instanceId, privateIp, publicDns, volumeCount, longName, 0);
+        this.instanceGroup = instanceGroup;
     }
 
     public String getInstanceId() {
@@ -47,5 +46,9 @@ public class CoreInstanceMetaData {
 
     public Integer getContainerCount() {
         return containerCount;
+    }
+
+    public InstanceGroup getInstanceGroup() {
+        return instanceGroup;
     }
 }

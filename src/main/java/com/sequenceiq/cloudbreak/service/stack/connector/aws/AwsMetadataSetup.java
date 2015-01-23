@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.aws;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -9,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.amazonaws.regions.Regions;
 import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.ec2.AmazonEC2Client;
@@ -24,6 +26,7 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.MetadataSetup;
@@ -65,37 +68,41 @@ public class AwsMetadataSetup implements MetadataSetup {
 
         Set<CoreInstanceMetaData> coreInstanceMetadata = new HashSet<>();
 
-        AwsTemplate awsTemplate = (AwsTemplate) stack.getTemplate();
         AwsCredential awsCredential = (AwsCredential) stack.getCredential();
 
-        AmazonCloudFormationClient amazonCFClient = awsStackUtil.createCloudFormationClient(awsTemplate.getRegion(), awsCredential);
-        AmazonAutoScalingClient amazonASClient = awsStackUtil.createAutoScalingClient(awsTemplate.getRegion(), awsCredential);
-        AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(awsTemplate.getRegion(), awsCredential);
+        AmazonCloudFormationClient amazonCFClient = awsStackUtil.createCloudFormationClient(Regions.valueOf(stack.getRegion()), awsCredential);
+        AmazonAutoScalingClient amazonASClient = awsStackUtil.createAutoScalingClient(Regions.valueOf(stack.getRegion()), awsCredential);
+        AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(Regions.valueOf(stack.getRegion()), awsCredential);
 
-        // wait until all instances are up
-        String asGroupName = cfStackUtil.getAutoscalingGroupName(stack);
-        AutoScalingGroupReady asGroupReady = new AutoScalingGroupReady(stack, amazonEC2Client, amazonASClient, asGroupName, stack.getNodeCount());
-        LOGGER.info("Polling autoscaling group until new instances are ready. [stack: {}, asGroup: {}]", stack.getId(), asGroupName);
-        if (awsTemplate.getSpotPrice() == null) {
-            pollingService.pollWithTimeout(asGroupStatusCheckerTask, asGroupReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
-        } else {
-            pollingService.pollWithTimeout(asGroupStatusCheckerTask, asGroupReady, POLLING_INTERVAL, MAX_SPOT_POLLING_ATTEMPTS);
+        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+            // wait until all instances are up
+            String asGroupName = cfStackUtil.getAutoscalingGroupName(stack, instanceGroup.getGroupName());
+            AutoScalingGroupReady asGroupReady = new AutoScalingGroupReady(stack, amazonEC2Client, amazonASClient, asGroupName, instanceGroup.getNodeCount());
+            LOGGER.info("Polling autoscaling group until new instances are ready. [stack: {}, asGroup: {}]", stack.getId(), asGroupName);
+            if (((AwsTemplate) instanceGroup.getTemplate()).getSpotPrice() == null) {
+                pollingService.pollWithTimeout(asGroupStatusCheckerTask, asGroupReady, POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+            } else {
+                pollingService.pollWithTimeout(asGroupStatusCheckerTask, asGroupReady, POLLING_INTERVAL, MAX_SPOT_POLLING_ATTEMPTS);
+            }
         }
 
-        List<String> instanceIds = cfStackUtil.getInstanceIds(stack, amazonASClient, amazonCFClient);
-
-        DescribeInstancesRequest instancesRequest = new DescribeInstancesRequest().withInstanceIds(instanceIds);
-        DescribeInstancesResult instancesResult = amazonEC2Client.describeInstances(instancesRequest);
-        for (Reservation reservation : instancesResult.getReservations()) {
-            LOGGER.info("Number of instances found in reservation: {}", reservation.getInstances().size());
-            for (com.amazonaws.services.ec2.model.Instance instance : reservation.getInstances()) {
-                coreInstanceMetadata.add(new CoreInstanceMetaData(
-                        instance.getInstanceId(),
-                        instance.getPrivateIpAddress(),
-                        instance.getPublicDnsName(),
-                        instance.getBlockDeviceMappings().size() - 1,
-                        instance.getPrivateDnsName()
-                        ));
+        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+            List<String> instanceIds = new ArrayList<>();
+            instanceIds.addAll(cfStackUtil.getInstanceIds(stack, amazonASClient, amazonCFClient, instanceGroup.getGroupName()));
+            DescribeInstancesRequest instancesRequest = new DescribeInstancesRequest().withInstanceIds(instanceIds);
+            DescribeInstancesResult instancesResult = amazonEC2Client.describeInstances(instancesRequest);
+            for (Reservation reservation : instancesResult.getReservations()) {
+                LOGGER.info("Number of instances found in reservation: {}", reservation.getInstances().size());
+                for (com.amazonaws.services.ec2.model.Instance instance : reservation.getInstances()) {
+                    coreInstanceMetadata.add(new CoreInstanceMetaData(
+                            instance.getInstanceId(),
+                            instance.getPrivateIpAddress(),
+                            instance.getPublicDnsName(),
+                            instance.getBlockDeviceMappings().size() - 1,
+                            instance.getPrivateDnsName(),
+                            instanceGroup
+                            ));
+                }
             }
         }
 
@@ -105,39 +112,45 @@ public class AwsMetadataSetup implements MetadataSetup {
     }
 
     @Override
-    public void addNewNodesToMetadata(Stack stack, Set<Resource> resourceList) {
+    public void addNewNodesToMetadata(Stack stack, Set<Resource> resourceList, String hostGroup) {
         MDCBuilder.buildMdcContext(stack);
         Set<CoreInstanceMetaData> coreInstanceMetadata = new HashSet<>();
         LOGGER.info("Adding new instances to metadata: [stack: '{}']", stack.getId());
         AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(
-                ((AwsTemplate) stack.getTemplate()).getRegion(),
+                Regions.valueOf(stack.getRegion()),
                 (AwsCredential) stack.getCredential());
-        List<String> instanceIds = cfStackUtil.getInstanceIds(stack);
-        DescribeInstancesRequest instancesRequest = new DescribeInstancesRequest().withInstanceIds(instanceIds);
-        DescribeInstancesResult instancesResult = amazonEC2Client.describeInstances(instancesRequest);
-        for (Reservation reservation : instancesResult.getReservations()) {
-            for (final com.amazonaws.services.ec2.model.Instance instance : reservation.getInstances()) {
-                boolean metadataExists = FluentIterable.from(stack.getInstanceMetaData()).anyMatch(new Predicate<InstanceMetaData>() {
-                    @Override
-                    public boolean apply(InstanceMetaData input) {
-                        return input.getInstanceId().equals(instance.getInstanceId());
+
+        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+            List<String> instanceIds = new ArrayList<>();
+            instanceIds.addAll(cfStackUtil.getInstanceIds(stack, instanceGroup.getGroupName()));
+
+            DescribeInstancesRequest instancesRequest = new DescribeInstancesRequest().withInstanceIds(instanceIds);
+            DescribeInstancesResult instancesResult = amazonEC2Client.describeInstances(instancesRequest);
+            for (Reservation reservation : instancesResult.getReservations()) {
+                for (final com.amazonaws.services.ec2.model.Instance instance : reservation.getInstances()) {
+                    boolean metadataExists = FluentIterable.from(instanceGroup.getInstanceMetaData()).anyMatch(new Predicate<InstanceMetaData>() {
+                        @Override
+                        public boolean apply(InstanceMetaData input) {
+                            return input.getInstanceId().equals(instance.getInstanceId());
+                        }
+                    });
+                    if (!metadataExists) {
+                        coreInstanceMetadata.add(new CoreInstanceMetaData(
+                                instance.getInstanceId(),
+                                instance.getPrivateIpAddress(),
+                                instance.getPublicDnsName(),
+                                instance.getBlockDeviceMappings().size() - 1,
+                                instance.getPrivateDnsName(),
+                                instanceGroup
+                        ));
+                        LOGGER.info("New instance added to metadata: [stack: '{}', instanceId: '{}']", stack.getId(), instance.getInstanceId());
                     }
-                });
-                if (!metadataExists) {
-                    coreInstanceMetadata.add(new CoreInstanceMetaData(
-                            instance.getInstanceId(),
-                            instance.getPrivateIpAddress(),
-                            instance.getPublicDnsName(),
-                            instance.getBlockDeviceMappings().size() - 1,
-                            instance.getPrivateDnsName()
-                            ));
-                    LOGGER.info("New instance added to metadata: [stack: '{}', instanceId: '{}']", stack.getId(), instance.getInstanceId());
                 }
             }
         }
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.METADATA_UPDATE_COMPLETE_EVENT, stack.getId());
         reactor.notify(ReactorConfig.METADATA_UPDATE_COMPLETE_EVENT,
-                Event.wrap(new MetadataUpdateComplete(CloudPlatform.AWS, stack.getId(), coreInstanceMetadata)));
+                Event.wrap(new MetadataUpdateComplete(CloudPlatform.AWS, stack.getId(), coreInstanceMetadata, hostGroup)));
     }
 
     @Override

@@ -66,7 +66,7 @@ public class SimpleCredentialService implements CredentialService {
     public Credential create(CbUser user, Credential credential) {
         MDCBuilder.buildMdcContext(credential);
         LOGGER.debug("Creating credential: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
-        credentialHandlers.get(credential.getCloudPlatform()).init(credential);
+        credentialHandlers.get(credential.cloudPlatform()).init(credential);
         credential.setOwner(user.getUserId());
         credential.setAccount(user.getAccount());
         Credential savedCredential = null;
@@ -119,10 +119,14 @@ public class SimpleCredentialService implements CredentialService {
     private void delete(Credential credential, CbUser user) {
         if (!user.getUserId().equals(credential.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
             throw new BadRequestException("Public credentials can be deleted only by account admins or owners.");
+        }
+        List<Stack> stacks = stackRepository.findByCredential(credential.getId());
+        if (stacks.isEmpty()) {
+            credentialHandlers.get(credential.cloudPlatform()).delete(credential);
+            credentialRepository.delete(credential);
         } else {
-            List<Stack> stacks = stackRepository.findByCredential(credential.getId());
             if (stacks.isEmpty()) {
-                credentialHandlers.get(credential.getCloudPlatform()).delete(credential);
+                credentialHandlers.get(credential.cloudPlatform()).delete(credential);
                 credentialRepository.delete(credential);
             } else {
                 throw new BadRequestException(String.format("Credential '%d' is in use, cannot be deleted.", credential.getId()));

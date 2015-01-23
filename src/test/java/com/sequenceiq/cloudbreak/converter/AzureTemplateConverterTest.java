@@ -4,11 +4,9 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -19,7 +17,6 @@ import com.sequenceiq.cloudbreak.controller.validation.AzureTemplateParam;
 import com.sequenceiq.cloudbreak.domain.AzureLocation;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
-import com.sequenceiq.cloudbreak.domain.Port;
 
 public class AzureTemplateConverterTest {
 
@@ -53,8 +50,7 @@ public class AzureTemplateConverterTest {
         TemplateJson result = underTest.convert(azureTemplate);
         // THEN
         assertEquals(result.getCloudPlatform(), azureTemplate.cloudPlatform());
-        assertEquals(result.getParameters().get(AzureTemplateParam.LOCATION.getName()),
-                azureTemplate.getLocation().name());
+
 
     }
 
@@ -65,8 +61,6 @@ public class AzureTemplateConverterTest {
         AzureTemplate result = underTest.convert(templateJson);
         assertEquals(result.cloudPlatform(), templateJson.getCloudPlatform());
         assertEquals(result.getDescription(), templateJson.getDescription());
-        assertEquals(result.getLocation().name(),
-                templateJson.getParameters().get(AzureTemplateParam.LOCATION.getName()));
     }
 
     @Test
@@ -129,11 +123,8 @@ public class AzureTemplateConverterTest {
         azureTemplate.setVmType(DUMMY_VM_TYPE);
         azureTemplate.setDescription(DUMMY_DESCRIPTION);
         azureTemplate.setImageName(DUMMY_IMAGE_NAME);
-        azureTemplate.setLocation(DUMMY_LOCATION);
         azureTemplate.setName(DUMMY_NAME);
         azureTemplate.setId(1L);
-        Set<Port> ports = new HashSet<>();
-        ports.add(new Port(DUMMY_NAME, PORT, LOCAL_PORT, DUMMY_PROTOCOL));
         azureTemplate.setPublicInAccount(true);
         return azureTemplate;
     }

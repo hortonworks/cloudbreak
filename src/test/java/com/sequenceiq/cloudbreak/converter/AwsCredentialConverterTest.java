@@ -96,7 +96,6 @@ public class AwsCredentialConverterTest {
         awsCredential.setSnsTopics(new HashSet<SnsTopic>());
         awsCredential.setDescription(DUMMY_DESCRIPTION);
         awsCredential.setTemporaryAwsCredentials(new TemporaryAwsCredentials());
-        awsCredential.setCloudPlatform(CloudPlatform.AWS);
         awsCredential.setPublicInAccount(true);
         return awsCredential;
     }

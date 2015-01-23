@@ -19,12 +19,15 @@ import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
+import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureResourcePollerObject;
+import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureResourceStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureSimpleNetworkResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDeleteContextObject;
-import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDescribeContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureProvisionContextObject;
 
 import groovyx.net.http.HttpResponseDecorator;
@@ -38,20 +41,27 @@ public class AzureNetworkResourceBuilder extends AzureSimpleNetworkResourceBuild
     private StackRepository stackRepository;
     @Autowired
     private AzureStackUtil azureStackUtil;
+    @Autowired
+    private AzureResourceStatusCheckerTask azureResourceStatusCheckerTask;
+    @Autowired
+    private PollingService<AzureResourcePollerObject> azureResourcePollerObjectPollingService;
+
 
     @Override
-    public Boolean create(CreateResourceRequest createResourceRequest) throws Exception {
+    public Boolean create(CreateResourceRequest createResourceRequest, String region) throws Exception {
         AzureNetworkCreateRequest aCSCR = (AzureNetworkCreateRequest) createResourceRequest;
+        Stack stack = stackRepository.findById(aCSCR.getStackId());
         if (!aCSCR.getAzureClient().getVirtualNetworkConfiguration().toString().contains(aCSCR.getName())) {
             HttpResponseDecorator virtualNetworkResponse = (HttpResponseDecorator) aCSCR.getAzureClient().createVirtualNetwork(aCSCR.getProps());
-            String requestId = (String) aCSCR.getAzureClient().getRequestId(virtualNetworkResponse);
-            waitUntilComplete(aCSCR.getAzureClient(), requestId);
+            AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(aCSCR.getAzureClient(), virtualNetworkResponse, stack);
+            azureResourcePollerObjectPollingService.pollWithTimeout(azureResourceStatusCheckerTask, azureResourcePollerObject,
+                    POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
         }
         return true;
     }
 
     @Override
-    public Boolean delete(Resource resource, AzureDeleteContextObject deleteContextObject) throws Exception {
+    public Boolean delete(Resource resource, AzureDeleteContextObject deleteContextObject, String region) throws Exception {
         Stack stack = stackRepository.findById(deleteContextObject.getStackId());
         AzureCredential credential = (AzureCredential) stack.getCredential();
         Map<String, String> props;
@@ -71,20 +81,16 @@ public class AzureNetworkResourceBuilder extends AzureSimpleNetworkResourceBuild
     }
 
     @Override
-    public Optional<String> describe(Resource resource, AzureDescribeContextObject describeContextObject) throws Exception {
-        return Optional.absent();
-    }
-
-    @Override
-    public List<Resource> buildResources(AzureProvisionContextObject provisionContextObject, int index, List<Resource> resources) {
+    public List<Resource> buildResources(AzureProvisionContextObject provisionContextObject, int index, List<Resource> resources,
+            Optional<InstanceGroup> instanceGroup) {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         String s = stack.getName().replaceAll("\\s+", "") + String.valueOf(new Date().getTime());
-        return Arrays.asList(new Resource(resourceType(), s, stack));
+        return Arrays.asList(new Resource(resourceType(), s, stack, null));
     }
 
     @Override
     public CreateResourceRequest buildCreateRequest(AzureProvisionContextObject provisionContextObject, List<Resource> resources,
-            List<Resource> buildResources, int index) throws Exception {
+            List<Resource> buildResources, int index, Optional<InstanceGroup> instanceGroup) throws Exception {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         AzureCredential credential = (AzureCredential) stack.getCredential();
         Map<String, String> props = new HashMap<>();

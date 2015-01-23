@@ -21,13 +21,16 @@ import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.X509Certificate;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
+import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureResourcePollerObject;
+import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureResourceStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureSimpleInstanceResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDeleteContextObject;
-import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDescribeContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureProvisionContextObject;
 
 import groovyx.net.http.HttpResponseDecorator;
@@ -41,35 +44,33 @@ public class AzureServiceCertificateResourceBuilder extends AzureSimpleInstanceR
     @Autowired
     private AzureStackUtil azureStackUtil;
 
+    @Autowired
+    private AzureResourceStatusCheckerTask azureResourceStatusCheckerTask;
+
+    @Autowired
+    private PollingService<AzureResourcePollerObject> azureResourcePollerObjectPollingService;
+
     @Override
-    public Boolean create(final CreateResourceRequest createResourceRequest) throws Exception {
+    public Boolean create(final CreateResourceRequest createResourceRequest, final String region) throws Exception {
         AzureServiceCertificateCreateRequest aCSCR = (AzureServiceCertificateCreateRequest) createResourceRequest;
         HttpResponseDecorator serviceCertificate = (HttpResponseDecorator) aCSCR.getAzureClient().createServiceCertificate(aCSCR.getProps());
-        String requestId = (String) aCSCR.getAzureClient().getRequestId(serviceCertificate);
-        waitUntilComplete(aCSCR.getAzureClient(), requestId);
+        AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(aCSCR.getAzureClient(), serviceCertificate, aCSCR.getStack());
+        azureResourcePollerObjectPollingService.pollWithTimeout(azureResourceStatusCheckerTask, azureResourcePollerObject,
+                POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
         return true;
     }
 
     @Override
-    public Boolean delete(Resource resource, AzureDeleteContextObject deleteContextObject) throws Exception {
-        return true;
-    }
-
-    @Override
-    public Optional<String> describe(Resource resource, AzureDescribeContextObject describeContextObject) throws Exception {
-        return Optional.absent();
-    }
-
-    @Override
-    public List<Resource> buildResources(AzureProvisionContextObject provisionContextObject, int index, List<Resource> resources) {
+    public List<Resource> buildResources(AzureProvisionContextObject provisionContextObject, int index, List<Resource> resources,
+            Optional<InstanceGroup> instanceGroup) {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         String name = filterResourcesByType(resources, ResourceType.AZURE_CLOUD_SERVICE).get(0).getResourceName();
-        return Arrays.asList(new Resource(resourceType(), name, stack));
+        return Arrays.asList(new Resource(resourceType(), name, stack, instanceGroup.orNull().getGroupName()));
     }
 
     @Override
     public CreateResourceRequest buildCreateRequest(AzureProvisionContextObject provisionContextObject, List<Resource> resources,
-            List<Resource> buildResources, int index) throws Exception {
+            List<Resource> buildResources, int index, Optional<InstanceGroup> instanceGroup) throws Exception {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
         AzureCredential azureCredential = (AzureCredential) stack.getCredential();
         Map<String, String> props = new HashMap<>();
@@ -87,7 +88,8 @@ public class AzureServiceCertificateResourceBuilder extends AzureSimpleInstanceR
         } catch (CertificateEncodingException e) {
             throw new StackCreationFailureException(e);
         }
-        return new AzureServiceCertificateCreateRequest(props, azureStackUtil.createAzureClient(azureCredential), resources, buildResources);
+        return new AzureServiceCertificateCreateRequest(props,
+                azureStackUtil.createAzureClient(azureCredential), resources, buildResources, stack, instanceGroup.orNull());
     }
 
     @Override
@@ -95,16 +97,34 @@ public class AzureServiceCertificateResourceBuilder extends AzureSimpleInstanceR
         return ResourceType.AZURE_SERVICE_CERTIFICATE;
     }
 
+    @Override
+    public Boolean delete(Resource resource, AzureDeleteContextObject azureDeleteContextObject, String region) throws Exception {
+        return true;
+    }
+
     public class AzureServiceCertificateCreateRequest extends CreateResourceRequest {
         private Map<String, String> props = new HashMap<>();
         private AzureClient azureClient;
         private List<Resource> resources;
+        private Stack stack;
+        private InstanceGroup instanceGroup;
 
-        public AzureServiceCertificateCreateRequest(Map<String, String> props, AzureClient azureClient, List<Resource> resources, List<Resource> buildNames) {
+        public AzureServiceCertificateCreateRequest(Map<String, String> props, AzureClient azureClient, List<Resource> resources, List<Resource> buildNames,
+                Stack stack, InstanceGroup instanceGroup) {
             super(buildNames);
             this.props = props;
             this.azureClient = azureClient;
             this.resources = resources;
+            this.stack = stack;
+            this.instanceGroup = instanceGroup;
+        }
+
+        public Stack getStack() {
+            return stack;
+        }
+
+        public InstanceGroup getInstanceGroup() {
+            return instanceGroup;
         }
 
         public Map<String, String> getProps() {

@@ -70,13 +70,13 @@ public class StackCreationFailureHandler implements Consumer<Event<StackOperatio
         Long stackId = stackCreationFailure.getStackId();
         String detailedMessage = stackCreationFailure.getDetailedMessage();
         stackUpdater.updateStackStatus(stackId, Status.CREATE_FAILED, detailedMessage);
-        Stack stack = stackRepository.findOneWithLists(stackId);
+        final Stack stack = stackRepository.findOneWithLists(stackId);
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Accepted {} event.", ReactorConfig.STACK_CREATE_FAILED_EVENT, stackId);
         if (stack.getCluster().getEmailNeeded()) {
             ambariClusterInstallerMailSenderService.sendFailEmail(stack.getOwner());
         }
-        final CloudPlatform cloudPlatform = stack.getTemplate().cloudPlatform();
+        final CloudPlatform cloudPlatform = stack.cloudPlatform();
         try {
             if (cloudPlatform.isWithTemplate()) {
                 cloudPlatformConnectors.get(cloudPlatform).rollback(stackRepository.findOneWithLists(stackId), stack.getResources());
@@ -92,7 +92,7 @@ public class StackCreationFailureHandler implements Consumer<Event<StackOperatio
                         Future<Boolean> submit = resourceBuilderExecutor.submit(new Callable<Boolean>() {
                             @Override
                             public Boolean call() throws Exception {
-                                return instanceResourceBuilders.get(cloudPlatform).get(index).rollback(resource, dCO);
+                                return instanceResourceBuilders.get(cloudPlatform).get(index).rollback(resource, dCO, stack.getRegion());
                             }
                         });
                         futures.add(submit);
@@ -101,10 +101,10 @@ public class StackCreationFailureHandler implements Consumer<Event<StackOperatio
                         future.get();
                     }
                 }
-                for (int i = instanceResourceBuilders.get(cloudPlatform).size() - 1; i >= 0; i--) {
+                for (int i = networkResourceBuilders.get(cloudPlatform).size() - 1; i >= 0; i--) {
                     for (Resource resource
                             : stack.getResourcesByType(networkResourceBuilders.get(cloudPlatform).get(i).resourceType())) {
-                        networkResourceBuilders.get(cloudPlatform).get(i).rollback(resource, dCO);
+                        networkResourceBuilders.get(cloudPlatform).get(i).rollback(resource, dCO, stack.getRegion());
                     }
                 }
             }

@@ -9,8 +9,8 @@ import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.service.stack.flow.dummy.DummyDeleteContextObject;
-import com.sequenceiq.cloudbreak.service.stack.flow.dummy.DummyDescribeContextObject;
 import com.sequenceiq.cloudbreak.service.stack.flow.dummy.DummyProvisionContextObject;
 import com.sequenceiq.cloudbreak.service.stack.flow.dummy.DummyStartStopContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
@@ -18,26 +18,21 @@ import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
 
 public class DummyNetworkResourceBuilder
-        implements ResourceBuilder<DummyProvisionContextObject, DummyDeleteContextObject, DummyDescribeContextObject, DummyStartStopContextObject> {
+        implements ResourceBuilder<DummyProvisionContextObject, DummyDeleteContextObject, DummyStartStopContextObject> {
 
     @Override
-    public Boolean create(CreateResourceRequest createResourceRequest) throws Exception {
+    public Boolean create(CreateResourceRequest createResourceRequest, String region) throws Exception {
         return true;
     }
 
     @Override
-    public Boolean delete(Resource resource, DummyDeleteContextObject deleteContextObject) throws Exception {
+    public Boolean delete(Resource resource, DummyDeleteContextObject deleteContextObject, String region) throws Exception {
         return true;
     }
 
     @Override
-    public Boolean rollback(Resource resource, DummyDeleteContextObject deleteContextObject) throws Exception {
+    public Boolean rollback(Resource resource, DummyDeleteContextObject deleteContextObject, String region) throws Exception {
         return true;
-    }
-
-    @Override
-    public Optional<String> describe(Resource resource, DummyDescribeContextObject describeContextObject) throws Exception {
-        return Optional.absent();
     }
 
     @Override
@@ -46,23 +41,24 @@ public class DummyNetworkResourceBuilder
     }
 
     @Override
-    public Boolean start(DummyStartStopContextObject startStopContextObject, Resource resource) {
+    public Boolean start(DummyStartStopContextObject startStopContextObject, Resource resource, String region) {
         return true;
     }
 
     @Override
-    public Boolean stop(DummyStartStopContextObject startStopContextObject, Resource resource) {
+    public Boolean stop(DummyStartStopContextObject startStopContextObject, Resource resource, String region) {
         return true;
     }
 
     @Override
-    public List<Resource> buildResources(DummyProvisionContextObject provisionContextObject, int index, List<Resource> resources) {
-        return Arrays.asList(new Resource(resourceType(), "network" + index, new Stack()));
+    public List<Resource> buildResources(DummyProvisionContextObject provisionContextObject, int index, List<Resource> resources,
+            Optional<InstanceGroup> instanceGroup) {
+        return Arrays.asList(new Resource(resourceType(), "network" + index, new Stack(), "master"));
     }
 
     @Override
     public CreateResourceRequest buildCreateRequest(DummyProvisionContextObject provisionContextObject, List<Resource> resources,
-            List<Resource> buildResources, int index) throws Exception {
+            List<Resource> buildResources, int index, Optional<InstanceGroup> instanceGroup) throws Exception {
         return new DummyNetworkCreateRequest(new ArrayList<Resource>());
     }
 

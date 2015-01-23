@@ -13,6 +13,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 
 import org.junit.Before;
@@ -22,9 +23,11 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.access.AccessDeniedException;
 
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.ClusterResponse;
 import com.sequenceiq.cloudbreak.controller.json.InstanceMetaDataJson;
 import com.sequenceiq.cloudbreak.controller.json.StackJson;
+import com.sequenceiq.cloudbreak.controller.json.InstanceGroupJson;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
@@ -32,6 +35,7 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 
@@ -64,6 +68,9 @@ public class StackConverterTest {
     private ClusterConverter clusterConverter;
 
     @Mock
+    private InstanceGroupConverter instanceGroupConverter;
+
+    @Mock
     private MetaDataConverter metaDataConverter;
 
     private Stack stack;
@@ -84,6 +91,10 @@ public class StackConverterTest {
         awsTemplate.setId(DUMMY_ID);
         stack = createStack();
         stackJson = createStackJson();
+        given(instanceGroupConverter.convertAllJsonToEntity(anySetOf(InstanceGroupJson.class)))
+                .willReturn(new HashSet<InstanceGroup>());
+        given(instanceGroupConverter.convertAllEntityToJson(anySetOf(InstanceGroup.class)))
+                .willReturn(new HashSet<InstanceGroupJson>());
     }
 
     @Test
@@ -97,7 +108,7 @@ public class StackConverterTest {
         assertEquals(result.getAmbariServerIp(), stack.getAmbariIp());
         assertEquals(result.getId(), stack.getId());
         assertEquals(result.getCloudPlatform(), CloudPlatform.AWS);
-        assertNotNull(result.getMetadata());
+        assertNotNull(result.getInstanceGroups());
         assertEquals(result.getAccount(), DUMMY_NAME);
         assertEquals(result.getOwner(), DUMMY_NAME);
         assertTrue(result.isPublicInAccount());
@@ -116,7 +127,7 @@ public class StackConverterTest {
         assertEquals(result.getAmbariServerIp(), stack.getAmbariIp());
         assertEquals(result.getId(), stack.getId());
         assertEquals(result.getCloudPlatform(), CloudPlatform.AWS);
-        assertNotNull(result.getMetadata());
+        assertNotNull(result.getInstanceGroups());
         verify(clusterConverter, times(0)).convert(any(Cluster.class), anyString());
     }
 
@@ -131,7 +142,7 @@ public class StackConverterTest {
         assertEquals(result.getAmbariServerIp(), stack.getAmbariIp());
         assertEquals(result.getId(), stack.getId());
         assertEquals(result.getCloudPlatform(), CloudPlatform.AWS);
-        assertNotNull(result.getMetadata());
+        assertNotNull(result.getInstanceGroups());
         verify(clusterConverter, times(1)).convert(any(Cluster.class), anyString());
     }
 
@@ -147,11 +158,11 @@ public class StackConverterTest {
         assertEquals(result.getAmbariServerIp(), stack.getAmbariIp());
         assertEquals(result.getId(), stack.getId());
         assertEquals(result.getCloudPlatform(), CloudPlatform.AWS);
-        assertNotNull(result.getMetadata());
+        assertNotNull(result.getInstanceGroups());
         verify(clusterConverter, times(0)).convert(any(Cluster.class), anyString());
     }
 
-    @Test
+    @Test(expected = BadRequestException.class)
     public void testConvertStackJsonToEntity() {
         // GIVEN
         given(credentialRepository.findOne(DUMMY_ID)).willReturn(awsCredential);
@@ -160,13 +171,12 @@ public class StackConverterTest {
         Stack result = underTest.convert(stackJson);
         // THEN
         assertEquals(result.getCredential().getId(), stackJson.getCredentialId());
-        assertEquals(result.getTemplate().getId(), stackJson.getTemplateId());
+        // assertEquals(result.getTemplate().getId(), stackJson.getTemplateId());
         assertEquals(result.getStatus(), Status.REQUESTED);
         assertNull(result.getAccount());
         assertNull(result.getOwner());
         assertFalse(result.isPublicInAccount());
         verify(credentialRepository, times(1)).findOne(anyLong());
-        verify(templateRepository, times(1)).findOne(anyLong());
     }
 
     @Test(expected = AccessDeniedException.class)
@@ -177,7 +187,6 @@ public class StackConverterTest {
         underTest.convert(stackJson);
     }
 
-    @Test(expected = AccessDeniedException.class)
     public void testConvertStackJsonToEntityWhenAccessDeniedOnTemplate() {
         // GIVEN
         given(credentialRepository.findOne(DUMMY_ID)).willReturn(awsCredential);
@@ -192,20 +201,21 @@ public class StackConverterTest {
         stack.setStackCompleted(CF_STACK_COMPLETED);
         stack.setCluster(new Cluster());
         stack.setCredential(awsCredential);
-        stack.setTemplate(awsTemplate);
+        //stack.setTemplate(awsTemplate);
         stack.setDescription(DESCRIPTION);
         stack.setHash(DUMMY_HASH);
         stack.setId(DUMMY_ID);
-        stack.setInstanceMetaData(new HashSet<InstanceMetaData>());
+        stack.setInstanceGroups(new HashSet<InstanceGroup>());
         stack.setMetadataReady(METADATA_READY);
         stack.setName(DUMMY_NAME);
-        stack.setNodeCount(NODE_COUNT);
+        //stack.setNodeCount(NODE_COUNT);
         stack.setStatus(Status.AVAILABLE);
         stack.setStatusReason(DUMMY_STATUS_REASON);
         stack.setVersion(VERSION);
         stack.setPublicInAccount(true);
         stack.setAccount(DUMMY_NAME);
         stack.setOwner(DUMMY_NAME);
+        stack.setInstanceGroups(new HashSet<InstanceGroup>());
         return stack;
     }
 
@@ -220,11 +230,12 @@ public class StackConverterTest {
         stackJson.setPublicInAccount(false);
         stackJson.setAccount(DUMMY_HASH);
         stackJson.setOwner(DUMMY_HASH);
-        stackJson.setMetadata(new HashSet<InstanceMetaDataJson>());
+        stackJson.setInstanceGroups(new ArrayList<InstanceGroupJson>());
         stackJson.setName(DUMMY_NAME);
-        stackJson.setNodeCount(NODE_COUNT);
+        //stackJson.setNodeCount(NODE_COUNT);
         stackJson.setStatus(Status.AVAILABLE);
-        stackJson.setTemplateId(DUMMY_ID);
+        //stackJson.setTemplateId(DUMMY_ID);
+        stackJson.setInstanceGroups(new ArrayList<InstanceGroupJson>());
         return stackJson;
     }
 

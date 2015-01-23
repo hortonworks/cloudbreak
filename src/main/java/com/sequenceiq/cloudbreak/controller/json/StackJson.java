@@ -1,11 +1,8 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
-import javax.validation.constraints.Digits;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
@@ -18,17 +15,12 @@ import com.sequenceiq.cloudbreak.domain.Status;
 public class StackJson implements JsonEntity {
 
     private Long id;
-    @Min(value = 3, message = "The node count has to be greater than 2")
-    @Max(value = 100000, message = "The node count has to be less than 100000")
-    @Digits(fraction = 0, integer = 10, message = "The node count has to be a number")
-    private int nodeCount;
     @Size(max = 40, min = 5, message = "The length of the name has to be in range of 5 to 40")
     @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
             message = "The name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
     @NotNull
     private String name;
-    @NotNull
-    private Long templateId;
+    private String region;
     private String owner;
     private String account;
     private boolean publicInAccount;
@@ -50,7 +42,7 @@ public class StackJson implements JsonEntity {
     private String hash;
     private ClusterResponse cluster;
     private String statusReason;
-    private Set<InstanceMetaDataJson> metadata = new HashSet<>();
+    private List<InstanceGroupJson> instanceGroups = new ArrayList<>();
 
     public StackJson() {
     }
@@ -63,14 +55,6 @@ public class StackJson implements JsonEntity {
     @JsonIgnore
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public int getNodeCount() {
-        return nodeCount;
-    }
-
-    public void setNodeCount(int nodeCount) {
-        this.nodeCount = nodeCount;
     }
 
     public String getName() {
@@ -97,12 +81,12 @@ public class StackJson implements JsonEntity {
         this.password = password;
     }
 
-    public Long getTemplateId() {
-        return templateId;
+    public List<InstanceGroupJson> getInstanceGroups() {
+        return instanceGroups;
     }
 
-    public void setTemplateId(Long templateId) {
-        this.templateId = templateId;
+    public void setInstanceGroups(List<InstanceGroupJson> instanceGroups) {
+        this.instanceGroups = instanceGroups;
     }
 
     @JsonProperty("cloudPlatform")
@@ -121,6 +105,14 @@ public class StackJson implements JsonEntity {
 
     public void setCredentialId(Long credentialId) {
         this.credentialId = credentialId;
+    }
+
+    public String getRegion() {
+        return region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
     }
 
     @JsonProperty("status")
@@ -161,16 +153,6 @@ public class StackJson implements JsonEntity {
     @JsonIgnore
     public void setHash(String hash) {
         this.hash = hash;
-    }
-
-    @JsonProperty("metadata")
-    public Set<InstanceMetaDataJson> getMetadata() {
-        return metadata;
-    }
-
-    @JsonIgnore
-    public void setMetadata(Set<InstanceMetaDataJson> metadata) {
-        this.metadata = metadata;
     }
 
     @JsonProperty("cluster")

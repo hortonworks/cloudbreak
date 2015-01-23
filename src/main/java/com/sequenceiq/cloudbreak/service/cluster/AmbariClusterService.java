@@ -139,10 +139,10 @@ public class AmbariClusterService implements ClusterService {
         List<HostMetadata> downScaleCandidates = new ArrayList<>();
         if (decommissionRequest) {
             AmbariClient ambariClient = clientService.create(stack);
-            int replication = getReplicationFactor(ambariClient);
+            int replication = getReplicationFactor(ambariClient, hostGroupAdjustment.getHostGroup());
             String hostGroup = hostGroupAdjustment.getHostGroup();
             Set<HostMetadata> hostsInHostGroup = hostMetadataRepository.findHostsInHostgroup(hostGroup, cluster.getId());
-            List<HostMetadata> filteredHostList = hostFilterService.filterHostsForDecommission(stack, hostsInHostGroup);
+            List<HostMetadata> filteredHostList = hostFilterService.filterHostsForDecommission(stack, hostsInHostGroup, hostGroupAdjustment.getHostGroup());
             verifyNodeCount(cluster, replication, hostGroupAdjustment.getScalingAdjustment(), filteredHostList);
             if (doesHostGroupContainDataNode(ambariClient, cluster.getBlueprint().getBlueprintName(), hostGroup)) {
                 downScaleCandidates = checkAndSortByAvailableSpace(stack, ambariClient, replication,
@@ -202,9 +202,9 @@ public class AmbariClusterService implements ClusterService {
         }
     }
 
-    private int getReplicationFactor(AmbariClient ambariClient) {
+    private int getReplicationFactor(AmbariClient ambariClient, String hostGroup) {
         try {
-            Map<String, String> configuration = configurationService.getConfiguration(ambariClient);
+            Map<String, String> configuration = configurationService.getConfiguration(ambariClient, hostGroup);
             return Integer.parseInt(configuration.get(ConfigParam.DFS_REPLICATION.key()));
         } catch (ConnectException e) {
             LOGGER.error("Cannot connect to Ambari to get the configuration", e);

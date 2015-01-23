@@ -10,23 +10,20 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
 import com.sequenceiq.cloudbreak.domain.AzureLocation;
-import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Resource;
-import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDeleteContextObject;
-import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDescribeContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureProvisionContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureStartStopContextObject;
 
 @Component
 public class AzureResourceBuilderInit implements
-        ResourceBuilderInit<AzureProvisionContextObject, AzureDeleteContextObject, AzureDescribeContextObject, AzureStartStopContextObject> {
+        ResourceBuilderInit<AzureProvisionContextObject, AzureDeleteContextObject, AzureStartStopContextObject> {
 
     @Autowired
     private AzureStackUtil azureStackUtil;
@@ -34,40 +31,42 @@ public class AzureResourceBuilderInit implements
     @Override
     public AzureProvisionContextObject provisionInit(Stack stack, String userData) throws Exception {
         AzureCredential credential = (AzureCredential) stack.getCredential();
-        AzureTemplate template = (AzureTemplate) stack.getTemplate();
+        AzureLocation azureLocation = AzureLocation.valueOf(stack.getRegion());
 
-        AzureClient azureClient =  azureStackUtil.createAzureClient((AzureCredential) stack.getCredential());
+        AzureClient azureClient = azureStackUtil.createAzureClient((AzureCredential) stack.getCredential());
         AzureProvisionContextObject azureProvisionContextObject =
-                new AzureProvisionContextObject(stack.getId(), credential.getCommonName(template.getLocation()), azureClient,
-                        getOsImageName(credential, template.getLocation()), userData);
+                new AzureProvisionContextObject(stack.getId(), credential.getCommonName(azureLocation), azureClient,
+                        getOsImageName(credential, azureLocation), userData);
         return azureProvisionContextObject;
     }
 
     @Override
     public AzureDeleteContextObject deleteInit(Stack stack) throws Exception {
         AzureCredential credential = (AzureCredential) stack.getCredential();
-        AzureTemplate template = (AzureTemplate) stack.getTemplate();
+        AzureLocation azureLocation = AzureLocation.valueOf(stack.getRegion());
 
-        AzureClient azureClient =  azureStackUtil.createAzureClient((AzureCredential) stack.getCredential());
+        AzureClient azureClient = azureStackUtil.createAzureClient((AzureCredential) stack.getCredential());
         AzureDeleteContextObject azureDeleteContextObject =
-                new AzureDeleteContextObject(stack.getId(), credential.getCommonName(template.getLocation()), azureClient);
+                new AzureDeleteContextObject(stack.getId(), credential.getCommonName(azureLocation), azureClient);
         return azureDeleteContextObject;
     }
 
     @Override
     public AzureDeleteContextObject decommissionInit(Stack stack, Set<String> decommissionSet) throws Exception {
         AzureCredential credential = (AzureCredential) stack.getCredential();
-        AzureTemplate template = (AzureTemplate) stack.getTemplate();
+        AzureLocation azureLocation = AzureLocation.valueOf(stack.getRegion());
 
-        AzureClient azureClient =  azureStackUtil.createAzureClient((AzureCredential) stack.getCredential());
+        AzureClient azureClient = azureStackUtil.createAzureClient((AzureCredential) stack.getCredential());
         List<Resource> resourceList = new ArrayList<>();
         for (String res : decommissionSet) {
-            resourceList.add(new Resource(ResourceType.AZURE_VIRTUAL_MACHINE, res, stack));
-            resourceList.add(new Resource(ResourceType.AZURE_SERVICE_CERTIFICATE, res, stack));
-            resourceList.add(new Resource(ResourceType.AZURE_CLOUD_SERVICE, res, stack));
+            for (Resource resource : stack.getResources()) {
+                if (resource.getResourceName().equals(res)) {
+                    resourceList.add(resource);
+                }
+            }
         }
         AzureDeleteContextObject azureDeleteContextObject =
-                new AzureDeleteContextObject(stack.getId(), credential.getCommonName(template.getLocation()), azureClient, resourceList);
+                new AzureDeleteContextObject(stack.getId(), credential.getCommonName(azureLocation), azureClient, resourceList);
         return azureDeleteContextObject;
     }
 
@@ -75,17 +74,6 @@ public class AzureResourceBuilderInit implements
     public AzureStartStopContextObject startStopInit(Stack stack) throws Exception {
         AzureClient azureClient = azureStackUtil.createAzureClient((AzureCredential) stack.getCredential());
         return new AzureStartStopContextObject(stack, azureClient);
-    }
-
-    @Override
-    public AzureDescribeContextObject describeInit(Stack stack) throws Exception {
-        AzureCredential credential = (AzureCredential) stack.getCredential();
-        AzureTemplate template = (AzureTemplate) stack.getTemplate();
-
-        AzureClient azureClient = azureStackUtil.createAzureClient((AzureCredential) stack.getCredential());
-        AzureDescribeContextObject azureDescribeContextObject =
-                new AzureDescribeContextObject(stack.getId(), credential.getCommonName(template.getLocation()), azureClient);
-        return azureDescribeContextObject;
     }
 
     @Override
@@ -99,7 +87,7 @@ public class AzureResourceBuilderInit implements
     }
 
     public String getOsImageName(Credential credential, AzureLocation location) {
-        return  azureStackUtil.getOsImageName(credential, location);
+        return azureStackUtil.getOsImageName(credential, location);
     }
 
 }

@@ -16,15 +16,16 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDeleteContextObject;
-import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDescribeContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureProvisionContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureStartStopContextObject;
 
 import groovyx.net.http.HttpResponseException;
 
 public abstract class AzureSimpleNetworkResourceBuilder implements
-        ResourceBuilder<AzureProvisionContextObject, AzureDeleteContextObject, AzureDescribeContextObject, AzureStartStopContextObject> {
+        ResourceBuilder<AzureProvisionContextObject, AzureDeleteContextObject, AzureStartStopContextObject> {
     protected static final Logger LOGGER = LoggerFactory.getLogger(AzureSimpleInstanceResourceBuilder.class);
+    protected static final int POLLING_INTERVAL = 5000;
+    protected static final int MAX_POLLING_ATTEMPTS = 60;
     protected static final int NOT_FOUND = 404;
     protected static final String LOCATION = "location";
     protected static final String DESCRIPTION = "description";
@@ -45,7 +46,7 @@ public abstract class AzureSimpleNetworkResourceBuilder implements
     protected void httpResponseExceptionHandler(HttpResponseException ex, String resourceName, String user, Stack stack) {
         MDCBuilder.buildMdcContext(stack);
         if (ex.getStatusCode() != NOT_FOUND) {
-            throw new InternalServerException(ex.getMessage());
+            throw new InternalServerException(ex.getResponse().getData().toString());
         } else {
             LOGGER.error(String.format("Azure resource not found with %s name for %s user.", resourceName, user));
         }
@@ -69,17 +70,17 @@ public abstract class AzureSimpleNetworkResourceBuilder implements
     }
 
     @Override
-    public Boolean start(AzureStartStopContextObject startStopContextObject, Resource resource) {
+    public Boolean start(AzureStartStopContextObject aSSCO, Resource resource, String region) {
         return true;
     }
 
     @Override
-    public Boolean stop(AzureStartStopContextObject startStopContextObject, Resource resource) {
+    public Boolean stop(AzureStartStopContextObject aSSCO, Resource resource, String region) {
         return true;
     }
 
     @Override
-    public Boolean rollback(Resource resource, AzureDeleteContextObject deleteContextObject) throws Exception {
-        return delete(resource, deleteContextObject);
+    public Boolean rollback(Resource resource, AzureDeleteContextObject azureDeleteContextObject, String region) throws Exception {
+        return delete(resource, azureDeleteContextObject, region);
     }
 }

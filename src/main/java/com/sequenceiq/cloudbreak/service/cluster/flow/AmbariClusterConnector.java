@@ -4,6 +4,7 @@ import static java.util.Collections.singletonMap;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -27,6 +28,7 @@ import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
@@ -275,7 +277,11 @@ public class AmbariClusterConnector {
         int requestId = -1;
         try {
             if (stopped) {
-                requestId = ambariClient.stopAllServices();
+                if (!allServiceStopped(ambariClient.getHostComponentsStates())) {
+                    requestId = ambariClient.stopAllServices();
+                } else {
+                    requestId = -1;
+                }
             } else {
                 requestId = ambariClient.startAllServices();
             }
@@ -292,6 +298,19 @@ public class AmbariClusterConnector {
                     AmbariClusterConnector.MAX_ATTEMPTS_FOR_AMBARI_OPS);
         }
         return result;
+    }
+
+    private boolean allServiceStopped(Map<String, Map<String, String>> hostComponentsStates) {
+        boolean stopped = true;
+        Collection<Map<String, String>> values = hostComponentsStates.values();
+        for (Map<String, String> value : values) {
+            for (String state : value.values()) {
+                if (!"INSTALLED".equals(state)) {
+                    stopped = false;
+                }
+            }
+        }
+        return stopped;
     }
 
     private void saveHostMetadata(Cluster cluster, Map<String, List<String>> hostGroupMappings) {
@@ -312,7 +331,7 @@ public class AmbariClusterConnector {
     private void addBlueprint(Stack stack, AmbariClient ambariClient, Blueprint blueprint) {
         MDCBuilder.buildMdcContext(stack);
         try {
-            ambariClient.addBlueprint(blueprint.getBlueprintText(), hadoopConfigurationService.getConfiguration(stack));
+            ambariClient.addBlueprintWithHostgroupConfiguration(blueprint.getBlueprintText(), hadoopConfigurationService.getConfiguration(stack));
             LOGGER.info("Blueprint added [Stack: {}, blueprint: '{}']", stack.getId(), blueprint.getId());
         } catch (HttpResponseException e) {
             if ("Conflict".equals(e.getMessage())) {
@@ -330,7 +349,7 @@ public class AmbariClusterConnector {
         LOGGER.info("Waiting for hosts to connect.[Ambari server address: {}]", stack.getAmbariIp());
         hostsPollingService.pollWithTimeout(
                 new AmbariHostsStatusCheckerTask(),
-                new AmbariHosts(stack, ambariClient, stack.getNodeCount() * stack.getMultiplier()),
+                new AmbariHosts(stack, ambariClient, stack.getFullNodeCount()),
                 POLLING_INTERVAL,
                 MAX_ATTEMPTS_FOR_HOSTS);
     }
@@ -339,7 +358,16 @@ public class AmbariClusterConnector {
         MDCBuilder.buildMdcContext(stack);
         waitForHosts(stack, ambariClient);
         LOGGER.info("Asking Ambari client to recommend host-hostGroup mapping [Ambari server address: {}]", stack.getAmbariIp());
-        Map<String, List<String>> hostGroupMappings = ambariClient.recommendAssignments(blueprintName);
+        Map<String, List<String>> hostGroupMappings = new HashMap<>();
+        Map<String, String> hostNames = ambariClient.getHostNames();
+        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+            for (InstanceMetaData metaData : instanceGroup.getInstanceMetaData()) {
+                if (hostGroupMappings.get(instanceGroup.getGroupName()) == null) {
+                    hostGroupMappings.put(instanceGroup.getGroupName(), new ArrayList<String>());
+                }
+                hostGroupMappings.get(instanceGroup.getGroupName()).add(hostNames.get(metaData.getPublicIp()));
+            }
+        }
         LOGGER.info("recommended host-hostGroup mappings for stack: {}", hostGroupMappings);
         return hostGroupMappings;
     }

@@ -30,31 +30,45 @@ import javax.persistence.Version;
         @NamedQuery(
                 name = "Stack.findById",
                 query = "SELECT c FROM Stack c "
+                        + "LEFT JOIN FETCH c.resources "
+                        + "LEFT JOIN FETCH c.instanceGroups ig "
+                        + "LEFT JOIN FETCH ig.instanceMetaData "
                         + "WHERE c.id= :id"),
         @NamedQuery(
                 name = "Stack.findAllStackForTemplate",
-                query = "SELECT c FROM Stack c "
-                        + "WHERE c.template.id= :id"),
+                query = "SELECT c FROM Stack c inner join c.instanceGroups tg "
+                        + "LEFT JOIN FETCH c.resources "
+                        + "LEFT JOIN FETCH c.instanceGroups ig "
+                        + "LEFT JOIN FETCH ig.instanceMetaData "
+                        + "WHERE tg.template.id= :id"),
         @NamedQuery(
                 name = "Stack.findStackForCluster",
                 query = "SELECT c FROM Stack c "
+                        + "LEFT JOIN FETCH c.resources "
+                        + "LEFT JOIN FETCH c.instanceGroups ig "
+                        + "LEFT JOIN FETCH ig.instanceMetaData "
                         + "WHERE c.cluster.id= :id"),
         @NamedQuery(
                 name = "Stack.findStackWithListsForCluster",
                 query = "SELECT c FROM Stack c "
                         + "LEFT JOIN FETCH c.resources "
-                        + "LEFT JOIN FETCH c.instanceMetaData "
+                        + "LEFT JOIN FETCH c.instanceGroups ig "
+                        + "LEFT JOIN FETCH ig.instanceMetaData "
                         + "WHERE c.cluster.id= :id"),
         @NamedQuery(
                 name = "Stack.findRequestedStacksWithCredential",
-                query = "SELECT c FROM Stack c "
+                query = "SELECT DISTINCT c FROM Stack c "
+                        + "LEFT JOIN FETCH c.resources "
+                        + "LEFT JOIN FETCH c.instanceGroups ig "
+                        + "LEFT JOIN FETCH ig.instanceMetaData "
                         + "WHERE c.credential.id= :credentialId "
                         + "AND c.status= 'REQUESTED'"),
         @NamedQuery(
                 name = "Stack.findOneWithLists",
                 query = "SELECT c FROM Stack c "
                         + "LEFT JOIN FETCH c.resources "
-                        + "LEFT JOIN FETCH c.instanceMetaData "
+                        + "LEFT JOIN FETCH c.instanceGroups ig "
+                        + "LEFT JOIN FETCH ig.instanceMetaData "
                         + "WHERE c.id= :id"),
         @NamedQuery(
                 name = "Stack.findByStackResourceName",
@@ -63,39 +77,67 @@ import javax.persistence.Version;
         @NamedQuery(
                 name = "Stack.findForUser",
                 query = "SELECT s FROM Stack s "
+                        + "LEFT JOIN FETCH s.resources "
+                        + "LEFT JOIN FETCH s.instanceGroups ig "
+                        + "LEFT JOIN FETCH ig.instanceMetaData "
                         + "WHERE s.owner= :user"),
         @NamedQuery(
                 name = "Stack.findPublicInAccountForUser",
                 query = "SELECT s FROM Stack s "
+                        + "LEFT JOIN FETCH s.resources "
+                        + "LEFT JOIN FETCH s.instanceGroups ig "
+                        + "LEFT JOIN FETCH ig.instanceMetaData "
                         + "WHERE (s.account= :account AND s.publicInAccount= true) "
                         + "OR s.owner= :user"),
         @NamedQuery(
                 name = "Stack.findAllInAccount",
                 query = "SELECT s FROM Stack s "
+                        + "LEFT JOIN FETCH s.resources "
+                        + "LEFT JOIN FETCH s.instanceGroups ig "
+                        + "LEFT JOIN FETCH ig.instanceMetaData "
                         + "WHERE s.account= :account "),
         @NamedQuery(
                 name = "Stack.findByAmbari",
                 query = "SELECT s from Stack s "
+                        + "LEFT JOIN FETCH s.resources "
+                        + "LEFT JOIN FETCH s.instanceGroups ig "
+                        + "LEFT JOIN FETCH ig.instanceMetaData "
                         + "WHERE s.ambariIp= :ambariIp"),
         @NamedQuery(
                 name = "Stack.findOneByName",
                 query = "SELECT c FROM Stack c "
+                        + "LEFT JOIN FETCH c.resources "
+                        + "LEFT JOIN FETCH c.instanceGroups ig "
+                        + "LEFT JOIN FETCH ig.instanceMetaData "
                         + "WHERE c.name= :name and c.account= :account"),
         @NamedQuery(
                 name = "Stack.findByIdInAccount",
                 query = "SELECT s FROM Stack s "
+                        + "LEFT JOIN FETCH s.resources "
+                        + "LEFT JOIN FETCH s.instanceGroups ig "
+                        + "LEFT JOIN FETCH ig.instanceMetaData "
                         + "WHERE s.id= :id and ((s.account= :account and s.publicInAccount=true) or s.owner= :owner)"),
         @NamedQuery(
                 name = "Stack.findByNameInAccount",
                 query = "SELECT s FROM Stack s "
+                        + "LEFT JOIN FETCH s.resources "
+                        + "LEFT JOIN FETCH s.instanceGroups ig "
+                        + "LEFT JOIN FETCH ig.instanceMetaData "
                         + "WHERE s.name= :name and ((s.account= :account and s.publicInAccount=true) or s.owner= :owner)"),
         @NamedQuery(
                 name = "Stack.findByNameInUser",
                 query = "SELECT t FROM Stack t "
+                        + "LEFT JOIN FETCH t.resources "
+                        + "LEFT JOIN FETCH t.instanceGroups ig "
+                        + "LEFT JOIN FETCH ig.instanceMetaData "
                         + "WHERE t.owner= :owner and t.name= :name"),
         @NamedQuery(
                 name = "Stack.findByCredential",
-                query = "SELECT t FROM Stack t WHERE t.credential.id= :credentialId")
+                query = "SELECT t FROM Stack t "
+                        + "LEFT JOIN FETCH t.resources "
+                        + "LEFT JOIN FETCH t.instanceGroups ig "
+                        + "LEFT JOIN FETCH ig.instanceMetaData "
+                        + "WHERE t.credential.id= :credentialId ")
 })
 public class Stack implements ProvisionEntity {
 
@@ -111,8 +153,8 @@ public class Stack implements ProvisionEntity {
     private String account;
 
     private boolean publicInAccount;
+    private String region;
 
-    private Integer nodeCount;
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
 
@@ -132,12 +174,6 @@ public class Stack implements ProvisionEntity {
 
     private boolean metadataReady;
 
-    @OneToMany(mappedBy = "stack", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<InstanceMetaData> instanceMetaData = new HashSet<>();
-
-    @OneToOne
-    private Template template;
-
     @OneToOne
     private Credential credential;
 
@@ -149,6 +185,17 @@ public class Stack implements ProvisionEntity {
 
     @Version
     private Long version;
+
+    @OneToMany(mappedBy = "stack", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<InstanceGroup> instanceGroups = new HashSet<>();
+
+    public Set<InstanceGroup> getInstanceGroups() {
+        return instanceGroups;
+    }
+
+    public void setInstanceGroups(Set<InstanceGroup> instanceGroups) {
+        this.instanceGroups = instanceGroups;
+    }
 
     public Long getId() {
         return id;
@@ -196,22 +243,6 @@ public class Stack implements ProvisionEntity {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public Integer getNodeCount() {
-        return nodeCount;
-    }
-
-    public void setNodeCount(Integer nodeCount) {
-        this.nodeCount = nodeCount;
-    }
-
-    public Template getTemplate() {
-        return template;
-    }
-
-    public void setTemplate(Template template) {
-        this.template = template;
     }
 
     public Cluster getCluster() {
@@ -302,12 +333,12 @@ public class Stack implements ProvisionEntity {
         this.metadataReady = metadataReady;
     }
 
-    public Set<InstanceMetaData> getInstanceMetaData() {
-        return instanceMetaData;
+    public String getRegion() {
+        return region;
     }
 
-    public void setInstanceMetaData(Set<InstanceMetaData> instanceMetaData) {
-        this.instanceMetaData = instanceMetaData;
+    public void setRegion(String region) {
+        this.region = region;
     }
 
     public Set<Resource> getResources() {
@@ -337,17 +368,37 @@ public class Stack implements ProvisionEntity {
         return null;
     }
 
-    public Resource getResourceByName(String name) {
-        for (Resource resource : resources) {
-            if (name.equals(resource.getResourceName())) {
-                return resource;
+    public InstanceGroup getInstanceGroupByInstanceGroupName(String group) {
+        for (InstanceGroup instanceGroup : instanceGroups) {
+            if (group.equals(instanceGroup.getGroupName())) {
+                return instanceGroup;
             }
         }
         return null;
     }
 
-    public Integer getMultiplier() {
-        return template.getMultiplier();
+    public Integer getFullNodeCount() {
+        int nodeCount = 0;
+        for (InstanceGroup instanceGroup : instanceGroups) {
+            nodeCount += instanceGroup.getNodeCount();
+        }
+        return nodeCount;
+    }
+
+    public Set<InstanceMetaData> getAllInstanceMetaData() {
+        Set<InstanceMetaData> instanceMetaDatas = new HashSet<>();
+        for (InstanceGroup instanceGroup : instanceGroups) {
+            instanceMetaDatas.addAll(instanceGroup.getInstanceMetaData());
+        }
+        return instanceMetaDatas;
+    }
+
+    public List<InstanceGroup> getInstanceGroupsAsList() {
+        return new ArrayList<>(instanceGroups);
+    }
+
+    public CloudPlatform cloudPlatform() {
+        return credential.cloudPlatform();
     }
 
 }

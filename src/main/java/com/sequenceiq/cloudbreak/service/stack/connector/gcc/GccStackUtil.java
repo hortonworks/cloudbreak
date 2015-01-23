@@ -32,7 +32,7 @@ import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.StorageScopes;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
-import com.sequenceiq.cloudbreak.domain.GccTemplate;
+import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccZone;
@@ -90,21 +90,20 @@ public class GccStackUtil {
         return disks;
     }
 
-    public CoreInstanceMetaData getMetadata(Stack stack, Compute compute, String resource) {
+    public CoreInstanceMetaData getMetadata(Stack stack, Compute compute, Resource resource) {
         MDCBuilder.buildMdcContext(stack);
         try {
             GccCredential credential = (GccCredential) stack.getCredential();
-            GccTemplate template = (GccTemplate) stack.getTemplate();
-            Compute.Instances.Get instanceGet = compute.instances().get(
-                    credential.getProjectId(), template.getGccZone().getValue(), resource);
+            Compute.Instances.Get instanceGet = compute.instances().get(credential.getProjectId(),
+                    GccZone.valueOf(stack.getRegion()).getValue(), resource.getResourceName());
             Instance executeInstance = instanceGet.execute();
             CoreInstanceMetaData coreInstanceMetaData = new CoreInstanceMetaData(
-                    resource,
+                    resource.getResourceName(),
                     executeInstance.getNetworkInterfaces().get(0).getNetworkIP(),
                     executeInstance.getNetworkInterfaces().get(0).getAccessConfigs().get(0).getNatIP(),
-                    template.getVolumeCount(),
-                    longName(resource, credential.getProjectId()),
-                    template.getContainerCount()
+                    stack.getInstanceGroupByInstanceGroupName(resource.getInstanceGroup()).getTemplate().getVolumeCount(),
+                    longName(resource.getResourceName(), credential.getProjectId()),
+                    stack.getInstanceGroupByInstanceGroupName(resource.getInstanceGroup())
             );
             return coreInstanceMetaData;
         } catch (IOException e) {

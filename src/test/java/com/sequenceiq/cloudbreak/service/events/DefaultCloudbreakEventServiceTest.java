@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.repository.CloudbreakEventRepository;
@@ -56,9 +57,12 @@ public class DefaultCloudbreakEventServiceTest {
         given(stackRepository.findById(1L)).willReturn(stack);
         CloudbreakEvent stackEvent = new CloudbreakEvent();
         given(eventRepository.save(Mockito.any(CloudbreakEvent.class))).willReturn(stackEvent);
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setGroupName("master");
+        instanceGroup.setTemplate(template);
 
         //WHEN
-        eventService.createStackEvent(1L, "STACK_CREATED", "Stack created");
+        eventService.createStackEvent(1L, "STACK_CREATED", "Stack created", instanceGroup);
 
         //THEN
         BDDMockito.verify(eventRepository).save(captor.capture());
@@ -78,9 +82,12 @@ public class DefaultCloudbreakEventServiceTest {
         given(stackRepository.findById(1L)).willReturn(stack);
         CloudbreakEvent stackEvent = new CloudbreakEvent();
         given(eventRepository.save(Mockito.any(CloudbreakEvent.class))).willReturn(stackEvent);
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setGroupName("master");
+        instanceGroup.setTemplate(template);
 
         //WHEN
-        eventService.createStackEvent(1L, "STACK_CREATED", "Stack created");
+        eventService.createStackEvent(1L, "STACK_CREATED", "Stack created", instanceGroup);
 
         //THEN
         BDDMockito.verify(eventRepository).save(captor.capture());
@@ -102,9 +109,12 @@ public class DefaultCloudbreakEventServiceTest {
         given(stackRepository.findById(1L)).willReturn(stack);
         CloudbreakEvent stackEvent = new CloudbreakEvent();
         given(eventRepository.save(Mockito.any(CloudbreakEvent.class))).willReturn(stackEvent);
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setGroupName("master");
+        instanceGroup.setTemplate(template);
 
         //WHEN
-        eventService.createStackEvent(1L, "STACK_CREATED", "Stack created");
+        eventService.createStackEvent(1L, "STACK_CREATED", "Stack created", instanceGroup);
 
         //THEN
         BDDMockito.verify(eventRepository).save(captor.capture());

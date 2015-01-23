@@ -18,9 +18,11 @@ import org.springframework.stereotype.Service;
 
 import com.ecwid.consul.v1.ConsulClient;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
@@ -46,6 +48,9 @@ public class AmbariRoleAllocator {
     private StackRepository stackRepository;
 
     @Autowired
+    private InstanceMetaDataRepository instanceMetaDataRepository;
+
+    @Autowired
     private RetryingStackUpdater stackUpdater;
 
     @Autowired
@@ -62,18 +67,21 @@ public class AmbariRoleAllocator {
             Stack stack = stackRepository.findById(stackId);
             MDCBuilder.buildMdcContext(stack);
             if (!stack.isMetadataReady()) {
-                if (coreInstanceMetaData.size() != stack.getNodeCount()) {
+                if (coreInstanceMetaData.size() != stack.getFullNodeCount()) {
                     throw new WrongMetadataException(String.format(
                             "Size of the collected metadata set does not equal the node count of the stack. [metadata size=%s] [nodecount=%s]",
-                            coreInstanceMetaData.size(), stack.getNodeCount()));
+                            coreInstanceMetaData.size(), stack.getFullNodeCount()));
                 }
-                Set<InstanceMetaData> instancesMetaData = prepareInstanceMetaData(stack, coreInstanceMetaData);
-                stackUpdater.updateStackMetaData(stackId, instancesMetaData);
-                stackUpdater.updateMetadataReady(stackId, true);
-                String publicAmbariAddress = updateAmbariInstanceMetadata(stack, instancesMetaData);
-                waitForConsulAgents(stack, instancesMetaData);
-                updateToConsulHostNames(instancesMetaData);
-                stackUpdater.updateStackMetaData(stackId, instancesMetaData);
+                for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+                    Set<InstanceMetaData> instancesMetaData = prepareInstanceMetaData(coreInstanceMetaData, instanceGroup);
+                    stackUpdater.updateStackMetaData(stackId, instancesMetaData, instanceGroup.getGroupName());
+                }
+                stack = stackUpdater.updateMetadataReady(stackId, true);
+                Set<InstanceMetaData> allInstanceMetaData = stack.getAllInstanceMetaData();
+                String publicAmbariAddress = updateAmbariInstanceMetadata(stack, allInstanceMetaData);
+                waitForConsulAgents(stack, allInstanceMetaData);
+                updateToConsulHostNames(allInstanceMetaData);
+                instanceMetaDataRepository.save(allInstanceMetaData);
                 LOGGER.info("Publishing {} event", ReactorConfig.AMBARI_ROLE_ALLOCATION_COMPLETE_EVENT);
                 reactor.notify(ReactorConfig.AMBARI_ROLE_ALLOCATION_COMPLETE_EVENT, Event.wrap(new AmbariRoleAllocationComplete(stack,
                         publicAmbariAddress)));
@@ -89,24 +97,25 @@ public class AmbariRoleAllocator {
         }
     }
 
-    public void updateInstanceMetadata(Long stackId, Set<CoreInstanceMetaData> coreInstanceMetaData) {
-        Stack stack = stackRepository.findOneWithLists(stackId);
-        MDCBuilder.buildMdcContext(stack);
+    public void updateInstanceMetadata(Long stackId, Set<CoreInstanceMetaData> coreInstanceMetaData, String hostGroup) {
+        Stack one = stackRepository.findOneWithLists(stackId);
+        InstanceGroup instanceGroup = one.getInstanceGroupByInstanceGroupName(hostGroup);
+        MDCBuilder.buildMdcContext(one);
         try {
-            Set<InstanceMetaData> originalMetadata = stack.getInstanceMetaData();
-            Set<InstanceMetaData> instanceMetaData = prepareInstanceMetaData(stack, coreInstanceMetaData);
+            Set<InstanceMetaData> originalMetadata = instanceGroup.getInstanceMetaData();
+            Set<InstanceMetaData> instanceMetaData = prepareInstanceMetaData(coreInstanceMetaData, one.getInstanceGroupByInstanceGroupName(hostGroup));
             originalMetadata.addAll(instanceMetaData);
-            Set<InstanceMetaData> savedMetaData = stackUpdater.updateStackMetaData(stackId, originalMetadata).getInstanceMetaData();
+            Stack modifiedStack = stackUpdater.updateStackMetaData(stackId, originalMetadata, hostGroup);
             stackUpdater.updateMetadataReady(stackId, true);
-            waitForConsulAgents(stack, instanceMetaData);
-            updateToConsulHostNames(savedMetaData);
-            stackUpdater.updateStackMetaData(stackId, savedMetaData);
+            waitForConsulAgents(modifiedStack, instanceMetaData);
+            updateToConsulHostNames(modifiedStack.getInstanceGroupByInstanceGroupName(hostGroup).getInstanceMetaData());
+            stackUpdater.updateStackMetaData(stackId, modifiedStack.getInstanceGroupByInstanceGroupName(hostGroup).getInstanceMetaData(), hostGroup);
             Set<String> instanceIds = new HashSet<>();
             for (InstanceMetaData metadataEntry : instanceMetaData) {
                 instanceIds.add(metadataEntry.getInstanceId());
             }
             LOGGER.info("Publishing {} event.", ReactorConfig.STACK_UPDATE_SUCCESS_EVENT);
-            reactor.notify(ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, Event.wrap(new StackUpdateSuccess(stackId, false, instanceIds)));
+            reactor.notify(ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, Event.wrap(new StackUpdateSuccess(stackId, false, instanceIds, hostGroup)));
         } catch (Exception e) {
             String errMessage = "Unhandled exception occurred while updating stack metadata.";
             LOGGER.error(errMessage, e);
@@ -162,21 +171,23 @@ public class AmbariRoleAllocator {
         }
     }
 
-    private Set<InstanceMetaData> prepareInstanceMetaData(Stack stack, Set<CoreInstanceMetaData> coreInstanceMetaData) {
+    private Set<InstanceMetaData> prepareInstanceMetaData(Set<CoreInstanceMetaData> coreInstanceMetaData, InstanceGroup instanceGroup) {
         Set<InstanceMetaData> instanceMetaData = new HashSet<>();
         for (CoreInstanceMetaData coreInstanceMetaDataEntry : coreInstanceMetaData) {
-            InstanceMetaData instanceMetaDataEntry = new InstanceMetaData();
-            instanceMetaDataEntry.setPrivateIp(coreInstanceMetaDataEntry.getPrivateIp());
-            instanceMetaDataEntry.setPublicIp(coreInstanceMetaDataEntry.getPublicDns());
-            instanceMetaDataEntry.setInstanceId(coreInstanceMetaDataEntry.getInstanceId());
-            instanceMetaDataEntry.setVolumeCount(coreInstanceMetaDataEntry.getVolumeCount());
-            instanceMetaDataEntry.setLongName(coreInstanceMetaDataEntry.getLongName());
-            instanceMetaDataEntry.setDockerSubnet(String.format("172.18.%s.1", coreInstanceMetaDataEntry.getPrivateIp().split("\\.")[LAST]));
-            instanceMetaDataEntry.setContainerCount(coreInstanceMetaDataEntry.getContainerCount());
-            instanceMetaDataEntry.setAmbariServer(Boolean.FALSE);
-            instanceMetaDataEntry.setRemovable(true);
-            instanceMetaDataEntry.setStack(stack);
-            instanceMetaData.add(instanceMetaDataEntry);
+            if (coreInstanceMetaDataEntry.getInstanceGroup().getGroupName().equals(instanceGroup.getGroupName())) {
+                InstanceMetaData instanceMetaDataEntry = new InstanceMetaData();
+                instanceMetaDataEntry.setPrivateIp(coreInstanceMetaDataEntry.getPrivateIp());
+                instanceMetaDataEntry.setInstanceGroup(coreInstanceMetaDataEntry.getInstanceGroup());
+                instanceMetaDataEntry.setPublicIp(coreInstanceMetaDataEntry.getPublicDns());
+                instanceMetaDataEntry.setInstanceId(coreInstanceMetaDataEntry.getInstanceId());
+                instanceMetaDataEntry.setVolumeCount(coreInstanceMetaDataEntry.getVolumeCount());
+                instanceMetaDataEntry.setLongName(coreInstanceMetaDataEntry.getLongName());
+                instanceMetaDataEntry.setDockerSubnet(String.format("172.18.%s.1", coreInstanceMetaDataEntry.getPrivateIp().split("\\.")[LAST]));
+                instanceMetaDataEntry.setContainerCount(coreInstanceMetaDataEntry.getContainerCount());
+                instanceMetaDataEntry.setAmbariServer(Boolean.FALSE);
+                instanceMetaDataEntry.setRemovable(true);
+                instanceMetaData.add(instanceMetaDataEntry);
+            }
         }
         return instanceMetaData;
     }

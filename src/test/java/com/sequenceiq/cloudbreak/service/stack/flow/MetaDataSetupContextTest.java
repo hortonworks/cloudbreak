@@ -50,7 +50,7 @@ public class MetaDataSetupContextTest {
         underTest = new MetadataSetupContext();
         MockitoAnnotations.initMocks(this);
         stack = new Stack();
-        stack.getResources().add(new Resource(ResourceType.CLOUDFORMATION_STACK, "stack", stack));
+        stack.getResources().add(new Resource(ResourceType.CLOUDFORMATION_STACK, "stack", stack, "master"));
     }
 
     @Test

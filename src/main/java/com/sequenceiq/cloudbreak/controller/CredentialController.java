@@ -169,7 +169,7 @@ public class CredentialController {
 
     private CredentialJson convert(Credential credential) {
         CredentialJson ret = null;
-        switch (credential.getCloudPlatform()) {
+        switch (credential.cloudPlatform()) {
             case AWS:
                 ret = awsCredentialConverter.convert((AwsCredential) credential);
                 break;
@@ -180,7 +180,7 @@ public class CredentialController {
                 ret = gccCredentialConverter.convert((GccCredential) credential);
                 break;
             default:
-                throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", credential.getCloudPlatform()));
+                throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", credential.cloudPlatform()));
         }
         return ret;
     }

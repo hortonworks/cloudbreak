@@ -126,7 +126,7 @@ public class StackController {
             stackService.updateStatus(id, updateRequest.getStatus());
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
-            stackService.updateNodeCount(id, updateRequest.getScalingAdjustment());
+            stackService.updateNodeCount(id, updateRequest.getHostGroupAdjustment());
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
     }

@@ -9,6 +9,7 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 
 @Service
 public class HadoopConfigurationService {
@@ -19,12 +20,16 @@ public class HadoopConfigurationService {
     public static final String YARN_NODEMANAGER_LOG_DIRS = "yarn.nodemanager.log-dirs";
     public static final String HDFS_DATANODE_DATA_DIRS = "dfs.datanode.data.dir";
 
-    public Map<String, Map<String, String>> getConfiguration(Stack stack) {
-        Map<String, Map<String, String>> hadoopConfig = new HashMap<>();
-        int volumeCount = stack.getTemplate().getVolumeCount();
-        if (volumeCount > 0) {
-            hadoopConfig.put(YARN_SITE, getYarnSiteConfigs(buildDiskPathString(volumeCount, "nodemanager")));
-            hadoopConfig.put(HDFS_SITE, getHDFSSiteConfigs(buildDiskPathString(volumeCount, "datanode")));
+    public Map<String, Map<String, Map<String, String>>> getConfiguration(Stack stack) {
+        Map<String, Map<String, Map<String, String>>> hadoopConfig = new HashMap<>();
+        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+            Map<String, Map<String, String>> tmpConfig = new HashMap<>();
+            int volumeCount = instanceGroup.getTemplate().getVolumeCount();
+            if (volumeCount > 0) {
+                tmpConfig.put(YARN_SITE, getYarnSiteConfigs(buildDiskPathString(volumeCount, "nodemanager")));
+                tmpConfig.put(HDFS_SITE, getHDFSSiteConfigs(buildDiskPathString(volumeCount, "datanode")));
+                hadoopConfig.put(instanceGroup.getGroupName(), tmpConfig);
+            }
         }
         return hadoopConfig;
     }

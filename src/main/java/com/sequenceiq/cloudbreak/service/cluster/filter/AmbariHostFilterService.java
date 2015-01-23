@@ -34,12 +34,12 @@ public class AmbariHostFilterService {
     @Autowired
     private AmbariClientService clientService;
 
-    public List<HostMetadata> filterHostsForDecommission(Stack stack, Set<HostMetadata> hosts) {
+    public List<HostMetadata> filterHostsForDecommission(Stack stack, Set<HostMetadata> hosts, String hostGroup) {
         MDCBuilder.buildMdcContext(stack);
         List<HostMetadata> filteredList = new ArrayList<>(hosts);
         try {
             AmbariClient ambariClient = clientService.create(stack);
-            Map<String, String> config = configurationService.getConfiguration(ambariClient);
+            Map<String, String> config = configurationService.getConfiguration(ambariClient, hostGroup);
             for (AmbariHostFilter hostFilter : hostFilters) {
                 try {
                     filteredList = hostFilter.filter(config, filteredList);

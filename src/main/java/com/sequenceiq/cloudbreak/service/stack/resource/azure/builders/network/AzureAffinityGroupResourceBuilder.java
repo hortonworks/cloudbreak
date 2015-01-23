@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.stack.resource.azure.builders.network;
 
-import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.ERROR;
 import static com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil.NAME;
 
 import java.util.Arrays;
@@ -17,7 +16,7 @@ import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.StackCreationFailureException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
-import com.sequenceiq.cloudbreak.domain.AzureTemplate;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -26,7 +25,6 @@ import com.sequenceiq.cloudbreak.service.stack.connector.azure.AzureStackUtil;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureSimpleNetworkResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDeleteContextObject;
-import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDescribeContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureProvisionContextObject;
 
 import groovyx.net.http.HttpResponseDecorator;
@@ -42,7 +40,7 @@ public class AzureAffinityGroupResourceBuilder extends AzureSimpleNetworkResourc
     private AzureStackUtil azureStackUtil;
 
     @Override
-    public Boolean create(CreateResourceRequest createResourceRequest) throws Exception {
+    public Boolean create(CreateResourceRequest createResourceRequest, String region) throws Exception {
         AzureAffinityGroupCreateRequest aCSCR = (AzureAffinityGroupCreateRequest) createResourceRequest;
         try {
             aCSCR.getAzureClient().getAffinityGroup(aCSCR.getName());
@@ -63,36 +61,26 @@ public class AzureAffinityGroupResourceBuilder extends AzureSimpleNetworkResourc
     }
 
     @Override
-    public Boolean delete(Resource resource, AzureDeleteContextObject deleteContextObject) throws Exception {
+    public Boolean delete(Resource resource, AzureDeleteContextObject azureDeleteContextObject, String region) throws Exception {
         return true;
     }
 
     @Override
-    public Optional<String> describe(Resource resource, AzureDescribeContextObject describeContextObject) throws Exception {
-        try {
-            Object affinityGroup = describeContextObject.getAzureClient().getAffinityGroup(resource.getResourceName());
-            return Optional.fromNullable(affinityGroup.toString());
-        } catch (Exception ex) {
-            return Optional.fromNullable(String.format("{\"AffinityGroup\": {%s}}", ERROR));
-        }
-    }
-
-    @Override
-    public List<Resource> buildResources(AzureProvisionContextObject provisionContextObject, int index, List<Resource> resources) {
+    public List<Resource> buildResources(AzureProvisionContextObject provisionContextObject, int index, List<Resource> resources,
+            Optional<InstanceGroup> instanceGroup) {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
-        return Arrays.asList(new Resource(resourceType(), provisionContextObject.getCommonName(), stack));
+        return Arrays.asList(new Resource(resourceType(), provisionContextObject.getCommonName(), stack, null));
     }
 
     @Override
     public AzureAffinityGroupCreateRequest buildCreateRequest(AzureProvisionContextObject provisionContextObject, List<Resource> resources,
-            List<Resource> buildResources, int i) throws Exception {
+            List<Resource> buildResources, int i, Optional<InstanceGroup> instanceGroup) throws Exception {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
-        AzureTemplate template = (AzureTemplate) stack.getTemplate();
         AzureCredential azureCredential = (AzureCredential) stack.getCredential();
         Map<String, String> props = new HashMap<>();
         props.put(NAME, buildResources.get(0).getResourceName());
-        props.put(LOCATION, template.getLocation().location());
-        props.put(DESCRIPTION, template.getDescription());
+        props.put(LOCATION, stack.getRegion());
+        props.put(DESCRIPTION, "description");
         return new AzureAffinityGroupCreateRequest(buildResources.get(0).getResourceName(), provisionContextObject.getStackId(), props,
                 azureStackUtil.createAzureClient(azureCredential), resources, buildResources);
     }
