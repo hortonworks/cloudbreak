@@ -35,7 +35,7 @@ public class UpdateAmbariHostsRequestHandler implements Consumer<Event<UpdateAmb
         LOGGER.info("Accepted {} event.", ReactorConfig.UPDATE_AMBARI_HOSTS_REQUEST_EVENT);
         HostGroupAdjustmentJson adjustment = request.getHostGroupAdjustment();
         if (request.isDecommission()) {
-            ambariClusterConnector.decommissionAmbariNodes(request.getStackId(), adjustment.getScalingAdjustment(), request.getDecommissionCandidates());
+            ambariClusterConnector.decommissionAmbariNodes(request.getStackId(), adjustment, request.getDecommissionCandidates());
         } else {
             ambariClusterConnector.installAmbariNode(request.getStackId(), adjustment);
         }
