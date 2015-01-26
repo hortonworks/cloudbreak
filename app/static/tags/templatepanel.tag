@@ -31,7 +31,7 @@
                                     </div>
                                     <div class="btn-group btn-group-justified">
                                       <a id="gccTemplateChange" class="btn btn-default" role="button" ng-click="createGccTemplateRequest()">GCP</a>
-                                      <a id="openstackTemplateChange" class="btn btn-default" role="button" ng-click="createOpenstackTemplateRequest()">Openstack</a>
+                                      <a id="openstackTemplateChange" class="btn btn-default" role="button" ng-click="createOpenstackTemplateRequest()">OpenStack</a>
                                     </div>
                                 </div>
                             </div>
