@@ -929,7 +929,6 @@ process.on('uncaughtException', function (err) {
         console.log('Exception error occurred: ' + err.code + ' when try to connect: ' + err.request.options.host + ':' + err.request.options.port + err.request.options.path);
     } else {
         console.log(err)
-        process.exit(1)
     }
  });
 
