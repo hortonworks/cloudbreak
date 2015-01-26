@@ -59,7 +59,6 @@ public class StackUsageGenerator {
             }
 
             generateRunningStackUsage(stackUsages, start);
-//            stackUsages = sumUsagesByDay(stackUsages);
         } catch (ParseException e) {
             LOGGER.error("Usage generation is failed for stack(id:{})! Invalid date in event(id:{})! Ex: {}", actEvent.getStackId(), actEvent.getId(), e);
             throw new IllegalStateException(e);
@@ -107,36 +106,6 @@ public class StackUsageGenerator {
             stackRepository.delete(stack);
         }
     }
-
-    //probably this could be removed in case of the heterogen implementation
-//    private List<CloudbreakUsage> sumUsagesByDay(List<CloudbreakUsage> usages) {
-//        sortUsagesByDate(usages);
-//        Map<String, CloudbreakUsage> usagesByDay = new HashMap<>();
-//
-//        for (CloudbreakUsage usage : usages) {
-//            String day = DATE_FORMAT.format(usage.getDay());
-//            CloudbreakUsage usageOfDay = usagesByDay.get(day);
-//            if (usageOfDay != null) {
-//                long instanceHours = usageOfDay.getInstanceHours() + usage.getInstanceHours();
-//                double costs = usageOfDay.getCosts() + usage.getCosts();
-//                usageOfDay.setInstanceHours(instanceHours);
-//                usageOfDay.setCosts(costs);
-//            } else {
-//                usagesByDay.put(day, usage);
-//            }
-//        }
-//
-//        return new LinkedList<>(usagesByDay.values());
-//    }
-
-//    private void sortUsagesByDate(List<CloudbreakUsage> usageList) {
-//        Collections.sort(usageList, new Comparator<CloudbreakUsage>() {
-//            @Override
-//            public int compare(CloudbreakUsage actual, CloudbreakUsage next) {
-//                return actual.getDay().compareTo(next.getDay());
-//            }
-//        });
-//    }
 
     private void setDayToBeginning(Calendar calendar) {
         calendar.set(HOUR_OF_DAY, 0);

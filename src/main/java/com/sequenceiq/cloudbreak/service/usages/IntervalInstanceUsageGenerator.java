@@ -19,19 +19,23 @@ import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
+@Component
 public class IntervalInstanceUsageGenerator {
     private static final Logger LOGGER = LoggerFactory.getLogger(IntervalInstanceUsageGenerator.class);
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
     private static final long HOURS_PER_DAY = 24;
     private static final double MS_PER_HOUR = 3600000.0;
 
-    public Map<String, Long> generateUsage(InstanceMetaData instance, Date startTime, Date stopTime) throws ParseException {
+    public Map<String, Long> getInstanceHours(InstanceMetaData instance, Date startTime, Date stopTime) throws ParseException {
+        MDCBuilder.buildMdcContext(instance);
         Map<String, Long> dailyInstanceUsages = new HashMap<>();
-        Calendar start = getUsageStart(startTime, instance);
-        Calendar stop = getUsageStop(stopTime, instance);
+        Calendar start = getUsageStart(startTime, stopTime, instance);
+        Calendar stop = getUsageStop(startTime, stopTime, instance);
 
         if (start != null && stop != null) {
             doGenerateUsage(instance, dailyInstanceUsages, start, stop);
@@ -39,12 +43,12 @@ public class IntervalInstanceUsageGenerator {
         return dailyInstanceUsages;
     }
 
-    private Calendar getUsageStart(Date startTime, InstanceMetaData instance) {
+    private Calendar getUsageStart(Date startTime, Date stopTime, InstanceMetaData instance) {
         Calendar start = null;
         Long instanceStart = instance.getStartDate();
-        Long instanceStop = instance.getTerminationDate();
-        long intervalStart = startTime.getTime();
-        if (instanceStop == null || intervalStart < instanceStop) {
+        Long intervalStart = startTime.getTime();
+        Long intervalStop = stopTime.getTime();
+        if (intervalStop > instanceStart) {
             if (instanceStart < intervalStart) {
                 start = getCalendarInstanceForDate(intervalStart);
             } else {
@@ -54,14 +58,17 @@ public class IntervalInstanceUsageGenerator {
         return start;
     }
 
-    private Calendar getUsageStop(Date stopTime, InstanceMetaData instance) {
+    private Calendar getUsageStop(Date startTime, Date stopTime, InstanceMetaData instance) {
         Calendar stop = null;
         Long instanceStop = instance.getTerminationDate();
-        long intervalStop = stopTime.getTime();
-        if (instanceStop == null) {
-            stop = getCalendarInstanceForDate(intervalStop);
-        } else if (instanceStop != null && instanceStop < intervalStop) {
-            stop = getCalendarInstanceForDate(instanceStop);
+        Long intervalStart = startTime.getTime();
+        Long intervalStop = stopTime.getTime();
+        if (instanceStop == null || intervalStart < instanceStop) {
+            if (instanceStop != null && instanceStop < intervalStop) {
+                stop = getCalendarInstanceForDate(instanceStop);
+            } else {
+                stop = getCalendarInstanceForDate(intervalStop);
+            }
         }
         return stop;
     }
@@ -80,21 +87,20 @@ public class IntervalInstanceUsageGenerator {
             LOGGER.debug("Instance '{}' ran less than a day, usage: {}", instance.getId(), runningHours);
             dailyInstanceUsages.put(DATE_FORMAT.format(startAsDate), runningHours);
         } else {
-            //subtract minutes that are overflowed from the start
-            stop.add(MINUTE, -start.get(MINUTE));
+            subtractOverFlowedTimeFromStart(start, stop);
             // get start day running hours
             runningHours = runningHoursForDay(startAsDate, true);
             dailyInstanceUsages.put(DATE_FORMAT.format(startAsDate), runningHours);
-            LOGGER.debug("Instance '{}' ran on the of the start, usage: {}", instance.getId(), runningHours);
+            LOGGER.debug("Instance '{}' ran on the start day, usage: {}", instance.getId(), runningHours);
             // get stop day running hours
             Date stopAsDate = stop.getTime();
             runningHours = runningHoursForDay(stopAsDate, false);
             if (runningHours > 0) {
                 dailyInstanceUsages.put(DATE_FORMAT.format(stopAsDate), runningHours);
-                LOGGER.debug("Instance '{}' ran on the of the stop, usage: {}", instance.getId(), runningHours);
+                LOGGER.debug("Instance '{}' ran on the day of the termination, usage: {}", instance.getId(), runningHours);
             }
 
-            generateAllDayStackUsages(start.getTimeInMillis(), stop.getTimeInMillis(), dailyInstanceUsages, instance);
+            generateAllDayStackUsages(start.getTimeInMillis(), stop.getTimeInMillis(), dailyInstanceUsages);
         }
     }
 
@@ -102,6 +108,12 @@ public class IntervalInstanceUsageGenerator {
         return start.get(YEAR) == stop.get(YEAR)
                 && start.get(MONTH) == start.get(MONTH)
                 && start.get(DATE) == stop.get(DATE);
+    }
+
+    private void subtractOverFlowedTimeFromStart(Calendar start, Calendar stop) {
+        stop.add(MINUTE, -start.get(MINUTE));
+        stop.add(SECOND, -start.get(SECOND));
+        stop.add(MILLISECOND, -start.get(MILLISECOND));
     }
 
     private long runningHoursForDay(Date date, boolean startDay) throws ParseException {
@@ -120,7 +132,7 @@ public class IntervalInstanceUsageGenerator {
         return ceiledHours.longValue();
     }
 
-    private void generateAllDayStackUsages(long startInMs, long stopInMs, Map<String, Long> dailyInstanceUsages, InstanceMetaData instance) {
+    private void generateAllDayStackUsages(long startInMs, long stopInMs, Map<String, Long> dailyInstanceUsages) {
         Calendar start = getCalendarInstanceForDate(startInMs);
         start.add(DATE, 1);
         setDayToBeginning(start);
@@ -130,8 +142,7 @@ public class IntervalInstanceUsageGenerator {
         for (Date date = start.getTime(); !start.after(end) && !start.equals(end); start.add(DATE, 1), date = start.getTime()) {
             String day = DATE_FORMAT.format(date);
             dailyInstanceUsages.put(day, HOURS_PER_DAY);
-            //instance parameter could be removed from this function after test to decrease number of parameters
-            LOGGER.debug("Instance '{}' ran on all day, usage: '{}'", instance.getId(), day);
+            LOGGER.debug("Instance ran on all day, usage: '{}'", day);
         }
     }
 

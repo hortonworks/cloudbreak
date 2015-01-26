@@ -35,7 +35,7 @@ public class IntervalStackUsageGenerator {
         Set<InstanceMetaData> instancesMetaData = stack.getAllInstanceMetaData();
 
         for (InstanceMetaData instance : instancesMetaData) {
-            Map<String, Long> instanceUsages = instanceUsageGenerator.generateUsage(instance, startTime, stopTime);
+            Map<String, Long> instanceUsages = instanceUsageGenerator.getInstanceHours(instance, startTime, stopTime);
             addInstanceUsagesToStackUsages(dailyStackUsages, instanceUsages, startEvent);
         }
 
