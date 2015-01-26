@@ -2,13 +2,11 @@ package com.sequenceiq.cloudbreak.controller.validation;
 
 import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccInstanceType;
-import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccZone;
 
 public enum GccTemplateParam implements TemplateParam {
 
-    ZONE("gccZone", true, GccZone.class, Optional.<String>absent()),
     INSTANCETYPE("gccInstanceType", true, GccInstanceType.class, Optional.<String>absent()),
-    CONTAINERCOUNT("containerCount", true, Integer.class, Optional.<String>absent()),
+    CONTAINERCOUNT("containerCount", false, Integer.class, Optional.<String>absent()),
     TYPE("volumeType", false, GccInstanceType.class, Optional.<String>absent());
 
     private final String paramName;

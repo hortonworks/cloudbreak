@@ -59,7 +59,7 @@ public class GccDiskResourceBuilder extends GccSimpleInstanceResourceBuilder {
         final GccDiskCreateRequest gDCR = (GccDiskCreateRequest) createResourceRequest;
         Stack stack = stackRepository.findById(gDCR.getStackId());
         Compute.Disks.Insert insDisk = gDCR.getCompute().disks().insert(gDCR.getProjectId(), GccZone.valueOf(stack.getRegion()).getValue(), gDCR.getDisk());
-        insDisk.setSourceImage(gccStackUtil.getAmbariUbuntu(gDCR.getProjectId()));
+        insDisk.setSourceImage(gccStackUtil.getAmbariUbuntu(gDCR.getProjectId(), stack.getImage()));
         Operation execute = insDisk.execute();
         if (execute.getHttpErrorStatusCode() == null) {
             Compute.ZoneOperations.Get zoneOperations = createZoneOperations(gDCR.getCompute(),

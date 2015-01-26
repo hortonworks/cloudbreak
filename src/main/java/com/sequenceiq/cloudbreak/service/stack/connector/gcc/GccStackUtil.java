@@ -15,7 +15,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
@@ -47,9 +46,6 @@ public class GccStackUtil {
 
     private static final String GCC_IMAGE_TYPE_PREFIX = "https://www.googleapis.com/compute/v1/projects/%s/global/images/";
     private static final String EMPTY_BUCKET = "";
-
-    @Value("${cb.gcp.source.image.path}")
-    private String sourceImagePath;
 
     public Compute buildCompute(GccCredential gccCredential) {
         MDCBuilder.buildMdcContext(gccCredential);
@@ -145,9 +141,9 @@ public class GccStackUtil {
         return credential;
     }
 
-    public String getBucket() {
-        if (!StringUtils.isEmpty(sourceImagePath) && createParts(sourceImagePath).length > 1) {
-            String[] parts = createParts(sourceImagePath);
+    public String getBucket(String image) {
+        if (!StringUtils.isEmpty(image) && createParts(image).length > 1) {
+            String[] parts = createParts(image);
             return StringUtils.join(ArrayUtils.remove(parts, parts.length - 1), "/");
         } else {
             LOGGER.warn("No bucket found in source image path.");
@@ -155,21 +151,21 @@ public class GccStackUtil {
         }
     }
 
-    public String getTarName() {
-        if (!StringUtils.isEmpty(sourceImagePath)) {
-            String[] parts = createParts(sourceImagePath);
+    public String getTarName(String image) {
+        if (!StringUtils.isEmpty(image)) {
+            String[] parts = createParts(image);
             return parts[parts.length - 1];
         } else {
             throw new InternalServerException("Source image path environment variable is not well formed");
         }
     }
 
-    public String getImageName() {
-        return getTarName().replaceAll("(\\.tar|\\.zip|\\.gz|\\.gzip)", "").replaceAll("\\.", "-");
+    public String getImageName(String image) {
+        return getTarName(image).replaceAll("(\\.tar|\\.zip|\\.gz|\\.gzip)", "").replaceAll("\\.", "-");
     }
 
-    public String getAmbariUbuntu(String projectId) {
-        return String.format(GCC_IMAGE_TYPE_PREFIX + getImageName(), projectId);
+    public String getAmbariUbuntu(String projectId, String image) {
+        return String.format(GCC_IMAGE_TYPE_PREFIX + getImageName(image), projectId);
     }
 
     private String longName(String resourceName, String projectId) {

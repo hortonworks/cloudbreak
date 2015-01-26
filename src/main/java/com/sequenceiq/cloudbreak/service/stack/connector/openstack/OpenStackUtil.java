@@ -6,7 +6,6 @@ import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.openstack4j.api.OSClient;
 import org.openstack4j.openstack.OSFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.OpenStackCredential;
@@ -19,9 +18,6 @@ public class OpenStackUtil {
 
     @Autowired
     private StandardPBEStringEncryptor encryptor;
-
-    @Value("${cb.openstack.image}")
-    private String image;
 
     public OSClient createOSClient(Stack stack) {
         return createOSClient((OpenStackCredential) stack.getCredential());
@@ -36,10 +32,6 @@ public class OpenStackUtil {
 
     public String getKeyPairName(OpenStackCredential credential) {
         return CB_KEYPAIR_NAME + deleteWhitespace(credential.getName().toLowerCase());
-    }
-
-    public String getImageName() {
-        return image;
     }
 
 }

@@ -10,7 +10,6 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -54,9 +53,6 @@ public class AzureProvisionSetup implements ProvisionSetup {
     private static final int ONE_HUNDRED = 100;
     private static final int CONTAINER_EXISTS = 409;
 
-    @Value("${cb.azure.image.uri}")
-    private String baseImageUri;
-
     @Autowired
     private Reactor reactor;
 
@@ -75,7 +71,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
         Credential credential = stack.getCredential();
         AzureLocation azureLocation = AzureLocation.valueOf(stack.getRegion());
         AzureClient azureClient = azureStackUtil.createAzureClient((AzureCredential) credential);
-        if (!azureClient.isImageAvailable(azureStackUtil.getOsImageName(credential, azureLocation))) {
+        if (!azureClient.isImageAvailable(azureStackUtil.getOsImageName(credential, azureLocation, stack.getImage()))) {
             String affinityGroupName = ((AzureCredential) credential).getCommonName(azureLocation);
             createAffinityGroup(stack, azureClient, affinityGroupName);
             String storageName = String.format("%s%s", VM_COMMON_NAME, stack.getId());
@@ -95,10 +91,10 @@ public class AzureProvisionSetup implements ProvisionSetup {
             String storageAccountKey = actualObj.get("StorageService").get("StorageServiceKeys").get("Primary").asText();
 
             createBlobContainer(targetBlobContainerUri, storageAccountKey);
-            AzureClientUtil.copyOsImage(storageAccountKey, baseImageUri, targetImageUri);
+            AzureClientUtil.copyOsImage(storageAccountKey, stack.getImage(), targetImageUri);
 
             checkCopyStatus(stack, targetImageUri, storageAccountKey);
-            createOsImageLink(credential, azureClient, targetImageUri, azureLocation);
+            createOsImageLink(credential, azureClient, targetImageUri, azureLocation, stack.getImage());
         }
         LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT, stack.getId());
         reactor.notify(ReactorConfig.PROVISION_SETUP_COMPLETE_EVENT,
@@ -108,10 +104,10 @@ public class AzureProvisionSetup implements ProvisionSetup {
         );
     }
 
-    private void createOsImageLink(Credential credential, AzureClient azureClient, String targetImageUri, AzureLocation location) {
+    private void createOsImageLink(Credential credential, AzureClient azureClient, String targetImageUri, AzureLocation location, String imageUrl) {
         Map<String, String> params;
         params = new HashMap<>();
-        params.put(AzureStackUtil.NAME, azureStackUtil.getOsImageName(credential, location));
+        params.put(AzureStackUtil.NAME, azureStackUtil.getOsImageName(credential, location, imageUrl));
         params.put(OS, "Linux");
         params.put(MEDIALINK, targetImageUri);
         azureClient.addOsImage(params);

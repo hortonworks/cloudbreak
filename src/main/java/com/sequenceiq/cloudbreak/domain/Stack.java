@@ -162,6 +162,7 @@ public class Stack implements ProvisionEntity {
     private Status status;
 
     private boolean stackCompleted;
+    private String image;
 
     private String ambariIp;
     private String userName;
@@ -347,6 +348,14 @@ public class Stack implements ProvisionEntity {
 
     public void setResources(Set<Resource> resources) {
         this.resources = resources;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
     }
 
     public List<Resource> getResourcesByType(ResourceType resourceType) {

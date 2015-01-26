@@ -36,7 +36,7 @@ public class AzureResourceBuilderInit implements
         AzureClient azureClient = azureStackUtil.createAzureClient((AzureCredential) stack.getCredential());
         AzureProvisionContextObject azureProvisionContextObject =
                 new AzureProvisionContextObject(stack.getId(), credential.getCommonName(azureLocation), azureClient,
-                        getOsImageName(credential, azureLocation), userData);
+                        getOsImageName(credential, azureLocation, stack.getImage()), userData);
         return azureProvisionContextObject;
     }
 
@@ -86,8 +86,8 @@ public class AzureResourceBuilderInit implements
         return CloudPlatform.AZURE;
     }
 
-    public String getOsImageName(Credential credential, AzureLocation location) {
-        return azureStackUtil.getOsImageName(credential, location);
+    public String getOsImageName(Credential credential, AzureLocation location, String imageUrl) {
+        return azureStackUtil.getOsImageName(credential, location, imageUrl);
     }
 
 }

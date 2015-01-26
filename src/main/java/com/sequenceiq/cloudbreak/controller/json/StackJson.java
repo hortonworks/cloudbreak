@@ -39,6 +39,7 @@ public class StackJson implements JsonEntity {
             message = "The password can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
     @NotNull
     private String password;
+    private String image;
     private String hash;
     private ClusterResponse cluster;
     private String statusReason;
@@ -188,6 +189,14 @@ public class StackJson implements JsonEntity {
     @JsonProperty("public")
     public boolean isPublicInAccount() {
         return publicInAccount;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
     }
 
     @JsonIgnore

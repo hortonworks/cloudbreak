@@ -1,13 +1,10 @@
 package com.sequenceiq.cloudbreak.controller.validation;
 
 import com.google.common.base.Optional;
-import com.sequenceiq.cloudbreak.domain.AzureLocation;
 import com.sequenceiq.cloudbreak.domain.AzureVmType;
 
 public enum AzureTemplateParam implements TemplateParam {
 
-    LOCATION("location", true, AzureLocation.class, Optional.<String>absent()),
-    IMAGENAME("imageName", true, String.class, Optional.<String>absent()),
     VMTYPE("vmType", true, AzureVmType.class, Optional.<String>absent());
 
     private final String paramName;

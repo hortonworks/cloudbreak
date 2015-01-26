@@ -14,7 +14,6 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloud.azure.client.AzureClient;
@@ -40,9 +39,6 @@ public class AzureStackUtil {
     public static final String DEFAULT_JKS_PASS = "azure1";
     public static final Logger LOGGER = LoggerFactory.getLogger(AzureStackUtil.class);
 
-    @Value("${cb.azure.image.uri}")
-    private String baseImageUri;
-
     @Autowired
     private KeyGeneratorService keyGeneratorService;
 
@@ -52,8 +48,8 @@ public class AzureStackUtil {
     @Autowired
     private UserDetailsService userDetailsService;
 
-    public String getOsImageName(Credential credential, AzureLocation location) {
-        String[] split = baseImageUri.split("/");
+    public String getOsImageName(Credential credential, AzureLocation location, String image) {
+        String[] split = image.split("/");
         AzureCredential azureCredential = (AzureCredential) credential;
         return String.format("%s-%s-%s", azureCredential.getCommonName(location), IMAGE_NAME,
                 split[split.length - 1].replaceAll(".vhd", ""));
