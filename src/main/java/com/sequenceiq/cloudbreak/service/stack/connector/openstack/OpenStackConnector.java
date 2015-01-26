@@ -80,7 +80,7 @@ public class OpenStackConnector implements CloudPlatformConnector {
                 .heat()
                 .stacks()
                 .create(Builders.stack().name(stackName).template(heatTemplate).disableRollback(false)
-                        .parameters(buildParameters(instanceGroups, credential)).timeoutMins(OPERATION_TIMEOUT).build());
+                        .parameters(buildParameters(instanceGroups, credential, stack.getImage())).timeoutMins(OPERATION_TIMEOUT).build());
         List<Resource> resources = new ArrayList<>();
         resources.add(new Resource(ResourceType.HEAT_STACK, openStackStack.getId(), stack));
         Stack updatedStack = stackUpdater.addStackResources(stack.getId(), resources);
@@ -152,11 +152,11 @@ public class OpenStackConnector implements CloudPlatformConnector {
         return CloudPlatform.OPENSTACK;
     }
 
-    private Map<String, String> buildParameters(List<InstanceGroup> instanceGroups, OpenStackCredential credential) {
+    private Map<String, String> buildParameters(List<InstanceGroup> instanceGroups, OpenStackCredential credential, String image) {
         OpenStackTemplate template = (OpenStackTemplate) instanceGroups.get(0).getTemplate();
         Map<String, String> parameters = Maps.newHashMap();
         parameters.put("public_net_id", template.getPublicNetId());
-        parameters.put("image_id", openStackUtil.getImageName());
+        parameters.put("image_id", image);
         parameters.put("key_name", openStackUtil.getKeyPairName(credential));
         parameters.put("tenant_id", credential.getTenantName());
         return parameters;

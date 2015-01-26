@@ -64,7 +64,7 @@ public class GccProvisionSetup implements ProvisionSetup {
             GccCredential credential = (GccCredential) stack.getCredential();
             ImageList list = compute.images().list(credential.getProjectId()).execute();
             Long time = new Date().getTime();
-            if (!containsSpecificImage(list)) {
+            if (!containsSpecificImage(list, stack.getImage())) {
                 try {
                     Bucket bucket = new Bucket();
                     bucket.setName(credential.getProjectId() + time);
@@ -76,14 +76,14 @@ public class GccProvisionSetup implements ProvisionSetup {
                         throw ex;
                     }
                 }
-                String tarName = gccStackUtil.getTarName();
-                Storage.Objects.Copy copy = storage.objects().copy(gccStackUtil.getBucket(), tarName,
+                String tarName = gccStackUtil.getTarName(stack.getImage());
+                Storage.Objects.Copy copy = storage.objects().copy(gccStackUtil.getBucket(stack.getImage()), tarName,
                         credential.getProjectId() + time, tarName,
                         new StorageObject());
                 copy.execute();
 
                 Image image = new Image();
-                image.setName(gccStackUtil.getImageName());
+                image.setName(gccStackUtil.getImageName(stack.getImage()));
                 Image.RawDisk rawDisk = new Image.RawDisk();
                 rawDisk.setSource(String.format("http://storage.googleapis.com/%s/%s", credential.getProjectId() + time, tarName));
                 image.setRawDisk(rawDisk);
@@ -112,10 +112,10 @@ public class GccProvisionSetup implements ProvisionSetup {
         return Optional.absent();
     }
 
-    private boolean containsSpecificImage(ImageList imageList) {
+    private boolean containsSpecificImage(ImageList imageList, String imageUrl) {
         try {
             for (Image image : imageList.getItems()) {
-                if (image.getName().equals(gccStackUtil.getImageName())) {
+                if (image.getName().equals(gccStackUtil.getImageName(imageUrl))) {
                     return true;
                 }
             }

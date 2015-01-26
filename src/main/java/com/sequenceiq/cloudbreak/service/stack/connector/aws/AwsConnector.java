@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.service.stack.connector.aws;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -12,7 +11,6 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.AmazonServiceException;
@@ -72,9 +70,6 @@ public class AwsConnector implements CloudPlatformConnector {
     private static final int POLLING_INTERVAL = 5000;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsConnector.class);
-
-    @Value("${cb.aws.ami.map}")
-    private String amis;
 
     @Autowired
     private AwsStackUtil awsStackUtil;
@@ -174,7 +169,7 @@ public class AwsConnector implements CloudPlatformConnector {
                 new Parameter().withParameterKey("StackName").withParameterValue(stackName),
                 new Parameter().withParameterKey("StackOwner").withParameterValue(awsCredential.getRoleArn()),
                 new Parameter().withParameterKey("KeyName").withParameterValue(awsCredential.getKeyPairName()),
-                new Parameter().withParameterKey("AMI").withParameterValue(prepareAmis().get(Regions.valueOf(stack.getRegion()).getName()))
+                new Parameter().withParameterKey("AMI").withParameterValue(stack.getImage())
         ));
         CreateStackRequest createStackRequest = createStackRequest()
                 .withStackName(stackName)
@@ -201,14 +196,6 @@ public class AwsConnector implements CloudPlatformConnector {
             }
         }
         return spotPrice;
-    }
-
-    private Map<String, String> prepareAmis() {
-        Map<String, String> amisMap = new HashMap<>();
-        for (String s : amis.split(",")) {
-            amisMap.put(s.split(":")[0], s.split(":")[1]);
-        }
-        return amisMap;
     }
 
     @Override

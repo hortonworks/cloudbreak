@@ -8,7 +8,6 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.amazonaws.regions.Regions;
 import com.amazonaws.services.ec2.model.InstanceType;
 import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
 import com.sequenceiq.cloudbreak.controller.validation.AwsTemplateParam;
@@ -61,8 +60,6 @@ public class AwsTemplateConverterTest {
         templateJson.setDescription(DUMMY_DESCRIPTION);
         templateJson.setName(DUMMY_NAME);
         Map<String, Object> props = new HashMap<>();
-        props.put(AwsTemplateParam.REGION.getName(), Regions.DEFAULT_REGION.toString());
-        props.put(AwsTemplateParam.AMI_ID.getName(), DUMMY_AMI_ID);
         props.put(AwsTemplateParam.INSTANCE_TYPE.getName(), InstanceType.C1Medium.name());
         props.put(AwsTemplateParam.SSH_LOCATION.getName(), DUMMY_SSH_LOCATION);
         templateJson.setVolumeCount(2);

@@ -29,7 +29,6 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.amazonaws.regions.Regions;
 import com.amazonaws.services.ec2.model.InstanceType;
 import com.google.common.collect.ImmutableList;
 import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
@@ -73,9 +72,7 @@ public class ProvisionParametersValidatorTest {
         templateJson.setDescription("description");
         templateJson.setName("name");
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put(AwsTemplateParam.AMI_ID.getName(), "ami");
         parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), InstanceType.C1Medium.name());
-        parameters.put(AwsTemplateParam.REGION.getName(), Regions.AP_NORTHEAST_1);
         parameters.put(AwsTemplateParam.SSH_LOCATION.getName(), "0.0.0.0/0");
         templateJson.setVolumeCount(3);
         templateJson.setVolumeSize(30);
@@ -91,9 +88,7 @@ public class ProvisionParametersValidatorTest {
         templateJson.setDescription("description");
         templateJson.setName("name");
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put(AwsTemplateParam.AMI_ID.getName(), "ami");
         parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), InstanceType.C1Medium.name());
-        parameters.put(AwsTemplateParam.REGION.getName(), Regions.AP_NORTHEAST_1);
         parameters.put(AwsTemplateParam.SSH_LOCATION.getName(), "192.12.12.12/12");
         templateJson.setVolumeCount(3);
         templateJson.setVolumeSize(30);
@@ -109,9 +104,7 @@ public class ProvisionParametersValidatorTest {
         templateJson.setDescription("description");
         templateJson.setName("name");
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put(AwsTemplateParam.AMI_ID.getName(), "ami");
         parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), InstanceType.C1Medium.name());
-        parameters.put(AwsTemplateParam.REGION.getName(), Regions.AP_NORTHEAST_1);
         parameters.put(AwsTemplateParam.SSH_LOCATION.getName(), "0.0.0.0");
         templateJson.setVolumeCount(3);
         templateJson.setVolumeSize(30);
@@ -127,9 +120,7 @@ public class ProvisionParametersValidatorTest {
         templateJson.setDescription("description");
         templateJson.setName("name");
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put(AwsTemplateParam.AMI_ID.getName(), "ami");
         parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), InstanceType.C1Medium.name());
-        parameters.put(AwsTemplateParam.REGION.getName(), Regions.AP_NORTHEAST_1);
         parameters.put(AwsTemplateParam.SSH_LOCATION.getName(), "0.0.0.0/0");
         templateJson.setVolumeCount(3);
         templateJson.setVolumeSize(30);
@@ -146,9 +137,7 @@ public class ProvisionParametersValidatorTest {
         templateJson.setDescription("description");
         templateJson.setName("name");
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put(AwsTemplateParam.AMI_ID.getName(), "ami");
         parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), InstanceType.C1Medium.name());
-        parameters.put(AwsTemplateParam.REGION.getName(), Regions.AP_NORTHEAST_1);
         parameters.put(AwsTemplateParam.SSH_LOCATION.getName(), "0.0.0.0/0");
         templateJson.setVolumeCount(3);
         templateJson.setVolumeSize(30);
@@ -165,9 +154,7 @@ public class ProvisionParametersValidatorTest {
         templateJson.setDescription("description");
         templateJson.setName("name");
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put(AwsTemplateParam.AMI_ID.getName(), "ami");
         parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), InstanceType.C1Medium.name());
-        parameters.put(AwsTemplateParam.REGION.getName(), Regions.AP_NORTHEAST_1);
         parameters.put(AwsTemplateParam.SSH_LOCATION.getName(), "0.0.0.0/0");
         templateJson.setVolumeCount(3);
         templateJson.setVolumeSize(30);
@@ -184,9 +171,7 @@ public class ProvisionParametersValidatorTest {
         templateJson.setDescription("description");
         templateJson.setName("name");
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put(AwsTemplateParam.AMI_ID.getName(), "ami");
         parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), InstanceType.C1Medium.name());
-        parameters.put(AwsTemplateParam.REGION.getName(), Regions.AP_NORTHEAST_1);
         parameters.put(AwsTemplateParam.SSH_LOCATION.getName(), "192.0.0.0/256");
         templateJson.setVolumeCount(3);
         templateJson.setVolumeSize(30);
@@ -202,9 +187,7 @@ public class ProvisionParametersValidatorTest {
         templateJson.setDescription("description");
         templateJson.setName("name");
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put(AwsTemplateParam.AMI_ID.getName(), "ami");
         parameters.put(AwsTemplateParam.INSTANCE_TYPE.getName(), InstanceType.C1Medium.name());
-        parameters.put(AwsTemplateParam.REGION.getName(), Regions.AP_NORTHEAST_1);
         parameters.put(AwsTemplateParam.SSH_LOCATION.getName(), "0.0.0.0/0");
         templateJson.setVolumeCount(3);
         templateJson.setVolumeSize(30);
