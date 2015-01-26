@@ -94,6 +94,7 @@ app.post('/', function(req, res){
     var userCredentials = {username: username, password: password}
     needle.post(uaaAddress + '/login.do', userCredentials,
        function(err, tokenResp) {
+        if (err == null){
         var splittedLocation = tokenResp.headers.location.split('?')
         if (splittedLocation.length == 1 || splittedLocation[1] != 'error=true'){
             var cookies = tokenResp.headers['set-cookie'][0].split(';')
@@ -112,6 +113,10 @@ app.post('/', function(req, res){
             }
         } else {
             res.render('login',{ errorMessage: "Incorrect email/password or account is disabled." });
+        }
+        } else {
+            console.log("Client cannot access resource server. Check UAA address.");
+            res.render('login',{ errorMessage: "Client cannot access resource server." });
         }
     });
 });
@@ -178,13 +183,13 @@ app.get('/confirm', function(req, res){
                           res.redirect(confirmResp.headers.location)
                         }
                     } else {
-                        console.err('Confirm error - code: ' + confirmResp.statusCode +', message: ' + confirmResp.message)
+                        console.log('Confirm error - code: ' + confirmResp.statusCode +', message: ' + confirmResp.message)
                         res.end('Login/confirm: Error from token server, code: ' + confirmResp.statusCode)
                     }
      })
   } else {
      res.statusCode = 500
-     console.err('Invalid state at confirm.')
+     console.log('Invalid state at confirm.')
      res.send('Invalid state');
   }
 });
@@ -215,7 +220,7 @@ app.post('/confirm', function(req, res){
                    res.cookie('JSESSIONID', getCookie(req, 'uaa_cookie'))
                    res.redirect(confirmResp.headers.location)
                } else {
-                   console.err('Authorization failed - ' + confirmResp.message)
+                   console.log('Authorization failed - ' + confirmResp.message)
                    res.render('login',{ errorMessage: "" });
                }
     });
@@ -807,6 +812,7 @@ getUserName = function(req, res, callback) {
             }
         }
         needle.post(uaaAddress + "/check_token", 'token=' + token, checkTokenRespOption, function(err, checkTokenResp){
+            if (err == null) {
             if (checkTokenResp.statusCode == 200){
                var userName = checkTokenResp.body.user_name
                callback(userName)
@@ -814,6 +820,11 @@ getUserName = function(req, res, callback) {
                 console.log('Cannot retrieve user name from token.')
                 res.statusCode = checkTokenResp.statusCode
                 res.json({message: 'Cannot retrieve user name from token.'})
+            }
+            } else {
+                console.log('Authorization: cannot access UAA server.')
+                res.statusCode = 400
+                res.json({message: 'Cannot access resource server.'})
             }
         })
     } else {
@@ -914,8 +925,13 @@ d.on('error', function(err) {
 });
 
 process.on('uncaughtException', function (err) {
-  console.log('Exception error occurred: ' + err.code + ' when try to connect: ' + err.request.options.host + ':' + err.request.options.port + err.request.options.path);
-});
+    if (err.code == 'ECONNREFUSED' || err.code == 'ECONNRESET' || err.code == 'ENETUNREACH') {
+        console.log('Exception error occurred: ' + err.code + ' when try to connect: ' + err.request.options.host + ':' + err.request.options.port + err.request.options.path);
+    } else {
+        console.log(err)
+        process.exit(1)
+    }
+ });
 
 // listen
 var port = process.env.SL_PORT || 8080;
