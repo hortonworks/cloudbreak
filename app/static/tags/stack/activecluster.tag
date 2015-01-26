@@ -121,19 +121,16 @@
                                             <thead>
                                               <tr>
                                                  <th>
-                                                 <a title="sort by" ng-click="reverse=!reverse;orderMetadataBy('longName',reverse)">Name</a>
-                                                 <i class="fa fa-sort"></i>
+                                                 <span>Name</span>
                                                  </th>
                                                  <th>
-                                                 <a title="sort by" ng-click="reverse=!reverse;orderMetadataBy('publicIp',reverse)">Public Address</a>
-                                                 <i class="fa fa-sort"></i>
+                                                 <span>Public Address</span>
                                                  </th>
                                                  <th>
-                                                 <a title="sort by" ng-click="reverse=!reverse;orderMetadataBy('privateIp',reverse)">Private Address</a>
-                                                 <i class="fa fa-sort"></i>
+                                                 <span>Private Address</span>
                                                  </th>
                                                  <th>
-                                                 <a title="sort by" ng-click="reverse=!reverse;orderMetadataBy('hostgroup',reverse)">Hostgroup Name</a>
+                                                 <span>Hostgroup Name</span>
                                                  </th>
                                                </tr>
                                             </thead>

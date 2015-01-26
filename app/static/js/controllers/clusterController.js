@@ -142,13 +142,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             }
          });
 
-        $scope.orderMetadataBy = function(predicate, reverse) {
-            if ($rootScope.activeCluster.metadata != null) {
-                $rootScope.activeCluster.metadata = $filter('orderBy')($rootScope.activeCluster.metadata, predicate, reverse);
-                paginateMetadata();
-            }
-        }
-
         function paginateMetadata() {
             var begin = (($scope.pagination.currentPage - 1) * $scope.pagination.itemsPerPage),
             end = begin + $scope.pagination.itemsPerPage;
