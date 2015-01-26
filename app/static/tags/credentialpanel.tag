@@ -29,11 +29,11 @@
                             <div class="row " style="padding-bottom: 10px">
                                 <div class="btn-segmented-control" id="providerSelector1">
                                     <div class="btn-group btn-group-justified">
-                                        <a id="awsChange" type="button" class="btn btn-info" ng-click="createAwsCredentialRequest()">Aws</a>
+                                        <a id="awsChange" type="button" class="btn btn-info" ng-click="createAwsCredentialRequest()">AWS</a>
                                         <a id="azureChange" type="button" class="btn btn-default" ng-click="createAzureCredentialRequest()">Azure</a>
                                     </div>
                                     <div class="btn-group btn-group-justified">
-                                      <a id="gccChange" type="button" class="btn btn-default" ng-click="createGccCredentialRequest()">Gcc</a>
+                                      <a id="gccChange" type="button" class="btn btn-default" ng-click="createGccCredentialRequest()">GCP</a>
                                       <a id="openstackChange" type="button" class="btn btn-default" ng-click="createOpenstackCredentialRequest()">Openstack</a>
                                     </div>
                                 </div>

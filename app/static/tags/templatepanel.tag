@@ -26,11 +26,11 @@
                             <div class="row " style="padding-bottom: 10px">
                                 <div class="btn-segmented-control" id="providerSelector2">
                                     <div class="btn-group btn-group-justified">
-                                        <a id="awsTemplateChange" type="button" class="btn btn-info" role="button" ng-click="createAwsTemplateRequest()">Aws</a>
+                                        <a id="awsTemplateChange" type="button" class="btn btn-info" role="button" ng-click="createAwsTemplateRequest()">AWS</a>
                                         <a id="azureTemplateChange" class="btn btn-default" role="button" ng-click="createAzureTemplateRequest()">Azure</a>
                                     </div>
                                     <div class="btn-group btn-group-justified">
-                                      <a id="gccTemplateChange" class="btn btn-default" role="button" ng-click="createGccTemplateRequest()">Gcc</a>
+                                      <a id="gccTemplateChange" class="btn btn-default" role="button" ng-click="createGccTemplateRequest()">GCP</a>
                                       <a id="openstackTemplateChange" class="btn btn-default" role="button" ng-click="createOpenstackTemplateRequest()">Openstack</a>
                                     </div>
                                 </div>
