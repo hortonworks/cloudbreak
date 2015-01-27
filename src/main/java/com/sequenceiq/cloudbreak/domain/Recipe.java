@@ -48,8 +48,6 @@ public class Recipe implements ProvisionEntity {
 
     private String description;
 
-    private String customerId;
-
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Plugin> plugins;
 
@@ -84,14 +82,6 @@ public class Recipe implements ProvisionEntity {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public String getCustomerId() {
-        return customerId;
-    }
-
-    public void setCustomerId(String customerId) {
-        this.customerId = customerId;
     }
 
     public List<Plugin> getPlugins() {

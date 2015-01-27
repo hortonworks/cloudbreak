@@ -21,7 +21,6 @@ public class RecipeConverter extends AbstractConverter<RecipeJson, Recipe> {
         json.setName(recipe.getName());
         json.setDescription(recipe.getDescription());
         json.setPlugins(convertPlugins(recipe.getPlugins()));
-        json.setCustomerId(recipe.getCustomerId());
         json.setId(recipe.getId().toString());
         json.setKeyValues(convertKeyValues(recipe.getKeyValues()));
         return json;
@@ -31,7 +30,6 @@ public class RecipeConverter extends AbstractConverter<RecipeJson, Recipe> {
     public Recipe convert(RecipeJson json) {
         Recipe recipe = new Recipe();
         recipe.setName(json.getName());
-        recipe.setCustomerId(json.getCustomerId());
         recipe.setDescription(json.getDescription());
         recipe.setPlugins(convertPlugins(json.getPlugins(), recipe));
         recipe.setKeyValues(convertKeyValues(json.getKeyValues(), recipe));

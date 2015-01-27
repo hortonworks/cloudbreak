@@ -23,9 +23,6 @@ public class RecipeJson implements JsonEntity {
     @Size(max = 1000)
     private String description;
 
-    @Size(max = 1000)
-    private String customerId;
-
     @Valid
     private List<PluginJson> plugins;
 
@@ -56,14 +53,6 @@ public class RecipeJson implements JsonEntity {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public String getCustomerId() {
-        return customerId;
-    }
-
-    public void setCustomerId(String customerId) {
-        this.customerId = customerId;
     }
 
     public List<PluginJson> getPlugins() {
