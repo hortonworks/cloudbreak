@@ -52,13 +52,13 @@ public class StackUsageGenerator {
                 } else if (validStopEvent(start, cbEvent)) {
                     addAllGeneratedUsages(stackUsages, start, cbEvent.getEventTimestamp());
                     start = null;
-                    deleteStackIfTerminated(cbEvent);
                 }
             }
 
             generateRunningStackUsage(stackUsages, start);
-        } catch (ParseException e) {
-            LOGGER.error("Usage generation is failed for stack(id:{})! Invalid date in event(id:{})! Ex: {}", actEvent.getStackId(), actEvent.getId(), e);
+            deleteStackIfTerminated(actEvent);
+        } catch (Exception e) {
+            LOGGER.error("Usage generation failed for stack(id:{})! Error when processing event(id:{})! Ex: {}", actEvent.getStackId(), actEvent.getId(), e);
             throw new IllegalStateException(e);
         }
         return stackUsages;
@@ -99,9 +99,11 @@ public class StackUsageGenerator {
     }
 
     private void deleteStackIfTerminated(CloudbreakEvent event) {
-        Stack stack = stackRepository.findById(event.getStackId());
-        if (Status.DELETE_COMPLETED.equals(stack.getStatus())) {
-            stackRepository.delete(stack);
+        if (event != null) {
+            Stack stack = stackRepository.findById(event.getStackId());
+            if (stack != null && Status.DELETE_COMPLETED.equals(stack.getStatus())) {
+                stackRepository.delete(stack);
+            }
         }
     }
 

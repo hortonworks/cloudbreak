@@ -6,6 +6,7 @@ import static java.util.Calendar.MILLISECOND;
 import static java.util.Calendar.MINUTE;
 import static java.util.Calendar.SECOND;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.text.ParseException;
 import java.util.Calendar;
@@ -280,6 +281,25 @@ public class IntervalInstanceUsageGeneratorTest {
         assertEquals(result.size(), 2);
         assertEquals(Long.valueOf(12), result.get("2015-02-27"));
         assertEquals(Long.valueOf(13), result.get("2015-02-28"));
+    }
+
+    @Test
+    public void testGetInstanceHoursShouldReturnWithEmptyListWhenInstanceStartIsNull() throws ParseException {
+        InstanceMetaData instance = new InstanceMetaData();
+        Calendar cal = Calendar.getInstance();
+        cal.set(2015, 1, 27);
+        setCalendarTo(cal, 12, 1, 11, 111);
+        Date intervalStart = cal.getTime();
+        instance.setStartDate(null);
+        cal.set(DATE, cal.get(DATE) + 1);
+        setCalendarTo(cal, 12, 1, 11, 112);
+        instance.setTerminationDate(cal.getTimeInMillis());
+        cal.set(DATE, cal.get(DATE) + 1);
+        Date intervalEnd = cal.getTime();
+
+        Map<String, Long> result = underTest.getInstanceHours(instance, intervalStart, intervalEnd);
+
+        assertTrue(result.isEmpty());
     }
 
     private void setCalendarTo(Calendar calendar, int hour, int min, int sec, int ms) {

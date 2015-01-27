@@ -48,7 +48,7 @@ public class IntervalInstanceUsageGenerator {
         Long instanceStart = instance.getStartDate();
         Long intervalStart = startTime.getTime();
         Long intervalStop = stopTime.getTime();
-        if (intervalStop > instanceStart) {
+        if (instanceStart != null && intervalStop > instanceStart) {
             if (instanceStart < intervalStart) {
                 start = getCalendarInstanceForDate(intervalStart);
             } else {

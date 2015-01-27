@@ -39,15 +39,17 @@ public class IntervalStackUsageGenerator {
     public Map<String, CloudbreakUsage> generateUsages(Date startTime, Date stopTime, CloudbreakEvent startEvent) throws ParseException {
         Map<String, CloudbreakUsage> dailyStackUsages = new HashMap<>();
         Stack stack = stackRepository.findById(startEvent.getStackId());
-        Set<InstanceMetaData> instancesMetaData = stack.getAllInstanceMetaData();
-        PriceGenerator priceGenerator = selectPriceGeneratorByPlatform(stack);
 
-        for (InstanceMetaData instance : instancesMetaData) {
-            Template template = instance.getInstanceGroup().getTemplate();
-            Map<String, Long> instanceHours = instanceUsageGenerator.getInstanceHours(instance, startTime, stopTime);
-            addInstanceHoursToStackUsages(dailyStackUsages, instanceHours, startEvent, priceGenerator, template);
+        if (stack != null) {
+            Set<InstanceMetaData> instancesMetaData = stack.getAllInstanceMetaData();
+            PriceGenerator priceGenerator = selectPriceGeneratorByPlatform(stack);
+
+            for (InstanceMetaData instance : instancesMetaData) {
+                Template template = instance.getInstanceGroup().getTemplate();
+                Map<String, Long> instanceHours = instanceUsageGenerator.getInstanceHours(instance, startTime, stopTime);
+                addInstanceHoursToStackUsages(dailyStackUsages, instanceHours, startEvent, priceGenerator, template);
+            }
         }
-
         return dailyStackUsages;
     }
 
