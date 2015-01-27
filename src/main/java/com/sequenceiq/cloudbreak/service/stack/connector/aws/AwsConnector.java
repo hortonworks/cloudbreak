@@ -7,6 +7,10 @@ import static com.amazonaws.services.cloudformation.model.StackStatus.DELETE_FAI
 import static com.amazonaws.services.cloudformation.model.StackStatus.ROLLBACK_COMPLETE;
 import static com.amazonaws.services.cloudformation.model.StackStatus.ROLLBACK_FAILED;
 import static com.amazonaws.services.cloudformation.model.StackStatus.ROLLBACK_IN_PROGRESS;
+import static com.amazonaws.services.cloudformation.model.StackStatus.UPDATE_COMPLETE;
+import static com.amazonaws.services.cloudformation.model.StackStatus.UPDATE_ROLLBACK_COMPLETE;
+import static com.amazonaws.services.cloudformation.model.StackStatus.UPDATE_ROLLBACK_FAILED;
+import static com.sequenceiq.cloudbreak.service.PollingResult.isExited;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
 
 import java.util.ArrayList;
@@ -36,6 +40,7 @@ import com.amazonaws.services.cloudformation.model.DeleteStackRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
 import com.amazonaws.services.cloudformation.model.Parameter;
 import com.amazonaws.services.cloudformation.model.StackStatus;
+import com.amazonaws.services.cloudformation.model.UpdateStackRequest;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeImagesRequest;
 import com.amazonaws.services.ec2.model.DescribeImagesResult;
@@ -52,7 +57,6 @@ import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.BuildStackFailureException;
 import com.sequenceiq.cloudbreak.controller.StackCreationFailureException;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
-import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Credential;
@@ -71,6 +75,8 @@ import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
+import com.sequenceiq.cloudbreak.service.stack.connector.UpdateFailedException;
+import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
 import com.sequenceiq.cloudbreak.service.stack.event.AddInstancesComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteComplete;
@@ -123,6 +129,9 @@ public class AwsConnector implements CloudPlatformConnector {
     private ClusterRepository clusterRepository;
 
     @Autowired
+    private UserDataBuilder userDataBuilder;
+
+    @Autowired
     private StackRepository stackRepository;
 
     @Autowired
@@ -134,41 +143,31 @@ public class AwsConnector implements CloudPlatformConnector {
     @Override
     public void buildStack(Stack stack, String userData, Map<String, Object> setupProperties) {
         MDCBuilder.buildMdcContext(stack);
+        Long stackId = stack.getId();
         AwsCredential awsCredential = (AwsCredential) stack.getCredential();
         AmazonCloudFormationClient client = awsStackUtil.createCloudFormationClient(Regions.valueOf(stack.getRegion()), awsCredential);
-        String cFStackName = String.format("%s-%s", stack.getName(), stack.getId());
-        List<Parameter> parameters = new ArrayList<>(Arrays.asList(
-                new Parameter().withParameterKey("SSHLocation").withParameterValue("0.0.0.0/0"),
-                new Parameter().withParameterKey("CBUserData").withParameterValue(userData),
-                new Parameter().withParameterKey("StackName").withParameterValue(cFStackName),
-                new Parameter().withParameterKey("StackOwner").withParameterValue(awsCredential.getRoleArn()),
-                new Parameter().withParameterKey("KeyName").withParameterValue(awsCredential.getKeyPairName()),
-                new Parameter().withParameterKey("AMI").withParameterValue(stack.getImage()),
-                new Parameter().withParameterKey("RootDeviceName").withParameterValue(getRootDeviceName(stack, awsCredential))
-        ));
-        CreateStackRequest createStackRequest = createStackRequest()
+        String cFStackName = cfStackUtil.getCfStackName(stack);
+        CreateStackRequest createStackRequest = new CreateStackRequest()
                 .withStackName(cFStackName)
                 .withOnFailure(com.amazonaws.services.cloudformation.model.OnFailure.valueOf(stack.getOnFailureActionAction().name()))
-                .withTemplateBody(cfTemplateBuilder.build("templates/aws-cf-stack.ftl",
-                        spotPriceNeeded(stack.getInstanceGroups()), stack.getInstanceGroupsAsList()))
-                .withParameters(parameters);
+                .withTemplateBody(cfTemplateBuilder.build(stack, "templates/aws-cf-stack.ftl"))
+                .withParameters(getStackParameters(stack, userData, awsCredential, cFStackName));
         client.createStack(createStackRequest);
         Resource resource = new Resource(ResourceType.CLOUDFORMATION_STACK, cFStackName, stack, null);
         Set<Resource> resources = Sets.newHashSet(resource);
-        stack = stackUpdater.updateStackResources(stack.getId(), resources);
-        LOGGER.info("CloudFormation stack creation request sent with stack name: '{}' for stack: '{}'", cFStackName, stack.getId());
-
+        stack = stackUpdater.updateStackResources(stackId, resources);
+        LOGGER.info("CloudFormation stack creation request sent with stack name: '{}' for stack: '{}'", cFStackName, stackId);
         List<StackStatus> errorStatuses = Arrays.asList(CREATE_FAILED, ROLLBACK_IN_PROGRESS, ROLLBACK_FAILED, ROLLBACK_COMPLETE);
         CloudFormationStackPollerContext stackPollerContext = new CloudFormationStackPollerContext(client, CREATE_COMPLETE, errorStatuses, stack);
         try {
             PollingResult pollingResult = stackPollingService
                     .pollWithTimeout(cloudFormationStackStatusChecker, stackPollerContext, POLLING_INTERVAL, INFINITE_ATTEMPTS);
             if (isSuccess(pollingResult)) {
-                sendUpdatedStackCreateComplete(stack, cFStackName, resources);
+                sendUpdatedStackCreateComplete(stackId, cFStackName, resources);
             }
         } catch (CloudFormationStackException e) {
-            LOGGER.error(String.format("Failed to create CloudFormation stack: %s", stack.getId()), e);
-            stackUpdater.updateStackStatus(stack.getId(), Status.CREATE_FAILED, "Creation of cluster infrastructure failed: " + e.getMessage());
+            LOGGER.error(String.format("Failed to create CloudFormation stack: %s", stackId), e);
+            stackUpdater.updateStackStatus(stackId, Status.CREATE_FAILED, "Creation of cluster infrastructure failed: " + e.getMessage());
             throw new BuildStackFailureException(e);
         }
     }
@@ -223,6 +222,27 @@ public class AwsConnector implements CloudPlatformConnector {
         return true;
     }
 
+    @Override
+    public void updateAllowedSubnets(Stack stack, String userData) throws UpdateFailedException {
+        String cFStackName = cfStackUtil.getCfStackName(stack);
+        UpdateStackRequest updateStackRequest = new UpdateStackRequest()
+                .withStackName(cFStackName)
+                .withTemplateBody(cfTemplateBuilder.build(stack, "templates/aws-cf-stack.ftl"))
+                .withParameters(getStackParameters(stack, userData, (AwsCredential) stack.getCredential(), stack.getName()));
+        AmazonCloudFormationClient cloudFormationClient = awsStackUtil.createCloudFormationClient(stack);
+        cloudFormationClient.updateStack(updateStackRequest);
+        List<StackStatus> errorStatuses = Arrays.asList(UPDATE_ROLLBACK_COMPLETE, UPDATE_ROLLBACK_FAILED);
+        CloudFormationStackPollerContext stackPollerContext = new CloudFormationStackPollerContext(cloudFormationClient, UPDATE_COMPLETE, errorStatuses, stack);
+        try {
+            PollingResult pollingResult =
+                    stackPollingService.pollWithTimeout(cloudFormationStackStatusChecker, stackPollerContext, POLLING_INTERVAL, INFINITE_ATTEMPTS);
+            if (isExited(pollingResult)) {
+                throw new UpdateFailedException(new IllegalStateException());
+            }
+        } catch (CloudFormationStackException e) {
+            throw new UpdateFailedException(e);
+        }
+    }
 
     @Override
     public boolean startAll(Stack stack) {
@@ -284,22 +304,22 @@ public class AwsConnector implements CloudPlatformConnector {
         }
     }
 
-    private boolean spotPriceNeeded(Set<InstanceGroup> instanceGroups) {
-        boolean spotPrice = true;
-        for (InstanceGroup instanceGroup : instanceGroups) {
-            AwsTemplate awsTemplate = (AwsTemplate) instanceGroup.getTemplate();
-            if (awsTemplate.getSpotPrice() == null) {
-                spotPrice = false;
-            }
-        }
-        return spotPrice;
+    private List<Parameter> getStackParameters(Stack stack, String userData, AwsCredential awsCredential, String stackName) {
+        return new ArrayList<>(Arrays.asList(
+                new Parameter().withParameterKey("CBUserData").withParameterValue(userData),
+                new Parameter().withParameterKey("StackName").withParameterValue(stackName),
+                new Parameter().withParameterKey("StackOwner").withParameterValue(awsCredential.getRoleArn()),
+                new Parameter().withParameterKey("KeyName").withParameterValue(awsCredential.getKeyPairName()),
+                new Parameter().withParameterKey("AMI").withParameterValue(stack.getImage()),
+                new Parameter().withParameterKey("RootDeviceName").withParameterValue(getRootDeviceName(stack, awsCredential))
+        ));
     }
 
-    private void sendUpdatedStackCreateComplete(Stack stack, String cFStackName, Set<Resource> resourceSet) {
-        stack = stackUpdater.updateStackCreateComplete(stack.getId());
+    private void sendUpdatedStackCreateComplete(long stackId, String cFStackName, Set<Resource> resourceSet) {
+        stackUpdater.updateStackCreateComplete(stackId);
         LOGGER.info("CloudFormation stack({}) creation completed.", cFStackName);
         LOGGER.info("Publishing {} event.", ReactorConfig.PROVISION_COMPLETE_EVENT);
-        reactor.notify(ReactorConfig.PROVISION_COMPLETE_EVENT, Event.wrap(new ProvisionComplete(CloudPlatform.AWS, stack.getId(), resourceSet)));
+        reactor.notify(ReactorConfig.PROVISION_COMPLETE_EVENT, Event.wrap(new ProvisionComplete(CloudPlatform.AWS, stackId, resourceSet)));
     }
 
     private String getRootDeviceName(Stack stack, AwsCredential awsCredential) {
@@ -420,4 +440,5 @@ public class AwsConnector implements CloudPlatformConnector {
     protected CreateStackRequest createStackRequest() {
         return new CreateStackRequest();
     }
+
 }

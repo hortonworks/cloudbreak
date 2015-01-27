@@ -21,7 +21,7 @@ public enum ResourceType {
     GCC_ATTACHED_DISK,
     GCC_NETWORK,
     GCC_FIREWALL_IN,
-    GCC_FIREWALL_OUT,
+    GCC_FIREWALL_INTERNAL,
     GCC_ROUTE,
     GCC_INSTANCE,
 }

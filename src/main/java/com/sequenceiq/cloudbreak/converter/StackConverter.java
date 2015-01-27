@@ -1,12 +1,9 @@
 package com.sequenceiq.cloudbreak.converter;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +22,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
+import com.sequenceiq.cloudbreak.service.network.SecurityService;
 import com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils;
 
 @Component
@@ -49,6 +47,12 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
 
     @Autowired
     private FailurePolicyConverter failurePolicyConverter;
+
+    @Autowired
+    private SubnetConverter subnetConverter;
+
+    @Autowired
+    private SecurityService securityService;
 
     @Value("${cb.aws.ami.map}")
     private String awsImage;
@@ -86,6 +90,7 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
         stackJson.setConsulServerCount(entity.getConsulServers());
         stackJson.setRegion(entity.getRegion());
         stackJson.setOnFailureAction(entity.getOnFailureActionAction());
+        stackJson.setAllowedSubnets(new ArrayList<>(subnetConverter.convertAllEntityToJson(entity.getAllowedSubnets())));
         List<InstanceGroupJson> templateGroups = new ArrayList<>();
         templateGroups.addAll(instanceGroupConverter.convertAllEntityToJson(entity.getInstanceGroups()));
         stackJson.setInstanceGroups(templateGroups);
@@ -110,6 +115,10 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
         stack.setPublicInAccount(json.isPublicInAccount());
         stack.setRegion(json.getRegion());
         stack.setOnFailureActionAction(json.getOnFailureAction());
+        if (json.getAllowedSubnets() != null) {
+            stack.setAllowedSubnets(subnetConverter.convertAllJsonToEntity(json.getAllowedSubnets(), stack));
+        }
+        stack.addAllowedSubnets(securityService.getCloudbreakSubnets(stack));
         try {
             stack.setCredential(credentialRepository.findOne(json.getCredentialId()));
         } catch (AccessDeniedException e) {
@@ -187,14 +196,6 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
         Stack stack = convert(json);
         stack.setPublicInAccount(publicInAccount);
         return stack;
-    }
-
-    public Set<StackJson> convertAllEntityToJsonWithClause(Collection<Stack> entityList) {
-        Set<StackJson> stackJsons = new HashSet<>();
-        for (Stack stack : entityList) {
-            stackJsons.add(convert(stack));
-        }
-        return stackJsons;
     }
 
     public Map<String, Object> convertStackStatus(Stack stack) {

@@ -18,19 +18,19 @@ parameters:
   app_net_cidr:
     type: string
     description: app network address (CIDR notation)
-    default: 10.10.1.0/24
+    default: ${cbSubnet}
   app_net_gateway:
     type: string
     description: app network gateway address
-    default: 10.10.1.1
+    default: ${gatewayIP}
   app_net_pool_start:
     type: string
     description: Start of app network IP address allocation pool
-    default: 10.10.1.4
+    default: ${startIP}
   app_net_pool_end:
     type: string
     description: End of app network IP address allocation pool
-    default: 10.10.1.254
+    default: ${endIP}
   public_net_id:
     type: string
     description: The ID of the public network. You will need to replace it with your DevStack public network ID
@@ -128,18 +128,26 @@ ${userdata}
   server_security_group:
     type: OS::Neutron::SecurityGroup
     properties:
-      description: Test group to demonstrate Neutron security group functionality with Heat.
-      name: test-security-group
+      description: Cloudbreak security group
+      name: cb-sec-group
       rules: [
-        {remote_ip_prefix: 0.0.0.0/0,
+        <#list subnets as s>
+        <#list ports as p>
+        {remote_ip_prefix: ${s.cidr},
+        protocol: ${p.protocol},
+        port_range_min: ${p.localPort},
+        port_range_max: ${p.localPort}},
+        </#list>
+        </#list>
+        {remote_ip_prefix: ${cbSubnet},
         protocol: tcp,
         port_range_min: 1,
         port_range_max: 65535},
-        {remote_ip_prefix: 0.0.0.0/0,
+        {remote_ip_prefix: ${cbSubnet},
         protocol: udp,
         port_range_min: 1,
         port_range_max: 65535},
-        {remote_ip_prefix: 0.0.0.0/0,
+        {remote_ip_prefix: ${cbSubnet},
         protocol: icmp}]
         
 outputs:

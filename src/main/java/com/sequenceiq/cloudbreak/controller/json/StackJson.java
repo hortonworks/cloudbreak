@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.OnFailureAction;
 import com.sequenceiq.cloudbreak.domain.Status;
+import com.sequenceiq.cloudbreak.domain.SubnetJson;
 
 public class StackJson implements JsonEntity {
 
@@ -48,6 +49,7 @@ public class StackJson implements JsonEntity {
     private FailurePolicyJson failurePolicy;
     private List<InstanceGroupJson> instanceGroups = new ArrayList<>();
     private Integer consulServerCount;
+    private List<SubnetJson> allowedSubnets = new ArrayList<>();
 
     public StackJson() {
     }
@@ -134,6 +136,14 @@ public class StackJson implements JsonEntity {
 
     public void setRegion(String region) {
         this.region = region;
+    }
+
+    public List<SubnetJson> getAllowedSubnets() {
+        return allowedSubnets;
+    }
+
+    public void setAllowedSubnets(List<SubnetJson> allowedSubnets) {
+        this.allowedSubnets = allowedSubnets;
     }
 
     @JsonProperty("status")

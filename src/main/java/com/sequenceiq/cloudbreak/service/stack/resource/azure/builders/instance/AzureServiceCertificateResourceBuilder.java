@@ -54,7 +54,7 @@ public class AzureServiceCertificateResourceBuilder extends AzureSimpleInstanceR
     public Boolean create(final CreateResourceRequest createResourceRequest, final String region) throws Exception {
         AzureServiceCertificateCreateRequest aCSCR = (AzureServiceCertificateCreateRequest) createResourceRequest;
         HttpResponseDecorator serviceCertificate = (HttpResponseDecorator) aCSCR.getAzureClient().createServiceCertificate(aCSCR.getProps());
-        AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(aCSCR.getAzureClient(), serviceCertificate, aCSCR.getStack());
+        AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(aCSCR.getAzureClient(), aCSCR.getStack(), serviceCertificate);
         azureResourcePollerObjectPollingService.pollWithTimeout(azureCreateResourceStatusCheckerTask, azureResourcePollerObject,
                 POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
         return true;

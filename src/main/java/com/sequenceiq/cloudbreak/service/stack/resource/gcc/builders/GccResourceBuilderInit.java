@@ -30,10 +30,11 @@ import com.sequenceiq.cloudbreak.service.stack.resource.gcc.builders.instance.Gc
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccProvisionContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccStartStopContextObject;
+import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccUpdateContextObject;
 
 @Component
 public class GccResourceBuilderInit implements
-        ResourceBuilderInit<GccProvisionContextObject, GccDeleteContextObject, GccStartStopContextObject> {
+        ResourceBuilderInit<GccProvisionContextObject, GccDeleteContextObject, GccStartStopContextObject, GccUpdateContextObject> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GccResourceBuilderInit.class);
 
@@ -53,6 +54,13 @@ public class GccResourceBuilderInit implements
                 gccStackUtil.buildCompute(credential, stack));
         gccProvisionContextObject.setUserData(userData);
         return gccProvisionContextObject;
+    }
+
+    @Override
+    public GccUpdateContextObject updateInit(Stack stack) {
+        GccCredential credential = (GccCredential) stack.getCredential();
+        Compute compute = gccStackUtil.buildCompute(credential);
+        return new GccUpdateContextObject(stack, compute, credential.getProjectId());
     }
 
     @Override

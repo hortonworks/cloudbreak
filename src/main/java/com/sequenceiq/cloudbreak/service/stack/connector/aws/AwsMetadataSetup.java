@@ -72,7 +72,7 @@ public class AwsMetadataSetup implements MetadataSetup {
 
         AmazonCloudFormationClient amazonCFClient = awsStackUtil.createCloudFormationClient(Regions.valueOf(stack.getRegion()), awsCredential);
         AmazonAutoScalingClient amazonASClient = awsStackUtil.createAutoScalingClient(Regions.valueOf(stack.getRegion()), awsCredential);
-        AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(Regions.valueOf(stack.getRegion()), awsCredential);
+        AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(stack);
 
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             // wait until all instances are up
@@ -116,9 +116,7 @@ public class AwsMetadataSetup implements MetadataSetup {
         MDCBuilder.buildMdcContext(stack);
         Set<CoreInstanceMetaData> coreInstanceMetadata = new HashSet<>();
         LOGGER.info("Adding new instances to metadata: [stack: '{}']", stack.getId());
-        AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(
-                Regions.valueOf(stack.getRegion()),
-                (AwsCredential) stack.getCredential());
+        AmazonEC2Client amazonEC2Client = awsStackUtil.createEC2Client(stack);
 
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             List<String> instanceIds = new ArrayList<>();

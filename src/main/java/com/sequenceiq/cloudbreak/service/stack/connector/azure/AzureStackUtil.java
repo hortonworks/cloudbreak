@@ -34,7 +34,9 @@ public class AzureStackUtil {
 
     public static final int NOT_FOUND = 404;
     public static final String NAME = "name";
+    public static final String PORTS = "ports";
     public static final String SERVICENAME = "serviceName";
+    public static final String VIRTUAL_NETWORK_IP_ADDRESS = "virtualNetworkIPAddress";
     public static final String ERROR = "\"error\":\"Could not fetch data from azure\"";
     public static final String CREDENTIAL = "credential";
     public static final String IMAGE_NAME = "ambari-docker-v1";

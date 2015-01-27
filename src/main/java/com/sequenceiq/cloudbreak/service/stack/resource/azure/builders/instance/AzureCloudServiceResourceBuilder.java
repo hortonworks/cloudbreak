@@ -62,7 +62,7 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
     public Boolean create(final CreateResourceRequest createResourceRequest, String region) throws Exception {
         AzureCloudServiceCreateRequest aCSCR = (AzureCloudServiceCreateRequest) createResourceRequest;
         HttpResponseDecorator cloudServiceResponse = (HttpResponseDecorator) aCSCR.getAzureClient().createCloudService(aCSCR.getProps());
-        AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(aCSCR.getAzureClient(), cloudServiceResponse, aCSCR.getStack());
+        AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(aCSCR.getAzureClient(), aCSCR.getStack(), cloudServiceResponse);
         azureResourcePollerObjectPollingService.pollWithTimeout(azureCreateResourceStatusCheckerTask, azureResourcePollerObject,
                 POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
         return true;

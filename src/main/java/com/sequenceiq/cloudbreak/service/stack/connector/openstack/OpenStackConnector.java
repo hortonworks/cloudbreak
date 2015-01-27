@@ -13,6 +13,7 @@ import org.openstack4j.api.Builders;
 import org.openstack4j.api.OSClient;
 import org.openstack4j.model.compute.Action;
 import org.openstack4j.model.compute.ActionResponse;
+import org.openstack4j.model.heat.StackUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,7 @@ import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
+import com.sequenceiq.cloudbreak.service.stack.connector.UpdateFailedException;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteComplete;
 
@@ -76,7 +78,7 @@ public class OpenStackConnector implements CloudPlatformConnector {
         String stackName = stack.getName();
         OpenStackCredential credential = (OpenStackCredential) stack.getCredential();
         List<InstanceGroup> instanceGroups = stack.getInstanceGroupsAsList();
-        String heatTemplate = heatTemplateBuilder.build("templates/openstack-heat.ftl", instanceGroups, userData);
+        String heatTemplate = heatTemplateBuilder.build(stack, "templates/openstack-heat.ftl", instanceGroups, userData);
         OSClient osClient = openStackUtil.createOSClient(credential);
         org.openstack4j.model.heat.Stack openStackStack = osClient
                 .heat()
@@ -156,6 +158,29 @@ public class OpenStackConnector implements CloudPlatformConnector {
     @Override
     public CloudPlatform getCloudPlatform() {
         return CloudPlatform.OPENSTACK;
+    }
+
+    @Override
+    public void updateAllowedSubnets(Stack stack, String userData) throws UpdateFailedException {
+        OpenStackCredential credential = (OpenStackCredential) stack.getCredential();
+        List<InstanceGroup> instanceGroups = stack.getInstanceGroupsAsList();
+        String heatTemplate = heatTemplateBuilder.build(stack, "templates/openstack-heat.ftl", instanceGroups, userData);
+        Resource heatStack = stack.getResourceByType(ResourceType.HEAT_STACK);
+        String heatStackId = heatStack.getResourceName();
+        OSClient osClient = openStackUtil.createOSClient(credential);
+        StackUpdate updateRequest = Builders.stackUpdate().template(heatTemplate)
+                .parameters(buildParameters(instanceGroups, credential, stack.getImage())).timeoutMins(OPERATION_TIMEOUT).build();
+        String stackName = stack.getName();
+        osClient.heat().stacks().update(stackName, heatStackId, updateRequest);
+        LOGGER.info("Heat stack update request sent with stack name: '{}' for Heat stack: '{}'", stackName, heatStackId);
+        try {
+            pollingService.pollWithTimeout(openStackHeatStackStatusCheckerTask,
+                    new OpenStackContext(stack, asList(heatStackId), osClient, HeatStackStatus.UPDATED.getStatus()),
+                    POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
+            LOGGER.info("Successfully updated security group on Heat stack: {}", heatStackId);
+        } catch (HeatStackFailedException e) {
+            throw new UpdateFailedException(e);
+        }
     }
 
     private Map<String, String> buildParameters(List<InstanceGroup> instanceGroups, OpenStackCredential credential, String image) {

@@ -4,8 +4,7 @@ public enum HeatStackStatus {
 
     CREATED("CREATE_COMPLETE"),
     DELETED("DELETE_COMPLETE"),
-    DELETE_FAILED("DELETE_FAILED"),
-    CREATE_FAILED("CREATE_FAILED");
+    UPDATED("UPDATE_COMPLETE");
 
     private final String status;
 

@@ -2,13 +2,17 @@ package com.sequenceiq.cloudbreak.service.stack.connector.aws;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
@@ -17,6 +21,7 @@ import com.sequenceiq.cloudbreak.domain.AwsInstanceType;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.AwsVolumeType;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.Stack;
 
 import freemarker.template.Configuration;
 
@@ -24,6 +29,9 @@ public class CloudFormationTemplateBuilderTest {
 
     @InjectMocks
     private CloudFormationTemplateBuilder underTest;
+
+    @Mock
+    private Stack stack;
 
     @Before
     public void setUp() throws Exception {
@@ -51,8 +59,12 @@ public class CloudFormationTemplateBuilderTest {
         instanceGroup1.setNodeCount(1);
         instanceGroup1.setTemplate(awsTemplate);
         instanceGroup1.setGroupName("master");
+        List<InstanceGroup> instanceGroupsList = Arrays.asList(instanceGroup1);
+        Set<InstanceGroup> instanceGroupSet = new HashSet<>(instanceGroupsList);
+        when(stack.getInstanceGroupsAsList()).thenReturn(instanceGroupsList);
+        when(stack.getInstanceGroups()).thenReturn(instanceGroupSet);
         // WHEN
-        String result = underTest.build("templates/aws-cf-stack.ftl", false, Arrays.asList(instanceGroup1));
+        String result = underTest.build(stack, "templates/aws-cf-stack.ftl");
         // THEN
         assertTrue(result.contains("\"DeviceName\" : \"/dev/xvdf\""));
         assertTrue(result.contains("\"DeviceName\" : \"/dev/xvdg\""));
@@ -73,8 +85,12 @@ public class CloudFormationTemplateBuilderTest {
         instanceGroup1.setNodeCount(1);
         instanceGroup1.setTemplate(awsTemplate);
         instanceGroup1.setGroupName("master");
+        List<InstanceGroup> instanceGroupsList = Arrays.asList(instanceGroup1);
+        Set<InstanceGroup> instanceGroupSet = new HashSet<>(instanceGroupsList);
+        when(stack.getInstanceGroupsAsList()).thenReturn(instanceGroupsList);
+        when(stack.getInstanceGroups()).thenReturn(instanceGroupSet);
         // WHEN
-        String result = underTest.build("templates/aws-cf-stack.ftl", true, Arrays.asList(instanceGroup1));
+        String result = underTest.build(stack, "templates/aws-cf-stack.ftl");
         // THEN
         assertTrue(result.contains("\"SpotPrice\""));
     }
@@ -92,8 +108,12 @@ public class CloudFormationTemplateBuilderTest {
         instanceGroup1.setNodeCount(1);
         instanceGroup1.setTemplate(awsTemplate);
         instanceGroup1.setGroupName("master");
+        List<InstanceGroup> instanceGroupsList = Arrays.asList(instanceGroup1);
+        Set<InstanceGroup> instanceGroupSet = new HashSet<>(instanceGroupsList);
+        when(stack.getInstanceGroupsAsList()).thenReturn(instanceGroupsList);
+        when(stack.getInstanceGroups()).thenReturn(instanceGroupSet);
         // WHEN
-        String result = underTest.build("templates/aws-cf-stack.ftl", false, Arrays.asList(instanceGroup1));
+        String result = underTest.build(stack, "templates/aws-cf-stack.ftl");
         // THEN
         assertFalse(result.contains("\"SpotPrice\""));
     }
@@ -101,6 +121,6 @@ public class CloudFormationTemplateBuilderTest {
     @Test(expected = InternalServerException.class)
     public void testBuildTemplateShouldThrowInternalServerExceptionWhenTemplateDoesNotExist() {
         // WHEN
-        underTest.build("templates/non-existent.ftl", false, new ArrayList<InstanceGroup>());
+        underTest.build(stack, "templates/non-existent.ftl");
     }
 }

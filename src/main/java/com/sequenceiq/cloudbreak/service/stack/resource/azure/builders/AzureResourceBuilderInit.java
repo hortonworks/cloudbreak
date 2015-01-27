@@ -23,10 +23,11 @@ import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderType;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureProvisionContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureStartStopContextObject;
+import com.sequenceiq.cloudbreak.service.stack.resource.azure.model.AzureUpdateContextObject;
 
 @Component
 public class AzureResourceBuilderInit implements
-        ResourceBuilderInit<AzureProvisionContextObject, AzureDeleteContextObject, AzureStartStopContextObject> {
+        ResourceBuilderInit<AzureProvisionContextObject, AzureDeleteContextObject, AzureStartStopContextObject, AzureUpdateContextObject> {
 
     @Autowired
     private AzureStackUtil azureStackUtil;
@@ -39,6 +40,11 @@ public class AzureResourceBuilderInit implements
                 new AzureProvisionContextObject(stack.getId(), credential.getCommonName(azureLocation),
                         getOsImageName(credential, azureLocation, stack.getImage()), userData, getAllocatedAddresses(stack));
         return azureProvisionContextObject;
+    }
+
+    @Override
+    public AzureUpdateContextObject updateInit(Stack stack) {
+        return new AzureUpdateContextObject(stack);
     }
 
     @Override

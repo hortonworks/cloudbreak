@@ -50,7 +50,7 @@ public class ProvisionContextCallable implements Callable<ResourceRequestResult>
     public ResourceRequestResult call() {
         LOGGER.info("Node {}. creation starting", index);
         List<Resource> resources = new ArrayList<>();
-        List<Resource> buildResources = new ArrayList<Resource>();
+        List<Resource> buildResources = new ArrayList<>();
         try {
             for (final ResourceBuilder resourceBuilder : instanceResourceBuilders.get(stack.cloudPlatform())) {
                 ResourceBuilderType resourceBuilderType = resourceBuilder.resourceBuilderType();

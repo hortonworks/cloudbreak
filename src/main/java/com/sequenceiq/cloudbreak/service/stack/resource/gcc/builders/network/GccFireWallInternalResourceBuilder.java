@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
+import com.sequenceiq.cloudbreak.service.network.NetworkConfig;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveCheckerStatus;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveReadyPollerObject;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccZone;
@@ -33,7 +34,7 @@ import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccProvisionCo
 
 @Component
 @Order(2)
-public class GccFireWallOutResourceBuilder extends GccSimpleNetworkResourceBuilder {
+public class GccFireWallInternalResourceBuilder extends GccSimpleNetworkResourceBuilder {
 
     @Autowired
     private StackRepository stackRepository;
@@ -76,14 +77,12 @@ public class GccFireWallOutResourceBuilder extends GccSimpleNetworkResourceBuild
     public List<Resource> buildResources(GccProvisionContextObject provisionContextObject, int index, List<Resource> resources,
             Optional<InstanceGroup> instanceGroup) {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
-        return Arrays.asList(new Resource(resourceType(), stack.getName() + "out", stack, null));
+        return Arrays.asList(new Resource(resourceType(), stack.getName() + "internal", stack, null));
     }
 
     @Override
     public CreateResourceRequest buildCreateRequest(GccProvisionContextObject provisionContextObject, List<Resource> resources,
             List<Resource> buildResources, int index, Optional<InstanceGroup> instanceGroup) throws Exception {
-        Stack stack = stackRepository.findById(provisionContextObject.getStackId());
-
         Firewall firewall = new Firewall();
         Firewall.Allowed allowed1 = new Firewall.Allowed();
         allowed1.setIPProtocol("tcp");
@@ -98,7 +97,7 @@ public class GccFireWallOutResourceBuilder extends GccSimpleNetworkResourceBuild
 
         firewall.setAllowed(ImmutableList.of(allowed1, allowed2, allowed3));
         firewall.setName(buildResources.get(0).getResourceName());
-        firewall.setSourceRanges(ImmutableList.of("0.0.0.0/0"));
+        firewall.setSourceRanges(ImmutableList.of(NetworkConfig.SUBNET_16));
         firewall.setNetwork(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s",
                 provisionContextObject.getProjectId(), provisionContextObject.filterResourcesByType(ResourceType.GCC_NETWORK).get(0).getResourceName()));
         return new GccFireWallOutCreateRequest(provisionContextObject.getStackId(), firewall, provisionContextObject.getProjectId(),
@@ -107,7 +106,7 @@ public class GccFireWallOutResourceBuilder extends GccSimpleNetworkResourceBuild
 
     @Override
     public ResourceType resourceType() {
-        return ResourceType.GCC_FIREWALL_OUT;
+        return ResourceType.GCC_FIREWALL_INTERNAL;
     }
 
     public class GccFireWallOutCreateRequest extends CreateResourceRequest {

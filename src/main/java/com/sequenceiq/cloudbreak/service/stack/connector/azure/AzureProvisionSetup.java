@@ -193,7 +193,7 @@ public class AzureProvisionSetup implements ProvisionSetup {
                 params.put(DESCRIPTION, VM_COMMON_NAME);
                 params.put(AFFINITYGROUP, affinityGroupName);
                 HttpResponseDecorator response = (HttpResponseDecorator) azureClient.createStorageAccount(params);
-                AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(azureClient, response, stack);
+                AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(azureClient, stack, response);
                 azureResourcePollerObjectPollingService.pollWithTimeout(azureCreateResourceStatusCheckerTask, azureResourcePollerObject,
                         POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
             } else {

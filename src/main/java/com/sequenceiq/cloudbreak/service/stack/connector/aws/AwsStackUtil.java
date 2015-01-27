@@ -26,6 +26,10 @@ public class AwsStackUtil {
     @Autowired
     private CrossAccountCredentialsProvider credentialsProvider;
 
+    public AmazonCloudFormationClient createCloudFormationClient(Stack stack) {
+        return createCloudFormationClient(Regions.valueOf(stack.getRegion()), (AwsCredential) stack.getCredential());
+    }
+
     public AmazonCloudFormationClient createCloudFormationClient(Regions regions, AwsCredential credential) {
         MDCBuilder.buildMdcContext(credential);
         BasicSessionCredentials basicSessionCredentials = credentialsProvider
@@ -35,6 +39,10 @@ public class AwsStackUtil {
         amazonCloudFormationClient.setRegion(Region.getRegion(regions));
         LOGGER.debug("Amazon CloudFormation client successfully created.");
         return amazonCloudFormationClient;
+    }
+
+    public AmazonEC2Client createEC2Client(Stack stack) {
+        return createEC2Client(Regions.valueOf(stack.getRegion()), (AwsCredential) stack.getCredential());
     }
 
     public AmazonEC2Client createEC2Client(Regions regions, AwsCredential credential) {

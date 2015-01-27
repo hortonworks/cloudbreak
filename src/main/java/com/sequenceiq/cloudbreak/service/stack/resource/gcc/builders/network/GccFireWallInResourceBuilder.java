@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.resource.gcc.builders.network;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -13,16 +14,19 @@ import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.Firewall;
 import com.google.api.services.compute.model.Operation;
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableList;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.domain.GccCredential;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.Subnet;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.PollingService;
+import com.sequenceiq.cloudbreak.service.network.NetworkUtils;
+import com.sequenceiq.cloudbreak.service.stack.connector.UpdateFailedException;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveCheckerStatus;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.GccRemoveReadyPollerObject;
 import com.sequenceiq.cloudbreak.service.stack.connector.gcc.domain.GccZone;
@@ -30,6 +34,7 @@ import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.GccSimpleNetworkResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccDeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccProvisionContextObject;
+import com.sequenceiq.cloudbreak.service.stack.resource.gcc.model.GccUpdateContextObject;
 
 @Component
 @Order(3)
@@ -84,21 +89,26 @@ public class GccFireWallInResourceBuilder extends GccSimpleNetworkResourceBuilde
             List<Resource> buildResources, int index, Optional<InstanceGroup> instanceGroup) throws Exception {
         Stack stack = stackRepository.findById(provisionContextObject.getStackId());
 
+        List<String> sourceRanges = getSourceRanges(stack);
+
         Firewall firewall = new Firewall();
-        Firewall.Allowed allowed1 = new Firewall.Allowed();
-        allowed1.setIPProtocol("tcp");
-        allowed1.setPorts(ImmutableList.of("1-65535"));
+        firewall.setSourceRanges(sourceRanges);
 
-        Firewall.Allowed allowed2 = new Firewall.Allowed();
-        allowed2.setIPProtocol("icmp");
+        List<Firewall.Allowed> allowedRules = new ArrayList<>();
+        allowedRules.add(new Firewall.Allowed().setIPProtocol("icmp"));
 
-        Firewall.Allowed allowed3 = new Firewall.Allowed();
-        allowed3.setIPProtocol("udp");
-        allowed3.setPorts(ImmutableList.of("1-65535"));
+        Firewall.Allowed tcp = createRule(stack, "tcp");
+        if (tcp != null) {
+            allowedRules.add(tcp);
+        }
 
-        firewall.setAllowed(ImmutableList.of(allowed1, allowed2, allowed3));
+        Firewall.Allowed udp = createRule(stack, "udp");
+        if (udp != null) {
+            allowedRules.add(udp);
+        }
+
+        firewall.setAllowed(allowedRules);
         firewall.setName(buildResources.get(0).getResourceName());
-        firewall.setSourceRanges(ImmutableList.of("10.0.0.0/16"));
         firewall.setNetwork(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s",
                 provisionContextObject.getProjectId(), provisionContextObject.filterResourcesByType(ResourceType.GCC_NETWORK).get(0).getResourceName()));
         return new GccFireWallInCreateRequest(provisionContextObject.getStackId(), firewall, provisionContextObject.getProjectId(),
@@ -106,8 +116,44 @@ public class GccFireWallInResourceBuilder extends GccSimpleNetworkResourceBuilde
     }
 
     @Override
+    public void update(GccUpdateContextObject updateContextObject) throws UpdateFailedException {
+        Stack stack = updateContextObject.getStack();
+        MDCBuilder.buildMdcContext(stack);
+        Compute compute = updateContextObject.getCompute();
+        String project = updateContextObject.getProject();
+        String resourceName = stack.getResourceByType(ResourceType.GCC_FIREWALL_IN).getResourceName();
+        try {
+            Firewall fireWall = compute.firewalls().get(project, resourceName).execute();
+            List<String> sourceRanges = getSourceRanges(stack);
+            fireWall.setSourceRanges(sourceRanges);
+            compute.firewalls().update(project, resourceName, fireWall).execute();
+        } catch (IOException e) {
+            throw new UpdateFailedException(e);
+        }
+    }
+
+    @Override
     public ResourceType resourceType() {
         return ResourceType.GCC_FIREWALL_IN;
+    }
+
+    private List<String> getSourceRanges(Stack stack) {
+        List<String> sourceRanges = new ArrayList<>(stack.getAllowedSubnets().size());
+        for (Subnet subnet : stack.getAllowedSubnets()) {
+            sourceRanges.add(subnet.getCidr());
+        }
+        return sourceRanges;
+    }
+
+    private Firewall.Allowed createRule(Stack stack, String protocol) {
+        List<String> ports = NetworkUtils.getRawPorts(stack, protocol);
+        if (!ports.isEmpty()) {
+            Firewall.Allowed rule = new Firewall.Allowed();
+            rule.setIPProtocol(protocol);
+            rule.setPorts(ports);
+            return rule;
+        }
+        return null;
     }
 
     public class GccFireWallInCreateRequest extends CreateResourceRequest {
