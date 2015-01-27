@@ -6,7 +6,6 @@ import static java.util.Calendar.MINUTE;
 import static java.util.Calendar.SECOND;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
@@ -30,7 +29,6 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 @Component
 public class StackUsageGenerator {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackUsageGenerator.class);
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
     @Autowired
     private CloudbreakEventRepository eventRepository;
@@ -78,8 +76,8 @@ public class StackUsageGenerator {
         return BillingStatus.BILLING_STARTED.name().equals(event.getEventType());
     }
 
-    private void addAllGeneratedUsages(List<CloudbreakUsage> stackUsages, CloudbreakEvent start, Date stop) throws ParseException {
-        Map<String, CloudbreakUsage> usages = intervalUsageGenerator.generateUsages(start.getEventTimestamp(), stop, start);
+    private void addAllGeneratedUsages(List<CloudbreakUsage> stackUsages, CloudbreakEvent startEvent, Date stopTime) throws ParseException {
+        Map<String, CloudbreakUsage> usages = intervalUsageGenerator.generateUsages(startEvent.getEventTimestamp(), stopTime, startEvent);
         stackUsages.addAll(usages.values());
     }
 
@@ -94,9 +92,9 @@ public class StackUsageGenerator {
             start.setTime(startEvent.getEventTimestamp());
             cal.set(MINUTE, start.get(MINUTE));
             //save billing start event for daily usage generation
-            CloudbreakEvent newBilling = createBillingStarterCloudbreakEvent(startEvent, cal);
-            eventRepository.save(newBilling);
-            LOGGER.debug("BILLING_STARTED is created with date:{} for running stack {}.", cal.getTime(), newBilling.getStackId());
+            CloudbreakEvent newBillingStart = createBillingStarterCloudbreakEvent(startEvent, cal);
+            eventRepository.save(newBillingStart);
+            LOGGER.debug("BILLING_STARTED is created with date:{} for running stack {}.", cal.getTime(), newBillingStart.getStackId());
         }
     }
 
@@ -131,9 +129,5 @@ public class StackUsageGenerator {
         event.setNodeCount(startEvent.getNodeCount());
         event.setInstanceGroup(startEvent.getInstanceGroup());
         return event;
-    }
-
-    void setIntervalUsageGenerator(IntervalStackUsageGenerator intervalUsageGenerator) {
-        this.intervalUsageGenerator = intervalUsageGenerator;
     }
 }
