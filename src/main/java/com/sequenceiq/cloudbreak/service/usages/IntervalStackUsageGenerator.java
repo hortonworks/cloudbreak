@@ -4,6 +4,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -12,11 +13,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.price.PriceGenerator;
 
 @Component
 public class IntervalStackUsageGenerator {
@@ -29,39 +33,67 @@ public class IntervalStackUsageGenerator {
     @Autowired
     private IntervalInstanceUsageGenerator instanceUsageGenerator;
 
+    @Autowired
+    private List<PriceGenerator> priceGenerators;
+
     public Map<String, CloudbreakUsage> generateUsages(Date startTime, Date stopTime, CloudbreakEvent startEvent) throws ParseException {
         Map<String, CloudbreakUsage> dailyStackUsages = new HashMap<>();
         Stack stack = stackRepository.findById(startEvent.getStackId());
         Set<InstanceMetaData> instancesMetaData = stack.getAllInstanceMetaData();
+        PriceGenerator priceGenerator = selectPriceGeneratorByPlatform(stack);
 
         for (InstanceMetaData instance : instancesMetaData) {
-            Map<String, Long> instanceUsages = instanceUsageGenerator.getInstanceHours(instance, startTime, stopTime);
-            addInstanceUsagesToStackUsages(dailyStackUsages, instanceUsages, startEvent);
+            Template template = instance.getInstanceGroup().getTemplate();
+            Map<String, Long> instanceHours = instanceUsageGenerator.getInstanceHours(instance, startTime, stopTime);
+            addInstanceHoursToStackUsages(dailyStackUsages, instanceHours, startEvent, priceGenerator, template);
         }
 
         return dailyStackUsages;
     }
 
-    private void addInstanceUsagesToStackUsages(Map<String, CloudbreakUsage> dailyStackUsages, Map<String, Long> instanceUsages,
-            CloudbreakEvent event) throws ParseException {
+
+    private PriceGenerator selectPriceGeneratorByPlatform(Stack stack) {
+        PriceGenerator result = null;
+        CloudPlatform stackCloudPlatform = stack.cloudPlatform();
+        for (PriceGenerator generator : priceGenerators) {
+            CloudPlatform generatorCloudPlatform = generator.getCloudPlatform();
+            if (stackCloudPlatform.equals(generatorCloudPlatform)) {
+                result = generator;
+                break;
+            }
+        }
+        return result;
+    }
+
+    private void addInstanceHoursToStackUsages(Map<String, CloudbreakUsage> dailyStackUsages, Map<String, Long> instanceUsages,
+            CloudbreakEvent event, PriceGenerator priceGenerator, Template template) throws ParseException {
+
         for (Map.Entry<String, Long> entry : instanceUsages.entrySet()) {
             String day = entry.getKey();
             Long instanceHours = entry.getValue();
+            Double costOfInstance = calculateCostOfInstance(priceGenerator, template, instanceHours);
             if (dailyStackUsages.containsKey(day)) {
                 CloudbreakUsage usage = dailyStackUsages.get(day);
                 long numberOfHours = usage.getInstanceHours() + instanceHours;
+                double costOfStack = usage.getCosts() + costOfInstance;
                 usage.setInstanceHours(numberOfHours);
-//                real calculated usage should be set here
-//                usage.setCosts();
+                usage.setCosts(costOfStack);
             } else {
-                //real calculated usage should be set here
-                CloudbreakUsage usage = getCloudbreakUsage(event, instanceHours, day);
+                CloudbreakUsage usage = getCloudbreakUsage(event, instanceHours, day, costOfInstance);
                 dailyStackUsages.put(day, usage);
             }
         }
     }
 
-    private CloudbreakUsage getCloudbreakUsage(CloudbreakEvent event, long runningHours, String dayString) throws ParseException {
+    private Double calculateCostOfInstance(PriceGenerator priceGenerator, Template template, Long instanceHours) {
+        Double result = 0.0;
+        if (priceGenerator != null) {
+            result = priceGenerator.calculate(template, instanceHours);
+        }
+        return result;
+    }
+
+    private CloudbreakUsage getCloudbreakUsage(CloudbreakEvent event, long runningHours, String dayString, Double costOfInstance) throws ParseException {
         Date day = DATE_FORMAT.parse(dayString);
         long nodesRunningHours = runningHours * event.getNodeCount();
         CloudbreakUsage usage = new CloudbreakUsage();
@@ -73,9 +105,7 @@ public class IntervalStackUsageGenerator {
         usage.setDay(day);
         usage.setStackId(event.getStackId());
         usage.setStackName(event.getStackName());
-
-        //real calculated usage should be set here
-        usage.setCosts(0.0);
+        usage.setCosts(costOfInstance);
         return usage;
     }
 }
