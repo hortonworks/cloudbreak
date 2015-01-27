@@ -12,6 +12,7 @@ public class ClusterRequest {
             message = "The name of the cluster can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
     @NotNull
     private String name;
+    @NotNull
     private Long blueprintId;
     private Long recipeId;
     @Size(max = 1000)

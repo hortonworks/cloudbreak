@@ -3,16 +3,19 @@ package com.sequenceiq.cloudbreak.service.recipe;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
+import com.sequenceiq.cloudbreak.domain.APIResourceType;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CbUserRole;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.RecipeRepository;
+import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 
 @Component
 public class SimpleRecipeService implements RecipeService {
@@ -27,7 +30,11 @@ public class SimpleRecipeService implements RecipeService {
     public Recipe create(CbUser user, Recipe recipe) {
         recipe.setOwner(user.getUserId());
         recipe.setAccount(user.getAccount());
-        return recipeRepository.save(recipe);
+        try {
+            return recipeRepository.save(recipe);
+        } catch (DataIntegrityViolationException ex) {
+            throw new DuplicateKeyValueException(APIResourceType.RECIPE, recipe.getName(), ex);
+        }
     }
 
     @Override

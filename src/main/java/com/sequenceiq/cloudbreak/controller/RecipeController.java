@@ -19,12 +19,9 @@ import com.sequenceiq.cloudbreak.controller.json.IdJson;
 import com.sequenceiq.cloudbreak.controller.json.RecipeJson;
 import com.sequenceiq.cloudbreak.converter.BlueprintConverter;
 import com.sequenceiq.cloudbreak.converter.RecipeConverter;
-import com.sequenceiq.cloudbreak.domain.APIResourceType;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.repository.RecipeRepository;
-import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
 
@@ -117,13 +114,7 @@ public class RecipeController {
     }
 
     private ResponseEntity<IdJson> createRecipe(CbUser user, RecipeJson recipeRequest, boolean publicInAccount) {
-        if (recipeRepository.findByNameInAccount(recipeRequest.getName(), user.getAccount()) != null) {
-            throw new DuplicateKeyValueException(APIResourceType.RECIPE, recipeRequest.getName());
-        }
-        Blueprint blueprint = blueprintService.create(
-                user,
-                blueprintConverter.convert(RECIPE_BP_PREFIX + recipeRequest.getName(), recipeRequest.getBlueprint(), publicInAccount));
-        Recipe recipe = recipeService.create(user, recipeConverter.convert(recipeRequest, blueprint, publicInAccount));
+        Recipe recipe = recipeService.create(user, recipeConverter.convert(recipeRequest, publicInAccount));
         return new ResponseEntity<>(new IdJson(recipe.getId()), HttpStatus.CREATED);
     }
 }

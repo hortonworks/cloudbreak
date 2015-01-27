@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.controller.json.KeyValueJson;
 import com.sequenceiq.cloudbreak.controller.json.PluginJson;
 import com.sequenceiq.cloudbreak.controller.json.RecipeJson;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.KeyValue;
 import com.sequenceiq.cloudbreak.domain.Plugin;
 import com.sequenceiq.cloudbreak.domain.Recipe;
@@ -24,7 +23,6 @@ public class RecipeConverter extends AbstractConverter<RecipeJson, Recipe> {
         json.setPlugins(convertPlugins(recipe.getPlugins()));
         json.setCustomerId(recipe.getCustomerId());
         json.setId(recipe.getId().toString());
-        json.setBlueprintFromText(recipe.getBlueprint().getBlueprintText());
         json.setKeyValues(convertKeyValues(recipe.getKeyValues()));
         return json;
     }
@@ -40,9 +38,8 @@ public class RecipeConverter extends AbstractConverter<RecipeJson, Recipe> {
         return recipe;
     }
 
-    public Recipe convert(RecipeJson json, Blueprint blueprint, boolean publicInAccount) {
+    public Recipe convert(RecipeJson json, boolean publicInAccount) {
         Recipe recipe = convert(json);
-        recipe.setBlueprint(blueprint);
         recipe.setPublicInAccount(publicInAccount);
         return recipe;
     }

@@ -6,7 +6,6 @@ import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -51,9 +50,6 @@ public class Recipe implements ProvisionEntity {
 
     private String customerId;
 
-    @ManyToOne
-    private Blueprint blueprint;
-
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Plugin> plugins;
 
@@ -96,14 +92,6 @@ public class Recipe implements ProvisionEntity {
 
     public void setCustomerId(String customerId) {
         this.customerId = customerId;
-    }
-
-    public Blueprint getBlueprint() {
-        return blueprint;
-    }
-
-    public void setBlueprint(Blueprint blueprint) {
-        this.blueprint = blueprint;
     }
 
     public List<Plugin> getPlugins() {

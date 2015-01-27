@@ -2,14 +2,15 @@ package com.sequenceiq.cloudbreak.controller.json;
 
 import java.util.List;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonRawValue;
-import com.fasterxml.jackson.databind.JsonNode;
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonProperty;
+
+
 
 public class RecipeJson implements JsonEntity {
 
@@ -25,12 +26,11 @@ public class RecipeJson implements JsonEntity {
     @Size(max = 1000)
     private String customerId;
 
+    @Valid
     private List<PluginJson> plugins;
 
     @JsonProperty("keyvalues")
     private List<KeyValueJson> keyValues;
-
-    private String blueprint;
 
     @JsonProperty("id")
     public String getId() {
@@ -64,19 +64,6 @@ public class RecipeJson implements JsonEntity {
 
     public void setCustomerId(String customerId) {
         this.customerId = customerId;
-    }
-
-    @JsonRawValue
-    public String getBlueprint() {
-        return blueprint;
-    }
-
-    public void setBlueprint(JsonNode node) {
-        this.blueprint = node.toString();
-    }
-
-    public void setBlueprintFromText(String blueprintText) {
-        this.blueprint = blueprintText;
     }
 
     public List<PluginJson> getPlugins() {
