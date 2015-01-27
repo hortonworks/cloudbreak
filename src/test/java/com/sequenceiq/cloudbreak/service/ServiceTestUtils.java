@@ -203,7 +203,6 @@ public final class ServiceTestUtils {
                 azureTemplate.setOwner(owner);
                 azureTemplate.setAccount(account);
                 azureTemplate.setVmType("test-vm-type");
-                azureTemplate.setImageName("TEST_IMAGE");
                 azureTemplate.setVolumeCount(1);
                 azureTemplate.setVolumeSize(100);
                 azureTemplate.setDescription("azure test template");

@@ -23,6 +23,7 @@ import com.sequenceiq.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.controller.StackCreationFailureException;
 import com.sequenceiq.cloudbreak.domain.AzureCredential;
+import com.sequenceiq.cloudbreak.domain.AzureLocation;
 import com.sequenceiq.cloudbreak.domain.AzureTemplate;
 import com.sequenceiq.cloudbreak.domain.AzureVmType;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -109,8 +110,7 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
         props.put(NAME, buildResources.get(0).getResourceName());
         props.put(DEPLOYMENTSLOT, PRODUCTION);
         props.put(LABEL, label);
-        props.put(IMAGENAME,
-                azureTemplate.getImageName().equals(AzureStackUtil.IMAGE_NAME) ? provisionContextObject.getOsImageName() : azureTemplate.getImageName());
+        props.put(IMAGENAME, azureStackUtil.getOsImageName(stack.getCredential(), AzureLocation.valueOf(stack.getRegion()), stack.getImage()));
         props.put(IMAGESTOREURI, buildimageStoreUri(provisionContextObject.getCommonName(), buildResources.get(0).getResourceName()));
         props.put(HOSTNAME, buildResources.get(0).getResourceName());
         props.put(USERNAME, DEFAULT_USER_NAME);

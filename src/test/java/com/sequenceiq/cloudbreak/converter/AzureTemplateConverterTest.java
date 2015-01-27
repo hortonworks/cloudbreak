@@ -112,7 +112,6 @@ public class AzureTemplateConverterTest {
         AzureTemplate azureTemplate = new AzureTemplate();
         azureTemplate.setVmType(DUMMY_VM_TYPE);
         azureTemplate.setDescription(DUMMY_DESCRIPTION);
-        azureTemplate.setImageName(DUMMY_IMAGE_NAME);
         azureTemplate.setName(DUMMY_NAME);
         azureTemplate.setId(1L);
         azureTemplate.setPublicInAccount(true);
