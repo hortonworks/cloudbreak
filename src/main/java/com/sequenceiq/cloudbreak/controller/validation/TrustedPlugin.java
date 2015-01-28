@@ -15,7 +15,7 @@ import javax.validation.Payload;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface TrustedPlugin {
 
-    String message() default "Only plugins from a trusted source can be executed.";
+    String message() default "Only plugins from a trusted Github source are accepted and the repository must follow the naming convention 'consul-plugins-*'.";
 
     Class<?>[] groups() default { };
 

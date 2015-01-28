@@ -4,15 +4,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.ecwid.consul.v1.ConsulClient;
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.KeyValue;
-import com.sequenceiq.cloudbreak.domain.Plugin;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.cluster.PluginFailureException;
@@ -26,14 +26,15 @@ public class ConsulPluginManager implements PluginManager {
     public static final String FAILED_SIGNAL = "FAILED";
     public static final int POLLING_INTERVAL = 5000;
     public static final int MAX_ATTEMPTS = 30;
+    public static final String RECIPE_INSTALL = "recipe-install";
 
     @Autowired
     private PollingService<ConsulKVCheckerContext> keyValuePollingService;
 
     @Override
-    public void prepareKeyValues(Collection<InstanceMetaData> instanceMetaData, Collection<KeyValue> keyValues) {
+    public void prepareKeyValues(Collection<InstanceMetaData> instanceMetaData, Map<String, String> keyValues) {
         List<ConsulClient> clients = ConsulUtils.createClients(instanceMetaData);
-        for (KeyValue kv : keyValues) {
+        for (Map.Entry<String, String> kv : keyValues.entrySet()) {
             if (!ConsulUtils.putKVValue(clients, kv.getKey(), kv.getValue(), null)) {
                 throw new PluginFailureException("Failed to put values in Consul's key-value store.");
             }
@@ -41,11 +42,11 @@ public class ConsulPluginManager implements PluginManager {
     }
 
     @Override
-    public Set<String> installPlugins(Collection<InstanceMetaData> instanceMetaData, Collection<Plugin> plugins) {
+    public Set<String> installPlugins(Collection<InstanceMetaData> instanceMetaData, Collection<String> plugins) {
         List<ConsulClient> clients = ConsulUtils.createClients(instanceMetaData);
         Set<String> eventIds = new HashSet<>();
-        for (Plugin plugin : plugins) {
-            String eventId = ConsulUtils.fireEvent(clients, INSTALL_PLUGIN_EVENT, plugin.getUrl() + " " + plugin.getName(), null, null);
+        for (String plugin : plugins) {
+            String eventId = ConsulUtils.fireEvent(clients, INSTALL_PLUGIN_EVENT, plugin + " " + getPluginName(plugin), null, null);
             if (eventId != null) {
                 eventIds.add(eventId);
             } else {
@@ -57,22 +58,15 @@ public class ConsulPluginManager implements PluginManager {
     }
 
     @Override
-    public Set<String> triggerPlugins(Collection<InstanceMetaData> instanceMetaData, Collection<Plugin> plugins) {
+    public Set<String> triggerPlugins(Collection<InstanceMetaData> instanceMetaData) {
         List<ConsulClient> clients = ConsulUtils.createClients(instanceMetaData);
-        Set<String> eventIds = new HashSet<>();
-        for (Plugin plugin : plugins) {
-            StringBuilder payload = new StringBuilder();
-            for (String parameter : plugin.getParameters()) {
-                payload.append(parameter).append(" ");
-            }
-            String eventId = ConsulUtils.fireEvent(clients, plugin.getName(), payload.toString().trim(), null, null);
-            if (eventId != null) {
-                eventIds.add(eventId);
-            } else {
-                throw new PluginFailureException("Failed to trigger plugins, Consul client couldn't fire the event or failed to retrieve an event ID.");
-            }
+        String eventId = ConsulUtils.fireEvent(clients, RECIPE_INSTALL, "", null, null);
+        if (eventId != null) {
+            return Sets.newHashSet(eventId);
+        } else {
+            throw new PluginFailureException("Failed to trigger plugins, Consul client couldn't fire the "
+                    + RECIPE_INSTALL + " event or failed to retrieve an event ID.");
         }
-        return eventIds;
     }
 
     @Override
@@ -94,5 +88,10 @@ public class ConsulPluginManager implements PluginManager {
             }
         }
         return keys;
+    }
+
+    private String getPluginName(String url) {
+        String[] splits = url.split("/");
+        return splits[splits.length - 1].replace("consul-plugins-", "").replace(".git", "");
     }
 }

@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.controller.json;
 
-import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
@@ -10,6 +10,7 @@ import javax.validation.constraints.Size;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 
+import com.sequenceiq.cloudbreak.controller.validation.TrustedPlugin;
 
 
 public class RecipeJson implements JsonEntity {
@@ -23,11 +24,11 @@ public class RecipeJson implements JsonEntity {
     @Size(max = 1000)
     private String description;
 
-    @Valid
-    private List<PluginJson> plugins;
+    @TrustedPlugin
+    private Set<String> plugins;
 
-    @JsonProperty("keyvalues")
-    private List<KeyValueJson> keyValues;
+    @JsonProperty("properties")
+    private Map<String, String> properties;
 
     @JsonProperty("id")
     public String getId() {
@@ -55,19 +56,19 @@ public class RecipeJson implements JsonEntity {
         this.description = description;
     }
 
-    public List<PluginJson> getPlugins() {
+    public Map<String, String> getProperties() {
+        return properties;
+    }
+
+    public void setProperties(Map<String, String> properties) {
+        this.properties = properties;
+    }
+
+    public Set<String> getPlugins() {
         return plugins;
     }
 
-    public void setPlugins(List<PluginJson> plugins) {
+    public void setPlugins(Set<String> plugins) {
         this.plugins = plugins;
-    }
-
-    public List<KeyValueJson> getKeyValues() {
-        return keyValues;
-    }
-
-    public void setKeyValues(List<KeyValueJson> keyValues) {
-        this.keyValues = keyValues;
     }
 }

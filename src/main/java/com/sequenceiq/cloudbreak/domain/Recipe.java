@@ -1,14 +1,16 @@
 package com.sequenceiq.cloudbreak.domain;
 
-import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
@@ -48,11 +50,12 @@ public class Recipe implements ProvisionEntity {
 
     private String description;
 
-    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Plugin> plugins;
+    @ElementCollection(fetch = FetchType.EAGER)
+    private Set<String> plugins;
 
-    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<KeyValue> keyValues;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Column(columnDefinition = "TEXT", length = 100000)
+    private Map<String, String> keyValues;
 
     private String account;
 
@@ -84,20 +87,20 @@ public class Recipe implements ProvisionEntity {
         this.description = description;
     }
 
-    public List<Plugin> getPlugins() {
-        return plugins;
-    }
-
-    public void setPlugins(List<Plugin> plugins) {
-        this.plugins = plugins;
-    }
-
-    public List<KeyValue> getKeyValues() {
+    public Map<String, String> getKeyValues() {
         return keyValues;
     }
 
-    public void setKeyValues(List<KeyValue> keyValues) {
+    public void setKeyValues(Map<String, String> keyValues) {
         this.keyValues = keyValues;
+    }
+
+    public Set<String> getPlugins() {
+        return plugins;
+    }
+
+    public void setPlugins(Set<String> plugins) {
+        this.plugins = plugins;
     }
 
     public String getAccount() {
