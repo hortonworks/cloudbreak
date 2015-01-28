@@ -3,8 +3,6 @@ package com.sequenceiq.cloudbreak.controller.json;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
@@ -12,9 +10,11 @@ import javax.validation.constraints.Size;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.controller.validation.ValidProvisionRequest;
+import com.sequenceiq.cloudbreak.controller.validation.ValidVolume;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 
 @ValidProvisionRequest
+@ValidVolume(minCount = 1, maxCount = 15, minSize = 10, maxSize = 1000)
 public class TemplateJson implements JsonEntity {
 
     private Long id;
@@ -27,13 +27,8 @@ public class TemplateJson implements JsonEntity {
     private Map<String, Object> parameters = new HashMap<>();
     @Size(max = 1000)
     private String description;
-    @Min(value = 1, message = "The number of volumes has to be greater than 0")
-    @Max(value = 15, message = "The number of volumes has to be less than 15")
     @NotNull
     private Integer volumeCount;
-    @Min(value = 10, message = "The size of the volume has to be greater than or equal to 10 GB")
-    @Max(value = 1000, message = "The size of the volume has to be less than or equal to 1000 GB")
-    @NotNull
     private Integer volumeSize;
     private boolean publicInAccount;
 

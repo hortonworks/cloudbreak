@@ -185,10 +185,14 @@
 			<#if x_index = tgroup.template.volumeCount><#break></#if>
   		  ,{
           	"DeviceName" : "/dev/xvd${x}",
-          	"Ebs" : {
-           	  "VolumeSize" : ${tgroup.template.volumeSize},
-           	  "VolumeType" : "${tgroup.template.volumeType}"
+          	<#if tgroup.template.volumeType == "ephemeral">
+            "VirtualName" : "ephemeral${x_index}"
+            <#else>
+            "Ebs" : {
+              "VolumeSize" : ${tgroup.template.volumeSize},
+              "VolumeType" : "${tgroup.template.volumeType}"
             }
+            </#if>
       	  }
 			</#list>
       	],

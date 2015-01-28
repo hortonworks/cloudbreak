@@ -3,10 +3,10 @@ package com.sequenceiq.cloudbreak.service.stack.connector.aws;
 import java.util.Set;
 
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
-import com.amazonaws.services.ec2.model.InstanceType;
-import com.amazonaws.services.ec2.model.VolumeType;
 import com.sequenceiq.cloudbreak.domain.AwsCredential;
+import com.sequenceiq.cloudbreak.domain.AwsInstanceType;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
+import com.sequenceiq.cloudbreak.domain.AwsVolumeType;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -47,11 +47,11 @@ public class AwsConnectorTestUtil extends ConnectorTestUtil {
     public static AwsTemplate createAwsTemplate() {
         AwsTemplate awsTemplate = new AwsTemplate();
         awsTemplate.setId(DEFAULT_ID);
-        awsTemplate.setInstanceType(InstanceType.C1Medium);
+        awsTemplate.setInstanceType(AwsInstanceType.C1Medium);
         awsTemplate.setSshLocation(SSH_LOCATION);
         awsTemplate.setVolumeCount(2);
         awsTemplate.setVolumeSize(60);
-        awsTemplate.setVolumeType(VolumeType.Gp2);
+        awsTemplate.setVolumeType(AwsVolumeType.Gp2);
         awsTemplate.setSpotPrice(0.4);
         return awsTemplate;
     }
@@ -59,11 +59,11 @@ public class AwsConnectorTestUtil extends ConnectorTestUtil {
     public static AwsTemplate createAwsTemplateWithZeroVolumes() {
         AwsTemplate awsTemplate = new AwsTemplate();
         awsTemplate.setId(DEFAULT_ID);
-        awsTemplate.setInstanceType(InstanceType.C1Medium);
+        awsTemplate.setInstanceType(AwsInstanceType.C1Medium);
         awsTemplate.setSshLocation(SSH_LOCATION);
         awsTemplate.setVolumeCount(0);
         awsTemplate.setVolumeSize(60);
-        awsTemplate.setVolumeType(VolumeType.Gp2);
+        awsTemplate.setVolumeType(AwsVolumeType.Gp2);
         return awsTemplate;
     }
 

@@ -4,27 +4,24 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 
-import com.amazonaws.services.ec2.model.InstanceType;
-import com.amazonaws.services.ec2.model.VolumeType;
-
 @Entity
 public class AwsTemplate extends Template implements ProvisionEntity {
 
     @Enumerated(EnumType.STRING)
-    private InstanceType instanceType;
+    private AwsInstanceType instanceType;
     private String sshLocation;
     @Enumerated(EnumType.STRING)
-    private VolumeType volumeType;
+    private AwsVolumeType volumeType;
     private Double spotPrice;
 
     public AwsTemplate() {
     }
 
-    public InstanceType getInstanceType() {
+    public AwsInstanceType getInstanceType() {
         return instanceType;
     }
 
-    public void setInstanceType(InstanceType instanceType) {
+    public void setInstanceType(AwsInstanceType instanceType) {
         this.instanceType = instanceType;
     }
 
@@ -41,11 +38,11 @@ public class AwsTemplate extends Template implements ProvisionEntity {
         return CloudPlatform.AWS;
     }
 
-    public VolumeType getVolumeType() {
+    public AwsVolumeType getVolumeType() {
         return volumeType;
     }
 
-    public void setVolumeType(VolumeType volumeType) {
+    public void setVolumeType(AwsVolumeType volumeType) {
         this.volumeType = volumeType;
     }
 
