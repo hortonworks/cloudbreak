@@ -95,15 +95,14 @@ public class IntervalStackUsageGenerator {
         return result;
     }
 
-    private CloudbreakUsage getCloudbreakUsage(CloudbreakEvent event, long runningHours, String dayString, Double costOfInstance) throws ParseException {
+    private CloudbreakUsage getCloudbreakUsage(CloudbreakEvent event, long instanceHours, String dayString, Double costOfInstance) throws ParseException {
         Date day = DATE_FORMAT.parse(dayString);
-        long nodesRunningHours = runningHours * event.getNodeCount();
         CloudbreakUsage usage = new CloudbreakUsage();
         usage.setOwner(event.getOwner());
         usage.setAccount(event.getAccount());
         usage.setProvider(event.getCloud());
         usage.setRegion(event.getRegion());
-        usage.setInstanceHours(nodesRunningHours);
+        usage.setInstanceHours(instanceHours);
         usage.setDay(day);
         usage.setStackId(event.getStackId());
         usage.setStackName(event.getStackName());
