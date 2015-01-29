@@ -40,7 +40,7 @@
                             </div>
 
                             <div class="alert alert-info" role="alert" ng-show="credentialInCreation"><b>Please wait!</b> creation in progress...</div>
-                            <form class="form-horizontal" role="form" ng-show="awsCredential  && !credentialInCreation" name="awsCredentialForm">
+                            <form class="form-horizontal" role="form" name="awsCredentialForm" ng-show="awsCredential  && !credentialInCreation" name="awsCredentialForm">
                               <div ng-include src="'tags/credential/awsform.tag'"></div>
                             </form>
 
