@@ -9,6 +9,7 @@ import java.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
@@ -36,6 +37,9 @@ import reactor.function.Consumer;
 public class StackCreationFailureHandler implements Consumer<Event<StackOperationFailure>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackCreationFailureHandler.class);
+
+    @Value("${cb.debug:false}")
+    private Boolean debug;
 
     @Autowired
     private RetryingStackUpdater stackUpdater;
@@ -77,39 +81,41 @@ public class StackCreationFailureHandler implements Consumer<Event<StackOperatio
             ambariClusterInstallerMailSenderService.sendFailEmail(stack.getOwner());
         }
         final CloudPlatform cloudPlatform = stack.cloudPlatform();
-        try {
-            if (cloudPlatform.isWithTemplate()) {
-                cloudPlatformConnectors.get(cloudPlatform).rollback(stackRepository.findOneWithLists(stackId), stack.getResources());
-            } else {
-                ResourceBuilderInit resourceBuilderInit = resourceBuilderInits.get(cloudPlatform);
-                final DeleteContextObject dCO = resourceBuilderInit.deleteInit(stack);
-                for (int i = instanceResourceBuilders.get(cloudPlatform).size() - 1; i >= 0; i--) {
-                    List<Future<Boolean>> futures = new ArrayList<>();
-                    final int index = i;
-                    List<Resource> resourceByType =
-                            stack.getResourcesByType(instanceResourceBuilders.get(cloudPlatform).get(i).resourceType());
-                    for (final Resource resource : resourceByType) {
-                        Future<Boolean> submit = resourceBuilderExecutor.submit(new Callable<Boolean>() {
-                            @Override
-                            public Boolean call() throws Exception {
-                                return instanceResourceBuilders.get(cloudPlatform).get(index).rollback(resource, dCO, stack.getRegion());
-                            }
-                        });
-                        futures.add(submit);
+        if (!debug) {
+            try {
+                if (cloudPlatform.isWithTemplate()) {
+                    cloudPlatformConnectors.get(cloudPlatform).rollback(stackRepository.findOneWithLists(stackId), stack.getResources());
+                } else {
+                    ResourceBuilderInit resourceBuilderInit = resourceBuilderInits.get(cloudPlatform);
+                    final DeleteContextObject dCO = resourceBuilderInit.deleteInit(stack);
+                    for (int i = instanceResourceBuilders.get(cloudPlatform).size() - 1; i >= 0; i--) {
+                        List<Future<Boolean>> futures = new ArrayList<>();
+                        final int index = i;
+                        List<Resource> resourceByType =
+                                stack.getResourcesByType(instanceResourceBuilders.get(cloudPlatform).get(i).resourceType());
+                        for (final Resource resource : resourceByType) {
+                            Future<Boolean> submit = resourceBuilderExecutor.submit(new Callable<Boolean>() {
+                                @Override
+                                public Boolean call() throws Exception {
+                                    return instanceResourceBuilders.get(cloudPlatform).get(index).rollback(resource, dCO, stack.getRegion());
+                                }
+                            });
+                            futures.add(submit);
+                        }
+                        for (Future<Boolean> future : futures) {
+                            future.get();
+                        }
                     }
-                    for (Future<Boolean> future : futures) {
-                        future.get();
+                    for (int i = networkResourceBuilders.get(cloudPlatform).size() - 1; i >= 0; i--) {
+                        for (Resource resource
+                                : stack.getResourcesByType(networkResourceBuilders.get(cloudPlatform).get(i).resourceType())) {
+                            networkResourceBuilders.get(cloudPlatform).get(i).rollback(resource, dCO, stack.getRegion());
+                        }
                     }
                 }
-                for (int i = networkResourceBuilders.get(cloudPlatform).size() - 1; i >= 0; i--) {
-                    for (Resource resource
-                            : stack.getResourcesByType(networkResourceBuilders.get(cloudPlatform).get(i).resourceType())) {
-                        networkResourceBuilders.get(cloudPlatform).get(i).rollback(resource, dCO, stack.getRegion());
-                    }
-                }
+            } catch (Exception ex) {
+                LOGGER.error(String.format("Stack rollback failed on {} stack: ", stack.getId()), ex);
             }
-        } catch (Exception ex) {
-            LOGGER.error(String.format("Stack rollback failed on {} stack: ", stack.getId()), ex);
         }
         stackUpdater.updateStackStatusReason(stackId, detailedMessage);
         cloudbreakEventService.fireCloudbreakEvent(stackId, BillingStatus.BILLING_STOPPED.name(), "Stack creation failed.");
