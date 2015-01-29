@@ -6,39 +6,6 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
     function ($scope, $rootScope, $filter, UserUsages, AccountUsages) {
         $scope.regions = [];
 
-        $scope.gccPrice = {
-            'n1-standard-1': 0.045,
-            'n1-standard-2': 0.089,
-            'n1-standard-4': 0.177,
-            'n1-standard-8': 0.353,
-            'n1-standard-16': 0.706,
-            'n1-highmem-2': 0.104,
-            'n1-highmem-4': 0.208,
-            'n1-highmem-8': 0.415,
-            'n1-highmem-16': 0.829,
-            'n1-highcpu-2': 0.056,
-            'n1-highcpu-4': 0.112,
-            'n1-highcpu-8': 0.224,
-            'n1-highcpu-16': 0.448
-        }
-
-        $scope.azurePrice = {
-            'SMALL': 0.018,
-            'MEDIUM': 0.094,
-            'LARGE': 0.188,
-            'EXTRA_LARGE': 0.376
-        }
-
-        $scope.awsPrice = {
-            'T2Micro': 0.013,
-            'T2Small': 0.026,
-            'T2Medium': 0.052,
-            'M3Medium': 0.070,
-            'M3Large': 0.140,
-            'M3Xlarge': 0.280,
-            'M32xlarge': 0.560
-        }
-
         $scope.clearFilter = function() {
             initFilter();
         }
@@ -48,7 +15,7 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
             var filterStartDate = $scope.usageFilter.startDate;
             var filterEndDate = new Date($scope.usageFilter.endDate.getTime());
             var param = createRequestParams(filterStartDate);
-            var chartsData = { gcp: [], azure: [], aws: [], cloud: $scope.usageFilter.cloud};
+            var chartsData = { gcp: [], azure: [], aws: [], cloud: $scope.usageFilter.provider};
 
             populateChartsDataBySelectedPeriod(chartsData, filterStartDate, filterEndDate);
 
@@ -70,8 +37,8 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
           param =  param.concat(filterStartDate !== null ? "since=".concat(filterStartDate.getTime().toString().concat("&")) : "");
           param =  param.concat(filterEndDate !== null ? "filterenddate=".concat(filterEndDate.getTime().toString().concat("&")) : "");
           param =  param.concat($scope.usageFilter.user !== "all" ? "user=".concat($scope.usageFilter.user.concat("&")) : "");
-          param = param.concat($scope.usageFilter.cloud !== "all" ? "cloud=".concat($scope.usageFilter.cloud.concat("&")) : "");
-          param = param.concat($scope.usageFilter.zone !== "all" ? "zone=".concat($scope.usageFilter.zone.concat("&")) : "");
+          param = param.concat($scope.usageFilter.provider !== "all" ? "cloud=".concat($scope.usageFilter.provider.concat("&")) : "");
+          param = param.concat($scope.usageFilter.region !== "all" ? "zone=".concat($scope.usageFilter.region.concat("&")) : "");
           if( param.substr(-1) === "&" ) {
             param = param.substring(0, param.length - 1);
           }
@@ -100,15 +67,12 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
             var usageByProvider;
             var chartsDataByProvider;
             if ($scope.gccFilterFunction(item)) {
-              calculatedCost = parseFloat(item.instanceHours) * parseFloat($scope.gccPrice[item.machineType]);
               usageByProvider = $scope.gccSum;
               chartsDataByProvider = chartsData.gcp;
             } else if($scope.azureFilterFunction(item)) {
-              calculatedCost = parseFloat(item.instanceHours) * parseFloat($scope.azurePrice[item.machineType]);
               usageByProvider = $scope.azureSum;
               chartsDataByProvider = chartsData.azure;
             } else if($scope.awsFilterFunction(item)) {
-              calculatedCost = parseFloat(item.instanceHours) * parseFloat($scope.awsPrice[item.machineType]);
               usageByProvider = $scope.awsSum;
               chartsDataByProvider = chartsData.aws;
             }
@@ -132,12 +96,8 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
 
         function addUsageToSum(item, calculatedCost, usageByProvider) {
           usageByProvider.fullHours += parseFloat(item.instanceHours);
-          var newFullMoney = parseFloat(usageByProvider.fullMoney) + parseFloat(calculatedCost);
-          usageByProvider.fullMoney = parseFloat(newFullMoney).toFixed(2);
-          item.money = parseFloat(calculatedCost).toFixed(2);
           var result = $filter('filter')(usageByProvider.items, {stackId: item.stackId}, true);
           if (result.length > 0) {
-            result[0].money = (parseFloat(result[0].money) + parseFloat(calculatedCost)).toFixed(2);
             result[0].instanceHours = result[0].instanceHours + item.instanceHours;
           } else {
             usageByProvider.items.push(item);
@@ -146,7 +106,7 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
 
         $scope.gccFilterFunction = function(element) {
             try {
-                return element.cloud.match('GCC') ? true : false;
+                return element.provider.match('GCC') ? true : false;
             } catch (err) {
                 return false;
             }
@@ -154,7 +114,7 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
 
         $scope.awsFilterFunction = function(element) {
             try {
-                return element.cloud.match('AWS') ? true : false;
+                return element.provider.match('AWS') ? true : false;
             }  catch (err) {
                 return false;
             }
@@ -162,7 +122,7 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
 
         $scope.azureFilterFunction = function(element) {
             try {
-                return element.cloud.match('AZURE') ? true : false;
+                return element.provider.match('AZURE') ? true : false;
             } catch (err) {
                 return false;
             }
@@ -170,28 +130,28 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
 
         $scope.selectRegionsByProvider = function() {
           $scope.regions = [];
-          $scope.usageFilter.zone = 'all';
+          $scope.usageFilter.region = 'all';
 
-          if ($scope.usageFilter.cloud == 'AWS' || $scope.usageFilter.cloud == 'all') {
+          if ($scope.usageFilter.provider == 'AWS' || $scope.usageFilter.provider == 'all') {
             $rootScope.config.AWS.awsRegions.forEach(function(item) {$scope.regions.push(item);});
           }
 
-          if ($scope.usageFilter.cloud == 'AZURE' || $scope.usageFilter.cloud == 'all') {
+          if ($scope.usageFilter.provider == 'AZURE' || $scope.usageFilter.provider == 'all') {
             $rootScope.config.AZURE.azureRegions.forEach(function(item) {$scope.regions.push(item);});
           }
 
-          if ($scope.usageFilter.cloud == 'GCC' || $scope.usageFilter.cloud == 'all') {
+          if ($scope.usageFilter.provider == 'GCC' || $scope.usageFilter.provider == 'all') {
             $rootScope.config.GCC.gccRegions.forEach(function(item) {$scope.regions.push(item);});
           }
         };
 
         $scope.selectProviderByRegion = function() {
-            if($filter('filter')($rootScope.config.AWS.awsRegions, { key: $scope.usageFilter.zone}).length === 1) {
-                $scope.usageFilter.cloud = 'AWS';
-            } else if ($filter('filter')($rootScope.config.AZURE.azureRegions, { key: $scope.usageFilter.zone}).length === 1) {
-                $scope.usageFilter.cloud = 'AZURE';
-            } else if($filter('filter')($rootScope.config.GCC.gccRegions, { key: $scope.usageFilter.zone}).length === 1) {
-                $scope.usageFilter.cloud = 'GCC';
+            if($filter('filter')($rootScope.config.AWS.awsRegions, { key: $scope.usageFilter.region}).length === 1) {
+                $scope.usageFilter.provider = 'AWS';
+            } else if ($filter('filter')($rootScope.config.AZURE.azureRegions, { key: $scope.usageFilter.region}).length === 1) {
+                $scope.usageFilter.provider = 'AZURE';
+            } else if($filter('filter')($rootScope.config.GCC.gccRegions, { key: $scope.usageFilter.region}).length === 1) {
+                $scope.usageFilter.provider = 'GCC';
             }
         }
 
@@ -213,24 +173,16 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
 
         function initSums() {
             $scope.awsSum = {
-                fullMoney: 0,
                 fullHours: 0,
                 items: []
             };
             $scope.gccSum = {
-                fullMoney: 0,
                 fullHours: 0,
                 items: []
             };
             $scope.azureSum = {
-                fullMoney: 0,
                 fullHours: 0,
                 items: []
-            };
-            $scope.dataOfCharts = {
-              gcp: [],
-              azure: [],
-              aws: []
             };
         }
 
@@ -242,8 +194,8 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
               startDate: floorToDay(startDate),
               endDate: floorToDay(endDate),
               user: "all",
-              cloud: "all",
-              zone: "all"
+              provider: "all",
+              region: "all"
           };
           $scope.selectRegionsByProvider();
         }

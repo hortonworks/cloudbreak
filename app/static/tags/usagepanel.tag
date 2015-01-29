@@ -69,7 +69,7 @@
             <label for="cloudProvider">cloud provider</label>
 
             <div>
-              <select class="form-control input-sm" id="cloudProvider" ng-model="usageFilter.cloud" ng-change="selectRegionsByProvider()">
+              <select class="form-control input-sm" id="cloudProvider" ng-model="usageFilter.provider" ng-change="selectRegionsByProvider()">
                 <option>all</option>
                 <option value="AWS">Amazon EC2</option>
                 <option value="AZURE">Microsoft Azure</option>
@@ -80,7 +80,7 @@
           <div class="col-xs-6 col-sm-2 col-md-2">
             <label for="region">region</label>
             <div>
-              <select class="form-control input-sm" id="region" ng-model="usageFilter.zone" ng-change="selectProviderByRegion()">
+              <select class="form-control input-sm" id="region" ng-model="usageFilter.region" ng-change="selectProviderByRegion()">
                 <option value="all">all</option>
                 <option ng-repeat="region in regions" value="{{region.key}}">{{region.value}}</option>
               </select>
@@ -116,21 +116,21 @@
                         <i class="fa fa-sort"></i>
                     </a>
                 </th>
-                <th class="text-right">
+                <!--th class="text-right">
                   <a title="sort by" ng-click="reverse=!reverse;orderUsagesBy('money',reverse)">estimated costs
                         <i class="fa fa-sort"></i>
                     </a>
-                </th>
+                </th-->
               </tr>
             </thead>
             <tbody>
               <tr ng-repeat="usage in gccSum.items">
-                <td ng-if="$index == 0" rowspan="{{gccSum.items.length}}">{{usage.cloud}}</td>
+                <td ng-if="$index == 0" rowspan="{{gccSum.items.length}}">{{usage.provider}}</td>
                 <td>{{usage.stackName}}</td>
                 <td>{{usage.username}}</td>
-                <td><p id="awsregion" class="form-control-static" ng-repeat="item in $root.config.GCC.gccRegions | filter:{key: usage.zone}">{{item.value}}</p></td>
+                <td><p id="awsregion" class="form-control-static" ng-repeat="item in $root.config.GCC.gccRegions | filter:{key: usage.region}">{{item.value}}</p></td>
                 <td class="text-right">{{usage.instanceHours}} hrs</td>
-                <td class="text-right">{{usage.money}} $</td>
+                <!--td class="text-right">{{usage.money}} $</td-->
               </tr>
               <tr class="row-summa" ng-show="usages && gccSum.items.length != 0">
                 <td>&nbsp;</td>
@@ -138,16 +138,16 @@
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
                 <td class="text-right">{{gccSum.fullHours}} hrs</td>
-                <td class="text-right">$ {{gccSum.fullMoney}}</td>
+                <!--td class="text-right">$ {{gccSum.fullMoney}}</td-->
               </tr>
 
               <tr ng-repeat="usage in awsSum.items">
-                <td ng-if="$index == 0" rowspan="{{awsSum.items.length}}">{{usage.cloud}}</td>
+                <td ng-if="$index == 0" rowspan="{{awsSum.items.length}}">{{usage.provider}}</td>
                 <td>{{usage.stackName}}</td>
                 <td>{{usage.username}}</td>
-                <td><p id="awsregion" class="form-control-static" ng-repeat="item in $root.config.AWS.awsRegions | filter:{key: usage.zone}">{{item.value}}</p></td>
+                <td><p id="awsregion" class="form-control-static" ng-repeat="item in $root.config.AWS.awsRegions | filter:{key: usage.region}">{{item.value}}</p></td>
                 <td class="text-right">{{usage.instanceHours}} hrs</td>
-                <td class="text-right">{{usage.money}} $</td>
+                <!--td class="text-right">{{usage.money}} $</td-->
               </tr>
 
               <tr class="row-summa" ng-show="usages && awsSum.items.length != 0">
@@ -156,16 +156,16 @@
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
                 <td class="text-right">{{awsSum.fullHours}} hrs</td>
-                <td class="text-right">$ {{awsSum.fullMoney}}</td>
+                <!--td class="text-right">$ {{awsSum.fullMoney}}</td-->
               </tr>
 
               <tr ng-repeat="usage in azureSum.items">
-                <td ng-if="$index == 0" rowspan="{{azureSum.items.length}}">{{usage.cloud}}</td>
+                <td ng-if="$index == 0" rowspan="{{azureSum.items.length}}">{{usage.provider}}</td>
                 <td>{{usage.stackName}}</td>
                 <td>{{usage.username}}</td>
-                <td><p id="awsregion" class="form-control-static" ng-repeat="item in $root.config.AZURE.azureRegions | filter:{key: usage.zone}">{{item.value}}</p></td>
+                <td><p id="awsregion" class="form-control-static" ng-repeat="item in $root.config.AZURE.azureRegions | filter:{key: usage.region}">{{item.value}}</p></td>
                 <td class="text-right">{{usage.instanceHours}} hrs</td>
-                <td class="text-right">{{usage.money}} $</td>
+                <!--td class="text-right">{{usage.money}} $</td-->
               </tr>
 
               <tr class="row-summa" ng-show="usages && azureSum.items.length != 0">
@@ -174,7 +174,7 @@
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
                 <td class="text-right">{{azureSum.fullHours}} hrs</td>
-                <td class="text-right">$ {{azureSum.fullMoney}}</td>
+                <!--td class="text-right">$ {{azureSum.fullMoney}}</td-->
               </tr>
             </tbody>
           </table>
