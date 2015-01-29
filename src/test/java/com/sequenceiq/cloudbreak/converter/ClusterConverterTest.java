@@ -74,7 +74,7 @@ public class ClusterConverterTest {
     public void testConvertClusterEntityToJsonWhenStackHasNoInstanceGroup() {
         // GIVEN
         given(blueprintRepository.findOne(anyLong())).willReturn(blueprint);
-        given(stackRepository.findById(anyLong())).willReturn(new Stack());
+        given(stackRepository.findOne(anyLong())).willReturn(new Stack());
         // WHEN
         Cluster result = underTest.convert(clusterRequest, 1L);
     }
@@ -87,7 +87,7 @@ public class ClusterConverterTest {
         instanceGroup1.setGroupName("master");
         stack.getInstanceGroups().add(instanceGroup1);
         given(blueprintRepository.findOne(anyLong())).willReturn(blueprint);
-        given(stackRepository.findById(anyLong())).willReturn(stack);
+        given(stackRepository.findOne(anyLong())).willReturn(stack);
         // WHEN
         Cluster result = underTest.convert(clusterRequest, 1L);
     }
@@ -103,7 +103,7 @@ public class ClusterConverterTest {
         stack.getInstanceGroups().add(instanceGroup1);
         stack.getInstanceGroups().add(instanceGroup2);
         given(blueprintRepository.findOne(anyLong())).willReturn(blueprint);
-        given(stackRepository.findById(anyLong())).willReturn(stack);
+        given(stackRepository.findOne(anyLong())).willReturn(stack);
         // WHEN
         Cluster result = underTest.convert(clusterRequest, 1L);
         // THEN

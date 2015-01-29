@@ -20,14 +20,14 @@ public class RecipeEngine {
     private PluginManager pluginManager;
 
     void executeRecipe(Stack stack) {
-        Set<InstanceMetaData> instanceMetaData = instanceMetadataRepository.findAllInStack(stack.getId());
+        Set<InstanceMetaData> instances = instanceMetadataRepository.findAllInStack(stack.getId());
         Map<String, String> properties = stack.getCluster().getRecipe().getKeyValues();
         Set<String> plugins = stack.getCluster().getRecipe().getPlugins();
 
-        pluginManager.prepareKeyValues(instanceMetaData, properties);
-        Set<String> installEventIds = pluginManager.installPlugins(instanceMetaData, plugins);
-        pluginManager.waitForEventFinish(stack, instanceMetaData, installEventIds);
-        Set<String> triggerEventIds = pluginManager.triggerPlugins(instanceMetaData);
-        pluginManager.waitForEventFinish(stack, instanceMetaData, triggerEventIds);
+        pluginManager.prepareKeyValues(instances, properties);
+        Set<String> installEventIds = pluginManager.installPlugins(instances, plugins);
+        pluginManager.waitForEventFinish(stack, instances, installEventIds);
+        Set<String> triggerEventIds = pluginManager.triggerPlugins(instances);
+        pluginManager.waitForEventFinish(stack, instances, triggerEventIds);
     }
 }

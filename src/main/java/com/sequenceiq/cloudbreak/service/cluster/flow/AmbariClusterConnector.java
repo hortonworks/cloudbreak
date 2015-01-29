@@ -14,11 +14,15 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.google.common.base.Function;
+import com.google.common.collect.FluentIterable;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.ambari.client.InvalidHostGroupHostAssociation;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
@@ -147,7 +151,10 @@ public class AmbariClusterConnector {
             stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS, "Adding new host(s) to the cluster.");
             AmbariClient ambariClient = clientService.create(stack);
             waitForHosts(stack, ambariClient);
-            List<String> hosts = findHosts(stack.getId(), hostGroupAdjustment);
+            List<String> hosts = findFreeHosts(stack.getId(), hostGroupAdjustment);
+            if (cluster.getRecipe() != null) {
+                recipeEngine.executeRecipe(stack);
+            }
             addHostMetadata(cluster, hosts, hostGroupAdjustment);
             waitForAmbariOperations(stack, ambariClient, installServices(hosts, stack, ambariClient, hostGroupAdjustment));
             waitForAmbariOperations(stack, ambariClient, singletonMap("START_SERVICES", ambariClient.startAllServices()));
@@ -160,6 +167,16 @@ public class AmbariClusterConnector {
             LOGGER.error(UNHANDLED_EXCEPTION_MSG, e);
             updateHostFailed(cluster, UNHANDLED_EXCEPTION_MSG, true);
         }
+    }
+
+    private List<String> getHostNames(Set<InstanceMetaData> instances) {
+        return FluentIterable.from(instances).transform(new Function<InstanceMetaData, String>() {
+            @Nullable
+            @Override
+            public String apply(@Nullable InstanceMetaData input) {
+                return input.getLongName();
+            }
+        }).toList();
     }
 
     public void decommissionAmbariNodes(Long stackId, HostGroupAdjustmentJson adjustmentRequest, List<HostMetadata> decommissionCandidates) {
@@ -394,21 +411,13 @@ public class AmbariClusterConnector {
         waitForAmbariOperations(stack, ambariClient, clusterInstallRequest);
     }
 
-    private List<String> findHosts(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment) {
-        List<String> unregisteredHostNames = new ArrayList<>();
+    private List<String> findFreeHosts(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment) {
         Set<InstanceMetaData> unregisteredHosts = instanceMetadataRepository.findUnregisteredHostsInStack(stackId);
-        int i = 0;
-        int scalingAdjustment = hostGroupAdjustment.getScalingAdjustment();
-        for (InstanceMetaData instanceMetaData : unregisteredHosts) {
-            if (i++ < scalingAdjustment) {
-                unregisteredHostNames.add(instanceMetaData.getLongName());
-            } else {
-                break;
-            }
-        }
-        String statusReason = String.format("Adding '%s' new host(s) to the '%s' host group.", scalingAdjustment, hostGroupAdjustment.getHostGroup());
+        Set<InstanceMetaData> instances = FluentIterable.from(unregisteredHosts).limit(hostGroupAdjustment.getScalingAdjustment()).toSet();
+        String statusReason = String.format("Adding '%s' new host(s) to the '%s' host group.",
+                hostGroupAdjustment.getScalingAdjustment(), hostGroupAdjustment.getHostGroup());
         eventService.fireCloudbreakEvent(stackId, Status.UPDATE_IN_PROGRESS.name(), statusReason);
-        return unregisteredHostNames;
+        return getHostNames(instances);
     }
 
     private Map<String, Integer> installServices(List<String> hosts, Stack stack, AmbariClient ambariClient, HostGroupAdjustmentJson hostGroup) {

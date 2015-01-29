@@ -56,7 +56,7 @@ public class ClusterConverter {
             cluster.setBlueprint(blueprint);
             ObjectMapper mapper = new ObjectMapper();
             JsonNode root = mapper.readTree(blueprint.getBlueprintText());
-            validateBlueprintRequest(root, stackRepository.findById(stackId));
+            validateBlueprintRequest(root, stackRepository.findOne(stackId));
         } catch (AccessDeniedException e) {
             throw new AccessDeniedException(
                     String.format("Access to blueprint '%s' is denied or blueprint doesn't exist.", clusterRequest.getBlueprintId()), e);
