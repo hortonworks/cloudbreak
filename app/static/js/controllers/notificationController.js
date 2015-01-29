@@ -2,8 +2,8 @@
 
 var log = log4javascript.getLogger("notificationController-logger");
 
-angular.module('uluwatuControllers').controller('notificationController', ['$scope', '$rootScope', '$filter', 'Cluster',
-function ($scope, $rootScope, $filter, Cluster) {
+angular.module('uluwatuControllers').controller('notificationController', ['$scope', '$rootScope', '$filter', 'Cluster', 'GlobalStack',
+function ($scope, $rootScope, $filter, Cluster, GlobalStack) {
     var successEvents = [ "REQUESTED",
                           "CREATE_IN_PROGRESS",
                           "UPDATE_IN_PROGRESS",
@@ -69,6 +69,7 @@ function ($scope, $rootScope, $filter, Cluster) {
       if (nodeCount != null && nodeCount != undefined) {
         actCluster.nodeCount = nodeCount;
       }
+      refreshMetadata(notification)
       actCluster.status = notification.eventType;
       $scope.modifyStatusMessage(msg, actCluster.name);
       $scope.modifyStatusClass("has-success");
@@ -92,6 +93,18 @@ function ($scope, $rootScope, $filter, Cluster) {
     function addNotificationToGlobalEvents(item) {
       item.customTimeStamp =  new Date(item.eventTimestamp).toLocaleDateString() + " " + new Date(item.eventTimestamp).toLocaleTimeString();
       $rootScope.events.push(item);
+    }
+    
+    function refreshMetadata(notification) {
+       GlobalStack.get({ id: notification.stackId }, function(success) {
+          var metadata = []
+          angular.forEach(success.instanceGroups, function(item) {
+             angular.forEach(item.metadata, function(item1) {
+               metadata.push(item1)
+             });
+          });
+          $rootScope.activeCluster.metadata = metadata // trigger activeCluster.metadata
+       });
     }
   }
 ]);

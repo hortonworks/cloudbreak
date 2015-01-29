@@ -120,12 +120,12 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             $rootScope.activeClusterBlueprint = $filter('filter')($rootScope.blueprints, { id: $rootScope.activeCluster.blueprintId})[0];
             $rootScope.activeClusterCredential = $filter('filter')($rootScope.credentials, {id: $rootScope.activeCluster.credentialId}, true)[0];
             $rootScope.activeCluster.cloudPlatform =  $rootScope.activeClusterCredential.cloudPlatform;
+            $rootScope.activeCluster.metadata = []
             GlobalStack.get({ id: clusterId }, function(success) {
-                    $rootScope.activeCluster.description = success.description;
-                    $rootScope.activeCluster.metadata = [];
-                    angular.forEach($rootScope.activeCluster.instanceGroups, function(item) {
+                    var metadata = []
+                    angular.forEach(success.instanceGroups, function(item) {
                       angular.forEach(item.metadata, function(item1) {
-                        $rootScope.activeCluster.metadata.push(item1)
+                        metadata.push(item1)
                       });
                     });
                     $scope.pagination = {
@@ -133,6 +133,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                                 itemsPerPage: 10,
                                 totalItems: $rootScope.activeCluster.metadata.length
                     }
+                    $rootScope.activeCluster.metadata = metadata
                 }
             );
         }
@@ -141,11 +142,21 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 paginateMetadata();
             }
          });
-
+        
+        $rootScope.$watch('activeCluster.metadata', function() {
+            if ($rootScope.activeCluster.metadata != null) {
+                paginateMetadata();
+            }
+        });
+        
         function paginateMetadata() {
-            var begin = (($scope.pagination.currentPage - 1) * $scope.pagination.itemsPerPage),
-            end = begin + $scope.pagination.itemsPerPage;
-            $scope.filteredActiveClusterData = $rootScope.activeCluster.metadata.slice(begin, end);
+            if ($scope.pagination != null) {
+                var begin = (($scope.pagination.currentPage - 1) * $scope.pagination.itemsPerPage),
+                end = begin + $scope.pagination.itemsPerPage;
+                $scope.filteredActiveClusterData = $rootScope.activeCluster.metadata.slice(begin, end);
+            } else {
+                $scope.filteredActiveClusterData = [];
+            }
         }
 
         $scope.getSelectedTemplate = function (templateId) {
