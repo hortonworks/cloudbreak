@@ -25,21 +25,21 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
             $scope.azureCredential = false;
             $scope.awsCredential = true;
             $scope.gccCredential = false;
-            $scope.oepnstackCredential = false;
+            $scope.openstackCredential = false;
         }
 
         $scope.createAzureCredentialRequest = function() {
             $scope.azureCredential = true;
             $scope.awsCredential = false;
             $scope.gccCredential = false;
-            $scope.oepnstackCredential = false;
+            $scope.openstackCredential = false;
         }
 
         $scope.createGccCredentialRequest = function() {
             $scope.azureCredential = false;
             $scope.awsCredential = false;
             $scope.gccCredential = true;
-            $scope.oepnstackCredential = false;
+            $scope.openstackCredential = false;
         }
 
         $scope.createOpenstackCredentialRequest = function() {
