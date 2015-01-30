@@ -21,6 +21,7 @@ public class Notification {
     private String stackName;
     private Status stackStatus;
     private Integer nodeCount;
+    private String instanceGroup;
 
     public Notification() {
     }
@@ -40,6 +41,7 @@ public class Notification {
         this.stackName = event.getStackName();
         this.stackStatus = event.getStackStatus();
         this.nodeCount = event.getNodeCount();
+        this.instanceGroup = event.getInstanceGroup();
     }
 
     public String getEventType() {
@@ -152,5 +154,13 @@ public class Notification {
 
     public void setNodeCount(Integer nodeCount) {
         this.nodeCount = nodeCount;
+    }
+
+    public String getInstanceGroup() {
+        return instanceGroup;
+    }
+
+    public void setInstanceGroup(String instanceGroup) {
+        this.instanceGroup = instanceGroup;
     }
 }
