@@ -69,7 +69,7 @@ public class DefaultBlueprintService implements BlueprintService {
 
     @Override
     public void delete(Long id, CbUser user) {
-        Blueprint blueprint = blueprintRepository.findByIdInAccount(id, user.getAccount(), user.getUserId());
+        Blueprint blueprint = blueprintRepository.findByIdInAccount(id, user.getAccount());
         MDCBuilder.buildMdcContext(blueprint);
         if (blueprint == null) {
             throw new NotFoundException(String.format("Blueprint '%s' not found.", id));
@@ -108,10 +108,9 @@ public class DefaultBlueprintService implements BlueprintService {
         MDCBuilder.buildMdcContext(blueprint);
         if (clusterRepository.findAllClusterByBlueprint(blueprint.getId()).isEmpty()) {
             if (!user.getUserId().equals(blueprint.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
-                throw new BadRequestException("Public blueprints can be deleted only by account admins or owners.");
-            } else {
-                blueprintRepository.delete(blueprint);
+                throw new BadRequestException("Blueprints can be deleted only by account admins or owners.");
             }
+            blueprintRepository.delete(blueprint);
         } else {
             throw new BadRequestException(String.format(
                     "There are stacks associated with blueprint '%s'. Please remove these before the deleting the blueprint.", blueprint.getId()));

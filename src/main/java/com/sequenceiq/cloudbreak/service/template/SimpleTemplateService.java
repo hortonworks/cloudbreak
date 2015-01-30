@@ -75,7 +75,7 @@ public class SimpleTemplateService implements TemplateService {
 
     @Override
     public void delete(Long templateId, CbUser user) {
-        Template template = templateRepository.findByIdInAccount(templateId, user.getAccount(), user.getUserId());
+        Template template = templateRepository.findByIdInAccount(templateId, user.getAccount());
         if (template == null) {
             throw new NotFoundException(String.format(TEMPLATE_NOT_FOUND_MSG, templateId));
         }
@@ -117,10 +117,9 @@ public class SimpleTemplateService implements TemplateService {
         List<Stack> allStackForTemplate = stackRepository.findAllStackForTemplate(template.getId());
         if (allStackForTemplate.isEmpty()) {
             if (!user.getUserId().equals(template.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
-                throw new BadRequestException("Public templates can be deleted only by account admins or owners.");
-            } else {
-                templateRepository.delete(template);
+                throw new BadRequestException("Templates can be deleted only by account admins or owners.");
             }
+            templateRepository.delete(template);
         } else {
             throw new BadRequestException(String.format(
                     "There are stacks associated with template '%s'. Please remove these before deleting the template.", template.getName()));

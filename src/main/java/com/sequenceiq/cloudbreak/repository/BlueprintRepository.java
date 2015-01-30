@@ -26,7 +26,7 @@ public interface BlueprintRepository extends CrudRepository<Blueprint, Long> {
 
     Blueprint findByNameInAccount(@Param("name") String name, @Param("account") String account, @Param("owner") String owner);
 
-    Blueprint findByIdInAccount(@Param("id") Long id, @Param("account") String account, @Param("owner") String owner);
+    Blueprint findByIdInAccount(@Param("id") Long id, @Param("account") String account);
 
     Blueprint findByNameInUser(@Param("name") String name, @Param("owner") String owner);
 

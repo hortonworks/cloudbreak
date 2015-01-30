@@ -154,7 +154,7 @@ public class DefaultStackService implements StackService {
 
     @Override
     public void delete(Long id, CbUser user) {
-        Stack stack = stackRepository.findByIdInAccount(id, user.getAccount(), user.getUserId());
+        Stack stack = stackRepository.findByIdInAccount(id, user.getAccount());
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", id));
         }
@@ -259,11 +259,10 @@ public class DefaultStackService implements StackService {
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Stack delete requested.");
         if (!user.getUserId().equals(stack.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
-            throw new BadRequestException("Public stacks can be deleted only by account admins or owners.");
-        } else {
-            LOGGER.info("Publishing {} event.", ReactorConfig.DELETE_REQUEST_EVENT);
-            reactor.notify(ReactorConfig.DELETE_REQUEST_EVENT, Event.wrap(new StackDeleteRequest(stack.cloudPlatform(), stack.getId())));
+            throw new BadRequestException("Stacks can be deleted only by account admins or owners.");
         }
+        LOGGER.info("Publishing {} event.", ReactorConfig.DELETE_REQUEST_EVENT);
+        reactor.notify(ReactorConfig.DELETE_REQUEST_EVENT, Event.wrap(new StackDeleteRequest(stack.cloudPlatform(), stack.getId())));
     }
 
     private String generateHash(Stack stack) {
