@@ -34,7 +34,6 @@ public class AwsTemplateConverter extends AbstractConverter<TemplateJson, AwsTem
         }
         templateJson.setParameters(props);
         templateJson.setCloudPlatform(CloudPlatform.AWS);
-        templateJson.setPublicInAccount(entity.isPublicInAccount());
         templateJson.setDescription(entity.getDescription() == null ? "" : entity.getDescription());
         return templateJson;
     }
