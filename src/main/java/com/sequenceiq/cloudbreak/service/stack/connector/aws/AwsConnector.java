@@ -276,17 +276,17 @@ public class AwsConnector implements CloudPlatformConnector {
                     amazonASClient.suspendProcesses(new SuspendProcessesRequest().withAutoScalingGroupName(asGroupName));
                     amazonEC2Client.stopInstances(new StopInstancesRequest().withInstanceIds(instances));
                 } else {
-                    amazonASClient.resumeProcesses(new ResumeProcessesRequest().withAutoScalingGroupName(asGroupName));
                     amazonEC2Client.startInstances(new StartInstancesRequest().withInstanceIds(instances));
                     awsPollingService.pollWithTimeout(
                             new AwsInstanceStatusCheckerTask(),
                             new AwsInstances(stack, amazonEC2Client, new ArrayList(instances), "Running"),
                             AmbariClusterConnector.POLLING_INTERVAL,
                             AmbariClusterConnector.MAX_ATTEMPTS_FOR_AMBARI_OPS);
+                    amazonASClient.resumeProcesses(new ResumeProcessesRequest().withAutoScalingGroupName(asGroupName));
                     updateInstanceMetadata(stack, amazonEC2Client, stack.getAllInstanceMetaData(), instances);
                 }
             } catch (Exception e) {
-                LOGGER.error(String.format("Failed to %s AWS instances on stack: %s", stopped ? "stop" : "start", stack.getId()));
+                LOGGER.error(String.format("Failed to %s AWS instances on stack: %s", stopped ? "stop" : "start", stack.getId()), e);
                 result = false;
             }
         }
