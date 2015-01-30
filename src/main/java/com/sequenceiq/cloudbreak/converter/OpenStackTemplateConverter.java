@@ -37,10 +37,15 @@ public class OpenStackTemplateConverter extends AbstractConverter<TemplateJson, 
         template.setInstanceType(String.valueOf(json.getParameters().get(OpenStackTemplateParam.INSTANCE_TYPE.getName())));
         template.setPublicNetId(String.valueOf(json.getParameters().get(OpenStackTemplateParam.PUBLIC_NET_ID.getName())));
         template.setDescription(json.getDescription());
-        template.setPublicInAccount(json.isPublicInAccount());
         template.setVolumeCount((json.getVolumeCount() == null) ? 0 : json.getVolumeCount());
         template.setVolumeSize((json.getVolumeSize() == null) ? 0 : json.getVolumeSize());
         return template;
+    }
+
+    public OpenStackTemplate convert(TemplateJson json, boolean publicInAccount) {
+        OpenStackTemplate openStackTemplate = convert(json);
+        openStackTemplate.setPublicInAccount(publicInAccount);
+        return openStackTemplate;
     }
 
 }

@@ -157,13 +157,13 @@ public class CredentialController {
     private Credential convert(CredentialJson json, boolean publicInAccount) {
         switch (json.getCloudPlatform()) {
             case AWS:
-                return awsCredentialConverter.convert(json);
+                return awsCredentialConverter.convert(json, publicInAccount);
             case AZURE:
-                return azureCredentialConverter.convert(json);
+                return azureCredentialConverter.convert(json, publicInAccount);
             case GCC:
-                return gccCredentialConverter.convert(json);
+                return gccCredentialConverter.convert(json, publicInAccount);
             case OPENSTACK:
-                return openStackCredentialConverter.convert(json);
+                return openStackCredentialConverter.convert(json, publicInAccount);
             default:
                 throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", json.getCloudPlatform()));
         }
