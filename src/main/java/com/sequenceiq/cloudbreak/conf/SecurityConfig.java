@@ -123,9 +123,10 @@ public class SecurityConfig {
                     .antMatchers("/usages/**").access("#oauth2.hasScope('cloudbreak.usages.global')")
                     .antMatchers("/account/usages/**").access("#oauth2.hasScope('cloudbreak.usages.account')")
                     .antMatchers("/user/usages/**").access("#oauth2.hasScope('cloudbreak.usages.user')")
-                    .antMatchers("/subscription").access("#oauth2.hasScope('cloudbreak.subscribe')");
-//                    .antMatchers("/user/recipes").access("#oauth2.hasScope('cloudbreak.recipes')")
-//                    .antMatchers("/account/recipes").access("#oauth2.hasScope('cloudbreak.recipes')");
+                    .antMatchers("/subscription").access("#oauth2.hasScope('cloudbreak.subscribe')")
+                    .antMatchers("/user/recipes").access("#oauth2.hasScope('cloudbreak.recipes')")
+                    .antMatchers("/account/recipes").access("#oauth2.hasScope('cloudbreak.recipes')")
+                    .antMatchers("/recipes").access("#oauth2.hasScope('cloudbreak.recipes')");
         }
     }
 
