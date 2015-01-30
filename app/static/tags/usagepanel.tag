@@ -15,11 +15,11 @@
         <h5><i class="fa fa-filter fa-fw"></i> filters</h5>
 
         <form class="row row-filter" name="usageFilterForm">
-          <div class="col-xs-6 col-sm-2 col-md-2">
+          <div class="col-xs-6 col-sm-4 col-md-2">
             <label for="startDate">start date</label>
             <div ng-class="{ 'has-error': usageFilterForm.startDate.$invalid }">
               <div class="input-group date" id="datePickerStart" data-date-format="YYYY-MM-DD">
-                <input type="date" class="form-control input-sm" id="startDate" ng-model="usageFilter.startDate" name="startDate" startdatevalidation="endDate">
+                <input type="date" class="form-control input-sm datepickerclass" id="startDate" ng-model="usageFilter.startDate" name="startDate" startdatevalidation="endDate">
                 <span class="input-group-btn">
                     <button class="btn btn-default btn-sm" type="button">
                         <i class="fa fa-calendar"></i>
@@ -32,11 +32,11 @@
             </div>
           </div>
 
-          <div class="col-xs-6 col-sm-2 col-md-2">
+          <div class="col-xs-6 col-sm-4 col-md-2">
             <label for="endDate">end date</label>
             <div ng-class="{ 'has-error': usageFilterForm.endDate.$invalid }">
               <div class="input-group date" id="datePickerEnd" data-date-format="YYYY-MM-DD">
-                <input type="date" class="form-control input-sm" id="endDate" ng-model="usageFilter.endDate" name="endDate" enddatevalidation>
+                <input type="date" class="form-control input-sm datepickerclass" id="endDate" ng-model="usageFilter.endDate" name="endDate" enddatevalidation>
                 <span class="input-group-btn">
                     <button class="btn btn-default btn-sm" type="button">
                       <i class="fa fa-calendar"></i>
@@ -49,7 +49,7 @@
             </div>
           </div>
 
-          <div class="col-xs-6 col-sm-2 col-md-2" ng-show="user.admin">
+          <div class="col-xs-6 col-sm-4 col-md-2" ng-show="user.admin">
             <label for="user">user</label>
             <div>
               <div class="input-group">
@@ -65,7 +65,7 @@
             </div>
           </div>
 
-          <div class="col-xs-6 col-sm-2 col-md-2">
+          <div class="col-xs-6 col-sm-4 col-md-2">
             <label for="cloudProvider">cloud provider</label>
 
             <div>
@@ -77,7 +77,7 @@
               </select>
             </div>
           </div>
-          <div class="col-xs-6 col-sm-2 col-md-2">
+          <div class="col-xs-6 col-sm-4 col-md-2">
             <label for="region">region</label>
             <div>
               <select class="form-control input-sm" id="region" ng-model="usageFilter.region" ng-change="selectProviderByRegion()">
@@ -87,12 +87,12 @@
             </div>
           </div>
 
-          <div class="col-xs-6 col-sm-2 col-md-2">
+          <div class="col-xs-6 col-sm-4 col-md-2">
             <a id="btnClearFilters" class="btn btn-danger btn-block" ng-click="clearFilter()" role="button">
               <i class="fa fa-eraser fa-fw"></i>clear filters</a>
             <a id="btnGenReport" ng-click="loadUsages()" class="btn btn-success btn-block" role="button" ng-disabled="usageFilterForm.startDate.$invalid || usageFilterForm.endDate.$invalid">
               <i class="fa fa-table fa-fw"></i>
-              <!-- <i class="fa fa-circle-o-notch fa-spin fa-fw"></i> -->generate report</a>
+              <!-- <i class="fa fa-circle-o-notch fa-spin fa-fw"></i> -->generate</a>
           </div>
 
         </form>

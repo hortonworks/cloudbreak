@@ -14,7 +14,7 @@ cloudbreakApp.directive('usagecharts', function() {
           x_accessor: "date",
           y_accessor: "hours",
           interpolate: 'linear',
-          width: 400,
+          width: 380,
           y_axis: y_axis
         });
       }
