@@ -129,13 +129,13 @@ public class TemplateController {
     private Template convert(TemplateJson templateRequest, boolean publicInAccount) {
         switch (templateRequest.getCloudPlatform()) {
             case AWS:
-                return awsTemplateConverter.convert(templateRequest);
+                return awsTemplateConverter.convert(templateRequest, publicInAccount);
             case AZURE:
-                return azureTemplateConverter.convert(templateRequest);
+                return azureTemplateConverter.convert(templateRequest, publicInAccount);
             case GCC:
-                return gccTemplateConverter.convert(templateRequest);
+                return gccTemplateConverter.convert(templateRequest, publicInAccount);
             case OPENSTACK:
-                return openStackTemplateConverter.convert(templateRequest);
+                return openStackTemplateConverter.convert(templateRequest, publicInAccount);
             default:
                 throw new UnknownFormatConversionException(String.format("The cloudPlatform '%s' is not supported.", templateRequest.getCloudPlatform()));
         }

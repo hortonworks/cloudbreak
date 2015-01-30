@@ -46,7 +46,13 @@ public class OpenStackCredentialConverter extends AbstractConverter<CredentialJs
         openStackCredential.setTenantName(String.valueOf(json.getParameters().get(OpenStackCredentialParam.TENANT_NAME.getName())));
         openStackCredential.setEndpoint(String.valueOf(json.getParameters().get(OpenStackCredentialParam.ENDPOINT.getName())));
         openStackCredential.setPublicKey(json.getPublicKey());
-        openStackCredential.setPublicInAccount(json.isPublicInAccount());
         return openStackCredential;
     }
+
+    public OpenStackCredential convert(CredentialJson json, boolean publicInAccount) {
+        OpenStackCredential openStackCredential = convert(json);
+        openStackCredential.setPublicInAccount(publicInAccount);
+        return openStackCredential;
+    }
+
 }
