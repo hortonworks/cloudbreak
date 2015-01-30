@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.ClusterResponse;
 import com.sequenceiq.cloudbreak.controller.json.StackJson;
 import com.sequenceiq.cloudbreak.controller.json.InstanceGroupJson;
+import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
@@ -152,6 +153,10 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
         Map<String, Object> stackStatus = new HashMap<>();
         stackStatus.put("id", stack.getId());
         stackStatus.put("status", stack.getStatus().name());
+        Cluster cluster = stack.getCluster();
+        if (cluster != null) {
+            stackStatus.put("clusterStatus", cluster.getStatus().name());
+        }
         return stackStatus;
     }
 }
