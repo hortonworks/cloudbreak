@@ -78,7 +78,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 $scope.showError($rootScope.error_msg.hostgroup_single_invalid);
                 return;
             }
-
             $scope.cluster.credentialId = $rootScope.activeCredential.id;
             UluwatuCluster.save($scope.cluster, function (result) {
                 var nodeCount = 0;
@@ -236,7 +235,12 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         function initCluster(){
             $scope.cluster = {
                 password: "admin",
-                userName: "admin"
+                userName: "admin",
+                onFailureAction: "ROLLBACK",
+                failurePolicy: {
+                  adjustmentType: "EXACT",
+                  threshold: 1
+                }
             };
         }
 

@@ -154,6 +154,8 @@ uluwatuServices.factory('UluwatuCluster', ['UserStack', 'AccountStack', 'Cluster
                     password: cluster.password,
                     userName: cluster.userName,
                     region: cluster.region,
+                    failurePolicy: cluster.failurePolicy,
+                    onFailure: cluster.onFailure,
                     instanceGroups: cluster.instanceGroups
                 }
                 if (cluster.public) {
@@ -229,7 +231,7 @@ uluwatuServices.factory('UluwatuCluster', ['UserStack', 'AccountStack', 'Cluster
     function ($resource) {
       return $resource('periscope/clusters/:id/policies/:policyId', null, {'query':  {method:'GET', isArray:true}});
     }]);
-    
+
     uluwatuServices.factory('ErrorHandler', function() {
         return {
             handleError: function(error) {
