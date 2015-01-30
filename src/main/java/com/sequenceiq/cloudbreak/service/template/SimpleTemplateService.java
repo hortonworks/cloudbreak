@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
+import com.sequenceiq.cloudbreak.domain.APIResourceType;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CbUserRole;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -68,7 +69,7 @@ public class SimpleTemplateService implements TemplateService {
         try {
             savedTemplate = templateRepository.save(template);
         } catch (DataIntegrityViolationException ex) {
-            throw new DuplicateKeyValueException(template.getName(), ex);
+            throw new DuplicateKeyValueException(APIResourceType.TEMPLATE, template.getName(), ex);
         }
         return savedTemplate;
     }

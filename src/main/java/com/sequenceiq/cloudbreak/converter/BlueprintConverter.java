@@ -64,21 +64,14 @@ public class BlueprintConverter extends AbstractConverter<BlueprintJson, Bluepri
         } else {
             blueprint.setBlueprintText(json.getAmbariBlueprint());
         }
-
         validateBlueprint(blueprint.getBlueprintText());
         blueprint.setName(json.getName());
         blueprint.setDescription(json.getDescription());
         ObjectMapper mapper = new ObjectMapper();
         try {
             JsonNode root = mapper.readTree(blueprint.getBlueprintText());
-            int hostGroupCount = 0;
-            blueprint.setBlueprintName(root.get("Blueprints").get("blueprint_name").asText());
-            Iterator<JsonNode> hostGroups = root.get("host_groups").elements();
-            while (hostGroups.hasNext()) {
-                hostGroups.next();
-                hostGroupCount++;
-            }
-            blueprint.setHostGroupCount(hostGroupCount);
+            blueprint.setBlueprintName(getBlueprintName(root));
+            blueprint.setHostGroupCount(countHostGroups(root));
         } catch (IOException e) {
             throw new BadRequestException("Invalid Blueprint: Failed to parse JSON.", e);
         }
@@ -90,6 +83,38 @@ public class BlueprintConverter extends AbstractConverter<BlueprintJson, Bluepri
         Blueprint blueprint = convert(json);
         blueprint.setPublicInAccount(publicInAccount);
         return blueprint;
+    }
+
+    public Blueprint convert(String name, String blueprintText, boolean publicInAccount) {
+        Blueprint blueprint = new Blueprint();
+        blueprint.setName(name);
+        blueprint.setBlueprintText(blueprintText);
+        blueprint.setPublicInAccount(publicInAccount);
+        validateBlueprint(blueprint.getBlueprintText());
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            JsonNode root = mapper.readTree(blueprint.getBlueprintText());
+            blueprint.setBlueprintName(getBlueprintName(root));
+            blueprint.setHostGroupCount(countHostGroups(root));
+        } catch (IOException e) {
+            throw new BadRequestException("Invalid Blueprint: Failed to parse JSON.", e);
+        }
+
+        return blueprint;
+    }
+
+    private String getBlueprintName(JsonNode root) {
+        return root.get("Blueprints").get("blueprint_name").asText();
+    }
+
+    private int countHostGroups(JsonNode root) {
+        int hostGroupCount = 0;
+        Iterator<JsonNode> hostGroups = root.get("host_groups").elements();
+        while (hostGroups.hasNext()) {
+            hostGroups.next();
+            hostGroupCount++;
+        }
+        return hostGroupCount;
     }
 
     private String readUrl(String url) throws IOException {

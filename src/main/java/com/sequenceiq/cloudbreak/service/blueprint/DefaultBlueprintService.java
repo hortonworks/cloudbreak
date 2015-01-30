@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
+import com.sequenceiq.cloudbreak.domain.APIResourceType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CbUserRole;
@@ -62,7 +63,7 @@ public class DefaultBlueprintService implements BlueprintService {
         try {
             savedBlueprint = blueprintRepository.save(blueprint);
         } catch (DataIntegrityViolationException ex) {
-            throw new DuplicateKeyValueException(blueprint.getName(), ex);
+            throw new DuplicateKeyValueException(APIResourceType.BLUEPRINT, blueprint.getName(), ex);
         }
         return savedBlueprint;
     }
@@ -106,14 +107,14 @@ public class DefaultBlueprintService implements BlueprintService {
 
     private void delete(Blueprint blueprint, CbUser user) {
         MDCBuilder.buildMdcContext(blueprint);
-        if (clusterRepository.findAllClusterByBlueprint(blueprint.getId()).isEmpty()) {
+        if (clusterRepository.findAllClustersByBlueprint(blueprint.getId()).isEmpty()) {
             if (!user.getUserId().equals(blueprint.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
-                throw new BadRequestException("Blueprints can be deleted only by account admins or owners.");
+                throw new BadRequestException("Blueprints can only be deleted by account admins or owners.");
             }
             blueprintRepository.delete(blueprint);
         } else {
             throw new BadRequestException(String.format(
-                    "There are stacks associated with blueprint '%s'. Please remove these before the deleting the blueprint.", blueprint.getId()));
+                    "There are clusters associated with blueprint '%s'. Please remove these before deleting the blueprint.", blueprint.getId()));
         }
     }
 }

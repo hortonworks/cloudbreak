@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.json.HostGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.domain.APIResourceType;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CbUserRole;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
@@ -146,7 +147,7 @@ public class DefaultStackService implements StackService {
                 LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_REQUEST_EVENT, stack.getId());
                 reactor.notify(ReactorConfig.PROVISION_REQUEST_EVENT, Event.wrap(new ProvisionRequest(stack.cloudPlatform(), stack.getId())));
             } catch (DataIntegrityViolationException ex) {
-                throw new DuplicateKeyValueException(stack.getName(), ex);
+                throw new DuplicateKeyValueException(APIResourceType.STACK, stack.getName(), ex);
             }
             return savedStack;
         }

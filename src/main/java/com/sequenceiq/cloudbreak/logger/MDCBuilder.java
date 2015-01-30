@@ -5,6 +5,7 @@ import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.logger.resourcetype.BlueprintLoggerFactory;
@@ -13,6 +14,7 @@ import com.sequenceiq.cloudbreak.logger.resourcetype.ClusterLoggerFactory;
 import com.sequenceiq.cloudbreak.logger.resourcetype.CredentialLoggerFactory;
 import com.sequenceiq.cloudbreak.logger.resourcetype.EventDataLoggerFactory;
 import com.sequenceiq.cloudbreak.logger.resourcetype.EventLoggerFactory;
+import com.sequenceiq.cloudbreak.logger.resourcetype.RecipeLoggerFactory;
 import com.sequenceiq.cloudbreak.logger.resourcetype.StackLoggerFactory;
 import com.sequenceiq.cloudbreak.logger.resourcetype.TemplateLoggerFactory;
 import com.sequenceiq.cloudbreak.logger.resourcetype.UsageLoggerFactory;
@@ -43,6 +45,8 @@ public class MDCBuilder {
             TemplateLoggerFactory.buildMdcContext((Template) object);
         } else if (object instanceof Blueprint) {
             BlueprintLoggerFactory.buildMdcContext((Blueprint) object);
+        } else if (object instanceof Recipe) {
+            RecipeLoggerFactory.buildMdcContext((Recipe) object);
         } else if (object instanceof CloudbreakEvent) {
             EventLoggerFactory.buildMdcContext((CloudbreakEvent) object);
         } else if (object instanceof CloudbreakUsage) {

@@ -11,6 +11,7 @@ public class ClusterResponse {
     private int minutesUp;
     private String cluster;
     private Long blueprintId;
+    private Long recipeId;
     private String description;
     private String statusReason;
 
@@ -77,5 +78,13 @@ public class ClusterResponse {
 
     public void setBlueprintId(Long blueprintId) {
         this.blueprintId = blueprintId;
+    }
+
+    public Long getRecipeId() {
+        return recipeId;
+    }
+
+    public void setRecipeId(Long recipeId) {
+        this.recipeId = recipeId;
     }
 }

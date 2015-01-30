@@ -21,6 +21,8 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.domain.Recipe;
+import com.sequenceiq.cloudbreak.repository.RecipeRepository;
 
 @Component
 public class ClusterConverter {
@@ -35,6 +37,9 @@ public class ClusterConverter {
     private StackRepository stackRepository;
 
     @Autowired
+    private RecipeRepository recipeRepository;
+
+    @Autowired
     private JsonHelper jsonHelper;
 
     public Cluster convert(ClusterRequest clusterRequest) {
@@ -47,15 +52,24 @@ public class ClusterConverter {
         }
         Cluster cluster = new Cluster();
         try {
-            Blueprint one = blueprintRepository.findOne(clusterRequest.getBlueprintId());
-            cluster.setBlueprint(one);
+            Blueprint blueprint = blueprintRepository.findOne(clusterRequest.getBlueprintId());
+            cluster.setBlueprint(blueprint);
             ObjectMapper mapper = new ObjectMapper();
-            JsonNode root = mapper.readTree(one.getBlueprintText());
-            validateBlueprintRequest(root, stackRepository.findById(stackId));
+            JsonNode root = mapper.readTree(blueprint.getBlueprintText());
+            validateBlueprintRequest(root, stackRepository.findOne(stackId));
         } catch (AccessDeniedException e) {
-            throw new AccessDeniedException(String.format("Access to blueprint '%s' is denied or blueprint doesn't exist.", clusterRequest.getBlueprintId()), e);
+            throw new AccessDeniedException(
+                    String.format("Access to blueprint '%s' is denied or blueprint doesn't exist.", clusterRequest.getBlueprintId()), e);
         } catch (IOException e) {
             throw new BadRequestException(String.format("Blueprint [%s] can not convert to json node.", clusterRequest.getBlueprintId()));
+        }
+        if (clusterRequest.getRecipeId() != null) {
+            try {
+                Recipe recipe = recipeRepository.findOne(clusterRequest.getRecipeId());
+                cluster.setRecipe(recipe);
+            } catch (AccessDeniedException e) {
+                throw new AccessDeniedException(String.format("Access to recipe '%s' is denied or recipe doesn't exist.", clusterRequest.getRecipeId()), e);
+            }
         }
         cluster.setName(clusterRequest.getName());
         cluster.setStatus(Status.REQUESTED);
@@ -104,6 +118,9 @@ public class ClusterConverter {
         }
         clusterResponse.setStatusReason(cluster.getStatusReason());
         clusterResponse.setBlueprintId(cluster.getBlueprint().getId());
+        if (cluster.getRecipe() != null) {
+            clusterResponse.setRecipeId(cluster.getRecipe().getId());
+        }
         clusterResponse.setDescription(cluster.getDescription() == null ? "" : cluster.getDescription());
         return clusterResponse;
     }

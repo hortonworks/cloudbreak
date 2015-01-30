@@ -23,9 +23,13 @@ import javax.persistence.UniqueConstraint;
 })
 @NamedQueries({
         @NamedQuery(
-                name = "Cluster.findAllClusterByBlueprint",
+                name = "Cluster.findAllClustersByBlueprint",
                 query = "SELECT c FROM Cluster c "
                         + "WHERE c.blueprint.id= :id"),
+        @NamedQuery(
+                name = "Cluster.findAllClustersByRecipe",
+                query = "SELECT c FROM Cluster c "
+                        + "WHERE c.recipe.id= :id"),
         @NamedQuery(
                 name = "Cluster.findOneWithLists",
                 query = "SELECT c FROM Cluster c "
@@ -40,6 +44,9 @@ public class Cluster implements ProvisionEntity {
 
     @ManyToOne
     private Blueprint blueprint;
+
+    @ManyToOne
+    private Recipe recipe;
 
     @Column(nullable = false)
     private String name;
@@ -58,6 +65,7 @@ public class Cluster implements ProvisionEntity {
 
     private Long upSince;
 
+    @Column(length = 1000000, columnDefinition = "TEXT")
     private String statusReason;
 
     private Boolean emailNeeded;
@@ -87,6 +95,14 @@ public class Cluster implements ProvisionEntity {
 
     public void setBlueprint(Blueprint blueprint) {
         this.blueprint = blueprint;
+    }
+
+    public Recipe getRecipe() {
+        return recipe;
+    }
+
+    public void setRecipe(Recipe recipe) {
+        this.recipe = recipe;
     }
 
     public String getName() {
