@@ -250,7 +250,7 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
         }
 
         public AzureClient getAzureClient() {
-            return azureClient;
+            return azureStackUtil.createAzureClient((AzureCredential) stack.getCredential());
         }
 
         public Stack getStack() {

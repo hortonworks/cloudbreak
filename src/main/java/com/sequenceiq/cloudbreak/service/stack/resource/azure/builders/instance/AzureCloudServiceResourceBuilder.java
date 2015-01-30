@@ -133,7 +133,7 @@ public class AzureCloudServiceResourceBuilder extends AzureSimpleInstanceResourc
         }
 
         public AzureClient getAzureClient() {
-            return azureClient;
+            return azureStackUtil.createAzureClient((AzureCredential) stack.getCredential());
         }
 
         public List<Resource> getResources() {
