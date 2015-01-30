@@ -132,7 +132,7 @@ public class AzureServiceCertificateResourceBuilder extends AzureSimpleInstanceR
         }
 
         public AzureClient getAzureClient() {
-            return azureClient;
+            return azureStackUtil.createAzureClient((AzureCredential) stack.getCredential());
         }
 
         public List<Resource> getResources() {
