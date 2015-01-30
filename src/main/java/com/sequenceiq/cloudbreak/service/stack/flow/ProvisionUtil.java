@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
@@ -9,8 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.common.base.Optional;
-import com.sequenceiq.cloudbreak.controller.BuildStackFailureException;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -36,24 +36,31 @@ public class ProvisionUtil {
         return (fullIndex * instanceResourceBuilders.get(stack.cloudPlatform()).size()) % stack.cloudPlatform().parallelNumber() == 0;
     }
 
-    public void waitForRequestToFinish(Long stackId, List<Future<Boolean>> futures) {
+    public Map<FutureResult, List<ResourceRequestResult>> waitForRequestToFinish(Long stackId, List<Future<ResourceRequestResult>> futures)
+            throws Exception {
         Stack stack = stackRepository.findOneWithLists(stackId);
         MDCBuilder.buildMdcContext(stack);
+        Map<FutureResult, List<ResourceRequestResult>> result = new HashMap<>();
+        result.put(FutureResult.FAILED, new ArrayList<ResourceRequestResult>());
+        result.put(FutureResult.SUCCESS, new ArrayList<ResourceRequestResult>());
         LOGGER.info("Waiting for futures to finishing.");
-        StringBuilder sb = new StringBuilder();
-        Optional<Exception> exception = Optional.absent();
-        for (Future<Boolean> future : futures) {
-            try {
-                future.get();
-            } catch (Exception ex) {
-                exception = Optional.fromNullable(ex);
-                sb.append(String.format("%s, ", ex.getMessage()));
+        for (Future<ResourceRequestResult> future : futures) {
+            ResourceRequestResult resourceRequestResult = future.get();
+            if (FutureResult.FAILED.equals(resourceRequestResult.getFutureResult())) {
+                result.get(FutureResult.FAILED).add(resourceRequestResult);
+            } else {
+                result.get(FutureResult.SUCCESS).add(resourceRequestResult);
             }
         }
-        if (exception.isPresent()) {
-            throw new BuildStackFailureException(sb.toString(), exception.orNull(), stack.getResources());
-        }
         LOGGER.info("All futures finished continue with the next group.");
+        return result;
+    }
+
+    public void checkErrorOccurred(Map<FutureResult, List<ResourceRequestResult>> futureResultListMap) throws Exception {
+        List<ResourceRequestResult> resourceRequestResults = futureResultListMap.get(FutureResult.FAILED);
+        if (!resourceRequestResults.isEmpty()) {
+            throw resourceRequestResults.get(0).getException().orNull();
+        }
     }
 
 }

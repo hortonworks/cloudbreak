@@ -186,6 +186,12 @@ public class Stack implements ProvisionEntity {
     @OneToMany(mappedBy = "stack", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Resource> resources = new HashSet<>();
 
+    @Enumerated(EnumType.STRING)
+    private OnFailureAction onFailureActionAction = OnFailureAction.ROLLBACK;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    private FailurePolicy failurePolicy;
+
     @Version
     private Long version;
 
@@ -360,6 +366,22 @@ public class Stack implements ProvisionEntity {
         this.image = image;
     }
 
+    public OnFailureAction getOnFailureActionAction() {
+        return onFailureActionAction;
+    }
+
+    public void setOnFailureActionAction(OnFailureAction onFailureActionAction) {
+        this.onFailureActionAction = onFailureActionAction;
+    }
+
+    public FailurePolicy getFailurePolicy() {
+        return failurePolicy;
+    }
+
+    public void setFailurePolicy(FailurePolicy failurePolicy) {
+        this.failurePolicy = failurePolicy;
+    }
+
     public List<Resource> getResourcesByType(ResourceType resourceType) {
         List<Resource> resourceList = new ArrayList<>();
         for (Resource resource : resources) {
@@ -418,6 +440,10 @@ public class Stack implements ProvisionEntity {
 
     public CloudPlatform cloudPlatform() {
         return credential.cloudPlatform();
+    }
+
+    public Boolean isCloudPlatformUsedWithTemplate() {
+        return cloudPlatform().isWithTemplate();
     }
 
 }

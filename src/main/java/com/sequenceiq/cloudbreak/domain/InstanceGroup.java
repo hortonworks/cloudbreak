@@ -12,7 +12,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
 @Entity
-public class InstanceGroup implements ProvisionEntity {
+public class InstanceGroup implements ProvisionEntity, Comparable {
     @Id
     @GeneratedValue
     private Long id;
@@ -81,5 +81,10 @@ public class InstanceGroup implements ProvisionEntity {
 
     public void setInstanceMetaData(Set<InstanceMetaData> instanceMetaData) {
         this.instanceMetaData = instanceMetaData;
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        return Integer.compare(getNodeCount(), ((InstanceGroup) o).getNodeCount());
     }
 }

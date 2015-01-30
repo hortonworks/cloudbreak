@@ -126,6 +126,7 @@ public class ReactorInitializer implements InitializingBean {
 
         reactor.on($(ReactorConfig.UPDATE_INSTANCES_REQUEST_EVENT), updateInstancesRequestHandler);
         reactor.on($(ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT), addInstancesCompleteHandler);
+        reactor.on($(ReactorConfig.REMOVE_INSTANCES_COMPLETE_EVENT), stackUpdateSuccessHandler);
         reactor.on($(ReactorConfig.METADATA_UPDATE_COMPLETE_EVENT), metadataUpdateCompleteHandler);
         reactor.on($(ReactorConfig.STACK_UPDATE_SUCCESS_EVENT), stackUpdateSuccessHandler);
         reactor.on($(ReactorConfig.STACK_UPDATE_FAILED_EVENT), stackUpdateFailureHandler);

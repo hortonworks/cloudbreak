@@ -182,6 +182,7 @@ public class AwsConnector implements CloudPlatformConnector {
         ));
         CreateStackRequest createStackRequest = createStackRequest()
                 .withStackName(stackName)
+                .withOnFailure(com.amazonaws.services.cloudformation.model.OnFailure.valueOf(stack.getOnFailureActionAction().name()))
                 .withTemplateBody(cfTemplateBuilder.build("templates/aws-cf-stack.ftl",
                         spotPriceNeeded(stack.getInstanceGroups()), stack.getInstanceGroupsAsList()))
                 .withNotificationARNs((String) setupProperties.get(SnsTopicManager.NOTIFICATION_TOPIC_ARN_KEY))

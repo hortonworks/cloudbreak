@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.ClusterResponse;
 import com.sequenceiq.cloudbreak.controller.json.StackJson;
 import com.sequenceiq.cloudbreak.controller.json.InstanceGroupJson;
+import com.sequenceiq.cloudbreak.domain.AdjustmentType;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
@@ -28,7 +29,7 @@ import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 public class StackConverter extends AbstractConverter<StackJson, Stack> {
 
     private static final int MIN_NODE_COUNT = 3;
-
+    private static final double ONE_HUNDRED = 100.0;
 
     @Autowired
     private TemplateRepository templateRepository;
@@ -44,6 +45,9 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
 
     @Autowired
     private MetaDataConverter metaDataConverter;
+
+    @Autowired
+    private FailurePolicyConverter failurePolicyConverter;
 
     @Value("${cb.aws.ami.map}")
     private String awsImage;
@@ -74,6 +78,7 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
         stackJson.setPassword(entity.getPassword());
         stackJson.setHash(entity.getHash());
         stackJson.setRegion(entity.getRegion());
+        stackJson.setOnFailureAction(entity.getOnFailureActionAction());
         List<InstanceGroupJson> templateGroups = new ArrayList<>();
         templateGroups.addAll(instanceGroupConverter.convertAllEntityToJson(entity.getInstanceGroups()));
         stackJson.setInstanceGroups(templateGroups);
@@ -81,6 +86,9 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
             stackJson.setCluster(clusterConverter.convert(entity.getCluster(), "{}"));
         } else {
             stackJson.setCluster(new ClusterResponse());
+        }
+        if (entity.getFailurePolicy() != null) {
+            stackJson.setFailurePolicy(failurePolicyConverter.convert(entity.getFailurePolicy()));
         }
         stackJson.setImage(entity.getImage());
         return stackJson;
@@ -94,6 +102,7 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
         stack.setPassword(json.getPassword());
         stack.setPublicInAccount(json.isPublicInAccount());
         stack.setRegion(json.getRegion());
+        stack.setOnFailureActionAction(json.getOnFailureAction());
         try {
             stack.setCredential(credentialRepository.findOne(json.getCredentialId()));
         } catch (AccessDeniedException e) {
@@ -109,7 +118,26 @@ public class StackConverter extends AbstractConverter<StackJson, Stack> {
         } else {
             stack.setImage(prepareImage(stack));
         }
+        if (json.getFailurePolicy() != null) {
+            stack.setFailurePolicy(failurePolicyConverter.convert(json.getFailurePolicy()));
+            if (stack.getFailurePolicy().getThreshold() == 0L) {
+                throw new BadRequestException("The threshold can not be 0.");
+            }
+            if (stack.getFailurePolicy().getAdjustmentType().equals(AdjustmentType.EXACT)) {
+                if (stack.getFullNodeCount() - stack.getFailurePolicy().getThreshold() < MIN_NODE_COUNT) {
+                    throw new BadRequestException("At least 3 live nodes are required after rollback.");
+                }
+            } else if (stack.getFailurePolicy().getAdjustmentType().equals(AdjustmentType.PERCENTAGE)) {
+                if (stack.getFullNodeCount() - calculateMinCount(stack) < MIN_NODE_COUNT) {
+                    throw new BadRequestException("At least 3 live nodes are required after rollback.");
+                }
+            }
+        }
         return stack;
+    }
+
+    private long calculateMinCount(Stack stack) {
+        return Math.round(Double.valueOf(stack.getFullNodeCount()) * (Double.valueOf(stack.getFailurePolicy().getThreshold()) / ONE_HUNDRED));
     }
 
     private String prepareImage(Stack stack) {

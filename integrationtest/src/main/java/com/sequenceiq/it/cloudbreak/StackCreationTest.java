@@ -35,9 +35,10 @@ public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
     }
 
     @Test
-    @Parameters({ "stackName", "region", "ambariUser", "ambariPassword" })
+    @Parameters({ "stackName", "region", "ambariUser", "ambariPassword", "onFailureAction", "threshold", "adjustmentType" })
     public void testStackCreation(@Optional("testing1") String stackName, @Optional("EUROPE_WEST1_B") String region, @Optional("admin") String ambariUser,
-            @Optional("admin") String ambariPassword) {
+            @Optional("admin") String ambariPassword, @Optional("DO_NOTHING") String onFailureAction, @Optional("1") Long threshold,
+            @Optional("EXACT") String adjustmentType) {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
         Map<String, Object> templateModel = new HashMap<>();
@@ -45,6 +46,9 @@ public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
         templateModel.put("region", region);
         templateModel.put("ambariUser", ambariUser);
         templateModel.put("ambariPassword", ambariPassword);
+        templateModel.put("onFailureAction", onFailure);
+        templateModel.put("threshold", threshold);
+        templateModel.put("adjustmentType", adjustmentType);
         templateModel.put("instanceGroups", itContext.getContextParam(CloudbreakITContextConstants.TEMPLATE_ID, List.class));
         templateModel.put("credentialId", itContext.getContextParam(CloudbreakITContextConstants.CREDENTIAL_ID));
         // WHEN

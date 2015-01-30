@@ -16,3 +16,5 @@ out/
 curl_config_admin_user
 *.suml
 startit.sh
+integrationtest/build/
+integrationtest/test-output/

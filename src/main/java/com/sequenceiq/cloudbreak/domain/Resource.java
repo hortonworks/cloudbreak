@@ -7,8 +7,16 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 
 @Entity
+@NamedQueries({
+        @NamedQuery(
+                name = "Resource.findByStackIdAndName",
+                query = "SELECT r FROM Resource r "
+                        + "WHERE r.stack.id = :stackId AND r.resourceName = :name AND r.resourceType = :type")
+})
 public class Resource {
 
     @Id

@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.domain;
 public enum CloudPlatform {
     AWS("ec2", true, 0),
     AZURE("azure", false, 6),
-    GCC("gcc", false, 20),
+    GCC("gcc", false, 30),
     OPENSTACK("openstack", true, 0);
 
     private final String initScriptPrefix;

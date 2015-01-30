@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
@@ -15,9 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Component;
 
-import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
-import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
@@ -27,21 +24,22 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.stack.AddInstancesFailedException;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.connector.UserDataBuilder;
 import com.sequenceiq.cloudbreak.service.stack.event.AddInstancesComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.StackOperationFailure;
 import com.sequenceiq.cloudbreak.service.stack.event.StackUpdateSuccess;
 import com.sequenceiq.cloudbreak.service.stack.event.UpdateInstancesRequest;
+import com.sequenceiq.cloudbreak.service.stack.flow.FutureResult;
 import com.sequenceiq.cloudbreak.service.stack.flow.ProvisionUtil;
-import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
+import com.sequenceiq.cloudbreak.service.stack.flow.ResourceRequestResult;
+import com.sequenceiq.cloudbreak.service.stack.handler.callable.DownScaleCallable.DownScaleCallableBuilder;
+import com.sequenceiq.cloudbreak.service.stack.handler.callable.UpScaleCallable.UpScaleCallableBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.DeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.ProvisionContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
 
-import groovyx.net.http.HttpResponseException;
 import reactor.core.Reactor;
 import reactor.event.Event;
 import reactor.function.Consumer;
@@ -84,127 +82,131 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
     @Override
     public void accept(Event<UpdateInstancesRequest> event) {
         final UpdateInstancesRequest request = event.getData();
-        final CloudPlatform cloudPlatform = request.getCloudPlatform();
-        Long stackId = request.getStackId();
-        Integer scalingAdjustment = request.getScalingAdjustment();
-        final Stack stack = stackRepository.findOneWithLists(stackId);
+        final Stack stack = stackRepository.findOneWithLists(request.getStackId());
         MDCBuilder.buildMdcContext(stack);
         try {
             LOGGER.info("Accepted {} event on stack.", ReactorConfig.UPDATE_INSTANCES_REQUEST_EVENT);
-            stackUpdater.updateMetadataReady(stackId, false);
-            if (scalingAdjustment > 0) {
-                if (cloudPlatform.isWithTemplate()) {
-                    cloudPlatformConnectors.get(cloudPlatform)
-                            .addInstances(stack, userDataBuilder.build(cloudPlatform, stack.getHash(), new HashMap<String, String>()),
-                                    scalingAdjustment, request.getHostGroup());
-                } else {
-                    ResourceBuilderInit resourceBuilderInit = resourceBuilderInits.get(cloudPlatform);
-                    final ProvisionContextObject pCO =
-                            resourceBuilderInit.provisionInit(stack, userDataBuilder.build(cloudPlatform, stack.getHash(), new HashMap<String, String>()));
-                    for (ResourceBuilder resourceBuilder : networkResourceBuilders.get(cloudPlatform)) {
-                        pCO.getNetworkResources().addAll(stack.getResourcesByType(resourceBuilder.resourceType()));
-                    }
-                    List<Future<Boolean>> futures = new ArrayList<>();
-                    final Set<Resource> resourceSet = new HashSet<>();
-                    for (int i = stack.getFullNodeCount(); i < stack.getFullNodeCount() + scalingAdjustment; i++) {
-                        final int index = i;
-                        Future<Boolean> submit = resourceBuilderExecutor.submit(new Callable<Boolean>() {
-                            @Override
-                            public Boolean call() throws Exception {
-                                List<Resource> resources = new ArrayList<>();
-                                for (final ResourceBuilder resourceBuilder : instanceResourceBuilders.get(cloudPlatform)) {
-                                    CreateResourceRequest createResourceRequest =
-                                            resourceBuilder.buildCreateRequest(pCO,
-                                                    resources,
-                                                    resourceBuilder.buildResources(pCO, index, resources,
-                                                            Optional.of(stack.getInstanceGroupByInstanceGroupName(request.getHostGroup()))),
-                                                    index,
-                                                    Optional.of(stack.getInstanceGroupByInstanceGroupName(request.getHostGroup())));
-                                    stackUpdater.addStackResources(stack.getId(), createResourceRequest.getBuildableResources());
-                                    resources.addAll(createResourceRequest.getBuildableResources());
-                                    resourceSet.addAll(createResourceRequest.getBuildableResources());
-                                    resourceBuilder.create(createResourceRequest, stack.getRegion());
-                                }
-                                return true;
-                            }
-                        });
-                        futures.add(submit);
-                        if (provisionUtil.isRequestFullWithCloudPlatform(stack, futures.size() + 1)) {
-                            provisionUtil.waitForRequestToFinish(stackId, futures);
-                            futures = new ArrayList<>();
-                        }
-                    }
-                    provisionUtil.waitForRequestToFinish(stackId, futures);
-                    LOGGER.info("Publishing {} event.", ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT);
-                    reactor.notify(ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT,
-                            Event.wrap(new AddInstancesComplete(cloudPlatform, stack.getId(), resourceSet, request.getHostGroup())));
-                }
+            stackUpdater.updateMetadataReady(stack.getId(), false);
+            if (isUpScaleRequest(request)) {
+                upScaleStack(request, stack);
             } else {
-                Set<String> instanceIds = new HashSet<>();
-                int i = 0;
-                for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-                    for (InstanceMetaData metadataEntry : instanceGroup.getInstanceMetaData()) {
-                        if (metadataEntry.isRemovable()) {
-                            instanceIds.add(metadataEntry.getInstanceId());
-                            if (++i >= scalingAdjustment * -1) {
-                                break;
-                            }
-                        }
-                    }
-                }
-                if (cloudPlatform.isWithTemplate()) {
-                    cloudPlatformConnectors.get(cloudPlatform).removeInstances(stack, instanceIds, request.getHostGroup());
-                } else {
-                    ResourceBuilderInit resourceBuilderInit = resourceBuilderInits.get(cloudPlatform);
-                    final DeleteContextObject dCO = resourceBuilderInit.decommissionInit(stack, instanceIds);
-
-                    for (int j = instanceResourceBuilders.get(cloudPlatform).size() - 1; j >= 0; j--) {
-                        List<Future<Boolean>> futures = new ArrayList<>();
-                        final int index = j;
-                        final ResourceBuilder resourceBuilder = instanceResourceBuilders.get(cloudPlatform).get(index);
-                        for (final Resource resource : getResourcesByType(resourceBuilder.resourceType(), dCO.getDecommisionResources())) {
-                            Future<Boolean> submit = resourceBuilderExecutor.submit(new Callable<Boolean>() {
-                                @Override
-                                public Boolean call() throws Exception {
-                                    Boolean delete = false;
-                                    try {
-                                        delete = resourceBuilder.delete(resource, dCO, stack.getRegion());
-                                    } catch (HttpResponseException ex) {
-                                        LOGGER.error(String.format("Error occurred on stack under the instance remove"), ex);
-                                        throw new InternalServerException(
-                                                String.format("Error occurred while removing instance '%s' on stack. Message: '%s'",
-                                                        resource.getResourceName(), ex.getResponse().toString()), ex);
-                                    } catch (Exception ex) {
-                                        throw new InternalServerException(
-                                                String.format("Error occurred while removing instance '%s' on stack. Message: '%s'",
-                                                        resource.getResourceName(), ex.getMessage()), ex);
-                                    }
-                                    return delete;
-                                }
-                            });
-                            futures.add(submit);
-                            if (provisionUtil.isRequestFull(stack, futures.size() + 1)) {
-                                provisionUtil.waitForRequestToFinish(stackId, futures);
-                                futures = new ArrayList<>();
-                            }
-                        }
-                        provisionUtil.waitForRequestToFinish(stackId, futures);
-                    }
-                    stackUpdater.removeStackResources(stackId, dCO.getDecommisionResources());
-                    LOGGER.info("Terminated instances in stack: '{}'", instanceIds);
-                    LOGGER.info("Publishing {} event.", ReactorConfig.STACK_UPDATE_SUCCESS_EVENT);
-                    reactor.notify(ReactorConfig.STACK_UPDATE_SUCCESS_EVENT, Event.wrap(new StackUpdateSuccess(stack.getId(), true,
-                            instanceIds, request.getHostGroup())));
-                }
+                downScaleStack(request, stack);
             }
-        } catch (AddInstancesFailedException e) {
+        } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
             notifyUpdateFailed(stack, e.getMessage());
-        } catch (Exception e) {
-            String errMessage = "Unhandled exception occurred while updating stack.";
-            LOGGER.error(errMessage, e);
-            notifyUpdateFailed(stack, errMessage);
         }
+    }
+
+    private boolean isUpScaleRequest(UpdateInstancesRequest request) {
+        return request.getScalingAdjustment() > 0;
+    }
+
+    private void downScaleStack(UpdateInstancesRequest request, Stack stack) throws Exception {
+        Set<String> instanceIds = new HashSet<>();
+        int i = 0;
+        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+            for (InstanceMetaData metadataEntry : instanceGroup.getInstanceMetaData()) {
+                if (metadataEntry.isRemovable()) {
+                    instanceIds.add(metadataEntry.getInstanceId());
+                    if (++i >= request.getScalingAdjustment() * -1) {
+                        break;
+                    }
+                }
+            }
+        }
+        if (stack.isCloudPlatformUsedWithTemplate()) {
+            cloudPlatformConnectors.get(stack.cloudPlatform()).removeInstances(stack, instanceIds, request.getHostGroup());
+        } else {
+            ResourceBuilderInit resourceBuilderInit = resourceBuilderInits.get(stack.cloudPlatform());
+            final DeleteContextObject deleteContextObject = resourceBuilderInit.decommissionInit(stack, instanceIds);
+            for (int j = instanceResourceBuilders.get(stack.cloudPlatform()).size() - 1; j >= 0; j--) {
+                List<Future<ResourceRequestResult>> futures = new ArrayList<>();
+                final int index = j;
+                final ResourceBuilder resourceBuilder = instanceResourceBuilders.get(stack.cloudPlatform()).get(index);
+                for (final Resource resource : getResourcesByType(resourceBuilder.resourceType(), deleteContextObject.getDecommisionResources())) {
+                    Future<ResourceRequestResult> submit = resourceBuilderExecutor.submit(
+                            DownScaleCallableBuilder.builder()
+                                    .withStack(stack)
+                                    .withDeleteContextObject(deleteContextObject)
+                                    .withResource(resource)
+                                    .withResourceBuilder(resourceBuilder)
+                                    .build()
+                    );
+                    futures.add(submit);
+                    if (provisionUtil.isRequestFull(stack, futures.size() + 1)) {
+                        Map<FutureResult, List<ResourceRequestResult>> result = provisionUtil.waitForRequestToFinish(stack.getId(), futures);
+                        provisionUtil.checkErrorOccurred(result);
+                        futures = new ArrayList<>();
+                    }
+                }
+                Map<FutureResult, List<ResourceRequestResult>> result = provisionUtil.waitForRequestToFinish(stack.getId(), futures);
+                provisionUtil.checkErrorOccurred(result);
+            }
+            stackUpdater.removeStackResources(stack.getId(), deleteContextObject.getDecommisionResources());
+            LOGGER.info("Terminated instances in stack: '{}'", instanceIds);
+            LOGGER.info("Publishing {} event.", ReactorConfig.REMOVE_INSTANCES_COMPLETE_EVENT);
+            reactor.notify(ReactorConfig.REMOVE_INSTANCES_COMPLETE_EVENT, Event.wrap(new StackUpdateSuccess(stack.getId(), true,
+                    instanceIds, request.getHostGroup())));
+        }
+    }
+
+    private void upScaleStack(UpdateInstancesRequest request, Stack stack) throws Exception {
+        if (stack.isCloudPlatformUsedWithTemplate()) {
+            cloudPlatformConnectors.get(stack.cloudPlatform()).addInstances(stack,
+                    userDataBuilder.build(stack.cloudPlatform(), stack.getHash(), new HashMap<String, String>()),
+                    request.getScalingAdjustment(),
+                    request.getHostGroup());
+        } else {
+            ResourceBuilderInit resourceBuilderInit = resourceBuilderInits.get(stack.cloudPlatform());
+            final ProvisionContextObject provisionContextObject = resourceBuilderInit
+                    .provisionInit(stack, userDataBuilder.build(stack.cloudPlatform(), stack.getHash(), new HashMap<String, String>()));
+            for (ResourceBuilder resourceBuilder : networkResourceBuilders.get(stack.cloudPlatform())) {
+                provisionContextObject.getNetworkResources().addAll(stack.getResourcesByType(resourceBuilder.resourceType()));
+            }
+            List<Future<ResourceRequestResult>> futures = new ArrayList<>();
+            final Set<ResourceRequestResult> resourceRequestResults = new HashSet<>();
+            for (int i = stack.getFullNodeCount(); i < stack.getFullNodeCount() + request.getScalingAdjustment(); i++) {
+                final int index = i;
+                Future<ResourceRequestResult> submit = resourceBuilderExecutor.submit(
+                        UpScaleCallableBuilder.builder()
+                                .withStack(stack)
+                                .withStackUpdater(stackUpdater)
+                                .withIndex(index)
+                                .withProvisionContextObject(provisionContextObject)
+                                .withInstanceResourceBuilders(instanceResourceBuilders)
+                                .withHostGroup(request.getHostGroup())
+                                .build()
+                );
+                futures.add(submit);
+                if (provisionUtil.isRequestFullWithCloudPlatform(stack, futures.size() + 1)) {
+                    Map<FutureResult, List<ResourceRequestResult>> result = provisionUtil.waitForRequestToFinish(stack.getId(), futures);
+                    provisionUtil.checkErrorOccurred(result);
+                    resourceRequestResults.addAll(result.get(FutureResult.SUCCESS));
+                    futures = new ArrayList<>();
+                }
+            }
+            Map<FutureResult, List<ResourceRequestResult>> result = provisionUtil.waitForRequestToFinish(stack.getId(), futures);
+            provisionUtil.checkErrorOccurred(result);
+            resourceRequestResults.addAll(result.get(FutureResult.SUCCESS));
+            LOGGER.info("Publishing {} event.", ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT);
+            reactor.notify(ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT,
+                    Event.wrap(new AddInstancesComplete(
+                            stack.cloudPlatform(),
+                            stack.getId(),
+                            collectResources(resourceRequestResults),
+                            request.getHostGroup())
+                    )
+            );
+        }
+    }
+
+    private Set<Resource> collectResources(Set<ResourceRequestResult> resourceSet) {
+        Set<Resource> resources = new HashSet<>();
+        for (ResourceRequestResult resourceRequestResult : resourceSet) {
+            resources.addAll(resourceRequestResult.getBuiltResources());
+        }
+        return resources;
     }
 
     private List<Resource> getResourcesByType(ResourceType resourceType, List<Resource> resources) {
