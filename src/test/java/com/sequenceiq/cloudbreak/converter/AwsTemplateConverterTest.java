@@ -11,6 +11,7 @@ import org.junit.Test;
 import com.amazonaws.services.ec2.model.InstanceType;
 import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
 import com.sequenceiq.cloudbreak.controller.validation.AwsTemplateParam;
+import com.sequenceiq.cloudbreak.domain.AwsInstanceType;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 
@@ -73,7 +74,7 @@ public class AwsTemplateConverterTest {
         AwsTemplate awsTemplate = new AwsTemplate();
         awsTemplate.setId(DUMMY_ID);
         awsTemplate.setDescription(DUMMY_DESCRIPTION);
-        awsTemplate.setInstanceType(InstanceType.C1Medium);
+        awsTemplate.setInstanceType(AwsInstanceType.C1Medium);
         awsTemplate.setSshLocation(DUMMY_SSH_LOCATION);
         awsTemplate.setName(DUMMY_NAME);
         awsTemplate.setPublicInAccount(true);

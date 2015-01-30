@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.controller.validation;
 
 import com.amazonaws.services.ec2.model.InstanceType;
-import com.amazonaws.services.ec2.model.VolumeType;
 import com.google.common.base.Optional;
+import com.sequenceiq.cloudbreak.domain.AwsVolumeType;
 
 public enum AwsTemplateParam implements TemplateParam {
 
@@ -11,7 +11,7 @@ public enum AwsTemplateParam implements TemplateParam {
             + "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\."
             + "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\."
             + "([01]?\\d\\d?|2[0-4]\\d|25[0-5])/([01]?\\d\\d?|2[0-4]\\d|25[0-5])$")),
-    VOLUME_TYPE("volumeType", true, VolumeType.class, Optional.<String>absent()),
+    VOLUME_TYPE("volumeType", true, AwsVolumeType.class, Optional.<String>absent()),
     SPOT_PRICE("spotPrice", false, Double.class, Optional.<String>absent());
 
     private final String paramName;

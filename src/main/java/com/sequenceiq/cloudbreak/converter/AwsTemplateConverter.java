@@ -5,11 +5,11 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.services.ec2.model.InstanceType;
-import com.amazonaws.services.ec2.model.VolumeType;
 import com.sequenceiq.cloudbreak.controller.json.TemplateJson;
 import com.sequenceiq.cloudbreak.controller.validation.AwsTemplateParam;
+import com.sequenceiq.cloudbreak.domain.AwsInstanceType;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
+import com.sequenceiq.cloudbreak.domain.AwsVolumeType;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 
 @Component
@@ -42,14 +42,14 @@ public class AwsTemplateConverter extends AbstractConverter<TemplateJson, AwsTem
     public AwsTemplate convert(TemplateJson json) {
         AwsTemplate awsTemplate = new AwsTemplate();
         awsTemplate.setName(json.getName());
-        awsTemplate.setInstanceType(InstanceType.valueOf(String.valueOf(json.getParameters().get(AwsTemplateParam.INSTANCE_TYPE.getName()))));
+        awsTemplate.setInstanceType(AwsInstanceType.valueOf(String.valueOf(json.getParameters().get(AwsTemplateParam.INSTANCE_TYPE.getName()))));
         String sshLocation = json.getParameters().containsKey(AwsTemplateParam.SSH_LOCATION.getName())
                 ? String.valueOf(json.getParameters().get(AwsTemplateParam.SSH_LOCATION.getName())) : DEFAULT_SSH_LOCATION;
         awsTemplate.setSshLocation(sshLocation);
         awsTemplate.setDescription(json.getDescription());
-        awsTemplate.setVolumeCount((json.getVolumeCount() == null) ? 0 : json.getVolumeCount());
-        awsTemplate.setVolumeSize((json.getVolumeSize() == null) ? 0 : json.getVolumeSize());
-        awsTemplate.setVolumeType(VolumeType.valueOf(String.valueOf(json.getParameters().get(AwsTemplateParam.VOLUME_TYPE.getName()))));
+        awsTemplate.setVolumeCount(json.getVolumeCount() == null ? 0 : json.getVolumeCount());
+        awsTemplate.setVolumeSize(json.getVolumeSize() == null ? 0 : json.getVolumeSize());
+        awsTemplate.setVolumeType(AwsVolumeType.valueOf(String.valueOf(json.getParameters().get(AwsTemplateParam.VOLUME_TYPE.getName()))));
         Double spotPrice = json.getParameters().containsKey(AwsTemplateParam.SPOT_PRICE.getName())
                 && json.getParameters().get(AwsTemplateParam.SPOT_PRICE.getName()) != null
                 ? Double.valueOf(json.getParameters().get(AwsTemplateParam.SPOT_PRICE.getName()).toString()) : null;

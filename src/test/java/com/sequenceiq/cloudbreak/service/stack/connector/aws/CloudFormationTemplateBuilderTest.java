@@ -12,10 +12,10 @@ import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
-import com.amazonaws.services.ec2.model.InstanceType;
-import com.amazonaws.services.ec2.model.VolumeType;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
+import com.sequenceiq.cloudbreak.domain.AwsInstanceType;
 import com.sequenceiq.cloudbreak.domain.AwsTemplate;
+import com.sequenceiq.cloudbreak.domain.AwsVolumeType;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 
 import freemarker.template.Configuration;
@@ -41,13 +41,13 @@ public class CloudFormationTemplateBuilderTest {
     public void testBuildTemplateShouldCreateTwoDeviceNameEntriesWhenTwoVolumesAreSpecified() {
         InstanceGroup instanceGroup1 = new InstanceGroup();
         AwsTemplate awsTemplate = new AwsTemplate();
-        awsTemplate.setInstanceType(InstanceType.C1Medium);
+        awsTemplate.setInstanceType(AwsInstanceType.C1Medium);
         awsTemplate.setSpotPrice(0.2);
         awsTemplate.setSshLocation("0.0.0.0/0");
         awsTemplate.setName("awstemp1");
         awsTemplate.setVolumeCount(2);
         awsTemplate.setVolumeSize(100);
-        awsTemplate.setVolumeType(VolumeType.Gp2);
+        awsTemplate.setVolumeType(AwsVolumeType.Gp2);
         instanceGroup1.setNodeCount(1);
         instanceGroup1.setTemplate(awsTemplate);
         instanceGroup1.setGroupName("master");
@@ -63,13 +63,13 @@ public class CloudFormationTemplateBuilderTest {
     public void testBuildTemplateShouldHaveSpotPriceSpecifiedWhenItIsSet() {
         InstanceGroup instanceGroup1 = new InstanceGroup();
         AwsTemplate awsTemplate = new AwsTemplate();
-        awsTemplate.setInstanceType(InstanceType.C1Medium);
+        awsTemplate.setInstanceType(AwsInstanceType.C1Medium);
         awsTemplate.setSpotPrice(0.2);
         awsTemplate.setSshLocation("0.0.0.0/0");
         awsTemplate.setName("awstemp1");
         awsTemplate.setVolumeCount(1);
         awsTemplate.setVolumeSize(100);
-        awsTemplate.setVolumeType(VolumeType.Gp2);
+        awsTemplate.setVolumeType(AwsVolumeType.Gp2);
         instanceGroup1.setNodeCount(1);
         instanceGroup1.setTemplate(awsTemplate);
         instanceGroup1.setGroupName("master");
@@ -83,12 +83,12 @@ public class CloudFormationTemplateBuilderTest {
     public void testBuildTemplateShouldNotHaveSpotPriceSpecifiedWhenItIsSetToFalse() {
         InstanceGroup instanceGroup1 = new InstanceGroup();
         AwsTemplate awsTemplate = new AwsTemplate();
-        awsTemplate.setInstanceType(InstanceType.C1Medium);
+        awsTemplate.setInstanceType(AwsInstanceType.C1Medium);
         awsTemplate.setSshLocation("0.0.0.0/0");
         awsTemplate.setName("awstemp1");
         awsTemplate.setVolumeCount(1);
         awsTemplate.setVolumeSize(100);
-        awsTemplate.setVolumeType(VolumeType.Gp2);
+        awsTemplate.setVolumeType(AwsVolumeType.Gp2);
         instanceGroup1.setNodeCount(1);
         instanceGroup1.setTemplate(awsTemplate);
         instanceGroup1.setGroupName("master");
