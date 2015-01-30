@@ -12,7 +12,8 @@ import org.springframework.beans.factory.annotation.Value;
 
 public class TrustedPluginValidator implements ConstraintValidator<TrustedPlugin, Set<String>> {
 
-    public static final String PLUGIN_URL_PATTERN = "https://github.com/.*/(consul-plugins-)[a-z0-9-._]*.git";
+    private static final String PLUGIN_URL_PATTERN = "https://github.com/.*/(consul-plugins-)[a-z0-9-._]*.git";
+
     @Value("${cb.plugins.trusted.sources:sequenceiq}")
     private String trustedSources;
 

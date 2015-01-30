@@ -17,33 +17,19 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sequenceiq.cloudbreak.controller.json.IdJson;
 import com.sequenceiq.cloudbreak.controller.json.RecipeJson;
-import com.sequenceiq.cloudbreak.converter.BlueprintConverter;
 import com.sequenceiq.cloudbreak.converter.RecipeConverter;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Recipe;
-import com.sequenceiq.cloudbreak.repository.RecipeRepository;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
 
 @Controller
 public class RecipeController {
 
-    public static final String RECIPE_BP_PREFIX = "recipe-bp-";
-
     @Autowired
     private RecipeConverter recipeConverter;
 
     @Autowired
-    private RecipeRepository recipeRepository;
-
-    @Autowired
     private RecipeService recipeService;
-
-    @Autowired
-    private BlueprintConverter blueprintConverter;
-
-    @Autowired
-    private BlueprintService blueprintService;
 
     @RequestMapping(value = "account/recipes", method = RequestMethod.POST)
     @ResponseBody
