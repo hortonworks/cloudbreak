@@ -67,7 +67,16 @@ function ($scope, $rootScope, $filter, Cluster, GlobalStack) {
       }
       var nodeCount = notification.nodeCount;
       if (nodeCount != null && nodeCount != undefined) {
-        actCluster.nodeCount = nodeCount;
+        angular.forEach(actCluster.instanceGroups, function(k){
+          if (k.group === notification.instanceGroup) {
+            k.nodeCount = notification.nodeCount;
+          }
+        });
+        var fullNodeCount = 0;
+        angular.forEach(actCluster.instanceGroups, function(group) {
+          fullNodeCount += group.nodeCount;
+        });
+        actCluster.nodeCount = fullNodeCount;
       }
       refreshMetadata(notification)
       actCluster.status = notification.eventType;
