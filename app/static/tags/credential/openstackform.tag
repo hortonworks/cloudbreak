@@ -42,7 +42,7 @@
   <label class="col-sm-3 control-label" for="opassword">Password</label>
 
   <div class="col-sm-9">
-    <input type="text" class="form-control" name="opassword" ng-model="credentialOpenstack.parameters.password" required id="opassword" placeholder="openstack password">
+    <input type="password" class="form-control" name="opassword" ng-model="credentialOpenstack.parameters.password" required id="opassword" placeholder="openstack password">
       <div class="help-block" ng-show="openstackCredentialForm.opassword.$dirty && openstackCredentialForm.opassword.$invalid">
         <i class="fa fa-warning"></i> {{error_msg.openstack_credential_opassword_invalid}}
       </div>
