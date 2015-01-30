@@ -13,8 +13,8 @@ cloudbreakApp.directive('usagecharts', function() {
           target: '#' + targetDivId,
           x_accessor: "date",
           y_accessor: "hours",
-          width: 400,
           interpolate: 'linear',
+          width: 400,
           y_axis: y_axis
         });
       }
@@ -30,9 +30,9 @@ cloudbreakApp.directive('usagecharts', function() {
           interpolate: 'linear',
           legend: ['GCP','AZURE','AWS'],
           legend_target: '.legend',
-          width: 650,
           missing_is_zero: false,
           linked: true,
+          width: 450,
           y_axis: y_axis
         });
       }
@@ -68,23 +68,24 @@ cloudbreakApp.directive('usagecharts', function() {
 
         var unitedChartData = [];
         if (value.cloud == 'all' || value.cloud == 'GCC') {
-          element.append('<div id="gcpChart" class="col-xs-6 col-sm-4 col-md-4"/>');
+          element.append('<div id="gcpChart" class="col-xs-12 col-sm-6 col-md-4"/>');
           createChart('GCP running hours', gcpUsage, 'gcpChart', (gcpMaxHour > 0));
           unitedChartData.push(gcpUsage);
         }
         if (value.cloud == 'all' || value.cloud == 'AZURE') {
-          element.append('<div id="azureChart" class="col-xs-6 col-sm-4 col-md-4"/>');
+          element.append('<div id="azureChart" class="col-xs-12 col-sm-6 col-md-4"/>');
           createChart('AZURE running hours', azureUsage, 'azureChart', (azureMaxHour > 0));
           unitedChartData.push(azureUsage);
         }
         if (value.cloud == 'all' || value.cloud == 'AWS') {
-          element.append('<div id="awsChart" class="col-xs-6 col-sm-4 col-md-4"/>');
+          element.append('<div id="awsChart" class="col-xs-12 col-sm-6 col-md-4"/>');
           createChart('AWS running hours', awsUsage, 'awsChart', (awsMaxHour > 0));
           unitedChartData.push(awsUsage);
         }
         if (value.cloud == 'all') {
-          element.append('<div id="unitedChartLegend" class="col-xs-2 col-sm-2 col-md-2 legend" />');
-          element.append('<div id="unitedChart" class="col-xs-8 col-sm-8 col-md-8" />');
+          element.append('<div class="col-xs-12 col-sm-12 col-md-12">' 
+            + '<div id="unitedChartLegend" class="col-xs-1 col-sm-2 col-md-2 legend" />'
+            + '<div id="unitedChart" class="col-xs-8 col-sm-10 col-md-10" /></div>');
           var y_axis = (gcpMaxHour > 0 || azureMaxHour > 0 || awsMaxHour > 0);
           createUnitedChart(unitedChartData, y_axis);
         }
