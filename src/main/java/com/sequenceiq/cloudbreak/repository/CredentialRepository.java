@@ -24,7 +24,7 @@ public interface CredentialRepository extends CrudRepository<Credential, Long> {
 
     Credential findByNameInAccount(@Param("name") String name, @Param("account") String account, @Param("owner") String owner);
 
-    Credential findByIdInAccount(@Param("id") Long id, @Param("account") String account, @Param("owner") String owner);
+    Credential findByIdInAccount(@Param("id") Long id, @Param("account") String account);
 
     Credential findByNameInUser(@Param("name") String name, @Param("owner") String owner);
 

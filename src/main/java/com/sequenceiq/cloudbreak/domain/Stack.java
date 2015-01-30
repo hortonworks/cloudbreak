@@ -116,7 +116,7 @@ import javax.persistence.Version;
                         + "LEFT JOIN FETCH s.resources "
                         + "LEFT JOIN FETCH s.instanceGroups ig "
                         + "LEFT JOIN FETCH ig.instanceMetaData "
-                        + "WHERE s.id= :id and ((s.account= :account and s.publicInAccount=true) or s.owner= :owner)"),
+                        + "WHERE s.id= :id and s.account= :account"),
         @NamedQuery(
                 name = "Stack.findByNameInAccount",
                 query = "SELECT s FROM Stack s "

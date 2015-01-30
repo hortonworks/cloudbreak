@@ -26,7 +26,7 @@ public interface TemplateRepository extends CrudRepository<Template, Long> {
 
     Template findByNameInAccount(@Param("name") String name, @Param("account") String account, @Param("owner") String owner);
 
-    Template findByIdInAccount(@Param("id") Long id, @Param("account") String account, @Param("owner") String owner);
+    Template findByIdInAccount(@Param("id") Long id, @Param("account") String account);
 
     Template findByNameInUser(@Param("name") String name, @Param("owner") String owner);
 

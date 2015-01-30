@@ -100,7 +100,7 @@ public class SimpleCredentialService implements CredentialService {
 
     @Override
     public void delete(Long id, CbUser user) {
-        Credential credential = credentialRepository.findByIdInAccount(id, user.getAccount(), user.getUserId());
+        Credential credential = credentialRepository.findByIdInAccount(id, user.getAccount());
         if (credential == null) {
             throw new NotFoundException(String.format("Credential '%s' not found.", id));
         }
@@ -118,7 +118,7 @@ public class SimpleCredentialService implements CredentialService {
 
     private void delete(Credential credential, CbUser user) {
         if (!user.getUserId().equals(credential.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
-            throw new BadRequestException("Public credentials can be deleted only by account admins or owners.");
+            throw new BadRequestException("Credentials can be deleted only by account admins or owners.");
         }
         List<Stack> stacks = stackRepository.findByCredential(credential.getId());
         if (stacks.isEmpty()) {

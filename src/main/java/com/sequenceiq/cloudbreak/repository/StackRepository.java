@@ -38,7 +38,7 @@ public interface StackRepository extends CrudRepository<Stack, Long> {
 
     Stack findStackByHash(@Param("hash") String hash);
 
-    Stack findByIdInAccount(@Param("id") Long id, @Param("account") String account, @Param("owner") String owner);
+    Stack findByIdInAccount(@Param("id") Long id, @Param("account") String account);
 
     Stack findByNameInAccount(@Param("name") String name, @Param("account") String account, @Param("owner") String owner);
 
