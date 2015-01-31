@@ -157,12 +157,12 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
 
         $scope.setStartDate = function(dateString) {
             $scope.usageFilter.startDate = floorToDay(dateString);
-            $scope.$apply();
+            $scope.$digest();
         }
 
         $scope.setEndDate = function(dateString) {
           $scope.usageFilter.endDate = floorToDay(dateString);
-          $scope.$apply();
+          $scope.$digest();
         }
 
         $scope.orderUsagesBy = function(predicate, reverse) {

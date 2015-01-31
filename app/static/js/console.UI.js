@@ -253,34 +253,18 @@ function addPanelJQueryEventListeners(panel){
 function addDatePickerPanelJQueryEventListeners() {
 
     $jq('#datePickerStart').datetimepicker({
-        icons: {
-            time: "fa fa-clock-o",
-            date: "fa fa-calendar",
-            up: "fa fa-arrow-up",
-            down: "fa fa-arrow-down"
-        },
         pickTime: false
     });
 
     $jq("#datePickerStart").on("dp.change", function (e) {
-        // filter activated
         angular.element($jq("#datePickerStart")).scope().setStartDate(e.date._d.toString());
-        $jq('.col-xs-6').has(this).addClass('active');
     });
 
     $jq('#datePickerEnd').datetimepicker({
-      icons: {
-        time: "fa fa-clock-o",
-        date: "fa fa-calendar",
-        up: "fa fa-arrow-up",
-        down: "fa fa-arrow-down"
-      },
       pickTime: false
     });
 
     $jq("#datePickerEnd").on("dp.change", function (e) {
-      // filter activated
       angular.element($jq("#datePickerEnd")).scope().setEndDate(e.date._d.toString());
-      $jq('.col-xs-6').has(this).addClass('active');
     });
 }
