@@ -84,6 +84,14 @@ public class StackDeleteRequestHandler implements Consumer<Event<StackDeleteRequ
                             }
                         });
                         futures.add(submit);
+                        if (isRequestFull(stack, futures.size() + 1)) {
+                            LOGGER.info("Waiting for futures to finishing.");
+                            for (Future<Boolean> future : futures) {
+                                future.get();
+                            }
+                            LOGGER.info("All futures finished continue with the next group.");
+                            futures = new ArrayList<>();
+                        }
                     }
                     for (Future<Boolean> future : futures) {
                         future.get();
@@ -99,8 +107,12 @@ public class StackDeleteRequestHandler implements Consumer<Event<StackDeleteRequ
                 cloudPlatformConnectors.get(data.getCloudPlatform()).deleteStack(stack, stack.getCredential());
             }
         } catch (Exception ex) {
-            LOGGER.error(String.format("Stack delete failed on {} stack: ", stack.getId()), ex);
-            retryingStackUpdater.updateStackStatus(data.getStackId(), Status.DELETE_FAILED, "Termination of cluster infrastructure failed.");
+            LOGGER.error(String.format("Stack delete failed on {} stack: ", stack.getId()), ex.getMessage());
+            retryingStackUpdater.updateStackStatus(data.getStackId(), Status.DELETE_FAILED, "Termination of cluster infrastructure failed: " + ex.getMessage());
         }
+    }
+
+    private boolean isRequestFull(Stack stack, Integer futuresSize) {
+        return futuresSize % stack.cloudPlatform().parallelNumber() == 0;
     }
 }

@@ -126,22 +126,12 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
                             }
                         });
                         futures.add(submit);
-                    }
-
-                    StringBuilder sb = new StringBuilder();
-                    Optional<Exception> exception = Optional.absent();
-                    for (Future<Boolean> future : futures) {
-                        try {
-                            future.get();
-                        } catch (Exception ex) {
-                            exception = Optional.fromNullable(ex);
-                            sb.append(String.format("%s, ", ex.getMessage()));
+                        if (isRequestFull(stack, futures.size() + 1)) {
+                            waitForRequestToFinish(stackId, futures);
+                            futures = new ArrayList<>();
                         }
                     }
-                    if (exception.isPresent()) {
-                        throw new BuildStackFailureException(sb.toString(), exception.orNull(), stackRepository.findOneWithLists(stackId).getResources());
-                    }
-
+                    waitForRequestToFinish(stackId, futures);
                     LOGGER.info("Publishing {} event.", ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT);
                     reactor.notify(ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT,
                             Event.wrap(new AddInstancesComplete(cloudPlatform, stack.getId(), resourceSet, request.getHostGroup())));
@@ -190,14 +180,12 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
                                 }
                             });
                             futures.add(submit);
-                        }
-                        for (Future<Boolean> future : futures) {
-                            try {
-                                future.get();
-                            } catch (Exception ex) {
-                                throw ex;
+                            if ((futures.size() + 1) % stack.cloudPlatform().parallelNumber() == 0) {
+                                waitForRequestToFinish(stackId, futures);
+                                futures = new ArrayList<>();
                             }
                         }
+                        waitForRequestToFinish(stackId, futures);
                     }
                     stackUpdater.removeStackResources(stackId, dCO.getDecommisionResources());
                     LOGGER.info("Terminated instances in stack: '{}'", instanceIds);
@@ -224,6 +212,28 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
             }
         }
         return resourceList;
+    }
+
+    private boolean isRequestFull(Stack stack, int fullIndex) {
+        return (fullIndex * instanceResourceBuilders.get(stack.cloudPlatform()).size()) % stack.cloudPlatform().parallelNumber() == 0;
+    }
+
+    private void waitForRequestToFinish(Long stackId, List<Future<Boolean>> futures) {
+        LOGGER.info("Waiting for futures to finishing.");
+        StringBuilder sb = new StringBuilder();
+        Optional<Exception> exception = Optional.absent();
+        for (Future<Boolean> future : futures) {
+            try {
+                future.get();
+            } catch (Exception ex) {
+                exception = Optional.fromNullable(ex);
+                sb.append(String.format("%s, ", ex.getMessage()));
+            }
+        }
+        if (exception.isPresent()) {
+            throw new BuildStackFailureException(sb.toString(), exception.orNull(), stackRepository.findOneWithLists(stackId).getResources());
+        }
+        LOGGER.info("All futures finished continue with the next group.");
     }
 
     private void notifyUpdateFailed(Stack stack, String detailedMessage) {

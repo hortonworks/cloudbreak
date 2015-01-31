@@ -92,7 +92,7 @@ public class ProvisionContextTest {
     public void setUp() {
         underTest = new ProvisionContext();
         MockitoAnnotations.initMocks(this);
-        stack = ServiceTestUtils.createStack();
+        stack = ServiceTestUtils.createStack(CloudPlatform.GCC);
 
         Map<CloudPlatform, ResourceBuilderInit> resourceBuilderInits = new HashMap<>();
         resourceBuilderInits.put(CloudPlatform.GCC, new DummyResourceBuilderInit());

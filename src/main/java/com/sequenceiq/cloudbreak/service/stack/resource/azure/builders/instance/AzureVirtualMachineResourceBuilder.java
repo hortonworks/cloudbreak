@@ -164,7 +164,7 @@ public class AzureVirtualMachineResourceBuilder extends AzureSimpleInstanceResou
             props.put(NAME, resource.getResourceName());
             AzureClient azureClient = azureStackUtil.createAzureClient(credential);
             HttpResponseDecorator deleteVirtualMachineResult = (HttpResponseDecorator) azureClient.deleteVirtualMachine(props);
-            AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(aDCO.getAzureClient(), deleteVirtualMachineResult,
+            AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(azureClient, deleteVirtualMachineResult,
                     stack);
             azureResourcePollerObjectPollingService.pollWithTimeout(azureResourceStatusCheckerTask, azureResourcePollerObject,
                     POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
