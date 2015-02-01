@@ -38,4 +38,8 @@ public class FileReaderUtils {
         return Base64.encodeAsString(Files.readAllBytes(path));
     }
 
+    public static final String readFileFromPathToString(String fileName) throws IOException {
+        Path path = Paths.get(fileName);
+        return new String(Files.readAllBytes(path));
+    }
 }

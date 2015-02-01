@@ -36,6 +36,8 @@
     <suppress checks="IllegalCatch" files="GccRemoveCheckerStatus.java"/>
     <suppress checks="IllegalCatch" files="GccStackUtil.java"/>
     <suppress checks="IllegalCatch" files="GccProvisionSetup.java"/>
+    <suppress checks="IllegalImport" files="KeyGeneratorService.java"/>
+    <suppress id="string-instantiation" files="FileReaderUtils.java"/>
 
     <!-- -->
 
