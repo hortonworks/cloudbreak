@@ -53,12 +53,14 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         initCluster();
 
         $scope.selectedBlueprintChange = function () {
-            var actualBp = $filter('filter')($rootScope.blueprints, { id: $scope.cluster.blueprintId});
-            var hostgroups = [];
-            actualBp[0].ambariBlueprint.host_groups.forEach(function(k){
-                hostgroups.push({templateId: null, group: k.name, nodeCount: 0});
-            });
-            $scope.cluster.instanceGroups = hostgroups;
+          var tmpCloudPlatform = $filter('filter')($rootScope.credentials, {id: $rootScope.activeCredential.id}, true)[0].cloudPlatform;
+          var tmpTemplateId = $filter('filter')($rootScope.templates, {cloudPlatform: tmpCloudPlatform}, true)[0].id;
+          var actualBp = $filter('filter')($rootScope.blueprints, { id: $scope.cluster.blueprintId});
+          var hostgroups = [];
+          actualBp[0].ambariBlueprint.host_groups.forEach(function(k){
+            hostgroups.push({templateId: tmpTemplateId, group: k.name, nodeCount: 1});
+          });
+          $scope.cluster.instanceGroups = hostgroups;
         }
 
         $scope.createCluster = function () {
@@ -142,13 +144,13 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 paginateMetadata();
             }
          });
-        
+
         $rootScope.$watch('activeCluster.metadata', function() {
             if ($rootScope.activeCluster.metadata != null) {
                 paginateMetadata();
             }
         });
-        
+
         function paginateMetadata() {
             if ($scope.pagination != null) {
                 var begin = (($scope.pagination.currentPage - 1) * $scope.pagination.itemsPerPage),
