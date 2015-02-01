@@ -6,7 +6,6 @@
         <h4>usage explorer</h4>
     </div>
 
-    <!-- <div id="panel-usages-collapse" class=""> -->
     <div id="panel-usages-collapse" class="panel-btn-in-header-collapse collapse" style="background-color: white;">
 
 
@@ -53,10 +52,6 @@
             <label for="user">user</label>
             <div>
               <div class="input-group">
-                <!--span class="input-group-addon">
-                    <i class="fa fa-search"></i>
-                </span>
-                <input class="form-control input-sm" type="text" ng-model="usageFilter.user" id="user"-->
                 <select class="form-control input-sm" id="cloudProvider" ng-model="usageFilter.user">
                   <option default value="all">all</option>
                   <option ng-repeat="u in $root.accountUsers" value="{{u.id}}">{{u.username}}</option>
@@ -91,8 +86,7 @@
             <a id="btnClearFilters" class="btn btn-danger btn-block" ng-click="clearFilter()" role="button">
               <i class="fa fa-eraser fa-fw"></i>clear filters</a>
             <a id="btnGenReport" ng-click="loadUsages()" class="btn btn-success btn-block" role="button" ng-disabled="usageFilterForm.startDate.$invalid || usageFilterForm.endDate.$invalid">
-              <i class="fa fa-table fa-fw"></i>
-              <!-- <i class="fa fa-circle-o-notch fa-spin fa-fw"></i> -->generate</a>
+              <i class="fa fa-table fa-fw"></i>generate</a>
           </div>
 
         </form>
@@ -102,7 +96,6 @@
           <table class="table table-report table-sortable-cols table-with-pagination ">
             <thead>
               <tr>
-                <!-- <th></th> -->
                 <th>cloud</th>
                 <th>
                   <a title="sort by" ng-click="reverse=!reverse;orderUsagesBy('stackName',reverse)">stack name
@@ -116,11 +109,6 @@
                         <i class="fa fa-sort"></i>
                     </a>
                 </th>
-                <!--th class="text-right">
-                  <a title="sort by" ng-click="reverse=!reverse;orderUsagesBy('money',reverse)">estimated costs
-                        <i class="fa fa-sort"></i>
-                    </a>
-                </th-->
               </tr>
             </thead>
             <tbody>
@@ -130,7 +118,6 @@
                 <td>{{usage.username}}</td>
                 <td><p id="awsregion" class="form-control-static" ng-repeat="item in $root.config.GCC.gccRegions | filter:{key: usage.region}">{{item.value}}</p></td>
                 <td class="text-right">{{usage.instanceHours}} hrs</td>
-                <!--td class="text-right">{{usage.money}} $</td-->
               </tr>
               <tr class="row-summa" ng-show="usages && gccSum.items.length != 0">
                 <td>&nbsp;</td>
@@ -138,7 +125,6 @@
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
                 <td class="text-right">{{gccSum.fullHours}} hrs</td>
-                <!--td class="text-right">$ {{gccSum.fullMoney}}</td-->
               </tr>
 
               <tr ng-repeat="usage in awsSum.items">
@@ -147,7 +133,6 @@
                 <td>{{usage.username}}</td>
                 <td><p id="awsregion" class="form-control-static" ng-repeat="item in $root.config.AWS.awsRegions | filter:{key: usage.region}">{{item.value}}</p></td>
                 <td class="text-right">{{usage.instanceHours}} hrs</td>
-                <!--td class="text-right">{{usage.money}} $</td-->
               </tr>
 
               <tr class="row-summa" ng-show="usages && awsSum.items.length != 0">
@@ -156,7 +141,6 @@
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
                 <td class="text-right">{{awsSum.fullHours}} hrs</td>
-                <!--td class="text-right">$ {{awsSum.fullMoney}}</td-->
               </tr>
 
               <tr ng-repeat="usage in azureSum.items">
@@ -165,7 +149,6 @@
                 <td>{{usage.username}}</td>
                 <td><p id="awsregion" class="form-control-static" ng-repeat="item in $root.config.AZURE.azureRegions | filter:{key: usage.region}">{{item.value}}</p></td>
                 <td class="text-right">{{usage.instanceHours}} hrs</td>
-                <!--td class="text-right">{{usage.money}} $</td-->
               </tr>
 
               <tr class="row-summa" ng-show="usages && azureSum.items.length != 0">
@@ -174,7 +157,6 @@
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
                 <td class="text-right">{{azureSum.fullHours}} hrs</td>
-                <!--td class="text-right">$ {{azureSum.fullMoney}}</td-->
               </tr>
             </tbody>
           </table>
