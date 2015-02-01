@@ -53,7 +53,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         initCluster();
 
         $scope.selectedBlueprintChange = function () {
-          var tmpCloudPlatform = $filter('filter')($rootScope.credentials, {id: $rootScope.activeCredential.id}, true)[0].cloudPlatform;
+          var tmpCloudPlatform = $rootScope.activeCredential.cloudPlatform;
           var tmpTemplateId = $filter('filter')($rootScope.templates, {cloudPlatform: tmpCloudPlatform}, true)[0].id;
           var actualBp = $filter('filter')($rootScope.blueprints, { id: $scope.cluster.blueprintId});
           var hostgroups = [];
