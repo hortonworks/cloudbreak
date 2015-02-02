@@ -24,6 +24,14 @@
         <!-- .col-sm-9 -->
     </div>
     <div class="form-group">
+        <label class="col-sm-3 control-label" for="awsvolumetype">Volume type</label>
+
+        <div class="col-sm-9">
+            <p id="awsvolumetype" class="form-control-static" ng-repeat="item in $root.config.AWS.volumeTypes | filter:{key: template.parameters.volumeType}">{{item.value}}</p>
+        </div>
+        <!-- .col-sm-9 -->
+    </div>
+    <div class="form-group">
         <label class="col-sm-3 control-label" for="awsvolumecount">Attached volumes per instance</label>
 
         <div class="col-sm-9">
@@ -36,14 +44,6 @@
 
         <div class="col-sm-9">
             <p id="awsvolumesize" class="form-control-static">{{template.volumeSize}}</p>
-        </div>
-        <!-- .col-sm-9 -->
-    </div>
-    <div class="form-group">
-        <label class="col-sm-3 control-label" for="awsvolumetype">Volume type</label>
-
-        <div class="col-sm-9">
-            <p id="awsvolumetype" class="form-control-static" ng-repeat="item in $root.config.AWS.volumeTypes | filter:{key: template.parameters.volumeType}">{{item.value}}</p>
         </div>
         <!-- .col-sm-9 -->
     </div>
