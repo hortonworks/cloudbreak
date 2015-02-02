@@ -125,7 +125,8 @@ public class AmbariClusterConnector {
 
             AmbariClient ambariClient = clientService.create(stack);
             if (cluster.getRecipe() != null) {
-                recipeEngine.executeRecipe(stack);
+                recipeEngine.setupRecipe(stack);
+                recipeEngine.executePreInstall(stack);
             }
             addBlueprint(stack, ambariClient, blueprint);
             Map<String, List<String>> hostGroupMappings = recommend(stack, ambariClient);
@@ -133,6 +134,9 @@ public class AmbariClusterConnector {
             ambariClient.createCluster(cluster.getName(), blueprint.getBlueprintName(), hostGroupMappings);
             waitForClusterInstall(stack, ambariClient);
             runSmokeTest(stack, ambariClient);
+            if (cluster.getRecipe() != null) {
+                recipeEngine.executePostInstall(stack);
+            }
             clusterCreateSuccess(cluster, new Date().getTime(), stack.getAmbariIp());
         } catch (PluginFailureException | AmbariHostsUnavailableException | AmbariOperationFailedException | InvalidHostGroupHostAssociation e) {
             LOGGER.error(e.getMessage(), e);
@@ -153,7 +157,7 @@ public class AmbariClusterConnector {
             waitForHosts(stack, ambariClient);
             List<String> hosts = findFreeHosts(stack.getId(), hostGroupAdjustment);
             if (cluster.getRecipe() != null) {
-                recipeEngine.executeRecipe(stack);
+                recipeEngine.setupRecipe(stack);
             }
             addHostMetadata(cluster, hosts, hostGroupAdjustment);
             waitForAmbariOperations(stack, ambariClient, installServices(hosts, stack, ambariClient, hostGroupAdjustment));

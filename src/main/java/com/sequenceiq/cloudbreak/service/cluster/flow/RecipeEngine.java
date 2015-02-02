@@ -19,15 +19,27 @@ public class RecipeEngine {
     @Autowired
     private PluginManager pluginManager;
 
-    void executeRecipe(Stack stack) {
+    public void setupRecipe(Stack stack) {
         Set<InstanceMetaData> instances = instanceMetadataRepository.findAllInStack(stack.getId());
         Map<String, String> properties = stack.getCluster().getRecipe().getKeyValues();
         Set<String> plugins = stack.getCluster().getRecipe().getPlugins();
-
         pluginManager.prepareKeyValues(instances, properties);
         Set<String> installEventIds = pluginManager.installPlugins(instances, plugins);
         pluginManager.waitForEventFinish(stack, instances, installEventIds);
-        Set<String> triggerEventIds = pluginManager.triggerPlugins(instances);
+    }
+
+    public void executePreInstall(Stack stack) {
+        triggerAndWaitForPlugins(stack, RecipeLifecycleEvent.PRE_INSTALL);
+    }
+
+    public void executePostInstall(Stack stack) {
+        triggerAndWaitForPlugins(stack, RecipeLifecycleEvent.POST_INSTALL);
+    }
+
+    private void triggerAndWaitForPlugins(Stack stack, RecipeLifecycleEvent event) {
+        Set<InstanceMetaData> instances = instanceMetadataRepository.findAllInStack(stack.getId());
+        Set<String> triggerEventIds = pluginManager.triggerPlugins(instances, event);
         pluginManager.waitForEventFinish(stack, instances, triggerEventIds);
     }
+
 }
