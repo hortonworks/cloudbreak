@@ -50,12 +50,12 @@
       </div>
     </div>
 
-    <div class="form-group" ng-class="{ 'has-error': awsTemplateForm.aws_tvolumesize.$dirty && awsTemplateForm.aws_tvolumesize.$invalid }">
+    <div class="form-group" ng-hide="awsTemp.parameters.volumeType == 'Ephemeral'" ng-class="{ 'has-error': awsTemplateForm.aws_tvolumesize.$dirty && awsTemplateForm.aws_tvolumesize.$invalid }">
         <label class="col-sm-3 control-label" for="aws_tvolumesize">Volume size (GB)</label>
 
         <div class="col-sm-9">
             <input type="number" name="aws_tvolumesize" class="form-control" ng-model="awsTemp.volumeSize" id="aws_tvolumesize" min="10"
-                   max="1000" placeholder="10 - 1000 GB" required>
+                   max="1000" placeholder="10 - 1000 GB" ng-required="awsTemp.parameters.volumeType != 'Ephemeral'">
 
             <div class="help-block"
                  ng-show="awsTemplateForm.aws_tvolumesize.$dirty && awsTemplateForm.aws_tvolumesize.$invalid"><i class="fa fa-warning"></i>

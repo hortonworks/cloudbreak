@@ -95,7 +95,8 @@ angular.module('uluwatuControllers').controller('mainController', ['$scope', '$r
             'AWS': {
                 volumeTypes: [
                     {key: 'Gp2', value: 'SSD'},
-                    {key: 'Standard', value: 'Magnetic'}
+                    {key: 'Standard', value: 'Magnetic'},
+                    {key: 'Ephemeral', value: 'Ephemeral'}
                 ],
                 awsRegions : [
                     {key: 'US_EAST_1', value: 'US East(N. Virginia)', cloud: 'AWS'},

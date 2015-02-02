@@ -31,7 +31,7 @@
         </div>
         <!-- .col-sm-9 -->
     </div>
-    <div class="form-group">
+    <div class="form-group" ng-hide="template.parameters.volumeType == 'Ephemeral'">
         <label class="col-sm-3 control-label" for="awsvolumesize">Volume size (GB)</label>
 
         <div class="col-sm-9">
