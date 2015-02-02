@@ -14,7 +14,9 @@ public class TrustedPluginValidator implements ConstraintValidator<TrustedPlugin
 
     private static final String PLUGIN_URL_PATTERN = "https://github.com/.*/(consul-plugins-)[a-z0-9-._]*.git";
 
-    @Value("${cb.plugins.trusted.sources:sequenceiq}")
+    private static final String TRUST_ALL = "all-accounts";
+
+    @Value("${cb.plugins.trusted.sources:all-accounts}")
     private String trustedSources;
 
     @Override
@@ -28,7 +30,11 @@ public class TrustedPluginValidator implements ConstraintValidator<TrustedPlugin
                 return false;
             } else {
                 String source = url.replace("https://github.com/", "").split("/")[0];
-                if (!parseTrustedSources(trustedSources).contains(source)) {
+                Set<String> trustedAccounts = parseTrustedSources(trustedSources);
+                if (trustedAccounts.contains(TRUST_ALL)) {
+                    return true;
+                }
+                if (!trustedAccounts.contains(source)) {
                     return false;
                 }
             }
