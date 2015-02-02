@@ -19,7 +19,7 @@ public class GccResourceCheckerStatus implements StatusCheckerTask<GccResourceRe
     @Override
     public boolean checkStatus(GccResourceReadyPollerObject gccResourceReadyPollerObject) {
         MDCBuilder.buildMdcContext(gccResourceReadyPollerObject.getStack());
-        LOGGER.info("Checking status of Gcc resource '{}' [{}].", gccResourceReadyPollerObject.getName(),
+        LOGGER.info("Checking status of GCP resource '{}' [{}].", gccResourceReadyPollerObject.getName(),
                 gccResourceReadyPollerObject.getResourceType().name());
         Operation operation = null;
         try {
@@ -27,7 +27,7 @@ public class GccResourceCheckerStatus implements StatusCheckerTask<GccResourceRe
             return analyzeOperation(operation, gccResourceReadyPollerObject);
         } catch (IOException e) {
             throw new GccResourceCreationException(String.format(
-                    "Something went wrong. Resource in Gcc '%s' [%s] with '%s' operation failed on '%s' stack.",
+                    "Something went wrong. Resource in GCP '%s' [%s] with '%s' operation failed on '%s' stack.",
                     gccResourceReadyPollerObject.getName(),
                     gccResourceReadyPollerObject.getResourceType().name(),
                     gccResourceReadyPollerObject.getOperationName(),
@@ -38,7 +38,7 @@ public class GccResourceCheckerStatus implements StatusCheckerTask<GccResourceRe
     @Override
     public void handleTimeout(GccResourceReadyPollerObject gccResourceReadyPollerObject) {
         throw new GccResourceCreationException(String.format(
-                "Something went wrong. Resource in Gcc '%s' [%s] with '%s' operation  not started in a reasonable timeframe on '%s' stack.",
+                "Something went wrong. Resource in GCP '%s' [%s] with '%s' operation  not started in a reasonable timeframe on '%s' stack.",
                 gccResourceReadyPollerObject.getName(),
                 gccResourceReadyPollerObject.getResourceType().name(),
                 gccResourceReadyPollerObject.getOperationName(),
@@ -48,7 +48,7 @@ public class GccResourceCheckerStatus implements StatusCheckerTask<GccResourceRe
     @Override
     public String successMessage(GccResourceReadyPollerObject gccResourceReadyPollerObject) {
         MDCBuilder.buildMdcContext(gccResourceReadyPollerObject.getStack());
-        return String.format("Gcc resource '%s' [%s] is ready on '%s' stack",
+        return String.format("GCP resource '%s' [%s] is ready on '%s' stack",
                 gccResourceReadyPollerObject.getName(), gccResourceReadyPollerObject.getResourceType().name(), gccResourceReadyPollerObject.getStack().getId());
     }
 
@@ -65,7 +65,7 @@ public class GccResourceCheckerStatus implements StatusCheckerTask<GccResourceRe
                 }
             }
             throw new GccResourceCreationException(String.format(
-                    "Something went wrong. Resource in Gcc '%s' [%s] with '%s' operation failed on '%s' stack with %s message: %s",
+                    "Something went wrong. Resource in GCP '%s' [%s] with '%s' operation failed on '%s' stack with %s message: %s",
                     gccResourceReadyPollerObject.getName(),
                     gccResourceReadyPollerObject.getResourceType().name(),
                     gccResourceReadyPollerObject.getOperationName(),
