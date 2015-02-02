@@ -60,9 +60,10 @@ public class DefaultCloudbreakEventServiceTest {
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setGroupName("master");
         instanceGroup.setTemplate(template);
+        CloudbreakEventData eventData = new CloudbreakEventData(1L, "STACK_CREATED", "Stack created");
 
         //WHEN
-        eventService.createStackEvent(1L, "STACK_CREATED", "Stack created", instanceGroup);
+        eventService.createStackEvent(eventData);
 
         //THEN
         BDDMockito.verify(eventRepository).save(captor.capture());
@@ -85,9 +86,10 @@ public class DefaultCloudbreakEventServiceTest {
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setGroupName("master");
         instanceGroup.setTemplate(template);
+        CloudbreakEventData eventData = new CloudbreakEventData(1L, "STACK_CREATED", "Stack created");
 
         //WHEN
-        eventService.createStackEvent(1L, "STACK_CREATED", "Stack created", instanceGroup);
+        eventService.createStackEvent(eventData);
 
         //THEN
         BDDMockito.verify(eventRepository).save(captor.capture());
@@ -112,9 +114,10 @@ public class DefaultCloudbreakEventServiceTest {
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setGroupName("master");
         instanceGroup.setTemplate(template);
+        CloudbreakEventData eventData = new CloudbreakEventData(1L, "STACK_CREATED", "Stack created");
 
         //WHEN
-        eventService.createStackEvent(1L, "STACK_CREATED", "Stack created", instanceGroup);
+        eventService.createStackEvent(eventData);
 
         //THEN
         BDDMockito.verify(eventRepository).save(captor.capture());
