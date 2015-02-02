@@ -30,6 +30,8 @@ public class CloudbreakUsage implements ProvisionEntity {
 
     private Double costs;
 
+    private String instanceType;
+
     public Long getId() {
         return id;
     }
@@ -102,6 +104,14 @@ public class CloudbreakUsage implements ProvisionEntity {
         this.stackName = stackName;
     }
 
+    public String getInstanceType() {
+        return instanceType;
+    }
+
+    public void setInstanceType(String instanceType) {
+        this.instanceType = instanceType;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("CloudbreakUsage{");
@@ -114,6 +124,7 @@ public class CloudbreakUsage implements ProvisionEntity {
         sb.append(", instanceHours='").append(instanceHours).append('\'');
         sb.append(", stackId='").append(stackId).append('\'');
         sb.append(", stackName='").append(stackName).append('\'');
+        sb.append(", instanceType='").append(instanceType).append('\'');
         sb.append(", costs='").append(costs).append('\'');
         sb.append('}');
         return sb.toString();
