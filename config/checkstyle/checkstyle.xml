@@ -155,11 +155,6 @@
             <property name="classes" value="java.lang.Boolean,java.lang.Integer,java.lang.Long,java.lang.Float,java.lang.Double" />
         </module>
         <module name="IllegalInstantiation">
-        	<property name="id" value="string-instantiation"/>
-            <!-- use valueOf() -->
-            <property name="classes" value="java.lang.String" />
-        </module>
-        <module name="IllegalInstantiation">
             <!-- use alternative classes -->
             <property name="classes" value="java.util.Vector" />
         </module>

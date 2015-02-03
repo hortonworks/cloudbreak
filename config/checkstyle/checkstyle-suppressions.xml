@@ -20,14 +20,6 @@
     <suppress checks="AbstractClassName" files="test" />
     <suppress checks="EmptyBlock" files="test" />
     <suppress checks="HideUtilityClassConstructor" files=".*Application.java" />
-    <suppress id="string-instantiation" files="AzureProvisionService.java"/>
-    <suppress id="string-instantiation" files="AzureProvisioner.java"/>
-    <suppress id="string-instantiation" files="AwsStackUtil.java"/>
-    <suppress id="string-instantiation" files="RemoteUserDetailsService.java"/>
-    <suppress id="string-instantiation" files="PublicKeyReaderUtil.java"/>
-    <suppress id="string-instantiation" files="AzureServiceCertificateResourceBuilder.java"/>
-    <suppress id="string-instantiation" files="AzureVirtualMachineResourceBuilder.java"/>
-    <suppress id="string-instantiation" files="ConsulUtils.java"/>
     <suppress checks="ParameterNumber" files="AzureProvisioner.java"/>
     <suppress checks="ParameterNumber" files="CloudbreakUsageController.java"/>
     <suppress checks="IllegalCatch" files="CredentialController.java"/>
