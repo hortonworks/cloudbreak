@@ -141,7 +141,7 @@ public class ProvisionContextTest {
     public void buildStackWhenNetworkResourceBuilderDropException() {
         prepareInstanceResourceBuilders();
         prepareExNetWorkResourceBuilders();
-
+        doThrow(new BuildStackFailureException(new Exception())).when(provisionUtil).waitForRequestToFinish(anyLong(), anyList());
         // GIVEN
         given(stackRepository.findOneWithLists(1L)).willReturn(stack);
 
@@ -155,7 +155,6 @@ public class ProvisionContextTest {
         // WHEN
         underTest.buildStack(cloudPlatform, 1L, setupProperties, userDataParams);
         // THEN
-        verify(stackUpdater, times(1)).addStackResources(anyLong(), anyList());
         verify(reactor, times(1)).notify(eq(ReactorConfig.STACK_CREATE_FAILED_EVENT), Event.wrap(anyObject()));
     }
 
@@ -163,6 +162,7 @@ public class ProvisionContextTest {
     public void buildStackWhenInstanceResourceBuilderDropException() {
         prepareExInstanceResourceBuilders();
         prepareNetWorkResourceBuilders();
+        doThrow(new BuildStackFailureException(new Exception())).when(provisionUtil).waitForRequestToFinish(anyLong(), anyList());
 
         // GIVEN
         given(stackRepository.findOneWithLists(1L)).willReturn(stack);
@@ -178,7 +178,6 @@ public class ProvisionContextTest {
         // WHEN
         underTest.buildStack(cloudPlatform, 1L, setupProperties, userDataParams);
         // THEN
-        verify(stackUpdater, times(9)).addStackResources(anyLong(), anyList());
         verify(reactor, times(1)).notify(eq(ReactorConfig.STACK_CREATE_FAILED_EVENT), Event.wrap(anyObject()));
     }
 
