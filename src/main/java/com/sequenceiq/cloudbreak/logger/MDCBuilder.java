@@ -24,11 +24,7 @@ public class MDCBuilder {
             MDC.put(LoggerContextKey.OWNER_ID.toString(), getFieldValue(object, "owner"));
             MDC.put(LoggerContextKey.RESOURCE_ID.toString(), getFieldValue(object, "id"));
             MDC.put(LoggerContextKey.RESOURCE_NAME.toString(), getFieldValue(object, "name"));
-            try {
-                MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), object.getClass().getSimpleName().toUpperCase());
-            } catch (Exception e) {
-                MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), "undefined");
-            }
+            MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), object.getClass().getSimpleName().toUpperCase());
         }
     }
 
@@ -38,7 +34,7 @@ public class MDCBuilder {
             privateStringField.setAccessible(true);
             return privateStringField.get(o).toString();
         } catch (Exception e) {
-            return  "undefined";
+            return "undefined";
         }
     }
 }
