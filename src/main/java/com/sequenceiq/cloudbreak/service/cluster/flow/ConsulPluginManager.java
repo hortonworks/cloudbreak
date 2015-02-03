@@ -26,7 +26,6 @@ public class ConsulPluginManager implements PluginManager {
     public static final String FAILED_SIGNAL = "FAILED";
     public static final int POLLING_INTERVAL = 5000;
     public static final int MAX_ATTEMPTS = 30;
-    public static final String RECIPE_INSTALL = "recipe-install";
 
     @Autowired
     private PollingService<ConsulKVCheckerContext> keyValuePollingService;
@@ -58,14 +57,14 @@ public class ConsulPluginManager implements PluginManager {
     }
 
     @Override
-    public Set<String> triggerPlugins(Collection<InstanceMetaData> instanceMetaData) {
+    public Set<String> triggerPlugins(Collection<InstanceMetaData> instanceMetaData, RecipeLifecycleEvent event) {
         List<ConsulClient> clients = ConsulUtils.createClients(instanceMetaData);
-        String eventId = ConsulUtils.fireEvent(clients, RECIPE_INSTALL, "", null, null);
+        String eventId = ConsulUtils.fireEvent(clients, event.getName(), "", null, null);
         if (eventId != null) {
             return Sets.newHashSet(eventId);
         } else {
             throw new PluginFailureException("Failed to trigger plugins, Consul client couldn't fire the "
-                    + RECIPE_INSTALL + " event or failed to retrieve an event ID.");
+                    + event.getName() + " event or failed to retrieve an event ID.");
         }
     }
 
