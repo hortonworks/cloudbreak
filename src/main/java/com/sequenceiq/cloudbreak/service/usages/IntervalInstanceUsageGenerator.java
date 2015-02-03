@@ -87,15 +87,15 @@ public class IntervalInstanceUsageGenerator {
             LOGGER.debug("Instance '{}' ran less than a day, usage: {}", instance.getId(), runningHours);
             dailyInstanceUsages.put(DATE_FORMAT.format(startAsDate), runningHours);
         } else {
-            subtractOverFlowedTimeFromStart(start, stop);
             // get start day running hours
             runningHours = runningHoursForDay(startAsDate, true);
             dailyInstanceUsages.put(DATE_FORMAT.format(startAsDate), runningHours);
             LOGGER.debug("Instance '{}' ran on the start day, usage: {}", instance.getId(), runningHours);
             // get stop day running hours
-            Date stopAsDate = stop.getTime();
-            runningHours = runningHoursForDay(stopAsDate, false);
-            if (runningHours > 0) {
+            subtractStartOverFlowedTimeFromStop(start, stop);
+            if (!isCalendarsOnTheSameDay(start, stop)) {
+                Date stopAsDate = stop.getTime();
+                runningHours = runningHoursForDay(stopAsDate, false);
                 dailyInstanceUsages.put(DATE_FORMAT.format(stopAsDate), runningHours);
                 LOGGER.debug("Instance '{}' ran on the day of the termination, usage: {}", instance.getId(), runningHours);
             }
@@ -106,11 +106,11 @@ public class IntervalInstanceUsageGenerator {
 
     private boolean isCalendarsOnTheSameDay(Calendar start, Calendar stop) {
         return start.get(YEAR) == stop.get(YEAR)
-                && start.get(MONTH) == start.get(MONTH)
+                && start.get(MONTH) == stop.get(MONTH)
                 && start.get(DATE) == stop.get(DATE);
     }
 
-    private void subtractOverFlowedTimeFromStart(Calendar start, Calendar stop) {
+    private void subtractStartOverFlowedTimeFromStop(Calendar start, Calendar stop) {
         stop.add(MINUTE, -start.get(MINUTE));
         stop.add(SECOND, -start.get(SECOND));
         stop.add(MILLISECOND, -start.get(MILLISECOND));

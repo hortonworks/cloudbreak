@@ -302,6 +302,47 @@ public class IntervalInstanceUsageGeneratorTest {
         assertTrue(result.isEmpty());
     }
 
+    @Test
+    public void testGetInstanceHoursShouldCalcHoursForADayWhenTheInstanceRunsLessThanTheOverFlowedMinutesExistOnTheNextDay() throws ParseException {
+        InstanceMetaData instance = new InstanceMetaData();
+        Calendar cal = Calendar.getInstance();
+        //from 12:50
+        setCalendarTo(cal, 12, 50, 0, 0);
+        instance.setStartDate(cal.getTimeInMillis());
+        cal.set(DATE, cal.get(DATE) + 1);
+        Date intervalStart = cal.getTime();
+        //to next day 00:40
+        cal.set(DATE, cal.get(DATE) + 1);
+        setCalendarTo(cal, 0, 40, 0, 0);
+        Date intervalEnd = cal.getTime();
+
+        Map<String, Long> result = underTest.getInstanceHours(instance, intervalStart, intervalEnd);
+
+        assertEquals(result.size(), 1);
+        assertEquals(12L, result.values().toArray()[0]);
+    }
+
+    @Test
+    public void testGetInstanceHoursShouldCalcHoursWhenTheInstanceRunsMoreThanTheOverFlowedMinutesExistOnTheNextDay() throws ParseException {
+        InstanceMetaData instance = new InstanceMetaData();
+        Calendar cal = Calendar.getInstance();
+        //from 12:50
+        setCalendarTo(cal, 12, 50, 0, 0);
+        instance.setStartDate(cal.getTimeInMillis());
+        cal.set(DATE, cal.get(DATE) + 1);
+        Date intervalStart = cal.getTime();
+        //to next day 00:40
+        cal.set(DATE, cal.get(DATE) + 1);
+        setCalendarTo(cal, 0, 51, 0, 0);
+        Date intervalEnd = cal.getTime();
+
+        Map<String, Long> result = underTest.getInstanceHours(instance, intervalStart, intervalEnd);
+
+        assertEquals(result.size(), 2);
+        assertEquals(12L, result.values().toArray()[0]);
+        assertEquals(1L, result.values().toArray()[1]);
+    }
+
     private void setCalendarTo(Calendar calendar, int hour, int min, int sec, int ms) {
         calendar.set(HOUR_OF_DAY, hour);
         calendar.set(MINUTE, min);
