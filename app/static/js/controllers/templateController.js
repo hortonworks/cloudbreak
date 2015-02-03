@@ -2,8 +2,8 @@
 
 var log = log4javascript.getLogger("templateController-logger");
 
-angular.module('uluwatuControllers').controller('templateController', ['$scope', '$rootScope', '$filter', 'UserTemplate', 'AccountTemplate', 'GlobalTemplate',
-    function ($scope, $rootScope, $filter, UserTemplate, AccountTemplate, GlobalTemplate) {
+angular.module('uluwatuControllers').controller('templateController', ['$scope', '$rootScope', '$filter', 'UserTemplate', 'AccountTemplate', 'GlobalTemplate', 'Notification',
+    function ($scope, $rootScope, $filter, UserTemplate, AccountTemplate, GlobalTemplate, Notification) {
 
         $rootScope.templates = AccountTemplate.query();
         $scope.awsTemplateForm = {};
@@ -159,6 +159,7 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                 $rootScope.templates.splice($rootScope.templates.indexOf(template), 1);
                 $scope.modifyStatusMessage($rootScope.error_msg.template_delete_success1 + template.id + $rootScope.error_msg.template_delete_success2);
                 $scope.modifyStatusClass("has-success");
+                Notification('Primary notification');
             }, function (error) {
                 $scope.showError(error, $rootScope.error_msg.template_delete_failed)
             });

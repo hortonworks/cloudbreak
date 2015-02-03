@@ -2,8 +2,8 @@
 
 var log = log4javascript.getLogger("credentialController-logger");
 
-angular.module('uluwatuControllers').controller('credentialController', ['$scope', '$rootScope', '$base64', 'UserCredential', 'AccountCredential', 'GlobalCredential', 'GlobalCredentialCertificate',
-    function ($scope, $rootScope, $base64, UserCredential, AccountCredential, GlobalCredential, GlobalCredentialCertificate) {
+angular.module('uluwatuControllers').controller('credentialController', ['$scope', '$rootScope', '$base64', 'UserCredential', 'AccountCredential', 'GlobalCredential', 'GlobalCredentialCertificate', 'Notification',
+    function ($scope, $rootScope, $base64, UserCredential, AccountCredential, GlobalCredential, GlobalCredentialCertificate, Notification) {
         $rootScope.credentials = AccountCredential.query();
         $rootScope.credentialInCreation = false;
         $scope.credentialAws = {};
@@ -139,7 +139,7 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
                 $scope.azureCredentialForm.$setPristine();
                 collapseCreateCredentialFormPanel();
             }
-            
+
         }
 
         $scope.createGccCredential = function() {
@@ -190,6 +190,7 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
                 $rootScope.credentials.splice($rootScope.credentials.indexOf(credential), 1 );
                 $scope.modifyStatusMessage($rootScope.error_msg.credential_delete_success1 + credential.id + $rootScope.error_msg.credential_delete_success2);
                 $scope.modifyStatusClass("has-success");
+                Notification.error({message: 'Error notification 1s', delay: 1000});
             }, function(error){
                 $scope.showError(error);
             });

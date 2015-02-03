@@ -8,7 +8,7 @@ var popUpAppender = new log4javascript.PopUpAppender();
 var layout = new log4javascript.PatternLayout("[%-5p] %m");
 popUpAppender.setLayout(layout);
 
-var uluwatuControllers = angular.module('uluwatuControllers', []);
+var uluwatuControllers = angular.module('uluwatuControllers', ['ui-notification']);
 
 uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '$rootScope', '$filter', 'UserPermission', 'ErrorHandler',
     function ($scope, $http, User, $rootScope, $filter, UserPermission, ErrorHandler) {
