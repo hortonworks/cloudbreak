@@ -100,8 +100,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 $jq("#notification-n-filtering").prop("disabled", false);
                 $scope.clusterCreationForm.$setPristine();
             }, function(failure) {
-                $scope.modifyStatusMessage($rootScope.error_msg.cluster_failed + ": " + failure.data.message);
-                $scope.modifyStatusClass("has-error");
+                $scope.showError(failure, $rootScope.error_msg.cluster_failed);
             });
         }
 
@@ -113,8 +112,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 $scope.modifyStatusClass("has-success");
                 $scope.$broadcast('DELETE_PERISCOPE_CLUSTER', cluster.id);
             }, function (failure){
-                $scope.modifyStatusMessage($rootScope.error_msg.cluster_delete_failed + ": " + failure.data.message);
-                $scope.modifyStatusClass("has-error");
+                $scope.showError(failure, $rootScope.error_msg.cluster_delete_failed);
             });
         }
         $scope.changeActiveCluster = function (clusterId) {
@@ -184,13 +182,11 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 GlobalStack.update({id: activeCluster.id}, newStatus, function(result){
                   activeCluster.status = "STOP_REQUESTED";
                 }, function(error) {
-                  $scope.modifyStatusMessage($rootScope.error_msg.cluster_stop_failed + ": " + error.data.message);
-                  $scope.modifyStatusClass("has-error");
+                  $scope.showError(error, $rootScope.error_msg.cluster_stop_failed);
                 });
 
             }, function(error) {
-              $scope.modifyStatusMessage($rootScope.error_msg.cluster_stop_failed + ": " + error.data.message);
-              $scope.modifyStatusClass("has-error");
+              $scope.showError(error, $rootScope.error_msg.cluster_stop_failed);
             });
         }
 
@@ -201,13 +197,11 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 Cluster.update({id: activeCluster.id}, newStatus, function(success){
                     activeCluster.status = "START_REQUESTED";
                 }, function(error) {
-                  $scope.modifyStatusMessage($rootScope.error_msg.cluster_start_failed + ": " + error.data.message);
-                  $scope.modifyStatusClass("has-error");
+                  $scope.showError(error, $rootScope.error_msg.cluster_start_failed);
                 });
 
             }, function(error) {
-              $scope.modifyStatusMessage($rootScope.error_msg.cluster_start_failed + ": " + error.data.message);
-              $scope.modifyStatusClass("has-error");
+              $scope.showError(error, $rootScope.error_msg.cluster_start_failed);
             });
         }
 

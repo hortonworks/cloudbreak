@@ -2,8 +2,8 @@
 
 var log = log4javascript.getLogger("blueprintController-logger");
 
-angular.module('uluwatuControllers').controller('blueprintController', ['$scope', '$rootScope', 'UserBlueprint', 'AccountBlueprint', 'GlobalBlueprint',
-    function ($scope, $rootScope, UserBlueprint, AccountBlueprint, GlobalBlueprint) {
+angular.module('uluwatuControllers').controller('blueprintController', ['$scope', '$rootScope', 'UserBlueprint', 'AccountBlueprint', 'GlobalBlueprint', 'ErrorHandler',
+    function ($scope, $rootScope, UserBlueprint, AccountBlueprint, GlobalBlueprint, ErrorHandler) {
         $rootScope.blueprints = AccountBlueprint.query();
         initializeBlueprint();
 
@@ -14,7 +14,7 @@ angular.module('uluwatuControllers').controller('blueprintController', ['$scope'
                         handleBlueprintSuccess(success)
                     });
                 }, function (error) {
-                    handleBlueprintError(error)
+                    $scope.showError(error, $rootScope.error_msg.blueprint_failed);
                 });           
             } else {
                 UserBlueprint.save($scope.blueprint, function (result) {
@@ -22,7 +22,7 @@ angular.module('uluwatuControllers').controller('blueprintController', ['$scope'
                         handleBlueprintSuccess(success)
                     });
                 }, function (error) {
-                    handleBlueprintError(error)
+                    $scope.showError(error, $rootScope.error_msg.blueprint_failed);
                 });
             }
             
@@ -33,11 +33,6 @@ angular.module('uluwatuControllers').controller('blueprintController', ['$scope'
                 $scope.modifyStatusClass("has-success");
                 $scope.blueprintForm.$setPristine();
                 angular.element(document.querySelector('#panel-create-blueprints-collapse-btn')).click();
-            }
-            
-            function handleBlueprintError(error) {
-                $scope.modifyStatusMessage($rootScope.error_msg.blueprint_template_failed + ": " + error.data.message);
-                $scope.modifyStatusClass("has-error");            
             }
         }
         
@@ -58,8 +53,7 @@ angular.module('uluwatuControllers').controller('blueprintController', ['$scope'
                 $scope.modifyStatusMessage($rootScope.error_msg.blueprint_delete_success1 + blueprint.id + $rootScope.error_msg.blueprint_delete_success2);
                 $scope.modifyStatusClass("has-success");
             }, function (error) {
-                $scope.modifyStatusMessage($rootScope.error_msg.blueprint_delete_failed  + ": " + error.data.message);
-                $scope.modifyStatusClass("has-error");
+                $scope.showError(error, $rootScope.error_msg.blueprint_delete_failed);
             });
         }
 

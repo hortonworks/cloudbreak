@@ -50,13 +50,13 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                 AccountTemplate.save($scope.awsTemp, function (result) {
                     handleAwsTemplateSuccess(result)
                 }, function (error) {
-                    handleTemplateError(error, $rootScope.error_msg.aws_template_failed)
+                    $scope.showError(error, $rootScope.error_msg.aws_template_failed)
                 });
             } else {
                 UserTemplate.save($scope.awsTemp, function (result) {
                     handleAwsTemplateSuccess(result)
                 }, function (error) {
-                    handleTemplateError(error, $rootScope.error_msg.aws_template_failed)
+                    $scope.showError(error, $rootScope.error_msg.aws_template_failed)
                 });
             }
 
@@ -77,15 +77,13 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
             AccountTemplate.save($scope.openstackTemp, function (result) {
               handleOpenstackTemplateSuccess(result)
             }, function (error) {
-              handleOpenstackTemplateError(error)
-              handleTemplateError(error, $rootScope.error_msg.openstack_template_failed)
+              $scope.showError(error, $rootScope.error_msg.openstack_template_failed)
             });
           } else {
             UserTemplate.save($scope.openstackTemp, function (result) {
               handleOpenstackTemplateSuccess(result)
             }, function (error) {
-              handleOpenstackTemplateError(error)
-              handleTemplateError(error, $rootScope.error_msg.openstack_template_failed)
+              $scope.showError(error, $rootScope.error_msg.openstack_template_failed)
             });
           }
 
@@ -107,15 +105,13 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                 AccountTemplate.save($scope.gccTemp, function (result) {
                     handleGccTemplateSuccess(result)
                 }, function (error) {
-                    handleGccTemplateError(error)
-                    handleTemplateError(error, $rootScope.error_msg.gcc_template_failed)
+                    $scope.showError(error, $rootScope.error_msg.gcc_template_failed)
                 });
             } else {
                 UserTemplate.save($scope.gccTemp, function (result) {
                     handleGccTemplateSuccess(result)
                 }, function (error) {
-                    handleGccTemplateError(error)
-                    handleTemplateError(error, $rootScope.error_msg.gcc_template_failed)
+                    $scope.showError(error, $rootScope.error_msg.gcc_template_failed)
                 });
             }
 
@@ -137,13 +133,13 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                 AccountTemplate.save($scope.azureTemp, function (result) {
                   handleAzureTemplateSuccess(result)
                }, function (error) {
-                  handleTemplateError(error, $rootScope.error_msg.azure_template_failed)
+                  $scope.showError(error, $rootScope.error_msg.azure_template_failed)
                });
             } else {
                UserTemplate.save($scope.azureTemp, function (result) {
                   handleAzureTemplateSuccess(result)
                }, function (error) {
-                  handleTemplateError(error, $rootScope.error_msg.azure_template_failed)
+                  $scope.showError(error, $rootScope.error_msg.azure_template_failed)
                });
             }
 
@@ -164,23 +160,9 @@ angular.module('uluwatuControllers').controller('templateController', ['$scope',
                 $scope.modifyStatusMessage($rootScope.error_msg.template_delete_success1 + template.id + $rootScope.error_msg.template_delete_success2);
                 $scope.modifyStatusClass("has-success");
             }, function (error) {
-                $scope.modifyStatusMessage($rootScope.error_msg.template_delete_failed + ": " + error.data.message);
-                $scope.modifyStatusClass("has-error");
+                $scope.showError(error, $rootScope.error_msg.template_delete_failed)
             });
         }
-        
-        function handleTemplateError(error, templateFailedMsg) {
-            var errorData = error.data["validationErrors"]
-            if (errorData != null) {
-               for (var key in errorData) {
-                  templateFailedMsg += errorData[key] + "; "
-               }
-            } else {
-                  templateFailedMsg += ": " + error.data.message
-            }
-            $scope.modifyStatusMessage(templateFailedMsg);
-            $scope.modifyStatusClass("has-error");
-         }
 
         function collapseCreateTemplateFormPanel() {
           angular.element(document.querySelector('#panel-create-templates-collapse-btn')).click();

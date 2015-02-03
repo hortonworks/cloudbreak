@@ -224,3 +224,24 @@ uluwatuServices.factory('UluwatuCluster', ['UserStack', 'AccountStack', 'Cluster
     function ($resource) {
       return $resource('periscope/clusters/:id/policies/:policyId', null, {'query':  {method:'GET', isArray:true}});
     }]);
+    
+    uluwatuServices.factory('ErrorHandler', function() {
+        return {
+            handleError: function(error) {
+                var failedMsg = ""
+                var errorData = error.data["validationErrors"]
+                if (errorData != null) {
+                    for (var key in errorData) {
+                        failedMsg += errorData[key] + "; "
+                    }
+                } else if (error.data != null){
+                    failedMsg += error.data.message
+                } else if (error.error_description != null) {
+                    failedMsg += error.error_description
+                } else {
+                    failedMsg += "Unknown error or Cloudbreak Server is not running."
+                }
+                return failedMsg;
+            }
+        }
+    });
