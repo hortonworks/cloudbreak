@@ -28,15 +28,15 @@ public class ProvisionUtil {
     @javax.annotation.Resource
     private Map<CloudPlatform, List<ResourceBuilder>> instanceResourceBuilders;
 
-    public synchronized boolean isRequestFull(Stack stack, int fullIndex) {
+    public boolean isRequestFull(Stack stack, int fullIndex) {
         return fullIndex % stack.cloudPlatform().parallelNumber() == 0;
     }
 
-    public synchronized boolean isRequestFullWithCloudPlatform(Stack stack, int fullIndex) {
+    public boolean isRequestFullWithCloudPlatform(Stack stack, int fullIndex) {
         return (fullIndex * instanceResourceBuilders.get(stack.cloudPlatform()).size()) % stack.cloudPlatform().parallelNumber() == 0;
     }
 
-    public synchronized void waitForRequestToFinish(Long stackId, List<Future<Boolean>> futures) {
+    public void waitForRequestToFinish(Long stackId, List<Future<Boolean>> futures) {
         Stack stack = stackRepository.findOneWithLists(stackId);
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Waiting for futures to finishing.");
