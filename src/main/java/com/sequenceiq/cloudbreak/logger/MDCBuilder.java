@@ -21,32 +21,24 @@ public class MDCBuilder {
             MDC.put(LoggerContextKey.RESOURCE_ID.toString(), "undefined");
             MDC.put(LoggerContextKey.RESOURCE_NAME.toString(), "cb");
         } else {
-            try {
-                Field privateStringField = object.getClass().getDeclaredField("owner");
-                privateStringField.setAccessible(true);
-                MDC.put(LoggerContextKey.OWNER_ID.toString(), (String) privateStringField.get(object));
-            } catch (Exception e) {
-                MDC.put(LoggerContextKey.OWNER_ID.toString(), "undefined");
-            }
+            MDC.put(LoggerContextKey.OWNER_ID.toString(), getFieldValue(object, "owner"));
+            MDC.put(LoggerContextKey.RESOURCE_ID.toString(), getFieldValue(object, "id"));
+            MDC.put(LoggerContextKey.RESOURCE_NAME.toString(), getFieldValue(object, "name"));
             try {
                 MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), object.getClass().getSimpleName().toUpperCase());
             } catch (Exception e) {
                 MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), "undefined");
             }
-            try {
-                Field privateStringField = object.getClass().getDeclaredField("name");
-                privateStringField.setAccessible(true);
-                MDC.put(LoggerContextKey.RESOURCE_NAME.toString(), (String) privateStringField.get(object));
-            } catch (Exception e) {
-                MDC.put(LoggerContextKey.RESOURCE_NAME.toString(), "undefined");
-            }
-            try {
-                Field privateStringField = object.getClass().getDeclaredField("id");
-                privateStringField.setAccessible(true);
-                MDC.put(LoggerContextKey.RESOURCE_ID.toString(), privateStringField.get(object).toString());
-            } catch (Exception e) {
-                MDC.put(LoggerContextKey.RESOURCE_ID.toString(), "undefined");
-            }
+        }
+    }
+
+    private static String getFieldValue(Object o, String field) {
+        try {
+            Field privateStringField = o.getClass().getDeclaredField(field);
+            privateStringField.setAccessible(true);
+            return privateStringField.get(o).toString();
+        } catch (Exception e) {
+            return  "undefined";
         }
     }
 }
