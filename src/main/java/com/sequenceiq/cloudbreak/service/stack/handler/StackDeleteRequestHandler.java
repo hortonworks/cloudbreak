@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
+import com.sequenceiq.cloudbreak.service.stack.flow.ProvisionUtil;
 import com.sequenceiq.cloudbreak.service.stack.resource.DeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
@@ -60,6 +61,9 @@ public class StackDeleteRequestHandler implements Consumer<Event<StackDeleteRequ
     @Autowired
     private AsyncTaskExecutor resourceBuilderExecutor;
 
+    @Autowired
+    private ProvisionUtil provisionUtil;
+
     @Override
     public void accept(Event<StackDeleteRequest> stackDeleteRequest) {
         final StackDeleteRequest data = stackDeleteRequest.getData();
@@ -84,13 +88,8 @@ public class StackDeleteRequestHandler implements Consumer<Event<StackDeleteRequ
                             }
                         });
                         futures.add(submit);
-                        if (isRequestFull(stack, futures.size() + 1)) {
-                            LOGGER.info("Waiting for futures to finishing.");
-                            for (Future<Boolean> future : futures) {
-                                future.get();
-                            }
-                            LOGGER.info("All futures finished continue with the next group.");
-                            futures = new ArrayList<>();
+                        if (provisionUtil.isRequestFull(stack, futures.size() + 1, 1)) {
+                            provisionUtil.waitForRequestToFinish(stack.getId(), futures);
                         }
                     }
                     for (Future<Boolean> future : futures) {
@@ -112,7 +111,4 @@ public class StackDeleteRequestHandler implements Consumer<Event<StackDeleteRequ
         }
     }
 
-    private boolean isRequestFull(Stack stack, Integer futuresSize) {
-        return futuresSize % stack.cloudPlatform().parallelNumber() == 0;
-    }
 }

@@ -71,6 +71,9 @@ public class ProvisionContext {
     @javax.annotation.Resource
     private Map<CloudPlatform, ResourceBuilderInit> resourceBuilderInits;
 
+    @Autowired
+    private ProvisionUtil provisionUtil;
+
     public void buildStack(final CloudPlatform cloudPlatform, Long stackId, Map<String, Object> setupProperties, Map<String, String> userDataParams) {
         Stack stack = stackRepository.findOneWithLists(stackId);
         MDCBuilder.buildMdcContext(stack);
@@ -127,13 +130,13 @@ public class ProvisionContext {
                             });
                             futures.add(submit);
                             fullIndex++;
-                            if (isRequestFull(stack, futures.size() + 1)) {
-                                waitForRequestToFinish(stackId, futures);
+                            if (provisionUtil.isRequestFull(stack, futures.size() + 1, instanceResourceBuilders.get(stack.cloudPlatform()).size())) {
+                                provisionUtil.waitForRequestToFinish(stackId, futures);
                                 futures = new ArrayList<>();
                             }
                         }
                     }
-                    waitForRequestToFinish(stackId, futures);
+                    provisionUtil.waitForRequestToFinish(stackId, futures);
                     LOGGER.info("Publishing {} event [StackId: '{}']", ReactorConfig.PROVISION_COMPLETE_EVENT, stack.getId());
                     reactor.notify(ReactorConfig.PROVISION_COMPLETE_EVENT, Event.wrap(new ProvisionComplete(cloudPlatform, stack.getId(), resourceSet)));
                 } else {
@@ -157,28 +160,6 @@ public class ProvisionContext {
                     new StackOperationFailure(stackId, "Internal server error occurred while creating stack: " + e.getMessage());
             reactor.notify(ReactorConfig.STACK_CREATE_FAILED_EVENT, Event.wrap(stackCreationFailure));
         }
-    }
-
-    private void waitForRequestToFinish(Long stackId, List<Future<Boolean>> futures) {
-        LOGGER.info("Waiting for futures to finishing.");
-        StringBuilder sb = new StringBuilder();
-        Optional<Exception> exception = Optional.absent();
-        for (Future<Boolean> future : futures) {
-            try {
-                future.get();
-            } catch (Exception ex) {
-                exception = Optional.fromNullable(ex);
-                sb.append(String.format("%s, ", ex.getMessage()));
-            }
-        }
-        if (exception.isPresent()) {
-            throw new BuildStackFailureException(sb.toString(), exception.orNull(), stackRepository.findOneWithLists(stackId).getResources());
-        }
-        LOGGER.info("All futures finished continue with the next group.");
-    }
-
-    private boolean isRequestFull(Stack stack, int fullIndex) {
-        return (fullIndex * instanceResourceBuilders.get(stack.cloudPlatform()).size()) % stack.cloudPlatform().parallelNumber() == 0;
     }
 
 }

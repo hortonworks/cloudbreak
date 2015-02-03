@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyMap;
@@ -8,6 +9,8 @@ import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -26,6 +29,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
+import com.sequenceiq.cloudbreak.controller.BuildStackFailureException;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Status;
@@ -80,6 +84,9 @@ public class ProvisionContextTest {
     @Mock
     private Map<CloudPlatform, List<ResourceBuilder>> networkResourceBuilders;
 
+    @Mock
+    private ProvisionUtil provisionUtil;
+
     private Map<String, Object> setupProperties = new HashMap<>();
 
     private Map<String, String> userDataParams = new HashMap<>();
@@ -117,6 +124,8 @@ public class ProvisionContextTest {
         given(stackUpdater.updateStackStatus(anyLong(), any(Status.class), anyString())).willReturn(stack);
         given(stackUpdater.updateStackStatusReason(anyLong(), anyString())).willReturn(stack);
         given(stackUpdater.addStackResources(anyLong(), anyList())).willReturn(stack);
+        given(provisionUtil.isRequestFull(any(Stack.class), anyInt(), anyInt())).willReturn(false);
+        doNothing().when(provisionUtil).waitForRequestToFinish(anyLong(), anyList());
 
         given(reactor.notify(any(), any(Event.class))).willReturn(null);
 
@@ -161,6 +170,7 @@ public class ProvisionContextTest {
         given(stackUpdater.updateStackStatus(anyLong(), any(Status.class), anyString())).willReturn(stack);
         given(stackUpdater.updateStackStatusReason(anyLong(), anyString())).willReturn(stack);
         given(stackUpdater.addStackResources(anyLong(), anyList())).willReturn(stack);
+        doThrow(new BuildStackFailureException("ex", new Exception())).when(provisionUtil).waitForRequestToFinish(anyLong(), anyList());
 
         given(reactor.notify(any(), any(Event.class))).willReturn(null);
 
