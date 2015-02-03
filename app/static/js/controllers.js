@@ -10,8 +10,8 @@ popUpAppender.setLayout(layout);
 
 var uluwatuControllers = angular.module('uluwatuControllers', []);
 
-uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '$rootScope', '$filter', 'UserPermission',
-    function ($scope, $http, User, $rootScope, $filter, UserPermission) {
+uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '$rootScope', '$filter', 'UserPermission', 'ErrorHandler',
+    function ($scope, $http, User, $rootScope, $filter, UserPermission, ErrorHandler) {
         var orderBy = $filter('orderBy');
         $scope.user = User.get();
 
@@ -41,6 +41,16 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
 
         $scope.modifyStatusClass = function(status) {
             $scope.statusclass = status;
+        }
+        
+        $scope.showError = function(error, prefix) {
+            var errorMsg = ErrorHandler.handleError(error);
+            if (prefix){
+                $scope.modifyStatusMessage(errorMsg, prefix);
+            } else {
+                $scope.modifyStatusMessage(errorMsg);
+            }
+            $scope.modifyStatusClass("has-error");
         }
 
         $scope.addPanelJQueryEventListeners = function(panel) {
