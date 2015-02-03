@@ -39,6 +39,7 @@ public class CloudbreakUsageConverter extends AbstractConverter<CloudbreakUsageJ
         json.setStackName(entity.getStackName());
         json.setUsername(cbUser.getUsername());
         json.setCosts(entity.getCosts());
+        json.setInstanceType(entity.getInstanceType());
         return json;
     }
 
@@ -52,11 +53,12 @@ public class CloudbreakUsageConverter extends AbstractConverter<CloudbreakUsageJ
         entity.setInstanceHours(json.getInstanceHours());
         entity.setStackId(json.getStackId());
         entity.setStackName(json.getStackName());
+        entity.setInstanceType(json.getInstanceType());
         return entity;
     }
 
     private String getZoneNameByProvider(String cloud, String zoneFromUsage) {
-        String zone = null;
+        String zone = "";
         if (zoneFromUsage != null && CloudPlatform.AWS.name().equals(cloud)) {
             Regions transformedZone = Regions.valueOf(zoneFromUsage);
             zone = transformedZone.name();

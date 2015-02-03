@@ -21,6 +21,8 @@ public class CloudbreakUsageJson implements JsonEntity {
 
     private Double costs;
 
+    private String instanceType;
+
     public String getOwner() {
         return owner;
     }
@@ -99,5 +101,13 @@ public class CloudbreakUsageJson implements JsonEntity {
 
     public void setCosts(Double costs) {
         this.costs = costs;
+    }
+
+    public String getInstanceType() {
+        return instanceType;
+    }
+
+    public void setInstanceType(String instanceType) {
+        this.instanceType = instanceType;
     }
 }
