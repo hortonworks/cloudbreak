@@ -19,7 +19,7 @@ get_vpc_peers() {
   if [ -z "$METADATA_RESULT" ]; then
     METADATA_STATUS=204
     while [ $METADATA_STATUS -ne 200 ]; do
-      METADATA_STATUS=$(curl -sk -m 2 -o /tmp/metadata_result -w "%{http_code}" -X GET -H Content-Type:application/json $METADATA_ADDRESS/stacks/metadata/$METADATA_HASH);
+      METADATA_STATUS=$(curl -sk -m 10 -o /tmp/metadata_result -w "%{http_code}" -X GET -H Content-Type:application/json $METADATA_ADDRESS/stacks/metadata/$METADATA_HASH);
       [ $METADATA_STATUS -ne 200 ] && sleep 5;
     done
 
