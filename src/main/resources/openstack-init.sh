@@ -18,11 +18,9 @@ fix_hostname() {
 get_vpc_peers() {
   if [ -z "$METADATA_RESULT" ]; then
     METADATA_STATUS=204
-    MAX_RETRIES=600
-    RETRIES=0
-    while [ $METADATA_STATUS -ne 200 ] && [ $RETRIES -ne $MAX_RETRIES ]; do
+    while [ $METADATA_STATUS -ne 200 ]; do
       METADATA_STATUS=$(curl -sk -o /tmp/metadata_result -w "%{http_code}" -X GET -H Content-Type:application/json $METADATA_ADDRESS/stacks/metadata/$METADATA_HASH);
-      [ $METADATA_STATUS -ne 200 ] && sleep 5 && ((RETRIES++));
+      [ $METADATA_STATUS -ne 200 ] && sleep 5;
     done
 
     [ $METADATA_STATUS -ne 200 ] && exit 1;
