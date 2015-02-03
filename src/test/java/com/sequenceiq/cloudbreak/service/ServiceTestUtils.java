@@ -67,6 +67,13 @@ public final class ServiceTestUtils {
                 createCluster(owner, account, createBlueprint(owner, account)));
     }
 
+    public static Stack createStack(CloudPlatform cloudPlatform) {
+        return createStack(DUMMY_OWNER, DUMMY_ACCOUNT,
+                createTemplate(DUMMY_OWNER, DUMMY_ACCOUNT, cloudPlatform),
+                createCredential(DUMMY_OWNER, DUMMY_ACCOUNT, cloudPlatform),
+                createCluster(DUMMY_OWNER, DUMMY_ACCOUNT, createBlueprint(DUMMY_OWNER, DUMMY_ACCOUNT)));
+    }
+
     public static Stack createStack(String owner, String account, Template template, Cluster cluster) {
         return createStack(owner, account, template,
                 createCredential(owner, account, template.cloudPlatform()),

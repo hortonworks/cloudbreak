@@ -17,7 +17,6 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
-import com.sequenceiq.cloudbreak.controller.BuildStackFailureException;
 import com.sequenceiq.cloudbreak.controller.InternalServerException;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -35,6 +34,7 @@ import com.sequenceiq.cloudbreak.service.stack.event.AddInstancesComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.StackOperationFailure;
 import com.sequenceiq.cloudbreak.service.stack.event.StackUpdateSuccess;
 import com.sequenceiq.cloudbreak.service.stack.event.UpdateInstancesRequest;
+import com.sequenceiq.cloudbreak.service.stack.flow.ProvisionUtil;
 import com.sequenceiq.cloudbreak.service.stack.resource.CreateResourceRequest;
 import com.sequenceiq.cloudbreak.service.stack.resource.DeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.ProvisionContextObject;
@@ -77,6 +77,9 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
 
     @Autowired
     private AsyncTaskExecutor resourceBuilderExecutor;
+
+    @Autowired
+    private ProvisionUtil provisionUtil;
 
     @Override
     public void accept(Event<UpdateInstancesRequest> event) {
@@ -126,22 +129,12 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
                             }
                         });
                         futures.add(submit);
-                    }
-
-                    StringBuilder sb = new StringBuilder();
-                    Optional<Exception> exception = Optional.absent();
-                    for (Future<Boolean> future : futures) {
-                        try {
-                            future.get();
-                        } catch (Exception ex) {
-                            exception = Optional.fromNullable(ex);
-                            sb.append(String.format("%s, ", ex.getMessage()));
+                        if (provisionUtil.isRequestFullWithCloudPlatform(stack, futures.size() + 1)) {
+                            provisionUtil.waitForRequestToFinish(stackId, futures);
+                            futures = new ArrayList<>();
                         }
                     }
-                    if (exception.isPresent()) {
-                        throw new BuildStackFailureException(sb.toString(), exception.orNull(), stackRepository.findOneWithLists(stackId).getResources());
-                    }
-
+                    provisionUtil.waitForRequestToFinish(stackId, futures);
                     LOGGER.info("Publishing {} event.", ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT);
                     reactor.notify(ReactorConfig.ADD_INSTANCES_COMPLETE_EVENT,
                             Event.wrap(new AddInstancesComplete(cloudPlatform, stack.getId(), resourceSet, request.getHostGroup())));
@@ -190,14 +183,12 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
                                 }
                             });
                             futures.add(submit);
-                        }
-                        for (Future<Boolean> future : futures) {
-                            try {
-                                future.get();
-                            } catch (Exception ex) {
-                                throw ex;
+                            if (provisionUtil.isRequestFull(stack, futures.size() + 1)) {
+                                provisionUtil.waitForRequestToFinish(stackId, futures);
+                                futures = new ArrayList<>();
                             }
                         }
+                        provisionUtil.waitForRequestToFinish(stackId, futures);
                     }
                     stackUpdater.removeStackResources(stackId, dCO.getDecommisionResources());
                     LOGGER.info("Terminated instances in stack: '{}'", instanceIds);

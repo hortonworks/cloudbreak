@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.connector.CloudPlatformConnector;
 import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteComplete;
 import com.sequenceiq.cloudbreak.service.stack.event.StackDeleteRequest;
+import com.sequenceiq.cloudbreak.service.stack.flow.ProvisionUtil;
 import com.sequenceiq.cloudbreak.service.stack.resource.DeleteContextObject;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
 import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilderInit;
@@ -60,6 +61,9 @@ public class StackDeleteRequestHandler implements Consumer<Event<StackDeleteRequ
     @Autowired
     private AsyncTaskExecutor resourceBuilderExecutor;
 
+    @Autowired
+    private ProvisionUtil provisionUtil;
+
     @Override
     public void accept(Event<StackDeleteRequest> stackDeleteRequest) {
         final StackDeleteRequest data = stackDeleteRequest.getData();
@@ -84,6 +88,10 @@ public class StackDeleteRequestHandler implements Consumer<Event<StackDeleteRequ
                             }
                         });
                         futures.add(submit);
+                        if (provisionUtil.isRequestFull(stack, futures.size() + 1)) {
+                            provisionUtil.waitForRequestToFinish(stack.getId(), futures);
+                            futures = new ArrayList<>();
+                        }
                     }
                     for (Future<Boolean> future : futures) {
                         future.get();
@@ -100,7 +108,8 @@ public class StackDeleteRequestHandler implements Consumer<Event<StackDeleteRequ
             }
         } catch (Exception ex) {
             LOGGER.error(String.format("Stack delete failed on {} stack: ", stack.getId()), ex);
-            retryingStackUpdater.updateStackStatus(data.getStackId(), Status.DELETE_FAILED, "Termination of cluster infrastructure failed.");
+            retryingStackUpdater.updateStackStatus(data.getStackId(), Status.DELETE_FAILED, "Termination of cluster infrastructure failed: " + ex.getMessage());
         }
     }
+
 }
