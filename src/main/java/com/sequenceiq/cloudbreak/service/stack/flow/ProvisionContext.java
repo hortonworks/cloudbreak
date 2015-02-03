@@ -130,7 +130,7 @@ public class ProvisionContext {
                             });
                             futures.add(submit);
                             fullIndex++;
-                            if (provisionUtil.isRequestFull(stack, futures.size() + 1, instanceResourceBuilders.get(stack.cloudPlatform()).size())) {
+                            if (provisionUtil.isRequestFullWithCloudPlatform(stack, futures.size() + 1)) {
                                 provisionUtil.waitForRequestToFinish(stackId, futures);
                                 futures = new ArrayList<>();
                             }

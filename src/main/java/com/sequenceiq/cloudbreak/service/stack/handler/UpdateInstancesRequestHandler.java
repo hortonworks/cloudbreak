@@ -129,7 +129,7 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
                             }
                         });
                         futures.add(submit);
-                        if (provisionUtil.isRequestFull(stack, futures.size() + 1, instanceResourceBuilders.get(stack.cloudPlatform()).size())) {
+                        if (provisionUtil.isRequestFullWithCloudPlatform(stack, futures.size() + 1)) {
                             provisionUtil.waitForRequestToFinish(stackId, futures);
                             futures = new ArrayList<>();
                         }
@@ -183,7 +183,7 @@ public class UpdateInstancesRequestHandler implements Consumer<Event<UpdateInsta
                                 }
                             });
                             futures.add(submit);
-                            if (provisionUtil.isRequestFull(stack, futures.size() + 1, 1)) {
+                            if (provisionUtil.isRequestFull(stack, futures.size() + 1)) {
                                 provisionUtil.waitForRequestToFinish(stackId, futures);
                                 futures = new ArrayList<>();
                             }

@@ -124,7 +124,7 @@ public class ProvisionContextTest {
         given(stackUpdater.updateStackStatus(anyLong(), any(Status.class), anyString())).willReturn(stack);
         given(stackUpdater.updateStackStatusReason(anyLong(), anyString())).willReturn(stack);
         given(stackUpdater.addStackResources(anyLong(), anyList())).willReturn(stack);
-        given(provisionUtil.isRequestFull(any(Stack.class), anyInt(), anyInt())).willReturn(false);
+        given(provisionUtil.isRequestFullWithCloudPlatform(any(Stack.class), anyInt())).willReturn(false);
         doNothing().when(provisionUtil).waitForRequestToFinish(anyLong(), anyList());
 
         given(reactor.notify(any(), any(Event.class))).willReturn(null);

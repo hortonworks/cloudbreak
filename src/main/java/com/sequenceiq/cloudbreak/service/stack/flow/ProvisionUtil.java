@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
@@ -10,9 +11,11 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.controller.BuildStackFailureException;
+import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.stack.resource.ResourceBuilder;
 
 @Component
 public class ProvisionUtil {
@@ -22,8 +25,15 @@ public class ProvisionUtil {
     @Autowired
     private StackRepository stackRepository;
 
-    public synchronized boolean isRequestFull(Stack stack, int fullIndex, int multiplier) {
-        return (fullIndex * multiplier) % stack.cloudPlatform().parallelNumber() == 0;
+    @javax.annotation.Resource
+    private Map<CloudPlatform, List<ResourceBuilder>> instanceResourceBuilders;
+
+    public synchronized boolean isRequestFull(Stack stack, int fullIndex) {
+        return fullIndex % stack.cloudPlatform().parallelNumber() == 0;
+    }
+
+    public synchronized boolean isRequestFullWithCloudPlatform(Stack stack, int fullIndex) {
+        return (fullIndex * instanceResourceBuilders.get(stack.cloudPlatform()).size()) % stack.cloudPlatform().parallelNumber() == 0;
     }
 
     public synchronized void waitForRequestToFinish(Long stackId, List<Future<Boolean>> futures) {

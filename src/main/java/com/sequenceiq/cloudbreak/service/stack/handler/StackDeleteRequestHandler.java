@@ -88,7 +88,7 @@ public class StackDeleteRequestHandler implements Consumer<Event<StackDeleteRequ
                             }
                         });
                         futures.add(submit);
-                        if (provisionUtil.isRequestFull(stack, futures.size() + 1, 1)) {
+                        if (provisionUtil.isRequestFull(stack, futures.size() + 1)) {
                             provisionUtil.waitForRequestToFinish(stack.getId(), futures);
                         }
                     }
