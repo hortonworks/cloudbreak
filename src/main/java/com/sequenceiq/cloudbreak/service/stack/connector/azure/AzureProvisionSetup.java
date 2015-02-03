@@ -27,8 +27,11 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
+import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.stack.connector.ProvisionSetup;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionSetupComplete;
+import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureResourcePollerObject;
+import com.sequenceiq.cloudbreak.service.stack.resource.azure.AzureResourceStatusCheckerTask;
 
 import groovyx.net.http.HttpResponseDecorator;
 import groovyx.net.http.HttpResponseException;
@@ -52,6 +55,8 @@ public class AzureProvisionSetup implements ProvisionSetup {
     private static final String SUCCESS = "success";
     private static final int ONE_HUNDRED = 100;
     private static final int CONTAINER_EXISTS = 409;
+    private static final int POLLING_INTERVAL = 5000;
+    private static final int MAX_POLLING_ATTEMPTS = 60;
 
     @Autowired
     private Reactor reactor;
@@ -64,6 +69,12 @@ public class AzureProvisionSetup implements ProvisionSetup {
 
     @Autowired
     private CredentialRepository credentialRepository;
+
+    @Autowired
+    private AzureResourceStatusCheckerTask azureResourceStatusCheckerTask;
+
+    @Autowired
+    private PollingService<AzureResourcePollerObject> azureResourcePollerObjectPollingService;
 
     @Override
     public void setupProvisioning(Stack stack) {
@@ -182,19 +193,13 @@ public class AzureProvisionSetup implements ProvisionSetup {
                 params.put(DESCRIPTION, VM_COMMON_NAME);
                 params.put(AFFINITYGROUP, affinityGroupName);
                 HttpResponseDecorator response = (HttpResponseDecorator) azureClient.createStorageAccount(params);
-                String requestId = (String) azureClient.getRequestId(response);
-                waitUntilComplete(azureClient, requestId);
+                AzureResourcePollerObject azureResourcePollerObject = new AzureResourcePollerObject(azureClient, response, stack);
+                azureResourcePollerObjectPollingService.pollWithTimeout(azureResourceStatusCheckerTask, azureResourcePollerObject,
+                        POLLING_INTERVAL, MAX_POLLING_ATTEMPTS);
             } else {
                 LOGGER.error(String.format("Error occurs on %s stack under the storage creation", stack.getId()), ex);
                 throw new InternalServerException(ex.getMessage());
             }
-        }
-    }
-
-    private void waitUntilComplete(AzureClient azureClient, String requestId) {
-        boolean finished = azureClient.waitUntilComplete(requestId);
-        if (!finished) {
-            throw new InternalServerException("Azure resource timeout");
         }
     }
 
