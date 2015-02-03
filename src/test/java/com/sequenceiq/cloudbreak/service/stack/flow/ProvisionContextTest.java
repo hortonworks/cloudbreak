@@ -111,21 +111,21 @@ public class ProvisionContextTest {
         executor.setThreadNamePrefix("resourceBuilderExecutor-");
         executor.initialize();
         ReflectionTestUtils.setField(underTest, "resourceBuilderExecutor", executor);
+        given(provisionUtil.isRequestFullWithCloudPlatform(any(Stack.class), anyInt())).willReturn(false);
+        given(provisionUtil.isRequestFull(any(Stack.class), anyInt())).willReturn(false);
     }
 
     @Test
     public void buildStackWhenAllResourceBuilderWorksFine() {
         prepareInstanceResourceBuilders();
         prepareNetWorkResourceBuilders();
-
+        doNothing().when(provisionUtil).waitForRequestToFinish(anyLong(), anyList());
         // GIVEN
         given(stackRepository.findOneWithLists(1L)).willReturn(stack);
 
         given(stackUpdater.updateStackStatus(anyLong(), any(Status.class), anyString())).willReturn(stack);
         given(stackUpdater.updateStackStatusReason(anyLong(), anyString())).willReturn(stack);
         given(stackUpdater.addStackResources(anyLong(), anyList())).willReturn(stack);
-        given(provisionUtil.isRequestFullWithCloudPlatform(any(Stack.class), anyInt())).willReturn(false);
-        doNothing().when(provisionUtil).waitForRequestToFinish(anyLong(), anyList());
 
         given(reactor.notify(any(), any(Event.class))).willReturn(null);
 
