@@ -10,7 +10,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,8 +76,8 @@ public class StackUsageGenerator {
     }
 
     private void addAllGeneratedUsages(List<CloudbreakUsage> stackUsages, CloudbreakEvent startEvent, Date stopTime) throws ParseException {
-        Map<String, CloudbreakUsage> usages = intervalUsageGenerator.generateUsages(startEvent.getEventTimestamp(), stopTime, startEvent);
-        stackUsages.addAll(usages.values());
+        List<CloudbreakUsage> usages = intervalUsageGenerator.generateUsages(startEvent.getEventTimestamp(), stopTime, startEvent);
+        stackUsages.addAll(usages);
     }
 
     private void generateRunningStackUsage(List<CloudbreakUsage> dailyCbUsages, CloudbreakEvent startEvent) throws ParseException {

@@ -16,9 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -84,8 +82,7 @@ public class StackUsageGeneratorTest {
         Date stopDate = referenceCalendar.getTime();
         CloudbreakEvent startEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STARTED.name(), startDate);
         CloudbreakEvent stopEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STOPPED.name(), stopDate);
-        Map<String, CloudbreakUsage> usagesByDay = new HashMap<>();
-        usagesByDay.put(DATE_FORMAT.format(startDate), cloudbreakUsage);
+        List<CloudbreakUsage> usagesByDay = Arrays.asList(cloudbreakUsage);
         when(intervalUsageGenerator.generateUsages(startDate, stopDate, startEvent)).thenReturn(usagesByDay);
         Stack stack = ServiceTestUtils.createStack();
         stack.setStatus(Status.AVAILABLE);
@@ -109,8 +106,7 @@ public class StackUsageGeneratorTest {
         Date stopDate = referenceCalendar.getTime();
         CloudbreakEvent startEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STARTED.name(), startDate);
         CloudbreakEvent stopEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STOPPED.name(), stopDate);
-        Map<String, CloudbreakUsage> usagesByDay = new HashMap<>();
-        usagesByDay.put(DATE_FORMAT.format(startDate), cloudbreakUsage);
+        List<CloudbreakUsage> usagesByDay = Arrays.asList(cloudbreakUsage);
         when(intervalUsageGenerator.generateUsages(startDate, stopDate, startEvent)).thenReturn(usagesByDay);
         Stack stack = ServiceTestUtils.createStack();
         stack.setStatus(Status.DELETE_COMPLETED);
@@ -132,8 +128,7 @@ public class StackUsageGeneratorTest {
         Date startDate = referenceCalendar.getTime();
         referenceCalendar.set(DATE, referenceCalendar.get(DATE) + 1);
         CloudbreakEvent startEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STARTED.name(), startDate);
-        Map<String, CloudbreakUsage> usagesByDay = new HashMap<>();
-        usagesByDay.put(DATE_FORMAT.format(startDate), cloudbreakUsage);
+        List<CloudbreakUsage> usagesByDay = Arrays.asList(cloudbreakUsage);
         when(intervalUsageGenerator.generateUsages(any(Date.class), any(Date.class), any(CloudbreakEvent.class))).thenReturn(usagesByDay);
         Stack stack = ServiceTestUtils.createStack();
         stack.setStatus(Status.AVAILABLE);
@@ -153,8 +148,7 @@ public class StackUsageGeneratorTest {
         Date startDate = referenceCalendar.getTime();
         referenceCalendar.set(DATE, referenceCalendar.get(DATE) + 1);
         CloudbreakEvent startEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STARTED.name(), startDate);
-        Map<String, CloudbreakUsage> usagesByDay = new HashMap<>();
-        usagesByDay.put(DATE_FORMAT.format(startDate), cloudbreakUsage);
+        List<CloudbreakUsage> usagesByDay = Arrays.asList(cloudbreakUsage);
         when(intervalUsageGenerator.generateUsages(any(Date.class), any(Date.class), any(CloudbreakEvent.class))).thenReturn(usagesByDay);
         Stack stack = ServiceTestUtils.createStack();
         stack.setStatus(Status.AVAILABLE);
@@ -177,8 +171,7 @@ public class StackUsageGeneratorTest {
         Date stopDate = referenceCalendar.getTime();
         CloudbreakEvent startEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STOPPED.name(), startDate);
         CloudbreakEvent stopEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STOPPED.name(), stopDate);
-        Map<String, CloudbreakUsage> usagesByDay = new HashMap<>();
-        usagesByDay.put(DATE_FORMAT.format(startDate), cloudbreakUsage);
+        List<CloudbreakUsage> usagesByDay = Arrays.asList(cloudbreakUsage);
         when(intervalUsageGenerator.generateUsages(startDate, stopDate, startEvent)).thenReturn(usagesByDay);
         Stack stack = ServiceTestUtils.createStack();
         stack.setStatus(Status.AVAILABLE);
@@ -202,8 +195,7 @@ public class StackUsageGeneratorTest {
         CloudbreakEvent startEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STARTED.name(), startDate);
         CloudbreakEvent secondStartEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STARTED.name(), secondStartDate);
         CloudbreakEvent stopEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STOPPED.name(), stopDate);
-        Map<String, CloudbreakUsage> usagesByDay = new HashMap<>();
-        usagesByDay.put(DATE_FORMAT.format(startDate), cloudbreakUsage);
+        List<CloudbreakUsage> usagesByDay = Arrays.asList(cloudbreakUsage);
         when(intervalUsageGenerator.generateUsages(startDate, stopDate, startEvent)).thenReturn(usagesByDay);
         Stack stack = ServiceTestUtils.createStack();
         stack.setStatus(Status.AVAILABLE);
@@ -225,8 +217,7 @@ public class StackUsageGeneratorTest {
         Date startDate = referenceCalendar.getTime();
         referenceCalendar.set(DATE, referenceCalendar.get(DATE) + 1);
         CloudbreakEvent startEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STARTED.name(), startDate);
-        Map<String, CloudbreakUsage> usagesByDay = new HashMap<>();
-        usagesByDay.put(DATE_FORMAT.format(startDate), cloudbreakUsage);
+        List<CloudbreakUsage> usagesByDay = Arrays.asList(cloudbreakUsage);
         when(intervalUsageGenerator.generateUsages(any(Date.class), any(Date.class), any(CloudbreakEvent.class))).thenReturn(usagesByDay);
         when(stackRepository.findById(1L)).thenReturn(null);
 
@@ -246,8 +237,7 @@ public class StackUsageGeneratorTest {
         Date startDate = referenceCalendar.getTime();
         referenceCalendar.set(DATE, referenceCalendar.get(DATE) + 1);
         CloudbreakEvent startEvent = ServiceTestUtils.createEvent(1L, 1, BillingStatus.BILLING_STARTED.name(), startDate);
-        Map<String, CloudbreakUsage> usagesByDay = new HashMap<>();
-        usagesByDay.put(DATE_FORMAT.format(startDate), cloudbreakUsage);
+        List<CloudbreakUsage> usagesByDay = Arrays.asList(cloudbreakUsage);
         when(intervalUsageGenerator.generateUsages(any(Date.class), any(Date.class), any(CloudbreakEvent.class))).thenReturn(usagesByDay);
         Stack stack = ServiceTestUtils.createStack();
         stack.setStatus(Status.AVAILABLE);
