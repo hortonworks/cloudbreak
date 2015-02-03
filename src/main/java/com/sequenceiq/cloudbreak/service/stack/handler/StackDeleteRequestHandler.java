@@ -107,7 +107,7 @@ public class StackDeleteRequestHandler implements Consumer<Event<StackDeleteRequ
                 cloudPlatformConnectors.get(data.getCloudPlatform()).deleteStack(stack, stack.getCredential());
             }
         } catch (Exception ex) {
-            LOGGER.error(String.format("Stack delete failed on {} stack: ", stack.getId()), ex.getMessage());
+            LOGGER.error(String.format("Stack delete failed on {} stack: ", stack.getId()), ex);
             retryingStackUpdater.updateStackStatus(data.getStackId(), Status.DELETE_FAILED, "Termination of cluster infrastructure failed: " + ex.getMessage());
         }
     }
