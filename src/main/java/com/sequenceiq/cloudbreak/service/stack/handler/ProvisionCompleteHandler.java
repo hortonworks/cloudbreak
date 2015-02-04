@@ -10,7 +10,6 @@ import com.sequenceiq.cloudbreak.domain.BillingStatus;
 import com.sequenceiq.cloudbreak.domain.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.repository.RetryingStackUpdater;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.stack.event.ProvisionComplete;
@@ -26,9 +25,6 @@ public class ProvisionCompleteHandler implements Consumer<Event<ProvisionComplet
 
     @Autowired
     private MetadataSetupContext metadataSetupContext;
-
-    @Autowired
-    private RetryingStackUpdater retryingStackUpdater;
 
     @Autowired
     private StackRepository stackRepository;

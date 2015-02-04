@@ -192,8 +192,10 @@ public class AmbariClusterConnector {
             int adjustment = Math.abs(adjustmentRequest.getScalingAdjustment());
             String hostGroup = adjustmentRequest.getHostGroup();
             LOGGER.info("Decommissioning {} hosts from host group '{}'", adjustment, hostGroup);
-            String statusReason = String.format("Removing '%s' node(s) from the cluster", adjustment);
-            stackUpdater.updateStackStatus(stack.getId(), Status.UPDATE_IN_PROGRESS, statusReason);
+            String statusReason = String.format("Removing '%s' node(s) from the cluster.", adjustment);
+            stackUpdater.updateStackStatus(stackId, Status.UPDATE_IN_PROGRESS, statusReason);
+            String eventMsg = String.format("Removing '%s' node(s) from the '%s' hostgroup.", adjustment, hostGroup);
+            eventService.fireCloudbreakInstanceGroupEvent(stackId, Status.UPDATE_IN_PROGRESS.name(), eventMsg, hostGroup);
             AmbariClient ambariClient = clientService.create(stack);
             String blueprintName = stack.getCluster().getBlueprint().getBlueprintName();
             Set<String> components = ambariClient.getComponentsCategory(blueprintName, hostGroup).keySet();
@@ -420,7 +422,7 @@ public class AmbariClusterConnector {
         Set<InstanceMetaData> instances = FluentIterable.from(unregisteredHosts).limit(hostGroupAdjustment.getScalingAdjustment()).toSet();
         String statusReason = String.format("Adding '%s' new host(s) to the '%s' host group.",
                 hostGroupAdjustment.getScalingAdjustment(), hostGroupAdjustment.getHostGroup());
-        eventService.fireCloudbreakEvent(stackId, Status.UPDATE_IN_PROGRESS.name(), statusReason);
+        eventService.fireCloudbreakInstanceGroupEvent(stackId, Status.UPDATE_IN_PROGRESS.name(), statusReason, hostGroupAdjustment.getHostGroup());
         return getHostNames(instances);
     }
 

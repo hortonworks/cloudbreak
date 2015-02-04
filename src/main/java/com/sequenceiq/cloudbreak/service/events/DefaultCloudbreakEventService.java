@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.conf.ReactorConfig;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.CloudbreakEventRepository;
@@ -50,9 +49,19 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     }
 
     @Override
-    public CloudbreakEvent createStackEvent(Long stackId, String eventType, String eventMessage, InstanceGroup instanceGroup) {
-        Stack stack = stackRepository.findById(stackId);
-        CloudbreakEvent stackEvent = createStackEvent(stack, eventType, eventMessage, instanceGroup);
+    public void fireCloudbreakInstanceGroupEvent(Long stackId, String eventType, String eventMessage, String instanceGroupName) {
+        InstanceGroupEventData eventData = new InstanceGroupEventData(stackId, eventType, eventMessage, instanceGroupName);
+        MDCBuilder.buildMdcContext(eventData);
+        LOGGER.info("Fireing cloudbreak event: {}", eventData);
+        Event reactorEvent = Event.wrap(eventData);
+        reactor.notify(ReactorConfig.CLOUDBREAK_EVENT, reactorEvent);
+    }
+
+    @Override
+    public CloudbreakEvent createStackEvent(CloudbreakEventData eventData) {
+        String instanceGroupName = getInstanceGroupNameFromEvent(eventData);
+        Stack stack = stackRepository.findById(eventData.getEntityId());
+        CloudbreakEvent stackEvent = createStackEvent(stack, eventData.getEventType(), eventData.getEventMessage(), instanceGroupName);
         stackEvent = eventRepository.save(stackEvent);
 
         Notification notification = new Notification(stackEvent);
@@ -61,6 +70,14 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
         MDCBuilder.buildMdcContext(stackEvent);
         LOGGER.info("Event and notification from the event were created: {}", stackEvent);
         return stackEvent;
+    }
+
+    private String getInstanceGroupNameFromEvent(CloudbreakEventData eventData) {
+        String instanceGroup = null;
+        if (eventData instanceof InstanceGroupEventData) {
+            instanceGroup = ((InstanceGroupEventData) eventData).getInstanceGroupName();
+        }
+        return instanceGroup;
     }
 
     @Override
@@ -76,11 +93,11 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
         return null != events ? events : Collections.EMPTY_LIST;
     }
 
-    private CloudbreakEvent createStackEvent(Stack stack, String eventType, String eventMessage, InstanceGroup instanceGroup) {
+    private CloudbreakEvent createStackEvent(Stack stack, String eventType, String eventMessage, String instanceGroupName) {
         CloudbreakEvent stackEvent = new CloudbreakEvent();
 
         stackEvent.setEventTimestamp(Calendar.getInstance().getTime());
-        stackEvent.setEventMessage(String.format("Interaction on '%s' hostgroup %s", instanceGroup.getGroupName(), eventMessage));
+        stackEvent.setEventMessage(eventMessage);
         stackEvent.setEventType(eventType);
         stackEvent.setOwner(stack.getOwner());
         stackEvent.setAccount(stack.getAccount());
@@ -88,9 +105,14 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
         stackEvent.setStackStatus(stack.getStatus());
         stackEvent.setStackName(stack.getName());
         stackEvent.setNodeCount(stack.getRunningInstanceMetaData().size());
+        stackEvent.setRegion(stack.getRegion());
+        stackEvent.setCloud(stack.cloudPlatform().name());
 
         populateClusterData(stackEvent, stack);
-        populateTemplateData(stackEvent, stack, instanceGroup);
+
+        if (instanceGroupName != null) {
+            stackEvent.setInstanceGroup(instanceGroupName);
+        }
 
         return stackEvent;
     }
@@ -103,11 +125,5 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
         } else {
             LOGGER.debug("No cluster data available for the stack: {}", stack.getId());
         }
-    }
-
-    private void populateTemplateData(CloudbreakEvent stackEvent, Stack stack, InstanceGroup instanceGroup) {
-        stackEvent.setRegion(stack.getRegion());
-        stackEvent.setCloud(stack.cloudPlatform().name());
-        stackEvent.setInstanceGroup(instanceGroup.getGroupName());
     }
 }
