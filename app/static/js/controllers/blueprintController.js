@@ -15,7 +15,7 @@ angular.module('uluwatuControllers').controller('blueprintController', ['$scope'
                     });
                 }, function (error) {
                     $scope.showError(error, $rootScope.error_msg.blueprint_failed);
-                });           
+                });
             } else {
                 UserBlueprint.save($scope.blueprint, function (result) {
                     GlobalBlueprint.get({ id: result.id}, function(success) {
@@ -25,17 +25,16 @@ angular.module('uluwatuControllers').controller('blueprintController', ['$scope'
                     $scope.showError(error, $rootScope.error_msg.blueprint_failed);
                 });
             }
-            
+
             function handleBlueprintSuccess(success) {
                 $rootScope.blueprints.push(success);
                 initializeBlueprint();
-                $scope.modifyStatusMessage($rootScope.error_msg.blueprint_success1 + success.id + $rootScope.error_msg.blueprint_success2);
-                $scope.modifyStatusClass("has-success");
+                $scope.showSuccess($rootScope.error_msg.blueprint_success1 + success.id + $rootScope.error_msg.blueprint_success2);
                 $scope.blueprintForm.$setPristine();
                 angular.element(document.querySelector('#panel-create-blueprints-collapse-btn')).click();
             }
         }
-        
+
         $scope.copyAndEditBlueprint = function(blueprint) {
              var newBlueprint = angular.copy(blueprint)
              angular.element(document.querySelector('#panel-create-blueprints-collapse')).collapse('show');
@@ -50,8 +49,7 @@ angular.module('uluwatuControllers').controller('blueprintController', ['$scope'
         $scope.deleteBlueprint = function (blueprint) {
             GlobalBlueprint.delete({ id: blueprint.id }, function (success) {
                 $rootScope.blueprints.splice($rootScope.blueprints.indexOf(blueprint), 1);
-                $scope.modifyStatusMessage($rootScope.error_msg.blueprint_delete_success1 + blueprint.id + $rootScope.error_msg.blueprint_delete_success2);
-                $scope.modifyStatusClass("has-success");
+                $scope.showSuccess($rootScope.error_msg.blueprint_delete_success1 + blueprint.id + $rootScope.error_msg.blueprint_delete_success2);
             }, function (error) {
                 $scope.showError(error, $rootScope.error_msg.blueprint_delete_failed);
             });

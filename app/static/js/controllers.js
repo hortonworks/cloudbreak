@@ -10,8 +10,8 @@ popUpAppender.setLayout(layout);
 
 var uluwatuControllers = angular.module('uluwatuControllers', ['ui-notification']);
 
-uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '$rootScope', '$filter', 'UserPermission', 'ErrorHandler',
-    function ($scope, $http, User, $rootScope, $filter, UserPermission, ErrorHandler) {
+uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '$rootScope', '$filter', 'UserPermission', 'ErrorHandler', 'Notification',
+    function ($scope, $http, User, $rootScope, $filter, UserPermission, ErrorHandler, Notification) {
         var orderBy = $filter('orderBy');
         $scope.user = User.get();
 
@@ -42,15 +42,64 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
         $scope.modifyStatusClass = function(status) {
             $scope.statusclass = status;
         }
-        
+
         $scope.showError = function(error, prefix) {
             var errorMsg = ErrorHandler.handleError(error);
             if (prefix){
-                $scope.modifyStatusMessage(errorMsg, prefix);
+                $scope.showErrorMessage(errorMsg, prefix)
             } else {
-                $scope.modifyStatusMessage(errorMsg);
+                $scope.showErrorMessage(errorMsg);
             }
+        }
+
+        $scope.showErrorMessage = function(message, prefix) {
+            $scope.modifyStatusMessage(message, prefix);
             $scope.modifyStatusClass("has-error");
+            $scope.popupError($scope.statusMessage);
+        }
+
+        $scope.showWarningMessage = function(message) {
+          $scope.modifyStatusMessage(message);
+          $scope.modifyStatusClass("has-warning");
+          $scope.popupWarning($scope.statusMessage);
+        }
+
+        $scope.showSuccess = function(message, prefix) {
+          $scope.modifyStatusMessage(message);
+          $scope.modifyStatusClass("has-success");
+          $scope.popupSuccess($scope.statusMessage);
+        }
+
+        $scope.popupInfo = function(message) {
+            Notification.info({
+                message: message,
+                title: 'Primary notification',
+                delay: 3000
+            });
+        }
+
+        $scope.popupWarning = function(message) {
+            Notification.warning({
+                message: message,
+                title: 'Warning',
+                delay: 3000
+            });
+        }
+
+        $scope.popupError = function(message) {
+            Notification.error({
+                message: message,
+                title: 'Error',
+                delay: 3000
+            });
+        }
+
+        $scope.popupSuccess = function(message) {
+            Notification.success({
+                message: message,
+                title: 'Success',
+                delay: 3000
+            });
         }
 
         $scope.addPanelJQueryEventListeners = function(panel) {

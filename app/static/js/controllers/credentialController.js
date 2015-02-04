@@ -2,8 +2,8 @@
 
 var log = log4javascript.getLogger("credentialController-logger");
 
-angular.module('uluwatuControllers').controller('credentialController', ['$scope', '$rootScope', '$base64', 'UserCredential', 'AccountCredential', 'GlobalCredential', 'GlobalCredentialCertificate', 'Notification',
-    function ($scope, $rootScope, $base64, UserCredential, AccountCredential, GlobalCredential, GlobalCredentialCertificate, Notification) {
+angular.module('uluwatuControllers').controller('credentialController', ['$scope', '$rootScope', '$base64', 'UserCredential', 'AccountCredential', 'GlobalCredential', 'GlobalCredentialCertificate',
+    function ($scope, $rootScope, $base64, UserCredential, AccountCredential, GlobalCredential, GlobalCredentialCertificate) {
         $rootScope.credentials = AccountCredential.query();
         $rootScope.credentialInCreation = false;
         $scope.credentialAws = {};
@@ -71,8 +71,7 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
                 $scope.credentialAws.id = result.id;
                 $rootScope.credentials.push($scope.credentialAws);
                 $scope.credentialAws = {};
-                $scope.modifyStatusMessage($rootScope.error_msg.aws_credential_success1 + result.id + $rootScope.error_msg.aws_credential_success2);
-                $scope.modifyStatusClass("has-success");
+                $scope.showSuccess($rootScope.error_msg.aws_credential_success1 + result.id + $rootScope.error_msg.aws_credential_success2);
                 $scope.awsCredentialForm.$setPristine();
                 collapseCreateCredentialFormPanel();
                 $rootScope.credentialInCreation = false;
@@ -101,8 +100,7 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
             $scope.credentialOpenstack.id = result.id;
             $rootScope.credentials.push($scope.credentialOpenstack);
             $scope.credentialOpenstack = {};
-            $scope.modifyStatusMessage($rootScope.error_msg.openstack_credential_success1 + result.id + $rootScope.error_msg.openstack_credential_success2);
-            $scope.modifyStatusClass("has-success");
+            $scope.showSuccess($rootScope.error_msg.openstack_credential_success1 + result.id + $rootScope.error_msg.openstack_credential_success2);
             $scope.credentialOpenstackForm.$setPristine();
             collapseCreateCredentialFormPanel();
             $rootScope.credentialInCreation = false;
@@ -133,8 +131,7 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
                 $scope.credentialAzure.id = result.id;
                 $rootScope.credentials.push($scope.credentialAzure);
                 $scope.credentialAzure = {};
-                $scope.modifyStatusMessage($rootScope.error_msg.azure_credential_success1 + result.id + $rootScope.error_msg.azure_credential_success2);
-                $scope.modifyStatusClass("has-success");
+                $scope.showSuccess($rootScope.error_msg.azure_credential_success1 + result.id + $rootScope.error_msg.azure_credential_success2);
                 window.location.href = "credentials/certificate/" + result.id
                 $scope.azureCredentialForm.$setPristine();
                 collapseCreateCredentialFormPanel();
@@ -173,8 +170,7 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
                  $scope.credentialGcc.id = result.id;
                  $rootScope.credentials.push($scope.credentialGcc);
                  $scope.credentialGcc = {};
-                 $scope.modifyStatusMessage($rootScope.error_msg.gcc_credential_success1 + result.id + $rootScope.error_msg.gcc_credential_success2);
-                 $scope.modifyStatusClass("has-success");
+                 $scope.showSuccess($rootScope.error_msg.gcc_credential_success1 + result.id + $rootScope.error_msg.gcc_credential_success2);
                  $rootScope.credentialInCreation = false;
                  $scope.gccCredentialForm.$setPristine();
                  collapseCreateCredentialFormPanel();
@@ -188,9 +184,7 @@ angular.module('uluwatuControllers').controller('credentialController', ['$scope
         $scope.deleteCredential = function(credential) {
             GlobalCredential.delete({ id: credential.id }, function(success){
                 $rootScope.credentials.splice($rootScope.credentials.indexOf(credential), 1 );
-                $scope.modifyStatusMessage($rootScope.error_msg.credential_delete_success1 + credential.id + $rootScope.error_msg.credential_delete_success2);
-                $scope.modifyStatusClass("has-success");
-                Notification.error({message: 'Error notification 1s', delay: 1000});
+                $scope.showSuccess($rootScope.error_msg.credential_delete_success1 + credential.id + $rootScope.error_msg.credential_delete_success2);
             }, function(error){
                 $scope.showError(error);
             });

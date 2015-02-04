@@ -89,7 +89,7 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
             periCluster.state = 'SUSPENDED';
             disableAutoScalingPolicies();
           }, function(error){
-            addMessageToStatusBar($rootScope.error_msg.peri_cluster_update_failed + ": " + error.data.message, "has-error");
+            $scope.showError($rootScope.error_msg.peri_cluster_update_failed + ": " + error.data.message);
           });
         }
 
@@ -130,7 +130,7 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
         }
 
         function createAlarmErrorHandler(error) {
-          addMessageToStatusBar($rootScope.error_msg.alarm_creation_failed + ": " + error.data.message, "has-error");
+          $scope.showErrorMessage($rootScope.error_msg.alarm_creation_failed + ": " + error.data.message);
         }
 
         function resetAlarmForms() {
@@ -159,7 +159,7 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
         }
 
         function deleteAlarmErrorHandler(error) {
-          addMessageToStatusBar($rootScope.error_msg.alarm_delete_failed + ": " + error.data.message, "has-error");
+          $scope.showErrorMessage($rootScope.error_msg.alarm_delete_failed + ": " + error.data.message);
         }
 
         function selectPeriscopeClusterByAmbariIp(ambariServerIp) {
@@ -176,7 +176,7 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
             PeriscopeClusterScalingConfiguration.save({id: $scope.actPeriscopeCluster.id}, $scope.scalingConfiguration, function(success) {
               $scope.scalingConfiguration = success;
             }, function(error) {
-              addMessageToStatusBar($rootScope.error_msg.peri_cluster_update_failed + ": " + error.data.message, "has-error");
+              $scope.showErrorMessage($rootScope.error_msg.peri_cluster_update_failed + ": " + error.data.message);
             });
           }
         }
@@ -203,7 +203,7 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
             ScalingPolicy.delete({id: $scope.actPeriscopeCluster.id, policyId: policy.id}, function(success) {
               $scope.policies = $filter('filter')($scope.policies, function(value, index) { return value.id != policy.id; }, true);
             }, function(error) {
-              addMessageToStatusBar($rootScope.error_msg.scaling_policy_delete_failed + ": " + error.data.message, "has-error");
+              $scope.showErrorMessage($rootScope.error_msg.scaling_policy_delete_failed + ": " + error.data.message);
             });
           }
         }
@@ -214,7 +214,7 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
             PeriscopeCluster.delete({id: periCluster.id}, function(success){
               $rootScope.periscopeClusters = $filter('filter')($rootScope.periscopeClusters, function(value, index) { return value.id != periCluster.id;});
             }, function(error) {
-              addMessageToStatusBar($rootScope.error_msg.peri_cluster_delete_failed + ": " + error.data.message, "has-error");
+              $scope.showErrorMessage($rootScope.error_msg.peri_cluster_delete_failed + ": " + error.data.message);
             });
           }
         });
@@ -242,11 +242,11 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
                       setActivePeriClusterWithResources(periCluster);
                     }
                   }, function(error){
-                    addMessageToStatusBar($rootScope.error_msg.peri_cluster_start_failed + ": " + error.data.message, "has-error");
+                    $scope.showErrorMessage($rootScope.error_msg.peri_cluster_start_failed + ": " + error.data.message);
                   });
 
                 }, function(error) {
-                  addMessageToStatusBar($rootScope.error_msg.peri_cluster_start_failed + ": " + error.data.message, "has-error");
+                  $scope.showErrorMessage($rootScope.error_msg.peri_cluster_start_failed + ": " + error.data.message);
                 });
               }
             }
@@ -264,13 +264,13 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
                   setActivePeriClusterWithResources(periCluster);
                 }
               }, function(error) {
-                addMessageToStatusBar($rootScope.error_msg.peri_cluster_creation_failed + ": " + error.data.message, "has-error");
+                $scope.showErrorMessage($rootScope.error_msg.peri_cluster_creation_failed + ": " + error.data.message);
               });
             } else {
-              addMessageToStatusBar($rootScope.error_msg.cluster_not_available_yet, "has-warning");
+              $scope.showWarningMessage($rootScope.error_msg.cluster_not_available_yet);
             }
           }, function(error) {
-            addMessageToStatusBar($rootScope.error_msg.cluster_not_available_yet, "has-warning");
+            $scope.showWarningMessage($rootScope.error_msg.cluster_not_available_yet);
           });
         }
 
@@ -280,11 +280,6 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
             result = parseInt(mapEntry.key.replace("Etc/GMT",""));
           }
           return result;
-        }
-
-        function addMessageToStatusBar(message, statusClass) {
-          $scope.modifyStatusMessage(message, $rootScope.activeCluster.name);
-          $scope.modifyStatusClass(statusClass);
         }
 
         function createAmbariJsonFromUluwatuCluster(uluCluster) {

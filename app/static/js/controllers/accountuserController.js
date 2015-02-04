@@ -16,8 +16,7 @@ angular.module('uluwatuControllers').controller('accountuserController', ['$scop
                 initInvite();
                 collapseInviteUsersFormPanel();
             }, function (error) {
-                $scope.modifyStatusMessage(error.data.message);
-                $scope.modifyStatusClass("has-error");
+                $scope.showError(error);
             });
         }
 
@@ -33,20 +32,18 @@ angular.module('uluwatuControllers').controller('accountuserController', ['$scop
             ActivateAccountUsers.save({ activate: activate, email: email },  function (result) {
                 $filter('filter')($scope.accountUsers, { username: email })[0].active = activate;
             }, function (error) {
-                $scope.modifyStatusMessage(error.data.message);
-                $scope.modifyStatusClass("has-error");
+                $scope.showError(error);
             })
         }
-        
+
         $scope.makeAdmin = function(userId, index) {
             UserPermission.save({id: userId, role: 'admin'}, function(result) {
                 $scope.getUsers();
             }, function (error) {
-                $scope.modifyStatusMessage(error.data.message);
-                $scope.modifyStatusClass("has-error");
+                $scope.showError(error);
             })
         }
-        
+
         function getUsersForAccount() {
             UserPermission.get(function(success){
                $scope.user.admin = success.admin;
@@ -61,7 +58,7 @@ angular.module('uluwatuControllers').controller('accountuserController', ['$scop
                 mail: ""
             };
         }
-        
+
         function collapseInviteUsersFormPanel() {
             angular.element(document.querySelector('#inviteCollapse')).click();
         }

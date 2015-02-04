@@ -28,13 +28,13 @@ function ($scope, $rootScope, $filter, Cluster, GlobalStack) {
       var eventType = notification.eventType;
 
       if (successEvents.indexOf(eventType) > -1) {
-        handleStatusChange(notification, "has-success");
+        $scope.showSuccessMessage(notification.message, actCluster.name);
       } else if (errorEvents.indexOf(eventType) > -1) {
-        handleStatusChange(notification, "has-error");
+        $scope.showErrorMessage(notification.message, actCluster.name);
       } else {
         switch(eventType) {
           case "DELETE_COMPLETED":
-            handleStatusChange(notification, "has-success");
+            $scope.showSuccess(notification.message, actCluster.name);
             $rootScope.clusters = $filter('filter')($rootScope.clusters, function(value, index) { return value.id != notification.stackId;});
             break;
           case "AVAILABLE":
@@ -52,8 +52,6 @@ function ($scope, $rootScope, $filter, Cluster, GlobalStack) {
     function handleStatusChange(notification, statusClass){
       var actCluster = $filter('filter')($rootScope.clusters, { id: notification.stackId })[0];
       actCluster.status = notification.eventType;
-      $scope.modifyStatusMessage(notification.eventMessage, actCluster.name);
-      $scope.modifyStatusClass(statusClass);
       addNotificationToGlobalEvents(notification);
     }
 
@@ -71,8 +69,7 @@ function ($scope, $rootScope, $filter, Cluster, GlobalStack) {
       }
       refreshMetadata(notification)
       actCluster.status = notification.eventType;
-      $scope.modifyStatusMessage(msg, actCluster.name);
-      $scope.modifyStatusClass("has-success");
+      $scope.showSuccess(msg, actCluster.name);
       addNotificationToGlobalEvents(notification);
       $rootScope.$broadcast('START_PERISCOPE_CLUSTER', actCluster, msg);
     }
@@ -94,7 +91,7 @@ function ($scope, $rootScope, $filter, Cluster, GlobalStack) {
       item.customTimeStamp =  new Date(item.eventTimestamp).toLocaleDateString() + " " + new Date(item.eventTimestamp).toLocaleTimeString();
       $rootScope.events.push(item);
     }
-    
+
     function refreshMetadata(notification) {
        GlobalStack.get({ id: notification.stackId }, function(success) {
           var metadata = []
