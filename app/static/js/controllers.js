@@ -26,6 +26,7 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
         $scope.lastOrderPredicate = 'name';
 
         $scope.statusMessage = "";
+        $scope.shortStatusMessage = "";
         $scope.statusclass = "";
         getUserPermission();
 
@@ -37,6 +38,7 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
             } else {
                 $scope.statusMessage = date + " " + message;
             }
+            $scope.shortStatusMessage = $scope.statusMessage.substring(0, 100) + '...';
         }
 
         $scope.modifyStatusClass = function(status) {
@@ -74,7 +76,7 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
             Notification.info({
                 message: message,
                 title: 'Primary notification',
-                delay: 3000
+                delay: 60000
             });
         }
 
@@ -82,7 +84,7 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
             Notification.warning({
                 message: message,
                 title: 'Warning',
-                delay: 3000
+                delay: 60000
             });
         }
 
@@ -90,7 +92,7 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
             Notification.error({
                 message: message,
                 title: 'Error',
-                delay: 3000
+                delay: 60000
             });
         }
 
@@ -98,7 +100,7 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
             Notification.success({
                 message: message,
                 title: 'Success',
-                delay: 3000
+                delay: 60000
             });
         }
 
