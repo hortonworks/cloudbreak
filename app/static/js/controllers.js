@@ -76,7 +76,7 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
             Notification.info({
                 message: message,
                 title: 'Primary notification',
-                delay: 60000
+                delay: 5000
             });
         }
 
@@ -84,7 +84,7 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
             Notification.warning({
                 message: message,
                 title: 'Warning',
-                delay: 60000
+                delay: 5000
             });
         }
 
@@ -92,7 +92,7 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
             Notification.error({
                 message: message,
                 title: 'Error',
-                delay: 60000
+                delay: 5000
             });
         }
 
@@ -100,7 +100,7 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
             Notification.success({
                 message: message,
                 title: 'Success',
-                delay: 60000
+                delay: 5000
             });
         }
 
