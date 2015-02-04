@@ -23,6 +23,8 @@ public class CloudbreakUsageJson implements JsonEntity {
 
     private String instanceType;
 
+    private String hostGroup;
+
     public String getOwner() {
         return owner;
     }
@@ -109,5 +111,13 @@ public class CloudbreakUsageJson implements JsonEntity {
 
     public void setInstanceType(String instanceType) {
         this.instanceType = instanceType;
+    }
+
+    public String getHostGroup() {
+        return hostGroup;
+    }
+
+    public void setHostGroup(String hostGroup) {
+        this.hostGroup = hostGroup;
     }
 }

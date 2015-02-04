@@ -52,10 +52,11 @@ public class IntervalStackUsageGenerator {
                 Map<String, CloudbreakUsage> instanceGroupDailyUsages = new HashMap<>();
                 Template template = instanceGroup.getTemplate();
                 String instanceType = getInstanceType(template);
+                String groupName = instanceGroup.getGroupName();
 
                 for (InstanceMetaData metaData : instanceGroup.getAllInstanceMetaData()) {
                     Map<String, Long> instanceHours = instanceUsageGenerator.getInstanceHours(metaData, startTime, stopTime);
-                    addInstanceHoursToStackUsages(instanceGroupDailyUsages, instanceHours, startEvent, instanceType);
+                    addInstanceHoursToStackUsages(instanceGroupDailyUsages, instanceHours, startEvent, instanceType, groupName);
                 }
 
                 addCalculatedPrice(instanceGroupDailyUsages, priceGenerator, template);
@@ -99,7 +100,7 @@ public class IntervalStackUsageGenerator {
     }
 
     private void addInstanceHoursToStackUsages(Map<String, CloudbreakUsage> dailyStackUsages, Map<String, Long> instanceUsages,
-            CloudbreakEvent event, String instanceType) throws ParseException {
+            CloudbreakEvent event, String instanceType, String groupName) throws ParseException {
 
         for (Map.Entry<String, Long> entry : instanceUsages.entrySet()) {
             String day = entry.getKey();
@@ -109,13 +110,14 @@ public class IntervalStackUsageGenerator {
                 long numberOfHours = usage.getInstanceHours() + instanceHours;
                 usage.setInstanceHours(numberOfHours);
             } else {
-                CloudbreakUsage usage = getCloudbreakUsage(event, instanceHours, day, instanceType);
+                CloudbreakUsage usage = getCloudbreakUsage(event, instanceHours, day, instanceType, groupName);
                 dailyStackUsages.put(day, usage);
             }
         }
     }
 
-    private CloudbreakUsage getCloudbreakUsage(CloudbreakEvent event, long instanceHours, String dayString, String instanceType) throws ParseException {
+    private CloudbreakUsage getCloudbreakUsage(CloudbreakEvent event, long instanceHours, String dayString, String instanceType, String groupName)
+            throws ParseException {
         Date day = DATE_FORMAT.parse(dayString);
         CloudbreakUsage usage = new CloudbreakUsage();
         usage.setOwner(event.getOwner());
@@ -127,6 +129,7 @@ public class IntervalStackUsageGenerator {
         usage.setStackId(event.getStackId());
         usage.setStackName(event.getStackName());
         usage.setInstanceType(instanceType);
+        usage.setHostGroup(groupName);
         return usage;
     }
 
