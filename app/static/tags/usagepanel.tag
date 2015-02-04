@@ -93,7 +93,7 @@
         <!-- .row -->
 
         <div class="table-responsive" ng-show="(usages.length != 0) && usages">
-          <table class="table table-report table-sortable-cols table-with-pagination ">
+          <table class="table table-report table-sortable-cols table-with-pagination">
             <thead>
               <tr>
                 <th>cloud</th>
@@ -104,6 +104,7 @@
                 </th>
                 <th>user</th>
                 <th>region</th>
+                <th></th>
                 <th class="text-right">
                   <a title="sort by" ng-click="reverse=!reverse;orderUsagesBy('instanceHours',reverse)">running time
                         <i class="fa fa-sort"></i>
@@ -116,10 +117,29 @@
                 <td ng-if="$index == 0" rowspan="{{gccSum.items.length}}">{{usage.provider}}</td>
                 <td>{{usage.stackName}}</td>
                 <td>{{usage.username}}</td>
-                <td><p id="awsregion" class="form-control-static" ng-repeat="item in $root.config.GCC.gccRegions | filter:{key: usage.region}">{{item.value}}</p></td>
+                <td><p id="awsregion" ng-repeat="item in $root.config.GCC.gccRegions | filter:{key: usage.region}">{{item.value}}</p></td>
+                <td>
+                  <table class="table usage-inline-table" style="background-color: #FFFFFF; margin-bottom: 0px;">
+                    <thead>
+                      <tr>
+                        <th>host group</th>
+                        <th>instance type</th>
+                        <th>hours</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="group in usage.instanceGroups">
+                          <td>{{group.name}}</td>
+                          <td><p ng-repeat="item in $root.config.GCC.gccInstanceTypes | filter:{key: group.instanceType}">{{item.value}}</p></td>
+                          <td>{{group.hours}}</td>
+                        </tr>
+                      </tbody>
+                  </table>
+                </td>
                 <td class="text-right">{{usage.instanceHours}} hrs</td>
               </tr>
               <tr class="row-summa" ng-show="usages && gccSum.items.length != 0">
+                <td>&nbsp;</td>
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
@@ -131,11 +151,29 @@
                 <td ng-if="$index == 0" rowspan="{{awsSum.items.length}}">{{usage.provider}}</td>
                 <td>{{usage.stackName}}</td>
                 <td>{{usage.username}}</td>
-                <td><p id="awsregion" class="form-control-static" ng-repeat="item in $root.config.AWS.awsRegions | filter:{key: usage.region}">{{item.value}}</p></td>
+                <td><p ng-repeat="item in $root.config.AWS.awsRegions | filter:{key: usage.region}">{{item.value}}</p></td>
+                <td>
+                  <table class="table usage-inline-table" style="background-color: #FFFFFF; margin-bottom: 0px;">
+                    <thead>
+                      <tr>
+                        <th>host group</th>
+                        <th>instance type</th>
+                        <th>hours</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="group in usage.instanceGroups">
+                          <td>{{group.name}}</td>
+                          <td><p ng-repeat="item in $root.config.AWS.instanceType | filter:{key: group.instanceType}">{{item.value}}</p></td>
+                          <td>{{group.hours}}</td>
+                        </tr>
+                      </tbody>
+                  </table>
+                </td>
                 <td class="text-right">{{usage.instanceHours}} hrs</td>
               </tr>
-
               <tr class="row-summa" ng-show="usages && awsSum.items.length != 0">
+                <td>&nbsp;</td>
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
@@ -147,11 +185,29 @@
                 <td ng-if="$index == 0" rowspan="{{azureSum.items.length}}">{{usage.provider}}</td>
                 <td>{{usage.stackName}}</td>
                 <td>{{usage.username}}</td>
-                <td><p id="awsregion" class="form-control-static" ng-repeat="item in $root.config.AZURE.azureRegions | filter:{key: usage.region}">{{item.value}}</p></td>
+                <td><p ng-repeat="item in $root.config.AZURE.azureRegions | filter:{key: usage.region}">{{item.value}}</p></td>
+                <td>
+                  <table class="table usage-inline-table" style="background-color: #FFFFFF; margin-bottom: 0px;">
+                    <thead>
+                      <tr>
+                        <th>host group</th>
+                        <th>instance type</th>
+                        <th>hours</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="group in usage.instanceGroups">
+                          <td>{{group.name}}</td>
+                          <td><p ng-repeat="item in $root.config.AZURE.azureVmTypes | filter:{key: group.instanceType}">{{item.value}}</p></td>
+                          <td>{{group.hours}}</td>
+                        </tr>
+                      </tbody>
+                  </table>
+                </td>
                 <td class="text-right">{{usage.instanceHours}} hrs</td>
               </tr>
-
               <tr class="row-summa" ng-show="usages && azureSum.items.length != 0">
+                <td>&nbsp;</td>
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>

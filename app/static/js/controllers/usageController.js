@@ -59,6 +59,7 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
         }
 
         function processUsages(usages, chartsData) {
+          console.log(usages)
           angular.forEach(usages, function(item) {
             item.monthString = new Date(item.day).getFullYear() + "-" +  new Date(item.day).getMonth();
             item.monthDayString = new Date(item.day).toLocaleDateString();
@@ -99,7 +100,10 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
           var result = $filter('filter')(usageByProvider.items, {stackId: item.stackId}, true);
           if (result.length > 0) {
             result[0].instanceHours = result[0].instanceHours + item.instanceHours;
+            result[0].instanceGroups.push({instanceType: item.instanceType, hours: item.instanceHours, name: item.hostGroup});
           } else {
+            item.instanceGroups = [];
+            item.instanceGroups.push({instanceType: item.instanceType, hours:  item.instanceHours, name: item.hostGroup});
             usageByProvider.items.push(item);
           }
         }

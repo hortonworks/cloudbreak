@@ -236,3 +236,8 @@ input[type="date"]::-webkit-input-placeholder{
       width: 97px;
   }
 }
+
+.usage-inline-table tbody > tr > td {
+  padding-bottom: 0px !important;
+  line-height: 1.10 !important;
+}
