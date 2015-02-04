@@ -28,15 +28,15 @@ function ($scope, $rootScope, $filter, Cluster, GlobalStack) {
       var eventType = notification.eventType;
 
       if (successEvents.indexOf(eventType) > -1) {
-        $scope.showSuccessMessage(notification.message, actCluster.name);
-        $scope.handleStatusChange(notification);
+        $scope.showSuccess(notification.eventMessage, notification.stackName);
+        handleStatusChange(notification);
       } else if (errorEvents.indexOf(eventType) > -1) {
-        $scope.showErrorMessage(notification.message, actCluster.name);
-        $scope.handleStatusChange(notification);
+        $scope.showError(notification.eventMessage, notification.stackName);
+        handleStatusChange(notification);
       } else {
         switch(eventType) {
           case "DELETE_COMPLETED":
-            $scope.showSuccess(notification.message, actCluster.name);
+            $scope.showSuccess(notification.eventMessage, notification.stackName);
             $rootScope.clusters = $filter('filter')($rootScope.clusters, function(value, index) { return value.id != notification.stackId;});
             break;
           case "AVAILABLE":
